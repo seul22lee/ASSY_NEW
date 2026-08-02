@@ -1,0 +1,171 @@
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg core :: requirement
+#
+# Requirements, constraints, quantities and units.
+#
+# Two rules are enforced structurally rather than by convention:
+#   1. A numeric value never floats free of its unit (mdcore:QuantityValue).
+#   2. A vague qualifier ("high speed", "heavy load") is never given a global
+#      numeric boundary. It is modelled as a ThresholdDefinition that names
+#      the context and the source that fixed it, or it stays unquantified.
+# ===========================================================================
+
+<https://w3id.org/mdkg/core/requirement> a owl:Ontology ;
+    dcterms:title "mdkg core: requirement, quantity and threshold"@en ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+# --- Requirements ----------------------------------------------------------
+
+mdcore:Requirement a owl:Class ;
+    rdfs:label "Requirement"@en ;
+    skos:altLabel "요구사항"@ko ;
+    skos:definition """A stated condition that an acceptable design must
+        satisfy, attributable to a stakeholder, a standard, an operating
+        context or a physical necessity."""@en .
+
+mdcore:Constraint a owl:Class ;
+    rdfs:subClassOf mdcore:Requirement ;
+    rdfs:label "Constraint"@en ;
+    skos:altLabel "제약조건"@ko ;
+    skos:definition """A requirement that bounds the admissible solution space
+        rather than expressing a desired level of performance; it is satisfied
+        or violated, and is not traded off."""@en ;
+    skos:scopeNote """Distinguishing Constraint from the general Requirement
+        matters for decision-making: constraints filter the candidate set
+        before any weighting or scoring is applied."""@en .
+
+mdcore:RequirementKind a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Requirement Kind"@en ;
+    skos:definition """A controlled term naming the aspect of a design that a
+        requirement addresses (load capacity, life, cost, ...)."""@en .
+
+mdcore:hasRequirementKind a owl:ObjectProperty ;
+    rdfs:label "has requirement kind"@en ;
+    rdfs:domain mdcore:Requirement ;
+    rdfs:range mdcore:RequirementKind .
+
+mdcore:requirementApplicableIn a owl:ObjectProperty ;
+    rdfs:label "requirement applicable in context"@en ;
+    rdfs:domain mdcore:Requirement ;
+    rdfs:range mdcore:OperatingContext .
+
+mdcore:hasTargetValue a owl:ObjectProperty ;
+    rdfs:label "has target value"@en ;
+    rdfs:domain mdcore:Requirement ;
+    rdfs:range mdcore:QuantityValue .
+
+mdcore:requirementStatement a owl:DatatypeProperty ;
+    rdfs:label "requirement statement"@en ;
+    rdfs:domain mdcore:Requirement ;
+    rdfs:range xsd:string .
+
+# --- Controlled vocabulary of requirement kinds ----------------------------
+# Analyst-authored vocabulary. Terms are not claims about either textbook.
+
+mdcore:RequirementKindScheme a skos:ConceptScheme ;
+    skos:prefLabel "Requirement kinds"@en ;
+    dcterms:description "Aspects of a design that requirements may address."@en .
+
+mdcore:LoadCapacityRequirement    a mdcore:RequirementKind ; skos:prefLabel "load capacity"@en ;      skos:altLabel "하중 용량"@ko ; skos:inScheme mdcore:RequirementKindScheme .
+mdcore:TorqueCapacityRequirement  a mdcore:RequirementKind ; skos:prefLabel "torque capacity"@en ;    skos:altLabel "토크 용량"@ko ; skos:inScheme mdcore:RequirementKindScheme ; skos:broader mdcore:LoadCapacityRequirement .
+mdcore:PowerCapacityRequirement   a mdcore:RequirementKind ; skos:prefLabel "power capacity"@en ;     skos:inScheme mdcore:RequirementKindScheme .
+mdcore:LifeRequirement            a mdcore:RequirementKind ; skos:prefLabel "life"@en ;               skos:altLabel "수명"@ko ; skos:inScheme mdcore:RequirementKindScheme .
+mdcore:ReliabilityRequirement     a mdcore:RequirementKind ; skos:prefLabel "reliability"@en ;        skos:altLabel "신뢰도"@ko ; skos:inScheme mdcore:RequirementKindScheme .
+mdcore:StiffnessRequirement       a mdcore:RequirementKind ; skos:prefLabel "stiffness"@en ;          skos:inScheme mdcore:RequirementKindScheme .
+mdcore:DeflectionRequirement      a mdcore:RequirementKind ; skos:prefLabel "deflection"@en ;         skos:inScheme mdcore:RequirementKindScheme .
+mdcore:AlignmentRequirement       a mdcore:RequirementKind ; skos:prefLabel "alignment"@en ;          skos:inScheme mdcore:RequirementKindScheme .
+mdcore:PositioningRequirement     a mdcore:RequirementKind ; skos:prefLabel "positioning"@en ;        skos:inScheme mdcore:RequirementKindScheme .
+mdcore:MotionAllowanceRequirement a mdcore:RequirementKind ; skos:prefLabel "motion allowance"@en ;   skos:inScheme mdcore:RequirementKindScheme ;
+    skos:definition "Required freedom for relative motion between mating parts, for example permitted axial travel of a hub along a shaft."@en .
+mdcore:ManufacturabilityRequirement a mdcore:RequirementKind ; skos:prefLabel "manufacturability"@en ; skos:inScheme mdcore:RequirementKindScheme .
+mdcore:MaintainabilityRequirement a mdcore:RequirementKind ; skos:prefLabel "maintainability"@en ;    skos:inScheme mdcore:RequirementKindScheme .
+mdcore:InspectabilityRequirement  a mdcore:RequirementKind ; skos:prefLabel "inspectability"@en ;     skos:inScheme mdcore:RequirementKindScheme .
+mdcore:SafetyRequirement          a mdcore:RequirementKind ; skos:prefLabel "safety"@en ;             skos:inScheme mdcore:RequirementKindScheme .
+mdcore:MassRequirement            a mdcore:RequirementKind ; skos:prefLabel "mass"@en ;               skos:inScheme mdcore:RequirementKindScheme .
+mdcore:CostRequirement            a mdcore:RequirementKind ; skos:prefLabel "cost"@en ;               skos:altLabel "비용"@ko ; skos:inScheme mdcore:RequirementKindScheme .
+mdcore:SpaceRequirement           a mdcore:RequirementKind ; skos:prefLabel "space envelope"@en ;     skos:inScheme mdcore:RequirementKindScheme .
+mdcore:TemperatureResistanceRequirement a mdcore:RequirementKind ; skos:prefLabel "temperature resistance"@en ; skos:inScheme mdcore:RequirementKindScheme .
+mdcore:CorrosionResistanceRequirement   a mdcore:RequirementKind ; skos:prefLabel "corrosion resistance"@en ;   skos:inScheme mdcore:RequirementKindScheme .
+mdcore:NoiseRequirement           a mdcore:RequirementKind ; skos:prefLabel "noise"@en ;              skos:inScheme mdcore:RequirementKindScheme .
+mdcore:VibrationRequirement       a mdcore:RequirementKind ; skos:prefLabel "vibration"@en ;          skos:inScheme mdcore:RequirementKindScheme .
+mdcore:AssemblyEffortRequirement  a mdcore:RequirementKind ; skos:prefLabel "assembly and disassembly effort"@en ; skos:inScheme mdcore:RequirementKindScheme .
+mdcore:OverloadProtectionRequirement a mdcore:RequirementKind ; skos:prefLabel "overload protection"@en ; skos:inScheme mdcore:RequirementKindScheme ;
+    skos:definition "Requirement that the connection fail preferentially, or limit transmitted load, when an overload occurs."@en .
+
+# --- Quantities and units --------------------------------------------------
+
+mdcore:Unit a owl:Class ;
+    rdfs:label "Unit"@en ;
+    skos:definition """A unit of measure. Identified by a symbol string; the
+        pipeline validates dimensional consistency with Pint rather than by
+        OWL reasoning."""@en .
+
+mdcore:QuantityValue a owl:Class ;
+    rdfs:label "Quantity Value"@en ;
+    skos:altLabel "수치값"@ko ;
+    skos:definition """A numeric value together with the unit in which it was
+        stated. Dimensionless quantities carry the explicit unit token
+        'dimensionless' rather than no unit at all, so that a missing unit is
+        always an error and never an assumption."""@en ;
+    skos:scopeNote """When a value has been converted, the original value and
+        unit are retained alongside the normalized ones together with the
+        conversion method. Conversion is never silent."""@en .
+
+mdcore:numericValue      a owl:DatatypeProperty ; rdfs:domain mdcore:QuantityValue ; rdfs:range xsd:decimal ;
+    rdfs:label "numeric value"@en .
+mdcore:unitSymbol        a owl:DatatypeProperty ; rdfs:domain mdcore:QuantityValue ; rdfs:range xsd:string ;
+    rdfs:label "unit symbol"@en ;
+    skos:scopeNote "Use 'dimensionless' for pure numbers such as a design factor."@en .
+mdcore:originalValue     a owl:DatatypeProperty ; rdfs:domain mdcore:QuantityValue ; rdfs:range xsd:string ;
+    rdfs:label "original value as printed"@en .
+mdcore:originalUnit      a owl:DatatypeProperty ; rdfs:domain mdcore:QuantityValue ; rdfs:range xsd:string ;
+    rdfs:label "original unit as printed"@en .
+mdcore:normalizedValue   a owl:DatatypeProperty ; rdfs:domain mdcore:QuantityValue ; rdfs:range xsd:decimal ;
+    rdfs:label "normalized value"@en .
+mdcore:normalizedUnit    a owl:DatatypeProperty ; rdfs:domain mdcore:QuantityValue ; rdfs:range xsd:string ;
+    rdfs:label "normalized unit"@en .
+mdcore:conversionMethod  a owl:DatatypeProperty ; rdfs:domain mdcore:QuantityValue ; rdfs:range xsd:string ;
+    rdfs:label "conversion method"@en ;
+    skos:scopeNote "For example 'pint 0.24; 1 psi = 6894.757 Pa; exact'. Required whenever normalizedValue differs from numericValue."@en .
+mdcore:valueIsRange      a owl:DatatypeProperty ; rdfs:domain mdcore:QuantityValue ; rdfs:range xsd:boolean ;
+    rdfs:label "value is a range"@en .
+mdcore:rangeMinimum      a owl:DatatypeProperty ; rdfs:domain mdcore:QuantityValue ; rdfs:range xsd:decimal ;
+    rdfs:label "range minimum"@en .
+mdcore:rangeMaximum      a owl:DatatypeProperty ; rdfs:domain mdcore:QuantityValue ; rdfs:range xsd:decimal ;
+    rdfs:label "range maximum"@en .
+
+# --- Context-dependent thresholds -----------------------------------------
+
+mdcore:ThresholdDefinition a owl:Class ;
+    rdfs:label "Threshold Definition"@en ;
+    skos:altLabel "임계값 정의"@ko ;
+    skos:definition """A reified statement that some qualitative term is given
+        a specific boundary value, valid only within a named context and only
+        on the authority of a named source."""@en ;
+    skos:scopeNote """This class exists to prevent the ontology from asserting
+        universal boundaries for vague terms. If no source defines a boundary,
+        no ThresholdDefinition is created and the qualitative term remains
+        unquantified, which downstream queries must treat as unknown rather
+        than as false."""@en .
+
+mdcore:definesTerm       a owl:DatatypeProperty ; rdfs:domain mdcore:ThresholdDefinition ; rdfs:range xsd:string ;
+    rdfs:label "defines qualitative term"@en .
+mdcore:thresholdValue    a owl:ObjectProperty   ; rdfs:domain mdcore:ThresholdDefinition ; rdfs:range mdcore:QuantityValue ;
+    rdfs:label "threshold value"@en .
+mdcore:thresholdContext  a owl:ObjectProperty   ; rdfs:domain mdcore:ThresholdDefinition ; rdfs:range mdcore:OperatingContext ;
+    rdfs:label "threshold applies in context"@en .
+mdcore:thresholdScopeNote a owl:DatatypeProperty ; rdfs:domain mdcore:ThresholdDefinition ; rdfs:range xsd:string ;
+    rdfs:label "threshold scope note"@en ;
+    skos:scopeNote "Records the limits the source itself placed on the boundary, e.g. that no sharp dividing line exists."@en .
+mdcore:thresholdIsUniversal a owl:DatatypeProperty ; rdfs:domain mdcore:ThresholdDefinition ; rdfs:range xsd:boolean ;
+    rdfs:label "threshold claimed universal by source"@en ;
+    skos:scopeNote "Defaults to false. Set true only when the source explicitly presents the boundary as generally valid."@en .

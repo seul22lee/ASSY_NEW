@@ -1,0 +1,709 @@
+# ###########################################################################
+# GENERATED FILE -- DO NOT EDIT BY HAND
+#
+# Produced by scripts/build_ontology.py from:
+#   ontology/core/evidence.ttl
+#
+# Edit the inputs and re-run:  python3 scripts/build_ontology.py
+# ###########################################################################
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ev: <https://w3id.org/mdkg/evidence#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/mdkg/evidence> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg: evidence, provenance and claims"@en ;
+    owl:versionInfo "0.1.0" .
+
+ev:Agrees a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "agrees with"@en .
+
+ev:BroaderThan a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "broader than"@en .
+
+ev:CandidateDesignRule a owl:Class ;
+    rdfs:label "Candidate Design Rule"@en ;
+    rdfs:subClassOf ev:Claim ;
+    skos:definition "A normalized claim proposed for promotion into the rule layer, not yet accepted."@en .
+
+ev:CloseMatch a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "close match"@en .
+
+ev:Complements a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "complements"@en .
+
+ev:ConflictingUsage a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "conflicting usage"@en .
+
+ev:Contradicts a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "contradicts"@en .
+
+ev:DesignProcedure a owl:Class ;
+    rdfs:label "Design Procedure"@en ;
+    skos:altLabel "설계 절차"@ko ;
+    skos:definition """An ordered procedure printed in a source, cited as a
+        unit because its steps are only valid together."""@en .
+
+ev:DiffersInAssumption a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "differs in assumptions"@en .
+
+ev:DiffersInScope a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "differs in scope"@en .
+
+ev:DiffersInTerminology a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "differs in terminology"@en .
+
+ev:ExactMatch a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "exact match"@en .
+
+ev:ExtractedClaim a owl:Class ;
+    rdfs:label "Extracted Claim"@en ;
+    rdfs:subClassOf ev:Claim ;
+    skos:definition "A claim as first obtained from the source text, before normalisation."@en .
+
+ev:ManufacturerCatalog a owl:Class ;
+    rdfs:label "Manufacturer Catalog"@en ;
+    skos:altLabel "제조사 카탈로그"@ko ;
+    skos:definition "A manufacturer's published data source, cited but not reproduced."@en .
+
+ev:NarrowerThan a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "narrower than"@en .
+
+ev:NormalizedClaim a owl:Class ;
+    rdfs:label "Normalized Claim"@en ;
+    rdfs:subClassOf ev:Claim ;
+    skos:definition "A claim restated in controlled vocabulary, with conditions and units made explicit."@en .
+
+ev:NotComparable a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "cannot be compared"@en .
+
+ev:Refines a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "refines"@en .
+
+ev:RelatedNotEquivalent a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "related but not equivalent"@en .
+
+ev:Standard a owl:Class ;
+    rdfs:label "Standard"@en ;
+    skos:altLabel "표준"@ko ;
+    skos:definition """A published standard referenced by a source. Referencing
+        a standard is not the same as reproducing it: the ontology records that
+        a standard governs a value, not the value itself, unless the source
+        printed it."""@en .
+
+ev:TerminologyAlignment a owl:Class ;
+    rdfs:label "Terminology Alignment"@en ;
+    rdfs:subClassOf ev:ConceptAlignment ;
+    skos:definition "A concept alignment concerned specifically with vocabulary or symbol usage."@en .
+
+ev:Unresolved a ev:AlignmentType ;
+    skos:inScheme ev:AlignmentTypeScheme ;
+    skos:prefLabel "unresolved"@en .
+
+ev:agreesWith a owl:ObjectProperty,
+        owl:SymmetricProperty ;
+    rdfs:label "agrees with"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Claim .
+
+ev:alignmentType a owl:ObjectProperty ;
+    rdfs:label "alignment type"@en ;
+    rdfs:range ev:AlignmentType .
+
+ev:alignsSourceSymbol a owl:DatatypeProperty ;
+    rdfs:label "source symbol"@en ;
+    rdfs:domain ev:ConceptAlignment ;
+    rdfs:range xsd:string .
+
+ev:alignsSourceTerm a owl:DatatypeProperty ;
+    rdfs:label "source term"@en ;
+    rdfs:domain ev:ConceptAlignment ;
+    rdfs:range xsd:string .
+
+ev:alignsToConcept a owl:ObjectProperty ;
+    rdfs:label "aligns to core concept"@en ;
+    rdfs:domain ev:ConceptAlignment .
+
+ev:author a owl:DatatypeProperty ;
+    rdfs:label "author"@en ;
+    rdfs:range xsd:string .
+
+ev:blockIdentifier a owl:DatatypeProperty ;
+    rdfs:label "paragraph or block identifier"@en ;
+    rdfs:domain ev:EvidenceSpan ;
+    rdfs:range xsd:string .
+
+ev:bookTitle a owl:DatatypeProperty ;
+    rdfs:label "book title"@en ;
+    rdfs:range xsd:string .
+
+ev:boundingBox a owl:DatatypeProperty ;
+    rdfs:label "bounding box"@en ;
+    rdfs:domain ev:EvidenceSpan ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "PDF user-space coordinates as 'x0,y0,x1,y1', origin top-left, in points."@en .
+
+ev:calculatedQuantity a owl:DatatypeProperty ;
+    rdfs:label "calculated quantity"@en ;
+    rdfs:domain ev:Equation ;
+    rdfs:range xsd:string .
+
+ev:canonicalName a owl:DatatypeProperty ;
+    rdfs:label "canonical name"@en ;
+    rdfs:domain ev:Variable ;
+    rdfs:range xsd:string .
+
+ev:caption a owl:DatatypeProperty ;
+    rdfs:label "caption"@en ;
+    rdfs:range xsd:string .
+
+ev:chapterNumber a owl:DatatypeProperty ;
+    rdfs:label "chapter number"@en ;
+    rdfs:domain ev:Chapter ;
+    rdfs:range xsd:string .
+
+ev:chapterTitle a owl:DatatypeProperty ;
+    rdfs:label "chapter title"@en ;
+    rdfs:domain ev:Chapter ;
+    rdfs:range xsd:string .
+
+ev:claimAbout a owl:ObjectProperty ;
+    rdfs:label "claim is about"@en ;
+    rdfs:domain ev:Claim ;
+    skos:definition """Links a claim to the ontology individual it concerns --
+        an alternative, a function, a failure mode, a verification method.
+        This is what lets a query walk from a design object to its
+        evidence."""@en .
+
+ev:claimAssumption a owl:DatatypeProperty ;
+    rdfs:label "assumption"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range xsd:string .
+
+ev:claimCondition a owl:DatatypeProperty ;
+    rdfs:label "condition stated by source"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range xsd:string .
+
+ev:claimException a owl:DatatypeProperty ;
+    rdfs:label "exception stated by source"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range xsd:string .
+
+ev:claimIdentifier a owl:DatatypeProperty ;
+    rdfs:label "claim identifier"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range xsd:string .
+
+ev:claimObject a owl:DatatypeProperty ;
+    rdfs:label "claim object"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range xsd:string .
+
+ev:claimPredicate a owl:DatatypeProperty ;
+    rdfs:label "claim predicate"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range xsd:string .
+
+ev:claimQuantity a owl:ObjectProperty ;
+    rdfs:label "quantitative value in claim"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range mdcore:QuantityValue .
+
+ev:claimSubject a owl:DatatypeProperty ;
+    rdfs:label "claim subject"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range xsd:string .
+
+ev:claimTopic a owl:DatatypeProperty ;
+    rdfs:label "pilot topic"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range xsd:string .
+
+ev:commonConcept a owl:DatatypeProperty ;
+    rdfs:label "common concept"@en ;
+    rdfs:range xsd:string .
+
+ev:complements a owl:ObjectProperty,
+        owl:SymmetricProperty ;
+    rdfs:label "complements"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Claim .
+
+ev:concernsEquation a owl:ObjectProperty ;
+    rdfs:label "concerns equation"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Equation .
+
+ev:concernsFigure a owl:ObjectProperty ;
+    rdfs:label "concerns figure"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Figure .
+
+ev:concernsTable a owl:ObjectProperty ;
+    rdfs:label "concerns table"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Table .
+
+ev:contradicts a owl:ObjectProperty,
+        owl:SymmetricProperty ;
+    rdfs:label "contradicts"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Claim .
+
+ev:differingAssumptions a owl:DatatypeProperty ;
+    rdfs:label "differing assumptions"@en ;
+    rdfs:range xsd:string .
+
+ev:differingConditions a owl:DatatypeProperty ;
+    rdfs:label "differing conditions"@en ;
+    rdfs:range xsd:string .
+
+ev:differsFrom a owl:ObjectProperty,
+        owl:SymmetricProperty ;
+    rdfs:label "differs from"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Claim .
+
+ev:editionLabel a owl:DatatypeProperty ;
+    rdfs:label "edition label"@en ;
+    rdfs:domain ev:BookEdition ;
+    rdfs:range xsd:string .
+
+ev:editionOf a owl:ObjectProperty ;
+    rdfs:label "edition of"@en ;
+    owl:inverseOf ev:hasEdition .
+
+ev:editionOrdinal a owl:DatatypeProperty ;
+    rdfs:label "edition ordinal"@en ;
+    rdfs:domain ev:BookEdition ;
+    rdfs:range xsd:integer .
+
+ev:equationAssumption a owl:DatatypeProperty ;
+    rdfs:label "assumption"@en ;
+    rdfs:domain ev:Equation ;
+    rdfs:range xsd:string .
+
+ev:equationNumber a owl:DatatypeProperty ;
+    rdfs:label "equation number"@en ;
+    rdfs:domain ev:Equation ;
+    rdfs:range xsd:string .
+
+ev:exampleNumber a owl:DatatypeProperty ;
+    rdfs:label "example number"@en ;
+    rdfs:domain ev:ExampleProblem ;
+    rdfs:range xsd:string .
+
+ev:explainedBySpan a owl:ObjectProperty ;
+    rdfs:label "explained by surrounding text"@en ;
+    rdfs:range ev:EvidenceSpan ;
+    skos:definition """Links a table, figure or equation to the span of running
+        text that explains it, so the item is never cited stripped of the
+        conditions its own paragraph placed on it."""@en .
+
+ev:extractedText a owl:DatatypeProperty ;
+    rdfs:label "extracted text"@en ;
+    rdfs:domain ev:EvidenceSpan ;
+    rdfs:range xsd:string .
+
+ev:extractionConfidence a owl:DatatypeProperty ;
+    rdfs:label "extraction confidence"@en ;
+    rdfs:range xsd:decimal .
+
+ev:extractionMethod a owl:DatatypeProperty ;
+    rdfs:label "extraction method"@en ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "For example 'pymupdf-1.24.11-textdict' or 'manual-transcription-from-rendered-page'."@en .
+
+ev:figureNumber a owl:DatatypeProperty ;
+    rdfs:label "figure number"@en ;
+    rdfs:domain ev:Figure ;
+    rdfs:range xsd:string .
+
+ev:fromSourceDocument a owl:ObjectProperty ;
+    rdfs:label "from source document"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:SourceDocument .
+
+ev:hasChapter a owl:ObjectProperty ;
+    rdfs:label "has chapter"@en ;
+    rdfs:domain ev:BookEdition ;
+    rdfs:range ev:Chapter .
+
+ev:hasDocument a owl:ObjectProperty ;
+    rdfs:label "has source document"@en ;
+    rdfs:domain ev:BookEdition ;
+    rdfs:range ev:SourceDocument .
+
+ev:hasInputVariable a owl:ObjectProperty ;
+    rdfs:label "has input variable"@en ;
+    rdfs:domain ev:Equation ;
+    rdfs:range ev:Variable .
+
+ev:hasOutputVariable a owl:ObjectProperty ;
+    rdfs:label "has output variable"@en ;
+    rdfs:domain ev:Equation ;
+    rdfs:range ev:Variable .
+
+ev:hasSection a owl:ObjectProperty ;
+    rdfs:label "has section"@en ;
+    rdfs:domain ev:Chapter ;
+    rdfs:range ev:Section .
+
+ev:inChapter a owl:ObjectProperty ;
+    rdfs:label "in chapter"@en ;
+    rdfs:range ev:Chapter .
+
+ev:inSection a owl:ObjectProperty ;
+    rdfs:label "in section"@en ;
+    rdfs:range ev:Section .
+
+ev:localDefinition a owl:DatatypeProperty ;
+    rdfs:label "local definition as given by the source"@en ;
+    rdfs:domain ev:Variable ;
+    rdfs:range xsd:string .
+
+ev:mathFontCharRatio a owl:DatatypeProperty ;
+    rdfs:label "math-font character ratio"@en ;
+    rdfs:domain ev:EvidenceSpan ;
+    rdfs:range xsd:decimal ;
+    skos:definition "Fraction of characters in the span set in a mathematics font; a machine-computed proxy for text-layer risk."@en .
+
+ev:narrowerThanClaim a owl:ObjectProperty ;
+    rdfs:label "narrower than"@en ;
+    owl:inverseOf ev:broaderThanClaim .
+
+ev:normalizedStatement a owl:DatatypeProperty ;
+    rdfs:label "normalized statement"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range xsd:string .
+
+ev:onPage a owl:ObjectProperty ;
+    rdfs:label "on page"@en ;
+    rdfs:range ev:Page .
+
+ev:originalExcerpt a owl:DatatypeProperty ;
+    rdfs:label "short original excerpt"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "Kept deliberately short; the normalized statement carries the meaning."@en .
+
+ev:pageCount a owl:DatatypeProperty ;
+    rdfs:label "page count"@en ;
+    rdfs:domain ev:SourceDocument ;
+    rdfs:range xsd:integer .
+
+ev:pageLabel a owl:DatatypeProperty ;
+    rdfs:label "raw page label"@en ;
+    rdfs:domain ev:Page ;
+    rdfs:range xsd:string ;
+    skos:definition "The label exactly as declared by the PDF, including non-numeric labels such as 'Cover'."@en .
+
+ev:pageLabelStyle a owl:DatatypeProperty ;
+    rdfs:label "page label style"@en ;
+    rdfs:domain ev:Page ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "One of 'arabic', 'roman', 'named', 'none'."@en .
+
+ev:pageOfDocument a owl:ObjectProperty ;
+    rdfs:label "page of document"@en ;
+    rdfs:domain ev:Page ;
+    rdfs:range ev:SourceDocument .
+
+ev:pdfPageIndex a owl:DatatypeProperty ;
+    rdfs:label "PDF page index (0-based)"@en ;
+    rdfs:domain ev:Page ;
+    rdfs:range xsd:integer ;
+    skos:definition """Zero-based index of the page within the PDF file, as
+        used by PyMuPDF. The canonical machine-facing locator."""@en .
+
+ev:pdfPageNumber a owl:DatatypeProperty ;
+    rdfs:label "PDF page number (1-based)"@en ;
+    rdfs:domain ev:Page ;
+    rdfs:range xsd:integer ;
+    skos:definition "One-based page number as shown by a PDF viewer."@en .
+
+ev:preferredUnit a owl:DatatypeProperty ;
+    rdfs:label "preferred unit"@en ;
+    rdfs:domain ev:Variable ;
+    rdfs:range xsd:string .
+
+ev:printedPage a owl:DatatypeProperty ;
+    rdfs:label "printed page number"@en ;
+    rdfs:domain ev:Page ;
+    rdfs:range xsd:string ;
+    skos:definition """The page number printed on the page itself, taken from
+        the PDF page-label tree. A string, because front matter is roman and
+        some pages carry no number."""@en ;
+    skos:scopeNote """MUST NOT be computed from pdfPageIndex. When absent, it is
+        genuinely absent and the citation says so."""@en .
+
+ev:publicationYear a owl:DatatypeProperty ;
+    rdfs:label "publication year"@en ;
+    rdfs:range xsd:gYear .
+
+ev:publisher a owl:DatatypeProperty ;
+    rdfs:label "publisher"@en ;
+    rdfs:range xsd:string .
+
+ev:referencesFigure a owl:ObjectProperty ;
+    rdfs:label "references figure"@en ;
+    rdfs:range ev:Figure .
+
+ev:referencesTable a owl:ObjectProperty ;
+    rdfs:label "references table"@en ;
+    rdfs:range ev:Table .
+
+ev:refines a owl:ObjectProperty ;
+    rdfs:label "refines"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Claim .
+
+ev:sectionNumber a owl:DatatypeProperty ;
+    rdfs:label "section number"@en ;
+    rdfs:domain ev:Section ;
+    rdfs:range xsd:string .
+
+ev:sectionTitle a owl:DatatypeProperty ;
+    rdfs:label "section title"@en ;
+    rdfs:domain ev:Section ;
+    rdfs:range xsd:string .
+
+ev:sha256 a owl:DatatypeProperty ;
+    rdfs:label "SHA-256 of source file"@en ;
+    rdfs:domain ev:SourceDocument ;
+    rdfs:range xsd:string .
+
+ev:sourceClaimA a owl:ObjectProperty ;
+    rdfs:label "source claim A"@en ;
+    rdfs:domain ev:ClaimAlignment ;
+    rdfs:range ev:Claim .
+
+ev:sourceClaimB a owl:ObjectProperty ;
+    rdfs:label "source claim B"@en ;
+    rdfs:domain ev:ClaimAlignment ;
+    rdfs:range ev:Claim .
+
+ev:sourceFileName a owl:DatatypeProperty ;
+    rdfs:label "source file name"@en ;
+    rdfs:domain ev:SourceDocument ;
+    rdfs:range xsd:string .
+
+ev:sourceNotation a owl:DatatypeProperty ;
+    rdfs:label "source-specific notation"@en ;
+    rdfs:domain ev:Variable ;
+    rdfs:range xsd:string .
+
+ev:spanOfDocument a owl:ObjectProperty ;
+    rdfs:label "span of document"@en ;
+    rdfs:domain ev:EvidenceSpan ;
+    rdfs:range ev:SourceDocument .
+
+ev:spanOnPage a owl:ObjectProperty ;
+    rdfs:label "span on page"@en ;
+    rdfs:domain ev:EvidenceSpan ;
+    rdfs:range ev:Page .
+
+ev:supportedByEvidence a owl:ObjectProperty ;
+    rdfs:label "supported by evidence"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Evidence .
+
+ev:supports a owl:ObjectProperty ;
+    rdfs:label "supports"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Claim .
+
+ev:symbol a owl:DatatypeProperty ;
+    rdfs:label "symbol"@en ;
+    rdfs:domain ev:Variable ;
+    rdfs:range xsd:string .
+
+ev:symbolicExpression a owl:DatatypeProperty ;
+    rdfs:label "symbolic expression"@en ;
+    rdfs:domain ev:Equation ;
+    rdfs:range xsd:string ;
+    skos:scopeNote """Transcribed by an analyst from the rendered page, not
+        copied from the text layer, whenever ev:textIntegrity is not
+        'reliable'. ev:transcriptionSource records which."""@en .
+
+ev:tableNumber a owl:DatatypeProperty ;
+    rdfs:label "table number"@en ;
+    rdfs:domain ev:Table ;
+    rdfs:range xsd:string .
+
+ev:textIntegrity a owl:DatatypeProperty ;
+    rdfs:label "text-layer integrity"@en ;
+    rdfs:domain ev:EvidenceSpan ;
+    rdfs:range xsd:string ;
+    skos:definition """Assessment of whether the extracted characters faithfully
+        represent the printed glyphs."""@en ;
+    skos:scopeNote """One of 'reliable', 'partial-glyph-loss',
+        'glyph-mismapped', 'unverified'. In the Shigley source, mathematics-font
+        glyphs decode to unrelated ASCII characters, so spans covering
+        equations are marked 'glyph-mismapped' and their text must not be
+        quoted."""@en .
+
+ev:transcriptionSource a owl:DatatypeProperty ;
+    rdfs:label "transcription source"@en ;
+    rdfs:range xsd:string .
+
+ev:unitDimension a owl:DatatypeProperty ;
+    rdfs:label "dimension"@en ;
+    rdfs:domain ev:Variable ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "For example '[force]', '[length]', 'dimensionless'."@en .
+
+ev:unitSystem a owl:DatatypeProperty ;
+    rdfs:label "unit system required by equation"@en ;
+    rdfs:domain ev:Equation ;
+    rdfs:range xsd:string ;
+    skos:scopeNote """Some printed equations are dimensionally inconsistent and
+        valid only in the units the author assumed. Recording the required
+        system prevents silent misuse in the other system."""@en .
+
+ev:unresolvedRelativeTo a owl:ObjectProperty,
+        owl:SymmetricProperty ;
+    rdfs:label "unresolved relative to"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Claim .
+
+ev:validityCondition a owl:DatatypeProperty ;
+    rdfs:label "validity condition"@en ;
+    rdfs:domain ev:Equation ;
+    rdfs:range xsd:string .
+
+ev:Book a owl:Class ;
+    rdfs:label "Book"@en ;
+    skos:altLabel "도서"@ko ;
+    skos:definition "A work, independent of any particular edition or printing."@en .
+
+ev:ExampleProblem a owl:Class ;
+    rdfs:label "Example Problem"@en ;
+    skos:altLabel "예제"@ko .
+
+ev:broaderThanClaim a owl:ObjectProperty ;
+    rdfs:label "broader than"@en ;
+    rdfs:domain ev:Claim ;
+    rdfs:range ev:Claim .
+
+ev:hasEdition a owl:ObjectProperty ;
+    rdfs:label "has edition"@en ;
+    rdfs:domain ev:Book ;
+    rdfs:range ev:BookEdition .
+
+ev:ClaimAlignment a owl:Class ;
+    rdfs:label "Claim Alignment"@en ;
+    skos:altLabel "주장 정렬"@ko ;
+    skos:definition """A reified comparison of two claims from different
+        sources, recording how they relate without merging them."""@en ;
+    skos:scopeNote "Conflicting claims are preserved side by side. Reconciliation is never silent."@en .
+
+ev:Evidence a owl:Class ;
+    rdfs:label "Evidence"@en ;
+    skos:altLabel "근거"@ko ;
+    skos:definition "Anything that supports or contradicts a claim."@en .
+
+ev:Figure a owl:Class ;
+    rdfs:label "Figure"@en ;
+    skos:altLabel "그림"@ko .
+
+ev:Table a owl:Class ;
+    rdfs:label "Table"@en ;
+    skos:altLabel "표"@ko .
+
+ev:ConceptAlignment a owl:Class ;
+    rdfs:label "Concept Alignment"@en ;
+    skos:altLabel "개념 정렬"@ko ;
+    skos:definition """A mapping between a source-specific term or symbol and a
+        core-ontology concept, or between the corresponding terms of two
+        sources."""@en .
+
+ev:Section a owl:Class ;
+    rdfs:label "Section"@en ;
+    skos:altLabel "절"@ko .
+
+ev:BookEdition a owl:Class ;
+    rdfs:label "Book Edition"@en ;
+    skos:altLabel "판"@ko ;
+    skos:definition """A specific edition of a book. Claims are attached to
+        editions, never to works, because pagination, equation numbering and
+        content differ between editions."""@en .
+
+ev:Chapter a owl:Class ;
+    rdfs:label "Chapter"@en ;
+    skos:altLabel "장"@ko .
+
+ev:SourceDocument a owl:Class ;
+    rdfs:label "Source Document"@en ;
+    skos:definition """The concrete file that was processed, identified by file
+        name and SHA-256, so that provenance cannot silently drift onto a
+        different scan of the same edition."""@en .
+
+ev:EvidenceSpan a owl:Class ;
+    rdfs:label "Evidence Span"@en ;
+    rdfs:subClassOf ev:Evidence ;
+    skos:altLabel "근거 구간"@ko ;
+    skos:definition """A located, quotable region of a source document: a
+        document, a page, a block, optionally a bounding box, and the text that
+        was actually extracted from it."""@en ;
+    skos:scopeNote """Excerpts are kept short. The purpose of the stored text is
+        to make the citation verifiable by re-reading the page, not to
+        reproduce the book."""@en .
+
+ev:Page a owl:Class ;
+    rdfs:label "Page"@en ;
+    skos:altLabel "페이지"@ko ;
+    skos:definition """One page of one source document, carrying both its
+        zero-based PDF index and its printed label."""@en .
+
+ev:Variable a owl:Class ;
+    rdfs:label "Variable"@en ;
+    skos:altLabel "변수"@ko ;
+    skos:definition """A symbol appearing in an equation, together with its
+        meaning, dimension and preferred unit, scoped to the source that used
+        it."""@en ;
+    skos:scopeNote """Variables are source-scoped on purpose. Mott's k and
+        Shigley's a are the same physical exponent but are NOT merged; they are
+        linked through a ConceptAlignment instead."""@en .
+
+ev:Equation a owl:Class ;
+    rdfs:label "Equation"@en ;
+    skos:altLabel "수식"@ko .
+
+ev:AlignmentTypeScheme a skos:ConceptScheme ;
+    skos:prefLabel "Alignment types"@en .
+
+ev:AlignmentType a owl:Class ;
+    rdfs:label "Alignment Type"@en ;
+    rdfs:subClassOf skos:Concept .
+
+ev:Claim a owl:Class ;
+    rdfs:label "Claim"@en ;
+    skos:altLabel "주장"@ko ;
+    skos:definition """A single assertion attributed to a source, held as data
+        rather than as an ontology axiom, so that it can be conditioned,
+        contradicted, revised or rejected without touching the schema."""@en ;
+    skos:scopeNote """Claims are ABox individuals. Promotion of a claim into a
+        TBox axiom or an executable rule is a separate, human-authorised
+        step."""@en .
+

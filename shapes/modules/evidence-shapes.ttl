@@ -1,0 +1,203 @@
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix mdsh:   <https://w3id.org/mdkg/shapes#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix ev:     <https://w3id.org/mdkg/evidence#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+
+# ===========================================================================
+# SHACL :: evidence and provenance
+#
+# These shapes enforce the project's central promise: no source-derived
+# statement without a locatable citation, and no citation whose two page
+# numbers have been conflated.
+# ===========================================================================
+
+mdsh:EvidenceSpanShape a sh:NodeShape ;
+    sh:targetClass ev:EvidenceSpan ;
+    rdfs:label "Evidence span must be locatable and quality-rated"@en ;
+
+    sh:property [
+        sh:path ev:spanOfDocument ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class ev:SourceDocument ;
+        sh:message "Every EvidenceSpan must identify exactly one source document."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:spanOnPage ;
+        sh:minCount 1 ;
+        sh:class ev:Page ;
+        sh:message "Every EvidenceSpan must sit on at least one identified Page."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:extractedText ;
+        sh:minCount 1 ; sh:maxCount 1 ; sh:datatype rdfs:Literal ;
+        sh:message "Every EvidenceSpan must carry the text that was actually extracted."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:extractionMethod ;
+        sh:minCount 1 ;
+        sh:message "Every EvidenceSpan must record how its text was obtained."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:textIntegrity ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:in ( "reliable" "partial-glyph-loss" "glyph-mismapped" "unverified" ) ;
+        sh:message "Every EvidenceSpan must carry an explicit text-integrity verdict."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:boundingBox ;
+        sh:maxCount 1 ;
+        sh:pattern "^-?[0-9.]+,-?[0-9.]+,-?[0-9.]+,-?[0-9.]+$" ;
+        sh:message "A bounding box must be four comma-separated PDF user-space coordinates."@en ;
+    ] .
+
+mdsh:PageShape a sh:NodeShape ;
+    sh:targetClass ev:Page ;
+    rdfs:label "PDF page index and printed page are separate, and the index is mandatory"@en ;
+
+    sh:property [
+        sh:path ev:pdfPageIndex ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:integer ; sh:minInclusive 0 ;
+        sh:message "Every Page must carry its zero-based PDF page index."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:pdfPageNumber ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:integer ; sh:minInclusive 1 ;
+        sh:message "Every Page must carry its one-based PDF page number."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:printedPage ;
+        sh:maxCount 1 ; sh:datatype xsd:string ;
+        sh:message """The printed page must be a string and must be recorded at most
+            once. It is optional because front matter and unnumbered pages genuinely
+            have none; it is NEVER computed from the PDF index."""@en ;
+    ] ;
+    sh:property [
+        sh:path ev:pageLabelStyle ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:in ( "arabic" "roman" "named" "none" ) ;
+        sh:message "Every Page must declare the style of its label."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:pageOfDocument ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "Every Page must belong to exactly one source document."@en ;
+    ] .
+
+mdsh:SourceDocumentShape a sh:NodeShape ;
+    sh:targetClass ev:SourceDocument ;
+    rdfs:label "A source document is identified by file name and content hash"@en ;
+    sh:property [
+        sh:path ev:sourceFileName ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A SourceDocument must record its file name."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:sha256 ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:pattern "^[0-9a-f]{64}$" ;
+        sh:message """A SourceDocument must record a SHA-256, so provenance cannot
+            silently drift onto a different scan of the same edition."""@en ;
+    ] .
+
+mdsh:ClaimShape a sh:NodeShape ;
+    sh:targetClass ev:Claim , ev:NormalizedClaim , ev:ExtractedClaim ;
+    rdfs:label "A source-derived claim must be evidenced, attributed and reviewable"@en ;
+
+    sh:property [
+        sh:path ev:supportedByEvidence ;
+        sh:minCount 1 ;
+        sh:message """Every source-derived Claim must have at least one piece of
+            supporting evidence. A claim with no evidence is not a claim about a
+            book, it is an assertion."""@en ;
+    ] ;
+    sh:property [
+        sh:path ev:fromSourceDocument ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message """Every Claim must be attributed to exactly one source document.
+            Claims spanning two books are not merged; use ev:ClaimAlignment."""@en ;
+    ] ;
+    sh:property [
+        sh:path ev:normalizedStatement ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "Every Claim must carry a normalized statement."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:reviewStatus ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class mdcore:ReviewState ;
+        sh:message "Every Claim must carry exactly one review state."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:extractionConfidence ;
+        sh:maxCount 1 ; sh:datatype xsd:decimal ;
+        sh:minInclusive 0.0 ; sh:maxInclusive 1.0 ;
+        sh:message "Extraction confidence must lie in [0,1]."@en ;
+    ] .
+
+mdsh:QuantityValueShape a sh:NodeShape ;
+    sh:targetClass mdcore:QuantityValue ;
+    rdfs:label "A numeric value never floats free of its unit"@en ;
+
+    sh:property [
+        sh:path mdcore:unitSymbol ;
+        sh:minCount 1 ; sh:maxCount 1 ; sh:minLength 1 ;
+        sh:message """Every QuantityValue must state a unit. Dimensionless
+            quantities carry the explicit token 'dimensionless'; a missing unit is
+            always an error and never an assumption."""@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:originalValue ;
+        sh:minCount 1 ;
+        sh:message "Every QuantityValue must preserve the value as the source printed it."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:originalUnit ;
+        sh:minCount 1 ;
+        sh:message "Every QuantityValue must preserve the unit as the source printed it."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:valueProvenance ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class mdcore:ValueProvenanceKind ;
+        sh:message """Every QuantityValue must say where it came from, so that a
+            printed figure is never confused with an analyst's estimate."""@en ;
+    ] ;
+    # A range must be bounded on both sides, or it is not a range.
+    sh:or (
+        [ sh:not [ sh:path mdcore:valueIsRange ; sh:hasValue true ] ]
+        [ sh:and (
+            [ sh:path mdcore:rangeMinimum ; sh:minCount 1 ]
+            [ sh:path mdcore:rangeMaximum ; sh:minCount 1 ]
+        ) ]
+    ) ;
+    sh:message "A QuantityValue flagged as a range must carry both bounds."@en .
+
+mdsh:ThresholdDefinitionShape a sh:NodeShape ;
+    sh:targetClass mdcore:ThresholdDefinition ;
+    rdfs:label "A threshold must name its term and declare whether it is universal"@en ;
+    sh:property [
+        sh:path mdcore:definesTerm ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A ThresholdDefinition must name the qualitative term it bounds."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:thresholdIsUniversal ;
+        sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ;
+        sh:message """A ThresholdDefinition must declare explicitly whether its
+            source presented the boundary as generally valid. Silence here is how
+            a book's rule of thumb turns into a fabricated universal law."""@en ;
+    ] .
+
+mdsh:ClaimAlignmentShape a sh:NodeShape ;
+    sh:targetClass ev:ClaimAlignment ;
+    rdfs:label "An alignment relates two named claims under a named type"@en ;
+    sh:property [ sh:path ev:sourceClaimA ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A ClaimAlignment must name its first claim."@en ] ;
+    sh:property [ sh:path ev:sourceClaimB ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A ClaimAlignment must name its second claim."@en ] ;
+    sh:property [ sh:path ev:alignmentType ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class ev:AlignmentType ;
+        sh:message "A ClaimAlignment must state its alignment type."@en ] ;
+    sh:property [ sh:path mdcore:reviewStatus ; sh:minCount 1 ;
+        sh:message "A ClaimAlignment must carry a review state."@en ] .

@@ -1,0 +1,140 @@
+# ---------------------------------------------------------------------------
+# Configuration for the mechanical-design ontology pipeline (ASSY_Ver3.0)
+#
+# Every path is resolved relative to the repository root unless absolute.
+# ---------------------------------------------------------------------------
+
+project:
+  name: "mdkg"                    # mechanical-design knowledge graph
+  version: "0.1.0"
+  ontology_language: "en"
+  secondary_language: "ko"        # secondary skos:altLabel language
+
+paths:
+  repo_root: "."
+  build_dir: "build"              # generated intermediates (never hand-edited)
+  data_dir: "data"                # curated, reviewable datasets
+  ontology_dir: "ontology"        # hand-authored TBox modules
+  shapes_dir: "shapes"
+  rules_dir: "rules"
+  outputs_dir: "outputs"          # generated reports, diagrams, summaries
+  docs_dir: "docs"
+
+# ---------------------------------------------------------------------------
+# Source documents
+#
+# `sha256` is filled in by scripts/extract_pdf_structure.py on first run and
+# then checked on every subsequent run, so that provenance cannot silently
+# drift onto a different file.
+# ---------------------------------------------------------------------------
+sources:
+  mott6:
+    file: "Machine Elements in Mechanical Design.pdf"
+    title: "Machine Elements in Mechanical Design"
+    authors:
+      - "Robert L. Mott"
+      - "Edward M. Vavrek"
+      - "Jyhwen Wang"
+    edition: "6th"
+    edition_ordinal: 6
+    publisher: "Pearson"
+    year: 2018
+    namespace_prefix: "mott6"
+    # Text-layer quality, established empirically in docs/extraction_report.md
+    text_layer: "embedded"
+    math_text_reliability: "partial"   # body text clean; some math glyphs dropped
+    math_fonts:
+      - "PearsonMATHPRO"
+      - "MathematicalPi"
+
+  shigley10:
+    file: "ad7608c18e740b0e402c025fa3187de8.pdf"
+    title: "Shigley's Mechanical Engineering Design"
+    authors:
+      - "Richard G. Budynas"
+      - "J. Keith Nisbett"
+    edition: "10th"
+    edition_ordinal: 10
+    publisher: "McGraw-Hill Education"
+    year: 2015
+    namespace_prefix: "shigley10"
+    text_layer: "embedded"
+    # CRITICAL: math-font glyphs are mis-mapped to ASCII in this PDF.
+    # See docs/extraction_report.md, section "Shigley glyph mis-mapping".
+    math_text_reliability: "corrupted"
+    math_fonts:
+      - "MathematicalPi"
+      - "CMMI"
+      - "CMSY"
+      - "CMEX"
+      - "Grk"
+      - "Mathematical"
+
+# ---------------------------------------------------------------------------
+# Extraction settings
+# ---------------------------------------------------------------------------
+extraction:
+  # A page is flagged `needs_review` when the fraction of characters set in a
+  # recognised math font exceeds this value, because such text cannot be
+  # trusted verbatim (especially for shigley10).
+  math_font_char_ratio_threshold: 0.06
+  # A page whose extracted text is shorter than this is a candidate for OCR.
+  min_chars_per_text_page: 40
+  # Regexes used to spot structural artefacts inside page text.
+  patterns:
+    equation_number: '\(([0-9]{1,2})\s*[–\-—]\s*([0-9]{1,3}[a-z]?)\)'
+    table_caption: '\b[Tt]able\s+([0-9]{1,2})\s*[–\-—]\s*([0-9]{1,3})'
+    figure_caption: '\b(?:FIGURE|Figure|Fig\.)\s+([0-9]{1,2})\s*[–\-—]\s*([0-9]{1,3})'
+    example_marker: '\b(?:EXAMPLE\s+PROBLEM|Example\s+Problem|EXAMPLE)\s+([0-9]{1,2})\s*[–\-—]\s*([0-9]{1,3})'
+
+ocr:
+  # OCR is OFF by default. Both source PDFs carry a usable embedded text
+  # layer, so blanket OCR would add cost and a second error source.
+  enabled: false
+  engine: "tesseract"
+  language: "eng"
+  dpi: 300
+  # Only pages listed by the extractor as `ocr_candidate` would be processed.
+  only_flagged_pages: true
+
+# ---------------------------------------------------------------------------
+# Namespaces
+# ---------------------------------------------------------------------------
+namespaces:
+  mdcore:    "https://w3id.org/mdkg/core#"
+  mech:      "https://w3id.org/mdkg/mechanical-design#"
+  melem:     "https://w3id.org/mdkg/machine-elements#"
+  evidence:  "https://w3id.org/mdkg/evidence#"
+  align:     "https://w3id.org/mdkg/alignment#"
+  mott6:     "https://w3id.org/mdkg/source/mott6#"
+  shigley10: "https://w3id.org/mdkg/source/shigley10#"
+  mdsh:      "https://w3id.org/mdkg/shapes#"
+
+# ---------------------------------------------------------------------------
+# Confidence and review policy
+# ---------------------------------------------------------------------------
+confidence:
+  # Claims below this extraction confidence are never promoted past
+  # `NeedsReview`, regardless of any other signal.
+  min_for_normalization: 0.50
+  # An automated pipeline may never assign a state above this one.
+  max_automated_review_state: "NeedsReview"
+  # Review states, in promotion order.
+  review_states:
+    - "AutomaticallyExtracted"
+    - "Normalized"
+    - "NeedsReview"
+    - "HumanVerified"
+    - "Rejected"
+
+validation:
+  fail_on_shacl_violation: true
+  # Custom checks run by scripts/validate_ontology.py in addition to SHACL.
+  custom_checks:
+    - "evidence_span_text_matches_pdf"    # re-opens the PDF and re-verifies
+    - "printed_and_pdf_page_distinct_fields"
+    - "no_symmetric_substitution_inference"
+    - "no_transitive_substitution_inference"
+    - "numeric_values_have_units"
+    - "conditional_substitution_has_conditions"
+    - "source_claims_have_evidence"

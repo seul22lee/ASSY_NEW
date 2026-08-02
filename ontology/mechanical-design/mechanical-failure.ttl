@@ -1,0 +1,159 @@
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg mechanical-design :: failure modes, mechanisms and verification
+#
+# Failure modes are individuals, not classes: a designer picks from a
+# vocabulary of recognised modes and attaches them to alternatives, rather
+# than instantiating a new mode per part.
+# ===========================================================================
+
+<https://w3id.org/mdkg/mechanical-design/failure> a owl:Ontology ;
+    dcterms:title "mdkg mechanical design: failure and verification vocabulary"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/core/failure> , <https://w3id.org/mdkg/core/verification> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mech:FailureModeScheme a skos:ConceptScheme ; skos:prefLabel "Mechanical failure modes"@en .
+mech:FailureMechanismScheme a skos:ConceptScheme ; skos:prefLabel "Mechanical failure mechanisms"@en .
+
+# --- Mechanisms ------------------------------------------------------------
+
+mech:PlasticYielding a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ;
+    rdfs:label "Plastic yielding"@en ; skos:altLabel "소성 항복"@ko .
+mech:BrittleFracture a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ;
+    rdfs:label "Brittle fracture"@en .
+mech:FatigueCrackInitiationAndGrowth a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ;
+    rdfs:label "Fatigue crack initiation and growth"@en ; skos:altLabel "피로 균열"@ko ;
+    skos:definition "Progressive cracking under repeated stress, typically starting at a surface discontinuity or an internal flaw."@en .
+mech:SurfaceFatigue a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ;
+    rdfs:label "Surface (contact) fatigue"@en ;
+    skos:definition "Subsurface-initiated fatigue under repeated rolling contact stress, appearing as spalling or pitting."@en .
+mech:AdhesiveWear a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ; rdfs:label "Adhesive wear"@en .
+mech:AbrasiveWear a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ; rdfs:label "Abrasive wear"@en .
+mech:FrettingWear a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ;
+    rdfs:label "Fretting"@en ;
+    skos:definition "Wear and surface damage caused by small-amplitude oscillatory relative motion between nominally fixed mating surfaces."@en .
+mech:Corrosion a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ; rdfs:label "Corrosion"@en ; skos:altLabel "부식"@ko .
+mech:CorrosionFatigue a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ;
+    rdfs:label "Corrosion fatigue"@en ;
+    skos:definition "Fatigue accelerated by a corrosive environment acting at the crack tip."@en .
+mech:PlasticIndentation a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ;
+    rdfs:label "Static plastic indentation"@en ;
+    skos:definition "Permanent local deformation produced when a static contact load exceeds the material's capacity, without relative motion."@en .
+mech:Creep a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ; rdfs:label "Creep"@en .
+mech:ElasticInstability a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ;
+    rdfs:label "Elastic instability (buckling)"@en .
+mech:FrictionSlip a mdcore:FailureMechanism ; skos:inScheme mech:FailureMechanismScheme ;
+    rdfs:label "Gross slip at a friction interface"@en ;
+    skos:definition "Loss of the frictional grip on which a connection's torque capacity depends."@en .
+
+# --- Modes -----------------------------------------------------------------
+
+mech:ShearFailure a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Shear failure"@en ; skos:altLabel "전단 파손"@ko ;
+    skos:definition "Separation across a plane loaded predominantly in shear."@en ;
+    mdcore:causedByFailureMechanism mech:PlasticYielding .
+
+mech:BearingCompressionFailure a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Bearing (compressive crushing) failure"@en ; skos:altLabel "면압 파손"@ko ;
+    skos:definition """Permanent deformation of a mating flank under compressive
+        bearing stress, occurring on whichever of the contacting parts has the
+        lower compressive strength."""@en ;
+    mdcore:causedByFailureMechanism mech:PlasticYielding .
+
+mech:FatigueFracture a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Fatigue fracture"@en ; skos:altLabel "피로 파단"@ko ;
+    mdcore:causedByFailureMechanism mech:FatigueCrackInitiationAndGrowth ;
+    mdcore:aggravatedByCondition mdcore:CyclicLoading .
+
+mech:SurfacePitting a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Surface pitting or spalling"@en ; skos:altLabel "피팅"@ko ;
+    mdcore:causedByFailureMechanism mech:SurfaceFatigue .
+
+mech:Brinelling a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Brinelling"@en ; skos:altLabel "브리넬링"@ko ;
+    skos:definition """Permanent indentation of a raceway by a rolling element
+        under a static load, named for its resemblance to a Brinell hardness
+        impression."""@en ;
+    mdcore:causedByFailureMechanism mech:PlasticIndentation .
+
+mech:ConnectionSlip a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Connection slip"@en ; skos:altLabel "연결부 미끄러짐"@ko ;
+    skos:definition "Loss of angular or axial registration between mating parts that were intended to move together."@en ;
+    mdcore:causedByFailureMechanism mech:FrictionSlip ;
+    mdcore:aggravatedByCondition mdcore:ShockLoading .
+
+mech:Loosening a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Loosening"@en ;
+    skos:definition "Progressive loss of a preload or clamping force in service."@en .
+
+mech:ExcessiveDeflection a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Excessive deflection"@en ; skos:altLabel "과대 변형"@ko ;
+    skos:definition "Deformation within the elastic range that is nonetheless large enough to prevent a required function."@en .
+
+mech:Seizure a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Seizure"@en ;
+    mdcore:causedByFailureMechanism mech:AdhesiveWear .
+
+mech:WearOut a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Wear-out"@en ;
+    mdcore:causedByFailureMechanism mech:AbrasiveWear , mech:AdhesiveWear .
+
+mech:Buckling a mdcore:FailureMode ; skos:inScheme mech:FailureModeScheme ;
+    rdfs:label "Buckling"@en ; skos:altLabel "좌굴"@ko ;
+    mdcore:causedByFailureMechanism mech:ElasticInstability .
+
+# --- Mechanical verification methods --------------------------------------
+
+mech:ShearStressCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Direct shear stress check"@en ; skos:altLabel "전단응력 검토"@ko ;
+    mdcore:addressesFailureMode mech:ShearFailure ;
+    skos:definition "Comparison of the computed direct shear stress on the governing plane against an allowable shear stress."@en .
+
+mech:BearingStressCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Bearing (compressive) stress check"@en ; skos:altLabel "면압 검토"@ko ;
+    mdcore:addressesFailureMode mech:BearingCompressionFailure .
+
+mech:FatigueStrengthCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Fatigue strength check"@en ;
+    mdcore:addressesFailureMode mech:FatigueFracture .
+
+mech:StressConcentrationAssessment a mdcore:EngineeringCalculation ;
+    rdfs:label "Stress concentration assessment"@en ;
+    mdcore:addressesFailureMode mech:FatigueFracture .
+
+mech:BearingLifeCalculation a mdcore:EngineeringCalculation ;
+    rdfs:label "Rolling bearing rating-life calculation"@en ; skos:altLabel "베어링 수명 계산"@ko ;
+    mdcore:addressesFailureMode mech:SurfacePitting .
+
+mech:StaticLoadRatingCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Static load rating check"@en ;
+    mdcore:addressesFailureMode mech:Brinelling .
+
+mech:DeflectionCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Deflection check"@en ;
+    mdcore:addressesFailureMode mech:ExcessiveDeflection .
+
+mech:CriticalSpeedCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Critical speed check"@en .
+
+mech:InterferencePressureCalculation a mdcore:EngineeringCalculation ;
+    rdfs:label "Interference-fit pressure calculation"@en .
+
+mech:FrictionTorqueCapacityCalculation a mdcore:EngineeringCalculation ;
+    rdfs:label "Friction torque capacity calculation"@en ;
+    mdcore:addressesFailureMode mech:ConnectionSlip .
+
+mech:FitAndToleranceInspection a mdcore:DimensionalInspection ;
+    rdfs:label "Fit and tolerance inspection"@en ;
+    skos:definition "Dimensional inspection confirming that mating parts fall within the tolerance zones assumed by the design calculation."@en .
+
+mech:AssemblyTorqueTest a mdcore:TorqueTest ;
+    rdfs:label "Assembly torque test"@en ;
+    skos:definition "Test of the torque a specific assembled connection carries before slipping or yielding."@en .

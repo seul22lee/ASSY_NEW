@@ -1,0 +1,63 @@
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg mechanical-design :: motion conditions
+# ===========================================================================
+
+<https://w3id.org/mdkg/mechanical-design/motion-condition> a owl:Ontology ;
+    dcterms:title "mdkg mechanical design: motion and kinematic conditions"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/core/context> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mech:ContinuousRotation a owl:Class ; rdfs:subClassOf mdcore:RotationalMotion ;
+    rdfs:label "Continuous Rotation"@en .
+mech:IntermittentRotation a owl:Class ; rdfs:subClassOf mdcore:RotationalMotion ;
+    rdfs:label "Intermittent Rotation"@en .
+
+mech:AxialSlidingUnderTorque a owl:Class ;
+    rdfs:subClassOf mdcore:RelativeMotion ;
+    rdfs:label "Axial Sliding Under Torque"@en ; skos:altLabel "토크 전달 중 축방향 미끄럼"@ko ;
+    skos:definition """The mounted element must translate along the shaft while
+        torque is being transmitted."""@en ;
+    skos:scopeNote """This condition alone eliminates several otherwise
+        equivalent shaft/hub connection alternatives, and is one of the clearest
+        cases where a shared function does not imply substitutability."""@en .
+
+mech:AxialSlidingWithoutTorque a owl:Class ;
+    rdfs:subClassOf mdcore:RelativeMotion ;
+    rdfs:label "Axial Sliding Without Torque"@en ;
+    skos:definition "The mounted element must be repositionable along the shaft, but only while unloaded."@en .
+
+mech:AngularIndexing a owl:Class ;
+    rdfs:subClassOf mdcore:RelativeMotion ;
+    rdfs:label "Angular Indexing"@en ;
+    skos:definition "The mounted element must be re-assembled at a choice of discrete angular positions."@en .
+
+mech:Misalignment a owl:Class ;
+    rdfs:subClassOf mdcore:KinematicCondition ;
+    rdfs:label "Misalignment"@en ; skos:altLabel "정렬 불량"@ko ;
+    skos:definition "Departure of mating axes from their nominal collinear or parallel relationship."@en .
+mech:AngularMisalignment a owl:Class ; rdfs:subClassOf mech:Misalignment ; rdfs:label "Angular Misalignment"@en .
+mech:ParallelMisalignment a owl:Class ; rdfs:subClassOf mech:Misalignment ; rdfs:label "Parallel Offset Misalignment"@en .
+
+mech:HighRotationalSpeedCondition a owl:Class ;
+    rdfs:subClassOf mdcore:RotationalMotion ;
+    rdfs:label "Elevated Rotational Speed Condition"@en ;
+    skos:definition """Operation at a rotational speed high enough that
+        balance, concentricity or critical-speed effects become design
+        drivers."""@en ;
+    skos:scopeNote """Deliberately NOT given a numeric boundary. Whether a speed
+        is 'high' depends on the element, its geometry and its supports. Any
+        boundary must be introduced as a mdcore:ThresholdDefinition citing a
+        source and a context."""@en .
+
+mech:RotationalBacklash a owl:Class ;
+    rdfs:subClassOf mdcore:KinematicCondition ;
+    rdfs:label "Rotational Backlash"@en ; skos:altLabel "회전 백래시"@ko ;
+    skos:definition "Angular lost motion at a connection before load is picked up on the opposite flank."@en .

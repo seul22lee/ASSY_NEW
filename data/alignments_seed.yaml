@@ -1,0 +1,415 @@
+# ---------------------------------------------------------------------------
+# Cross-source alignments  --  input to scripts/build_ontology.py
+#
+# Two kinds of alignment are recorded:
+#
+#   concept_alignments  -- how each book's TERM or SYMBOL maps to a core
+#                          concept, and to the other book's term.
+#   claim_alignments    -- how one book's CLAIM stands to another's.
+#
+# Governing rule: nothing is merged.  Where the books differ, both claims stay
+# in the graph and the alignment records the difference.  Where they agree, the
+# alignment records the agreement without deleting either.  A reader can always
+# recover what each book actually said.
+#
+# Alignment types come from the ev:AlignmentType scheme in
+# ontology/core/evidence.ttl.
+# ---------------------------------------------------------------------------
+
+version: "0.1.0"
+
+defaults:
+  review_status: "NeedsReview"
+
+# ===========================================================================
+# Terminology and symbol alignments
+# ===========================================================================
+concept_alignments:
+
+  - id: align-t-0001
+    common_concept: "design factor"
+    core_concept: "mdcore:SafetyRequirement"
+    mott6_term: "design factor"
+    mott6_symbol: "N"
+    shigley10_term: "design factor"
+    shigley10_symbol: "n_d"
+    alignment_type: "CloseMatch"
+    analyst_note: >-
+      Both denote the ratio by which strength exceeds the stress or load a part
+      must carry. Symbols differ. Shigley additionally reserves a second symbol
+      for the value actually achieved after design; Mott does not.
+    evidence: [mott6-es-0001, shigley10-es-0001]
+
+  - id: align-t-0002
+    common_concept: "achieved safety margin after the design is fixed"
+    core_concept: "mdcore:SafetyRequirement"
+    mott6_term: "design factor (no separate term)"
+    mott6_symbol: "N"
+    shigley10_term: "factor of safety"
+    shigley10_symbol: "n"
+    alignment_type: "DiffersInTerminology"
+    analyst_note: >-
+      Shigley distinguishes the a-priori design factor n_d from the as-built
+      factor of safety n, which generally differs numerically because of
+      rounding to standard sizes. Mott uses one symbol N throughout. Readers
+      moving between the books must not assume N and n are interchangeable.
+    evidence: [mott6-es-0001, shigley10-es-0002]
+
+  - id: align-t-0003
+    common_concept: "rolling-bearing load/life exponent"
+    core_concept: "mech:BearingLifeCalculation"
+    mott6_term: "load/life exponent"
+    mott6_symbol: "k"
+    shigley10_term: "load-life exponent"
+    shigley10_symbol: "a"
+    alignment_type: "ExactMatch"
+    analyst_note: >-
+      Same physical exponent, different symbol. Values agree for ball bearings
+      (3.00 and 3); for roller bearings Mott prints the rounded decimal 3.33 and
+      Shigley the exact fraction 10/3. The symbols are deliberately NOT merged
+      in the graph.
+    evidence: [mott6-es-0071, shigley10-es-0054]
+
+  - id: align-t-0004
+    common_concept: "load applied to a rolling bearing"
+    core_concept: "mdcore:LoadCapacityRequirement"
+    mott6_term: "load"
+    mott6_symbol: "P"
+    shigley10_term: "load"
+    shigley10_symbol: "F"
+    alignment_type: "DiffersInTerminology"
+    analyst_note: >-
+      Same quantity, different symbol. Note the collision risk: Shigley uses P
+      elsewhere for force, pressure and diametral pitch, so symbol-level merging
+      across the two books would be actively wrong.
+    evidence: [mott6-es-0070, shigley10-es-0054]
+
+  - id: align-t-0005
+    common_concept: "load-life relation for rolling bearings"
+    core_concept: "mech:BearingLifeCalculation"
+    mott6_term: "relationship between bearing load and life, L2/L1 = (P1/P2)^k"
+    mott6_symbol: "Eq. 14-1"
+    shigley10_term: "load-life regression, F L^(1/a) = constant"
+    shigley10_symbol: "Eq. 11-1"
+    alignment_type: "CloseMatch"
+    analyst_note: >-
+      Algebraically equivalent statements of the same power law, written in
+      different forms: Mott as a ratio between two operating points, Shigley as
+      an invariant of the fitted line. Equivalence holds only when the exponent
+      and the rating-life basis are matched.
+    evidence: [mott6-es-0070, shigley10-es-0054]
+
+  - id: align-t-0006
+    common_concept: "rating life at 90 percent survival"
+    core_concept: "mdcore:LifeRequirement"
+    mott6_term: "rated life / L10 life"
+    mott6_symbol: "L10"
+    shigley10_term: "rating life (also minimum life, L10 life, B10 life)"
+    shigley10_symbol: "L10"
+    alignment_type: "Refines"
+    analyst_note: >-
+      Shigley gives the fuller definition, attributes the term to the ABMA,
+      enumerates the synonyms, and locates it as the 10th percentile of the
+      revolutions-to-failure distribution. Shigley refines Mott here rather than
+      disagreeing with it.
+    evidence: [mott6-es-0070, shigley10-es-0050, shigley10-es-0051]
+
+  - id: align-t-0007
+    common_concept: "basic dynamic load rating"
+    core_concept: "melem:RollingContactBearing"
+    mott6_term: "basic dynamic load rating"
+    mott6_symbol: "C"
+    shigley10_term: "catalog load rating / Basic Dynamic Load Rating"
+    shigley10_symbol: "C10"
+    alignment_type: "CloseMatch"
+    analyst_note: >-
+      Shigley's subscript 10 marks the tie to the 10 percent failure fraction,
+      and Shigley notes the name Basic Dynamic Load Rating applies specifically
+      when the manufacturer's rating life is one million revolutions. Mott's C
+      carries the same meaning but assumes that basis silently.
+    evidence: [mott6-es-0072, shigley10-es-0055]
+
+  - id: align-t-0008
+    common_concept: "groove receiving a key"
+    core_concept: "mech:Keyseat"
+    mott6_term: "keyseat (shaft and hub); keyway used commonly for the hub groove"
+    mott6_symbol: ""
+    shigley10_term: "keyseat; keyway depth"
+    shigley10_symbol: ""
+    alignment_type: "DiffersInTerminology"
+    analyst_note: >-
+      Mott explicitly notes that the hub groove is usually called a keyway but is
+      more properly also a keyseat. The ontology keeps one class and records both
+      surface forms as labels rather than picking a winner.
+    evidence: [mott6-es-0020, shigley10-es-0032]
+
+  - id: align-t-0009
+    common_concept: "spline"
+    core_concept: "melem:Spline"
+    mott6_term: "a series of axial keys machined into a shaft, with corresponding grooves in the bore of the mating part"
+    mott6_symbol: ""
+    shigley10_term: "essentially stubby gear teeth formed on the outside of the shaft and inside of the hub"
+    shigley10_symbol: ""
+    alignment_type: "CloseMatch"
+    analyst_note: >-
+      Same element, two framings. Mott frames the spline as a multiplied key,
+      Shigley as a shortened gear. The framings foreshadow their differing
+      emphases: Mott stresses load sharing, Shigley stresses manufacturing cost.
+    evidence: [mott6-es-0040, shigley10-es-0010]
+
+  - id: align-t-0010
+    common_concept: "yield strength"
+    core_concept: "mech:YieldStrength"
+    mott6_term: "yield strength"
+    mott6_symbol: "s_y"
+    shigley10_term: "yield strength"
+    shigley10_symbol: "S_y"
+    alignment_type: "ExactMatch"
+    analyst_note: >-
+      Same property; Mott uses lower-case s for strengths and Shigley upper-case
+      S. A purely notational difference, but one that breaks naive symbol
+      matching across the two books.
+    evidence: [mott6-es-0031, shigley10-es-0004]
+
+  - id: align-t-0011
+    common_concept: "failure modes of a key"
+    core_concept: "melem:ParallelKeyConnection"
+    mott6_term: "shear across the shaft/hub interface; compression due to bearing action"
+    mott6_symbol: ""
+    shigley10_term: "direct shear; bearing stress"
+    shigley10_symbol: ""
+    alignment_type: "ExactMatch"
+    analyst_note: >-
+      The two books identify the same two failure modes for a key in the same
+      order. One of the clearest agreements in the pilot.
+    evidence: [mott6-es-0030, shigley10-es-0032]
+
+  - id: align-t-0012
+    common_concept: "torque capacity of a friction-based shaft/hub connection"
+    core_concept: "mech:FrictionalLoadTransfer"
+    mott6_term: "keyless hub-to-shaft connection using a compressed steel ring (proprietary locking assembly)"
+    mott6_symbol: ""
+    shigley10_term: "interference fit torque capacity, T = (pi/2) f p l d^2"
+    shigley10_symbol: "Eq. 7-49"
+    alignment_type: "RelatedNotEquivalent"
+    analyst_note: >-
+      Both concern friction-based torque transfer at a pressurised shaft/hub
+      interface, but Shigley supplies a closed-form capacity model for a plain
+      interference fit while Mott describes a proprietary ring assembly and
+      directs the reader to the manufacturer. Not interchangeable as a basis for
+      calculation.
+    evidence: [mott6-es-0065, shigley10-es-0041]
+
+# ===========================================================================
+# Claim-to-claim alignments
+# ===========================================================================
+claim_alignments:
+
+  - id: align-c-0001
+    claim_a: mott6-c-0060
+    claim_b: shigley10-c-0060
+    alignment_type: "Agrees"
+    relation: "agreesWith"
+    common_concept: "failure modes of a key transmitting torque"
+    analyst_note: >-
+      Both books state that a key can fail by direct shear or by bearing
+      (compressive) stress, and both treat the two as checks to be made
+      together. No difference in scope or condition.
+
+  - id: align-c-0002
+    claim_a: mott6-c-0071
+    claim_b: shigley10-c-0074
+    alignment_type: "Agrees"
+    relation: "agreesWith"
+    common_concept: "rolling-bearing load/life exponent"
+    differing_conditions: >-
+      For ball bearings the values are identical (3.00 and 3). For roller
+      bearings Mott prints 3.33 while Shigley prints the exact fraction 10/3
+      (3.3333...); Shigley additionally states the value applies to cylindrical
+      and tapered roller bearings, whereas Mott says only 'roller bearings'.
+    analyst_note: >-
+      Agreement to within the rounding Mott applies. The remaining 0.1 percent
+      difference in the roller exponent is a rounding artefact, not a
+      disagreement, and is preserved rather than normalised away.
+
+  - id: align-c-0003
+    claim_a: mott6-c-0070
+    claim_b: shigley10-c-0074
+    alignment_type: "CloseMatch"
+    relation: "complements"
+    common_concept: "load-life power law for rolling bearings"
+    differing_assumptions: >-
+      Mott writes the law as a ratio between two operating points, which cancels
+      the rating-life basis; Shigley writes it as an invariant of a regression
+      line explicitly associated with reliability 0.90.
+    analyst_note: >-
+      Algebraically the same relation. Shigley's form makes the 0.90 reliability
+      attachment explicit, which Mott's ratio form leaves implicit.
+
+  - id: align-c-0004
+    claim_a: mott6-c-0074
+    claim_b: shigley10-c-0073
+    alignment_type: "Refines"
+    relation: "refines"
+    common_concept: "catalogue rating-life basis"
+    differing_assumptions: >-
+      Mott's working equations assume the manufacturer's data are rated at 10^6
+      revolutions. Shigley states that this is merely the most common basis and
+      names a well-known manufacturer that rates at 3000 hours at 500 rev/min,
+      equal to 90 million revolutions.
+    analyst_note: >-
+      Practically important. Applying Mott's C = P_d (L_d/10^6)^(1/k) to a
+      catalogue rated on a different basis gives a wrong answer. Shigley's claim
+      refines and bounds Mott's assumption; both are kept.
+
+  - id: align-c-0005
+    claim_a: mott6-c-0041
+    claim_b: shigley10-c-0041
+    alignment_type: "DiffersInScope"
+    relation: "differsFrom"
+    common_concept: "splines compared with keys"
+    differing_conditions: >-
+      Mott's 'many advantages' is asserted on load sharing, integral
+      construction, controlled fit, wear resistance and indexing. Shigley's
+      'usually not necessary' is asserted on manufacturing cost, for the
+      specific case of simple torque transmission.
+    analyst_note: >-
+      Not a contradiction. The books foreground different evaluation criteria and
+      different design situations. Merging them into a single verdict on splines
+      would destroy exactly the information a designer needs. Both are retained
+      and the substitution assessments cite both.
+
+  - id: align-c-0006
+    claim_a: mott6-c-0063
+    claim_b: shigley10-c-0024
+    alignment_type: "DiffersInAssumption"
+    relation: "unresolvedRelativeTo"
+    common_concept: "how conservative a key design should be"
+    differing_assumptions: >-
+      Mott's parallel-key design procedure recommends N = 3 in typical industrial
+      applications, explicitly to accommodate accidental overloads and shock.
+      Shigley warns that excessive safety factors should be avoided in key design
+      because it is desirable for the key, rather than costlier components, to
+      fail in an overload.
+    analyst_note: >-
+      The two are not formally contradictory: Mott gives a number, Shigley gives
+      a direction, and N = 3 is not necessarily 'excessive'. But they express
+      opposite design intents -- survive the overload versus act as the fuse --
+      and which applies depends on whether the key is meant to be sacrificial.
+      Left explicitly unresolved. Any rule derived from either must state which
+      intent it assumes.
+    review_status: "NeedsReview"
+
+  - id: align-c-0007
+    claim_a: mott6-c-0044
+    claim_b: shigley10-c-0043
+    alignment_type: "Complements"
+    relation: "complements"
+    common_concept: "axial motion of a hub relative to the shaft while torque is transmitted"
+    analyst_note: >-
+      Mott states that sliding motion between a standard parallel key and the
+      mating element should not be permitted; Shigley states that a spline with a
+      loose slip fit allows large axial motion while still transmitting torque.
+      Together they establish, from two independent sources, the condition under
+      which a key cannot be used and a spline can. This pair is the evidential
+      basis of substitution assessment SA-001.
+
+  - id: align-c-0008
+    claim_a: mott6-c-0049
+    claim_b: shigley10-c-0023
+    alignment_type: "Complements"
+    relation: "complements"
+    common_concept: "using more than one key to carry a larger load"
+    analyst_note: >-
+      Mott offers two keys or a spline as the remedy when a single key would be
+      longer than the hub. Shigley states that multiple keys may be used to carry
+      greater loads and adds the practical detail that they are typically
+      oriented at 90 degrees apart. Shigley supplies the arrangement Mott omits.
+
+  - id: align-c-0009
+    claim_a: mott6-c-0001
+    claim_b: shigley10-c-0001
+    alignment_type: "Agrees"
+    relation: "agreesWith"
+    common_concept: "definition of the design factor"
+    analyst_note: >-
+      Both define the design factor as the ratio of a strength to an allowable
+      stress, and both derive a design stress by dividing strength by the factor.
+
+  - id: align-c-0010
+    claim_a: mott6-c-0001
+    claim_b: shigley10-c-0002
+    alignment_type: "DiffersInTerminology"
+    relation: "differsFrom"
+    common_concept: "naming of the safety margin before and after design"
+    differing_conditions: >-
+      Shigley separates n_d (chosen) from n (achieved). Mott uses N for both
+      roles.
+    analyst_note: >-
+      A reader combining formulas from both books must check which of the two
+      roles each symbol plays; they are not blindly interchangeable.
+
+  - id: align-c-0011
+    claim_a: mott6-c-0025
+    claim_b: shigley10-c-0026
+    alignment_type: "Complements"
+    relation: "complements"
+    common_concept: "when to choose a Woodruff key"
+    differing_conditions: >-
+      Mott's stated conditions are light loading and easy assembly and
+      disassembly. Shigley's are concentricity after assembly, positioning
+      against a shoulder without cutting the keyslot into the stress
+      concentration region, and prevention of key rolling in smaller shafts.
+    analyst_note: >-
+      Non-overlapping rationales for the same element. Taken together they give a
+      fuller applicability profile than either book alone.
+
+  - id: align-c-0012
+    claim_a: mott6-c-0053
+    claim_b: shigley10-c-0046
+    alignment_type: "Complements"
+    relation: "complements"
+    common_concept: "stress concentration introduced by a shaft/hub connection"
+    analyst_note: >-
+      Mott states that pin-type connections produce stress concentrations in the
+      shaft; Shigley states that the stress-concentration factor from a press or
+      shrink fit is usually quite small. Read together they support a comparative
+      ranking, which neither book states outright. Any such ranking is an analyst
+      inference and is marked as one.
+
+  - id: align-c-0013
+    claim_a: mott6-c-0076
+    claim_b: shigley10-c-0073
+    alignment_type: "Agrees"
+    relation: "agreesWith"
+    common_concept: "necessity of using the specific manufacturer's published data"
+    analyst_note: >-
+      Both books direct the designer to manufacturer data for any real bearing
+      selection, and both present their own tabulated values as illustrative.
+
+  - id: align-c-0014
+    claim_a: mott6-c-0047
+    claim_b: shigley10-c-0042
+    alignment_type: "DiffersInScope"
+    relation: "differsFrom"
+    common_concept: "torque capacity of a spline connection"
+    differing_conditions: >-
+      Mott supplies a closed-form capacity model for SAE straight-sided splines
+      based on a 1000 psi allowable bearing stress, in inch units. Shigley states
+      only that splines are typically used to transfer high torques and gives no
+      spline capacity equation in the cited section.
+    analyst_note: >-
+      Complementary in practice but not comparable as statements: one is
+      quantitative and narrow, the other qualitative and broad. Only Mott's claim
+      can support a capacity calculation, and only within its stated unit system.
+
+  - id: align-c-0015
+    claim_a: mott6-c-0073
+    claim_b: shigley10-c-0070
+    alignment_type: "Complements"
+    relation: "complements"
+    common_concept: "why rolling bearings have a finite life"
+    analyst_note: >-
+      Mott gives the physical reason (fatigue under high contact stress); Shigley
+      gives the statistical definition of the life that is quoted (the 10th
+      percentile of the failure distribution). Neither is complete alone.

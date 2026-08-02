@@ -1,0 +1,100 @@
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg core :: rule layer and review state
+#
+# The rule layer is deliberately kept OUT of OWL axioms.  Eligibility,
+# selection and substitution logic is conditional, context-bound and revisable;
+# expressing it as subclass axioms would make it monotonic and would let a
+# reasoner draw conclusions no engineer authorised.  Rules therefore live in
+# rules/*.yaml and are represented here only as identified, citable objects
+# with a review state and an applicable context.
+#
+# Review state is defined here rather than in the evidence module because the
+# same promotion ladder governs claims, rules and substitution assessments.
+# ===========================================================================
+
+<https://w3id.org/mdkg/core/rule> a owl:Ontology ;
+    dcterms:title "mdkg core: design rules and review states"@en ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+# --- Rules -----------------------------------------------------------------
+
+mdcore:DesignRule a owl:Class ;
+    rdfs:label "Design Rule"@en ;
+    skos:altLabel "설계 규칙"@ko ;
+    skos:definition """A conditional statement of the form 'in context C, for
+        requirement set R, do or prefer X', held as a citable object with its
+        own provenance and review state."""@en ;
+    skos:scopeNote """Every DesignRule must either name an applicable context or
+        declare mdcore:contextUnspecified true. A rule with neither is
+        invalid."""@en .
+
+mdcore:SelectionRule a owl:Class ; rdfs:subClassOf mdcore:DesignRule ;
+    rdfs:label "Selection Rule"@en ; skos:altLabel "선정 규칙"@ko ;
+    skos:definition "A rule that admits, excludes or ranks alternatives for a design problem."@en .
+
+mdcore:SubstitutionRule a owl:Class ; rdfs:subClassOf mdcore:DesignRule ;
+    rdfs:label "Substitution Rule"@en ; skos:altLabel "대체 규칙"@ko ;
+    skos:definition "A rule that determines the substitution state of a candidate against a baseline in a context."@en .
+
+mdcore:VerificationRule a owl:Class ; rdfs:subClassOf mdcore:DesignRule ;
+    rdfs:label "Verification Rule"@en ;
+    skos:definition "A rule that determines which verification methods are required for an alternative or failure mode."@en .
+
+mdcore:ruleIdentifier a owl:DatatypeProperty ; rdfs:domain mdcore:DesignRule ; rdfs:range xsd:string ;
+    rdfs:label "rule identifier"@en ;
+    skos:scopeNote "Must match the `id` of the corresponding entry in rules/*.yaml."@en .
+mdcore:ruleStatement a owl:DatatypeProperty ; rdfs:domain mdcore:DesignRule ; rdfs:range xsd:string ;
+    rdfs:label "rule statement"@en .
+mdcore:ruleAppliesInContext a owl:ObjectProperty ; rdfs:domain mdcore:DesignRule ; rdfs:range mdcore:OperatingContext ;
+    rdfs:label "rule applies in context"@en .
+mdcore:ruleConcernsFunction a owl:ObjectProperty ; rdfs:domain mdcore:DesignRule ; rdfs:range mdcore:Function ;
+    rdfs:label "rule concerns function"@en .
+mdcore:ruleConcernsAlternative a owl:ObjectProperty ; rdfs:domain mdcore:DesignRule ; rdfs:range mdcore:DesignAlternative ;
+    rdfs:label "rule concerns alternative"@en .
+mdcore:ruleDerivedFromClaim a owl:ObjectProperty ; rdfs:domain mdcore:DesignRule ;
+    rdfs:label "rule derived from claim"@en ;
+    skos:scopeNote "Range is ev:Claim. A rule with no derived-from claim and no analyst attribution is unsupported."@en .
+mdcore:ruleIsAnalystAuthored a owl:DatatypeProperty ; rdfs:domain mdcore:DesignRule ; rdfs:range xsd:boolean ;
+    rdfs:label "rule is analyst-authored"@en ;
+    skos:definition "True when the rule expresses ontology-engineering or engineering judgement rather than a cited source statement."@en .
+
+# --- Review states ---------------------------------------------------------
+
+mdcore:ReviewState a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Review State"@en ; skos:altLabel "검토 상태"@ko ;
+    skos:definition "Position of a claim, rule or assessment on the promotion ladder."@en .
+
+mdcore:ReviewStateScheme a skos:ConceptScheme ;
+    skos:prefLabel "Review states"@en ;
+    dcterms:description """Promotion ladder. An automated process may assign at
+        most NeedsReview; only a human may assign HumanVerified or
+        Rejected."""@en .
+
+mdcore:AutomaticallyExtracted a mdcore:ReviewState ; skos:inScheme mdcore:ReviewStateScheme ;
+    skos:prefLabel "automatically extracted"@en ; skos:altLabel "자동 추출"@ko ; mdcore:ordinalRank 1 .
+mdcore:Normalized a mdcore:ReviewState ; skos:inScheme mdcore:ReviewStateScheme ;
+    skos:prefLabel "normalized"@en ; skos:altLabel "정규화됨"@ko ; mdcore:ordinalRank 2 .
+mdcore:NeedsReview a mdcore:ReviewState ; skos:inScheme mdcore:ReviewStateScheme ;
+    skos:prefLabel "needs review"@en ; skos:altLabel "검토 필요"@ko ; mdcore:ordinalRank 3 ;
+    skos:scopeNote "Highest state an automated pipeline may assign."@en .
+mdcore:HumanVerified a mdcore:ReviewState ; skos:inScheme mdcore:ReviewStateScheme ;
+    skos:prefLabel "human verified"@en ; skos:altLabel "검증 완료"@ko ; mdcore:ordinalRank 4 ;
+    skos:scopeNote """Asserts that a named person compared the normalized
+        statement against the cited page and accepted it."""@en .
+mdcore:Rejected a mdcore:ReviewState ; skos:inScheme mdcore:ReviewStateScheme ;
+    skos:prefLabel "rejected"@en ; skos:altLabel "기각됨"@ko ; mdcore:ordinalRank 0 ;
+    skos:scopeNote "Retained, not deleted, so that the same erroneous extraction is not re-proposed."@en .
+
+mdcore:reviewedBy a owl:DatatypeProperty ; rdfs:range xsd:string ;
+    rdfs:label "reviewed by"@en .
+mdcore:reviewDate a owl:DatatypeProperty ; rdfs:range xsd:date ;
+    rdfs:label "review date"@en .

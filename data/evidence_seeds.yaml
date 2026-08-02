@@ -1,0 +1,641 @@
+# ---------------------------------------------------------------------------
+# Curated evidence seeds  --  input to scripts/build_evidence_spans.py
+#
+# An analyst supplies only: the document, the PDF page index, a short anchor
+# phrase read on that page, and a topic tag.  Everything else -- printed page
+# label, chapter, section, block, bounding box, text-integrity verdict -- is
+# resolved and VERIFIED against the PDF by the builder.  A seed whose anchor is
+# not present on the stated page fails the build.
+#
+# Page indices are 0-based PDF indices.  The corresponding printed page is
+# resolved from the PDF page-label tree and is never computed by arithmetic.
+# For reference only (do not rely on it in code): in these two files the front
+# matter happens to offset mott6 by 16 and shigley10 by 22.
+#
+# Anchors are matched after de-hyphenation and whitespace collapsing, so they
+# may be typed as continuous prose even where the PDF breaks them across lines.
+# ---------------------------------------------------------------------------
+
+version: "0.1.0"
+
+evidence_seeds:
+
+  # =========================================================================
+  # MOTT 6e  --  general design topic: design factor
+  # =========================================================================
+  - id: mott6-es-0001
+    doc: mott6
+    pdf_page_index: 205
+    topic: design-factor
+    anchor: "The term design factor, N, is a measure of the relative safety of a load-carrying component"
+    artifact_refs: [{kind: section, number: "5-9"}]
+
+  - id: mott6-es-0002
+    doc: mott6
+    pdf_page_index: 205
+    topic: design-factor
+    anchor: "the strength of the material from which the component is to be made is divided by the design factor to determine a design stress"
+
+  - id: mott6-es-0003
+    doc: mott6
+    pdf_page_index: 205
+    topic: design-factor
+    anchor: "In the absence of codes or standards, the designer must use judgment to specify the desired design factor"
+
+  - id: mott6-es-0004
+    doc: mott6
+    pdf_page_index: 205
+    topic: design-factor
+    anchor: "Often the value of the design factor or the design stress is governed by codes established by standards-setting organizations"
+
+  # =========================================================================
+  # MOTT 6e  --  failure topic: fatigue
+  # =========================================================================
+  - id: mott6-es-0010
+    doc: mott6
+    pdf_page_index: 192
+    topic: fatigue
+    anchor: "While no specific dividing line can be defined, designers often use up to 1000 cycles"
+    note: "Source explicitly denies a sharp LCF/HCF boundary; modelled as a non-universal ThresholdDefinition."
+
+  - id: mott6-es-0011
+    doc: mott6
+    pdf_page_index: 192
+    topic: fatigue
+    anchor: "Such failures frequently occur within areas of stress concentration such as keyways or grooves in shafts"
+
+  - id: mott6-es-0012
+    doc: mott6
+    pdf_page_index: 192
+    topic: fatigue
+    anchor: "Fatigue failures start at small surface cracks, internal imperfections, or even at grain boundaries"
+
+  # =========================================================================
+  # MOTT 6e  --  connection topic: keys
+  # =========================================================================
+  - id: mott6-es-0020
+    doc: mott6
+    pdf_page_index: 488
+    topic: shaft-hub-connection
+    anchor: "The most common type of key for shafts up to 6"
+    artifact_refs: [{kind: figure, number: "11-1"}]
+
+  - id: mott6-es-0021
+    doc: mott6
+    pdf_page_index: 488
+    topic: shaft-hub-connection
+    anchor: "The width is approximately one-quarter of the diameter of the shaft"
+    artifact_refs: [{kind: table, number: "11-1"}]
+
+  - id: mott6-es-0022
+    doc: mott6
+    pdf_page_index: 488
+    topic: shaft-hub-connection
+    anchor: "radiused keyseats and chamfered keys can be used to reduce the stress concentrations"
+    artifact_refs: [{kind: table, number: "11-2"}]
+
+  - id: mott6-es-0023
+    doc: mott6
+    pdf_page_index: 488
+    topic: shaft-hub-connection
+    anchor: "this design gives a smaller bearing area on the sides of the key, and the bearing stress must be checked"
+    artifact_refs: [{kind: figure, number: "11-3"}]
+
+  - id: mott6-es-0024
+    doc: mott6
+    pdf_page_index: 488
+    topic: shaft-hub-connection
+    anchor: "Lower stress concentration factors result from this design as compared with parallel or taper keys"
+
+  - id: mott6-es-0025
+    doc: mott6
+    pdf_page_index: 489
+    topic: shaft-hub-connection
+    anchor: "Where light loading and relatively easy assembly and disassembly are desired, the Woodruff key should be considered"
+
+  - id: mott6-es-0026
+    doc: mott6
+    pdf_page_index: 492
+    topic: shaft-hub-connection
+    anchor: "it is recommended that the low-carbon steel SAE 1018 be considered for most applications"
+    artifact_refs: [{kind: table, number: "11-4"}, {kind: section, number: "11-3"}]
+
+  # --- verification topic: key stress analysis ------------------------------
+  - id: mott6-es-0030
+    doc: mott6
+    pdf_page_index: 492
+    topic: verification
+    anchor: "There are two basic modes of potential failure for keys transmitting power"
+    artifact_refs: [{kind: section, number: "11-4"}]
+
+  - id: mott6-es-0031
+    doc: mott6
+    pdf_page_index: 492
+    topic: verification
+    anchor: "In design, we can set the shearing stress equal to a design stress in shear for the maximum shear stress theory of failure"
+    artifact_refs: [{kind: equation, number: "11-1"}, {kind: equation, number: "11-2"}]
+
+  - id: mott6-es-0032
+    doc: mott6
+    pdf_page_index: 493
+    topic: verification
+    anchor: "The failure in bearing is related to the compressive stress on the side of the key"
+    artifact_refs: [{kind: equation, number: "11-3"}]
+
+  - id: mott6-es-0033
+    doc: mott6
+    pdf_page_index: 493
+    topic: verification
+    anchor: "Specify a suitable design factor, N. In typical industrial applications"
+    artifact_refs: [{kind: procedure, number: "design-procedure-parallel-keys"}]
+
+  - id: mott6-es-0034
+    doc: mott6
+    pdf_page_index: 493
+    topic: verification
+    anchor: "The larger of the two computed lengths governs the design"
+    artifact_refs: [{kind: procedure, number: "design-procedure-parallel-keys"}]
+
+  - id: mott6-es-0035
+    doc: mott6
+    pdf_page_index: 493
+    topic: substitution
+    anchor: "Alternatively, two keys or a spline can be used instead of a single key"
+    artifact_refs: [{kind: procedure, number: "design-procedure-parallel-keys"}]
+    note: "Primary Mott evidence that spline and multiple keys are alternatives to a single key."
+
+  - id: mott6-es-0036
+    doc: mott6
+    pdf_page_index: 493
+    topic: verification
+    anchor: "The key should extend over all or a substantial part of the length of the hub"
+
+  # --- splines --------------------------------------------------------------
+  - id: mott6-es-0040
+    doc: mott6
+    pdf_page_index: 495
+    topic: substitution
+    anchor: "The splines perform the same function as a key in transmitting torque from the shaft to the mating element"
+    artifact_refs: [{kind: section, number: "11-5"}]
+
+  - id: mott6-es-0041
+    doc: mott6
+    pdf_page_index: 495
+    topic: substitution
+    anchor: "The advantages of splines over keys are many"
+
+  - id: mott6-es-0042
+    doc: mott6
+    pdf_page_index: 495
+    topic: substitution
+    anchor: "Because usually four or more splines are used, as compared with one or two keys, a more uniform transfer of the torque and a lower loading on a given part of the shaft/hub interface result"
+
+  - id: mott6-es-0043
+    doc: mott6
+    pdf_page_index: 495
+    topic: substitution
+    anchor: "The splines are integral with the shaft, so no relative motion can occur as between a key and the shaft"
+
+  - id: mott6-es-0044
+    doc: mott6
+    pdf_page_index: 495
+    topic: substitution
+    anchor: "Sliding motion between a standard parallel key and the mating element should not be permitted"
+    note: "Decisive constraint: rules out a plain parallel key where axial sliding is required."
+
+  - id: mott6-es-0045
+    doc: mott6
+    pdf_page_index: 495
+    topic: substitution
+    anchor: "The surface of the spline is often hardened to resist wear and to facilitate its use in applications in which axial motion of the mating element is desired"
+
+  - id: mott6-es-0046
+    doc: mott6
+    pdf_page_index: 495
+    topic: substitution
+    anchor: "Because of the multiple splines on the shaft, the mating element can be indexed to various positions"
+
+  - id: mott6-es-0047
+    doc: mott6
+    pdf_page_index: 495
+    topic: substitution
+    anchor: "The involute form is preferred because it provides for self-centering of the mating element and because it can be machined with standard hobs used to cut gear teeth"
+
+  - id: mott6-es-0048
+    doc: mott6
+    pdf_page_index: 496
+    topic: substitution
+    anchor: "The torque capacity for SAE splines is based on the limit of 1000-psi bearing stress on the sides of the splines"
+    artifact_refs: [{kind: equation, number: "11-9"}, {kind: equation, number: "11-10"}]
+
+  - id: mott6-es-0049
+    doc: mott6
+    pdf_page_index: 496
+    topic: substitution
+    anchor: "The permanent fit, A, is used when the mating part is not to be moved after installation"
+    artifact_refs: [{kind: table, number: "11-5"}]
+
+  - id: mott6-es-0050
+    doc: mott6
+    pdf_page_index: 496
+    topic: substitution
+    anchor: "The torque capacity is per inch of length of the spline"
+    note: "Unit-critical: Eq. 11-9/11-10 give torque per inch of spline length, in pound-inches, with dimensions in inches."
+
+  # --- keyless methods and the testing gap ---------------------------------
+  - id: mott6-es-0060
+    doc: mott6
+    pdf_page_index: 498
+    topic: substitution
+    anchor: "some of the ways in which power-transmitting elements can be attached to shafts without keys or splines"
+    artifact_refs: [{kind: section, number: "11-6"}]
+
+  - id: mott6-es-0061
+    doc: mott6
+    pdf_page_index: 498
+    topic: verification
+    anchor: "In most cases the designs have not been standardized"
+
+  - id: mott6-es-0062
+    doc: mott6
+    pdf_page_index: 498
+    topic: verification
+    anchor: "If a satisfactory analysis is not possible, testing of the assembly is recommended"
+    note: "Canonical case of testRecommended=true with no procedure and no acceptance criterion."
+
+  - id: mott6-es-0063
+    doc: mott6
+    pdf_page_index: 499
+    topic: shaft-hub-connection
+    anchor: "Sometimes the diameter of the pin is purposely made small to ensure that the pin will break if a moderate overload is encountered"
+    artifact_refs: [{kind: equation, number: "11-19"}]
+
+  - id: mott6-es-0064
+    doc: mott6
+    pdf_page_index: 499
+    topic: shaft-hub-connection
+    anchor: "the presence of any of the pin-type connections produces stress concentrations in the shaft"
+
+  - id: mott6-es-0065
+    doc: mott6
+    pdf_page_index: 499
+    topic: shaft-hub-connection
+    anchor: "Using a steel ring compressed tightly around a smooth shaft allows torque to be transmitted between the hub of a power-transmitting element and a shaft without having a key"
+
+  # =========================================================================
+  # MOTT 6e  --  bearing topic
+  # =========================================================================
+  - id: mott6-es-0070
+    doc: mott6
+    pdf_page_index: 587
+    topic: bearing-life
+    anchor: "relationship between load, P, and life, L, for rolling contact bearings can be stated as"
+    artifact_refs: [{kind: equation, number: "14-1"}, {kind: section, number: "14-6"}]
+
+  - id: mott6-es-0071
+    doc: mott6
+    pdf_page_index: 587
+    topic: bearing-life
+    anchor: "k = 3.00 for ball bearings"
+    artifact_refs: [{kind: equation, number: "14-1"}]
+
+  - id: mott6-es-0072
+    doc: mott6
+    pdf_page_index: 587
+    topic: bearing-life
+    anchor: "The basic static load rating, Co, is the load that the bearing can withstand without permanent deformation of any component"
+
+  - id: mott6-es-0073
+    doc: mott6
+    pdf_page_index: 587
+    topic: bearing-life
+    anchor: "the failure is sometimes referred to as brinelling"
+
+  - id: mott6-es-0074
+    doc: mott6
+    pdf_page_index: 586
+    topic: bearing-life
+    anchor: "all bearings have a finite life and will eventually fail due to fatigue because of the high contact stresses"
+
+  - id: mott6-es-0075
+    doc: mott6
+    pdf_page_index: 591
+    topic: bearing-life
+    anchor: "The design life is specified by the designer, considering the application"
+    artifact_refs: [{kind: table, number: "14-4"}, {kind: section, number: "14-8"}]
+
+  - id: mott6-es-0076
+    doc: mott6
+    pdf_page_index: 591
+    topic: bearing-life
+    anchor: "If the reported load data in the manufacturer's literature is for 10"
+    artifact_refs: [{kind: equation, number: "14-2"}, {kind: equation, number: "14-3"}]
+
+  - id: mott6-es-0077
+    doc: mott6
+    pdf_page_index: 587
+    topic: bearing-life
+    anchor: "It is essential that published data from specific manufacturers be used in any real application"
+
+  # =========================================================================
+  # SHIGLEY 10e  --  general design topic: design factor
+  # =========================================================================
+  - id: shigley10-es-0001
+    doc: shigley10
+    pdf_page_index: 40
+    topic: design-factor
+    anchor: "The fundamental equation is Eq. (1-1) where nd is called the design factor"
+    artifact_refs: [{kind: section, number: "1-11"}, {kind: equation, number: "1-1"}]
+
+  - id: shigley10-es-0002
+    doc: shigley10
+    pdf_page_index: 40
+    topic: design-factor
+    anchor: "The factor is then referred to as the factor of safety, n. The factor of safety has the same definition as the design factor, but it generally differs numerically"
+    note: "Shigley separates n_d (design factor, a priori) from n (factor of safety, as built). Mott uses a single N."
+
+  - id: shigley10-es-0003
+    doc: shigley10
+    pdf_page_index: 40
+    topic: design-factor
+    anchor: "All loss-of-function modes must be analyzed, and the mode leading to the smallest design factor governs"
+
+  - id: shigley10-es-0004
+    doc: shigley10
+    pdf_page_index: 40
+    topic: design-factor
+    anchor: "The stress and strength terms in Eq. (1-3) must be of the same type and units"
+    artifact_refs: [{kind: equation, number: "1-3"}]
+
+  - id: shigley10-es-0005
+    doc: shigley10
+    pdf_page_index: 41
+    topic: design-factor
+    anchor: "the designer must rely on experience, company policies, and the many codes that may pertain to the application"
+
+  # =========================================================================
+  # SHIGLEY 10e  --  connection topic
+  # =========================================================================
+  - id: shigley10-es-0010
+    doc: shigley10
+    pdf_page_index: 379
+    topic: substitution
+    anchor: "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component"
+    artifact_refs: [{kind: section, number: "7-3"}]
+
+  - id: shigley10-es-0011
+    doc: shigley10
+    pdf_page_index: 379
+    topic: substitution
+    anchor: "Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission"
+    note: "Contrasts with Mott p.479 'The advantages of splines over keys are many'; preserved, not reconciled."
+
+  - id: shigley10-es-0012
+    doc: shigley10
+    pdf_page_index: 379
+    topic: substitution
+    anchor: "They are typically used to transfer high torques"
+    note: "'High torque' left undefined by the source; no numeric threshold may be introduced."
+
+  - id: shigley10-es-0013
+    doc: shigley10
+    pdf_page_index: 379
+    topic: substitution
+    anchor: "it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still transmitting torque"
+
+  - id: shigley10-es-0014
+    doc: shigley10
+    pdf_page_index: 379
+    topic: substitution
+    anchor: "Stress-concentration factors are greatest where the spline ends and blends into the shaft, but are generally quite moderate"
+
+  - id: shigley10-es-0015
+    doc: shigley10
+    pdf_page_index: 379
+    topic: substitution
+    anchor: "For cases of low torque transmission, various means of transmitting torque are available. These include pins, setscrews in hubs, tapered fits, and press fits"
+    note: "Explicit condition ('low torque transmission') qualifying a set of alternatives."
+
+  - id: shigley10-es-0016
+    doc: shigley10
+    pdf_page_index: 379
+    topic: substitution
+    anchor: "Press and shrink fits for securing hubs to shafts are used both for torque transfer and for preserving axial location. The resulting stress-concentration factor is usually quite small"
+    artifact_refs: [{kind: section, number: "7-8"}]
+
+  - id: shigley10-es-0017
+    doc: shigley10
+    pdf_page_index: 379
+    topic: substitution
+    anchor: "A similar method is to use a split hub with screws to clamp the hub to the shaft. This method allows for disassembly and lateral adjustments"
+
+  - id: shigley10-es-0018
+    doc: shigley10
+    pdf_page_index: 379
+    topic: substitution
+    anchor: "This approach is useful because it can be disassembled, but it does not provide good axial location of the wheel on the shaft"
+    note: "Concerns tapered fits."
+
+  - id: shigley10-es-0019
+    doc: shigley10
+    pdf_page_index: 379
+    topic: verification
+    anchor: "It is necessary to know where the shaft discontinuities, such as keyways, holes, and splines, will be in order to determine critical locations for analysis"
+
+  # --- setscrews ------------------------------------------------------------
+  - id: shigley10-es-0020
+    doc: shigley10
+    pdf_page_index: 402
+    topic: shaft-hub-connection
+    anchor: "the setscrew depends on compression to develop the clamping force"
+    artifact_refs: [{kind: section, number: "7-7"}]
+
+  - id: shigley10-es-0021
+    doc: shigley10
+    pdf_page_index: 402
+    topic: shaft-hub-connection
+    anchor: "This holding power, which is really a force resistance, is due to frictional resistance of the contacting portions of the collar and shaft"
+
+  - id: shigley10-es-0022
+    doc: shigley10
+    pdf_page_index: 404
+    topic: shaft-hub-connection
+    anchor: "Typical factors of safety are 1.5 to 2.0 for static loads and 4 to 8 for various dynamic loads"
+    artifact_refs: [{kind: table, number: "7-4"}]
+
+  - id: shigley10-es-0023
+    doc: shigley10
+    pdf_page_index: 404
+    topic: shaft-hub-connection
+    anchor: "Setscrews should have a length of about half of the shaft diameter"
+
+  # --- keys and pins --------------------------------------------------------
+  - id: shigley10-es-0030
+    doc: shigley10
+    pdf_page_index: 404
+    topic: shaft-hub-connection
+    anchor: "Keys are used to enable the transmission of torque from the shaft to the shaft-supported element. Pins are used for axial positioning and for the transfer of torque or thrust or both"
+    artifact_refs: [{kind: figure, number: "7-16"}]
+
+  - id: shigley10-es-0031
+    doc: shigley10
+    pdf_page_index: 404
+    topic: shaft-hub-connection
+    anchor: "Pins are useful when the principal loading is shear and when both torsion and thrust are present"
+
+  - id: shigley10-es-0032
+    doc: shigley10
+    pdf_page_index: 405
+    topic: verification
+    anchor: "Failure of the key can be by direct shear, or by bearing stress"
+    artifact_refs: [{kind: table, number: "7-6"}, {kind: example, number: "7-6"}]
+
+  - id: shigley10-es-0033
+    doc: shigley10
+    pdf_page_index: 405
+    topic: shaft-hub-connection
+    anchor: "The maximum length of a key is limited by the hub length of the attached element, and should generally not exceed about 1.5 times the shaft diameter to avoid excessive twisting"
+
+  - id: shigley10-es-0034
+    doc: shigley10
+    pdf_page_index: 405
+    topic: substitution
+    anchor: "Multiple keys may be used as necessary to carry greater loads, typically oriented at 90"
+
+  - id: shigley10-es-0035
+    doc: shigley10
+    pdf_page_index: 405
+    topic: design-factor
+    anchor: "Excessive safety factors should be avoided in key design, since it is desirable in an overload situation for the key to fail, rather than more costly components"
+    note: "In tension with Mott's design-procedure recommendation of N=3 for accidental overloads and shock. Preserved as a differing design intent."
+
+  - id: shigley10-es-0036
+    doc: shigley10
+    pdf_page_index: 405
+    topic: shaft-hub-connection
+    anchor: "A setscrew is sometimes used along with a key to hold the hub axially, and to minimize rotational backlash when the shaft rotates in both directions"
+
+  - id: shigley10-es-0037
+    doc: shigley10
+    pdf_page_index: 406
+    topic: shaft-hub-connection
+    anchor: "The use of the Woodruff key also yields better concentricity after assembly of the wheel and shaft. This is especially important at high speeds"
+
+  - id: shigley10-es-0038
+    doc: shigley10
+    pdf_page_index: 406
+    topic: verification
+    anchor: "charts give Kt"
+    note: "Numeric stress-concentration factors on this page sit in mathematics-font runs; values must be read from the rendered page, not the text layer."
+
+  - id: shigley10-es-0039
+    doc: shigley10
+    pdf_page_index: 406
+    topic: shaft-hub-connection
+    anchor: "The sled-runner keyseat can only be used when definite longitudinal key positioning is not necessary"
+
+  # --- interference fits ----------------------------------------------------
+  - id: shigley10-es-0040
+    doc: shigley10
+    pdf_page_index: 412
+    topic: substitution
+    anchor: "Interference fits between a shaft and its components can sometimes be used effectively to minimize the need for shoulders and keyways"
+    artifact_refs: [{kind: section, number: "7-8"}]
+
+  - id: shigley10-es-0041
+    doc: shigley10
+    pdf_page_index: 414
+    topic: substitution
+    anchor: "The amount of torque that can be transmitted through an interference fit can be estimated with a simple friction analysis at the interface"
+    artifact_refs: [{kind: equation, number: "7-48"}, {kind: equation, number: "7-49"}]
+
+  - id: shigley10-es-0042
+    doc: shigley10
+    pdf_page_index: 414
+    topic: verification
+    anchor: "The minimum interference, from Eq. (7-42), should be used to determine the minimum pressure to check for the maximum amount of torque that the joint should be designed to transmit without slipping"
+
+  - id: shigley10-es-0043
+    doc: shigley10
+    pdf_page_index: 414
+    topic: verification
+    anchor: "there is, however, a stress concentration effect in the shaft bending stress near the ends of the hub, due to the sudden change from compressed to uncompressed material"
+
+  - id: shigley10-es-0044
+    doc: shigley10
+    pdf_page_index: 414
+    topic: verification
+    anchor: "making it difficult to report generalized values. For first estimates, values are typically not greater than 2"
+
+  - id: shigley10-es-0045
+    doc: shigley10
+    pdf_page_index: 413
+    topic: verification
+    anchor: "Since there will be tolerances on both diameters, the maximum and minimum pressures can be found by applying the maximum and minimum interferences"
+    artifact_refs: [{kind: equation, number: "7-39"}, {kind: equation, number: "7-40"}]
+
+  # =========================================================================
+  # SHIGLEY 10e  --  bearing topic
+  # =========================================================================
+  - id: shigley10-es-0050
+    doc: shigley10
+    pdf_page_index: 588
+    topic: bearing-life
+    anchor: "The rating life of a group of nominally identical ball or roller bearings is defined as the number of revolutions"
+    artifact_refs: [{kind: section, number: "11-2"}]
+
+  - id: shigley10-es-0051
+    doc: shigley10
+    pdf_page_index: 588
+    topic: bearing-life
+    anchor: "The terms minimum life, L10 life, and B10 life are also used as synonyms for rating life"
+
+  - id: shigley10-es-0052
+    doc: shigley10
+    pdf_page_index: 588
+    topic: bearing-life
+    anchor: "the median life is between 4 and 5 times the L10 life"
+
+  - id: shigley10-es-0053
+    doc: shigley10
+    pdf_page_index: 588
+    topic: bearing-life
+    anchor: "The most commonly used rating life is 10"
+
+  - id: shigley10-es-0054
+    doc: shigley10
+    pdf_page_index: 588
+    topic: bearing-life
+    anchor: "for roller bearings (cylindrical and tapered roller)"
+    artifact_refs: [{kind: equation, number: "11-1"}, {kind: section, number: "11-3"}]
+    note: "Exponent values on this page are set in mathematics fonts; read from the rendered page."
+
+  - id: shigley10-es-0055
+    doc: shigley10
+    pdf_page_index: 588
+    topic: bearing-life
+    anchor: "A catalog load rating is defined as the radial load that causes 10 percent of a group of bearings to fail at the bearing manufacturer"
+
+  - id: shigley10-es-0056
+    doc: shigley10
+    pdf_page_index: 588
+    topic: bearing-life
+    anchor: "the Basic Load Rating should be viewed as a reference value, and not as an actual load to be achieved by a bearing"
+
+  - id: shigley10-es-0057
+    doc: shigley10
+    pdf_page_index: 587
+    topic: bearing-life
+    anchor: "Needle bearings (Fig. 11-3d) are very useful where radial space is limited"
+
+  - id: shigley10-es-0058
+    doc: shigley10
+    pdf_page_index: 587
+    topic: bearing-life
+    anchor: "The spherical-roller thrust bearing (Fig. 11-3b) is useful where heavy loads and misalignment occur"
+
+  - id: shigley10-es-0059
+    doc: shigley10
+    pdf_page_index: 587
+    topic: bearing-life
+    anchor: "Tapered roller bearings (Fig. 11-3e, f ) combine the advantages of ball and straight roller bearings"

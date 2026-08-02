@@ -1,0 +1,228 @@
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg core :: decision and comparison
+#
+# A general model for comparing alternatives.  The central discipline here is
+# provenance of *values*: an evaluation records not only what score an
+# alternative received on a criterion, but where that score came from --
+# printed in a book, normalised from a book's wording, inferred by an analyst,
+# chosen by a user as a weight, or computed by the pipeline.  Mixing those is
+# the fastest way to turn a knowledge graph into fiction.
+# ===========================================================================
+
+<https://w3id.org/mdkg/core/decision> a owl:Ontology ;
+    dcterms:title "mdkg core: design problem, alternatives and decisions"@en ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+# --- Problem and candidates ------------------------------------------------
+
+mdcore:DesignProblem a owl:Class ;
+    rdfs:label "Design Problem"@en ;
+    skos:altLabel "설계 문제"@ko ;
+    skos:definition """A stated need for a design solution, characterised by
+        the functions required, the operating context, and the requirements
+        and constraints that a solution must satisfy."""@en .
+
+mdcore:DesignAlternative a owl:Class ;
+    rdfs:label "Design Alternative"@en ;
+    skos:altLabel "설계 대안"@ko ;
+    skos:definition """A candidate solution concept that could be adopted to
+        satisfy a design problem: a class of artifact, a working principle, or
+        a specific configuration."""@en ;
+    skos:scopeNote """A DesignAlternative is a *solution concept*, not an
+        individual manufactured item. 'Parallel key connection' is an
+        alternative; 'the key in gearbox serial 4471' is not."""@en .
+
+mdcore:CandidateSet a owl:Class ;
+    rdfs:label "Candidate Set"@en ;
+    skos:definition """The set of design alternatives admitted to comparison
+        for a given design problem, together with the filter that produced
+        it."""@en ;
+    rdfs:comment """Reified so that the reason an alternative was excluded from
+        consideration is recoverable, not lost."""@en .
+
+mdcore:hasCandidate a owl:ObjectProperty ;
+    rdfs:label "has candidate"@en ;
+    rdfs:domain mdcore:CandidateSet ; rdfs:range mdcore:DesignAlternative .
+mdcore:candidateSetFor a owl:ObjectProperty ;
+    rdfs:label "candidate set for problem"@en ;
+    rdfs:domain mdcore:CandidateSet ; rdfs:range mdcore:DesignProblem .
+mdcore:exclusionRationale a owl:DatatypeProperty ;
+    rdfs:label "exclusion rationale"@en ;
+    rdfs:domain mdcore:CandidateSet ; rdfs:range xsd:string .
+
+mdcore:problemContext a owl:ObjectProperty ;
+    rdfs:label "problem operating context"@en ;
+    rdfs:domain mdcore:DesignProblem ; rdfs:range mdcore:OperatingContext .
+mdcore:hasRequirement a owl:ObjectProperty ;
+    rdfs:label "has requirement"@en ;
+    rdfs:domain mdcore:DesignProblem ; rdfs:range mdcore:Requirement .
+
+# --- Criteria and evaluations ---------------------------------------------
+
+mdcore:EvaluationCriterion a owl:Class ;
+    rdfs:label "Evaluation Criterion"@en ;
+    skos:altLabel "평가 기준"@ko ;
+    skos:definition """A dimension along which design alternatives are compared,
+        derived from a requirement or from a stakeholder concern."""@en .
+
+mdcore:SelectionCriterion a owl:Class ;
+    rdfs:subClassOf mdcore:EvaluationCriterion ;
+    rdfs:label "Selection Criterion"@en ;
+    skos:definition """An evaluation criterion used to choose among admissible
+        alternatives, as opposed to one used to screen them for
+        admissibility."""@en .
+
+mdcore:derivedFromRequirement a owl:ObjectProperty ;
+    rdfs:label "derived from requirement"@en ;
+    rdfs:domain mdcore:EvaluationCriterion ; rdfs:range mdcore:Requirement .
+
+mdcore:AlternativeEvaluation a owl:Class ;
+    rdfs:label "Alternative Evaluation"@en ;
+    skos:altLabel "대안 평가"@ko ;
+    skos:definition """A reified statement that a design alternative attains a
+        stated level on a stated criterion, in a stated context, on stated
+        authority."""@en ;
+    skos:scopeNote """Reified because the same alternative scores differently
+        on the same criterion in different contexts, and because the
+        provenance of each score must travel with it."""@en .
+
+mdcore:evaluatesAlternative a owl:ObjectProperty ;
+    rdfs:domain mdcore:AlternativeEvaluation ; rdfs:range mdcore:DesignAlternative ;
+    rdfs:label "evaluates alternative"@en .
+mdcore:againstCriterion a owl:ObjectProperty ;
+    rdfs:domain mdcore:AlternativeEvaluation ; rdfs:range mdcore:EvaluationCriterion ;
+    rdfs:label "against criterion"@en .
+mdcore:evaluationLevel a owl:ObjectProperty ;
+    rdfs:domain mdcore:AlternativeEvaluation ; rdfs:range mdcore:SatisfactionLevel ;
+    rdfs:label "evaluation level"@en .
+mdcore:evaluationQuantity a owl:ObjectProperty ;
+    rdfs:domain mdcore:AlternativeEvaluation ; rdfs:range mdcore:QuantityValue ;
+    rdfs:label "evaluation numeric value"@en ;
+    skos:scopeNote """Present only when the source printed a number, or when the
+        value is explicitly marked as an analyst-defined decision-model value
+        via mdcore:valueProvenance."""@en .
+mdcore:evaluationScale a owl:DatatypeProperty ;
+    rdfs:domain mdcore:AlternativeEvaluation ; rdfs:range xsd:string ;
+    rdfs:label "evaluation scale"@en ;
+    skos:scopeNote "Names the scale used, e.g. 'mdkg qualitative satisfaction scale v1' or 'lbf'."@en .
+mdcore:applicableContext a owl:ObjectProperty ;
+    rdfs:range mdcore:OperatingContext ;
+    rdfs:label "applicable in operating context"@en .
+mdcore:confidence a owl:DatatypeProperty ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "confidence"@en ;
+    skos:scopeNote "In [0,1]. An analyst's or extractor's stated confidence, never a probability derived from data unless the source supplied one."@en .
+
+# --- Qualitative satisfaction scale ---------------------------------------
+
+mdcore:SatisfactionLevel a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Satisfaction Level"@en ;
+    skos:definition "A qualitative degree to which an alternative meets a criterion."@en .
+
+mdcore:SatisfactionScale a skos:ConceptScheme ;
+    skos:prefLabel "mdkg qualitative satisfaction scale v1"@en ;
+    dcterms:description """Ordered qualitative scale. 'Unknown' is a first-class
+        value and must not be collapsed to 'does not satisfy'."""@en .
+
+mdcore:FullySatisfies     a mdcore:SatisfactionLevel ; skos:prefLabel "fully satisfies"@en ;     skos:altLabel "완전 충족"@ko ; skos:inScheme mdcore:SatisfactionScale ; mdcore:ordinalRank 4 .
+mdcore:PartiallySatisfies a mdcore:SatisfactionLevel ; skos:prefLabel "partially satisfies"@en ; skos:altLabel "부분 충족"@ko ; skos:inScheme mdcore:SatisfactionScale ; mdcore:ordinalRank 3 .
+mdcore:WeaklySatisfies    a mdcore:SatisfactionLevel ; skos:prefLabel "weakly satisfies"@en ;    skos:inScheme mdcore:SatisfactionScale ; mdcore:ordinalRank 2 .
+mdcore:DoesNotSatisfy     a mdcore:SatisfactionLevel ; skos:prefLabel "does not satisfy"@en ;    skos:altLabel "미충족"@ko ; skos:inScheme mdcore:SatisfactionScale ; mdcore:ordinalRank 1 .
+mdcore:SatisfactionUnknown a mdcore:SatisfactionLevel ; skos:prefLabel "unknown"@en ;            skos:altLabel "불명"@ko ; skos:inScheme mdcore:SatisfactionScale ;
+    skos:definition "Neither the sources nor the analyst can determine the level. Distinct from 'does not satisfy'."@en .
+
+mdcore:ordinalRank a owl:DatatypeProperty ;
+    rdfs:label "ordinal rank"@en ; rdfs:range xsd:integer ;
+    skos:scopeNote """Ordering aid for queries. It is an ordinal, not a
+        measurement: the gaps between ranks carry no meaning and ranks must not
+        be averaged."""@en .
+
+# --- Provenance of a value ------------------------------------------------
+
+mdcore:ValueProvenanceKind a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Value Provenance Kind"@en ;
+    skos:definition "Where a stated value came from."@en .
+
+mdcore:ValueProvenanceScheme a skos:ConceptScheme ;
+    skos:prefLabel "Value provenance kinds"@en .
+
+mdcore:SourceDerivedValue a mdcore:ValueProvenanceKind ; skos:inScheme mdcore:ValueProvenanceScheme ;
+    skos:prefLabel "source-derived value"@en ;
+    skos:definition "Printed in a cited source; must carry an EvidenceSpan."@en .
+mdcore:NormalizedInterpretation a mdcore:ValueProvenanceKind ; skos:inScheme mdcore:ValueProvenanceScheme ;
+    skos:prefLabel "normalized qualitative interpretation"@en ;
+    skos:definition "An analyst's mapping of a source's wording onto the controlled scale; the wording is cited, the level is the analyst's."@en .
+mdcore:EngineeringInference a mdcore:ValueProvenanceKind ; skos:inScheme mdcore:ValueProvenanceScheme ;
+    skos:prefLabel "engineering inference"@en ;
+    skos:definition "An analyst's reasoned conclusion that goes beyond what any cited source states. Never citable as textbook content."@en .
+mdcore:UserDefinedWeight a mdcore:ValueProvenanceKind ; skos:inScheme mdcore:ValueProvenanceScheme ;
+    skos:prefLabel "user-defined weight"@en ;
+    skos:definition "A preference supplied by the user of the decision model."@en .
+mdcore:ComputedResult a mdcore:ValueProvenanceKind ; skos:inScheme mdcore:ValueProvenanceScheme ;
+    skos:prefLabel "computed result"@en ;
+    skos:definition "Produced by the pipeline from other values; traceable to its inputs."@en .
+
+mdcore:valueProvenance a owl:ObjectProperty ;
+    rdfs:label "value provenance"@en ;
+    rdfs:range mdcore:ValueProvenanceKind ;
+    skos:scopeNote "Required on every AlternativeEvaluation and on every numeric value that is not directly quoted from a source."@en .
+
+# --- Decision --------------------------------------------------------------
+
+mdcore:DesignDecision a owl:Class ;
+    rdfs:label "Design Decision"@en ;
+    skos:altLabel "설계 결정"@ko ;
+    skos:definition """A recorded commitment to one alternative for a design
+        problem, with the evaluations and rationale that supported it."""@en .
+
+mdcore:DecisionRationale a owl:Class ;
+    rdfs:label "Decision Rationale"@en ;
+    skos:altLabel "결정 근거"@ko ;
+    skos:definition """The stated reasoning for a design decision, including
+        the criteria that dominated and the alternatives rejected."""@en .
+
+mdcore:decidesProblem a owl:ObjectProperty ; rdfs:domain mdcore:DesignDecision ; rdfs:range mdcore:DesignProblem ;
+    rdfs:label "decides problem"@en .
+mdcore:selectsAlternative a owl:ObjectProperty ; rdfs:domain mdcore:DesignDecision ; rdfs:range mdcore:DesignAlternative ;
+    rdfs:label "selects alternative"@en .
+mdcore:rejectsAlternative a owl:ObjectProperty ; rdfs:domain mdcore:DesignDecision ; rdfs:range mdcore:DesignAlternative ;
+    rdfs:label "rejects alternative"@en .
+mdcore:hasRationale a owl:ObjectProperty ; rdfs:domain mdcore:DesignDecision ; rdfs:range mdcore:DecisionRationale ;
+    rdfs:label "has rationale"@en .
+mdcore:supportedByEvaluation a owl:ObjectProperty ; rdfs:domain mdcore:DecisionRationale ; rdfs:range mdcore:AlternativeEvaluation ;
+    rdfs:label "supported by evaluation"@en .
+mdcore:rationaleStatement a owl:DatatypeProperty ; rdfs:domain mdcore:DecisionRationale ; rdfs:range xsd:string ;
+    rdfs:label "rationale statement"@en .
+
+# --- Advantages, disadvantages, trade-offs --------------------------------
+
+mdcore:TradeOff a owl:Class ;
+    rdfs:label "Trade-Off"@en ;
+    skos:altLabel "상충관계"@ko ;
+    skos:definition """A reified statement that gaining on one criterion costs
+        performance on another, for a given alternative in a given context."""@en .
+
+mdcore:tradeOffGains a owl:ObjectProperty ; rdfs:domain mdcore:TradeOff ; rdfs:range mdcore:EvaluationCriterion ;
+    rdfs:label "trade-off gains on criterion"@en .
+mdcore:tradeOffCosts a owl:ObjectProperty ; rdfs:domain mdcore:TradeOff ; rdfs:range mdcore:EvaluationCriterion ;
+    rdfs:label "trade-off costs on criterion"@en .
+mdcore:tradeOffStatement a owl:DatatypeProperty ; rdfs:domain mdcore:TradeOff ; rdfs:range xsd:string ;
+    rdfs:label "trade-off statement"@en .
+
+mdcore:hasAdvantage a owl:ObjectProperty ;
+    rdfs:label "has advantage"@en ;
+    rdfs:domain mdcore:DesignAlternative ; rdfs:range mdcore:AlternativeEvaluation ;
+    skos:scopeNote "Points at an evaluation so that the advantage carries its context and provenance, rather than being a bare string."@en .
+mdcore:hasDisadvantage a owl:ObjectProperty ;
+    rdfs:label "has disadvantage"@en ;
+    rdfs:domain mdcore:DesignAlternative ; rdfs:range mdcore:AlternativeEvaluation .

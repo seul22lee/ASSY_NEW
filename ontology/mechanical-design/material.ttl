@@ -1,0 +1,105 @@
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg mechanical-design :: materials and material properties
+#
+# Property values are ALWAYS mdcore:QuantityValue instances, never bare
+# numbers, and are always attached to a named material *condition*, because
+# strength depends on processing as much as on composition.  Both source books
+# print strength tables with the caveat that values are typical rather than
+# guaranteed; that caveat travels with the value as an assumption on the
+# owning claim.
+# ===========================================================================
+
+<https://w3id.org/mdkg/mechanical-design/material> a owl:Ontology ;
+    dcterms:title "mdkg mechanical design: materials"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/core/artifact> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mech:EngineeringMaterial a owl:Class ; rdfs:subClassOf mdcore:Material ;
+    rdfs:label "Engineering Material"@en .
+
+mech:Metal    a owl:Class ; rdfs:subClassOf mech:EngineeringMaterial ; rdfs:label "Metal"@en .
+mech:Steel    a owl:Class ; rdfs:subClassOf mech:Metal ; rdfs:label "Steel"@en ; skos:altLabel "강"@ko .
+mech:CarbonSteel a owl:Class ; rdfs:subClassOf mech:Steel ; rdfs:label "Carbon Steel"@en .
+mech:AlloySteel  a owl:Class ; rdfs:subClassOf mech:Steel ; rdfs:label "Alloy Steel"@en .
+mech:StainlessSteel a owl:Class ; rdfs:subClassOf mech:Steel ; rdfs:label "Stainless Steel"@en ; skos:altLabel "스테인리스강"@ko .
+mech:CastIron a owl:Class ; rdfs:subClassOf mech:Metal ; rdfs:label "Cast Iron"@en .
+mech:Aluminum a owl:Class ; rdfs:subClassOf mech:Metal ; rdfs:label "Aluminum Alloy"@en .
+mech:Polymer  a owl:Class ; rdfs:subClassOf mech:EngineeringMaterial ; rdfs:label "Polymer"@en .
+mech:Ceramic  a owl:Class ; rdfs:subClassOf mech:EngineeringMaterial ; rdfs:label "Ceramic"@en ; skos:altLabel "세라믹"@ko .
+mech:Composite a owl:Class ; rdfs:subClassOf mech:EngineeringMaterial ; rdfs:label "Composite"@en .
+
+mech:MaterialCondition a owl:Class ;
+    rdfs:label "Material Condition"@en ; skos:altLabel "재료 상태"@ko ;
+    skos:definition """The processing state in which a material is supplied or
+        used -- cold-drawn, hot-rolled, quenched and tempered, case-hardened --
+        which conditions its property values."""@en .
+
+mech:hasMaterialCondition a owl:ObjectProperty ;
+    rdfs:domain mdcore:Material ; rdfs:range mech:MaterialCondition ;
+    rdfs:label "has material condition"@en .
+
+mech:materialDesignation a owl:DatatypeProperty ;
+    rdfs:domain mdcore:Material ; rdfs:range xsd:string ;
+    rdfs:label "material designation"@en ;
+    skos:scopeNote "The designation exactly as printed by the source, e.g. 'SAE 1018'. Designation systems differ; do not translate silently."@en .
+
+mech:designationSystem a owl:DatatypeProperty ;
+    rdfs:domain mdcore:Material ; rdfs:range xsd:string ;
+    rdfs:label "designation system"@en ;
+    skos:scopeNote "For example 'SAE', 'UNS', 'AISI', 'ASTM', 'ISO'."@en .
+
+# --- Properties ------------------------------------------------------------
+
+mech:MaterialProperty a owl:Class ;
+    rdfs:label "Material Property"@en ;
+    skos:definition "A named, measurable property of a material in a stated condition."@en .
+
+mech:hasProperty a owl:ObjectProperty ;
+    rdfs:domain mdcore:Material ; rdfs:range mech:MaterialProperty ;
+    rdfs:label "has material property"@en .
+mech:propertyValue a owl:ObjectProperty ;
+    rdfs:domain mech:MaterialProperty ; rdfs:range mdcore:QuantityValue ;
+    rdfs:label "property value"@en .
+mech:propertyKind a owl:DatatypeProperty ;
+    rdfs:domain mech:MaterialProperty ; rdfs:range xsd:string ;
+    rdfs:label "property kind"@en .
+mech:valuesAreTypicalNotGuaranteed a owl:DatatypeProperty ;
+    rdfs:domain mech:MaterialProperty ; rdfs:range xsd:boolean ;
+    rdfs:label "values are typical, not guaranteed"@en ;
+    skos:scopeNote """Set true when the source labels its table as typical. This
+        is a real constraint on how the value may be used in design, and it is
+        lost if only the number is stored."""@en .
+
+mech:UltimateTensileStrength a owl:Class ; rdfs:subClassOf mech:MaterialProperty ;
+    rdfs:label "Ultimate Tensile Strength"@en ; skos:altLabel "인장강도"@ko .
+mech:YieldStrength a owl:Class ; rdfs:subClassOf mech:MaterialProperty ;
+    rdfs:label "Yield Strength"@en ; skos:altLabel "항복강도"@ko .
+mech:EnduranceLimit a owl:Class ; rdfs:subClassOf mech:MaterialProperty ;
+    rdfs:label "Endurance Limit"@en ; skos:altLabel "피로한도"@ko ;
+    skos:definition """A stress level below which a material is taken to sustain
+        cyclic loading indefinitely."""@en ;
+    skos:scopeNote """Both source books distinguish a laboratory-specimen value
+        from an estimated actual value corrected for the part. They use
+        different symbols and partly different correction factors, so the two
+        notions are kept as separate claims joined by an alignment, not
+        merged."""@en .
+mech:ModulusOfElasticity a owl:Class ; rdfs:subClassOf mech:MaterialProperty ;
+    rdfs:label "Modulus of Elasticity"@en ; skos:altLabel "탄성계수"@ko .
+mech:Hardness a owl:Class ; rdfs:subClassOf mech:MaterialProperty ;
+    rdfs:label "Hardness"@en ; skos:altLabel "경도"@ko .
+mech:Ductility a owl:Class ; rdfs:subClassOf mech:MaterialProperty ;
+    rdfs:label "Ductility"@en .
+mech:CoefficientOfFriction a owl:Class ; rdfs:subClassOf mech:MaterialProperty ;
+    rdfs:label "Coefficient of Friction"@en ; skos:altLabel "마찰계수"@ko ;
+    skos:scopeNote """A property of a contacting pair and its surface state, not
+        of one material alone; store it against the interface where the source
+        does so."""@en .

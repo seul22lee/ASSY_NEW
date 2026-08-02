@@ -1,0 +1,478 @@
+# ###########################################################################
+# GENERATED FILE -- DO NOT EDIT BY HAND
+#
+# Canonical SHACL shape set, merged by scripts/validate_ontology.py from:
+#   shapes/modules/core-shapes.ttl
+#   shapes/modules/evidence-shapes.ttl
+#   shapes/modules/rule-shapes.ttl
+# ###########################################################################
+
+@prefix ev: <https://w3id.org/mdkg/evidence#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix mdsh: <https://w3id.org/mdkg/shapes#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+mdsh:AlternativeEvaluationShape a sh:NodeShape ;
+    rdfs:label "An evaluation must be attributable, scaled and context-bound"@en ;
+    sh:property [ sh:maxCount 1 ;
+            sh:message "An AlternativeEvaluation must name the alternative it evaluates."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:evaluatesAlternative ],
+        [ sh:message "An AlternativeEvaluation must name the criterion it evaluates against."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:againstCriterion ],
+        [ sh:class mdcore:SatisfactionLevel ;
+            sh:maxCount 1 ;
+            sh:message "An AlternativeEvaluation must state a level on the controlled scale."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:evaluationLevel ],
+        [ sh:class mdcore:ValueProvenanceKind ;
+            sh:maxCount 1 ;
+            sh:message """An AlternativeEvaluation must distinguish a source-derived
+            value from a normalized interpretation, an engineering inference, a
+            user weight or a computed result. Recommendations that blur these are
+            the ones that get misquoted as textbook fact."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:valueProvenance ],
+        [ sh:message """An AlternativeEvaluation must name the context it holds in;
+            the same alternative scores differently elsewhere."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:applicableContext ] ;
+    sh:targetClass mdcore:AlternativeEvaluation .
+
+mdsh:AutomatedExtractionShape a sh:NodeShape ;
+    rdfs:label "An automatically extracted claim may not also be human verified"@en ;
+    sh:property [ sh:message """An ExtractedClaim marked HumanVerified must name its reviewer.
+            Automatic extraction alone never promotes a claim past NeedsReview."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:reviewedBy ] ;
+    sh:target [ a sh:SPARQLTarget ;
+            sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            PREFIX ev: <https://w3id.org/mdkg/evidence#>
+            SELECT ?this WHERE {
+                ?this a ev:ExtractedClaim ;
+                      mdcore:reviewStatus mdcore:HumanVerified .
+            }
+        """ ] .
+
+mdsh:ClaimAlignmentShape a sh:NodeShape ;
+    rdfs:label "An alignment relates two named claims under a named type"@en ;
+    sh:property [ sh:maxCount 1 ;
+            sh:message "A ClaimAlignment must name its first claim."@en ;
+            sh:minCount 1 ;
+            sh:path ev:sourceClaimA ],
+        [ sh:maxCount 1 ;
+            sh:message "A ClaimAlignment must name its second claim."@en ;
+            sh:minCount 1 ;
+            sh:path ev:sourceClaimB ],
+        [ sh:class ev:AlignmentType ;
+            sh:maxCount 1 ;
+            sh:message "A ClaimAlignment must state its alignment type."@en ;
+            sh:minCount 1 ;
+            sh:path ev:alignmentType ],
+        [ sh:message "A ClaimAlignment must carry a review state."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:reviewStatus ] ;
+    sh:targetClass ev:ClaimAlignment .
+
+mdsh:ClaimShape a sh:NodeShape ;
+    rdfs:label "A source-derived claim must be evidenced, attributed and reviewable"@en ;
+    sh:property [ sh:message """Every source-derived Claim must have at least one piece of
+            supporting evidence. A claim with no evidence is not a claim about a
+            book, it is an assertion."""@en ;
+            sh:minCount 1 ;
+            sh:path ev:supportedByEvidence ],
+        [ sh:maxCount 1 ;
+            sh:message """Every Claim must be attributed to exactly one source document.
+            Claims spanning two books are not merged; use ev:ClaimAlignment."""@en ;
+            sh:minCount 1 ;
+            sh:path ev:fromSourceDocument ],
+        [ sh:maxCount 1 ;
+            sh:message "Every Claim must carry a normalized statement."@en ;
+            sh:minCount 1 ;
+            sh:path ev:normalizedStatement ],
+        [ sh:class mdcore:ReviewState ;
+            sh:maxCount 1 ;
+            sh:message "Every Claim must carry exactly one review state."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:reviewStatus ],
+        [ sh:datatype xsd:decimal ;
+            sh:maxCount 1 ;
+            sh:maxInclusive 1.0 ;
+            sh:message "Extraction confidence must lie in [0,1]."@en ;
+            sh:minInclusive 0.0 ;
+            sh:path ev:extractionConfidence ] ;
+    sh:targetClass ev:Claim,
+        ev:ExtractedClaim,
+        ev:NormalizedClaim .
+
+mdsh:ConditionalSubstitutionShape a sh:NodeShape ;
+    rdfs:label "A conditional verdict must carry its conditions"@en ;
+    sh:message """A ConditionallySubstitutable conclusion must record at least one
+        condition or at least one required design modification. A conditional
+        verdict whose conditions are not stated is indistinguishable from an
+        unconditional one, which is exactly the error this model exists to
+        prevent."""@en ;
+    sh:or ( [ sh:minCount 1 ;
+                sh:path mdcore:assessmentCondition ] [ sh:minCount 1 ;
+                sh:path mdcore:requiredDesignModification ] ) ;
+    sh:target [ a sh:SPARQLTarget ;
+            sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE {
+                ?this mdcore:assessmentConclusion mdcore:ConditionallySubstitutable .
+            }
+        """ ] .
+
+mdsh:DesignModificationShape a sh:NodeShape ;
+    sh:property [ sh:maxCount 1 ;
+            sh:message "A DesignModification must state what change is required."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:modificationStatement ],
+        [ sh:message """A DesignModification must say whether it comes from a source
+            or from analyst inference."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:valueProvenance ] ;
+    sh:targetClass mdcore:DesignModification .
+
+mdsh:DesignRuleShape a sh:NodeShape ;
+    rdfs:label "A rule must be identified, stated, contextualised and attributable"@en ;
+    sh:message """Every DesignRule must either state its applicable context or
+        explicitly declare that the context is unspecified. A rule that does
+        neither silently claims universal validity."""@en ;
+    sh:or ( [ sh:minCount 1 ;
+                sh:path mdcore:ruleAppliesInContext ] [ sh:hasValue true ;
+                sh:path mdcore:contextUnspecified ] ) ;
+    sh:property [ sh:maxCount 1 ;
+            sh:message "A DesignRule must carry the identifier of its YAML entry."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:ruleIdentifier ],
+        [ sh:message "A DesignRule must state what it requires."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:ruleStatement ],
+        [ sh:class mdcore:ReviewState ;
+            sh:maxCount 1 ;
+            sh:message "A DesignRule must carry a review state."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:reviewStatus ] ;
+    sh:targetClass mdcore:DesignRule,
+        mdcore:SelectionRule,
+        mdcore:SubstitutionRule,
+        mdcore:VerificationRule .
+
+mdsh:DirectSubstitutionShape a sh:NodeShape ;
+    rdfs:label "A direct verdict demands positive interface evidence"@en ;
+    sh:property [ sh:hasValue mdcore:InterfaceIdentical ;
+            sh:message """DirectlySubstitutable requires an interface assessed as
+            identical. It must never be inferred from a shared function, nor from
+            the absence of contrary evidence."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:interfaceCompatibility ],
+        [ sh:maxCount 0 ;
+            sh:message """DirectlySubstitutable means no significant redesign. An
+            assessment that lists a required modification is at best
+            ConditionallySubstitutable."""@en ;
+            sh:path mdcore:requiredDesignModification ],
+        [ sh:maxCount 0 ;
+            sh:message "DirectlySubstitutable is incompatible with a violated requirement."@en ;
+            sh:path mdcore:violatedRequirement ] ;
+    sh:target [ a sh:SPARQLTarget ;
+            sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE {
+                ?this mdcore:assessmentConclusion mdcore:DirectlySubstitutable .
+            }
+        """ ] .
+
+mdsh:EvidenceSpanShape a sh:NodeShape ;
+    rdfs:label "Evidence span must be locatable and quality-rated"@en ;
+    sh:property [ sh:class ev:SourceDocument ;
+            sh:maxCount 1 ;
+            sh:message "Every EvidenceSpan must identify exactly one source document."@en ;
+            sh:minCount 1 ;
+            sh:path ev:spanOfDocument ],
+        [ sh:maxCount 1 ;
+            sh:message "A bounding box must be four comma-separated PDF user-space coordinates."@en ;
+            sh:path ev:boundingBox ;
+            sh:pattern "^-?[0-9.]+,-?[0-9.]+,-?[0-9.]+,-?[0-9.]+$" ],
+        [ sh:class ev:Page ;
+            sh:message "Every EvidenceSpan must sit on at least one identified Page."@en ;
+            sh:minCount 1 ;
+            sh:path ev:spanOnPage ],
+        [ sh:datatype rdfs:Literal ;
+            sh:maxCount 1 ;
+            sh:message "Every EvidenceSpan must carry the text that was actually extracted."@en ;
+            sh:minCount 1 ;
+            sh:path ev:extractedText ],
+        [ sh:message "Every EvidenceSpan must record how its text was obtained."@en ;
+            sh:minCount 1 ;
+            sh:path ev:extractionMethod ],
+        [ sh:in ( "reliable" "partial-glyph-loss" "glyph-mismapped" "unverified" ) ;
+            sh:maxCount 1 ;
+            sh:message "Every EvidenceSpan must carry an explicit text-integrity verdict."@en ;
+            sh:minCount 1 ;
+            sh:path ev:textIntegrity ] ;
+    sh:targetClass ev:EvidenceSpan .
+
+mdsh:OperatingContextShape a sh:NodeShape ;
+    rdfs:label "A context has conditions, or says it deliberately has none"@en ;
+    sh:message """An OperatingContext must either list at least one condition or
+        declare mdcore:contextUnspecified true. An empty context is not the same
+        as 'all contexts', and the difference must be recorded."""@en ;
+    sh:or ( [ sh:minCount 1 ;
+                sh:path mdcore:hasCondition ] [ sh:hasValue true ;
+                sh:path mdcore:contextUnspecified ] ) ;
+    sh:targetClass mdcore:OperatingContext .
+
+mdsh:PageShape a sh:NodeShape ;
+    rdfs:label "PDF page index and printed page are separate, and the index is mandatory"@en ;
+    sh:property [ sh:datatype xsd:integer ;
+            sh:maxCount 1 ;
+            sh:message "Every Page must carry its zero-based PDF page index."@en ;
+            sh:minCount 1 ;
+            sh:minInclusive 0 ;
+            sh:path ev:pdfPageIndex ],
+        [ sh:datatype xsd:integer ;
+            sh:maxCount 1 ;
+            sh:message "Every Page must carry its one-based PDF page number."@en ;
+            sh:minCount 1 ;
+            sh:minInclusive 1 ;
+            sh:path ev:pdfPageNumber ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:message """The printed page must be a string and must be recorded at most
+            once. It is optional because front matter and unnumbered pages genuinely
+            have none; it is NEVER computed from the PDF index."""@en ;
+            sh:path ev:printedPage ],
+        [ sh:in ( "arabic" "roman" "named" "none" ) ;
+            sh:maxCount 1 ;
+            sh:message "Every Page must declare the style of its label."@en ;
+            sh:minCount 1 ;
+            sh:path ev:pageLabelStyle ],
+        [ sh:maxCount 1 ;
+            sh:message "Every Page must belong to exactly one source document."@en ;
+            sh:minCount 1 ;
+            sh:path ev:pageOfDocument ] ;
+    sh:targetClass ev:Page .
+
+mdsh:PreferredAlternativeShape a sh:NodeShape ;
+    rdfs:label "A preference must be relative to a stated requirement"@en ;
+    sh:property [ sh:message """PreferredAlternative must name at least one requirement the
+            candidate satisfies. A preference with no stated requirement is a
+            general ranking, which this ontology does not support."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:satisfiedRequirement ],
+        [ sh:message "PreferredAlternative must state the requirement set it is relative to."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:applicableRequirement ] ;
+    sh:target [ a sh:SPARQLTarget ;
+            sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE {
+                ?this mdcore:assessmentConclusion mdcore:PreferredAlternative .
+            }
+        """ ] .
+
+mdsh:QuantityValueShape a sh:NodeShape ;
+    rdfs:label "A numeric value never floats free of its unit"@en ;
+    sh:message "A QuantityValue flagged as a range must carry both bounds."@en ;
+    sh:or ( [ sh:not [ sh:hasValue true ;
+                        sh:path mdcore:valueIsRange ] ] [ sh:and ( [ sh:minCount 1 ;
+                            sh:path mdcore:rangeMinimum ] [ sh:minCount 1 ;
+                            sh:path mdcore:rangeMaximum ] ) ] ) ;
+    sh:property [ sh:maxCount 1 ;
+            sh:message """Every QuantityValue must state a unit. Dimensionless
+            quantities carry the explicit token 'dimensionless'; a missing unit is
+            always an error and never an assumption."""@en ;
+            sh:minCount 1 ;
+            sh:minLength 1 ;
+            sh:path mdcore:unitSymbol ],
+        [ sh:message "Every QuantityValue must preserve the value as the source printed it."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:originalValue ],
+        [ sh:message "Every QuantityValue must preserve the unit as the source printed it."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:originalUnit ],
+        [ sh:class mdcore:ValueProvenanceKind ;
+            sh:maxCount 1 ;
+            sh:message """Every QuantityValue must say where it came from, so that a
+            printed figure is never confused with an analyst's estimate."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:valueProvenance ] ;
+    sh:targetClass mdcore:QuantityValue .
+
+mdsh:RequirementShape a sh:NodeShape ;
+    sh:property [ sh:class mdcore:RequirementKind ;
+            sh:message "A Requirement must be classified by a controlled requirement kind."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:hasRequirementKind ],
+        [ sh:message "A Requirement must carry a statement."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:requirementStatement ] ;
+    sh:targetClass mdcore:Requirement .
+
+mdsh:ReviewStateShape a sh:NodeShape ;
+    rdfs:label "Human verification requires a named reviewer and a date"@en ;
+    sh:property [ sh:message """A HumanVerified state must name the person who verified it.
+            Automated pipelines may assign at most NeedsReview; an unattributed
+            HumanVerified is how machine output gets laundered into human
+            authority."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:reviewedBy ],
+        [ sh:datatype xsd:date ;
+            sh:message "A HumanVerified state must record the date of verification."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:reviewDate ] ;
+    sh:target [ a sh:SPARQLTarget ;
+            sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE { ?this mdcore:reviewStatus mdcore:HumanVerified . }
+        """ ] .
+
+mdsh:RuleAttributionShape a sh:NodeShape ;
+    rdfs:label "A rule is either derived from a claim or declared analyst-authored"@en ;
+    sh:message """Every DesignRule must either cite at least one claim it derives
+        from, or declare itself analyst-authored. A rule that is neither is
+        unsupported: it looks like textbook guidance but nothing backs it."""@en ;
+    sh:or ( [ sh:minCount 1 ;
+                sh:path mdcore:ruleDerivedFromClaim ] [ sh:hasValue true ;
+                sh:path mdcore:ruleIsAnalystAuthored ] ) ;
+    sh:targetClass mdcore:DesignRule,
+        mdcore:SelectionRule,
+        mdcore:SubstitutionRule,
+        mdcore:VerificationRule .
+
+mdsh:SourceDerivedEvaluationShape a sh:NodeShape ;
+    rdfs:label "A source-derived evaluation must cite evidence"@en ;
+    sh:property [ sh:message """An evaluation marked source-derived must cite at least one
+            evidence span. If it cannot, it is an engineering inference and must
+            say so."""@en ;
+            sh:minCount 1 ;
+            sh:path ev:supportedByEvidence ] ;
+    sh:target [ a sh:SPARQLTarget ;
+            sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE {
+                ?this mdcore:valueProvenance mdcore:SourceDerivedValue .
+                ?this a mdcore:AlternativeEvaluation .
+            }
+        """ ] .
+
+mdsh:SourceDocumentShape a sh:NodeShape ;
+    rdfs:label "A source document is identified by file name and content hash"@en ;
+    sh:property [ sh:maxCount 1 ;
+            sh:message "A SourceDocument must record its file name."@en ;
+            sh:minCount 1 ;
+            sh:path ev:sourceFileName ],
+        [ sh:maxCount 1 ;
+            sh:message """A SourceDocument must record a SHA-256, so provenance cannot
+            silently drift onto a different scan of the same edition."""@en ;
+            sh:minCount 1 ;
+            sh:path ev:sha256 ;
+            sh:pattern "^[0-9a-f]{64}$" ] ;
+    sh:targetClass ev:SourceDocument .
+
+mdsh:SubstitutionAssessmentShape a sh:NodeShape ;
+    rdfs:label "An assessment must name candidate, baseline, function and conclusion"@en ;
+    sh:property [ sh:maxCount 1 ;
+            sh:message "A SubstitutionAssessment must name exactly one candidate."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:candidateAlternative ],
+        [ sh:maxCount 1 ;
+            sh:message "A SubstitutionAssessment must name exactly one baseline."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:baselineAlternative ],
+        [ sh:class mdcore:Function ;
+            sh:message """A SubstitutionAssessment must name the function being
+            preserved. 'A can replace B' without a preserved function is not
+            interpretable."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:functionBeingPreserved ],
+        [ sh:class mdcore:SubstitutionState ;
+            sh:maxCount 1 ;
+            sh:message "A SubstitutionAssessment must reach exactly one conclusion."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:assessmentConclusion ],
+        [ sh:class mdcore:OperatingContext ;
+            sh:message """A SubstitutionAssessment must name its operating context.
+            Substitutability is context-relative; an assessment without a context
+            claims more than any evidence can support."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:assessmentContext ],
+        [ sh:maxCount 1 ;
+            sh:message "A SubstitutionAssessment must carry a review state."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:reviewStatus ],
+        [ sh:datatype xsd:decimal ;
+            sh:maxCount 1 ;
+            sh:maxInclusive 1.0 ;
+            sh:message "Confidence must lie in [0,1]."@en ;
+            sh:minInclusive 0.0 ;
+            sh:path mdcore:confidence ] ;
+    sh:targetClass mdcore:SubstitutionAssessment .
+
+mdsh:TerminologyAlignmentShape a sh:NodeShape ;
+    sh:property [ sh:class ev:AlignmentType ;
+            sh:maxCount 1 ;
+            sh:message "A TerminologyAlignment must state its alignment type."@en ;
+            sh:minCount 1 ;
+            sh:path ev:alignmentType ],
+        [ sh:message "A TerminologyAlignment must name the concept the terms share."@en ;
+            sh:minCount 1 ;
+            sh:path ev:commonConcept ],
+        [ sh:message "A TerminologyAlignment must record at least one source-specific term."@en ;
+            sh:minCount 1 ;
+            sh:path ev:alignsSourceTerm ] ;
+    sh:targetClass ev:TerminologyAlignment .
+
+mdsh:ThresholdDefinitionShape a sh:NodeShape ;
+    rdfs:label "A threshold must name its term and declare whether it is universal"@en ;
+    sh:property [ sh:maxCount 1 ;
+            sh:message "A ThresholdDefinition must name the qualitative term it bounds."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:definesTerm ],
+        [ sh:datatype xsd:boolean ;
+            sh:maxCount 1 ;
+            sh:message """A ThresholdDefinition must declare explicitly whether its
+            source presented the boundary as generally valid. Silence here is how
+            a book's rule of thumb turns into a fabricated universal law."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:thresholdIsUniversal ] ;
+    sh:targetClass mdcore:ThresholdDefinition .
+
+mdsh:TradeOffShape a sh:NodeShape ;
+    sh:property [ sh:message "A TradeOff must name the criterion gained."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:tradeOffGains ],
+        [ sh:message "A TradeOff must name the criterion sacrificed."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:tradeOffCosts ],
+        [ sh:message "A TradeOff must state whether it is source-derived or inferred."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:valueProvenance ] ;
+    sh:targetClass mdcore:TradeOff .
+
+mdsh:VerificationMethodTestShape a sh:NodeShape ;
+    rdfs:label "A recommended test must declare what its source did NOT specify"@en ;
+    sh:property [ sh:datatype xsd:boolean ;
+            sh:maxCount 1 ;
+            sh:message """Where a test is recommended, the ontology must state
+            explicitly whether a procedure was actually specified. Leaving it out
+            is how an unspecified test silently becomes a real one."""@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:testProcedureSpecified ],
+        [ sh:datatype xsd:boolean ;
+            sh:maxCount 1 ;
+            sh:message "Where a test is recommended, acceptance-criterion specification must be stated."@en ;
+            sh:minCount 1 ;
+            sh:path mdcore:acceptanceCriterionSpecified ] ;
+    sh:target [ a sh:SPARQLTarget ;
+            sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE { ?this mdcore:testRecommended true . }
+        """ ] .
+

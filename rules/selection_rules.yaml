@@ -1,0 +1,234 @@
+# ---------------------------------------------------------------------------
+# Selection rules  --  which alternatives are admissible for a design problem
+#
+# Rules live here, not in OWL, on purpose.  They are conditional, revisable and
+# defeasible; expressed as subclass axioms they would become monotonic and a
+# reasoner would draw conclusions no engineer authorised.
+#
+# Every rule declares:
+#   applies_when       -- the function and the context conditions that trigger it
+#   effect             -- require / exclude / prefer / flag, and on what
+#   derived_from       -- the claim ids that support it, or none
+#   analyst_authored   -- true when the rule is engineering judgement, not a
+#                         restatement of a cited source
+#   review_status      -- NeedsReview until a human signs it off
+#
+# A rule with neither derived_from nor analyst_authored: true is invalid and is
+# rejected by scripts/validate_ontology.py.
+#
+# `context_unspecified: true` must be set explicitly when a rule genuinely has
+# no stated context.  Silence is never read as "applies everywhere".
+# ---------------------------------------------------------------------------
+
+version: "0.1.0"
+scale_note: >-
+  Qualitative levels come from mdcore:SatisfactionScale. The ordinal ranks on
+  that scale order the levels but are not measurements and must not be averaged.
+
+rules:
+
+  - id: SEL-001
+    kind: SelectionRule
+    title: "Exclude a plain parallel key where the hub must slide under torque"
+    statement: >-
+      If the required function is transmission of torque between shaft and hub
+      and the operating context requires the mounted element to move axially
+      while torque is transmitted, exclude the plain parallel key connection.
+    applies_when:
+      function: "mech:TransmitTorqueShaftToHub"
+      context_conditions: ["mech:AxialSlidingUnderTorque"]
+    effect:
+      action: exclude
+      alternatives: ["melem:ParallelKeyConnection"]
+      rationale: >-
+        Mott states that sliding motion between a standard parallel key and the
+        mating element should not be permitted.
+    derived_from: [mott6-c-0044]
+    analyst_authored: false
+    confidence: 0.9
+    review_status: NeedsReview
+
+  - id: SEL-002
+    kind: SelectionRule
+    title: "Admit splines where the hub must slide under torque"
+    statement: >-
+      If the required function is transmission of torque between shaft and hub
+      and the context requires axial motion under torque, admit spline
+      connections, provided the spline is specified with a fit that permits
+      sliding.
+    applies_when:
+      function: "mech:TransmitTorqueShaftToHub"
+      context_conditions: ["mech:AxialSlidingUnderTorque"]
+    effect:
+      action: require_feature
+      alternatives: ["melem:InvoluteSplineConnection", "melem:StraightSidedSplineConnection"]
+      required_feature: "a fit class permitting movement under load"
+      rationale: >-
+        Shigley states that a spline can be made with a reasonably loose slip fit
+        to allow large axial motion while still transmitting torque. Mott's SAE
+        fit classes distinguish permanent installation (A), movement without
+        torque (B) and movement under load (C).
+    derived_from: [shigley10-c-0043, mott6-c-0048]
+    analyst_authored: false
+    confidence: 0.9
+    review_status: NeedsReview
+
+  - id: SEL-003
+    kind: SelectionRule
+    title: "Flag friction-based connections when overload protection is required"
+    statement: >-
+      If a requirement of kind overload protection is present, flag every
+      alternative whose torque transfer is purely frictional, because such a
+      connection has no member intended to fail first.
+    applies_when:
+      function: "mech:TransmitTorqueShaftToHub"
+      requirement_kinds: ["mdcore:OverloadProtectionRequirement"]
+      behaviors: ["mech:FrictionalLoadTransfer"]
+    effect:
+      action: flag
+      alternatives: ["melem:PressFitConnectionAlternative", "melem:ShrinkFitConnectionAlternative",
+                     "melem:SetscrewConnection", "melem:ClampingHubConnectionAlternative",
+                     "melem:KeylessLockingAssemblyAlternative"]
+      rationale: >-
+        Shigley states it is desirable in an overload situation for the key to
+        fail rather than more costly components, and Mott describes the shear
+        pin as a member deliberately sized to break on overload. Replacing a
+        sacrificial member with a friction joint removes that behaviour.
+    derived_from: [shigley10-c-0024, mott6-c-0052]
+    analyst_authored: false
+    confidence: 0.75
+    review_status: NeedsReview
+    notes: >-
+      The rule flags rather than excludes: a friction joint can slip rather than
+      break, which is itself a form of overload response. Whether slipping is
+      acceptable is a design judgement the sources do not settle.
+
+  - id: SEL-004
+    kind: SelectionRule
+    title: "Prefer alternatives without a keyseat when shaft fatigue governs"
+    statement: >-
+      If shaft fatigue life at the connection is a governing requirement, prefer
+      connections that do not require a keyseat in the shaft.
+    applies_when:
+      function: "mech:TransmitTorqueShaftToHub"
+      requirement_kinds: ["mdcore:LifeRequirement"]
+      context_conditions: ["mdcore:CyclicLoading"]
+    effect:
+      action: prefer
+      alternatives: ["melem:PressFitConnectionAlternative", "melem:ShrinkFitConnectionAlternative"]
+      over: ["melem:ParallelKeyConnection", "melem:MultipleKeyConnection"]
+      rationale: >-
+        Mott lists keyways in shafts among the stress concentrations at which
+        fatigue failures frequently occur; Shigley states that the
+        stress-concentration factor resulting from a press or shrink fit is
+        usually quite small.
+    derived_from: [mott6-c-0011, shigley10-c-0046]
+    analyst_authored: false
+    confidence: 0.7
+    review_status: NeedsReview
+    notes: >-
+      A press fit is not free of stress concentration: Shigley records a raiser
+      in the shaft bending stress near the hub ends, with first estimates
+      typically not greater than 2. The preference is comparative, not absolute.
+
+  - id: SEL-005
+    kind: SelectionRule
+    title: "Restrict setscrew, pin, tapered-fit and press-fit connections to low torque"
+    statement: >-
+      Treat pins, setscrews in hubs, tapered fits and press fits as candidates
+      for cases of low torque transmission.
+    applies_when:
+      function: "mech:TransmitTorqueShaftToHub"
+      context_conditions: []
+      context_unspecified: false
+    effect:
+      action: restrict
+      alternatives: ["melem:PinnedConnection", "melem:SetscrewConnection",
+                     "melem:TaperedFitConnectionAlternative", "melem:PressFitConnectionAlternative"]
+      restriction: "low torque transmission"
+      rationale: >-
+        Shigley introduces these four as the means available for cases of low
+        torque transmission.
+    derived_from: [shigley10-c-0045]
+    analyst_authored: false
+    confidence: 0.8
+    review_status: NeedsReview
+    executable: false
+    not_executable_because: >-
+      The source gives no numeric boundary for 'low torque', and none may be
+      introduced. The rule is advisory until an external standard, company
+      specification or engineering review supplies a threshold.
+    requires_external_authority: ["mdcore:RequiresCompanySpecification", "mdcore:RequiresEngineeringReview"]
+
+  - id: SEL-006
+    kind: SelectionRule
+    title: "Prefer the involute spline form over the straight-sided form"
+    statement: >-
+      Where a spline is selected, prefer the involute form.
+    applies_when:
+      function: "mech:TransmitTorqueShaftToHub"
+      context_unspecified: true
+    effect:
+      action: prefer
+      alternatives: ["melem:InvoluteSplineConnection"]
+      over: ["melem:StraightSidedSplineConnection"]
+      rationale: >-
+        Mott states the involute form is preferred because it self-centres the
+        mating element and can be machined with standard gear hobs.
+    derived_from: [mott6-c-0046]
+    analyst_authored: false
+    confidence: 0.85
+    review_status: NeedsReview
+    notes: >-
+      Mott states this preference without attaching an operating context, so the
+      rule carries context_unspecified rather than an invented one.
+
+  - id: SEL-007
+    kind: SelectionRule
+    title: "Require a thrust-capable support where thrust load is present"
+    statement: >-
+      If the support must carry a thrust load, exclude alternatives that do not
+      perform the carry-thrust-load function.
+    applies_when:
+      function: "mech:SupportRotatingShaft"
+      context_conditions: ["mech:ThrustLoading"]
+    effect:
+      action: exclude
+      alternatives_lacking_function: "mech:CarryThrustLoad"
+      rationale: >-
+        Shigley describes tapered roller bearings as taking radial or thrust
+        loads or any combination of the two, distinguishing them from families
+        described only in radial terms.
+    derived_from: [shigley10-c-0079]
+    analyst_authored: true
+    confidence: 0.6
+    review_status: NeedsReview
+    notes: >-
+      Marked analyst-authored because the exclusion rests on the function
+      assignments in this ontology, not on a cited statement that particular
+      families cannot take thrust.
+
+  - id: SEL-008
+    kind: SelectionRule
+    title: "Require manufacturer data for any real bearing selection"
+    statement: >-
+      Any bearing selection intended for a real application must be closed
+      against the specific manufacturer's published data, not against textbook
+      tables.
+    applies_when:
+      function: "mech:SupportRotatingShaft"
+      context_unspecified: true
+    effect:
+      action: require_external_authority
+      alternatives: ["melem:DeepGrooveBallBearingAlternative", "melem:CylindricalRollerBearingAlternative",
+                     "melem:TaperedRollerBearingAlternative", "melem:NeedleBearingAlternative",
+                     "melem:SphericalRollerBearingAlternative"]
+      rationale: >-
+        Mott states it is essential that published data from specific
+        manufacturers be used in any real application; Shigley notes each
+        manufacturer chooses its own rating-life basis.
+    derived_from: [mott6-c-0076, shigley10-c-0073]
+    analyst_authored: false
+    confidence: 0.95
+    review_status: NeedsReview
+    requires_external_authority: ["mdcore:RequiresManufacturerData"]

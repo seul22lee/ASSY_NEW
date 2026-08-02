@@ -1,0 +1,63 @@
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg mechanical-design :: load conditions
+#
+# Specialises mdcore:LoadingCondition by the *kind of internal loading* a
+# mechanical element sees.  Note that no class here carries a numeric
+# boundary: "heavy load" and "high torque" are not classes, they are
+# mdcore:ThresholdDefinition individuals attached to a source and a context.
+# ===========================================================================
+
+<https://w3id.org/mdkg/mechanical-design/load-condition> a owl:Ontology ;
+    dcterms:title "mdkg mechanical design: load conditions"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/core/context> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mech:TorsionalLoading a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Torsional Loading"@en ; skos:altLabel "비틀림 하중"@ko .
+mech:BendingLoading a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Bending Loading"@en ; skos:altLabel "굽힘 하중"@ko .
+mech:AxialLoading a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Axial Loading"@en ; skos:altLabel "축 하중"@ko .
+mech:RadialLoading a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Radial Loading"@en ; skos:altLabel "반경방향 하중"@ko .
+mech:ThrustLoading a owl:Class ; rdfs:subClassOf mech:AxialLoading ;
+    rdfs:label "Thrust Loading"@en ;
+    skos:definition "Axial load carried across a rotating interface, e.g. by a bearing."@en .
+mech:ContactLoading a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Contact Loading"@en ;
+    skos:definition "Load transmitted through a small contact region, producing locally high subsurface stress."@en .
+mech:BearingPressureLoading a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Bearing Pressure Loading"@en ; skos:altLabel "면압 하중"@ko ;
+    skos:definition "Compressive load distributed over a mating flank area, assessed against a compressive strength or an allowable bearing pressure."@en .
+
+mech:CombinedBendingAndTorsion a owl:Class ; rdfs:subClassOf mdcore:CombinedLoading ;
+    rdfs:label "Combined Bending and Torsion"@en ;
+    skos:definition "The characteristic loading of a rotating shaft carrying transverse loads."@en .
+
+mech:BidirectionalRotation a owl:Class ; rdfs:subClassOf mdcore:ReversingLoading ;
+    rdfs:label "Bidirectional Rotation"@en ; skos:altLabel "양방향 회전"@ko ;
+    skos:definition """Operation in which the driven direction reverses, so that
+        a connection with backlash is loaded alternately on opposite
+        flanks."""@en ;
+    skos:scopeNote """A decisive condition for shaft/hub connections: clearance
+        that is harmless under unidirectional drive becomes impact loading when
+        the direction reverses."""@en .
+
+mech:VariableLoading a owl:Class ; rdfs:subClassOf mdcore:CyclicLoading ;
+    rdfs:label "Variable Loading"@en ;
+    skos:definition "Loading whose amplitude changes over the duty cycle, requiring damage accumulation rather than a single-amplitude assessment."@en .
+
+mech:StressRatio a owl:Class ;
+    rdfs:label "Stress Ratio Condition"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:definition """The ratio of minimum to maximum stress in a cycle, which
+        characterises a cyclic loading case."""@en ;
+    skos:scopeNote "Quantified through mdcore:conditionParameter with unit 'dimensionless'."@en .

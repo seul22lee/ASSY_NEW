@@ -1,0 +1,553 @@
+# ---------------------------------------------------------------------------
+# Substitution assessments  --  input to scripts/build_ontology.py
+#
+# Each assessment is DIRECTIONAL (candidate replaces baseline) and is bound to
+# one preserved function, one operating context and an explicit requirement
+# set.  SA-001 and SA-006 are the same pair of alternatives in the same
+# context, assessed in both directions, and they reach opposite conclusions.
+# That is the point: substitutability is not symmetric, and the model must be
+# able to say so.
+#
+# Every advantage, disadvantage, condition and failure implication is tagged
+# with where it came from:
+#   SourceDerivedValue        -- a cited book says it
+#   NormalizedInterpretation  -- analyst mapped the book's wording onto a scale
+#   EngineeringInference      -- analyst reasoning beyond what any source states
+# Nothing marked EngineeringInference may be cited as textbook content.
+# ---------------------------------------------------------------------------
+
+version: "0.1.0"
+
+# ===========================================================================
+# Operating contexts
+# ===========================================================================
+contexts:
+
+  - id: ctx-axial-slide-under-torque
+    label: "Hub must slide axially along the shaft while transmitting torque"
+    conditions:
+      - "mech:AxialSlidingUnderTorque"
+      - "mech:ContinuousRotation"
+      - "mech:TorsionalLoading"
+    note: >-
+      The defining condition of a power-take-off style connection. Present in
+      both sources, though named differently.
+
+  - id: ctx-steady-fixed-hub
+    label: "Hub permanently located, steady unidirectional torque, no field disassembly"
+    conditions:
+      - "mech:ContinuousRotation"
+      - "mech:TorsionalLoading"
+      - "mdcore:StaticLoading"
+    note: >-
+      Deliberately excludes shock and reversal, because friction-based
+      connections behave differently under both.
+
+  - id: ctx-low-torque-adjustable
+    label: "Low torque, hub position adjusted during assembly, cost-driven"
+    conditions:
+      - "mech:ContinuousRotation"
+      - "mech:AxialSlidingWithoutTorque"
+      - "mdcore:ManufacturingCostConstraint"
+    note: >-
+      'Low torque' is left unquantified. Shigley uses the phrase without giving
+      a boundary and none may be introduced.
+
+  - id: ctx-hub-length-limited
+    label: "Required key length exceeds the available hub length"
+    conditions:
+      - "mech:TorsionalLoading"
+      - "mdcore:SpaceRequirement"
+    note: >-
+      The situation Mott's parallel-key design procedure explicitly addresses at
+      its step 7.
+
+  - id: ctx-radial-only-support
+    label: "Shaft support carrying radial load only, no thrust"
+    conditions:
+      - "mech:RadialLoading"
+      - "mech:ContinuousRotation"
+
+  - id: ctx-radial-and-thrust-support
+    label: "Shaft support carrying combined radial and thrust load"
+    conditions:
+      - "mech:RadialLoading"
+      - "mech:ThrustLoading"
+      - "mech:ContinuousRotation"
+
+# ===========================================================================
+# Requirements
+# ===========================================================================
+requirements:
+
+  - id: req-torque-capacity
+    label: "The connection shall transmit the specified design torque"
+    kind: "mdcore:TorqueCapacityRequirement"
+    statement: "Transmit the design torque between shaft and hub without slip, shear or bearing failure."
+
+  - id: req-axial-motion
+    label: "The hub shall be free to move axially while torque is transmitted"
+    kind: "mdcore:MotionAllowanceRequirement"
+    statement: "Permit axial travel of the mounted element along the shaft under load."
+
+  - id: req-axial-location
+    label: "The hub shall be located axially on the shaft"
+    kind: "mdcore:PositioningRequirement"
+    statement: "Fix the axial position of the mounted element."
+
+  - id: req-field-disassembly
+    label: "The connection shall be separable with ordinary maintenance tooling"
+    kind: "mdcore:MaintainabilityRequirement"
+    statement: "Allow the mounted element to be removed and refitted in service."
+
+  - id: req-overload-protection
+    label: "The connection shall fail preferentially on overload"
+    kind: "mdcore:OverloadProtectionRequirement"
+    statement: "Act as the sacrificial member so that costlier components survive an overload."
+
+  - id: req-manufacturing-cost
+    label: "The connection shall not raise manufacturing cost disproportionately"
+    kind: "mdcore:CostRequirement"
+    statement: "Keep the manufacturing cost of the connection commensurate with the duty."
+
+  - id: req-concentricity
+    label: "The mounted element shall run concentric with the shaft"
+    kind: "mdcore:AlignmentRequirement"
+    statement: "Maintain concentricity of the mounted element after assembly."
+
+  - id: req-fatigue-life
+    label: "The shaft shall achieve the required fatigue life at the connection"
+    kind: "mdcore:LifeRequirement"
+    statement: "Survive the specified cyclic duty at the stress raiser introduced by the connection."
+
+  - id: req-bearing-life
+    label: "The bearing shall achieve the specified rating life"
+    kind: "mdcore:LifeRequirement"
+    statement: "Achieve the specified L10 rating life at the applied load."
+
+  - id: req-carry-thrust
+    label: "The support shall carry the specified thrust load"
+    kind: "mdcore:LoadCapacityRequirement"
+    statement: "Carry the axial (thrust) component of the applied load."
+
+# ===========================================================================
+# Substitution assessments
+# ===========================================================================
+assessments:
+
+  # -----------------------------------------------------------------------
+  - id: SA-001
+    label: "Replace a parallel key with an involute spline where the hub must slide under torque"
+    baseline: "melem:ParallelKeyConnection"
+    candidate: "melem:InvoluteSplineConnection"
+    function_preserved: "mech:TransmitTorqueShaftToHub"
+    context: ctx-axial-slide-under-torque
+    conclusion: "PreferredAlternative"
+    interface_compatibility: "InterfaceCompatibleWithRework"
+    confidence: 0.85
+    applicable_requirements: [req-torque-capacity, req-axial-motion, req-manufacturing-cost, req-concentricity]
+    satisfied_requirements: [req-torque-capacity, req-axial-motion, req-concentricity]
+    violated_requirements: [req-manufacturing-cost]
+    conditions:
+      - condition: "mech:AxialSlidingUnderTorque"
+        statement: "The requirement for axial travel under torque is what makes the spline preferred; without it this assessment does not apply."
+        provenance: "SourceDerivedValue"
+        evidence: [mott6-es-0044, shigley10-es-0013]
+      - condition: "mech:SlipFit"
+        statement: "The spline must be specified with a fit that permits sliding: Shigley's reasonably loose slip fit, or Mott's SAE fit class C where movement occurs under load."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0013, mott6-es-0049]
+    modifications:
+      - statement: "Replace the shaft keyseat with an external spline, generated by hobbing."
+        effort: "significant"
+        provenance: "SourceDerivedValue"
+        evidence: [mott6-es-0047]
+      - statement: "Replace the hub keyway with a matching internal spline."
+        effort: "significant"
+        provenance: "EngineeringInference"
+      - statement: "Specify the spline to a published SAE or ANSI standard, including the fit class."
+        effort: "moderate"
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0010, mott6-es-0049]
+    advantages:
+      - criterion: "mdcore:MotionAllowanceRequirement"
+        level: "FullySatisfies"
+        statement: "A spline with a loose slip fit allows large axial motion between shaft and component while still transmitting torque; a standard parallel key must not be allowed to slide."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0013, mott6-es-0044, mott6-es-0045]
+      - criterion: "mdcore:LoadCapacityRequirement"
+        level: "FullySatisfies"
+        statement: "With four or more splines instead of one or two keys, torque transfer is more uniform and the loading on any given part of the shaft/hub interface is lower."
+        provenance: "SourceDerivedValue"
+        evidence: [mott6-es-0042]
+      - criterion: "mdcore:AlignmentRequirement"
+        level: "FullySatisfies"
+        statement: "The involute form self-centres the mating element."
+        provenance: "SourceDerivedValue"
+        evidence: [mott6-es-0047]
+    disadvantages:
+      - criterion: "mdcore:CostRequirement"
+        level: "DoesNotSatisfy"
+        statement: "Splines are generally much more expensive to manufacture than keys."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0011]
+    trade_offs:
+      - gains: "mdcore:MotionAllowanceRequirement"
+        costs: "mdcore:CostRequirement"
+        statement: "The capability to slide under torque is bought with a much more expensive shaft and hub feature; where no axial motion is needed, the same source calls a spline usually unnecessary."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0011, shigley10-es-0013]
+    introduced_failure_modes:
+      - failure_mode: "mech:WearOut"
+        statement: "A sliding spline interface wears; Mott notes the spline surface is often hardened to resist wear precisely for axial-motion applications."
+        provenance: "SourceDerivedValue"
+        evidence: [mott6-es-0045]
+      - failure_mode: "mech:FatigueFracture"
+        statement: "Stress concentration is greatest where the spline ends and blends into the shaft, though the source describes such factors as generally quite moderate."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0014]
+    mitigated_failure_modes:
+      - failure_mode: "mech:ShearFailure"
+        statement: "The single key's shear plane is removed; load is shared over several flanks."
+        provenance: "SourceDerivedValue"
+        evidence: [mott6-es-0042]
+      - failure_mode: "mech:FrettingWear"
+        statement: "Splines are integral with the shaft, so the relative motion that can occur between a key and its keyseat cannot occur."
+        provenance: "SourceDerivedValue"
+        evidence: [mott6-es-0043]
+    required_verification:
+      - method: "mech:BearingStressCheck"
+        statement: "Spline torque capacity from Mott Eq. 11-9/11-10, valid for SAE straight-sided splines in inch units and stated per inch of engaged length."
+        evidence: [mott6-es-0048, mott6-es-0050]
+      - method: "mech:StressConcentrationAssessment"
+        statement: "Assess the stress raiser where the spline runs out into the shaft."
+        evidence: [shigley10-es-0014]
+      - method: "mech:FitAndToleranceInspection"
+        statement: "Confirm the fit class actually achieved permits the required sliding."
+        evidence: [mott6-es-0049]
+    analyst_note: >-
+      Both books support the direction of this conclusion from different angles:
+      Mott rules the key out for sliding service, Shigley rules the spline in.
+      Neither book states the substitution as such; the conclusion is an analyst
+      synthesis over two cited claims, and is marked NeedsReview.
+    supporting_claims: [mott6-c-0044, shigley10-c-0043, mott6-c-0042, mott6-c-0046, shigley10-c-0041, shigley10-c-0044]
+
+  # -----------------------------------------------------------------------
+  - id: SA-006
+    label: "Replace an involute spline with a parallel key where the hub must slide under torque (reverse of SA-001)"
+    baseline: "melem:InvoluteSplineConnection"
+    candidate: "melem:ParallelKeyConnection"
+    function_preserved: "mech:TransmitTorqueShaftToHub"
+    context: ctx-axial-slide-under-torque
+    conclusion: "NotAnAlternative"
+    interface_compatibility: "InterfaceIncompatible"
+    confidence: 0.9
+    applicable_requirements: [req-torque-capacity, req-axial-motion, req-manufacturing-cost]
+    satisfied_requirements: [req-manufacturing-cost]
+    violated_requirements: [req-axial-motion]
+    conditions:
+      - condition: "mech:AxialSlidingUnderTorque"
+        statement: "In this context the hub must slide under torque, which is exactly what a standard parallel key must not be permitted to do."
+        provenance: "SourceDerivedValue"
+        evidence: [mott6-es-0044]
+    disadvantages:
+      - criterion: "mdcore:MotionAllowanceRequirement"
+        level: "DoesNotSatisfy"
+        statement: "Sliding motion between a standard parallel key and the mating element should not be permitted."
+        provenance: "SourceDerivedValue"
+        evidence: [mott6-es-0044]
+    introduced_failure_modes:
+      - failure_mode: "mech:WearOut"
+        statement: "Sliding a mating element on a standard parallel key is the condition the source warns against; wear and loss of fit follow."
+        provenance: "NormalizedInterpretation"
+        evidence: [mott6-es-0044]
+    required_verification: []
+    analyst_note: >-
+      Deliberately paired with SA-001 to demonstrate that the model does not
+      treat substitutability as symmetric. The spline replaces the key here; the
+      key does not replace the spline. A graph that inferred the reverse edge
+      automatically would assert something both sources contradict.
+    supporting_claims: [mott6-c-0044]
+
+  # -----------------------------------------------------------------------
+  - id: SA-002
+    label: "Replace a parallel key with an interference (press or shrink) fit on a permanently located hub"
+    baseline: "melem:ParallelKeyConnection"
+    candidate: "melem:PressFitConnectionAlternative"
+    function_preserved: "mech:TransmitTorqueShaftToHub"
+    context: ctx-steady-fixed-hub
+    conclusion: "ConditionallySubstitutable"
+    interface_compatibility: "InterfaceCompatibleWithRework"
+    confidence: 0.75
+    applicable_requirements: [req-torque-capacity, req-axial-location, req-field-disassembly, req-overload-protection, req-fatigue-life]
+    satisfied_requirements: [req-axial-location, req-fatigue-life]
+    violated_requirements: [req-field-disassembly, req-overload-protection]
+    conditions:
+      - condition: "mdcore:StaticLoading"
+        statement: "The design torque must not exceed the friction capacity computed at the MINIMUM interference, which is what bounds the torque the joint may be designed to transmit without slipping."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0042, shigley10-es-0041]
+      - condition: "mdcore:MaintenanceFreeOperation"
+        statement: "No requirement for routine field disassembly of the hub."
+        provenance: "EngineeringInference"
+      - condition: "mech:MaintainedInterfacePressure"
+        statement: "The interface pressure assumed in the capacity calculation must be maintained in service; the capacity is a friction capacity and depends on it."
+        provenance: "NormalizedInterpretation"
+        evidence: [shigley10-es-0041]
+    modifications:
+      - statement: "Delete the keyseat from the shaft and the keyway from the hub."
+        effort: "moderate"
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0040]
+      - statement: "Specify shaft and hub diameters to a fit class giving the required interference, with tolerances on both members."
+        effort: "moderate"
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0045]
+      - statement: "Specify the assembly method (axial press, or thermal expansion of the hub) and the associated process controls."
+        effort: "significant"
+        provenance: "EngineeringInference"
+    advantages:
+      - criterion: "mdcore:LifeRequirement"
+        level: "PartiallySatisfies"
+        statement: "Removing the keyseat removes a stress raiser at which fatigue cracks characteristically initiate; the source describes the press-fit stress-concentration factor as usually quite small."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0016, mott6-es-0011]
+      - criterion: "mdcore:PositioningRequirement"
+        level: "FullySatisfies"
+        statement: "Press and shrink fits are used both for torque transfer and for preserving axial location, and can minimise the need for shoulders and keyways."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0016, shigley10-es-0040]
+    disadvantages:
+      - criterion: "mdcore:MaintainabilityRequirement"
+        level: "DoesNotSatisfy"
+        statement: "An interference fit is not separable with ordinary maintenance tooling; the source offers a split clamping hub as the variant that does allow disassembly."
+        provenance: "NormalizedInterpretation"
+        evidence: [shigley10-es-0017]
+      - criterion: "mdcore:OverloadProtectionRequirement"
+        level: "DoesNotSatisfy"
+        statement: "The connection no longer contains a sacrificial member; where the key was intended to fail before costlier components, that behaviour is lost."
+        provenance: "NormalizedInterpretation"
+        evidence: [shigley10-es-0035]
+    trade_offs:
+      - gains: "mdcore:LifeRequirement"
+        costs: "mdcore:MaintainabilityRequirement"
+        statement: "Fatigue performance improves by removing the keyseat, at the cost of a joint that cannot be routinely taken apart."
+        provenance: "EngineeringInference"
+    introduced_failure_modes:
+      - failure_mode: "mech:ConnectionSlip"
+        statement: "Capacity is frictional, so the governing failure becomes gross slip rather than shear of a member."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0042]
+      - failure_mode: "mech:FatigueFracture"
+        statement: "A stress concentration appears in the shaft bending stress near the ends of the hub, from the sudden change between compressed and uncompressed material; the source gives first estimates typically not greater than 2 and declines to generalise."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0043, shigley10-es-0044]
+    mitigated_failure_modes:
+      - failure_mode: "mech:ShearFailure"
+        statement: "There is no key to shear."
+        provenance: "EngineeringInference"
+      - failure_mode: "mech:BearingCompressionFailure"
+        statement: "There are no key flanks to crush."
+        provenance: "EngineeringInference"
+    required_verification:
+      - method: "mech:InterferencePressureCalculation"
+        statement: "Interface pressure from the interference, using maximum interference to check for excessive stress."
+        evidence: [shigley10-es-0045]
+      - method: "mech:FrictionTorqueCapacityCalculation"
+        statement: "Torque capacity T = (pi/2) f p l d^2, evaluated at the minimum interference."
+        evidence: [shigley10-es-0041, shigley10-es-0042]
+      - method: "mech:FitAndToleranceInspection"
+        statement: "Confirm the achieved interference lies within the tolerance band the calculation assumed."
+        evidence: [shigley10-es-0045]
+      - method: "mech:AssemblyTorqueTest"
+        statement: "Neither source specifies a coefficient of friction for this joint in the cited sections, so the capacity cannot be closed analytically from the books alone."
+        external_authority: ["mdcore:RequiresManufacturerData", "mdcore:RequiresExperimentalProtocol"]
+        test_recommended: true
+        test_procedure_specified: false
+        acceptance_criterion_specified: false
+    analyst_note: >-
+      The decisive open item is the coefficient of friction f. Shigley's equation
+      is complete in form but the cited section does not fix f, so the torque
+      capacity is not determinable from these two books alone. That is recorded
+      as a gap requiring manufacturer data or test, not filled with a textbook
+      value from elsewhere.
+    supporting_claims: [shigley10-c-0049, shigley10-c-0050, shigley10-c-0051, shigley10-c-0052, shigley10-c-0046, shigley10-c-0047, shigley10-c-0024, mott6-c-0011]
+
+  # -----------------------------------------------------------------------
+  - id: SA-003
+    label: "Replace a parallel key with a setscrew connection at low torque"
+    baseline: "melem:ParallelKeyConnection"
+    candidate: "melem:SetscrewConnection"
+    function_preserved: "mech:TransmitTorqueShaftToHub"
+    context: ctx-low-torque-adjustable
+    conclusion: "ConditionallySubstitutable"
+    interface_compatibility: "InterfaceCompatibleWithRework"
+    confidence: 0.7
+    applicable_requirements: [req-torque-capacity, req-axial-location, req-manufacturing-cost]
+    satisfied_requirements: [req-axial-location, req-manufacturing-cost]
+    violated_requirements: []
+    conditions:
+      - condition: "mdcore:StaticLoading"
+        statement: "Applicable only to cases of low torque transmission; the source lists setscrews in hubs among the means available for such cases."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0015]
+      - condition: "mech:MaintainedInterfacePressure"
+        statement: "Holding power derives from frictional resistance plus slight penetration of the screw into the shaft, so the seating torque must be achieved and retained."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0020, shigley10-es-0021]
+    modifications:
+      - statement: "Delete the keyseat; add a tapped hole through the hub."
+        effort: "minor"
+        provenance: "EngineeringInference"
+      - statement: "Specify setscrew length at about half the shaft diameter."
+        effort: "minor"
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0023]
+    advantages:
+      - criterion: "mdcore:CostRequirement"
+        level: "FullySatisfies"
+        statement: "No keyseat need be machined in shaft or hub."
+        provenance: "EngineeringInference"
+      - criterion: "mdcore:PositioningRequirement"
+        level: "PartiallySatisfies"
+        statement: "The setscrew resists axial motion of the collar or hub relative to the shaft; the source calls this holding power and tabulates it."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0020, shigley10-es-0022]
+    disadvantages:
+      - criterion: "mdcore:TorqueCapacityRequirement"
+        level: "WeaklySatisfies"
+        statement: "Capacity is limited: the source recommends factors of safety of 4 to 8 for various dynamic loads against tabulated holding power, against 1.5 to 2.0 for static loads."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0022]
+    trade_offs:
+      - gains: "mdcore:CostRequirement"
+        costs: "mdcore:TorqueCapacityRequirement"
+        statement: "The cheapest connection is also the one the source confines to low torque and derates most heavily under dynamic load."
+        provenance: "NormalizedInterpretation"
+        evidence: [shigley10-es-0015, shigley10-es-0022]
+    introduced_failure_modes:
+      - failure_mode: "mech:ConnectionSlip"
+        statement: "Torque transfer is frictional; loss of grip is the governing mode."
+        provenance: "NormalizedInterpretation"
+        evidence: [shigley10-es-0020]
+      - failure_mode: "mech:Loosening"
+        statement: "Holding power depends on a retained seating torque."
+        provenance: "NormalizedInterpretation"
+        evidence: [shigley10-es-0022]
+    mitigated_failure_modes: []
+    required_verification:
+      - method: "mech:FrictionTorqueCapacityCalculation"
+        statement: "Compare the design torque against tabulated holding power divided by the appropriate factor of safety for the loading type."
+        evidence: [shigley10-es-0022]
+    unresolved:
+      - statement: "Neither source defines a numeric boundary for 'low torque transmission', so the applicability condition of this assessment cannot be evaluated automatically."
+        state: "InsufficientEvidence"
+        evidence: [shigley10-es-0015]
+    analyst_note: >-
+      The conclusion is conditional on a threshold the sources decline to fix.
+      The assessment is therefore usable as guidance but cannot be executed as a
+      rule without an externally supplied torque boundary.
+    supporting_claims: [shigley10-c-0045, shigley10-c-0028, shigley10-c-0029, shigley10-c-0030]
+
+  # -----------------------------------------------------------------------
+  - id: SA-004
+    label: "Replace a single parallel key with two keys where the hub length limits key length"
+    baseline: "melem:ParallelKeyConnection"
+    candidate: "melem:MultipleKeyConnection"
+    function_preserved: "mech:TransmitTorqueShaftToHub"
+    context: ctx-hub-length-limited
+    conclusion: "ConditionallySubstitutable"
+    interface_compatibility: "InterfaceCompatibleWithRework"
+    confidence: 0.8
+    applicable_requirements: [req-torque-capacity, req-axial-location, req-manufacturing-cost, req-fatigue-life]
+    satisfied_requirements: [req-torque-capacity, req-axial-location]
+    violated_requirements: []
+    conditions:
+      - condition: "mdcore:SpaceRequirement"
+        statement: "Applies where the computed minimum key length exceeds the hub length; the source offers two keys or a spline as the remedy at this point in its design procedure."
+        provenance: "SourceDerivedValue"
+        evidence: [mott6-es-0035]
+    modifications:
+      - statement: "Cut a second keyseat in shaft and hub, typically 90 degrees from the first."
+        effort: "moderate"
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0034]
+    advantages:
+      - criterion: "mdcore:TorqueCapacityRequirement"
+        level: "FullySatisfies"
+        statement: "Multiple keys may be used as necessary to carry greater loads."
+        provenance: "SourceDerivedValue"
+        evidence: [shigley10-es-0034]
+    disadvantages:
+      - criterion: "mdcore:LifeRequirement"
+        level: "PartiallySatisfies"
+        statement: "A second keyseat is a second stress raiser in a shaft, at locations where fatigue cracks characteristically initiate."
+        provenance: "EngineeringInference"
+        evidence: [mott6-es-0011]
+    trade_offs:
+      - gains: "mdcore:TorqueCapacityRequirement"
+        costs: "mdcore:LifeRequirement"
+        statement: "Capacity is gained by adding a second keyseat, which also adds a second fatigue initiation site."
+        provenance: "EngineeringInference"
+    introduced_failure_modes:
+      - failure_mode: "mech:FatigueFracture"
+        statement: "Additional keyseat introduces an additional stress concentration in the shaft."
+        provenance: "EngineeringInference"
+        evidence: [mott6-es-0011]
+    mitigated_failure_modes: []
+    required_verification:
+      - method: "mech:ShearStressCheck"
+        statement: "Re-run the key length calculation for the shared torque."
+        evidence: [mott6-es-0031]
+      - method: "mech:StressConcentrationAssessment"
+        statement: "Assess the shaft at both keyseats."
+        evidence: [mott6-es-0011]
+    unresolved:
+      - statement: "Neither source states how torque divides between two keys, so equal sharing must not be assumed. The load split is undetermined by the cited evidence."
+        state: "InsufficientEvidence"
+        evidence: [shigley10-es-0034, mott6-es-0035]
+    analyst_note: >-
+      A frequently made and rarely justified assumption is that two keys each
+      carry half the torque. Neither cited source says so. The assessment records
+      the gap instead of assuming equal sharing.
+    supporting_claims: [mott6-c-0049, shigley10-c-0023, mott6-c-0011]
+
+  # -----------------------------------------------------------------------
+  - id: SA-005
+    label: "Replace a deep-groove ball bearing with a cylindrical roller bearing under combined radial and thrust load"
+    baseline: "melem:DeepGrooveBallBearingAlternative"
+    candidate: "melem:CylindricalRollerBearingAlternative"
+    function_preserved: "mech:SupportRotatingShaft"
+    context: ctx-radial-and-thrust-support
+    conclusion: "NotAnAlternative"
+    interface_compatibility: "InterfaceCompatibilityUnknown"
+    confidence: 0.7
+    applicable_requirements: [req-bearing-life, req-carry-thrust]
+    satisfied_requirements: []
+    violated_requirements: [req-carry-thrust]
+    conditions:
+      - condition: "mech:ThrustLoading"
+        statement: "The context requires an axial load path. The candidate is modelled as carrying radial load only."
+        provenance: "EngineeringInference"
+    disadvantages:
+      - criterion: "mdcore:LoadCapacityRequirement"
+        level: "DoesNotSatisfy"
+        statement: "The candidate does not perform mech:CarryThrustLoad in this ontology. The source describes tapered roller bearings, not cylindrical ones, as taking radial or thrust loads or any combination."
+        provenance: "NormalizedInterpretation"
+        evidence: [shigley10-es-0059]
+    required_verification:
+      - method: "mech:BearingLifeCalculation"
+        statement: "If the context is relaxed to radial load only, the rating-life calculation must be re-run with the roller exponent, not the ball exponent."
+        evidence: [shigley10-es-0054, mott6-es-0071]
+    unresolved:
+      - statement: "The two books' cited sections do not state a thrust capacity for cylindrical roller bearings; the exclusion here rests on the function assignment in this ontology plus Shigley's contrasting description of tapered roller bearings, not on a direct statement that cylindrical roller bearings cannot take thrust."
+        state: "InsufficientEvidence"
+        evidence: [shigley10-es-0059]
+    analyst_note: >-
+      Included to show a NotAnAlternative verdict resting partly on an ontology
+      function assignment rather than wholly on cited text, and to show that such
+      a verdict is flagged as evidence-limited rather than presented as
+      textbook-supported. Note also that substituting between bearing families
+      changes the load-life exponent (3 for ball, 10/3 for roller), so a
+      capacity comparison cannot reuse the baseline's life calculation.
+    supporting_claims: [shigley10-c-0079, shigley10-c-0074, mott6-c-0071]

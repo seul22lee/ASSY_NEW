@@ -1,0 +1,290 @@
+@prefix melem:  <https://w3id.org/mdkg/machine-elements#> .
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg machine-elements :: shaft/hub connections  (PILOT FAMILY, in depth)
+#
+# Two kinds of entity appear here, and the distinction is load-bearing:
+#
+#   * ELEMENT TYPES are owl:Class -- kinds of physical part (melem:ParallelKey).
+#   * DESIGN ALTERNATIVES are individuals of mdcore:DesignAlternative -- named
+#     solution concepts that a designer chooses between
+#     (melem:ParallelKeyConnection).
+#
+# Substitution operates on alternatives, never on element classes, because the
+# thing being replaced is a way of solving the problem, not a part number.
+# Element types are additionally declared owl:NamedIndividual so that an
+# alternative can point at its element type (OWL 2 DL punning).
+#
+# Every alternative below carries only STRUCTURE: which function it performs,
+# which behavior delivers it, which interface it occupies. Statements about
+# capacity, cost, advantages, limits and applicability are CLAIMS, held in
+# ontology/mott6-claims.ttl and ontology/shigley10-claims.ttl with page-level
+# evidence, and are never asserted here.
+# ===========================================================================
+
+<https://w3id.org/mdkg/machine-elements/connections> a owl:Ontology ;
+    dcterms:title "mdkg machine elements: shaft/hub connections"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/machine-elements/families> ,
+                <https://w3id.org/mdkg/mechanical-design/function> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+# ---------------------------------------------------------------------------
+# Element types
+# ---------------------------------------------------------------------------
+
+melem:ShaftHubConnectionElement a owl:Class ;
+    rdfs:subClassOf melem:ConnectionElement ;
+    rdfs:label "Shaft/Hub Connection Element"@en ; skos:altLabel "축-보스 연결요소"@ko ;
+    skos:definition """A connection element occupying the interface between a
+        shaft and the bore of a mounted power-transmitting element."""@en .
+
+melem:Key a owl:Class , owl:NamedIndividual ;
+    rdfs:subClassOf melem:ShaftHubConnectionElement ;
+    rdfs:label "Key"@en ; skos:altLabel "키"@ko ;
+    skos:definition """A separate member seated partly in a shaft groove and
+        partly in a hub groove, carrying torque between them."""@en .
+
+melem:ParallelKey a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Key ;
+    rdfs:label "Parallel Key"@en ; skos:altLabel "평행키"@ko ;
+    skos:definition "A key whose top, bottom and sides are parallel; square or rectangular in section."@en .
+melem:SquareKey a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:ParallelKey ;
+    rdfs:label "Square Key"@en ; skos:altLabel "정사각키"@ko .
+melem:RectangularKey a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:ParallelKey ;
+    rdfs:label "Rectangular Key"@en .
+melem:TaperKey a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Key ;
+    rdfs:label "Taper Key"@en ; skos:altLabel "구배키"@ko ;
+    skos:definition "A key with a tapered top surface, driven in from the end of the hub after the hub is in position."@en .
+melem:GibHeadKey a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:TaperKey ;
+    rdfs:label "Gib-Head Key"@en ; skos:altLabel "머리붙이 구배키"@ko ;
+    skos:definition "A taper key with an extended head permitting extraction from the end at which it was installed."@en .
+melem:WoodruffKey a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Key ;
+    rdfs:label "Woodruff Key"@en ; skos:altLabel "반달키"@ko ;
+    skos:definition "A segment-of-a-circle key seated in a circular shaft groove."@en .
+melem:PinKey a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Key ;
+    rdfs:label "Pin Key"@en ;
+    skos:definition "A cylindrical pin seated in matching cylindrical grooves in shaft and hub."@en .
+
+melem:Spline a owl:Class , owl:NamedIndividual ;
+    rdfs:subClassOf melem:ShaftHubConnectionElement ;
+    rdfs:label "Spline"@en ; skos:altLabel "스플라인"@ko ;
+    skos:definition """A set of axial teeth or keys formed integrally on a shaft,
+        engaging matching grooves in the bore of the mating part."""@en .
+melem:StraightSidedSpline a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Spline ;
+    rdfs:label "Straight-Sided Spline"@en ; skos:altLabel "각형 스플라인"@ko .
+melem:InvoluteSpline a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Spline ;
+    rdfs:label "Involute Spline"@en ; skos:altLabel "인벌류트 스플라인"@ko ;
+    skos:definition "A spline whose tooth flanks are involute curves, as on a gear tooth."@en .
+
+melem:Pin a owl:Class , owl:NamedIndividual ;
+    rdfs:subClassOf melem:ShaftHubConnectionElement ;
+    rdfs:label "Pin"@en ; skos:altLabel "핀"@ko ;
+    skos:definition "A member passing through a transverse hole in both hub and shaft."@en .
+melem:StraightPin a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Pin ; rdfs:label "Straight Solid Pin"@en .
+melem:TaperPin a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Pin ; rdfs:label "Taper Pin"@en ; skos:altLabel "테이퍼 핀"@ko .
+melem:SplitSpringPin a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Pin ;
+    rdfs:label "Split Tubular Spring Pin"@en ;
+    skos:definition "A rolled, split tubular pin retained by its own spring force in an undersized hole."@en .
+melem:ShearPin a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Pin ;
+    rdfs:label "Shear Pin"@en ; skos:altLabel "전단핀"@ko ;
+    skos:definition """A pin deliberately sized to fail at a chosen overload, so
+        as to protect costlier parts of the mechanism."""@en ;
+    skos:scopeNote """Its defining function is mech:LimitTransmittedTorque, not
+        mech:TransmitTorqueShaftToHub alone. Replacing a shear pin with a
+        stronger connection removes a required function."""@en .
+
+melem:Setscrew a owl:Class , owl:NamedIndividual ;
+    rdfs:subClassOf melem:ShaftHubConnectionElement , melem:FasteningElement ;
+    rdfs:label "Setscrew"@en ; skos:altLabel "멈춤나사"@ko ;
+    skos:definition """A threaded member tightened through the hub against the
+        shaft, developing holding power by compression."""@en .
+
+melem:InterferenceFitConnection a owl:Class , owl:NamedIndividual ;
+    rdfs:subClassOf melem:ShaftHubConnectionElement ;
+    rdfs:label "Interference-Fit Connection"@en ; skos:altLabel "억지끼워맞춤 연결"@ko ;
+    skos:definition """A connection in which torque is carried by friction at an
+        interface pressurised by dimensional interference between shaft and
+        hub."""@en .
+melem:PressFitConnection a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:InterferenceFitConnection ;
+    rdfs:label "Press-Fit Connection"@en ; skos:altLabel "압입"@ko ;
+    skos:definition "An interference fit assembled by axial force at ambient temperature."@en .
+melem:ShrinkFitConnection a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:InterferenceFitConnection ;
+    rdfs:label "Shrink-Fit Connection"@en ; skos:altLabel "열박음"@ko ;
+    skos:definition "An interference fit assembled by differential thermal expansion."@en .
+
+melem:TaperedFitConnection a owl:Class , owl:NamedIndividual ;
+    rdfs:subClassOf melem:ShaftHubConnectionElement ;
+    rdfs:label "Tapered-Fit Connection"@en ;
+    skos:definition "A connection in which a tapered shaft end and a matching hub bore are drawn together, commonly by a nut on a threaded shaft end."@en .
+
+melem:ClampingHubConnection a owl:Class , owl:NamedIndividual ;
+    rdfs:subClassOf melem:ShaftHubConnectionElement ;
+    rdfs:label "Clamping (Split) Hub Connection"@en ; skos:altLabel "분할 보스 클램핑 연결"@ko ;
+    skos:definition "A connection in which a split hub is drawn onto a smooth shaft by screws, gripping it by friction."@en .
+
+melem:KeylessLockingAssembly a owl:Class , owl:NamedIndividual ;
+    rdfs:subClassOf melem:ShaftHubConnectionElement ;
+    rdfs:label "Keyless Locking Assembly"@en ; skos:altLabel "무키 록킹 어셈블리"@ko ;
+    skos:definition """A proprietary assembly of tapered rings drawn together by
+        fasteners, which grips a smooth shaft and a hub bore by friction."""@en ;
+    skos:scopeNote """Proprietary products are named as element types but their
+        performance data are never asserted here; they require manufacturer
+        data (mdcore:RequiresManufacturerData)."""@en .
+
+melem:usesElementType a owl:ObjectProperty ;
+    rdfs:domain mdcore:DesignAlternative ;
+    rdfs:label "uses element type"@en ;
+    skos:scopeNote """Range is a punned element-type individual. Punning is used
+        rather than a parallel individual hierarchy so that the taxonomy is not
+        duplicated."""@en .
+
+# ---------------------------------------------------------------------------
+# Design alternatives for mech:TransmitTorqueShaftToHub
+# ---------------------------------------------------------------------------
+
+melem:ShaftHubConnectionAlternatives a mdcore:CandidateSet ;
+    rdfs:label "Shaft/hub torque-transmitting connection alternatives"@en ;
+    skos:definition """The alternatives this ontology version knows for
+        transmitting torque between a shaft and a mounted element."""@en ;
+    mdcore:exclusionRationale """Restricted to alternatives that at least one of
+        the two source books describes as a means of attaching a
+        power-transmitting element to a shaft. Not exhaustive of engineering
+        practice."""@en ;
+    mdcore:hasCandidate
+        melem:ParallelKeyConnection , melem:TaperKeyConnection , melem:GibHeadKeyConnection ,
+        melem:WoodruffKeyConnection , melem:PinKeyConnection , melem:StraightSidedSplineConnection ,
+        melem:InvoluteSplineConnection , melem:PinnedConnection , melem:ShearPinConnection ,
+        melem:SetscrewConnection , melem:PressFitConnectionAlternative ,
+        melem:ShrinkFitConnectionAlternative , melem:TaperedFitConnectionAlternative ,
+        melem:ClampingHubConnectionAlternative , melem:KeylessLockingAssemblyAlternative ,
+        melem:MultipleKeyConnection .
+
+melem:ParallelKeyConnection a mdcore:DesignAlternative ;
+    rdfs:label "Parallel key connection"@en ; skos:altLabel "평행키 연결"@ko ;
+    melem:usesElementType melem:ParallelKey ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LocateAxially , mech:LimitTransmittedTorque ;
+    mdcore:enablesBehavior mech:ShearLoadTransfer , mech:BearingLoadTransfer ;
+    skos:definition """The baseline shaft/hub connection: a separate parallel key
+        in matching shaft and hub keyseats."""@en ;
+    skos:scopeNote """LimitTransmittedTorque is listed because the key is
+        commonly intended as the sacrificial member; whether that intent applies
+        is a claim, evidenced separately."""@en .
+
+melem:MultipleKeyConnection a mdcore:DesignAlternative ;
+    rdfs:label "Multiple parallel key connection"@en ;
+    melem:usesElementType melem:ParallelKey ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LocateAxially ;
+    mdcore:enablesBehavior mech:ShearLoadTransfer , mech:BearingLoadTransfer ;
+    skos:definition "Two or more parallel keys sharing the torque, spaced around the shaft."@en .
+
+melem:TaperKeyConnection a mdcore:DesignAlternative ;
+    rdfs:label "Taper key connection"@en ;
+    melem:usesElementType melem:TaperKey ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LocateAxially ;
+    mdcore:enablesBehavior mech:ShearLoadTransfer , mech:BearingLoadTransfer , mech:FrictionalLoadTransfer .
+
+melem:GibHeadKeyConnection a mdcore:DesignAlternative ;
+    rdfs:label "Gib-head key connection"@en ;
+    melem:usesElementType melem:GibHeadKey ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LocateAxially ;
+    mdcore:enablesBehavior mech:ShearLoadTransfer , mech:BearingLoadTransfer , mech:FrictionalLoadTransfer .
+
+melem:WoodruffKeyConnection a mdcore:DesignAlternative ;
+    rdfs:label "Woodruff key connection"@en ; skos:altLabel "반달키 연결"@ko ;
+    melem:usesElementType melem:WoodruffKey ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:MaintainConcentricity ;
+    mdcore:enablesBehavior mech:ShearLoadTransfer , mech:BearingLoadTransfer .
+
+melem:PinKeyConnection a mdcore:DesignAlternative ;
+    rdfs:label "Pin key connection"@en ;
+    melem:usesElementType melem:PinKey ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub ;
+    mdcore:enablesBehavior mech:ShearLoadTransfer , mech:BearingLoadTransfer .
+
+melem:StraightSidedSplineConnection a mdcore:DesignAlternative ;
+    rdfs:label "Straight-sided spline connection"@en ;
+    melem:usesElementType melem:StraightSidedSpline ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:PermitAxialMotion , mech:AngularIndexingFunction ;
+    mdcore:enablesBehavior mech:DistributedToothContact , mech:BearingLoadTransfer .
+
+melem:InvoluteSplineConnection a mdcore:DesignAlternative ;
+    rdfs:label "Involute spline connection"@en ; skos:altLabel "인벌류트 스플라인 연결"@ko ;
+    melem:usesElementType melem:InvoluteSpline ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:PermitAxialMotion ,
+                            mech:MaintainConcentricity , mech:AngularIndexingFunction ;
+    mdcore:enablesBehavior mech:DistributedToothContact , mech:BearingLoadTransfer .
+
+melem:PinnedConnection a mdcore:DesignAlternative ;
+    rdfs:label "Pinned connection"@en ; skos:altLabel "핀 연결"@ko ;
+    melem:usesElementType melem:StraightPin ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LocateAxially ;
+    mdcore:enablesBehavior mech:ShearLoadTransfer .
+
+melem:ShearPinConnection a mdcore:DesignAlternative ;
+    rdfs:label "Shear pin connection"@en ;
+    melem:usesElementType melem:ShearPin ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LimitTransmittedTorque ;
+    mdcore:enablesBehavior mech:ShearLoadTransfer .
+
+melem:SetscrewConnection a mdcore:DesignAlternative ;
+    rdfs:label "Setscrew connection"@en ; skos:altLabel "멈춤나사 연결"@ko ;
+    melem:usesElementType melem:Setscrew ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LocateAxially ;
+    mdcore:enablesBehavior mech:FrictionalLoadTransfer .
+
+melem:PressFitConnectionAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Press-fit connection"@en ; skos:altLabel "압입 연결"@ko ;
+    melem:usesElementType melem:PressFitConnection ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LocateAxially , mech:MaintainConcentricity ;
+    mdcore:enablesBehavior mech:FrictionalLoadTransfer .
+
+melem:ShrinkFitConnectionAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Shrink-fit connection"@en ; skos:altLabel "열박음 연결"@ko ;
+    melem:usesElementType melem:ShrinkFitConnection ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LocateAxially , mech:MaintainConcentricity ;
+    mdcore:enablesBehavior mech:FrictionalLoadTransfer .
+
+melem:TaperedFitConnectionAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Tapered-fit connection"@en ;
+    melem:usesElementType melem:TaperedFitConnection ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub ;
+    mdcore:enablesBehavior mech:FrictionalLoadTransfer .
+
+melem:ClampingHubConnectionAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Clamping split-hub connection"@en ;
+    melem:usesElementType melem:ClampingHubConnection ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LocateAxially ;
+    mdcore:enablesBehavior mech:FrictionalLoadTransfer .
+
+melem:KeylessLockingAssemblyAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Keyless locking assembly connection"@en ;
+    melem:usesElementType melem:KeylessLockingAssembly ;
+    mdcore:performsFunction mech:TransmitTorqueShaftToHub , mech:LocateAxially , mech:MaintainConcentricity ;
+    mdcore:enablesBehavior mech:FrictionalLoadTransfer .
+
+# Function referenced above but belonging to the mechanical-function vocabulary.
+mech:AngularIndexingFunction a mdcore:Function ;
+    rdfs:label "Permit angular indexing"@en ;
+    skos:prefLabel "allow the mounted element to be assembled at a choice of angular positions"@en ;
+    skos:inScheme mech:MechanicalFunctionScheme .
+
+# --- Co-function, asserted only where it genuinely holds -------------------
+# sharesFunctionWith is symmetric and harmless; it is NOT substitutability.
+
+melem:ParallelKeyConnection    mdcore:sharesFunctionWith melem:InvoluteSplineConnection ,
+    melem:StraightSidedSplineConnection , melem:PressFitConnectionAlternative ,
+    melem:ShrinkFitConnectionAlternative , melem:SetscrewConnection , melem:PinnedConnection ,
+    melem:WoodruffKeyConnection , melem:TaperKeyConnection , melem:MultipleKeyConnection ,
+    melem:ClampingHubConnectionAlternative , melem:KeylessLockingAssemblyAlternative ,
+    melem:TaperedFitConnectionAlternative .
+
+melem:InvoluteSplineConnection mdcore:sharesFunctionWith melem:StraightSidedSplineConnection .
+melem:PressFitConnectionAlternative mdcore:sharesFunctionWith melem:ShrinkFitConnectionAlternative ,
+    melem:ClampingHubConnectionAlternative , melem:KeylessLockingAssemblyAlternative .

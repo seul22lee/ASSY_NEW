@@ -1,0 +1,257 @@
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix mdsh:   <https://w3id.org/mdkg/shapes#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix ev:     <https://w3id.org/mdkg/evidence#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+
+# ===========================================================================
+# SHACL :: substitution, decision and verification
+#
+# The substitution shapes are the ones that matter most.  They stop the two
+# failure modes that make a substitution graph dangerous: a verdict stated
+# without the conditions that qualify it, and a strong verdict reached on weak
+# grounds.
+# ===========================================================================
+
+mdsh:SubstitutionAssessmentShape a sh:NodeShape ;
+    sh:targetClass mdcore:SubstitutionAssessment ;
+    rdfs:label "An assessment must name candidate, baseline, function and conclusion"@en ;
+
+    sh:property [
+        sh:path mdcore:candidateAlternative ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A SubstitutionAssessment must name exactly one candidate."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:baselineAlternative ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A SubstitutionAssessment must name exactly one baseline."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:functionBeingPreserved ;
+        sh:minCount 1 ;
+        sh:class mdcore:Function ;
+        sh:message """A SubstitutionAssessment must name the function being
+            preserved. 'A can replace B' without a preserved function is not
+            interpretable."""@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:assessmentConclusion ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class mdcore:SubstitutionState ;
+        sh:message "A SubstitutionAssessment must reach exactly one conclusion."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:assessmentContext ;
+        sh:minCount 1 ;
+        sh:class mdcore:OperatingContext ;
+        sh:message """A SubstitutionAssessment must name its operating context.
+            Substitutability is context-relative; an assessment without a context
+            claims more than any evidence can support."""@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:reviewStatus ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A SubstitutionAssessment must carry a review state."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:confidence ;
+        sh:maxCount 1 ; sh:datatype xsd:decimal ;
+        sh:minInclusive 0.0 ; sh:maxInclusive 1.0 ;
+        sh:message "Confidence must lie in [0,1]."@en ;
+    ] .
+
+mdsh:ConditionalSubstitutionShape a sh:NodeShape ;
+    rdfs:label "A conditional verdict must carry its conditions"@en ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE {
+                ?this mdcore:assessmentConclusion mdcore:ConditionallySubstitutable .
+            }
+        """ ;
+    ] ;
+    sh:or (
+        [ sh:path mdcore:assessmentCondition ; sh:minCount 1 ]
+        [ sh:path mdcore:requiredDesignModification ; sh:minCount 1 ]
+    ) ;
+    sh:message """A ConditionallySubstitutable conclusion must record at least one
+        condition or at least one required design modification. A conditional
+        verdict whose conditions are not stated is indistinguishable from an
+        unconditional one, which is exactly the error this model exists to
+        prevent."""@en .
+
+mdsh:DirectSubstitutionShape a sh:NodeShape ;
+    rdfs:label "A direct verdict demands positive interface evidence"@en ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE {
+                ?this mdcore:assessmentConclusion mdcore:DirectlySubstitutable .
+            }
+        """ ;
+    ] ;
+    sh:property [
+        sh:path mdcore:interfaceCompatibility ;
+        sh:minCount 1 ;
+        sh:hasValue mdcore:InterfaceIdentical ;
+        sh:message """DirectlySubstitutable requires an interface assessed as
+            identical. It must never be inferred from a shared function, nor from
+            the absence of contrary evidence."""@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:requiredDesignModification ;
+        sh:maxCount 0 ;
+        sh:message """DirectlySubstitutable means no significant redesign. An
+            assessment that lists a required modification is at best
+            ConditionallySubstitutable."""@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:violatedRequirement ;
+        sh:maxCount 0 ;
+        sh:message "DirectlySubstitutable is incompatible with a violated requirement."@en ;
+    ] .
+
+mdsh:PreferredAlternativeShape a sh:NodeShape ;
+    rdfs:label "A preference must be relative to a stated requirement"@en ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE {
+                ?this mdcore:assessmentConclusion mdcore:PreferredAlternative .
+            }
+        """ ;
+    ] ;
+    sh:property [
+        sh:path mdcore:satisfiedRequirement ;
+        sh:minCount 1 ;
+        sh:message """PreferredAlternative must name at least one requirement the
+            candidate satisfies. A preference with no stated requirement is a
+            general ranking, which this ontology does not support."""@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:applicableRequirement ;
+        sh:minCount 1 ;
+        sh:message "PreferredAlternative must state the requirement set it is relative to."@en ;
+    ] .
+
+mdsh:DesignModificationShape a sh:NodeShape ;
+    sh:targetClass mdcore:DesignModification ;
+    sh:property [
+        sh:path mdcore:modificationStatement ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A DesignModification must state what change is required."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:valueProvenance ; sh:minCount 1 ;
+        sh:message """A DesignModification must say whether it comes from a source
+            or from analyst inference."""@en ;
+    ] .
+
+mdsh:AlternativeEvaluationShape a sh:NodeShape ;
+    sh:targetClass mdcore:AlternativeEvaluation ;
+    rdfs:label "An evaluation must be attributable, scaled and context-bound"@en ;
+
+    sh:property [
+        sh:path mdcore:evaluatesAlternative ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "An AlternativeEvaluation must name the alternative it evaluates."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:againstCriterion ; sh:minCount 1 ;
+        sh:message "An AlternativeEvaluation must name the criterion it evaluates against."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:evaluationLevel ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class mdcore:SatisfactionLevel ;
+        sh:message "An AlternativeEvaluation must state a level on the controlled scale."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:valueProvenance ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class mdcore:ValueProvenanceKind ;
+        sh:message """An AlternativeEvaluation must distinguish a source-derived
+            value from a normalized interpretation, an engineering inference, a
+            user weight or a computed result. Recommendations that blur these are
+            the ones that get misquoted as textbook fact."""@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:applicableContext ; sh:minCount 1 ;
+        sh:message """An AlternativeEvaluation must name the context it holds in;
+            the same alternative scores differently elsewhere."""@en ;
+    ] .
+
+mdsh:SourceDerivedEvaluationShape a sh:NodeShape ;
+    rdfs:label "A source-derived evaluation must cite evidence"@en ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE {
+                ?this mdcore:valueProvenance mdcore:SourceDerivedValue .
+                ?this a mdcore:AlternativeEvaluation .
+            }
+        """ ;
+    ] ;
+    sh:property [
+        sh:path ev:supportedByEvidence ; sh:minCount 1 ;
+        sh:message """An evaluation marked source-derived must cite at least one
+            evidence span. If it cannot, it is an engineering inference and must
+            say so."""@en ;
+    ] .
+
+mdsh:TradeOffShape a sh:NodeShape ;
+    sh:targetClass mdcore:TradeOff ;
+    sh:property [ sh:path mdcore:tradeOffGains ; sh:minCount 1 ;
+        sh:message "A TradeOff must name the criterion gained."@en ] ;
+    sh:property [ sh:path mdcore:tradeOffCosts ; sh:minCount 1 ;
+        sh:message "A TradeOff must name the criterion sacrificed."@en ] ;
+    sh:property [ sh:path mdcore:valueProvenance ; sh:minCount 1 ;
+        sh:message "A TradeOff must state whether it is source-derived or inferred."@en ] .
+
+mdsh:VerificationMethodTestShape a sh:NodeShape ;
+    rdfs:label "A recommended test must declare what its source did NOT specify"@en ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE { ?this mdcore:testRecommended true . }
+        """ ;
+    ] ;
+    sh:property [
+        sh:path mdcore:testProcedureSpecified ;
+        sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ;
+        sh:message """Where a test is recommended, the ontology must state
+            explicitly whether a procedure was actually specified. Leaving it out
+            is how an unspecified test silently becomes a real one."""@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:acceptanceCriterionSpecified ;
+        sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ;
+        sh:message "Where a test is recommended, acceptance-criterion specification must be stated."@en ;
+    ] .
+
+mdsh:OperatingContextShape a sh:NodeShape ;
+    sh:targetClass mdcore:OperatingContext ;
+    rdfs:label "A context has conditions, or says it deliberately has none"@en ;
+    sh:or (
+        [ sh:path mdcore:hasCondition ; sh:minCount 1 ]
+        [ sh:path mdcore:contextUnspecified ; sh:hasValue true ]
+    ) ;
+    sh:message """An OperatingContext must either list at least one condition or
+        declare mdcore:contextUnspecified true. An empty context is not the same
+        as 'all contexts', and the difference must be recorded."""@en .
+
+mdsh:RequirementShape a sh:NodeShape ;
+    sh:targetClass mdcore:Requirement ;
+    sh:property [
+        sh:path mdcore:hasRequirementKind ; sh:minCount 1 ;
+        sh:class mdcore:RequirementKind ;
+        sh:message "A Requirement must be classified by a controlled requirement kind."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:requirementStatement ; sh:minCount 1 ;
+        sh:message "A Requirement must carry a statement."@en ;
+    ] .

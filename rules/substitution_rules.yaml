@@ -1,0 +1,246 @@
+# ---------------------------------------------------------------------------
+# Substitution rules  --  how a substitution state is reached, in a context
+#
+# These rules produce mdcore:SubstitutionState verdicts.  Three prohibitions
+# are structural, not stylistic, and are enforced by
+# scripts/validate_ontology.py:
+#
+#   1. No rule may conclude DirectlySubstitutable from a shared function alone.
+#   2. No rule may derive a reverse verdict from a forward one.
+#   3. No rule may chain two substitutions into a third.
+#
+# Rule evaluation order is by `priority`, lowest first; the first rule whose
+# guard matches and whose effect is terminal fixes the verdict.
+# ---------------------------------------------------------------------------
+
+version: "0.1.0"
+
+semantics:
+  directional: true
+  symmetric_inference_permitted: false
+  transitive_inference_permitted: false
+  default_when_no_rule_matches: "InsufficientEvidence"
+  notes: >-
+    The default matters. An unmatched pair yields InsufficientEvidence, never
+    NotAnAlternative: absence of evidence is not evidence of incompatibility.
+
+rules:
+
+  - id: SUB-000
+    kind: SubstitutionRule
+    priority: 0
+    title: "A shared function establishes at most a functional alternative"
+    statement: >-
+      If a candidate and a baseline both perform the preserved function, and
+      nothing further is known, the verdict is FunctionalAlternative. This is
+      the ceiling that co-function alone can justify.
+    guard:
+      candidate_performs_function: true
+      baseline_performs_function: true
+    effect:
+      conclusion: "FunctionalAlternative"
+      terminal: false
+    analyst_authored: true
+    confidence: 1.0
+    review_status: NeedsReview
+    notes: >-
+      Encodes the definition of FunctionalAlternative from
+      ontology/core/substitution.ttl. Not terminal: later rules may strengthen
+      or weaken the verdict on evidence about context and interfaces.
+
+  - id: SUB-001
+    kind: SubstitutionRule
+    priority: 10
+    title: "A candidate that cannot deliver the preserved function is not an alternative"
+    statement: >-
+      If the candidate does not perform the preserved function in the stated
+      context, or its interface is incompatible and no modification is offered,
+      the verdict is NotAnAlternative.
+    guard:
+      any_of:
+        - candidate_performs_function: false
+        - all_of:
+            - interface_compatibility: "InterfaceIncompatible"
+            - required_modifications_count: 0
+    effect:
+      conclusion: "NotAnAlternative"
+      terminal: true
+    analyst_authored: true
+    confidence: 1.0
+    review_status: NeedsReview
+
+  - id: SUB-002
+    kind: SubstitutionRule
+    priority: 20
+    title: "A violated requirement in the stated context defeats substitution"
+    statement: >-
+      If the candidate violates a requirement that is applicable in the stated
+      context, and that requirement expresses the reason the baseline was chosen,
+      the verdict is NotAnAlternative in that context.
+    guard:
+      violated_requirements_min: 1
+      violated_requirement_kinds: ["mdcore:MotionAllowanceRequirement", "mdcore:LoadCapacityRequirement"]
+    effect:
+      conclusion: "NotAnAlternative"
+      terminal: true
+      scope: "the stated context only"
+    derived_from: [mott6-c-0044]
+    analyst_authored: false
+    confidence: 0.85
+    review_status: NeedsReview
+    notes: >-
+      Instantiated by SA-006: a parallel key violates the axial-motion
+      requirement in a context that demands sliding under torque, so it is not
+      an alternative there, even though it is one elsewhere.
+
+  - id: SUB-003
+    kind: SubstitutionRule
+    priority: 30
+    title: "Named conditions or modifications yield a conditional verdict"
+    statement: >-
+      If the candidate preserves the function but only under stated conditions,
+      or only after stated design modifications, the verdict is
+      ConditionallySubstitutable.
+    guard:
+      candidate_performs_function: true
+      any_of:
+        - conditions_count_min: 1
+        - required_modifications_min: 1
+    effect:
+      conclusion: "ConditionallySubstitutable"
+      terminal: true
+      requires: "at least one condition or one required modification must be recorded"
+    analyst_authored: true
+    confidence: 0.9
+    review_status: NeedsReview
+    notes: >-
+      The `requires` clause is not decoration; SHACL enforces it, so a
+      ConditionallySubstitutable verdict with no condition and no modification
+      fails validation.
+
+  - id: SUB-004
+    kind: SubstitutionRule
+    priority: 40
+    title: "Direct substitutability requires positive interface and requirement evidence"
+    statement: >-
+      A verdict of DirectlySubstitutable may be reached only when the interface
+      is identical, no applicable requirement is violated, no design modification
+      is required, and the context conditions are unchanged.
+    guard:
+      all_of:
+        - candidate_performs_function: true
+        - interface_compatibility: "InterfaceIdentical"
+        - violated_requirements_count: 0
+        - required_modifications_count: 0
+        - context_conditions_unchanged: true
+    effect:
+      conclusion: "DirectlySubstitutable"
+      terminal: true
+    prohibitions:
+      - "MUST NOT be concluded from a shared function alone."
+      - "MUST NOT be concluded from the absence of contrary evidence."
+    analyst_authored: true
+    confidence: 1.0
+    review_status: NeedsReview
+    notes: >-
+      No assessment in v0.1 reaches this verdict. That is a finding, not a gap:
+      every pair examined in the pilot requires at least a change of shaft or
+      hub feature, so none is a drop-in replacement.
+
+  - id: SUB-005
+    kind: SubstitutionRule
+    priority: 50
+    title: "Preference requires a stated requirement set"
+    statement: >-
+      A verdict of PreferredAlternative may be reached only when the candidate is
+      at least conditionally substitutable AND outperforms the baseline on a
+      requirement that is applicable in the stated context. The preference is
+      relative to that requirement set and is not a general ranking.
+    guard:
+      all_of:
+        - conclusion_at_least: "ConditionallySubstitutable"
+        - satisfied_requirements_min: 1
+        - outperforms_baseline_on_applicable_requirement: true
+    effect:
+      conclusion: "PreferredAlternative"
+      terminal: true
+    analyst_authored: true
+    confidence: 0.9
+    review_status: NeedsReview
+    notes: >-
+      Instantiated by SA-001, where the spline is preferred because the context
+      makes axial motion a requirement. Change the requirement set and the
+      preference disappears: Shigley calls splines usually unnecessary for
+      simple torque transmission.
+
+  - id: SUB-006
+    kind: SubstitutionRule
+    priority: 60
+    title: "An unfixable threshold yields insufficient evidence"
+    statement: >-
+      If the applicability of a substitution turns on a qualitative threshold
+      that no cited source quantifies, the verdict for automated evaluation is
+      InsufficientEvidence, regardless of how well the alternatives otherwise
+      match.
+    guard:
+      depends_on_unquantified_threshold: true
+    effect:
+      conclusion: "InsufficientEvidence"
+      terminal: true
+      preserves_human_verdict: true
+    derived_from: [shigley10-c-0045, shigley10-c-0042]
+    analyst_authored: false
+    confidence: 0.9
+    review_status: NeedsReview
+    notes: >-
+      Instantiated by SA-003, whose applicability depends on 'low torque
+      transmission'. The human-readable conditional verdict is retained; only
+      automated evaluation degrades to InsufficientEvidence.
+
+  - id: SUB-007
+    kind: SubstitutionRule
+    priority: 70
+    title: "Substituting across a load-life exponent boundary invalidates the baseline life calculation"
+    statement: >-
+      When the candidate and the baseline belong to bearing families with
+      different load-life exponents, any life or capacity comparison must be
+      recomputed with the candidate's exponent. Carrying the baseline's result
+      across is invalid.
+    guard:
+      function: "mech:SupportRotatingShaft"
+      differing_load_life_exponent: true
+    effect:
+      action: require_recomputation
+      verification: ["mech:BearingLifeCalculation"]
+    derived_from: [mott6-c-0071, shigley10-c-0074]
+    analyst_authored: false
+    confidence: 0.95
+    review_status: NeedsReview
+    notes: >-
+      Both books give 3 for ball bearings and 3.33 or 10/3 for roller bearings.
+      They also warn that the exponent is meaningless without the rating-life
+      basis it was fitted against, which differs between manufacturers.
+
+  - id: SUB-008
+    kind: SubstitutionRule
+    priority: 80
+    title: "Removing a sacrificial member is a loss of function, not a neutral change"
+    statement: >-
+      If the baseline performs the limit-transmitted-torque function and the
+      candidate does not, the substitution is not function-preserving even when
+      torque capacity is equal or greater.
+    guard:
+      baseline_performs_function: "mech:LimitTransmittedTorque"
+      candidate_performs_function_not: "mech:LimitTransmittedTorque"
+    effect:
+      conclusion: "NotAnAlternative"
+      terminal: true
+      scope: "where overload protection is a stated requirement"
+    derived_from: [mott6-c-0052, shigley10-c-0024]
+    analyst_authored: false
+    confidence: 0.8
+    review_status: NeedsReview
+    notes: >-
+      Guards against the common error of treating a stronger connection as
+      strictly better. Mott's shear pin and Shigley's fusible key are both
+      intended to fail.

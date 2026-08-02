@@ -1,0 +1,164 @@
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg core :: context
+#
+# Operating context is a first-class, structured object, never a free-text
+# string.  Almost every interesting statement in this ontology -- a selection
+# rule, a substitution verdict, a threshold, a claimed advantage -- is true
+# only relative to a context, so the context has to be something a query can
+# filter on.
+#
+# An OperatingContext is a *bundle* of OperatingConditions.  Conditions are
+# reusable across contexts; contexts are specific to a design situation.
+# ===========================================================================
+
+<https://w3id.org/mdkg/core/context> a owl:Ontology ;
+    dcterms:title "mdkg core: operating context and conditions"@en ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mdcore:OperatingContext a owl:Class ;
+    rdfs:label "Operating Context"@en ;
+    skos:altLabel "운전 조건 집합"@ko ;
+    skos:definition """A named bundle of operating conditions describing the
+        situation in which an artifact must function, against which
+        requirements, rules and substitution verdicts are evaluated."""@en ;
+    skos:scopeNote """An empty OperatingContext means 'context unspecified',
+        which is not the same as 'all contexts'. Rules attached to an empty
+        context must declare mdcore:contextUnspecified true."""@en .
+
+mdcore:contextUnspecified a owl:DatatypeProperty ;
+    rdfs:label "context deliberately unspecified"@en ;
+    rdfs:range xsd:boolean ;
+    skos:definition """Explicit marker that a statement's applicable context is
+        not stated by its source. Forces the absence of context to be a
+        recorded fact rather than an oversight."""@en .
+
+mdcore:OperatingCondition a owl:Class ;
+    rdfs:label "Operating Condition"@en ;
+    skos:altLabel "운전 조건"@ko ;
+    skos:definition """A single characteristic of the situation in which an
+        artifact operates: how it is loaded, how it moves, what surrounds it,
+        how it is maintained, what it may cost."""@en .
+
+mdcore:hasCondition a owl:ObjectProperty ;
+    rdfs:label "has condition"@en ;
+    rdfs:domain mdcore:OperatingContext ;
+    rdfs:range mdcore:OperatingCondition .
+
+mdcore:conditionParameter a owl:ObjectProperty ;
+    rdfs:label "condition parameter"@en ;
+    rdfs:domain mdcore:OperatingCondition ;
+    rdfs:range mdcore:QuantityValue ;
+    skos:definition "A quantified parameter of the condition, with its unit."@en .
+
+# --- Loading ---------------------------------------------------------------
+
+mdcore:LoadingCondition a owl:Class ;
+    rdfs:subClassOf mdcore:OperatingCondition ;
+    rdfs:label "Loading Condition"@en ;
+    skos:altLabel "하중 조건"@ko ;
+    skos:definition "How force, moment or pressure is applied over time."@en .
+
+mdcore:StaticLoading a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Static Loading"@en ; skos:altLabel "정하중"@ko ;
+    skos:definition "Load applied gradually and held essentially constant."@en .
+
+mdcore:CyclicLoading a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Cyclic Loading"@en ; skos:altLabel "반복하중"@ko ;
+    skos:definition "Load that varies repeatedly with time, so that fatigue is a candidate failure mechanism."@en .
+
+mdcore:ReversingLoading a owl:Class ; rdfs:subClassOf mdcore:CyclicLoading ;
+    rdfs:label "Reversing Loading"@en ;
+    skos:definition "Cyclic loading whose direction reverses, e.g. a shaft driven in both directions."@en .
+
+mdcore:ShockLoading a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Shock Loading"@en ; skos:altLabel "충격하중"@ko ;
+    skos:definition "Load applied suddenly, with a rise time short relative to the system's response."@en .
+
+mdcore:CombinedLoading a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Combined Loading"@en ;
+    skos:definition "Two or more load types acting together, e.g. bending with torsion."@en .
+
+mdcore:OverloadCondition a owl:Class ; rdfs:subClassOf mdcore:LoadingCondition ;
+    rdfs:label "Overload Condition"@en ;
+    skos:definition "An occasional load exceeding the nominal design load, whether accidental or inherent to the duty."@en .
+
+# --- Kinematics ------------------------------------------------------------
+
+mdcore:KinematicCondition a owl:Class ;
+    rdfs:subClassOf mdcore:OperatingCondition ;
+    rdfs:label "Kinematic Condition"@en ; skos:altLabel "운동 조건"@ko ;
+    skos:definition "The motion regime in which the artifact operates."@en .
+
+mdcore:RotationalMotion a owl:Class ; rdfs:subClassOf mdcore:KinematicCondition ;
+    rdfs:label "Rotational Motion"@en ; skos:altLabel "회전운동"@ko .
+mdcore:LinearMotion a owl:Class ; rdfs:subClassOf mdcore:KinematicCondition ;
+    rdfs:label "Linear Motion"@en ; skos:altLabel "직선운동"@ko .
+mdcore:OscillatingMotion a owl:Class ; rdfs:subClassOf mdcore:KinematicCondition ;
+    rdfs:label "Oscillating Motion"@en .
+mdcore:RelativeMotion a owl:Class ; rdfs:subClassOf mdcore:KinematicCondition ;
+    rdfs:label "Relative Motion Between Mating Parts"@en ;
+    skos:definition """Motion of one mating part with respect to another across
+        a shared interface, such as axial sliding of a hub along a shaft while
+        torque is transmitted."""@en ;
+    skos:scopeNote """A decisive condition for shaft/hub connection choice, and
+        the reason several alternatives that share the function 'transmit
+        torque' are nonetheless not interchangeable."""@en .
+
+# --- Environment -----------------------------------------------------------
+
+mdcore:EnvironmentalCondition a owl:Class ;
+    rdfs:subClassOf mdcore:OperatingCondition ;
+    rdfs:label "Environmental Condition"@en ; skos:altLabel "환경 조건"@ko .
+
+mdcore:TemperatureCondition a owl:Class ; rdfs:subClassOf mdcore:EnvironmentalCondition ;
+    rdfs:label "Temperature Condition"@en .
+mdcore:CorrosiveEnvironment a owl:Class ; rdfs:subClassOf mdcore:EnvironmentalCondition ;
+    rdfs:label "Corrosive Environment"@en ; skos:altLabel "부식 환경"@ko .
+mdcore:ContaminatedEnvironment a owl:Class ; rdfs:subClassOf mdcore:EnvironmentalCondition ;
+    rdfs:label "Contaminated Environment"@en .
+mdcore:LubricationCondition a owl:Class ; rdfs:subClassOf mdcore:EnvironmentalCondition ;
+    rdfs:label "Lubrication Condition"@en ; skos:altLabel "윤활 조건"@ko .
+
+# --- Lifecycle -------------------------------------------------------------
+
+mdcore:LifecycleCondition a owl:Class ;
+    rdfs:subClassOf mdcore:OperatingCondition ;
+    rdfs:label "Lifecycle Condition"@en ;
+    skos:definition "A condition arising from how the artifact is made, assembled, serviced or retired."@en .
+
+mdcore:ManufacturingCondition a owl:Class ; rdfs:subClassOf mdcore:LifecycleCondition ;
+    rdfs:label "Manufacturing Condition"@en ; skos:altLabel "제조 조건"@ko .
+mdcore:AssemblyCondition a owl:Class ; rdfs:subClassOf mdcore:LifecycleCondition ;
+    rdfs:label "Assembly Condition"@en ; skos:altLabel "조립 조건"@ko .
+mdcore:MaintenanceCondition a owl:Class ; rdfs:subClassOf mdcore:LifecycleCondition ;
+    rdfs:label "Maintenance Condition"@en ; skos:altLabel "정비 조건"@ko .
+mdcore:FrequentAssembly a owl:Class ; rdfs:subClassOf mdcore:AssemblyCondition ;
+    rdfs:label "Frequent Assembly"@en .
+mdcore:FrequentDisassembly a owl:Class ; rdfs:subClassOf mdcore:MaintenanceCondition ;
+    rdfs:label "Frequent Disassembly"@en .
+mdcore:MaintenanceFreeOperation a owl:Class ; rdfs:subClassOf mdcore:MaintenanceCondition ;
+    rdfs:label "Maintenance-Free Operation"@en .
+mdcore:RequiredServiceLife a owl:Class ; rdfs:subClassOf mdcore:LifecycleCondition ;
+    rdfs:label "Required Service Life"@en .
+
+# --- Economics -------------------------------------------------------------
+
+mdcore:EconomicCondition a owl:Class ;
+    rdfs:subClassOf mdcore:OperatingCondition ;
+    rdfs:label "Economic Condition"@en ; skos:altLabel "경제적 조건"@ko .
+
+mdcore:ManufacturingCostConstraint a owl:Class ; rdfs:subClassOf mdcore:EconomicCondition ;
+    rdfs:label "Manufacturing Cost Constraint"@en .
+mdcore:MaintenanceCostConstraint a owl:Class ; rdfs:subClassOf mdcore:EconomicCondition ;
+    rdfs:label "Maintenance Cost Constraint"@en .
+mdcore:AvailabilityConstraint a owl:Class ; rdfs:subClassOf mdcore:EconomicCondition ;
+    rdfs:label "Availability Constraint"@en ;
+    skos:definition "Constraint arising from procurement lead time or from whether an element is a standard, catalogue item."@en .

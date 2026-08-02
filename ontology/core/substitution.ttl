@@ -1,0 +1,240 @@
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg core :: substitution
+#
+# Substitution is NOT an edge between two alternatives.  "A can replace B" is
+# meaningless without naming the function being preserved, the context, the
+# requirements in force, and the modifications assumed.  So the assessment
+# itself is the individual, and the alternatives are two of its arguments.
+#
+# Three properties of ordinary relations are deliberately NOT granted here:
+#
+#   * Symmetry.  A may replace B in a context where B cannot replace A.
+#     mdcore:substitutionAssessedAs is therefore neither symmetric nor
+#     inverse-functional, and validate_ontology.py actively reports any pair
+#     where a symmetric verdict was asserted without an independent
+#     assessment in the opposite direction.
+#   * Transitivity.  A->B and B->C do not license A->C, because the preserved
+#     function and the binding requirements may differ between the two hops.
+#   * Defaulting.  A shared function yields FunctionalAlternative and nothing
+#     stronger. DirectlySubstitutable must be asserted on evidence about
+#     interfaces, requirements and context, never inferred from co-function.
+# ===========================================================================
+
+<https://w3id.org/mdkg/core/substitution> a owl:Ontology ;
+    dcterms:title "mdkg core: context-dependent substitution assessment"@en ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mdcore:SubstitutionAssessment a owl:Class ;
+    rdfs:label "Substitution Assessment"@en ;
+    skos:altLabel "대체 가능성 평가"@ko ;
+    skos:definition """A reified judgement about whether a candidate design
+        alternative can take the place of a baseline design alternative, while
+        preserving a named function, within a named operating context, under
+        named requirements, given named modifications."""@en ;
+    skos:scopeNote """Every assessment is directional: candidate replaces
+        baseline. To claim the reverse, author a second assessment."""@en .
+
+# --- Arguments of the assessment ------------------------------------------
+
+mdcore:candidateAlternative a owl:ObjectProperty ;
+    rdfs:label "candidate alternative"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:DesignAlternative ;
+    skos:definition "The alternative proposed as a replacement."@en .
+
+mdcore:baselineAlternative a owl:ObjectProperty ;
+    rdfs:label "baseline alternative"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:DesignAlternative ;
+    skos:definition "The alternative currently assumed, which the candidate would displace."@en .
+
+mdcore:functionBeingPreserved a owl:ObjectProperty ;
+    rdfs:label "function being preserved"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:Function ;
+    skos:scopeNote """Mandatory. Substitution claims that do not say what is
+        being preserved are not interpretable."""@en .
+
+mdcore:assessmentContext a owl:ObjectProperty ;
+    rdfs:label "assessment operating context"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:OperatingContext .
+
+mdcore:applicableRequirement a owl:ObjectProperty ;
+    rdfs:label "applicable requirement"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:Requirement .
+mdcore:satisfiedRequirement a owl:ObjectProperty ;
+    rdfs:label "requirement satisfied by candidate"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:Requirement .
+mdcore:violatedRequirement a owl:ObjectProperty ;
+    rdfs:label "requirement violated by candidate"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:Requirement .
+
+mdcore:requiredDesignModification a owl:ObjectProperty ;
+    rdfs:label "required design modification"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:DesignModification .
+
+mdcore:interfaceCompatibility a owl:ObjectProperty ;
+    rdfs:label "interface compatibility"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:InterfaceCompatibilityLevel .
+
+mdcore:assessmentAdvantage a owl:ObjectProperty ;
+    rdfs:label "advantage of substituting"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:AlternativeEvaluation .
+mdcore:assessmentDisadvantage a owl:ObjectProperty ;
+    rdfs:label "disadvantage of substituting"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:AlternativeEvaluation .
+mdcore:assessmentTradeOff a owl:ObjectProperty ;
+    rdfs:label "trade-off of substituting"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:TradeOff .
+
+mdcore:introducedFailureMode a owl:ObjectProperty ;
+    rdfs:label "failure mode introduced by candidate"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:FailureMode .
+mdcore:mitigatedFailureMode a owl:ObjectProperty ;
+    rdfs:label "failure mode mitigated by candidate"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:FailureMode .
+
+mdcore:requiredVerification a owl:ObjectProperty ;
+    rdfs:label "verification required before substituting"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:VerificationMethod .
+
+mdcore:assessmentConclusion a owl:ObjectProperty ;
+    rdfs:label "assessment conclusion"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:SubstitutionState .
+
+mdcore:reviewStatus a owl:ObjectProperty ;
+    rdfs:label "review status"@en ;
+    rdfs:range mdcore:ReviewState .
+
+mdcore:analystNote a owl:DatatypeProperty ;
+    rdfs:label "analyst note"@en ; rdfs:range xsd:string ;
+    skos:scopeNote "Explicitly the analyst's voice. Never quotable as source content."@en .
+
+# --- Substitution states ---------------------------------------------------
+
+mdcore:SubstitutionState a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Substitution State"@en ;
+    skos:definition "The conclusion reached by a substitution assessment."@en .
+
+mdcore:SubstitutionStateScheme a skos:ConceptScheme ;
+    skos:prefLabel "Substitution states"@en ;
+    dcterms:description """Five mutually exclusive verdicts plus an explicit
+        evidence-gap verdict. The scheme is ordered by strength of claim, but
+        the order is not a scale: InsufficientEvidence sits outside it."""@en .
+
+mdcore:NotAnAlternative a mdcore:SubstitutionState ; skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "not an alternative"@en ; skos:altLabel "대안 아님"@ko ;
+    skos:definition """The candidate does not preserve the required function,
+        or cannot meet the interface, so replacement is not on the table."""@en .
+
+mdcore:FunctionalAlternative a mdcore:SubstitutionState ; skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "functional alternative"@en ; skos:altLabel "기능적 대안"@ko ;
+    skos:definition """Both alternatives can perform at least one common
+        required function, but they are not thereby interchangeable."""@en ;
+    skos:scopeNote """This is the strongest verdict that a shared function alone
+        can justify."""@en .
+
+mdcore:ConditionallySubstitutable a mdcore:SubstitutionState ; skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "conditionally substitutable"@en ; skos:altLabel "조건부 대체 가능"@ko ;
+    skos:definition """The candidate can replace the baseline only when stated
+        conditions hold or stated design modifications are made."""@en ;
+    skos:scopeNote """Requires at least one mdcore:assessmentCondition or one
+        mdcore:requiredDesignModification. Enforced by SHACL."""@en .
+
+mdcore:DirectlySubstitutable a mdcore:SubstitutionState ; skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "directly substitutable"@en ; skos:altLabel "직접 대체 가능"@ko ;
+    skos:definition """The candidate can replace the baseline while preserving
+        the required function, the interfaces, the operating conditions and the
+        essential requirements, without significant redesign."""@en ;
+    skos:scopeNote """Must never be inferred from a shared function. Requires
+        positive evidence on interface compatibility and on the binding
+        requirements."""@en .
+
+mdcore:PreferredAlternative a mdcore:SubstitutionState ; skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "preferred alternative"@en ; skos:altLabel "권장 대안"@ko ;
+    skos:definition """The candidate is substitutable and, in the stated
+        context and against the stated requirements, is to be preferred over
+        the baseline."""@en ;
+    skos:scopeNote "A preference is always relative to the stated requirement set; it is not a general ranking."@en .
+
+mdcore:InsufficientEvidence a mdcore:SubstitutionState ; skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "insufficient evidence"@en ; skos:altLabel "근거 부족"@ko ;
+    skos:definition """The available sources do not settle the question. Not a
+        negative verdict, and not a weak positive one."""@en .
+
+# --- Conditions attached to an assessment ---------------------------------
+
+mdcore:assessmentCondition a owl:ObjectProperty ;
+    rdfs:label "substitution condition"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ; rdfs:range mdcore:OperatingCondition ;
+    skos:definition "A condition that must hold for the conclusion to apply."@en .
+
+mdcore:conditionStatement a owl:DatatypeProperty ;
+    rdfs:label "condition statement"@en ; rdfs:range xsd:string ;
+    skos:scopeNote "Human-readable restatement. Never the only representation: a structured condition must also be given."@en .
+
+# --- Design modification ---------------------------------------------------
+
+mdcore:DesignModification a owl:Class ;
+    rdfs:label "Design Modification"@en ;
+    skos:altLabel "설계 변경"@ko ;
+    skos:definition """A change to geometry, material, tolerance, interface or
+        process that must be carried out before a candidate can take the
+        baseline's place."""@en .
+
+mdcore:modificationStatement a owl:DatatypeProperty ;
+    rdfs:domain mdcore:DesignModification ; rdfs:range xsd:string ;
+    rdfs:label "modification statement"@en .
+mdcore:modifiesInterface a owl:ObjectProperty ;
+    rdfs:domain mdcore:DesignModification ; rdfs:range mdcore:Interface ;
+    rdfs:label "modifies interface"@en .
+mdcore:modificationEffort a owl:DatatypeProperty ;
+    rdfs:domain mdcore:DesignModification ; rdfs:range xsd:string ;
+    rdfs:label "modification effort"@en ;
+    skos:scopeNote "Qualitative and analyst-assigned unless a source states otherwise; mark with mdcore:valueProvenance."@en .
+
+# --- Interface compatibility ----------------------------------------------
+
+mdcore:InterfaceCompatibilityLevel a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "Interface Compatibility Level"@en .
+
+mdcore:InterfaceCompatibilityScheme a skos:ConceptScheme ;
+    skos:prefLabel "Interface compatibility levels"@en .
+
+mdcore:InterfaceIdentical a mdcore:InterfaceCompatibilityLevel ; skos:inScheme mdcore:InterfaceCompatibilityScheme ;
+    skos:prefLabel "interface identical"@en ;
+    skos:definition "Mating geometry, tolerances and fit class are unchanged."@en .
+mdcore:InterfaceCompatibleWithRework a mdcore:InterfaceCompatibilityLevel ; skos:inScheme mdcore:InterfaceCompatibilityScheme ;
+    skos:prefLabel "compatible after rework"@en ;
+    skos:definition "The interface can accept the candidate once a stated modification is made."@en .
+mdcore:InterfaceIncompatible a mdcore:InterfaceCompatibilityLevel ; skos:inScheme mdcore:InterfaceCompatibilityScheme ;
+    skos:prefLabel "interface incompatible"@en .
+mdcore:InterfaceCompatibilityUnknown a mdcore:InterfaceCompatibilityLevel ; skos:inScheme mdcore:InterfaceCompatibilityScheme ;
+    skos:prefLabel "interface compatibility unknown"@en .
+
+# --- Deliberately weak relation between alternatives ----------------------
+
+mdcore:substitutionAssessedAs a owl:ObjectProperty ;
+    rdfs:label "substitution assessed as"@en ;
+    rdfs:domain mdcore:DesignAlternative ; rdfs:range mdcore:DesignAlternative ;
+    skos:definition """A convenience shortcut from candidate to baseline,
+        materialised by the build pipeline from an existing
+        SubstitutionAssessment and never asserted by hand."""@en ;
+    skos:scopeNote """Explicitly NOT owl:SymmetricProperty and NOT
+        owl:TransitiveProperty. Any reasoner configuration that makes it either
+        is a misuse of this ontology."""@en .
+
+mdcore:sharesFunctionWith a owl:ObjectProperty ;
+    a owl:SymmetricProperty ;
+    rdfs:label "shares function with"@en ;
+    rdfs:domain mdcore:DesignAlternative ; rdfs:range mdcore:DesignAlternative ;
+    skos:definition """Two alternatives can perform at least one common
+        function. Symmetric, because co-function genuinely is symmetric --
+        unlike substitutability, which is not."""@en .

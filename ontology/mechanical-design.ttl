@@ -1,0 +1,987 @@
+# ###########################################################################
+# GENERATED FILE -- DO NOT EDIT BY HAND
+#
+# Produced by scripts/build_ontology.py from:
+#   ontology/mechanical-design/load-condition.ttl
+#   ontology/mechanical-design/manufacturing.ttl
+#   ontology/mechanical-design/material.ttl
+#   ontology/mechanical-design/mechanical-artifact.ttl
+#   ontology/mechanical-design/mechanical-failure.ttl
+#   ontology/mechanical-design/mechanical-function.ttl
+#   ontology/mechanical-design/motion-condition.ttl
+#
+# Edit the inputs and re-run:  python3 scripts/build_ontology.py
+# ###########################################################################
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix mech: <https://w3id.org/mdkg/mechanical-design#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+mech:AlloySteel a owl:Class ;
+    rdfs:label "Alloy Steel"@en ;
+    rdfs:subClassOf mech:Steel .
+
+mech:Aluminum a owl:Class ;
+    rdfs:label "Aluminum Alloy"@en ;
+    rdfs:subClassOf mech:Metal .
+
+mech:AngularIndexing a owl:Class ;
+    rdfs:label "Angular Indexing"@en ;
+    rdfs:subClassOf mdcore:RelativeMotion ;
+    skos:definition "The mounted element must be re-assembled at a choice of discrete angular positions."@en .
+
+mech:AngularMisalignment a owl:Class ;
+    rdfs:label "Angular Misalignment"@en ;
+    rdfs:subClassOf mech:Misalignment .
+
+mech:AssemblyTorqueTest a mdcore:TorqueTest ;
+    rdfs:label "Assembly torque test"@en ;
+    skos:definition "Test of the torque a specific assembled connection carries before slipping or yielding."@en .
+
+mech:AxialSlidingUnderTorque a owl:Class ;
+    rdfs:label "Axial Sliding Under Torque"@en ;
+    rdfs:subClassOf mdcore:RelativeMotion ;
+    skos:altLabel "토크 전달 중 축방향 미끄럼"@ko ;
+    skos:definition """The mounted element must translate along the shaft while
+        torque is being transmitted."""@en ;
+    skos:scopeNote """This condition alone eliminates several otherwise
+        equivalent shaft/hub connection alternatives, and is one of the clearest
+        cases where a shared function does not imply substitutability."""@en .
+
+mech:AxialSlidingWithoutTorque a owl:Class ;
+    rdfs:label "Axial Sliding Without Torque"@en ;
+    rdfs:subClassOf mdcore:RelativeMotion ;
+    skos:definition "The mounted element must be repositionable along the shaft, but only while unloaded."@en .
+
+mech:BearingLifeCalculation a mdcore:EngineeringCalculation ;
+    rdfs:label "Rolling bearing rating-life calculation"@en ;
+    skos:altLabel "베어링 수명 계산"@ko ;
+    mdcore:addressesFailureMode mech:SurfacePitting .
+
+mech:BearingLoadTransfer a mdcore:Behavior ;
+    rdfs:label "Bearing (compressive) load transfer"@en ;
+    skos:inScheme mech:MechanicalBehaviorScheme ;
+    skos:prefLabel "transfer load by compressive bearing on mating flanks"@en ;
+    mdcore:realizesFunction mech:TransmitTorqueShaftToHub ;
+    mdcore:reliesOnEffect mech:ContactPressure .
+
+mech:BearingPressureLoading a owl:Class ;
+    rdfs:label "Bearing Pressure Loading"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:altLabel "면압 하중"@ko ;
+    skos:definition "Compressive load distributed over a mating flank area, assessed against a compressive strength or an allowable bearing pressure."@en .
+
+mech:BearingSeatInterface a owl:Class ;
+    rdfs:label "Bearing Seat Interface"@en ;
+    rdfs:subClassOf mech:MechanicalInterface ;
+    skos:definition "The interface between a bearing ring and the shaft or housing that carries it."@en .
+
+mech:BearingStressCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Bearing (compressive) stress check"@en ;
+    skos:altLabel "면압 검토"@ko ;
+    mdcore:addressesFailureMode mech:BearingCompressionFailure .
+
+mech:BendingLoading a owl:Class ;
+    rdfs:label "Bending Loading"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:altLabel "굽힘 하중"@ko .
+
+mech:BidirectionalRotation a owl:Class ;
+    rdfs:label "Bidirectional Rotation"@en ;
+    rdfs:subClassOf mdcore:ReversingLoading ;
+    skos:altLabel "양방향 회전"@ko ;
+    skos:definition """Operation in which the driven direction reverses, so that
+        a connection with backlash is loaded alternately on opposite
+        flanks."""@en ;
+    skos:scopeNote """A decisive condition for shaft/hub connections: clearance
+        that is harmless under unidirectional drive becomes impact loading when
+        the direction reverses."""@en .
+
+mech:BoltedAssembly a owl:Class ;
+    rdfs:label "Bolted Assembly"@en ;
+    rdfs:subClassOf mech:AssemblyProcess .
+
+mech:BrittleFracture a mdcore:FailureMechanism ;
+    rdfs:label "Brittle fracture"@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:Broaching a owl:Class ;
+    rdfs:label "Broaching"@en ;
+    rdfs:subClassOf mech:Machining .
+
+mech:Buckling a mdcore:FailureMode ;
+    rdfs:label "Buckling"@en ;
+    skos:altLabel "좌굴"@ko ;
+    skos:inScheme mech:FailureModeScheme ;
+    mdcore:causedByFailureMechanism mech:ElasticInstability .
+
+mech:CarbonSteel a owl:Class ;
+    rdfs:label "Carbon Steel"@en ;
+    rdfs:subClassOf mech:Steel .
+
+mech:CarryRadialLoad a mdcore:Function ;
+    rdfs:label "Carry radial load"@en ;
+    skos:broader mech:SupportRotatingShaft ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "carry radial load"@en .
+
+mech:CarryThrustLoad a mdcore:Function ;
+    rdfs:label "Carry thrust load"@en ;
+    skos:broader mech:SupportRotatingShaft ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "carry axial (thrust) load"@en .
+
+mech:CastIron a owl:Class ;
+    rdfs:label "Cast Iron"@en ;
+    rdfs:subClassOf mech:Metal .
+
+mech:Casting a owl:Class ;
+    rdfs:label "Casting"@en ;
+    rdfs:subClassOf mech:ManufacturingProcess .
+
+mech:Ceramic a owl:Class ;
+    rdfs:label "Ceramic"@en ;
+    rdfs:subClassOf mech:EngineeringMaterial ;
+    skos:altLabel "세라믹"@ko .
+
+mech:ChangeSpeedOrTorqueRatio a mdcore:Function ;
+    rdfs:label "Change speed or torque ratio"@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "change speed or torque ratio"@en .
+
+mech:CircularMilling a owl:Class ;
+    rdfs:label "Circular Cutter Milling"@en ;
+    rdfs:subClassOf mech:Milling ;
+    skos:scopeNote "Produces a keyseat with a run-out end (a sled-runner keyseat)."@en .
+
+mech:CoefficientOfFriction a owl:Class ;
+    rdfs:label "Coefficient of Friction"@en ;
+    rdfs:subClassOf mech:MaterialProperty ;
+    skos:altLabel "마찰계수"@ko ;
+    skos:scopeNote """A property of a contacting pair and its surface state, not
+        of one material alone; store it against the interface where the source
+        does so."""@en .
+
+mech:CombinedBendingAndTorsion a owl:Class ;
+    rdfs:label "Combined Bending and Torsion"@en ;
+    rdfs:subClassOf mdcore:CombinedLoading ;
+    skos:definition "The characteristic loading of a rotating shaft carrying transverse loads."@en .
+
+mech:Composite a owl:Class ;
+    rdfs:label "Composite"@en ;
+    rdfs:subClassOf mech:EngineeringMaterial .
+
+mech:ConnectMisalignedShafts a mdcore:Function ;
+    rdfs:label "Connect shafts allowing misalignment"@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "connect two shafts while accommodating misalignment"@en .
+
+mech:ContactInterface a owl:Class ;
+    rdfs:label "Rolling or Sliding Contact Interface"@en ;
+    rdfs:subClassOf mech:MechanicalInterface ;
+    skos:definition "An interface at which bodies transmit load through concentrated or distributed contact while moving relative to one another."@en .
+
+mech:ContactLoading a owl:Class ;
+    rdfs:label "Contact Loading"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:definition "Load transmitted through a small contact region, producing locally high subsurface stress."@en .
+
+mech:ContinuousRotation a owl:Class ;
+    rdfs:label "Continuous Rotation"@en ;
+    rdfs:subClassOf mdcore:RotationalMotion .
+
+mech:Corrosion a mdcore:FailureMechanism ;
+    rdfs:label "Corrosion"@en ;
+    skos:altLabel "부식"@ko ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:CorrosionFatigue a mdcore:FailureMechanism ;
+    rdfs:label "Corrosion fatigue"@en ;
+    skos:definition "Fatigue accelerated by a corrosive environment acting at the crack tip."@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:Creep a mdcore:FailureMechanism ;
+    rdfs:label "Creep"@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:CriticalSpeedCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Critical speed check"@en .
+
+mech:DeflectionCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Deflection check"@en ;
+    mdcore:addressesFailureMode mech:ExcessiveDeflection .
+
+mech:DissipateKineticEnergy a mdcore:Function ;
+    rdfs:label "Dissipate kinetic energy"@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "slow or stop a moving member"@en .
+
+mech:DistributedToothContact a mdcore:Behavior ;
+    rdfs:label "Distributed tooth contact"@en ;
+    skos:definition """Torque is shared among several engaged flanks, reducing
+        the load carried by any one of them relative to a single inserted
+        member."""@en ;
+    skos:inScheme mech:MechanicalBehaviorScheme ;
+    skos:prefLabel "transfer load through many engaged tooth flanks in parallel"@en ;
+    mdcore:realizesFunction mech:TransmitTorqueShaftToHub ;
+    mdcore:reliesOnEffect mech:ContactPressure .
+
+mech:Ductility a owl:Class ;
+    rdfs:label "Ductility"@en ;
+    rdfs:subClassOf mech:MaterialProperty .
+
+mech:ElasticEnergyStorage a mdcore:Behavior ;
+    rdfs:label "Elastic energy storage"@en ;
+    skos:inScheme mech:MechanicalBehaviorScheme ;
+    skos:prefLabel "store energy in elastic deformation"@en ;
+    mdcore:realizesFunction mech:StoreMechanicalEnergy ;
+    mdcore:reliesOnEffect mech:ElasticDeformation .
+
+mech:EndMilling a owl:Class ;
+    rdfs:label "End Milling"@en ;
+    rdfs:subClassOf mech:Milling ;
+    skos:scopeNote "Produces a keyseat with an abrupt end (a profile keyseat)."@en .
+
+mech:EnduranceLimit a owl:Class ;
+    rdfs:label "Endurance Limit"@en ;
+    rdfs:subClassOf mech:MaterialProperty ;
+    skos:altLabel "피로한도"@ko ;
+    skos:definition """A stress level below which a material is taken to sustain
+        cyclic loading indefinitely."""@en ;
+    skos:scopeNote """Both source books distinguish a laboratory-specimen value
+        from an estimated actual value corrected for the part. They use
+        different symbols and partly different correction factors, so the two
+        notions are kept as separate claims joined by an alignment, not
+        merged."""@en .
+
+mech:EngageOrDisengageDrive a mdcore:Function ;
+    rdfs:label "Engage or disengage a drive"@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "connect or disconnect a driving and a driven member"@en .
+
+mech:FatigueStrengthCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Fatigue strength check"@en ;
+    mdcore:addressesFailureMode mech:FatigueFracture .
+
+mech:Fillet a owl:Class ;
+    rdfs:label "Fillet"@en ;
+    rdfs:subClassOf mdcore:GeometryFeature .
+
+mech:FitAndToleranceInspection a mdcore:DimensionalInspection ;
+    rdfs:label "Fit and tolerance inspection"@en ;
+    skos:definition "Dimensional inspection confirming that mating parts fall within the tolerance zones assumed by the design calculation."@en .
+
+mech:Forming a owl:Class ;
+    rdfs:label "Forming"@en ;
+    rdfs:subClassOf mech:ManufacturingProcess .
+
+mech:FrettingWear a mdcore:FailureMechanism ;
+    rdfs:label "Fretting"@en ;
+    skos:definition "Wear and surface damage caused by small-amplitude oscillatory relative motion between nominally fixed mating surfaces."@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:FrictionTorqueCapacityCalculation a mdcore:EngineeringCalculation ;
+    rdfs:label "Friction torque capacity calculation"@en ;
+    mdcore:addressesFailureMode mech:ConnectionSlip .
+
+mech:FrictionalLoadTransfer a mdcore:Behavior ;
+    rdfs:label "Frictional load transfer"@en ;
+    skos:altLabel "마찰에 의한 하중 전달"@ko ;
+    skos:definition """Torque is carried by friction generated by a normal
+        pressure at the interface, so capacity depends on the coefficient of
+        friction and on the pressure being maintained in service."""@en ;
+    skos:inScheme mech:MechanicalBehaviorScheme ;
+    skos:prefLabel "transfer load by friction at a pressurised interface"@en ;
+    skos:scopeNote """The dependence on a maintained pressure, and on a friction
+        coefficient that is rarely known precisely, is what makes
+        friction-based connections behave differently under shock and
+        thermal cycling from form-locking ones."""@en ;
+    mdcore:behaviorRequiresCondition mech:MaintainedInterfacePressure ;
+    mdcore:realizesFunction mech:TransmitTorqueShaftToHub ;
+    mdcore:reliesOnEffect mech:DryFriction .
+
+mech:Grinding a owl:Class ;
+    rdfs:label "Grinding"@en ;
+    rdfs:subClassOf mech:Machining .
+
+mech:Groove a owl:Class ;
+    rdfs:label "Groove"@en ;
+    rdfs:subClassOf mdcore:GeometryFeature .
+
+mech:GuideLinearMotion a mdcore:Function ;
+    rdfs:label "Guide linear motion"@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "guide motion along a straight path"@en .
+
+mech:Hardness a owl:Class ;
+    rdfs:label "Hardness"@en ;
+    rdfs:subClassOf mech:MaterialProperty ;
+    skos:altLabel "경도"@ko .
+
+mech:HighRotationalSpeedCondition a owl:Class ;
+    rdfs:label "Elevated Rotational Speed Condition"@en ;
+    rdfs:subClassOf mdcore:RotationalMotion ;
+    skos:definition """Operation at a rotational speed high enough that
+        balance, concentricity or critical-speed effects become design
+        drivers."""@en ;
+    skos:scopeNote """Deliberately NOT given a numeric boundary. Whether a speed
+        is 'high' depends on the element, its geometry and its supports. Any
+        boundary must be introduced as a mdcore:ThresholdDefinition citing a
+        source and a context."""@en .
+
+mech:Hobbing a owl:Class ;
+    rdfs:label "Hobbing"@en ;
+    rdfs:subClassOf mech:Machining ;
+    skos:definition "Generating process using a hob cutter, used for gear teeth and for involute splines."@en .
+
+mech:HydrodynamicFilmSupport a mdcore:Behavior ;
+    rdfs:label "Hydrodynamic film support"@en ;
+    skos:inScheme mech:MechanicalBehaviorScheme ;
+    skos:prefLabel "carry load on a pressurised lubricant film generated by relative motion"@en ;
+    mdcore:behaviorRequiresCondition mech:AdequateLubricantSupply ;
+    mdcore:realizesFunction mech:SupportRotatingShaft ;
+    mdcore:reliesOnEffect mech:ViscousPressureGeneration .
+
+mech:InterferenceFit a owl:Class ;
+    rdfs:label "Interference Fit"@en ;
+    rdfs:subClassOf mech:Fit ;
+    skos:altLabel "억지 끼워맞춤"@ko ;
+    skos:definition """A fit in which the shaft is larger than the hole before
+        assembly, so that assembly generates interface pressure."""@en .
+
+mech:InterferencePressureCalculation a mdcore:EngineeringCalculation ;
+    rdfs:label "Interference-fit pressure calculation"@en .
+
+mech:IntermittentRotation a owl:Class ;
+    rdfs:label "Intermittent Rotation"@en ;
+    rdfs:subClassOf mdcore:RotationalMotion .
+
+mech:JoinComponents a mdcore:Function ;
+    rdfs:label "Join components"@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "hold two or more components together"@en .
+
+mech:Keyseat a owl:Class ;
+    rdfs:label "Keyseat"@en ;
+    rdfs:subClassOf mdcore:GeometryFeature ;
+    skos:altLabel "키홈"@ko ;
+    skos:definition "A groove machined in a shaft or a hub bore to receive a key."@en ;
+    skos:scopeNote """Both source books treat the shaft groove and the hub
+        groove as keyseats, with 'keyway' commonly used for the hub groove.
+        The terminology difference is recorded as a ConceptAlignment rather
+        than resolved by fiat."""@en .
+
+mech:LimitTransmittedTorque a mdcore:Function ;
+    rdfs:label "Limit transmitted torque"@en ;
+    skos:definition """A protective function. Distinguished from
+        TransmitTorque because an element may be required to fail, and a
+        substitution that removes this function is not function-preserving even
+        if torque capacity is unchanged."""@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "protect a drive train by limiting or interrupting torque on overload"@en .
+
+mech:LocateAxially a mdcore:Function ;
+    rdfs:label "Locate a component axially"@en ;
+    skos:altLabel "축방향 위치 결정"@ko ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "fix the axial position of a mounted component"@en .
+
+mech:Loosening a mdcore:FailureMode ;
+    rdfs:label "Loosening"@en ;
+    skos:definition "Progressive loss of a preload or clamping force in service."@en ;
+    skos:inScheme mech:FailureModeScheme .
+
+mech:MachineElement a owl:Class ;
+    rdfs:label "Machine Element"@en ;
+    rdfs:subClassOf mdcore:Component,
+        mech:MechanicalArtifact ;
+    skos:altLabel "기계요소"@ko ;
+    skos:definition """A standardised or generically recognised mechanical
+        component type whose design is treated as a self-contained problem with
+        its own selection procedure, failure modes and verification methods."""@en ;
+    skos:scopeNote """Machine-element *families* are defined in the
+        machine-elements module. This class is their common root."""@en .
+
+mech:MaintainConcentricity a mdcore:Function ;
+    rdfs:label "Maintain concentricity"@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "keep a mounted element concentric with the shaft"@en .
+
+mech:MechanicalSystem a owl:Class ;
+    rdfs:label "Mechanical System"@en ;
+    rdfs:subClassOf mdcore:TechnicalSystem,
+        mech:MechanicalArtifact ;
+    skos:altLabel "기계 시스템"@ko ;
+    skos:definition """An assembly of mechanical elements arranged to deliver a
+        system-level function such as a power transmission or a motion
+        stage."""@en .
+
+mech:ModulusOfElasticity a owl:Class ;
+    rdfs:label "Modulus of Elasticity"@en ;
+    rdfs:subClassOf mech:MaterialProperty ;
+    skos:altLabel "탄성계수"@ko .
+
+mech:ParallelMisalignment a owl:Class ;
+    rdfs:label "Parallel Offset Misalignment"@en ;
+    rdfs:subClassOf mech:Misalignment .
+
+mech:PermitAxialMotion a mdcore:Function ;
+    rdfs:label "Permit axial motion under torque"@en ;
+    skos:definition """Deliberately the converse of LocateAxially: an ontology
+        that conflates the two cannot express why a slip-fitted spline and an
+        interference fit are not interchangeable."""@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "allow a mounted element to move axially while torque is transmitted"@en .
+
+mech:Polymer a owl:Class ;
+    rdfs:label "Polymer"@en ;
+    rdfs:subClassOf mech:EngineeringMaterial .
+
+mech:PressAssembly a owl:Class ;
+    rdfs:label "Press Assembly"@en ;
+    rdfs:subClassOf mech:AssemblyProcess .
+
+mech:RadialLoading a owl:Class ;
+    rdfs:label "Radial Loading"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:altLabel "반경방향 하중"@ko .
+
+mech:RollingContactSupport a mdcore:Behavior ;
+    rdfs:label "Rolling contact support"@en ;
+    skos:inScheme mech:MechanicalBehaviorScheme ;
+    skos:prefLabel "carry load through rolling elements between raceways"@en ;
+    mdcore:realizesFunction mech:SupportRotatingShaft ;
+    mdcore:reliesOnEffect mech:HertzianContact .
+
+mech:RotationalBacklash a owl:Class ;
+    rdfs:label "Rotational Backlash"@en ;
+    rdfs:subClassOf mdcore:KinematicCondition ;
+    skos:altLabel "회전 백래시"@ko ;
+    skos:definition "Angular lost motion at a connection before load is picked up on the opposite flank."@en .
+
+mech:SealInterface a mdcore:Function ;
+    rdfs:label "Seal an interface"@en ;
+    skos:altLabel "밀봉"@ko ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "prevent leakage across an interface"@en .
+
+mech:Seizure a mdcore:FailureMode ;
+    rdfs:label "Seizure"@en ;
+    skos:inScheme mech:FailureModeScheme ;
+    mdcore:causedByFailureMechanism mech:AdhesiveWear .
+
+mech:ShaftHubInterface a owl:Class ;
+    rdfs:label "Shaft/Hub Interface"@en ;
+    rdfs:subClassOf mech:MechanicalInterface ;
+    skos:altLabel "축-보스 접합부"@ko ;
+    skos:definition """The interface between a rotating shaft and the bore of a
+        mounted element such as a gear, sheave, sprocket or coupling."""@en ;
+    skos:scopeNote """Named explicitly because it is the interface at which
+        several distinct connection alternatives compete, and therefore the one
+        whose compatibility governs their substitutability."""@en .
+
+mech:ShearLoadTransfer a mdcore:Behavior ;
+    rdfs:label "Shear load transfer"@en ;
+    skos:altLabel "전단에 의한 하중 전달"@ko ;
+    skos:definition """Torque is carried by an inserted member loaded in direct
+        shear over a defined shear area, with a complementary bearing action on
+        its flanks."""@en ;
+    skos:inScheme mech:MechanicalBehaviorScheme ;
+    skos:prefLabel "transfer load by direct shear across an inserted member"@en ;
+    mdcore:realizesFunction mech:TransmitTorqueShaftToHub ;
+    mdcore:reliesOnEffect mech:DirectShearStress .
+
+mech:ShearStressCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Direct shear stress check"@en ;
+    skos:altLabel "전단응력 검토"@ko ;
+    skos:definition "Comparison of the computed direct shear stress on the governing plane against an allowable shear stress."@en ;
+    mdcore:addressesFailureMode mech:ShearFailure .
+
+mech:ShotPeening a owl:Class ;
+    rdfs:label "Shot Peening"@en ;
+    rdfs:subClassOf mech:SurfaceTreatment ;
+    skos:definition "Cold working that introduces compressive residual stress at the surface."@en .
+
+mech:Shoulder a owl:Class ;
+    rdfs:label "Shoulder"@en ;
+    rdfs:subClassOf mdcore:GeometryFeature ;
+    skos:altLabel "단차"@ko .
+
+mech:SlideOnAssembly a owl:Class ;
+    rdfs:label "Slide-On Assembly"@en ;
+    rdfs:subClassOf mech:AssemblyProcess .
+
+mech:SlipFit a owl:Class ;
+    rdfs:label "Slip Fit"@en ;
+    rdfs:subClassOf mech:ClearanceFit ;
+    skos:definition "A clearance fit loose enough to permit relative axial motion of the mating parts in service."@en .
+
+mech:StainlessSteel a owl:Class ;
+    rdfs:label "Stainless Steel"@en ;
+    rdfs:subClassOf mech:Steel ;
+    skos:altLabel "스테인리스강"@ko .
+
+mech:StaticLoadRatingCheck a mdcore:EngineeringCalculation ;
+    rdfs:label "Static load rating check"@en ;
+    mdcore:addressesFailureMode mech:Brinelling .
+
+mech:StressConcentrationAssessment a mdcore:EngineeringCalculation ;
+    rdfs:label "Stress concentration assessment"@en ;
+    mdcore:addressesFailureMode mech:FatigueFracture .
+
+mech:StressRatio a owl:Class ;
+    rdfs:label "Stress Ratio Condition"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:definition """The ratio of minimum to maximum stress in a cycle, which
+        characterises a cyclic loading case."""@en ;
+    skos:scopeNote "Quantified through mdcore:conditionParameter with unit 'dimensionless'."@en .
+
+mech:SurfaceHardening a owl:Class ;
+    rdfs:label "Surface Hardening"@en ;
+    rdfs:subClassOf mech:SurfaceTreatment ;
+    skos:definition "Treatment raising surface hardness to resist wear or to raise fatigue strength."@en .
+
+mech:ThermalAssembly a owl:Class ;
+    rdfs:label "Thermal (Shrink or Chill) Assembly"@en ;
+    rdfs:subClassOf mech:AssemblyProcess ;
+    skos:definition "Assembly achieved by heating the outer member or cooling the inner member to create temporary clearance."@en .
+
+mech:ThermalExpansion a mdcore:PhysicalEffect ;
+    rdfs:label "Differential thermal expansion"@en .
+
+mech:ThreadedInterface a owl:Class ;
+    rdfs:label "Threaded Interface"@en ;
+    rdfs:subClassOf mech:MechanicalInterface .
+
+mech:ThrustLoading a owl:Class ;
+    rdfs:label "Thrust Loading"@en ;
+    rdfs:subClassOf mech:AxialLoading ;
+    skos:definition "Axial load carried across a rotating interface, e.g. by a bearing."@en .
+
+mech:TorsionalLoading a owl:Class ;
+    rdfs:label "Torsional Loading"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:altLabel "비틀림 하중"@ko .
+
+mech:TransitionFit a owl:Class ;
+    rdfs:label "Transition Fit"@en ;
+    rdfs:subClassOf mech:Fit ;
+    skos:altLabel "중간 끼워맞춤"@ko .
+
+mech:TransverseHole a owl:Class ;
+    rdfs:label "Transverse Hole"@en ;
+    rdfs:subClassOf mdcore:GeometryFeature .
+
+mech:UltimateTensileStrength a owl:Class ;
+    rdfs:label "Ultimate Tensile Strength"@en ;
+    rdfs:subClassOf mech:MaterialProperty ;
+    skos:altLabel "인장강도"@ko .
+
+mech:VariableLoading a owl:Class ;
+    rdfs:label "Variable Loading"@en ;
+    rdfs:subClassOf mdcore:CyclicLoading ;
+    skos:definition "Loading whose amplitude changes over the duty cycle, requiring damage accumulation rather than a single-amplitude assessment."@en .
+
+mech:WearOut a mdcore:FailureMode ;
+    rdfs:label "Wear-out"@en ;
+    skos:inScheme mech:FailureModeScheme ;
+    mdcore:causedByFailureMechanism mech:AbrasiveWear,
+        mech:AdhesiveWear .
+
+mech:Welding a owl:Class ;
+    rdfs:label "Welding"@en ;
+    rdfs:subClassOf mech:ManufacturingProcess .
+
+mech:YieldStrength a owl:Class ;
+    rdfs:label "Yield Strength"@en ;
+    rdfs:subClassOf mech:MaterialProperty ;
+    skos:altLabel "항복강도"@ko .
+
+mech:designationSystem a owl:DatatypeProperty ;
+    rdfs:label "designation system"@en ;
+    rdfs:domain mdcore:Material ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "For example 'SAE', 'UNS', 'AISI', 'ASTM', 'ISO'."@en .
+
+mech:hasMaterialCondition a owl:ObjectProperty ;
+    rdfs:label "has material condition"@en ;
+    rdfs:domain mdcore:Material ;
+    rdfs:range mech:MaterialCondition .
+
+mech:hasProperty a owl:ObjectProperty ;
+    rdfs:label "has material property"@en ;
+    rdfs:domain mdcore:Material ;
+    rdfs:range mech:MaterialProperty .
+
+mech:isPermanentConnection a owl:DatatypeProperty ;
+    rdfs:label "is a permanent connection"@en ;
+    rdfs:range xsd:boolean .
+
+mech:isStandardCatalogItem a owl:DatatypeProperty ;
+    rdfs:label "is a standard catalogue item"@en ;
+    rdfs:range xsd:boolean ;
+    skos:definition "True when the element is normally bought to a published standard rather than made to a drawing."@en .
+
+mech:materialDesignation a owl:DatatypeProperty ;
+    rdfs:label "material designation"@en ;
+    rdfs:domain mdcore:Material ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "The designation exactly as printed by the source, e.g. 'SAE 1018'. Designation systems differ; do not translate silently."@en .
+
+mech:permitsFieldDisassembly a owl:DatatypeProperty ;
+    rdfs:label "permits field disassembly"@en ;
+    rdfs:range xsd:boolean ;
+    skos:definition "True when the connection can be taken apart and reassembled with ordinary maintenance tooling."@en .
+
+mech:propertyKind a owl:DatatypeProperty ;
+    rdfs:label "property kind"@en ;
+    rdfs:domain mech:MaterialProperty ;
+    rdfs:range xsd:string .
+
+mech:propertyValue a owl:ObjectProperty ;
+    rdfs:label "property value"@en ;
+    rdfs:domain mech:MaterialProperty ;
+    rdfs:range mdcore:QuantityValue .
+
+mech:requiresProcess a owl:ObjectProperty ;
+    rdfs:label "requires manufacturing process"@en ;
+    rdfs:range mech:ManufacturingProcess ;
+    skos:definition """Relates a design alternative to a process its realisation
+        demands. Central to substitution: an alternative that requires a process
+        the shop does not have is not available regardless of its
+        performance."""@en .
+
+mech:requiresSpecialTooling a owl:DatatypeProperty ;
+    rdfs:label "requires special tooling"@en ;
+    rdfs:range xsd:boolean .
+
+mech:stressConcentrationFactor a owl:ObjectProperty ;
+    rdfs:label "stress concentration factor"@en ;
+    rdfs:domain mech:StressRaiser ;
+    rdfs:range mdcore:QuantityValue ;
+    skos:scopeNote """Dimensionless, and always tied to a loading mode and a
+        geometry ratio. A factor cited without its loading mode is
+        uninterpretable and must not be stored."""@en .
+
+mech:stressConcentrationLoadingMode a owl:DatatypeProperty ;
+    rdfs:label "loading mode for stress concentration factor"@en ;
+    rdfs:domain mech:StressRaiser ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "For example 'bending', 'torsion', 'axial'."@en .
+
+mech:valuesAreTypicalNotGuaranteed a owl:DatatypeProperty ;
+    rdfs:label "values are typical, not guaranteed"@en ;
+    rdfs:domain mech:MaterialProperty ;
+    rdfs:range xsd:boolean ;
+    skos:scopeNote """Set true when the source labels its table as typical. This
+        is a real constraint on how the value may be used in design, and it is
+        lost if only the number is stored."""@en .
+
+<https://w3id.org/mdkg/mechanical-design/artifact> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg mechanical design: artifacts"@en ;
+    owl:imports <https://w3id.org/mdkg/core/artifact> ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/mechanical-design/failure> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg mechanical design: failure and verification vocabulary"@en ;
+    owl:imports <https://w3id.org/mdkg/core/failure>,
+        <https://w3id.org/mdkg/core/verification> ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/mechanical-design/function> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg mechanical design: functions, behaviors and physical effects"@en ;
+    owl:imports <https://w3id.org/mdkg/core/behavior>,
+        <https://w3id.org/mdkg/core/function> ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/mechanical-design/load-condition> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg mechanical design: load conditions"@en ;
+    owl:imports <https://w3id.org/mdkg/core/context> ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/mechanical-design/manufacturing> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg mechanical design: manufacturing and lifecycle"@en ;
+    owl:imports <https://w3id.org/mdkg/core/context> ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/mechanical-design/material> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg mechanical design: materials"@en ;
+    owl:imports <https://w3id.org/mdkg/core/artifact> ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/mechanical-design/motion-condition> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg mechanical design: motion and kinematic conditions"@en ;
+    owl:imports <https://w3id.org/mdkg/core/context> ;
+    owl:versionInfo "0.1.0" .
+
+mech:AbrasiveWear a mdcore:FailureMechanism ;
+    rdfs:label "Abrasive wear"@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:AdequateLubricantSupply a mdcore:LubricationCondition ;
+    rdfs:label "Adequate lubricant supply"@en .
+
+mech:AxialLoading a owl:Class ;
+    rdfs:label "Axial Loading"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:altLabel "축 하중"@ko .
+
+mech:BearingCompressionFailure a mdcore:FailureMode ;
+    rdfs:label "Bearing (compressive crushing) failure"@en ;
+    skos:altLabel "면압 파손"@ko ;
+    skos:definition """Permanent deformation of a mating flank under compressive
+        bearing stress, occurring on whichever of the contacting parts has the
+        lower compressive strength."""@en ;
+    skos:inScheme mech:FailureModeScheme ;
+    mdcore:causedByFailureMechanism mech:PlasticYielding .
+
+mech:Brinelling a mdcore:FailureMode ;
+    rdfs:label "Brinelling"@en ;
+    skos:altLabel "브리넬링"@ko ;
+    skos:definition """Permanent indentation of a raceway by a rolling element
+        under a static load, named for its resemblance to a Brinell hardness
+        impression."""@en ;
+    skos:inScheme mech:FailureModeScheme ;
+    mdcore:causedByFailureMechanism mech:PlasticIndentation .
+
+mech:ClearanceFit a owl:Class ;
+    rdfs:label "Clearance Fit"@en ;
+    rdfs:subClassOf mech:Fit ;
+    skos:altLabel "헐거운 끼워맞춤"@ko .
+
+mech:ConnectionSlip a mdcore:FailureMode ;
+    rdfs:label "Connection slip"@en ;
+    skos:altLabel "연결부 미끄러짐"@ko ;
+    skos:definition "Loss of angular or axial registration between mating parts that were intended to move together."@en ;
+    skos:inScheme mech:FailureModeScheme ;
+    mdcore:aggravatedByCondition mdcore:ShockLoading ;
+    mdcore:causedByFailureMechanism mech:FrictionSlip .
+
+mech:DirectShearStress a mdcore:PhysicalEffect ;
+    rdfs:label "Direct shear stress"@en .
+
+mech:DryFriction a mdcore:PhysicalEffect ;
+    rdfs:label "Dry friction"@en ;
+    skos:altLabel "건마찰"@ko .
+
+mech:ElasticDeformation a mdcore:PhysicalEffect ;
+    rdfs:label "Elastic deformation"@en .
+
+mech:ElasticInstability a mdcore:FailureMechanism ;
+    rdfs:label "Elastic instability (buckling)"@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:ExcessiveDeflection a mdcore:FailureMode ;
+    rdfs:label "Excessive deflection"@en ;
+    skos:altLabel "과대 변형"@ko ;
+    skos:definition "Deformation within the elastic range that is nonetheless large enough to prevent a required function."@en ;
+    skos:inScheme mech:FailureModeScheme .
+
+mech:FatigueCrackInitiationAndGrowth a mdcore:FailureMechanism ;
+    rdfs:label "Fatigue crack initiation and growth"@en ;
+    skos:altLabel "피로 균열"@ko ;
+    skos:definition "Progressive cracking under repeated stress, typically starting at a surface discontinuity or an internal flaw."@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:FrictionSlip a mdcore:FailureMechanism ;
+    rdfs:label "Gross slip at a friction interface"@en ;
+    skos:definition "Loss of the frictional grip on which a connection's torque capacity depends."@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:HertzianContact a mdcore:PhysicalEffect ;
+    rdfs:label "Hertzian contact stress"@en .
+
+mech:MaintainedInterfacePressure a mdcore:OperatingCondition ;
+    rdfs:label "Maintained interface pressure"@en ;
+    skos:definition "The normal pressure at a friction interface remains above the level assumed in the capacity calculation throughout service."@en .
+
+mech:MaterialCondition a owl:Class ;
+    rdfs:label "Material Condition"@en ;
+    skos:altLabel "재료 상태"@ko ;
+    skos:definition """The processing state in which a material is supplied or
+        used -- cold-drawn, hot-rolled, quenched and tempered, case-hardened --
+        which conditions its property values."""@en .
+
+mech:PlasticIndentation a mdcore:FailureMechanism ;
+    rdfs:label "Static plastic indentation"@en ;
+    skos:definition "Permanent local deformation produced when a static contact load exceeds the material's capacity, without relative motion."@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:ShearFailure a mdcore:FailureMode ;
+    rdfs:label "Shear failure"@en ;
+    skos:altLabel "전단 파손"@ko ;
+    skos:definition "Separation across a plane loaded predominantly in shear."@en ;
+    skos:inScheme mech:FailureModeScheme ;
+    mdcore:causedByFailureMechanism mech:PlasticYielding .
+
+mech:StoreMechanicalEnergy a mdcore:Function ;
+    rdfs:label "Store mechanical energy"@en ;
+    skos:altLabel "기계 에너지 저장"@ko ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "store and release mechanical energy"@en .
+
+mech:SurfaceFatigue a mdcore:FailureMechanism ;
+    rdfs:label "Surface (contact) fatigue"@en ;
+    skos:definition "Subsurface-initiated fatigue under repeated rolling contact stress, appearing as spalling or pitting."@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:SurfacePitting a mdcore:FailureMode ;
+    rdfs:label "Surface pitting or spalling"@en ;
+    skos:altLabel "피팅"@ko ;
+    skos:inScheme mech:FailureModeScheme ;
+    mdcore:causedByFailureMechanism mech:SurfaceFatigue .
+
+mech:TransmitPower a mdcore:Function ;
+    rdfs:label "Transmit power"@en ;
+    skos:altLabel "동력 전달"@ko ;
+    skos:definition "Convey mechanical power from a source to a load."@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "transmit power"@en .
+
+mech:TransmitTorque a mdcore:Function ;
+    rdfs:label "Transmit torque"@en ;
+    skos:altLabel "토크 전달"@ko ;
+    skos:broader mech:TransmitPower ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "transmit torque"@en .
+
+mech:ViscousPressureGeneration a mdcore:PhysicalEffect ;
+    rdfs:label "Viscous pressure generation in a converging film"@en .
+
+mech:AdhesiveWear a mdcore:FailureMechanism ;
+    rdfs:label "Adhesive wear"@en ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:ContactPressure a mdcore:PhysicalEffect ;
+    rdfs:label "Contact (bearing) pressure"@en .
+
+mech:FatigueFracture a mdcore:FailureMode ;
+    rdfs:label "Fatigue fracture"@en ;
+    skos:altLabel "피로 파단"@ko ;
+    skos:inScheme mech:FailureModeScheme ;
+    mdcore:aggravatedByCondition mdcore:CyclicLoading ;
+    mdcore:causedByFailureMechanism mech:FatigueCrackInitiationAndGrowth .
+
+mech:MechanicalArtifact a owl:Class ;
+    rdfs:label "Mechanical Artifact"@en ;
+    rdfs:subClassOf mdcore:DesignedArtifact ;
+    skos:altLabel "기계 대상물"@ko ;
+    skos:definition """A designed artifact whose required functions are
+        delivered principally through the transmission, transformation,
+        support or containment of mechanical force, motion or energy."""@en .
+
+mech:Milling a owl:Class ;
+    rdfs:label "Milling"@en ;
+    rdfs:subClassOf mech:Machining .
+
+mech:Misalignment a owl:Class ;
+    rdfs:label "Misalignment"@en ;
+    rdfs:subClassOf mdcore:KinematicCondition ;
+    skos:altLabel "정렬 불량"@ko ;
+    skos:definition "Departure of mating axes from their nominal collinear or parallel relationship."@en .
+
+mech:PlasticYielding a mdcore:FailureMechanism ;
+    rdfs:label "Plastic yielding"@en ;
+    skos:altLabel "소성 항복"@ko ;
+    skos:inScheme mech:FailureMechanismScheme .
+
+mech:StressRaiser a owl:Class ;
+    rdfs:label "Stress Raiser"@en ;
+    rdfs:subClassOf mdcore:GeometryFeature ;
+    skos:altLabel "응력집중부"@ko ;
+    skos:definition """A geometry feature that locally elevates stress above the
+        nominal value, characterised by a stress-concentration factor."""@en .
+
+mech:SurfaceTreatment a owl:Class ;
+    rdfs:label "Surface Treatment"@en ;
+    rdfs:subClassOf mech:ManufacturingProcess ;
+    skos:altLabel "표면 처리"@ko .
+
+mech:Fit a owl:Class ;
+    rdfs:label "Fit"@en ;
+    rdfs:subClassOf mdcore:DesignFeature ;
+    skos:altLabel "끼워맞춤"@ko ;
+    skos:definition """The specified dimensional relationship between mating
+        parts, expressed through their tolerance zones."""@en .
+
+mech:Metal a owl:Class ;
+    rdfs:label "Metal"@en ;
+    rdfs:subClassOf mech:EngineeringMaterial .
+
+mech:Steel a owl:Class ;
+    rdfs:label "Steel"@en ;
+    rdfs:subClassOf mech:Metal ;
+    skos:altLabel "강"@ko .
+
+mech:AssemblyProcess a owl:Class ;
+    rdfs:label "Assembly Process"@en ;
+    skos:altLabel "조립 공정"@ko .
+
+mech:EngineeringMaterial a owl:Class ;
+    rdfs:label "Engineering Material"@en ;
+    rdfs:subClassOf mdcore:Material .
+
+mech:Machining a owl:Class ;
+    rdfs:label "Machining"@en ;
+    rdfs:subClassOf mech:ManufacturingProcess .
+
+mech:MechanicalInterface a owl:Class ;
+    rdfs:label "Mechanical Interface"@en ;
+    rdfs:subClassOf mdcore:Interface ;
+    skos:altLabel "기계적 접합부"@ko ;
+    skos:definition "An interface across which mechanical force, torque or motion is exchanged."@en .
+
+mech:SupportRotatingShaft a mdcore:Function ;
+    rdfs:label "Support a rotating shaft"@en ;
+    skos:altLabel "회전축 지지"@ko ;
+    skos:definition "Carry the reaction loads of a rotating shaft while permitting its rotation."@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "support a rotating shaft"@en .
+
+mech:TransmitTorqueShaftToHub a mdcore:Function ;
+    rdfs:label "Transmit torque between shaft and hub"@en ;
+    skos:altLabel "축과 보스 사이 토크 전달"@ko ;
+    skos:broader mech:TransmitTorque ;
+    skos:definition """Convey torque across the interface between a rotating
+        shaft and the bore of an element mounted on it."""@en ;
+    skos:inScheme mech:MechanicalFunctionScheme ;
+    skos:prefLabel "transmit torque between a shaft and a mounted element"@en ;
+    skos:scopeNote """The pilot function of this ontology version: several
+        distinct machine elements realise it through different behaviors, which
+        makes it the natural setting for demonstrating substitution."""@en .
+
+mech:ManufacturingProcess a owl:Class ;
+    rdfs:label "Manufacturing Process"@en ;
+    skos:altLabel "가공 공정"@ko ;
+    skos:definition "A process by which an artifact's geometry, material state or surface is produced or altered."@en .
+
+mech:MechanicalBehaviorScheme a skos:ConceptScheme ;
+    skos:prefLabel "Mechanical load-transfer behaviors"@en .
+
+mech:FailureModeScheme a skos:ConceptScheme ;
+    skos:prefLabel "Mechanical failure modes"@en .
+
+mech:MaterialProperty a owl:Class ;
+    rdfs:label "Material Property"@en ;
+    skos:definition "A named, measurable property of a material in a stated condition."@en .
+
+mech:FailureMechanismScheme a skos:ConceptScheme ;
+    skos:prefLabel "Mechanical failure mechanisms"@en .
+
+mech:MechanicalFunctionScheme a skos:ConceptScheme ;
+    dcterms:description """Solution-neutral mechanical functions. Analyst-authored
+        vocabulary; the individual functions are not claims about either
+        textbook, although the pilot claims attach to them."""@en ;
+    skos:prefLabel "Mechanical functions"@en .
+

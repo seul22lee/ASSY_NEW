@@ -1,0 +1,81 @@
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg mechanical-design :: manufacturing, assembly and maintenance
+#
+# Manufacturing matters to this ontology mainly through three channels:
+# what a process costs, what surface condition it leaves (which feeds fatigue),
+# and what equipment it demands (which decides whether a substitution is
+# realistic in a given shop).
+# ===========================================================================
+
+<https://w3id.org/mdkg/mechanical-design/manufacturing> a owl:Ontology ;
+    dcterms:title "mdkg mechanical design: manufacturing and lifecycle"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/core/context> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mech:ManufacturingProcess a owl:Class ;
+    rdfs:label "Manufacturing Process"@en ; skos:altLabel "가공 공정"@ko ;
+    skos:definition "A process by which an artifact's geometry, material state or surface is produced or altered."@en .
+
+mech:Machining a owl:Class ; rdfs:subClassOf mech:ManufacturingProcess ; rdfs:label "Machining"@en .
+mech:Milling  a owl:Class ; rdfs:subClassOf mech:Machining ; rdfs:label "Milling"@en .
+mech:EndMilling a owl:Class ; rdfs:subClassOf mech:Milling ; rdfs:label "End Milling"@en ;
+    skos:scopeNote "Produces a keyseat with an abrupt end (a profile keyseat)."@en .
+mech:CircularMilling a owl:Class ; rdfs:subClassOf mech:Milling ; rdfs:label "Circular Cutter Milling"@en ;
+    skos:scopeNote "Produces a keyseat with a run-out end (a sled-runner keyseat)."@en .
+mech:Hobbing a owl:Class ; rdfs:subClassOf mech:Machining ; rdfs:label "Hobbing"@en ;
+    skos:definition "Generating process using a hob cutter, used for gear teeth and for involute splines."@en .
+mech:Broaching a owl:Class ; rdfs:subClassOf mech:Machining ; rdfs:label "Broaching"@en .
+mech:Grinding a owl:Class ; rdfs:subClassOf mech:Machining ; rdfs:label "Grinding"@en .
+mech:Forming  a owl:Class ; rdfs:subClassOf mech:ManufacturingProcess ; rdfs:label "Forming"@en .
+mech:Casting  a owl:Class ; rdfs:subClassOf mech:ManufacturingProcess ; rdfs:label "Casting"@en .
+mech:Welding  a owl:Class ; rdfs:subClassOf mech:ManufacturingProcess ; rdfs:label "Welding"@en .
+
+mech:SurfaceTreatment a owl:Class ; rdfs:subClassOf mech:ManufacturingProcess ;
+    rdfs:label "Surface Treatment"@en ; skos:altLabel "표면 처리"@ko .
+mech:SurfaceHardening a owl:Class ; rdfs:subClassOf mech:SurfaceTreatment ; rdfs:label "Surface Hardening"@en ;
+    skos:definition "Treatment raising surface hardness to resist wear or to raise fatigue strength."@en .
+mech:ShotPeening a owl:Class ; rdfs:subClassOf mech:SurfaceTreatment ; rdfs:label "Shot Peening"@en ;
+    skos:definition "Cold working that introduces compressive residual stress at the surface."@en .
+
+mech:AssemblyProcess a owl:Class ;
+    rdfs:label "Assembly Process"@en ; skos:altLabel "조립 공정"@ko .
+mech:PressAssembly a owl:Class ; rdfs:subClassOf mech:AssemblyProcess ; rdfs:label "Press Assembly"@en .
+mech:ThermalAssembly a owl:Class ; rdfs:subClassOf mech:AssemblyProcess ; rdfs:label "Thermal (Shrink or Chill) Assembly"@en ;
+    skos:definition "Assembly achieved by heating the outer member or cooling the inner member to create temporary clearance."@en .
+mech:BoltedAssembly a owl:Class ; rdfs:subClassOf mech:AssemblyProcess ; rdfs:label "Bolted Assembly"@en .
+mech:SlideOnAssembly a owl:Class ; rdfs:subClassOf mech:AssemblyProcess ; rdfs:label "Slide-On Assembly"@en .
+
+mech:requiresProcess a owl:ObjectProperty ;
+    rdfs:range mech:ManufacturingProcess ;
+    rdfs:label "requires manufacturing process"@en ;
+    skos:definition """Relates a design alternative to a process its realisation
+        demands. Central to substitution: an alternative that requires a process
+        the shop does not have is not available regardless of its
+        performance."""@en .
+
+mech:requiresSpecialTooling a owl:DatatypeProperty ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "requires special tooling"@en .
+
+mech:isStandardCatalogItem a owl:DatatypeProperty ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "is a standard catalogue item"@en ;
+    skos:definition "True when the element is normally bought to a published standard rather than made to a drawing."@en .
+
+mech:permitsFieldDisassembly a owl:DatatypeProperty ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "permits field disassembly"@en ;
+    skos:definition "True when the connection can be taken apart and reassembled with ordinary maintenance tooling."@en .
+
+mech:isPermanentConnection a owl:DatatypeProperty ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "is a permanent connection"@en .

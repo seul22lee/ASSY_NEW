@@ -1,0 +1,1829 @@
+# ###########################################################################
+# GENERATED FILE -- DO NOT EDIT BY HAND
+#
+# Produced by scripts/build_ontology.py from:
+#   data/evidence_spans.jsonl
+#   data/claims.jsonl
+#   build/shigley10.meta.json
+#
+# Edit the inputs and re-run:  python3 scripts/build_ontology.py
+# ###########################################################################
+
+@prefix ev: <https://w3id.org/mdkg/evidence#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix mech: <https://w3id.org/mdkg/mechanical-design#> .
+@prefix melem: <https://w3id.org/mdkg/machine-elements#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix shigley10: <https://w3id.org/mdkg/source/shigley10#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+shigley10:book a ev:Book ;
+    rdfs:label "Shigley's Mechanical Engineering Design"@en ;
+    ev:author "J. Keith Nisbett",
+        "Richard G. Budynas" ;
+    ev:bookTitle "Shigley's Mechanical Engineering Design"@en ;
+    ev:hasEdition shigley10:edition .
+
+shigley10:c-0001 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0001" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:SafetyRequirement ;
+    ev:claimIdentifier "shigley10-c-0001" ;
+    ev:claimObject "loss-of-function strength divided by allowable stress"@en ;
+    ev:claimPredicate "is defined as"@en ;
+    ev:claimSubject "design factor n_d"@en ;
+    ev:claimTopic "design-factor" ;
+    ev:concernsEquation shigley10:eq_n1-1,
+        shigley10:eq_n1-3 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley defines the design factor n_d as the ratio of the loss-of-function strength to the allowable stress, and calls the deterministic form of this approach the classical method of design."@en ;
+    ev:supportedByEvidence shigley10:es-0001 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0002 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0002" ;
+    mdcore:analystNote "Terminology difference from Mott, who uses a single symbol N for the design factor. Recorded as a terminology alignment, not merged."@en ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:SafetyRequirement ;
+    ev:claimIdentifier "shigley10-c-0002" ;
+    ev:claimObject "design factor n_d"@en ;
+    ev:claimPredicate "is distinguished from"@en ;
+    ev:claimSubject "factor of safety n"@en ;
+    ev:claimTopic "design-factor" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley distinguishes the design factor n_d, chosen before the design is completed, from the factor of safety n, which is the value actually achieved after choices such as rounding up to a standard size. The two have the same definition but generally differ numerically."@en ;
+    ev:supportedByEvidence shigley10:es-0002 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0003 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0003" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:SafetyRequirement ;
+    ev:claimIdentifier "shigley10-c-0003" ;
+    ev:claimObject "analysis of all loss-of-function modes, with the smallest resulting factor governing"@en ;
+    ev:claimPredicate "requires"@en ;
+    ev:claimSubject "design factor evaluation"@en ;
+    ev:claimTopic "design-factor" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that all loss-of-function modes must be analyzed and that the mode leading to the smallest design factor governs."@en ;
+    ev:supportedByEvidence shigley10:es-0003 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0004 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0004" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:SafetyRequirement ;
+    ev:claimIdentifier "shigley10-c-0004" ;
+    ev:claimObject "of the same type and units, and applied at the same critical location"@en ;
+    ev:claimPredicate "must be"@en ;
+    ev:claimSubject "stress and strength terms in the design-factor equation"@en ;
+    ev:claimTopic "design-factor" ;
+    ev:concernsEquation shigley10:eq_n1-3 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that the stress and strength terms used in the design-factor equation must be of the same type and the same units, and must apply to the same critical location in the part."@en ;
+    ev:supportedByEvidence shigley10:es-0004 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0005 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0005" ;
+    mdcore:requiresExternalAuthority mdcore:RequiresCompanySpecification,
+        mdcore:RequiresEngineeringReview,
+        mdcore:RequiresExternalStandard ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:SafetyRequirement ;
+    ev:claimIdentifier "shigley10-c-0005" ;
+    ev:claimObject "experience, company policies and applicable codes"@en ;
+    ev:claimPredicate "requires"@en ;
+    ev:claimSubject "assignment of a design factor value"@en ;
+    ev:claimTopic "design-factor" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that the designer must rely on experience, company policies and applicable codes to arrive at an appropriate design factor, because of the difficulty of evaluating the uncertainties involved."@en ;
+    ev:supportedByEvidence shigley10:es-0005 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0020 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0020" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:Key,
+        melem:Pin ;
+    ev:claimIdentifier "shigley10-c-0020" ;
+    ev:claimObject "distinct roles: keys transmit torque, pins locate axially and transfer torque or thrust or both"@en ;
+    ev:claimPredicate "serve"@en ;
+    ev:claimSubject "keys and pins"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:concernsFigure shigley10:fig_n7-16 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that keys are used to enable the transmission of torque from the shaft to the shaft-supported element, while pins are used for axial positioning and for the transfer of torque or thrust or both."@en ;
+    ev:supportedByEvidence shigley10:es-0030 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0021 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0021" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:PinnedConnection ;
+    ev:claimCondition "both torsion and thrust present"@en,
+        "principal loading is shear"@en ;
+    ev:claimIdentifier "shigley10-c-0021" ;
+    ev:claimObject "the principal loading is shear and both torsion and thrust are present"@en ;
+    ev:claimPredicate "are useful when"@en ;
+    ev:claimSubject "pins"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that pins are useful when the principal loading is shear and when both torsion and thrust are present."@en ;
+    ev:supportedByEvidence shigley10:es-0031 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0022 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0022" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:ParallelKeyConnection ;
+    ev:claimIdentifier "shigley10-c-0022" ;
+    ev:claimObject "about 1.5 times the shaft diameter"@en ;
+    ev:claimPredicate "should not exceed"@en ;
+    ev:claimQuantity shigley10:shigley10-c-0022_q0 ;
+    ev:claimSubject "maximum key length"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that the maximum length of a key is limited by the hub length of the attached element and should generally not exceed about 1.5 times the shaft diameter, to avoid excessive twisting with the angular deflection of the shaft."@en ;
+    ev:supportedByEvidence shigley10:es-0033 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0023 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0023" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:MultipleKeyConnection ;
+    ev:claimIdentifier "shigley10-c-0023" ;
+    ev:claimObject "carry greater loads, typically oriented at 90 degrees from one another"@en ;
+    ev:claimPredicate "may be used to"@en ;
+    ev:claimQuantity shigley10:shigley10-c-0023_q0 ;
+    ev:claimSubject "multiple keys"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that multiple keys may be used as necessary to carry greater loads, typically oriented at 90 degrees from one another."@en ;
+    ev:supportedByEvidence shigley10:es-0034 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0024 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0024" ;
+    mdcore:analystNote "Differs in design intent from Mott's parallel-key design procedure, which recommends N = 3 to accommodate accidental overloads and shock. Both are preserved; see the claim alignment."@en ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:ParallelKeyConnection,
+        mech:LimitTransmittedTorque ;
+    ev:claimIdentifier "shigley10-c-0024" ;
+    ev:claimObject "excessive, because it is desirable for the key to fail rather than costlier components"@en ;
+    ev:claimPredicate "should not be"@en ;
+    ev:claimSubject "safety factor in key design"@en ;
+    ev:claimTopic "design-factor" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that excessive safety factors should be avoided in key design, since in an overload situation it is desirable for the key to fail rather than more costly components."@en ;
+    ev:supportedByEvidence shigley10:es-0035 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0025 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0025" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:SetscrewConnection,
+        mech:BidirectionalRotation,
+        mech:RotationalBacklash ;
+    ev:claimCondition "shaft rotates in both directions"@en ;
+    ev:claimIdentifier "shigley10-c-0025" ;
+    ev:claimObject "hold the hub axially and minimise rotational backlash under bidirectional rotation"@en ;
+    ev:claimPredicate "serves to"@en ;
+    ev:claimSubject "setscrew used together with a key"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that a setscrew is sometimes used along with a key to hold the hub axially and to minimise rotational backlash when the shaft rotates in both directions."@en ;
+    ev:supportedByEvidence shigley10:es-0036 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0026 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0026" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:WoodruffKeyConnection,
+        mech:MaintainConcentricity,
+        shigley10:shigley10-c-0026_threshold ;
+    ev:claimCondition "high rotational speed (no numeric boundary given by the source)"@en ;
+    ev:claimIdentifier "shigley10-c-0026" ;
+    ev:claimObject "better concentricity after assembly, which is especially important at high speeds"@en ;
+    ev:claimPredicate "yields"@en ;
+    ev:claimSubject "Woodruff key"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that the Woodruff key yields better concentricity after assembly of wheel and shaft, especially important at high speeds, that it is useful when a wheel is positioned against a shoulder because the keyslot need not be machined into the shoulder stress-concentration region, and that its deeper penetration helps prevent key rolling in smaller shafts."@en ;
+    ev:supportedByEvidence shigley10:es-0037 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0027 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0027" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:CircularMilling,
+        mech:Keyseat ;
+    ev:claimCondition "definite longitudinal key positioning not required"@en ;
+    ev:claimIdentifier "shigley10-c-0027" ;
+    ev:claimObject "definite longitudinal key positioning is not necessary"@en ;
+    ev:claimPredicate "may be used only when"@en ;
+    ev:claimSubject "sled-runner keyseat"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that a sled-runner keyseat reduces the stress concentration at the end of the keyseat by eliminating the abrupt end, but can only be used when definite longitudinal key positioning is not necessary, and is not as suitable near a shoulder."@en ;
+    ev:supportedByEvidence shigley10:es-0039 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0028 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0028" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:SetscrewConnection,
+        mech:FrictionalLoadTransfer ;
+    ev:claimIdentifier "shigley10-c-0028" ;
+    ev:claimObject "compression, unlike bolts and cap screws which depend on tension"@en ;
+    ev:claimPredicate "develops clamping force by"@en ;
+    ev:claimSubject "setscrew"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that, unlike bolts and cap screws which depend on tension to develop a clamping force, the setscrew depends on compression; its holding power comes from frictional resistance between collar and shaft together with any slight penetration of the setscrew into the shaft."@en ;
+    ev:supportedByEvidence shigley10:es-0020,
+        shigley10:es-0021 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0029 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0029" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:SetscrewConnection ;
+    ev:claimIdentifier "shigley10-c-0029" ;
+    ev:claimObject "factors of safety of 1.5 to 2.0 for static loads and 4 to 8 for various dynamic loads"@en ;
+    ev:claimPredicate "is typically applied with"@en ;
+    ev:claimQuantity shigley10:shigley10-c-0029_q0,
+        shigley10:shigley10-c-0029_q1 ;
+    ev:claimSubject "setscrew holding power"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:concernsTable shigley10:tab_n7-4 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that typical factors of safety applied to tabulated setscrew holding power are 1.5 to 2.0 for static loads and 4 to 8 for various dynamic loads, the tabulated values applying to both axial and tangential holding power."@en ;
+    ev:supportedByEvidence shigley10:es-0022 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0030 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0030" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:SetscrewConnection ;
+    ev:claimIdentifier "shigley10-c-0030" ;
+    ev:claimObject "half the shaft diameter"@en ;
+    ev:claimPredicate "should be about"@en ;
+    ev:claimQuantity shigley10:shigley10-c-0030_q0 ;
+    ev:claimSubject "setscrew length"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that setscrews should have a length of about half of the shaft diameter, and notes that this also gives a rough rule for the radial thickness of a hub or collar."@en ;
+    ev:supportedByEvidence shigley10:es-0023 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0040 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0040" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:Spline,
+        shigley10:std_ANSI_spline_standards,
+        shigley10:std_SAE_spline_standards ;
+    ev:claimIdentifier "shigley10-c-0040" ;
+    ev:claimObject "essentially stubby gear teeth formed on the shaft outside diameter and the hub bore"@en ;
+    ev:claimPredicate "are"@en ;
+    ev:claimSubject "splines"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley describes splines as essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component, and notes that SAE and ANSI publish standards for splines."@en ;
+    ev:supportedByEvidence shigley10:es-0010 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0041 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0041" ;
+    mdcore:analystNote "Directly comparable with Mott's 'the advantages of splines over keys are many'. The two are not contradictory but differ in emphasis and in the criterion foregrounded; preserved separately."@en ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:CostRequirement,
+        melem:Key,
+        melem:Spline ;
+    ev:claimCondition "simple torque transmission (no axial motion or high-torque requirement)"@en ;
+    ev:claimIdentifier "shigley10-c-0041" ;
+    ev:claimObject "generally much more expensive to manufacture, and usually unnecessary for simple torque transmission"@en ;
+    ev:claimPredicate "are"@en ;
+    ev:claimSubject "splines compared with keys"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that splines are generally much more expensive to manufacture than keys and are usually not necessary for simple torque transmission."@en ;
+    ev:supportedByEvidence shigley10:es-0011 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0042 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0042" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:TorqueCapacityRequirement,
+        melem:Spline,
+        shigley10:shigley10-c-0042_threshold ;
+    ev:claimIdentifier "shigley10-c-0042" ;
+    ev:claimObject "transfer high torques"@en ;
+    ev:claimPredicate "are typically used to"@en ;
+    ev:claimSubject "splines"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that splines are typically used to transfer high torques."@en ;
+    ev:supportedByEvidence shigley10:es-0012 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0043 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0043" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:InvoluteSplineConnection,
+        mech:AxialSlidingUnderTorque,
+        mech:PermitAxialMotion,
+        mech:SlipFit ;
+    ev:claimCondition "spline made with a reasonably loose slip fit"@en ;
+    ev:claimIdentifier "shigley10-c-0043" ;
+    ev:claimObject "large axial motion between shaft and component while still transmitting torque"@en ;
+    ev:claimPredicate "allows"@en ;
+    ev:claimSubject "spline with a reasonably loose slip fit"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that one feature of a spline is that it can be made with a reasonably loose slip fit to allow large axial motion between shaft and component while still transmitting torque, which is useful for connecting shafts where relative motion is common, such as a tractor power take-off."@en ;
+    ev:supportedByEvidence shigley10:es-0013 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0044 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0044" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:Spline,
+        mech:StressRaiser ;
+    ev:claimIdentifier "shigley10-c-0044" ;
+    ev:claimObject "the point where the spline ends and blends into the shaft, but are generally quite moderate"@en ;
+    ev:claimPredicate "are greatest at"@en ;
+    ev:claimSubject "spline stress-concentration factors"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that stress-concentration factors for splines are greatest where the spline ends and blends into the shaft, but are generally quite moderate."@en ;
+    ev:supportedByEvidence shigley10:es-0014 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0045 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0045" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:PinnedConnection,
+        melem:PressFitConnectionAlternative,
+        melem:SetscrewConnection,
+        melem:TaperedFitConnectionAlternative,
+        shigley10:shigley10-c-0045_threshold ;
+    ev:claimCondition "low torque transmission"@en ;
+    ev:claimIdentifier "shigley10-c-0045" ;
+    ev:claimObject "pins, setscrews in hubs, tapered fits and press fits"@en ;
+    ev:claimPredicate "may be achieved by"@en ;
+    ev:claimSubject "low torque transmission"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that for cases of low torque transmission various means of transmitting torque are available, including pins, setscrews in hubs, tapered fits and press fits."@en ;
+    ev:supportedByEvidence shigley10:es-0015 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0046 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0046" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:PressFitConnectionAlternative,
+        melem:ShrinkFitConnectionAlternative,
+        mech:LocateAxially ;
+    ev:claimIdentifier "shigley10-c-0046" ;
+    ev:claimObject "both torque transfer and axial location, with a usually quite small stress-concentration factor"@en ;
+    ev:claimPredicate "are used for"@en ;
+    ev:claimSubject "press and shrink fits"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that press and shrink fits for securing hubs to shafts are used both for torque transfer and for preserving axial location, and that the resulting stress-concentration factor is usually quite small."@en ;
+    ev:supportedByEvidence shigley10:es-0016 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0047 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0047" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:MaintainabilityRequirement,
+        melem:ClampingHubConnectionAlternative ;
+    ev:claimIdentifier "shigley10-c-0047" ;
+    ev:claimObject "disassembly and lateral adjustments"@en ;
+    ev:claimPredicate "allows"@en ;
+    ev:claimSubject "split hub clamped with screws"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that a split hub clamped to the shaft with screws allows for disassembly and lateral adjustments."@en ;
+    ev:supportedByEvidence shigley10:es-0017 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0048 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0048" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:TaperedFitConnectionAlternative,
+        mech:LocateAxially ;
+    ev:claimIdentifier "shigley10-c-0048" ;
+    ev:claimObject "does not provide good axial location of the mounted element"@en ;
+    ev:claimPredicate "permits disassembly but"@en ;
+    ev:claimSubject "tapered fit between shaft and mounted device"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that tapered fits, often used on the overhanging end of a shaft with a nut on a threaded shaft end, are useful because they can be disassembled, but do not provide good axial location of the wheel on the shaft."@en ;
+    ev:supportedByEvidence shigley10:es-0018 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0049 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0049" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:InterferenceFitConnection,
+        mech:Keyseat,
+        mech:Shoulder ;
+    ev:claimIdentifier "shigley10-c-0049" ;
+    ev:claimObject "minimise the need for shoulders and keyways"@en ;
+    ev:claimPredicate "can"@en ;
+    ev:claimSubject "interference fits"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that interference fits between a shaft and its components can sometimes be used effectively to minimise the need for shoulders and keyways."@en ;
+    ev:supportedByEvidence shigley10:es-0040 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0050 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0050" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:PressFitConnectionAlternative,
+        melem:ShrinkFitConnectionAlternative,
+        mech:FrictionTorqueCapacityCalculation,
+        mech:FrictionalLoadTransfer ;
+    ev:claimAssumption "A single representative coefficient of friction f, whose value the source does not fix here."@en,
+        "Capacity is the torque at the onset of gross slip, not a fatigue-rated capacity."@en,
+        "Uniform interface pressure over the full hub length."@en ;
+    ev:claimIdentifier "shigley10-c-0050" ;
+    ev:claimObject "a friction analysis giving T = (pi/2) f p l d^2"@en ;
+    ev:claimPredicate "is estimated by"@en ;
+    ev:claimSubject "torque capacity of an interference fit"@en ;
+    ev:claimTopic "substitution" ;
+    ev:concernsEquation shigley10:eq_n7-48,
+        shigley10:eq_n7-49 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that the torque an interference fit can transmit is estimated by a simple friction analysis at the interface, the friction force being the product of the coefficient of friction and the normal force, giving a torque capacity T = (pi/2) f p l d^2, where f is the coefficient of friction, p the interface pressure, l the hub length and d the nominal shaft diameter."@en ;
+    ev:supportedByEvidence shigley10:es-0041 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0051 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0051" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:ConnectionSlip,
+        mech:FrictionTorqueCapacityCalculation,
+        mech:InterferencePressureCalculation ;
+    ev:claimCondition "tolerances exist on both mating diameters"@en ;
+    ev:claimIdentifier "shigley10-c-0051" ;
+    ev:claimObject "the minimum interference, to obtain the minimum pressure and hence the maximum torque the joint may be designed to transmit without slipping"@en ;
+    ev:claimPredicate "must use"@en ;
+    ev:claimSubject "interference-fit torque capacity check"@en ;
+    ev:claimTopic "verification" ;
+    ev:concernsEquation shigley10:eq_n7-39,
+        shigley10:eq_n7-40,
+        shigley10:eq_n7-42,
+        shigley10:eq_n7-43 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that the minimum interference should be used to determine the minimum pressure, which in turn bounds the maximum torque the joint should be designed to transmit without slipping; the maximum interference is used instead to check for excessive stress."@en ;
+    ev:supportedByEvidence shigley10:es-0042,
+        shigley10:es-0045 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0052 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0052" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:PressFitConnectionAlternative,
+        mech:FatigueFracture,
+        mech:StressRaiser ;
+    ev:claimAssumption "Value is described as a first estimate, not a design value."@en ;
+    ev:claimCondition "shaft bending stress near the ends of the hub"@en ;
+    ev:claimIdentifier "shigley10-c-0052" ;
+    ev:claimObject "the shaft bending stress near the ends of the hub; first estimates are typically not greater than 2"@en ;
+    ev:claimPredicate "occurs in"@en ;
+    ev:claimQuantity shigley10:shigley10-c-0052_q0 ;
+    ev:claimSubject "stress concentration due to a press fit"@en ;
+    ev:claimTopic "verification" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that a press fit produces a stress-concentration effect in the shaft bending stress near the ends of the hub, due to the sudden change from compressed to uncompressed material, that hub geometry makes generalised values difficult to report, and that for first estimates values are typically not greater than 2."@en ;
+    ev:supportedByEvidence shigley10:es-0043,
+        shigley10:es-0044 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0060 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0060" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:ParallelKeyConnection,
+        mech:BearingCompressionFailure,
+        mech:BearingStressCheck,
+        mech:ShearFailure,
+        mech:ShearStressCheck,
+        shigley10:ex_n7-6 ;
+    ev:claimIdentifier "shigley10-c-0060" ;
+    ev:claimObject "direct shear or by bearing stress"@en ;
+    ev:claimPredicate "may occur by"@en ;
+    ev:claimSubject "key failure"@en ;
+    ev:claimTopic "verification" ;
+    ev:concernsTable shigley10:tab_n7-6 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that failure of a key can be by direct shear or by bearing stress, that the shaft diameter determines standard sizes for key width, height and depth, and that the designer chooses the key length to carry the torsional load."@en ;
+    ev:supportedByEvidence shigley10:es-0032 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0061 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0061" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:Keyseat,
+        mech:StressConcentrationAssessment ;
+    ev:claimIdentifier "shigley10-c-0061" ;
+    ev:claimObject "determine the critical locations for stress analysis"@en ;
+    ev:claimPredicate "must be known to"@en ;
+    ev:claimSubject "location of shaft discontinuities"@en ;
+    ev:claimTopic "verification" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that it is necessary to know where shaft discontinuities such as keyways, holes and splines will be, in order to determine the critical locations for analysis."@en ;
+    ev:supportedByEvidence shigley10:es-0019 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0062 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0062" ;
+    mdcore:analystNote "The numeric factors printed on this page fall in mathematics-font runs and the text layer of this PDF mis-maps them. The numbers are therefore NOT recorded as quantities in v0.1; only the structure of the claim is. They require transcription from the rendered page before use."@en ;
+    mdcore:requiresExternalAuthority mdcore:RequiresExternalStandard ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:Keyseat,
+        mech:StressConcentrationAssessment,
+        mech:StressRaiser ;
+    ev:claimAssumption "Values are taken by the source from an external stress-concentration reference, not derived."@en ;
+    ev:claimIdentifier "shigley10-c-0062" ;
+    ev:claimObject "published stress-concentration charts, as a function of the groove radius to shaft diameter ratio"@en ;
+    ev:claimPredicate "are cited from"@en ;
+    ev:claimSubject "stress-concentration factors for an end-milled keyseat"@en ;
+    ev:claimTopic "verification" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley cites published stress-concentration charts giving factors for an end-milled keyseat as a function of the ratio of the groove-bottom radius to the shaft diameter, with separate values for bending and for torsion, and with a further distinction for torsion with the key in place."@en ;
+    ev:supportedByEvidence shigley10:es-0038 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0070 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0070" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:LifeRequirement,
+        mdcore:ReliabilityRequirement,
+        melem:RollingContactBearing,
+        shigley10:std_ABMA__cited_without_a_standard_number ;
+    ev:claimIdentifier "shigley10-c-0070" ;
+    ev:claimObject "the number of revolutions, or hours at constant speed, that 90 percent of a group of nominally identical bearings will achieve or exceed before the failure criterion develops"@en ;
+    ev:claimPredicate "is defined as"@en ;
+    ev:claimQuantity shigley10:shigley10-c-0070_q0 ;
+    ev:claimSubject "rating life"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that the rating life, a term sanctioned by the ABMA and used by most manufacturers, is the number of revolutions or hours at constant speed that 90 percent of a group of nominally identical bearings will achieve or exceed before the failure criterion develops; it is the 10th percentile of the revolutions-to-failure distribution."@en ;
+    ev:supportedByEvidence shigley10:es-0050 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0071 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0071" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:LifeRequirement,
+        melem:RollingContactBearing ;
+    ev:claimIdentifier "shigley10-c-0071" ;
+    ev:claimObject "synonyms for rating life"@en ;
+    ev:claimPredicate "are"@en ;
+    ev:claimSubject "minimum life, L10 life and B10 life"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that the terms minimum life, L10 life and B10 life are used as synonyms for rating life."@en ;
+    ev:supportedByEvidence shigley10:es-0051 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0072 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0072" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:LifeRequirement,
+        melem:RollingContactBearing ;
+    ev:claimIdentifier "shigley10-c-0072" ;
+    ev:claimObject "between 4 and 5 times the L10 life"@en ;
+    ev:claimPredicate "is"@en ;
+    ev:claimQuantity shigley10:shigley10-c-0072_q0 ;
+    ev:claimSubject "median life"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that median life is the 50th percentile life of a group of bearings, that the term average life has been used as a synonym for it contributing to confusion, and that when many groups are tested the median life is between 4 and 5 times the L10 life."@en ;
+    ev:supportedByEvidence shigley10:es-0052 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0073 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0073" ;
+    mdcore:analystNote "Decisive for cross-source comparison: a load/life exponent is meaningless without the rating-life basis it is paired with."@en ;
+    mdcore:requiresExternalAuthority mdcore:RequiresManufacturerData ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:RollingContactBearing ;
+    ev:claimIdentifier "shigley10-c-0073" ;
+    ev:claimObject "one million revolutions, with named exceptions"@en ;
+    ev:claimPredicate "is most commonly"@en ;
+    ev:claimQuantity shigley10:shigley10-c-0073_q0,
+        shigley10:shigley10-c-0073_q1 ;
+    ev:claimSubject "manufacturers' rating life"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that each manufacturer chooses a specific rating life for which load ratings are reported, that the most commonly used rating life is 10^6 revolutions, and that at least one well-known manufacturer instead rates bearings at 3000 hours at 500 rev/min, equal to 90 million revolutions."@en ;
+    ev:supportedByEvidence shigley10:es-0053 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0074 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0074" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:BallBearing,
+        melem:CylindricalRollerBearing,
+        melem:RollerBearing,
+        melem:TaperedRollerBearing,
+        mech:BearingLifeCalculation ;
+    ev:claimAssumption "Reliability associated with the fitted load-life line is 0.90."@en ;
+    ev:claimIdentifier "shigley10-c-0074" ;
+    ev:claimObject "3 for ball bearings and 10/3 for cylindrical and tapered roller bearings"@en ;
+    ev:claimPredicate "takes the values"@en ;
+    ev:claimQuantity shigley10:shigley10-c-0074_q0,
+        shigley10:shigley10-c-0074_q1 ;
+    ev:claimSubject "load/life exponent a"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:concernsEquation shigley10:eq_n11-1 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that regression of many tests on the load-life relation F L^(1/a) = constant gives a = 3 for ball bearings and a = 10/3 for roller bearings, both cylindrical and tapered."@en ;
+    ev:supportedByEvidence shigley10:es-0054 ;
+    ev:textIntegrity "glyph-mismapped" .
+
+shigley10:c-0075 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0075" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:RollingContactBearing,
+        mech:BearingLifeCalculation ;
+    ev:claimIdentifier "shigley10-c-0075" ;
+    ev:claimObject "the radial load causing 10 percent of a group of bearings to fail at the manufacturer's rating life"@en ;
+    ev:claimPredicate "is defined as"@en ;
+    ev:claimSubject "catalog load rating C10"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that a catalog load rating, denoted C10, is the radial load that causes 10 percent of a group of bearings to fail at the manufacturer's rating life, and is often called the Basic Dynamic Load Rating when the rating life is one million revolutions."@en ;
+    ev:supportedByEvidence shigley10:es-0055 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0076 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0076" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:RollingContactBearing ;
+    ev:claimIdentifier "shigley10-c-0076" ;
+    ev:claimObject "a reference value, not an actual load to be achieved by a bearing"@en ;
+    ev:claimPredicate "should be viewed as"@en ;
+    ev:claimSubject "Basic Load Rating"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that the radial load necessary to cause failure at so low a life would be unrealistically high, and that the Basic Load Rating should consequently be viewed as a reference value rather than an actual load to be achieved by a bearing."@en ;
+    ev:supportedByEvidence shigley10:es-0056 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0077 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0077" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:SpaceRequirement,
+        melem:NeedleBearingAlternative ;
+    ev:claimCondition "radial space limited"@en ;
+    ev:claimIdentifier "shigley10-c-0077" ;
+    ev:claimObject "radial space is limited"@en ;
+    ev:claimPredicate "are useful where"@en ;
+    ev:claimSubject "needle bearings"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that needle bearings are very useful where radial space is limited, and have high load capacity when separators are used."@en ;
+    ev:supportedByEvidence shigley10:es-0057 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0078 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0078" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:SphericalRollerBearingAlternative,
+        mech:Misalignment,
+        shigley10:shigley10-c-0078_threshold ;
+    ev:claimCondition "heavy loads"@en,
+        "misalignment present"@en ;
+    ev:claimIdentifier "shigley10-c-0078" ;
+    ev:claimObject "heavy loads and misalignment occur"@en ;
+    ev:claimPredicate "is useful where"@en ;
+    ev:claimSubject "spherical roller thrust bearing"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that the spherical-roller thrust bearing is useful where heavy loads and misalignment occur, the spherical elements increasing their contact area as load increases."@en ;
+    ev:supportedByEvidence shigley10:es-0058 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:c-0079 a ev:NormalizedClaim ;
+    rdfs:label "shigley10-c-0079" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:TaperedRollerBearingAlternative,
+        mech:CarryRadialLoad,
+        mech:CarryThrustLoad ;
+    ev:claimIdentifier "shigley10-c-0079" ;
+    ev:claimObject "the advantages of ball and straight roller bearings, taking radial or thrust load or any combination"@en ;
+    ev:claimPredicate "combine"@en ;
+    ev:claimSubject "tapered roller bearings"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument shigley10:document ;
+    ev:normalizedStatement "Shigley states that tapered roller bearings combine the advantages of ball and straight roller bearings, since they can take radial or thrust loads or any combination of the two, and additionally have the high load-carrying capacity of straight roller bearings."@en ;
+    ev:supportedByEvidence shigley10:es-0059 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:edition a ev:BookEdition ;
+    rdfs:label "Shigley's Mechanical Engineering Design, 10th edition"@en ;
+    ev:editionLabel "10th" ;
+    ev:editionOrdinal 10 ;
+    ev:hasChapter shigley10:ch_n1,
+        shigley10:ch_n11,
+        shigley10:ch_n7 ;
+    ev:hasDocument shigley10:document ;
+    ev:publicationYear "2015"^^xsd:gYear ;
+    ev:publisher "McGraw-Hill Education" .
+
+shigley10:eq_n1-1 a ev:Equation ;
+    rdfs:label "shigley10 equation 1-1"@en ;
+    ev:equationNumber "1-1" ;
+    ev:explainedBySpan shigley10:es-0001 .
+
+shigley10:eq_n11-1 a ev:Equation ;
+    rdfs:label "shigley10 equation 11-1"@en ;
+    mdcore:analystNote "Values confirmed on the rendered page; this PDF's text layer renders them as 'a 5 3' and 'a 5 10y3'."@en ;
+    ev:equationNumber "11-1" ;
+    ev:explainedBySpan shigley10:es-0054 ;
+    ev:transcriptionSource "rendered-page-image" .
+
+shigley10:eq_n7-39 a ev:Equation ;
+    rdfs:label "shigley10 equation 7-39"@en ;
+    ev:equationNumber "7-39" ;
+    ev:explainedBySpan shigley10:es-0045 .
+
+shigley10:eq_n7-40 a ev:Equation ;
+    rdfs:label "shigley10 equation 7-40"@en ;
+    ev:equationNumber "7-40" ;
+    ev:explainedBySpan shigley10:es-0045 .
+
+shigley10:eq_n7-42 a ev:Equation ;
+    rdfs:label "shigley10 equation 7-42"@en ;
+    ev:equationNumber "7-42" .
+
+shigley10:eq_n7-43 a ev:Equation ;
+    rdfs:label "shigley10 equation 7-43"@en ;
+    ev:equationNumber "7-43" .
+
+shigley10:eq_n7-48 a ev:Equation ;
+    rdfs:label "shigley10 equation 7-48"@en ;
+    mdcore:analystNote "Transcribed from the rendered page because the PDF text layer mis-maps mathematics glyphs in this source."@en ;
+    ev:equationNumber "7-48" ;
+    ev:explainedBySpan shigley10:es-0041 ;
+    ev:transcriptionSource "rendered-page-image" .
+
+shigley10:eq_n7-49 a ev:Equation ;
+    rdfs:label "shigley10 equation 7-49"@en ;
+    mdcore:analystNote "Transcribed from the rendered page because the PDF text layer mis-maps mathematics glyphs in this source."@en ;
+    ev:equationNumber "7-49" ;
+    ev:explainedBySpan shigley10:es-0041 ;
+    ev:transcriptionSource "rendered-page-image" .
+
+shigley10:es-0002 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0002" ;
+    mdcore:analystNote "Shigley separates n_d (design factor, a priori) from n (factor of safety, as built). Mott uses a single N."@en ;
+    ev:blockIdentifier "shigley10/p40/b2" ;
+    ev:boundingBox "196.5,118.24,547.01,261.4" ;
+    ev:extractedText "A general approach to the allowable load versus loss-of-function load problem is the deterministic design factor method, and sometimes called the classical method of design. The fundamental equation is Eq. (1–1) where nd is called the design factor. All loss-offunction modes must be analyzed, and the mode leading to the smallest design factor governs. After the design is completed, the actual design factor may change as a result of changes such as rounding up to a standard …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n1 ;
+    ev:inSection shigley10:sec_n1-11 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx40 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0003 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0003" ;
+    ev:blockIdentifier "shigley10/p40/b2" ;
+    ev:boundingBox "196.5,118.24,547.01,261.4" ;
+    ev:extractedText "A general approach to the allowable load versus loss-of-function load problem is the deterministic design factor method, and sometimes called the classical method of design. The fundamental equation is Eq. (1–1) where nd is called the design factor. All loss-offunction modes must be analyzed, and the mode leading to the smallest design factor governs. After the design is completed, the actual design factor may change as a result of changes such as rounding up to a standard …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n1 ;
+    ev:inSection shigley10:sec_n1-11 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx40 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0005 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0005" ;
+    ev:blockIdentifier "shigley10/p41/b1" ;
+    ev:boundingBox "238.5,98.35,589.0,169.51" ;
+    ev:extractedText "of the many uncertainties associated with the loss-of-function modes. The reality is, the designer must attempt to account for the variance of all the factors that will affect the results. Then, the designer must rely on experience, company policies, and the many codes that may pertain to the application (e.g. the ASME Boiler and Pressure Vessel Code) to arrive at an appropriate design factor. An example might help clarify the intricacy of assigning a design factor."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n1 ;
+    ev:inSection shigley10:sec_n1-11 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx41 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0010 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0010" ;
+    ev:blockIdentifier "shigley10/p379/b1" ;
+    ev:boundingBox "238.5,98.35,589.01,457.51" ;
+    ev:extractedText "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component. Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission. They are typically used to transfer high torques. One feature of a spline is that it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx379 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0011 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0011" ;
+    mdcore:analystNote "Contrasts with Mott p.479 'The advantages of splines over keys are many'; preserved, not reconciled."@en ;
+    ev:blockIdentifier "shigley10/p379/b1" ;
+    ev:boundingBox "238.5,98.35,589.01,457.51" ;
+    ev:extractedText "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component. Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission. They are typically used to transfer high torques. One feature of a spline is that it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx379 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0012 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0012" ;
+    mdcore:analystNote "'High torque' left undefined by the source; no numeric threshold may be introduced."@en ;
+    ev:blockIdentifier "shigley10/p379/b1" ;
+    ev:boundingBox "238.5,98.35,589.01,457.51" ;
+    ev:extractedText "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component. Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission. They are typically used to transfer high torques. One feature of a spline is that it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx379 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0013 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0013" ;
+    ev:blockIdentifier "shigley10/p379/b1" ;
+    ev:boundingBox "238.5,98.35,589.01,457.51" ;
+    ev:extractedText "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component. Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission. They are typically used to transfer high torques. One feature of a spline is that it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx379 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0014 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0014" ;
+    ev:blockIdentifier "shigley10/p379/b1" ;
+    ev:boundingBox "238.5,98.35,589.01,457.51" ;
+    ev:extractedText "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component. Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission. They are typically used to transfer high torques. One feature of a spline is that it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx379 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0015 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0015" ;
+    mdcore:analystNote "Explicit condition ('low torque transmission') qualifying a set of alternatives."@en ;
+    ev:blockIdentifier "shigley10/p379/b1" ;
+    ev:boundingBox "238.5,98.35,589.01,457.51" ;
+    ev:extractedText "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component. Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission. They are typically used to transfer high torques. One feature of a spline is that it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx379 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0016 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0016" ;
+    ev:blockIdentifier "shigley10/p379/b1" ;
+    ev:boundingBox "238.5,98.35,589.01,457.51" ;
+    ev:extractedText "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component. Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission. They are typically used to transfer high torques. One feature of a spline is that it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx379 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0017 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0017" ;
+    ev:blockIdentifier "shigley10/p379/b1" ;
+    ev:boundingBox "238.5,98.35,589.01,457.51" ;
+    ev:extractedText "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component. Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission. They are typically used to transfer high torques. One feature of a spline is that it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx379 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0018 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0018" ;
+    mdcore:analystNote "Concerns tapered fits."@en ;
+    ev:blockIdentifier "shigley10/p379/b1" ;
+    ev:boundingBox "238.5,98.35,589.01,457.51" ;
+    ev:extractedText "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component. Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission. They are typically used to transfer high torques. One feature of a spline is that it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx379 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0019 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0019" ;
+    ev:blockIdentifier "shigley10/p379/b1" ;
+    ev:boundingBox "238.5,98.35,589.01,457.51" ;
+    ev:extractedText "Splines are essentially stubby gear teeth formed on the outside of the shaft and on the inside of the hub of the load-transmitting component. Splines are generally much more expensive to manufacture than keys, and are usually not necessary for simple torque transmission. They are typically used to transfer high torques. One feature of a spline is that it can be made with a reasonably loose slip fit to allow for large axial motion between the shaft and component while still …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx379 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0020 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0020" ;
+    ev:blockIdentifier "shigley10/p402/b37" ;
+    ev:boundingBox "196.5,610.82,547.01,697.4" ;
+    ev:extractedText "Setscrews Unlike bolts and cap screws, which depend on tension to develop a clamping force, the setscrew depends on compression to develop the clamping force. The resistance to axial motion of the collar or hub relative to the shaft is called holding power. This holding power, which is really a force resistance, is due to frictional resistance of the contacting portions of the collar and shaft as well as any slight penetration of the setscrew into the shaft."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx402 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0021 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0021" ;
+    ev:blockIdentifier "shigley10/p402/b37" ;
+    ev:boundingBox "196.5,610.82,547.01,697.4" ;
+    ev:extractedText "Setscrews Unlike bolts and cap screws, which depend on tension to develop a clamping force, the setscrew depends on compression to develop the clamping force. The resistance to axial motion of the collar or hub relative to the shaft is called holding power. This holding power, which is really a force resistance, is due to frictional resistance of the contacting portions of the collar and shaft as well as any slight penetration of the setscrew into the shaft."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx402 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0023 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0023" ;
+    ev:blockIdentifier "shigley10/p404/b1" ;
+    ev:boundingBox "196.5,98.35,547.01,145.51" ;
+    ev:extractedText "resisting thrust, and the tangential holding power, for resisting torsion. Typical factors of safety are 1.5 to 2.0 for static loads and 4 to 8 for various dynamic loads. Setscrews should have a length of about half of the shaft diameter. Note that this practice also provides a rough rule for the radial thickness of a hub or collar."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx404 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0031 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0031" ;
+    ev:blockIdentifier "shigley10/p404/b2" ;
+    ev:boundingBox "196.5,154.93,547.0,265.51" ;
+    ev:extractedText "Keys and Pins Keys and pins are used on shafts to secure rotating elements, such as gears, pulleys, or other wheels. Keys are used to enable the transmission of torque from the shaft to the shaft-supported element. Pins are used for axial positioning and for the transfer of torque or thrust or both. Figure 7–16 shows a variety of keys and pins. Pins are useful when the principal loading is shear and when both torsion and thrust are present. Taper pins are sized according to …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx404 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0033 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0033" ;
+    ev:blockIdentifier "shigley10/p405/b2" ;
+    ev:boundingBox "238.5,455.95,589.03,647.11" ;
+    ev:extractedText "The square key, shown in Fig. 7–16a, is also available in rectangular sizes. Standard sizes of these, together with the range of applicable shaft diameters, are listed in Table 7–6. The shaft diameter determines standard sizes for width, height, and key depth. The designer chooses an appropriate key length to carry the torsional load. Failure of the key can be by direct shear, or by bearing stress. Example 7–6 demonstrates the process to size the length of a key. The maximum …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx405 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0034 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0034" ;
+    ev:blockIdentifier "shigley10/p405/b2" ;
+    ev:boundingBox "238.5,455.95,589.03,647.11" ;
+    ev:extractedText "The square key, shown in Fig. 7–16a, is also available in rectangular sizes. Standard sizes of these, together with the range of applicable shaft diameters, are listed in Table 7–6. The shaft diameter determines standard sizes for width, height, and key depth. The designer chooses an appropriate key length to carry the torsional load. Failure of the key can be by direct shear, or by bearing stress. Example 7–6 demonstrates the process to size the length of a key. The maximum …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx405 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0035 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0035" ;
+    mdcore:analystNote "In tension with Mott's design-procedure recommendation of N=3 for accidental overloads and shock. Preserved as a differing design intent."@en ;
+    ev:blockIdentifier "shigley10/p405/b2" ;
+    ev:boundingBox "238.5,455.95,589.03,647.11" ;
+    ev:extractedText "The square key, shown in Fig. 7–16a, is also available in rectangular sizes. Standard sizes of these, together with the range of applicable shaft diameters, are listed in Table 7–6. The shaft diameter determines standard sizes for width, height, and key depth. The designer chooses an appropriate key length to carry the torsional load. Failure of the key can be by direct shear, or by bearing stress. Example 7–6 demonstrates the process to size the length of a key. The maximum …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx405 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0036 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0036" ;
+    ev:blockIdentifier "shigley10/p405/b2" ;
+    ev:boundingBox "238.5,455.95,589.03,647.11" ;
+    ev:extractedText "The square key, shown in Fig. 7–16a, is also available in rectangular sizes. Standard sizes of these, together with the range of applicable shaft diameters, are listed in Table 7–6. The shaft diameter determines standard sizes for width, height, and key depth. The designer chooses an appropriate key length to carry the torsional load. Failure of the key can be by direct shear, or by bearing stress. Example 7–6 demonstrates the process to size the length of a key. The maximum …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx405 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0037 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0037" ;
+    ev:blockIdentifier "shigley10/p406/b1" ;
+    ev:boundingBox "196.5,374.75,547.03,650.65" ;
+    ev:extractedText "The gib-head key, in Fig. 7–17a, is tapered so that, when firmly driven, it acts to prevent relative axial motion. This also gives the advantage that the hub position can be adjusted for the best axial location. The head makes removal possible without access to the other end, but the projection may be hazardous. The Woodruff key, shown in Fig. 7–17b, is of general usefulness, especially when a wheel is to be positioned against a shaft shoulder, since the keyslot need not be …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0032 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx406 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0038 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0038" ;
+    mdcore:analystNote "Numeric stress-concentration factors on this page sit in mathematics-font runs; values must be read from the rendered page, not the text layer."@en ;
+    ev:blockIdentifier "shigley10/p406/b1" ;
+    ev:boundingBox "196.5,374.75,547.03,650.65" ;
+    ev:extractedText "The gib-head key, in Fig. 7–17a, is tapered so that, when firmly driven, it acts to prevent relative axial motion. This also gives the advantage that the hub position can be adjusted for the best axial location. The head makes removal possible without access to the other end, but the projection may be hazardous. The Woodruff key, shown in Fig. 7–17b, is of general usefulness, especially when a wheel is to be positioned against a shaft shoulder, since the keyslot need not be …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0032 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx406 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0039 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0039" ;
+    ev:blockIdentifier "shigley10/p406/b1" ;
+    ev:boundingBox "196.5,374.75,547.03,650.65" ;
+    ev:extractedText "The gib-head key, in Fig. 7–17a, is tapered so that, when firmly driven, it acts to prevent relative axial motion. This also gives the advantage that the hub position can be adjusted for the best axial location. The head makes removal possible without access to the other end, but the projection may be hazardous. The Woodruff key, shown in Fig. 7–17b, is of general usefulness, especially when a wheel is to be positioned against a shaft shoulder, since the keyslot need not be …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0032 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx406 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0040 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0040" ;
+    ev:blockIdentifier "shigley10/p412/b1" ;
+    ev:boundingBox "196.5,599.05,547.01,697.63" ;
+    ev:extractedText "Stress and Torque Capacity in Interference Fits Interference fits between a shaft and its components can sometimes be used effectively to minimize the need for shoulders and keyways. The stresses due to an interference fit can be obtained by treating the shaft as a cylinder with a uniform external pressure, and the hub as a hollow cylinder with a uniform internal pressure. Stress equations for these situations were developed in Sec. 3–16, and will be converted here from …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-8 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx412 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0042 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0042" ;
+    ev:blockIdentifier "shigley10/p414/b7" ;
+    ev:boundingBox "196.5,320.35,547.01,355.51" ;
+    ev:extractedText "The minimum interference, from Eq. (7–42), should be used to determine the minimum pressure to check for the maximum amount of torque that the joint should be designed to transmit without slipping."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx414 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0043 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0043" ;
+    ev:blockIdentifier "shigley10/p414/b1" ;
+    ev:boundingBox "196.5,98.35,547.01,230.56" ;
+    ev:extractedText "the shaft analysis by ignoring the steady compressive stresses due to the press fit. There is, however, a stress concentration effect in the shaft bending stress near the ends of the hub, due to the sudden change from compressed to uncompressed material. The design of the hub geometry, and therefore its uniformity and rigidity, can have a significant effect on the specific value of the stress-concentration factor, making it difficult to report generalized values. For first …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx414 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0044 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0044" ;
+    ev:blockIdentifier "shigley10/p414/b1" ;
+    ev:boundingBox "196.5,98.35,547.01,230.56" ;
+    ev:extractedText "the shaft analysis by ignoring the steady compressive stresses due to the press fit. There is, however, a stress concentration effect in the shaft bending stress near the ends of the hub, due to the sudden change from compressed to uncompressed material. The design of the hub geometry, and therefore its uniformity and rigidity, can have a significant effect on the specific value of the stress-concentration factor, making it difficult to report generalized values. For first …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx414 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0050 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0050" ;
+    ev:blockIdentifier "shigley10/p588/b1" ;
+    ev:boundingBox "196.5,98.35,547.01,277.51" ;
+    ev:extractedText "The rating life is a term sanctioned by the ABMA and used by most manufacturers. The rating life of a group of nominally identical ball or roller bearings is defined as the number of revolutions (or hours at a constant speed) that 90 percent of a group of bearings will achieve or exceed before the failure criterion develops. The terms minimum life, L10 life, and B10 life are also used as synonyms for rating life. The rating life is the 10th percentile location of the bearing …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n11 ;
+    ev:inSection shigley10:sec_n11-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx588 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0051 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0051" ;
+    ev:blockIdentifier "shigley10/p588/b1" ;
+    ev:boundingBox "196.5,98.35,547.01,277.51" ;
+    ev:extractedText "The rating life is a term sanctioned by the ABMA and used by most manufacturers. The rating life of a group of nominally identical ball or roller bearings is defined as the number of revolutions (or hours at a constant speed) that 90 percent of a group of bearings will achieve or exceed before the failure criterion develops. The terms minimum life, L10 life, and B10 life are also used as synonyms for rating life. The rating life is the 10th percentile location of the bearing …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n11 ;
+    ev:inSection shigley10:sec_n11-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx588 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0052 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0052" ;
+    ev:blockIdentifier "shigley10/p588/b1" ;
+    ev:boundingBox "196.5,98.35,547.01,277.51" ;
+    ev:extractedText "The rating life is a term sanctioned by the ABMA and used by most manufacturers. The rating life of a group of nominally identical ball or roller bearings is defined as the number of revolutions (or hours at a constant speed) that 90 percent of a group of bearings will achieve or exceed before the failure criterion develops. The terms minimum life, L10 life, and B10 life are also used as synonyms for rating life. The rating life is the 10th percentile location of the bearing …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n11 ;
+    ev:inSection shigley10:sec_n11-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx588 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0053 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0053" ;
+    ev:blockIdentifier "shigley10/p588/b1" ;
+    ev:boundingBox "196.5,98.35,547.01,277.51" ;
+    ev:extractedText "The rating life is a term sanctioned by the ABMA and used by most manufacturers. The rating life of a group of nominally identical ball or roller bearings is defined as the number of revolutions (or hours at a constant speed) that 90 percent of a group of bearings will achieve or exceed before the failure criterion develops. The terms minimum life, L10 life, and B10 life are also used as synonyms for rating life. The rating life is the 10th percentile location of the bearing …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n11 ;
+    ev:inSection shigley10:sec_n11-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx588 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0055 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0055" ;
+    ev:blockIdentifier "shigley10/p588/b7" ;
+    ev:boundingBox "196.49,457.35,547.0,540.51" ;
+    ev:extractedText "A catalog load rating is defined as the radial load that causes 10 percent of a group of bearings to fail at the bearing manufacturer’s rating life. We shall denote the catalog load rating as C10. The catalog load rating is often referred to as a Basic Dynamic Load Rating, or sometimes just Basic Load Rating, if the manufacturer’s rating life is 106 revolutions. The radial load that would be necessary to cause failure at such a low life would be unrealistically high. …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n11 ;
+    ev:inSection shigley10:sec_n11-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx588 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0056 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0056" ;
+    ev:blockIdentifier "shigley10/p588/b7" ;
+    ev:boundingBox "196.49,457.35,547.0,540.51" ;
+    ev:extractedText "A catalog load rating is defined as the radial load that causes 10 percent of a group of bearings to fail at the bearing manufacturer’s rating life. We shall denote the catalog load rating as C10. The catalog load rating is often referred to as a Basic Dynamic Load Rating, or sometimes just Basic Load Rating, if the manufacturer’s rating life is 106 revolutions. The radial load that would be necessary to cause failure at such a low life would be unrealistically high. …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n11 ;
+    ev:inSection shigley10:sec_n11-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx588 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0057 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0057" ;
+    ev:blockIdentifier "shigley10/p587/b1" ;
+    ev:boundingBox "238.5,98.35,589.05,265.51" ;
+    ev:extractedText "The spherical-roller thrust bearing (Fig. 11–3b) is useful where heavy loads and misalignment occur. The spherical elements have the advantage of increasing their contact area as the load is increased. Needle bearings (Fig. 11–3d) are very useful where radial space is limited. They have a high load capacity when separators are used, but may be obtained without separators. They are furnished both with and without races. Tapered roller bearings (Fig. 11–3e, f ) combine the …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n11 ;
+    ev:inSection shigley10:sec_n11-2 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx587 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0058 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0058" ;
+    ev:blockIdentifier "shigley10/p587/b1" ;
+    ev:boundingBox "238.5,98.35,589.05,265.51" ;
+    ev:extractedText "The spherical-roller thrust bearing (Fig. 11–3b) is useful where heavy loads and misalignment occur. The spherical elements have the advantage of increasing their contact area as the load is increased. Needle bearings (Fig. 11–3d) are very useful where radial space is limited. They have a high load capacity when separators are used, but may be obtained without separators. They are furnished both with and without races. Tapered roller bearings (Fig. 11–3e, f ) combine the …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n11 ;
+    ev:inSection shigley10:sec_n11-2 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx587 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0059 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0059" ;
+    ev:blockIdentifier "shigley10/p587/b1" ;
+    ev:boundingBox "238.5,98.35,589.05,265.51" ;
+    ev:extractedText "The spherical-roller thrust bearing (Fig. 11–3b) is useful where heavy loads and misalignment occur. The spherical elements have the advantage of increasing their contact area as the load is increased. Needle bearings (Fig. 11–3d) are very useful where radial space is limited. They have a high load capacity when separators are used, but may be obtained without separators. They are furnished both with and without races. Tapered roller bearings (Fig. 11–3e, f ) combine the …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n11 ;
+    ev:inSection shigley10:sec_n11-2 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx587 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:ex_n7-6 a ev:ExampleProblem ;
+    rdfs:label "shigley10 example 7-6"@en ;
+    ev:exampleNumber "7-6" ;
+    ev:explainedBySpan shigley10:es-0032 .
+
+shigley10:fig_n7-16 a ev:Figure ;
+    rdfs:label "shigley10 figure 7-16"@en ;
+    ev:explainedBySpan shigley10:es-0030 ;
+    ev:figureNumber "7-16" .
+
+shigley10:page_idx41 a ev:Page ;
+    rdfs:label "shigley10 p. 19 (pdf index 41)"@en ;
+    ev:pageLabel "19" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 41 ;
+    ev:pdfPageNumber 42 ;
+    ev:printedPage "19" .
+
+shigley10:page_idx412 a ev:Page ;
+    rdfs:label "shigley10 p. 390 (pdf index 412)"@en ;
+    ev:pageLabel "390" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 412 ;
+    ev:pdfPageNumber 413 ;
+    ev:printedPage "390" .
+
+shigley10:page_idx413 a ev:Page ;
+    rdfs:label "shigley10 p. 391 (pdf index 413)"@en ;
+    ev:pageLabel "391" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 413 ;
+    ev:pdfPageNumber 414 ;
+    ev:printedPage "391" .
+
+shigley10:shigley10-c-0022_q0 a mdcore:QuantityValue ;
+    rdfs:label "ratio of maximum key length to shaft diameter"@en ;
+    mdcore:numericValue 1.5 ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "about 1.5 times" ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0023_q0 a mdcore:QuantityValue ;
+    rdfs:label "typical angular spacing of multiple keys"@en ;
+    mdcore:numericValue 90.0 ;
+    mdcore:originalUnit "degrees" ;
+    mdcore:originalValue "90" ;
+    mdcore:unitSymbol "degree" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0026_threshold a mdcore:ThresholdDefinition ;
+    rdfs:label "threshold for 'high speed'"@en ;
+    mdcore:definesTerm "high speed" ;
+    mdcore:thresholdIsUniversal false ;
+    mdcore:thresholdScopeNote "The source gives no numeric speed boundary; none may be introduced."@en .
+
+shigley10:shigley10-c-0029_q0 a mdcore:QuantityValue ;
+    rdfs:label "factor of safety, static loads"@en ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "1.5 to 2.0" ;
+    mdcore:rangeMaximum 2.0 ;
+    mdcore:rangeMinimum 1.5 ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueIsRange true ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0029_q1 a mdcore:QuantityValue ;
+    rdfs:label "factor of safety, dynamic loads"@en ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "4 to 8" ;
+    mdcore:rangeMaximum 8.0 ;
+    mdcore:rangeMinimum 4.0 ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueIsRange true ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0030_q0 a mdcore:QuantityValue ;
+    rdfs:label "ratio of setscrew length to shaft diameter"@en ;
+    mdcore:numericValue 0.5 ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "about half" ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0042_threshold a mdcore:ThresholdDefinition ;
+    rdfs:label "threshold for 'high torque'"@en ;
+    mdcore:definesTerm "high torque" ;
+    mdcore:thresholdIsUniversal false ;
+    mdcore:thresholdScopeNote "The source gives no numeric torque boundary; none may be introduced."@en .
+
+shigley10:shigley10-c-0045_threshold a mdcore:ThresholdDefinition ;
+    rdfs:label "threshold for 'low torque'"@en ;
+    mdcore:definesTerm "low torque" ;
+    mdcore:thresholdIsUniversal false ;
+    mdcore:thresholdScopeNote "The source gives no numeric torque boundary; none may be introduced."@en .
+
+shigley10:shigley10-c-0052_q0 a mdcore:QuantityValue ;
+    rdfs:label "press-fit stress-concentration factor, first estimate upper bound"@en ;
+    mdcore:numericValue 2.0 ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "not greater than 2" ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0070_q0 a mdcore:QuantityValue ;
+    rdfs:label "survival fraction defining rating life"@en ;
+    mdcore:numericValue 90.0 ;
+    mdcore:originalUnit "percent" ;
+    mdcore:originalValue "90" ;
+    mdcore:unitSymbol "percent" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0072_q0 a mdcore:QuantityValue ;
+    rdfs:label "ratio of median life to L10 life"@en ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "between 4 and 5 times" ;
+    mdcore:rangeMaximum 5.0 ;
+    mdcore:rangeMinimum 4.0 ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueIsRange true ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0073_q0 a mdcore:QuantityValue ;
+    rdfs:label "most common catalogue rating life"@en ;
+    mdcore:numericValue 1000000.0 ;
+    mdcore:originalUnit "revolutions" ;
+    mdcore:originalValue "10^6" ;
+    mdcore:unitSymbol "revolution" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0073_q1 a mdcore:QuantityValue ;
+    rdfs:label "named alternative rating life"@en ;
+    mdcore:numericValue 90000000.0 ;
+    mdcore:originalUnit "revolutions" ;
+    mdcore:originalValue "90(10^6)" ;
+    mdcore:unitSymbol "revolution" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0074_q0 a mdcore:QuantityValue ;
+    rdfs:label "load/life exponent, ball bearings"@en ;
+    mdcore:numericValue 3.0 ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "3" ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0074_q1 a mdcore:QuantityValue ;
+    rdfs:label "load/life exponent, roller bearings"@en ;
+    mdcore:conversionMethod "exact fraction 10/3 evaluated to 10 decimal places; the source prints the fraction, not a decimal"@en ;
+    mdcore:numericValue 3.3333333333 ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "10/3" ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+shigley10:shigley10-c-0078_threshold a mdcore:ThresholdDefinition ;
+    rdfs:label "threshold for 'heavy load'"@en ;
+    mdcore:definesTerm "heavy load" ;
+    mdcore:thresholdIsUniversal false ;
+    mdcore:thresholdScopeNote "The source gives no numeric load boundary; none may be introduced."@en .
+
+shigley10:std_ABMA__cited_without_a_standard_number a ev:Standard ;
+    rdfs:label "ABMA (cited without a standard number)"@en .
+
+shigley10:std_ANSI_spline_standards a ev:Standard ;
+    rdfs:label "ANSI spline standards"@en .
+
+shigley10:std_SAE_spline_standards a ev:Standard ;
+    rdfs:label "SAE spline standards"@en .
+
+shigley10:tab_n7-4 a ev:Table ;
+    rdfs:label "shigley10 table 7-4"@en ;
+    ev:explainedBySpan shigley10:es-0022 ;
+    ev:tableNumber "7-4" .
+
+shigley10:tab_n7-6 a ev:Table ;
+    rdfs:label "shigley10 table 7-6"@en ;
+    ev:explainedBySpan shigley10:es-0032 ;
+    ev:tableNumber "7-6" .
+
+shigley10:eq_n1-3 a ev:Equation ;
+    rdfs:label "shigley10 equation 1-3"@en ;
+    ev:equationNumber "1-3" ;
+    ev:explainedBySpan shigley10:es-0004 .
+
+shigley10:es-0001 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0001" ;
+    ev:blockIdentifier "shigley10/p40/b2" ;
+    ev:boundingBox "196.5,118.24,547.01,261.4" ;
+    ev:extractedText "A general approach to the allowable load versus loss-of-function load problem is the deterministic design factor method, and sometimes called the classical method of design. The fundamental equation is Eq. (1–1) where nd is called the design factor. All loss-offunction modes must be analyzed, and the mode leading to the smallest design factor governs. After the design is completed, the actual design factor may change as a result of changes such as rounding up to a standard …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n1 ;
+    ev:inSection shigley10:sec_n1-11 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx40 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0004 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0004" ;
+    ev:blockIdentifier "shigley10/p40/b6" ;
+    ev:boundingBox "196.5,300.24,546.98,323.4" ;
+    ev:extractedText "The stress and strength terms in Eq. (1–3) must be of the same type and units. Also, the stress and strength must apply to the same critical location in the part."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n1 ;
+    ev:inSection shigley10:sec_n1-11 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx40 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0022 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0022" ;
+    ev:blockIdentifier "shigley10/p404/b1" ;
+    ev:boundingBox "196.5,98.35,547.01,145.51" ;
+    ev:extractedText "resisting thrust, and the tangential holding power, for resisting torsion. Typical factors of safety are 1.5 to 2.0 for static loads and 4 to 8 for various dynamic loads. Setscrews should have a length of about half of the shaft diameter. Note that this practice also provides a rough rule for the radial thickness of a hub or collar."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx404 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0030 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0030" ;
+    ev:blockIdentifier "shigley10/p404/b2" ;
+    ev:boundingBox "196.5,154.93,547.0,265.51" ;
+    ev:extractedText "Keys and Pins Keys and pins are used on shafts to secure rotating elements, such as gears, pulleys, or other wheels. Keys are used to enable the transmission of torque from the shaft to the shaft-supported element. Pins are used for axial positioning and for the transfer of torque or thrust or both. Figure 7–16 shows a variety of keys and pins. Pins are useful when the principal loading is shear and when both torsion and thrust are present. Taper pins are sized according to …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx404 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0054 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0054" ;
+    mdcore:analystNote "Exponent values on this page are set in mathematics fonts; read from the rendered page."@en ;
+    ev:blockIdentifier "shigley10/p588/b6" ;
+    ev:boundingBox "196.5,424.35,453.34,451.25" ;
+    ev:extractedText "• a 5 3 for ball bearings • a 5 10y3 for roller bearings (cylindrical and tapered roller)"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n11 ;
+    ev:inSection shigley10:sec_n11-3 ;
+    ev:mathFontCharRatio 0.0341 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx588 ;
+    ev:textIntegrity "glyph-mismapped" .
+
+shigley10:page_idx402 a ev:Page ;
+    rdfs:label "shigley10 p. 380 (pdf index 402)"@en ;
+    ev:pageLabel "380" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 402 ;
+    ev:pdfPageNumber 403 ;
+    ev:printedPage "380" .
+
+shigley10:es-0032 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0032" ;
+    ev:blockIdentifier "shigley10/p405/b2" ;
+    ev:boundingBox "238.5,455.95,589.03,647.11" ;
+    ev:extractedText "The square key, shown in Fig. 7–16a, is also available in rectangular sizes. Standard sizes of these, together with the range of applicable shaft diameters, are listed in Table 7–6. The shaft diameter determines standard sizes for width, height, and key depth. The designer chooses an appropriate key length to carry the torsional load. Failure of the key can be by direct shear, or by bearing stress. Example 7–6 demonstrates the process to size the length of a key. The maximum …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx405 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0041 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0041" ;
+    ev:blockIdentifier "shigley10/p414/b1" ;
+    ev:boundingBox "196.5,98.35,547.01,230.56" ;
+    ev:extractedText "the shaft analysis by ignoring the steady compressive stresses due to the press fit. There is, however, a stress concentration effect in the shaft bending stress near the ends of the hub, due to the sudden change from compressed to uncompressed material. The design of the hub geometry, and therefore its uniformity and rigidity, can have a significant effect on the specific value of the stress-concentration factor, making it difficult to report generalized values. For first …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx414 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:es-0045 a ev:EvidenceSpan ;
+    rdfs:label "shigley10-es-0045" ;
+    ev:blockIdentifier "shigley10/p413/b16" ;
+    ev:boundingBox "238.5,306.85,589.01,342.01" ;
+    ev:extractedText "Since there will be tolerances on both diameters, the maximum and minimum pressures can be found by applying the maximum and minimum interferences. Adopting the notation from Fig. 7–20, we write"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter shigley10:ch_n7 ;
+    ev:inSection shigley10:sec_n7-8 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument shigley10:document ;
+    ev:spanOnPage shigley10:page_idx413 ;
+    ev:textIntegrity "reliable" .
+
+shigley10:page_idx406 a ev:Page ;
+    rdfs:label "shigley10 p. 384 (pdf index 406)"@en ;
+    ev:pageLabel "384" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 406 ;
+    ev:pdfPageNumber 407 ;
+    ev:printedPage "384" .
+
+shigley10:page_idx587 a ev:Page ;
+    rdfs:label "shigley10 p. 565 (pdf index 587)"@en ;
+    ev:pageLabel "565" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 587 ;
+    ev:pdfPageNumber 588 ;
+    ev:printedPage "565" .
+
+shigley10:sec_n7-8 a ev:Section ;
+    rdfs:label "shigley10 sec. 7-8: Limits and Fits"@en ;
+    ev:sectionNumber "7-8" ;
+    ev:sectionTitle "Limits and Fits"@en .
+
+shigley10:page_idx40 a ev:Page ;
+    rdfs:label "shigley10 p. 18 (pdf index 40)"@en ;
+    ev:pageLabel "18" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 40 ;
+    ev:pdfPageNumber 41 ;
+    ev:printedPage "18" .
+
+shigley10:page_idx404 a ev:Page ;
+    rdfs:label "shigley10 p. 382 (pdf index 404)"@en ;
+    ev:pageLabel "382" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 404 ;
+    ev:pdfPageNumber 405 ;
+    ev:printedPage "382" .
+
+shigley10:page_idx414 a ev:Page ;
+    rdfs:label "shigley10 p. 392 (pdf index 414)"@en ;
+    ev:pageLabel "392" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 414 ;
+    ev:pdfPageNumber 415 ;
+    ev:printedPage "392" .
+
+shigley10:sec_n11-2 a ev:Section ;
+    rdfs:label "shigley10 sec. 11-2: Bearing Life"@en ;
+    ev:sectionNumber "11-2" ;
+    ev:sectionTitle "Bearing Life"@en .
+
+shigley10:page_idx405 a ev:Page ;
+    rdfs:label "shigley10 p. 383 (pdf index 405)"@en ;
+    ev:pageLabel "383" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 405 ;
+    ev:pdfPageNumber 406 ;
+    ev:printedPage "383" .
+
+shigley10:ch_n1 a ev:Chapter ;
+    rdfs:label "shigley10 ch. 1: Introduction to Mechanical Engineering Design"@en ;
+    ev:chapterNumber "1" ;
+    ev:chapterTitle "Introduction to Mechanical Engineering Design"@en ;
+    ev:hasSection shigley10:sec_n1-11 .
+
+shigley10:sec_n1-11 a ev:Section ;
+    rdfs:label "shigley10 sec. 1-11: Design Factor and Factor of Safety"@en ;
+    ev:sectionNumber "1-11" ;
+    ev:sectionTitle "Design Factor and Factor of Safety"@en .
+
+shigley10:page_idx588 a ev:Page ;
+    rdfs:label "shigley10 p. 566 (pdf index 588)"@en ;
+    ev:pageLabel "566" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 588 ;
+    ev:pdfPageNumber 589 ;
+    ev:printedPage "566" .
+
+shigley10:sec_n11-3 a ev:Section ;
+    rdfs:label "shigley10 sec. 11-3: Bearing Load Life at Rated Reliability"@en ;
+    ev:sectionNumber "11-3" ;
+    ev:sectionTitle "Bearing Load Life at Rated Reliability"@en .
+
+shigley10:page_idx379 a ev:Page ;
+    rdfs:label "shigley10 p. 357 (pdf index 379)"@en ;
+    ev:pageLabel "357" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument shigley10:document ;
+    ev:pdfPageIndex 379 ;
+    ev:pdfPageNumber 380 ;
+    ev:printedPage "357" .
+
+shigley10:ch_n11 a ev:Chapter ;
+    rdfs:label "shigley10 ch. 11: Rolling-Contact Bearings"@en ;
+    ev:chapterNumber "11" ;
+    ev:chapterTitle "Rolling-Contact Bearings"@en ;
+    ev:hasSection shigley10:sec_n11-2,
+        shigley10:sec_n11-3 .
+
+shigley10:sec_n7-3 a ev:Section ;
+    rdfs:label "shigley10 sec. 7-3: Shaft Layout"@en ;
+    ev:sectionNumber "7-3" ;
+    ev:sectionTitle "Shaft Layout"@en .
+
+shigley10:sec_n7-7 a ev:Section ;
+    rdfs:label "shigley10 sec. 7-7: Miscellaneous Shaft Components"@en ;
+    ev:sectionNumber "7-7" ;
+    ev:sectionTitle "Miscellaneous Shaft Components"@en .
+
+shigley10:ch_n7 a ev:Chapter ;
+    rdfs:label "shigley10 ch. 7: Shafts and Shaft Components"@en ;
+    ev:chapterNumber "7" ;
+    ev:chapterTitle "Shafts and Shaft Components"@en ;
+    ev:hasSection shigley10:sec_n7-3,
+        shigley10:sec_n7-7,
+        shigley10:sec_n7-8 .
+
+shigley10:document a ev:SourceDocument ;
+    rdfs:label "ad7608c18e740b0e402c025fa3187de8.pdf" ;
+    ev:pageCount 1105 ;
+    ev:sha256 "d6bf6ca2206d12a2986e7378a89e0fd2f3a9d41c8cec211158a1ac5698b89d91" ;
+    ev:sourceFileName "ad7608c18e740b0e402c025fa3187de8.pdf" ;
+    ev:textIntegrity "corrupted" .
+

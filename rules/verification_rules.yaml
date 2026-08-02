@@ -1,0 +1,235 @@
+# ---------------------------------------------------------------------------
+# Verification rules  --  what must be checked, and what the books do not supply
+#
+# The distinctive obligation of this file is honesty about gaps.  Where a
+# source recommends a test without defining one, the rule records
+# test_recommended: true alongside test_procedure_specified: false and
+# acceptance_criterion_specified: false, and names the external authority that
+# would have to close it.  It never invents a procedure, a load level, a cycle
+# count or an acceptance limit.
+# ---------------------------------------------------------------------------
+
+version: "0.1.0"
+
+rules:
+
+  - id: VER-001
+    kind: VerificationRule
+    title: "A key connection requires both a shear check and a bearing check"
+    statement: >-
+      Any parallel key connection must be checked for direct shear and for
+      bearing (compressive) stress. Where the two give different required
+      lengths, the larger governs.
+    applies_to:
+      alternatives: ["melem:ParallelKeyConnection", "melem:MultipleKeyConnection"]
+    requires_verification:
+      - method: "mech:ShearStressCheck"
+        addresses_failure_mode: "mech:ShearFailure"
+        equations: ["mott6:11-1", "mott6:11-2"]
+      - method: "mech:BearingStressCheck"
+        addresses_failure_mode: "mech:BearingCompressionFailure"
+        equations: ["mott6:11-3", "mott6:11-4", "mott6:11-5"]
+    acceptance:
+      specified_by_source: true
+      statement: >-
+        Actual stress must not exceed the design stress obtained by dividing the
+        relevant strength by the design factor. Bearing failure is assessed
+        against whichever of key, shaft keyseat or hub keyseat has the lowest
+        compressive yield strength.
+    derived_from: [mott6-c-0060, mott6-c-0061, mott6-c-0062, mott6-c-0064, shigley10-c-0060]
+    analyst_authored: false
+    confidence: 0.95
+    review_status: NeedsReview
+    both_sources_agree: true
+
+  - id: VER-002
+    kind: VerificationRule
+    title: "A keyed or splined shaft requires a stress-concentration assessment"
+    statement: >-
+      Where a keyseat, transverse hole or spline run-out is present in a shaft
+      under cyclic loading, the stress concentration at that feature must be
+      assessed as part of the shaft fatigue check.
+    applies_to:
+      alternatives: ["melem:ParallelKeyConnection", "melem:MultipleKeyConnection",
+                     "melem:WoodruffKeyConnection", "melem:PinnedConnection",
+                     "melem:InvoluteSplineConnection", "melem:StraightSidedSplineConnection"]
+      context_conditions: ["mdcore:CyclicLoading"]
+    requires_verification:
+      - method: "mech:StressConcentrationAssessment"
+        addresses_failure_mode: "mech:FatigueFracture"
+      - method: "mech:FatigueStrengthCheck"
+        addresses_failure_mode: "mech:FatigueFracture"
+    acceptance:
+      specified_by_source: false
+      statement: >-
+        Numeric stress-concentration factors for an end-milled keyseat are cited
+        by Shigley from an external stress-concentration reference. Those numbers
+        are NOT reproduced here: they fall in mathematics-font runs that this
+        PDF's text layer mis-maps, and they originate outside the book.
+      requires_external_authority: ["mdcore:RequiresExternalStandard"]
+    derived_from: [mott6-c-0011, shigley10-c-0061, shigley10-c-0062, shigley10-c-0044]
+    analyst_authored: false
+    confidence: 0.85
+    review_status: NeedsReview
+
+  - id: VER-003
+    kind: VerificationRule
+    title: "An interference fit requires a pressure calculation at both tolerance extremes"
+    statement: >-
+      An interference-fit connection must be evaluated at both interference
+      extremes: the maximum interference to check for excessive stress, and the
+      minimum interference to bound the torque the joint may be designed to
+      transmit without slipping.
+    applies_to:
+      alternatives: ["melem:PressFitConnectionAlternative", "melem:ShrinkFitConnectionAlternative"]
+    requires_verification:
+      - method: "mech:InterferencePressureCalculation"
+        equations: ["shigley10:7-39", "shigley10:7-40", "shigley10:7-42", "shigley10:7-43"]
+        addresses_failure_mode: "mech:BearingCompressionFailure"
+      - method: "mech:FrictionTorqueCapacityCalculation"
+        equations: ["shigley10:7-48", "shigley10:7-49"]
+        addresses_failure_mode: "mech:ConnectionSlip"
+      - method: "mech:FitAndToleranceInspection"
+        addresses_failure_mode: "mech:ConnectionSlip"
+    acceptance:
+      specified_by_source: false
+      statement: >-
+        The form of the capacity equation is given, but the cited sections do not
+        fix a coefficient of friction for the joint. The capacity therefore
+        cannot be closed from these two books alone.
+      requires_external_authority: ["mdcore:RequiresManufacturerData", "mdcore:RequiresExperimentalProtocol"]
+    open_parameters:
+      - symbol: "f"
+        name: "coefficient of friction at the shaft/hub interface"
+        status: "not specified by either cited source"
+    derived_from: [shigley10-c-0050, shigley10-c-0051, shigley10-c-0052]
+    analyst_authored: false
+    confidence: 0.9
+    review_status: NeedsReview
+
+  - id: VER-004
+    kind: VerificationRule
+    title: "A non-standardised keyless connection requires testing that neither book defines"
+    statement: >-
+      Where a shaft/hub attachment method is not standardised and a satisfactory
+      analysis is not possible, testing of the assembly is recommended.
+    applies_to:
+      alternatives: ["melem:KeylessLockingAssemblyAlternative", "melem:ClampingHubConnectionAlternative",
+                     "melem:TaperedFitConnectionAlternative"]
+    requires_verification:
+      - method: "mech:AssemblyTorqueTest"
+        test_recommended: true
+        test_procedure_specified: false
+        acceptance_criterion_specified: false
+        requires_external_authority: ["mdcore:RequiresExperimentalProtocol",
+                                      "mdcore:RequiresManufacturerData",
+                                      "mdcore:RequiresCompanySpecification"]
+    acceptance:
+      specified_by_source: false
+      statement: >-
+        Mott recommends testing but defines no procedure: no instrumentation, no
+        load sequence, no cycle count and no pass criterion. The ontology records
+        the recommendation and the three gaps, and supplies none of them.
+    derived_from: [mott6-c-0050, mott6-c-0051]
+    analyst_authored: false
+    confidence: 0.95
+    review_status: NeedsReview
+
+  - id: VER-005
+    kind: VerificationRule
+    title: "A rolling bearing requires both a rating-life and a static-rating check"
+    statement: >-
+      A rolling-contact bearing selection must be checked for rating life under
+      the operating load and, separately, against the basic static load rating
+      for the largest load applied while stationary or slow-moving.
+    applies_to:
+      alternatives: ["melem:DeepGrooveBallBearingAlternative", "melem:CylindricalRollerBearingAlternative",
+                     "melem:TaperedRollerBearingAlternative", "melem:NeedleBearingAlternative",
+                     "melem:SphericalRollerBearingAlternative"]
+    requires_verification:
+      - method: "mech:BearingLifeCalculation"
+        addresses_failure_mode: "mech:SurfacePitting"
+        equations: ["mott6:14-1", "mott6:14-2", "mott6:14-3", "shigley10:11-1"]
+      - method: "mech:StaticLoadRatingCheck"
+        addresses_failure_mode: "mech:Brinelling"
+    acceptance:
+      specified_by_source: true
+      statement: >-
+        The computed required basic dynamic load rating must not exceed the
+        catalogue rating of the selected bearing, and the applied static load
+        must not exceed the basic static load rating.
+    preconditions:
+      - statement: >-
+          The catalogue rating-life basis must be established before the
+          load-life equation is applied. One million revolutions is the most
+          common basis but is not universal.
+        derived_from: [shigley10-c-0073]
+      - statement: >-
+          The correct exponent for the bearing family must be used: 3 for ball
+          bearings, 3.33 or 10/3 for roller bearings.
+        derived_from: [mott6-c-0071, shigley10-c-0074]
+    requires_external_authority: ["mdcore:RequiresManufacturerData"]
+    derived_from: [mott6-c-0070, mott6-c-0072, mott6-c-0074, mott6-c-0076,
+                   shigley10-c-0070, shigley10-c-0073, shigley10-c-0074, shigley10-c-0075]
+    analyst_authored: false
+    confidence: 0.9
+    review_status: NeedsReview
+    both_sources_agree: true
+
+  - id: VER-006
+    kind: VerificationRule
+    title: "A setscrew connection is verified against tabulated holding power with a load-type factor"
+    statement: >-
+      A setscrew connection is checked by comparing the applied axial or
+      tangential load against tabulated holding power, derated by a factor of
+      safety chosen for the loading type.
+    applies_to:
+      alternatives: ["melem:SetscrewConnection"]
+    requires_verification:
+      - method: "mech:FrictionTorqueCapacityCalculation"
+        addresses_failure_mode: "mech:ConnectionSlip"
+    acceptance:
+      specified_by_source: true
+      statement: >-
+        Shigley gives typical factors of safety of 1.5 to 2.0 for static loads
+        and 4 to 8 for various dynamic loads, applied to tabulated holding power
+        for both axial and tangential directions.
+    derived_from: [shigley10-c-0029]
+    analyst_authored: false
+    confidence: 0.85
+    review_status: NeedsReview
+    notes: >-
+      The tabulated holding-power values themselves are not reproduced in this
+      ontology; the rule cites their location.
+
+  - id: VER-007
+    kind: VerificationRule
+    title: "A spline capacity calculation must respect its unit system and length basis"
+    statement: >-
+      Mott's SAE straight-sided spline torque capacity is stated in inch units
+      with torque in pound-inches, and is a capacity PER INCH of engaged spline
+      length. It must be multiplied by the engaged length and must not be used
+      in SI without conversion.
+    applies_to:
+      alternatives: ["melem:StraightSidedSplineConnection"]
+    requires_verification:
+      - method: "mech:BearingStressCheck"
+        equations: ["mott6:11-9", "mott6:11-10"]
+        addresses_failure_mode: "mech:BearingCompressionFailure"
+    acceptance:
+      specified_by_source: true
+      statement: >-
+        Capacity is based on an assumed limit of 1000 psi bearing stress on the
+        sides of the splines.
+    unit_constraints:
+      - "Dimensions in inches; torque in pound-inches."
+      - "Result is per inch of spline length."
+      - "The equation is not dimensionally general and does not carry over to SI unchanged."
+    derived_from: [mott6-c-0047]
+    analyst_authored: false
+    confidence: 0.9
+    review_status: NeedsReview
+    notes: >-
+      Recorded as a verification rule rather than a note because silently
+      applying this formula in SI, or forgetting the per-inch basis, is a
+      plausible and consequential error.

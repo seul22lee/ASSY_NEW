@@ -1,0 +1,143 @@
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg core :: artifact
+#
+# Level 1 (general engineering design).  Nothing in this file is specific to
+# mechanical engineering, and nothing here is derived from either textbook.
+# These are ontology-engineering constructs, not source-derived content.
+# ===========================================================================
+
+<https://w3id.org/mdkg/core/artifact> a owl:Ontology ;
+    dcterms:title "mdkg core: artifact structure"@en ;
+    dcterms:description """Structural backbone of the design ontology: designed
+        artifacts, their part structure, the interfaces through which they
+        connect, their geometry features and their materials."""@en ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+# --- Artifacts -------------------------------------------------------------
+
+mdcore:DesignedArtifact a owl:Class ;
+    rdfs:label "Designed Artifact"@en ;
+    skos:altLabel "설계 대상물"@ko ;
+    skos:definition """Any human-made entity that is the intended outcome of a
+        design process, and about which functions, requirements and design
+        decisions can be asserted. Deliberately domain-neutral: a designed
+        artifact may be mechanical, electrical, software or organisational."""@en ;
+    skos:scopeNote """Use for the thing being designed, not for the design
+        description of it. A drawing of a shaft is a document, not a
+        DesignedArtifact."""@en .
+
+mdcore:TechnicalSystem a owl:Class ;
+    rdfs:subClassOf mdcore:DesignedArtifact ;
+    rdfs:label "Technical System"@en ;
+    skos:altLabel "기술 시스템"@ko ;
+    skos:definition """A designed artifact composed of interacting sub-artifacts
+        that together deliver a function no single sub-artifact delivers alone,
+        and whose boundary to its environment is explicitly identified."""@en .
+
+mdcore:Assembly a owl:Class ;
+    rdfs:subClassOf mdcore:DesignedArtifact ;
+    rdfs:label "Assembly"@en ;
+    skos:altLabel "조립체"@ko ;
+    skos:definition """A designed artifact produced by joining two or more
+        artifacts through interfaces, and which is handled as a single item at
+        the next level of assembly."""@en .
+
+mdcore:Component a owl:Class ;
+    rdfs:subClassOf mdcore:DesignedArtifact ;
+    rdfs:label "Component"@en ;
+    skos:altLabel "구성 부품"@ko ;
+    skos:definition """A designed artifact treated as atomic at the level of
+        decomposition currently under consideration. Atomicity is relative to
+        the analysis, not absolute: a rolling bearing is a component to a shaft
+        designer and an assembly to a bearing manufacturer."""@en .
+
+# --- Interfaces, geometry, material ---------------------------------------
+
+mdcore:Interface a owl:Class ;
+    rdfs:label "Interface"@en ;
+    skos:altLabel "인터페이스"@ko ;
+    skos:definition """A region, surface or logical boundary at which two
+        artifacts meet and exchange force, motion, energy, matter or
+        information. Interfaces carry the compatibility conditions that decide
+        whether one design alternative can physically replace another."""@en ;
+    skos:scopeNote """Interface is reified rather than modelled as a bare
+        relation because substitution reasoning must attach conditions,
+        tolerances and required modifications to the junction itself."""@en .
+
+mdcore:GeometryFeature a owl:Class ;
+    rdfs:label "Geometry Feature"@en ;
+    skos:altLabel "형상 특징"@ko ;
+    skos:definition """A named, bounded portion of an artifact's shape that
+        carries design intent, for example a groove, a fillet, a shoulder or a
+        hole. Geometry features are the usual carriers of stress concentration
+        and of manufacturing and inspection requirements."""@en .
+
+mdcore:Material a owl:Class ;
+    rdfs:label "Material"@en ;
+    skos:altLabel "재료"@ko ;
+    skos:definition """A substance, or a specified condition of a substance,
+        from which an artifact is made, and to which property values such as
+        strength, stiffness and hardness can be attributed."""@en ;
+    skos:scopeNote """A Material instance should name its specification and
+        condition together where the source does so (for example 'SAE 1018
+        low-carbon steel'), because property values are condition-dependent."""@en .
+
+mdcore:DesignFeature a owl:Class ;
+    rdfs:label "Design Feature"@en ;
+    skos:altLabel "설계 특징"@ko ;
+    skos:definition """Any deliberate characteristic of an artifact -- geometric,
+        material, dimensional or procedural -- introduced to influence
+        behaviour, for example to mitigate a failure mode."""@en ;
+    rdfs:comment """Broader than GeometryFeature: a surface treatment or a
+        specified fit is a DesignFeature but not a GeometryFeature."""@en .
+
+mdcore:GeometryFeature rdfs:subClassOf mdcore:DesignFeature .
+
+# --- Structural properties -------------------------------------------------
+
+mdcore:hasPart a owl:ObjectProperty ;
+    rdfs:label "has part"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:DesignedArtifact ;
+    a owl:TransitiveProperty ;
+    skos:definition "Relates an artifact to an artifact contained within it."@en .
+
+mdcore:partOf a owl:ObjectProperty ;
+    rdfs:label "part of"@en ;
+    owl:inverseOf mdcore:hasPart ;
+    a owl:TransitiveProperty .
+
+mdcore:hasInterface a owl:ObjectProperty ;
+    rdfs:label "has interface"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:Interface .
+
+mdcore:connects a owl:ObjectProperty ;
+    rdfs:label "connects"@en ;
+    rdfs:domain mdcore:Interface ;
+    rdfs:range mdcore:DesignedArtifact ;
+    skos:definition "Relates an interface to each artifact it joins."@en .
+
+mdcore:hasGeometryFeature a owl:ObjectProperty ;
+    rdfs:label "has geometry feature"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:GeometryFeature .
+
+mdcore:hasDesignFeature a owl:ObjectProperty ;
+    rdfs:label "has design feature"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:DesignFeature .
+
+mdcore:madeOfMaterial a owl:ObjectProperty ;
+    rdfs:label "made of material"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:Material .

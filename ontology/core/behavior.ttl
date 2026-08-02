@@ -1,0 +1,78 @@
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg core :: behavior
+#
+# The B of Function-Behavior-Structure.  Behavior is the bridge that explains
+# *how* a structure delivers a function.  Keeping it explicit is what lets the
+# ontology answer "are these two alternatives functionally equivalent?" with
+# something better than a shared label: two alternatives may share a function
+# yet realise it through different behaviors, which is precisely where their
+# failure modes, verification needs and substitution conditions diverge.
+# ===========================================================================
+
+<https://w3id.org/mdkg/core/behavior> a owl:Ontology ;
+    dcterms:title "mdkg core: behavior"@en ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mdcore:Behavior a owl:Class ;
+    rdfs:label "Behavior"@en ;
+    skos:altLabel "거동"@ko ;
+    skos:definition """A physical process by which a structure produces a
+        function under given operating conditions, described in terms of the
+        quantities that are exchanged or transformed."""@en ;
+    skos:scopeNote """Behavior answers 'by what mechanism?'. 'Transmit torque'
+        is a Function; 'transfer load by shear across a shaft/hub interface'
+        is a Behavior."""@en .
+
+mdcore:PhysicalEffect a owl:Class ;
+    rdfs:label "Physical Effect"@en ;
+    skos:altLabel "물리 효과"@ko ;
+    skos:definition """The underlying physical principle a behavior relies on,
+        such as dry friction, elastic deformation or contact pressure."""@en ;
+    rdfs:comment """Separated from Behavior so that alternatives relying on the
+        same principle (for example every friction-based shaft/hub connection)
+        can be retrieved as a family, independently of their geometry."""@en .
+
+# --- FBS relations ---------------------------------------------------------
+
+mdcore:realizedBy a owl:ObjectProperty ;
+    rdfs:label "realized by"@en ;
+    rdfs:domain mdcore:Function ;
+    rdfs:range mdcore:Behavior ;
+    skos:definition "Relates a function to a behavior that produces it."@en .
+
+mdcore:realizesFunction a owl:ObjectProperty ;
+    rdfs:label "realizes function"@en ;
+    owl:inverseOf mdcore:realizedBy ;
+    rdfs:domain mdcore:Behavior ;
+    rdfs:range mdcore:Function .
+
+mdcore:enabledBy a owl:ObjectProperty ;
+    rdfs:label "enabled by"@en ;
+    rdfs:domain mdcore:Behavior ;
+    rdfs:range mdcore:DesignAlternative ;
+    skos:definition """Relates a behavior to a structure or design alternative
+        whose configuration makes that behavior possible."""@en .
+
+mdcore:enablesBehavior a owl:ObjectProperty ;
+    rdfs:label "enables behavior"@en ;
+    owl:inverseOf mdcore:enabledBy .
+
+mdcore:reliesOnEffect a owl:ObjectProperty ;
+    rdfs:label "relies on physical effect"@en ;
+    rdfs:domain mdcore:Behavior ;
+    rdfs:range mdcore:PhysicalEffect .
+
+mdcore:behaviorRequiresCondition a owl:ObjectProperty ;
+    rdfs:label "behavior requires condition"@en ;
+    rdfs:domain mdcore:Behavior ;
+    rdfs:range mdcore:OperatingCondition ;
+    skos:definition """A condition that must hold for the behavior to occur at
+        all, for example a maintained normal pressure for a friction-based
+        load transfer."""@en .

@@ -1,0 +1,82 @@
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg core :: failure
+#
+# FailureMode (what is observed to go wrong) is kept distinct from
+# FailureMechanism (the physical process that produces it).  The distinction
+# earns its keep in substitution reasoning: two alternatives may share a
+# failure mode while failing by different mechanisms, which changes what
+# aggravates the failure and what verification is appropriate.
+# ===========================================================================
+
+<https://w3id.org/mdkg/core/failure> a owl:Ontology ;
+    dcterms:title "mdkg core: failure modes and mechanisms"@en ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mdcore:FailureMode a owl:Class ;
+    rdfs:label "Failure Mode"@en ;
+    skos:altLabel "고장 모드"@ko ;
+    skos:definition """The manner in which an artifact ceases to perform a
+        required function, described observably: fracture, excessive
+        deflection, loss of clamping, surface pitting, loosening."""@en .
+
+mdcore:FailureMechanism a owl:Class ;
+    rdfs:label "Failure Mechanism"@en ;
+    skos:altLabel "고장 메커니즘"@ko ;
+    skos:definition """The physical, chemical or tribological process by which
+        a failure mode develops: fatigue crack growth, plastic yielding,
+        adhesive wear, corrosion, creep, fretting."""@en .
+
+mdcore:FailureConsequence a owl:Class ;
+    rdfs:label "Failure Consequence"@en ;
+    skos:definition """The effect of a failure mode on the containing system,
+        including whether the failure is benign, protective, or damaging to
+        adjacent components."""@en ;
+    skos:scopeNote """Needed to represent deliberately sacrificial elements,
+        where failure of one part is the intended way to protect others."""@en .
+
+# --- Relations -------------------------------------------------------------
+
+mdcore:mayExperienceFailureMode a owl:ObjectProperty ;
+    rdfs:label "may experience failure mode"@en ;
+    rdfs:domain mdcore:DesignAlternative ; rdfs:range mdcore:FailureMode ;
+    skos:scopeNote """Modal by design: asserts possibility in some context, not
+        inevitability. Pair with mdcore:aggravatedByCondition to say when."""@en .
+
+mdcore:causedByFailureMechanism a owl:ObjectProperty ;
+    rdfs:label "caused by failure mechanism"@en ;
+    rdfs:domain mdcore:FailureMode ; rdfs:range mdcore:FailureMechanism .
+
+mdcore:aggravatedByCondition a owl:ObjectProperty ;
+    rdfs:label "aggravated by condition"@en ;
+    rdfs:domain mdcore:FailureMode ; rdfs:range mdcore:OperatingCondition .
+
+mdcore:mitigatedByDesignFeature a owl:ObjectProperty ;
+    rdfs:label "mitigated by design feature"@en ;
+    rdfs:domain mdcore:FailureMode ; rdfs:range mdcore:DesignFeature .
+
+mdcore:initiatesAtFeature a owl:ObjectProperty ;
+    rdfs:label "initiates at geometry feature"@en ;
+    rdfs:domain mdcore:FailureMode ; rdfs:range mdcore:GeometryFeature ;
+    skos:definition "The geometry feature at which the failure characteristically starts, such as a keyseat or a fillet."@en .
+
+mdcore:hasConsequence a owl:ObjectProperty ;
+    rdfs:label "has failure consequence"@en ;
+    rdfs:domain mdcore:FailureMode ; rdfs:range mdcore:FailureConsequence .
+
+mdcore:isProtectiveFailure a owl:DatatypeProperty ;
+    rdfs:label "is protective (sacrificial) failure"@en ;
+    rdfs:domain mdcore:FailureMode ; rdfs:range xsd:boolean ;
+    skos:definition """True when the failure of this element is deliberately
+        preferred to the failure of adjacent, costlier components."""@en .
+
+mdcore:requiresAnalysis a owl:ObjectProperty ;
+    rdfs:label "requires analysis"@en ;
+    rdfs:domain mdcore:FailureMode ; rdfs:range mdcore:VerificationMethod .

@@ -1,0 +1,1446 @@
+# ---------------------------------------------------------------------------
+# Curated claim seeds  --  input to scripts/build_claims.py
+#
+# Each claim is a single assertion attributed to one source, restated in
+# controlled vocabulary, and bound to one or more VERIFIED evidence spans.
+#
+# What an analyst writes here:  the normalized statement, its subject /
+# predicate / object, the conditions and assumptions the source itself placed
+# on it, any quantities with their units, and which ontology individuals the
+# claim is about.
+#
+# What an analyst does NOT write here:  chapter, section, printed page or PDF
+# page.  Those are resolved from the cited evidence spans, which were
+# themselves verified against the PDF.  Citations are therefore assembled, not
+# typed.
+#
+# REVIEW STATUS.  Every claim in v0.1 is `NeedsReview`.  These statements were
+# authored by an analyst reading the cited pages and were mechanically checked
+# against the PDF text, which is stronger than automatic extraction but is not
+# human sign-off.  `HumanVerified` is reserved for a named person who has
+# compared the normalized statement against the printed page.  v0.1 contains
+# zero HumanVerified claims by design.
+# ---------------------------------------------------------------------------
+
+version: "0.1.0"
+
+defaults:
+  review_status: "NeedsReview"
+  extraction_method: "analyst-curated-from-source-page, anchor-verified against PDF"
+  extraction_confidence: 0.90
+
+claims:
+
+  # =========================================================================
+  # PILOT TOPIC 1  --  general design: design factor / factor of safety
+  # =========================================================================
+  - id: mott6-c-0001
+    doc: mott6
+    topic: design-factor
+    subject: "design factor N"
+    predicate: "is defined as"
+    object: "a measure of the relative safety of a load-carrying component; the material strength divided by the design factor gives the design (allowable) stress"
+    normalized_statement: >-
+      Mott defines the design factor N as a measure of the relative safety of a
+      load-carrying component. In most cases the strength of the material is
+      divided by N to obtain a design stress (also called the allowable stress),
+      and the actual stress must be less than the design stress.
+    exceptions:
+      - "For column buckling, Mott applies the design factor to the load on the column rather than to the material strength."
+    evidence: [mott6-es-0001, mott6-es-0002]
+    about: ["mdcore:SafetyRequirement"]
+
+  - id: mott6-c-0002
+    doc: mott6
+    topic: design-factor
+    subject: "value of the design factor"
+    predicate: "is governed by"
+    object: "codes established by standards-setting organizations, or by company policy"
+    normalized_statement: >-
+      Mott states that the value of the design factor or design stress is often
+      governed by codes from standards-setting organizations, and that some
+      companies adopt their own policies based on past experience.
+    evidence: [mott6-es-0004]
+    about: ["mdcore:SafetyRequirement"]
+    external_authority: ["mdcore:RequiresExternalStandard", "mdcore:RequiresCompanySpecification"]
+
+  - id: mott6-c-0003
+    doc: mott6
+    topic: design-factor
+    subject: "selection of the design factor"
+    predicate: "requires"
+    object: "designer judgement when no code or standard applies"
+    normalized_statement: >-
+      Mott states that in the absence of codes or standards the designer must
+      use judgement to specify the desired design factor.
+    evidence: [mott6-es-0003]
+    about: ["mdcore:SafetyRequirement"]
+    external_authority: ["mdcore:RequiresEngineeringReview"]
+
+  - id: shigley10-c-0001
+    doc: shigley10
+    topic: design-factor
+    subject: "design factor n_d"
+    predicate: "is defined as"
+    object: "loss-of-function strength divided by allowable stress"
+    normalized_statement: >-
+      Shigley defines the design factor n_d as the ratio of the loss-of-function
+      strength to the allowable stress, and calls the deterministic form of this
+      approach the classical method of design.
+    equations: ["1-1", "1-3"]
+    evidence: [shigley10-es-0001]
+    about: ["mdcore:SafetyRequirement"]
+
+  - id: shigley10-c-0002
+    doc: shigley10
+    topic: design-factor
+    subject: "factor of safety n"
+    predicate: "is distinguished from"
+    object: "design factor n_d"
+    normalized_statement: >-
+      Shigley distinguishes the design factor n_d, chosen before the design is
+      completed, from the factor of safety n, which is the value actually
+      achieved after choices such as rounding up to a standard size. The two have
+      the same definition but generally differ numerically.
+    evidence: [shigley10-es-0002]
+    about: ["mdcore:SafetyRequirement"]
+    analyst_note: >-
+      Terminology difference from Mott, who uses a single symbol N for the
+      design factor. Recorded as a terminology alignment, not merged.
+
+  - id: shigley10-c-0003
+    doc: shigley10
+    topic: design-factor
+    subject: "design factor evaluation"
+    predicate: "requires"
+    object: "analysis of all loss-of-function modes, with the smallest resulting factor governing"
+    normalized_statement: >-
+      Shigley states that all loss-of-function modes must be analyzed and that
+      the mode leading to the smallest design factor governs.
+    evidence: [shigley10-es-0003]
+    about: ["mdcore:SafetyRequirement"]
+
+  - id: shigley10-c-0004
+    doc: shigley10
+    topic: design-factor
+    subject: "stress and strength terms in the design-factor equation"
+    predicate: "must be"
+    object: "of the same type and units, and applied at the same critical location"
+    normalized_statement: >-
+      Shigley states that the stress and strength terms used in the design-factor
+      equation must be of the same type and the same units, and must apply to the
+      same critical location in the part.
+    equations: ["1-3"]
+    evidence: [shigley10-es-0004]
+    about: ["mdcore:SafetyRequirement"]
+
+  - id: shigley10-c-0005
+    doc: shigley10
+    topic: design-factor
+    subject: "assignment of a design factor value"
+    predicate: "requires"
+    object: "experience, company policies and applicable codes"
+    normalized_statement: >-
+      Shigley states that the designer must rely on experience, company policies
+      and applicable codes to arrive at an appropriate design factor, because of
+      the difficulty of evaluating the uncertainties involved.
+    evidence: [shigley10-es-0005]
+    about: ["mdcore:SafetyRequirement"]
+    external_authority: ["mdcore:RequiresExternalStandard", "mdcore:RequiresCompanySpecification", "mdcore:RequiresEngineeringReview"]
+
+  # =========================================================================
+  # PILOT TOPIC 2  --  failure: fatigue
+  # =========================================================================
+  - id: mott6-c-0010
+    doc: mott6
+    topic: fatigue
+    subject: "boundary between low-cycle and high-cycle fatigue"
+    predicate: "is"
+    object: "not sharply definable; designers often take up to about 1000 cycles as low-cycle fatigue"
+    normalized_statement: >-
+      Mott states that no specific dividing line can be defined between low-cycle
+      and high-cycle fatigue, and that designers often use up to 1000 cycles for
+      low-cycle fatigue and higher numbers, up to infinite life, for high-cycle
+      fatigue.
+    conditions:
+      - "Applies to designers' working practice, not to a physical boundary."
+    quantities:
+      - role: "low-cycle fatigue practical upper bound"
+        value: 1000
+        unit: "cycle"
+        original_value: "1000 cycles (10^3)"
+        original_unit: "cycles"
+    threshold:
+      term: "low-cycle fatigue"
+      is_universal: false
+      scope_note: "The source explicitly denies that a specific dividing line can be defined."
+    evidence: [mott6-es-0010]
+    about: ["mech:FatigueFracture"]
+
+  - id: mott6-c-0011
+    doc: mott6
+    topic: fatigue
+    subject: "fatigue failures"
+    predicate: "frequently occur at"
+    object: "areas of stress concentration such as keyways or grooves in shafts, steps in cross section, and notches"
+    normalized_statement: >-
+      Mott states that fatigue failures frequently occur within areas of stress
+      concentration such as keyways or grooves in shafts, steps in the size of a
+      cross section, notches and other geometric discontinuities, and that even
+      surface roughness or accidental nicks can initiate cracks.
+    evidence: [mott6-es-0011]
+    about: ["mech:FatigueFracture", "mech:Keyseat"]
+
+  - id: mott6-c-0012
+    doc: mott6
+    topic: fatigue
+    subject: "fatigue cracks"
+    predicate: "initiate at"
+    object: "small surface cracks, internal imperfections or grain boundaries in areas subjected to tensile stress"
+    normalized_statement: >-
+      Mott states that fatigue failures start at small surface cracks, internal
+      imperfections, or grain boundaries in areas subjected to tensile stress,
+      and grow with repeated stress application until the component fails, often
+      suddenly.
+    evidence: [mott6-es-0012]
+    about: ["mech:FatigueCrackInitiationAndGrowth"]
+
+  # =========================================================================
+  # PILOT TOPIC 3  --  connection: keys, splines, fits
+  # =========================================================================
+
+  # --- Mott on keys ---------------------------------------------------------
+  - id: mott6-c-0020
+    doc: mott6
+    topic: shaft-hub-connection
+    subject: "square key"
+    predicate: "is the most common key type for"
+    object: "shafts up to 6.5 inches in diameter"
+    normalized_statement: >-
+      Mott states that the square key is the most common type of key for shafts
+      up to 6 1/2 in in diameter, and that the rectangular key is recommended for
+      larger shafts and used for smaller shafts where the reduced height can be
+      tolerated.
+    quantities:
+      - role: "upper shaft diameter for which the square key is described as most common"
+        value: 6.5
+        unit: "in"
+        original_value: "6 1/2"
+        original_unit: "in"
+    figures: ["11-1"]
+    evidence: [mott6-es-0020]
+    about: ["melem:SquareKey", "melem:RectangularKey"]
+
+  - id: mott6-c-0021
+    doc: mott6
+    topic: shaft-hub-connection
+    subject: "parallel key width"
+    predicate: "is approximately"
+    object: "one quarter of the shaft diameter"
+    normalized_statement: >-
+      Mott states that for the preferred parallel key dimensions tabulated
+      against shaft diameter, the key width is approximately one-quarter of the
+      shaft diameter.
+    quantities:
+      - role: "ratio of key width to shaft diameter"
+        value: 0.25
+        unit: "dimensionless"
+        original_value: "approximately one-quarter"
+        original_unit: "dimensionless"
+    tables: ["11-1"]
+    evidence: [mott6-es-0021]
+    about: ["melem:ParallelKey"]
+
+  - id: mott6-c-0022
+    doc: mott6
+    topic: shaft-hub-connection
+    subject: "radiused keyseats and chamfered keys"
+    predicate: "reduce"
+    object: "stress concentrations"
+    normalized_statement: >-
+      Mott states that radiused keyseats and chamfered keys can be used to reduce
+      stress concentrations, and cites suggested values from ANSI Standard B17.1.
+    tables: ["11-2"]
+    standards: ["ANSI B17.1"]
+    evidence: [mott6-es-0022]
+    about: ["mech:Keyseat", "mech:FatigueFracture"]
+
+  - id: mott6-c-0023
+    doc: mott6
+    topic: shaft-hub-connection
+    subject: "taper key"
+    predicate: "has"
+    object: "a smaller bearing area on the sides of the key than a parallel key, so the bearing stress must be checked"
+    normalized_statement: >-
+      Mott states that the taper key design gives a smaller bearing area on the
+      sides of the key and that the bearing stress must therefore be checked.
+    figures: ["11-3"]
+    evidence: [mott6-es-0023]
+    about: ["melem:TaperKey", "mech:BearingCompressionFailure"]
+
+  - id: mott6-c-0024
+    doc: mott6
+    topic: shaft-hub-connection
+    subject: "pin key"
+    predicate: "produces"
+    object: "lower stress concentration factors than parallel or taper keys"
+    normalized_statement: >-
+      Mott states that lower stress concentration factors result from the pin key
+      design as compared with parallel or taper keys, and that a close fit
+      between pin and groove is required so that bearing is uniform along the pin.
+    evidence: [mott6-es-0024]
+    about: ["melem:PinKey"]
+
+  - id: mott6-c-0025
+    doc: mott6
+    topic: shaft-hub-connection
+    subject: "Woodruff key"
+    predicate: "should be considered where"
+    object: "loading is light and relatively easy assembly and disassembly are desired"
+    normalized_statement: >-
+      Mott states that where light loading and relatively easy assembly and
+      disassembly are desired, the Woodruff key should be considered.
+    conditions:
+      - "light loading"
+      - "relatively easy assembly and disassembly desired"
+    tables: ["11-3"]
+    standards: ["ANSI B17.2-1967"]
+    evidence: [mott6-es-0025]
+    about: ["melem:WoodruffKeyConnection"]
+
+  - id: mott6-c-0026
+    doc: mott6
+    topic: shaft-hub-connection
+    subject: "key material"
+    predicate: "is recommended to be"
+    object: "low-carbon steel SAE 1018 for most applications in this book's problems"
+    normalized_statement: >-
+      Mott recommends that low-carbon steel SAE 1018 be considered for most key
+      applications in this book's problem solutions, being low cost and readily
+      available with generally adequate strength, and lists higher-strength and
+      corrosion-resistant alternatives.
+    assumptions:
+      - "Recommendation is framed for the book's problem solutions, not as a universal specification."
+    tables: ["11-4"]
+    evidence: [mott6-es-0026]
+    about: ["melem:Key"]
+
+  # --- Shigley on keys, pins, setscrews ------------------------------------
+  - id: shigley10-c-0020
+    doc: shigley10
+    topic: shaft-hub-connection
+    subject: "keys and pins"
+    predicate: "serve"
+    object: "distinct roles: keys transmit torque, pins locate axially and transfer torque or thrust or both"
+    normalized_statement: >-
+      Shigley states that keys are used to enable the transmission of torque from
+      the shaft to the shaft-supported element, while pins are used for axial
+      positioning and for the transfer of torque or thrust or both.
+    figures: ["7-16"]
+    evidence: [shigley10-es-0030]
+    about: ["melem:Key", "melem:Pin"]
+
+  - id: shigley10-c-0021
+    doc: shigley10
+    topic: shaft-hub-connection
+    subject: "pins"
+    predicate: "are useful when"
+    object: "the principal loading is shear and both torsion and thrust are present"
+    normalized_statement: >-
+      Shigley states that pins are useful when the principal loading is shear and
+      when both torsion and thrust are present.
+    conditions:
+      - "principal loading is shear"
+      - "both torsion and thrust present"
+    evidence: [shigley10-es-0031]
+    about: ["melem:PinnedConnection"]
+
+  - id: shigley10-c-0022
+    doc: shigley10
+    topic: shaft-hub-connection
+    subject: "maximum key length"
+    predicate: "should not exceed"
+    object: "about 1.5 times the shaft diameter"
+    normalized_statement: >-
+      Shigley states that the maximum length of a key is limited by the hub length
+      of the attached element and should generally not exceed about 1.5 times the
+      shaft diameter, to avoid excessive twisting with the angular deflection of
+      the shaft.
+    quantities:
+      - role: "ratio of maximum key length to shaft diameter"
+        value: 1.5
+        unit: "dimensionless"
+        original_value: "about 1.5 times"
+        original_unit: "dimensionless"
+    evidence: [shigley10-es-0033]
+    about: ["melem:ParallelKeyConnection"]
+
+  - id: shigley10-c-0023
+    doc: shigley10
+    topic: substitution
+    subject: "multiple keys"
+    predicate: "may be used to"
+    object: "carry greater loads, typically oriented at 90 degrees from one another"
+    normalized_statement: >-
+      Shigley states that multiple keys may be used as necessary to carry greater
+      loads, typically oriented at 90 degrees from one another.
+    quantities:
+      - role: "typical angular spacing of multiple keys"
+        value: 90
+        unit: "degree"
+        original_value: "90"
+        original_unit: "degrees"
+    evidence: [shigley10-es-0034]
+    about: ["melem:MultipleKeyConnection"]
+
+  - id: shigley10-c-0024
+    doc: shigley10
+    topic: design-factor
+    subject: "safety factor in key design"
+    predicate: "should not be"
+    object: "excessive, because it is desirable for the key to fail rather than costlier components"
+    normalized_statement: >-
+      Shigley states that excessive safety factors should be avoided in key
+      design, since in an overload situation it is desirable for the key to fail
+      rather than more costly components.
+    evidence: [shigley10-es-0035]
+    about: ["melem:ParallelKeyConnection", "mech:LimitTransmittedTorque"]
+    analyst_note: >-
+      Differs in design intent from Mott's parallel-key design procedure, which
+      recommends N = 3 to accommodate accidental overloads and shock. Both are
+      preserved; see the claim alignment.
+
+  - id: shigley10-c-0025
+    doc: shigley10
+    topic: shaft-hub-connection
+    subject: "setscrew used together with a key"
+    predicate: "serves to"
+    object: "hold the hub axially and minimise rotational backlash under bidirectional rotation"
+    normalized_statement: >-
+      Shigley states that a setscrew is sometimes used along with a key to hold
+      the hub axially and to minimise rotational backlash when the shaft rotates
+      in both directions.
+    conditions:
+      - "shaft rotates in both directions"
+    evidence: [shigley10-es-0036]
+    about: ["melem:SetscrewConnection", "mech:RotationalBacklash", "mech:BidirectionalRotation"]
+
+  - id: shigley10-c-0026
+    doc: shigley10
+    topic: shaft-hub-connection
+    subject: "Woodruff key"
+    predicate: "yields"
+    object: "better concentricity after assembly, which is especially important at high speeds"
+    normalized_statement: >-
+      Shigley states that the Woodruff key yields better concentricity after
+      assembly of wheel and shaft, especially important at high speeds, that it
+      is useful when a wheel is positioned against a shoulder because the keyslot
+      need not be machined into the shoulder stress-concentration region, and
+      that its deeper penetration helps prevent key rolling in smaller shafts.
+    conditions:
+      - "high rotational speed (no numeric boundary given by the source)"
+    threshold:
+      term: "high speed"
+      is_universal: false
+      scope_note: "The source gives no numeric speed boundary; none may be introduced."
+    evidence: [shigley10-es-0037]
+    about: ["melem:WoodruffKeyConnection", "mech:MaintainConcentricity"]
+
+  - id: shigley10-c-0027
+    doc: shigley10
+    topic: shaft-hub-connection
+    subject: "sled-runner keyseat"
+    predicate: "may be used only when"
+    object: "definite longitudinal key positioning is not necessary"
+    normalized_statement: >-
+      Shigley states that a sled-runner keyseat reduces the stress concentration
+      at the end of the keyseat by eliminating the abrupt end, but can only be
+      used when definite longitudinal key positioning is not necessary, and is
+      not as suitable near a shoulder.
+    conditions:
+      - "definite longitudinal key positioning not required"
+    evidence: [shigley10-es-0039]
+    about: ["mech:Keyseat", "mech:CircularMilling"]
+
+  - id: shigley10-c-0028
+    doc: shigley10
+    topic: shaft-hub-connection
+    subject: "setscrew"
+    predicate: "develops clamping force by"
+    object: "compression, unlike bolts and cap screws which depend on tension"
+    normalized_statement: >-
+      Shigley states that, unlike bolts and cap screws which depend on tension to
+      develop a clamping force, the setscrew depends on compression; its holding
+      power comes from frictional resistance between collar and shaft together
+      with any slight penetration of the setscrew into the shaft.
+    evidence: [shigley10-es-0020, shigley10-es-0021]
+    about: ["melem:SetscrewConnection", "mech:FrictionalLoadTransfer"]
+
+  - id: shigley10-c-0029
+    doc: shigley10
+    topic: shaft-hub-connection
+    subject: "setscrew holding power"
+    predicate: "is typically applied with"
+    object: "factors of safety of 1.5 to 2.0 for static loads and 4 to 8 for various dynamic loads"
+    normalized_statement: >-
+      Shigley states that typical factors of safety applied to tabulated setscrew
+      holding power are 1.5 to 2.0 for static loads and 4 to 8 for various
+      dynamic loads, the tabulated values applying to both axial and tangential
+      holding power.
+    quantities:
+      - role: "factor of safety, static loads"
+        is_range: true
+        range_min: 1.5
+        range_max: 2.0
+        unit: "dimensionless"
+        original_value: "1.5 to 2.0"
+        original_unit: "dimensionless"
+      - role: "factor of safety, dynamic loads"
+        is_range: true
+        range_min: 4
+        range_max: 8
+        unit: "dimensionless"
+        original_value: "4 to 8"
+        original_unit: "dimensionless"
+    tables: ["7-4"]
+    evidence: [shigley10-es-0022]
+    about: ["melem:SetscrewConnection"]
+
+  - id: shigley10-c-0030
+    doc: shigley10
+    topic: shaft-hub-connection
+    subject: "setscrew length"
+    predicate: "should be about"
+    object: "half the shaft diameter"
+    normalized_statement: >-
+      Shigley states that setscrews should have a length of about half of the
+      shaft diameter, and notes that this also gives a rough rule for the radial
+      thickness of a hub or collar.
+    quantities:
+      - role: "ratio of setscrew length to shaft diameter"
+        value: 0.5
+        unit: "dimensionless"
+        original_value: "about half"
+        original_unit: "dimensionless"
+    evidence: [shigley10-es-0023]
+    about: ["melem:SetscrewConnection"]
+
+  # --- Mott on splines ------------------------------------------------------
+  - id: mott6-c-0040
+    doc: mott6
+    topic: substitution
+    subject: "splines"
+    predicate: "perform"
+    object: "the same function as a key in transmitting torque from shaft to mating element"
+    normalized_statement: >-
+      Mott states that splines perform the same function as a key in transmitting
+      torque from the shaft to the mating element, a spline being a series of
+      axial keys machined into the shaft with corresponding grooves in the bore of
+      the mating part.
+    figures: ["11-6"]
+    evidence: [mott6-es-0040]
+    about: ["melem:Spline", "mech:TransmitTorqueShaftToHub"]
+
+  - id: mott6-c-0041
+    doc: mott6
+    topic: substitution
+    subject: "splines compared with keys"
+    predicate: "have"
+    object: "many advantages"
+    normalized_statement: >-
+      Mott states that the advantages of splines over keys are many.
+    evidence: [mott6-es-0041]
+    about: ["melem:Spline", "melem:Key"]
+    analyst_note: >-
+      A qualitative evaluative claim. Contrast with Shigley, who emphasises that
+      splines are much more expensive than keys and usually unnecessary for
+      simple torque transmission.
+
+  - id: mott6-c-0042
+    doc: mott6
+    topic: substitution
+    subject: "spline with four or more teeth"
+    predicate: "produces"
+    object: "more uniform torque transfer and lower loading on a given part of the shaft/hub interface than one or two keys"
+    normalized_statement: >-
+      Mott states that because usually four or more splines are used, as compared
+      with one or two keys, a more uniform transfer of torque and a lower loading
+      on a given part of the shaft/hub interface result.
+    evidence: [mott6-es-0042]
+    about: ["melem:Spline", "mech:DistributedToothContact"]
+
+  - id: mott6-c-0043
+    doc: mott6
+    topic: substitution
+    subject: "splines"
+    predicate: "are"
+    object: "integral with the shaft, so no relative motion can occur as between a key and the shaft"
+    normalized_statement: >-
+      Mott states that splines are integral with the shaft, so that no relative
+      motion can occur of the kind that can occur between a key and the shaft, and
+      that splines are accurately machined to provide a controlled fit between
+      mating internal and external splines.
+    evidence: [mott6-es-0043]
+    about: ["melem:Spline", "mech:FrettingWear"]
+
+  - id: mott6-c-0044
+    doc: mott6
+    topic: substitution
+    subject: "sliding motion between a standard parallel key and the mating element"
+    predicate: "should not be"
+    object: "permitted"
+    normalized_statement: >-
+      Mott states that sliding motion between a standard parallel key and the
+      mating element should not be permitted, whereas a spline surface is often
+      hardened to resist wear and to facilitate use in applications where axial
+      motion of the mating element is desired.
+    evidence: [mott6-es-0044, mott6-es-0045]
+    about: ["melem:ParallelKeyConnection", "mech:AxialSlidingUnderTorque", "mech:PermitAxialMotion"]
+    analyst_note: >-
+      This is the decisive constraint behind substitution assessment SA-001: a
+      requirement for axial sliding under torque excludes the plain parallel key
+      regardless of its torque capacity.
+
+  - id: mott6-c-0045
+    doc: mott6
+    topic: substitution
+    subject: "multiple splines on a shaft"
+    predicate: "allow"
+    object: "the mating element to be indexed to various angular positions"
+    normalized_statement: >-
+      Mott states that because of the multiple splines on the shaft, the mating
+      element can be indexed to various positions.
+    evidence: [mott6-es-0046]
+    about: ["melem:Spline", "mech:AngularIndexingFunction"]
+
+  - id: mott6-c-0046
+    doc: mott6
+    topic: substitution
+    subject: "involute spline form"
+    predicate: "is preferred over"
+    object: "the straight-sided form, because it self-centres the mating element and can be cut with standard gear hobs"
+    normalized_statement: >-
+      Mott states that the involute spline form is preferred because it provides
+      self-centering of the mating element and because it can be machined with
+      standard hobs used to cut gear teeth.
+    evidence: [mott6-es-0047]
+    about: ["melem:InvoluteSpline", "melem:StraightSidedSpline", "mech:MaintainConcentricity", "mech:Hobbing"]
+
+  - id: mott6-c-0047
+    doc: mott6
+    topic: substitution
+    subject: "torque capacity of SAE straight-sided splines"
+    predicate: "is based on"
+    object: "a limit of 1000 psi bearing stress on the sides of the splines, giving T = 1000 N R h per inch of spline length"
+    normalized_statement: >-
+      Mott states that the torque capacity for SAE straight-sided splines is based
+      on a limit of 1000 psi bearing stress on the sides of the splines, from
+      which T = 1000 N R h is derived, where N is the number of splines, R the
+      mean radius and h the spline depth. The torque capacity is per inch of
+      spline length.
+    quantities:
+      - role: "allowable bearing stress on spline sides assumed by the SAE capacity formula"
+        value: 1000
+        unit: "psi"
+        original_value: "1000"
+        original_unit: "psi"
+    assumptions:
+      - "Dimensions in inches and torque in pound-inches; the formula is not dimensionally general."
+      - "Capacity is stated per inch of spline length and must be multiplied by the engaged length."
+    conditions:
+      - "Applies to SAE straight-sided splines with h taken from the source's dimension table."
+    equations: ["11-9", "11-10"]
+    tables: ["11-5"]
+    standards: ["SAE straight-sided spline standard (cited by the source without a number)"]
+    evidence: [mott6-es-0048, mott6-es-0050]
+    about: ["melem:StraightSidedSplineConnection", "mech:BearingLoadTransfer"]
+
+  - id: mott6-c-0048
+    doc: mott6
+    topic: substitution
+    subject: "SAE spline fit classes A, B and C"
+    predicate: "correspond to"
+    object: "permanent installation, movement along the shaft without torque load, and movement under load"
+    normalized_statement: >-
+      Mott states that the SAE spline permanent fit A is used when the mating part
+      is not to be moved after installation, fit B when the mating part will be
+      moved along the shaft without a torque load, and fit C when the mating part
+      must be moved under load; the spline depth h and minor diameter d differ
+      between the fits.
+    tables: ["11-5"]
+    evidence: [mott6-es-0049]
+    about: ["melem:StraightSidedSplineConnection", "mech:AxialSlidingUnderTorque", "mech:AxialSlidingWithoutTorque"]
+
+  - id: mott6-c-0049
+    doc: mott6
+    topic: substitution
+    subject: "a spline or two keys"
+    predicate: "may be used instead of"
+    object: "a single key, when the computed key length exceeds the hub length"
+    normalized_statement: >-
+      In its design procedure for parallel keys, Mott states that if the computed
+      minimum key length is longer than the hub length, a higher-strength material
+      must be selected and the design repeated, or alternatively two keys or a
+      spline can be used instead of a single key.
+    conditions:
+      - "computed minimum key length exceeds the available hub length"
+    evidence: [mott6-es-0035]
+    about: ["melem:ParallelKeyConnection", "melem:MultipleKeyConnection", "melem:StraightSidedSplineConnection"]
+
+  # --- Mott on keyless methods ---------------------------------------------
+  - id: mott6-c-0050
+    doc: mott6
+    topic: substitution
+    subject: "attachment of power-transmitting elements without keys or splines"
+    predicate: "is possible by"
+    object: "pinning, keyless friction connections and similar methods, mostly not standardised"
+    normalized_statement: >-
+      Mott introduces methods of attaching power-transmitting elements to shafts
+      without keys or splines, noting that in most cases these designs have not
+      been standardised and that analysis of individual cases considering the
+      forces and manner of loading is necessary.
+    evidence: [mott6-es-0060, mott6-es-0061]
+    about: ["melem:ShaftHubConnectionElement"]
+    external_authority: ["mdcore:RequiresManufacturerData", "mdcore:RequiresEngineeringReview"]
+
+  - id: mott6-c-0051
+    doc: mott6
+    topic: verification
+    subject: "keyless attachment design"
+    predicate: "requires"
+    object: "testing of the assembly when a satisfactory analysis is not possible"
+    normalized_statement: >-
+      Mott states that if a satisfactory analysis of a keyless attachment method
+      is not possible, testing of the assembly is recommended.
+    verification:
+      method_kind: "PrototypeTest"
+      test_recommended: true
+      test_procedure_specified: false
+      acceptance_criterion_specified: false
+      external_authority: ["mdcore:RequiresExperimentalProtocol", "mdcore:RequiresCompanySpecification"]
+    evidence: [mott6-es-0062]
+    about: ["melem:ShaftHubConnectionElement"]
+    analyst_note: >-
+      Canonical example of a recommended test with neither a procedure nor an
+      acceptance criterion. The ontology records the gap rather than inventing a
+      test.
+
+  - id: mott6-c-0052
+    doc: mott6
+    topic: shaft-hub-connection
+    subject: "shear pin"
+    predicate: "is"
+    object: "a pin deliberately undersized so that it breaks on a moderate overload, protecting critical parts"
+    normalized_statement: >-
+      Mott states that the diameter of a pin is sometimes purposely made small to
+      ensure that the pin will break if a moderate overload is encountered, in
+      order to protect critical parts of a mechanism, and that such a pin is
+      called a shear pin.
+    equations: ["11-18", "11-19"]
+    evidence: [mott6-es-0063]
+    about: ["melem:ShearPinConnection", "mech:LimitTransmittedTorque"]
+
+  - id: mott6-c-0053
+    doc: mott6
+    topic: shaft-hub-connection
+    subject: "pin-type connections"
+    predicate: "produce"
+    object: "stress concentrations in the shaft"
+    normalized_statement: >-
+      Mott states that the presence of any of the pin-type connections produces
+      stress concentrations in the shaft.
+    evidence: [mott6-es-0064]
+    about: ["melem:PinnedConnection", "mech:StressRaiser", "mech:TransverseHole"]
+
+  - id: mott6-c-0054
+    doc: mott6
+    topic: substitution
+    subject: "a steel ring compressed around a smooth shaft"
+    predicate: "allows"
+    object: "torque transmission between hub and shaft without a key"
+    normalized_statement: >-
+      Mott states that using a steel ring compressed tightly around a smooth shaft
+      allows torque to be transmitted between the hub of a power-transmitting
+      element and the shaft without a key, and describes a commercially available
+      locking assembly employing opposed tapered rings drawn together by fasteners.
+    evidence: [mott6-es-0065]
+    about: ["melem:KeylessLockingAssemblyAlternative", "mech:FrictionalLoadTransfer"]
+    external_authority: ["mdcore:RequiresManufacturerData"]
+
+  # --- Shigley on splines and fits -----------------------------------------
+  - id: shigley10-c-0040
+    doc: shigley10
+    topic: substitution
+    subject: "splines"
+    predicate: "are"
+    object: "essentially stubby gear teeth formed on the shaft outside diameter and the hub bore"
+    normalized_statement: >-
+      Shigley describes splines as essentially stubby gear teeth formed on the
+      outside of the shaft and on the inside of the hub of the load-transmitting
+      component, and notes that SAE and ANSI publish standards for splines.
+    standards: ["SAE spline standards", "ANSI spline standards"]
+    evidence: [shigley10-es-0010]
+    about: ["melem:Spline"]
+
+  - id: shigley10-c-0041
+    doc: shigley10
+    topic: substitution
+    subject: "splines compared with keys"
+    predicate: "are"
+    object: "generally much more expensive to manufacture, and usually unnecessary for simple torque transmission"
+    normalized_statement: >-
+      Shigley states that splines are generally much more expensive to manufacture
+      than keys and are usually not necessary for simple torque transmission.
+    conditions:
+      - "simple torque transmission (no axial motion or high-torque requirement)"
+    evidence: [shigley10-es-0011]
+    about: ["melem:Spline", "melem:Key", "mdcore:CostRequirement"]
+    analyst_note: >-
+      Directly comparable with Mott's 'the advantages of splines over keys are
+      many'. The two are not contradictory but differ in emphasis and in the
+      criterion foregrounded; preserved separately.
+
+  - id: shigley10-c-0042
+    doc: shigley10
+    topic: substitution
+    subject: "splines"
+    predicate: "are typically used to"
+    object: "transfer high torques"
+    normalized_statement: >-
+      Shigley states that splines are typically used to transfer high torques.
+    threshold:
+      term: "high torque"
+      is_universal: false
+      scope_note: "The source gives no numeric torque boundary; none may be introduced."
+    evidence: [shigley10-es-0012]
+    about: ["melem:Spline", "mdcore:TorqueCapacityRequirement"]
+
+  - id: shigley10-c-0043
+    doc: shigley10
+    topic: substitution
+    subject: "spline with a reasonably loose slip fit"
+    predicate: "allows"
+    object: "large axial motion between shaft and component while still transmitting torque"
+    normalized_statement: >-
+      Shigley states that one feature of a spline is that it can be made with a
+      reasonably loose slip fit to allow large axial motion between shaft and
+      component while still transmitting torque, which is useful for connecting
+      shafts where relative motion is common, such as a tractor power take-off.
+    conditions:
+      - "spline made with a reasonably loose slip fit"
+    evidence: [shigley10-es-0013]
+    about: ["melem:InvoluteSplineConnection", "mech:PermitAxialMotion", "mech:AxialSlidingUnderTorque", "mech:SlipFit"]
+
+  - id: shigley10-c-0044
+    doc: shigley10
+    topic: substitution
+    subject: "spline stress-concentration factors"
+    predicate: "are greatest at"
+    object: "the point where the spline ends and blends into the shaft, but are generally quite moderate"
+    normalized_statement: >-
+      Shigley states that stress-concentration factors for splines are greatest
+      where the spline ends and blends into the shaft, but are generally quite
+      moderate.
+    evidence: [shigley10-es-0014]
+    about: ["melem:Spline", "mech:StressRaiser"]
+
+  - id: shigley10-c-0045
+    doc: shigley10
+    topic: substitution
+    subject: "low torque transmission"
+    predicate: "may be achieved by"
+    object: "pins, setscrews in hubs, tapered fits and press fits"
+    normalized_statement: >-
+      Shigley states that for cases of low torque transmission various means of
+      transmitting torque are available, including pins, setscrews in hubs,
+      tapered fits and press fits.
+    conditions:
+      - "low torque transmission"
+    threshold:
+      term: "low torque"
+      is_universal: false
+      scope_note: "The source gives no numeric torque boundary; none may be introduced."
+    evidence: [shigley10-es-0015]
+    about: ["melem:PinnedConnection", "melem:SetscrewConnection", "melem:TaperedFitConnectionAlternative", "melem:PressFitConnectionAlternative"]
+
+  - id: shigley10-c-0046
+    doc: shigley10
+    topic: substitution
+    subject: "press and shrink fits"
+    predicate: "are used for"
+    object: "both torque transfer and axial location, with a usually quite small stress-concentration factor"
+    normalized_statement: >-
+      Shigley states that press and shrink fits for securing hubs to shafts are
+      used both for torque transfer and for preserving axial location, and that
+      the resulting stress-concentration factor is usually quite small.
+    evidence: [shigley10-es-0016]
+    about: ["melem:PressFitConnectionAlternative", "melem:ShrinkFitConnectionAlternative", "mech:LocateAxially"]
+
+  - id: shigley10-c-0047
+    doc: shigley10
+    topic: substitution
+    subject: "split hub clamped with screws"
+    predicate: "allows"
+    object: "disassembly and lateral adjustments"
+    normalized_statement: >-
+      Shigley states that a split hub clamped to the shaft with screws allows for
+      disassembly and lateral adjustments.
+    evidence: [shigley10-es-0017]
+    about: ["melem:ClampingHubConnectionAlternative", "mdcore:MaintainabilityRequirement"]
+
+  - id: shigley10-c-0048
+    doc: shigley10
+    topic: substitution
+    subject: "tapered fit between shaft and mounted device"
+    predicate: "permits disassembly but"
+    object: "does not provide good axial location of the mounted element"
+    normalized_statement: >-
+      Shigley states that tapered fits, often used on the overhanging end of a
+      shaft with a nut on a threaded shaft end, are useful because they can be
+      disassembled, but do not provide good axial location of the wheel on the
+      shaft.
+    evidence: [shigley10-es-0018]
+    about: ["melem:TaperedFitConnectionAlternative", "mech:LocateAxially"]
+
+  - id: shigley10-c-0049
+    doc: shigley10
+    topic: substitution
+    subject: "interference fits"
+    predicate: "can"
+    object: "minimise the need for shoulders and keyways"
+    normalized_statement: >-
+      Shigley states that interference fits between a shaft and its components can
+      sometimes be used effectively to minimise the need for shoulders and
+      keyways.
+    evidence: [shigley10-es-0040]
+    about: ["melem:InterferenceFitConnection", "mech:Keyseat", "mech:Shoulder"]
+
+  - id: shigley10-c-0050
+    doc: shigley10
+    topic: substitution
+    subject: "torque capacity of an interference fit"
+    predicate: "is estimated by"
+    object: "a friction analysis giving T = (pi/2) f p l d^2"
+    normalized_statement: >-
+      Shigley states that the torque an interference fit can transmit is estimated
+      by a simple friction analysis at the interface, the friction force being the
+      product of the coefficient of friction and the normal force, giving a torque
+      capacity T = (pi/2) f p l d^2, where f is the coefficient of friction, p the
+      interface pressure, l the hub length and d the nominal shaft diameter.
+    assumptions:
+      - "Uniform interface pressure over the full hub length."
+      - "A single representative coefficient of friction f, whose value the source does not fix here."
+      - "Capacity is the torque at the onset of gross slip, not a fatigue-rated capacity."
+    equations: ["7-48", "7-49"]
+    equation_transcription:
+      source: "rendered-page-image"
+      note: "Transcribed from the rendered page because the PDF text layer mis-maps mathematics glyphs in this source."
+    evidence: [shigley10-es-0041]
+    about: ["melem:PressFitConnectionAlternative", "melem:ShrinkFitConnectionAlternative", "mech:FrictionalLoadTransfer", "mech:FrictionTorqueCapacityCalculation"]
+
+  - id: shigley10-c-0051
+    doc: shigley10
+    topic: verification
+    subject: "interference-fit torque capacity check"
+    predicate: "must use"
+    object: "the minimum interference, to obtain the minimum pressure and hence the maximum torque the joint may be designed to transmit without slipping"
+    normalized_statement: >-
+      Shigley states that the minimum interference should be used to determine the
+      minimum pressure, which in turn bounds the maximum torque the joint should
+      be designed to transmit without slipping; the maximum interference is used
+      instead to check for excessive stress.
+    conditions:
+      - "tolerances exist on both mating diameters"
+    equations: ["7-39", "7-40", "7-42", "7-43"]
+    evidence: [shigley10-es-0042, shigley10-es-0045]
+    about: ["mech:FrictionTorqueCapacityCalculation", "mech:InterferencePressureCalculation", "mech:ConnectionSlip"]
+
+  - id: shigley10-c-0052
+    doc: shigley10
+    topic: verification
+    subject: "stress concentration due to a press fit"
+    predicate: "occurs in"
+    object: "the shaft bending stress near the ends of the hub; first estimates are typically not greater than 2"
+    normalized_statement: >-
+      Shigley states that a press fit produces a stress-concentration effect in
+      the shaft bending stress near the ends of the hub, due to the sudden change
+      from compressed to uncompressed material, that hub geometry makes
+      generalised values difficult to report, and that for first estimates values
+      are typically not greater than 2.
+    quantities:
+      - role: "press-fit stress-concentration factor, first estimate upper bound"
+        value: 2
+        unit: "dimensionless"
+        original_value: "not greater than 2"
+        original_unit: "dimensionless"
+    assumptions:
+      - "Value is described as a first estimate, not a design value."
+    conditions:
+      - "shaft bending stress near the ends of the hub"
+    evidence: [shigley10-es-0043, shigley10-es-0044]
+    about: ["melem:PressFitConnectionAlternative", "mech:StressRaiser", "mech:FatigueFracture"]
+
+  # =========================================================================
+  # PILOT TOPIC 4  --  verification: key stress analysis
+  # =========================================================================
+  - id: mott6-c-0060
+    doc: mott6
+    topic: verification
+    subject: "keys transmitting power"
+    predicate: "have"
+    object: "two basic potential failure modes: shear across the shaft/hub interface and bearing compression on the key sides"
+    normalized_statement: >-
+      Mott states that there are two basic modes of potential failure for keys
+      transmitting power: shear across the shaft/hub interface, and compression
+      failure due to the bearing action between the sides of the key and the shaft
+      or hub material.
+    figures: ["11-4"]
+    evidence: [mott6-es-0030]
+    about: ["melem:ParallelKeyConnection", "mech:ShearFailure", "mech:BearingCompressionFailure",
+            "mech:ShearStressCheck", "mech:BearingStressCheck"]
+
+  - id: mott6-c-0061
+    doc: mott6
+    topic: verification
+    subject: "minimum key length for shear"
+    predicate: "is computed from"
+    object: "L_min = 2T / (tau_d D W), with tau_d = 0.5 s_y / N from the maximum shear stress theory"
+    normalized_statement: >-
+      Mott sets the shearing stress equal to a design stress in shear based on the
+      maximum shear stress theory of failure, tau_d = 0.5 s_y / N, and obtains the
+      minimum required key length for shear as L_min = 2T / (tau_d D W), where T
+      is torque, D the shaft diameter and W the key width.
+    assumptions:
+      - "Maximum shear stress theory of failure."
+      - "Idealised force distribution in which the torque produces a single force on the key side."
+      - "Shear area taken as key width times key length."
+    equations: ["11-1", "11-2"]
+    equation_transcription:
+      source: "rendered-page-image"
+      note: "Transcribed from the rendered page; some math glyphs are dropped in this source's text layer."
+    evidence: [mott6-es-0031]
+    about: ["mech:ShearStressCheck", "mech:ShearFailure"]
+
+  - id: mott6-c-0062
+    doc: mott6
+    topic: verification
+    subject: "bearing failure of a key connection"
+    predicate: "occurs on"
+    object: "whichever of key, shaft keyseat or hub keyseat has the lowest compressive yield strength"
+    normalized_statement: >-
+      Mott states that failure in bearing relates to the compressive stress on the
+      side of the key, the shaft keyseat or the hub keyseat; the compression area
+      is the same for each, so failure occurs on the surface with the lowest
+      compressive yield strength.
+    equations: ["11-3", "11-4", "11-5"]
+    evidence: [mott6-es-0032]
+    about: ["mech:BearingStressCheck", "mech:BearingCompressionFailure"]
+
+  - id: mott6-c-0063
+    doc: mott6
+    topic: verification
+    subject: "design factor for parallel keys in typical industrial applications"
+    predicate: "is recommended as"
+    object: "N = 3, to accommodate accidental overloads and shock"
+    normalized_statement: >-
+      In its design procedure for parallel keys, Mott states that in typical
+      industrial applications a design factor N = 3 is adequate to accommodate
+      accidental overloads and shock.
+    quantities:
+      - role: "recommended design factor for parallel keys"
+        value: 3
+        unit: "dimensionless"
+        original_value: "3"
+        original_unit: "dimensionless"
+    conditions:
+      - "typical industrial applications"
+    procedures: ["design-procedure-parallel-keys"]
+    evidence: [mott6-es-0033]
+    about: ["melem:ParallelKeyConnection", "mdcore:SafetyRequirement"]
+    analyst_note: >-
+      To be read together with Shigley's warning against excessive safety factors
+      in key design. See the claim alignment; the two are not merged.
+
+  - id: mott6-c-0064
+    doc: mott6
+    topic: verification
+    subject: "required key length"
+    predicate: "is governed by"
+    object: "the larger of the lengths computed for shear and for bearing"
+    normalized_statement: >-
+      Mott states that where a rectangular key is used, or where the shaft or hub
+      has lower strength than the key, the minimum lengths for bearing and for
+      shear must both be computed and the larger governs; the result must be
+      checked against the available hub length.
+    conditions:
+      - "rectangular key, or shaft or hub weaker than the key"
+    procedures: ["design-procedure-parallel-keys"]
+    evidence: [mott6-es-0034, mott6-es-0036]
+    about: ["mech:ShearStressCheck", "mech:BearingStressCheck", "melem:ParallelKeyConnection"]
+
+  - id: shigley10-c-0060
+    doc: shigley10
+    topic: verification
+    subject: "key failure"
+    predicate: "may occur by"
+    object: "direct shear or by bearing stress"
+    normalized_statement: >-
+      Shigley states that failure of a key can be by direct shear or by bearing
+      stress, that the shaft diameter determines standard sizes for key width,
+      height and depth, and that the designer chooses the key length to carry the
+      torsional load.
+    tables: ["7-6"]
+    examples: ["7-6"]
+    evidence: [shigley10-es-0032]
+    about: ["melem:ParallelKeyConnection", "mech:ShearFailure", "mech:BearingCompressionFailure",
+            "mech:ShearStressCheck", "mech:BearingStressCheck"]
+
+  - id: shigley10-c-0061
+    doc: shigley10
+    topic: verification
+    subject: "location of shaft discontinuities"
+    predicate: "must be known to"
+    object: "determine the critical locations for stress analysis"
+    normalized_statement: >-
+      Shigley states that it is necessary to know where shaft discontinuities such
+      as keyways, holes and splines will be, in order to determine the critical
+      locations for analysis.
+    evidence: [shigley10-es-0019]
+    about: ["mech:StressConcentrationAssessment", "mech:Keyseat"]
+
+  - id: shigley10-c-0062
+    doc: shigley10
+    topic: verification
+    subject: "stress-concentration factors for an end-milled keyseat"
+    predicate: "are cited from"
+    object: "published stress-concentration charts, as a function of the groove radius to shaft diameter ratio"
+    normalized_statement: >-
+      Shigley cites published stress-concentration charts giving factors for an
+      end-milled keyseat as a function of the ratio of the groove-bottom radius to
+      the shaft diameter, with separate values for bending and for torsion, and
+      with a further distinction for torsion with the key in place.
+    assumptions:
+      - "Values are taken by the source from an external stress-concentration reference, not derived."
+    evidence: [shigley10-es-0038]
+    about: ["mech:Keyseat", "mech:StressRaiser", "mech:StressConcentrationAssessment"]
+    external_authority: ["mdcore:RequiresExternalStandard"]
+    analyst_note: >-
+      The numeric factors printed on this page fall in mathematics-font runs and
+      the text layer of this PDF mis-maps them. The numbers are therefore NOT
+      recorded as quantities in v0.1; only the structure of the claim is. They
+      require transcription from the rendered page before use.
+
+  # =========================================================================
+  # PILOT TOPIC 5  --  bearings: load / life
+  # =========================================================================
+  - id: mott6-c-0070
+    doc: mott6
+    topic: bearing-life
+    subject: "relationship between rolling-bearing load and life"
+    predicate: "is"
+    object: "L2 / L1 = (P1 / P2)^k"
+    normalized_statement: >-
+      Mott states the relationship between load P and life L for rolling contact
+      bearings as L2 / L1 = (P1 / P2)^k.
+    equations: ["14-1"]
+    equation_transcription:
+      source: "rendered-page-image"
+      note: "Transcribed from the rendered page to avoid the text layer's dropped math glyphs."
+    evidence: [mott6-es-0070]
+    about: ["melem:RollingContactBearing", "mech:BearingLifeCalculation"]
+
+  - id: mott6-c-0071
+    doc: mott6
+    topic: bearing-life
+    subject: "load/life exponent k"
+    predicate: "takes the values"
+    object: "3.00 for ball bearings and 3.33 for roller bearings"
+    normalized_statement: >-
+      Mott gives the load/life exponent k as 3.00 for ball bearings and 3.33 for
+      roller bearings.
+    quantities:
+      - role: "load/life exponent, ball bearings"
+        value: 3.00
+        unit: "dimensionless"
+        original_value: "3.00"
+        original_unit: "dimensionless"
+      - role: "load/life exponent, roller bearings"
+        value: 3.33
+        unit: "dimensionless"
+        original_value: "3.33"
+        original_unit: "dimensionless"
+    equations: ["14-1"]
+    evidence: [mott6-es-0071]
+    about: ["melem:BallBearing", "melem:RollerBearing", "mech:BearingLifeCalculation"]
+
+  - id: mott6-c-0072
+    doc: mott6
+    topic: bearing-life
+    subject: "basic static load rating C_o"
+    predicate: "is"
+    object: "the load a bearing can withstand without permanent deformation of any component"
+    normalized_statement: >-
+      Mott states that the basic static load rating C_o is the load the bearing can
+      withstand without permanent deformation of any component; exceeding it most
+      probably indents a race, a failure referred to as brinelling, after which
+      operation would be noisy and progressive failure would follow.
+    evidence: [mott6-es-0072, mott6-es-0073]
+    about: ["melem:RollingContactBearing", "mech:Brinelling", "mech:StaticLoadRatingCheck"]
+
+  - id: mott6-c-0073
+    doc: mott6
+    topic: bearing-life
+    subject: "rolling contact bearings"
+    predicate: "have"
+    object: "a finite life, eventually failing by fatigue due to high contact stresses"
+    normalized_statement: >-
+      Mott states that despite the use of very high strength steels, all rolling
+      contact bearings have a finite life and will eventually fail due to fatigue
+      because of the high contact stresses, the lighter the load the longer the
+      life.
+    evidence: [mott6-es-0074]
+    about: ["melem:RollingContactBearing", "mech:SurfaceFatigue", "mech:SurfacePitting"]
+
+  - id: mott6-c-0074
+    doc: mott6
+    topic: bearing-life
+    subject: "required basic dynamic load rating"
+    predicate: "is computed from"
+    object: "C = P_d (L_d / 10^6)^(1/k) for catalogue data rated at one million revolutions"
+    normalized_statement: >-
+      Mott states that where manufacturer load data are reported for one million
+      revolutions, the design life is L_d = (C / P_d)^k times 10^6 and the required
+      basic dynamic load rating is C = P_d (L_d / 10^6)^(1/k), with design
+      revolutions obtained from hours of operation and shaft speed.
+    assumptions:
+      - "Manufacturer's rating life is 10^6 revolutions; other rating bases require a different constant."
+    quantities:
+      - role: "assumed catalogue rating life"
+        value: 1000000
+        unit: "revolution"
+        original_value: "10^6"
+        original_unit: "rev"
+    equations: ["14-2", "14-3"]
+    evidence: [mott6-es-0076]
+    about: ["mech:BearingLifeCalculation"]
+
+  - id: mott6-c-0075
+    doc: mott6
+    topic: bearing-life
+    subject: "bearing design life"
+    predicate: "is specified by"
+    object: "the designer, considering the application, guided by a table of recommended values by application class"
+    normalized_statement: >-
+      Mott states that the design life is specified by the designer considering the
+      application, and provides a table of recommended design life in hours by
+      application class as a guide.
+    tables: ["14-4"]
+    evidence: [mott6-es-0075]
+    about: ["mdcore:LifeRequirement", "melem:RollingContactBearing"]
+
+  - id: mott6-c-0076
+    doc: mott6
+    topic: bearing-life
+    subject: "bearing selection for a real application"
+    predicate: "requires"
+    object: "published data from the specific manufacturer"
+    normalized_statement: >-
+      Mott states that the tabulated bearing data in the book are similar to those
+      in manufacturers' catalogues, and that it is essential that published data
+      from specific manufacturers be used in any real application.
+    evidence: [mott6-es-0077]
+    about: ["melem:RollingContactBearing"]
+    external_authority: ["mdcore:RequiresManufacturerData"]
+
+  - id: shigley10-c-0070
+    doc: shigley10
+    topic: bearing-life
+    subject: "rating life"
+    predicate: "is defined as"
+    object: "the number of revolutions, or hours at constant speed, that 90 percent of a group of nominally identical bearings will achieve or exceed before the failure criterion develops"
+    normalized_statement: >-
+      Shigley states that the rating life, a term sanctioned by the ABMA and used
+      by most manufacturers, is the number of revolutions or hours at constant
+      speed that 90 percent of a group of nominally identical bearings will
+      achieve or exceed before the failure criterion develops; it is the 10th
+      percentile of the revolutions-to-failure distribution.
+    quantities:
+      - role: "survival fraction defining rating life"
+        value: 90
+        unit: "percent"
+        original_value: "90"
+        original_unit: "percent"
+    standards: ["ABMA (cited without a standard number)"]
+    evidence: [shigley10-es-0050]
+    about: ["melem:RollingContactBearing", "mdcore:LifeRequirement", "mdcore:ReliabilityRequirement"]
+
+  - id: shigley10-c-0071
+    doc: shigley10
+    topic: bearing-life
+    subject: "minimum life, L10 life and B10 life"
+    predicate: "are"
+    object: "synonyms for rating life"
+    normalized_statement: >-
+      Shigley states that the terms minimum life, L10 life and B10 life are used
+      as synonyms for rating life.
+    evidence: [shigley10-es-0051]
+    about: ["melem:RollingContactBearing", "mdcore:LifeRequirement"]
+
+  - id: shigley10-c-0072
+    doc: shigley10
+    topic: bearing-life
+    subject: "median life"
+    predicate: "is"
+    object: "between 4 and 5 times the L10 life"
+    normalized_statement: >-
+      Shigley states that median life is the 50th percentile life of a group of
+      bearings, that the term average life has been used as a synonym for it
+      contributing to confusion, and that when many groups are tested the median
+      life is between 4 and 5 times the L10 life.
+    quantities:
+      - role: "ratio of median life to L10 life"
+        is_range: true
+        range_min: 4
+        range_max: 5
+        unit: "dimensionless"
+        original_value: "between 4 and 5 times"
+        original_unit: "dimensionless"
+    evidence: [shigley10-es-0052]
+    about: ["melem:RollingContactBearing", "mdcore:LifeRequirement"]
+
+  - id: shigley10-c-0073
+    doc: shigley10
+    topic: bearing-life
+    subject: "manufacturers' rating life"
+    predicate: "is most commonly"
+    object: "one million revolutions, with named exceptions"
+    normalized_statement: >-
+      Shigley states that each manufacturer chooses a specific rating life for
+      which load ratings are reported, that the most commonly used rating life is
+      10^6 revolutions, and that at least one well-known manufacturer instead
+      rates bearings at 3000 hours at 500 rev/min, equal to 90 million revolutions.
+    quantities:
+      - role: "most common catalogue rating life"
+        value: 1000000
+        unit: "revolution"
+        original_value: "10^6"
+        original_unit: "revolutions"
+      - role: "named alternative rating life"
+        value: 90000000
+        unit: "revolution"
+        original_value: "90(10^6)"
+        original_unit: "revolutions"
+    evidence: [shigley10-es-0053]
+    about: ["melem:RollingContactBearing"]
+    external_authority: ["mdcore:RequiresManufacturerData"]
+    analyst_note: >-
+      Decisive for cross-source comparison: a load/life exponent is meaningless
+      without the rating-life basis it is paired with.
+
+  - id: shigley10-c-0074
+    doc: shigley10
+    topic: bearing-life
+    subject: "load/life exponent a"
+    predicate: "takes the values"
+    object: "3 for ball bearings and 10/3 for cylindrical and tapered roller bearings"
+    normalized_statement: >-
+      Shigley states that regression of many tests on the load-life relation
+      F L^(1/a) = constant gives a = 3 for ball bearings and a = 10/3 for roller
+      bearings, both cylindrical and tapered.
+    quantities:
+      - role: "load/life exponent, ball bearings"
+        value: 3
+        unit: "dimensionless"
+        original_value: "3"
+        original_unit: "dimensionless"
+      - role: "load/life exponent, roller bearings"
+        value: 3.3333333333
+        unit: "dimensionless"
+        original_value: "10/3"
+        original_unit: "dimensionless"
+        conversion_method: "exact fraction 10/3 evaluated to 10 decimal places; the source prints the fraction, not a decimal"
+    assumptions:
+      - "Reliability associated with the fitted load-life line is 0.90."
+    equations: ["11-1"]
+    equation_transcription:
+      source: "rendered-page-image"
+      note: "Values confirmed on the rendered page; this PDF's text layer renders them as 'a 5 3' and 'a 5 10y3'."
+    evidence: [shigley10-es-0054]
+    about: ["melem:BallBearing", "melem:RollerBearing", "melem:CylindricalRollerBearing",
+            "melem:TaperedRollerBearing", "mech:BearingLifeCalculation"]
+
+  - id: shigley10-c-0075
+    doc: shigley10
+    topic: bearing-life
+    subject: "catalog load rating C10"
+    predicate: "is defined as"
+    object: "the radial load causing 10 percent of a group of bearings to fail at the manufacturer's rating life"
+    normalized_statement: >-
+      Shigley states that a catalog load rating, denoted C10, is the radial load
+      that causes 10 percent of a group of bearings to fail at the manufacturer's
+      rating life, and is often called the Basic Dynamic Load Rating when the
+      rating life is one million revolutions.
+    evidence: [shigley10-es-0055]
+    about: ["melem:RollingContactBearing", "mech:BearingLifeCalculation"]
+
+  - id: shigley10-c-0076
+    doc: shigley10
+    topic: bearing-life
+    subject: "Basic Load Rating"
+    predicate: "should be viewed as"
+    object: "a reference value, not an actual load to be achieved by a bearing"
+    normalized_statement: >-
+      Shigley states that the radial load necessary to cause failure at so low a
+      life would be unrealistically high, and that the Basic Load Rating should
+      consequently be viewed as a reference value rather than an actual load to be
+      achieved by a bearing.
+    evidence: [shigley10-es-0056]
+    about: ["melem:RollingContactBearing"]
+
+  - id: shigley10-c-0077
+    doc: shigley10
+    topic: bearing-life
+    subject: "needle bearings"
+    predicate: "are useful where"
+    object: "radial space is limited"
+    normalized_statement: >-
+      Shigley states that needle bearings are very useful where radial space is
+      limited, and have high load capacity when separators are used.
+    conditions:
+      - "radial space limited"
+    evidence: [shigley10-es-0057]
+    about: ["melem:NeedleBearingAlternative", "mdcore:SpaceRequirement"]
+
+  - id: shigley10-c-0078
+    doc: shigley10
+    topic: bearing-life
+    subject: "spherical roller thrust bearing"
+    predicate: "is useful where"
+    object: "heavy loads and misalignment occur"
+    normalized_statement: >-
+      Shigley states that the spherical-roller thrust bearing is useful where heavy
+      loads and misalignment occur, the spherical elements increasing their contact
+      area as load increases.
+    conditions:
+      - "heavy loads"
+      - "misalignment present"
+    threshold:
+      term: "heavy load"
+      is_universal: false
+      scope_note: "The source gives no numeric load boundary; none may be introduced."
+    evidence: [shigley10-es-0058]
+    about: ["melem:SphericalRollerBearingAlternative", "mech:Misalignment"]
+
+  - id: shigley10-c-0079
+    doc: shigley10
+    topic: bearing-life
+    subject: "tapered roller bearings"
+    predicate: "combine"
+    object: "the advantages of ball and straight roller bearings, taking radial or thrust load or any combination"
+    normalized_statement: >-
+      Shigley states that tapered roller bearings combine the advantages of ball
+      and straight roller bearings, since they can take radial or thrust loads or
+      any combination of the two, and additionally have the high load-carrying
+      capacity of straight roller bearings.
+    evidence: [shigley10-es-0059]
+    about: ["melem:TaperedRollerBearingAlternative", "mech:CarryRadialLoad", "mech:CarryThrustLoad"]

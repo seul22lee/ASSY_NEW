@@ -1,0 +1,105 @@
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix mdsh:   <https://w3id.org/mdkg/shapes#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix ev:     <https://w3id.org/mdkg/evidence#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+
+# ===========================================================================
+# SHACL :: rule layer and review discipline
+# ===========================================================================
+
+mdsh:DesignRuleShape a sh:NodeShape ;
+    sh:targetClass mdcore:DesignRule , mdcore:SelectionRule ,
+                   mdcore:SubstitutionRule , mdcore:VerificationRule ;
+    rdfs:label "A rule must be identified, stated, contextualised and attributable"@en ;
+
+    sh:property [
+        sh:path mdcore:ruleIdentifier ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:message "A DesignRule must carry the identifier of its YAML entry."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:ruleStatement ; sh:minCount 1 ;
+        sh:message "A DesignRule must state what it requires."@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:reviewStatus ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class mdcore:ReviewState ;
+        sh:message "A DesignRule must carry a review state."@en ;
+    ] ;
+    # Context is mandatory in the sense that its ABSENCE must be declared.
+    sh:or (
+        [ sh:path mdcore:ruleAppliesInContext ; sh:minCount 1 ]
+        [ sh:path mdcore:contextUnspecified ; sh:hasValue true ]
+    ) ;
+    sh:message """Every DesignRule must either state its applicable context or
+        explicitly declare that the context is unspecified. A rule that does
+        neither silently claims universal validity."""@en .
+
+mdsh:RuleAttributionShape a sh:NodeShape ;
+    sh:targetClass mdcore:DesignRule , mdcore:SelectionRule ,
+                   mdcore:SubstitutionRule , mdcore:VerificationRule ;
+    rdfs:label "A rule is either derived from a claim or declared analyst-authored"@en ;
+    sh:or (
+        [ sh:path mdcore:ruleDerivedFromClaim ; sh:minCount 1 ]
+        [ sh:path mdcore:ruleIsAnalystAuthored ; sh:hasValue true ]
+    ) ;
+    sh:message """Every DesignRule must either cite at least one claim it derives
+        from, or declare itself analyst-authored. A rule that is neither is
+        unsupported: it looks like textbook guidance but nothing backs it."""@en .
+
+mdsh:ReviewStateShape a sh:NodeShape ;
+    rdfs:label "Human verification requires a named reviewer and a date"@en ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            SELECT ?this WHERE { ?this mdcore:reviewStatus mdcore:HumanVerified . }
+        """ ;
+    ] ;
+    sh:property [
+        sh:path mdcore:reviewedBy ; sh:minCount 1 ;
+        sh:message """A HumanVerified state must name the person who verified it.
+            Automated pipelines may assign at most NeedsReview; an unattributed
+            HumanVerified is how machine output gets laundered into human
+            authority."""@en ;
+    ] ;
+    sh:property [
+        sh:path mdcore:reviewDate ; sh:minCount 1 ; sh:datatype xsd:date ;
+        sh:message "A HumanVerified state must record the date of verification."@en ;
+    ] .
+
+mdsh:AutomatedExtractionShape a sh:NodeShape ;
+    rdfs:label "An automatically extracted claim may not also be human verified"@en ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            PREFIX mdcore: <https://w3id.org/mdkg/core#>
+            PREFIX ev: <https://w3id.org/mdkg/evidence#>
+            SELECT ?this WHERE {
+                ?this a ev:ExtractedClaim ;
+                      mdcore:reviewStatus mdcore:HumanVerified .
+            }
+        """ ;
+    ] ;
+    sh:property [
+        sh:path mdcore:reviewedBy ; sh:minCount 1 ;
+        sh:message """An ExtractedClaim marked HumanVerified must name its reviewer.
+            Automatic extraction alone never promotes a claim past NeedsReview."""@en ;
+    ] .
+
+mdsh:TerminologyAlignmentShape a sh:NodeShape ;
+    sh:targetClass ev:TerminologyAlignment ;
+    sh:property [
+        sh:path ev:alignmentType ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class ev:AlignmentType ;
+        sh:message "A TerminologyAlignment must state its alignment type."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:commonConcept ; sh:minCount 1 ;
+        sh:message "A TerminologyAlignment must name the concept the terms share."@en ;
+    ] ;
+    sh:property [
+        sh:path ev:alignsSourceTerm ; sh:minCount 1 ;
+        sh:message "A TerminologyAlignment must record at least one source-specific term."@en ;
+    ] .

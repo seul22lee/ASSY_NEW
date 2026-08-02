@@ -1,0 +1,1619 @@
+# ###########################################################################
+# GENERATED FILE -- DO NOT EDIT BY HAND
+#
+# Produced by scripts/build_ontology.py from:
+#   ontology/core/artifact.ttl
+#   ontology/core/behavior.ttl
+#   ontology/core/context.ttl
+#   ontology/core/decision.ttl
+#   ontology/core/failure.ttl
+#   ontology/core/function.ttl
+#   ontology/core/requirement.ttl
+#   ontology/core/rule.ttl
+#   ontology/core/substitution.ttl
+#   ontology/core/verification.ttl
+#
+# Edit the inputs and re-run:  python3 scripts/build_ontology.py
+# ###########################################################################
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+mdcore:AlignmentRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "alignment"@en .
+
+mdcore:AnalyticalModel a owl:Class ;
+    rdfs:label "Analytical Model"@en ;
+    rdfs:subClassOf mdcore:CalculationMethod ;
+    skos:definition "A derived model of behaviour, stated with its assumptions and validity conditions."@en .
+
+mdcore:Assembly a owl:Class ;
+    rdfs:label "Assembly"@en ;
+    rdfs:subClassOf mdcore:DesignedArtifact ;
+    skos:altLabel "조립체"@ko ;
+    skos:definition """A designed artifact produced by joining two or more
+        artifacts through interfaces, and which is handled as a single item at
+        the next level of assembly."""@en .
+
+mdcore:AssemblyEffortRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "assembly and disassembly effort"@en .
+
+mdcore:AutomaticallyExtracted a mdcore:ReviewState ;
+    skos:altLabel "자동 추출"@ko ;
+    skos:inScheme mdcore:ReviewStateScheme ;
+    skos:prefLabel "automatically extracted"@en ;
+    mdcore:ordinalRank 1 .
+
+mdcore:AvailabilityConstraint a owl:Class ;
+    rdfs:label "Availability Constraint"@en ;
+    rdfs:subClassOf mdcore:EconomicCondition ;
+    skos:definition "Constraint arising from procurement lead time or from whether an element is a standard, catalogue item."@en .
+
+mdcore:CombinedLoading a owl:Class ;
+    rdfs:label "Combined Loading"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:definition "Two or more load types acting together, e.g. bending with torsion."@en .
+
+mdcore:Component a owl:Class ;
+    rdfs:label "Component"@en ;
+    rdfs:subClassOf mdcore:DesignedArtifact ;
+    skos:altLabel "구성 부품"@ko ;
+    skos:definition """A designed artifact treated as atomic at the level of
+        decomposition currently under consideration. Atomicity is relative to
+        the analysis, not absolute: a rolling bearing is a component to a shaft
+        designer and an assembly to a bearing manufacturer."""@en .
+
+mdcore:ComputedResult a mdcore:ValueProvenanceKind ;
+    skos:definition "Produced by the pipeline from other values; traceable to its inputs."@en ;
+    skos:inScheme mdcore:ValueProvenanceScheme ;
+    skos:prefLabel "computed result"@en .
+
+mdcore:ConditionallySubstitutable a mdcore:SubstitutionState ;
+    skos:altLabel "조건부 대체 가능"@ko ;
+    skos:definition """The candidate can replace the baseline only when stated
+        conditions hold or stated design modifications are made."""@en ;
+    skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "conditionally substitutable"@en ;
+    skos:scopeNote """Requires at least one mdcore:assessmentCondition or one
+        mdcore:requiredDesignModification. Enforced by SHACL."""@en .
+
+mdcore:Constraint a owl:Class ;
+    rdfs:label "Constraint"@en ;
+    rdfs:subClassOf mdcore:Requirement ;
+    skos:altLabel "제약조건"@ko ;
+    skos:definition """A requirement that bounds the admissible solution space
+        rather than expressing a desired level of performance; it is satisfied
+        or violated, and is not traded off."""@en ;
+    skos:scopeNote """Distinguishing Constraint from the general Requirement
+        matters for decision-making: constraints filter the candidate set
+        before any weighting or scoring is applied."""@en .
+
+mdcore:ContaminatedEnvironment a owl:Class ;
+    rdfs:label "Contaminated Environment"@en ;
+    rdfs:subClassOf mdcore:EnvironmentalCondition .
+
+mdcore:CorrosionResistanceRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "corrosion resistance"@en .
+
+mdcore:CorrosiveEnvironment a owl:Class ;
+    rdfs:label "Corrosive Environment"@en ;
+    rdfs:subClassOf mdcore:EnvironmentalCondition ;
+    skos:altLabel "부식 환경"@ko .
+
+mdcore:CostRequirement a mdcore:RequirementKind ;
+    skos:altLabel "비용"@ko ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "cost"@en .
+
+mdcore:DeflectionRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "deflection"@en .
+
+mdcore:DimensionalInspection a owl:Class ;
+    rdfs:label "Dimensional Inspection"@en ;
+    rdfs:subClassOf mdcore:InspectionMethod .
+
+mdcore:DirectlySubstitutable a mdcore:SubstitutionState ;
+    skos:altLabel "직접 대체 가능"@ko ;
+    skos:definition """The candidate can replace the baseline while preserving
+        the required function, the interfaces, the operating conditions and the
+        essential requirements, without significant redesign."""@en ;
+    skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "directly substitutable"@en ;
+    skos:scopeNote """Must never be inferred from a shared function. Requires
+        positive evidence on interface compatibility and on the binding
+        requirements."""@en .
+
+mdcore:DoesNotSatisfy a mdcore:SatisfactionLevel ;
+    skos:altLabel "미충족"@ko ;
+    skos:inScheme mdcore:SatisfactionScale ;
+    skos:prefLabel "does not satisfy"@en ;
+    mdcore:ordinalRank 1 .
+
+mdcore:EngineeringCalculation a owl:Class ;
+    rdfs:label "Engineering Calculation"@en ;
+    rdfs:subClassOf mdcore:CalculationMethod ;
+    skos:definition "A closed-form design calculation, typically a sizing or stress check."@en .
+
+mdcore:EngineeringInference a mdcore:ValueProvenanceKind ;
+    skos:definition "An analyst's reasoned conclusion that goes beyond what any cited source states. Never citable as textbook content."@en ;
+    skos:inScheme mdcore:ValueProvenanceScheme ;
+    skos:prefLabel "engineering inference"@en .
+
+mdcore:FatigueTest a owl:Class ;
+    rdfs:label "Fatigue Test"@en ;
+    rdfs:subClassOf mdcore:TestMethod .
+
+mdcore:FrequentAssembly a owl:Class ;
+    rdfs:label "Frequent Assembly"@en ;
+    rdfs:subClassOf mdcore:AssemblyCondition .
+
+mdcore:FrequentDisassembly a owl:Class ;
+    rdfs:label "Frequent Disassembly"@en ;
+    rdfs:subClassOf mdcore:MaintenanceCondition .
+
+mdcore:FullySatisfies a mdcore:SatisfactionLevel ;
+    skos:altLabel "완전 충족"@ko ;
+    skos:inScheme mdcore:SatisfactionScale ;
+    skos:prefLabel "fully satisfies"@en ;
+    mdcore:ordinalRank 4 .
+
+mdcore:FunctionalAlternative a mdcore:SubstitutionState ;
+    skos:altLabel "기능적 대안"@ko ;
+    skos:definition """Both alternatives can perform at least one common
+        required function, but they are not thereby interchangeable."""@en ;
+    skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "functional alternative"@en ;
+    skos:scopeNote """This is the strongest verdict that a shared function alone
+        can justify."""@en .
+
+mdcore:FunctionalTest a owl:Class ;
+    rdfs:label "Functional Test"@en ;
+    rdfs:subClassOf mdcore:TestMethod .
+
+mdcore:HumanVerified a mdcore:ReviewState ;
+    skos:altLabel "검증 완료"@ko ;
+    skos:inScheme mdcore:ReviewStateScheme ;
+    skos:prefLabel "human verified"@en ;
+    skos:scopeNote """Asserts that a named person compared the normalized
+        statement against the cited page and accepted it."""@en ;
+    mdcore:ordinalRank 4 .
+
+mdcore:InspectabilityRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "inspectability"@en .
+
+mdcore:InsufficientEvidence a mdcore:SubstitutionState ;
+    skos:altLabel "근거 부족"@ko ;
+    skos:definition """The available sources do not settle the question. Not a
+        negative verdict, and not a weak positive one."""@en ;
+    skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "insufficient evidence"@en .
+
+mdcore:InterfaceCompatibilityUnknown a mdcore:InterfaceCompatibilityLevel ;
+    skos:inScheme mdcore:InterfaceCompatibilityScheme ;
+    skos:prefLabel "interface compatibility unknown"@en .
+
+mdcore:InterfaceCompatibleWithRework a mdcore:InterfaceCompatibilityLevel ;
+    skos:definition "The interface can accept the candidate once a stated modification is made."@en ;
+    skos:inScheme mdcore:InterfaceCompatibilityScheme ;
+    skos:prefLabel "compatible after rework"@en .
+
+mdcore:InterfaceIdentical a mdcore:InterfaceCompatibilityLevel ;
+    skos:definition "Mating geometry, tolerances and fit class are unchanged."@en ;
+    skos:inScheme mdcore:InterfaceCompatibilityScheme ;
+    skos:prefLabel "interface identical"@en .
+
+mdcore:InterfaceIncompatible a mdcore:InterfaceCompatibilityLevel ;
+    skos:inScheme mdcore:InterfaceCompatibilityScheme ;
+    skos:prefLabel "interface incompatible"@en .
+
+mdcore:LifeRequirement a mdcore:RequirementKind ;
+    skos:altLabel "수명"@ko ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "life"@en .
+
+mdcore:LifeTest a owl:Class ;
+    rdfs:label "Life Test"@en ;
+    rdfs:subClassOf mdcore:TestMethod .
+
+mdcore:LinearMotion a owl:Class ;
+    rdfs:label "Linear Motion"@en ;
+    rdfs:subClassOf mdcore:KinematicCondition ;
+    skos:altLabel "직선운동"@ko .
+
+mdcore:LubricationCondition a owl:Class ;
+    rdfs:label "Lubrication Condition"@en ;
+    rdfs:subClassOf mdcore:EnvironmentalCondition ;
+    skos:altLabel "윤활 조건"@ko .
+
+mdcore:MaintainabilityRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "maintainability"@en .
+
+mdcore:MaintenanceCostConstraint a owl:Class ;
+    rdfs:label "Maintenance Cost Constraint"@en ;
+    rdfs:subClassOf mdcore:EconomicCondition .
+
+mdcore:MaintenanceFreeOperation a owl:Class ;
+    rdfs:label "Maintenance-Free Operation"@en ;
+    rdfs:subClassOf mdcore:MaintenanceCondition .
+
+mdcore:ManufacturabilityRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "manufacturability"@en .
+
+mdcore:ManufacturingCondition a owl:Class ;
+    rdfs:label "Manufacturing Condition"@en ;
+    rdfs:subClassOf mdcore:LifecycleCondition ;
+    skos:altLabel "제조 조건"@ko .
+
+mdcore:ManufacturingCostConstraint a owl:Class ;
+    rdfs:label "Manufacturing Cost Constraint"@en ;
+    rdfs:subClassOf mdcore:EconomicCondition .
+
+mdcore:MassRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "mass"@en .
+
+mdcore:MaterialInspection a owl:Class ;
+    rdfs:label "Material Inspection"@en ;
+    rdfs:subClassOf mdcore:InspectionMethod .
+
+mdcore:MotionAllowanceRequirement a mdcore:RequirementKind ;
+    skos:definition "Required freedom for relative motion between mating parts, for example permitted axial travel of a hub along a shaft."@en ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "motion allowance"@en .
+
+mdcore:NeedsReview a mdcore:ReviewState ;
+    skos:altLabel "검토 필요"@ko ;
+    skos:inScheme mdcore:ReviewStateScheme ;
+    skos:prefLabel "needs review"@en ;
+    skos:scopeNote "Highest state an automated pipeline may assign."@en ;
+    mdcore:ordinalRank 3 .
+
+mdcore:NoiseRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "noise"@en .
+
+mdcore:Normalized a mdcore:ReviewState ;
+    skos:altLabel "정규화됨"@ko ;
+    skos:inScheme mdcore:ReviewStateScheme ;
+    skos:prefLabel "normalized"@en ;
+    mdcore:ordinalRank 2 .
+
+mdcore:NormalizedInterpretation a mdcore:ValueProvenanceKind ;
+    skos:definition "An analyst's mapping of a source's wording onto the controlled scale; the wording is cited, the level is the analyst's."@en ;
+    skos:inScheme mdcore:ValueProvenanceScheme ;
+    skos:prefLabel "normalized qualitative interpretation"@en .
+
+mdcore:NotAnAlternative a mdcore:SubstitutionState ;
+    skos:altLabel "대안 아님"@ko ;
+    skos:definition """The candidate does not preserve the required function,
+        or cannot meet the interface, so replacement is not on the table."""@en ;
+    skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "not an alternative"@en .
+
+mdcore:NumericalSimulation a owl:Class ;
+    rdfs:label "Numerical Simulation"@en ;
+    rdfs:subClassOf mdcore:SimulationMethod .
+
+mdcore:OscillatingMotion a owl:Class ;
+    rdfs:label "Oscillating Motion"@en ;
+    rdfs:subClassOf mdcore:KinematicCondition .
+
+mdcore:OverloadCondition a owl:Class ;
+    rdfs:label "Overload Condition"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:definition "An occasional load exceeding the nominal design load, whether accidental or inherent to the duty."@en .
+
+mdcore:OverloadProtectionRequirement a mdcore:RequirementKind ;
+    skos:definition "Requirement that the connection fail preferentially, or limit transmitted load, when an overload occurs."@en ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "overload protection"@en .
+
+mdcore:PartiallySatisfies a mdcore:SatisfactionLevel ;
+    skos:altLabel "부분 충족"@ko ;
+    skos:inScheme mdcore:SatisfactionScale ;
+    skos:prefLabel "partially satisfies"@en ;
+    mdcore:ordinalRank 3 .
+
+mdcore:PositioningRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "positioning"@en .
+
+mdcore:PowerCapacityRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "power capacity"@en .
+
+mdcore:PreferredAlternative a mdcore:SubstitutionState ;
+    skos:altLabel "권장 대안"@ko ;
+    skos:definition """The candidate is substitutable and, in the stated
+        context and against the stated requirements, is to be preferred over
+        the baseline."""@en ;
+    skos:inScheme mdcore:SubstitutionStateScheme ;
+    skos:prefLabel "preferred alternative"@en ;
+    skos:scopeNote "A preference is always relative to the stated requirement set; it is not a general ranking."@en .
+
+mdcore:PrototypeTest a owl:Class ;
+    rdfs:label "Prototype Test"@en ;
+    rdfs:subClassOf mdcore:TestMethod .
+
+mdcore:Rejected a mdcore:ReviewState ;
+    skos:altLabel "기각됨"@ko ;
+    skos:inScheme mdcore:ReviewStateScheme ;
+    skos:prefLabel "rejected"@en ;
+    skos:scopeNote "Retained, not deleted, so that the same erroneous extraction is not re-proposed."@en ;
+    mdcore:ordinalRank 0 .
+
+mdcore:RelativeMotion a owl:Class ;
+    rdfs:label "Relative Motion Between Mating Parts"@en ;
+    rdfs:subClassOf mdcore:KinematicCondition ;
+    skos:definition """Motion of one mating part with respect to another across
+        a shared interface, such as axial sliding of a hub along a shaft while
+        torque is transmitted."""@en ;
+    skos:scopeNote """A decisive condition for shaft/hub connection choice, and
+        the reason several alternatives that share the function 'transmit
+        torque' are nonetheless not interchangeable."""@en .
+
+mdcore:ReliabilityRequirement a mdcore:RequirementKind ;
+    skos:altLabel "신뢰도"@ko ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "reliability"@en .
+
+mdcore:RequiredServiceLife a owl:Class ;
+    rdfs:label "Required Service Life"@en ;
+    rdfs:subClassOf mdcore:LifecycleCondition .
+
+mdcore:RequiresCompanySpecification a mdcore:ExternalAuthorityKind ;
+    skos:inScheme mdcore:ExternalAuthorityScheme ;
+    skos:prefLabel "requires internal company specification"@en .
+
+mdcore:RequiresEngineeringReview a mdcore:ExternalAuthorityKind ;
+    skos:inScheme mdcore:ExternalAuthorityScheme ;
+    skos:prefLabel "requires engineering review"@en .
+
+mdcore:RequiresExperimentalProtocol a mdcore:ExternalAuthorityKind ;
+    skos:inScheme mdcore:ExternalAuthorityScheme ;
+    skos:prefLabel "requires experimental protocol"@en .
+
+mdcore:RequiresExternalStandard a mdcore:ExternalAuthorityKind ;
+    skos:inScheme mdcore:ExternalAuthorityScheme ;
+    skos:prefLabel "requires external standard"@en .
+
+mdcore:RequiresManufacturerData a mdcore:ExternalAuthorityKind ;
+    skos:inScheme mdcore:ExternalAuthorityScheme ;
+    skos:prefLabel "requires manufacturer data"@en .
+
+mdcore:ReversingLoading a owl:Class ;
+    rdfs:label "Reversing Loading"@en ;
+    rdfs:subClassOf mdcore:CyclicLoading ;
+    skos:definition "Cyclic loading whose direction reverses, e.g. a shaft driven in both directions."@en .
+
+mdcore:RotationalMotion a owl:Class ;
+    rdfs:label "Rotational Motion"@en ;
+    rdfs:subClassOf mdcore:KinematicCondition ;
+    skos:altLabel "회전운동"@ko .
+
+mdcore:SafetyRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "safety"@en .
+
+mdcore:SatisfactionUnknown a mdcore:SatisfactionLevel ;
+    skos:altLabel "불명"@ko ;
+    skos:definition "Neither the sources nor the analyst can determine the level. Distinct from 'does not satisfy'."@en ;
+    skos:inScheme mdcore:SatisfactionScale ;
+    skos:prefLabel "unknown"@en .
+
+mdcore:SelectionCriterion a owl:Class ;
+    rdfs:label "Selection Criterion"@en ;
+    rdfs:subClassOf mdcore:EvaluationCriterion ;
+    skos:definition """An evaluation criterion used to choose among admissible
+        alternatives, as opposed to one used to screen them for
+        admissibility."""@en .
+
+mdcore:SelectionRule a owl:Class ;
+    rdfs:label "Selection Rule"@en ;
+    rdfs:subClassOf mdcore:DesignRule ;
+    skos:altLabel "선정 규칙"@ko ;
+    skos:definition "A rule that admits, excludes or ranks alternatives for a design problem."@en .
+
+mdcore:ShockLoading a owl:Class ;
+    rdfs:label "Shock Loading"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:altLabel "충격하중"@ko ;
+    skos:definition "Load applied suddenly, with a rise time short relative to the system's response."@en .
+
+mdcore:SourceDerivedValue a mdcore:ValueProvenanceKind ;
+    skos:definition "Printed in a cited source; must carry an EvidenceSpan."@en ;
+    skos:inScheme mdcore:ValueProvenanceScheme ;
+    skos:prefLabel "source-derived value"@en .
+
+mdcore:SpaceRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "space envelope"@en .
+
+mdcore:StaticLoading a owl:Class ;
+    rdfs:label "Static Loading"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:altLabel "정하중"@ko ;
+    skos:definition "Load applied gradually and held essentially constant."@en .
+
+mdcore:StiffnessRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "stiffness"@en .
+
+mdcore:SubstitutionRule a owl:Class ;
+    rdfs:label "Substitution Rule"@en ;
+    rdfs:subClassOf mdcore:DesignRule ;
+    skos:altLabel "대체 규칙"@ko ;
+    skos:definition "A rule that determines the substitution state of a candidate against a baseline in a context."@en .
+
+mdcore:TechnicalSystem a owl:Class ;
+    rdfs:label "Technical System"@en ;
+    rdfs:subClassOf mdcore:DesignedArtifact ;
+    skos:altLabel "기술 시스템"@ko ;
+    skos:definition """A designed artifact composed of interacting sub-artifacts
+        that together deliver a function no single sub-artifact delivers alone,
+        and whose boundary to its environment is explicitly identified."""@en .
+
+mdcore:TemperatureCondition a owl:Class ;
+    rdfs:label "Temperature Condition"@en ;
+    rdfs:subClassOf mdcore:EnvironmentalCondition .
+
+mdcore:TemperatureResistanceRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "temperature resistance"@en .
+
+mdcore:TemperatureTest a owl:Class ;
+    rdfs:label "Temperature Test"@en ;
+    rdfs:subClassOf mdcore:TestMethod .
+
+mdcore:TorqueCapacityRequirement a mdcore:RequirementKind ;
+    skos:altLabel "토크 용량"@ko ;
+    skos:broader mdcore:LoadCapacityRequirement ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "torque capacity"@en .
+
+mdcore:TorqueTest a owl:Class ;
+    rdfs:label "Torque Test"@en ;
+    rdfs:subClassOf mdcore:TestMethod .
+
+mdcore:Unit a owl:Class ;
+    rdfs:label "Unit"@en ;
+    skos:definition """A unit of measure. Identified by a symbol string; the
+        pipeline validates dimensional consistency with Pint rather than by
+        OWL reasoning."""@en .
+
+mdcore:UserDefinedWeight a mdcore:ValueProvenanceKind ;
+    skos:definition "A preference supplied by the user of the decision model."@en ;
+    skos:inScheme mdcore:ValueProvenanceScheme ;
+    skos:prefLabel "user-defined weight"@en .
+
+mdcore:VerificationRule a owl:Class ;
+    rdfs:label "Verification Rule"@en ;
+    rdfs:subClassOf mdcore:DesignRule ;
+    skos:definition "A rule that determines which verification methods are required for an alternative or failure mode."@en .
+
+mdcore:VibrationRequirement a mdcore:RequirementKind ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "vibration"@en .
+
+mdcore:VibrationTest a owl:Class ;
+    rdfs:label "Vibration Test"@en ;
+    rdfs:subClassOf mdcore:TestMethod .
+
+mdcore:WeaklySatisfies a mdcore:SatisfactionLevel ;
+    skos:inScheme mdcore:SatisfactionScale ;
+    skos:prefLabel "weakly satisfies"@en ;
+    mdcore:ordinalRank 2 .
+
+mdcore:acceptanceCriterionSpecified a owl:DatatypeProperty ;
+    rdfs:label "acceptance criterion specified by source"@en ;
+    rdfs:domain mdcore:VerificationMethod ;
+    rdfs:range xsd:boolean .
+
+mdcore:acceptanceStatement a owl:DatatypeProperty ;
+    rdfs:label "acceptance statement"@en ;
+    rdfs:domain mdcore:AcceptanceCriterion ;
+    rdfs:range xsd:string .
+
+mdcore:acceptanceThreshold a owl:ObjectProperty ;
+    rdfs:label "acceptance threshold"@en ;
+    rdfs:domain mdcore:AcceptanceCriterion ;
+    rdfs:range mdcore:QuantityValue .
+
+mdcore:addressesFailureMode a owl:ObjectProperty ;
+    rdfs:label "addresses failure mode"@en ;
+    rdfs:domain mdcore:VerificationMethod ;
+    rdfs:range mdcore:FailureMode .
+
+mdcore:againstCriterion a owl:ObjectProperty ;
+    rdfs:label "against criterion"@en ;
+    rdfs:domain mdcore:AlternativeEvaluation ;
+    rdfs:range mdcore:EvaluationCriterion .
+
+mdcore:aggravatedByCondition a owl:ObjectProperty ;
+    rdfs:label "aggravated by condition"@en ;
+    rdfs:domain mdcore:FailureMode ;
+    rdfs:range mdcore:OperatingCondition .
+
+mdcore:analystNote a owl:DatatypeProperty ;
+    rdfs:label "analyst note"@en ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "Explicitly the analyst's voice. Never quotable as source content."@en .
+
+mdcore:applicableContext a owl:ObjectProperty ;
+    rdfs:label "applicable in operating context"@en ;
+    rdfs:range mdcore:OperatingContext .
+
+mdcore:applicableRequirement a owl:ObjectProperty ;
+    rdfs:label "applicable requirement"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:Requirement .
+
+mdcore:assessmentAdvantage a owl:ObjectProperty ;
+    rdfs:label "advantage of substituting"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:AlternativeEvaluation .
+
+mdcore:assessmentConclusion a owl:ObjectProperty ;
+    rdfs:label "assessment conclusion"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:SubstitutionState .
+
+mdcore:assessmentCondition a owl:ObjectProperty ;
+    rdfs:label "substitution condition"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:OperatingCondition ;
+    skos:definition "A condition that must hold for the conclusion to apply."@en .
+
+mdcore:assessmentContext a owl:ObjectProperty ;
+    rdfs:label "assessment operating context"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:OperatingContext .
+
+mdcore:assessmentDisadvantage a owl:ObjectProperty ;
+    rdfs:label "disadvantage of substituting"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:AlternativeEvaluation .
+
+mdcore:assessmentTradeOff a owl:ObjectProperty ;
+    rdfs:label "trade-off of substituting"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:TradeOff .
+
+mdcore:baselineAlternative a owl:ObjectProperty ;
+    rdfs:label "baseline alternative"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:DesignAlternative ;
+    skos:definition "The alternative currently assumed, which the candidate would displace."@en .
+
+mdcore:behaviorRequiresCondition a owl:ObjectProperty ;
+    rdfs:label "behavior requires condition"@en ;
+    rdfs:domain mdcore:Behavior ;
+    rdfs:range mdcore:OperatingCondition ;
+    skos:definition """A condition that must hold for the behavior to occur at
+        all, for example a maintained normal pressure for a friction-based
+        load transfer."""@en .
+
+mdcore:candidateAlternative a owl:ObjectProperty ;
+    rdfs:label "candidate alternative"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:DesignAlternative ;
+    skos:definition "The alternative proposed as a replacement."@en .
+
+mdcore:candidateSetFor a owl:ObjectProperty ;
+    rdfs:label "candidate set for problem"@en ;
+    rdfs:domain mdcore:CandidateSet ;
+    rdfs:range mdcore:DesignProblem .
+
+mdcore:causedByFailureMechanism a owl:ObjectProperty ;
+    rdfs:label "caused by failure mechanism"@en ;
+    rdfs:domain mdcore:FailureMode ;
+    rdfs:range mdcore:FailureMechanism .
+
+mdcore:conditionParameter a owl:ObjectProperty ;
+    rdfs:label "condition parameter"@en ;
+    rdfs:domain mdcore:OperatingCondition ;
+    rdfs:range mdcore:QuantityValue ;
+    skos:definition "A quantified parameter of the condition, with its unit."@en .
+
+mdcore:conditionStatement a owl:DatatypeProperty ;
+    rdfs:label "condition statement"@en ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "Human-readable restatement. Never the only representation: a structured condition must also be given."@en .
+
+mdcore:confidence a owl:DatatypeProperty ;
+    rdfs:label "confidence"@en ;
+    rdfs:range xsd:decimal ;
+    skos:scopeNote "In [0,1]. An analyst's or extractor's stated confidence, never a probability derived from data unless the source supplied one."@en .
+
+mdcore:connects a owl:ObjectProperty ;
+    rdfs:label "connects"@en ;
+    rdfs:domain mdcore:Interface ;
+    rdfs:range mdcore:DesignedArtifact ;
+    skos:definition "Relates an interface to each artifact it joins."@en .
+
+mdcore:contextUnspecified a owl:DatatypeProperty ;
+    rdfs:label "context deliberately unspecified"@en ;
+    rdfs:range xsd:boolean ;
+    skos:definition """Explicit marker that a statement's applicable context is
+        not stated by its source. Forces the absence of context to be a
+        recorded fact rather than an oversight."""@en .
+
+mdcore:conversionMethod a owl:DatatypeProperty ;
+    rdfs:label "conversion method"@en ;
+    rdfs:domain mdcore:QuantityValue ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "For example 'pint 0.24; 1 psi = 6894.757 Pa; exact'. Required whenever normalizedValue differs from numericValue."@en .
+
+mdcore:decidesProblem a owl:ObjectProperty ;
+    rdfs:label "decides problem"@en ;
+    rdfs:domain mdcore:DesignDecision ;
+    rdfs:range mdcore:DesignProblem .
+
+mdcore:decomposesFunction a owl:ObjectProperty ;
+    rdfs:label "decomposes function"@en ;
+    rdfs:domain mdcore:FunctionDecomposition ;
+    rdfs:range mdcore:Function .
+
+mdcore:definesTerm a owl:DatatypeProperty ;
+    rdfs:label "defines qualitative term"@en ;
+    rdfs:domain mdcore:ThresholdDefinition ;
+    rdfs:range xsd:string .
+
+mdcore:derivedFromRequirement a owl:ObjectProperty ;
+    rdfs:label "derived from requirement"@en ;
+    rdfs:domain mdcore:EvaluationCriterion ;
+    rdfs:range mdcore:Requirement .
+
+mdcore:enablesBehavior a owl:ObjectProperty ;
+    rdfs:label "enables behavior"@en ;
+    owl:inverseOf mdcore:enabledBy .
+
+mdcore:evaluatesAlternative a owl:ObjectProperty ;
+    rdfs:label "evaluates alternative"@en ;
+    rdfs:domain mdcore:AlternativeEvaluation ;
+    rdfs:range mdcore:DesignAlternative .
+
+mdcore:evaluationLevel a owl:ObjectProperty ;
+    rdfs:label "evaluation level"@en ;
+    rdfs:domain mdcore:AlternativeEvaluation ;
+    rdfs:range mdcore:SatisfactionLevel .
+
+mdcore:evaluationQuantity a owl:ObjectProperty ;
+    rdfs:label "evaluation numeric value"@en ;
+    rdfs:domain mdcore:AlternativeEvaluation ;
+    rdfs:range mdcore:QuantityValue ;
+    skos:scopeNote """Present only when the source printed a number, or when the
+        value is explicitly marked as an analyst-defined decision-model value
+        via mdcore:valueProvenance."""@en .
+
+mdcore:evaluationScale a owl:DatatypeProperty ;
+    rdfs:label "evaluation scale"@en ;
+    rdfs:domain mdcore:AlternativeEvaluation ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "Names the scale used, e.g. 'mdkg qualitative satisfaction scale v1' or 'lbf'."@en .
+
+mdcore:exclusionRationale a owl:DatatypeProperty ;
+    rdfs:label "exclusion rationale"@en ;
+    rdfs:domain mdcore:CandidateSet ;
+    rdfs:range xsd:string .
+
+mdcore:functionBeingPreserved a owl:ObjectProperty ;
+    rdfs:label "function being preserved"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:Function ;
+    skos:scopeNote """Mandatory. Substitution claims that do not say what is
+        being preserved are not interpretable."""@en .
+
+mdcore:hasAcceptanceCriterion a owl:ObjectProperty ;
+    rdfs:label "has acceptance criterion"@en ;
+    rdfs:domain mdcore:VerificationMethod ;
+    rdfs:range mdcore:AcceptanceCriterion .
+
+mdcore:hasAdvantage a owl:ObjectProperty ;
+    rdfs:label "has advantage"@en ;
+    rdfs:domain mdcore:DesignAlternative ;
+    rdfs:range mdcore:AlternativeEvaluation ;
+    skos:scopeNote "Points at an evaluation so that the advantage carries its context and provenance, rather than being a bare string."@en .
+
+mdcore:hasCandidate a owl:ObjectProperty ;
+    rdfs:label "has candidate"@en ;
+    rdfs:domain mdcore:CandidateSet ;
+    rdfs:range mdcore:DesignAlternative .
+
+mdcore:hasCondition a owl:ObjectProperty ;
+    rdfs:label "has condition"@en ;
+    rdfs:domain mdcore:OperatingContext ;
+    rdfs:range mdcore:OperatingCondition .
+
+mdcore:hasConsequence a owl:ObjectProperty ;
+    rdfs:label "has failure consequence"@en ;
+    rdfs:domain mdcore:FailureMode ;
+    rdfs:range mdcore:FailureConsequence .
+
+mdcore:hasDesignFeature a owl:ObjectProperty ;
+    rdfs:label "has design feature"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:DesignFeature .
+
+mdcore:hasDisadvantage a owl:ObjectProperty ;
+    rdfs:label "has disadvantage"@en ;
+    rdfs:domain mdcore:DesignAlternative ;
+    rdfs:range mdcore:AlternativeEvaluation .
+
+mdcore:hasFunction a owl:ObjectProperty ;
+    rdfs:label "has function"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:Function ;
+    skos:definition """Relates an artifact to a function it is intended to
+        deliver. Intent, not observed behaviour."""@en .
+
+mdcore:hasGeometryFeature a owl:ObjectProperty ;
+    rdfs:label "has geometry feature"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:GeometryFeature .
+
+mdcore:hasInterface a owl:ObjectProperty ;
+    rdfs:label "has interface"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:Interface .
+
+mdcore:hasRationale a owl:ObjectProperty ;
+    rdfs:label "has rationale"@en ;
+    rdfs:domain mdcore:DesignDecision ;
+    rdfs:range mdcore:DecisionRationale .
+
+mdcore:hasRequirement a owl:ObjectProperty ;
+    rdfs:label "has requirement"@en ;
+    rdfs:domain mdcore:DesignProblem ;
+    rdfs:range mdcore:Requirement .
+
+mdcore:hasRequirementKind a owl:ObjectProperty ;
+    rdfs:label "has requirement kind"@en ;
+    rdfs:domain mdcore:Requirement ;
+    rdfs:range mdcore:RequirementKind .
+
+mdcore:hasSubFunction a owl:ObjectProperty,
+        owl:TransitiveProperty ;
+    rdfs:label "has sub-function"@en ;
+    rdfs:domain mdcore:Function ;
+    rdfs:range mdcore:Function .
+
+mdcore:hasTargetValue a owl:ObjectProperty ;
+    rdfs:label "has target value"@en ;
+    rdfs:domain mdcore:Requirement ;
+    rdfs:range mdcore:QuantityValue .
+
+mdcore:initiatesAtFeature a owl:ObjectProperty ;
+    rdfs:label "initiates at geometry feature"@en ;
+    rdfs:domain mdcore:FailureMode ;
+    rdfs:range mdcore:GeometryFeature ;
+    skos:definition "The geometry feature at which the failure characteristically starts, such as a keyseat or a fillet."@en .
+
+mdcore:interfaceCompatibility a owl:ObjectProperty ;
+    rdfs:label "interface compatibility"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:InterfaceCompatibilityLevel .
+
+mdcore:introducedFailureMode a owl:ObjectProperty ;
+    rdfs:label "failure mode introduced by candidate"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:FailureMode .
+
+mdcore:isProtectiveFailure a owl:DatatypeProperty ;
+    rdfs:label "is protective (sacrificial) failure"@en ;
+    rdfs:domain mdcore:FailureMode ;
+    rdfs:range xsd:boolean ;
+    skos:definition """True when the failure of this element is deliberately
+        preferred to the failure of adjacent, costlier components."""@en .
+
+mdcore:madeOfMaterial a owl:ObjectProperty ;
+    rdfs:label "made of material"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:Material .
+
+mdcore:mayExperienceFailureMode a owl:ObjectProperty ;
+    rdfs:label "may experience failure mode"@en ;
+    rdfs:domain mdcore:DesignAlternative ;
+    rdfs:range mdcore:FailureMode ;
+    skos:scopeNote """Modal by design: asserts possibility in some context, not
+        inevitability. Pair with mdcore:aggravatedByCondition to say when."""@en .
+
+mdcore:mitigatedByDesignFeature a owl:ObjectProperty ;
+    rdfs:label "mitigated by design feature"@en ;
+    rdfs:domain mdcore:FailureMode ;
+    rdfs:range mdcore:DesignFeature .
+
+mdcore:mitigatedFailureMode a owl:ObjectProperty ;
+    rdfs:label "failure mode mitigated by candidate"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:FailureMode .
+
+mdcore:modificationEffort a owl:DatatypeProperty ;
+    rdfs:label "modification effort"@en ;
+    rdfs:domain mdcore:DesignModification ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "Qualitative and analyst-assigned unless a source states otherwise; mark with mdcore:valueProvenance."@en .
+
+mdcore:modificationStatement a owl:DatatypeProperty ;
+    rdfs:label "modification statement"@en ;
+    rdfs:domain mdcore:DesignModification ;
+    rdfs:range xsd:string .
+
+mdcore:modifiesInterface a owl:ObjectProperty ;
+    rdfs:label "modifies interface"@en ;
+    rdfs:domain mdcore:DesignModification ;
+    rdfs:range mdcore:Interface .
+
+mdcore:normalizedUnit a owl:DatatypeProperty ;
+    rdfs:label "normalized unit"@en ;
+    rdfs:domain mdcore:QuantityValue ;
+    rdfs:range xsd:string .
+
+mdcore:normalizedValue a owl:DatatypeProperty ;
+    rdfs:label "normalized value"@en ;
+    rdfs:domain mdcore:QuantityValue ;
+    rdfs:range xsd:decimal .
+
+mdcore:numericValue a owl:DatatypeProperty ;
+    rdfs:label "numeric value"@en ;
+    rdfs:domain mdcore:QuantityValue ;
+    rdfs:range xsd:decimal .
+
+mdcore:ordinalRank a owl:DatatypeProperty ;
+    rdfs:label "ordinal rank"@en ;
+    rdfs:range xsd:integer ;
+    skos:scopeNote """Ordering aid for queries. It is an ordinal, not a
+        measurement: the gaps between ranks carry no meaning and ranks must not
+        be averaged."""@en .
+
+mdcore:originalUnit a owl:DatatypeProperty ;
+    rdfs:label "original unit as printed"@en ;
+    rdfs:domain mdcore:QuantityValue ;
+    rdfs:range xsd:string .
+
+mdcore:originalValue a owl:DatatypeProperty ;
+    rdfs:label "original value as printed"@en ;
+    rdfs:domain mdcore:QuantityValue ;
+    rdfs:range xsd:string .
+
+mdcore:partOf a owl:ObjectProperty,
+        owl:TransitiveProperty ;
+    rdfs:label "part of"@en ;
+    owl:inverseOf mdcore:hasPart .
+
+mdcore:performsFunction a owl:ObjectProperty ;
+    rdfs:label "performs function"@en ;
+    rdfs:domain mdcore:DesignAlternative ;
+    rdfs:range mdcore:Function ;
+    skos:definition """Relates a design alternative to a function it is capable
+        of delivering. This is the entry point for the query 'what can perform
+        this function?'."""@en ;
+    skos:scopeNote """Shared performsFunction is necessary but NOT sufficient
+        for substitutability. See mdcore:SubstitutionAssessment."""@en .
+
+mdcore:problemContext a owl:ObjectProperty ;
+    rdfs:label "problem operating context"@en ;
+    rdfs:domain mdcore:DesignProblem ;
+    rdfs:range mdcore:OperatingContext .
+
+mdcore:rangeMaximum a owl:DatatypeProperty ;
+    rdfs:label "range maximum"@en ;
+    rdfs:domain mdcore:QuantityValue ;
+    rdfs:range xsd:decimal .
+
+mdcore:rangeMinimum a owl:DatatypeProperty ;
+    rdfs:label "range minimum"@en ;
+    rdfs:domain mdcore:QuantityValue ;
+    rdfs:range xsd:decimal .
+
+mdcore:rationaleStatement a owl:DatatypeProperty ;
+    rdfs:label "rationale statement"@en ;
+    rdfs:domain mdcore:DecisionRationale ;
+    rdfs:range xsd:string .
+
+mdcore:realizesFunction a owl:ObjectProperty ;
+    rdfs:label "realizes function"@en ;
+    rdfs:domain mdcore:Behavior ;
+    rdfs:range mdcore:Function ;
+    owl:inverseOf mdcore:realizedBy .
+
+mdcore:rejectsAlternative a owl:ObjectProperty ;
+    rdfs:label "rejects alternative"@en ;
+    rdfs:domain mdcore:DesignDecision ;
+    rdfs:range mdcore:DesignAlternative .
+
+mdcore:reliesOnEffect a owl:ObjectProperty ;
+    rdfs:label "relies on physical effect"@en ;
+    rdfs:domain mdcore:Behavior ;
+    rdfs:range mdcore:PhysicalEffect .
+
+mdcore:requiredDesignModification a owl:ObjectProperty ;
+    rdfs:label "required design modification"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:DesignModification .
+
+mdcore:requiredVerification a owl:ObjectProperty ;
+    rdfs:label "verification required before substituting"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:VerificationMethod .
+
+mdcore:requirementApplicableIn a owl:ObjectProperty ;
+    rdfs:label "requirement applicable in context"@en ;
+    rdfs:domain mdcore:Requirement ;
+    rdfs:range mdcore:OperatingContext .
+
+mdcore:requirementStatement a owl:DatatypeProperty ;
+    rdfs:label "requirement statement"@en ;
+    rdfs:domain mdcore:Requirement ;
+    rdfs:range xsd:string .
+
+mdcore:requiresAnalysis a owl:ObjectProperty ;
+    rdfs:label "requires analysis"@en ;
+    rdfs:domain mdcore:FailureMode ;
+    rdfs:range mdcore:VerificationMethod .
+
+mdcore:requiresExternalAuthority a owl:ObjectProperty ;
+    rdfs:label "requires external authority"@en ;
+    rdfs:domain mdcore:VerificationMethod ;
+    rdfs:range mdcore:ExternalAuthorityKind .
+
+mdcore:requiresFunction a owl:ObjectProperty ;
+    rdfs:label "requires function"@en ;
+    rdfs:domain mdcore:DesignProblem ;
+    rdfs:range mdcore:Function .
+
+mdcore:requiresInspection a owl:ObjectProperty ;
+    rdfs:label "requires inspection"@en ;
+    rdfs:range mdcore:InspectionMethod .
+
+mdcore:requiresTest a owl:ObjectProperty ;
+    rdfs:label "requires test"@en ;
+    rdfs:range mdcore:TestMethod .
+
+mdcore:reviewDate a owl:DatatypeProperty ;
+    rdfs:label "review date"@en ;
+    rdfs:range xsd:date .
+
+mdcore:reviewStatus a owl:ObjectProperty ;
+    rdfs:label "review status"@en ;
+    rdfs:range mdcore:ReviewState .
+
+mdcore:reviewedBy a owl:DatatypeProperty ;
+    rdfs:label "reviewed by"@en ;
+    rdfs:range xsd:string .
+
+mdcore:ruleAppliesInContext a owl:ObjectProperty ;
+    rdfs:label "rule applies in context"@en ;
+    rdfs:domain mdcore:DesignRule ;
+    rdfs:range mdcore:OperatingContext .
+
+mdcore:ruleConcernsAlternative a owl:ObjectProperty ;
+    rdfs:label "rule concerns alternative"@en ;
+    rdfs:domain mdcore:DesignRule ;
+    rdfs:range mdcore:DesignAlternative .
+
+mdcore:ruleConcernsFunction a owl:ObjectProperty ;
+    rdfs:label "rule concerns function"@en ;
+    rdfs:domain mdcore:DesignRule ;
+    rdfs:range mdcore:Function .
+
+mdcore:ruleDerivedFromClaim a owl:ObjectProperty ;
+    rdfs:label "rule derived from claim"@en ;
+    rdfs:domain mdcore:DesignRule ;
+    skos:scopeNote "Range is ev:Claim. A rule with no derived-from claim and no analyst attribution is unsupported."@en .
+
+mdcore:ruleIdentifier a owl:DatatypeProperty ;
+    rdfs:label "rule identifier"@en ;
+    rdfs:domain mdcore:DesignRule ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "Must match the `id` of the corresponding entry in rules/*.yaml."@en .
+
+mdcore:ruleIsAnalystAuthored a owl:DatatypeProperty ;
+    rdfs:label "rule is analyst-authored"@en ;
+    rdfs:domain mdcore:DesignRule ;
+    rdfs:range xsd:boolean ;
+    skos:definition "True when the rule expresses ontology-engineering or engineering judgement rather than a cited source statement."@en .
+
+mdcore:ruleStatement a owl:DatatypeProperty ;
+    rdfs:label "rule statement"@en ;
+    rdfs:domain mdcore:DesignRule ;
+    rdfs:range xsd:string .
+
+mdcore:satisfiedRequirement a owl:ObjectProperty ;
+    rdfs:label "requirement satisfied by candidate"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:Requirement .
+
+mdcore:selectsAlternative a owl:ObjectProperty ;
+    rdfs:label "selects alternative"@en ;
+    rdfs:domain mdcore:DesignDecision ;
+    rdfs:range mdcore:DesignAlternative .
+
+mdcore:sharesFunctionWith a owl:ObjectProperty,
+        owl:SymmetricProperty ;
+    rdfs:label "shares function with"@en ;
+    rdfs:domain mdcore:DesignAlternative ;
+    rdfs:range mdcore:DesignAlternative ;
+    skos:definition """Two alternatives can perform at least one common
+        function. Symmetric, because co-function genuinely is symmetric --
+        unlike substitutability, which is not."""@en .
+
+mdcore:substitutionAssessedAs a owl:ObjectProperty ;
+    rdfs:label "substitution assessed as"@en ;
+    rdfs:domain mdcore:DesignAlternative ;
+    rdfs:range mdcore:DesignAlternative ;
+    skos:definition """A convenience shortcut from candidate to baseline,
+        materialised by the build pipeline from an existing
+        SubstitutionAssessment and never asserted by hand."""@en ;
+    skos:scopeNote """Explicitly NOT owl:SymmetricProperty and NOT
+        owl:TransitiveProperty. Any reasoner configuration that makes it either
+        is a misuse of this ontology."""@en .
+
+mdcore:supportedByEvaluation a owl:ObjectProperty ;
+    rdfs:label "supported by evaluation"@en ;
+    rdfs:domain mdcore:DecisionRationale ;
+    rdfs:range mdcore:AlternativeEvaluation .
+
+mdcore:testProcedureSpecified a owl:DatatypeProperty ;
+    rdfs:label "test procedure specified by source"@en ;
+    rdfs:domain mdcore:VerificationMethod ;
+    rdfs:range xsd:boolean ;
+    skos:scopeNote """False means the source did not define instruments, load
+        levels, cycle counts or sequence. The ontology must not supply them."""@en .
+
+mdcore:testRecommended a owl:DatatypeProperty ;
+    rdfs:label "test recommended by source"@en ;
+    rdfs:domain mdcore:VerificationMethod ;
+    rdfs:range xsd:boolean .
+
+mdcore:thresholdContext a owl:ObjectProperty ;
+    rdfs:label "threshold applies in context"@en ;
+    rdfs:domain mdcore:ThresholdDefinition ;
+    rdfs:range mdcore:OperatingContext .
+
+mdcore:thresholdIsUniversal a owl:DatatypeProperty ;
+    rdfs:label "threshold claimed universal by source"@en ;
+    rdfs:domain mdcore:ThresholdDefinition ;
+    rdfs:range xsd:boolean ;
+    skos:scopeNote "Defaults to false. Set true only when the source explicitly presents the boundary as generally valid."@en .
+
+mdcore:thresholdScopeNote a owl:DatatypeProperty ;
+    rdfs:label "threshold scope note"@en ;
+    rdfs:domain mdcore:ThresholdDefinition ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "Records the limits the source itself placed on the boundary, e.g. that no sharp dividing line exists."@en .
+
+mdcore:thresholdValue a owl:ObjectProperty ;
+    rdfs:label "threshold value"@en ;
+    rdfs:domain mdcore:ThresholdDefinition ;
+    rdfs:range mdcore:QuantityValue .
+
+mdcore:tradeOffCosts a owl:ObjectProperty ;
+    rdfs:label "trade-off costs on criterion"@en ;
+    rdfs:domain mdcore:TradeOff ;
+    rdfs:range mdcore:EvaluationCriterion .
+
+mdcore:tradeOffGains a owl:ObjectProperty ;
+    rdfs:label "trade-off gains on criterion"@en ;
+    rdfs:domain mdcore:TradeOff ;
+    rdfs:range mdcore:EvaluationCriterion .
+
+mdcore:tradeOffStatement a owl:DatatypeProperty ;
+    rdfs:label "trade-off statement"@en ;
+    rdfs:domain mdcore:TradeOff ;
+    rdfs:range xsd:string .
+
+mdcore:unitSymbol a owl:DatatypeProperty ;
+    rdfs:label "unit symbol"@en ;
+    rdfs:domain mdcore:QuantityValue ;
+    rdfs:range xsd:string ;
+    skos:scopeNote "Use 'dimensionless' for pure numbers such as a design factor."@en .
+
+mdcore:usesEquation a owl:ObjectProperty ;
+    rdfs:label "uses equation"@en ;
+    rdfs:domain mdcore:VerificationMethod ;
+    skos:scopeNote "Range is ev:Equation, declared in the evidence module."@en .
+
+mdcore:valueIsRange a owl:DatatypeProperty ;
+    rdfs:label "value is a range"@en ;
+    rdfs:domain mdcore:QuantityValue ;
+    rdfs:range xsd:boolean .
+
+mdcore:valueProvenance a owl:ObjectProperty ;
+    rdfs:label "value provenance"@en ;
+    rdfs:range mdcore:ValueProvenanceKind ;
+    skos:scopeNote "Required on every AlternativeEvaluation and on every numeric value that is not directly quoted from a source."@en .
+
+mdcore:verifiedBy a owl:ObjectProperty ;
+    rdfs:label "verified by"@en ;
+    rdfs:range mdcore:VerificationMethod ;
+    skos:definition "Relates an alternative, requirement or failure mode to a method that checks it."@en .
+
+mdcore:verifiesRequirement a owl:ObjectProperty ;
+    rdfs:label "verifies requirement"@en ;
+    rdfs:domain mdcore:VerificationMethod ;
+    rdfs:range mdcore:Requirement .
+
+mdcore:violatedRequirement a owl:ObjectProperty ;
+    rdfs:label "requirement violated by candidate"@en ;
+    rdfs:domain mdcore:SubstitutionAssessment ;
+    rdfs:range mdcore:Requirement .
+
+mdcore:yieldsSubFunction a owl:ObjectProperty ;
+    rdfs:label "yields sub-function"@en ;
+    rdfs:domain mdcore:FunctionDecomposition ;
+    rdfs:range mdcore:Function .
+
+<https://w3id.org/mdkg/core/artifact> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:description """Structural backbone of the design ontology: designed
+        artifacts, their part structure, the interfaces through which they
+        connect, their geometry features and their materials."""@en ;
+    dcterms:title "mdkg core: artifact structure"@en ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/core/behavior> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg core: behavior"@en ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/core/context> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg core: operating context and conditions"@en ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/core/decision> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg core: design problem, alternatives and decisions"@en ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/core/failure> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg core: failure modes and mechanisms"@en ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/core/function> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg core: function"@en ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/core/requirement> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg core: requirement, quantity and threshold"@en ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/core/rule> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg core: design rules and review states"@en ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/core/substitution> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg core: context-dependent substitution assessment"@en ;
+    owl:versionInfo "0.1.0" .
+
+<https://w3id.org/mdkg/core/verification> a owl:Ontology ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en ;
+    dcterms:title "mdkg core: verification methods and acceptance"@en ;
+    owl:versionInfo "0.1.0" .
+
+mdcore:AssemblyCondition a owl:Class ;
+    rdfs:label "Assembly Condition"@en ;
+    rdfs:subClassOf mdcore:LifecycleCondition ;
+    skos:altLabel "조립 조건"@ko .
+
+mdcore:CyclicLoading a owl:Class ;
+    rdfs:label "Cyclic Loading"@en ;
+    rdfs:subClassOf mdcore:LoadingCondition ;
+    skos:altLabel "반복하중"@ko ;
+    skos:definition "Load that varies repeatedly with time, so that fatigue is a candidate failure mechanism."@en .
+
+mdcore:FailureConsequence a owl:Class ;
+    rdfs:label "Failure Consequence"@en ;
+    skos:definition """The effect of a failure mode on the containing system,
+        including whether the failure is benign, protective, or damaging to
+        adjacent components."""@en ;
+    skos:scopeNote """Needed to represent deliberately sacrificial elements,
+        where failure of one part is the intended way to protect others."""@en .
+
+mdcore:FailureMechanism a owl:Class ;
+    rdfs:label "Failure Mechanism"@en ;
+    skos:altLabel "고장 메커니즘"@ko ;
+    skos:definition """The physical, chemical or tribological process by which
+        a failure mode develops: fatigue crack growth, plastic yielding,
+        adhesive wear, corrosion, creep, fretting."""@en .
+
+mdcore:LoadCapacityRequirement a mdcore:RequirementKind ;
+    skos:altLabel "하중 용량"@ko ;
+    skos:inScheme mdcore:RequirementKindScheme ;
+    skos:prefLabel "load capacity"@en .
+
+mdcore:Material a owl:Class ;
+    rdfs:label "Material"@en ;
+    skos:altLabel "재료"@ko ;
+    skos:definition """A substance, or a specified condition of a substance,
+        from which an artifact is made, and to which property values such as
+        strength, stiffness and hardness can be attributed."""@en ;
+    skos:scopeNote """A Material instance should name its specification and
+        condition together where the source does so (for example 'SAE 1018
+        low-carbon steel'), because property values are condition-dependent."""@en .
+
+mdcore:PhysicalEffect a owl:Class ;
+    rdfs:label "Physical Effect"@en ;
+    rdfs:comment """Separated from Behavior so that alternatives relying on the
+        same principle (for example every friction-based shaft/hub connection)
+        can be retrieved as a family, independently of their geometry."""@en ;
+    skos:altLabel "물리 효과"@ko ;
+    skos:definition """The underlying physical principle a behavior relies on,
+        such as dry friction, elastic deformation or contact pressure."""@en .
+
+mdcore:SimulationMethod a owl:Class ;
+    rdfs:label "Simulation Method"@en ;
+    rdfs:subClassOf mdcore:VerificationMethod ;
+    skos:altLabel "시뮬레이션 방법"@ko .
+
+mdcore:enabledBy a owl:ObjectProperty ;
+    rdfs:label "enabled by"@en ;
+    rdfs:domain mdcore:Behavior ;
+    rdfs:range mdcore:DesignAlternative ;
+    skos:definition """Relates a behavior to a structure or design alternative
+        whose configuration makes that behavior possible."""@en .
+
+mdcore:hasPart a owl:ObjectProperty,
+        owl:TransitiveProperty ;
+    rdfs:label "has part"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:DesignedArtifact ;
+    skos:definition "Relates an artifact to an artifact contained within it."@en .
+
+mdcore:realizedBy a owl:ObjectProperty ;
+    rdfs:label "realized by"@en ;
+    rdfs:domain mdcore:Function ;
+    rdfs:range mdcore:Behavior ;
+    skos:definition "Relates a function to a behavior that produces it."@en .
+
+mdcore:CalculationMethod a owl:Class ;
+    rdfs:label "Calculation Method"@en ;
+    rdfs:subClassOf mdcore:VerificationMethod ;
+    skos:altLabel "계산 방법"@ko .
+
+mdcore:FunctionDecomposition a owl:Class ;
+    rdfs:label "Function Decomposition"@en ;
+    rdfs:comment """Reified so that competing decompositions of the same
+        function can coexist and be compared, rather than being merged."""@en ;
+    skos:altLabel "기능 분해"@ko ;
+    skos:definition """A reified statement that one function is fulfilled by a
+        named set of sub-functions under a stated rationale."""@en .
+
+mdcore:GeometryFeature a owl:Class ;
+    rdfs:label "Geometry Feature"@en ;
+    rdfs:subClassOf mdcore:DesignFeature ;
+    skos:altLabel "형상 특징"@ko ;
+    skos:definition """A named, bounded portion of an artifact's shape that
+        carries design intent, for example a groove, a fillet, a shoulder or a
+        hole. Geometry features are the usual carriers of stress concentration
+        and of manufacturing and inspection requirements."""@en .
+
+mdcore:MaintenanceCondition a owl:Class ;
+    rdfs:label "Maintenance Condition"@en ;
+    rdfs:subClassOf mdcore:LifecycleCondition ;
+    skos:altLabel "정비 조건"@ko .
+
+mdcore:AcceptanceCriterion a owl:Class ;
+    rdfs:label "Acceptance Criterion"@en ;
+    skos:altLabel "합격 기준"@ko ;
+    skos:definition """The condition a verification result must meet for the
+        design to be judged acceptable."""@en .
+
+mdcore:CandidateSet a owl:Class ;
+    rdfs:label "Candidate Set"@en ;
+    rdfs:comment """Reified so that the reason an alternative was excluded from
+        consideration is recoverable, not lost."""@en ;
+    skos:definition """The set of design alternatives admitted to comparison
+        for a given design problem, together with the filter that produced
+        it."""@en .
+
+mdcore:DecisionRationale a owl:Class ;
+    rdfs:label "Decision Rationale"@en ;
+    skos:altLabel "결정 근거"@ko ;
+    skos:definition """The stated reasoning for a design decision, including
+        the criteria that dominated and the alternatives rejected."""@en .
+
+mdcore:DesignFeature a owl:Class ;
+    rdfs:label "Design Feature"@en ;
+    rdfs:comment """Broader than GeometryFeature: a surface treatment or a
+        specified fit is a DesignFeature but not a GeometryFeature."""@en ;
+    skos:altLabel "설계 특징"@ko ;
+    skos:definition """Any deliberate characteristic of an artifact -- geometric,
+        material, dimensional or procedural -- introduced to influence
+        behaviour, for example to mitigate a failure mode."""@en .
+
+mdcore:EconomicCondition a owl:Class ;
+    rdfs:label "Economic Condition"@en ;
+    rdfs:subClassOf mdcore:OperatingCondition ;
+    skos:altLabel "경제적 조건"@ko .
+
+mdcore:InspectionMethod a owl:Class ;
+    rdfs:label "Inspection Method"@en ;
+    rdfs:subClassOf mdcore:VerificationMethod ;
+    skos:altLabel "검사 방법"@ko .
+
+mdcore:Interface a owl:Class ;
+    rdfs:label "Interface"@en ;
+    skos:altLabel "인터페이스"@ko ;
+    skos:definition """A region, surface or logical boundary at which two
+        artifacts meet and exchange force, motion, energy, matter or
+        information. Interfaces carry the compatibility conditions that decide
+        whether one design alternative can physically replace another."""@en ;
+    skos:scopeNote """Interface is reified rather than modelled as a bare
+        relation because substitution reasoning must attach conditions,
+        tolerances and required modifications to the junction itself."""@en .
+
+mdcore:DesignDecision a owl:Class ;
+    rdfs:label "Design Decision"@en ;
+    skos:altLabel "설계 결정"@ko ;
+    skos:definition """A recorded commitment to one alternative for a design
+        problem, with the evaluations and rationale that supported it."""@en .
+
+mdcore:DesignModification a owl:Class ;
+    rdfs:label "Design Modification"@en ;
+    skos:altLabel "설계 변경"@ko ;
+    skos:definition """A change to geometry, material, tolerance, interface or
+        process that must be carried out before a candidate can take the
+        baseline's place."""@en .
+
+mdcore:EnvironmentalCondition a owl:Class ;
+    rdfs:label "Environmental Condition"@en ;
+    rdfs:subClassOf mdcore:OperatingCondition ;
+    skos:altLabel "환경 조건"@ko .
+
+mdcore:InterfaceCompatibilityScheme a skos:ConceptScheme ;
+    skos:prefLabel "Interface compatibility levels"@en .
+
+mdcore:KinematicCondition a owl:Class ;
+    rdfs:label "Kinematic Condition"@en ;
+    rdfs:subClassOf mdcore:OperatingCondition ;
+    skos:altLabel "운동 조건"@ko ;
+    skos:definition "The motion regime in which the artifact operates."@en .
+
+mdcore:LifecycleCondition a owl:Class ;
+    rdfs:label "Lifecycle Condition"@en ;
+    rdfs:subClassOf mdcore:OperatingCondition ;
+    skos:definition "A condition arising from how the artifact is made, assembled, serviced or retired."@en .
+
+mdcore:TradeOff a owl:Class ;
+    rdfs:label "Trade-Off"@en ;
+    skos:altLabel "상충관계"@ko ;
+    skos:definition """A reified statement that gaining on one criterion costs
+        performance on another, for a given alternative in a given context."""@en .
+
+mdcore:Behavior a owl:Class ;
+    rdfs:label "Behavior"@en ;
+    skos:altLabel "거동"@ko ;
+    skos:definition """A physical process by which a structure produces a
+        function under given operating conditions, described in terms of the
+        quantities that are exchanged or transformed."""@en ;
+    skos:scopeNote """Behavior answers 'by what mechanism?'. 'Transmit torque'
+        is a Function; 'transfer load by shear across a shaft/hub interface'
+        is a Behavior."""@en .
+
+mdcore:DesignProblem a owl:Class ;
+    rdfs:label "Design Problem"@en ;
+    skos:altLabel "설계 문제"@ko ;
+    skos:definition """A stated need for a design solution, characterised by
+        the functions required, the operating context, and the requirements
+        and constraints that a solution must satisfy."""@en .
+
+mdcore:EvaluationCriterion a owl:Class ;
+    rdfs:label "Evaluation Criterion"@en ;
+    skos:altLabel "평가 기준"@ko ;
+    skos:definition """A dimension along which design alternatives are compared,
+        derived from a requirement or from a stakeholder concern."""@en .
+
+mdcore:ExternalAuthorityScheme a skos:ConceptScheme ;
+    skos:prefLabel "External authority kinds"@en .
+
+mdcore:InterfaceCompatibilityLevel a owl:Class ;
+    rdfs:label "Interface Compatibility Level"@en ;
+    rdfs:subClassOf skos:Concept .
+
+mdcore:LoadingCondition a owl:Class ;
+    rdfs:label "Loading Condition"@en ;
+    rdfs:subClassOf mdcore:OperatingCondition ;
+    skos:altLabel "하중 조건"@ko ;
+    skos:definition "How force, moment or pressure is applied over time."@en .
+
+mdcore:ReviewStateScheme a skos:ConceptScheme ;
+    dcterms:description """Promotion ladder. An automated process may assign at
+        most NeedsReview; only a human may assign HumanVerified or
+        Rejected."""@en ;
+    skos:prefLabel "Review states"@en .
+
+mdcore:SatisfactionScale a skos:ConceptScheme ;
+    dcterms:description """Ordered qualitative scale. 'Unknown' is a first-class
+        value and must not be collapsed to 'does not satisfy'."""@en ;
+    skos:prefLabel "mdkg qualitative satisfaction scale v1"@en .
+
+mdcore:ThresholdDefinition a owl:Class ;
+    rdfs:label "Threshold Definition"@en ;
+    skos:altLabel "임계값 정의"@ko ;
+    skos:definition """A reified statement that some qualitative term is given
+        a specific boundary value, valid only within a named context and only
+        on the authority of a named source."""@en ;
+    skos:scopeNote """This class exists to prevent the ontology from asserting
+        universal boundaries for vague terms. If no source defines a boundary,
+        no ThresholdDefinition is created and the qualitative term remains
+        unquantified, which downstream queries must treat as unknown rather
+        than as false."""@en .
+
+mdcore:ValueProvenanceScheme a skos:ConceptScheme ;
+    skos:prefLabel "Value provenance kinds"@en .
+
+mdcore:ExternalAuthorityKind a owl:Class ;
+    rdfs:label "External Authority Kind"@en ;
+    rdfs:subClassOf skos:Concept ;
+    skos:definition "The kind of external source that must supply what the textbooks left unspecified."@en .
+
+mdcore:ReviewState a owl:Class ;
+    rdfs:label "Review State"@en ;
+    rdfs:subClassOf skos:Concept ;
+    skos:altLabel "검토 상태"@ko ;
+    skos:definition "Position of a claim, rule or assessment on the promotion ladder."@en .
+
+mdcore:SatisfactionLevel a owl:Class ;
+    rdfs:label "Satisfaction Level"@en ;
+    rdfs:subClassOf skos:Concept ;
+    skos:definition "A qualitative degree to which an alternative meets a criterion."@en .
+
+mdcore:SubstitutionStateScheme a skos:ConceptScheme ;
+    dcterms:description """Five mutually exclusive verdicts plus an explicit
+        evidence-gap verdict. The scheme is ordered by strength of claim, but
+        the order is not a scale: InsufficientEvidence sits outside it."""@en ;
+    skos:prefLabel "Substitution states"@en .
+
+mdcore:ValueProvenanceKind a owl:Class ;
+    rdfs:label "Value Provenance Kind"@en ;
+    rdfs:subClassOf skos:Concept ;
+    skos:definition "Where a stated value came from."@en .
+
+mdcore:OperatingContext a owl:Class ;
+    rdfs:label "Operating Context"@en ;
+    skos:altLabel "운전 조건 집합"@ko ;
+    skos:definition """A named bundle of operating conditions describing the
+        situation in which an artifact must function, against which
+        requirements, rules and substitution verdicts are evaluated."""@en ;
+    skos:scopeNote """An empty OperatingContext means 'context unspecified',
+        which is not the same as 'all contexts'. Rules attached to an empty
+        context must declare mdcore:contextUnspecified true."""@en .
+
+mdcore:SubstitutionState a owl:Class ;
+    rdfs:label "Substitution State"@en ;
+    rdfs:subClassOf skos:Concept ;
+    skos:definition "The conclusion reached by a substitution assessment."@en .
+
+mdcore:TestMethod a owl:Class ;
+    rdfs:label "Test Method"@en ;
+    rdfs:subClassOf mdcore:VerificationMethod ;
+    skos:altLabel "시험 방법"@ko .
+
+mdcore:AlternativeEvaluation a owl:Class ;
+    rdfs:label "Alternative Evaluation"@en ;
+    skos:altLabel "대안 평가"@ko ;
+    skos:definition """A reified statement that a design alternative attains a
+        stated level on a stated criterion, in a stated context, on stated
+        authority."""@en ;
+    skos:scopeNote """Reified because the same alternative scores differently
+        on the same criterion in different contexts, and because the
+        provenance of each score must travel with it."""@en .
+
+mdcore:DesignRule a owl:Class ;
+    rdfs:label "Design Rule"@en ;
+    skos:altLabel "설계 규칙"@ko ;
+    skos:definition """A conditional statement of the form 'in context C, for
+        requirement set R, do or prefer X', held as a citable object with its
+        own provenance and review state."""@en ;
+    skos:scopeNote """Every DesignRule must either name an applicable context or
+        declare mdcore:contextUnspecified true. A rule with neither is
+        invalid."""@en .
+
+mdcore:OperatingCondition a owl:Class ;
+    rdfs:label "Operating Condition"@en ;
+    skos:altLabel "운전 조건"@ko ;
+    skos:definition """A single characteristic of the situation in which an
+        artifact operates: how it is loaded, how it moves, what surrounds it,
+        how it is maintained, what it may cost."""@en .
+
+mdcore:DesignedArtifact a owl:Class ;
+    rdfs:label "Designed Artifact"@en ;
+    skos:altLabel "설계 대상물"@ko ;
+    skos:definition """Any human-made entity that is the intended outcome of a
+        design process, and about which functions, requirements and design
+        decisions can be asserted. Deliberately domain-neutral: a designed
+        artifact may be mechanical, electrical, software or organisational."""@en ;
+    skos:scopeNote """Use for the thing being designed, not for the design
+        description of it. A drawing of a shaft is a document, not a
+        DesignedArtifact."""@en .
+
+mdcore:FailureMode a owl:Class ;
+    rdfs:label "Failure Mode"@en ;
+    skos:altLabel "고장 모드"@ko ;
+    skos:definition """The manner in which an artifact ceases to perform a
+        required function, described observably: fracture, excessive
+        deflection, loss of clamping, surface pitting, loosening."""@en .
+
+mdcore:Function a owl:Class ;
+    rdfs:label "Function"@en ;
+    skos:altLabel "기능"@ko ;
+    skos:definition """An intended, solution-neutral effect that a designed
+        artifact is required to produce, expressed as a transformation of
+        energy, material, motion, force or information."""@en ;
+    skos:scopeNote """Name functions as verb phrases ('transmit torque from
+        shaft to hub'), never as element names ('key'). A function that can
+        only be stated by naming one solution is not solution-neutral and is
+        probably a Requirement or a DesignAlternative in disguise."""@en .
+
+mdcore:Requirement a owl:Class ;
+    rdfs:label "Requirement"@en ;
+    skos:altLabel "요구사항"@ko ;
+    skos:definition """A stated condition that an acceptable design must
+        satisfy, attributable to a stakeholder, a standard, an operating
+        context or a physical necessity."""@en .
+
+mdcore:QuantityValue a owl:Class ;
+    rdfs:label "Quantity Value"@en ;
+    skos:altLabel "수치값"@ko ;
+    skos:definition """A numeric value together with the unit in which it was
+        stated. Dimensionless quantities carry the explicit unit token
+        'dimensionless' rather than no unit at all, so that a missing unit is
+        always an error and never an assumption."""@en ;
+    skos:scopeNote """When a value has been converted, the original value and
+        unit are retained alongside the normalized ones together with the
+        conversion method. Conversion is never silent."""@en .
+
+mdcore:VerificationMethod a owl:Class ;
+    rdfs:label "Verification Method"@en ;
+    skos:altLabel "검증 방법"@ko ;
+    skos:definition """A defined activity that produces evidence about whether a
+        design satisfies a requirement or resists a failure mode."""@en .
+
+mdcore:DesignAlternative a owl:Class ;
+    rdfs:label "Design Alternative"@en ;
+    skos:altLabel "설계 대안"@ko ;
+    skos:definition """A candidate solution concept that could be adopted to
+        satisfy a design problem: a class of artifact, a working principle, or
+        a specific configuration."""@en ;
+    skos:scopeNote """A DesignAlternative is a *solution concept*, not an
+        individual manufactured item. 'Parallel key connection' is an
+        alternative; 'the key in gearbox serial 4471' is not."""@en .
+
+mdcore:SubstitutionAssessment a owl:Class ;
+    rdfs:label "Substitution Assessment"@en ;
+    skos:altLabel "대체 가능성 평가"@ko ;
+    skos:definition """A reified judgement about whether a candidate design
+        alternative can take the place of a baseline design alternative, while
+        preserving a named function, within a named operating context, under
+        named requirements, given named modifications."""@en ;
+    skos:scopeNote """Every assessment is directional: candidate replaces
+        baseline. To claim the reverse, author a second assessment."""@en .
+
+mdcore:RequirementKindScheme a skos:ConceptScheme ;
+    dcterms:description "Aspects of a design that requirements may address."@en ;
+    skos:prefLabel "Requirement kinds"@en .
+
+mdcore:RequirementKind a owl:Class ;
+    rdfs:label "Requirement Kind"@en ;
+    rdfs:subClassOf skos:Concept ;
+    skos:definition """A controlled term naming the aspect of a design that a
+        requirement addresses (load capacity, life, cost, ...)."""@en .
+

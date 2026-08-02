@@ -1,0 +1,138 @@
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg core :: verification
+#
+# Textbooks routinely say "testing is recommended" without saying what test,
+# to what limit.  Recording that as "requires a test" would silently invent a
+# test method.  So a VerificationMethod carries three independent booleans:
+# whether it was recommended, whether a procedure was actually specified, and
+# whether an acceptance criterion was actually specified.  Anything missing
+# points at an external authority instead of being filled in.
+# ===========================================================================
+
+<https://w3id.org/mdkg/core/verification> a owl:Ontology ;
+    dcterms:title "mdkg core: verification methods and acceptance"@en ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mdcore:VerificationMethod a owl:Class ;
+    rdfs:label "Verification Method"@en ;
+    skos:altLabel "검증 방법"@ko ;
+    skos:definition """A defined activity that produces evidence about whether a
+        design satisfies a requirement or resists a failure mode."""@en .
+
+# --- Categories ------------------------------------------------------------
+
+mdcore:CalculationMethod a owl:Class ; rdfs:subClassOf mdcore:VerificationMethod ;
+    rdfs:label "Calculation Method"@en ; skos:altLabel "계산 방법"@ko .
+mdcore:EngineeringCalculation a owl:Class ; rdfs:subClassOf mdcore:CalculationMethod ;
+    rdfs:label "Engineering Calculation"@en ;
+    skos:definition "A closed-form design calculation, typically a sizing or stress check."@en .
+mdcore:AnalyticalModel a owl:Class ; rdfs:subClassOf mdcore:CalculationMethod ;
+    rdfs:label "Analytical Model"@en ;
+    skos:definition "A derived model of behaviour, stated with its assumptions and validity conditions."@en .
+
+mdcore:SimulationMethod a owl:Class ; rdfs:subClassOf mdcore:VerificationMethod ;
+    rdfs:label "Simulation Method"@en ; skos:altLabel "시뮬레이션 방법"@ko .
+mdcore:NumericalSimulation a owl:Class ; rdfs:subClassOf mdcore:SimulationMethod ;
+    rdfs:label "Numerical Simulation"@en .
+
+mdcore:InspectionMethod a owl:Class ; rdfs:subClassOf mdcore:VerificationMethod ;
+    rdfs:label "Inspection Method"@en ; skos:altLabel "검사 방법"@ko .
+mdcore:DimensionalInspection a owl:Class ; rdfs:subClassOf mdcore:InspectionMethod ;
+    rdfs:label "Dimensional Inspection"@en .
+mdcore:MaterialInspection a owl:Class ; rdfs:subClassOf mdcore:InspectionMethod ;
+    rdfs:label "Material Inspection"@en .
+
+mdcore:TestMethod a owl:Class ; rdfs:subClassOf mdcore:VerificationMethod ;
+    rdfs:label "Test Method"@en ; skos:altLabel "시험 방법"@ko .
+mdcore:PrototypeTest a owl:Class ; rdfs:subClassOf mdcore:TestMethod ; rdfs:label "Prototype Test"@en .
+mdcore:FatigueTest   a owl:Class ; rdfs:subClassOf mdcore:TestMethod ; rdfs:label "Fatigue Test"@en .
+mdcore:TorqueTest    a owl:Class ; rdfs:subClassOf mdcore:TestMethod ; rdfs:label "Torque Test"@en .
+mdcore:VibrationTest a owl:Class ; rdfs:subClassOf mdcore:TestMethod ; rdfs:label "Vibration Test"@en .
+mdcore:TemperatureTest a owl:Class ; rdfs:subClassOf mdcore:TestMethod ; rdfs:label "Temperature Test"@en .
+mdcore:LifeTest      a owl:Class ; rdfs:subClassOf mdcore:TestMethod ; rdfs:label "Life Test"@en .
+mdcore:FunctionalTest a owl:Class ; rdfs:subClassOf mdcore:TestMethod ; rdfs:label "Functional Test"@en .
+
+# --- Specification completeness -------------------------------------------
+
+mdcore:testRecommended a owl:DatatypeProperty ;
+    rdfs:label "test recommended by source"@en ;
+    rdfs:domain mdcore:VerificationMethod ; rdfs:range xsd:boolean .
+
+mdcore:testProcedureSpecified a owl:DatatypeProperty ;
+    rdfs:label "test procedure specified by source"@en ;
+    rdfs:domain mdcore:VerificationMethod ; rdfs:range xsd:boolean ;
+    skos:scopeNote """False means the source did not define instruments, load
+        levels, cycle counts or sequence. The ontology must not supply them."""@en .
+
+mdcore:acceptanceCriterionSpecified a owl:DatatypeProperty ;
+    rdfs:label "acceptance criterion specified by source"@en ;
+    rdfs:domain mdcore:VerificationMethod ; rdfs:range xsd:boolean .
+
+mdcore:ExternalAuthorityKind a owl:Class ;
+    rdfs:subClassOf skos:Concept ;
+    rdfs:label "External Authority Kind"@en ;
+    skos:definition "The kind of external source that must supply what the textbooks left unspecified."@en .
+
+mdcore:ExternalAuthorityScheme a skos:ConceptScheme ; skos:prefLabel "External authority kinds"@en .
+
+mdcore:RequiresExternalStandard      a mdcore:ExternalAuthorityKind ; skos:inScheme mdcore:ExternalAuthorityScheme ;
+    skos:prefLabel "requires external standard"@en .
+mdcore:RequiresManufacturerData      a mdcore:ExternalAuthorityKind ; skos:inScheme mdcore:ExternalAuthorityScheme ;
+    skos:prefLabel "requires manufacturer data"@en .
+mdcore:RequiresCompanySpecification  a mdcore:ExternalAuthorityKind ; skos:inScheme mdcore:ExternalAuthorityScheme ;
+    skos:prefLabel "requires internal company specification"@en .
+mdcore:RequiresExperimentalProtocol  a mdcore:ExternalAuthorityKind ; skos:inScheme mdcore:ExternalAuthorityScheme ;
+    skos:prefLabel "requires experimental protocol"@en .
+mdcore:RequiresEngineeringReview     a mdcore:ExternalAuthorityKind ; skos:inScheme mdcore:ExternalAuthorityScheme ;
+    skos:prefLabel "requires engineering review"@en .
+
+mdcore:requiresExternalAuthority a owl:ObjectProperty ;
+    rdfs:label "requires external authority"@en ;
+    rdfs:domain mdcore:VerificationMethod ; rdfs:range mdcore:ExternalAuthorityKind .
+
+# --- Acceptance ------------------------------------------------------------
+
+mdcore:AcceptanceCriterion a owl:Class ;
+    rdfs:label "Acceptance Criterion"@en ;
+    skos:altLabel "합격 기준"@ko ;
+    skos:definition """The condition a verification result must meet for the
+        design to be judged acceptable."""@en .
+
+mdcore:hasAcceptanceCriterion a owl:ObjectProperty ;
+    rdfs:label "has acceptance criterion"@en ;
+    rdfs:domain mdcore:VerificationMethod ; rdfs:range mdcore:AcceptanceCriterion .
+mdcore:acceptanceThreshold a owl:ObjectProperty ;
+    rdfs:domain mdcore:AcceptanceCriterion ; rdfs:range mdcore:QuantityValue ;
+    rdfs:label "acceptance threshold"@en .
+mdcore:acceptanceStatement a owl:DatatypeProperty ;
+    rdfs:domain mdcore:AcceptanceCriterion ; rdfs:range xsd:string ;
+    rdfs:label "acceptance statement"@en .
+
+# --- Linking verification to the rest -------------------------------------
+
+mdcore:verifiedBy a owl:ObjectProperty ;
+    rdfs:label "verified by"@en ;
+    rdfs:range mdcore:VerificationMethod ;
+    skos:definition "Relates an alternative, requirement or failure mode to a method that checks it."@en .
+mdcore:requiresInspection a owl:ObjectProperty ;
+    rdfs:label "requires inspection"@en ; rdfs:range mdcore:InspectionMethod .
+mdcore:requiresTest a owl:ObjectProperty ;
+    rdfs:label "requires test"@en ; rdfs:range mdcore:TestMethod .
+mdcore:verifiesRequirement a owl:ObjectProperty ;
+    rdfs:domain mdcore:VerificationMethod ; rdfs:range mdcore:Requirement ;
+    rdfs:label "verifies requirement"@en .
+mdcore:addressesFailureMode a owl:ObjectProperty ;
+    rdfs:domain mdcore:VerificationMethod ; rdfs:range mdcore:FailureMode ;
+    rdfs:label "addresses failure mode"@en .
+mdcore:usesEquation a owl:ObjectProperty ;
+    rdfs:domain mdcore:VerificationMethod ;
+    rdfs:label "uses equation"@en ;
+    skos:scopeNote "Range is ev:Equation, declared in the evidence module."@en .

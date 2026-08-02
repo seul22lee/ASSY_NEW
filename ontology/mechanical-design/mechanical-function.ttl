@@ -1,0 +1,188 @@
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg mechanical-design :: functions and behaviors
+#
+# This module is the entry point for the query "what can do this job?" when
+# the user does not know the name of the element they need.  Functions are
+# individuals (skos:Concept-like), not classes, because a designer selects
+# from a vocabulary of functions rather than instantiating them.
+#
+# The behaviors below are the analytically important layer: several distinct
+# machine elements deliver mech:TransmitTorqueShaftToHub, but they do so
+# through different behaviors, and it is the *behavior* that determines the
+# failure modes, the governing calculation and the substitution conditions.
+# ===========================================================================
+
+<https://w3id.org/mdkg/mechanical-design/function> a owl:Ontology ;
+    dcterms:title "mdkg mechanical design: functions, behaviors and physical effects"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/core/function> , <https://w3id.org/mdkg/core/behavior> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mech:MechanicalFunctionScheme a skos:ConceptScheme ;
+    skos:prefLabel "Mechanical functions"@en ;
+    dcterms:description """Solution-neutral mechanical functions. Analyst-authored
+        vocabulary; the individual functions are not claims about either
+        textbook, although the pilot claims attach to them."""@en .
+
+# --- Power and torque ------------------------------------------------------
+
+mech:TransmitPower a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Transmit power"@en ; skos:prefLabel "transmit power"@en ; skos:altLabel "동력 전달"@ko ;
+    skos:definition "Convey mechanical power from a source to a load."@en .
+
+mech:TransmitTorque a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Transmit torque"@en ; skos:prefLabel "transmit torque"@en ; skos:altLabel "토크 전달"@ko ;
+    skos:broader mech:TransmitPower .
+
+mech:TransmitTorqueShaftToHub a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Transmit torque between shaft and hub"@en ;
+    skos:prefLabel "transmit torque between a shaft and a mounted element"@en ;
+    skos:altLabel "축과 보스 사이 토크 전달"@ko ;
+    skos:broader mech:TransmitTorque ;
+    skos:definition """Convey torque across the interface between a rotating
+        shaft and the bore of an element mounted on it."""@en ;
+    skos:scopeNote """The pilot function of this ontology version: several
+        distinct machine elements realise it through different behaviors, which
+        makes it the natural setting for demonstrating substitution."""@en .
+
+mech:ChangeSpeedOrTorqueRatio a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Change speed or torque ratio"@en ; skos:prefLabel "change speed or torque ratio"@en .
+
+mech:ConnectMisalignedShafts a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Connect shafts allowing misalignment"@en ;
+    skos:prefLabel "connect two shafts while accommodating misalignment"@en .
+
+# --- Support, location, guidance ------------------------------------------
+
+mech:SupportRotatingShaft a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Support a rotating shaft"@en ; skos:prefLabel "support a rotating shaft"@en ; skos:altLabel "회전축 지지"@ko ;
+    skos:definition "Carry the reaction loads of a rotating shaft while permitting its rotation."@en .
+
+mech:CarryRadialLoad a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Carry radial load"@en ; skos:prefLabel "carry radial load"@en ; skos:broader mech:SupportRotatingShaft .
+mech:CarryThrustLoad a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Carry thrust load"@en ; skos:prefLabel "carry axial (thrust) load"@en ; skos:broader mech:SupportRotatingShaft .
+
+mech:LocateAxially a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Locate a component axially"@en ; skos:prefLabel "fix the axial position of a mounted component"@en ; skos:altLabel "축방향 위치 결정"@ko .
+mech:PermitAxialMotion a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Permit axial motion under torque"@en ;
+    skos:prefLabel "allow a mounted element to move axially while torque is transmitted"@en ;
+    skos:definition """Deliberately the converse of LocateAxially: an ontology
+        that conflates the two cannot express why a slip-fitted spline and an
+        interference fit are not interchangeable."""@en .
+mech:MaintainConcentricity a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Maintain concentricity"@en ; skos:prefLabel "keep a mounted element concentric with the shaft"@en .
+mech:GuideLinearMotion a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Guide linear motion"@en ; skos:prefLabel "guide motion along a straight path"@en .
+
+# --- Other functions -------------------------------------------------------
+
+mech:StoreMechanicalEnergy a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Store mechanical energy"@en ; skos:prefLabel "store and release mechanical energy"@en ; skos:altLabel "기계 에너지 저장"@ko .
+mech:JoinComponents a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Join components"@en ; skos:prefLabel "hold two or more components together"@en .
+mech:SealInterface a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Seal an interface"@en ; skos:prefLabel "prevent leakage across an interface"@en ; skos:altLabel "밀봉"@ko .
+mech:EngageOrDisengageDrive a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Engage or disengage a drive"@en ; skos:prefLabel "connect or disconnect a driving and a driven member"@en .
+mech:DissipateKineticEnergy a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Dissipate kinetic energy"@en ; skos:prefLabel "slow or stop a moving member"@en .
+mech:LimitTransmittedTorque a mdcore:Function ; skos:inScheme mech:MechanicalFunctionScheme ;
+    rdfs:label "Limit transmitted torque"@en ;
+    skos:prefLabel "protect a drive train by limiting or interrupting torque on overload"@en ;
+    skos:definition """A protective function. Distinguished from
+        TransmitTorque because an element may be required to fail, and a
+        substitution that removes this function is not function-preserving even
+        if torque capacity is unchanged."""@en .
+
+# ---------------------------------------------------------------------------
+# Behaviors: how the functions get delivered
+# ---------------------------------------------------------------------------
+
+mech:MechanicalBehaviorScheme a skos:ConceptScheme ;
+    skos:prefLabel "Mechanical load-transfer behaviors"@en .
+
+mech:ShearLoadTransfer a mdcore:Behavior ; skos:inScheme mech:MechanicalBehaviorScheme ;
+    rdfs:label "Shear load transfer"@en ; skos:prefLabel "transfer load by direct shear across an inserted member"@en ;
+    skos:altLabel "전단에 의한 하중 전달"@ko ;
+    mdcore:realizesFunction mech:TransmitTorqueShaftToHub ;
+    mdcore:reliesOnEffect mech:DirectShearStress ;
+    skos:definition """Torque is carried by an inserted member loaded in direct
+        shear over a defined shear area, with a complementary bearing action on
+        its flanks."""@en .
+
+mech:BearingLoadTransfer a mdcore:Behavior ; skos:inScheme mech:MechanicalBehaviorScheme ;
+    rdfs:label "Bearing (compressive) load transfer"@en ;
+    skos:prefLabel "transfer load by compressive bearing on mating flanks"@en ;
+    mdcore:realizesFunction mech:TransmitTorqueShaftToHub ;
+    mdcore:reliesOnEffect mech:ContactPressure .
+
+mech:FrictionalLoadTransfer a mdcore:Behavior ; skos:inScheme mech:MechanicalBehaviorScheme ;
+    rdfs:label "Frictional load transfer"@en ;
+    skos:prefLabel "transfer load by friction at a pressurised interface"@en ;
+    skos:altLabel "마찰에 의한 하중 전달"@ko ;
+    mdcore:realizesFunction mech:TransmitTorqueShaftToHub ;
+    mdcore:reliesOnEffect mech:DryFriction ;
+    mdcore:behaviorRequiresCondition mech:MaintainedInterfacePressure ;
+    skos:definition """Torque is carried by friction generated by a normal
+        pressure at the interface, so capacity depends on the coefficient of
+        friction and on the pressure being maintained in service."""@en ;
+    skos:scopeNote """The dependence on a maintained pressure, and on a friction
+        coefficient that is rarely known precisely, is what makes
+        friction-based connections behave differently under shock and
+        thermal cycling from form-locking ones."""@en .
+
+mech:DistributedToothContact a mdcore:Behavior ; skos:inScheme mech:MechanicalBehaviorScheme ;
+    rdfs:label "Distributed tooth contact"@en ;
+    skos:prefLabel "transfer load through many engaged tooth flanks in parallel"@en ;
+    mdcore:realizesFunction mech:TransmitTorqueShaftToHub ;
+    mdcore:reliesOnEffect mech:ContactPressure ;
+    skos:definition """Torque is shared among several engaged flanks, reducing
+        the load carried by any one of them relative to a single inserted
+        member."""@en .
+
+mech:RollingContactSupport a mdcore:Behavior ; skos:inScheme mech:MechanicalBehaviorScheme ;
+    rdfs:label "Rolling contact support"@en ;
+    skos:prefLabel "carry load through rolling elements between raceways"@en ;
+    mdcore:realizesFunction mech:SupportRotatingShaft ;
+    mdcore:reliesOnEffect mech:HertzianContact .
+
+mech:HydrodynamicFilmSupport a mdcore:Behavior ; skos:inScheme mech:MechanicalBehaviorScheme ;
+    rdfs:label "Hydrodynamic film support"@en ;
+    skos:prefLabel "carry load on a pressurised lubricant film generated by relative motion"@en ;
+    mdcore:realizesFunction mech:SupportRotatingShaft ;
+    mdcore:reliesOnEffect mech:ViscousPressureGeneration ;
+    mdcore:behaviorRequiresCondition mech:AdequateLubricantSupply .
+
+mech:ElasticEnergyStorage a mdcore:Behavior ; skos:inScheme mech:MechanicalBehaviorScheme ;
+    rdfs:label "Elastic energy storage"@en ;
+    skos:prefLabel "store energy in elastic deformation"@en ;
+    mdcore:realizesFunction mech:StoreMechanicalEnergy ;
+    mdcore:reliesOnEffect mech:ElasticDeformation .
+
+# --- Physical effects ------------------------------------------------------
+
+mech:DirectShearStress a mdcore:PhysicalEffect ; rdfs:label "Direct shear stress"@en .
+mech:ContactPressure   a mdcore:PhysicalEffect ; rdfs:label "Contact (bearing) pressure"@en .
+mech:DryFriction       a mdcore:PhysicalEffect ; rdfs:label "Dry friction"@en ; skos:altLabel "건마찰"@ko .
+mech:HertzianContact   a mdcore:PhysicalEffect ; rdfs:label "Hertzian contact stress"@en .
+mech:ElasticDeformation a mdcore:PhysicalEffect ; rdfs:label "Elastic deformation"@en .
+mech:ViscousPressureGeneration a mdcore:PhysicalEffect ; rdfs:label "Viscous pressure generation in a converging film"@en .
+mech:ThermalExpansion  a mdcore:PhysicalEffect ; rdfs:label "Differential thermal expansion"@en .
+
+# --- Conditions referenced by behaviors -----------------------------------
+
+mech:MaintainedInterfacePressure a mdcore:OperatingCondition ;
+    rdfs:label "Maintained interface pressure"@en ;
+    skos:definition "The normal pressure at a friction interface remains above the level assumed in the capacity calculation throughout service."@en .
+
+mech:AdequateLubricantSupply a mdcore:LubricationCondition ;
+    rdfs:label "Adequate lubricant supply"@en .

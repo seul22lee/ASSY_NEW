@@ -1,0 +1,99 @@
+@prefix melem:  <https://w3id.org/mdkg/machine-elements#> .
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg machine-elements :: families
+#
+# Level 3.  Families are organised by the FUNCTION they primarily deliver, not
+# by the chapter that happens to describe them.  That choice matters: a
+# chapter-derived taxonomy would put keys, couplings and seals in one class
+# because Mott's Chapter 11 covers all three, which is a fact about the book,
+# not about machine elements.
+#
+# Family membership is deliberately non-exclusive. A tapered roller bearing
+# supports a shaft and locates it axially; a clutch both transmits and
+# interrupts power. Classes here are therefore NOT declared pairwise disjoint.
+# ===========================================================================
+
+<https://w3id.org/mdkg/machine-elements/families> a owl:Ontology ;
+    dcterms:title "mdkg machine elements: families"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/mechanical-design/artifact> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+melem:PowerTransmissionElement a owl:Class ;
+    rdfs:subClassOf mech:MachineElement ;
+    rdfs:label "Power Transmission Element"@en ; skos:altLabel "동력전달요소"@ko ;
+    skos:definition """A machine element whose primary function is to convey
+        mechanical power between locations, optionally changing speed, torque
+        or direction."""@en .
+
+melem:ConnectionElement a owl:Class ;
+    rdfs:subClassOf mech:MachineElement ;
+    rdfs:label "Connection Element"@en ; skos:altLabel "연결요소"@ko ;
+    skos:definition """A machine element whose primary function is to join two
+        members so that load or motion passes between them, while defining
+        their relative position."""@en ;
+    skos:scopeNote """The pilot family of this ontology version. Its members
+        compete for a single function -- transmit torque between a shaft and a
+        mounted element -- which makes it the clearest setting for substitution
+        reasoning."""@en .
+
+melem:SupportElement a owl:Class ;
+    rdfs:subClassOf mech:MachineElement ;
+    rdfs:label "Support Element"@en ; skos:altLabel "지지요소"@ko ;
+    skos:definition """A machine element that carries reaction loads while
+        permitting an intended relative motion, or that provides a structural
+        seat for other elements."""@en .
+
+melem:MotionGuidanceElement a owl:Class ;
+    rdfs:subClassOf mech:MachineElement ;
+    rdfs:label "Motion Guidance Element"@en ; skos:altLabel "운동안내요소"@ko ;
+    skos:definition "A machine element that constrains motion to an intended path."@en .
+
+melem:FasteningElement a owl:Class ;
+    rdfs:subClassOf mech:MachineElement ;
+    rdfs:label "Fastening Element"@en ; skos:altLabel "체결요소"@ko ;
+    skos:definition """A machine element whose primary function is to hold parts
+        together, typically through a preload or a permanent bond, rather than
+        to transmit a working torque."""@en ;
+    skos:scopeNote """Overlaps ConnectionElement by design: a setscrew is both.
+        The families answer different questions and are not partitioned."""@en .
+
+melem:SealingElement a owl:Class ;
+    rdfs:subClassOf mech:MachineElement ;
+    rdfs:label "Sealing Element"@en ; skos:altLabel "밀봉요소"@ko ;
+    skos:definition "A machine element that restricts the passage of fluid or contaminant across an interface."@en .
+
+melem:EnergyStorageElement a owl:Class ;
+    rdfs:subClassOf mech:MachineElement ;
+    rdfs:label "Energy Storage Element"@en ; skos:altLabel "에너지저장요소"@ko ;
+    skos:definition "A machine element that stores mechanical energy and returns it in a controlled way."@en .
+
+melem:MotionControlElement a owl:Class ;
+    rdfs:subClassOf melem:PowerTransmissionElement ;
+    rdfs:label "Motion Control Element"@en ; skos:altLabel "운동제어요소"@ko ;
+    skos:definition """A machine element that starts, stops or modulates the
+        transmission of power or the motion of a member."""@en ;
+    skos:scopeNote """Added beyond the seven families of the original outline
+        because clutches and brakes are functionally distinct from steady power
+        transmission: their defining function is to interrupt or dissipate,
+        not to convey."""@en .
+
+# --- Family-level function assignments -------------------------------------
+# Asserted as ontology-engineering structure. Source-derived statements about
+# particular elements live in the claims files, not here.
+
+melem:PowerTransmissionElement rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty mdcore:hasFunction ; owl:hasValue mech:TransmitPower ] .
+melem:ConnectionElement rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty mdcore:hasFunction ; owl:someValuesFrom mdcore:Function ] .
+melem:EnergyStorageElement rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty mdcore:hasFunction ; owl:hasValue mech:StoreMechanicalEnergy ] .
+melem:SealingElement rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty mdcore:hasFunction ; owl:hasValue mech:SealInterface ] .

@@ -1,0 +1,100 @@
+@prefix melem:  <https://w3id.org/mdkg/machine-elements#> .
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg machine-elements :: bearings   (PILOT FAMILY, moderate depth)
+# ===========================================================================
+
+<https://w3id.org/mdkg/machine-elements/bearings> a owl:Ontology ;
+    dcterms:title "mdkg machine elements: bearings"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/machine-elements/families> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+melem:Bearing a owl:Class , owl:NamedIndividual ;
+    rdfs:subClassOf melem:SupportElement ;
+    rdfs:label "Bearing"@en ; skos:altLabel "베어링"@ko ;
+    skos:definition "A support element that carries load between members in relative motion."@en .
+
+melem:RollingContactBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Bearing ;
+    rdfs:label "Rolling-Contact Bearing"@en ; skos:altLabel "구름 베어링"@ko ;
+    skos:definition "A bearing in which load passes through rolling elements between raceways."@en .
+melem:BallBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:RollingContactBearing ;
+    rdfs:label "Ball Bearing"@en ; skos:altLabel "볼 베어링"@ko .
+melem:DeepGrooveBallBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:BallBearing ;
+    rdfs:label "Single-Row Deep-Groove Ball Bearing"@en ; skos:altLabel "깊은 홈 볼 베어링"@ko .
+melem:AngularContactBallBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:BallBearing ;
+    rdfs:label "Angular-Contact Ball Bearing"@en .
+melem:RollerBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:RollingContactBearing ;
+    rdfs:label "Roller Bearing"@en ; skos:altLabel "롤러 베어링"@ko .
+melem:CylindricalRollerBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:RollerBearing ;
+    rdfs:label "Cylindrical Roller Bearing"@en .
+melem:TaperedRollerBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:RollerBearing ;
+    rdfs:label "Tapered Roller Bearing"@en ; skos:altLabel "테이퍼 롤러 베어링"@ko .
+melem:SphericalRollerBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:RollerBearing ;
+    rdfs:label "Spherical Roller Bearing"@en .
+melem:NeedleBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:RollerBearing ;
+    rdfs:label "Needle Bearing"@en ; skos:altLabel "니들 베어링"@ko .
+melem:ThrustBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Bearing ;
+    rdfs:label "Thrust Bearing"@en ; skos:altLabel "스러스트 베어링"@ko .
+
+melem:PlainBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Bearing ;
+    rdfs:label "Plain (Sliding) Bearing"@en ; skos:altLabel "미끄럼 베어링"@ko ;
+    skos:definition "A bearing in which load passes through a sliding interface, with or without a lubricant film."@en .
+melem:JournalBearing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:PlainBearing ;
+    rdfs:label "Journal Bearing"@en ; skos:altLabel "저널 베어링"@ko .
+
+# --- Alternatives ----------------------------------------------------------
+
+melem:ShaftSupportAlternatives a mdcore:CandidateSet ;
+    rdfs:label "Alternatives for supporting a rotating shaft"@en ;
+    mdcore:exclusionRationale "Restricted to bearing families described in the two source books."@en ;
+    mdcore:hasCandidate melem:DeepGrooveBallBearingAlternative , melem:CylindricalRollerBearingAlternative ,
+        melem:TaperedRollerBearingAlternative , melem:NeedleBearingAlternative ,
+        melem:SphericalRollerBearingAlternative , melem:JournalBearingAlternative .
+
+melem:DeepGrooveBallBearingAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Single-row deep-groove ball bearing"@en ;
+    melem:usesElementType melem:DeepGrooveBallBearing ;
+    mdcore:performsFunction mech:SupportRotatingShaft , mech:CarryRadialLoad , mech:CarryThrustLoad ;
+    mdcore:enablesBehavior mech:RollingContactSupport .
+
+melem:CylindricalRollerBearingAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Cylindrical roller bearing"@en ;
+    melem:usesElementType melem:CylindricalRollerBearing ;
+    mdcore:performsFunction mech:SupportRotatingShaft , mech:CarryRadialLoad ;
+    mdcore:enablesBehavior mech:RollingContactSupport .
+
+melem:TaperedRollerBearingAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Tapered roller bearing"@en ;
+    melem:usesElementType melem:TaperedRollerBearing ;
+    mdcore:performsFunction mech:SupportRotatingShaft , mech:CarryRadialLoad , mech:CarryThrustLoad ;
+    mdcore:enablesBehavior mech:RollingContactSupport .
+
+melem:NeedleBearingAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Needle bearing"@en ;
+    melem:usesElementType melem:NeedleBearing ;
+    mdcore:performsFunction mech:SupportRotatingShaft , mech:CarryRadialLoad ;
+    mdcore:enablesBehavior mech:RollingContactSupport .
+
+melem:SphericalRollerBearingAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Spherical roller bearing"@en ;
+    melem:usesElementType melem:SphericalRollerBearing ;
+    mdcore:performsFunction mech:SupportRotatingShaft , mech:CarryRadialLoad ;
+    mdcore:enablesBehavior mech:RollingContactSupport .
+
+melem:JournalBearingAlternative a mdcore:DesignAlternative ;
+    rdfs:label "Hydrodynamic journal bearing"@en ;
+    melem:usesElementType melem:JournalBearing ;
+    mdcore:performsFunction mech:SupportRotatingShaft , mech:CarryRadialLoad ;
+    mdcore:enablesBehavior mech:HydrodynamicFilmSupport .
+
+melem:DeepGrooveBallBearingAlternative mdcore:sharesFunctionWith
+    melem:CylindricalRollerBearingAlternative , melem:TaperedRollerBearingAlternative ,
+    melem:NeedleBearingAlternative , melem:SphericalRollerBearingAlternative ,
+    melem:JournalBearingAlternative .

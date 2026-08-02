@@ -1,0 +1,123 @@
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg mechanical-design :: artifacts and interfaces
+#
+# Level 2.  Specialises the general Level-1 artifact vocabulary for mechanical
+# engineering.  Still solution-family neutral: no specific machine element
+# appears here.
+# ===========================================================================
+
+<https://w3id.org/mdkg/mechanical-design/artifact> a owl:Ontology ;
+    dcterms:title "mdkg mechanical design: artifacts"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/core/artifact> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mech:MechanicalArtifact a owl:Class ;
+    rdfs:subClassOf mdcore:DesignedArtifact ;
+    rdfs:label "Mechanical Artifact"@en ; skos:altLabel "기계 대상물"@ko ;
+    skos:definition """A designed artifact whose required functions are
+        delivered principally through the transmission, transformation,
+        support or containment of mechanical force, motion or energy."""@en .
+
+mech:MechanicalSystem a owl:Class ;
+    rdfs:subClassOf mech:MechanicalArtifact, mdcore:TechnicalSystem ;
+    rdfs:label "Mechanical System"@en ; skos:altLabel "기계 시스템"@ko ;
+    skos:definition """An assembly of mechanical elements arranged to deliver a
+        system-level function such as a power transmission or a motion
+        stage."""@en .
+
+mech:MachineElement a owl:Class ;
+    rdfs:subClassOf mech:MechanicalArtifact, mdcore:Component ;
+    rdfs:label "Machine Element"@en ; skos:altLabel "기계요소"@ko ;
+    skos:definition """A standardised or generically recognised mechanical
+        component type whose design is treated as a self-contained problem with
+        its own selection procedure, failure modes and verification methods."""@en ;
+    skos:scopeNote """Machine-element *families* are defined in the
+        machine-elements module. This class is their common root."""@en .
+
+# --- Mechanical interfaces -------------------------------------------------
+
+mech:MechanicalInterface a owl:Class ;
+    rdfs:subClassOf mdcore:Interface ;
+    rdfs:label "Mechanical Interface"@en ; skos:altLabel "기계적 접합부"@ko ;
+    skos:definition "An interface across which mechanical force, torque or motion is exchanged."@en .
+
+mech:ShaftHubInterface a owl:Class ;
+    rdfs:subClassOf mech:MechanicalInterface ;
+    rdfs:label "Shaft/Hub Interface"@en ; skos:altLabel "축-보스 접합부"@ko ;
+    skos:definition """The interface between a rotating shaft and the bore of a
+        mounted element such as a gear, sheave, sprocket or coupling."""@en ;
+    skos:scopeNote """Named explicitly because it is the interface at which
+        several distinct connection alternatives compete, and therefore the one
+        whose compatibility governs their substitutability."""@en .
+
+mech:BearingSeatInterface a owl:Class ;
+    rdfs:subClassOf mech:MechanicalInterface ;
+    rdfs:label "Bearing Seat Interface"@en ;
+    skos:definition "The interface between a bearing ring and the shaft or housing that carries it."@en .
+
+mech:ThreadedInterface a owl:Class ;
+    rdfs:subClassOf mech:MechanicalInterface ;
+    rdfs:label "Threaded Interface"@en .
+
+mech:ContactInterface a owl:Class ;
+    rdfs:subClassOf mech:MechanicalInterface ;
+    rdfs:label "Rolling or Sliding Contact Interface"@en ;
+    skos:definition "An interface at which bodies transmit load through concentrated or distributed contact while moving relative to one another."@en .
+
+# --- Mechanical geometry features -----------------------------------------
+
+mech:Keyseat a owl:Class ; rdfs:subClassOf mdcore:GeometryFeature ;
+    rdfs:label "Keyseat"@en ; skos:altLabel "키홈"@ko ;
+    skos:definition "A groove machined in a shaft or a hub bore to receive a key."@en ;
+    skos:scopeNote """Both source books treat the shaft groove and the hub
+        groove as keyseats, with 'keyway' commonly used for the hub groove.
+        The terminology difference is recorded as a ConceptAlignment rather
+        than resolved by fiat."""@en .
+
+mech:Fillet a owl:Class ; rdfs:subClassOf mdcore:GeometryFeature ; rdfs:label "Fillet"@en .
+mech:Shoulder a owl:Class ; rdfs:subClassOf mdcore:GeometryFeature ; rdfs:label "Shoulder"@en ; skos:altLabel "단차"@ko .
+mech:Groove a owl:Class ; rdfs:subClassOf mdcore:GeometryFeature ; rdfs:label "Groove"@en .
+mech:TransverseHole a owl:Class ; rdfs:subClassOf mdcore:GeometryFeature ; rdfs:label "Transverse Hole"@en .
+
+mech:StressRaiser a owl:Class ;
+    rdfs:subClassOf mdcore:GeometryFeature ;
+    rdfs:label "Stress Raiser"@en ; skos:altLabel "응력집중부"@ko ;
+    skos:definition """A geometry feature that locally elevates stress above the
+        nominal value, characterised by a stress-concentration factor."""@en .
+
+mech:stressConcentrationFactor a owl:ObjectProperty ;
+    rdfs:domain mech:StressRaiser ; rdfs:range mdcore:QuantityValue ;
+    rdfs:label "stress concentration factor"@en ;
+    skos:scopeNote """Dimensionless, and always tied to a loading mode and a
+        geometry ratio. A factor cited without its loading mode is
+        uninterpretable and must not be stored."""@en .
+
+mech:stressConcentrationLoadingMode a owl:DatatypeProperty ;
+    rdfs:domain mech:StressRaiser ; rdfs:range xsd:string ;
+    rdfs:label "loading mode for stress concentration factor"@en ;
+    skos:scopeNote "For example 'bending', 'torsion', 'axial'."@en .
+
+# --- Fits ------------------------------------------------------------------
+
+mech:Fit a owl:Class ;
+    rdfs:subClassOf mdcore:DesignFeature ;
+    rdfs:label "Fit"@en ; skos:altLabel "끼워맞춤"@ko ;
+    skos:definition """The specified dimensional relationship between mating
+        parts, expressed through their tolerance zones."""@en .
+
+mech:ClearanceFit    a owl:Class ; rdfs:subClassOf mech:Fit ; rdfs:label "Clearance Fit"@en ; skos:altLabel "헐거운 끼워맞춤"@ko .
+mech:TransitionFit   a owl:Class ; rdfs:subClassOf mech:Fit ; rdfs:label "Transition Fit"@en ; skos:altLabel "중간 끼워맞춤"@ko .
+mech:InterferenceFit a owl:Class ; rdfs:subClassOf mech:Fit ; rdfs:label "Interference Fit"@en ; skos:altLabel "억지 끼워맞춤"@ko ;
+    skos:definition """A fit in which the shaft is larger than the hole before
+        assembly, so that assembly generates interface pressure."""@en .
+mech:SlipFit a owl:Class ; rdfs:subClassOf mech:ClearanceFit ; rdfs:label "Slip Fit"@en ;
+    skos:definition "A clearance fit loose enough to permit relative axial motion of the mating parts in service."@en .

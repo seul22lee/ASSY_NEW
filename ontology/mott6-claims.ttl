@@ -1,0 +1,1841 @@
+# ###########################################################################
+# GENERATED FILE -- DO NOT EDIT BY HAND
+#
+# Produced by scripts/build_ontology.py from:
+#   data/evidence_spans.jsonl
+#   data/claims.jsonl
+#   build/mott6.meta.json
+#
+# Edit the inputs and re-run:  python3 scripts/build_ontology.py
+# ###########################################################################
+
+@prefix ev: <https://w3id.org/mdkg/evidence#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix mech: <https://w3id.org/mdkg/mechanical-design#> .
+@prefix melem: <https://w3id.org/mdkg/machine-elements#> .
+@prefix mott6: <https://w3id.org/mdkg/source/mott6#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+mott6:book a ev:Book ;
+    rdfs:label "Machine Elements in Mechanical Design"@en ;
+    ev:author "Edward M. Vavrek",
+        "Jyhwen Wang",
+        "Robert L. Mott" ;
+    ev:bookTitle "Machine Elements in Mechanical Design"@en ;
+    ev:hasEdition mott6:edition .
+
+mott6:c-0001 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0001" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:SafetyRequirement ;
+    ev:claimException "For column buckling, Mott applies the design factor to the load on the column rather than to the material strength."@en ;
+    ev:claimIdentifier "mott6-c-0001" ;
+    ev:claimObject "a measure of the relative safety of a load-carrying component; the material strength divided by the design factor gives the design (allowable) stress"@en ;
+    ev:claimPredicate "is defined as"@en ;
+    ev:claimSubject "design factor N"@en ;
+    ev:claimTopic "design-factor" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott defines the design factor N as a measure of the relative safety of a load-carrying component. In most cases the strength of the material is divided by N to obtain a design stress (also called the allowable stress), and the actual stress must be less than the design stress."@en ;
+    ev:supportedByEvidence mott6:es-0001,
+        mott6:es-0002 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0002 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0002" ;
+    mdcore:requiresExternalAuthority mdcore:RequiresCompanySpecification,
+        mdcore:RequiresExternalStandard ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:SafetyRequirement ;
+    ev:claimIdentifier "mott6-c-0002" ;
+    ev:claimObject "codes established by standards-setting organizations, or by company policy"@en ;
+    ev:claimPredicate "is governed by"@en ;
+    ev:claimSubject "value of the design factor"@en ;
+    ev:claimTopic "design-factor" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the value of the design factor or design stress is often governed by codes from standards-setting organizations, and that some companies adopt their own policies based on past experience."@en ;
+    ev:supportedByEvidence mott6:es-0004 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0003 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0003" ;
+    mdcore:requiresExternalAuthority mdcore:RequiresEngineeringReview ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:SafetyRequirement ;
+    ev:claimIdentifier "mott6-c-0003" ;
+    ev:claimObject "designer judgement when no code or standard applies"@en ;
+    ev:claimPredicate "requires"@en ;
+    ev:claimSubject "selection of the design factor"@en ;
+    ev:claimTopic "design-factor" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that in the absence of codes or standards the designer must use judgement to specify the desired design factor."@en ;
+    ev:supportedByEvidence mott6:es-0003 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0010 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0010" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:FatigueFracture,
+        mott6:mott6-c-0010_threshold ;
+    ev:claimCondition "Applies to designers' working practice, not to a physical boundary."@en ;
+    ev:claimIdentifier "mott6-c-0010" ;
+    ev:claimObject "not sharply definable; designers often take up to about 1000 cycles as low-cycle fatigue"@en ;
+    ev:claimPredicate "is"@en ;
+    ev:claimQuantity mott6:mott6-c-0010_q0 ;
+    ev:claimSubject "boundary between low-cycle and high-cycle fatigue"@en ;
+    ev:claimTopic "fatigue" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that no specific dividing line can be defined between low-cycle and high-cycle fatigue, and that designers often use up to 1000 cycles for low-cycle fatigue and higher numbers, up to infinite life, for high-cycle fatigue."@en ;
+    ev:supportedByEvidence mott6:es-0010 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0011 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0011" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:FatigueFracture,
+        mech:Keyseat ;
+    ev:claimIdentifier "mott6-c-0011" ;
+    ev:claimObject "areas of stress concentration such as keyways or grooves in shafts, steps in cross section, and notches"@en ;
+    ev:claimPredicate "frequently occur at"@en ;
+    ev:claimSubject "fatigue failures"@en ;
+    ev:claimTopic "fatigue" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that fatigue failures frequently occur within areas of stress concentration such as keyways or grooves in shafts, steps in the size of a cross section, notches and other geometric discontinuities, and that even surface roughness or accidental nicks can initiate cracks."@en ;
+    ev:supportedByEvidence mott6:es-0011 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0012 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0012" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:FatigueCrackInitiationAndGrowth ;
+    ev:claimIdentifier "mott6-c-0012" ;
+    ev:claimObject "small surface cracks, internal imperfections or grain boundaries in areas subjected to tensile stress"@en ;
+    ev:claimPredicate "initiate at"@en ;
+    ev:claimSubject "fatigue cracks"@en ;
+    ev:claimTopic "fatigue" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that fatigue failures start at small surface cracks, internal imperfections, or grain boundaries in areas subjected to tensile stress, and grow with repeated stress application until the component fails, often suddenly."@en ;
+    ev:supportedByEvidence mott6:es-0012 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0020 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0020" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:RectangularKey,
+        melem:SquareKey ;
+    ev:claimIdentifier "mott6-c-0020" ;
+    ev:claimObject "shafts up to 6.5 inches in diameter"@en ;
+    ev:claimPredicate "is the most common key type for"@en ;
+    ev:claimQuantity mott6:mott6-c-0020_q0 ;
+    ev:claimSubject "square key"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:concernsFigure mott6:fig_n11-1 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the square key is the most common type of key for shafts up to 6 1/2 in in diameter, and that the rectangular key is recommended for larger shafts and used for smaller shafts where the reduced height can be tolerated."@en ;
+    ev:supportedByEvidence mott6:es-0020 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0021 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0021" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:ParallelKey ;
+    ev:claimIdentifier "mott6-c-0021" ;
+    ev:claimObject "one quarter of the shaft diameter"@en ;
+    ev:claimPredicate "is approximately"@en ;
+    ev:claimQuantity mott6:mott6-c-0021_q0 ;
+    ev:claimSubject "parallel key width"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:concernsTable mott6:tab_n11-1 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that for the preferred parallel key dimensions tabulated against shaft diameter, the key width is approximately one-quarter of the shaft diameter."@en ;
+    ev:supportedByEvidence mott6:es-0021 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0022 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0022" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:FatigueFracture,
+        mech:Keyseat,
+        mott6:std_ANSI_B17.1 ;
+    ev:claimIdentifier "mott6-c-0022" ;
+    ev:claimObject "stress concentrations"@en ;
+    ev:claimPredicate "reduce"@en ;
+    ev:claimSubject "radiused keyseats and chamfered keys"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:concernsTable mott6:tab_n11-2 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that radiused keyseats and chamfered keys can be used to reduce stress concentrations, and cites suggested values from ANSI Standard B17.1."@en ;
+    ev:supportedByEvidence mott6:es-0022 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0023 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0023" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:TaperKey,
+        mech:BearingCompressionFailure ;
+    ev:claimIdentifier "mott6-c-0023" ;
+    ev:claimObject "a smaller bearing area on the sides of the key than a parallel key, so the bearing stress must be checked"@en ;
+    ev:claimPredicate "has"@en ;
+    ev:claimSubject "taper key"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:concernsFigure mott6:fig_n11-3 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the taper key design gives a smaller bearing area on the sides of the key and that the bearing stress must therefore be checked."@en ;
+    ev:supportedByEvidence mott6:es-0023 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0024 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0024" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:PinKey ;
+    ev:claimIdentifier "mott6-c-0024" ;
+    ev:claimObject "lower stress concentration factors than parallel or taper keys"@en ;
+    ev:claimPredicate "produces"@en ;
+    ev:claimSubject "pin key"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that lower stress concentration factors result from the pin key design as compared with parallel or taper keys, and that a close fit between pin and groove is required so that bearing is uniform along the pin."@en ;
+    ev:supportedByEvidence mott6:es-0024 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0025 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0025" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:WoodruffKeyConnection,
+        mott6:std_ANSI_B17.2-1967 ;
+    ev:claimCondition "light loading"@en,
+        "relatively easy assembly and disassembly desired"@en ;
+    ev:claimIdentifier "mott6-c-0025" ;
+    ev:claimObject "loading is light and relatively easy assembly and disassembly are desired"@en ;
+    ev:claimPredicate "should be considered where"@en ;
+    ev:claimSubject "Woodruff key"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:concernsTable mott6:tab_n11-3 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that where light loading and relatively easy assembly and disassembly are desired, the Woodruff key should be considered."@en ;
+    ev:supportedByEvidence mott6:es-0025 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0026 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0026" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:Key ;
+    ev:claimAssumption "Recommendation is framed for the book's problem solutions, not as a universal specification."@en ;
+    ev:claimIdentifier "mott6-c-0026" ;
+    ev:claimObject "low-carbon steel SAE 1018 for most applications in this book's problems"@en ;
+    ev:claimPredicate "is recommended to be"@en ;
+    ev:claimSubject "key material"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:concernsTable mott6:tab_n11-4 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott recommends that low-carbon steel SAE 1018 be considered for most key applications in this book's problem solutions, being low cost and readily available with generally adequate strength, and lists higher-strength and corrosion-resistant alternatives."@en ;
+    ev:supportedByEvidence mott6:es-0026 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0040 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0040" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:Spline,
+        mech:TransmitTorqueShaftToHub ;
+    ev:claimIdentifier "mott6-c-0040" ;
+    ev:claimObject "the same function as a key in transmitting torque from shaft to mating element"@en ;
+    ev:claimPredicate "perform"@en ;
+    ev:claimSubject "splines"@en ;
+    ev:claimTopic "substitution" ;
+    ev:concernsFigure mott6:fig_n11-6 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that splines perform the same function as a key in transmitting torque from the shaft to the mating element, a spline being a series of axial keys machined into the shaft with corresponding grooves in the bore of the mating part."@en ;
+    ev:supportedByEvidence mott6:es-0040 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0041 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0041" ;
+    mdcore:analystNote "A qualitative evaluative claim. Contrast with Shigley, who emphasises that splines are much more expensive than keys and usually unnecessary for simple torque transmission."@en ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:Key,
+        melem:Spline ;
+    ev:claimIdentifier "mott6-c-0041" ;
+    ev:claimObject "many advantages"@en ;
+    ev:claimPredicate "have"@en ;
+    ev:claimSubject "splines compared with keys"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the advantages of splines over keys are many."@en ;
+    ev:supportedByEvidence mott6:es-0041 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0042 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0042" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:Spline,
+        mech:DistributedToothContact ;
+    ev:claimIdentifier "mott6-c-0042" ;
+    ev:claimObject "more uniform torque transfer and lower loading on a given part of the shaft/hub interface than one or two keys"@en ;
+    ev:claimPredicate "produces"@en ;
+    ev:claimSubject "spline with four or more teeth"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that because usually four or more splines are used, as compared with one or two keys, a more uniform transfer of torque and a lower loading on a given part of the shaft/hub interface result."@en ;
+    ev:supportedByEvidence mott6:es-0042 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0043 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0043" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:Spline,
+        mech:FrettingWear ;
+    ev:claimIdentifier "mott6-c-0043" ;
+    ev:claimObject "integral with the shaft, so no relative motion can occur as between a key and the shaft"@en ;
+    ev:claimPredicate "are"@en ;
+    ev:claimSubject "splines"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that splines are integral with the shaft, so that no relative motion can occur of the kind that can occur between a key and the shaft, and that splines are accurately machined to provide a controlled fit between mating internal and external splines."@en ;
+    ev:supportedByEvidence mott6:es-0043 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0044 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0044" ;
+    mdcore:analystNote "This is the decisive constraint behind substitution assessment SA-001: a requirement for axial sliding under torque excludes the plain parallel key regardless of its torque capacity."@en ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:ParallelKeyConnection,
+        mech:AxialSlidingUnderTorque,
+        mech:PermitAxialMotion ;
+    ev:claimIdentifier "mott6-c-0044" ;
+    ev:claimObject "permitted"@en ;
+    ev:claimPredicate "should not be"@en ;
+    ev:claimSubject "sliding motion between a standard parallel key and the mating element"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that sliding motion between a standard parallel key and the mating element should not be permitted, whereas a spline surface is often hardened to resist wear and to facilitate use in applications where axial motion of the mating element is desired."@en ;
+    ev:supportedByEvidence mott6:es-0044,
+        mott6:es-0045 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0045 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0045" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:Spline,
+        mech:AngularIndexingFunction ;
+    ev:claimIdentifier "mott6-c-0045" ;
+    ev:claimObject "the mating element to be indexed to various angular positions"@en ;
+    ev:claimPredicate "allow"@en ;
+    ev:claimSubject "multiple splines on a shaft"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that because of the multiple splines on the shaft, the mating element can be indexed to various positions."@en ;
+    ev:supportedByEvidence mott6:es-0046 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0046 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0046" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:InvoluteSpline,
+        melem:StraightSidedSpline,
+        mech:Hobbing,
+        mech:MaintainConcentricity ;
+    ev:claimIdentifier "mott6-c-0046" ;
+    ev:claimObject "the straight-sided form, because it self-centres the mating element and can be cut with standard gear hobs"@en ;
+    ev:claimPredicate "is preferred over"@en ;
+    ev:claimSubject "involute spline form"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the involute spline form is preferred because it provides self-centering of the mating element and because it can be machined with standard hobs used to cut gear teeth."@en ;
+    ev:supportedByEvidence mott6:es-0047 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0047 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0047" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:StraightSidedSplineConnection,
+        mech:BearingLoadTransfer,
+        mott6:std_SAE_straight-sided_spline_standard__cited_by_the_source_with ;
+    ev:claimAssumption "Capacity is stated per inch of spline length and must be multiplied by the engaged length."@en,
+        "Dimensions in inches and torque in pound-inches; the formula is not dimensionally general."@en ;
+    ev:claimCondition "Applies to SAE straight-sided splines with h taken from the source's dimension table."@en ;
+    ev:claimIdentifier "mott6-c-0047" ;
+    ev:claimObject "a limit of 1000 psi bearing stress on the sides of the splines, giving T = 1000 N R h per inch of spline length"@en ;
+    ev:claimPredicate "is based on"@en ;
+    ev:claimQuantity mott6:mott6-c-0047_q0 ;
+    ev:claimSubject "torque capacity of SAE straight-sided splines"@en ;
+    ev:claimTopic "substitution" ;
+    ev:concernsEquation mott6:eq_n11-10,
+        mott6:eq_n11-9 ;
+    ev:concernsTable mott6:tab_n11-5 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the torque capacity for SAE straight-sided splines is based on a limit of 1000 psi bearing stress on the sides of the splines, from which T = 1000 N R h is derived, where N is the number of splines, R the mean radius and h the spline depth. The torque capacity is per inch of spline length."@en ;
+    ev:supportedByEvidence mott6:es-0048,
+        mott6:es-0050 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0048 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0048" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:StraightSidedSplineConnection,
+        mech:AxialSlidingUnderTorque,
+        mech:AxialSlidingWithoutTorque ;
+    ev:claimIdentifier "mott6-c-0048" ;
+    ev:claimObject "permanent installation, movement along the shaft without torque load, and movement under load"@en ;
+    ev:claimPredicate "correspond to"@en ;
+    ev:claimSubject "SAE spline fit classes A, B and C"@en ;
+    ev:claimTopic "substitution" ;
+    ev:concernsTable mott6:tab_n11-5 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the SAE spline permanent fit A is used when the mating part is not to be moved after installation, fit B when the mating part will be moved along the shaft without a torque load, and fit C when the mating part must be moved under load; the spline depth h and minor diameter d differ between the fits."@en ;
+    ev:supportedByEvidence mott6:es-0049 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0049 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0049" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:MultipleKeyConnection,
+        melem:ParallelKeyConnection,
+        melem:StraightSidedSplineConnection ;
+    ev:claimCondition "computed minimum key length exceeds the available hub length"@en ;
+    ev:claimIdentifier "mott6-c-0049" ;
+    ev:claimObject "a single key, when the computed key length exceeds the hub length"@en ;
+    ev:claimPredicate "may be used instead of"@en ;
+    ev:claimSubject "a spline or two keys"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "In its design procedure for parallel keys, Mott states that if the computed minimum key length is longer than the hub length, a higher-strength material must be selected and the design repeated, or alternatively two keys or a spline can be used instead of a single key."@en ;
+    ev:supportedByEvidence mott6:es-0035 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0050 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0050" ;
+    mdcore:requiresExternalAuthority mdcore:RequiresEngineeringReview,
+        mdcore:RequiresManufacturerData ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:ShaftHubConnectionElement ;
+    ev:claimIdentifier "mott6-c-0050" ;
+    ev:claimObject "pinning, keyless friction connections and similar methods, mostly not standardised"@en ;
+    ev:claimPredicate "is possible by"@en ;
+    ev:claimSubject "attachment of power-transmitting elements without keys or splines"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott introduces methods of attaching power-transmitting elements to shafts without keys or splines, noting that in most cases these designs have not been standardised and that analysis of individual cases considering the forces and manner of loading is necessary."@en ;
+    ev:supportedByEvidence mott6:es-0060,
+        mott6:es-0061 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0051 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0051" ;
+    mdcore:analystNote "Canonical example of a recommended test with neither a procedure nor an acceptance criterion. The ontology records the gap rather than inventing a test."@en ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:ShaftHubConnectionElement,
+        mott6:mott6-c-0051_verification ;
+    ev:claimIdentifier "mott6-c-0051" ;
+    ev:claimObject "testing of the assembly when a satisfactory analysis is not possible"@en ;
+    ev:claimPredicate "requires"@en ;
+    ev:claimSubject "keyless attachment design"@en ;
+    ev:claimTopic "verification" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that if a satisfactory analysis of a keyless attachment method is not possible, testing of the assembly is recommended."@en ;
+    ev:supportedByEvidence mott6:es-0062 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0052 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0052" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:ShearPinConnection,
+        mech:LimitTransmittedTorque ;
+    ev:claimIdentifier "mott6-c-0052" ;
+    ev:claimObject "a pin deliberately undersized so that it breaks on a moderate overload, protecting critical parts"@en ;
+    ev:claimPredicate "is"@en ;
+    ev:claimSubject "shear pin"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:concernsEquation mott6:eq_n11-18,
+        mott6:eq_n11-19 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the diameter of a pin is sometimes purposely made small to ensure that the pin will break if a moderate overload is encountered, in order to protect critical parts of a mechanism, and that such a pin is called a shear pin."@en ;
+    ev:supportedByEvidence mott6:es-0063 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0053 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0053" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:PinnedConnection,
+        mech:StressRaiser,
+        mech:TransverseHole ;
+    ev:claimIdentifier "mott6-c-0053" ;
+    ev:claimObject "stress concentrations in the shaft"@en ;
+    ev:claimPredicate "produce"@en ;
+    ev:claimSubject "pin-type connections"@en ;
+    ev:claimTopic "shaft-hub-connection" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the presence of any of the pin-type connections produces stress concentrations in the shaft."@en ;
+    ev:supportedByEvidence mott6:es-0064 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0054 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0054" ;
+    mdcore:requiresExternalAuthority mdcore:RequiresManufacturerData ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:KeylessLockingAssemblyAlternative,
+        mech:FrictionalLoadTransfer ;
+    ev:claimIdentifier "mott6-c-0054" ;
+    ev:claimObject "torque transmission between hub and shaft without a key"@en ;
+    ev:claimPredicate "allows"@en ;
+    ev:claimSubject "a steel ring compressed around a smooth shaft"@en ;
+    ev:claimTopic "substitution" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that using a steel ring compressed tightly around a smooth shaft allows torque to be transmitted between the hub of a power-transmitting element and the shaft without a key, and describes a commercially available locking assembly employing opposed tapered rings drawn together by fasteners."@en ;
+    ev:supportedByEvidence mott6:es-0065 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0060 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0060" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:ParallelKeyConnection,
+        mech:BearingCompressionFailure,
+        mech:BearingStressCheck,
+        mech:ShearFailure,
+        mech:ShearStressCheck ;
+    ev:claimIdentifier "mott6-c-0060" ;
+    ev:claimObject "two basic potential failure modes: shear across the shaft/hub interface and bearing compression on the key sides"@en ;
+    ev:claimPredicate "have"@en ;
+    ev:claimSubject "keys transmitting power"@en ;
+    ev:claimTopic "verification" ;
+    ev:concernsFigure mott6:fig_n11-4 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that there are two basic modes of potential failure for keys transmitting power: shear across the shaft/hub interface, and compression failure due to the bearing action between the sides of the key and the shaft or hub material."@en ;
+    ev:supportedByEvidence mott6:es-0030 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0061 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0061" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:ShearFailure,
+        mech:ShearStressCheck ;
+    ev:claimAssumption "Idealised force distribution in which the torque produces a single force on the key side."@en,
+        "Maximum shear stress theory of failure."@en,
+        "Shear area taken as key width times key length."@en ;
+    ev:claimIdentifier "mott6-c-0061" ;
+    ev:claimObject "L_min = 2T / (tau_d D W), with tau_d = 0.5 s_y / N from the maximum shear stress theory"@en ;
+    ev:claimPredicate "is computed from"@en ;
+    ev:claimSubject "minimum key length for shear"@en ;
+    ev:claimTopic "verification" ;
+    ev:concernsEquation mott6:eq_n11-1,
+        mott6:eq_n11-2 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott sets the shearing stress equal to a design stress in shear based on the maximum shear stress theory of failure, tau_d = 0.5 s_y / N, and obtains the minimum required key length for shear as L_min = 2T / (tau_d D W), where T is torque, D the shaft diameter and W the key width."@en ;
+    ev:supportedByEvidence mott6:es-0031 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0062 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0062" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:BearingCompressionFailure,
+        mech:BearingStressCheck ;
+    ev:claimIdentifier "mott6-c-0062" ;
+    ev:claimObject "whichever of key, shaft keyseat or hub keyseat has the lowest compressive yield strength"@en ;
+    ev:claimPredicate "occurs on"@en ;
+    ev:claimSubject "bearing failure of a key connection"@en ;
+    ev:claimTopic "verification" ;
+    ev:concernsEquation mott6:eq_n11-3,
+        mott6:eq_n11-4,
+        mott6:eq_n11-5 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that failure in bearing relates to the compressive stress on the side of the key, the shaft keyseat or the hub keyseat; the compression area is the same for each, so failure occurs on the surface with the lowest compressive yield strength."@en ;
+    ev:supportedByEvidence mott6:es-0032 ;
+    ev:textIntegrity "partial-glyph-loss" .
+
+mott6:c-0063 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0063" ;
+    mdcore:analystNote "To be read together with Shigley's warning against excessive safety factors in key design. See the claim alignment; the two are not merged."@en ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:SafetyRequirement,
+        melem:ParallelKeyConnection,
+        mott6:proc_design-procedure-parallel-keys ;
+    ev:claimCondition "typical industrial applications"@en ;
+    ev:claimIdentifier "mott6-c-0063" ;
+    ev:claimObject "N = 3, to accommodate accidental overloads and shock"@en ;
+    ev:claimPredicate "is recommended as"@en ;
+    ev:claimQuantity mott6:mott6-c-0063_q0 ;
+    ev:claimSubject "design factor for parallel keys in typical industrial applications"@en ;
+    ev:claimTopic "verification" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "In its design procedure for parallel keys, Mott states that in typical industrial applications a design factor N = 3 is adequate to accommodate accidental overloads and shock."@en ;
+    ev:supportedByEvidence mott6:es-0033 ;
+    ev:textIntegrity "partial-glyph-loss" .
+
+mott6:c-0064 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0064" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:ParallelKeyConnection,
+        mech:BearingStressCheck,
+        mech:ShearStressCheck,
+        mott6:proc_design-procedure-parallel-keys ;
+    ev:claimCondition "rectangular key, or shaft or hub weaker than the key"@en ;
+    ev:claimIdentifier "mott6-c-0064" ;
+    ev:claimObject "the larger of the lengths computed for shear and for bearing"@en ;
+    ev:claimPredicate "is governed by"@en ;
+    ev:claimSubject "required key length"@en ;
+    ev:claimTopic "verification" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that where a rectangular key is used, or where the shaft or hub has lower strength than the key, the minimum lengths for bearing and for shear must both be computed and the larger governs; the result must be checked against the available hub length."@en ;
+    ev:supportedByEvidence mott6:es-0034,
+        mott6:es-0036 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0070 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0070" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:RollingContactBearing,
+        mech:BearingLifeCalculation ;
+    ev:claimIdentifier "mott6-c-0070" ;
+    ev:claimObject "L2 / L1 = (P1 / P2)^k"@en ;
+    ev:claimPredicate "is"@en ;
+    ev:claimSubject "relationship between rolling-bearing load and life"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:concernsEquation mott6:eq_n14-1 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states the relationship between load P and life L for rolling contact bearings as L2 / L1 = (P1 / P2)^k."@en ;
+    ev:supportedByEvidence mott6:es-0070 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0071 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0071" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:BallBearing,
+        melem:RollerBearing,
+        mech:BearingLifeCalculation ;
+    ev:claimIdentifier "mott6-c-0071" ;
+    ev:claimObject "3.00 for ball bearings and 3.33 for roller bearings"@en ;
+    ev:claimPredicate "takes the values"@en ;
+    ev:claimQuantity mott6:mott6-c-0071_q0,
+        mott6:mott6-c-0071_q1 ;
+    ev:claimSubject "load/life exponent k"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:concernsEquation mott6:eq_n14-1 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott gives the load/life exponent k as 3.00 for ball bearings and 3.33 for roller bearings."@en ;
+    ev:supportedByEvidence mott6:es-0071 ;
+    ev:textIntegrity "partial-glyph-loss" .
+
+mott6:c-0072 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0072" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:RollingContactBearing,
+        mech:Brinelling,
+        mech:StaticLoadRatingCheck ;
+    ev:claimIdentifier "mott6-c-0072" ;
+    ev:claimObject "the load a bearing can withstand without permanent deformation of any component"@en ;
+    ev:claimPredicate "is"@en ;
+    ev:claimSubject "basic static load rating C_o"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the basic static load rating C_o is the load the bearing can withstand without permanent deformation of any component; exceeding it most probably indents a race, a failure referred to as brinelling, after which operation would be noisy and progressive failure would follow."@en ;
+    ev:supportedByEvidence mott6:es-0072,
+        mott6:es-0073 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0073 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0073" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:RollingContactBearing,
+        mech:SurfaceFatigue,
+        mech:SurfacePitting ;
+    ev:claimIdentifier "mott6-c-0073" ;
+    ev:claimObject "a finite life, eventually failing by fatigue due to high contact stresses"@en ;
+    ev:claimPredicate "have"@en ;
+    ev:claimSubject "rolling contact bearings"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that despite the use of very high strength steels, all rolling contact bearings have a finite life and will eventually fail due to fatigue because of the high contact stresses, the lighter the load the longer the life."@en ;
+    ev:supportedByEvidence mott6:es-0074 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0074 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0074" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mech:BearingLifeCalculation ;
+    ev:claimAssumption "Manufacturer's rating life is 10^6 revolutions; other rating bases require a different constant."@en ;
+    ev:claimIdentifier "mott6-c-0074" ;
+    ev:claimObject "C = P_d (L_d / 10^6)^(1/k) for catalogue data rated at one million revolutions"@en ;
+    ev:claimPredicate "is computed from"@en ;
+    ev:claimQuantity mott6:mott6-c-0074_q0 ;
+    ev:claimSubject "required basic dynamic load rating"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:concernsEquation mott6:eq_n14-2,
+        mott6:eq_n14-3 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that where manufacturer load data are reported for one million revolutions, the design life is L_d = (C / P_d)^k times 10^6 and the required basic dynamic load rating is C = P_d (L_d / 10^6)^(1/k), with design revolutions obtained from hours of operation and shaft speed."@en ;
+    ev:supportedByEvidence mott6:es-0076 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0075 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0075" ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout mdcore:LifeRequirement,
+        melem:RollingContactBearing ;
+    ev:claimIdentifier "mott6-c-0075" ;
+    ev:claimObject "the designer, considering the application, guided by a table of recommended values by application class"@en ;
+    ev:claimPredicate "is specified by"@en ;
+    ev:claimSubject "bearing design life"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:concernsTable mott6:tab_n14-4 ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the design life is specified by the designer considering the application, and provides a table of recommended design life in hours by application class as a guide."@en ;
+    ev:supportedByEvidence mott6:es-0075 ;
+    ev:textIntegrity "reliable" .
+
+mott6:c-0076 a ev:NormalizedClaim ;
+    rdfs:label "mott6-c-0076" ;
+    mdcore:requiresExternalAuthority mdcore:RequiresManufacturerData ;
+    mdcore:reviewStatus mdcore:NeedsReview ;
+    ev:claimAbout melem:RollingContactBearing ;
+    ev:claimIdentifier "mott6-c-0076" ;
+    ev:claimObject "published data from the specific manufacturer"@en ;
+    ev:claimPredicate "requires"@en ;
+    ev:claimSubject "bearing selection for a real application"@en ;
+    ev:claimTopic "bearing-life" ;
+    ev:extractionConfidence 0.9 ;
+    ev:extractionMethod "analyst-curated-from-source-page, anchor-verified against PDF" ;
+    ev:fromSourceDocument mott6:document ;
+    ev:normalizedStatement "Mott states that the tabulated bearing data in the book are similar to those in manufacturers' catalogues, and that it is essential that published data from specific manufacturers be used in any real application."@en ;
+    ev:supportedByEvidence mott6:es-0077 ;
+    ev:textIntegrity "reliable" .
+
+mott6:edition a ev:BookEdition ;
+    rdfs:label "Machine Elements in Mechanical Design, 6th edition"@en ;
+    ev:editionLabel "6th" ;
+    ev:editionOrdinal 6 ;
+    ev:hasChapter mott6:ch_n11,
+        mott6:ch_n14,
+        mott6:ch_n5 ;
+    ev:hasDocument mott6:document ;
+    ev:publicationYear "2018"^^xsd:gYear ;
+    ev:publisher "Pearson" .
+
+mott6:eq_n11-1 a ev:Equation ;
+    rdfs:label "mott6 equation 11-1"@en ;
+    mdcore:analystNote "Transcribed from the rendered page; some math glyphs are dropped in this source's text layer."@en ;
+    ev:equationNumber "11-1" ;
+    ev:explainedBySpan mott6:es-0031 ;
+    ev:transcriptionSource "rendered-page-image" .
+
+mott6:eq_n11-10 a ev:Equation ;
+    rdfs:label "mott6 equation 11-10"@en ;
+    ev:equationNumber "11-10" ;
+    ev:explainedBySpan mott6:es-0048 .
+
+mott6:eq_n11-18 a ev:Equation ;
+    rdfs:label "mott6 equation 11-18"@en ;
+    ev:equationNumber "11-18" .
+
+mott6:eq_n11-19 a ev:Equation ;
+    rdfs:label "mott6 equation 11-19"@en ;
+    ev:equationNumber "11-19" ;
+    ev:explainedBySpan mott6:es-0063 .
+
+mott6:eq_n11-2 a ev:Equation ;
+    rdfs:label "mott6 equation 11-2"@en ;
+    mdcore:analystNote "Transcribed from the rendered page; some math glyphs are dropped in this source's text layer."@en ;
+    ev:equationNumber "11-2" ;
+    ev:explainedBySpan mott6:es-0031 ;
+    ev:transcriptionSource "rendered-page-image" .
+
+mott6:eq_n11-3 a ev:Equation ;
+    rdfs:label "mott6 equation 11-3"@en ;
+    ev:equationNumber "11-3" ;
+    ev:explainedBySpan mott6:es-0032 .
+
+mott6:eq_n11-4 a ev:Equation ;
+    rdfs:label "mott6 equation 11-4"@en ;
+    ev:equationNumber "11-4" .
+
+mott6:eq_n11-5 a ev:Equation ;
+    rdfs:label "mott6 equation 11-5"@en ;
+    ev:equationNumber "11-5" .
+
+mott6:eq_n11-9 a ev:Equation ;
+    rdfs:label "mott6 equation 11-9"@en ;
+    ev:equationNumber "11-9" ;
+    ev:explainedBySpan mott6:es-0048 .
+
+mott6:eq_n14-2 a ev:Equation ;
+    rdfs:label "mott6 equation 14-2"@en ;
+    ev:equationNumber "14-2" ;
+    ev:explainedBySpan mott6:es-0076 .
+
+mott6:eq_n14-3 a ev:Equation ;
+    rdfs:label "mott6 equation 14-3"@en ;
+    ev:equationNumber "14-3" ;
+    ev:explainedBySpan mott6:es-0076 .
+
+mott6:es-0001 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0001" ;
+    ev:blockIdentifier "mott6/p205/b6" ;
+    ev:boundingBox "62.97,363.65,305.91,747.7" ;
+    ev:extractedText "The term design factor, N, is a measure of the relative safety of a load-carrying component. In most cases, the strength of the material from which the component is to be made is divided by the design factor to determine a design stress, sd, sometimes called the allowable stress. Then the actual stress to which the component is subjected should be less than the design stress. For some kinds of loading, it is more convenient to set up a relationship from which the design …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n5 ;
+    ev:inSection mott6:sec_n5-9 ;
+    ev:mathFontCharRatio 0.0006 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx205 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0002 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0002" ;
+    ev:blockIdentifier "mott6/p205/b6" ;
+    ev:boundingBox "62.97,363.65,305.91,747.7" ;
+    ev:extractedText "The term design factor, N, is a measure of the relative safety of a load-carrying component. In most cases, the strength of the material from which the component is to be made is divided by the design factor to determine a design stress, sd, sometimes called the allowable stress. Then the actual stress to which the component is subjected should be less than the design stress. For some kinds of loading, it is more convenient to set up a relationship from which the design …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n5 ;
+    ev:inSection mott6:sec_n5-9 ;
+    ev:mathFontCharRatio 0.0006 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx205 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0003 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0003" ;
+    ev:blockIdentifier "mott6/p205/b6" ;
+    ev:boundingBox "62.97,363.65,305.91,747.7" ;
+    ev:extractedText "The term design factor, N, is a measure of the relative safety of a load-carrying component. In most cases, the strength of the material from which the component is to be made is divided by the design factor to determine a design stress, sd, sometimes called the allowable stress. Then the actual stress to which the component is subjected should be less than the design stress. For some kinds of loading, it is more convenient to set up a relationship from which the design …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n5 ;
+    ev:inSection mott6:sec_n5-9 ;
+    ev:mathFontCharRatio 0.0006 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx205 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0004 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0004" ;
+    ev:blockIdentifier "mott6/p205/b6" ;
+    ev:boundingBox "62.97,363.65,305.91,747.7" ;
+    ev:extractedText "The term design factor, N, is a measure of the relative safety of a load-carrying component. In most cases, the strength of the material from which the component is to be made is divided by the design factor to determine a design stress, sd, sometimes called the allowable stress. Then the actual stress to which the component is subjected should be less than the design stress. For some kinds of loading, it is more convenient to set up a relationship from which the design …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n5 ;
+    ev:inSection mott6:sec_n5-9 ;
+    ev:mathFontCharRatio 0.0006 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx205 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0010 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0010" ;
+    mdcore:analystNote "Source explicitly denies a sharp LCF/HCF boundary; modelled as a non-universal ThresholdDefinition."@en ;
+    ev:blockIdentifier "mott6/p192/b1" ;
+    ev:boundingBox "50.98,195.54,293.93,747.59" ;
+    ev:extractedText "fatigue (LCF) or high-cycle fatigue (HCF) because the mechanism of failure is different for each. While no specific dividing line can be defined, designers often use up to 1000 cycles (103) for LCF and higher numbers of cycles—up to infinite life—as HCF. Fatigue failures start at small surface cracks, internal imperfections, or even at grain boundaries in the material in areas subjected to tensile stress. With repeated applications of stress, the cracks grow and progress to …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n5 ;
+    ev:inSection mott6:sec_n5-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx192 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0011 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0011" ;
+    ev:blockIdentifier "mott6/p192/b1" ;
+    ev:boundingBox "50.98,195.54,293.93,747.59" ;
+    ev:extractedText "fatigue (LCF) or high-cycle fatigue (HCF) because the mechanism of failure is different for each. While no specific dividing line can be defined, designers often use up to 1000 cycles (103) for LCF and higher numbers of cycles—up to infinite life—as HCF. Fatigue failures start at small surface cracks, internal imperfections, or even at grain boundaries in the material in areas subjected to tensile stress. With repeated applications of stress, the cracks grow and progress to …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n5 ;
+    ev:inSection mott6:sec_n5-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx192 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0012 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0012" ;
+    ev:blockIdentifier "mott6/p192/b1" ;
+    ev:boundingBox "50.98,195.54,293.93,747.59" ;
+    ev:extractedText "fatigue (LCF) or high-cycle fatigue (HCF) because the mechanism of failure is different for each. While no specific dividing line can be defined, designers often use up to 1000 cycles (103) for LCF and higher numbers of cycles—up to infinite life—as HCF. Fatigue failures start at small surface cracks, internal imperfections, or even at grain boundaries in the material in areas subjected to tensile stress. With repeated applications of stress, the cracks grow and progress to …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n5 ;
+    ev:inSection mott6:sec_n5-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx192 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0024 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0024" ;
+    ev:blockIdentifier "mott6/p488/b9" ;
+    ev:boundingBox "308.98,431.85,551.78,479.9" ;
+    ev:extractedText "The pin key, shown in Figure 11–3(d), is a cylindrical pin placed in a cylindrical groove in the shaft and hub. Lower stress concentration factors result from this design as compared with parallel or taper keys. A close"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-2 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx488 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0025 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0025" ;
+    ev:blockIdentifier "mott6/p489/b3" ;
+    ev:boundingBox "62.98,663.64,305.79,747.68" ;
+    ev:extractedText "Where light loading and relatively easy assembly and disassembly are desired, the Woodruff key should be considered. Figure 11–3(e) shows the standard configuration. The circular groove in the shaft holds the key in position while the mating part is slid over the key. The stress analysis for this type of key proceeds in the manner discussed for the parallel key, taking into"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-2 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx489 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0030 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0030" ;
+    ev:blockIdentifier "mott6/p492/b5" ;
+    ev:boundingBox "50.98,360.94,293.85,396.98" ;
+    ev:extractedText "There are two basic modes of potential failure for keys transmitting power: (1) shear across the shaft/ hub interface and (2) compression failure due to the"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx492 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0036 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0036" ;
+    ev:blockIdentifier "mott6/p493/b26" ;
+    ev:boundingBox "336.98,595.81,547.22,665.63" ;
+    ev:extractedText "8. Specify the actual length of the key to be equal to or longer than the computed minimum length. A convenient standard size should be specified using the preferred basic sizes shown in Appendix A2–1. The key should extend over all or a substantial part of the length of the hub. But the keyseat should not run into other stress ­raisers such as shoulders or grooves."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-4 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx493 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0040 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0040" ;
+    ev:blockIdentifier "mott6/p495/b2" ;
+    ev:boundingBox "320.98,70.93,563.92,358.98" ;
+    ev:extractedText "A spline can be described as a series of axial keys machined into a shaft, with corresponding grooves machined into the bore of the mating part (gear, sheave, sprocket, and so on; see Figure 11–6). The splines perform the same function as a key in transmitting torque from the shaft to the mating element. The advantages of splines over keys are many. Because usually four or more splines are used, as compared with one or two keys, a more uniform transfer of the torque and a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx495 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0041 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0041" ;
+    ev:blockIdentifier "mott6/p495/b2" ;
+    ev:boundingBox "320.98,70.93,563.92,358.98" ;
+    ev:extractedText "A spline can be described as a series of axial keys machined into a shaft, with corresponding grooves machined into the bore of the mating part (gear, sheave, sprocket, and so on; see Figure 11–6). The splines perform the same function as a key in transmitting torque from the shaft to the mating element. The advantages of splines over keys are many. Because usually four or more splines are used, as compared with one or two keys, a more uniform transfer of the torque and a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx495 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0042 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0042" ;
+    ev:blockIdentifier "mott6/p495/b2" ;
+    ev:boundingBox "320.98,70.93,563.92,358.98" ;
+    ev:extractedText "A spline can be described as a series of axial keys machined into a shaft, with corresponding grooves machined into the bore of the mating part (gear, sheave, sprocket, and so on; see Figure 11–6). The splines perform the same function as a key in transmitting torque from the shaft to the mating element. The advantages of splines over keys are many. Because usually four or more splines are used, as compared with one or two keys, a more uniform transfer of the torque and a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx495 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0043 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0043" ;
+    ev:blockIdentifier "mott6/p495/b2" ;
+    ev:boundingBox "320.98,70.93,563.92,358.98" ;
+    ev:extractedText "A spline can be described as a series of axial keys machined into a shaft, with corresponding grooves machined into the bore of the mating part (gear, sheave, sprocket, and so on; see Figure 11–6). The splines perform the same function as a key in transmitting torque from the shaft to the mating element. The advantages of splines over keys are many. Because usually four or more splines are used, as compared with one or two keys, a more uniform transfer of the torque and a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx495 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0044 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0044" ;
+    mdcore:analystNote "Decisive constraint: rules out a plain parallel key where axial sliding is required."@en ;
+    ev:blockIdentifier "mott6/p495/b2" ;
+    ev:boundingBox "320.98,70.93,563.92,358.98" ;
+    ev:extractedText "A spline can be described as a series of axial keys machined into a shaft, with corresponding grooves machined into the bore of the mating part (gear, sheave, sprocket, and so on; see Figure 11–6). The splines perform the same function as a key in transmitting torque from the shaft to the mating element. The advantages of splines over keys are many. Because usually four or more splines are used, as compared with one or two keys, a more uniform transfer of the torque and a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx495 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0045 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0045" ;
+    ev:blockIdentifier "mott6/p495/b2" ;
+    ev:boundingBox "320.98,70.93,563.92,358.98" ;
+    ev:extractedText "A spline can be described as a series of axial keys machined into a shaft, with corresponding grooves machined into the bore of the mating part (gear, sheave, sprocket, and so on; see Figure 11–6). The splines perform the same function as a key in transmitting torque from the shaft to the mating element. The advantages of splines over keys are many. Because usually four or more splines are used, as compared with one or two keys, a more uniform transfer of the torque and a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx495 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0046 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0046" ;
+    ev:blockIdentifier "mott6/p495/b2" ;
+    ev:boundingBox "320.98,70.93,563.92,358.98" ;
+    ev:extractedText "A spline can be described as a series of axial keys machined into a shaft, with corresponding grooves machined into the bore of the mating part (gear, sheave, sprocket, and so on; see Figure 11–6). The splines perform the same function as a key in transmitting torque from the shaft to the mating element. The advantages of splines over keys are many. Because usually four or more splines are used, as compared with one or two keys, a more uniform transfer of the torque and a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx495 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0047 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0047" ;
+    ev:blockIdentifier "mott6/p495/b2" ;
+    ev:boundingBox "320.98,70.93,563.92,358.98" ;
+    ev:extractedText "A spline can be described as a series of axial keys machined into a shaft, with corresponding grooves machined into the bore of the mating part (gear, sheave, sprocket, and so on; see Figure 11–6). The splines perform the same function as a key in transmitting torque from the shaft to the mating element. The advantages of splines over keys are many. Because usually four or more splines are used, as compared with one or two keys, a more uniform transfer of the torque and a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx495 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0050 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0050" ;
+    mdcore:analystNote "Unit-critical: Eq. 11-9/11-10 give torque per inch of spline length, in pound-inches, with dimensions in inches."@en ;
+    ev:blockIdentifier "mott6/p496/b7" ;
+    ev:boundingBox "50.97,491.19,293.57,515.23" ;
+    ev:extractedText "The torque capacity is per inch of length of the spline. But note that"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx496 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0060 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0060" ;
+    ev:blockIdentifier "mott6/p498/b23" ;
+    ev:boundingBox "308.98,344.21,551.89,464.25" ;
+    ev:extractedText "The following discussion will acquaint you with some of the ways in which power-transmitting elements can be attached to shafts without keys or splines. In most cases the designs have not been standardized, and analysis of individual cases, considering the forces exerted on the elements and the manner of loading of the fastening means, is necessary. In several of the designs, the analysis of shear and bearing will follow a procedure similar to that shown for keys. If a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-6 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx498 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0061 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0061" ;
+    ev:blockIdentifier "mott6/p498/b23" ;
+    ev:boundingBox "308.98,344.21,551.89,464.25" ;
+    ev:extractedText "The following discussion will acquaint you with some of the ways in which power-transmitting elements can be attached to shafts without keys or splines. In most cases the designs have not been standardized, and analysis of individual cases, considering the forces exerted on the elements and the manner of loading of the fastening means, is necessary. In several of the designs, the analysis of shear and bearing will follow a procedure similar to that shown for keys. If a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-6 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx498 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0062 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0062" ;
+    mdcore:analystNote "Canonical case of testRecommended=true with no procedure and no acceptance criterion."@en ;
+    ev:blockIdentifier "mott6/p498/b23" ;
+    ev:boundingBox "308.98,344.21,551.89,464.25" ;
+    ev:extractedText "The following discussion will acquaint you with some of the ways in which power-transmitting elements can be attached to shafts without keys or splines. In most cases the designs have not been standardized, and analysis of individual cases, considering the forces exerted on the elements and the manner of loading of the fastening means, is necessary. In several of the designs, the analysis of shear and bearing will follow a procedure similar to that shown for keys. If a …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-6 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx498 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0064 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0064" ;
+    ev:blockIdentifier "mott6/p499/b18" ;
+    ev:boundingBox "62.98,319.36,305.91,439.4" ;
+    ev:extractedText "adequately to provide precise location of the hub and to prevent the pin from falling out is difficult. The taper pin overcomes some of these problems, as does the split spring pin shown in Figure 11–9(c). For the split spring pin, the hole is made slightly smaller than the pin diameter so that a light force is required to assemble the pin in the hole. The spring force retains the pin in the hole and holds the assembly in position. But, of course, the presence of any of the …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-6 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx499 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0065 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0065" ;
+    ev:blockIdentifier "mott6/p499/b20" ;
+    ev:boundingBox "62.98,471.36,305.91,555.4" ;
+    ev:extractedText "Using a steel ring compressed tightly around a smooth shaft allows torque to be transmitted between the hub of a power-transmitting element and a shaft without having a key between the two elements. Figure 11–10 shows a commercially available product called a Locking Assembly™ from Ringfeder® Corporation that employs this principle."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-6 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx499 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0072 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0072" ;
+    ev:blockIdentifier "mott6/p587/b12" ;
+    ev:boundingBox "320.97,111.85,563.92,591.9" ;
+    ev:extractedText "The basic static load rating, Co, is the load that the bearing can withstand without permanent deformation of any component. If this load is exceeded, the most probable result would be the indentation of one of the bearing races by the rolling elements. The deformation would be similar to that produced in the Brinell hardness test, and the failure is sometimes referred to as brinelling. Operation of the bearing after brinelling would be very noisy, and the impact loads on …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n14 ;
+    ev:inSection mott6:sec_n14-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx587 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0073 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0073" ;
+    ev:blockIdentifier "mott6/p587/b12" ;
+    ev:boundingBox "320.97,111.85,563.92,591.9" ;
+    ev:extractedText "The basic static load rating, Co, is the load that the bearing can withstand without permanent deformation of any component. If this load is exceeded, the most probable result would be the indentation of one of the bearing races by the rolling elements. The deformation would be similar to that produced in the Brinell hardness test, and the failure is sometimes referred to as brinelling. Operation of the bearing after brinelling would be very noisy, and the impact loads on …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n14 ;
+    ev:inSection mott6:sec_n14-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx587 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0074 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0074" ;
+    ev:blockIdentifier "mott6/p586/b3" ;
+    ev:boundingBox "308.98,709.58,551.79,757.62" ;
+    ev:extractedText "Despite using steels with very high strength, all bearings have a finite life and will eventually fail due to fatigue because of the high contact stresses. But, obviously, the lighter the load, the longer the life, and vice versa. The"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n14 ;
+    ev:inSection mott6:sec_n14-6 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx586 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0077 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0077" ;
+    ev:blockIdentifier "mott6/p587/b10" ;
+    ev:boundingBox "62.98,195.86,305.89,591.9" ;
+    ev:extractedText "The selection of a rolling contact bearing from a manufacturer’s catalog involves considerations of load-carrying capacity and the geometry of the bearing. Table 14–3 shows data for three classes of single-row, deep-groove ball bearings that are similar to those in manufactures’ catalogs. It is essential that published data from specific manufacturers be used in any real application. Standard bearings are available in several classes, typically extremely light, extra-light, …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n14 ;
+    ev:inSection mott6:sec_n14-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx587 ;
+    ev:textIntegrity "reliable" .
+
+mott6:fig_n11-1 a ev:Figure ;
+    rdfs:label "mott6 figure 11-1"@en ;
+    ev:explainedBySpan mott6:es-0020 ;
+    ev:figureNumber "11-1" .
+
+mott6:fig_n11-3 a ev:Figure ;
+    rdfs:label "mott6 figure 11-3"@en ;
+    ev:explainedBySpan mott6:es-0023 ;
+    ev:figureNumber "11-3" .
+
+mott6:fig_n11-4 a ev:Figure ;
+    rdfs:label "mott6 figure 11-4"@en ;
+    ev:figureNumber "11-4" .
+
+mott6:fig_n11-6 a ev:Figure ;
+    rdfs:label "mott6 figure 11-6"@en ;
+    ev:figureNumber "11-6" .
+
+mott6:mott6-c-0010_q0 a mdcore:QuantityValue ;
+    rdfs:label "low-cycle fatigue practical upper bound"@en ;
+    mdcore:numericValue 1000.0 ;
+    mdcore:originalUnit "cycles" ;
+    mdcore:originalValue "1000 cycles (10^3)" ;
+    mdcore:unitSymbol "cycle" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+mott6:mott6-c-0010_threshold a mdcore:ThresholdDefinition ;
+    rdfs:label "threshold for 'low-cycle fatigue'"@en ;
+    mdcore:definesTerm "low-cycle fatigue" ;
+    mdcore:thresholdIsUniversal false ;
+    mdcore:thresholdScopeNote "The source explicitly denies that a specific dividing line can be defined."@en .
+
+mott6:mott6-c-0020_q0 a mdcore:QuantityValue ;
+    rdfs:label "upper shaft diameter for which the square key is described as most common"@en ;
+    mdcore:numericValue 6.5 ;
+    mdcore:originalUnit "in" ;
+    mdcore:originalValue "6 1/2" ;
+    mdcore:unitSymbol "in" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+mott6:mott6-c-0021_q0 a mdcore:QuantityValue ;
+    rdfs:label "ratio of key width to shaft diameter"@en ;
+    mdcore:numericValue 0.25 ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "approximately one-quarter" ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+mott6:mott6-c-0047_q0 a mdcore:QuantityValue ;
+    rdfs:label "allowable bearing stress on spline sides assumed by the SAE capacity formula"@en ;
+    mdcore:numericValue 1000.0 ;
+    mdcore:originalUnit "psi" ;
+    mdcore:originalValue "1000" ;
+    mdcore:unitSymbol "psi" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+mott6:mott6-c-0051_verification a mdcore:PrototypeTest ;
+    rdfs:label "verification recommended by mott6-c-0051"@en ;
+    mdcore:acceptanceCriterionSpecified false ;
+    mdcore:requiresExternalAuthority mdcore:RequiresCompanySpecification,
+        mdcore:RequiresExperimentalProtocol ;
+    mdcore:testProcedureSpecified false ;
+    mdcore:testRecommended true .
+
+mott6:mott6-c-0063_q0 a mdcore:QuantityValue ;
+    rdfs:label "recommended design factor for parallel keys"@en ;
+    mdcore:numericValue 3.0 ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "3" ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+mott6:mott6-c-0071_q0 a mdcore:QuantityValue ;
+    rdfs:label "load/life exponent, ball bearings"@en ;
+    mdcore:numericValue 3.0 ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "3.00" ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+mott6:mott6-c-0071_q1 a mdcore:QuantityValue ;
+    rdfs:label "load/life exponent, roller bearings"@en ;
+    mdcore:numericValue 3.33 ;
+    mdcore:originalUnit "dimensionless" ;
+    mdcore:originalValue "3.33" ;
+    mdcore:unitSymbol "dimensionless" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+mott6:mott6-c-0074_q0 a mdcore:QuantityValue ;
+    rdfs:label "assumed catalogue rating life"@en ;
+    mdcore:numericValue 1000000.0 ;
+    mdcore:originalUnit "rev" ;
+    mdcore:originalValue "10^6" ;
+    mdcore:unitSymbol "revolution" ;
+    mdcore:valueProvenance mdcore:SourceDerivedValue .
+
+mott6:page_idx489 a ev:Page ;
+    rdfs:label "mott6 p. 473 (pdf index 489)"@en ;
+    ev:pageLabel "473" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 489 ;
+    ev:pdfPageNumber 490 ;
+    ev:printedPage "473" .
+
+mott6:page_idx586 a ev:Page ;
+    rdfs:label "mott6 p. 570 (pdf index 586)"@en ;
+    ev:pageLabel "570" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 586 ;
+    ev:pdfPageNumber 587 ;
+    ev:printedPage "570" .
+
+mott6:std_ANSI_B17.1 a ev:Standard ;
+    rdfs:label "ANSI B17.1"@en .
+
+mott6:std_ANSI_B17.2-1967 a ev:Standard ;
+    rdfs:label "ANSI B17.2-1967"@en .
+
+mott6:std_SAE_straight-sided_spline_standard__cited_by_the_source_with a ev:Standard ;
+    rdfs:label "SAE straight-sided spline standard (cited by the source without a number)"@en .
+
+mott6:tab_n11-1 a ev:Table ;
+    rdfs:label "mott6 table 11-1"@en ;
+    ev:explainedBySpan mott6:es-0021 ;
+    ev:tableNumber "11-1" .
+
+mott6:tab_n11-2 a ev:Table ;
+    rdfs:label "mott6 table 11-2"@en ;
+    ev:explainedBySpan mott6:es-0022 ;
+    ev:tableNumber "11-2" .
+
+mott6:tab_n11-3 a ev:Table ;
+    rdfs:label "mott6 table 11-3"@en ;
+    ev:tableNumber "11-3" .
+
+mott6:tab_n11-4 a ev:Table ;
+    rdfs:label "mott6 table 11-4"@en ;
+    ev:explainedBySpan mott6:es-0026 ;
+    ev:tableNumber "11-4" .
+
+mott6:tab_n14-4 a ev:Table ;
+    rdfs:label "mott6 table 14-4"@en ;
+    ev:explainedBySpan mott6:es-0075 ;
+    ev:tableNumber "14-4" .
+
+mott6:eq_n14-1 a ev:Equation ;
+    rdfs:label "mott6 equation 14-1"@en ;
+    mdcore:analystNote "Transcribed from the rendered page to avoid the text layer's dropped math glyphs."@en ;
+    ev:equationNumber "14-1" ;
+    ev:explainedBySpan mott6:es-0070,
+        mott6:es-0071 ;
+    ev:transcriptionSource "rendered-page-image" .
+
+mott6:es-0020 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0020" ;
+    ev:blockIdentifier "mott6/p488/b3" ;
+    ev:boundingBox "50.98,142.28,278.33,155.9" ;
+    ev:extractedText "The most common type of key for shafts up to 6 1"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-2 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx488 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0021 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0021" ;
+    ev:blockIdentifier "mott6/p488/b4" ;
+    ev:boundingBox "50.97,143.86,293.89,479.9" ;
+    ev:extractedText "2 in in diameter is the square key, as illustrated in Figure 11–1(b). The rectangular key, Figure 11–1(c), is recommended for larger shafts and is used for smaller shafts where the shorter height can be tolerated. Both the square and the rectangular keys are referred to as parallel keys because the top and bottom and the sides of the key are parallel. (See Internet sites 1 and 20.) Table 11–1 gives the preferred dimensions for parallel keys as a function of shaft diameter …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-2 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx488 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0022 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0022" ;
+    ev:blockIdentifier "mott6/p488/b5" ;
+    ev:boundingBox "308.97,51.86,551.89,183.9" ;
+    ev:extractedText "keyseat, respectively (refer Figure 12–7). In general practice, the keyseats and keys are left with essentially square ends and edges. But radiused keyseats and chamfered keys can be used to reduce the stress concentrations. Table 11–2 shows suggested values from ANSI Standard B17.1. As alternates to the use of parallel keys, taper keys, gib head keys, pin keys, and Woodruff keys can be used to provide special features of installation or operation. Figure 11–3 shows the …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-2 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx488 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0023 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0023" ;
+    ev:blockIdentifier "mott6/p488/b7" ;
+    ev:boundingBox "308.98,217.85,551.87,397.9" ;
+    ev:extractedText "Taper keys [Figure 11–3(a) and (b)] are designed to be inserted from the end of the shaft after the hub is in position rather than installing the key first and then sliding the hub over the key as with parallel keys. The taper extends over at least the length of the hub, and the height, H, measured at the end of the hub, is the same as for the parallel key. The taper is typically 1/8 in per foot. Note that this design gives a smaller bearing area on the sides of the key, and …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-2 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx488 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0026 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0026" ;
+    ev:blockIdentifier "mott6/p492/b2" ;
+    ev:boundingBox "50.98,70.94,293.85,310.98" ;
+    ev:extractedText "Keys are made from plain carbon steel, alloy steels, stainless steels, and some nonferrous metals. Even plastics are used for small devices under low loads. This book will focus primarily on steels for general industrial applications. Table 11–4 lists a variety of steels and one aluminum alloy to illustrate the types of materials available. (See Internet site 20.) For problem solutions in this book, it is recommended that the low-carbon steel SAE 1018 be considered for most …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx492 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0032 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0032" ;
+    ev:blockIdentifier "mott6/p493/b1" ;
+    ev:boundingBox "62.98,282.06,305.79,366.13" ;
+    ev:extractedText "The failure in bearing is related to the compressive stress on the side of the key, the side of the shaft keyseat, or the side of the hub keyseat. The area in compression is the same for either of these zones, L * (H/2). Thus, the failure occurs on the surface with the lowest compressive yield strength. Let’s define a design stress for compression as"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-4 ;
+    ev:mathFontCharRatio 0.0057 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx493 ;
+    ev:textIntegrity "partial-glyph-loss" .
+
+mott6:es-0033 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0033" ;
+    ev:blockIdentifier "mott6/p493/b21" ;
+    ev:boundingBox "336.98,353.81,547.25,395.11" ;
+    ev:extractedText "2. Select the size of the key from Table 11–1. 3. Specify a suitable design factor, N. In typical industrial applications, N = 3 is adequate to accommodate accidental overloads and shock."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-4 ;
+    ev:mathFontCharRatio 0.0052 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx493 ;
+    ev:textIntegrity "partial-glyph-loss" .
+
+mott6:es-0034 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0034" ;
+    ev:blockIdentifier "mott6/p493/b25" ;
+    ev:boundingBox "336.98,483.81,547.33,593.11" ;
+    ev:extractedText "7. If a rectangular key is used, or if either the shaft or the hub has a lower strength than the key, use Equation (11–4) to compute the minimum required length of the key based on bearing stress. Also, use Equation (11–2) or (11–5) to compute the minimum required length based on shear of the key. The larger of the two computed lengths governs the design. Check to be sure that the computed length is shorter than the hub length. If not, a higher-strength material must be …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-4 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx493 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0035 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0035" ;
+    mdcore:analystNote "Primary Mott evidence that spline and multiple keys are alternatives to a single key."@en ;
+    ev:blockIdentifier "mott6/p493/b25" ;
+    ev:boundingBox "336.98,483.81,547.33,593.11" ;
+    ev:extractedText "7. If a rectangular key is used, or if either the shaft or the hub has a lower strength than the key, use Equation (11–4) to compute the minimum required length of the key based on bearing stress. Also, use Equation (11–2) or (11–5) to compute the minimum required length based on shear of the key. The larger of the two computed lengths governs the design. Check to be sure that the computed length is shorter than the hub length. If not, a higher-strength material must be …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-4 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx493 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0049 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0049" ;
+    ev:blockIdentifier "mott6/p496/b1" ;
+    ev:boundingBox "50.98,234.68,293.9,390.73" ;
+    ev:extractedText "parameters of D (major diameter), d (minor diameter), W (spline width), and h (spline depth). The dimensions for d, W, and h are related to the nominal major diameter D by the formulas given in Table 11–5. Note that the values of h and d differ according to the use of the spline. The permanent fit, A, is used when the mating part is not to be moved after installation. The B fit is used if the mating part will be moved along the shaft without a torque load. When the mating …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx496 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0063 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0063" ;
+    ev:blockIdentifier "mott6/p499/b16" ;
+    ev:boundingBox "62.98,259.36,305.81,307.43" ;
+    ev:extractedText "Sometimes the diameter of the pin is purposely made small to ensure that the pin will break if a moderate overload is encountered, in order to protect critical parts of a mechanism. Such a pin is called a shear pin."@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-6 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx499 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0070 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0070" ;
+    ev:blockIdentifier "mott6/p587/b1" ;
+    ev:boundingBox "62.98,51.85,303.17,75.9" ;
+    ev:extractedText "relationship between load, P, and life, L, for rolling contact bearings can be stated as"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n14 ;
+    ev:inSection mott6:sec_n14-7 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx587 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0071 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0071" ;
+    ev:blockIdentifier "mott6/p587/b7" ;
+    ev:boundingBox "62.98,125.85,208.79,139.39" ;
+    ev:extractedText "where k = 3.00 for ball bearings"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n14 ;
+    ev:inSection mott6:sec_n14-7 ;
+    ev:mathFontCharRatio 0.0606 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx587 ;
+    ev:textIntegrity "partial-glyph-loss" .
+
+mott6:es-0075 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0075" ;
+    ev:blockIdentifier "mott6/p591/b14" ;
+    ev:boundingBox "320.97,285.78,563.86,393.82" ;
+    ev:extractedText "Most people do not think in terms of the number of revolutions that a shaft makes. Rather, they consider the speed of rotation of the shaft, usually in rpm, and the design life of the machine, usually in hours of operation. The design life is specified by the designer, considering the application. As a guide, Table 14–4 can be used. Now, for a specified design life in hours, h, and a known speed of rotation in rpm, the number of design revolutions for the bearing would be"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n14 ;
+    ev:inSection mott6:sec_n14-8 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx591 ;
+    ev:textIntegrity "reliable" .
+
+mott6:page_idx591 a ev:Page ;
+    rdfs:label "mott6 p. 575 (pdf index 591)"@en ;
+    ev:pageLabel "575" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 591 ;
+    ev:pdfPageNumber 592 ;
+    ev:printedPage "575" .
+
+mott6:proc_design-procedure-parallel-keys a ev:DesignProcedure ;
+    rdfs:label "mott6 procedure design-procedure-parallel-keys"@en ;
+    ev:explainedBySpan mott6:es-0033,
+        mott6:es-0034,
+        mott6:es-0035 .
+
+mott6:sec_n14-6 a ev:Section ;
+    rdfs:label "mott6 sec. 14-6: Load/Life Relationship"@en ;
+    ev:sectionNumber "14-6" ;
+    ev:sectionTitle "Load/Life Relationship"@en .
+
+mott6:tab_n11-5 a ev:Table ;
+    rdfs:label "mott6 table 11-5"@en ;
+    ev:explainedBySpan mott6:es-0049 ;
+    ev:tableNumber "11-5" .
+
+mott6:es-0031 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0031" ;
+    ev:blockIdentifier "mott6/p492/b14" ;
+    ev:boundingBox "308.97,260.86,551.77,296.9" ;
+    ev:extractedText "In design, we can set the shearing stress equal to a design stress in shear for the maximum shear stress theory of failure:"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-3 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx492 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0048 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0048" ;
+    ev:blockIdentifier "mott6/p496/b1" ;
+    ev:boundingBox "50.98,234.68,293.9,390.73" ;
+    ev:extractedText "parameters of D (major diameter), d (minor diameter), W (spline width), and h (spline depth). The dimensions for d, W, and h are related to the nominal major diameter D by the formulas given in Table 11–5. Note that the values of h and d differ according to the use of the spline. The permanent fit, A, is used when the mating part is not to be moved after installation. The B fit is used if the mating part will be moved along the shaft without a torque load. When the mating …"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n11 ;
+    ev:inSection mott6:sec_n11-5 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx496 ;
+    ev:textIntegrity "reliable" .
+
+mott6:es-0076 a ev:EvidenceSpan ;
+    rdfs:label "mott6-es-0076" ;
+    ev:blockIdentifier "mott6/p591/b8" ;
+    ev:boundingBox "62.97,266.29,305.76,338.33" ;
+    ev:extractedText "We will use the method developed in Example Problem 14–1 to refine the procedure for computing the required basic dynamic load rating C for a given design load Pd and a given design life Ld. If the reported load data in the manufacturer’s literature is for 106 revolutions, Equation (14–1) can be written as"@en ;
+    ev:extractionConfidence 0.95 ;
+    ev:extractionMethod "pymupdf-textdict+anchor-verified" ;
+    ev:inChapter mott6:ch_n14 ;
+    ev:inSection mott6:sec_n14-8 ;
+    ev:mathFontCharRatio 0.0 ;
+    ev:spanOfDocument mott6:document ;
+    ev:spanOnPage mott6:page_idx591 ;
+    ev:textIntegrity "reliable" .
+
+mott6:page_idx192 a ev:Page ;
+    rdfs:label "mott6 p. 176 (pdf index 192)"@en ;
+    ev:pageLabel "176" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 192 ;
+    ev:pdfPageNumber 193 ;
+    ev:printedPage "176" .
+
+mott6:page_idx492 a ev:Page ;
+    rdfs:label "mott6 p. 476 (pdf index 492)"@en ;
+    ev:pageLabel "476" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 492 ;
+    ev:pdfPageNumber 493 ;
+    ev:printedPage "476" .
+
+mott6:page_idx496 a ev:Page ;
+    rdfs:label "mott6 p. 480 (pdf index 496)"@en ;
+    ev:pageLabel "480" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 496 ;
+    ev:pdfPageNumber 497 ;
+    ev:printedPage "480" .
+
+mott6:page_idx498 a ev:Page ;
+    rdfs:label "mott6 p. 482 (pdf index 498)"@en ;
+    ev:pageLabel "482" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 498 ;
+    ev:pdfPageNumber 499 ;
+    ev:printedPage "482" .
+
+mott6:page_idx499 a ev:Page ;
+    rdfs:label "mott6 p. 483 (pdf index 499)"@en ;
+    ev:pageLabel "483" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 499 ;
+    ev:pdfPageNumber 500 ;
+    ev:printedPage "483" .
+
+mott6:sec_n14-8 a ev:Section ;
+    rdfs:label "mott6 sec. 14-8: Design Life"@en ;
+    ev:sectionNumber "14-8" ;
+    ev:sectionTitle "Design Life"@en .
+
+mott6:page_idx205 a ev:Page ;
+    rdfs:label "mott6 p. 189 (pdf index 205)"@en ;
+    ev:pageLabel "189" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 205 ;
+    ev:pdfPageNumber 206 ;
+    ev:printedPage "189" .
+
+mott6:sec_n11-3 a ev:Section ;
+    rdfs:label "mott6 sec. 11-3: Materials for Keys"@en ;
+    ev:sectionNumber "11-3" ;
+    ev:sectionTitle "Materials for Keys"@en .
+
+mott6:sec_n5-5 a ev:Section ;
+    rdfs:label "mott6 sec. 5-5: Endurance Limit and Mechanisms of Fatigue Failure"@en ;
+    ev:sectionNumber "5-5" ;
+    ev:sectionTitle "Endurance Limit and Mechanisms of Fatigue Failure"@en .
+
+mott6:page_idx488 a ev:Page ;
+    rdfs:label "mott6 p. 472 (pdf index 488)"@en ;
+    ev:pageLabel "472" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 488 ;
+    ev:pdfPageNumber 489 ;
+    ev:printedPage "472" .
+
+mott6:page_idx493 a ev:Page ;
+    rdfs:label "mott6 p. 477 (pdf index 493)"@en ;
+    ev:pageLabel "477" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 493 ;
+    ev:pdfPageNumber 494 ;
+    ev:printedPage "477" .
+
+mott6:page_idx587 a ev:Page ;
+    rdfs:label "mott6 p. 571 (pdf index 587)"@en ;
+    ev:pageLabel "571" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 587 ;
+    ev:pdfPageNumber 588 ;
+    ev:printedPage "571" .
+
+mott6:sec_n5-9 a ev:Section ;
+    rdfs:label "mott6 sec. 5-9: Design Factors"@en ;
+    ev:sectionNumber "5-9" ;
+    ev:sectionTitle "Design Factors"@en .
+
+mott6:sec_n11-4 a ev:Section ;
+    rdfs:label "mott6 sec. 11-4: Stress Analysis to Determine Key Length"@en ;
+    ev:sectionNumber "11-4" ;
+    ev:sectionTitle "Stress Analysis to Determine Key Length"@en .
+
+mott6:sec_n14-7 a ev:Section ;
+    rdfs:label "mott6 sec. 14-7: Bearing Manufacturers’ Data"@en ;
+    ev:sectionNumber "14-7" ;
+    ev:sectionTitle "Bearing Manufacturers’ Data"@en .
+
+mott6:sec_n11-2 a ev:Section ;
+    rdfs:label "mott6 sec. 11-2: Keys"@en ;
+    ev:sectionNumber "11-2" ;
+    ev:sectionTitle "Keys"@en .
+
+mott6:sec_n11-6 a ev:Section ;
+    rdfs:label "mott6 sec. 11-6: Other Methods of Fastening Elements to Shafts"@en ;
+    ev:sectionNumber "11-6" ;
+    ev:sectionTitle "Other Methods of Fastening Elements to Shafts"@en .
+
+mott6:ch_n5 a ev:Chapter ;
+    rdfs:label "mott6 ch. 5: Design for Different Types of Loading"@en ;
+    ev:chapterNumber "5" ;
+    ev:chapterTitle "Design for Different Types of Loading"@en ;
+    ev:hasSection mott6:sec_n5-5,
+        mott6:sec_n5-9 .
+
+mott6:page_idx495 a ev:Page ;
+    rdfs:label "mott6 p. 479 (pdf index 495)"@en ;
+    ev:pageLabel "479" ;
+    ev:pageLabelStyle "arabic" ;
+    ev:pageOfDocument mott6:document ;
+    ev:pdfPageIndex 495 ;
+    ev:pdfPageNumber 496 ;
+    ev:printedPage "479" .
+
+mott6:ch_n14 a ev:Chapter ;
+    rdfs:label "mott6 ch. 14: Rolling Contact Bearings"@en ;
+    ev:chapterNumber "14" ;
+    ev:chapterTitle "Rolling Contact Bearings"@en ;
+    ev:hasSection mott6:sec_n14-6,
+        mott6:sec_n14-7,
+        mott6:sec_n14-8 .
+
+mott6:sec_n11-5 a ev:Section ;
+    rdfs:label "mott6 sec. 11-5: Splines"@en ;
+    ev:sectionNumber "11-5" ;
+    ev:sectionTitle "Splines"@en .
+
+mott6:ch_n11 a ev:Chapter ;
+    rdfs:label "mott6 ch. 11: Keys, Couplings, and Seals"@en ;
+    ev:chapterNumber "11" ;
+    ev:chapterTitle "Keys, Couplings, and Seals"@en ;
+    ev:hasSection mott6:sec_n11-2,
+        mott6:sec_n11-3,
+        mott6:sec_n11-4,
+        mott6:sec_n11-5,
+        mott6:sec_n11-6 .
+
+mott6:document a ev:SourceDocument ;
+    rdfs:label "Machine Elements in Mechanical Design.pdf" ;
+    ev:pageCount 873 ;
+    ev:sha256 "567ca2af8190cc8c441d608de1c05b2548c8857706d7d1cf1fc3e1ceb66123b5" ;
+    ev:sourceFileName "Machine Elements in Mechanical Design.pdf" ;
+    ev:textIntegrity "partial" .
+

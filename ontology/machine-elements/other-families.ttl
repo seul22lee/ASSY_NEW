@@ -1,0 +1,134 @@
+@prefix melem:  <https://w3id.org/mdkg/machine-elements#> .
+@prefix mech:   <https://w3id.org/mdkg/mechanical-design#> .
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg machine-elements :: remaining families  (BREADTH, deliberately shallow)
+#
+# Phase 6 of the work plan calls for broad families, not every product. These
+# families are stubbed to one or two levels so that the taxonomy has full
+# coverage of both books' subject matter, while depth is added only where a
+# pilot needs it (connections, bearings).
+#
+# The original module outline proposed one file per family. They are merged
+# here because at v0.1 each would contain five to ten lines, and eleven
+# near-empty files obscure rather than clarify the structure. Splitting them
+# is a mechanical operation once a family gains real depth; docs/ontology_design.md
+# records the split criterion.
+# ===========================================================================
+
+<https://w3id.org/mdkg/machine-elements/other-families> a owl:Ontology ;
+    dcterms:title "mdkg machine elements: remaining families at breadth"@en ;
+    owl:versionInfo "0.1.0" ;
+    owl:imports <https://w3id.org/mdkg/machine-elements/families> ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+# --- Shafts and shaft components ------------------------------------------
+
+melem:Shaft a owl:Class , owl:NamedIndividual ;
+    rdfs:subClassOf melem:PowerTransmissionElement , melem:SupportElement ;
+    rdfs:label "Shaft"@en ; skos:altLabel "축"@ko ;
+    skos:definition "A rotating member that carries power-transmitting elements and transmits torque along its axis."@en .
+melem:SteppedShaft a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Shaft ; rdfs:label "Stepped Shaft"@en .
+melem:Axle a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:SupportElement ; rdfs:label "Axle"@en ;
+    skos:definition "A non-rotating or torque-free member that supports rotating elements."@en .
+melem:RetainingRing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:ConnectionElement ;
+    rdfs:label "Retaining Ring"@en ; skos:altLabel "멈춤링"@ko ;
+    skos:definition "A ring seated in a groove to locate a component axially."@en ;
+    mdcore:hasFunction mech:LocateAxially .
+melem:Collar a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:ConnectionElement ; rdfs:label "Collar"@en .
+
+# --- Gears -----------------------------------------------------------------
+
+melem:Gear a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:PowerTransmissionElement ;
+    rdfs:label "Gear"@en ; skos:altLabel "기어"@ko ;
+    skos:definition "A toothed element transmitting power between shafts by conjugate tooth action."@en ;
+    mdcore:hasFunction mech:ChangeSpeedOrTorqueRatio .
+melem:SpurGear    a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Gear ; rdfs:label "Spur Gear"@en ; skos:altLabel "평기어"@ko .
+melem:HelicalGear a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Gear ; rdfs:label "Helical Gear"@en ; skos:altLabel "헬리컬기어"@ko .
+melem:BevelGear   a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Gear ; rdfs:label "Bevel Gear"@en ; skos:altLabel "베벨기어"@ko .
+melem:WormGearSet a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Gear ; rdfs:label "Worm and Wormgear Set"@en ; skos:altLabel "웜기어"@ko .
+
+# --- Flexible power transmission ------------------------------------------
+
+melem:FlexibleDriveElement a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:PowerTransmissionElement ;
+    rdfs:label "Flexible Drive Element"@en ;
+    skos:definition "A power transmission element that spans a centre distance through a flexible tension member."@en .
+melem:BeltDrive  a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:FlexibleDriveElement ; rdfs:label "Belt Drive"@en ; skos:altLabel "벨트 전동"@ko .
+melem:VBeltDrive a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:BeltDrive ; rdfs:label "V-Belt Drive"@en .
+melem:SynchronousBeltDrive a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:BeltDrive ; rdfs:label "Synchronous (Timing) Belt Drive"@en .
+melem:ChainDrive a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:FlexibleDriveElement ; rdfs:label "Chain Drive"@en ; skos:altLabel "체인 전동"@ko .
+melem:WireRope   a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:FlexibleDriveElement ; rdfs:label "Wire Rope"@en .
+
+# --- Couplings and joints --------------------------------------------------
+
+melem:Coupling a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:ConnectionElement , melem:PowerTransmissionElement ;
+    rdfs:label "Coupling"@en ; skos:altLabel "커플링"@ko ;
+    skos:definition "A connection element joining two shafts end to end to transmit torque."@en ;
+    mdcore:hasFunction mech:TransmitTorque .
+melem:RigidCoupling    a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Coupling ; rdfs:label "Rigid Coupling"@en .
+melem:FlexibleCoupling a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Coupling ; rdfs:label "Flexible Coupling"@en ;
+    mdcore:hasFunction mech:ConnectMisalignedShafts .
+melem:UniversalJoint   a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Coupling ; rdfs:label "Universal Joint"@en ; skos:altLabel "유니버설 조인트"@ko ;
+    mdcore:hasFunction mech:ConnectMisalignedShafts .
+
+# --- Fasteners and permanent joints ---------------------------------------
+
+melem:Fastener a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:FasteningElement ;
+    rdfs:label "Fastener"@en ; skos:altLabel "체결구"@ko ;
+    mdcore:hasFunction mech:JoinComponents .
+melem:Bolt   a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Fastener ; rdfs:label "Bolt"@en ; skos:altLabel "볼트"@ko .
+melem:CapScrew a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Fastener ; rdfs:label "Cap Screw"@en .
+melem:Nut    a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Fastener ; rdfs:label "Nut"@en ; skos:altLabel "너트"@ko .
+melem:PowerScrew a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:PowerTransmissionElement ; rdfs:label "Power Screw"@en ;
+    skos:definition "A screw used to convert rotation into translation under load."@en .
+melem:Rivet  a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Fastener ; rdfs:label "Rivet"@en .
+melem:WeldedJoint a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:ConnectionElement ; rdfs:label "Welded Joint"@en ; skos:altLabel "용접이음"@ko .
+melem:AdhesiveJoint a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:ConnectionElement ; rdfs:label "Adhesive Joint"@en .
+
+# --- Springs ---------------------------------------------------------------
+
+melem:Spring a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:EnergyStorageElement ;
+    rdfs:label "Spring"@en ; skos:altLabel "스프링"@ko ;
+    mdcore:hasFunction mech:StoreMechanicalEnergy .
+melem:HelicalCompressionSpring a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Spring ; rdfs:label "Helical Compression Spring"@en ; skos:altLabel "압축 코일 스프링"@ko .
+melem:HelicalExtensionSpring   a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Spring ; rdfs:label "Helical Extension Spring"@en .
+melem:TorsionSpring a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Spring ; rdfs:label "Torsion Spring"@en .
+melem:LeafSpring    a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Spring ; rdfs:label "Leaf Spring"@en .
+melem:BellevilleSpring a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Spring ; rdfs:label "Belleville Spring"@en .
+
+# --- Clutches, brakes, flywheels ------------------------------------------
+
+melem:Clutch a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:MotionControlElement ;
+    rdfs:label "Clutch"@en ; skos:altLabel "클러치"@ko ;
+    mdcore:hasFunction mech:EngageOrDisengageDrive .
+melem:Brake a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:MotionControlElement ;
+    rdfs:label "Brake"@en ; skos:altLabel "브레이크"@ko ;
+    mdcore:hasFunction mech:DissipateKineticEnergy .
+melem:Flywheel a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:EnergyStorageElement ;
+    rdfs:label "Flywheel"@en ; skos:altLabel "플라이휠"@ko ;
+    mdcore:hasFunction mech:StoreMechanicalEnergy .
+
+# --- Seals -----------------------------------------------------------------
+
+melem:Seal a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:SealingElement ;
+    rdfs:label "Seal"@en ; skos:altLabel "실"@ko ;
+    mdcore:hasFunction mech:SealInterface .
+melem:StaticSeal  a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Seal ; rdfs:label "Static Seal"@en .
+melem:DynamicSeal a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:Seal ; rdfs:label "Dynamic Seal"@en .
+melem:ORing       a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:StaticSeal ; rdfs:label "O-Ring"@en ; skos:altLabel "오링"@ko .
+melem:LipSeal     a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:DynamicSeal ; rdfs:label "Lip Seal"@en .
+melem:LabyrinthSeal a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:DynamicSeal ; rdfs:label "Labyrinth Seal"@en .
+
+# --- Linear motion elements ------------------------------------------------
+
+melem:LinearMotionElement a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:MotionGuidanceElement ;
+    rdfs:label "Linear Motion Element"@en ; skos:altLabel "직선운동요소"@ko ;
+    mdcore:hasFunction mech:GuideLinearMotion .
+melem:BallScrew  a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:LinearMotionElement ; rdfs:label "Ball Screw"@en ; skos:altLabel "볼스크류"@ko .
+melem:LinearGuide a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:LinearMotionElement ; rdfs:label "Linear Guide"@en .
+melem:BallBushing a owl:Class , owl:NamedIndividual ; rdfs:subClassOf melem:LinearMotionElement ; rdfs:label "Ball Bushing"@en .

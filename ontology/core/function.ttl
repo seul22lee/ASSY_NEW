@@ -1,0 +1,80 @@
+@prefix mdcore: <https://w3id.org/mdkg/core#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms:<http://purl.org/dc/terms/> .
+
+# ===========================================================================
+# mdkg core :: function
+#
+# The F of the Function-Behavior-Structure model.  Functions are what a design
+# is *for*; they are stated independently of any element that realises them,
+# so that a user can search from a required function without knowing the name
+# of a machine element.
+# ===========================================================================
+
+<https://w3id.org/mdkg/core/function> a owl:Ontology ;
+    dcterms:title "mdkg core: function"@en ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:creator "mdkg ontology engineering (analyst-authored, not source-derived)"@en .
+
+mdcore:Function a owl:Class ;
+    rdfs:label "Function"@en ;
+    skos:altLabel "기능"@ko ;
+    skos:definition """An intended, solution-neutral effect that a designed
+        artifact is required to produce, expressed as a transformation of
+        energy, material, motion, force or information."""@en ;
+    skos:scopeNote """Name functions as verb phrases ('transmit torque from
+        shaft to hub'), never as element names ('key'). A function that can
+        only be stated by naming one solution is not solution-neutral and is
+        probably a Requirement or a DesignAlternative in disguise."""@en .
+
+mdcore:FunctionDecomposition a owl:Class ;
+    rdfs:label "Function Decomposition"@en ;
+    skos:altLabel "기능 분해"@ko ;
+    skos:definition """A reified statement that one function is fulfilled by a
+        named set of sub-functions under a stated rationale."""@en ;
+    rdfs:comment """Reified so that competing decompositions of the same
+        function can coexist and be compared, rather than being merged."""@en .
+
+# --- Function structure ----------------------------------------------------
+
+mdcore:hasSubFunction a owl:ObjectProperty ;
+    rdfs:label "has sub-function"@en ;
+    rdfs:domain mdcore:Function ;
+    rdfs:range mdcore:Function ;
+    a owl:TransitiveProperty .
+
+mdcore:decomposesFunction a owl:ObjectProperty ;
+    rdfs:label "decomposes function"@en ;
+    rdfs:domain mdcore:FunctionDecomposition ;
+    rdfs:range mdcore:Function .
+
+mdcore:yieldsSubFunction a owl:ObjectProperty ;
+    rdfs:label "yields sub-function"@en ;
+    rdfs:domain mdcore:FunctionDecomposition ;
+    rdfs:range mdcore:Function .
+
+# --- Function to artifact --------------------------------------------------
+
+mdcore:hasFunction a owl:ObjectProperty ;
+    rdfs:label "has function"@en ;
+    rdfs:domain mdcore:DesignedArtifact ;
+    rdfs:range mdcore:Function ;
+    skos:definition """Relates an artifact to a function it is intended to
+        deliver. Intent, not observed behaviour."""@en .
+
+mdcore:performsFunction a owl:ObjectProperty ;
+    rdfs:label "performs function"@en ;
+    rdfs:domain mdcore:DesignAlternative ;
+    rdfs:range mdcore:Function ;
+    skos:definition """Relates a design alternative to a function it is capable
+        of delivering. This is the entry point for the query 'what can perform
+        this function?'."""@en ;
+    skos:scopeNote """Shared performsFunction is necessary but NOT sufficient
+        for substitutability. See mdcore:SubstitutionAssessment."""@en .
+
+mdcore:requiresFunction a owl:ObjectProperty ;
+    rdfs:label "requires function"@en ;
+    rdfs:domain mdcore:DesignProblem ;
+    rdfs:range mdcore:Function .
