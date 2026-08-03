@@ -1,20 +1,61 @@
 case_id: BM-001-3
-schema_version: "0.2.0"
-note: Each fixture is evaluated on its own geometry; none is compared to a generated parent design.
+schema_version: "0.3.0"
+domain: physical_design
+note: >
+  PHYSICAL delta fixtures only. Each is evaluated on its own geometry; none is
+  compared to a generated parent design. Contact topologies were re-derived at
+  findings SF-4.2 and SF-4.3 rather than asserted by tag.
+
+physical_tag_vocabulary:
+  curved_underside_region: "a boundary region of non-zero curvature exists on the underside"
+  planar_top_with_aperture: "a planar boundary region on the top contains the aperture"
+  resting_configuration_derived: "a load-bearing resting contact on the curved region is derived from contact geometry"
+  sweep_clears_curved_region: "the closure sweep clears the curved boundary region as well as the planar one"
 
 admissible_realizations:
   - id: ADM-BM-001-3-A
-    summary: "Single-curvature underside running front to back, planar top carrying the aperture, resting contact along a line derived from the profile."
-    materially_differs_by: [curvature_type, curvature_axis]
+    summary: >
+      Single-curvature underside running front to back, planar top carrying the
+      aperture. Resting contact is a LINE along the profile's lowest generator,
+      derived from the cylinder-plane intersection.
+    materially_differs_by: [curvature_type, curvature_axis, contact_topology]
+    contact_topology: "one line contact (cylindrical surface on a plane)"
     tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
+
   - id: ADM-BM-001-3-B
-    summary: "Doubly-curved (spherical-cap) underside with three derived contact patches, planar top carrying the aperture."
-    materially_differs_by: [curvature_type, contact_topology]
+    summary: >
+      Underside formed as three raised spherical lobes on a doubly-curved base,
+      the lobe apexes coplanar. The enclosure rests on the three lobe apexes -
+      three point contacts, all on curved material.
+    materially_differs_by: [curvature_type, contact_topology, stabilisation_strategy]
+    contact_topology: "three point contacts (three spherical lobes, apexes coplanar)"
+    revised_at: SF-4.2
+    revision_note: >
+      The prior fixture claimed "a spherical-cap underside with three derived
+      contact patches". A single spherical cap on a rigid plane gives ONE ideal
+      point contact, not three; the fixture was held together by its tags alone.
+      Three contacts are now made physically possible by three explicit lobes,
+      which is the geometric feature the prior narrative lacked. The coplanarity
+      of the apexes is an explicit assumption, recorded in
+      FIXTURE_PLAUSIBILITY_REVIEW.yaml and still pending CAD confirmation.
     tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
+
   - id: ADM-BM-001-3-C
-    summary: "Curved underside interrupted by a narrow derived flat land, planar top with aperture; resting contact on the land."
-    materially_differs_by: [stabilisation_strategy, contact_topology]
-    note: "Admissible: the curved region exists; nothing in REQ-011 forbids a land. Tests that the Oracle does not require an uninterrupted curve."
+    summary: >
+      Single-curvature underside interrupted by a shallow NON-LOAD-BEARING
+      recess set above the contact envelope. The enclosure rests on the two
+      curved bands either side of the recess - two line contacts, both on curved
+      material.
+    materially_differs_by: [contact_topology, boundary_continuity]
+    contact_topology: "two line contacts on the curved bands flanking a relieved recess"
+    revised_at: SF-4.3
+    revision_note: >
+      The prior fixture rested on a flat LAND interrupting the curve. Under
+      RDG-BM-001-3-01 that design's load-bearing contact is on the land, not on
+      the curved back, so REQ-011 was not satisfied and the fixture was held by
+      tag assertion. Revised so the interruption carries no load. The point the
+      fixture exists to test is preserved: the Oracle must not require an
+      UNINTERRUPTED curve.
     tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
 
 inadmissible_realizations:
@@ -33,3 +74,14 @@ inadmissible_realizations:
     from_negative_case: NEG-BM-001-3-004
     missing_tags: [sweep_clears_curved_region]
     tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived]
+  - id: INA-BM-001-3-D
+    summary: >
+      Underside carrying a LOAD-BEARING flat land that takes the whole weight,
+      with curvature present only on the decorative flanks above the contact
+      envelope.
+    from_negative_case: NEG-BM-001-3-005
+    missing_tags: [resting_configuration_derived]
+    note: >
+      Added at SF-4.3. This is the design the prior ADM-BM-001-3-C actually
+      described. Under RDG-BM-001-3-01 it does not rest on a curved back.
+    tags: [curved_underside_region, planar_top_with_aperture, sweep_clears_curved_region]

@@ -1,0 +1,539 @@
+schema_version: 0.3.0
+purpose: Physical plausibility review for every ADMISSIBLE fixture. Tags are authored by the same hand
+  as the invariants and are not independent evidence, so this record asks separately how each fixture
+  physically operates, what it assumes, and what would break it. It is a REVIEW RECORD, never Oracle evidence.
+status_vocabulary:
+  PHYSICALLY_PLAUSIBLE: operation and assumptions are established without geometry or physics work
+  NEEDS_GEOMETRY_VALIDATION: operation is coherent and assumptions are explicit, but CAD or physics is
+    required to confirm them
+  REJECTED: the described operation is not physically realizable as stated
+standing_caveat: 'EVERY fixture is NEEDS_GEOMETRY_VALIDATION. No CAD model and no physics run exists for
+  any of them. That is the honest status and none is an upgrade candidate until geometry exists. Three
+  fixtures were REVISED rather than validated during this review: ADM-BM-001-3-B, whose single spherical
+  cap could not produce the three contacts it claimed; ADM-BM-001-3-C, whose load-bearing contact was
+  on a flat land rather than the curved back; and ADM-BM-002-C, whose terminal was a drum stall, which
+  is an overload condition rather than a travel determinant.'
+summary:
+  total_admissible_fixtures: 41
+  PHYSICALLY_PLAUSIBLE: 0
+  NEEDS_GEOMETRY_VALIDATION: 41
+  REJECTED: 0
+  revised_during_review:
+  - ADM-BM-001-3-B
+  - ADM-BM-001-3-C
+  - ADM-BM-002-C
+reviews:
+- fixture_id: ADM-BM-001-A
+  pack: BM-001
+  physical_operation: Lid rotates about a lateral axis carried by mating knuckle features; a compressive
+    catch on the front face holds it closed; a moulded abutment on the body arrests the lid at a discrete
+    open pose.
+  assumptions:
+  - the knuckle bore and pin diameters admit a running fit
+  - the abutment lies outside the lid sweep until the open pose
+  - the catch deflection region is thin enough to flex and thick enough to hold
+  assumptions_explicit: true
+  plausible_counterexample: If the abutment is placed inside the sweep the lid fouls it before the open
+    pose. Geometry-dependent; unresolved without CAD.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-BM-001-B
+  pack: BM-001
+  physical_operation: A single moulded shell whose closure region is a thinned compliant band; the closure
+    flexes rather than rotating on a joint. A magnetic pair holds it closed; an over-centre condition
+    in the band defines the open pose.
+  assumptions:
+  - the band material admits the strain of full opening without yielding
+  - the over-centre condition is reachable within that strain
+  - the magnet pair fits within the wall section
+  assumptions_explicit: true
+  plausible_counterexample: A band stiff enough to hold the over-centre pose may exceed its strain limit
+    when opened. A real material trade, NOT resolved here.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: Strain feasibility is a physics question, not a geometry question; both are pending.
+- fixture_id: ADM-BM-001-C
+  pack: BM-001
+  physical_operation: A cover withdrawn along mating guide features until it clears them, then set aside;
+    an over-centre draw latch holds it closed. Open state is a rest condition off the product.
+  assumptions:
+  - the guide features disengage without interference at the withdrawal limit
+  - the draw latch geometry admits the over-centre travel
+  - the cover is stable resting off the product
+  assumptions_explicit: true
+  plausible_counterexample: If the guides run out before the cover clears the aperture, the cover cannot
+    be removed. Geometry-dependent.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-BM-001-D
+  pack: BM-001
+  physical_operation: A lid on a friction pivot the user positions anywhere within a declared open region;
+    friction alone holds it. At the declared working pose the lid overhangs part of the aperture projection
+    while the declared usable access region in front of it stays clear.
+  assumptions:
+  - pivot friction exceeds the lid gravity moment throughout the declared region
+  - the declared usable access region is genuinely reachable past the overhanging lid
+  - the lid does not foul the body anywhere in the region
+  assumptions_explicit: true
+  plausible_counterexample: If the friction moment falls below the gravity moment at the far end of the
+    region, the lid falls and the region is not admissible. A friction/mass question requiring physics.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: THE falsifiability fixture for SF-2.1 and SF-2.2. Its plausibility rests on a friction margin
+    that is genuinely unverified.
+- fixture_id: ADM-BM-001-2-A
+  pack: BM-001-2
+  physical_operation: Prismatic body seated on one flat face; all exposed arrises filleted; retention
+    worked from the cavity interior.
+  assumptions:
+  - the fillet radius is large enough to count as non-projecting under whatever definition is later supplied
+  - the interior actuator is reachable when the enclosure is open
+  assumptions_explicit: true
+  plausible_counterexample: No radius is defined (UNR-BM-001-2-002), so non-projection cannot be checked
+    numerically.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-BM-001-2-B
+  pack: BM-001-2
+  physical_operation: Single-curvature exposed shell over a flat seating plate; an interior lever releases
+    the retention, reachable only when open.
+  assumptions:
+  - the shell and plate join without a projecting seam at the exposed boundary
+  - the lever swing clears the cavity contents
+  assumptions_explicit: true
+  plausible_counterexample: A seam at the shell/plate joint could itself project. Geometry-dependent.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-BM-001-2-C
+  pack: BM-001-2
+  physical_operation: Flat seating region with the exposed boundary formed by chamfered and recessed arrises
+    rather than curvature.
+  assumptions:
+  - a chamfer counts as non-projecting under the eventual definition
+  - the recess depth does not weaken the wall
+  assumptions_explicit: true
+  plausible_counterexample: If no projecting corners is later read as requiring tangent continuity, a
+    chamfer fails. That reading is not selected.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-BM-001-2-D
+  pack: BM-001-2
+  physical_operation: L-shaped body seated on one narrow face; the exposed boundary wraps three adjoining
+    faces, none opposite the seat; all arrises non-projecting.
+  assumptions:
+  - the L-section is stable when mounted on the narrow face
+  - all three exposed faces can carry the same edge condition
+  assumptions_explicit: true
+  plausible_counterexample: Mounting on a narrow face may need fastening the source does not specify.
+    Not a defect of the fixture.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-BM-001-3-A
+  pack: BM-001-3
+  physical_operation: Cylindrical underside resting on a plane; the contact is a LINE along the lowest
+    generator. Planar top carries the aperture.
+  assumptions:
+  - the cylinder axis is horizontal so the line contact is a true line, not a point
+  - the centre of mass lies over the contact line
+  assumptions_explicit: true
+  plausible_counterexample: If the axis is not horizontal the contact degenerates to a point and the body
+    rocks in two directions. Assumed, not proven.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-BM-001-3-B
+  pack: BM-001-3
+  physical_operation: Three raised spherical lobes on a doubly-curved underside; the enclosure rests on
+    the three lobe apexes - three point contacts on curved material.
+  assumptions:
+  - the three lobe apexes are COPLANAR to within manufacturing tolerance
+  - the centre of mass projects inside the triangle the apexes form
+  - each lobe is convex at its apex so contact is a point, not an edge
+  assumptions_explicit: true
+  plausible_counterexample: If the apexes are not coplanar the body rocks on two of three lobes. This
+    is the assumption the fixture stands on and exactly what CAD must confirm.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: REVISED at SF-4.2. The prior version claimed three contact patches from a SINGLE spherical cap,
+    which yields one ideal point contact - the fixture was held together by its tags alone.
+- fixture_id: ADM-BM-001-3-C
+  pack: BM-001-3
+  physical_operation: Single-curvature underside interrupted by a shallow NON-LOAD-BEARING recess set
+    above the contact envelope; the enclosure rests on the two curved bands flanking it - two line contacts
+    on curved material.
+  assumptions:
+  - the recess floor lies strictly above the plane the two curved bands touch
+  - the bands are wide enough to carry the weight without local yield
+  assumptions_explicit: true
+  plausible_counterexample: If the recess is not relieved far enough it becomes the contact and the body
+    rests on a flat land, which under RDG-BM-001-3-01 fails REQ-011. The clearance is the whole point
+    and is unverified.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: REVISED at SF-4.3. The prior version rested on a flat LAND, whose load-bearing contact is not
+    on the curved back.
+- fixture_id: ADM-BM-002-A
+  pack: BM-002
+  physical_operation: Crank turns a threaded column on a lower thrust seat and an upper journal; a nut
+    on the platform translates; two parallel guides carry the platform and restrain rotation.
+  assumptions:
+  - the thrust seat can carry the payload weight plus preload
+  - the guides are parallel to the screw axis within the nut clearance
+  - the screw is long enough for the declared travel plus run-out
+  assumptions_explicit: true
+  plausible_counterexample: Guide/screw misalignment binds the nut - an over-constraint ordinary practice
+    handles with a floating nut. Not resolved here.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-BM-002-B
+  pack: BM-002
+  physical_operation: Crank drives a nut journalled in the housing; the non-rotating screw carries the
+    platform and rises through it.
+  assumptions:
+  - the screw is restrained against rotation by the platform guidance
+  - the nut journal seat carries the axial payload load
+  - the housing is tall enough for the screw to rise, or the screw exits it
+  assumptions_explicit: true
+  plausible_counterexample: If the platform guidance does not restrain the screw, the screw turns with
+    the nut and nothing rises. The restraint is assumed.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: 'Falsifies the retired universal axial-reaction premise: no separate thrust feature exists on
+    any rotating element.'
+- fixture_id: ADM-BM-002-C
+  pack: BM-002
+  physical_operation: Crank winds a drum; four cables at the platform corners lift it symmetrically; terminals
+    at a deliberate cable-length stop collar and at platform seating on the floor.
+  assumptions:
+  - the four cables are equal in length and stay in tension
+  - the drum winds all four at the same rate
+  - the stop collar arrests the drum without shock-loading the cables
+  assumptions_explicit: true
+  plausible_counterexample: Unequal cable stretch tilts the platform, and cables cannot push - descent
+    is under the platform own weight. A limitation of the family, not a defect of the fixture.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: Its terminal is a DELIBERATE stop collar. The prior version used DRUM STALL, which is not a travel
+    determinant but a jamming or overload condition and conflicted with REQ-007 (SF-5.7).
+- fixture_id: ADM-BM-002-D
+  pack: BM-002
+  physical_operation: Crank drives a threaded cross-tie spreading the lower scissor pivots; the linkage
+    raises the platform and its geometry guides it.
+  assumptions:
+  - the linkage has enough mechanical advantage near full extension to be crankable by hand
+  - the pivots have clearance for the full angular sweep
+  - the cross-tie thread carries the spreading force
+  assumptions_explicit: true
+  plausible_counterexample: Near full retraction the scissor mechanical advantage collapses and crank
+    effort rises sharply. No effort ceiling exists (UNR-BM-002-003) so this cannot be judged.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-BM-002-E
+  pack: BM-002
+  physical_operation: Crank pin drives a connecting link to a platform carrier in a housing channel; the
+    relation is sinusoidal; the platform is a rotationally symmetric disc whose angular position is immaterial.
+  assumptions:
+  - the crank throw is at least half the required travel
+  - the channel carries the carrier through the full stroke
+  - the scenario genuinely does not constrain the platform angular position
+  assumptions_explicit: true
+  plausible_counterexample: A crank of throw r gives 2r of travel, so 80-100 mm needs a 40-50 mm throw,
+    which may exceed a desktop envelope (UNR-BM-002-006). A real packaging tension, unresolved.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: THE falsifiability fixture for SF-5.4.
+- fixture_id: ADM-C4-A
+  pack: C4-drawer
+  physical_operation: Knob shaft carries a toothed wheel engaging a toothed member on the drawer underside;
+    two side rails carry the drawer and keep it square; abutments at each end of one rail set both ends
+    of travel.
+  assumptions:
+  - the tooth engagement stays meshed over the full stroke
+  - the rails carry the drawer weight at full extension
+  - the abutments lie outside the drawer sweep until the ends
+  assumptions_explicit: true
+  plausible_counterexample: At full extension the drawer overhangs its rails and the mesh may lift. The
+    overhang margin is unverified.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-C4-B
+  pack: C4-drawer
+  physical_operation: Knob drives a threaded rod along the travel direction; a follower on the drawer
+    translates; a dovetailed channel in the shell guides the drawer.
+  assumptions:
+  - the dovetail admits a sliding fit over the full stroke
+  - the rod thrust is reacted at an end seat
+  - the follower does not rotate with the rod
+  assumptions_explicit: true
+  plausible_counterexample: A dovetail long enough for the stroke roughly doubles the cabinet depth. A
+    packaging tension, not a defect.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-C4-C
+  pack: C4-drawer
+  physical_operation: Knob turns a drum winding a band to each end of the drawer; rolling supports in
+    a tray recess carry it; NO configuration is declared an end of travel.
+  assumptions:
+  - the band stays in tension in both directions
+  - the rollers stay captive through the full stroke
+  - the user stops turning at the intended configurations
+  assumptions_explicit: true
+  plausible_counterexample: With no end of travel the user can overrun and pull the drawer off its rollers.
+    A usability consequence, not a source violation - no travel limit is stated.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: Falsifies the retired universal axial-load premise AND the retired unconditional terminal requirement.
+- fixture_id: ADM-C4-D
+  pack: C4-drawer
+  physical_operation: Knob drives a centred crank and connecting link to a drawer carrier in a single
+    wide channel; the drawer is a shallow open tray whose angular position is immaterial.
+  assumptions:
+  - the centred drive genuinely applies no net moment about the travel axis
+  - the crank throw gives the intended projection
+  - the channel walls carry the tray weight at extension
+  assumptions_explicit: true
+  plausible_counterexample: If the drive is not exactly centred a residual moment appears and the tray
+    yaws. The symmetry is the assumption the fixture rests on.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: THE falsifiability fixture for SF-6.1.
+- fixture_id: ADM-GS-A
+  pack: guided-slider
+  physical_operation: Two parallel round rails; two carriages on the translating body; the rail pair removes
+    all five non-translational freedoms.
+  assumptions:
+  - the rails are parallel within the carriage clearance
+  - both carriages engage both rails through the stroke
+  assumptions_explicit: true
+  plausible_counterexample: Rail non-parallelism binds the carriages - the classic over-constraint of
+    this arrangement.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-GS-B
+  pack: guided-slider
+  physical_operation: One guide bar of non-circular section through a matching bore; the section removes
+    rotation about the travel axis.
+  assumptions:
+  - bore and bar sections match closely enough to remove rotation
+  - the bar is long enough for the stroke plus bore length
+  assumptions_explicit: true
+  plausible_counterexample: A close non-circular fit binds on thermal expansion. Material-dependent and
+    unresolved.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-GS-C
+  pack: guided-slider
+  physical_operation: Dovetailed channel and matching male form; one continuous interaction removes all
+    five freedoms.
+  assumptions:
+  - the dovetail angle is self-retaining under transverse load
+  - the fit admits sliding without lift-off
+  assumptions_explicit: true
+  plausible_counterexample: A dovetail too shallow lifts out under transverse load. Angle-dependent.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-GS-D
+  pack: guided-slider
+  physical_operation: The translating body runs in a rectangular recess, located by three pads bearing
+    on three recess walls. No dedicated guide part exists.
+  assumptions:
+  - three pads on three mutually non-parallel walls remove the five freedoms
+  - the pads stay on their walls through the stroke
+  - a preload holds the pads in contact
+  assumptions_explicit: true
+  plausible_counterexample: Three pads on three walls is determinate only with a preload holding them
+    in contact; without one the body can lift off a wall. The preload is assumed.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-GS-E
+  pack: guided-slider
+  physical_operation: A cylindrical rod in a plain round bore. The bore removes two lateral translations
+    and two lateral rotations; rotation about the travel axis is LEFT FREE and declared so.
+  assumptions:
+  - the bore length gives enough moment arm to remove the lateral rotations
+  - the instantiating requirement is genuinely indifferent to the rod angular position
+  assumptions_explicit: true
+  plausible_counterexample: A short bore relative to its diameter does not remove the lateral rotations
+    and the rod cocks in the bore. The length/diameter ratio is the assumption.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: 'THE falsifiability fixture for SF-7.1: the most ordinary guided slider there is, which the prior
+    capability statement rejected.'
+- fixture_id: ADM-LR-A
+  pack: latch-retention
+  physical_operation: Cantilever snap hook engaging a lip; engaged by insertion with a declared beam deflection;
+    released by pressing the beam clear.
+  assumptions:
+  - the beam deflects enough to clear the lip without yielding
+  - the disturbance direction does not deflect the beam
+  assumptions_explicit: true
+  plausible_counterexample: A beam stiff enough to hold may exceed its strain limit on insertion. The
+    classic snap trade, unresolved.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-LR-B
+  pack: latch-retention
+  physical_operation: Magnetic pair with a keeper face locating the retained state; released by a peeling
+    motion applied at an offset.
+  assumptions:
+  - pole face and keeper area are large enough for the holding force
+  - the peel geometry gives enough mechanical advantage to break the field
+  assumptions_explicit: true
+  plausible_counterexample: A field strong enough to resist straight pull may also resist peeling if the
+    offset is too small. Geometry- and field-dependent.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: Admissible only because SF-9.1 requires identified participating MATERIAL rather than touching
+    surfaces.
+- fixture_id: ADM-LR-C
+  pack: latch-retention
+  physical_operation: Over-centre link held past its dead point; the disturbance drives it further over
+    centre; release requires lifting the handle.
+  assumptions:
+  - the link geometry has a true dead point within its travel
+  - the handle is reachable in the retained state
+  assumptions_explicit: true
+  plausible_counterexample: If the over-centre offset is too small the link can be driven back through
+    the dead point by the disturbance. Offset-dependent.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-LR-D
+  pack: latch-retention
+  physical_operation: Spring-loaded detent ball seating in a recess; engagement and release share a path;
+    the discriminant is force magnitude.
+  assumptions:
+  - the release threshold is strictly above the declared disturbance
+  - the recess geometry gives a reproducible seating force
+  assumptions_explicit: true
+  plausible_counterexample: With no declared disturbance (UNR-LR-001) the required separation between
+    hold and release forces cannot be set. The discriminant is real but unquantified.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-RL-A
+  pack: rotary-to-linear-engagement
+  physical_operation: Toothed wheel on the input shaft engaging a toothed linear member running in a channel.
+  assumptions:
+  - the mesh stays engaged over the full output range
+  - the channel reacts the tooth separating force
+  assumptions_explicit: true
+  plausible_counterexample: The separating force lifts the member out of mesh if the channel does not
+    react it.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-RL-B
+  pack: rotary-to-linear-engagement
+  physical_operation: Helical thread on the input shaft engaging a follower whose non-circular section
+    restrains rotation.
+  assumptions:
+  - the thread lead gives usable travel per turn
+  - the follower section restrains rotation without binding
+  assumptions_explicit: true
+  plausible_counterexample: A lead coarse enough to be quick may back-drive. Lead-dependent and unresolved.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-RL-C
+  pack: rotary-to-linear-engagement
+  physical_operation: Band on a drum anchored to each end of the output body; the two anchors at a separation
+    restrain output rotation.
+  assumptions:
+  - both band runs stay in tension
+  - the anchor separation gives enough moment arm to restrain rotation
+  assumptions_explicit: true
+  plausible_counterexample: A band cannot push; the return run must be pretensioned or the output gravity-returned.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-RL-D
+  pack: rotary-to-linear-engagement
+  physical_operation: Rotating nut journalled in the frame driving a fixed non-rotating screw that carries
+    the output.
+  assumptions:
+  - the screw is restrained against rotation downstream
+  - the nut journal reacts the axial load
+  assumptions_explicit: true
+  plausible_counterexample: If nothing downstream restrains the screw it turns with the nut. That restraint
+    is external to this capability.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-RL-E
+  pack: rotary-to-linear-engagement
+  physical_operation: Crank disc, connecting link pinned to the crank pin, slider carrying the output.
+    Input and output bodies never touch. The relation is sinusoidal.
+  assumptions:
+  - the crank throw gives the required output range
+  - the link length avoids a toggle within the working range
+  - both pins have clearance for the full sweep
+  assumptions_explicit: true
+  plausible_counterexample: Near dead centre the mechanical advantage collapses; if the working range
+    includes a dead centre the mechanism stalls. Range-dependent.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: 'THE falsifiability fixture for SF-8.1: no interaction exists between input body and output body.'
+- fixture_id: ADM-RL-F
+  pack: rotary-to-linear-engagement
+  physical_operation: Cam on the input shaft acting on a roller follower carried by a pushrod driving
+    the output.
+  assumptions:
+  - the follower stays in contact through the whole cam rotation
+  - no pressure angle on the profile is steep enough to jam the follower
+  assumptions_explicit: true
+  plausible_counterexample: A steep pressure angle jams the follower in its guide. Profile-dependent and
+    unverified.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-HS-A
+  pack: bounded-two-state-closure
+  physical_operation: Pin and knuckle joint; the lid seats on the rim at the closed extreme and a flange
+    meets the wall at the open extreme.
+  assumptions:
+  - the flange lies outside the lid sweep until the open extreme
+  - the rim seat is continuous enough to define the closed pose
+  assumptions_explicit: true
+  plausible_counterexample: A flange placed inside the sweep fouls the lid before the open extreme.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-HS-B
+  pack: bounded-two-state-closure
+  physical_operation: Four-bar linkage; the open extreme is the linkage dead point, the closed extreme
+    is the lid seating on the rim.
+  assumptions:
+  - the dead point falls at the intended open configuration
+  - the coupler clears the body through the whole sweep
+  assumptions_explicit: true
+  plausible_counterexample: A four-bar can pass through its dead point under momentum, overrunning the
+    intended open extreme.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-HS-C
+  pack: bounded-two-state-closure
+  physical_operation: Sliding cover in a channel; the cover face meets one channel end and a boss meets
+    the other. Both bounds on one part.
+  assumptions:
+  - the boss clears the channel through the travel until the far end
+  - the channel is long enough for the declared separation
+  assumptions_explicit: true
+  plausible_counterexample: A boss sized to arrest the cover may also foul it earlier in the travel.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: null
+- fixture_id: ADM-HS-D
+  pack: bounded-two-state-closure
+  physical_operation: Lid on a pivot pin running in a curved slot; both extremes are the pin reaching
+    an end of the SAME continuous slot.
+  assumptions:
+  - the slot ends arrest the pin without deforming
+  - the slot curvature matches the lid pivot path
+  assumptions_explicit: true
+  plausible_counterexample: A slot whose curvature does not match the pivot path binds the pin partway.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: 'FALSIFIABILITY fixture for SF-10.2: one continuous geometry produces both bounds.'
+- fixture_id: ADM-HS-E
+  pack: bounded-two-state-closure
+  physical_operation: 'Compliant flexure closure: the flexure stiffness constrains the first part of travel,
+    then it buckles clear and a moulded rib takes over, guiding the panel to its seat.'
+  assumptions:
+  - the flexure and the rib OVERLAP in coverage so no configuration is unconstrained
+  - the buckling transition is repeatable and does not damage the flexure
+  assumptions_explicit: true
+  plausible_counterexample: If the flexure buckles before the rib engages there is an unconstrained band
+    and the design fails NRM-HS-003 correctly. The overlap is the assumption, and exactly what CAD must
+    confirm.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: 'FALSIFIABILITY fixture for SF-10.1: no single relative constraint persists through the motion.'
+- fixture_id: ADM-HS-F
+  pack: bounded-two-state-closure
+  physical_operation: Magnetically detented cover with two stable seats produced by ONE field arrangement
+    - the closed seat and the open seat are two minima of the same magnets.
+  assumptions:
+  - the field has two distinct stable minima at the intended configurations
+  - the barrier between them exceeds the disturbance the closure sees in normal use
+  assumptions_explicit: true
+  plausible_counterexample: A field with two minima usually has a shallow barrier between them; the cover
+    may drift between states. Field-strength dependent and unverified.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: 'Second falsifiability fixture for SF-10.2: one physical field produces both bounds.'

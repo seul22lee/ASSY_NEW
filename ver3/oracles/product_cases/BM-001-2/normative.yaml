@@ -1,16 +1,23 @@
 case_id: BM-001-2
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 tier: product_case
 inherits: BM-001
 dossier: ver3/oracles/_dossiers/DOS-BM-001-2.md
 lock_status: BLOCKED_BY_SOURCE_AMBIGUITY
+physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
 lock_blocker: AMB-001-2-01
+
+correction_note: >
+  Corrected at finding SF-3.1. The delta requirement no longer asserts geometric
+  opposition between the seating region and the exposed boundary. AMB-001-2-01
+  is preserved unresolved and the pack remains blocked for lock.
 
 invariants:
   - id: NRM-BM-001-2-001
     statement: >
       One boundary region of the enclosure seats flat against a mounting surface,
-      and the opposite exposed boundary presents no projecting corner.
+      and the exposed exterior boundary presents no projecting corner.
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ["DOS-BM-001-2 S1 REQ-009"]
@@ -18,7 +25,14 @@ invariants:
     exclusions:
       - "Does NOT require a rounded profile. The source statement requires non-projection; 'rounded' is one observable of it. Chamfered and recessed edges are admissible."
       - "Does not fix which region seats."
-    verification_predicate: "exists(planar boundary region) AND for every exposed exterior edge: the edge is non-projecting, evaluated on metric surface geometry."
+      - >
+        Does NOT assert that the exposed boundary is geometrically OPPOSITE the
+        seating region. REQ-009 says "flush against a mounting panel on one side"
+        and "no projecting corners on the exposed side"; it never relates the two
+        sides geometrically. A body seated on one face whose exposed boundary
+        wraps several adjoining faces satisfies this. Corrected at SF-3.1.
+      - "Does not fix how much of the exterior counts as exposed; that follows from what the mounting occludes (UNR-BM-001-2-004)."
+    verification_predicate: "exists(planar boundary region) AND for every edge of the exposed exterior boundary: the edge is non-projecting, evaluated on metric surface geometry."
     requires_tags: [planar_seating_region, exposed_edges_non_projecting]
     related_freedoms: [FRE-BM-001-2-001, FRE-BM-001-2-002]
     related_unresolved: [UNR-BM-001-2-001, UNR-BM-001-2-002]
@@ -60,18 +74,42 @@ required_unresolved:
   - id: UNR-BM-001-2-001
     decision: Which boundary region seats against the mounting surface.
     why_must_remain_open: "DOS-BM-001-2 S2: REQ-009 requires a flat seating region and does not say which."
+    kind: structural_choice
     resolvable_when: "An access, load-path or packaging constraint selects it."
-    blocks: []
+    block_scopes: []
     source_locators: ["DOS-BM-001-2 S2"]
   - id: UNR-BM-001-2-002
     decision: Non-projecting profile geometry and its magnitude.
     why_must_remain_open: "DOS-BM-001-2 S2: no radius, chamfer size or definition of projecting is stated."
+    kind: quantitative
     resolvable_when: "A user-supplied profile, a standard, or a derived manufacturing constraint exists."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-BM-001-2-001 as a structural predicate — whether an edge projects is inspectable on the solid without a radius value."
     source_locators: ["DOS-BM-001-2 S2"]
   - id: UNR-BM-001-2-003
     decision: What "inside the enclosure" denotes, and how the enclosure is opened given REQ-010.
     why_must_remain_open: "AMB-001-2-01. Three incompatible readings, none selected by any rank-1 source."
+    kind: interpretive
     resolvable_when: "A rank-1 clarification of 'inside the enclosure', or a statement of how the enclosure is opened."
-    blocks: [NRM-BM-001-2-002]
+    block_scopes: [blocks_structural_predicate, blocks_evidence_interpretation, blocks_PASS]
+    structural_block_justification: >
+      This is not a missing quantity. The predicate's DOMAIN is undefined: until
+      "inside the enclosure" is fixed, there is no set of poses the predicate
+      ranges over, so it cannot separate compliant from non-compliant designs at
+      any fidelity. This is the one place in the corrected set where a structural
+      predicate is legitimately blocked, and it is why BM-001-2 alone remains
+      BLOCKED_BY_SOURCE_AMBIGUITY.
     source_locators: ["DOS-BM-001-2 S4"]
+  - id: UNR-BM-001-2-004
+    decision: Which portion of the exterior counts as "the exposed side".
+    kind: interpretive
+    why_must_remain_open: >
+      DOS-BM-001-2 S2 records no statement of which face mounts. What is exposed
+      follows from what the mounting occludes, which the source does not fix.
+    resolvable_when: "The mounting face is selected, or a reach model defines exposure."
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-BM-001-2-001 — the design declares its seating region and its exposed boundary; only the adequacy of that declaration is unresolved."
+    source_locators: ["DOS-BM-001-2 S2"]
+    closes_finding: [SF-3.1]

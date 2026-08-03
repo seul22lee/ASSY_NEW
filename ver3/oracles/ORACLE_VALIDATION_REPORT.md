@@ -1,4 +1,11 @@
-# Oracle validation report — Passes 3A–6
+# Oracle validation report — Passes 3A–6, then the independent semantic review
+
+> **SUPERSEDED IN PART.** The clean result described below was real but
+> insufficient: it proved internal structural consistency, not source fidelity.
+> An independent human review then raised 45 semantic findings. See
+> [INDEPENDENT_SEMANTIC_REVIEW_REPORT.md](INDEPENDENT_SEMANTIC_REVIEW_REPORT.md)
+> for the corrections and the current audit results. This document is preserved
+> as the record of the earlier pass, including the 24-finding blind run.
 
 **Result: 0 findings across 3A, 3B, 3C and 3D over all nine packs**, in canonical
 order and under three independent shuffle seeds. No `LOCK.json` was created. No
@@ -171,3 +178,28 @@ Each of these has an invariant. NOT_VERIFIED is never INFEASIBLE.
 - AMB-002-01, AMB-002-02 and AMB-C4-01 are carried as required-unresolved
   decisions. They bound the evaluation of specific requirements without blocking
   their packs.
+
+---
+
+## 7. What happened after this report
+
+The audit above was clean and the pack set was still wrong in several places.
+The corrections are recorded in
+[INDEPENDENT_SEMANTIC_REVIEW_REPORT.md](INDEPENDENT_SEMANTIC_REVIEW_REPORT.md);
+the headline items:
+
+- **BM-002's stated travel and payload requirements had no normative
+  representation at all.** A design declaring 45 mm of travel passed every
+  invariant in the pack.
+- Physical design and verification process shared one all-or-nothing tag set, so
+  a buildable latch could be rejected for want of a test.
+- Micro-oracles presented their project-authored capability statements as rank-1
+  user language.
+- Four physical premises were asserted as universal and are false.
+- The auditor contained an `and False` sub-expression making one check
+  unreachable, and its requirement-coverage check counted a passing mention in a
+  derivation premise as coverage.
+
+The auditor gained ten new checks and a mutation suite of 45 cases with 7
+controls, and it now documents its own scope: it does not establish physical
+truth, and fixture tags are not independent evidence.

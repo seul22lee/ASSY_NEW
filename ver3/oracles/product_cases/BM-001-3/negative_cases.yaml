@@ -53,3 +53,40 @@ negative_cases:
     expected_status: FAIL
     violates: [NRM-BM-001-3-003]
     sources: ["DOS-BM-001-3 S1 REQ-011"]
+  - id: NEG-BM-001-3-005
+    failure_class: load_bearing_contact_not_on_the_curved_region
+    fixture: INA-BM-001-3-D
+    description: >
+      The underside carries a load-bearing flat land that takes the whole weight;
+      curvature is present only on decorative flanks above the contact envelope.
+      REQ-011 is reported satisfied because a curved region exists.
+    why_wrong: >
+      Under RDG-BM-001-3-01, "rests on a curved back" requires the load-bearing
+      resting contact to lie on the curved region. Curvature elsewhere on the
+      body is not the thing the enclosure rests on.
+    concealment: "A curvature check on the boundary passes, and the resting configuration is genuinely derived from contact geometry - just not from curved contact."
+    detect_stage: s04
+    detect_predicate: "the derived load-bearing resting contact region must lie on the curved underside region."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-3-002]
+    sources: ["DOS-BM-001-3 S1 REQ-011"]
+    closes_finding: [SF-4.3]
+
+  - id: NEG-BM-001-3-006
+    failure_class: stability_unknown_blocks_contact_derivation
+    description: >
+      The pipeline reports the resting configuration as underivable because no
+      stability criterion is stated.
+    why_wrong: >
+      Contact between a curved underside and a supporting plane is computable
+      from geometry alone. The missing criterion blocks a stability PASS and a
+      tipping-margin claim; it does not block the contact derivation.
+    concealment: "The report reads as appropriate caution, and the criterion really is absent."
+    detect_stage: s11
+    detect_predicate: "UNR-BM-001-3-002 carries no `blocks_structural_predicate` scope."
+    must_not_be_reported_as: [UNRESOLVED]
+    expected_status: "resting configuration derived; stability INDETERMINATE"
+    violates: [UNR-BM-001-3-002]
+    sources: ["DOS-BM-001-3 S4"]
+    closes_finding: [SF-4.1]

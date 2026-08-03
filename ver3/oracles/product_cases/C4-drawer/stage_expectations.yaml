@@ -1,5 +1,5 @@
 case_id: C4-drawer
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 note: >
   States only what the pipeline must represent, preserve, defer or report.
   Adds no product requirement. Stage-11 rules are conditional; no outcome is
@@ -11,7 +11,7 @@ stages:
   s01:
     must_exist: [requirements, scenarios, actors, system_boundary, observables, assumptions, unknowns]
     must_not_be_decided: [mechanism_family, product_layout, parts, geometry, dimensions, materials, retention_requirement]
-    may_remain_unresolved: [UNR-C4-001, UNR-C4-002, UNR-C4-003, UNR-C4-004, UNR-C4-005, UNR-C4-006, UNR-C4-007]
+    may_remain_unresolved: [UNR-C4-001, UNR-C4-003, UNR-C4-004, UNR-C4-005, UNR-C4-006, UNR-C4-007]
     provenance_required: ["requirement -> source clause id"]
     sparsity_note: >
       Every requirement produced by s01 must trace to a fragment of the one-sentence
@@ -20,22 +20,25 @@ stages:
   s02:
     must_exist: [obligations, physical_interactions, body_hypotheses, states, transitions, candidates]
     must_not_be_decided: [selected_candidate, conversion_mechanism, guidance_mechanism, product_faces, geometry]
-    may_remain_unresolved: [candidate_ranking, UNR-C4-002]
+    may_remain_unresolved: [candidate_ranking]
     provenance_required: ["obligation -> requirement id"]
-    plurality_note: >
-      More than one conversion family must survive s02 (FRE-C4-002). Eliminating
-      to a single candidate is admissible only with the obligation each rejected
-      candidate failed recorded.
+    open_search_note: >
+      Corrected at SF-8.3; the former fixed-plurality rule is withdrawn. One
+      candidate may legitimately remain after source- and physics-based
+      elimination. What must hold instead: the space was not closed by library
+      availability; each rejection names a source, physical or feasibility reason;
+      synthesis beyond the catalogue remained possible; and an absent implemented
+      realizer yields UNSUPPORTED, never INFEASIBLE.
   s03:
     must_exist: [fixed_and_moving_bodies, cabinet_and_cavity_topology, opening, boundary_crossing, knob_access_path, interface_ownership, load_path_ownership, assembly_dependency_graph]
     must_not_be_decided: [emergence_face_without_evidence, knob_face_without_evidence, detailed_feature_geometry, selected_candidate, part_count_as_criterion]
     may_remain_unresolved: [opening_region, crossing_region]
     provenance_required: ["body -> obligation id", "access_path -> requirement id"]
   s04:
-    must_exist: [world_and_body_frames, joint_frames, axes, gravity_direction, travel_corridor, retracted_pose, extended_pose, motion_paths, engagement_sites, swept_volumes_with_fidelity, spatial_feasibility_per_candidate, extreme_determinants]
+    must_exist: [world_and_body_frames, joint_frames, axes, gravity_direction, retracted_configuration, extended_configuration, motion_paths, engagement_sites, swept_volumes_with_fidelity, spatial_feasibility_per_candidate, declared_ends_of_travel_if_any]
     must_not_be_decided: [final_dimensions, stroke_value, manufacturing_features, renderer_originated_values]
     may_remain_unresolved: [free_spatial_alternatives, UNR-C4-001]
-    provenance_required: ["pose -> constraint/contact ids", "swept_volume -> fidelity declaration", "extreme -> its own determinant id", "travel axis -> geometric relation to gravity direction"]
+    provenance_required: ["pose -> constraint/contact ids", "swept_volume -> fidelity declaration", "declared end of travel -> its own determinant id", "travel axis -> geometric relation to gravity direction"]
     orientation_note: >
       Horizontality (NRM-C4-002) must be established as a geometric relation
       between the travel axis and the gravity direction. A face label or an axis
@@ -43,7 +46,7 @@ stages:
       (NEG-C4-013).
     selection_gate: "A SelectionDecision may be emitted only after every retained candidate carries s03 and s04 feasibility evidence at equal obligation coverage."
   s05:
-    must_exist: [connection_realizations, conversion_engagement_features, guidance_realization, anti_rotation_realization, drawer_support_realizations, radial_support_realizations, axial_reaction_realization, feature_graph, construction_program, solver_problem, load_path_records]
+    must_exist: [connection_realizations, conversion_engagement_features, guidance_realization, drawer_support_realizations, reaction_realizations_for_carried_loads, feature_graph, construction_program, solver_problem, load_path_records]
     must_not_be_decided: [new_independent_entities, duplicate_bodies, parameter_values, retention_feature_without_requirement]
     may_remain_unresolved: [embodiment_alternatives, UNR-C4-003]
     provenance_required: ["realization -> obligation ids it discharges"]
@@ -87,6 +90,11 @@ stages:
       (EV-C4-002).
   s11:
     must_exist: [requirement_evaluation, evidence_coverage, acceptance_summary]
+    unresolved_scope_rule: >
+      An unresolved decision suppresses only the outcomes named in its
+      `block_scopes`. A quantitative unknown may withhold PASS or make an
+      acceptance INDETERMINATE; it may never make a structural predicate
+      underivable.
     must_not_be_decided: [new_evidence]
     may_remain_unresolved: []
     provenance_required: ["evaluation -> evidence ids", "PASS -> declared scope"]
@@ -119,42 +127,45 @@ stages:
         if_evidence_is_declared_pair_only: NOT_VERIFIED
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      C4-R5_guidance_and_anti_rotation:
+      C4-R5_guidance:
         traces_to: NRM-C4-005
-        pass_requires: "contact-resolving evidence that the drawer is confined to its path and does not rotate about the travel direction"
-        fail_when: "the evidence shows the drawer departs its path or rotates"
+        pass_requires: "contact-resolving evidence that the required horizontal sliding behaviour is preserved through the travel"
+        fail_when: "the evidence shows the required behaviour fails - the drawer departs its path, or skews where the behaviour depends on it not skewing"
         if_evidence_is_structural_artifact: NOT_VERIFIED
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       C4-R6_weight_reacted:
         traces_to: NRM-C4-006
-        pass_requires: "a load path demonstrated at the retracted state, the extended state and along the path, against a declared load case (UNR-C4-005 resolved)"
+        pass_requires: "a load path demonstrated at the retracted configuration, the extended configuration and along the path, for the drawer's own weight, plus any contents load an instantiating requirement declares (UNR-C4-005)"
         fail_when: "the load path is incomplete at any point of travel"
         if_unresolved: INDETERMINATE
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      C4-R7_travel_extremes:
+      C4-R7_declared_ends_of_travel:
         traces_to: NRM-C4-007
-        pass_requires: "each extreme shown determined by its own condition, evaluated at that extreme"
-        fail_when: "one condition is credited to both extremes, or an extreme has no determinant"
+        pass_requires: "each DECLARED physical end of travel shown produced by its own condition, evaluated at its own configuration"
+        fail_when: "a declared end has no realized condition, or one evaluation result is copied to both"
+        if_no_end_of_travel_is_declared: NOT_APPLICABLE
+        note: "DOS-C4-drawer S3 records no stated travel limit; a design declaring none is not thereby deficient."
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       C4-R8_knob_access_and_crossing:
         traces_to: NRM-C4-008
-        pass_requires: "an access path from the user region to the knob in the retracted state, plus a supported boundary crossing"
-        fail_when: "the knob is unreachable in the retracted state, or the crossing element is unsupported"
+        pass_requires: "an access path from the user region to the knob in the retracted configuration, plus a realized crossing with no unintended interference"
+        fail_when: "the knob is unreachable in the retracted configuration, or the moving element fouls the cabinet at the crossing"
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      C4-R9_rotating_support:
+      C4-R9_carried_loads_reacted:
         traces_to: NRM-C4-009
-        pass_requires: "a radial support realization for each rotating element and an axial reaction where axial load occurs"
-        fail_when: "a rotating element is located only by its engagement"
+        pass_requires: "a reaction realization for every load component every element actually carries in the declared scenario"
+        fail_when: "an element carries a load component with no reaction for it"
+        note: "Elements carrying no such component owe no reaction; see SF-6.5."
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      C4-R10_corridor_and_emergence:
+      C4-R10_clearance_and_traversability:
         traces_to: NRM-C4-010
-        pass_requires: "swept volume shown to be a proper subset of the corridor and free of cabinet material at every point of travel"
-        fail_when: "the swept volume intersects cabinet material or fills the corridor"
+        pass_requires: "the drawer shown not to intersect cabinet material at any configuration of the travel, and the path shown traversable"
+        fail_when: "an intersection occurs at any configuration, or the path is blocked at an interior point"
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       C4-R11_assembly:

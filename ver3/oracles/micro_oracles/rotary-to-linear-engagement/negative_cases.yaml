@@ -1,5 +1,5 @@
 capability_id: rotary-to-linear-engagement
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 purpose: >
   Realizations and pipeline behaviours that must be rejected at capability level.
   Process cases reproduce recorded legacy behaviour.
@@ -12,7 +12,14 @@ negative_cases:
     fixture: INA-RL-A
   - id: NEG-RL-002
     kind: design
-    description: "Engagement present but no input/output relation and no identified driving body."
+    description: >
+      A localized chain exists, but over the declared operating range the geometry
+      is at a dead point throughout, so input rotation produces no output
+      translation.
+    note: >
+      Corrected at SF-8.2. The former case was "no relation is DECLARED", which is
+      a DesignState representation defect and now lives in stage_expectations. The
+      physical defect is that rotation does not in fact cause translation.
     must_be_rejected_by: [NRM-RL-002]
     fixture: INA-RL-B
   - id: NEG-RL-003
@@ -22,24 +29,26 @@ negative_cases:
     fixture: INA-RL-C
   - id: NEG-RL-004
     kind: design
-    description: "Output body free to rotate about the input axis; it turns instead of translating."
+    description: "Output body free to rotate about the input axis where the chain demonstrably applies that moment; it turns instead of translating."
+    note: "Conditional at SF-8.1/SF-8.4: a chain producing no such moment owes no restraint."
     must_be_rejected_by: [NRM-RL-004]
     fixture: INA-RL-D
   - id: NEG-RL-005
     kind: design
-    description: "Rotating body located only by its engagement."
+    description: "A body in the chain demonstrably carries a load component with no reaction path for it."
+    note: "Made load-conditional. A drum carries no axial load and owes no thrust feature."
     must_be_rejected_by: [NRM-RL-005]
     fixture: INA-RL-E
   - id: NEG-RL-006
     kind: design
-    description: "A force component of the engagement has no reaction path."
-    must_be_rejected_by: [NRM-RL-006]
-    fixture: INA-RL-F
+    description: "One link of the chain disengages partway through the declared output range."
+    must_be_rejected_by: [NRM-RL-003]
+    fixture: INA-RL-C
   - id: NEG-RL-007
-    kind: design
+    kind: evidence
     description: "Conversion credited as verified on declared-pair ratio agreement."
-    must_be_rejected_by: [NRM-RL-007]
-    fixture: INA-RL-G
+    must_be_rejected_by: [NRM-RL-006]
+    fixture: INA-EV-RL-A
 
   - id: NEG-RL-008
     kind: process
@@ -72,7 +81,8 @@ negative_cases:
     reproduced_from: >
       DOS S5 - "the card is built and P-GEAR passes V-A 5/5"; "V-B is
       NAMED-DEFERRED, not silently dropped"
-    must_be_rejected_by: [NRM-RL-007, UNR-RL-003]
+    must_be_rejected_by: [NRM-RL-006, UNR-RL-003]
+    fixture: INA-EV-RL-B
     required_outcome: "NOT_VERIFIED with the fidelity gap named. No contact-level evidence exists for any rotary-to-linear conversion in the corpus."
   - id: NEG-RL-011
     kind: process
@@ -80,7 +90,7 @@ negative_cases:
       This capability is renamed, aliased or documented as a rack-and-pinion
       capability, or a rack-and-pinion realization is treated as its definition.
     reproduced_from: "DOS S6, S7"
-    must_be_rejected_by: [normative.naming_note, FRE-RL-001]
+    must_be_rejected_by: [FRE-RL-001]
     required_outcome: >
       Rejected. The capability is named for what it does. Rack-and-pinion is a
       cited reference realization and an evidence source, never the family.
@@ -90,11 +100,12 @@ negative_cases:
       This capability is required to supply general guidance of the output body,
       or a guidance obligation is discharged by pointing at the conversion.
     reproduced_from: "normative.scope_exclusions"
-    must_be_rejected_by: [normative.scope_exclusions]
+    must_be_rejected_by: [NRM-RL-004]
     required_outcome: >
       Rejected. NRM-RL-004 requires only the restraint without which conversion
-      would not occur. Guidance is owned by the guided-slider micro-oracle, and
-      conflating them would let one obligation appear discharged twice.
+      would not occur, and only where the chain produces the moment. Guidance is
+      owned by the guided-slider micro-oracle, and conflating them would let one
+      obligation appear discharged twice.
   - id: NEG-RL-013
     kind: process
     description: >
@@ -103,3 +114,41 @@ negative_cases:
     reproduced_from: "DOS S4"
     must_be_rejected_by: [FRE-RL-004, UNR-RL-001]
     required_outcome: "Rejected as UNSUPPORTED_INFERENCE."
+  - id: NEG-RL-014
+    kind: design
+    description: >
+      A multi-stage conversion - crank/link/slider, cable/drum/output, or
+      cam/follower/output - is rejected because the rotating input body and the
+      translating output body do not engage each other directly.
+    reproduced_from: "SF-8.1"
+    must_be_rejected_by: [NRM-RL-001]
+    required_outcome: >
+      Rejected as a defect OF THE ORACLE, not of the design. ADM-RL-E and ADM-RL-F
+      are admissible; a crank-link-slider is the most common rotary-to-linear
+      mechanism there is.
+
+  - id: NEG-RL-015
+    kind: process
+    description: >
+      Candidate generation is required to retain more than one conversion family,
+      or a run is faulted merely for arriving at a single surviving candidate.
+    reproduced_from: "SF-8.3"
+    must_be_rejected_by: [FRE-RL-001]
+    required_outcome: >
+      Rejected. One candidate may legitimately remain after source- and
+      physics-based elimination. What must hold is that the space was not closed
+      by library availability, that each rejection names a source, physical or
+      feasibility reason, that synthesis beyond the catalogue remained possible,
+      and that an absent realizer yields UNSUPPORTED.
+
+  - id: NEG-RL-016
+    kind: process
+    description: >
+      A physical invariant requires that the input/output relation be DECLARED, or
+      that the driving body be RECORDED, so a design whose kinematics are correct
+      fails for a DesignState bookkeeping reason.
+    reproduced_from: "SF-8.2"
+    must_be_rejected_by: [NRM-RL-002]
+    required_outcome: >
+      Rejected. Representation obligations belong in stage_expectations. The
+      physical invariant concerns whether rotation actually causes translation.

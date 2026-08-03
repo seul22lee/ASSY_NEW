@@ -1,5 +1,5 @@
 capability_id: guided-slider
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 freedoms:
   - id: FRE-GS-001
     decision: Which of the two bodies is fixed in the world frame.
@@ -35,4 +35,13 @@ freedoms:
       DOS S6 records that `slide_rail.carve` REPLACES its mover piece, so in that
       library a rail could not also be the drawer. That is a limitation of one
       construction operation, not of the capability.
+    must_not_be_asserted_by_tests: true
+  - id: FRE-GS-008
+    decision: Which freedoms are constrained and which are left intentionally free.
+    why_free: >
+      Added at SF-7.1. The capability requires the freedoms the instantiating
+      motion requirement depends on to be constrained, and the rest to be
+      declared. A rod in a plain bore with free axial rotation, a fully prismatic
+      dovetail, and a three-pad recess are all admissible; which is right depends
+      on the instantiating requirement, not on this capability.
     must_not_be_asserted_by_tests: true

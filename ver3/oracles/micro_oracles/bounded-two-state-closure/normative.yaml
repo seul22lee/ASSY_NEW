@@ -1,9 +1,11 @@
 capability_id: bounded-two-state-closure
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 tier: micro_oracle
 inherits: null
 dossier: ver3/oracles/_dossiers/DOS-bounded-two-state-closure.md
 lock_status: SEMANTICALLY_AUDITED
+physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
 
 capability_statement: >
   A closure that reaches two defined states by a bounded motion, where the bound
@@ -19,10 +21,23 @@ naming_note: >
   sections are unchanged.
 
 basis_semantics: >
-  A micro-oracle has no user. Its rank-1 source is the declared capability
-  statement in DOS S1. DIRECT_USER_REQUIREMENT marks fragments of that statement;
-  NECESSARY_PHYSICAL_CONSEQUENCE marks statements derived from it;
-  VERIFICATION_MINIMUM marks statements about what evidence must be able to show.
+  A micro-oracle has no user. Its capability statement was PROJECT-AUTHORED and
+  then frozen into dossier S1; it is not user language and it is not rank 1.
+  Statements restating a fragment of it carry basis_type
+  PROJECT_DEFINED_CAPABILITY, whose authority is explicitly human-reviewable.
+  Corrected at SF-1.3.
+
+source_declares_terminal_states:
+  value: true
+  locator: "DOS-bounded-two-state-closure S1"
+  verbatim_fragment: "the bound at each extreme is physically produced"
+  why: >
+    Bounds are DEFINITIONAL for this capability - they are the thing it names.
+    The UNCONDITIONAL_TERMINAL_BOUND check exists to stop a terminal determinant
+    being demanded where the source declares no travel limit, which is the case
+    for BM-002 and C4-drawer. Here the capability statement declares it. The
+    auditor verifies this fragment against the frozen dossier rather than taking
+    the declaration on trust.
 
 scope_exclusions:
   - "Holding either state is NOT part of this capability; see the latch-retention micro-oracle. A bound determines where the motion ends, not that the closure stays there."
@@ -34,7 +49,7 @@ invariants:
     statement: >
       Two states are defined as relative configurations of the two bodies, and
       both are reachable.
-    basis_type: DIRECT_USER_REQUIREMENT
+    basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
     source_locators: ["DOS-bounded-two-state-closure S1"]
     conclusion_scope: "Existence and reachability of the two states."
@@ -48,7 +63,7 @@ invariants:
   - id: NRM-HS-002
     statement: >
       A continuous motion connects the two states.
-    basis_type: DIRECT_USER_REQUIREMENT
+    basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
     source_locators: ["DOS-bounded-two-state-closure S1 (\"reaches two defined states by a bounded motion\")"]
     conclusion_scope: "Existence of a continuous path between the two states."
@@ -61,28 +76,44 @@ invariants:
 
   - id: NRM-HS-003
     statement: >
-      The relative constraint between the two bodies persists at every point of
-      the motion between the two states.
+      At every configuration along the declared bounded path, at least one
+      realized constraint or interaction keeps the configuration within the
+      allowed motion manifold.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-bounded-two-state-closure S1"]
     derivation_premises:
-      - "A bounded motion is a motion whose configuration space is limited by a constraint."
-      - "Where the constraint has lapsed, the configuration is not limited, so the motion is not bounded there."
-    conclusion_scope: "Persistence of the relative constraint across the bounded motion only."
+      - "A bounded motion is a motion whose configuration space is limited."
+      - "Where nothing constrains the configuration, it is not limited there, so the motion is not bounded at that configuration."
+      - "What limits it may differ from one part of the path to another without the motion ceasing to be bounded."
+    conclusion_scope: >
+      Continuity of CONSTRAINT COVERAGE along the bounded path. Not the identity
+      or persistence of any one constraint.
     exclusions:
-      - "Says nothing about configurations outside the bounded motion. A design in which the two bodies separate outside the range of this capability is not addressed here."
-      - "Does not name the constraint, and does not require it to be a joint."
-    verification_predicate: "for the extremes and the interior of the motion: the constraint between the two bodies is engaged."
-    requires_tags: [relative_constraint_persists_through_motion]
+      - >
+        Does NOT require ONE identical relative constraint to persist through the
+        whole motion. The constraint MODE may change, and the path may use
+        several features or interaction regimes in succession - a pin taking over
+        from a cam, a flexure handing off to a contact face. What must not occur
+        is a stretch of path where nothing constrains the configuration.
+        Corrected at SF-10.1.
+      - "Says nothing about configurations outside the bounded motion."
+      - "Does not name the constraint and does not require it to be a joint."
+    verification_predicate: >
+      for every configuration along the declared bounded path: at least one
+      realized constraint or interaction is active and keeps the configuration
+      within the allowed manifold. Hand-offs between constraints are admissible
+      provided coverage is continuous.
+    requires_tags: [constraint_coverage_continuous]
     related_freedoms: [FRE-HS-003]
     related_unresolved: []
+    closes_finding: [SF-10.1]
 
   - id: NRM-HS-004
     statement: >
       The bound at each extreme is produced by a realized physical condition, not
       by a limit imposed on the model.
-    basis_type: DIRECT_USER_REQUIREMENT
+    basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
     source_locators: ["DOS-bounded-two-state-closure S1 (\"where the bound at each extreme is physically produced\")"]
     conclusion_scope: "Physical origin of each bound."
@@ -96,22 +127,33 @@ invariants:
 
   - id: NRM-HS-005
     statement: >
-      Each extreme is bounded by its own condition, evaluated at that extreme's
-      configuration.
+      Each extreme is physically determined and is evaluated independently at its
+      own configuration.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-bounded-two-state-closure S1"]
     derivation_premises:
       - "The capability names two extremes, at two different configurations."
-      - "Two distinct configurations cannot both be determined by one condition evaluated once."
-    conclusion_scope: "Distinctness of the two bounding conditions."
+      - "A result obtained at one configuration is a fact about that configuration."
+      - "Copying it to the other asserts something no evaluation established."
+    conclusion_scope: "Independent evaluation of each extreme, and physical determination of each."
     exclusions:
-      - "Distinctness is required of the CONDITION or CONTACT FEATURE, not of the manufactured part. One part carrying an abutment at each extreme satisfies this."
-      - "Does not require the two bounds to use the same principle. One extreme may be set by contact and the other by run-out."
-    verification_predicate: "each extreme references its own condition, evaluated at its own configuration."
-    requires_tags: [bounds_distinct_per_extreme]
-    related_freedoms: [FRE-HS-004]
+      - >
+        Does NOT require each extreme to have a completely different determining
+        feature. ONE continuous geometry or ONE physical field may produce both
+        bounds at different configurations - a single curved slot whose two ends
+        arrest the pin, a single magnetic field with two stable seats. What is
+        forbidden is copying one evaluation RESULT to both. Corrected at SF-10.2.
+      - "The same manufactured part may participate in both bounds."
+      - "The two extremes need not use the same bounding principle."
+    verification_predicate: >
+      each extreme references a realized physical condition, and each is evaluated
+      at its own configuration; no evaluation result is reused across extremes.
+      A single continuous feature or field participating in both is admissible.
+    requires_tags: [each_extreme_independently_evaluated]
+    related_freedoms: [FRE-HS-004, FRE-HS-007]
     related_unresolved: []
+    closes_finding: [SF-10.2]
 
   - id: NRM-HS-006
     statement: >
@@ -139,6 +181,11 @@ invariants:
       distinguish a bounded closure from an otherwise identical unbounded one.
     basis_type: VERIFICATION_MINIMUM
     support_type: derived
+    enables_claim: >
+      NRM-HS-004 may be reported PASS. Without this minimum, a criterion that also
+      passes on an otherwise identical UNBOUNDED closure would be counted as
+      showing that a bound is present - which is exactly what the corpus's matched
+      pair does.
     source_locators: ["DOS-bounded-two-state-closure S5", "DOS-bounded-two-state-closure S3"]
     derivation_premises:
       - "DOS S5 records a matched pair differing in exactly one feature: the presence of the limit."
@@ -149,35 +196,45 @@ invariants:
       - "Does not invalidate the matched pair as evidence of something else. DOS S5 records what it does support: removing the limit produced seed-level instability across a five-seed sweep."
       - "Does not require a physical control specimen. A demonstrated sensitivity of the criterion to the bound's absence is sufficient."
     verification_predicate: "for each criterion mapped to NRM-HS-004: a configuration is identified in which the criterion fails when the bound is removed."
-    requires_tags: [bound_criterion_discriminates]
+    requires_evidence_tags: [bound_criterion_discriminates]
+    moved_at: SF-1.1
+    move_note: "Whether a test distinguishes a bounded from an unbounded control is an evidence property, not a property of the physical closure (SF-10.4)."
     related_freedoms: []
     related_unresolved: []
 
 required_unresolved:
   - id: UNR-HS-001
     decision: The angular or linear separation between the two states.
+    kind: quantitative
     why_must_remain_open: >
       DOS S4: no capability-level open angle exists. The 90 degree threshold is
       the m0 fixture's own, and the realization targeted 90 degrees (DOS S6).
     resolvable_when: "An instantiating case supplies a required separation."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-HS-001 — reachability of two declared states is structural."
     source_locators: ["DOS-bounded-two-state-closure S4", "DOS-bounded-two-state-closure S6"]
   - id: UNR-HS-002
     decision: Whether either state is held, and against what.
+    kind: qualitative
     why_must_remain_open: >
       Outside this capability's scope. A bound says where the motion ends, not
       that the closure remains there. Holding is owned by latch-retention.
     resolvable_when: "An instantiating case states a holding requirement."
-    blocks: []
+    block_scopes: []
     source_locators: ["DOS-bounded-two-state-closure S4"]
   - id: UNR-HS-003
     decision: Load carried at the bound, life, and duty.
+    kind: quantitative
     why_must_remain_open: "DOS S4: no capability-level load or life exists."
     resolvable_when: "An instantiating case supplies a load case and a duty."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-HS-004 — that a bound is physically produced is structural."
     source_locators: ["DOS-bounded-two-state-closure S4"]
   - id: UNR-HS-004
     decision: A single-run criterion that distinguishes a bounded from an unbounded closure.
+    kind: interpretive
     why_must_remain_open: >
       DOS S5: the corpus's matched pair does not supply one. Every seed-0
       criterion passes in both members; the verdicts differ only through seed
@@ -187,5 +244,7 @@ required_unresolved:
       A criterion is demonstrated to fail when the bound is removed, at a stated
       fidelity — or a seed-sweep protocol is declared as the discriminator, with
       its aggregation rule.
-    blocks: []
+    block_scopes: [blocks_evidence_interpretation, blocks_PASS]
+    does_not_block:
+      - "NRM-HS-004 as a structural predicate — whether the design declares a realized bounding condition is inspectable without any test."
     source_locators: ["DOS-bounded-two-state-closure S5", "DOS-bounded-two-state-closure S3"]

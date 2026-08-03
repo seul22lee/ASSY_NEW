@@ -1,0 +1,35 @@
+capability_id: latch-retention
+schema_version: "0.3.0"
+domain: evidence_and_verification
+note: >
+  Evidence and verification-process admissibility, moved out of the physical
+  fixture set at findings SF-1.1 and SF-9.2. Tests NRM-LR-007 and NRM-LR-008.
+  None of these may make a physical latch inadmissible.
+
+evidence_tag_vocabulary:
+  retention_claim_names_its_disturbance: "every retention result carries the disturbance case it was evaluated against"
+  force_window_not_cited_as_result: "every cited force is marked as an input condition or as a measurement, and only measurements are counted as results"
+
+admissible_evidence_cases:
+  - id: ADM-EV-LR-A
+    summary: "A retention result reported against a named disturbance case, with the holding force obtained by measurement and marked as such."
+    tags: [retention_claim_names_its_disturbance, force_window_not_cited_as_result]
+  - id: ADM-EV-LR-B
+    summary: >
+      A retention test whose force window is declared as a test INPUT condition
+      and reported as a condition, with the disturbance case named and the
+      retention outcome reported as NOT_VERIFIED for want of a measurement.
+    note: "Admitted although it reports no achieved force. Declining to report a value is not a defect; reporting an input as an outcome is."
+    tags: [retention_claim_names_its_disturbance, force_window_not_cited_as_result]
+
+inadmissible_evidence_cases:
+  - id: INA-EV-LR-A
+    summary: "Retention reported as holding, with no disturbance case named."
+    from_negative_case: NEG-LR-007
+    missing_tags: [retention_claim_names_its_disturbance]
+    tags: [force_window_not_cited_as_result]
+  - id: INA-EV-LR-B
+    summary: "The task-definition force window of 15-60 N reported as the retention the product achieves."
+    from_negative_case: NEG-LR-008
+    missing_tags: [force_window_not_cited_as_result]
+    tags: [retention_claim_names_its_disturbance]

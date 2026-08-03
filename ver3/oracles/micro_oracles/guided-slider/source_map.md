@@ -46,3 +46,24 @@ every legacy fixture having one.
 | Anti-rotation realized by using two rails (S7) | 6 | The mechanism, not the requirement. NEG-GS-008. |
 | `tracks_straight = 0.0` (S5) | 6 | Structural artifact. EV-GS-002, NRM-GS-007. |
 | `P-SLIDE-VA` 5/5 (S3) | 6 | EV-GS-001, with its fidelity. |
+
+---
+
+## Corrections at the independent semantic review
+
+The findings below were raised by human review of the first clean audit and are
+recorded finding-by-finding in `../../INDEPENDENT_SEMANTIC_REVIEW_REPORT.md`.
+Statement text, basis types and unresolved scopes in this map reflect the
+corrected pack, not the reviewed one.
+
+| Finding | What changed |
+|---|---|
+| SF-1.3 | Basis type for capability fragments is `PROJECT_DEFINED_CAPABILITY`, not `DIRECT_USER_REQUIREMENT`. A micro-oracle has no user; this capability statement was project-authored and then frozen. |
+| SF-7.1 | **The capability statement was rewritten.** "with the non-translational freedoms removed" defines a strict prismatic joint, which is narrower than the ordinary sense of "guided slider" and than any project source. It now reads "with the freedoms constrained that the instantiating motion requirement depends on". `ADM-GS-E` — a rod in a plain round bore with declared free axial rotation — falsifies the retired reading. New freedom `FRE-GS-008`; new unresolved `UNR-GS-004`. |
+| SF-7.2 | `NRM-GS-006` replaces proper-subset corridor containment with non-intersection and traversability. |
+| SF-1.1 | `NRM-GS-007` now uses `requires_evidence_tags`; the structural-artifact property moved out of the physical fixture tags into `evidence_cases.yaml`. A physical guide is no longer inadmissible for want of a test. |
+
+If a future project source genuinely requires strict single-degree-of-freedom
+guidance, that is a DIFFERENT capability and belongs in a separate pack named
+`single-dof-linear-guidance`. The retired statement is preserved in
+`capability_statement_history`.

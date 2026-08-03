@@ -1,64 +1,105 @@
 capability_id: rotary-to-linear-engagement
-schema_version: "0.2.0"
+schema_version: "0.3.0"
+domain: physical_design
 note: >
-  Four materially different conversion principles, each satisfying every
-  invariant. ADM-C and ADM-D have neither teeth nor threads; they exist to prove
-  the capability was not defined in terms of the one card the legacy library had
-  wired in.
+  PHYSICAL design fixtures only (SF-1.1). ADM-RL-E and ADM-RL-F are multi-stage
+  chains with NO direct engagement between input and output bodies; they falsify
+  the retired direct-engagement reading (SF-8.1).
+
+physical_tag_vocabulary:
+  rotating_input_body: "a rotating input body exists"
+  translating_output_body: "a translating output body exists"
+  uninterrupted_interaction_chain: "a connected sequence of realized interactions joins them with no gap"
+  interactions_localized: "each interaction names participating material on both of its bodies"
+  rotation_causes_translation: "input rotation produces output translation over the declared range"
+  chain_persists_over_output_range: "every link stays engaged over the declared output range"
+  output_rotation_restrained_where_needed: "where the chain applies a moment about the input axis, a realized restraint removes that rotation"
+  carried_loads_reacted: "every body has a reaction for every load component it actually carries"
 
 admissible_realizations:
   - id: ADM-RL-A
-    summary: "Toothed wheel on the input shaft engaging a toothed linear member. Output rotation restrained by the linear member running in a channel. Shaft radially supported in two bores; tooth force reacted through them."
-    materially_differs_by: [conversion_principle, restraint_source]
-    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+    summary: "Toothed wheel on the input shaft engaging a toothed linear member. Output restrained by the member running in a channel. One-stage chain, direct engagement."
+    family: toothed_direct
+    chain: "input shaft -> tooth engagement -> linear member"
+    load_profile: "shaft carries radial tooth load; no axial load"
+    materially_differs_by: [conversion_principle, chain_length]
+    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted']
   - id: ADM-RL-B
-    summary: "Helical thread on the input shaft engaging a follower on the output body. Output rotation restrained by the follower's non-circular section in a matching channel. Axial thread force reacted at a shoulder on the shaft."
-    materially_differs_by: [conversion_principle, dominant_force_direction, restraint_source]
-    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+    summary: "Helical thread on the input shaft engaging a follower on the output body. Output restrained by the follower's non-circular section."
+    family: helical_thread
+    chain: "input shaft -> thread engagement -> follower/output"
+    load_profile: "shaft carries axial thrust and radial load"
+    materially_differs_by: [conversion_principle, dominant_force_direction]
+    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted']
   - id: ADM-RL-C
-    summary: "Band wound on a drum on the input shaft, anchored to each end of the output body, pulling it either way. Output rotation restrained by the pair of band anchors acting at a separation. Drum radially supported; band tension reacted through the drum bores."
-    materially_differs_by: [conversion_principle, engagement_type, restraint_source]
-    note: "Engagement is a wrapped band, not a tooth or thread. Admitted because NRM-RL-001 requires a localized engagement, not a meshing one."
-    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+    summary: "Band wound on a drum on the input shaft, anchored to each end of the output body. Output rotation restrained by the pair of anchors acting at a separation."
+    family: band_and_drum
+    chain: "input shaft -> drum -> band -> output anchors"
+    load_profile: "drum carries radial band tension; NO axial load anywhere"
+    materially_differs_by: [conversion_principle, engagement_type, chain_length]
+    note: "Falsifies any universal axial-load premise."
+    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted']
   - id: ADM-RL-D
-    summary: "Crank pin on the input disc engaging a slot in the output body, driving it along its line. Output rotation restrained by the slot walls. Relation between input angle and output position is sinusoidal, not linear."
-    materially_differs_by: [conversion_principle, relation_linearity, engagement_type]
-    note: "Admitted because NRM-RL-002 requires a declared relation, not a constant ratio (FRE-RL-003)."
-    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+    summary: "Rotating nut journalled in the frame driving a fixed non-rotating screw that carries the output. The output body itself never engages the input body."
+    family: rotating_nut_fixed_screw
+    chain: "input nut -> thread engagement -> screw -> output"
+    load_profile: "axial load passes down the screw into the nut's journal seat"
+    materially_differs_by: [which_body_rotates, axial_reaction_location, chain_length]
+    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted']
+  - id: ADM-RL-E
+    summary: >
+      Crank disc on the input shaft, a connecting link pinned to the crank pin,
+      and a slider carrying the output. The rotating input body and the
+      translating output body NEVER touch: they are joined through two pin
+      interactions and an intermediate link. The relation is sinusoidal.
+    family: crank_link_slider
+    chain: "input disc -> crank pin -> link -> wrist pin -> slider/output"
+    load_profile: "crank pin carries radial load at its journal; the link carries axial load along itself reacted at both pins"
+    materially_differs_by: [chain_length, relation_linearity, direct_engagement_absence]
+    note: >
+      THE FALSIFIABILITY FIXTURE for SF-8.1. There is no interaction between the
+      input body and the output body. The retired wording required a localized
+      engagement between them and rejected this design - which is the single most
+      common rotary-to-linear mechanism in engineering.
+    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted']
+  - id: ADM-RL-F
+    summary: >
+      Cam on the input shaft acting on a roller follower carried by a pushrod
+      which drives the output. Three bodies between input and output; the relation
+      is whatever the cam profile makes it.
+    family: cam_and_follower
+    chain: "input shaft -> cam -> roller -> pushrod -> output"
+    load_profile: "cam and roller carry contact normal load; pushrod carries axial load reacted at the output guide"
+    materially_differs_by: [chain_length, relation_arbitrariness, direct_engagement_absence]
+    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted']
 
 inadmissible_realizations:
   - id: INA-RL-A
-    summary: "Input rotation and output translation related by a declared ratio, with no engagement geometry on either body."
+    summary: "Input rotation and output translation related by a declared ratio, with no participating material anywhere in between."
     from_negative_case: NEG-RL-001
-    missing_tags: [engagement_localized_both_bodies]
-    tags: ['rotating_body', 'translating_output_body', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+    missing_tags: [uninterrupted_interaction_chain, interactions_localized]
+    tags: ['rotating_input_body', 'translating_output_body', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted']
   - id: INA-RL-B
-    summary: "Engagement geometry exists on both bodies but no relation between input rotation and output translation is declared, and which body drives is unstated."
+    summary: >
+      A chain of bodies exists and each interaction is localized, but at the
+      declared operating range the geometry is such that input rotation produces
+      no output translation at all - the link is at a dead point throughout.
     from_negative_case: NEG-RL-002
-    missing_tags: [input_output_relation_declared]
-    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+    missing_tags: [rotation_causes_translation]
+    note: "Corrected at SF-8.2: the defect is kinematic, not a missing declaration."
+    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted']
   - id: INA-RL-C
-    summary: "Engagement covers the first portion of the output range; beyond it the output body has disengaged and rotation no longer moves it."
+    summary: "One link of the chain disengages partway through the declared output range."
     from_negative_case: NEG-RL-003
-    missing_tags: [engagement_persists_over_output_range]
-    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+    missing_tags: [chain_persists_over_output_range]
+    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'output_rotation_restrained_where_needed', 'carried_loads_reacted']
   - id: INA-RL-D
-    summary: "Follower on a threaded shaft with nothing restraining it about the shaft axis; it turns with the shaft instead of translating."
+    summary: "Follower on a threaded shaft with nothing restraining it about the shaft axis, where the thread demonstrably applies that moment; it turns with the shaft instead of translating."
     from_negative_case: NEG-RL-004
-    missing_tags: [output_rotation_restrained]
-    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+    missing_tags: [output_rotation_restrained_where_needed]
+    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'carried_loads_reacted']
   - id: INA-RL-E
-    summary: "Rotating body located only by the engagement itself, with no radial support."
+    summary: "A body in the chain demonstrably carries a load component with no reaction path for it."
     from_negative_case: NEG-RL-005
-    missing_tags: [rotating_body_radially_supported]
-    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
-  - id: INA-RL-F
-    summary: "Thread engagement whose axial force component has no reaction path; the shaft is free to translate along its own axis."
-    from_negative_case: NEG-RL-006
-    missing_tags: [reaction_of_conversion_force_realized]
-    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'ratio_evidence_not_structural_artifact']
-  - id: INA-RL-G
-    summary: "Conversion reported as verified because commanded input and observed output agreed under a declared-pair model."
-    from_negative_case: NEG-RL-007
-    missing_tags: [ratio_evidence_not_structural_artifact]
-    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized']
+    missing_tags: [carried_loads_reacted]
+    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed']

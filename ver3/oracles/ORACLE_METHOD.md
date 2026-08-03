@@ -467,6 +467,37 @@ matched pair differing only in whether a real stop exists, which is exactly the
 
 ---
 
+## 13.5 Micro-oracle basis semantics — corrected at SF-1.3
+
+A micro-oracle has no user. Its capability statement was **written by this
+project** and then frozen into dossier S1. Appearing in a frozen dossier makes it
+stable and citable; it does not make it user language and it does not make it
+rank 1.
+
+Statements restating a fragment of a capability statement therefore carry
+`basis_type: PROJECT_DEFINED_CAPABILITY`, not `DIRECT_USER_REQUIREMENT`. The
+distinction is not bookkeeping. A reader auditing an acceptance decision must be
+able to see at a glance which obligations trace to something a user asked for and
+which trace to a definition this project chose. A project-defined capability may
+ground normative statements, but its authority is explicitly human-reviewable and
+a reviewer may reject the definition itself — which is impossible if it is
+disguised as user language.
+
+Two capability statements were rewritten under this rule, and both had absorbed a
+mechanism:
+
+| Capability | Was | Why it was too narrow |
+|---|---|---|
+| `guided-slider` | "with the non-translational freedoms removed" | Defines a strict prismatic joint. A rod in a plain bore — the most ordinary guided slider there is — was rejected. |
+| `rotary-to-linear-engagement` | "through a localized engagement" | Read as requiring DIRECT engagement between input and output bodies, which rejects every multi-stage conversion including crank-link-slider. |
+
+## 13.6 Domain separation — corrected at SF-1.1
+
+Physical design admissibility and verification-process admissibility are separate
+questions and never share a tag set. A physical realization must not become
+inadmissible because no test has been authored for it. See
+`ORACLE_AUTHORING_POLICY.md` §9.
+
 ## 14. Relationship to the root ASSY_NEW knowledge project
 
 `/home/ftk3187/github/ASSY_Ver3.0` (repository root, remote

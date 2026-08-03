@@ -1,5 +1,5 @@
 capability_id: bounded-two-state-closure
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 purpose: >
   Realizations and pipeline behaviours that must be rejected at capability level.
   Process cases reproduce recorded legacy behaviour.
@@ -17,7 +17,11 @@ negative_cases:
     fixture: INA-HS-B
   - id: NEG-HS-003
     kind: design
-    description: "Relative constraint lapses partway through the motion."
+    description: "Over a stretch of the declared path NOTHING constrains the configuration - no constraint is active and none takes over."
+    note: >
+      Corrected at SF-10.1. The defect is a GAP in constraint coverage, not a
+      change of constraint mode. ADM-HS-E hands off from a flexure to a rib
+      partway through and is admissible.
     must_be_rejected_by: [NRM-HS-003]
     fixture: INA-HS-C
   - id: NEG-HS-004
@@ -27,7 +31,11 @@ negative_cases:
     fixture: INA-HS-D
   - id: NEG-HS-005
     kind: design
-    description: "One condition credited to both extremes."
+    description: "One extreme is evaluated and the RESULT is copied to the other; the second configuration is never evaluated."
+    note: >
+      Corrected at SF-10.2. The defect is copying an evaluation result, not
+      sharing a feature. ADM-HS-D bounds both extremes with one continuous slot
+      and ADM-HS-F with one magnetic field; both are admissible.
     must_be_rejected_by: [NRM-HS-005]
     fixture: INA-HS-E
   - id: NEG-HS-006
@@ -36,10 +44,10 @@ negative_cases:
     must_be_rejected_by: [NRM-HS-006]
     fixture: INA-HS-F
   - id: NEG-HS-007
-    kind: design
+    kind: evidence
     description: "Bound claimed on a criterion that passes with the bound removed."
     must_be_rejected_by: [NRM-HS-007]
-    fixture: INA-HS-G
+    fixture: INA-EV-HS-A
 
   - id: NEG-HS-008
     kind: process
@@ -51,6 +59,7 @@ negative_cases:
       matched pair, including theta_max, since 115.37 and 219.65 both exceed the
       90 degree threshold.
     must_be_rejected_by: [NRM-HS-007, UNR-HS-004]
+    fixture: INA-EV-HS-A
     required_outcome: >
       NOT_VERIFIED, with the finding stated: the pair supports "removing the
       limit produced seed-level instability across a five-seed sweep" and does
@@ -110,3 +119,38 @@ negative_cases:
     reproduced_from: "DOS-bounded-two-state-closure S5 - verdicts differ only through 5/5 against 1/5"
     must_be_rejected_by: [UNR-HS-004]
     required_outcome: "The aggregation protocol is declared with the result, or the result is NOT_VERIFIED."
+  - id: NEG-HS-015
+    kind: process
+    description: >
+      A closure whose constraint MODE changes partway along the motion - a flexure
+      handing off to a rib, a cam handing off to a pin - is rejected because no
+      single relative constraint persists throughout.
+    reproduced_from: "SF-10.1"
+    must_be_rejected_by: [NRM-HS-003]
+    required_outcome: >
+      Rejected as a defect OF THE ORACLE. ADM-HS-E is admissible; what the
+      capability requires is continuous coverage, not a single persistent
+      constraint.
+
+  - id: NEG-HS-016
+    kind: process
+    description: >
+      A closure whose two bounds are produced by ONE continuous geometry or ONE
+      physical field is rejected because the extremes lack distinct determining
+      features.
+    reproduced_from: "SF-10.2"
+    must_be_rejected_by: [NRM-HS-005]
+    required_outcome: >
+      Rejected as a defect OF THE ORACLE. ADM-HS-D and ADM-HS-F are admissible.
+      What is forbidden is copying one evaluation result to both extremes.
+
+  - id: NEG-HS-017
+    kind: process
+    description: >
+      A physically realized bounded closure is reported inadmissible because no
+      discriminating test criterion has been authored for its bound.
+    reproduced_from: "SF-1.1, SF-10.4"
+    must_be_rejected_by: [NRM-HS-004]
+    required_outcome: >
+      Rejected. Criterion discrimination bounds what may be CLAIMED, not what may
+      be BUILT. The design is admissible; the bound claim is NOT_VERIFIED.

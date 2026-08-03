@@ -1,0 +1,62 @@
+{
+  "auditor_scope": "This auditor checks structural, referential, policy and tag-algebra consistency, and that every semantic question carries a recorded human review. It does NOT establish physical truth: fixture tags are authored by the same hand as the invariants and are not independent evidence. CAD/physics validation is pending for every fixture.",
+  "counts": {
+    "BLOCKING": 3,
+    "MAJOR": 0,
+    "total": 3
+  },
+  "findings": [
+    {
+      "affected_dependants": [],
+      "defect_type": "UNCONDITIONAL_TERMINAL_BOUND",
+      "finding_id": "F-3E-001",
+      "minimal_correction": "quote a fragment that actually appears in the dossier, or withdraw the claim",
+      "pack": "bounded-two-state-closure",
+      "pass": "3E",
+      "severity": "BLOCKING",
+      "source_evidence": "source_declares_terminal_states asserted but its verbatim_fragment is not present in the frozen dossier",
+      "statement_id": "-"
+    },
+    {
+      "affected_dependants": [],
+      "defect_type": "UNCONDITIONAL_TERMINAL_BOUND",
+      "finding_id": "F-3E-002",
+      "minimal_correction": "apply only where the design declares a terminal state as a physical end of travel, or ground a source_declares_terminal_states fragment in the dossier",
+      "pack": "bounded-two-state-closure",
+      "pass": "3E",
+      "severity": "BLOCKING",
+      "source_evidence": "terminal-bound tag ['each_bound_physically_realized'] with no applies_when, and the frozen source declares no terminal state",
+      "statement_id": "NRM-HS-004"
+    },
+    {
+      "affected_dependants": [],
+      "defect_type": "UNCONDITIONAL_TERMINAL_BOUND",
+      "finding_id": "F-3E-003",
+      "minimal_correction": "apply only where the design declares a terminal state as a physical end of travel, or ground a source_declares_terminal_states fragment in the dossier",
+      "pack": "bounded-two-state-closure",
+      "pass": "3E",
+      "severity": "BLOCKING",
+      "source_evidence": "terminal-bound tag ['each_extreme_independently_evaluated'] with no applies_when, and the frozen source declares no terminal state",
+      "statement_id": "NRM-HS-005"
+    }
+  ],
+  "packs_audited": [
+    "BM-001",
+    "BM-001-2",
+    "BM-001-3",
+    "BM-002",
+    "C4-drawer",
+    "bounded-two-state-closure",
+    "guided-slider",
+    "latch-retention",
+    "rotary-to-linear-engagement"
+  ],
+  "passes_run": [
+    "3A",
+    "3B",
+    "3C",
+    "3D",
+    "3E"
+  ],
+  "shuffle_seed": null
+}

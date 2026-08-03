@@ -1,180 +1,224 @@
 capability_id: rotary-to-linear-engagement
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 tier: micro_oracle
 inherits: null
 dossier: ver3/oracles/_dossiers/DOS-rotary-to-linear-engagement.md
 lock_status: SEMANTICALLY_AUDITED
+physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+historical_aliases:
+  - rack-pinion-conversion
 
 capability_statement: >
-  Conversion of rotary input motion into linear output motion through a localized
-  engagement, with the reaction of the resulting loads.
+  Conversion of rotary input motion into linear output motion through an
+  uninterrupted chain of realized localized interactions, with the reaction of
+  the loads those interactions produce.
 
-naming_note: >
-  This capability is deliberately named for what it does, not for how it is done.
-  It replaces an earlier mechanism-named micro-oracle. Rack-and-pinion is
-  preserved only as a cited reference realization and evidence source; it is one
-  member of the family this capability admits, and it may never stand for the
-  family.
+capability_statement_history:
+  - version: "0.2"
+    text: "Conversion of rotary input motion into linear output motion through a localized engagement, with the reaction of the resulting loads."
+    retired_at: SF-8.1
+    why: >
+      "a localized engagement" was read as requiring DIRECT engagement between the
+      rotating input body and the translating output body. Multi-stage conversions
+      - crank/link/slider, cable/drum/output, cam/follower/output - have no such
+      direct engagement, and would have been rejected. Replaced with an
+      interaction-chain formulation.
 
 basis_semantics: >
-  A micro-oracle has no user. Its rank-1 source is the declared capability
-  statement in DOS S1. DIRECT_USER_REQUIREMENT marks fragments of that statement;
-  NECESSARY_PHYSICAL_CONSEQUENCE marks statements derived from it;
-  VERIFICATION_MINIMUM marks statements about what evidence must be able to show.
+  A micro-oracle has no user. Its capability statement was PROJECT-AUTHORED and
+  then frozen into dossier S1; it is not user language and it is not rank 1.
+  Statements restating a fragment of it carry basis_type
+  PROJECT_DEFINED_CAPABILITY, whose authority is explicitly human-reviewable.
+  Corrected at SF-1.3.
+
+naming_note: >
+  This capability is named for what it does, not for how it is done. Rack-and-pinion
+  is preserved only as a cited reference realization and evidence source.
 
 scope_exclusions:
-  - "Guidance of the output body along its line is NOT owned here; see the guided-slider micro-oracle. This pack requires only the specific restraint without which the output would rotate instead of translating."
-  - "Bounding of the output travel is NOT part of this capability; see bounded-two-state-closure."
-  - "Holding position when the input is released is NOT part of this capability; see latch-retention."
+  - "Guidance of the output body along its line is NOT owned here; that is guided-slider. This pack requires only the restraint without which the output would rotate instead of translating."
+  - "Bounding of the output travel is NOT part of this capability."
+  - "Holding position when the input is released is NOT part of this capability."
+  - >
+    Representation obligations - that a relation is DECLARED, that a driving body
+    is RECORDED - are DesignState requirements and were moved to
+    stage_expectations at SF-8.2. They are not physical properties of a design.
 
 invariants:
   - id: NRM-RL-001
     statement: >
-      A rotating input body, a translating output body, and a localized
-      engagement between them with geometry on both bodies all exist.
-    basis_type: DIRECT_USER_REQUIREMENT
+      An uninterrupted chain of realized localized interactions connects a
+      rotating input body to a translating output body, each interaction
+      identifying the participating material on both bodies it acts between.
+    basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
     source_locators: ["DOS-rotary-to-linear-engagement S1"]
-    conclusion_scope: "Existence and locality of the conversion engagement and its two participants."
+    conclusion_scope: "Existence, continuity and locality of the interaction chain."
     exclusions:
-      - "Does not name a conversion family, an engagement geometry, a ratio or a tooth or thread form."
-      - "Does not require the engagement to be a single site; several sites acting together are admissible."
-    verification_predicate: "exists(rotating body), exists(translating output body), and exists(engagement) with participating geometry on each."
-    requires_tags: [rotating_body, translating_output_body, engagement_localized_both_bodies]
+      - >
+        Does NOT require direct engagement between the input and output bodies.
+        Intermediate bodies are admissible and the chain may have any number of
+        stages. Corrected at SF-8.1.
+      - "Does not name a conversion family, an engagement geometry, a ratio, or a tooth or thread form."
+      - "Does not require contact; a field interaction with identified participating regions satisfies it."
+    verification_predicate: >
+      exists(rotating input body), exists(translating output body), and a
+      connected sequence of realized interactions between them with no gap, each
+      naming participating material on both of its bodies.
+    requires_tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized]
     related_freedoms: [FRE-RL-001, FRE-RL-002]
     related_unresolved: []
+    closes_finding: [SF-8.1]
 
   - id: NRM-RL-002
     statement: >
-      A relation between input rotation and output translation is declared, with
-      its direction of causation.
-    basis_type: DIRECT_USER_REQUIREMENT
+      Rotation of the input body causes translation of the output body over the
+      declared operating range.
+    basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
     source_locators: ["DOS-rotary-to-linear-engagement S1"]
-    conclusion_scope: "Existence of a declared input/output relation."
+    conclusion_scope: "The actual kinematic relation between input rotation and output translation."
     exclusions:
-      - "Does not fix a ratio, a linearity, a sign or a reversibility. None exists at capability level (DOS S4); see UNR-RL-001."
-      - "Does not require the relation to be derivable from a model of any particular fidelity."
-    verification_predicate: "exists(relation) mapping input rotation to output translation over the output range, with the driving body identified."
-    requires_tags: [input_output_relation_declared]
+      - >
+        Does NOT require the relation to be LINEAR, monotonic or constant-ratio. A
+        crank-and-link conversion is sinusoidal in the input angle and is
+        admissible.
+      - "Does not fix a ratio, a sign or a reversibility; none exists at capability level. See UNR-RL-001."
+      - >
+        Does NOT require the relation to be "declared", nor the driving body to be
+        "recorded". Those are representation obligations and were moved to
+        stage_expectations at SF-8.2. A design in which rotation does produce
+        translation satisfies this invariant whatever its DesignState records.
+    verification_predicate: >
+      over the declared operating range, a change in input rotation produces a
+      change in output translation, evaluated on the realized kinematics.
+    requires_tags: [rotation_causes_translation]
     related_freedoms: [FRE-RL-003, FRE-RL-004]
     related_unresolved: [UNR-RL-001]
+    closes_finding: [SF-8.2]
 
   - id: NRM-RL-003
     statement: >
-      The engagement remains engaged over the whole declared output range.
+      Every interaction in the chain remains engaged over the whole declared
+      output range.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-rotary-to-linear-engagement S1"]
     derivation_premises:
       - "The capability is conversion over a range of output motion, not at one output position."
-      - "Once the engagement ends, rotation no longer produces translation."
-    conclusion_scope: "Persistence of the engagement over the declared output range."
+      - "Once any link of the chain disengages, the chain is interrupted and rotation no longer produces translation."
+    conclusion_scope: "Persistence of every link of the chain over the declared output range."
     exclusions:
-      - "Does not fix an engagement length or an output range. The legacy relation L_rack >= stroke + pi*m*z/4 is a rack-and-pinion fact (DOS S6), not a capability fact."
-    verification_predicate: "for the extremes and the interior of the declared output range: the participating geometries overlap."
-    requires_tags: [engagement_persists_over_output_range]
+      - "Does not fix an engagement length or an output range. The legacy relation L_rack >= stroke + pi*m*z/4 is a rack-and-pinion fact, not a capability fact."
+    verification_predicate: "for the ends and the interior of the declared output range: every interaction in the chain remains engaged."
+    requires_tags: [chain_persists_over_output_range]
     related_freedoms: [FRE-RL-005]
     related_unresolved: [UNR-RL-002]
 
   - id: NRM-RL-004
     statement: >
-      The output body has a realized restraint against following the input's
-      rotation.
+      Where the chain applies a moment to the output body about the input axis,
+      a realized restraint prevents the output body from following that rotation
+      instead of translating.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
+    applies_when: "the chain applies a net moment to the output body about the input axis"
     source_locators: ["DOS-rotary-to-linear-engagement S1"]
     derivation_premises:
-      - "The engagement transmits a force between the two bodies at a location offset from the input axis."
-      - "That force applies a moment to the output body about the input axis."
+      - "Where an interaction transmits force to the output body at a location offset from the input axis, it applies a moment about that axis."
       - "An output body free to rotate under that moment rotates rather than translating, so no conversion occurs."
-    conclusion_scope: "Existence of a restraint on the output body's rotation about the input axis."
+      - "Not every chain produces such a moment: a symmetric multi-point drive and a centred linkage do not."
+    conclusion_scope: "Existence of a rotational restraint WHERE the chain produces the moment."
     exclusions:
-      - "The restraint may be provided by the engagement geometry itself where that geometry removes the freedom; a separate feature is not required."
-      - "Does not require, and does not supply, general guidance of the output body. Guidance is owned by the guided-slider micro-oracle."
-    verification_predicate: "exists(realized constraint) removing the output body's rotation about the input axis, naming the interaction that provides it."
-    requires_tags: [output_rotation_restrained]
+      - "The restraint may be provided by the interaction geometry itself; a separate feature is not required."
+      - "Does NOT supply general guidance of the output body; that is guided-slider."
+      - "Does NOT apply where the chain produces no such moment."
+    verification_predicate: "where a net moment about the input axis acts on the output body: exists(realized constraint) removing that rotation, naming the interaction that provides it."
+    requires_tags: [output_rotation_restrained_where_needed]
     related_freedoms: [FRE-RL-006]
     related_unresolved: []
 
   - id: NRM-RL-005
     statement: >
-      The rotating body is supported against the radial component of the
-      engagement force.
+      Every body in the chain has a realized reaction for every load component it
+      carries.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
+    applies_when: "a body carries the relevant load component in the declared scenario"
     source_locators: ["DOS-rotary-to-linear-engagement S1"]
     derivation_premises:
-      - "The engagement applies a force to the rotating body at a location offset from its axis."
-      - "A rotating body carrying a transverse force without a radial constraint displaces, and the engagement is lost."
-    conclusion_scope: "Existence of radial support for the rotating body."
-    exclusions: ["Does not name a support type or a support count, and does not require a separate part."]
-    verification_predicate: "exists(radial support realization) for the rotating body, located so that it reacts the engagement force."
-    requires_tags: [rotating_body_radially_supported]
-    related_freedoms: [FRE-RL-007]
-    related_unresolved: []
-
-  - id: NRM-RL-006
-    statement: >
-      Every component of the engagement force on each participating body has a
-      realized reaction path.
-    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
-    support_type: derived
-    source_locators: ["DOS-rotary-to-linear-engagement S1", "DOS-rotary-to-linear-engagement S1 (\"with the reaction of the resulting loads\")"]
-    derivation_premises:
-      - "The engagement produces equal and opposite forces on the two bodies."
+      - "Interactions produce equal and opposite forces on the bodies they act between."
       - "A force component with no reaction path accelerates the body carrying it."
-      - "Conversion geometries generally produce force components along the input axis as well as transverse to it."
-    conclusion_scope: "Completeness of the reaction paths for the engagement force, on both bodies."
+      - "Which components a given body carries depends on the conversion family, not on the capability."
+    conclusion_scope: "Completeness of reaction paths for loads ACTUALLY carried. Existence, not adequacy."
     exclusions:
-      - "Does not state a load, a margin or a stiffness. None exists at capability level (DOS S4); see UNR-RL-003."
-      - "Does not require the axial and radial reactions to be carried by different features."
-    verification_predicate: "for each participating body and each component of the engagement force: exists(load_path) to a reaction site."
-    requires_tags: [reaction_of_conversion_force_realized]
+      - >
+        Does NOT assert that conversion geometries generally produce axial force
+        on the rotating body. A toothed wheel driving a linear member produces
+        none; a drum winding a band produces none. Universalizing it would encode
+        the screw family.
+      - "Does not state a load, a margin or a stiffness; none exists at capability level. See UNR-RL-003."
+      - "Does not require radial and axial reactions to be carried by different features."
+    verification_predicate: "for each body and each load component it carries in the declared scenario: exists(load_path) to a reaction site. Bodies not carrying a component owe no reaction for it."
+    requires_tags: [carried_loads_reacted]
     related_freedoms: [FRE-RL-007]
     related_unresolved: [UNR-RL-003]
 
-  - id: NRM-RL-007
+  - id: NRM-RL-006
     statement: >
       Agreement between commanded input and observed output under a model that
       imposes the input/output relation by declaration is not evidence that the
-      engagement exists or transmits.
+      chain's interactions exist or transmit.
     basis_type: VERIFICATION_MINIMUM
     support_type: derived
+    enables_claim: >
+      NRM-RL-001, NRM-RL-003 and NRM-RL-005 may be reported PASS. Without this
+      minimum, a declared-pair run's exact ratio agreement would be counted as
+      showing that an engagement exists, persists and transmits.
     source_locators: ["DOS-rotary-to-linear-engagement S5"]
     derivation_premises:
-      - "DOS S5 records verbatim that the conversion card passes V-A 5/5 and that V-B is named-deferred."
+      - "DOS-rotary-to-linear-engagement S5 records verbatim that the conversion card passes V-A 5/5 and that V-B is named-deferred."
       - "Under declared pairs the ratio is exact by construction of the coupling."
       - "An observable determined by the declaration reports the declaration, not the artifact."
-    conclusion_scope: "Admissibility of ratio agreement as evidence of the engagement. Says nothing about the design."
+    conclusion_scope: "Admissibility of ratio agreement as evidence of the chain. Says nothing about the design."
     exclusions:
-      - "Does not forbid declared-pair models. It requires that ratio agreement obtained from one be marked as a structural artifact rather than counted as engagement evidence."
-      - "Does not assert that no conversion engagement can be verified; it states what this class of evidence cannot show."
-    verification_predicate: "any evidence mapped to NRM-RL-001, NRM-RL-003, NRM-RL-005 or NRM-RL-006 declares whether it resolves contact; declared-pair results are marked as structural artifacts for those criteria."
-    requires_tags: [ratio_evidence_not_structural_artifact]
+      - "Does not forbid declared-pair models; it requires their ratio agreement to be marked as a structural artifact for chain criteria."
+      - "Does not assert that no conversion can be verified; it states what this class of evidence cannot show."
+    verification_predicate: "any evidence mapped to NRM-RL-001, NRM-RL-003 or NRM-RL-005 declares whether it resolves contact; declared-pair results are marked as structural artifacts for those criteria."
+    requires_evidence_tags: [contact_resolution_declared, declared_pair_not_cited_for_chain]
     related_freedoms: []
     related_unresolved: []
+    moved_at: SF-1.1
 
 required_unresolved:
   - id: UNR-RL-001
     decision: Ratio, linearity, reversibility and whether the conversion is self-locking.
-    why_must_remain_open: >
-      DOS S4: no capability-level ratio, torque or efficiency exists. The legacy
-      values m=5, z=12 are rack-and-pinion realization facts (DOS S6).
+    kind: quantitative
+    why_must_remain_open: "DOS-rotary-to-linear-engagement S4: no capability-level ratio, torque or efficiency exists. The legacy values m=5, z=12 are rack-and-pinion realization facts."
     resolvable_when: "An instantiating case supplies an effort ceiling, a turns budget, or a back-drive requirement."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-RL-002 — that rotation causes translation is structural and needs no ratio."
     source_locators: ["DOS-rotary-to-linear-engagement S4", "DOS-rotary-to-linear-engagement S6"]
   - id: UNR-RL-002
     decision: Output range and engagement length.
-    why_must_remain_open: "DOS S4: no capability-level engagement length or output range exists."
+    kind: quantitative
+    why_must_remain_open: "DOS-rotary-to-linear-engagement S4: no capability-level engagement length or output range exists."
     resolvable_when: "An instantiating case supplies an output range."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-RL-003 — persistence over whatever range the design declares is structural."
     source_locators: ["DOS-rotary-to-linear-engagement S4"]
   - id: UNR-RL-003
     decision: Transmitted load, backlash, friction, efficiency and life.
+    kind: quantitative
     why_must_remain_open: >
-      DOS S4/S5: no capability-level load rating exists, and no contact-level
-      evidence exists anywhere in the corpus for any rotary-to-linear conversion.
+      DOS-rotary-to-linear-engagement S4/S5: no capability-level load rating
+      exists, and no contact-level evidence exists anywhere in the corpus for any
+      rotary-to-linear conversion.
     resolvable_when: "An instantiating case supplies a load case, and contact-resolving capability exists."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS, blocks_evidence_interpretation]
+    does_not_block:
+      - "NRM-RL-005 — the existence of a reaction path is structural."
     source_locators: ["DOS-rotary-to-linear-engagement S4", "DOS-rotary-to-linear-engagement S5"]

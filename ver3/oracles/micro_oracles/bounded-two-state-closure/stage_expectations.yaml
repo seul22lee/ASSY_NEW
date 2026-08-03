@@ -1,5 +1,5 @@
 capability_id: bounded-two-state-closure
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 applies_when: >
   A design instantiates a bounded closure motion between two states. These
   expectations constrain how the pipeline must represent that capability wherever
@@ -19,10 +19,14 @@ stages:
     must_not_be_decided: [bounding_principle, joint_type]
     may_remain_unresolved: [candidate_ranking]
     provenance_required: ["obligation -> the requirement demanding it"]
-    plurality_note: >
-      More than one bounding principle must survive s02 (FRE-HS-004). Reduction
-      to one because only a discrete stop is implemented must be reported as a
-      capability gap, not as an elimination.
+    open_search_note: >
+      Corrected at SF-8.3; the former fixed-plurality rule is withdrawn. One
+      candidate may legitimately remain after source- and physics-based
+      elimination. What must hold instead: the space was not closed by library
+      availability - and DOS-bounded-two-state-closure S7 records that the corpus
+      bounds motion ONLY by a discrete stop, so that risk is live here; each
+      rejection names a source, physical or feasibility reason; synthesis beyond
+      the catalogue remained possible; and an absent realizer yields UNSUPPORTED.
   s04:
     must_exist: [state_configurations, motion_path, constraint_engagement_along_path, extreme_determinants, swept_volumes_with_fidelity, interference_along_path]
     must_not_be_decided: [angle_values_without_a_stated_requirement, feature_dimensions]

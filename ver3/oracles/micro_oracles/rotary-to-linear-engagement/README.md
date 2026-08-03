@@ -6,8 +6,9 @@
 
 ## Capability
 
-> Conversion of rotary input motion into linear output motion through a localized
-> engagement, with the reaction of the resulting loads.
+> Conversion of rotary input motion into linear output motion through an
+> uninterrupted chain of realized localized interactions, with the reaction of
+> the loads those interactions produce.
 
 The name is deliberate. This pack replaces a mechanism-named predecessor, and it
 names what is achieved rather than how. Rack-and-pinion appears here only as a
@@ -28,9 +29,10 @@ make impossible:
 
 - `FRE-RL-001` declares the conversion family free, and lists eight realizations.
 - `NEG-RL-008` makes the INFEASIBLE verdict a defect with a required outcome.
-- `stage_expectations.s02.plurality_note` requires more than one family to survive
-  candidate generation, and requires reduction-to-one-because-only-one-exists to
-  be reported as a capability gap.
+- `stage_expectations.s02.open_search_note` requires that the solution space was not
+  closed by library availability, that each rejection names a reason, and that
+  reduction-to-one-because-only-one-is-implemented is reported as a capability gap.
+  It does NOT require a fixed number of candidates to survive (SF-8.3).
 - `stage_expectations.s12.capability_gap_rule` requires the revision record to name
   the missing realizer rather than the missing physics.
 
@@ -71,3 +73,20 @@ realization may not be credited to it unless it demonstrably removes rotation
 about the input axis. Guidance is owned by `guided-slider`. `NEG-RL-012` and the
 `double_discharge_rule` in `stage_expectations.s05` keep one realization from
 discharging two obligations.
+
+## Corrected at the independent semantic review
+
+The capability statement above is the SF-8.1 rewrite. The reviewed version said
+"through a localized engagement", which was read as requiring direct engagement
+between the rotating input body and the translating output body — and therefore
+rejected every multi-stage conversion, including the crank-link-slider, which is
+the most common rotary-to-linear mechanism in engineering. `ADM-RL-E` and
+`ADM-RL-F` are in the fixture set precisely to keep that reading out.
+
+Two further corrections: the requirement that the input/output relation be
+*declared* was a DesignState obligation and moved to `stage_expectations`
+(SF-8.2), and the fixed-plurality rule was withdrawn (SF-8.3).
+
+Basis types are `PROJECT_DEFINED_CAPABILITY`, not `DIRECT_USER_REQUIREMENT`: a
+micro-oracle has no user, and this capability statement was written by the
+project and then frozen (SF-1.3).

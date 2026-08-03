@@ -1,5 +1,5 @@
 case_id: BM-002
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 note: >
   States only what the pipeline must represent, preserve, defer or report.
   Adds no product requirement. Stage-11 rules are conditional; no outcome is
@@ -9,7 +9,7 @@ stages:
   s01:
     must_exist: [requirements, scenarios, actors, system_boundary, observables, assumptions, unknowns]
     must_not_be_decided: [mechanism_family, product_layout, parts, geometry, dimensions, materials]
-    may_remain_unresolved: [UNR-BM-002-001, UNR-BM-002-002, UNR-BM-002-003, UNR-BM-002-004, UNR-BM-002-005, UNR-BM-002-006]
+    may_remain_unresolved: [UNR-BM-002-001, UNR-BM-002-002, UNR-BM-002-003, UNR-BM-002-004, UNR-BM-002-005, UNR-BM-002-006, UNR-BM-002-007]
     provenance_required: ["requirement -> source clause id"]
     quantity_note: >
       REQ-002 and REQ-003 carry stated quantities with an "approximately"
@@ -20,26 +20,39 @@ stages:
     must_not_be_decided: [selected_candidate, conversion_mechanism, product_faces, geometry]
     may_remain_unresolved: [candidate_ranking, UNR-BM-002-003, UNR-BM-002-004]
     provenance_required: ["obligation -> requirement id"]
-    plurality_note: >
-      More than one conversion family must survive s02 (FRE-BM-002-002). A single
-      surviving candidate is admissible only if the eliminations are recorded
-      with the obligation each candidate failed.
+    open_search_note: >
+      Corrected at SF-8.3; the former fixed-plurality rule is withdrawn. One
+      candidate may legitimately remain after source- and physics-based
+      elimination. What must hold instead:
+        - the solution space was not closed merely by current library availability;
+        - each rejected candidate carries a source, physical or feasibility reason;
+        - synthesis beyond the provider catalogue remained possible;
+        - an absent implemented realizer yields UNSUPPORTED, never INFEASIBLE.
   s03:
     must_exist: [fixed_and_moving_bodies, enclosure_and_cavity_topology, boundary_crossing, payload_access_path, interface_ownership, load_path_ownership, assembly_dependency_graph]
     must_not_be_decided: [crossing_face_without_evidence, detailed_feature_geometry, selected_candidate]
     may_remain_unresolved: [crossing_region, access_region, UNR-BM-002-001]
     provenance_required: ["body -> obligation id", "access_path -> requirement id"]
   s04:
-    must_exist: [world_and_body_frames, joint_frames, axes, travel_corridor, extreme_poses, motion_paths, engagement_sites, swept_volumes_with_fidelity, spatial_feasibility_per_candidate, extreme_determinants]
+    must_exist: [world_and_body_frames, joint_frames, axes, required_poses, motion_paths, engagement_sites, swept_volumes_with_fidelity, spatial_feasibility_per_candidate, declared_terminal_states_if_any]
     must_not_be_decided: [final_dimensions, manufacturing_features, renderer_originated_values]
     may_remain_unresolved: [free_spatial_alternatives]
-    provenance_required: ["pose -> constraint/contact ids", "swept_volume -> fidelity declaration", "extreme -> its own determinant id"]
+    provenance_required: ["pose -> constraint/contact ids", "swept_volume -> fidelity declaration", "declared terminal -> its own determinant id"]
+    corridor_note: >
+      Corrected at SF-5.5. There is no proper-subset corridor obligation. What s04
+      owes is non-intersection at every required pose and traversability of the
+      required path; the swept volume may itself define the corridor.
     selection_gate: "A SelectionDecision may be emitted only after every retained candidate carries s03 and s04 feasibility evidence at equal obligation coverage."
   s05:
-    must_exist: [connection_realizations, conversion_engagement_features, guidance_realization, anti_rotation_realization, radial_support_realizations, axial_reaction_realization, feature_graph, construction_program, solver_problem, load_path_records]
+    must_exist: [connection_realizations, conversion_engagement_features, guidance_realization, reaction_realizations_for_carried_loads, feature_graph, construction_program, solver_problem, load_path_records]
     must_not_be_decided: [new_independent_entities, duplicate_bodies, parameter_values]
     may_remain_unresolved: [embodiment_alternatives, UNR-BM-002-004]
-    provenance_required: ["realization -> obligation ids it discharges"]
+    provenance_required: ["realization -> obligation ids it discharges", "reaction realization -> the load component it reacts"]
+    conditional_realization_note: >
+      Corrected at SF-5.3 and SF-5.4. A radial or axial reaction is owed only for
+      a load component the selected realization actually produces on that element.
+      An anti-rotation realization is owed only where the scenario or the
+      conversion requires it.
   s06:
     must_exist: [solved_values_or_explicit_status, constraint_residuals, feasibility_report, active_constraints]
     must_not_be_decided: [default_units, deferred_constraints]
@@ -74,6 +87,11 @@ stages:
     provenance_required: ["evidence -> observable id"]
   s11:
     must_exist: [requirement_evaluation, evidence_coverage, acceptance_summary]
+    unresolved_scope_rule: >
+      An unresolved decision suppresses only the outcomes named in its
+      `block_scopes`. A quantitative unknown may withhold PASS or make an
+      acceptance INDETERMINATE; it may never make a structural predicate
+      underivable.
     must_not_be_decided: [new_evidence]
     may_remain_unresolved: []
     provenance_required: ["evaluation -> evidence ids", "PASS -> declared scope"]
@@ -84,14 +102,20 @@ stages:
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       REQ-002:
-        pass_requires: "measured platform displacement, in a declared unit, together with a resolved compliance edge for 'approximately 80-100 mm' (UNR-BM-002-002)"
-        fail_when: "measured displacement is outside the range under the resolved reading"
-        if_unresolved: INDETERMINATE
+        traces_to: NRM-BM-002-004
+        pass_requires: "measured platform displacement, in millimetres, within 80-100 mm, with the compliance edge of 'approximately' resolved (UNR-BM-002-002)"
+        fail_when: "measured displacement is clearly outside the band under any reading of the qualifier - for example 45 mm"
+        if_near_band_edge: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       REQ-003:
-        pass_requires: "load-carrying evidence for the declared payload along the realized load path, with a declared margin"
-        fail_when: "the load path is incomplete or the evidence shows the payload is not carried"
+        traces_to: [NRM-BM-002-005, NRM-BM-002-011]
+        pass_requires: "a declared supported payload with unit, a complete load path, and strength evidence for approximately 1 kg with a declared margin (UNR-BM-002-007)"
+        fail_when: "no payload is declared, the load path is incomplete, or evidence shows the payload is not carried"
+        if_no_strength_evidence_exists: UNSUPPORTED
+        if_near_qualifier_edge: INDETERMINATE
+        note: "DOS-BM-002 S5 records no strength evidence at any fidelity, so today this resolves to UNSUPPORTED. That is a tooling and evidence state, not a product verdict."
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       REQ-004:

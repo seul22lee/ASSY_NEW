@@ -1,5 +1,5 @@
 capability_id: latch-retention
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 purpose: >
   Realizations and pipeline behaviours that must be rejected at capability level.
   Process cases reproduce recorded legacy behaviour.
@@ -12,7 +12,8 @@ negative_cases:
     fixture: INA-LR-A
   - id: NEG-LR-002
     kind: design
-    description: "Retention asserted between whole bodies with no participating geometry."
+    description: "Retention asserted between whole bodies with no participating material identified on either - neither contact regions nor field regions."
+    note: "Broadened at SF-9.1: a field interaction with explicit participating regions is admissible."
     must_be_rejected_by: [NRM-LR-002]
     fixture: INA-LR-B
   - id: NEG-LR-003
@@ -36,15 +37,15 @@ negative_cases:
     must_be_rejected_by: [NRM-LR-006]
     fixture: INA-LR-F
   - id: NEG-LR-007
-    kind: design
+    kind: evidence
     description: "Retention claimed with no disturbance named."
     must_be_rejected_by: [NRM-LR-007]
-    fixture: INA-LR-G
+    fixture: INA-EV-LR-A
   - id: NEG-LR-008
-    kind: design
+    kind: evidence
     description: "A task-definition input force window reported as an achieved retention result."
     must_be_rejected_by: [NRM-LR-008]
-    fixture: INA-LR-H
+    fixture: INA-EV-LR-B
 
   - id: NEG-LR-009
     kind: process
@@ -96,3 +97,29 @@ negative_cases:
     reproduced_from: "DOS-latch-retention S4"
     must_be_rejected_by: [UNR-LR-004]
     required_outcome: "Rejected as UNSUPPORTED_INFERENCE."
+  - id: NEG-LR-015
+    kind: process
+    description: >
+      Candidate generation is required to retain more than one retention
+      principle, or a run is faulted merely for arriving at a single surviving
+      candidate.
+    reproduced_from: "SF-9.3"
+    must_be_rejected_by: [FRE-LR-002]
+    required_outcome: >
+      Rejected. An arbitrary candidate count is not a quality criterion. What must
+      hold is that the space was not closed by library availability, that each
+      rejection names a source, physical or feasibility reason, that synthesis
+      beyond the catalogue remained possible, and that an absent realizer yields
+      UNSUPPORTED, never INFEASIBLE.
+
+  - id: NEG-LR-016
+    kind: process
+    description: >
+      A physically realized latch is reported inadmissible because a
+      verification-process property is unsatisfied - no disturbance has been named
+      in a test, or a force provenance is unrecorded.
+    reproduced_from: "SF-1.1, SF-9.2"
+    must_be_rejected_by: [NRM-LR-002]
+    required_outcome: >
+      Rejected. Evidence minima bound what may be CLAIMED, not what may be BUILT.
+      The physical design is admissible; the claim is NOT_VERIFIED.

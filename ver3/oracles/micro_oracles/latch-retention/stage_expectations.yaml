@@ -1,5 +1,5 @@
 capability_id: latch-retention
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 applies_when: >
   A design instantiates retention of a relative state. These expectations
   constrain how the pipeline must represent that capability wherever it appears.
@@ -22,10 +22,13 @@ stages:
     must_not_be_decided: [retention_principle, retention_feature]
     may_remain_unresolved: [candidate_ranking, UNR-LR-001]
     provenance_required: ["retention obligation -> the requirement demanding it"]
-    plurality_note: >
-      More than one retention principle must survive s02 (FRE-LR-002). Reduction
-      to one because only one is implemented must be reported as a capability
-      gap, not as an elimination.
+    open_search_note: >
+      Corrected at SF-9.3; the former fixed-plurality rule is withdrawn. One
+      candidate may legitimately remain after source- and physics-based
+      elimination. What must hold instead: the space was not closed by library
+      availability; each rejection names a source, physical or feasibility reason;
+      synthesis beyond the catalogue remained possible; and an absent implemented
+      realizer yields UNSUPPORTED, never INFEASIBLE.
   s04:
     must_exist: [retained_state_configuration, engagement_path, release_path, swept_volumes_with_fidelity, interference_along_paths]
     must_not_be_decided: [feature_dimensions, deflection_values]

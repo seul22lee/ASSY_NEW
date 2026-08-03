@@ -1,5 +1,5 @@
 case_id: C4-drawer
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 purpose: >
   Designs and pipeline behaviours that must be rejected, each with the invariant
   or unresolved decision that must do the rejecting. Process cases reproduce
@@ -23,17 +23,25 @@ negative_cases:
     fixture: INA-C4-C
   - id: NEG-C4-004
     kind: design
-    description: "Drawer weight reacted only at the retracted state; at full extension the drawer runs off its supports."
+    description: "Drawer's own weight reacted only at the retracted configuration; at full extension the drawer runs off its supports."
     must_be_rejected_by: [NRM-C4-006]
     fixture: INA-C4-D
   - id: NEG-C4-005
     kind: design
-    description: "Drawer free to rotate about the travel direction while the conversion applies a moment."
+    description: >
+      Deep drawer driven by a single off-centre engagement, free to yaw in an
+      oversize channel; at part travel it skews and jams, defeating the required
+      horizontal sliding behaviour.
+    note: >
+      Corrected at SF-6.1. The defect is failure of the REQUIRED behaviour, not
+      the absence of anti-rotation as such. ADM-C4-D has no dedicated
+      anti-rotation provision and is admissible.
     must_be_rejected_by: [NRM-C4-005]
     fixture: INA-C4-E
   - id: NEG-C4-006
     kind: design
-    description: "A single limit condition credited to both travel extremes."
+    description: "Both configurations are DECLARED physical ends of travel, and one condition is evaluated once and its result copied to both."
+    note: "Corrected at SF-6.3. The invariant applies only where an end of travel is declared."
     must_be_rejected_by: [NRM-C4-007]
     fixture: INA-C4-F
   - id: NEG-C4-007
@@ -43,7 +51,7 @@ negative_cases:
     fixture: INA-C4-G
   - id: NEG-C4-008
     kind: design
-    description: "Drawer's emergence path passes through solid cabinet material."
+    description: "Drawer's emergence path passes through solid cabinet material at an interior point of the travel."
     must_be_rejected_by: [NRM-C4-010]
     fixture: INA-C4-H
   - id: NEG-C4-009
@@ -58,7 +66,8 @@ negative_cases:
       Guidance is reported as demonstrated because an off-axis deviation of 0.0
       degrees was observed under a declared-pair model.
     reproduced_from: "DOS-C4-drawer S5 E2 - tracks_straight = 0.0 exactly"
-    must_be_rejected_by: [evidence_scope.EV-C4-002]
+    must_be_rejected_by: [NRM-C4-012]
+    fixture: INA-EV-C4-A
     required_outcome: >
       The value is identified as a structural artifact of the declared prismatic
       coupling and carries no evidential weight. Guidance remains NOT_VERIFIED at
@@ -69,7 +78,8 @@ negative_cases:
       C4-drawer is reported as physics-verified on the strength of a result
       produced for a different variant and carried across.
     reproduced_from: "DOS-C4-drawer S5 E1 - stages.physics = 'reused - PASS'"
-    must_be_rejected_by: [evidence_scope.EV-C4-001]
+    must_be_rejected_by: [NRM-C4-013]
+    fixture: INA-EV-C4-B
     required_outcome: "Evidence reuse across cases is declared as such, with the originating case named, or the requirement is NOT_VERIFIED."
   - id: NEG-C4-012
     kind: process
@@ -91,12 +101,15 @@ negative_cases:
   - id: NEG-C4-014
     kind: process
     description: >
-      The conflict about whether a toothed transmission is over-engineered is
-      resolved by the pipeline, in either direction, and used to require or
-      forbid a conversion family.
-    reproduced_from: "AMB-C4-01"
-    must_be_rejected_by: [UNR-C4-002, FRE-C4-002]
-    required_outcome: "The conflict is carried. Neither statement is rank-1, so neither may bind the family choice."
+      The disagreement between two legacy commentaries about whether a toothed
+      transmission is over-engineered is treated as a source ambiguity requiring a
+      human ruling, or is used to require or forbid a conversion family.
+    reproduced_from: "LEGACY-CONFLICT-C4-01, reclassified at SF-6.6"
+    must_be_rejected_by: [FRE-C4-002]
+    required_outcome: >
+      Neither statement is rank-1, so neither could bind the family and their
+      disagreement creates no acceptance ambiguity. It is recorded as evidence
+      that mechanism choice must remain free, and it requires no human decision.
   - id: NEG-C4-015
     kind: process
     description: >
@@ -124,3 +137,48 @@ negative_cases:
     reproduced_from: "DOS-C4-drawer S3, S8"
     must_be_rejected_by: [UNR-C4-003]
     required_outcome: "Rejected as UNSUPPORTED_INFERENCE. The source states no retention requirement."
+  - id: NEG-C4-018
+    kind: design
+    description: "Knob shaft passes through a clearance hole and fouls the cabinet wall over part of its rotation; the interference is unmodelled."
+    note: >
+      Added at SF-6.4 with the removal of mandatory cabinet-local crossing
+      support. The correct obligation at a crossing is non-interference.
+    must_be_rejected_by: [NRM-C4-008]
+    fixture: INA-C4-J
+
+  - id: NEG-C4-019
+    kind: process
+    description: >
+      Support or reaction is demanded of an element that carries no such load —
+      for example an axial reaction required on a knob shaft driving a toothed
+      linear member, which produces none.
+    reproduced_from: "SF-6.5"
+    must_be_rejected_by: [NRM-C4-009]
+    required_outcome: "Rejected. The predicate quantifies over load-carrying elements."
+
+  - id: NEG-C4-020
+    kind: process
+    description: >
+      Two physical travel limits are required, or a design is faulted for
+      declaring none, when DOS-C4-drawer S3 records that no travel limit is stated.
+    reproduced_from: "SF-6.3"
+    must_be_rejected_by: [NRM-C4-007, UNR-C4-003]
+    required_outcome: "Rejected. ADM-C4-C declares no physical end of travel and is admissible."
+
+  - id: NEG-C4-021
+    kind: process
+    description: >
+      An unbounded contents-load requirement is imposed on the drawer's load path
+      although the command states no payload.
+    reproduced_from: "SF-6.2"
+    must_be_rejected_by: [NRM-C4-006, UNR-C4-005]
+    required_outcome: "Rejected as UNSUPPORTED_INFERENCE. The invariant ranges over the drawer's own weight plus any contents load an instantiating requirement declares."
+
+  - id: NEG-C4-022
+    kind: process
+    description: >
+      Candidate generation is required to retain more than one conversion family,
+      or a run is faulted merely for arriving at a single surviving candidate.
+    reproduced_from: "SF-8.3"
+    must_be_rejected_by: [FRE-C4-002]
+    required_outcome: "Rejected. See the open-search rule in stage_expectations s02."

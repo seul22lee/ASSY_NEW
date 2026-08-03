@@ -101,3 +101,21 @@ and not read for design content.
 
 None identified for BM-001 itself. See `C4-drawer/source_map.md` for the one
 conflict found in the family.
+
+---
+
+## Corrections at the independent semantic review
+
+The findings below were raised by human review of the first clean audit and are
+recorded finding-by-finding in `../../INDEPENDENT_SEMANTIC_REVIEW_REPORT.md`.
+Statement text, basis types and unresolved scopes in this map reflect the
+corrected pack, not the reviewed one.
+
+| Finding | What changed |
+|---|---|
+| SF-2.1 | `NRM-BM-001-003` no longer requires the closure to vacate the aperture prism. It requires the DECLARED usable access region to be unobstructed. Adequacy of that region is held at the new `UNR-BM-001-006`. |
+| SF-2.2 | `NRM-BM-001-005` is conditional: a discrete terminal open pose must be physically produced, but a design may instead declare an open configuration region. DOS-BM-001 S2 records that no source bounds the motion at the open extreme. New freedom `FRE-BM-001-012`. |
+| SF-2.3 | `UNR-BM-001-001` and `UNR-BM-001-002` are quantitative and no longer block `NRM-BM-001-011` and `NRM-BM-001-008`. `NRM-BM-001-011` is load-conditional. |
+| SF-2.4 | `NRM-BM-001-007` requires a realizable engage/release/engage cycle rather than a declaration of repeatability. Cycle count is held at the new `UNR-BM-001-007`. |
+| SF-1.1 | Two VERIFICATION_MINIMUM statements added — `NRM-BM-001-012` (the m0 pair does not discriminate) and `NRM-BM-001-013` (the snap force window is an input). Both were prose in `evidence_scope.yaml`; both are now falsifiable and carry `enables_claim`. Their fixtures live in `evidence_cases.yaml`. |
+| SF-1.4 | New unresolved `UNR-BM-001-006` (access region), `UNR-BM-001-007` (cycle count), `UNR-BM-001-008` (a discriminating criterion). All carry explicit block scopes. |

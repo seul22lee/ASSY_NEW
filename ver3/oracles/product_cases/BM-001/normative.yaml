@@ -1,10 +1,17 @@
 case_id: BM-001
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 tier: product_case
 inherits: null
 policy: ver3/oracles/ORACLE_AUTHORING_POLICY.md
 dossier: ver3/oracles/_dossiers/DOS-BM-001.md
 lock_status: SEMANTICALLY_AUDITED
+physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+
+correction_note: >
+  Rewritten at semantic review findings SF-2.1, SF-2.2, SF-2.3, SF-2.4 and the
+  common-model findings SF-1.1 and SF-1.4. The prior wording was not used as the
+  starting authority; DOS-BM-001 S1 was re-read first.
 
 invariants:
   - id: NRM-BM-001-001
@@ -38,6 +45,7 @@ invariants:
     exclusions:
       - "Does NOT require a permanent connection: a closure detached in the open state satisfies this if engagement exists where the concept requires it."
       - "Does NOT name a mechanism."
+      - "Does NOT require support beyond what the selected concept depends on. Support is conditional on the concept, not universal."
     verification_predicate: "for the closure connection: engagement geometry exists on both participating bodies at every state where the concept declares contact."
     requires_tags: [connection_realized]
     related_freedoms: [FRE-BM-001-001]
@@ -46,21 +54,33 @@ invariants:
 
   - id: NRM-BM-001-003
     statement: >
-      In the open state the closure does not occupy the aperture, and the region
-      swept by the closure between states does not intersect the enclosure solid.
+      In the open state the closure does not obstruct the usable access the
+      design declares for the storage interaction, and the region swept by the
+      closure between states does not intersect the enclosure solid.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-BM-001 S1 REQ-001"]
+    source_locators: ["DOS-BM-001 S1 REQ-001", "DOS-BM-001 S1 product_intent"]
     derivation_premises:
-      - "REQ-001 requires the enclosure to open."
-      - "An aperture obstructed by the closure is not open."
+      - "REQ-001 requires the enclosure to open, and product_intent names it a storage box."
+      - "An access region the closure still obstructs is not usable for storing into."
       - "Solid bodies do not pass through one another."
-    conclusion_scope: "Aperture occupancy at OPEN, and sweep clearance along the transition."
-    exclusions: ["Does not constrain how far the closure travels beyond clearing the aperture."]
-    verification_predicate: "intersect(closure@OPEN, aperture_prism) is empty AND clearance(swept_volume(closure, CLOSED->OPEN), enclosure_solid) > 0, at a declared fidelity."
-    requires_tags: [open_clears_aperture, sweep_clears_enclosure]
+    conclusion_scope: >
+      Non-obstruction of the DECLARED usable access region at OPEN, and sweep
+      clearance along the transition. Nothing more.
+    exclusions:
+      - >
+        Does NOT require the closure to vacate the whole aperture projection.
+        DOS-BM-001 S2 states no aperture size and no access envelope, so a
+        requirement to clear the entire aperture prism would be stronger than the
+        source. A closure that remains partly across the aperture while leaving
+        the declared usable access unobstructed satisfies this.
+      - "Does not fix the usable access region; the design declares it (UNR-BM-001-006)."
+      - "Does not constrain how far the closure travels."
+    verification_predicate: "intersect(closure@OPEN, declared_usable_access_region) is empty AND clearance(swept_volume(closure, CLOSED->OPEN), enclosure_solid) > 0, at a declared fidelity."
+    requires_tags: [declared_usable_access_unobstructed, sweep_clears_enclosure]
     related_freedoms: [FRE-BM-001-003, FRE-BM-001-004]
-    related_unresolved: []
+    related_unresolved: [UNR-BM-001-006]
+    closes_finding: [SF-2.1]
 
   - id: NRM-BM-001-004
     statement: >
@@ -85,24 +105,40 @@ invariants:
 
   - id: NRM-BM-001-005
     statement: >
-      The open state's pose is physically determined: some realized feature or
-      condition of the design causes the closure to occupy that pose rather than
-      another.
+      Where the design declares a discrete terminal open pose, that pose is
+      produced by a realized physical condition rather than by a limit imposed
+      only on the model. Where the design instead declares an open configuration
+      region, that region is admissible and the declared usable access is
+      available within it.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
+    applies_when: "the design declares either a discrete terminal open pose or an open configuration region"
     source_locators: ["DOS-BM-001 S1 REQ-001"]
     derivation_premises:
-      - "NRM-BM-001-001 requires OPEN to be a named state with a defined pose."
-      - "A pose that nothing in the design determines is not a state of the design."
-    conclusion_scope: "Existence of a realized determinant of the open pose."
+      - "REQ-001 requires an open state to be reached, so the design must say what the open state is."
+      - "A discrete pose that nothing physical produces is a property of the model, not of the artifact."
+      - "A configuration region needs no terminal determinant; it needs only to be reachable and to afford the declared access."
+    conclusion_scope: >
+      Physical origin of a declared discrete terminal open pose, OR admissibility
+      of a declared open configuration region. Not both, and neither is required
+      to be the design's choice.
     exclusions:
-      - "Does NOT require a terminal contact feature, a discrete stop part, or any particular determinant."
-      - "The determinant may be a contact, a rest condition, an over-centre condition, or an equivalent."
-    verification_predicate: "the open pose references a realized determinant; an unbounded motion with an asserted open pose does not satisfy this."
-    requires_tags: [open_pose_determined]
+      - >
+        Does NOT require a terminal contact feature, a discrete stop part, or a
+        bounded open extreme. DOS-BM-001 S2 records that no source states the
+        motion is bounded at the open extreme. A user-positioned opening state
+        held anywhere in an admissible region satisfies this.
+      - "Does NOT prefer one of the two forms over the other."
+    verification_predicate: >
+      if a discrete terminal open pose is declared: it references a realized
+      determinant (contact, rest condition, over-centre, engagement run-out or
+      equivalent); else if an open configuration region is declared: every pose
+      in it is reachable along the transition and affords the declared usable
+      access.
+    requires_tags: [open_state_admissible]
     related_freedoms: [FRE-BM-001-009]
-    related_unresolved: []
-    closes_finding: [CLS-005]
+    related_unresolved: [UNR-BM-001-006]
+    closes_finding: [CLS-005, SF-2.2]
 
   - id: NRM-BM-001-006
     statement: >
@@ -116,24 +152,38 @@ invariants:
     exclusions:
       - "Does not name a retention mechanism."
       - "Does not supply a load magnitude; the design declares what it holds against."
-    verification_predicate: "retention realization has engagement geometry on both bodies, a holding condition at CLOSED under the declared disturbance, and a release condition reachable by a declared user action."
+      - "Localization means identified participating material regions; a field interaction with declared participating regions satisfies it."
+    verification_predicate: "retention realization has participating geometry on both bodies, a holding condition at CLOSED under the declared disturbance, and a release condition reachable by a declared user action."
     requires_tags: [retention_realized, retention_release_action]
     related_freedoms: [FRE-BM-001-002, FRE-BM-001-010]
     related_unresolved: [UNR-BM-001-001]
 
   - id: NRM-BM-001-007
     statement: >
-      Engagement and release of the retention may be repeated without consuming
-      or destroying a participating feature.
+      The retention completes a close-engage, release, close-engage-again cycle
+      in which every participating feature retains the geometry its retention
+      role depends on, and the closed state is reachable again after release.
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
-    source_locators: ["DOS-BM-001 S1 REQ-008"]
-    conclusion_scope: "Reusability of the retention."
-    exclusions: ["Does not supply a cycle count; none is stated in the source."]
-    verification_predicate: "the retention declares a repeatable engage/release transition and no participating feature is marked single-use."
-    requires_tags: [retention_reusable]
+    source_locators: ["DOS-BM-001 S1 REQ-008", "DOS-BM-001 S1 REQ-001"]
+    conclusion_scope: >
+      Physical repeatability of one full cycle. NOT a cycle count, NOT durability,
+      NOT wear.
+    exclusions:
+      - >
+        Does NOT supply a cycle count; DOS-BM-001 S2 records that none is stated.
+        Cycle count and durability are evidence questions and are held at
+        UNR-BM-001-007.
+      - "Does not require zero wear; it requires that no participating feature is consumed or permanently disabled by one cycle."
+    verification_predicate: >
+      a sequence CLOSED-engaged -> released -> CLOSED-engaged is realizable, with
+      each participating feature's retention-critical geometry present in the
+      final state. A declaration that the transition is repeatable, or the mere
+      absence of a single-use marking, does not satisfy this.
+    requires_tags: [retention_cycle_realizable]
     related_freedoms: [FRE-BM-001-002]
-    related_unresolved: []
+    related_unresolved: [UNR-BM-001-007]
+    closes_finding: [SF-2.4]
 
   - id: NRM-BM-001-008
     statement: >
@@ -145,15 +195,19 @@ invariants:
     derivation_premises:
       - "REQ-003 requires the retention to be operable by a user."
       - "A feature a user cannot reach cannot be operated by that user."
-    conclusion_scope: "Existence of an access path terminating at the actuator."
+    conclusion_scope: "Existence of an access path terminating at the actuator. Geometric reachability only."
     exclusions:
       - "Does NOT constrain the side, face or half-space the path originates from."
-      - "Does not supply an effort ceiling."
+      - >
+        Does not supply an effort ceiling, and is NOT blocked by its absence.
+        Whether a user can reach the actuator is a geometric question; how hard
+        the actuator is to work is a separate quantitative question held at
+        UNR-BM-001-002.
     verification_predicate: "exists(access_path) whose endpoint is the retention actuation feature and which does not intersect solid material."
     requires_tags: [actuator_reachable]
     related_freedoms: [FRE-BM-001-003]
-    related_unresolved: [UNR-BM-001-002]
-    closes_finding: [CLS-008]
+    related_unresolved: []
+    closes_finding: [CLS-008, SF-2.3]
 
   - id: NRM-BM-001-009
     statement: >
@@ -195,52 +249,158 @@ invariants:
 
   - id: NRM-BM-001-011
     statement: >
-      Retention and closure-connection loads are reacted: for each, a path exists
-      to a reaction site able to carry it.
+      Retention and closure-connection loads are reacted: for each interface that
+      carries load, a path exists to a reaction site.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
+    applies_when: "an interface carries load in the declared scenario"
     source_locators: ["DOS-BM-001 S1 REQ-002", "DOS-BM-001 S1 REQ-007"]
     derivation_premises:
       - "REQ-002 requires the closure to be held against a disturbance."
       - "A force that is applied and not reacted accelerates the body."
-    conclusion_scope: "Existence of a reaction path for the named interfaces."
+      - "An interface that carries no load in the declared scenario needs no reaction for that scenario."
+    conclusion_scope: >
+      Existence of a reaction path for load-carrying interfaces. Existence only —
+      not adequacy, not margin, not capacity.
     exclusions:
       - "Does NOT require the reaction site to be the enclosure; a mounting boundary or the user's grip are admissible sites."
+      - >
+        Does NOT require the path to be adequate for any particular magnitude,
+        and is NOT blocked by the absence of a disturbance magnitude. Whether a
+        load path exists is structural; whether it suffices is quantitative and
+        is held at UNR-BM-001-001.
       - "Does not prescribe how the path is recorded."
-    verification_predicate: "for each named load-bearing interface: exists(load_path) terminating at a reaction site."
+    verification_predicate: "for each load-carrying interface in the declared scenario: exists(load_path) terminating at a reaction site."
     requires_tags: [loads_reacted]
     related_freedoms: []
-    related_unresolved: [UNR-BM-001-001]
-    closes_finding: [CLS-011]
+    related_unresolved: []
+    closes_finding: [CLS-011, SF-2.3]
+
+  - id: NRM-BM-001-012
+    statement: >
+      A criterion offered as evidence that the open state's determinant is
+      physically produced must be able to fail when that determinant is removed.
+    basis_type: VERIFICATION_MINIMUM
+    support_type: derived
+    enables_claim: >
+      NRM-BM-001-005 may be reported PASS. Without this minimum, a criterion that
+      also passes on a design with no determinant would be counted as showing
+      that a determinant is present.
+    source_locators: ["DOS-BM-001 S5 E1"]
+    derivation_premises:
+      - "DOS-BM-001 S5 E1 records that in the m0 matched pair every seed-0 criterion passes in BOTH the limited and the unlimited member."
+      - "A criterion that passes on the control as well as the specimen separates nothing."
+      - "A criterion that separates nothing cannot be evidence of the feature that distinguishes them."
+    conclusion_scope: "Admissibility of a criterion as evidence for NRM-BM-001-005. Says nothing about the design."
+    exclusions:
+      - "Does not require a physical control specimen; a demonstrated sensitivity of the criterion to the determinant's absence is sufficient."
+      - "Does not invalidate the m0 pair as evidence of what DOS-BM-001 S5 E1 says it shows: seed-level instability without a limit."
+    verification_predicate: "for each criterion mapped to NRM-BM-001-005: a configuration is identified in which the criterion fails when the determinant is removed."
+    requires_evidence_tags: [determinant_criterion_discriminates]
+    related_freedoms: []
+    related_unresolved: [UNR-BM-001-008]
+
+  - id: NRM-BM-001-013
+    statement: >
+      A force window that is an input of a task or test definition may not be
+      cited as an achieved retention property.
+    basis_type: VERIFICATION_MINIMUM
+    support_type: derived
+    enables_claim: >
+      The holding clause of NRM-BM-001-006 may be reported PASS. Without this
+      minimum, a value supplied to a run and read back from it would be reported
+      as the retention the product achieves.
+    source_locators: ["DOS-BM-001 S5 E2"]
+    derivation_premises:
+      - "DOS-BM-001 S5 E2 records that the snap force window is an input parameter of the task, not a measured product property."
+      - "A value supplied to a run and read back from it reports the input."
+      - "Citing it as a result asserts as achieved what was assumed."
+    conclusion_scope: "Admissibility of a stated force window as evidence. Says nothing about the design."
+    exclusions:
+      - "Does not forbid declaring a force window as a requirement or as a test condition; it forbids reporting one as an outcome."
+    verification_predicate: "for every cited retention or release force: its provenance is recorded as either an input condition or a measurement, and only measurements are counted as results."
+    requires_evidence_tags: [force_provenance_declared]
+    related_freedoms: []
+    related_unresolved: []
 
 required_unresolved:
   - id: UNR-BM-001-001
     decision: Disturbance magnitude for handling and transport.
+    kind: quantitative
     why_must_remain_open: "DOS-BM-001 S2: no load magnitude, direction, duration or acceleration is stated."
     resolvable_when: "A user-supplied load case, an applicable standard, or a declared analyst assumption enters the DesignState."
-    blocks: [NRM-BM-001-006, NRM-BM-001-011]
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-BM-001-011 — the existence of a load path is structural and is derivable without a magnitude."
+      - "NRM-BM-001-006 — the existence and localization of retention is structural."
     source_locators: ["DOS-BM-001 S2"]
+    closes_finding: [SF-2.3]
   - id: UNR-BM-001-002
     decision: User actuation effort ceiling.
+    kind: quantitative
     why_must_remain_open: "DOS-BM-001 S2: no force, torque or effort limit is stated."
     resolvable_when: "An ergonomic standard or a user-stated ceiling is supplied."
-    blocks: [NRM-BM-001-008]
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-BM-001-008 — geometric reachability of the actuator does not depend on how much effort it takes."
     source_locators: ["DOS-BM-001 S2"]
+    closes_finding: [SF-2.3]
   - id: UNR-BM-001-003
     decision: Absolute product dimensions.
+    kind: quantitative
     why_must_remain_open: "DOS-BM-001 S1 clause C-006 says only desktop-sized."
     resolvable_when: "A user-supplied envelope or a derived packaging constraint exists."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
     source_locators: ["DOS-BM-001 S1 C-006"]
   - id: UNR-BM-001-004
     decision: Manufacturing process and material.
+    kind: qualitative
     why_must_remain_open: "DOS-BM-001 S2: no process, material or cost model is stated."
     resolvable_when: "A process or material is user-stated or justified by a costed comparison."
-    blocks: []
+    block_scopes: [blocks_PASS, blocks_evidence_interpretation]
     source_locators: ["DOS-BM-001 S2"]
   - id: UNR-BM-001-005
     decision: Whether the closure connection and the retention share a body or an axis.
+    kind: structural_choice
     why_must_remain_open: "DOS-BM-001 S2: unconstrained by any source."
     resolvable_when: "A packaging or access constraint forces one arrangement."
-    blocks: []
+    block_scopes: []
     source_locators: ["DOS-BM-001 S2"]
+  - id: UNR-BM-001-006
+    decision: The usable access region the open state must afford.
+    kind: quantitative
+    why_must_remain_open: >
+      DOS-BM-001 S2 states no aperture size, no opening angle, no stroke and no
+      open-state pose. The source requires the box to open and to be stored into;
+      it supplies no envelope by which "enough access" could be measured.
+    resolvable_when: "A stored-object envelope, an aperture size, or a reach model is supplied."
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-BM-001-003 and NRM-BM-001-005 — both evaluate against the region the DESIGN declares, which is always available; only the adequacy of that region is unresolved."
+    source_locators: ["DOS-BM-001 S2", "DOS-BM-001 S1 product_intent"]
+    closes_finding: [SF-2.1]
+  - id: UNR-BM-001-007
+    decision: Retention cycle count and durability.
+    kind: quantitative
+    why_must_remain_open: 'DOS-BM-001 S2: no cycle count is stated for "reusable".'
+    resolvable_when: "A duty, a cycle count, or a service life is supplied."
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-BM-001-007 — one realizable engage/release/engage cycle is a structural property and needs no cycle count."
+    source_locators: ["DOS-BM-001 S2"]
+    closes_finding: [SF-2.4]
+  - id: UNR-BM-001-008
+    decision: A criterion that distinguishes a design with an open-state determinant from one without.
+    kind: interpretive
+    why_must_remain_open: >
+      DOS-BM-001 S5 E1: the corpus's matched pair does not supply one. Every
+      seed-0 criterion passes in both members. Adopting one of them as the
+      discriminator would assert a discrimination the evidence does not show.
+    resolvable_when: >
+      A criterion is demonstrated to fail when the determinant is removed, at a
+      stated fidelity, or a seed-sweep protocol is declared as the discriminator
+      with its aggregation rule.
+    block_scopes: [blocks_evidence_interpretation, blocks_PASS]
+    does_not_block:
+      - "NRM-BM-001-005 as a structural predicate — whether the design declares a realized determinant is inspectable without any test."
+    source_locators: ["DOS-BM-001 S5 E1"]

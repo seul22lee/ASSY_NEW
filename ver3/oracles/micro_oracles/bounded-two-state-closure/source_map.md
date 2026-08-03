@@ -60,3 +60,24 @@ bound. `NRM-HS-007` requires any such criterion to be shown discriminating;
 `UNR-HS-004` records that the corpus has not supplied one; `NEG-HS-008` and
 `NEG-HS-014` enforce both. Nothing here weakens the evidence — it states what the
 evidence shows and declines to claim the rest.
+
+---
+
+## Corrections at the independent semantic review
+
+The findings below were raised by human review of the first clean audit and are
+recorded finding-by-finding in `../../INDEPENDENT_SEMANTIC_REVIEW_REPORT.md`.
+Statement text, basis types and unresolved scopes in this map reflect the
+corrected pack, not the reviewed one.
+
+| Finding | What changed |
+|---|---|
+| SF-1.3 | `PROJECT_DEFINED_CAPABILITY` replaces `DIRECT_USER_REQUIREMENT`. |
+| SF-10.1 | `NRM-HS-003` requires CONTINUOUS CONSTRAINT COVERAGE, not one persistent constraint. The constraint mode may change and the path may use several features in succession. `ADM-HS-E` — a flexure handing off to a moulded rib — falsifies the retired reading. |
+| SF-10.2 | `NRM-HS-005` requires each extreme to be independently EVALUATED at its own configuration, not to have a distinct determining feature. One continuous slot (`ADM-HS-D`) or one magnetic field (`ADM-HS-F`) may produce both bounds. What is forbidden is copying one evaluation result to both. |
+| SF-10.3 | Bounding remains separate from holding. `UNR-HS-002` keeps the holding question out; holding is owned by `latch-retention`. |
+| SF-10.4 | Criterion discrimination moved to `evidence_cases.yaml`. Whether a test distinguishes a bounded from an unbounded control is a property of the test, not of the closure. |
+| SF-11.1 | The pack declares `source_declares_terminal_states` with a verbatim fragment the auditor verifies against the frozen dossier. Bounds are definitional HERE; the terminal-bound check still fires for BM-002 and C4-drawer, whose sources declare no travel limit. |
+
+The mechanism-neutral name is kept and `historical_aliases: [hinge-and-stop]`
+records the former identifier without making it authoritative.

@@ -1,64 +1,97 @@
 capability_id: bounded-two-state-closure
-schema_version: "0.2.0"
+schema_version: "0.3.0"
+domain: physical_design
+historical_aliases:
+  - hinge-and-stop
 note: >
-  Four materially different bounded closures, each satisfying every invariant.
-  Only ADM-A resembles the corpus realization. ADM-C is not rotary at all, and
-  ADM-D bounds by run-out rather than by any added feature.
+  PHYSICAL design fixtures only (SF-1.1). The evidence-only tag
+  bound_criterion_discriminates has moved to evidence_cases.yaml: whether a test
+  distinguishes a bounded from an unbounded control is a property of the test,
+  not of the closure (SF-10.4). ADM-HS-E and ADM-HS-F falsify the retired
+  single-persistent-constraint and distinct-feature readings.
+
+physical_tag_vocabulary:
+  two_states_defined: "two states are given as relative configurations"
+  both_states_reachable: "both are reachable along the motion"
+  motion_continuous_between_states: "a continuous path connects them"
+  constraint_coverage_continuous: "at every configuration along the path at least one realized constraint keeps it in the allowed manifold"
+  each_bound_physically_realized: "each extreme is produced by a realized physical condition, not a model limit"
+  each_extreme_independently_evaluated: "each extreme is evaluated at its own configuration, with no result copied between them"
+  transition_free_of_interference: "no unintended interference within the motion"
 
 admissible_realizations:
   - id: ADM-HS-A
-    summary: "Pin and knuckle joint between lid and body. Closed extreme bounded by the lid seating on the body rim; open extreme bounded by a flange on the lid meeting the body wall. Two distinct contact features on two parts."
+    summary: "Pin and knuckle joint between lid and body. Closed extreme bounded by the lid seating on the rim; open extreme by a flange meeting the wall. Two contact features on two parts."
     materially_differs_by: [motion_type, bounding_principle]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference']
   - id: ADM-HS-B
-    summary: "Four-bar linkage carrying the lid. Open extreme bounded by the linkage reaching its dead point; closed extreme bounded by the lid seating on the rim. Two different bounding principles on one closure."
+    summary: "Four-bar linkage carrying the lid. Open extreme bounded by the linkage reaching its dead point; closed extreme by the lid seating on the rim. Two different bounding principles."
     materially_differs_by: [motion_type, bounding_principle, principle_mixing]
-    note: "Admitted because NRM-HS-005 permits the two extremes to use different principles."
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference']
   - id: ADM-HS-C
-    summary: "Sliding cover running in a channel. Closed extreme bounded by the cover face meeting the channel end; open extreme bounded by a boss on the cover meeting the other channel end. Both bounds on one channel part."
+    summary: "Sliding cover in a channel. Both bounds carried by one channel part: the cover face meets one channel end, a boss meets the other. Not a rotary closure."
     materially_differs_by: [motion_type, part_count, bounding_principle]
-    note: "Not a rotary closure, and both bounds are carried by one part. Admitted because the capability names a closure, not a hinge (FRE-HS-002), and requires distinct conditions rather than distinct parts (FRE-HS-007)."
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference']
   - id: ADM-HS-D
-    summary: "Lid on a pivot pin running in a curved slot. Both extremes bounded by the pin reaching an end of the slot — two different ends, two different contacts, no added stop feature."
+    summary: "Lid on a pivot pin running in a curved slot. Both extremes bounded by the pin reaching an end of the SAME continuous slot - one feature, two configurations, two independent evaluations."
     materially_differs_by: [bounding_principle, feature_economy]
-    note: "Bounds by geometric run-out of the constraint itself. Admitted because NRM-HS-004 requires a realized condition, not an added feature."
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+    note: >
+      FALSIFIABILITY FIXTURE for SF-10.2. One continuous geometry produces both
+      bounds. The prior wording required each extreme to have its "own condition",
+      which read as a distinct feature per extreme and put this design at risk.
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference']
+  - id: ADM-HS-E
+    summary: >
+      Compliant flexure closure. Over the first part of the travel the flexure's
+      own stiffness constrains the configuration; past mid-travel the flexure has
+      buckled clear and a moulded rib takes over, guiding the panel to its seat.
+      The constraint MODE changes partway; coverage is continuous throughout.
+    materially_differs_by: [constraint_mode_change, motion_type, bounding_principle]
+    note: >
+      FALSIFIABILITY FIXTURE for SF-10.1. No single relative constraint persists
+      through the whole motion. The prior wording required one to, and rejected
+      this design. Hand-off between constraint regimes is ordinary mechanism
+      design.
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference']
+  - id: ADM-HS-F
+    summary: >
+      Magnetically detented cover with two stable seats produced by ONE field: the
+      closed seat and the open seat are two minima of the same magnetic
+      arrangement, each evaluated at its own configuration.
+    materially_differs_by: [bounding_principle, interaction_type, feature_economy]
+    note: "Second falsifiability fixture for SF-10.2: one physical field produces both bounds."
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference']
 
 inadmissible_realizations:
   - id: INA-HS-A
     summary: "One state defined; the other referred to but given no relative configuration."
     from_negative_case: NEG-HS-001
     missing_tags: [two_states_defined, both_states_reachable]
-    tags: ['motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+    tags: ['motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference']
   - id: INA-HS-B
     summary: "Two states defined with no continuous path between them; the closure is shown only in its two configurations."
     from_negative_case: NEG-HS-002
     missing_tags: [motion_continuous_between_states]
-    tags: ['two_states_defined', 'both_states_reachable', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+    tags: ['two_states_defined', 'both_states_reachable', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference']
   - id: INA-HS-C
-    summary: "Constraint between the two bodies lapses partway through the motion; over that span the configuration is unlimited."
+    summary: "Over a stretch of the path NOTHING constrains the configuration - no constraint is active and none takes over; the panel is free in that band."
     from_negative_case: NEG-HS-003
-    missing_tags: [relative_constraint_persists_through_motion]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+    missing_tags: [constraint_coverage_continuous]
+    note: "Rejected for a GAP in coverage, not for changing constraint mode. ADM-HS-E changes mode and is admitted."
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference']
   - id: INA-HS-D
     summary: "Extremes set by a numeric range on a joint, with no realized condition at either configuration."
     from_negative_case: NEG-HS-004
     missing_tags: [each_bound_physically_realized]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_extreme_independently_evaluated', 'transition_free_of_interference']
   - id: INA-HS-E
-    summary: "One realized condition evaluated once and credited to both extremes."
+    summary: "One extreme is evaluated and the RESULT is copied to the other; the second configuration is never evaluated."
     from_negative_case: NEG-HS-005
-    missing_tags: [bounds_distinct_per_extreme]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'transition_free_of_interference', 'bound_criterion_discriminates']
+    missing_tags: [each_extreme_independently_evaluated]
+    note: "Rejected for copying a result, not for sharing a feature. ADM-HS-D and ADM-HS-F share one feature and one field respectively, and are admitted."
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'transition_free_of_interference']
   - id: INA-HS-F
     summary: "Lid passes through the body wall partway through the motion; the interference is unaccounted for."
     from_negative_case: NEG-HS-006
     missing_tags: [transition_free_of_interference]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'bound_criterion_discriminates']
-  - id: INA-HS-G
-    summary: "Presence of a bound claimed on a criterion that also passes when the bound is removed."
-    from_negative_case: NEG-HS-007
-    missing_tags: [bound_criterion_discriminates]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference']
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated']

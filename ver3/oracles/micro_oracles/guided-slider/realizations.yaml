@@ -1,62 +1,96 @@
 capability_id: guided-slider
-schema_version: "0.2.0"
+schema_version: "0.3.0"
+domain: physical_design
 note: >
-  Four materially different guidance realizations, each satisfying every
-  invariant. ADM-D uses a single part and no rail at all; it is admitted to prove
-  the capability was not defined in terms of the legacy two-rail fixture.
+  PHYSICAL design fixtures only (finding SF-1.1). The evidence-only tag
+  guidance_observable_can_fail has been moved to evidence_cases.yaml; a physical
+  guide is no longer inadmissible for want of a test. ADM-GS-E exists to falsify
+  the retired strict-prismatic reading (SF-7.1).
+
+physical_tag_vocabulary:
+  translating_body: "a translating body exists"
+  guiding_body: "a guiding body exists"
+  travel_direction_determinate: "the travel direction is determinate relative to both bodies, not established by a name"
+  required_freedoms_constrained: "every freedom the instantiating requirement depends on is removed by a realized constraint"
+  residual_freedoms_declared: "freedoms left unconstrained are declared as intentionally free"
+  constraints_attributable_to_interaction: "each claimed constraint names participating material on both bodies"
+  engagement_persists_across_travel: "the guiding interaction stays engaged across the declared travel range"
+  transverse_load_reacted_across_travel: "transverse load actually carried has a reaction path across the range"
+  travel_clearances_satisfied: "no unintended intersection at any configuration of the declared travel"
+  declared_path_traversable: "the declared travel path is traversable"
 
 admissible_realizations:
   - id: ADM-GS-A
-    summary: "Two parallel round rails on the guiding body; two carriages on the translating body. Rotation removed by the rail pair."
-    materially_differs_by: [guide_count, anti_rotation_source]
-    tags: ['translating_body', 'guiding_body', 'travel_line_geometric', 'nontranslational_freedoms_removed', 'constraints_attributable_to_engagement', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'corridor_not_fully_occupied', 'guidance_observable_can_fail']
+    summary: "Two parallel round rails on the guiding body; two carriages on the translating body. All five non-translational freedoms removed by the rail pair."
+    materially_differs_by: [guide_count, constrained_freedom_set]
+    constrained_freedoms: "all five non-translational"
+    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable']
   - id: ADM-GS-B
-    summary: "One guide bar of non-circular section through a matching bore in the translating body. Rotation removed by the section itself."
-    materially_differs_by: [guide_count, anti_rotation_source, part_count]
-    tags: ['translating_body', 'guiding_body', 'travel_line_geometric', 'nontranslational_freedoms_removed', 'constraints_attributable_to_engagement', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'corridor_not_fully_occupied', 'guidance_observable_can_fail']
+    summary: "One guide bar of non-circular section through a matching bore. Rotation about the travel axis removed by the section itself."
+    materially_differs_by: [guide_count, part_count, constrained_freedom_set]
+    constrained_freedoms: "all five non-translational"
+    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable']
   - id: ADM-GS-C
-    summary: "Dovetailed channel formed in the guiding body; matching male form on the translating body. All five freedoms removed by one continuous engagement."
-    materially_differs_by: [guide_count, engagement_continuity, anti_rotation_source]
-    tags: ['translating_body', 'guiding_body', 'travel_line_geometric', 'nontranslational_freedoms_removed', 'constraints_attributable_to_engagement', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'corridor_not_fully_occupied', 'guidance_observable_can_fail']
+    summary: "Dovetailed channel in the guiding body; matching male form on the translating body. All five freedoms removed by one continuous interaction."
+    materially_differs_by: [guide_count, engagement_continuity]
+    constrained_freedoms: "all five non-translational"
+    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable']
   - id: ADM-GS-D
-    summary: "Translating body runs in a rectangular recess of the guiding body, located by three pads bearing on three recess walls; the recess is a feature of a body that also serves as the enclosure."
+    summary: "Translating body runs in a rectangular recess of the guiding body, located by three pads bearing on three recess walls. No dedicated guide part exists."
     materially_differs_by: [guide_count, part_count, feature_sharing]
-    note: "No dedicated guide part exists. Admitted because NRM-GS-002 requires freedoms removed, not parts added (FRE-GS-003, FRE-GS-007)."
-    tags: ['translating_body', 'guiding_body', 'travel_line_geometric', 'nontranslational_freedoms_removed', 'constraints_attributable_to_engagement', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'corridor_not_fully_occupied', 'guidance_observable_can_fail']
+    constrained_freedoms: "all five non-translational"
+    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable']
+  - id: ADM-GS-E
+    summary: >
+      A cylindrical rod through a plain round bore. Translation along the axis is
+      guided; the two lateral translations and the two lateral rotations are
+      removed by the bore; ROTATION ABOUT THE TRAVEL AXIS IS LEFT FREE AND
+      DECLARED SO, because the instantiating requirement is indifferent to the
+      rod's angular position.
+    family: two_degree_of_freedom_guide
+    materially_differs_by: [constrained_freedom_set, residual_freedom]
+    constrained_freedoms: "four of five; axial rotation intentionally free"
+    note: >
+      THE FALSIFIABILITY FIXTURE for SF-7.1. The prior capability statement
+      required ALL non-translational freedoms removed and rejected this design.
+      A rod in a bore is the most ordinary guided slider there is, and nothing in
+      the project source demands a prismatic joint. If a corrected invariant
+      still rejects ADM-GS-E, the correction did not take.
+    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable']
 
 inadmissible_realizations:
   - id: INA-GS-A
-    summary: "Translating body declared to move along a named axis with no geometric direction given in any frame."
+    summary: "Translating body declared to move along a named axis with no determinate direction relative to either body."
     from_negative_case: NEG-GS-001
-    missing_tags: [travel_line_geometric]
-    tags: ['translating_body', 'guiding_body', 'nontranslational_freedoms_removed', 'constraints_attributable_to_engagement', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'corridor_not_fully_occupied', 'guidance_observable_can_fail']
+    missing_tags: [travel_direction_determinate]
+    tags: ['translating_body', 'guiding_body', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable']
   - id: INA-GS-B
-    summary: "Body constrained in translation and in two rotations; rotation about the travel line is left free and nothing removes it."
+    summary: >
+      The instantiating requirement is that the carried platform stay square to
+      the guiding body, and rotation about the travel axis is neither constrained
+      nor declared free - it is simply unaccounted for.
     from_negative_case: NEG-GS-002
-    missing_tags: [nontranslational_freedoms_removed]
-    tags: ['translating_body', 'guiding_body', 'travel_line_geometric', 'constraints_attributable_to_engagement', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'corridor_not_fully_occupied', 'guidance_observable_can_fail']
+    missing_tags: [required_freedoms_constrained, residual_freedoms_declared]
+    note: "Rejected because a REQUIRED freedom is unconstrained and unaccounted for. ADM-GS-E leaves the same freedom free, declares it, and is admitted."
+    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable']
   - id: INA-GS-C
-    summary: "A prismatic relationship asserted between the two bodies with no engagement geometry on either."
+    summary: "A prismatic relationship asserted between the two bodies with no participating material on either."
     from_negative_case: NEG-GS-003
-    missing_tags: [constraints_attributable_to_engagement]
-    tags: ['translating_body', 'guiding_body', 'travel_line_geometric', 'nontranslational_freedoms_removed', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'corridor_not_fully_occupied', 'guidance_observable_can_fail']
+    missing_tags: [constraints_attributable_to_interaction]
+    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable']
   - id: INA-GS-D
-    summary: "Guide engages over the first part of the travel only; beyond that the translating body has left its guide."
+    summary: "Guide engages over the first part of the declared travel only; beyond that the translating body has left its guide."
     from_negative_case: NEG-GS-004
     missing_tags: [engagement_persists_across_travel]
-    tags: ['translating_body', 'guiding_body', 'travel_line_geometric', 'nontranslational_freedoms_removed', 'constraints_attributable_to_engagement', 'transverse_load_reacted_across_travel', 'corridor_not_fully_occupied', 'guidance_observable_can_fail']
+    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable']
   - id: INA-GS-E
-    summary: "Transverse load reacted at the retracted position only; at the far extreme the body is cantilevered past its supports."
+    summary: "Transverse load demonstrably carried by the guiding interaction is reacted at the retracted position only; at the far end the body is cantilevered past its supports."
     from_negative_case: NEG-GS-005
     missing_tags: [transverse_load_reacted_across_travel]
-    tags: ['translating_body', 'guiding_body', 'travel_line_geometric', 'nontranslational_freedoms_removed', 'constraints_attributable_to_engagement', 'engagement_persists_across_travel', 'corridor_not_fully_occupied', 'guidance_observable_can_fail']
+    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable']
   - id: INA-GS-F
-    summary: "Translating body fills its corridor; no translation is possible."
+    summary: "At an interior configuration of the declared travel the translating body intersects a boss on the guiding body; the interference is unaccounted for."
     from_negative_case: NEG-GS-006
-    missing_tags: [corridor_not_fully_occupied]
-    tags: ['translating_body', 'guiding_body', 'travel_line_geometric', 'nontranslational_freedoms_removed', 'constraints_attributable_to_engagement', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'guidance_observable_can_fail']
-  - id: INA-GS-G
-    summary: "Guidance evidenced solely by an off-axis deviation of 0.0 degrees produced under a declared prismatic pair."
-    from_negative_case: NEG-GS-007
-    missing_tags: [guidance_observable_can_fail]
-    tags: ['translating_body', 'guiding_body', 'travel_line_geometric', 'nontranslational_freedoms_removed', 'constraints_attributable_to_engagement', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'corridor_not_fully_occupied']
+    missing_tags: [travel_clearances_satisfied, declared_path_traversable]
+    note: "Corrected at SF-7.2 from the retired 'fills its corridor' formulation."
+    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel']

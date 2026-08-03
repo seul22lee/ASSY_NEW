@@ -65,3 +65,22 @@ threshold. No bounding principle: the corpus bounds motion *only* by a discrete
 stop, while gravity rest, over-centre, detent, friction and geometric run-out are
 absent from that library and entirely present in engineering. No load, no life,
 no holding requirement.
+
+## Corrected at the independent semantic review
+
+- **SF-10.1** — `NRM-HS-003` required one identical relative constraint to persist
+  through the whole motion. It now requires continuous constraint *coverage*:
+  the mode may change and features may hand off. `ADM-HS-E`, a flexure handing off
+  to a moulded rib, is in the set to keep that reading out.
+- **SF-10.2** — `NRM-HS-005` required each extreme to have its "own condition",
+  which read as a distinct feature per extreme. It now requires each extreme to be
+  independently **evaluated**; one continuous slot (`ADM-HS-D`) or one magnetic
+  field (`ADM-HS-F`) may produce both. What is forbidden is copying an evaluation
+  result across extremes.
+- **SF-10.4** — criterion discrimination moved into `evidence_cases.yaml`. Whether
+  a test can distinguish a bounded closure from an unbounded control is a property
+  of the test.
+- **SF-1.3** — capability fragments carry `PROJECT_DEFINED_CAPABILITY`.
+
+Bounding remains separate from holding (SF-10.3), and the mechanism-neutral name
+is kept with `historical_aliases: [hinge-and-stop]`.

@@ -1,19 +1,24 @@
 capability_id: latch-retention
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 tier: micro_oracle
 inherits: null
 dossier: ver3/oracles/_dossiers/DOS-latch-retention.md
 lock_status: SEMANTICALLY_AUDITED
+physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
 
 capability_statement: >
   Holding two bodies in a defined relative state against a disturbance, and
   releasing them by a deliberate action, repeatably.
 
 basis_semantics: >
-  A micro-oracle has no user. Its rank-1 source is the declared capability
-  statement in DOS S1. DIRECT_USER_REQUIREMENT marks fragments of that statement;
+  A micro-oracle has no user. Its capability statement was PROJECT-AUTHORED and
+  then frozen into dossier S1; it is not user language and it is not rank 1.
+  Statements restating a fragment of it carry basis_type
+  PROJECT_DEFINED_CAPABILITY, whose authority is explicitly human-reviewable.
   NECESSARY_PHYSICAL_CONSEQUENCE marks statements derived from it;
   VERIFICATION_MINIMUM marks statements about what evidence must be able to show.
+  Corrected at SF-1.3.
 
 scope_exclusions:
   - "How the two bodies reach the vicinity of the retained state is NOT owned here. Guidance is owned by guided-slider; bounded travel by bounded-two-state-closure."
@@ -24,7 +29,7 @@ invariants:
   - id: NRM-LR-001
     statement: >
       A retained state is defined as a relative configuration of the two bodies.
-    basis_type: DIRECT_USER_REQUIREMENT
+    basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
     source_locators: ["DOS-latch-retention S1"]
     conclusion_scope: "Existence of a defined retained state."
@@ -39,18 +44,35 @@ invariants:
   - id: NRM-LR-002
     statement: >
       A realized interaction between the two bodies opposes departure from the
-      retained state, with geometry on both bodies.
-    basis_type: DIRECT_USER_REQUIREMENT
-    support_type: direct
-    source_locators: ["DOS-latch-retention S1", "DOS-latch-retention S1 (\"holding ... against a disturbance\")"]
-    conclusion_scope: "Existence and locality of the retention interaction."
+      retained state, and the material regions through which it acts are
+      identified on both bodies.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    reclassified_at: SF-9.1
+    reclassification_note: >
+      The capability statement says "holding two bodies in a defined relative
+      state against a disturbance". That an interaction exists is a fragment of
+      it; that PARTICIPATING MATERIAL EXISTS ON BOTH BODIES is not stated there -
+      it is a physical consequence of the interaction being realized. Formerly
+      carried as a direct capability fragment, which overstated its authority.
+    derivation_premises:
+      - "The capability requires an interaction that opposes departure from the retained state."
+      - "An interaction between two bodies acts through material of both, whether by contact or by a field."
+      - "An interaction asserted between whole bodies names no region where it acts and cannot be built."
+    source_locators: ["DOS-latch-retention S1"]
+    conclusion_scope: "Existence of the retention interaction and identification of the material it acts through."
     exclusions:
-      - "Does not name a retention principle. DOS S7 records that the legacy corpus realized retention exclusively by snap features; that is a library state, not a requirement."
-      - "Does not require the interaction to be contact. A field interaction with a realized geometry on both bodies is admissible."
-    verification_predicate: "exists(retention interaction) with participating geometry on each body, acting to oppose departure from the retained state."
+      - "Does not name a retention principle. DOS-latch-retention S7 records that the legacy corpus realized retention exclusively by snap features; that is a library state, not a requirement."
+      - >
+        Does NOT require contact. A field interaction is admissible provided the
+        participating material regions - pole faces, keeper areas, the volumes the
+        field acts between - are explicit. What is required is identified
+        participating material, not touching surfaces. Broadened at SF-9.1.
+    verification_predicate: "exists(retention interaction) opposing departure from the retained state, with the participating material region identified on each body."
     requires_tags: [retention_interaction_realized]
     related_freedoms: [FRE-LR-002]
     related_unresolved: []
+    closes_finding: [SF-9.1]
 
   - id: NRM-LR-003
     statement: >
@@ -115,7 +137,7 @@ invariants:
     statement: >
       Engaging and releasing consumes no participating feature, so the retained
       state is reachable again.
-    basis_type: DIRECT_USER_REQUIREMENT
+    basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
     source_locators: ["DOS-latch-retention S1 (\"repeatably\")"]
     conclusion_scope: "Non-consumption of participating features across an engage-release cycle."
@@ -132,6 +154,10 @@ invariants:
       A retention claim names the disturbance it holds against.
     basis_type: VERIFICATION_MINIMUM
     support_type: derived
+    enables_claim: >
+      NRM-LR-002 and NRM-LR-003 may be reported PASS. Without this minimum, a
+      retention could be reported as holding with no disturbance named, which
+      states no proposition that could be false.
     source_locators: ["DOS-latch-retention S1", "DOS-latch-retention S4"]
     derivation_premises:
       - "The capability is defined as holding against a disturbance."
@@ -141,7 +167,8 @@ invariants:
     exclusions:
       - "Does not prescribe the disturbance. It requires that whichever is used be declared with the claim."
     verification_predicate: "every retention result carries the disturbance case it was evaluated against."
-    requires_tags: [retention_claim_names_its_disturbance]
+    requires_evidence_tags: [retention_claim_names_its_disturbance]
+    moved_at: SF-1.1
     related_freedoms: []
     related_unresolved: [UNR-LR-001]
 
@@ -151,6 +178,10 @@ invariants:
       achieved retention property.
     basis_type: VERIFICATION_MINIMUM
     support_type: derived
+    enables_claim: >
+      Any quantitative retention or release claim may be reported PASS. Without
+      this minimum, a force window supplied to a run and read back from it would
+      be reported as the retention the product achieves.
     source_locators: ["DOS-latch-retention S3", "DOS-latch-retention S5"]
     derivation_premises:
       - "DOS S5 records that the force windows in the task definitions are input parameters, not measured properties."
@@ -160,39 +191,52 @@ invariants:
     exclusions:
       - "Does not forbid declaring a force window as a requirement or as a test condition. It forbids reporting it as an outcome."
     verification_predicate: "for every cited retention or release force: its provenance is recorded as either an input condition or a measurement, and only measurements are counted as results."
-    requires_tags: [force_window_not_cited_as_result]
+    requires_evidence_tags: [force_window_not_cited_as_result]
+    moved_at: SF-1.1
     related_freedoms: []
     related_unresolved: []
 
 required_unresolved:
   - id: UNR-LR-001
     decision: The disturbance case the retention holds against.
+    kind: interpretive
     why_must_remain_open: >
       DOS S4: no capability-level disturbance exists. It is a property of each
       instantiating case, and NRM-LR-007 requires it to be named there rather
       than assumed here.
     resolvable_when: "An instantiating case declares a disturbance."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS, blocks_evidence_interpretation]
+    does_not_block:
+      - "NRM-LR-002 and NRM-LR-005 — the existence of a retention interaction and of engagement and release paths is structural."
     source_locators: ["DOS-latch-retention S4"]
   - id: UNR-LR-002
     decision: Retention load and margin.
+    kind: quantitative
     why_must_remain_open: >
       DOS S4/S5: no capability-level retention load exists, and the force windows
       in the fixtures are inputs, not measured properties.
     resolvable_when: "An instantiating case supplies a load case and a margin."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-LR-003 — the existence of a reaction path is structural."
     source_locators: ["DOS-latch-retention S4", "DOS-latch-retention S5"]
   - id: UNR-LR-003
     decision: Release effort ceiling and whether release must be tool-free.
+    kind: quantitative
     why_must_remain_open: >
       DOS S4: no capability-level release effort exists. "Removable by hand" is a
       property of the snap-panel fixture, not of the capability.
     resolvable_when: "An instantiating case states a release effort ceiling or a tool policy."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-LR-004 — that the release action differs from the disturbance in some property the retention responds to is structural."
     source_locators: ["DOS-latch-retention S2", "DOS-latch-retention S4"]
   - id: UNR-LR-004
     decision: Cycle count, degradation limit, creep and temperature conditions.
+    kind: quantitative
     why_must_remain_open: "DOS S4: none exists at capability level."
     resolvable_when: "An instantiating case supplies a duty and an environment."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-LR-006 — one realizable engage/release cycle with no feature consumed is structural."
     source_locators: ["DOS-latch-retention S4"]

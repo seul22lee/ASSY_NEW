@@ -53,3 +53,23 @@ requirement trace is complete.
 3. Asserting the Ver2 realization's inside-the-wall beam-and-nose catch as
    required — it is one solution to REQ-010, cited only as context.
 4. Any comparison against `V2/out/BM-001-2/run-*`.
+
+## Corrected at the independent semantic review
+
+**SF-3.1** — `NRM-BM-001-2-001` asserted that the exposed boundary is *opposite*
+the seating region. REQ-009 says "flush against a mounting panel on one side" and
+"no projecting corners on the exposed side"; it never relates the two sides
+geometrically. `ADM-BM-001-2-D`, an L-shaped body seated on one narrow face whose
+exposed boundary wraps three adjoining faces, is in the set to keep the addition
+out.
+
+**AMB-001-2-01 is preserved.** The three readings of "worked from inside the
+enclosure" remain unresolved and the exact wording is unchanged. This pack carries
+the only `blocks_structural_predicate` scope in the whole set, with a
+justification: the predicate's *domain* is undefined, not merely a threshold
+missing. Until "inside the enclosure" is fixed there is no set of poses the
+predicate ranges over, so it cannot separate compliant from non-compliant designs
+at any fidelity.
+
+That is why BM-001-2 alone remains **BLOCKED_BY_SOURCE_AMBIGUITY** and is not
+lock-ready.

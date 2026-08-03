@@ -69,3 +69,20 @@ No retention load, no release effort ceiling, no cycle count, no tool policy, an
 no disturbance case. All four are held open. The retained state is not required
 to be a closed state either — retention of an open or an intermediate position is
 squarely within the capability, and `FRE-LR-001` says so.
+
+## Corrected at the independent semantic review
+
+- **SF-9.1** — `NRM-LR-002` was carried as a direct fragment of the capability
+  statement. It is not: "geometry on both bodies" appears nowhere in that
+  statement and is a *consequence* of the interaction being realized. It is now a
+  `NECESSARY_PHYSICAL_CONSEQUENCE`, and its wording asks for identified
+  participating **material** rather than touching surfaces, so `ADM-LR-B`'s
+  magnetic pair is admissible on its own terms.
+- **SF-9.2** — the disturbance-naming and force-provenance minima moved into
+  `evidence_cases.yaml`. A physically realized latch is no longer inadmissible
+  because no test has named its disturbance.
+- **SF-9.3** — the fixed-plurality rule is withdrawn.
+- **SF-1.3** — capability fragments carry `PROJECT_DEFINED_CAPABILITY`.
+
+`NRM-LR-004` — the release action must be distinguishable from the disturbance —
+is unchanged. It remains the statement this pack exists for.

@@ -1,131 +1,179 @@
 capability_id: guided-slider
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 tier: micro_oracle
 inherits: null
 dossier: ver3/oracles/_dossiers/DOS-guided-slider.md
 lock_status: SEMANTICALLY_AUDITED
+physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+historical_aliases: []
 
 capability_statement: >
-  Guided translation of one body relative to another along a defined line, with
-  the non-translational freedoms removed.
+  Guided translation of one body relative to another along a declared line or
+  path, with the freedoms constrained that the instantiating motion requirement
+  depends on.
+
+capability_statement_history:
+  - version: "0.2"
+    text: "Guided translation of one body relative to another along a defined line, with the non-translational freedoms removed."
+    retired_at: SF-7.1
+    why: >
+      "with the non-translational freedoms removed" defines a strict one-degree-of-freedom
+      prismatic joint. That is narrower than the ordinary sense of "guided
+      slider" and narrower than any project source requires. It would reject a
+      guided body whose residual axial rotation is immaterial to the
+      instantiating requirement, and it would silently force a prismatic joint
+      into every design that needs guidance. Replaced with the
+      solution-space-preserving formulation above.
+  - version: "0.3"
+    text: "the current capability_statement"
+    note: >
+      If a future project source genuinely requires strict single-degree-of-freedom
+      guidance, that is a DIFFERENT capability and belongs in a separate pack
+      named single-dof-linear-guidance. It is not this one.
 
 basis_semantics: >
-  A micro-oracle has no user. Its rank-1 source is the declared capability
-  statement in DOS S1, which plays the role a user requirement plays in a product
-  case. basis_type DIRECT_USER_REQUIREMENT is used for statements that are
-  fragments of that capability statement; NECESSARY_PHYSICAL_CONSEQUENCE for
-  statements derived from it; VERIFICATION_MINIMUM for statements about what
-  evidence must be able to show. No statement here derives from a product case.
+  A micro-oracle has no user. Its capability statement was PROJECT-AUTHORED and
+  then frozen into dossier S1; it is not user language and it is not rank 1.
+  Statements that restate a fragment of it therefore carry basis_type
+  PROJECT_DEFINED_CAPABILITY, whose authority is explicitly human-reviewable and
+  which must never be presented as a user requirement. Corrected at SF-1.3.
 
 scope_exclusions:
-  - "Bounding of travel is NOT part of this capability. The capability statement says 'along a defined line', not 'between two limits'. Bounded motion is the subject of the bounded-two-state-closure micro-oracle. Requiring travel limits here would import a neighbouring capability."
-  - "Retention at any position is NOT part of this capability; see the latch-retention micro-oracle."
-  - "Actuation is NOT part of this capability. Nothing here states how the translation is driven."
+  - "Bounding of travel is NOT part of this capability; that is bounded-two-state-closure."
+  - "Retention at any position is NOT part of this capability; that is latch-retention."
+  - "Actuation is NOT part of this capability."
 
 invariants:
   - id: NRM-GS-001
     statement: >
-      A translating body, a guiding body, and a line of travel whose direction
-      is determinate relative to both bodies all exist.
-    basis_type: DIRECT_USER_REQUIREMENT
+      A translating body, a guiding body, and a line or path of travel whose
+      direction is determinate relative to both bodies all exist.
+    basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
     source_locators: ["DOS-guided-slider S1"]
-    conclusion_scope: "Existence of the two participants and of a geometrically expressed travel line."
+    conclusion_scope: "Existence of the two participants and of a determinate travel direction."
     exclusions:
       - "Does not fix which body is fixed in the world frame; either may be."
-      - "Does not fix the direction of the line. A label such as 'horizontal' may accompany the relation but may never be its authority."
-    verification_predicate: "exists(translating body), exists(guiding body), and the travel line is given as a direction in a frame, not only as a name."
-    requires_tags: [translating_body, guiding_body, travel_line_geometric]
+      - "Does not fix the direction. A label may accompany the relation but may never be its authority."
+      - "Does not require the path to be straight."
+    verification_predicate: "exists(translating body), exists(guiding body), and the travel direction is determinate relative to both, not established by a name alone."
+    requires_tags: [translating_body, guiding_body, travel_direction_determinate]
     related_freedoms: [FRE-GS-001, FRE-GS-002]
     related_unresolved: []
 
   - id: NRM-GS-002
     statement: >
-      Every freedom of the translating body relative to the guiding body other
-      than translation along the travel line is removed by a realized constraint.
-    basis_type: DIRECT_USER_REQUIREMENT
+      Every freedom of the translating body relative to the guiding body whose
+      constraint the instantiating motion requirement depends on is removed by a
+      realized constraint, and the freedoms left unconstrained are declared.
+    basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
     source_locators: ["DOS-guided-slider S1"]
-    conclusion_scope: "Removal of the five non-translational freedoms."
+    conclusion_scope: >
+      Removal of the freedoms the instantiating requirement depends on, and
+      explicit declaration of those left free. NOT a fixed degree-of-freedom count.
     exclusions:
-      - "Does not say how many constraints do this, nor how many parts carry them. One profiled guide, two parallel guides and a dovetailed channel are equally admissible."
-      - "DOS S7: the legacy fixtures removed rotation by using two rails. That is a mechanism, not the requirement."
-    verification_predicate: "for each of the five non-translational freedoms: exists(realized constraint removing it), naming the interaction that does so."
-    requires_tags: [nontranslational_freedoms_removed]
-    related_freedoms: [FRE-GS-003, FRE-GS-004]
-    related_unresolved: []
+      - >
+        Does NOT require a one-degree-of-freedom prismatic joint. A residual
+        freedom - typically rotation about the travel axis - may remain where the
+        instantiating requirement and the selected realization permit it.
+        Corrected at SF-7.1.
+      - "Does not say how many constraints do this, nor how many parts carry them."
+      - "DOS-guided-slider S7: the legacy fixtures removed rotation by using two rails. That is a mechanism, not the requirement."
+    verification_predicate: >
+      the six relative freedoms are accounted for explicitly; for each freedom the
+      instantiating requirement depends on, a realized constraint removing it is
+      named; each remaining freedom is declared as intentionally unconstrained.
+    requires_tags: [required_freedoms_constrained, residual_freedoms_declared]
+    related_freedoms: [FRE-GS-003, FRE-GS-004, FRE-GS-008]
+    related_unresolved: [UNR-GS-004]
+    closes_finding: [SF-7.1]
 
   - id: NRM-GS-003
     statement: >
-      Each removed freedom is attributable to a named engagement between the two
-      bodies, with geometry on both.
+      Each removed freedom is attributable to a named interaction between the two
+      bodies, with participating material identified on both.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-guided-slider S1"]
     derivation_premises:
       - "A constraint between two bodies acts through material of both."
-      - "A constraint asserted between whole bodies with no participating geometry names no place where the constraint acts."
+      - "A constraint asserted between whole bodies with no participating material names no place where the constraint acts."
       - "An artifact cannot be built from a constraint that has no location."
-    conclusion_scope: "Attribution and locality of each constraint."
+    conclusion_scope: "Attribution and locality of each constraint that is claimed."
     exclusions:
-      - "Does not forbid modelling a guide as a declared kinematic pair. It requires that the design record which engagement the pair stands for. Model fidelity and design content are different questions; see NRM-GS-007."
-    verification_predicate: "each constraint references engagement geometry on the translating body and on the guiding body."
-    requires_tags: [constraints_attributable_to_engagement]
+      - "Does not forbid modelling a guide as a declared kinematic pair; it requires the design to record which interaction the pair stands for."
+      - "Does not require contact; a field interaction with identified participating regions satisfies it."
+    verification_predicate: "each claimed constraint references participating material on the translating body and on the guiding body."
+    requires_tags: [constraints_attributable_to_interaction]
     related_freedoms: []
     related_unresolved: []
 
   - id: NRM-GS-004
     statement: >
-      The engagement remains engaged at every point of the travel range.
+      The guiding interaction remains engaged at every point of the declared
+      travel range.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-guided-slider S1"]
     derivation_premises:
-      - "The capability is guidance along the line, not at one position on it."
-      - "A body whose guiding engagement has ended is unguided from that point on."
+      - "The capability is guidance along the path, not at one position on it."
+      - "A body whose guiding interaction has ended is unguided from that point on."
     conclusion_scope: "Persistence of engagement across the whole declared travel range."
-    exclusions:
-      - "Does not fix an engagement length, an overlap fraction, or a travel range. None is stated at capability level (DOS S4)."
-    verification_predicate: "for the extremes and the interior of the declared travel range: the engagement geometry of both bodies overlaps."
+    exclusions: ["Does not fix an engagement length, an overlap fraction, or a travel range."]
+    verification_predicate: "for the ends and the interior of the declared travel range: the participating material of the guiding interaction remains in engagement."
     requires_tags: [engagement_persists_across_travel]
     related_freedoms: [FRE-GS-005]
     related_unresolved: [UNR-GS-001]
 
   - id: NRM-GS-005
     statement: >
-      Load transverse to the travel line has a realized reaction path through the
-      guiding engagement at every point of the travel range.
+      Load transverse to the travel direction that the guiding interaction
+      carries has a realized reaction path at every point of the travel range.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
+    applies_when: "the guiding interaction carries transverse load in the declared scenario"
     source_locators: ["DOS-guided-slider S1"]
     derivation_premises:
-      - "Removing the non-translational freedoms means resisting the loads that would otherwise produce those motions."
+      - "Constraining a freedom means resisting the load that would otherwise produce that motion."
       - "A constraint that carries no load does not remove a freedom."
       - "The reaction must exist wherever the body can be, not only where it starts."
-    conclusion_scope: "Existence of a transverse reaction path across the travel range."
+    conclusion_scope: "Existence of a transverse reaction path where transverse load occurs. Existence, not adequacy."
     exclusions:
-      - "Does not state a load, a margin or a stiffness. None exists at capability level (DOS S4); see UNR-GS-002."
-    verification_predicate: "for the extremes and the interior of the travel range: exists(load_path) from the translating body through the engagement to a reaction site."
+      - >
+        Does NOT constrain FRE-GS-002, the direction of the travel line. This statement references that direction in order to name the transverse component; it fixes no direction.
+      - "Does not state a load, a margin or a stiffness; none exists at capability level. See UNR-GS-002."
+      - "Does not quantify over interactions that carry no transverse load in the declared scenario."
+    verification_predicate: "for the ends and the interior of the travel range: exists(load_path) from the translating body through the guiding interaction to a reaction site, for each transverse component actually carried."
     requires_tags: [transverse_load_reacted_across_travel]
-    related_freedoms: []
+    related_freedoms: [FRE-GS-002]
     related_unresolved: [UNR-GS-002]
 
   - id: NRM-GS-006
     statement: >
-      The translating body occupies a proper subset of its travel corridor, and
-      the corridor is clear of guiding-body material along the travel.
+      At every configuration of the declared travel the translating body does not
+      intersect guiding-body material outside the intended interaction, and the
+      declared travel path is traversable.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-guided-slider S1"]
     derivation_premises:
-      - "A body filling its corridor has nowhere to translate."
-      - "A body cannot pass through material occupying its path."
-    conclusion_scope: "Corridor occupancy and clearance."
-    exclusions: ["Does not fix a clearance value. The legacy clearance of 0.35 is a realization detail (DOS S6)."]
-    verification_predicate: "swept_volume(translating body) is a proper subset of the corridor and does not intersect guiding-body material outside the engagement."
-    requires_tags: [corridor_not_fully_occupied]
+      - "Material cannot pass through material."
+      - "A path blocked at any interior point is not traversable, whatever its endpoints do."
+    conclusion_scope: "Non-intersection along the travel and traversability of the declared path."
+    exclusions:
+      - >
+        Does NOT require the translating body to occupy a proper subset of a
+        travel corridor. The corridor is in general defined by the swept volume,
+        so proper-subset containment is either vacuous or contradictory. Replaced
+        with executable non-intersection and traversability predicates at SF-7.2.
+      - "Does not fix a clearance value; the legacy clearance of 0.35 is a realization detail."
+    verification_predicate: "for every configuration of the declared travel: intersect(translating_body, guiding_body_material) is empty outside the intended interaction; and the declared path is traversable."
+    requires_tags: [travel_clearances_satisfied, declared_path_traversable]
     related_freedoms: []
     related_unresolved: []
+    closes_finding: [SF-7.2]
 
   - id: NRM-GS-007
     statement: >
@@ -133,41 +181,69 @@ invariants:
       non-conforming value under the model that produces it.
     basis_type: VERIFICATION_MINIMUM
     support_type: derived
+    enables_claim: >
+      NRM-GS-002 and NRM-GS-003 may be reported PASS. Without this minimum, an
+      off-axis deviation of 0.0 degrees produced by a declared prismatic pair - a
+      value the model cannot vary - would be counted as showing that the freedoms
+      are constrained by a realized interaction.
     source_locators: ["DOS-guided-slider S5"]
     derivation_premises:
-      - "DOS S5 records tracks_straight measured as 0.0 degrees exactly under a declared prismatic pair."
+      - "DOS-guided-slider S5 records tracks_straight measured as 0.0 degrees exactly under a declared prismatic pair."
       - "Under that model off-axis deviation is identically zero by construction of the coupling."
       - "An observable that cannot take any other value distinguishes nothing, so it cannot be evidence."
     conclusion_scope: "Admissibility of an observable as evidence of guidance. Says nothing about the design."
     exclusions:
-      - "Does not forbid declared-pair models, and does not require contact modelling. It requires that a value exact by construction be marked as a structural artifact rather than counted."
+      - "Does not forbid declared-pair models and does not require contact modelling; it requires a value exact by construction to be marked as a structural artifact rather than counted."
     verification_predicate: "for each observable mapped to a guidance criterion: the model that produced it admits at least one configuration in which the observable violates its threshold."
-    requires_tags: [guidance_observable_can_fail]
+    requires_evidence_tags: [guidance_observable_can_fail]
     related_freedoms: []
     related_unresolved: []
+    moved_at: SF-1.1
+    move_note: "The tag this invariant requires now lives in evidence_cases.yaml. It previously sat in the physical realization tag set, where a physical design became inadmissible for want of a test."
 
 required_unresolved:
   - id: UNR-GS-001
     decision: Travel range, stroke and engagement length.
+    kind: quantitative
     why_must_remain_open: >
-      DOS S4: no capability-level stroke exists. The 50.0 mm minimum in
-      latched_drawer.json and the 120 mm stroke in the m13 realization belong to
-      those fixtures.
+      DOS-guided-slider S4: no capability-level stroke exists. The 50.0 mm minimum
+      in latched_drawer.json and the 120 mm stroke in the m13 realization belong
+      to those fixtures.
     resolvable_when: "An instantiating case supplies a travel range."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-GS-004 — engagement persistence over whatever range the design declares is structural."
     source_locators: ["DOS-guided-slider S3", "DOS-guided-slider S4"]
   - id: UNR-GS-002
     decision: Transverse load, friction, alignment tolerance, duty and life.
-    why_must_remain_open: "DOS S4: none is defined by any capability-level source."
+    kind: quantitative
+    why_must_remain_open: "DOS-guided-slider S4: none is defined by any capability-level source."
     resolvable_when: "An instantiating case supplies a load case and a tolerance."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-GS-005 — the existence of a reaction path is structural."
     source_locators: ["DOS-guided-slider S4"]
   - id: UNR-GS-003
     decision: Whether the travel is bounded, and by what.
+    kind: qualitative
     why_must_remain_open: >
-      Outside this capability's scope. The capability statement defines guidance
-      along a line, not between limits. Deciding it here would silently merge
-      this micro-oracle with bounded-two-state-closure.
+      Outside this capability's scope. The capability defines guidance along a
+      path, not between limits. Deciding it here would merge this micro-oracle
+      with bounded-two-state-closure.
     resolvable_when: "An instantiating case states a travel limit requirement."
-    blocks: []
+    block_scopes: []
     source_locators: ["DOS-guided-slider S1"]
+  - id: UNR-GS-004
+    decision: Which freedoms a given instantiating requirement depends on.
+    kind: interpretive
+    why_must_remain_open: >
+      This is a property of the instantiating case, not of the capability. A
+      product that must present a square platform depends on rotational restraint;
+      one whose slider is rotationally symmetric does not. Fixing it here would
+      reimpose the strict prismatic reading retired at SF-7.1.
+    resolvable_when: "An instantiating case declares the motion behaviour it requires."
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-GS-002 — the design declares which freedoms it constrains and which it leaves free; only whether that split SUITS a given product is deferred."
+    source_locators: ["DOS-guided-slider S1", "DOS-guided-slider S4"]
+    closes_finding: [SF-7.1]

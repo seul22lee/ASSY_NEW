@@ -24,7 +24,7 @@ that way.
 | NRM-RL-004 | NECESSARY_PHYSICAL_CONSEQUENCE | S1 → derived (an offset engagement force applies a moment) |
 | NRM-RL-005 | NECESSARY_PHYSICAL_CONSEQUENCE | S1 → derived |
 | NRM-RL-006 | NECESSARY_PHYSICAL_CONSEQUENCE | S1, "with the reaction of the resulting loads" → derived |
-| NRM-RL-007 | VERIFICATION_MINIMUM | S5 (V-B named-deferred; ratio exact by construction) |
+| NRM-RL-006 | VERIFICATION_MINIMUM | S5 (V-B named-deferred; ratio exact by construction) |
 
 ## Boundaries with neighbouring capabilities
 
@@ -52,3 +52,20 @@ conversion without it, and answered INFEASIBLE — with a second conversion sitt
 in the same repository. `FRE-RL-001` makes the family free, `NEG-RL-008` makes
 that answer a defect, and `stage_expectations.s02.plurality_note` and
 `s12.capability_gap_rule` place the obligation on specific stages.
+
+---
+
+## Corrections at the independent semantic review
+
+The findings below were raised by human review of the first clean audit and are
+recorded finding-by-finding in `../../INDEPENDENT_SEMANTIC_REVIEW_REPORT.md`.
+Statement text, basis types and unresolved scopes in this map reflect the
+corrected pack, not the reviewed one.
+
+| Finding | What changed |
+|---|---|
+| SF-1.3 | `PROJECT_DEFINED_CAPABILITY` replaces `DIRECT_USER_REQUIREMENT`. |
+| SF-8.1 | **The capability statement was rewritten** to an uninterrupted chain of realized localized interactions. "through a localized engagement" was read as requiring DIRECT engagement between the rotating input body and the translating output body, which rejects every multi-stage conversion. `ADM-RL-E` (crank-link-slider) and `ADM-RL-F` (cam-follower-pushrod) falsify the retired reading. |
+| SF-8.2 | `NRM-RL-002` concerns the actual kinematic relation — rotation causes translation over the declared range, possibly nonlinearly. The requirement that the relation be DECLARED and the driving body RECORDED moved to `stage_expectations.s04.representation_obligations`, where DesignState obligations belong. |
+| SF-8.3 | The fixed-plurality rule is withdrawn. One candidate may legitimately remain after reasoned elimination; what must hold is open search, reasoned rejection, and UNSUPPORTED for an absent realizer. |
+| SF-1.1 | `NRM-RL-006` uses `requires_evidence_tags`; fixtures in `evidence_cases.yaml`. |

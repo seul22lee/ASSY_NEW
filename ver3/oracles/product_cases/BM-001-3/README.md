@@ -53,3 +53,19 @@ convention.
 3. Fixing the curvature axis orientation.
 4. Requiring the closure to be hinged at a particular edge of the flat top.
 5. Any comparison against `V2/out/BM-001-3/run-*`.
+
+## Corrected at the independent semantic review
+
+- **SF-4.1** the missing stability criterion no longer blocks derivation of the
+  resting configuration. Contact between a curved underside and a plane is
+  computable from geometry; what the missing criterion blocks is a stability PASS
+  and a tipping-margin claim.
+- **SF-4.2** `ADM-BM-001-3-B` claimed three contact patches from a single
+  spherical cap, which yields one ideal point contact. It was held together by its
+  tags. Revised to three raised lobes with coplanar apexes.
+- **SF-4.3** `ADM-BM-001-3-C` rested on a flat land, so its load-bearing contact
+  was not on the curved back. The land became a non-load-bearing relieved recess.
+  The design the old fixture described is now the inadmissible `INA-BM-001-3-D`.
+
+A source reading is recorded explicitly as `RDG-BM-001-3-01` so a reviewer can
+reject it in one place.

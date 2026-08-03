@@ -1,0 +1,44 @@
+case_id: BM-001
+schema_version: "0.3.0"
+domain: evidence_and_verification
+note: >
+  Evidence and verification-process admissibility. These cases test the
+  VERIFICATION_MINIMUM invariants only. They are NOT physical designs and must
+  never make a physical realization inadmissible (finding SF-1.1).
+
+evidence_tag_vocabulary:
+  determinant_criterion_discriminates: "every criterion mapped to the open-state determinant is shown able to fail when the determinant is removed"
+  force_provenance_declared: "every cited retention or release force is marked as an input condition or as a measurement, and only measurements are counted as results"
+
+admissible_evidence_cases:
+  - id: ADM-EV-BM-001-A
+    summary: >
+      A contact-resolved test in which removing the open-state determinant makes
+      the criterion fail, reported alongside a retention force obtained by
+      measurement and marked as such.
+    tags: [determinant_criterion_discriminates, force_provenance_declared]
+  - id: ADM-EV-BM-001-B
+    summary: >
+      A seed-sweep protocol declared in advance as the discriminator, with its
+      aggregation rule stated, plus a retention force declared as a test INPUT
+      condition and reported as a condition rather than as a result.
+    note: >
+      Admitted although it reports no measured retention force. Declining to
+      report a value is not a defect; reporting an input as an outcome is.
+    tags: [determinant_criterion_discriminates, force_provenance_declared]
+
+inadmissible_evidence_cases:
+  - id: INA-EV-BM-001-A
+    summary: >
+      The open-state determinant is reported verified from criteria that all pass
+      on the undetermined control as well.
+    from_negative_case: NEG-BM-001-011
+    missing_tags: [determinant_criterion_discriminates]
+    tags: [force_provenance_declared]
+  - id: INA-EV-BM-001-B
+    summary: >
+      The task-definition force window is reported as the retention the product
+      achieves.
+    from_negative_case: NEG-BM-001-012
+    missing_tags: [force_provenance_declared]
+    tags: [determinant_criterion_discriminates]

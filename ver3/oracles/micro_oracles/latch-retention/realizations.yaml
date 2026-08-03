@@ -1,69 +1,83 @@
 capability_id: latch-retention
-schema_version: "0.2.0"
+schema_version: "0.3.0"
+domain: physical_design
 note: >
-  Four materially different retention principles, each satisfying every
-  invariant. Only ADM-A is a snap. The other three exist because the legacy
-  corpus contained nothing but snaps, and a pack derived from that corpus would
-  reject them.
+  PHYSICAL design fixtures only (SF-1.1, SF-9.2). The three evidence-only tags -
+  retention_claim_names_its_disturbance, force_window_not_cited_as_result and
+  evidence provenance - have been moved to evidence_cases.yaml. A physical latch
+  is no longer inadmissible because no test has been authored for it.
+  Only ADM-LR-A is a snap; the corpus contained nothing else.
+
+physical_tag_vocabulary:
+  retained_state_defined: "the retained state is given as a relative configuration of the two bodies"
+  retention_interaction_realized: "a realized interaction opposes departure, with participating material identified on both bodies"
+  disturbance_opposed_with_reaction_path: "the disturbance load has a reaction path through the retention"
+  release_action_distinct_from_disturbance: "the release action differs from the declared disturbance in a property the retention responds to"
+  deliberate_release_path_exists: "a deliberate release action is available"
+  engagement_path_exists: "paths into and out of the retained state are traversable"
+  repeatable_no_feature_consumed: "an engage/release cycle consumes no participating feature"
 
 admissible_realizations:
   - id: ADM-LR-A
-    summary: "Cantilever snap hook on one body engaging a lip on the other. Engaged by insertion with a declared beam deflection; released by pressing the beam clear, which the disturbance direction does not do. Disturbance load reacted through the hook face into the body."
+    summary: "Cantilever snap hook on one body engaging a lip on the other. Engaged by insertion with a declared beam deflection; released by pressing the beam clear, which the disturbance direction does not do."
+    principle: contact_snap
+    release_discriminant: direction
     materially_differs_by: [retention_principle, release_discriminant]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', 'retention_claim_names_its_disturbance', 'force_window_not_cited_as_result']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
   - id: ADM-LR-B
-    summary: "Magnetic pair, one element on each body, with a keeper face locating the retained state. Released by a peeling motion applied at an offset, which the straight-pull disturbance does not produce. Disturbance load reacted through the keeper faces."
+    summary: >
+      Magnetic pair, one element on each body, with a keeper face locating the
+      retained state. Participating material is explicit on both bodies: the pole
+      face on one, the keeper area on the other. Released by a peeling motion
+      applied at an offset, which the straight-pull disturbance does not produce.
+    principle: field_interaction
+    release_discriminant: point_of_application
     materially_differs_by: [retention_principle, interaction_type, release_discriminant]
-    note: "Not a contact-engaged retention. Admitted because NRM-LR-002 requires a realized interaction with geometry on both bodies, not a contact one."
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', 'retention_claim_names_its_disturbance', 'force_window_not_cited_as_result']
+    note: >
+      Not a contact-engaged retention. Admissible under the SF-9.1 wording, which
+      requires identified participating MATERIAL rather than touching surfaces.
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
   - id: ADM-LR-C
-    summary: "Over-centre link holding the two bodies together past its dead point. The disturbance loads the link along the direction that drives it further over centre; release requires lifting the handle, a distinct action. Load reacted through the link pins."
+    summary: "Over-centre link holding the two bodies past its dead point. The disturbance loads the link along the direction that drives it further over centre; release requires lifting the handle."
+    principle: over_centre
+    release_discriminant: sequence
     materially_differs_by: [retention_principle, release_discriminant, load_path]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', 'retention_claim_names_its_disturbance', 'force_window_not_cited_as_result']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
   - id: ADM-LR-D
-    summary: "Spring-loaded detent ball on one body seating in a recess on the other. Engagement and release are the same path; the discriminant is force magnitude, with the release threshold above the declared disturbance. Load reacted through the ball seat."
+    summary: "Spring-loaded detent ball seating in a recess. Engagement and release share a path; the discriminant is force magnitude, with the release threshold above the declared disturbance."
+    principle: detent
+    release_discriminant: magnitude
     materially_differs_by: [retention_principle, path_symmetry, release_discriminant]
-    note: "Release path reverses the engagement path. Admitted because FRE-LR-004 leaves the two unrelated, and the discriminant is magnitude rather than direction."
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', 'retention_claim_names_its_disturbance', 'force_window_not_cited_as_result']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
 
 inadmissible_realizations:
   - id: INA-LR-A
     summary: "Two bodies asserted to be retained, with no relative configuration given for the retained state."
     from_negative_case: NEG-LR-001
     missing_tags: [retained_state_defined]
-    tags: ['retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', 'retention_claim_names_its_disturbance', 'force_window_not_cited_as_result']
+    tags: ['retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
   - id: INA-LR-B
-    summary: "Retention asserted between whole bodies with no participating geometry on either."
+    summary: "Retention asserted between whole bodies with no participating material identified on either - neither contact regions nor field regions."
     from_negative_case: NEG-LR-002
     missing_tags: [retention_interaction_realized]
-    tags: ['retained_state_defined', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', 'retention_claim_names_its_disturbance', 'force_window_not_cited_as_result']
+    tags: ['retained_state_defined', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
   - id: INA-LR-C
     summary: "Retention feature present but the disturbance load passes through it to nothing; the feature is unsupported."
     from_negative_case: NEG-LR-003
     missing_tags: [disturbance_opposed_with_reaction_path]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', 'retention_claim_names_its_disturbance', 'force_window_not_cited_as_result']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
   - id: INA-LR-D
     summary: "Retention released by a straight pull, and the declared disturbance is a straight pull of the same magnitude and direction."
     from_negative_case: NEG-LR-004
     missing_tags: [release_action_distinct_from_disturbance, deliberate_release_path_exists]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'engagement_path_exists', 'repeatable_no_feature_consumed', 'retention_claim_names_its_disturbance', 'force_window_not_cited_as_result']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'engagement_path_exists', 'repeatable_no_feature_consumed']
   - id: INA-LR-E
-    summary: "Retention geometry that interferes on the way in with no clearance and no declared deflection; the retained state cannot be reached."
+    summary: "Retention geometry interferes on the way in with no clearance and no declared deflection; the retained state cannot be reached."
     from_negative_case: NEG-LR-005
     missing_tags: [engagement_path_exists]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'repeatable_no_feature_consumed', 'retention_claim_names_its_disturbance', 'force_window_not_cited_as_result']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'repeatable_no_feature_consumed']
   - id: INA-LR-F
     summary: "Retention that must be broken to release, so a participating feature is destroyed and the retained state is unreachable afterwards."
     from_negative_case: NEG-LR-006
     missing_tags: [repeatable_no_feature_consumed]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'retention_claim_names_its_disturbance', 'force_window_not_cited_as_result']
-  - id: INA-LR-G
-    summary: "Retention reported as holding, with no disturbance case named."
-    from_negative_case: NEG-LR-007
-    missing_tags: [retention_claim_names_its_disturbance]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', 'force_window_not_cited_as_result']
-  - id: INA-LR-H
-    summary: "Retention reported as achieving a 15-60 N window, where that window was an input parameter of the task definition."
-    from_negative_case: NEG-LR-008
-    missing_tags: [force_window_not_cited_as_result]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', 'retention_claim_names_its_disturbance']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists']

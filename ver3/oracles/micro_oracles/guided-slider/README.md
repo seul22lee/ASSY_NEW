@@ -5,8 +5,9 @@
 
 ## Capability
 
-> Guided translation of one body relative to another along a defined line, with
-> the non-translational freedoms removed.
+> Guided translation of one body relative to another along a declared line or
+> path, with the freedoms constrained that the instantiating motion requirement
+> depends on.
 
 That is the whole of it. This pack constrains a reusable capability, not a
 product and not a mechanism.
@@ -55,3 +56,23 @@ explicitly — one retained, five removed, each with the constraint that removes
 it named. `ADM-GS-D` (a body located by three pads in a recess, with no guide
 part at all) and `ADM-GS-B` (one non-circular bar) both satisfy this, which is
 how the pack demonstrates it did not encode the legacy two-rail arrangement.
+
+## Corrected at the independent semantic review
+
+The capability statement above is the SF-7.1 rewrite. The reviewed version ended
+"with the non-translational freedoms removed", which defines a strict prismatic
+joint — narrower than the ordinary sense of "guided slider" and narrower than any
+project source. It rejected `ADM-GS-E`: a cylindrical rod in a plain round bore,
+free to rotate about its own axis, which is about as ordinary a guided slider as
+exists.
+
+The corrected statement requires the freedoms the instantiating requirement
+depends on to be constrained, and the rest to be **declared** rather than left
+unaccounted for. If a future project source genuinely needs strict
+single-degree-of-freedom guidance, that is a different capability and belongs in
+a pack called `single-dof-linear-guidance`.
+
+The proper-subset corridor formulation was also withdrawn (SF-7.2), and the
+structural-artifact finding moved from the physical fixture tags into
+`evidence_cases.yaml` (SF-1.1) so that a physical guide is never inadmissible for
+want of a test.

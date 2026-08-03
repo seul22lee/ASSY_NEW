@@ -32,13 +32,13 @@ negative_cases:
     violates: [NRM-BM-001-002]
     sources: ["DOS-BM-001 S7 RL-0012"]
   - id: NEG-BM-001-003
-    failure_class: closure_does_not_clear_aperture
+    failure_class: closure_obstructs_its_own_declared_access
     fixture: INA-BM-001-C
-    description: "At the open pose the closure still lies within the aperture prism, partly covering the opening."
-    why_wrong: "The open state does not open; cavity access is obstructed by the closure."
+    description: "At the open pose the closure lies across the region the design itself declares as its usable access, so nothing can be put in or taken out."
+    why_wrong: "The open state does not open. Note the defect is obstruction of the DECLARED access region, not mere presence within the aperture projection: a closure that overhangs part of the aperture while leaving the declared access clear is admissible (ADM-BM-001-D)."
     concealment: "Endpoint-only checking: both end poses clear the walls, so an endpoint bounding test passes."
     detect_stage: s04
-    detect_predicate: "intersect(closure@OPEN, aperture_prism) must be empty."
+    detect_predicate: "intersect(closure@OPEN, declared_usable_access_region) must be empty."
     must_not_be_reported_as: [PASS]
     expected_status: FAIL
     violates: [NRM-BM-001-003, NRM-BM-001-009]
@@ -124,6 +124,7 @@ negative_cases:
     violates_invariant: [INV-012]
     sources: ["DOS-BM-001 S7 ERROR_TAXONOMY.md"]
   - id: NEG-BM-001-011
+    fixture: INA-EV-BM-001-A
     failure_class: renderer_originated_commitment
     description: "The closure axis does not exist in the spatial model; the renderer places it to draw the open state and it is read back into embodiment."
     why_wrong: "An axis a renderer invents has no derivation from any constraint and is unfalsifiable."
@@ -135,6 +136,7 @@ negative_cases:
     violates_invariant: [INV-005]
     sources: ["DOS-BM-001 S7 RL-0012", "RL-0005"]
   - id: NEG-BM-001-012
+    fixture: INA-EV-BM-001-B
     failure_class: unsupported_reported_as_infeasible
     description: "No retention realization is available to the system and the case is reported as physically infeasible."
     why_wrong: "A reusable retention is trivially realizable; the system lacks a capability, physics does not forbid the product."
@@ -145,3 +147,58 @@ negative_cases:
     expected_status: UNSUPPORTED
     violates_invariant: [INV-011]
     sources: ["DOS-BM-001 S7 KG_NO_PERMITTED_REALIZER"]
+  - id: NEG-BM-001-013
+    failure_class: retention_consumed_by_its_own_release
+    fixture: INA-BM-001-G
+    description: "Retention is released by breaking a moulded tab. After release the tab is gone and the closed state cannot be re-engaged."
+    why_wrong: >
+      REQ-008 requires a reusable latch. The design satisfies every wording of
+      the prior repeatability invariant — nothing is marked single-use and the
+      transition is declared repeatable — while being physically single-use.
+    concealment: "A `reusable: true` declaration and the absence of a single-use marking."
+    detect_stage: s05
+    detect_predicate: "a close-engage / release / close-engage-again sequence must be realizable with every participating feature's retention-critical geometry present in the final state."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-007]
+    sources: ["DOS-BM-001 S1 REQ-008"]
+    closes_finding: [SF-2.4]
+
+  - id: NEG-BM-001-014
+    failure_class: quantitative_unknown_blocks_structural_predicate
+    description: >
+      The pipeline reports the retention load path as underivable because no
+      disturbance magnitude is stated, or the actuator reachability check as
+      underivable because no effort ceiling is stated.
+    why_wrong: >
+      Whether a load path exists is a structural question answerable from the
+      topology; whether it is adequate is quantitative. Whether a user can reach
+      the actuator is geometric; how hard it is to work is quantitative.
+      Conflating the two suppresses work that is fully derivable.
+    concealment: "The report looks conservative, and the missing quantity is genuinely missing."
+    detect_stage: s11
+    detect_predicate: "an unresolved of kind `quantitative` may not carry block scope `blocks_structural_predicate`."
+    must_not_be_reported_as: [UNRESOLVED, INDETERMINATE]
+    expected_status: "structural predicate evaluated; quantitative acceptance INDETERMINATE"
+    violates: [UNR-BM-001-001, UNR-BM-001-002]
+    sources: ["DOS-BM-001 S2"]
+    closes_finding: [SF-2.3]
+
+  - id: NEG-BM-001-015
+    failure_class: open_state_form_imposed
+    description: >
+      A design whose open state is a user-positioned configuration region rather
+      than a discrete pose is rejected, or is required to add a stop feature.
+    why_wrong: >
+      DOS-BM-001 S2 records that no source states the motion is bounded at the
+      open extreme. Requiring a terminal open pose imports a legacy realization
+      decision (DOS-BM-001 S6, theta target 90 deg with a discrete stop) as a
+      requirement.
+    concealment: "Every legacy realization has an open stop, so its absence reads as an omission."
+    detect_stage: s04
+    detect_predicate: "NRM-BM-001-005 applies only where a discrete terminal open pose is declared."
+    must_not_be_reported_as: [FAIL]
+    expected_status: PASS
+    violates: [FRE-BM-001-009]
+    sources: ["DOS-BM-001 S2", "DOS-BM-001 S6"]
+    closes_finding: [SF-2.2]

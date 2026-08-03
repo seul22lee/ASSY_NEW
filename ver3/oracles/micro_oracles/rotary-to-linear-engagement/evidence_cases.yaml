@@ -1,0 +1,34 @@
+capability_id: rotary-to-linear-engagement
+schema_version: "0.3.0"
+domain: evidence_and_verification
+note: >
+  Evidence admissibility, separated from physical design at SF-1.1. Tests
+  NRM-RL-006 only.
+
+evidence_tag_vocabulary:
+  contact_resolution_declared: "every evidence item states whether it resolves contact"
+  declared_pair_not_cited_for_chain: "declared-pair ratio agreement is marked as a structural artifact for chain criteria and is not counted for them"
+
+admissible_evidence_cases:
+  - id: ADM-EV-RL-A
+    summary: "Contact-resolved simulation of every interaction in the chain, declared contact-resolving, cited for NRM-RL-001 and NRM-RL-003."
+    tags: [contact_resolution_declared, declared_pair_not_cited_for_chain]
+  - id: ADM-EV-RL-B
+    summary: >
+      A declared-pair run marked as such, cited only for the existence of the
+      bodies, with every chain criterion reported NOT_VERIFIED and the
+      corpus-level fidelity gap named.
+    note: "Admitted although it verifies no chain criterion."
+    tags: [contact_resolution_declared, declared_pair_not_cited_for_chain]
+
+inadmissible_evidence_cases:
+  - id: INA-EV-RL-A
+    summary: "Conversion reported verified because commanded input and observed output agreed under a declared-pair model."
+    from_negative_case: NEG-RL-007
+    missing_tags: [declared_pair_not_cited_for_chain]
+    tags: [contact_resolution_declared]
+  - id: INA-EV-RL-B
+    summary: "Backlash and efficiency reported from declared-pair evidence, with no statement of contact resolution."
+    from_negative_case: NEG-RL-010
+    missing_tags: [contact_resolution_declared, declared_pair_not_cited_for_chain]
+    tags: []

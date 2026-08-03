@@ -1,0 +1,884 @@
+schema_version: 0.3.0
+purpose: 'Source-entailment review. Locator existence is not semantic entailment: this record asks, for
+  every normative statement, what proposition the frozen source actually yields, whether the statement
+  follows from it, and what counterexample was tried against it. It is a REVIEW RECORD, never Oracle evidence,
+  and nothing in a pack may cite it.'
+method: For each statement the frozen dossier was read first and the source-derived proposition written
+  before the statement was compared to it. Every NECESSARY_PHYSICAL_CONSEQUENCE was given at least one
+  materially different candidate realization chosen to satisfy the requirement while violating the proposed
+  consequence. Where one was found the statement was weakened, conditioned or removed, and the outcome
+  says so.
+result_vocabulary:
+  directly_entailed: the statement restates a fragment of the source and adds nothing
+  physically_necessary: the statement does not appear in the source but no realization satisfying the
+    source can violate it
+  conditional: the statement holds only within a declared domain, recorded in applies_when or exclusions
+  unsupported: no source and no physical argument sustains it - BLOCKING if present
+summary:
+  total_statements: 73
+  directly_entailed: 20
+  physically_necessary: 35
+  conditional: 18
+  unsupported: 0
+reviews:
+- statement_id: NRM-BM-001-001
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 REQ-001
+  source_derived_proposition: The product must provide a mechanism for repeatedly opening and closing
+    the box; therefore an open state, a closed state, and a motion between them exist.
+  review_result: directly_entailed
+  counterexample_considered: 'A design with one state and a removable wall: is that "opening and closing"?'
+  counterexample_outcome: It still has two states and a transition; removal IS the transition. No narrowing
+    needed.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: Statement adds nothing to REQ-001 beyond naming its parts.
+- statement_id: NRM-BM-001-002
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 REQ-001
+  source_derived_proposition: Repeated relative motion between two bodies is produced by material interaction
+    between them.
+  review_result: physically_necessary
+  counterexample_considered: A magnetically levitated lid with no contact anywhere. Does it have engagement
+    geometry?
+  counterexample_outcome: Yes — the pole faces are participating material. The exclusion admitting field
+    interaction covers it. Held.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-001-003
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 REQ-001 + product_intent
+  source_derived_proposition: The box must open, and it is a storage box; therefore at OPEN the declared
+    usable access must not be obstructed by the closure.
+  review_result: conditional
+  counterexample_considered: A lid that overhangs half the aperture at OPEN while leaving a clear working
+    region in front.
+  counterexample_outcome: Admitted (ADM-BM-001-D). Under the prior "clears the aperture prism" wording
+    it was rejected, which was stronger than the source. Conditioned on the DECLARED access region.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Corrected at SF-2.1. Adequacy of the declared region is held at UNR-BM-001-006.
+- statement_id: NRM-BM-001-004
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 REQ-001
+  source_derived_proposition: The same closure opens and closes repeatedly; a body does not gain or lose
+    material by changing state.
+  review_result: physically_necessary
+  counterexample_considered: A compliant shell that visibly changes shape between states.
+  counterexample_outcome: Admitted — shape change is attributed to a declared compliant region. Content,
+    not extent, is conserved.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-001-005
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 REQ-001
+  source_derived_proposition: An open state must be reached, so the design must say what the open state
+    is; a discrete pose that nothing physical produces is a property of the model.
+  review_result: conditional
+  counterexample_considered: A friction-pivoted lid the user positions anywhere in a range, with no stop
+    at all.
+  counterexample_outcome: Admitted (ADM-BM-001-D) once the invariant was made conditional. DOS-BM-001
+    S2 records that no source bounds the motion at the open extreme, so the prior unconditional form was
+    stronger than the source.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Corrected at SF-2.2.
+- statement_id: NRM-BM-001-006
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 REQ-002/004/008
+  source_derived_proposition: The box must remain securely closed during handling and transport, with
+    a latch that is reusable and operable.
+  review_result: directly_entailed
+  counterexample_considered: A magnetic catch with no touching surfaces — is its engagement "localized"?
+  counterexample_outcome: Yes; the exclusion defines localization as identified participating material
+    regions, not touching surfaces.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: null
+- statement_id: NRM-BM-001-007
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 REQ-008 + REQ-001
+  source_derived_proposition: The latch must be reusable; therefore a full engage/release/engage cycle
+    must be realizable with nothing consumed.
+  review_result: directly_entailed
+  counterexample_considered: A breakaway tab released by snapping it off, declared repeatable and not
+    marked single-use.
+  counterexample_outcome: Now rejected (INA-BM-001-G). Under the prior wording it passed, because the
+    prior predicate asked only for a declaration and the absence of a single-use marking.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: Strengthened at SF-2.4. Cycle count remains out of scope at UNR-BM-001-007.
+- statement_id: NRM-BM-001-008
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 REQ-003
+  source_derived_proposition: The latch must be easy for a user to operate; a feature a user cannot reach
+    cannot be operated.
+  review_result: physically_necessary
+  counterexample_considered: An actuator reachable only with a tool. Is it "reachable"?
+  counterexample_outcome: Yes for this predicate, which is geometric. Whether a tool is acceptable is
+    an effort/usability question held at UNR-BM-001-002.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Unblocked from the effort ceiling at SF-2.3.
+- statement_id: NRM-BM-001-009
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 product_intent + REQ-006
+  source_derived_proposition: The product is a storage box; a storage volume that cannot be reached cannot
+    be stored into.
+  review_result: physically_necessary
+  counterexample_considered: A box whose cavity is reached only by inverting it.
+  counterexample_outcome: Admitted — an access path exists at OPEN; the predicate does not constrain orientation.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-001-010
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 REQ-007
+  source_derived_proposition: The product must be easy to assemble; a part cannot occupy space already
+    occupied.
+  review_result: physically_necessary
+  counterexample_considered: A single-piece moulding with a living hinge — no installation paths at all.
+  counterexample_outcome: Admitted; the predicate ranges over discretely-installed parts, of which there
+    are none.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-001-011
+  pack: BM-001
+  source_locator: DOS-BM-001 S1 REQ-002 + REQ-007
+  source_derived_proposition: The closure must be held against a disturbance; an unreacted force accelerates
+    the body.
+  review_result: conditional
+  counterexample_considered: An interface that carries no load in the declared scenario — a decorative
+    alignment boss.
+  counterexample_outcome: Excluded by applies_when. The predicate now ranges over load-carrying interfaces
+    only.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Made load-conditional and unblocked from the disturbance magnitude at SF-2.3.
+- statement_id: NRM-BM-001-012
+  pack: BM-001
+  source_locator: DOS-BM-001 S5 E1
+  source_derived_proposition: The m0 matched pair passes every seed-0 criterion in BOTH members, so none
+    of those criteria distinguishes a determined from an undetermined open state.
+  review_result: physically_necessary
+  counterexample_considered: Could a seed-aggregated pass rate serve as the discriminator instead?
+  counterexample_outcome: Yes, if declared in advance with its aggregation rule — admitted as ADM-EV-BM-001-B.
+    The minimum requires discrimination, not a particular method.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-001-013
+  pack: BM-001
+  source_locator: DOS-BM-001 S5 E2
+  source_derived_proposition: The snap force window is an input parameter of the task definition, not
+    a measured product property.
+  review_result: physically_necessary
+  counterexample_considered: A test that declares a force window as a condition and reports no measured
+    value.
+  counterexample_outcome: Admitted (ADM-EV-BM-001-B). Declining to report a value is not a defect; reporting
+    an input as an outcome is.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-001-2-001
+  pack: BM-001-2
+  source_locator: DOS-BM-001-2 S1 REQ-009
+  source_derived_proposition: The enclosure sits flush against a mounting panel on one side and presents
+    no projecting corners on the exposed side.
+  review_result: directly_entailed
+  counterexample_considered: An L-shaped body seated on one narrow face whose exposed boundary wraps three
+    ADJOINING faces, none opposite the seat.
+  counterexample_outcome: Admitted (ADM-BM-001-2-D) after the correction. REQ-009 never relates the two
+    sides geometrically; the prior "opposite" wording was an addition.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: Corrected at SF-3.1.
+- statement_id: NRM-BM-001-2-002
+  pack: BM-001-2
+  source_locator: DOS-BM-001-2 S1 REQ-010
+  source_derived_proposition: The latch must not be releasable from the exposed side; it can only be worked
+    from inside the enclosure.
+  review_result: conditional
+  counterexample_considered: An actuator on a non-exposed EXTERIOR side. Compliant?
+  counterexample_outcome: Rejected (INA-BM-001-2-D). The source says inside the enclosure, not merely
+    not-exposed. The literal wording is preserved and the tension with REQ-001/REQ-003 is left standing.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: AMB-001-2-01 unresolved; three readings recorded, none selected. This is the one statement whose
+    DOMAIN is undefined, which is why the pack is blocked.
+- statement_id: NRM-BM-001-3-001
+  pack: BM-001-3
+  source_locator: DOS-BM-001-3 S1 REQ-011
+  source_derived_proposition: The enclosure rests on a curved back and opens upward through a flat top
+    face.
+  review_result: directly_entailed
+  counterexample_considered: A doubly-curved underside; is "curved back" single-curvature only?
+  counterexample_outcome: No — the exclusion admits single or double curvature. DOS-BM-001-3 S2 records
+    that no profile is stated.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: null
+- statement_id: NRM-BM-001-3-002
+  pack: BM-001-3
+  source_locator: DOS-BM-001-3 S1 REQ-011
+  source_derived_proposition: The enclosure rests on its curved underside; a resting orientation is produced
+    by contact, not by a name.
+  review_result: physically_necessary
+  counterexample_considered: A body whose weight is carried by a flat land, with curvature only on decorative
+    flanks.
+  counterexample_outcome: Rejected (INA-BM-001-3-D) under the recorded reading RDG-BM-001-3-01. The alternative
+    reading would make REQ-011 vacuous.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: 'Unblocked from the stability criterion at SF-4.1: contact derivation is structural.'
+- statement_id: NRM-BM-001-3-003
+  pack: BM-001-3
+  source_locator: DOS-BM-001-3 S1 REQ-011
+  source_derived_proposition: The aperture is in the planar top while the underside is curved; solid bodies
+    do not interpenetrate.
+  review_result: physically_necessary
+  counterexample_considered: A closure whose sweep never approaches the underside at all.
+  counterexample_outcome: Admitted trivially; the predicate is satisfied where there is nothing to clear.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-002-001
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-001
+  source_derived_proposition: A user rotates an external hand crank to raise and lower an internal platform.
+  review_result: directly_entailed
+  counterexample_considered: A multi-stage chain in which crank and platform never touch.
+  counterexample_outcome: Admitted after rewording to an interaction CHAIN; the locality clause moved
+    to NRM-BM-002-003.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: null
+- statement_id: NRM-BM-002-002
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-001 + REQ-004
+  source_derived_proposition: The input is outside and the mechanism inside, so the chain crosses the
+    boundary; a moving element and the boundary must not occupy the same space.
+  review_result: physically_necessary
+  counterexample_considered: A shaft through an oversize clearance hole carried entirely on two internal
+    bearings.
+  counterexample_outcome: Admitted after SF-5.2. The prior wording required the housing to SUPPORT the
+    crossing element and rejected this ordinary arrangement.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-002-003
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-001
+  source_derived_proposition: Rotation does not become translation without an interaction that constrains
+    the two.
+  review_result: physically_necessary
+  counterexample_considered: A scissor linkage where the conversion is distributed across several pin
+    joints.
+  counterexample_outcome: Admitted - at least one realized interaction with geometry on both of its bodies,
+    not a single site between input and output.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-002-004
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-002
+  source_derived_proposition: The platform must move approximately 80-100 mm, observed as vertical displacement.
+  review_result: directly_entailed
+  counterexample_considered: A design declaring 45 mm travel.
+  counterexample_outcome: Rejected (INA-BM-002-I). Under the PRIOR pack this design passed every invariant,
+    because REQ-002 had no normative representation at all.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: Restored at SF-5.1. The qualifier is preserved; edge compliance is INDETERMINATE at UNR-BM-002-002.
+- statement_id: NRM-BM-002-005
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-003
+  source_derived_proposition: The platform must support a payload of approximately 1 kg, observed as maximum
+    supported payload.
+  review_result: directly_entailed
+  counterexample_considered: A design that declares no payload at all and treats a platform as sufficient.
+  counterexample_outcome: Rejected (INA-BM-002-J). Same omission class as NRM-BM-002-004.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: Restored at SF-5.1. Achieving the capacity is an evidence question; DOS-BM-002 S5 records no strength
+    evidence at any fidelity.
+- statement_id: NRM-BM-002-006
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-001/003/007
+  source_derived_proposition: An unreacted force accelerates the body carrying it.
+  review_result: conditional
+  counterexample_considered: A cable drum, which carries NO axial load; and a rotating nut on a fixed
+    screw, whose axial load is reacted through the screw rather than a thrust feature.
+  counterexample_outcome: Both admitted (ADM-BM-002-C, ADM-BM-002-B) once the predicate was restricted
+    to load components actually carried. The prior universal form encoded the screw family.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Made load-conditional at SF-5.3.
+- statement_id: NRM-BM-002-007
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-001/003/007
+  source_derived_proposition: The platform rises and falls carrying a payload, so its path and orientation
+    must be constrained where the scenario depends on them.
+  review_result: conditional
+  counterexample_considered: A rotationally symmetric platform on a centred crank-and-link, free to rotate
+    about the travel axis, where the scenario is indifferent to its angular position.
+  counterexample_outcome: Admitted (ADM-BM-002-E). The retired premise that a rotary conversion applies
+    a moment about the travel direction is FALSE for a symmetric four-cable lift and for a centred linkage.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Made conditional at SF-5.4; the universal moment premise was withdrawn.
+- statement_id: NRM-BM-002-008
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-002 + REQ-007
+  source_derived_proposition: The platform moves through a displacement; material cannot pass through
+    material.
+  review_result: physically_necessary
+  counterexample_considered: A platform whose swept volume IS the corridor.
+  counterexample_outcome: Admitted. The prior proper-subset wording was vacuous or contradictory here;
+    replaced with non-intersection and traversability.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Corrected at SF-5.5.
+- statement_id: NRM-BM-002-009
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-002 + REQ-007
+  source_derived_proposition: A declared physical end of travel is a claim about the artifact and must
+    be produced by something.
+  review_result: conditional
+  counterexample_considered: A rotating-nut lift delivering 90 mm within a 200 mm screw, declaring no
+    end of travel at all.
+  counterexample_outcome: Admitted (ADM-BM-002-B). REQ-002 states a displacement, not a bounded travel;
+    inferring stops from a stroke was the SF-5.6 defect.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-002-010
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-003
+  source_derived_proposition: A payload that cannot reach the platform cannot be supported by it.
+  review_result: physically_necessary
+  counterexample_considered: An access path terminating at the housing opening.
+  counterexample_outcome: Rejected (INA-BM-002-G) - the endpoint must be the platform surface.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-002-011
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-003
+  source_derived_proposition: A payload rests on the platform; an unreacted load accelerates the body.
+  review_result: physically_necessary
+  counterexample_considered: A load path terminating at a body that is itself unsupported.
+  counterexample_outcome: Rejected; the path must terminate at a reaction site.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Adequacy is quantitative and held at UNR-BM-002-007.
+- statement_id: NRM-BM-002-012
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-006
+  source_derived_proposition: The product must be easy to assemble; a part cannot occupy occupied space.
+  review_result: physically_necessary
+  counterexample_considered: A fully co-moulded assembly.
+  counterexample_outcome: Admitted; no discretely-installed parts exist.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-BM-002-013
+  pack: BM-002
+  source_locator: DOS-BM-002 S1 REQ-009
+  source_derived_proposition: The product must operate manually only, with no power source.
+  review_result: directly_entailed
+  counterexample_considered: A counterweight assisting the lift.
+  counterexample_outcome: Admitted; the exclusion distinguishes a balancing element from a driving source.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: null
+- statement_id: NRM-BM-002-014
+  pack: BM-002
+  source_locator: DOS-BM-002 S5 E1/E2
+  source_derived_proposition: All lift kinematic evidence is V-A declared-pair, under which the transmission
+    relationship is exact by construction.
+  review_result: physically_necessary
+  counterexample_considered: A declared-pair run cited only for chain traversability, with REQ-007 reported
+    NOT_VERIFIED.
+  counterexample_outcome: Admitted (ADM-EV-BM-002-B). The minimum bars a class of INFERENCE, not a class
+    of model.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-C4-001
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: 'A cabinet whose drawer slides out when you turn a knob: a rotary input
+    drives the drawer.'
+  review_result: directly_entailed
+  counterexample_considered: A crank-and-link chain where knob and drawer never touch.
+  counterexample_outcome: Admitted via the interaction-chain wording.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: null
+- statement_id: NRM-C4-002
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: The drawer slides out HORIZONTALLY.
+  review_result: directly_entailed
+  counterexample_considered: A design establishing horizontality by the frame label "+X = FRONT".
+  counterexample_outcome: Rejected as evidence; the predicate demands a geometric relation to gravity.
+    A label may accompany it but not be its authority.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: null
+- statement_id: NRM-C4-003
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: 'The drawer SLIDES OUT: it has a retracted configuration inside and an extended
+    one projecting outside.'
+  review_result: directly_entailed
+  counterexample_considered: A drawer that translates but never leaves the envelope.
+  counterexample_outcome: Rejected (INA-C4-C).
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: Explicitly does not make either configuration an END of travel; see NRM-C4-007.
+- statement_id: NRM-C4-004
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: Rotation does not become translation without an interaction constraining
+    the two.
+  review_result: physically_necessary
+  counterexample_considered: A band-and-drum drawer with no meshing engagement.
+  counterexample_outcome: Admitted; the predicate asks for a realized interaction, not a mesh.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-C4-005
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: The drawer must slide out horizontally, a definite behaviour requiring its
+    path and orientation to be constrained where that behaviour depends on them.
+  review_result: conditional
+  counterexample_considered: A shallow tray on a centred crank-and-link whose angular position is immaterial,
+    with no dedicated anti-rotation.
+  counterexample_outcome: Admitted (ADM-C4-D). The retired universal moment premise is false for a centred
+    symmetric drive.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Made conditional at SF-6.1.
+- statement_id: NRM-C4-006
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: The drawer is a body in a gravity field travelling horizontally; its weight
+    must be reacted throughout, including at extension.
+  review_result: conditional
+  counterexample_considered: A drawer loaded with an arbitrarily heavy contents load - is that in scope?
+  counterexample_outcome: No. The command states no payload; ranging over "any contents load" made the
+    requirement unbounded and unfalsifiable. Now scoped to the drawer own weight plus any contents load
+    an instantiating requirement declares.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Scoped at SF-6.2.
+- statement_id: NRM-C4-007
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: A declared physical end of travel is a claim about the artifact.
+  review_result: conditional
+  counterexample_considered: A band-and-drum drawer with no travel limit at either end, where the user
+    simply stops turning.
+  counterexample_outcome: Admitted (ADM-C4-C). DOS-C4-drawer S3 records explicitly that no travel limit
+    is stated; the prior unconditional two-determinant requirement was an invention.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Made conditional at SF-6.3.
+- statement_id: NRM-C4-008
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: The user turns the knob, so it is accessible; the drawer is inside, so the
+    chain crosses the boundary.
+  review_result: conditional
+  counterexample_considered: A knob shaft through a clearance hole carried on two internal supports.
+  counterexample_outcome: Admitted after SF-6.4. The prior wording required the cabinet material at the
+    crossing to be the support.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-C4-009
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: An unreacted force accelerates the body carrying it.
+  review_result: conditional
+  counterexample_considered: A knob shaft driving a toothed linear member, which produces NO axial force.
+  counterexample_outcome: Admitted. The retired premise that conversion generally creates axial force
+    on the rotating element is false for toothed and for band drives.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: Made load-conditional at SF-6.5.
+- statement_id: NRM-C4-010
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: Material cannot pass through material; a path blocked at an interior point
+    is not traversable.
+  review_result: physically_necessary
+  counterexample_considered: A drawer whose swept volume defines its own corridor.
+  counterexample_outcome: Admitted; proper-subset containment was withdrawn in line with SF-5.5.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-C4-011
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S1 command
+  source_derived_proposition: A cabinet is a producible artifact assembled from parts; a part cannot occupy
+    occupied space.
+  review_result: physically_necessary
+  counterexample_considered: A single moulded shell.
+  counterexample_outcome: Admitted; no discretely-installed parts.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-C4-012
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S5 E2
+  source_derived_proposition: tracks_straight measured 0.0 degrees exactly under a declared prismatic
+    pair, where the model admits no other value.
+  review_result: physically_necessary
+  counterexample_considered: A declared-pair run whose 0.0 result is marked a structural artifact and
+    excluded.
+  counterexample_outcome: Admitted (ADM-EV-C4-B). The minimum bars counting the artifact, not producing
+    it.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-C4-013
+  pack: C4-drawer
+  source_locator: DOS-C4-drawer S5 E1
+  source_derived_proposition: 'stages.physics = "reused - PASS": no simulation was executed for C4-drawer.'
+  review_result: physically_necessary
+  counterexample_considered: Reused evidence cited WITH its originating case named.
+  counterexample_outcome: Admitted (ADM-EV-C4-B). The minimum forbids silent reuse, not reuse.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-GS-001
+  pack: guided-slider
+  source_locator: DOS-guided-slider S1
+  source_derived_proposition: Guided translation of one body relative to another along a declared line
+    or path.
+  review_result: directly_entailed
+  counterexample_considered: A curved guided path rather than a straight line.
+  counterexample_outcome: Admitted; the statement says line OR path and the exclusions permit non-straight
+    paths.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: 'PROJECT_DEFINED_CAPABILITY: the capability statement is project-authored, not user language.'
+- statement_id: NRM-GS-002
+  pack: guided-slider
+  source_locator: DOS-guided-slider S1
+  source_derived_proposition: The freedoms the instantiating motion requirement depends on are constrained.
+  review_result: conditional
+  counterexample_considered: A cylindrical rod in a plain round bore, free to rotate about its own axis,
+    where the instantiating requirement is indifferent.
+  counterexample_outcome: Admitted (ADM-GS-E). The prior statement required ALL non-translational freedoms
+    removed, which defines a prismatic joint and is narrower than "guided slider" in ordinary use and
+    than any project source.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: Broadened at SF-7.1. Strict one-DOF guidance would be a DIFFERENT capability.
+- statement_id: NRM-GS-003
+  pack: guided-slider
+  source_locator: DOS-guided-slider S1
+  source_derived_proposition: A constraint between two bodies acts through material of both.
+  review_result: physically_necessary
+  counterexample_considered: A magnetically preloaded guide with no touching surfaces.
+  counterexample_outcome: Admitted; participating material regions are identified even without contact.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-GS-004
+  pack: guided-slider
+  source_locator: DOS-guided-slider S1
+  source_derived_proposition: Guidance is along the path, not at one position on it.
+  review_result: physically_necessary
+  counterexample_considered: A guide whose engagement is intermittent by design, e.g. a pin crossing successive
+    slots.
+  counterexample_outcome: 'Considered and NOT excluded: coverage must be continuous, so a design with
+    a genuine gap fails. A hand-off between successive slots with overlap satisfies the predicate.'
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-GS-005
+  pack: guided-slider
+  source_locator: DOS-guided-slider S1
+  source_derived_proposition: Constraining a freedom means resisting the load that would otherwise produce
+    that motion.
+  review_result: conditional
+  counterexample_considered: A guide carrying no transverse load at all in the declared scenario.
+  counterexample_outcome: Excluded by applies_when; the predicate ranges over transverse components actually
+    carried.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-GS-006
+  pack: guided-slider
+  source_locator: DOS-guided-slider S1
+  source_derived_proposition: Material cannot pass through material; a path blocked at an interior point
+    is not traversable.
+  review_result: physically_necessary
+  counterexample_considered: A body whose swept volume defines its own corridor.
+  counterexample_outcome: Admitted after SF-7.2 replaced the proper-subset formulation.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-GS-007
+  pack: guided-slider
+  source_locator: DOS-guided-slider S5
+  source_derived_proposition: tracks_straight measured 0.0 degrees exactly under a declared prismatic
+    pair.
+  review_result: physically_necessary
+  counterexample_considered: A declared-pair run whose result is marked a structural artifact and excluded.
+  counterexample_outcome: Admitted (ADM-EV-GS-B).
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-RL-001
+  pack: rotary-to-linear-engagement
+  source_locator: DOS-rotary-to-linear-engagement S1
+  source_derived_proposition: Conversion of rotary input into linear output through realized localized
+    interactions.
+  review_result: directly_entailed
+  counterexample_considered: A crank-link-slider, in which the rotating input body and the translating
+    output body never touch.
+  counterexample_outcome: Admitted (ADM-RL-E) after SF-8.1. The prior wording required a localized engagement
+    BETWEEN them and rejected the most common rotary-to-linear mechanism in engineering.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: PROJECT_DEFINED_CAPABILITY. Capability statement rewritten to an interaction chain.
+- statement_id: NRM-RL-002
+  pack: rotary-to-linear-engagement
+  source_locator: DOS-rotary-to-linear-engagement S1
+  source_derived_proposition: Input rotation causes output translation over the declared operating range.
+  review_result: directly_entailed
+  counterexample_considered: A crank-and-link conversion whose relation is sinusoidal, not a constant
+    ratio.
+  counterexample_outcome: Admitted; the exclusions forbid requiring linearity.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: 'Reworded at SF-8.2: the prior statement required the relation to be DECLARED, which is a DesignState
+    representation obligation and now lives in stage_expectations.'
+- statement_id: NRM-RL-003
+  pack: rotary-to-linear-engagement
+  source_locator: DOS-rotary-to-linear-engagement S1
+  source_derived_proposition: Conversion is over a range of output motion, not at one output position.
+  review_result: physically_necessary
+  counterexample_considered: A cam-follower chain where the follower loses contact at the dwell.
+  counterexample_outcome: 'Considered: if contact is genuinely lost the chain is interrupted and the design
+    fails, correctly. A preloaded follower maintaining contact satisfies the predicate.'
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-RL-004
+  pack: rotary-to-linear-engagement
+  source_locator: DOS-rotary-to-linear-engagement S1
+  source_derived_proposition: Where an interaction transmits force to the output body offset from the
+    input axis, it applies a moment about that axis.
+  review_result: conditional
+  counterexample_considered: A symmetric multi-point drive and a centred linkage, which produce no net
+    moment about the travel direction.
+  counterexample_outcome: Both excluded by applies_when. The prior unconditional form would have demanded
+    a restraint no physics requires.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-RL-005
+  pack: rotary-to-linear-engagement
+  source_locator: DOS-rotary-to-linear-engagement S1
+  source_derived_proposition: Interactions produce equal and opposite forces; an unreacted component accelerates
+    the body.
+  review_result: conditional
+  counterexample_considered: A cable drum, which carries no axial load at all.
+  counterexample_outcome: Excluded by applies_when. The prior form asserted that conversion geometries
+    generally produce axial force, which encodes the screw family.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-RL-006
+  pack: rotary-to-linear-engagement
+  source_locator: DOS-rotary-to-linear-engagement S5
+  source_derived_proposition: 'The card passes V-A 5/5 and V-B is NAMED-DEFERRED: no contact-level evidence
+    exists for any rotary-to-linear conversion in the corpus.'
+  review_result: physically_necessary
+  counterexample_considered: A declared-pair run cited only for the existence of the bodies, with chain
+    criteria NOT_VERIFIED.
+  counterexample_outcome: Admitted (ADM-EV-RL-B).
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-LR-001
+  pack: latch-retention
+  source_locator: DOS-latch-retention S1
+  source_derived_proposition: Holding two bodies in a DEFINED relative state.
+  review_result: directly_entailed
+  counterexample_considered: Retention of an OPEN or intermediate state rather than a closed one.
+  counterexample_outcome: Admitted; FRE-LR-001 leaves which state is retained free.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: PROJECT_DEFINED_CAPABILITY.
+- statement_id: NRM-LR-002
+  pack: latch-retention
+  source_locator: DOS-latch-retention S1
+  source_derived_proposition: An interaction that opposes departure from the retained state acts through
+    material of both bodies.
+  review_result: physically_necessary
+  counterexample_considered: A magnetic pair with no touching surfaces.
+  counterexample_outcome: Admitted (ADM-LR-B); participating material regions - pole face and keeper area
+    - are identified.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: 'Reclassified from a direct capability fragment to a derived consequence at SF-9.1: "geometry
+    on both bodies" is not stated in the capability statement.'
+- statement_id: NRM-LR-003
+  pack: latch-retention
+  source_locator: DOS-latch-retention S1
+  source_derived_proposition: Holding against a disturbance means resisting the load the disturbance applies.
+  review_result: physically_necessary
+  counterexample_considered: A retention whose reaction path terminates at an unsupported feature.
+  counterexample_outcome: Rejected (INA-LR-C).
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-LR-004
+  pack: latch-retention
+  source_locator: DOS-latch-retention S1
+  source_derived_proposition: The capability requires holding against a disturbance AND releasing by a
+    deliberate action; if the retention cannot tell them apart, the disturbance releases it too.
+  review_result: physically_necessary
+  counterexample_considered: A detent released along the same path as engagement, discriminating only
+    by force magnitude.
+  counterexample_outcome: 'Admitted (ADM-LR-D): magnitude is a property the retention responds to. The
+    predicate requires SOME discriminant, not a particular one.'
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: The load-bearing statement of this pack. No legacy fixture ever asked this question.
+- statement_id: NRM-LR-005
+  pack: latch-retention
+  source_locator: DOS-latch-retention S1
+  source_derived_proposition: Bodies must reach the retained state and be able to leave it.
+  review_result: physically_necessary
+  counterexample_considered: A snap whose engagement path interferes but with a declared beam deflection.
+  counterexample_outcome: Admitted; the predicate accepts interference accounted for by a declared deflection.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-LR-006
+  pack: latch-retention
+  source_locator: DOS-latch-retention S1
+  source_derived_proposition: Releasing and re-engaging REPEATABLY.
+  review_result: directly_entailed
+  counterexample_considered: A retention that must be broken to release.
+  counterexample_outcome: Rejected (INA-LR-F).
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: Cycle count remains out of scope at UNR-LR-004.
+- statement_id: NRM-LR-007
+  pack: latch-retention
+  source_locator: DOS-latch-retention S1 + S4
+  source_derived_proposition: No capability-level disturbance exists; a claim to hold with no disturbance
+    named states no proposition that could be false.
+  review_result: physically_necessary
+  counterexample_considered: A retention test that names its disturbance but reports NOT_VERIFIED for
+    want of a measurement.
+  counterexample_outcome: Admitted (ADM-EV-LR-B).
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-LR-008
+  pack: latch-retention
+  source_locator: DOS-latch-retention S3 + S5
+  source_derived_proposition: The force windows in the task definitions are input parameters, not measured
+    properties; the same 15-60 N window appears in two different tasks.
+  review_result: physically_necessary
+  counterexample_considered: A test declaring a force window as a condition and reporting it as a condition.
+  counterexample_outcome: Admitted (ADM-EV-LR-B). The minimum forbids reporting an input as an outcome.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-HS-001
+  pack: bounded-two-state-closure
+  source_locator: DOS-bounded-two-state-closure S1
+  source_derived_proposition: A closure reaches TWO DEFINED STATES.
+  review_result: directly_entailed
+  counterexample_considered: A closure bounded between two partly-open states rather than fully open and
+    fully closed.
+  counterexample_outcome: Admitted; FRE-HS-001 leaves which two states free.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: PROJECT_DEFINED_CAPABILITY.
+- statement_id: NRM-HS-002
+  pack: bounded-two-state-closure
+  source_locator: DOS-bounded-two-state-closure S1
+  source_derived_proposition: '...by a BOUNDED MOTION, so a continuous motion connects the states.'
+  review_result: directly_entailed
+  counterexample_considered: A translating closure rather than a rotary one.
+  counterexample_outcome: Admitted; the capability names a closure, not a hinge.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: null
+- statement_id: NRM-HS-003
+  pack: bounded-two-state-closure
+  source_locator: DOS-bounded-two-state-closure S1
+  source_derived_proposition: A bounded motion is one whose configuration space is limited; where nothing
+    limits it, it is not bounded there.
+  review_result: conditional
+  counterexample_considered: A compliant closure where the flexure constrains the first half of travel
+    and a moulded rib takes over for the second.
+  counterexample_outcome: Admitted (ADM-HS-E) after SF-10.1. The prior wording required ONE identical
+    relative constraint to persist throughout, which rejected ordinary hand-off designs.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-HS-004
+  pack: bounded-two-state-closure
+  source_locator: DOS-bounded-two-state-closure S1
+  source_derived_proposition: '...where the bound at each extreme is PHYSICALLY PRODUCED.'
+  review_result: directly_entailed
+  counterexample_considered: Extremes set only by a numeric joint range.
+  counterexample_outcome: Rejected (INA-HS-D).
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: false
+  note: null
+- statement_id: NRM-HS-005
+  pack: bounded-two-state-closure
+  source_locator: DOS-bounded-two-state-closure S1
+  source_derived_proposition: Two extremes at two configurations; a result obtained at one is a fact about
+    that one.
+  review_result: conditional
+  counterexample_considered: A pin in ONE continuous curved slot whose two ends arrest it; and one magnetic
+    field with two stable seats.
+  counterexample_outcome: Both admitted (ADM-HS-D, ADM-HS-F) after SF-10.2. The prior "own condition"
+    wording read as a distinct feature per extreme. What is forbidden is copying one evaluation RESULT
+    to both.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-HS-006
+  pack: bounded-two-state-closure
+  source_locator: DOS-bounded-two-state-closure S1
+  source_derived_proposition: Both states must be reached by the motion; material cannot pass through
+    material.
+  review_result: physically_necessary
+  counterexample_considered: Contact at a bounding condition - is that interference?
+  counterexample_outcome: No; excluded explicitly. Intended contact at a bound is the bound.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: null
+- statement_id: NRM-HS-007
+  pack: bounded-two-state-closure
+  source_locator: DOS-bounded-two-state-closure S5 + S3
+  source_derived_proposition: Every seed-0 criterion passes in BOTH members of the m0 matched pair, including
+    theta_max where the unbounded control reaches 219.65 deg and still clears the 90 deg threshold.
+  review_result: physically_necessary
+  counterexample_considered: A seed-sweep protocol declared in advance with its aggregation rule.
+  counterexample_outcome: Admitted (ADM-EV-HS-B). That is what the pair can legitimately support.
+  predicate_scope_reviewed: true
+  derivation_premises_reviewed: true
+  note: The corpus supplies no single-run discriminating criterion; UNR-HS-004 records that rather than
+    inventing one.

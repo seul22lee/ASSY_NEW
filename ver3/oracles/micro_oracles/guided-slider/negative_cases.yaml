@@ -1,5 +1,5 @@
 capability_id: guided-slider
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 purpose: >
   Realizations and pipeline behaviours that must be rejected at capability level.
   Process cases reproduce recorded legacy behaviour.
@@ -12,7 +12,13 @@ negative_cases:
     fixture: INA-GS-A
   - id: NEG-GS-002
     kind: design
-    description: "Rotation about the travel line left free with nothing removing it."
+    description: >
+      The instantiating requirement is that the carried platform stay square, and
+      rotation about the travel axis is neither constrained nor declared free - it
+      is simply unaccounted for.
+    note: >
+      Corrected at SF-7.1. The defect is an unaccounted-for freedom the
+      requirement depends on, not the existence of a residual freedom.
     must_be_rejected_by: [NRM-GS-002]
     fixture: INA-GS-B
   - id: NEG-GS-003
@@ -32,14 +38,15 @@ negative_cases:
     fixture: INA-GS-E
   - id: NEG-GS-006
     kind: design
-    description: "Translating body fills its corridor."
+    description: "At an interior configuration of the declared travel the translating body intersects a boss on the guiding body; the interference is unaccounted for."
+    note: "Corrected at SF-7.2 from the retired proper-subset-of-corridor formulation."
     must_be_rejected_by: [NRM-GS-006]
     fixture: INA-GS-F
   - id: NEG-GS-007
     kind: design
     description: "Guidance claimed on the strength of an observable that is zero by construction."
     must_be_rejected_by: [NRM-GS-007]
-    fixture: INA-GS-G
+    fixture: INA-EV-GS-A
 
   - id: NEG-GS-008
     kind: process
@@ -65,7 +72,7 @@ negative_cases:
       A retention or hold obligation is attached to this capability because the
       originating fixture was a latched drawer.
     reproduced_from: "DOS-guided-slider S2 latched_drawer.json"
-    must_be_rejected_by: [normative.scope_exclusions]
+    must_be_rejected_by: [UNR-GS-003]
     required_outcome: "Rejected. Retention belongs to the latch-retention micro-oracle."
   - id: NEG-GS-011
     kind: process
@@ -84,3 +91,12 @@ negative_cases:
     reproduced_from: "DOS-guided-slider S6 slide_rail.carve"
     must_be_rejected_by: [FRE-GS-007]
     required_outcome: "Rejected as CURRENT_TOOLING_LIMITATION."
+  - id: NEG-GS-013
+    kind: process
+    description: >
+      A design is rejected, or required to add a constraint, because a residual
+      freedom remains - typically rotation about the travel axis - although the
+      instantiating requirement is indifferent to it and the freedom is declared.
+    reproduced_from: "SF-7.1"
+    must_be_rejected_by: [NRM-GS-002, FRE-GS-008]
+    required_outcome: "Rejected. ADM-GS-E is admissible. Strict single-degree-of-freedom guidance is a different capability."

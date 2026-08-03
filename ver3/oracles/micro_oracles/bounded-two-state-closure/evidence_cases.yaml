@@ -1,0 +1,35 @@
+capability_id: bounded-two-state-closure
+schema_version: "0.3.0"
+domain: evidence_and_verification
+historical_aliases:
+  - hinge-and-stop
+note: >
+  Evidence admissibility, separated from physical design at SF-1.1 and SF-10.4.
+  Tests NRM-HS-007 only.
+
+evidence_tag_vocabulary:
+  bound_criterion_discriminates: "every criterion mapped to the presence of a bound carries a configuration in which it fails when the bound is removed"
+
+admissible_evidence_cases:
+  - id: ADM-EV-HS-A
+    summary: "A criterion demonstrated to fail when the bounding condition is removed, at a stated fidelity."
+    tags: [bound_criterion_discriminates]
+  - id: ADM-EV-HS-B
+    summary: >
+      A seed-sweep protocol declared IN ADVANCE as the discriminator, with its
+      sweep size and aggregation rule stated, reporting the m0 pair's 5/5 against
+      1/5 result under that declared rule.
+    note: >
+      Admitted because the discriminator is declared rather than selected after
+      the fact. This is what the corpus's matched pair can legitimately support.
+    tags: [bound_criterion_discriminates]
+
+inadmissible_evidence_cases:
+  - id: INA-EV-HS-A
+    summary: >
+      The presence of a bound reported verified from criteria that all pass on the
+      unbounded control as well - including theta_max, where the control reaches
+      219.65 degrees and still clears the 90-degree threshold.
+    from_negative_case: NEG-HS-008
+    missing_tags: [bound_criterion_discriminates]
+    tags: []

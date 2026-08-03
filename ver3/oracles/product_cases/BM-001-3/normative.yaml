@@ -1,9 +1,34 @@
 case_id: BM-001-3
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 tier: product_case
 inherits: BM-001
 dossier: ver3/oracles/_dossiers/DOS-BM-001-3.md
 lock_status: SEMANTICALLY_AUDITED
+physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+
+correction_note: >
+  Corrected at findings SF-4.1 (stability must not block derivation of the
+  resting configuration), SF-4.2 and SF-4.3 (fixture contact topology).
+
+source_reading:
+  id: RDG-BM-001-3-01
+  question: 'What does "rests on a curved back" require of the resting contact?'
+  reading_used: >
+    The load-bearing resting contact lies ON the curved region. An interruption
+    of the curve that carries no load is admissible; a design whose weight is
+    carried by a flat land, with curvature only elsewhere, is not.
+  alternative_not_used: >
+    "The underside is curved and the body rests on that underside somewhere",
+    which would admit a body carried entirely by a flat land set into a curved
+    face. Rejected as too weak to give REQ-011 any content.
+  why_recorded: >
+    This is a reading, not a source statement. It is recorded here rather than
+    buried in a fixture note so a reviewer can reject it in one place. It is not
+    an ambiguity blocker: the conservative reading is derivable from the plain
+    sense of "rests on", and the alternative would make the requirement vacuous.
+  affects: [NRM-BM-001-3-002, ADM-BM-001-3-C]
+  closes_finding: [SF-4.3]
 
 invariants:
   - id: NRM-BM-001-3-001
@@ -37,7 +62,14 @@ invariants:
     exclusions:
       - "Does NOT assert a stability criterion. None is stated in the source; see UNR-BM-001-3-002."
       - "Does not require any particular stabilising provision."
-    verification_predicate: "the resting configuration references a contact region between the curved underside and the supporting surface, with derived_from terminating in metric geometry."
+      - >
+        Does NOT require the resting configuration to be STABLE, and is NOT
+        blocked by the absence of a stability criterion. Whether a contact-derived
+        resting configuration exists is a structural question answerable from
+        geometry; whether it is adequately stable is a separate quantitative
+        question. Corrected at SF-4.1.
+      - "Per RDG-BM-001-3-01 the load-bearing resting contact must lie on the curved region."
+    verification_predicate: "the resting configuration references a load-bearing contact region between the CURVED underside and the supporting surface, with derived_from terminating in metric geometry."
     requires_tags: [resting_configuration_derived]
     related_freedoms: [FRE-BM-001-3-002]
     related_unresolved: [UNR-BM-001-3-002]
@@ -70,12 +102,26 @@ required_unresolved:
   - id: UNR-BM-001-3-001
     decision: Curvature profile and magnitude of the resting boundary.
     why_must_remain_open: "DOS-BM-001-3 S2: no profile, radius, or single/double curvature is stated."
+    kind: quantitative
     resolvable_when: "A user-supplied profile, an envelope constraint, or a stability requirement forces it."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
     source_locators: ["DOS-BM-001-3 S2"]
   - id: UNR-BM-001-3-002
     decision: What stability on a curved underside requires, and how it is achieved.
     why_must_remain_open: "AMB-001-3-01. DOS-BM-001-3 S4: a curved underside may rock; no stability criterion, tipping case or support condition is stated."
+    kind: quantitative
     resolvable_when: "A stability criterion or tipping load case is supplied."
-    blocks: [NRM-BM-001-3-002]
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS, blocks_evidence_interpretation]
+    does_not_block:
+      - >
+        NRM-BM-001-3-002 — a resting configuration derived from contact geometry
+        is a structural predicate. Contact between a curved underside and a plane
+        is computable without any stability criterion. What the missing criterion
+        blocks is a stability PASS, a tipping-margin claim, and any claim that the
+        rest configuration is ADEQUATELY stable.
+    blocked_claims:
+      - "stability PASS"
+      - "tipping margin"
+      - "adequacy of the resting configuration"
+    closes_finding: [SF-4.1]
     source_locators: ["DOS-BM-001-3 S4"]

@@ -65,3 +65,24 @@ makes them.
 | Pawl hold, 5 mm hold-drift limit (DOS S5) | 4/6 | Realization choice + a legacy benchmark threshold. See UNR-BM-002-004. |
 | `KG_NO_PERMITTED_REALIZER` INFEASIBLE verdict (DOS S7) | 6 | Library gap reported as physics. Recorded as NEG-BM-002-009. |
 | "over-engineered" / "FUNCTIONALLY NECESSARY" docstring judgements (DOS S6) | 6 | Author commentary on a realization. |
+
+---
+
+## Corrections at the independent semantic review
+
+The findings below were raised by human review of the first clean audit and are
+recorded finding-by-finding in `../../INDEPENDENT_SEMANTIC_REVIEW_REPORT.md`.
+Statement text, basis types and unresolved scopes in this map reflect the
+corrected pack, not the reviewed one.
+
+| Finding | What changed |
+|---|---|
+| SF-5.1 | **The travel and payload requirements were missing entirely.** `NRM-BM-002-004` (approximately 80-100 mm, in mm, observed as vertical displacement) and `NRM-BM-002-005` (approximately 1 kg) restore them, with the source's "approximately" qualifier preserved and edge compliance INDETERMINATE at `UNR-BM-002-002`. A 45 mm design passed every invariant in the reviewed pack. |
+| SF-5.2 | `NRM-BM-002-002` no longer requires housing-local support at the crossing. It requires the crossing to exist and not interfere; support is wherever the selected realization needs it. New freedom `FRE-BM-002-011`. |
+| SF-5.3 | `NRM-BM-002-006` is load-conditional. A cable drum carries no axial load; a rotating nut reacts axially through its screw. The universal form encoded the screw family. |
+| SF-5.4 | `NRM-BM-002-007` requires guidance sufficient for the REQUIRED behaviour. The premise that every rotary conversion applies a moment about the travel direction is **withdrawn** — false for a symmetric four-cable lift and for a centred linkage. Anti-rotation is required only where the scenario or the conversion needs it. |
+| SF-5.5 | `NRM-BM-002-008` replaces proper-subset corridor containment with non-intersection at required poses plus traversability. |
+| SF-5.6 | `NRM-BM-002-009` applies only where a terminal is DECLARED a physical end of travel. A displacement requirement is not a travel-limit requirement. New freedom `FRE-BM-002-010`. |
+| SF-5.7 | The drum-stall terminal is gone. `ADM-BM-002-C` now uses a deliberate cable-length stop collar; a stall is an overload condition, not a travel determinant, and conflicted with REQ-007. |
+| SF-5.8 | Five conversion families are now fixtures: direct screw, rotating nut on a fixed screw, cable and drum, scissor linkage, and a non-geared crank and link. Every derived invariant was re-tested against all five. |
+| SF-1.1 | `NRM-BM-002-014` (declared-pair evidence may not support engagement or jamming claims) with `enables_claim`; fixtures in `evidence_cases.yaml`. |

@@ -1,0 +1,35 @@
+case_id: BM-002
+schema_version: "0.3.0"
+domain: evidence_and_verification
+note: >
+  Evidence and verification-process admissibility, separated from physical design
+  at finding SF-1.1. These cases test NRM-BM-002-014 only and must never make a
+  physical realization inadmissible.
+
+evidence_tag_vocabulary:
+  contact_resolution_declared: "every evidence item states whether it resolves contact"
+  declared_pair_not_cited_for_engagement: "declared-pair results are marked as structural artifacts for engagement and jamming criteria and are not counted for them"
+
+admissible_evidence_cases:
+  - id: ADM-EV-BM-002-A
+    summary: "Contact-resolved simulation of the conversion engagement, declared as contact-resolving and cited for NRM-BM-002-003."
+    tags: [contact_resolution_declared, declared_pair_not_cited_for_engagement]
+  - id: ADM-EV-BM-002-B
+    summary: >
+      A declared-pair kinematic run, marked as declared-pair, cited only for the
+      chain-traversability clause of NRM-BM-002-001, with REQ-007 reported
+      NOT_VERIFIED and the fidelity gap named.
+    note: "Admitted although it proves nothing about the engagement. Declaring what evidence cannot show is not a defect."
+    tags: [contact_resolution_declared, declared_pair_not_cited_for_engagement]
+
+inadmissible_evidence_cases:
+  - id: INA-EV-BM-002-A
+    summary: "REQ-007 (avoid obvious jamming) reported verified on the strength of declared-pair kinematic evidence."
+    from_negative_case: NEG-BM-002-011
+    missing_tags: [declared_pair_not_cited_for_engagement]
+    tags: [contact_resolution_declared]
+  - id: INA-EV-BM-002-B
+    summary: "Evidence cited for the conversion engagement without stating whether the model resolves contact."
+    from_negative_case: NEG-BM-002-018
+    missing_tags: [contact_resolution_declared]
+    tags: [declared_pair_not_cited_for_engagement]

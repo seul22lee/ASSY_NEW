@@ -63,3 +63,22 @@ The hand-pulled latched drawer and the knob-and-rack fixture are separate cases
 (DOS S8). Importing either would silently answer a question this pack holds open:
 whether the drawer must be retained closed, and whether it must also move by
 hand.
+
+## Corrected at the independent semantic review
+
+One short sentence of source produced eleven derived invariants, and six of them
+were stronger than that sentence:
+
+- **SF-6.1** guidance is required for the *required sliding behaviour*, not
+  unconditional anti-rotation. The universal moment premise is withdrawn.
+- **SF-6.2** the load path covers the drawer's own weight, plus any contents load
+  an instantiating requirement declares. "Any contents load" was unbounded.
+- **SF-6.3** terminal determinants apply only where an end of travel is
+  *declared*. The frozen dossier says explicitly that no travel limit is stated.
+- **SF-6.4** the crossing must not interfere; the cabinet need not be the bearing.
+- **SF-6.5** reaction requirements are conditional on loads actually produced.
+- **SF-6.6** `AMB-C4-01` is **reclassified**, not resolved. Two lower-rank legacy
+  commentaries disagreeing about whether a gear is over-engineered creates no
+  acceptance ambiguity, because neither could bind the family. It is now
+  `LEGACY-CONFLICT-C4-01`, blocks nothing, and needs no human ruling — it is
+  evidence that mechanism choice must stay free.

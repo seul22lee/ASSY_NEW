@@ -1,0 +1,1102 @@
+schema_version: 0.3.0
+purpose: Workflow state for the independent semantic correction pass. NEVER Oracle evidence; no pack may
+  cite this file.
+branch: ver3-oracle-phase1-review
+starting_review_commit: 3b64aee601985ba509d2420462af624ed5616cc2
+workflow_status: READY_FOR_SECOND_HUMAN_REVIEW
+lock_created: false
+production_code_created: false
+cad_fixtures_created: false
+files_outside_ver3_modified: false
+findings:
+- finding_id: SF-1.1
+  area: 'common: separate design truth from verification-process truth'
+  affected_packs:
+  - ALL
+  affected_statements:
+  - NRM-GS-007
+  - NRM-RL-006
+  - NRM-LR-007
+  - NRM-LR-008
+  - NRM-HS-007
+  - NRM-BM-001-012
+  - NRM-BM-001-013
+  - NRM-BM-002-014
+  - NRM-C4-012
+  - NRM-C4-013
+  source_passages:
+  - review finding 1.1
+  correction_status: CORRECTED
+  semantic_rationale: A physical realization must never be inadmissible because no test has been authored
+    for it. Physical and evidence tags now live in separate files with separate vocabularies; a physical
+    invariant may not require an evidence tag and a VERIFICATION_MINIMUM may not require a physical tag.
+  files_changed:
+  - '*/realizations.yaml (physical_tag_vocabulary added)'
+  - '*/evidence_cases.yaml (new, 9 files)'
+  - '*/normative.yaml'
+  - oracle_tools/audit_oracles.py
+  audit_status: DESIGN_EVIDENCE_TAG_MIXED enforced; 3 mutation cases + 0 controls needed
+  unresolved_human_decisions: []
+- finding_id: SF-1.2
+  area: 'common: VERIFICATION_MINIMUM policy compliance'
+  affected_packs:
+  - ALL
+  affected_statements:
+  - every VERIFICATION_MINIMUM
+  source_passages:
+  - ORACLE_AUTHORING_POLICY §1
+  correction_status: CORRECTED
+  semantic_rationale: Policy already required a VERIFICATION_MINIMUM to name the claim it enables; no
+    pack carried the field. All ten now do, with substantive text.
+  files_changed:
+  - '*/normative.yaml'
+  - ORACLE_AUTHORING_POLICY.md
+  - oracle_tools/audit_oracles.py
+  audit_status: POLICY_FIELD_MISSING enforced; 2 mutation cases
+  unresolved_human_decisions: []
+- finding_id: SF-1.3
+  area: 'common: micro-oracle basis semantics'
+  affected_packs:
+  - guided-slider
+  - rotary-to-linear-engagement
+  - latch-retention
+  - bounded-two-state-closure
+  affected_statements:
+  - all capability-fragment statements in the four micro-oracles
+  source_passages:
+  - review finding 1.3
+  correction_status: CORRECTED
+  semantic_rationale: A micro-oracle has no user. Its capability statement was project-authored then frozen;
+    appearing in dossier S1 does not make it rank-1 user language. New basis type PROJECT_DEFINED_CAPABILITY,
+    whose authority is explicitly human-reviewable. A product case may not use it and a micro-oracle may
+    not use DIRECT_USER_REQUIREMENT; both directions are BLOCKING.
+  files_changed:
+  - 4 micro-oracle normative.yaml
+  - ORACLE_AUTHORING_POLICY.md §1
+  - ORACLE_METHOD.md §13.5
+  - oracle_tools/audit_oracles.py
+  - all source maps
+  audit_status: MICRO_ORACLE_CLAIMS_USER_REQUIREMENT + PRODUCT_CASE_CLAIMS_PROJECT_CAPABILITY enforced;
+    2 mutation cases
+  unresolved_human_decisions: []
+- finding_id: SF-1.4
+  area: 'common: unresolved blocking semantics'
+  affected_packs:
+  - ALL
+  affected_statements:
+  - all 44 required_unresolved entries
+  source_passages:
+  - review finding 1.4
+  correction_status: CORRECTED
+  semantic_rationale: 'The coarse blocks: relation conflated "cannot report PASS" with "cannot derive".
+    Replaced by kind + block_scopes. A quantitative unknown may never carry blocks_structural_predicate.
+    The only legitimate structural block in the whole set is BM-001-2 UNR-BM-001-2-003, where the predicate
+    DOMAIN is undefined, and it carries a written justification.'
+  files_changed:
+  - 9 normative.yaml
+  - ORACLE_AUTHORING_POLICY.md §10
+  - oracle_tools/audit_oracles.py
+  audit_status: UNRESOLVED_BLOCK_SCOPE_INVALID enforced; 3 mutation cases + 1 control
+  unresolved_human_decisions: []
+- finding_id: SF-1.5
+  area: 'common: source-entailment review'
+  affected_packs:
+  - ALL
+  affected_statements:
+  - all 73 normative statements
+  source_passages:
+  - review finding 1.5
+  correction_status: CORRECTED
+  semantic_rationale: Locator resolution is not semantic entailment. Every statement now has a record
+    naming the source-derived proposition, the entailment class, the counterexample tried and its outcome.
+    20 directly entailed, 35 physically necessary, 18 conditional, 0 unsupported.
+  files_changed:
+  - SOURCE_ENTAILMENT_REVIEW.yaml (new)
+  - oracle_tools/audit_oracles.py
+  audit_status: SOURCE_ENTAILMENT_REVIEW_REQUIRED + STATEMENT_REVIEWED_UNSUPPORTED enforced; 2 mutation
+    cases
+  unresolved_human_decisions: []
+- finding_id: SF-1.6
+  area: 'common: fixture plausibility review'
+  affected_packs:
+  - ALL
+  affected_statements:
+  - all 41 admissible fixtures
+  source_passages:
+  - review finding 1.6
+  correction_status: CORRECTED
+  semantic_rationale: Tags are authored by the same hand as the invariants and are not independent evidence.
+    Every admissible fixture now has a physical-operation narrative, explicit assumptions, a plausible
+    counterexample and a status. ALL 41 are NEEDS_GEOMETRY_VALIDATION - no CAD or physics run exists and
+    none was falsely upgraded. The review itself caused three fixtures to be revised.
+  files_changed:
+  - FIXTURE_PLAUSIBILITY_REVIEW.yaml (new)
+  - 3 realizations.yaml
+  - oracle_tools/audit_oracles.py
+  audit_status: FIXTURE_PHYSICAL_PLAUSIBILITY_UNVERIFIED + REJECTED_FIXTURE_STILL_ADMISSIBLE enforced;
+    3 mutation cases + 1 control
+  unresolved_human_decisions: []
+- finding_id: SF-1.7
+  area: 'common: preserve the mechanism-neutral rename'
+  affected_packs:
+  - bounded-two-state-closure
+  affected_statements:
+  - '-'
+  source_passages:
+  - review finding 1.7
+  correction_status: CORRECTED
+  semantic_rationale: 'Name kept. historical_aliases: [hinge-and-stop] added to normative.yaml, realizations.yaml
+    and evidence_cases.yaml so documentation stays traceable without making the old mechanism name authoritative.'
+  files_changed:
+  - micro_oracles/bounded-two-state-closure/*
+  audit_status: no auditor rule needed
+  unresolved_human_decisions: []
+- finding_id: SF-2.1
+  area: 'BM-001: usable access, not an empty aperture'
+  affected_packs:
+  - BM-001
+  affected_statements:
+  - NRM-BM-001-003
+  - UNR-BM-001-006
+  - FRE-BM-001-013
+  source_passages:
+  - DOS-BM-001 S1 REQ-001
+  - DOS-BM-001 S1 product_intent
+  - DOS-BM-001 S2 (no aperture size, no envelope)
+  correction_status: CORRECTED
+  semantic_rationale: Requiring the closure to vacate the entire aperture prism was stronger than the
+    source, which states no aperture size and no access envelope. Replaced by non-obstruction of the DECLARED
+    usable access region; adequacy of that region is held unresolved.
+  files_changed:
+  - BM-001/normative.yaml
+  - BM-001/realizations.yaml
+  - BM-001/negative_cases.yaml
+  - BM-001/freedoms.yaml
+  - BM-001/stage_expectations.yaml
+  - BM-001/source_map.md
+  - BM-001/README.md
+  audit_status: clean; falsified by ADM-BM-001-D
+  unresolved_human_decisions: []
+- finding_id: SF-2.2
+  area: 'BM-001: conditional open-pose determinant'
+  affected_packs:
+  - BM-001
+  affected_statements:
+  - NRM-BM-001-005
+  - FRE-BM-001-012
+  source_passages:
+  - DOS-BM-001 S2 "No statement that motion is bounded at the open extreme"
+  - DOS-BM-001 S6 (theta 90 deg + discrete stop is a legacy realization)
+  correction_status: CORRECTED
+  semantic_rationale: The source requires no discrete open pose and no open stop. The invariant now applies
+    only where a discrete terminal open pose is DECLARED; a design may instead declare an open configuration
+    region. Requiring a stop was importing DOS-BM-001 S6.
+  files_changed:
+  - BM-001/normative.yaml
+  - BM-001/realizations.yaml
+  - BM-001/negative_cases.yaml
+  - BM-001/freedoms.yaml
+  - BM-001/stage_expectations.yaml
+  audit_status: clean; falsified by ADM-BM-001-D
+  unresolved_human_decisions: []
+- finding_id: SF-2.3
+  area: 'BM-001: unresolved block relations'
+  affected_packs:
+  - BM-001
+  affected_statements:
+  - UNR-BM-001-001
+  - UNR-BM-001-002
+  - NRM-BM-001-008
+  - NRM-BM-001-011
+  source_passages:
+  - DOS-BM-001 S2
+  correction_status: CORRECTED
+  semantic_rationale: A missing disturbance magnitude does not block the EXISTENCE of a load path; a missing
+    effort ceiling does not block GEOMETRIC actuator reachability. Both unresolved are quantitative and
+    now carry only blocks_quantitative_acceptance and blocks_PASS, with does_not_block entries naming
+    the predicates they leave derivable.
+  files_changed:
+  - BM-001/normative.yaml
+  - BM-001/negative_cases.yaml (NEG-BM-001-014)
+  - BM-001/stage_expectations.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-2.4
+  area: 'BM-001: repeatability semantics'
+  affected_packs:
+  - BM-001
+  affected_statements:
+  - NRM-BM-001-007
+  - UNR-BM-001-007
+  - NEG-BM-001-013
+  - INA-BM-001-G
+  source_passages:
+  - DOS-BM-001 S1 REQ-008
+  - DOS-BM-001 S2 (no cycle count)
+  correction_status: CORRECTED
+  semantic_rationale: The reviewed predicate asked for a declaration of repeatability and the absence
+    of a single-use marking. A breakaway tab satisfies both and is physically single-use. Now a realizable
+    close-engage / release / close-engage-again cycle with every participating feature retaining its retention-critical
+    geometry. Cycle count and durability are separated into UNR-BM-001-007.
+  files_changed:
+  - BM-001/normative.yaml
+  - BM-001/realizations.yaml
+  - BM-001/negative_cases.yaml
+  - BM-001/stage_expectations.yaml
+  audit_status: clean; INA-BM-001-G rejected by exactly this invariant
+  unresolved_human_decisions: []
+- finding_id: SF-3.1
+  area: 'BM-001-2: exposed boundary wording'
+  affected_packs:
+  - BM-001-2
+  affected_statements:
+  - NRM-BM-001-2-001
+  - UNR-BM-001-2-004
+  - ADM-BM-001-2-D
+  source_passages:
+  - DOS-BM-001-2 S1 REQ-009 verbatim
+  correction_status: CORRECTED
+  semantic_rationale: REQ-009 states a flush side and a non-projecting exposed side; it never relates
+    them geometrically. "Opposite" was an addition. Now "the exposed exterior boundary". The exact REQ-010
+    wording "worked from inside the enclosure" is UNCHANGED and was not weakened to make it compatible
+    with easy opening.
+  files_changed:
+  - BM-001-2/normative.yaml
+  - BM-001-2/realizations.yaml
+  - BM-001-2/evidence_cases.yaml
+  - BM-001-2/source_map.md
+  - BM-001-2/README.md
+  audit_status: clean; falsified by ADM-BM-001-2-D
+  unresolved_human_decisions:
+  - 'AMB-001-2-01 remains open: three readings of "inside the enclosure", none selected. Pack stays BLOCKED_BY_SOURCE_AMBIGUITY.'
+- finding_id: SF-4.1
+  area: 'BM-001-3: stability must not block contact derivation'
+  affected_packs:
+  - BM-001-3
+  affected_statements:
+  - UNR-BM-001-3-002
+  - NRM-BM-001-3-002
+  - NEG-BM-001-3-006
+  source_passages:
+  - DOS-BM-001-3 S4 (AMB-001-3-01)
+  correction_status: CORRECTED
+  semantic_rationale: Contact between a curved underside and a supporting plane is computable from geometry
+    alone. The missing stability criterion blocks a stability PASS, a tipping-margin claim and any adequacy
+    claim - listed explicitly as blocked_claims - but not the derivation.
+  files_changed:
+  - BM-001-3/normative.yaml
+  - BM-001-3/negative_cases.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-4.2
+  area: 'BM-001-3: spherical-cap contact topology'
+  affected_packs:
+  - BM-001-3
+  affected_statements:
+  - ADM-BM-001-3-B
+  source_passages:
+  - physical review, no source change
+  correction_status: CORRECTED
+  semantic_rationale: A single spherical cap on a rigid plane produces ONE ideal point contact, not three
+    patches. The fixture was retained by tag assertion alone. Revised to three raised spherical lobes
+    with coplanar apexes, which makes three point contacts physically possible. Coplanarity is now an
+    explicit assumption in the plausibility review, pending CAD.
+  files_changed:
+  - BM-001-3/realizations.yaml
+  - FIXTURE_PLAUSIBILITY_REVIEW.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-4.3
+  area: 'BM-001-3: resting contact on the curved region'
+  affected_packs:
+  - BM-001-3
+  affected_statements:
+  - ADM-BM-001-3-C
+  - INA-BM-001-3-D
+  - NEG-BM-001-3-005
+  - RDG-BM-001-3-01
+  source_passages:
+  - DOS-BM-001-3 S1 REQ-011
+  correction_status: CORRECTED
+  semantic_rationale: Resting on a flat land puts the load-bearing contact off the curved back. The land
+    became a NON-LOAD-BEARING relieved recess so the resting contact stays on the two curved bands flanking
+    it. The design the old fixture actually described is now the inadmissible INA-BM-001-3-D. The source
+    reading used is recorded explicitly as RDG-BM-001-3-01, with the rejected alternative stated.
+  files_changed:
+  - BM-001-3/normative.yaml
+  - BM-001-3/realizations.yaml
+  - BM-001-3/negative_cases.yaml
+  - FIXTURE_PLAUSIBILITY_REVIEW.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-5.1
+  area: 'BM-002: restore the direct numerical requirements'
+  affected_packs:
+  - BM-002
+  affected_statements:
+  - NRM-BM-002-004
+  - NRM-BM-002-005
+  - UNR-BM-002-002
+  - UNR-BM-002-007
+  - INA-BM-002-I
+  - INA-BM-002-J
+  - NEG-BM-002-015
+  - NEG-BM-002-016
+  source_passages:
+  - DOS-BM-002 S1
+  - DOS-BM-002 S3
+  - DOS-BM-002 S5
+  correction_status: CORRECTED
+  semantic_rationale: The reviewed pack carried REQ-002 and REQ-003 only as an unresolved question about
+    the word "approximately", so a design declaring 45 mm of travel and no payload passed every invariant.
+    Both are now normative with quantity_is_user_stated, the qualifier preserved, edge compliance INDETERMINATE,
+    and capacity NOT_VERIFIED/UNSUPPORTED for want of strength evidence. No tolerance was invented.
+  files_changed:
+  - BM-002/normative.yaml
+  - BM-002/realizations.yaml
+  - BM-002/evidence_cases.yaml
+  - BM-002/negative_cases.yaml
+  - BM-002/freedoms.yaml
+  - BM-002/stage_expectations.yaml
+  - BM-002/source_map.md
+  - BM-002/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-5.2
+  area: 'BM-002: remove mandatory housing-local crossing support'
+  affected_packs:
+  - BM-002
+  affected_statements:
+  - NRM-BM-002-002
+  - FRE-BM-002-011
+  - INA-BM-002-K
+  - NEG-BM-002-017
+  source_passages:
+  - DOS-BM-002 S1
+  - DOS-BM-002 S3
+  - DOS-BM-002 S5
+  correction_status: CORRECTED
+  semantic_rationale: A drive element may cross through clearance and be supported elsewhere. The obligation
+    is now existence of the crossing plus absence of unintended interference; support is wherever the
+    selected realization needs it.
+  files_changed:
+  - BM-002/normative.yaml
+  - BM-002/realizations.yaml
+  - BM-002/evidence_cases.yaml
+  - BM-002/negative_cases.yaml
+  - BM-002/freedoms.yaml
+  - BM-002/stage_expectations.yaml
+  - BM-002/source_map.md
+  - BM-002/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-5.3
+  area: 'BM-002: load-conditional support predicates'
+  affected_packs:
+  - BM-002
+  affected_statements:
+  - NRM-BM-002-006
+  - NEG-BM-002-019
+  source_passages:
+  - DOS-BM-002 S1
+  - DOS-BM-002 S3
+  - DOS-BM-002 S5
+  correction_status: CORRECTED
+  semantic_rationale: 'The universal "for each rotating element: exists(radial support)" encoded the screw
+    family. A cable drum carries no axial load; a rotating nut reacts axially through its screw. The predicate
+    now ranges over load components actually carried, with applies_when.'
+  files_changed:
+  - BM-002/normative.yaml
+  - BM-002/realizations.yaml
+  - BM-002/evidence_cases.yaml
+  - BM-002/negative_cases.yaml
+  - BM-002/freedoms.yaml
+  - BM-002/stage_expectations.yaml
+  - BM-002/source_map.md
+  - BM-002/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-5.4
+  area: 'BM-002: conditional guidance and anti-rotation'
+  affected_packs:
+  - BM-002
+  affected_statements:
+  - NRM-BM-002-007
+  - FRE-BM-002-003
+  - ADM-BM-002-E
+  - NEG-BM-002-002
+  - NEG-BM-002-020
+  source_passages:
+  - DOS-BM-002 S1
+  - DOS-BM-002 S3
+  - DOS-BM-002 S5
+  correction_status: CORRECTED
+  semantic_rationale: The premise that every rotary-to-linear conversion applies a moment about the platform
+    travel direction is FALSE for a symmetric four-cable lift and for a centred linkage, and is withdrawn.
+    Guidance is now required to preserve the motion and orientation the scenario requires; anti-rotation
+    only where rotation would violate the required behaviour or defeat the conversion.
+  files_changed:
+  - BM-002/normative.yaml
+  - BM-002/realizations.yaml
+  - BM-002/evidence_cases.yaml
+  - BM-002/negative_cases.yaml
+  - BM-002/freedoms.yaml
+  - BM-002/stage_expectations.yaml
+  - BM-002/source_map.md
+  - BM-002/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-5.5
+  area: 'BM-002: remove the proper-subset corridor formulation'
+  affected_packs:
+  - BM-002
+  affected_statements:
+  - NRM-BM-002-008
+  - INA-BM-002-E
+  - NEG-BM-002-005
+  source_passages:
+  - DOS-BM-002 S1
+  - DOS-BM-002 S3
+  - DOS-BM-002 S5
+  correction_status: CORRECTED
+  semantic_rationale: The swept volume generally DEFINES the corridor, so proper-subset containment is
+    vacuous or contradictory. Replaced with non-intersection at every required pose, traversability of
+    the required path, and clearance either solved or explicitly unresolved.
+  files_changed:
+  - BM-002/normative.yaml
+  - BM-002/realizations.yaml
+  - BM-002/evidence_cases.yaml
+  - BM-002/negative_cases.yaml
+  - BM-002/freedoms.yaml
+  - BM-002/stage_expectations.yaml
+  - BM-002/source_map.md
+  - BM-002/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-5.6
+  area: 'BM-002: conditional terminal determinants'
+  affected_packs:
+  - BM-002
+  affected_statements:
+  - NRM-BM-002-009
+  - FRE-BM-002-010
+  - ADM-BM-002-B
+  - NEG-BM-002-021
+  source_passages:
+  - DOS-BM-002 S1
+  - DOS-BM-002 S3
+  - DOS-BM-002 S5
+  correction_status: CORRECTED
+  semantic_rationale: A stated displacement is not a stated travel limit. The invariant now applies only
+    where a terminal is DECLARED a physical end of travel; otherwise the required displacement is verified
+    within the mechanically available range.
+  files_changed:
+  - BM-002/normative.yaml
+  - BM-002/realizations.yaml
+  - BM-002/evidence_cases.yaml
+  - BM-002/negative_cases.yaml
+  - BM-002/freedoms.yaml
+  - BM-002/stage_expectations.yaml
+  - BM-002/source_map.md
+  - BM-002/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-5.7
+  area: 'BM-002: drum-stall terminal removed'
+  affected_packs:
+  - BM-002
+  affected_statements:
+  - ADM-BM-002-C
+  source_passages:
+  - DOS-BM-002 S1
+  - DOS-BM-002 S3
+  - DOS-BM-002 S5
+  correction_status: CORRECTED
+  semantic_rationale: A drum stall is an overload or jamming condition, not a deliberate travel determinant,
+    and conflicted with REQ-007. Replaced with a deliberate cable-length stop collar at one end and platform
+    seating on the floor at the other.
+  files_changed:
+  - BM-002/normative.yaml
+  - BM-002/realizations.yaml
+  - BM-002/evidence_cases.yaml
+  - BM-002/negative_cases.yaml
+  - BM-002/freedoms.yaml
+  - BM-002/stage_expectations.yaml
+  - BM-002/source_map.md
+  - BM-002/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-5.8
+  area: 'BM-002: re-audit against plausible alternatives'
+  affected_packs:
+  - BM-002
+  affected_statements:
+  - every derived invariant
+  source_passages:
+  - DOS-BM-002 S1
+  - DOS-BM-002 S3
+  - DOS-BM-002 S5
+  correction_status: CORRECTED
+  semantic_rationale: Every derived invariant was re-tested against five materially different families
+    - direct screw, rotating nut on fixed screw, cable and drum, scissor linkage, non-geared crank and
+    link - all five now fixtures. Two premises did not survive and were withdrawn (SF-5.3, SF-5.4).
+  files_changed:
+  - BM-002/normative.yaml
+  - BM-002/realizations.yaml
+  - BM-002/evidence_cases.yaml
+  - BM-002/negative_cases.yaml
+  - BM-002/freedoms.yaml
+  - BM-002/stage_expectations.yaml
+  - BM-002/source_map.md
+  - BM-002/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-6.1
+  area: 'C4-drawer: conditional guidance and anti-rotation'
+  affected_packs:
+  - C4-drawer
+  affected_statements:
+  - NRM-C4-005
+  - FRE-C4-005
+  - ADM-C4-D
+  - INA-C4-E
+  - NEG-C4-005
+  source_passages:
+  - DOS-C4-drawer S1 command
+  - DOS-C4-drawer S3
+  - DOS-C4-drawer S4
+  - DOS-C4-drawer S5
+  correction_status: CORRECTED
+  semantic_rationale: Same universal moment premise as SF-5.4, withdrawn on the same grounds. Guidance
+    is required for the required horizontal sliding behaviour; rotational restraint only where the behaviour
+    or the conversion needs it.
+  files_changed:
+  - C4-drawer/normative.yaml
+  - C4-drawer/realizations.yaml
+  - C4-drawer/evidence_cases.yaml
+  - C4-drawer/negative_cases.yaml
+  - C4-drawer/freedoms.yaml
+  - C4-drawer/stage_expectations.yaml
+  - C4-drawer/source_map.md
+  - C4-drawer/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-6.2
+  area: 'C4-drawer: weight and payload scope'
+  affected_packs:
+  - C4-drawer
+  affected_statements:
+  - NRM-C4-006
+  - UNR-C4-005
+  - NEG-C4-021
+  source_passages:
+  - DOS-C4-drawer S1 command
+  - DOS-C4-drawer S3
+  - DOS-C4-drawer S4
+  - DOS-C4-drawer S5
+  correction_status: CORRECTED
+  semantic_rationale: '"Any contents load" is an unbounded requirement the one-sentence source never made.
+    The invariant now covers the drawer own weight, plus a contents load only where an instantiating requirement
+    declares one.'
+  files_changed:
+  - C4-drawer/normative.yaml
+  - C4-drawer/realizations.yaml
+  - C4-drawer/evidence_cases.yaml
+  - C4-drawer/negative_cases.yaml
+  - C4-drawer/freedoms.yaml
+  - C4-drawer/stage_expectations.yaml
+  - C4-drawer/source_map.md
+  - C4-drawer/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-6.3
+  area: 'C4-drawer: conditional terminal determinants'
+  affected_packs:
+  - C4-drawer
+  affected_statements:
+  - NRM-C4-007
+  - FRE-C4-011
+  - ADM-C4-C
+  - NEG-C4-006
+  - NEG-C4-020
+  source_passages:
+  - DOS-C4-drawer S1 command
+  - DOS-C4-drawer S3
+  - DOS-C4-drawer S4
+  - DOS-C4-drawer S5
+  correction_status: CORRECTED
+  semantic_rationale: DOS-C4-drawer S3 records explicitly that no travel limit is stated at either end.
+    The unconditional two-determinant requirement was an invention. Now applies only where an end of travel
+    is DECLARED.
+  files_changed:
+  - C4-drawer/normative.yaml
+  - C4-drawer/realizations.yaml
+  - C4-drawer/evidence_cases.yaml
+  - C4-drawer/negative_cases.yaml
+  - C4-drawer/freedoms.yaml
+  - C4-drawer/stage_expectations.yaml
+  - C4-drawer/source_map.md
+  - C4-drawer/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-6.4
+  area: 'C4-drawer: remove mandatory cabinet-local crossing support'
+  affected_packs:
+  - C4-drawer
+  affected_statements:
+  - NRM-C4-008
+  - FRE-C4-012
+  - INA-C4-J
+  - NEG-C4-018
+  source_passages:
+  - DOS-C4-drawer S1 command
+  - DOS-C4-drawer S3
+  - DOS-C4-drawer S4
+  - DOS-C4-drawer S5
+  correction_status: CORRECTED
+  semantic_rationale: Same correction as SF-5.2. Obligation is knob reachability plus a realized, non-interfering
+    crossing.
+  files_changed:
+  - C4-drawer/normative.yaml
+  - C4-drawer/realizations.yaml
+  - C4-drawer/evidence_cases.yaml
+  - C4-drawer/negative_cases.yaml
+  - C4-drawer/freedoms.yaml
+  - C4-drawer/stage_expectations.yaml
+  - C4-drawer/source_map.md
+  - C4-drawer/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-6.5
+  area: 'C4-drawer: conditional rotating-element load premises'
+  affected_packs:
+  - C4-drawer
+  affected_statements:
+  - NRM-C4-009
+  - NEG-C4-019
+  source_passages:
+  - DOS-C4-drawer S1 command
+  - DOS-C4-drawer S3
+  - DOS-C4-drawer S4
+  - DOS-C4-drawer S5
+  correction_status: CORRECTED
+  semantic_rationale: The premise that rotary-to-linear conversion generally creates axial force on the
+    rotating element is false for toothed drives and for band drives, and is withdrawn.
+  files_changed:
+  - C4-drawer/normative.yaml
+  - C4-drawer/realizations.yaml
+  - C4-drawer/evidence_cases.yaml
+  - C4-drawer/negative_cases.yaml
+  - C4-drawer/freedoms.yaml
+  - C4-drawer/stage_expectations.yaml
+  - C4-drawer/source_map.md
+  - C4-drawer/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-6.6
+  area: 'C4-drawer: reclassify AMB-C4-01'
+  affected_packs:
+  - C4-drawer
+  affected_statements:
+  - LEGACY-CONFLICT-C4-01
+  - retired UNR-C4-002
+  - FRE-C4-002
+  - NEG-C4-014
+  source_passages:
+  - DOS-C4-drawer S1 command
+  - DOS-C4-drawer S3
+  - DOS-C4-drawer S4
+  - DOS-C4-drawer S5
+  correction_status: CORRECTED
+  semantic_rationale: 'The over-engineered / not-over-engineered disagreement is between a rank-4 docstring
+    and a rank-5 scoring note. Neither is the rank-1 command, which requires rotary-to-linear operation
+    and never mentions a gear, so neither could bind the family and their disagreement creates no acceptance
+    ambiguity. Recorded as conflicting legacy commentary with blocks_nothing: true and requires_human_decision:
+    false, and cited as support for FRE-C4-002. The implication that a human must rule on whether a toothed
+    transmission is required is withdrawn.'
+  files_changed:
+  - C4-drawer/normative.yaml
+  - C4-drawer/realizations.yaml
+  - C4-drawer/evidence_cases.yaml
+  - C4-drawer/negative_cases.yaml
+  - C4-drawer/freedoms.yaml
+  - C4-drawer/stage_expectations.yaml
+  - C4-drawer/source_map.md
+  - C4-drawer/README.md
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-7.1
+  area: 'guided-slider: solution-space-preserving capability'
+  affected_packs:
+  - guided-slider
+  affected_statements:
+  - capability_statement
+  - NRM-GS-002
+  - FRE-GS-008
+  - UNR-GS-004
+  - ADM-GS-E
+  - INA-GS-B
+  - NEG-GS-002
+  - NEG-GS-013
+  source_passages:
+  - DOS-guided-slider S1
+  correction_status: CORRECTED
+  semantic_rationale: '"with the non-translational freedoms removed" defines a strict prismatic joint,
+    narrower than the ordinary sense of guided slider and than any project source. It rejected a cylindrical
+    rod in a plain bore. Now: the freedoms the instantiating requirement depends on are constrained and
+    the rest are DECLARED. Strict one-DOF guidance would be a different capability named single-dof-linear-guidance;
+    the retired statement is kept in capability_statement_history.'
+  files_changed:
+  - guided-slider/*
+  audit_status: clean; falsified by ADM-GS-E
+  unresolved_human_decisions: []
+- finding_id: SF-7.2
+  area: 'guided-slider: remove proper-subset corridor'
+  affected_packs:
+  - guided-slider
+  affected_statements:
+  - NRM-GS-006
+  - INA-GS-F
+  - NEG-GS-006
+  source_passages:
+  - DOS-guided-slider S1
+  correction_status: CORRECTED
+  semantic_rationale: As SF-5.5. Replaced by non-intersection and traversability predicates.
+  files_changed:
+  - guided-slider/normative.yaml
+  - guided-slider/realizations.yaml
+  - guided-slider/negative_cases.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-8.1
+  area: 'rotary-to-linear: interaction chain, not direct engagement'
+  affected_packs:
+  - rotary-to-linear-engagement
+  affected_statements:
+  - capability_statement
+  - NRM-RL-001
+  - ADM-RL-E
+  - ADM-RL-F
+  - NEG-RL-014
+  source_passages:
+  - DOS-rotary-to-linear-engagement S1
+  correction_status: CORRECTED
+  semantic_rationale: 'A localized engagement BETWEEN the rotating input body and the translating output
+    body excludes every multi-stage conversion: crank-link-slider, cable/drum/output, cam/follower/output.
+    Now an uninterrupted chain of realized localized interactions, each naming its participating bodies.'
+  files_changed:
+  - rotary-to-linear-engagement/*
+  audit_status: clean; falsified by ADM-RL-E and ADM-RL-F
+  unresolved_human_decisions: []
+- finding_id: SF-8.2
+  area: 'rotary-to-linear: representation out of normative'
+  affected_packs:
+  - rotary-to-linear-engagement
+  affected_statements:
+  - NRM-RL-002
+  - stage_expectations.s04.representation_obligations
+  - INA-RL-B
+  - NEG-RL-002
+  - NEG-RL-016
+  source_passages:
+  - DOS-rotary-to-linear-engagement S1
+  correction_status: CORRECTED
+  semantic_rationale: 'That a relation is DECLARED and a driving body RECORDED are DesignState obligations,
+    not physical properties. Moved to stage_expectations. The physical invariant now concerns the actual
+    kinematics: rotation causes translation over the declared range, possibly nonlinearly.'
+  files_changed:
+  - rotary-to-linear-engagement/normative.yaml
+  - rotary-to-linear-engagement/realizations.yaml
+  - rotary-to-linear-engagement/negative_cases.yaml
+  - rotary-to-linear-engagement/stage_expectations.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-8.3
+  area: 'common: remove fixed candidate plurality'
+  affected_packs:
+  - BM-002
+  - C4-drawer
+  - rotary-to-linear-engagement
+  - latch-retention
+  - bounded-two-state-closure
+  affected_statements:
+  - stage_expectations.s02 in five packs
+  source_passages:
+  - review findings 8.3 and 9.3
+  correction_status: CORRECTED
+  semantic_rationale: 'One candidate may legitimately remain after source- and physics-based elimination.
+    All five plurality_note blocks replaced by open_search_note: the space was not closed by library availability,
+    each rejection names a source/physical/feasibility reason, synthesis beyond the catalogue remained
+    possible, and an absent realizer yields UNSUPPORTED not INFEASIBLE.'
+  files_changed:
+  - 5 stage_expectations.yaml
+  - 5 negative_cases.yaml
+  - oracle_tools/audit_oracles.py
+  audit_status: FIXED_CANDIDATE_PLURALITY enforced; 1 mutation case
+  unresolved_human_decisions: []
+- finding_id: SF-9.1
+  area: 'latch-retention: reclassify geometry-on-both-bodies'
+  affected_packs:
+  - latch-retention
+  affected_statements:
+  - NRM-LR-002
+  source_passages:
+  - DOS-latch-retention S1
+  correction_status: CORRECTED
+  semantic_rationale: That participating material exists on both bodies is not stated in the capability
+    statement; it is a consequence of the interaction being realized. Reclassified to NECESSARY_PHYSICAL_CONSEQUENCE
+    with premises. The wording now asks for identified participating MATERIAL rather than touching surfaces,
+    so a field interaction with explicit pole and keeper regions is admissible on its own terms.
+  files_changed:
+  - latch-retention/normative.yaml
+  - latch-retention/realizations.yaml
+  - latch-retention/negative_cases.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-9.2
+  area: 'latch-retention: evidence minima out of physical admissibility'
+  affected_packs:
+  - latch-retention
+  affected_statements:
+  - NRM-LR-007
+  - NRM-LR-008
+  - evidence_cases.yaml
+  - NEG-LR-016
+  source_passages:
+  - review finding 9.2
+  correction_status: CORRECTED
+  semantic_rationale: Disturbance naming, force-window provenance and evidence provenance moved out of
+    the physical realization tag set into evidence_cases.yaml. A physically realized latch is no longer
+    inadmissible because no test has named its disturbance.
+  files_changed:
+  - latch-retention/normative.yaml
+  - latch-retention/realizations.yaml
+  - latch-retention/evidence_cases.yaml
+  - latch-retention/negative_cases.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-10.1
+  area: 'bounded-two-state-closure: relax persistent-constraint wording'
+  affected_packs:
+  - bounded-two-state-closure
+  affected_statements:
+  - NRM-HS-003
+  - ADM-HS-E
+  - INA-HS-C
+  - NEG-HS-003
+  - NEG-HS-015
+  source_passages:
+  - DOS-bounded-two-state-closure S1
+  correction_status: CORRECTED
+  semantic_rationale: 'Requiring ONE identical relative constraint to persist through the whole motion
+    rejects ordinary hand-off designs. Now: at every configuration at least one realized constraint keeps
+    the configuration within the allowed manifold; the mode may change and features may hand off. What
+    fails is a GAP in coverage.'
+  files_changed:
+  - bounded-two-state-closure/normative.yaml
+  - bounded-two-state-closure/realizations.yaml
+  - bounded-two-state-closure/negative_cases.yaml
+  audit_status: clean; falsified by ADM-HS-E
+  unresolved_human_decisions: []
+- finding_id: SF-10.2
+  area: 'bounded-two-state-closure: bound distinctness'
+  affected_packs:
+  - bounded-two-state-closure
+  affected_statements:
+  - NRM-HS-005
+  - ADM-HS-D
+  - ADM-HS-F
+  - INA-HS-E
+  - NEG-HS-005
+  - NEG-HS-016
+  source_passages:
+  - DOS-bounded-two-state-closure S1
+  correction_status: CORRECTED
+  semantic_rationale: Each extreme must be independently EVALUATED at its own configuration; it need not
+    have a distinct determining feature. One continuous slot or one magnetic field may produce both bounds.
+    What is forbidden is copying one evaluation result to both.
+  files_changed:
+  - bounded-two-state-closure/normative.yaml
+  - bounded-two-state-closure/realizations.yaml
+  - bounded-two-state-closure/negative_cases.yaml
+  audit_status: clean; falsified by ADM-HS-D and ADM-HS-F
+  unresolved_human_decisions: []
+- finding_id: SF-10.3
+  area: 'bounded-two-state-closure: bounding separate from holding'
+  affected_packs:
+  - bounded-two-state-closure
+  affected_statements:
+  - UNR-HS-002
+  - NEG-HS-011
+  source_passages:
+  - review finding 10.3
+  correction_status: CONFIRMED_UNCHANGED
+  semantic_rationale: Already correct and retained. A travel bound is never evidence that the closure
+    remains held against a disturbance; holding is owned by latch-retention. Re-verified in the Pass E
+    cross-pack ownership review.
+  files_changed:
+  - CROSS_PACK_OWNERSHIP_REVIEW.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-10.4
+  area: 'bounded-two-state-closure: criterion discrimination is evidence'
+  affected_packs:
+  - bounded-two-state-closure
+  affected_statements:
+  - NRM-HS-007
+  - evidence_cases.yaml
+  - NEG-HS-017
+  source_passages:
+  - review finding 10.4
+  correction_status: CORRECTED
+  semantic_rationale: Whether a test distinguishes a bounded from an unbounded control is a property of
+    the test. Moved out of the physical fixture tags.
+  files_changed:
+  - bounded-two-state-closure/normative.yaml
+  - bounded-two-state-closure/realizations.yaml
+  - bounded-two-state-closure/evidence_cases.yaml
+  - bounded-two-state-closure/negative_cases.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-11.1
+  area: 'auditor: source-grounded terminal-bound exemption'
+  affected_packs:
+  - bounded-two-state-closure
+  affected_statements:
+  - source_declares_terminal_states
+  source_passages:
+  - DOS-bounded-two-state-closure S1 verbatim
+  correction_status: CORRECTED
+  semantic_rationale: UNCONDITIONAL_TERMINAL_BOUND fired on the one capability whose bounds ARE its definition.
+    Rather than exempt the pack by name, the pack declares source_declares_terminal_states with a verbatim
+    fragment the auditor verifies against the frozen dossier text. An ungrounded declaration is itself
+    BLOCKING, and the check still fires for BM-002 and C4-drawer.
+  files_changed:
+  - bounded-two-state-closure/normative.yaml
+  - oracle_tools/audit_oracles.py
+  audit_status: 'UNCONDITIONAL_TERMINAL_BOUND: 2 mutation cases + 1 control'
+  unresolved_human_decisions: []
+- finding_id: SF-11.2
+  area: 'auditor: freedom-overlap findings arbitrated'
+  affected_packs:
+  - BM-002
+  - C4-drawer
+  - guided-slider
+  affected_statements:
+  - NRM-BM-002-009
+  - NRM-C4-007
+  - NRM-C4-008
+  - NRM-GS-005
+  source_passages:
+  - '-'
+  correction_status: CORRECTED
+  semantic_rationale: Four MAJOR NORMATIVE_CONSTRAINS_DECLARED_FREEDOM findings. In each case the invariant
+    references the freedom subject without constraining it. Rather than suppress the check, each invariant
+    now carries an explicit exclusion naming the freedom it does NOT constrain, and declares the relation
+    in related_freedoms.
+  files_changed:
+  - BM-002/normative.yaml
+  - C4-drawer/normative.yaml
+  - guided-slider/normative.yaml
+  audit_status: clean
+  unresolved_human_decisions: []
+- finding_id: SF-11.3
+  area: 'auditor: dead unresolved-reference check'
+  affected_packs:
+  - ALL
+  affected_statements:
+  - '-'
+  source_passages:
+  - review finding 11
+  correction_status: CORRECTED
+  semantic_rationale: The UNRESOLVED_REF_NOT_FOUND check contained an `and False` sub-expression making
+    one branch unreachable, and did not resolve parent ids. Rewritten to walk the inheritance chain. A
+    regression mutation and a control (a child referencing a parent unresolved id) both pass.
+  files_changed:
+  - oracle_tools/audit_oracles.py
+  audit_status: UNRESOLVED_REF_NOT_FOUND enforced; 1 mutation case + 1 control
+  unresolved_human_decisions: []
+- finding_id: SF-11.4
+  area: 'auditor: coverage check was too loose'
+  affected_packs:
+  - BM-002
+  affected_statements:
+  - '-'
+  source_passages:
+  - '-'
+  correction_status: CORRECTED
+  semantic_rationale: 'DIRECT_REQUIREMENT_COVERAGE_GAP originally searched the whole pack blob, so a passing
+    mention of REQ-002 in a derivation premise counted as coverage. The mutation designed to reproduce
+    the SF-5.1 omission did not fire. Tightened to structured citations only: invariant locators, unresolved
+    locators, stage-11 evaluation rules and not-verified entries. Found by the mutation suite, not by
+    inspection.'
+  files_changed:
+  - oracle_tools/audit_oracles.py
+  - oracle_tools/mutation_tests.py
+  audit_status: DIRECT_REQUIREMENT_COVERAGE_GAP enforced; 1 mutation case
+  unresolved_human_decisions: []
+- finding_id: SF-11.5
+  area: 'auditor: scope documentation'
+  affected_packs:
+  - '-'
+  affected_statements:
+  - '-'
+  source_passages:
+  - review finding 11
+  correction_status: CORRECTED
+  semantic_rationale: The auditor module docstring now states what it can and cannot establish, and every
+    report carries an auditor_scope field. It does not claim to prove physical truth, and says so.
+  files_changed:
+  - oracle_tools/audit_oracles.py
+  audit_status: n/a
+  unresolved_human_decisions: []
+summary:
+  total_findings: 45
+  CORRECTED: 44
+  CONFIRMED_UNCHANGED: 1
+unresolved_human_decisions:
+- id: AMB-001-2-01
+  pack: BM-001-2
+  status: OPEN_BLOCKING
+  question: What does "worked from inside the enclosure" denote, given that REQ-001 and REQ-003 require
+    the enclosure to be openable?
+  why_a_human_must_decide: Three incompatible readings are recorded and no rank-1 source distinguishes
+    them. The predicate DOMAIN is undefined, so no fidelity of evaluation can separate compliant from
+    non-compliant designs.
+- id: AMB-002-01
+  pack: BM-002
+  status: OPEN_NON_BLOCKING
+  carried_as: UNR-BM-002-001
+  question: Does the boundary-crossing element count as part of the enclosed mechanism under REQ-004?
+- id: AMB-002-02
+  pack: BM-002
+  status: OPEN_NON_BLOCKING
+  carried_as: UNR-BM-002-002
+  question: Where is the compliance edge of the source qualifier "approximately"?
+- id: AMB-001-3-01
+  pack: BM-001-3
+  status: OPEN_NON_BLOCKING
+  carried_as: UNR-BM-001-3-002
+  question: What does "rests" require of stability on a curved underside?
+- id: RDG-BM-001-3-01
+  pack: BM-001-3
+  status: READING_RECORDED_FOR_REVIEW
+  question: Confirm or reject the reading that "rests on a curved back" requires the LOAD-BEARING contact
+    to lie on the curved region.
+  note: Not an ambiguity - a reading this correction pass adopted and recorded in one place so it can
+    be rejected in one place.
+- id: REVIEW-NAMING-01
+  pack: bounded-two-state-closure
+  status: PREVIOUSLY_FLAGGED_NOW_CONFIRMED
+  question: The rename from hinge-and-stop was confirmed by review finding 1.7 and is retained with historical_aliases.
+audit_state:
+  canonical: 0 BLOCKING / 0 MAJOR
+  shuffled_seeds:
+  - 20260802
+  - 4177
+  - 90210
+  mutation_tests: 45/45 (38 defect cases, 7 controls)
+  clean_audit_count_after_last_correction: 1
+  note: Any correction resets this count. The sequence below was re-run in full after the last file change.
+next_executable_step: Await the second human review. On approval, Phase 1 closes and Phase 2 (pipeline
+  and stage contracts) begins. No LOCK.json, no production code, no CAD fixtures.

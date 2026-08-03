@@ -1,0 +1,29 @@
+capability_id: guided-slider
+schema_version: "0.3.0"
+domain: evidence_and_verification
+note: >
+  Evidence and verification-process admissibility, separated from physical design
+  at finding SF-1.1. Tests NRM-GS-007 only. A physical guide must never become
+  inadmissible because no test has been authored for it.
+
+evidence_tag_vocabulary:
+  guidance_observable_can_fail: "every observable mapped to a guidance criterion can take a non-conforming value under its own model"
+
+admissible_evidence_cases:
+  - id: ADM-EV-GS-A
+    summary: "Contact-resolved travel with the guide modelled as engagement geometry, so off-axis deviation can exceed its threshold."
+    tags: [guidance_observable_can_fail]
+  - id: ADM-EV-GS-B
+    summary: >
+      A declared-pair run whose 0.0-degree off-axis result is MARKED as a
+      structural artifact and excluded from evidential weight, with guidance
+      reported NOT_VERIFIED.
+    note: "Admitted although it verifies nothing. Correctly declining to count an artifact is the behaviour the invariant is for."
+    tags: [guidance_observable_can_fail]
+
+inadmissible_evidence_cases:
+  - id: INA-EV-GS-A
+    summary: "Guidance claimed on the strength of an off-axis deviation of 0.0 degrees produced by a declared prismatic pair, counted as a pass."
+    from_negative_case: NEG-GS-007
+    missing_tags: [guidance_observable_can_fail]
+    tags: []

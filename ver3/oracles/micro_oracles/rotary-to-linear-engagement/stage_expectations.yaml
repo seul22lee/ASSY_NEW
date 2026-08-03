@@ -1,5 +1,5 @@
 capability_id: rotary-to-linear-engagement
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 applies_when: >
   A design instantiates conversion of rotary motion into linear motion. These
   expectations constrain how the pipeline must represent that capability wherever
@@ -15,16 +15,31 @@ stages:
     must_not_be_decided: [conversion_family, ratio, engagement_geometry]
     may_remain_unresolved: [UNR-RL-001, UNR-RL-002]
     provenance_required: ["conversion obligation -> the requirement stating a rotary input and a linear output"]
-    plurality_note: >
-      More than one conversion family must survive s02 (FRE-RL-001). Reduction to
-      one is admissible only with the obligation each rejected family failed
-      recorded. Reduction to one because only one is implemented is the defect
-      NEG-RL-008 describes, and must be reported as a capability gap.
+    open_search_note: >
+      Corrected at SF-8.3; the former fixed-plurality rule is withdrawn. One
+      candidate may legitimately remain after source- and physics-based
+      elimination. What must hold instead:
+        - the solution space was not closed merely by current library availability;
+        - each rejected candidate carries a source, physical or feasibility reason;
+        - synthesis beyond the provider catalogue remained possible;
+        - an absent implemented realizer yields UNSUPPORTED, never INFEASIBLE
+          (NEG-RL-008).
   s04:
     must_exist: [input_axis, output_line, engagement_site, output_range, relation_between_input_and_output, swept_volumes_with_fidelity]
     must_not_be_decided: [ratio_value, engagement_dimensions, final_dimensions]
     may_remain_unresolved: [output_range, UNR-RL-001]
     provenance_required: ["engagement site -> the bodies it acts between", "relation -> the geometry it follows from"]
+    representation_obligations:
+      moved_at: SF-8.2
+      note: >
+        The following are DesignState REPRESENTATION obligations, moved here from
+        the capability's normative content. They constrain the record, not the
+        artifact, and a design does not become physically inadmissible by failing
+        them:
+          - the input/output relation is declared over the operating range;
+          - the driving body is identified;
+          - directionality and reversibility are represented explicitly;
+          - each interaction in the chain names its participating bodies.
   s05:
     must_exist: [conversion_realization, engagement_features_on_both_bodies, output_rotation_restraint, radial_support_realization, reaction_path_records]
     must_not_be_decided: [new_independent_entities, parameter_values]

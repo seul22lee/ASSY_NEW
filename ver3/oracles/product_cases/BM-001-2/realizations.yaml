@@ -1,8 +1,16 @@
 case_id: BM-001-2
-schema_version: "0.2.0"
+schema_version: "0.3.0"
+domain: physical_design
 note: >
-  Delta fixtures. Each is evaluated on its own geometry; none is compared to a
-  generated BM-001 design.
+  PHYSICAL delta fixtures only. Each is evaluated on its own geometry; none is
+  compared to a generated BM-001 design. Verification admissibility lives in
+  evidence_cases.yaml (finding SF-1.1).
+
+physical_tag_vocabulary:
+  planar_seating_region: "a boundary region seats flat against a mounting surface"
+  exposed_edges_non_projecting: "every edge of the exposed exterior boundary is non-projecting"
+  actuator_not_reachable_from_exposed_side: "no access path from the exposed half-space terminates at the actuator"
+  release_worked_from_inside: "the declared release action originates inside the enclosure, in the sense left open by AMB-001-2-01"
 
 admissible_realizations:
   - id: ADM-BM-001-2-A
@@ -19,6 +27,18 @@ admissible_realizations:
     summary: "Flat seating region with the exposed boundary formed by chamfered, recessed arrises rather than curvature; interior-worked retention."
     materially_differs_by: [boundary_form]
     note: "Admits a non-rounded solution. Rejected by the pre-correction wording that demanded 'rounded'."
+    tags: [planar_seating_region, exposed_edges_non_projecting,
+           actuator_not_reachable_from_exposed_side, release_worked_from_inside]
+  - id: ADM-BM-001-2-D
+    summary: >
+      L-shaped body seated on one narrow face, with the exposed boundary wrapping
+      three adjoining faces - none of them opposite the seating face - all arrises
+      non-projecting. Interior-worked retention.
+    materially_differs_by: [seating_topology, exposed_boundary_topology]
+    note: >
+      THE FALSIFIABILITY FIXTURE for finding SF-3.1. The prior wording required
+      the exposed boundary to be OPPOSITE the seating region, which rejected this
+      design. REQ-009 never relates the two sides geometrically.
     tags: [planar_seating_region, exposed_edges_non_projecting,
            actuator_not_reachable_from_exposed_side, release_worked_from_inside]
 

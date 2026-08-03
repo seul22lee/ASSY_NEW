@@ -1,68 +1,141 @@
 case_id: C4-drawer
-schema_version: "0.2.0"
+schema_version: "0.3.0"
+domain: physical_design
 note: >
-  Three materially different designs, each satisfying every invariant. ADM-C
-  uses neither a toothed transmission nor sliding rails; it is admitted to prove
-  the pack has not absorbed the legacy rack-and-rail realization.
+  PHYSICAL design fixtures only (finding SF-1.1). ADM-C4-C and ADM-C4-D exist to
+  falsify the retired universal premises about anti-rotation, axial load and
+  terminal bounds.
+
+physical_tag_vocabulary:
+  rotary_user_input: "a user-operated rotary input exists"
+  translating_drawer: "a translating drawer exists"
+  continuous_interaction_chain: "an uninterrupted chain of realized interactions connects them"
+  travel_axis_horizontal: "the travel axis is perpendicular to gravity, by geometric relation"
+  retracted_state_inside: "a retracted configuration exists with the drawer inside the cabinet envelope"
+  extended_state_projects_outside: "an extended configuration exists with part of the drawer outside it"
+  transition_traversable: "a traversable path connects the two configurations"
+  conversion_engagement_localized: "at least one interaction converts rotation to translation, with geometry on both bodies"
+  drawer_motion_guided: "the drawer path is constrained where the required sliding behaviour depends on it"
+  required_orientation_preserved: "orientation is constrained where the behaviour or the conversion requires it"
+  drawer_weight_reacted_throughout_travel: "the drawer's own weight has a reaction path at every configuration"
+  declared_ends_physically_produced: "any configuration declared a physical end of travel is produced by its own realized condition"
+  knob_externally_reachable: "an access path from the user region reaches the knob in the retracted configuration"
+  boundary_crossing_realized: "the chain crosses the cabinet boundary at a realized crossing"
+  crossing_non_interfering: "the moving element passes the boundary without unintended interference"
+  loaded_elements_reacted: "every element has a reaction for every load component it actually carries"
+  pose_clearances_satisfied: "at every configuration the drawer does not intersect cabinet material"
+  required_path_traversable: "the path between configurations is traversable"
+  assembly_paths_exist: "each discretely-installed part has a collision-free installation path"
 
 admissible_realizations:
   - id: ADM-C4-A
-    summary: "Knob shaft carries a toothed wheel engaging a toothed member on the drawer underside; drawer runs on two side rails that also remove rotation; extremes set by an abutment at each end of one rail."
-    materially_differs_by: [conversion_principle, guidance_type, extreme_determinant]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'drawer_anti_rotation', 'weight_reacted_throughout_travel', 'two_extremes_distinctly_determined', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    summary: >
+      Knob shaft carries a toothed wheel engaging a toothed member on the drawer
+      underside; drawer runs on two side rails that also remove rotation. Both
+      ends declared as physical ends of travel, set by an abutment at each end of
+      one rail.
+    family: toothed_wheel_and_linear_member
+    load_profile: "shaft carries radial tooth load at two journals; no axial load; rails carry the drawer weight throughout travel"
+    materially_differs_by: [conversion_principle, guidance_type, terminal_form]
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
+
   - id: ADM-C4-B
-    summary: "Knob drives a threaded rod along the travel direction; a follower on the drawer translates. Drawer runs in a dovetailed channel formed in the cabinet shell, which guides it and removes rotation. Extremes set by thread run-out at one end and a shoulder at the other."
-    materially_differs_by: [conversion_principle, guidance_type, part_count, extreme_determinant]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'drawer_anti_rotation', 'weight_reacted_throughout_travel', 'two_extremes_distinctly_determined', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    summary: >
+      Knob drives a threaded rod along the travel direction; a follower on the
+      drawer translates. Drawer runs in a dovetailed channel formed in the cabinet
+      shell, which guides it and removes rotation. Ends declared at thread run-out
+      and at a shoulder.
+    family: helical_thread_and_follower
+    load_profile: "rod carries axial thrust reacted at an end seat and radial load at its journals; channel carries the drawer weight"
+    materially_differs_by: [conversion_principle, guidance_type, part_count, terminal_form]
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
+
   - id: ADM-C4-C
-    summary: "Knob turns a drum winding a band to each end of the drawer, pulling it out and back. Drawer is carried on rolling supports in a tray recess whose walls remove rotation. Extremes set by band pay-out at full extension and by drawer face meeting the cabinet front at full retraction."
-    materially_differs_by: [conversion_principle, guidance_type, support_principle, extreme_determinant]
-    note: "No teeth and no sliding rail. Admitted because guidance, anti-rotation and conversion are stated as functions, not as mechanisms."
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'drawer_anti_rotation', 'weight_reacted_throughout_travel', 'two_extremes_distinctly_determined', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    summary: >
+      Knob turns a drum winding a band to each end of the drawer, pulling it out
+      and back. Drawer is carried on rolling supports in a tray recess whose walls
+      keep it square. NO configuration is declared a physical end of travel: the
+      drawer simply reaches a retracted and a projected-out configuration, and the
+      user stops turning.
+    family: band_and_drum
+    load_profile: "drum carries radial band tension at its journals; NO axial load anywhere; rollers carry the drawer weight throughout travel"
+    materially_differs_by: [conversion_principle, guidance_type, support_principle, terminal_form]
+    note: >
+      FALSIFIES the retired universal axial-load premise (SF-6.5) - nothing here
+      carries axial load - and the retired unconditional terminal requirement
+      (SF-6.3) - DOS-C4-drawer S3 records that no travel limit is stated.
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
+
+  - id: ADM-C4-D
+    summary: >
+      Knob drives a centred crank and connecting link to a drawer carrier running
+      in a single wide channel. The drawer is a shallow open tray whose angular
+      position about the travel axis is immaterial to the required sliding
+      behaviour; nothing restrains rotation about the travel direction beyond the
+      channel walls' incidental contact, and the symmetric centred drive applies
+      no net moment about that axis.
+    family: crank_and_link
+    load_profile: "crank pin carries radial load at its journal; the link carries axial load along itself reacted at both pins; the channel carries the drawer weight"
+    materially_differs_by: [conversion_principle, relation_linearity, anti_rotation_source]
+    note: >
+      FALSIFIES the retired universal moment premise (SF-6.1). A centred symmetric
+      drive applies no moment about the travel direction, so no dedicated
+      anti-rotation provision is owed.
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
 
 inadmissible_realizations:
   - id: INA-C4-A
-    summary: "Drawer translation related to knob angle by a declared ratio with no engagement geometry between them."
+    summary: "Drawer translation related to knob angle by a declared ratio with no participating geometry anywhere in the chain."
     from_negative_case: NEG-C4-001
-    missing_tags: [conversion_realized, conversion_engagement_localized]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'drawer_guided', 'drawer_anti_rotation', 'weight_reacted_throughout_travel', 'two_extremes_distinctly_determined', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    missing_tags: [conversion_engagement_localized]
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
   - id: INA-C4-B
     summary: "Drawer travel axis is vertical; the design lifts the drawer out of the cabinet top."
     from_negative_case: NEG-C4-002
     missing_tags: [travel_axis_horizontal]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'drawer_anti_rotation', 'weight_reacted_throughout_travel', 'two_extremes_distinctly_determined', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
   - id: INA-C4-C
-    summary: "Drawer translates along a horizontal axis but remains wholly within the cabinet envelope at its extended state; nothing slides out."
+    summary: "Drawer translates along a horizontal axis but remains wholly within the cabinet envelope at its extended configuration; nothing slides out."
     from_negative_case: NEG-C4-003
     missing_tags: [extended_state_projects_outside]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'drawer_anti_rotation', 'weight_reacted_throughout_travel', 'two_extremes_distinctly_determined', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
   - id: INA-C4-D
-    summary: "Drawer is supported only at its retracted position; at full extension its weight has no reaction path and the drawer is cantilevered off the end of its supports."
+    summary: "Drawer is supported only at its retracted position; at full extension its weight has no reaction path and the drawer runs off the end of its supports."
     from_negative_case: NEG-C4-004
-    missing_tags: [weight_reacted_throughout_travel]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'drawer_anti_rotation', 'two_extremes_distinctly_determined', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    missing_tags: [drawer_weight_reacted_throughout_travel]
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
   - id: INA-C4-E
-    summary: "Drawer free to rotate about the travel direction while the conversion applies a moment to it."
+    summary: >
+      Deep drawer driven by a single off-centre toothed engagement at one side,
+      free to yaw in an oversize channel; at part travel it skews and jams,
+      defeating the required sliding behaviour.
     from_negative_case: NEG-C4-005
-    missing_tags: [drawer_anti_rotation]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'weight_reacted_throughout_travel', 'two_extremes_distinctly_determined', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    missing_tags: [required_orientation_preserved]
+    note: "Rejected because the REQUIRED behaviour fails, not because anti-rotation is universally owed. ADM-C4-D has no dedicated anti-rotation and is admitted."
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
   - id: INA-C4-F
-    summary: "One limit condition evaluated once and credited to both travel extremes."
+    summary: "Both configurations are DECLARED physical ends of travel; one condition is evaluated once and its result copied to both."
     from_negative_case: NEG-C4-006
-    missing_tags: [two_extremes_distinctly_determined]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'drawer_anti_rotation', 'weight_reacted_throughout_travel', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    missing_tags: [declared_ends_physically_produced]
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
   - id: INA-C4-G
     summary: "Knob placed inside the cabinet, reachable only after the drawer is already open."
     from_negative_case: NEG-C4-007
     missing_tags: [knob_externally_reachable]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'drawer_anti_rotation', 'weight_reacted_throughout_travel', 'two_extremes_distinctly_determined', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
   - id: INA-C4-H
     summary: "Drawer's emergence path passes through the cabinet front panel, which has no opening."
     from_negative_case: NEG-C4-008
-    missing_tags: [emergence_path_clear]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'drawer_anti_rotation', 'weight_reacted_throughout_travel', 'two_extremes_distinctly_determined', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'assembly_paths_exist']
+    missing_tags: [pose_clearances_satisfied, required_path_traversable]
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'loaded_elements_reacted', 'assembly_paths_exist']
   - id: INA-C4-I
-    summary: "Knob shaft has no radial support; it is located only by the conversion engagement."
+    summary: "Knob shaft demonstrably carries radial load from its conversion engagement, with no radial reaction anywhere in the design."
     from_negative_case: NEG-C4-009
-    missing_tags: [rotating_elements_radially_supported]
-    tags: ['rotary_user_input', 'translating_drawer', 'continuous_motion_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_realized', 'conversion_engagement_localized', 'drawer_guided', 'drawer_anti_rotation', 'weight_reacted_throughout_travel', 'two_extremes_distinctly_determined', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_element_supported', 'axial_reaction_realized', 'corridor_not_fully_occupied', 'emergence_path_clear', 'assembly_paths_exist']
+    missing_tags: [loaded_elements_reacted]
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'crossing_non_interfering', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']
+  - id: INA-C4-J
+    summary: "Knob shaft passes through a clearance hole and fouls the cabinet wall over part of its rotation; the interference is unmodelled."
+    from_negative_case: NEG-C4-018
+    missing_tags: [crossing_non_interfering]
+    note: "Added at SF-6.4. Rejected for interference, not for lacking cabinet-local support."
+    tags: ['rotary_user_input', 'translating_drawer', 'continuous_interaction_chain', 'travel_axis_horizontal', 'retracted_state_inside', 'extended_state_projects_outside', 'transition_traversable', 'conversion_engagement_localized', 'drawer_motion_guided', 'required_orientation_preserved', 'drawer_weight_reacted_throughout_travel', 'declared_ends_physically_produced', 'knob_externally_reachable', 'boundary_crossing_realized', 'loaded_elements_reacted', 'pose_clearances_satisfied', 'required_path_traversable', 'assembly_paths_exist']

@@ -1,5 +1,5 @@
 case_id: C4-drawer
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 freedoms:
   - id: FRE-C4-001
     decision: Chain topology between knob and drawer.
@@ -8,10 +8,11 @@ freedoms:
   - id: FRE-C4-002
     decision: Mechanism family realizing the rotary-to-linear conversion, and whether it is toothed.
     why_free: >
-      DOS-C4-drawer S3: no transmission type or ratio is stated. The two legacy
-      statements about whether a toothed transmission is over-engineered
-      contradict each other and neither is rank-1 (AMB-C4-01, UNR-C4-002), so
-      neither may require or forbid a family.
+      DOS-C4-drawer S3: no transmission type or ratio is stated. Two legacy
+      commentaries contradict each other about whether a toothed transmission is
+      over-engineered; neither is rank-1, so neither may require or forbid a
+      family, and their disagreement is itself evidence that the choice must stay
+      free (LEGACY-CONFLICT-C4-01, reclassified at SF-6.6).
     example_realizations: [toothed rack and driven wheel, helical thread pair, cable and drum, crank and connecting link, capstan and band, cam and follower]
     must_not_be_asserted_by_tests: true
   - id: FRE-C4-003
@@ -25,11 +26,15 @@ freedoms:
     why_free: "DOS-C4-drawer S3: no stroke, no flush condition and no clearance are stated."
     must_not_be_asserted_by_tests: true
   - id: FRE-C4-005
-    decision: Guidance and support strategy, including the number of guides and their placement.
+    decision: >
+      Guidance and support strategy, the number of guides and their placement, and
+      whether rotation about the travel direction is restrained at all.
     why_free: >
       DOS-C4-drawer S3: not stated. Two side rails, a single centre guide, a
       dovetailed shell and rolling supports all satisfy NRM-C4-005 and
       NRM-C4-006. The legacy rail_gap of 80 mm is a realization value (DOS S6).
+      Broadened at SF-6.1: rotational restraint is owed only where the required
+      sliding behaviour or the selected conversion needs it.
     must_not_be_asserted_by_tests: true
   - id: FRE-C4-006
     decision: Which realized condition determines each travel extreme, and whether the two share a part.
@@ -53,4 +58,17 @@ freedoms:
   - id: FRE-C4-010
     decision: Whether the drawer holds position when the knob is released.
     why_free: "DOS-C4-drawer S3: no back-drive or hold statement. See UNR-C4-003."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-011
+    decision: Whether the design declares physical ends of travel at all.
+    why_free: >
+      DOS-C4-drawer S3 records explicitly that no travel limit is stated at either
+      end. "Slides out" names two configurations, not two limits. Added at SF-6.3.
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-012
+    decision: Where the boundary-crossing element is supported.
+    why_free: >
+      DOS-C4-drawer S3 states nothing about the crossing. A shaft on two internal
+      supports through a clearance hole and a shaft journalled in the cabinet wall
+      are equally admissible. Added at SF-6.4.
     must_not_be_asserted_by_tests: true

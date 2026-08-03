@@ -1,5 +1,5 @@
 case_id: BM-001
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 note: >
   States only what the pipeline must represent, preserve, defer or report.
   Adds no product requirement. Stage-11 rules are conditional; no outcome is
@@ -9,7 +9,7 @@ stages:
   s01:
     must_exist: [requirements, scenarios, actors, system_boundary, observables, assumptions, unknowns]
     must_not_be_decided: [mechanism_family, product_layout, parts, geometry, dimensions, materials]
-    may_remain_unresolved: [UNR-BM-001-001, UNR-BM-001-002, UNR-BM-001-003, UNR-BM-001-004, UNR-BM-001-005]
+    may_remain_unresolved: [UNR-BM-001-001, UNR-BM-001-002, UNR-BM-001-003, UNR-BM-001-004, UNR-BM-001-005, UNR-BM-001-006, UNR-BM-001-007, UNR-BM-001-008]
     provenance_required: ["requirement -> source clause id"]
   s02:
     must_exist: [obligations, physical_interactions, body_hypotheses, states, transitions, candidates]
@@ -26,17 +26,22 @@ stages:
       correction CLS-010; the product requirement is only that each
       discretely-installed part has an installation path.
   s04:
-    must_exist: [world_and_body_frames, joint_frames, axes, state_poses, motion_paths, engagement_sites, swept_volumes_with_fidelity, spatial_feasibility_per_candidate, open_pose_determinant]
+    must_exist: [world_and_body_frames, joint_frames, axes, state_poses, motion_paths, engagement_sites, swept_volumes_with_fidelity, spatial_feasibility_per_candidate, open_state_declaration, declared_usable_access_region]
     must_not_be_decided: [final_dimensions, manufacturing_features, renderer_originated_values]
     may_remain_unresolved: [free_spatial_alternatives]
     provenance_required: ["pose -> constraint/contact ids", "swept_volume -> fidelity declaration"]
     selection_gate: "A SelectionDecision may be emitted only after every retained candidate carries s03 and s04 feasibility evidence at equal obligation coverage."
   s05:
-    must_exist: [connection_realizations, engagement_features, open_pose_determinant_realization, retention_realization, feature_graph, construction_program, solver_problem, load_path_records]
+    must_exist: [connection_realizations, engagement_features, retention_realization, feature_graph, construction_program, solver_problem, load_path_records]
     must_not_be_decided: [new_independent_entities, duplicate_bodies, parameter_values]
     may_remain_unresolved: [embodiment_alternatives]
     provenance_required: ["realization -> obligation ids it discharges"]
     representation_note: "load_path_records is a representation obligation moved here at correction CLS-011."
+    conditional_realization_note: >
+      A realization of the open-state determinant is required only where the
+      design declares a DISCRETE terminal open pose. A design declaring an open
+      configuration region owes a reachability and access record instead
+      (NRM-BM-001-005, finding SF-2.2).
   s06:
     must_exist: [solved_values_or_explicit_status, constraint_residuals, feasibility_report, active_constraints]
     must_not_be_decided: [default_units, deferred_constraints]
@@ -64,13 +69,20 @@ stages:
     provenance_required: ["evidence -> observable id"]
   s11:
     must_exist: [requirement_evaluation, evidence_coverage, acceptance_summary]
+    unresolved_scope_rule: >
+      An unresolved decision suppresses only the outcomes named in its
+      `block_scopes`. A quantitative unknown may make an acceptance INDETERMINATE
+      or withhold PASS; it may never make a structural predicate underivable
+      (NEG-BM-001-014, finding SF-2.3).
     must_not_be_decided: [new_evidence]
     may_remain_unresolved: []
     provenance_required: ["evaluation -> evidence ids", "PASS -> declared scope"]
     outcome_rules:
       REQ-001:
-        pass_requires: "kinematic evidence that both states are reached and the transition is traversable, at a declared fidelity"
-        fail_when: "a state is unreachable or the transition interferes"
+        pass_requires: "kinematic evidence that both states are reached and the transition is traversable, at a declared fidelity, with the declared usable access unobstructed at OPEN"
+        fail_when: "a state is unreachable, the transition interferes, or the closure obstructs its own declared usable access at OPEN"
+        if_access_adequacy_asserted: INDETERMINATE
+        note: "No access envelope exists (UNR-BM-001-006), so a claim that the access is ADEQUATE is INDETERMINATE regardless of the geometry."
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       REQ-002:
@@ -104,8 +116,10 @@ stages:
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       REQ-008:
-        pass_requires: "evidence of repeated engage/release without consumption of a participating feature"
-        fail_when: "a participating feature is consumed or destroyed"
+        pass_requires: "a realized close-engage / release / close-engage-again cycle with every participating feature's retention-critical geometry present in the final state"
+        fail_when: "a participating feature is consumed or permanently disabled, or the closed state is unreachable after release"
+        if_cycle_count_asserted: INDETERMINATE
+        note: "One realizable cycle is structural. A cycle count or durability claim is quantitative and blocked by UNR-BM-001-007."
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
   s12:

@@ -52,3 +52,23 @@ nothing else. `NRM-LR-008` forbids reporting such a value as a result;
 `stage_expectations.s08.provenance_of_values_note` and `s10.circularity_rule`
 place the obligation on specific stages so the check is mechanical rather than
 editorial.
+
+---
+
+## Corrections at the independent semantic review
+
+The findings below were raised by human review of the first clean audit and are
+recorded finding-by-finding in `../../INDEPENDENT_SEMANTIC_REVIEW_REPORT.md`.
+Statement text, basis types and unresolved scopes in this map reflect the
+corrected pack, not the reviewed one.
+
+| Finding | What changed |
+|---|---|
+| SF-1.3 | `PROJECT_DEFINED_CAPABILITY` replaces `DIRECT_USER_REQUIREMENT`. |
+| SF-9.1 | `NRM-LR-002` is reclassified from a capability fragment to a `NECESSARY_PHYSICAL_CONSEQUENCE`. "Geometry on both bodies" is not stated in the capability statement; it is a consequence of the interaction being realized. The wording now requires identified participating MATERIAL rather than touching surfaces, so a field interaction with explicit pole and keeper regions is admissible. |
+| SF-9.2 | The three evidence-only tags moved to `evidence_cases.yaml`. A physically realized latch is no longer inadmissible because no disturbance has been named in a test. |
+| SF-9.3 | The fixed-plurality rule is withdrawn. |
+
+The core idea is unchanged and remains the load-bearing statement of the pack:
+`NRM-LR-004`, the release action must be distinguishable from the disturbance the
+retention resists.

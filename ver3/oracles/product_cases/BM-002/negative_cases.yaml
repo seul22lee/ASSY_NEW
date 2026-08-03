@@ -1,5 +1,5 @@
 case_id: BM-002
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 purpose: >
   Each case is a design or a pipeline behaviour that must be rejected, together
   with the invariant that must do the rejecting. Cases NEG-*-009 onward are
@@ -13,18 +13,25 @@ negative_cases:
     fixture: INA-BM-002-A
   - id: NEG-BM-002-002
     kind: design
-    description: "Platform free to rotate about the travel direction while the conversion applies a moment to it."
-    must_be_rejected_by: [NRM-BM-002-005]
+    description: >
+      The scenario requires the platform to stay square to the housing to accept
+      the payload, and nothing restrains its rotation under the conversion's
+      friction moment.
+    note: >
+      Corrected at SF-5.4. The defect is failure to preserve an orientation the
+      SCENARIO requires, not the absence of anti-rotation as such. A platform
+      whose angular position is immaterial (ADM-BM-002-E) is admissible.
+    must_be_rejected_by: [NRM-BM-002-007]
     fixture: INA-BM-002-B
   - id: NEG-BM-002-003
     kind: design
     description: "Rotating drive element located only by the conversion engagement, with no radial support."
-    must_be_rejected_by: [NRM-BM-002-004]
+    must_be_rejected_by: [NRM-BM-002-006]
     fixture: INA-BM-002-C
   - id: NEG-BM-002-004
     kind: design
     description: "Axially loaded element with no axial reaction path; the payload load terminates nowhere."
-    must_be_rejected_by: [NRM-BM-002-004, NRM-BM-002-009]
+    must_be_rejected_by: [NRM-BM-002-006, NRM-BM-002-011]
     fixture: INA-BM-002-D
   - id: NEG-BM-002-005
     kind: design
@@ -33,13 +40,14 @@ negative_cases:
     fixture: INA-BM-002-E
   - id: NEG-BM-002-006
     kind: design
-    description: "A single limit condition credited to both travel extremes."
-    must_be_rejected_by: [NRM-BM-002-007]
+    description: "Both travel terminals are DECLARED as physical ends of travel, and one condition is evaluated once and its result copied to both."
+    note: "Corrected at SF-5.6. The invariant now applies only where terminals are declared as physical ends of travel."
+    must_be_rejected_by: [NRM-BM-002-009]
     fixture: INA-BM-002-F
   - id: NEG-BM-002-007
     kind: design
     description: "Payload access path terminating at the housing opening, accepted as reaching the platform."
-    must_be_rejected_by: [NRM-BM-002-008]
+    must_be_rejected_by: [NRM-BM-002-010]
     fixture: INA-BM-002-G
   - id: NEG-BM-002-008
     kind: design
@@ -69,7 +77,8 @@ negative_cases:
       REQ-007 ("avoid obvious jamming") is reported as verified on the strength of
       declared-pair (V-A) kinematic evidence.
     reproduced_from: "DOS-BM-002 S5 E1, E2"
-    must_be_rejected_by: [evidence_scope.EV-BM-002-001]
+    must_be_rejected_by: [NRM-BM-002-014]
+    fixture: INA-EV-BM-002-A
     required_outcome: "NOT_VERIFIED with the fidelity gap named; V-B contact evidence is absent."
   - id: NEG-BM-002-012
     kind: process
@@ -95,3 +104,77 @@ negative_cases:
     reproduced_from: "DOS-BM-002 S5 hold-drift row; DOS-BM-002 S6"
     must_be_rejected_by: [UNR-BM-002-004, FRE-BM-002-008]
     required_outcome: "Rejected as REFERENCE_REALIZATION_DETAIL."
+  - id: NEG-BM-002-015
+    kind: design
+    description: "Declared platform travel of 45 mm, reported as satisfying REQ-002."
+    note: >
+      Added at SF-5.1. The prior invariant set contained no travel requirement at
+      all — REQ-002 appeared only as an unresolved qualifier question — so this
+      design passed every invariant in the pack.
+    must_be_rejected_by: [NRM-BM-002-004]
+    fixture: INA-BM-002-I
+
+  - id: NEG-BM-002-016
+    kind: design
+    description: "No supported payload is declared; REQ-003 is treated as satisfied by the existence of a platform."
+    note: "Added at SF-5.1. Same omission as NEG-BM-002-015, on the payload requirement."
+    must_be_rejected_by: [NRM-BM-002-005]
+    fixture: INA-BM-002-J
+
+  - id: NEG-BM-002-017
+    kind: design
+    description: "Drive shaft passes through an oversize clearance hole and interferes with the housing at the extremes of its motion; the interference is unmodelled."
+    note: >
+      Added at SF-5.2, together with the removal of mandatory housing-local
+      support. The correct requirement at a crossing is non-interference, not that
+      the housing be the bearing.
+    must_be_rejected_by: [NRM-BM-002-002]
+    fixture: INA-BM-002-K
+
+  - id: NEG-BM-002-018
+    kind: evidence
+    description: "Evidence cited for the conversion engagement without stating whether the model resolves contact."
+    must_be_rejected_by: [NRM-BM-002-014]
+    fixture: INA-EV-BM-002-B
+
+  - id: NEG-BM-002-019
+    kind: process
+    description: >
+      Support or reaction is demanded of an element that carries no such load in
+      the declared scenario — for example a thrust feature required on a cable
+      drum, or a radial bearing required on a link that sees only axial load.
+    reproduced_from: "SF-5.3"
+    must_be_rejected_by: [NRM-BM-002-006]
+    required_outcome: "Rejected. The predicate quantifies over load-carrying elements, not over all elements."
+
+  - id: NEG-BM-002-020
+    kind: process
+    description: >
+      A design is rejected, or required to add a feature, because it lacks
+      anti-rotation of the platform, where the scenario does not constrain the
+      platform's angular position and the conversion does not need the restraint.
+    reproduced_from: "SF-5.4"
+    must_be_rejected_by: [NRM-BM-002-007, FRE-BM-002-003]
+    required_outcome: "Rejected. ADM-BM-002-E is admissible."
+
+  - id: NEG-BM-002-021
+    kind: process
+    description: >
+      Two physical stops are inferred from the existence of a stated 80-100 mm
+      displacement.
+    reproduced_from: "SF-5.6"
+    must_be_rejected_by: [NRM-BM-002-009]
+    required_outcome: "Rejected. A displacement requirement is not a travel-limit requirement; ADM-BM-002-B declares no physical end of travel."
+
+  - id: NEG-BM-002-022
+    kind: process
+    description: >
+      Candidate generation is required to retain more than one conversion family,
+      or a run is faulted merely for arriving at a single surviving candidate.
+    reproduced_from: "SF-8.3"
+    must_be_rejected_by: [FRE-BM-002-002]
+    required_outcome: >
+      Rejected. One candidate may legitimately remain after source- and
+      physics-based elimination. What must hold is that the space was not closed
+      by library availability, that each rejection names a source, physical or
+      feasibility reason, and that an absent realizer yields UNSUPPORTED.

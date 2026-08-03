@@ -1,30 +1,39 @@
 case_id: C4-drawer
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 tier: product_case
 inherits: null
+policy: ver3/oracles/ORACLE_AUTHORING_POLICY.md
 dossier: ver3/oracles/_dossiers/DOS-C4-drawer.md
 lock_status: SEMANTICALLY_AUDITED
+physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+
+correction_note: >
+  Corrected at findings SF-6.1 through SF-6.6. The entire rank-1 request is one
+  sentence, so every derived statement was re-tested for necessity against
+  materially different realizations rather than retained because it is common in
+  the legacy realization.
+
 source_note: >
-  The entire rank-1 source for this case is one sentence: "Design a desktop
-  cabinet whose drawer slides out horizontally when you turn a knob." Everything
-  else in the legacy record is realization detail, scoring commentary or reused
-  evidence. The invariant set is deliberately small. A large invariant set here
-  would be evidence that the pack had absorbed a realization.
+  The whole rank-1 source is: "Design a desktop cabinet whose drawer slides out
+  horizontally when you turn a knob." Everything else in the legacy record is
+  realization detail, scoring commentary or reused evidence.
 
 invariants:
   - id: NRM-C4-001
     statement: >
       A user-operated rotary input drives the drawer's translation, through an
-      uninterrupted motion chain.
+      uninterrupted chain of realized interactions.
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ["DOS-C4-drawer S1 command", "DOS-C4-drawer S2"]
-    conclusion_scope: "Existence of a rotary user input, a translating drawer, and a continuous chain between them."
+    conclusion_scope: "Existence of a rotary user input, a translating drawer, and a continuous interaction chain between them."
     exclusions:
       - "Does not name a conversion mechanism, a ratio, or a number of turns."
       - "Does not require that the knob be the only way to move the drawer."
-    verification_predicate: "exists(rotary user input) and exists(translating drawer) and a connected chain of realized couplings between them."
-    requires_tags: [rotary_user_input, translating_drawer, continuous_motion_chain]
+      - "Does not require direct engagement between knob and drawer; intermediate bodies are admissible."
+    verification_predicate: "exists(rotary user input) and exists(translating drawer) and a connected chain of realized interactions between them, each link naming its participating bodies."
+    requires_tags: [rotary_user_input, translating_drawer, continuous_interaction_chain]
     related_freedoms: [FRE-C4-001, FRE-C4-002]
     related_unresolved: []
 
@@ -37,7 +46,7 @@ invariants:
     exclusions:
       - "Does not fix which horizontal direction, nor which cabinet face the drawer emerges from."
       - "Does not require the travel to be a straight line, only that its direction is horizontal."
-    verification_predicate: "the drawer travel axis is perpendicular to the gravity direction, expressed as a geometric relation and not as a label."
+    verification_predicate: "the drawer travel axis is perpendicular to the gravity direction, established as a geometric relation and not by a face label."
     requires_tags: [travel_axis_horizontal]
     related_freedoms: [FRE-C4-003]
     related_unresolved: []
@@ -45,153 +54,223 @@ invariants:
   - id: NRM-C4-003
     statement: >
       The drawer has a retracted state within the cabinet and an extended state
-      in which part of it lies outside the cabinet boundary, and it reaches both.
+      in which part of it lies outside the cabinet boundary, and both are
+      reachable along a traversable path.
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
-    source_locators: ["DOS-C4-drawer S1 command (\"slides out\")", "DOS-C4-drawer S2"]
-    conclusion_scope: "Existence and reachability of the two named states."
+    source_locators: ['DOS-C4-drawer S1 command ("slides out")', "DOS-C4-drawer S2"]
+    conclusion_scope: "Existence and reachability of the two named configurations."
     exclusions:
       - "Does not fix the stroke; see UNR-C4-001."
       - "Does not require the drawer to be fully enclosed when retracted, nor fully clear when extended."
-    verification_predicate: "exists(retracted state) with the drawer inside the cabinet envelope, exists(extended state) with part of the drawer outside it, and a traversable path between them."
+      - >
+        Does NOT require either configuration to be a physical END of travel. The
+        command names two configurations, not two limits. See NRM-C4-007.
+    verification_predicate: "exists(retracted configuration) with the drawer inside the cabinet envelope, exists(extended configuration) with part of the drawer outside it, and a traversable path between them."
     requires_tags: [retracted_state_inside, extended_state_projects_outside, transition_traversable]
     related_freedoms: [FRE-C4-004]
     related_unresolved: [UNR-C4-001]
 
   - id: NRM-C4-004
     statement: >
-      Rotary motion is converted to drawer translation at a realized conversion
-      with localized engagement on both participating bodies.
+      Rotary motion becomes drawer translation through at least one realized
+      interaction whose participating geometry is identified on each body it acts
+      between.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-C4-drawer S1 command", "DOS-C4-drawer S2"]
     derivation_premises:
       - "The command states a rotary input and a translating output."
       - "Rotation does not become translation without an interaction constraining the two."
-      - "An interaction occurs at material in contact or engagement, not between whole bodies."
-    conclusion_scope: "Existence and locality of the conversion engagement."
+      - "An interaction occurs at material in contact, engagement or field coupling, not between whole bodies."
+    conclusion_scope: "Existence and locality of the conversion interaction(s)."
     exclusions:
-      - "Does not name a conversion family. The conflicting legacy judgements about whether a toothed transmission is appropriate (AMB-C4-01) are excluded from this statement."
-    verification_predicate: "exists(conversion realization) with engagement geometry on both participating bodies and a defined input/output relationship."
-    requires_tags: [conversion_realized, conversion_engagement_localized]
+      - "Does not name a conversion family."
+      - >
+        The conflicting legacy statements about whether a toothed transmission is
+        appropriate are lower-rank commentary and bear on nothing here. See
+        LEGACY-CONFLICT-C4-01.
+    verification_predicate: "at least one realized interaction in the chain converts rotation to translation, with participating geometry identified on both bodies it acts between."
+    requires_tags: [conversion_engagement_localized]
     related_freedoms: [FRE-C4-002]
-    related_unresolved: [UNR-C4-002]
-    acknowledges_ambiguity: AMB-C4-01
+    related_unresolved: []
+    closes_finding: [SF-6.6]
 
   - id: NRM-C4-005
     statement: >
-      The drawer is guided so that its motion is confined to its travel path, and
-      rotation of the drawer about the travel direction is prevented by a
-      realized constraint.
+      The drawer's motion is guided sufficiently to preserve the horizontal
+      sliding behaviour the command requires of it.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-C4-drawer S1 command"]
     derivation_premises:
-      - "The command requires the drawer to slide along a definite direction."
-      - "A rotary conversion applies a moment about the driven body's travel direction."
-      - "An unconstrained body under an applied moment rotates, and would not slide along the stated direction."
-    conclusion_scope: "Existence of travel guidance and of an anti-rotation constraint."
+      - "The command requires the drawer to slide out horizontally, which is a definite behaviour."
+      - "A body whose path or orientation is unconstrained where that behaviour depends on it does not perform the behaviour."
+    conclusion_scope: >
+      Guidance sufficient for the REQUIRED sliding behaviour. Not a fixed
+      degree-of-freedom count, not a guidance mechanism, not a guide count.
     exclusions:
-      - "Does not name a guidance mechanism or a number of guides."
-      - "The anti-rotation constraint may be provided by the guidance itself."
-      - "Does not require guidance to be demonstrated by an off-axis deviation value; see evidence_scope EV-C4-002."
-    verification_predicate: "exists(guidance realization constraining the drawer to its path) AND exists(realized constraint removing rotation about the travel direction)."
-    requires_tags: [drawer_guided, drawer_anti_rotation]
+      - >
+        Does NOT require rotational restraint universally. Rotation about the
+        travel direction must be restrained only where (a) it would violate the
+        required sliding behaviour, or (b) the selected conversion needs the
+        restraint to produce translation. Corrected at SF-6.1.
+      - >
+        Does NOT assert that every rotary conversion applies a moment about the
+        travel direction. A symmetric two-band pull and a centred linkage do not.
+        The former universal premise was falsified at SF-6.1.
+      - "Does not require guidance to be evidenced by an off-axis deviation value; see evidence_cases."
+    verification_predicate: >
+      the drawer's path and orientation are constrained wherever the required
+      horizontal sliding behaviour depends on them; and where rotation about the
+      travel direction would violate that behaviour or defeat the selected
+      conversion, a realized constraint removes it.
+    requires_tags: [drawer_motion_guided, required_orientation_preserved]
     related_freedoms: [FRE-C4-005]
     related_unresolved: []
+    closes_finding: [SF-6.1]
 
   - id: NRM-C4-006
     statement: >
-      The drawer's weight and any contents load have a realized reaction path at
-      every point of travel, including the extended state.
+      The drawer's own weight has a realized reaction path at every configuration
+      of its travel, including the extended one.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-C4-drawer S1 command"]
     derivation_premises:
       - "The drawer is a physical body in a gravity field, travelling horizontally."
       - "An unreacted weight accelerates the body downward."
-      - "At the extended state the drawer's centre of mass has moved relative to its supports, so the reaction path must still exist there."
-    conclusion_scope: "Existence of a weight reaction path across the whole travel, not only at the retracted state."
+      - "At the extended configuration the drawer's centre of mass has moved relative to its supports, so the reaction path must still exist there."
+    conclusion_scope: >
+      Existence of a reaction path for the DRAWER'S OWN WEIGHT across the whole
+      travel. Existence only, not adequacy, not margin.
     exclusions:
-      - "Does not prescribe a support type, a support count, or an overturning margin. No margin is stated by the source; see UNR-C4-005."
-    verification_predicate: "for the retracted state, the extended state and the intermediate path: exists(load_path) from the drawer to a reaction site."
-    requires_tags: [weight_reacted_throughout_travel]
+      - >
+        Does NOT range over "any contents load". The command states no payload
+        and no contents. A contents load enters this invariant only when an
+        instantiating requirement declares one; until then the requirement would
+        be unbounded and unfalsifiable. Corrected at SF-6.2.
+      - "Does not prescribe a support type, a support count, or an overturning margin; none is stated. See UNR-C4-005."
+    verification_predicate: >
+      for the retracted configuration, the extended configuration and the interior
+      of the path: exists(load_path) from the drawer to a reaction site, for the
+      drawer's own weight; and for any contents load an instantiating requirement
+      declares, the same.
+    requires_tags: [drawer_weight_reacted_throughout_travel]
     related_freedoms: [FRE-C4-005]
     related_unresolved: [UNR-C4-005]
+    closes_finding: [SF-6.2]
 
   - id: NRM-C4-007
     statement: >
-      Each travel extreme is determined by its own realized condition, evaluated
-      at that extreme's position.
+      Where the design declares a travel configuration as a physical end of
+      travel, that end is produced by a realized condition evaluated at its own
+      configuration.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-C4-drawer S1 command (\"slides out\")"]
+    applies_when: "the design declares a configuration as a physical end of travel"
+    source_locators: ['DOS-C4-drawer S1 command ("slides out")']
     derivation_premises:
-      - "The command names two distinct states, so the travel has two ends."
-      - "Two distinct positions cannot both be determined by one condition evaluated once."
-    conclusion_scope: "Distinctness of the two extreme determinants."
+      - "A declared physical end of travel is a claim about the artifact."
+      - "An end of travel that nothing physical produces is a property of the model."
+      - "Two distinct configurations cannot both be determined by one condition evaluated once."
+    conclusion_scope: >
+      Physical origin and independent evaluation of DECLARED ends of travel. Not a
+      requirement that ends of travel exist.
     exclusions:
-      - "Distinctness is required of the CONDITION or CONTACT FEATURE, not of the manufactured part. One rail carrying an abutment at each end satisfies this."
-      - "Does not require a hard stop, nor a retention feature; see UNR-C4-003."
-    verification_predicate: "each extreme references its own contact feature or its own limit condition, evaluated at that extreme's coordinate."
-    requires_tags: [two_extremes_distinctly_determined]
-    related_freedoms: [FRE-C4-006]
+      - >
+        Does NOT constrain FRE-C4-011, whether the design declares physical ends of travel at all. That choice stays free; this statement governs only what follows once the choice is made.
+      - >
+        Does NOT require two physical extreme determinants. DOS-C4-drawer S3
+        records explicitly that NO travel limit is stated at either end. A drawer
+        that simply reaches a retracted and a projected-out configuration along a
+        traversable path satisfies the command. Corrected at SF-6.3.
+      - "Distinctness is required of the CONDITION or CONTACT FEATURE, not of the manufactured part."
+      - "Does not require a retention feature; see UNR-C4-003."
+    verification_predicate: >
+      if a configuration is declared a physical end of travel: it references its
+      own realized condition, evaluated at its own configuration, with no result
+      copied between ends. Otherwise: NRM-C4-003's reachability and traversability
+      predicate is the whole obligation.
+    requires_tags: [declared_ends_physically_produced]
+    related_freedoms: [FRE-C4-006, FRE-C4-011]
     related_unresolved: [UNR-C4-003]
+    closes_finding: [SF-6.3]
 
   - id: NRM-C4-008
     statement: >
-      The knob is reachable by the user from outside the cabinet, and the chain
-      crosses the cabinet boundary at a realized crossing whose moving element is
-      supported by the cabinet.
+      The knob is reachable by the user from outside the cabinet, and where the
+      chain crosses the cabinet boundary the crossing is realized and the moving
+      element passes without unintended interference.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-C4-drawer S1 command (\"when you turn a knob\")"]
+    source_locators: ['DOS-C4-drawer S1 command ("when you turn a knob")']
     derivation_premises:
       - "The command requires a user to turn the knob, so the knob is accessible to the user."
-      - "The drawer is inside the cabinet in the retracted state, so a chain from an accessible knob to the drawer crosses the cabinet boundary."
-      - "An element that moves relative to the boundary it passes through is located by that boundary or it is unconstrained."
-    conclusion_scope: "Knob reachability and existence and support of the boundary crossing."
+      - "The drawer is inside the cabinet in the retracted configuration, so a chain from an accessible knob to the drawer crosses the cabinet boundary."
+      - "A moving element and the boundary it passes through must not occupy the same space."
+    conclusion_scope: "Knob reachability, and existence and non-interference of the boundary crossing."
     exclusions:
+      - >
+        Does NOT constrain FRE-C4-012, where the boundary-crossing element is supported. This statement requires only that the crossing exist and not interfere; the support location stays free.
+      - >
+        Does NOT require the cabinet material at the crossing to support the
+        moving element. A shaft may pass through clearance and be carried entirely
+        on internal supports. Corrected at SF-6.4.
       - "Does not fix which face carries the knob, nor a grip size or form."
       - "Does not require a seal."
-    verification_predicate: "exists(access path from the user region to the knob) and exists(boundary crossing) with engagement geometry between the moving element and the cabinet."
-    requires_tags: [knob_externally_reachable, boundary_crossing_realized, crossing_element_supported]
-    related_freedoms: [FRE-C4-007]
+    verification_predicate: "exists(access path from the user region to the knob in the retracted configuration) and exists(boundary crossing) with no interference between the moving element and the cabinet at any point of operation."
+    requires_tags: [knob_externally_reachable, boundary_crossing_realized, crossing_non_interfering]
+    related_freedoms: [FRE-C4-007, FRE-C4-012]
     related_unresolved: []
+    closes_finding: [SF-6.4]
 
   - id: NRM-C4-009
     statement: >
-      Rotating elements of the chain are supported against radial load, and any
-      element carrying axial load has a realized axial reaction.
+      Every element that carries a transverse or radial load in the declared
+      operating scenario has a realized radial reaction, and every element that
+      carries an axial load has a realized axial reaction.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
+    applies_when: "an element carries the relevant load component in the declared operating scenario"
     source_locators: ["DOS-C4-drawer S1 command"]
     derivation_premises:
-      - "A rotating element carrying transverse load requires a radial constraint or it displaces."
-      - "A conversion between rotation and translation generally produces a force component along the rotating element's axis."
-      - "An unreacted axial force accelerates the element."
-    conclusion_scope: "Existence of radial support and of axial reaction where axial load occurs."
-    exclusions: ["Does not name a support type. Does not require a separate part."]
-    verification_predicate: "for each rotating element: exists(radial support realization); for each axially loaded element: exists(axial reaction path)."
-    requires_tags: [rotating_elements_radially_supported, axial_reaction_realized]
+      - "An unreacted force accelerates the body carrying it."
+      - "Which load components a given element carries depends on the conversion selected, not on the command."
+    conclusion_scope: "Reaction of loads actually produced by the selected realization. Existence, not adequacy."
+    exclusions:
+      - >
+        Does NOT assert that rotary-to-linear conversion generally produces axial
+        force on the rotating element. A toothed wheel driving a linear member
+        produces none; a drum winding a band produces none. Only some families do.
+        The former universal premise was retired at SF-6.5.
+      - "Does not name a support type and does not require a separate part."
+    verification_predicate: "for each element and each load component it carries in the declared scenario: exists(reaction path) for that component. Elements not carrying a component owe no reaction for it."
+    requires_tags: [loaded_elements_reacted]
     related_freedoms: [FRE-C4-008]
     related_unresolved: []
+    closes_finding: [SF-6.5]
 
   - id: NRM-C4-010
     statement: >
-      The drawer occupies a proper subset of its travel corridor at every point
-      of travel, and the corridor is clear of the cabinet material through which
-      the drawer emerges.
+      At every configuration of the travel the drawer solid does not intersect
+      cabinet material, and the path between the retracted and extended
+      configurations is traversable.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-C4-drawer S1 command (\"slides out\")"]
+    source_locators: ['DOS-C4-drawer S1 command ("slides out")']
     derivation_premises:
-      - "A body filling its corridor has nowhere to move."
-      - "A body cannot pass through material that occupies its path."
-    conclusion_scope: "Corridor occupancy and clearance of the emergence path."
-    exclusions: ["Does not fix a clearance value; none is stated by the source."]
-    verification_predicate: "swept_volume(drawer) is a proper subset of the travel corridor and does not intersect cabinet material at any point of travel."
-    requires_tags: [corridor_not_fully_occupied, emergence_path_clear]
+      - "Material cannot pass through material."
+      - "A path blocked at any interior point is not traversable, whatever its endpoints do."
+    conclusion_scope: "Non-intersection along the travel and traversability of the path."
+    exclusions:
+      - >
+        Does NOT require the drawer to occupy a proper subset of a travel
+        corridor; the corridor is in general defined by the swept volume.
+        Corrected in line with SF-5.5.
+      - "Does not fix a clearance value; none is stated."
+    verification_predicate: "for every configuration of the travel: intersect(drawer_solid, cabinet_material) is empty; and the path is traversable at a declared fidelity."
+    requires_tags: [pose_clearances_satisfied, required_path_traversable]
     related_freedoms: []
     related_unresolved: []
 
@@ -201,7 +280,7 @@ invariants:
       position without passing through already-placed material.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-C4-drawer S1 command (\"Design a desktop cabinet\")"]
+    source_locators: ['DOS-C4-drawer S1 command ("Design a desktop cabinet")']
     derivation_premises:
       - "The command asks for a cabinet as a producible artifact, which is assembled from parts."
       - "A part cannot occupy space already occupied."
@@ -212,64 +291,148 @@ invariants:
     related_freedoms: [FRE-C4-009]
     related_unresolved: []
 
+  - id: NRM-C4-012
+    statement: >
+      An observable offered as evidence of guidance must be able to take a
+      non-conforming value under the model that produces it.
+    basis_type: VERIFICATION_MINIMUM
+    support_type: derived
+    enables_claim: >
+      NRM-C4-005 may be reported PASS. Without this minimum, an off-axis
+      deviation of 0.0 degrees produced by a declared prismatic pair - a value the
+      model cannot vary - would be counted as showing that the drawer is guided.
+    source_locators: ["DOS-C4-drawer S5 E2"]
+    derivation_premises:
+      - "DOS-C4-drawer S5 E2 records tracks_straight measured as 0.0 degrees exactly under a declared prismatic pair."
+      - "Under that model off-axis deviation is identically zero by construction of the coupling."
+      - "An observable that cannot take any other value distinguishes nothing, so it cannot be evidence."
+    conclusion_scope: "Admissibility of an observable as evidence of guidance. Says nothing about the design."
+    exclusions: ["Does not forbid declared-pair models; it requires a value exact by construction to be marked as a structural artifact rather than counted."]
+    verification_predicate: "for each observable mapped to a guidance criterion: the model that produced it admits at least one configuration in which the observable violates its threshold."
+    requires_evidence_tags: [guidance_observable_can_fail]
+    related_freedoms: []
+    related_unresolved: []
+
+  - id: NRM-C4-013
+    statement: >
+      Evidence produced for a different case may be cited only with its
+      originating case named.
+    basis_type: VERIFICATION_MINIMUM
+    support_type: derived
+    enables_claim: >
+      Any C4-drawer requirement may be reported PASS on carried-over evidence.
+      Without this minimum, a result produced for the lift variant would be
+      reported as a C4-drawer verification with nothing marking it as reused.
+    source_locators: ["DOS-C4-drawer S5 E1"]
+    derivation_premises:
+      - 'DOS-C4-drawer S5 E1 records stages.physics = "reused - PASS": no simulation was executed for C4-drawer.'
+      - "A result obtained on a different geometry is evidence about that geometry."
+      - "Reuse may be legitimate, but only a reader who knows it occurred can judge it."
+    conclusion_scope: "Admissibility of carried-over evidence. Says nothing about the design."
+    exclusions: ["Does not forbid evidence reuse; it forbids silent reuse."]
+    verification_predicate: "every cited result carries the case it was produced for; results produced for another case are marked as reused or are treated as absent."
+    requires_evidence_tags: [reuse_origin_declared]
+    related_freedoms: []
+    related_unresolved: []
+
+legacy_conflicts:
+  - id: LEGACY-CONFLICT-C4-01
+    formerly: AMB-C4-01
+    reclassified_at: SF-6.6
+    statements_in_conflict:
+      - source: "/home/ftk3187/github/ASSY_Ver1.0/tasks/build_goldens.py:1142 docstring"
+        rank: 4
+        says: "a drawer's rack-pinion is over-engineered; a good model would omit it"
+      - source: "/home/ftk3187/github/ASSY_Ver1.0/tasks/benchmark/manifest.json C4-drawer scoring_note"
+        rank: 5
+        says: "the drawer alternate, gear NOT over-engineered here"
+    classification: conflicting_legacy_commentary
+    why_not_a_source_ambiguity: >
+      Neither statement is rank-1. The rank-1 command requires rotary-to-linear
+      operation ("when you turn a knob") and says nothing about a gear. Two
+      lower-rank commentaries disagreeing about the merit of one realization
+      creates no ambiguity in the acceptance model, because neither could have
+      bound the family in the first place. Previously recorded as AMB-C4-01 with
+      an implication that a human must decide whether a toothed transmission is
+      required; that implication is withdrawn.
+    what_it_is_evidence_of: >
+      That mechanism choice must remain free. Two competent readers of the same
+      legacy corpus disagreed about a realization the source never required.
+      Recorded as support for FRE-C4-002.
+    blocks_nothing: true
+    requires_human_decision: false
+
 required_unresolved:
   - id: UNR-C4-001
     decision: Drawer stroke / travel distance.
+    kind: quantitative
     why_must_remain_open: >
       DOS-C4-drawer S3: no stroke is stated. The legacy realization used 120 mm
-      and the reused evidence reports 127.3 mm against a 120.0 threshold, but
-      both are realization and benchmark artifacts (DOS S6), not requirements.
+      and the reused evidence reports 127.3 mm against a 120.0 threshold; both are
+      realization and benchmark artifacts, not requirements.
     resolvable_when: "A stroke, a usable-opening depth, or a contents envelope is supplied."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-C4-003 — reachability of the two configurations is structural and needs no stroke value."
     source_locators: ["DOS-C4-drawer S3", "DOS-C4-drawer S6"]
-  - id: UNR-C4-002
-    decision: Whether a toothed transmission is warranted for this case.
-    why_must_remain_open: >
-      AMB-C4-01. Two legacy statements contradict each other: build_goldens.py
-      calls the drawer's rack-pinion "over-engineered", while the benchmark
-      manifest scoring_note calls it "NOT over-engineered here". Neither
-      statement is the rank-1 command, so neither can require or forbid a
-      conversion family. The conflict is recorded and left standing; what follows
-      from it is only that the family remains free (FRE-C4-002).
-    resolvable_when: "A rank-1 statement about transmission ratio, effort, or turns-to-full-travel is supplied."
-    blocks: []
-    source_locators: ["DOS-C4-drawer S4"]
   - id: UNR-C4-003
-    decision: Whether the drawer must be retained closed, or held at any position.
+    decision: Whether the drawer must be retained closed, held at any position, or bounded at either end.
+    kind: qualitative
     why_must_remain_open: >
-      DOS-C4-drawer S3: no retention, latching or hold requirement is stated, and
-      the case is explicitly distinguished from the latched drawer (DOS S8).
-    resolvable_when: "A retention or hold requirement is stated."
-    blocks: []
+      DOS-C4-drawer S3: no retention, latching, hold or travel-limit requirement
+      is stated, and the case is explicitly distinguished from the latched drawer
+      (DOS-C4-drawer S8).
+    resolvable_when: "A retention, hold or travel-limit requirement is stated."
+    block_scopes: []
     source_locators: ["DOS-C4-drawer S3", "DOS-C4-drawer S8"]
   - id: UNR-C4-004
     decision: Knob torque, effort, and turns to full travel.
+    kind: quantitative
     why_must_remain_open: "DOS-C4-drawer S3: none is stated."
     resolvable_when: "An ergonomic ceiling or a turns budget is supplied."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-C4-008 — geometric reachability of the knob does not depend on how hard it is to turn."
     source_locators: ["DOS-C4-drawer S3"]
   - id: UNR-C4-005
-    decision: Drawer payload, contents load, and any overturning margin at full extension.
+    decision: Drawer contents load and any overturning margin at full extension.
+    kind: quantitative
     why_must_remain_open: >
       DOS-C4-drawer S3: no payload or contents are stated. NRM-C4-006 therefore
-      requires only that a reaction path exists, never that a stated load is
-      carried with a stated margin.
-    resolvable_when: "A payload and a margin are supplied."
-    blocks: []
+      ranges over the drawer's own weight, and over a contents load only where an
+      instantiating requirement declares one.
+    resolvable_when: "A contents load and a margin are supplied."
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "NRM-C4-006 — the existence of a reaction path for the drawer's own weight is structural."
     source_locators: ["DOS-C4-drawer S3"]
+    closes_finding: [SF-6.2]
   - id: UNR-C4-006
     decision: The numeric envelope implied by "desktop".
+    kind: quantitative
     why_must_remain_open: "DOS-C4-drawer S3: no cabinet dimensions are stated."
     resolvable_when: "An envelope or a reference surface is supplied."
-    blocks: []
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
     source_locators: ["DOS-C4-drawer S3"]
   - id: UNR-C4-007
     decision: Whether the drawer must also be movable by hand.
+    kind: interpretive
     why_must_remain_open: >
       The command states the knob as the operating input but does not state
-      exclusivity. NRM-C4-001 therefore excludes the question rather than
-      deciding it. Merging this case with the hand-pulled latched drawer
-      (DOS S8) would decide it silently.
+      exclusivity. NRM-C4-001 therefore excludes the question rather than deciding
+      it. Merging this case with the hand-pulled latched drawer would decide it
+      silently.
     resolvable_when: "A statement of exclusivity or of a hand-operation requirement."
-    blocks: []
+    block_scopes: []
     source_locators: ["DOS-C4-drawer S1", "DOS-C4-drawer S8"]
+
+retired_unresolved:
+  - id: UNR-C4-002
+    was: Whether a toothed transmission is warranted for this case.
+    retired_at: SF-6.6
+    why: >
+      It was never an unresolved DECISION. It was a disagreement between two
+      lower-rank legacy commentaries about a realization the rank-1 command never
+      required. Recording it as unresolved implied a human must rule on whether a
+      gear is needed. Reclassified as LEGACY-CONFLICT-C4-01 and cited as support
+      for FRE-C4-002 instead.

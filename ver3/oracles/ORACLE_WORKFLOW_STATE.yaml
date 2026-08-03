@@ -1,33 +1,22 @@
 # Workflow state ONLY. Never Oracle evidence. Nothing here may be cited by a pack.
-schema_version: "0.3.0"
-updated_after: "Pass 6 - two clean audit sequences"
+schema_version: "0.4.0"
+updated_after: "independent semantic review and correction pass"
 
-current_pass: 6_COMPLETE
-workflow_status: READY_FOR_HUMAN_REVIEW
-clean_audit_count: 2      # canonical order; shuffled order under 3 seeds
+current_pass: SEMANTIC_CORRECTION_COMPLETE
+workflow_status: READY_FOR_SECOND_HUMAN_REVIEW
+branch: ver3-oracle-phase1-review
+reviewed_commit: 3b64aee601985ba509d2420462af624ed5616cc2
+
 lock_created: false
 production_pipeline_code_exists: false
+cad_fixtures_exist: false
+files_outside_ver3_modified: false
 
-completed_artifacts:
-  pass_1_frozen_dossiers:
-    - _dossiers/DOS-BM-001.md
-    - _dossiers/DOS-BM-001-2.md
-    - _dossiers/DOS-BM-001-3.md
-    - _dossiers/DOS-BM-002.md
-    - _dossiers/DOS-C4-drawer.md
-    - _dossiers/DOS-guided-slider.md
-    - _dossiers/DOS-rotary-to-linear-engagement.md
-    - _dossiers/DOS-latch-retention.md
-    - _dossiers/DOS-bounded-two-state-closure.md   # renamed at F-3C-001; content unchanged
-  policy_and_method:
-    - ORACLE_METHOD.md
-    - ORACLE_AUTHORING_POLICY.md
-  pass_2_packs: all nine authored, 8 files each
-  index_and_report:
-    - ORACLE_INDEX.md
-    - ORACLE_VALIDATION_REPORT.md
-  auditor: ../oracle_tools/audit_oracles.py
-  audit_reports: _audit/
+clean_audit_count: 1
+clean_audit_note: >
+  Reset to 1 by the correction pass, as required. The complete sequence - YAML
+  parse, per-pass 3A/3B/3C/3D/3E, canonical full audit, three shuffled audits and
+  the 45-case mutation suite - was re-run in full after the last file change.
 
 pack_status:
   BM-001:                       SEMANTICALLY_AUDITED
@@ -40,71 +29,79 @@ pack_status:
   latch-retention:              SEMANTICALLY_AUDITED
   bounded-two-state-closure:    SEMANTICALLY_AUDITED
 
-totals:
-  invariants: 67
-  required_unresolved: 37
-  freedoms: 65
-  admissible_fixtures: 31
-  inadmissible_fixtures: 59
-  negative_cases: 104
+physical_validation_status: PENDING_FOR_EVERY_PACK
+physical_validation_note: >
+  All 41 admissible fixtures are NEEDS_GEOMETRY_VALIDATION. No CAD model and no
+  physics run exists for any of them. SEMANTICALLY_AUDITED means the semantic
+  review passes are clean; it makes no claim about physical realizability.
 
-unresolved_findings: []      # 0 across 3A/3B/3C/3D, canonical and shuffled
+totals:
+  invariants: 73
+  verification_minima: 10
+  required_unresolved: 42
+  freedoms: 72
+  admissible_physical_fixtures: 41
+  inadmissible_physical_fixtures: 59
+  admissible_evidence_cases: 14
+  inadmissible_evidence_cases: 12
+  negative_cases: 131
+
+semantic_reviews:
+  source_entailment: {file: SOURCE_ENTAILMENT_REVIEW.yaml, statements: 73, unsupported: 0}
+  fixture_plausibility: {file: FIXTURE_PLAUSIBILITY_REVIEW.yaml, fixtures: 41, rejected: 0,
+                         needs_geometry_validation: 41}
+  cross_pack_ownership: {file: CROSS_PACK_OWNERSHIP_REVIEW.yaml, checks: 6, result: clean}
+
+audit_state:
+  canonical: {BLOCKING: 0, MAJOR: 0}
+  per_pass: {"3A": 0, "3B": 0, "3C": 0, "3D": 0, "3E": 0}
+  shuffled_seeds: [20260802, 4177, 90210]
+  shuffled_result: {BLOCKING: 0, MAJOR: 0}
+  mutation_tests: {total: 45, defect_cases: 38, control_cases: 7, failed: 0}
+
+unresolved_findings: []
 
 source_ambiguities:
-  AMB-001-2-01:
-    status: OPEN_BLOCKING
-    pack: BM-001-2
-    note: "Three candidate readings recorded in _ambiguities/AMB-001-2-01.md; none selected."
-  AMB-001-3-01:
-    status: OPEN_NON_BLOCKING
-    pack: BM-001-3
-  AMB-002-01:
-    status: OPEN_NON_BLOCKING
-    pack: BM-002
-    carried_as: UNR-BM-002-001
-    note: "REQ-004 encloses the mechanism; REQ-001 puts the input outside. The status of the crossing element is undetermined."
-  AMB-002-02:
-    status: OPEN_NON_BLOCKING
-    pack: BM-002
-    carried_as: UNR-BM-002-002
-    note: "'approximately 80-100 mm' has no stated compliance edge."
+  AMB-001-2-01: {status: OPEN_BLOCKING, pack: BM-001-2,
+    note: "Three readings recorded, none selected. The only unresolved in the set that legitimately blocks a structural predicate, because the predicate's DOMAIN is undefined."}
+  AMB-001-3-01: {status: OPEN_NON_BLOCKING, pack: BM-001-3, carried_as: UNR-BM-001-3-002}
+  AMB-002-01:   {status: OPEN_NON_BLOCKING, pack: BM-002, carried_as: UNR-BM-002-001}
+  AMB-002-02:   {status: OPEN_NON_BLOCKING, pack: BM-002, carried_as: UNR-BM-002-002}
+
+retired_ambiguities:
   AMB-C4-01:
-    status: OPEN_NON_BLOCKING
-    pack: C4-drawer
-    carried_as: UNR-C4-002
-    note: "Two legacy statements contradict each other about a toothed transmission. Neither is rank-1, so neither may bind the family choice. The disagreement stands."
+    retired_at: SF-6.6
+    became: LEGACY-CONFLICT-C4-01
+    why: >
+      Never a source ambiguity. A rank-4 docstring and a rank-5 scoring note
+      disagreeing about a realization the rank-1 command never required. Neither
+      could bind the family, so their disagreement creates no acceptance
+      ambiguity. Recorded as conflicting legacy commentary, cited as support for
+      FRE-C4-002, and requiring no human decision.
 
 correction_history:
-  # Oracle corrections from the manual classification report
-  - {id: CLS-002,  target: BM-001,        outcome: applied}
-  - {id: CLS-004,  target: BM-001,        outcome: applied}
-  - {id: CLS-005,  target: BM-001,        outcome: applied}
-  - {id: CLS-008,  target: BM-001,        outcome: applied}
-  - {id: CLS-010,  target: BM-001,        outcome: applied, note: "assembly_dependency_graph moved to stage_expectations"}
-  - {id: CLS-011,  target: BM-001,        outcome: applied, note: "load_path_records moved to stage_expectations"}
-  - {id: CLS-2-002, target: BM-001-2,     outcome: applied, note: "restored REQ-010 exact wording; recorded AMB-001-2-01"}
-  - {id: CLS-2-003, target: BM-001-2,     outcome: applied}
-  # Tool corrections - the auditor was defective, the Oracle was not
-  - {id: TOOL-001, target: auditor, outcome: applied, note: "exclusions-aware skip for freedom overlap"}
-  - {id: TOOL-002, target: auditor, outcome: applied, note: "unauthored packs passed silently; now BLOCKING"}
-  - {id: TOOL-003, target: auditor, outcome: applied, note: "rank-1 locators need not be REQ-numbered; added DIRECT_FROM_LEGACY_SECTION and MICRO_DIRECT_NOT_FROM_CAPABILITY"}
-  - {id: TOOL-004, target: auditor, outcome: applied, note: "a count behind a definite article is anaphoric, not prescriptive"}
-  - {id: TOOL-005, target: auditor, outcome: applied, note: "freedom-overlap keys deduplicated by stem"}
-  # Oracle corrections from the blind audit
-  - {id: ORA-001,  target: guided-slider, outcome: applied, note: "NRM-GS-001 stated a representation requirement; restated as a design property"}
-  - {id: F-3C-001, target: bounded-two-state-closure, outcome: applied,
-     note: "renamed from hinge-and-stop; mechanism name standing for a capability. FLAGGED FOR REVIEW - changes an identifier the operator had used in writing."}
-  - {id: SRCMAP-001, target: BM-001, outcome: applied, note: "source_map realigned to v0.2 ids; freedoms and requirement coverage added"}
+  - {id: "CLS-*", target: BM-001 family, outcome: applied, note: "classification-report corrections"}
+  - {id: "TOOL-001..005", target: auditor, outcome: applied, note: "earlier tool defects"}
+  - {id: "F-3C-001", target: bounded-two-state-closure, outcome: applied, note: "mechanism-name rename"}
+  - {id: "SF-1.1..SF-1.7", target: common model, outcome: applied}
+  - {id: "SF-2.1..SF-2.4", target: BM-001, outcome: applied}
+  - {id: "SF-3.1", target: BM-001-2, outcome: applied}
+  - {id: "SF-4.1..SF-4.3", target: BM-001-3, outcome: applied}
+  - {id: "SF-5.1..SF-5.8", target: BM-002, outcome: applied}
+  - {id: "SF-6.1..SF-6.6", target: C4-drawer, outcome: applied}
+  - {id: "SF-7.1..SF-7.2", target: guided-slider, outcome: applied}
+  - {id: "SF-8.1..SF-8.3", target: rotary-to-linear-engagement, outcome: applied}
+  - {id: "SF-9.1..SF-9.3", target: latch-retention, outcome: applied}
+  - {id: "SF-10.1..SF-10.4", target: bounded-two-state-closure, outcome: applied}
+  - {id: "SF-11.1..SF-11.5", target: auditor, outcome: applied}
 
-mutation_test:
-  performed: true
-  injected_defects: 12
-  caught: 12
-  controls: 1
-  controls_correctly_silent: 1
-  note: "Run on throwaway copies. Three checks were loosened at TOOL-003/004/005, so the auditor was re-tested for blindness before the clean result was accepted."
+outstanding_human_decisions:
+  - "AMB-001-2-01 - blocking; BM-001-2 cannot be locked until a reading is selected."
+  - "RDG-BM-001-3-01 - confirm or reject the reading of 'rests on a curved back' this pass adopted."
+  - "AMB-002-01, AMB-002-02, AMB-001-3-01 - non-blocking; each bounds one requirement's evaluation."
 
 next_executable_step: >
-  Await human review. On approval, Phase 1 closes with LOCK.json and Phase 2
-  (pipeline and stage contracts) begins. Nothing further should be authored
-  under oracles/ before that decision, and no production pipeline code exists yet.
+  Await the second human review. On approval, Phase 1 closes with LOCK.json and
+  Phase 2 (pipeline and stage contracts) begins. Physical validation of the
+  fixture set by CAD or simulation is a separate, still-outstanding activity and
+  is not a precondition for the semantic lock.

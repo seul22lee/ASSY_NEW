@@ -51,3 +51,26 @@ All available lift kinematic evidence is **V-A declared-pair**. Under declared
 coupling the transmission relationship is exact by construction, so it observes
 nothing about the engagement. REQ-007 (jamming) is a contact-level question and
 is therefore NOT_VERIFIED — which is not INFEASIBLE.
+
+## Corrected at the independent semantic review
+
+BM-002 needed a full rewrite rather than local edits. The most serious finding:
+
+> **The travel and payload requirements were missing from the acceptance model
+> entirely.** The source states approximately 80–100 mm and approximately 1 kg.
+> The reviewed pack carried them only as an unresolved question about the word
+> "approximately", so a design declaring 45 mm of travel passed every invariant.
+
+`NRM-BM-002-004` and `NRM-BM-002-005` restore them with the qualifier intact.
+
+Four premises were **withdrawn as false**, each falsified by a fixture now in the
+set: that every rotary conversion applies a moment about the platform travel
+direction (SF-5.4); that rotating elements universally need radial and axial
+reactions (SF-5.3); that a stated displacement implies two physical stops
+(SF-5.6); and that the housing must support the drive where it crosses the
+boundary (SF-5.2). The proper-subset corridor formulation went too (SF-5.5), and
+the drum-stall terminal was replaced — a stall is an overload condition, not a
+travel determinant, and it conflicted with REQ-007 (SF-5.7).
+
+Five conversion families are now fixtures, and every derived invariant was
+re-tested against all five (SF-5.8).
