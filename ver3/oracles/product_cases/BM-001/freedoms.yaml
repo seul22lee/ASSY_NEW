@@ -1,0 +1,62 @@
+case_id: BM-001
+schema_version: "0.2.0"
+note: >
+  Each entry is an explicit refusal to constrain. No test and no Oracle statement
+  may assert a value for any decision listed here.
+
+freedoms:
+  - id: FRE-BM-001-001
+    decision: Mechanism family realizing the closure connection.
+    why_free: "DOS-BM-001 S3: the source names a function, never a mechanism."
+    example_realizations: [rotating closure on a lateral axis, compliant flexing region, planar sliding cover, detachable cover with mating guides, multi-bar coupled motion]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-002
+    decision: Mechanism family realizing retention.
+    why_free: "DOS-BM-001 S3: 'reusable latch' names a function."
+    example_realizations: [compressive catch, interference catch, magnetic catch, over-centre draw, quarter-turn, friction fit]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-003
+    decision: Which boundary region carries the aperture, and where the closure connects.
+    why_free: "DOS-BM-001 S2: no face, side or handedness is stated."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-004
+    decision: Motion type of the closure.
+    why_free: "DOS-BM-001 S2: no motion type stated. Rotation, translation, compound and detachment are equally admissible."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-005
+    decision: Part count and part-boundary decomposition.
+    why_free: "DOS-BM-001 S2: no count stated. Part count is never evidence of quality."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-006
+    decision: Enclosure boundary form and cross-section.
+    why_free: >
+      DOS-BM-001 S2: nothing requires a prismatic enclosure. Stated explicitly
+      because the family variants add boundary requirements and the parent must
+      not presume a box.
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-007
+    decision: All absolute dimensions, tolerances and clearances.
+    why_free: "DOS-BM-001 S2; see UNR-BM-001-003."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-008
+    decision: Material and manufacturing process.
+    why_free: "DOS-BM-001 S2; see UNR-BM-001-004."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-009
+    decision: Which realized condition determines the open pose, and whether it is a discrete feature or integral to another body.
+    why_free: >
+      DOS-BM-001 S2: no source requires a travel limit at all. NRM-BM-001-005
+      requires only that something realized determines the pose.
+    example_realizations: [terminal abutment, integral run-out face, rest condition against a supporting surface, over-centre condition, retained position]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-010
+    decision: Number and arrangement of retention engagement sites.
+    why_free: "DOS-BM-001 S2: unconstrained."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-011
+    decision: Whether the closure remains connected to the enclosure in the open state.
+    why_free: >
+      DOS-BM-001 S2 records that no source states the closure stays attached.
+      Added at correction CLS-002 so the detachable realization ADM-BM-001-C is
+      explicitly admitted rather than merely unrejected.
+    must_not_be_asserted_by_tests: true

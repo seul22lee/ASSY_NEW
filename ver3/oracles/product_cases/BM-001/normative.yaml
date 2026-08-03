@@ -1,0 +1,245 @@
+case_id: BM-001
+schema_version: "0.2.0"
+tier: product_case
+inherits: null
+policy: ver3/oracles/ORACLE_AUTHORING_POLICY.md
+dossier: ver3/oracles/_dossiers/DOS-BM-001.md
+
+invariants:
+  - id: NRM-BM-001-001
+    statement: >
+      The enclosure has a closed state and an open state, and a motion that
+      connects them in both directions.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_locators: ["DOS-BM-001 S1 REQ-001"]
+    conclusion_scope: "The two states and their connecting motion only."
+    exclusions: ["Does not constrain motion type, axis, or whether the closure stays attached."]
+    verification_predicate: "exists(state CLOSED) and exists(state OPEN) and exists(transition CLOSED<->OPEN) evaluable at intermediate parameter values."
+    requires_tags: [two_states, continuous_transition]
+    related_freedoms: [FRE-BM-001-001, FRE-BM-001-004]
+    related_unresolved: []
+
+  - id: NRM-BM-001-002
+    statement: >
+      The connection between the closure and the enclosure is physically
+      realized: each participating body carries engagement geometry, and the
+      guidance or support that the chosen closure concept depends on is present
+      wherever that concept depends on it.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-001 S1 REQ-001"]
+    derivation_premises:
+      - "REQ-001 requires a mechanism that opens and closes repeatedly."
+      - "Repeatable relative motion between two bodies is produced by material interaction between them."
+      - "A type name or relationship record is not material and produces no interaction."
+    conclusion_scope: "Existence and locality of engagement geometry; presence of support where the concept needs it."
+    exclusions:
+      - "Does NOT require a permanent connection: a closure detached in the open state satisfies this if engagement exists where the concept requires it."
+      - "Does NOT name a mechanism."
+    verification_predicate: "for the closure connection: engagement geometry exists on both participating bodies at every state where the concept declares contact."
+    requires_tags: [connection_realized]
+    related_freedoms: [FRE-BM-001-001]
+    related_unresolved: []
+    closes_finding: [CLS-002]
+
+  - id: NRM-BM-001-003
+    statement: >
+      In the open state the closure does not occupy the aperture, and the region
+      swept by the closure between states does not intersect the enclosure solid.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-001 S1 REQ-001"]
+    derivation_premises:
+      - "REQ-001 requires the enclosure to open."
+      - "An aperture obstructed by the closure is not open."
+      - "Solid bodies do not pass through one another."
+    conclusion_scope: "Aperture occupancy at OPEN, and sweep clearance along the transition."
+    exclusions: ["Does not constrain how far the closure travels beyond clearing the aperture."]
+    verification_predicate: "intersect(closure@OPEN, aperture_prism) is empty AND clearance(swept_volume(closure, CLOSED->OPEN), enclosure_solid) > 0, at a declared fidelity."
+    requires_tags: [open_clears_aperture, sweep_clears_enclosure]
+    related_freedoms: [FRE-BM-001-003, FRE-BM-001-004]
+    related_unresolved: []
+
+  - id: NRM-BM-001-004
+    statement: >
+      The closure's material content is conserved across states. Any change of
+      shape between states is an explicitly modelled deformation of a declared
+      compliant region; a body's extent is not altered in order to achieve
+      clearance.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-001 S1 REQ-001"]
+    derivation_premises:
+      - "REQ-001 requires the same closure to open and close repeatedly."
+      - "A body does not gain or lose material by changing state."
+    conclusion_scope: "Conservation of material content between states."
+    exclusions:
+      - "Does NOT require rigid motion. A compliant closure is admissible provided its deformation is declared and modelled."
+    verification_predicate: "material content of the closure is equal across states within tolerance; any shape change is attributed to a declared compliant region."
+    requires_tags: [extent_conserved]
+    related_freedoms: [FRE-BM-001-001]
+    related_unresolved: []
+    closes_finding: [CLS-004]
+
+  - id: NRM-BM-001-005
+    statement: >
+      The open state's pose is physically determined: some realized feature or
+      condition of the design causes the closure to occupy that pose rather than
+      another.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-001 S1 REQ-001"]
+    derivation_premises:
+      - "NRM-BM-001-001 requires OPEN to be a named state with a defined pose."
+      - "A pose that nothing in the design determines is not a state of the design."
+    conclusion_scope: "Existence of a realized determinant of the open pose."
+    exclusions:
+      - "Does NOT require a terminal contact feature, a discrete stop part, or any particular determinant."
+      - "The determinant may be a contact, a rest condition, an over-centre condition, or an equivalent."
+    verification_predicate: "the open pose references a realized determinant; an unbounded motion with an asserted open pose does not satisfy this."
+    requires_tags: [open_pose_determined]
+    related_freedoms: [FRE-BM-001-009]
+    related_unresolved: []
+    closes_finding: [CLS-005]
+
+  - id: NRM-BM-001-006
+    statement: >
+      A retention function holds the closure in the closed state against the
+      disturbance the design declares, and is released by a deliberate user
+      action. Its engagement is localized on both participating bodies.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_locators: ["DOS-BM-001 S1 REQ-002", "DOS-BM-001 S1 REQ-004", "DOS-BM-001 S1 REQ-008"]
+    conclusion_scope: "Existence, localization, holding and release of retention."
+    exclusions:
+      - "Does not name a retention mechanism."
+      - "Does not supply a load magnitude; the design declares what it holds against."
+    verification_predicate: "retention realization has engagement geometry on both bodies, a holding condition at CLOSED under the declared disturbance, and a release condition reachable by a declared user action."
+    requires_tags: [retention_realized, retention_release_action]
+    related_freedoms: [FRE-BM-001-002, FRE-BM-001-010]
+    related_unresolved: [UNR-BM-001-001]
+
+  - id: NRM-BM-001-007
+    statement: >
+      Engagement and release of the retention may be repeated without consuming
+      or destroying a participating feature.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_locators: ["DOS-BM-001 S1 REQ-008"]
+    conclusion_scope: "Reusability of the retention."
+    exclusions: ["Does not supply a cycle count; none is stated in the source."]
+    verification_predicate: "the retention declares a repeatable engage/release transition and no participating feature is marked single-use."
+    requires_tags: [retention_reusable]
+    related_freedoms: [FRE-BM-001-002]
+    related_unresolved: []
+
+  - id: NRM-BM-001-008
+    statement: >
+      The user action that releases the retention is reachable along a realized
+      access path that terminates at the actuation feature.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-001 S1 REQ-003"]
+    derivation_premises:
+      - "REQ-003 requires the retention to be operable by a user."
+      - "A feature a user cannot reach cannot be operated by that user."
+    conclusion_scope: "Existence of an access path terminating at the actuator."
+    exclusions:
+      - "Does NOT constrain the side, face or half-space the path originates from."
+      - "Does not supply an effort ceiling."
+    verification_predicate: "exists(access_path) whose endpoint is the retention actuation feature and which does not intersect solid material."
+    requires_tags: [actuator_reachable]
+    related_freedoms: [FRE-BM-001-003]
+    related_unresolved: [UNR-BM-001-002]
+    closes_finding: [CLS-008]
+
+  - id: NRM-BM-001-009
+    statement: >
+      An interior cavity exists and is reachable through the aperture in the open
+      state.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-001 S1 product_intent", "DOS-BM-001 S1 REQ-006"]
+    derivation_premises:
+      - "product_intent names the product a storage box."
+      - "A storage volume that cannot be reached cannot be stored into."
+    conclusion_scope: "Existence and reachability of the cavity at OPEN."
+    exclusions: ["Does not constrain cavity shape, volume, or aperture size."]
+    verification_predicate: "exists(access_path) origin exterior, endpoint inside the cavity, valid at OPEN, not intersecting the enclosure solid or the closure at OPEN."
+    requires_tags: [cavity_access]
+    related_freedoms: [FRE-BM-001-006]
+    related_unresolved: []
+
+  - id: NRM-BM-001-010
+    statement: >
+      Each part installed as a discrete operation can reach its assembled
+      position without passing through already-placed material. Parts formed
+      together or permanently joined declare that relationship instead.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-001 S1 REQ-007"]
+    derivation_premises:
+      - "REQ-007 requires the product to be assemblable."
+      - "A part cannot occupy space already occupied by placed material."
+    conclusion_scope: "Existence of an installation path per discretely-installed part."
+    exclusions:
+      - "Does NOT require a path for co-formed or permanently joined parts."
+      - "Does not constrain assembly order, tooling, or how the order is recorded."
+    verification_predicate: "for each discretely-installed part: exists(installation_path) collision-free against already-placed parts."
+    requires_tags: [assembly_paths_exist]
+    related_freedoms: [FRE-BM-001-005]
+    related_unresolved: []
+    closes_finding: [CLS-010]
+
+  - id: NRM-BM-001-011
+    statement: >
+      Retention and closure-connection loads are reacted: for each, a path exists
+      to a reaction site able to carry it.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-001 S1 REQ-002", "DOS-BM-001 S1 REQ-007"]
+    derivation_premises:
+      - "REQ-002 requires the closure to be held against a disturbance."
+      - "A force that is applied and not reacted accelerates the body."
+    conclusion_scope: "Existence of a reaction path for the named interfaces."
+    exclusions:
+      - "Does NOT require the reaction site to be the enclosure; a mounting boundary or the user's grip are admissible sites."
+      - "Does not prescribe how the path is recorded."
+    verification_predicate: "for each named load-bearing interface: exists(load_path) terminating at a reaction site."
+    requires_tags: [loads_reacted]
+    related_freedoms: []
+    related_unresolved: [UNR-BM-001-001]
+    closes_finding: [CLS-011]
+
+required_unresolved:
+  - id: UNR-BM-001-001
+    decision: Disturbance magnitude for handling and transport.
+    why_must_remain_open: "DOS-BM-001 S2: no load magnitude, direction, duration or acceleration is stated."
+    resolvable_when: "A user-supplied load case, an applicable standard, or a declared analyst assumption enters the DesignState."
+    blocks: [NRM-BM-001-006, NRM-BM-001-011]
+    source_locators: ["DOS-BM-001 S2"]
+  - id: UNR-BM-001-002
+    decision: User actuation effort ceiling.
+    why_must_remain_open: "DOS-BM-001 S2: no force, torque or effort limit is stated."
+    resolvable_when: "An ergonomic standard or a user-stated ceiling is supplied."
+    blocks: [NRM-BM-001-008]
+    source_locators: ["DOS-BM-001 S2"]
+  - id: UNR-BM-001-003
+    decision: Absolute product dimensions.
+    why_must_remain_open: "DOS-BM-001 S1 clause C-006 says only desktop-sized."
+    resolvable_when: "A user-supplied envelope or a derived packaging constraint exists."
+    blocks: []
+    source_locators: ["DOS-BM-001 S1 C-006"]
+  - id: UNR-BM-001-004
+    decision: Manufacturing process and material.
+    why_must_remain_open: "DOS-BM-001 S2: no process, material or cost model is stated."
+    resolvable_when: "A process or material is user-stated or justified by a costed comparison."
+    blocks: []
+    source_locators: ["DOS-BM-001 S2"]
+  - id: UNR-BM-001-005
+    decision: Whether the closure connection and the retention share a body or an axis.
+    why_must_remain_open: "DOS-BM-001 S2: unconstrained by any source."
+    resolvable_when: "A packaging or access constraint forces one arrangement."
+    blocks: []
+    source_locators: ["DOS-BM-001 S2"]

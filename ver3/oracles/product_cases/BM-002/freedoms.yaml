@@ -1,0 +1,43 @@
+case_id: BM-002
+schema_version: "0.2.0"
+freedoms:
+  - id: FRE-BM-002-001
+    decision: Chain topology between the input and the platform.
+    why_free: "DOS-BM-002 S3: no source constrains it. Direct, geared-down, reversed or multi-stage chains are equally admissible."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-002-002
+    decision: Mechanism family realizing the rotary-to-linear conversion.
+    why_free: >
+      DOS-BM-002 S3: the source requires conversion, never a mechanism. The
+      legacy library wired exactly one realizer and reported INFEASIBLE when it
+      was forbidden (DOS-BM-002 S7); this freedom exists to prevent that.
+    example_realizations: [helical thread pair, toothed rack and driven wheel, cable and drum, crank and connecting link, cam and follower, scissor linkage]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-002-003
+    decision: Guidance and anti-rotation strategy, including the number of guides.
+    why_free: "DOS-BM-002 S3: not stated. One prismatic guide, two parallel guides, a profiled column and a keyed bore all satisfy NRM-BM-002-005."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-002-004
+    decision: Where the chain crosses the boundary, and how the crossing is sealed or supported.
+    why_free: "DOS-BM-002 S3: no face, region or sealing method is stated."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-002-005
+    decision: Support arrangement for rotating elements.
+    why_free: "DOS-BM-002 S3: not stated. Plain bores, rolling supports and integral journals are equally admissible."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-002-006
+    decision: Which realized condition determines each travel extreme, and whether the two share a part.
+    why_free: "DOS-BM-002 S3: not stated. NRM-BM-002-007 requires distinct conditions, not distinct parts."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-002-007
+    decision: Payload access region and opening arrangement.
+    why_free: "DOS-BM-002 S3: not stated."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-002-008
+    decision: Whether the mechanism holds position when the input is released.
+    why_free: "See UNR-BM-002-004. Self-locking, held and free-running arrangements are all admissible absent a stated requirement."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-002-009
+    decision: Housing form, part count, material and process.
+    why_free: "DOS-BM-002 S3: not stated."
+    must_not_be_asserted_by_tests: true

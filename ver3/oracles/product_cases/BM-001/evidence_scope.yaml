@@ -1,0 +1,58 @@
+case_id: BM-001
+schema_version: "0.2.0"
+note: "Records what current evidence can and cannot prove. Nothing here is normative."
+
+evidence:
+  - id: EV-BM-001-001
+    claim: "Removing a realized open-pose determinant from a closure produced seed-level instability across a 5-seed sweep."
+    model: "MuJoCo rigid body, ring collision (16 wedges/knuckle), friction_mu 0.3, solref [0.001,1.0]"
+    fidelity: V-B
+    reused_from: null
+    source_paths:
+      - /home/ftk3187/github/ASSY_Ver1.0/m0/out/stop/t2_verdict_V-B_ring.json
+      - /home/ftk3187/github/ASSY_Ver1.0/m0/out/nostop/t2_verdict_V-B_ring.json
+    observables:
+      - {name: verdict, unit: dimensionless, with_determinant: true, without: false}
+      - {name: seeds_passed, unit: dimensionless, with_determinant: 5, without: 1, of: 5}
+      - {name: theta_max, unit: degree, with_determinant: 115.37, without: 219.65, threshold: 90.0}
+    in_scope:
+      - "A matched pair differing in one feature; the only controlled comparison in the corpus."
+      - "Supports that absence of a determinant destabilises the outcome across seeds."
+    out_of_scope:
+      - "Retention force, actuation effort, cycling durability."
+      - "Any closure concept other than a rotating one on a lateral axis."
+      - "Manufacturability."
+    structural_artifacts:
+      - >
+        DECISIVE: every seed-0 criterion PASSES in both members of the pair,
+        including theta_max (115.37 and 219.65 both exceed the >=90 threshold).
+        The pair therefore supplies NO single-run criterion that distinguishes a
+        determined from an undetermined open pose. Any claim built on it inherits
+        that weakness.
+  - id: EV-BM-001-002
+    claim: "A compressive retention engages and releases within a force window."
+    model: "MuJoCo contact plus a tier-1 analytic formula"
+    fidelity: V-B
+    reused_from: null
+    source_paths:
+      - /home/ftk3187/github/ASSY_Ver1.0/m23_latch_physics
+      - /home/ftk3187/github/ASSY_Ver1.0/tasks/snap_panel.json
+    observables:
+      - {name: engage_force, unit: newton}
+      - {name: release_force, unit: newton}
+    in_scope: ["One retention geometry family, in the stiffness and friction range modelled."]
+    out_of_scope:
+      - "Magnetic, over-centre, detent and friction retention."
+      - "Cycling, creep, temperature."
+      - "Any transport or handling case, which BM-001 does not quantify."
+    structural_artifacts:
+      - >
+        The force window [15.0, 60.0] N in snap_panel.json is an INPUT PARAMETER
+        of the task definition, not a measured product property. Citing it as an
+        achieved value is circular.
+
+not_verified:
+  - {id: NV-BM-001-001, subject: "Retention under handling and transport", reason: "No disturbance case exists (UNR-BM-001-001).", relates_to: [REQ-002, REQ-004]}
+  - {id: NV-BM-001-002, subject: "Actuation effort", reason: "No effort ceiling exists (UNR-BM-001-002).", relates_to: [REQ-003]}
+  - {id: NV-BM-001-003, subject: "Low-cost manufacturability", reason: "No process, material or cost model is available.", relates_to: [REQ-005]}
+  - {id: NV-BM-001-004, subject: "Practicality for desktop use", reason: "No criterion is stated.", relates_to: [REQ-006]}

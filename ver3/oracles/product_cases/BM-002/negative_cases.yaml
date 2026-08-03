@@ -1,0 +1,97 @@
+case_id: BM-002
+schema_version: "0.2.0"
+purpose: >
+  Each case is a design or a pipeline behaviour that must be rejected, together
+  with the invariant that must do the rejecting. Cases NEG-*-009 onward are
+  process failures reproduced from recorded legacy behaviour.
+
+negative_cases:
+  - id: NEG-BM-002-001
+    kind: design
+    description: "Crank and platform related by a declared ratio with no engagement geometry between them."
+    must_be_rejected_by: [NRM-BM-002-003]
+    fixture: INA-BM-002-A
+  - id: NEG-BM-002-002
+    kind: design
+    description: "Platform free to rotate about the travel direction while the conversion applies a moment to it."
+    must_be_rejected_by: [NRM-BM-002-005]
+    fixture: INA-BM-002-B
+  - id: NEG-BM-002-003
+    kind: design
+    description: "Rotating drive element located only by the conversion engagement, with no radial support."
+    must_be_rejected_by: [NRM-BM-002-004]
+    fixture: INA-BM-002-C
+  - id: NEG-BM-002-004
+    kind: design
+    description: "Axially loaded element with no axial reaction path; the payload load terminates nowhere."
+    must_be_rejected_by: [NRM-BM-002-004, NRM-BM-002-009]
+    fixture: INA-BM-002-D
+  - id: NEG-BM-002-005
+    kind: design
+    description: "Platform fills its travel corridor; neither declared extreme is reachable."
+    must_be_rejected_by: [NRM-BM-002-006]
+    fixture: INA-BM-002-E
+  - id: NEG-BM-002-006
+    kind: design
+    description: "A single limit condition credited to both travel extremes."
+    must_be_rejected_by: [NRM-BM-002-007]
+    fixture: INA-BM-002-F
+  - id: NEG-BM-002-007
+    kind: design
+    description: "Payload access path terminating at the housing opening, accepted as reaching the platform."
+    must_be_rejected_by: [NRM-BM-002-008]
+    fixture: INA-BM-002-G
+  - id: NEG-BM-002-008
+    kind: design
+    description: "External crank modelled as travelling with the platform, so no boundary crossing exists."
+    must_be_rejected_by: [NRM-BM-002-001, NRM-BM-002-002]
+    fixture: INA-BM-002-H
+
+  - id: NEG-BM-002-009
+    kind: process
+    description: >
+      The pipeline reports INFEASIBLE because its mechanism library contains no
+      permitted realizer for the conversion, when a realizable arrangement exists.
+    reproduced_from: "DOS-BM-002 S7 - C5-lift-nogear KG_NO_PERMITTED_REALIZER"
+    must_be_rejected_by: [FRE-BM-002-002]
+    required_outcome: "UNSUPPORTED with the missing capability named; never INFEASIBLE."
+  - id: NEG-BM-002-010
+    kind: process
+    description: >
+      An invariant, freedom or test asserts a specific conversion mechanism, a
+      ratio, a module, a tooth count, a rail count or a rail spacing.
+    reproduced_from: "DOS-BM-002 S6 - anchor_hard(variant='lift') parameters"
+    must_be_rejected_by: [FRE-BM-002-002, FRE-BM-002-003]
+    required_outcome: "Rejected as REFERENCE_REALIZATION_DETAIL."
+  - id: NEG-BM-002-011
+    kind: process
+    description: >
+      REQ-007 ("avoid obvious jamming") is reported as verified on the strength of
+      declared-pair (V-A) kinematic evidence.
+    reproduced_from: "DOS-BM-002 S5 E1, E2"
+    must_be_rejected_by: [evidence_scope.EV-BM-002-001]
+    required_outcome: "NOT_VERIFIED with the fidelity gap named; V-B contact evidence is absent."
+  - id: NEG-BM-002-012
+    kind: process
+    description: >
+      The compliance edge of "approximately 80-100 mm" is silently fixed, e.g. by
+      adopting a tolerance or by treating the range ends as hard bounds.
+    reproduced_from: "AMB-002-02"
+    must_be_rejected_by: [UNR-BM-002-002]
+    required_outcome: "The unresolved decision is carried; values at the edge yield INDETERMINATE."
+  - id: NEG-BM-002-013
+    kind: process
+    description: >
+      The status of the boundary-crossing element under REQ-004 is decided by the
+      pipeline rather than carried as unresolved.
+    reproduced_from: "AMB-002-01"
+    must_be_rejected_by: [UNR-BM-002-001]
+    required_outcome: "The unresolved decision is carried; REQ-004 evaluation states its dependence on it."
+  - id: NEG-BM-002-014
+    kind: process
+    description: >
+      A holding, self-locking or anti-back-drive requirement is imposed on the
+      design because the legacy lift realization used a pawl.
+    reproduced_from: "DOS-BM-002 S5 hold-drift row; DOS-BM-002 S6"
+    must_be_rejected_by: [UNR-BM-002-004, FRE-BM-002-008]
+    required_outcome: "Rejected as REFERENCE_REALIZATION_DETAIL."

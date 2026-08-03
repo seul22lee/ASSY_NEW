@@ -1,0 +1,37 @@
+case_id: BM-001-2
+schema_version: "0.2.0"
+inherits: BM-001
+note: Deltas only; absent keys inherit the parent entry.
+stages:
+  s01:
+    must_exist: ["requirement REQ-009", "requirement REQ-010", "ambiguity record AMB-001-2-01"]
+    must_not_be_decided: [seating_region, profile_magnitude, actuation_side]
+    may_remain_unresolved: [UNR-BM-001-2-001, UNR-BM-001-2-002, UNR-BM-001-2-003]
+    provenance_required: ["REQ-009 -> spec clause", "REQ-010 -> spec clause"]
+  s03:
+    must_exist: [seating_boundary_region, exposed_boundary_region, exposed_half_space_definition]
+    must_not_be_decided: [seating_region_without_evidence]
+    may_remain_unresolved: [UNR-BM-001-2-001, UNR-BM-001-2-003]
+    provenance_required: ["boundary region -> REQ-009"]
+  s04:
+    must_exist: [metric_exposed_boundary_geometry, non_projecting_edge_predicate_inputs]
+    must_not_be_decided: ["boundary form asserted by annotation only"]
+    may_remain_unresolved: [UNR-BM-001-2-002]
+    provenance_required: ["exposed boundary -> REQ-009"]
+  s11:
+    must_exist: []
+    must_not_be_decided: []
+    may_remain_unresolved: []
+    provenance_required: []
+    outcome_rules:
+      REQ-009:
+        pass_requires: "metric geometric evidence of a planar seating region and non-projecting exposed edges, at a declared fidelity"
+        fail_when: "an exposed edge is projecting, or no planar seating region exists"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-010:
+        pass_requires: "a declared reach model, a resolution of AMB-001-2-01, and evidence no exposed-side path reaches the actuator while the declared release originates inside"
+        fail_when: "an exposed-side access path terminates at the actuator"
+        if_capability_absent: UNSUPPORTED
+        otherwise: INDETERMINATE
+        note: "INDETERMINATE rather than NOT_VERIFIED while AMB-001-2-01 stands: evidence cannot decide because the criterion itself is undetermined."

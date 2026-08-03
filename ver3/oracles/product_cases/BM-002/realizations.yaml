@@ -1,0 +1,63 @@
+case_id: BM-002
+schema_version: "0.2.0"
+note: >
+  Three materially different conversion topologies, each satisfying every
+  invariant. If any invariant rejected one of these it would be prescribing a
+  mechanism.
+
+admissible_realizations:
+  - id: ADM-BM-002-A
+    summary: "Helical thread pair: crank turns a threaded column; a follower on the platform translates. Platform guided by two parallel columns providing anti-rotation. Extremes set by an abutment at each end of the thread."
+    materially_differs_by: [conversion_principle, guidance_count, extreme_determinant]
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_motion_chain', 'boundary_crossing_realized', 'crossing_element_supported', 'conversion_realized', 'conversion_engagement_localized', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'platform_guided', 'platform_anti_rotation', 'both_extremes_reachable', 'corridor_not_fully_occupied', 'two_extremes_distinctly_determined', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+  - id: ADM-BM-002-B
+    summary: "Toothed linear member driven by a wheel on the crank shaft; platform runs on a single profiled guide whose non-circular section provides anti-rotation. Extremes set by a run-out of the toothed member at one end and an abutment at the other."
+    materially_differs_by: [conversion_principle, guidance_count, extreme_determinant]
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_motion_chain', 'boundary_crossing_realized', 'crossing_element_supported', 'conversion_realized', 'conversion_engagement_localized', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'platform_guided', 'platform_anti_rotation', 'both_extremes_reachable', 'corridor_not_fully_occupied', 'two_extremes_distinctly_determined', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+  - id: ADM-BM-002-C
+    summary: "Cable wound on a drum lifts a scissor linkage carrying the platform; the linkage geometry itself guides the platform and removes rotation. Extremes set by linkage geometry at full extension and by drum stall at full retraction."
+    materially_differs_by: [conversion_principle, guidance_topology, extreme_determinant, load_path]
+    note: "No sliding guide and no toothed engagement. Admitted only because guidance and anti-rotation are stated as functions, not as mechanisms."
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_motion_chain', 'boundary_crossing_realized', 'crossing_element_supported', 'conversion_realized', 'conversion_engagement_localized', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'platform_guided', 'platform_anti_rotation', 'both_extremes_reachable', 'corridor_not_fully_occupied', 'two_extremes_distinctly_determined', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+
+inadmissible_realizations:
+  - id: INA-BM-002-A
+    summary: "Crank and platform declared coupled by a ratio relationship; no engagement geometry anywhere between them."
+    from_negative_case: NEG-BM-002-001
+    missing_tags: [conversion_realized, conversion_engagement_localized]
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_motion_chain', 'boundary_crossing_realized', 'crossing_element_supported', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'platform_guided', 'platform_anti_rotation', 'both_extremes_reachable', 'corridor_not_fully_occupied', 'two_extremes_distinctly_determined', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+  - id: INA-BM-002-B
+    summary: "Platform runs on a guide that permits translation; nothing removes rotation about the travel direction, and the conversion applies a moment."
+    from_negative_case: NEG-BM-002-002
+    missing_tags: [platform_anti_rotation]
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_motion_chain', 'boundary_crossing_realized', 'crossing_element_supported', 'conversion_realized', 'conversion_engagement_localized', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'platform_guided', 'both_extremes_reachable', 'corridor_not_fully_occupied', 'two_extremes_distinctly_determined', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+  - id: INA-BM-002-C
+    summary: "Rotating drive element has no radial support; it is located only by the conversion engagement itself."
+    from_negative_case: NEG-BM-002-003
+    missing_tags: [rotating_elements_radially_supported]
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_motion_chain', 'boundary_crossing_realized', 'crossing_element_supported', 'conversion_realized', 'conversion_engagement_localized', 'axial_reaction_realized', 'platform_guided', 'platform_anti_rotation', 'both_extremes_reachable', 'corridor_not_fully_occupied', 'two_extremes_distinctly_determined', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+  - id: INA-BM-002-D
+    summary: "Threaded element carries the payload axially with no axial reaction path to the housing."
+    from_negative_case: NEG-BM-002-004
+    missing_tags: [axial_reaction_realized, platform_load_reacted]
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_motion_chain', 'boundary_crossing_realized', 'crossing_element_supported', 'conversion_realized', 'conversion_engagement_localized', 'rotating_elements_radially_supported', 'platform_guided', 'platform_anti_rotation', 'both_extremes_reachable', 'corridor_not_fully_occupied', 'two_extremes_distinctly_determined', 'payload_access_reaches_platform', 'assembly_paths_exist', 'manually_driven_only']
+  - id: INA-BM-002-E
+    summary: "Platform solid occupies its entire travel corridor; both extremes are declared but neither is reachable."
+    from_negative_case: NEG-BM-002-005
+    missing_tags: [corridor_not_fully_occupied, both_extremes_reachable]
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_motion_chain', 'boundary_crossing_realized', 'crossing_element_supported', 'conversion_realized', 'conversion_engagement_localized', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'platform_guided', 'platform_anti_rotation', 'two_extremes_distinctly_determined', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+  - id: INA-BM-002-F
+    summary: "One limit condition is evaluated once and credited to both travel extremes."
+    from_negative_case: NEG-BM-002-006
+    missing_tags: [two_extremes_distinctly_determined]
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_motion_chain', 'boundary_crossing_realized', 'crossing_element_supported', 'conversion_realized', 'conversion_engagement_localized', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'platform_guided', 'platform_anti_rotation', 'both_extremes_reachable', 'corridor_not_fully_occupied', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+  - id: INA-BM-002-G
+    summary: "Payload access path terminates at the housing opening and is accepted as reaching the platform."
+    from_negative_case: NEG-BM-002-007
+    missing_tags: [payload_access_reaches_platform]
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_motion_chain', 'boundary_crossing_realized', 'crossing_element_supported', 'conversion_realized', 'conversion_engagement_localized', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'platform_guided', 'platform_anti_rotation', 'both_extremes_reachable', 'corridor_not_fully_occupied', 'two_extremes_distinctly_determined', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+  - id: INA-BM-002-H
+    summary: "Crank inherits the platform's translation corridor, so the input element is modelled as travelling with the platform."
+    from_negative_case: NEG-BM-002-008
+    missing_tags: [external_rotary_input, boundary_crossing_realized]
+    tags: ['internal_platform', 'continuous_motion_chain', 'crossing_element_supported', 'conversion_realized', 'conversion_engagement_localized', 'rotating_elements_radially_supported', 'axial_reaction_realized', 'platform_guided', 'platform_anti_rotation', 'both_extremes_reachable', 'corridor_not_fully_occupied', 'two_extremes_distinctly_determined', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']

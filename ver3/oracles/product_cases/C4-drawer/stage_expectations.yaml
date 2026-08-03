@@ -1,0 +1,173 @@
+case_id: C4-drawer
+schema_version: "0.2.0"
+note: >
+  States only what the pipeline must represent, preserve, defer or report.
+  Adds no product requirement. Stage-11 rules are conditional; no outcome is
+  fixed by current tooling capability. The rank-1 source is one sentence, so the
+  dominant risk for this case is that stages invent criteria; the
+  must_not_be_decided lists carry that weight.
+
+stages:
+  s01:
+    must_exist: [requirements, scenarios, actors, system_boundary, observables, assumptions, unknowns]
+    must_not_be_decided: [mechanism_family, product_layout, parts, geometry, dimensions, materials, retention_requirement]
+    may_remain_unresolved: [UNR-C4-001, UNR-C4-002, UNR-C4-003, UNR-C4-004, UNR-C4-005, UNR-C4-006, UNR-C4-007]
+    provenance_required: ["requirement -> source clause id"]
+    sparsity_note: >
+      Every requirement produced by s01 must trace to a fragment of the one-sentence
+      command. A requirement with no such fragment is an invention, not an
+      elaboration.
+  s02:
+    must_exist: [obligations, physical_interactions, body_hypotheses, states, transitions, candidates]
+    must_not_be_decided: [selected_candidate, conversion_mechanism, guidance_mechanism, product_faces, geometry]
+    may_remain_unresolved: [candidate_ranking, UNR-C4-002]
+    provenance_required: ["obligation -> requirement id"]
+    plurality_note: >
+      More than one conversion family must survive s02 (FRE-C4-002). Eliminating
+      to a single candidate is admissible only with the obligation each rejected
+      candidate failed recorded.
+  s03:
+    must_exist: [fixed_and_moving_bodies, cabinet_and_cavity_topology, opening, boundary_crossing, knob_access_path, interface_ownership, load_path_ownership, assembly_dependency_graph]
+    must_not_be_decided: [emergence_face_without_evidence, knob_face_without_evidence, detailed_feature_geometry, selected_candidate, part_count_as_criterion]
+    may_remain_unresolved: [opening_region, crossing_region]
+    provenance_required: ["body -> obligation id", "access_path -> requirement id"]
+  s04:
+    must_exist: [world_and_body_frames, joint_frames, axes, gravity_direction, travel_corridor, retracted_pose, extended_pose, motion_paths, engagement_sites, swept_volumes_with_fidelity, spatial_feasibility_per_candidate, extreme_determinants]
+    must_not_be_decided: [final_dimensions, stroke_value, manufacturing_features, renderer_originated_values]
+    may_remain_unresolved: [free_spatial_alternatives, UNR-C4-001]
+    provenance_required: ["pose -> constraint/contact ids", "swept_volume -> fidelity declaration", "extreme -> its own determinant id", "travel axis -> geometric relation to gravity direction"]
+    orientation_note: >
+      Horizontality (NRM-C4-002) must be established as a geometric relation
+      between the travel axis and the gravity direction. A face label or an axis
+      name such as FRONT may accompany it but may never be its authority
+      (NEG-C4-013).
+    selection_gate: "A SelectionDecision may be emitted only after every retained candidate carries s03 and s04 feasibility evidence at equal obligation coverage."
+  s05:
+    must_exist: [connection_realizations, conversion_engagement_features, guidance_realization, anti_rotation_realization, drawer_support_realizations, radial_support_realizations, axial_reaction_realization, feature_graph, construction_program, solver_problem, load_path_records]
+    must_not_be_decided: [new_independent_entities, duplicate_bodies, parameter_values, retention_feature_without_requirement]
+    may_remain_unresolved: [embodiment_alternatives, UNR-C4-003]
+    provenance_required: ["realization -> obligation ids it discharges"]
+  s06:
+    must_exist: [solved_values_or_explicit_status, constraint_residuals, feasibility_report, active_constraints]
+    must_not_be_decided: [default_units, deferred_constraints, stroke_default]
+    may_remain_unresolved: [underdetermined_degrees_of_freedom]
+    provenance_required: ["value -> constraint id", "value -> unit declared at its source"]
+    underdetermination_note: >
+      The source states no dimension at all. A fully determined parameter set is
+      therefore expected to rest on declared design choices, each recorded as
+      such. A value that appears without either a constraint or a recorded choice
+      is a silent default.
+  s07:
+    must_exist: [cad_manifest, geometry_build_report, model_hashes]
+    must_not_be_decided: [form, placement, axis, interface, missing_dimensions]
+    may_remain_unresolved: []
+    provenance_required: ["cad_entity -> construction statement id"]
+  s08:
+    must_exist: [verification_plan, requirement_test_map, model_fidelity_report, observables_with_units]
+    must_not_be_decided: [hidden_load, hidden_effort, hidden_material]
+    may_remain_unresolved: ["tests blocked by UNR-C4-001", "tests blocked by UNR-C4-004", "tests blocked by UNR-C4-005"]
+    provenance_required: ["test -> requirement id + criterion id"]
+    fidelity_note: >
+      A test must declare whether it resolves contact. A declared-pair test may
+      not be mapped to guidance, engagement or support (EV-C4-002).
+  s09:
+    must_exist: [verification_results, raw_evidence, execution_environment]
+    must_not_be_decided: [requirement_reinterpretation]
+    may_remain_unresolved: []
+    provenance_required: ["result -> plan item id", "reused result -> originating case id"]
+    reuse_note: "Evidence carried from another case must name that case (NEG-C4-011)."
+  s10:
+    must_exist: ["exactly one outcome per planned observable"]
+    must_not_be_decided: [which_requirement_passes]
+    may_remain_unresolved: []
+    provenance_required: ["evidence -> observable id"]
+    artifact_rule: >
+      An observable whose value is exact by construction of the model must be
+      marked as a structural artifact and excluded from evidential weight
+      (EV-C4-002).
+  s11:
+    must_exist: [requirement_evaluation, evidence_coverage, acceptance_summary]
+    must_not_be_decided: [new_evidence]
+    may_remain_unresolved: []
+    provenance_required: ["evaluation -> evidence ids", "PASS -> declared scope"]
+    outcome_rules:
+      C4-R1_knob_drives_drawer:
+        traces_to: NRM-C4-001
+        pass_requires: "kinematic evidence that the drawer translates in response to knob rotation, at a declared fidelity, with the chain traversable"
+        fail_when: "the chain is broken or the drawer does not respond to the input"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      C4-R2_horizontal_travel:
+        traces_to: NRM-C4-002
+        pass_requires: "the travel axis is shown perpendicular to the gravity direction by a geometric relation"
+        fail_when: "the relation shows a non-horizontal travel axis"
+        if_established_only_by_label: NOT_VERIFIED
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      C4-R3_slides_out:
+        traces_to: NRM-C4-003
+        pass_requires: "both states reached and the transition traversed, with the extended state showing drawer material outside the cabinet envelope"
+        fail_when: "a state is unreachable, the transition interferes, or the drawer never leaves the envelope"
+        if_stroke_compliance_asserted: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+        note: "No stroke is stated (UNR-C4-001), so any claim of stroke compliance is INDETERMINATE regardless of the observed value."
+      C4-R4_conversion_engagement:
+        traces_to: NRM-C4-004
+        pass_requires: "contact-resolving evidence that the engagement exists and transmits between the participating bodies"
+        fail_when: "the evidence shows the engagement does not transmit"
+        if_evidence_is_declared_pair_only: NOT_VERIFIED
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      C4-R5_guidance_and_anti_rotation:
+        traces_to: NRM-C4-005
+        pass_requires: "contact-resolving evidence that the drawer is confined to its path and does not rotate about the travel direction"
+        fail_when: "the evidence shows the drawer departs its path or rotates"
+        if_evidence_is_structural_artifact: NOT_VERIFIED
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      C4-R6_weight_reacted:
+        traces_to: NRM-C4-006
+        pass_requires: "a load path demonstrated at the retracted state, the extended state and along the path, against a declared load case (UNR-C4-005 resolved)"
+        fail_when: "the load path is incomplete at any point of travel"
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      C4-R7_travel_extremes:
+        traces_to: NRM-C4-007
+        pass_requires: "each extreme shown determined by its own condition, evaluated at that extreme"
+        fail_when: "one condition is credited to both extremes, or an extreme has no determinant"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      C4-R8_knob_access_and_crossing:
+        traces_to: NRM-C4-008
+        pass_requires: "an access path from the user region to the knob in the retracted state, plus a supported boundary crossing"
+        fail_when: "the knob is unreachable in the retracted state, or the crossing element is unsupported"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      C4-R9_rotating_support:
+        traces_to: NRM-C4-009
+        pass_requires: "a radial support realization for each rotating element and an axial reaction where axial load occurs"
+        fail_when: "a rotating element is located only by its engagement"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      C4-R10_corridor_and_emergence:
+        traces_to: NRM-C4-010
+        pass_requires: "swept volume shown to be a proper subset of the corridor and free of cabinet material at every point of travel"
+        fail_when: "the swept volume intersects cabinet material or fills the corridor"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      C4-R11_assembly:
+        traces_to: NRM-C4-011
+        pass_requires: "installation paths demonstrated for every discretely-installed part, plus an acyclic assembly order"
+        fail_when: "a part has no collision-free installation path, or the order contains a cycle"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+  s12:
+    must_exist: [revision_plan, root_cause_candidates, rerun_closure, preserved_commitments]
+    must_not_be_decided: [coarse_enum_to_stage_mapping]
+    may_remain_unresolved: []
+    provenance_required: ["root_cause -> owning decision id"]
+    capability_gap_rule: >
+      A revision triggered by UNSUPPORTED must name the absent capability. It may
+      never be recorded as a physical infeasibility of the product (NEG-C4-016).

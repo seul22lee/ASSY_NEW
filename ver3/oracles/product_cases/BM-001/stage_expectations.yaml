@@ -1,0 +1,115 @@
+case_id: BM-001
+schema_version: "0.2.0"
+note: >
+  States only what the pipeline must represent, preserve, defer or report.
+  Adds no product requirement. Stage-11 rules are conditional; no outcome is
+  fixed by current tooling capability.
+
+stages:
+  s01:
+    must_exist: [requirements, scenarios, actors, system_boundary, observables, assumptions, unknowns]
+    must_not_be_decided: [mechanism_family, product_layout, parts, geometry, dimensions, materials]
+    may_remain_unresolved: [UNR-BM-001-001, UNR-BM-001-002, UNR-BM-001-003, UNR-BM-001-004, UNR-BM-001-005]
+    provenance_required: ["requirement -> source clause id"]
+  s02:
+    must_exist: [obligations, physical_interactions, body_hypotheses, states, transitions, candidates]
+    must_not_be_decided: [selected_candidate, product_faces, geometry, raw_request_reinterpretation]
+    may_remain_unresolved: [candidate_ranking, UNR-BM-001-005]
+    provenance_required: ["obligation -> requirement id"]
+  s03:
+    must_exist: [fixed_and_moving_bodies, enclosure_and_cavity_topology, aperture, access_paths, interface_ownership, load_path_ownership, assembly_dependency_graph]
+    must_not_be_decided: [boundary_region_without_evidence, detailed_feature_geometry, selected_candidate]
+    may_remain_unresolved: [packaging_alternatives, aperture_region]
+    provenance_required: ["body -> obligation id", "access_path -> requirement id"]
+    representation_note: >
+      assembly_dependency_graph is a representation obligation moved here at
+      correction CLS-010; the product requirement is only that each
+      discretely-installed part has an installation path.
+  s04:
+    must_exist: [world_and_body_frames, joint_frames, axes, state_poses, motion_paths, engagement_sites, swept_volumes_with_fidelity, spatial_feasibility_per_candidate, open_pose_determinant]
+    must_not_be_decided: [final_dimensions, manufacturing_features, renderer_originated_values]
+    may_remain_unresolved: [free_spatial_alternatives]
+    provenance_required: ["pose -> constraint/contact ids", "swept_volume -> fidelity declaration"]
+    selection_gate: "A SelectionDecision may be emitted only after every retained candidate carries s03 and s04 feasibility evidence at equal obligation coverage."
+  s05:
+    must_exist: [connection_realizations, engagement_features, open_pose_determinant_realization, retention_realization, feature_graph, construction_program, solver_problem, load_path_records]
+    must_not_be_decided: [new_independent_entities, duplicate_bodies, parameter_values]
+    may_remain_unresolved: [embodiment_alternatives]
+    provenance_required: ["realization -> obligation ids it discharges"]
+    representation_note: "load_path_records is a representation obligation moved here at correction CLS-011."
+  s06:
+    must_exist: [solved_values_or_explicit_status, constraint_residuals, feasibility_report, active_constraints]
+    must_not_be_decided: [default_units, deferred_constraints]
+    may_remain_unresolved: [underdetermined_degrees_of_freedom]
+    provenance_required: ["value -> constraint id"]
+  s07:
+    must_exist: [cad_manifest, geometry_build_report, model_hashes]
+    must_not_be_decided: [form, placement, axis, interface, missing_dimensions]
+    may_remain_unresolved: []
+    provenance_required: ["cad_entity -> construction statement id"]
+  s08:
+    must_exist: [verification_plan, requirement_test_map, model_fidelity_report, observables_with_units]
+    must_not_be_decided: [hidden_disturbance, hidden_effort, hidden_material]
+    may_remain_unresolved: ["tests blocked by UNR-BM-001-001", "tests blocked by UNR-BM-001-002"]
+    provenance_required: ["test -> requirement id + criterion id"]
+  s09:
+    must_exist: [verification_results, raw_evidence, execution_environment]
+    must_not_be_decided: [requirement_reinterpretation]
+    may_remain_unresolved: []
+    provenance_required: ["result -> plan item id"]
+  s10:
+    must_exist: ["exactly one outcome per planned observable"]
+    must_not_be_decided: [which_requirement_passes]
+    may_remain_unresolved: []
+    provenance_required: ["evidence -> observable id"]
+  s11:
+    must_exist: [requirement_evaluation, evidence_coverage, acceptance_summary]
+    must_not_be_decided: [new_evidence]
+    may_remain_unresolved: []
+    provenance_required: ["evaluation -> evidence ids", "PASS -> declared scope"]
+    outcome_rules:
+      REQ-001:
+        pass_requires: "kinematic evidence that both states are reached and the transition is traversable, at a declared fidelity"
+        fail_when: "a state is unreachable or the transition interferes"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-002:
+        pass_requires: "a declared disturbance case (UNR-BM-001-001 resolved) plus evidence the retention holds under it"
+        fail_when: "retention releases under the declared disturbance"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-003:
+        pass_requires: "a declared effort ceiling (UNR-BM-001-002 resolved) plus measured actuation effort within it"
+        fail_when: "measured effort exceeds the declared ceiling"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-004:
+        pass_requires: "a declared transport case plus evidence the closed state is maintained under it"
+        fail_when: "the closed state is not maintained"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-005:
+        pass_requires: "a manufacturability or cost model with a declared scope, applied to the produced design"
+        fail_when: "the model reports the design outside the declared cost or process envelope"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-006:
+        pass_requires: "a declared desktop-use criterion plus evidence against it"
+        fail_when: "the criterion is violated"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-007:
+        pass_requires: "installation paths demonstrated for every discretely-installed part, plus an acyclic assembly order"
+        fail_when: "a part has no collision-free installation path, or the order contains a cycle"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-008:
+        pass_requires: "evidence of repeated engage/release without consumption of a participating feature"
+        fail_when: "a participating feature is consumed or destroyed"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+  s12:
+    must_exist: [revision_plan, root_cause_candidates, rerun_closure, preserved_commitments]
+    must_not_be_decided: [coarse_enum_to_stage_mapping]
+    may_remain_unresolved: []
+    provenance_required: ["root_cause -> owning decision id"]

@@ -1,0 +1,140 @@
+case_id: BM-002
+schema_version: "0.2.0"
+note: >
+  States only what the pipeline must represent, preserve, defer or report.
+  Adds no product requirement. Stage-11 rules are conditional; no outcome is
+  fixed by current tooling capability.
+
+stages:
+  s01:
+    must_exist: [requirements, scenarios, actors, system_boundary, observables, assumptions, unknowns]
+    must_not_be_decided: [mechanism_family, product_layout, parts, geometry, dimensions, materials]
+    may_remain_unresolved: [UNR-BM-002-001, UNR-BM-002-002, UNR-BM-002-003, UNR-BM-002-004, UNR-BM-002-005, UNR-BM-002-006]
+    provenance_required: ["requirement -> source clause id"]
+    quantity_note: >
+      REQ-002 and REQ-003 carry stated quantities with an "approximately"
+      qualifier. The qualifier must be preserved as part of the requirement, not
+      discarded to produce a crisp bound (AMB-002-02).
+  s02:
+    must_exist: [obligations, physical_interactions, body_hypotheses, states, transitions, candidates]
+    must_not_be_decided: [selected_candidate, conversion_mechanism, product_faces, geometry]
+    may_remain_unresolved: [candidate_ranking, UNR-BM-002-003, UNR-BM-002-004]
+    provenance_required: ["obligation -> requirement id"]
+    plurality_note: >
+      More than one conversion family must survive s02 (FRE-BM-002-002). A single
+      surviving candidate is admissible only if the eliminations are recorded
+      with the obligation each candidate failed.
+  s03:
+    must_exist: [fixed_and_moving_bodies, enclosure_and_cavity_topology, boundary_crossing, payload_access_path, interface_ownership, load_path_ownership, assembly_dependency_graph]
+    must_not_be_decided: [crossing_face_without_evidence, detailed_feature_geometry, selected_candidate]
+    may_remain_unresolved: [crossing_region, access_region, UNR-BM-002-001]
+    provenance_required: ["body -> obligation id", "access_path -> requirement id"]
+  s04:
+    must_exist: [world_and_body_frames, joint_frames, axes, travel_corridor, extreme_poses, motion_paths, engagement_sites, swept_volumes_with_fidelity, spatial_feasibility_per_candidate, extreme_determinants]
+    must_not_be_decided: [final_dimensions, manufacturing_features, renderer_originated_values]
+    may_remain_unresolved: [free_spatial_alternatives]
+    provenance_required: ["pose -> constraint/contact ids", "swept_volume -> fidelity declaration", "extreme -> its own determinant id"]
+    selection_gate: "A SelectionDecision may be emitted only after every retained candidate carries s03 and s04 feasibility evidence at equal obligation coverage."
+  s05:
+    must_exist: [connection_realizations, conversion_engagement_features, guidance_realization, anti_rotation_realization, radial_support_realizations, axial_reaction_realization, feature_graph, construction_program, solver_problem, load_path_records]
+    must_not_be_decided: [new_independent_entities, duplicate_bodies, parameter_values]
+    may_remain_unresolved: [embodiment_alternatives, UNR-BM-002-004]
+    provenance_required: ["realization -> obligation ids it discharges"]
+  s06:
+    must_exist: [solved_values_or_explicit_status, constraint_residuals, feasibility_report, active_constraints]
+    must_not_be_decided: [default_units, deferred_constraints]
+    may_remain_unresolved: [underdetermined_degrees_of_freedom]
+    provenance_required: ["value -> constraint id", "value -> unit declared at its source"]
+    unit_note: >
+      REQ-002 states its unit (mm). No value may acquire a unit by default. A
+      quantity whose unit is not carried from its source is a defect, not a
+      formatting matter.
+  s07:
+    must_exist: [cad_manifest, geometry_build_report, model_hashes]
+    must_not_be_decided: [form, placement, axis, interface, missing_dimensions]
+    may_remain_unresolved: []
+    provenance_required: ["cad_entity -> construction statement id"]
+  s08:
+    must_exist: [verification_plan, requirement_test_map, model_fidelity_report, observables_with_units]
+    must_not_be_decided: [hidden_disturbance, hidden_effort, hidden_material]
+    may_remain_unresolved: ["tests blocked by UNR-BM-002-002", "tests blocked by UNR-BM-002-005"]
+    provenance_required: ["test -> requirement id + criterion id"]
+    fidelity_note: >
+      A test addressing REQ-007 must declare whether it resolves contact. A
+      declared-pair (V-A) test may not be mapped to REQ-007 (EV-BM-002-001).
+  s09:
+    must_exist: [verification_results, raw_evidence, execution_environment]
+    must_not_be_decided: [requirement_reinterpretation]
+    may_remain_unresolved: []
+    provenance_required: ["result -> plan item id"]
+  s10:
+    must_exist: ["exactly one outcome per planned observable"]
+    must_not_be_decided: [which_requirement_passes]
+    may_remain_unresolved: []
+    provenance_required: ["evidence -> observable id"]
+  s11:
+    must_exist: [requirement_evaluation, evidence_coverage, acceptance_summary]
+    must_not_be_decided: [new_evidence]
+    may_remain_unresolved: []
+    provenance_required: ["evaluation -> evidence ids", "PASS -> declared scope"]
+    outcome_rules:
+      REQ-001:
+        pass_requires: "kinematic evidence that the platform rises and falls in response to the external input, at a declared fidelity, with the chain traversable"
+        fail_when: "the chain is broken or the platform does not respond to the input"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-002:
+        pass_requires: "measured platform displacement, in a declared unit, together with a resolved compliance edge for 'approximately 80-100 mm' (UNR-BM-002-002)"
+        fail_when: "measured displacement is outside the range under the resolved reading"
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-003:
+        pass_requires: "load-carrying evidence for the declared payload along the realized load path, with a declared margin"
+        fail_when: "the load path is incomplete or the evidence shows the payload is not carried"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-004:
+        pass_requires: "evidence the mechanism remains within the housing during operation, evaluated under a resolved reading of the boundary-crossing element (UNR-BM-002-001)"
+        fail_when: "a mechanism element leaves the housing during operation under the resolved reading"
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-005:
+        pass_requires: "a declared safety criterion (UNR-BM-002-005 resolved) plus evidence against it"
+        fail_when: "the declared criterion is violated"
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-006:
+        pass_requires: "installation paths demonstrated for every discretely-installed part, an acyclic assembly order, and a manufacturability model with a declared scope"
+        fail_when: "a part has no collision-free installation path, or the order contains a cycle, or the model reports the design outside its declared envelope"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-007:
+        pass_requires: "a declared jamming and stability criterion (UNR-BM-002-005 resolved) plus contact-resolving evidence at the conversion and guidance engagements"
+        fail_when: "the declared criterion is violated"
+        if_evidence_is_declared_pair_only: NOT_VERIFIED
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-008:
+        pass_requires: "a declared desktop envelope (UNR-BM-002-006 resolved) plus the produced product dimensions within it"
+        fail_when: "the produced dimensions exceed the declared envelope"
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      REQ-009:
+        pass_requires: "no element of the drive chain is declared as a powered or stored-energy driving source"
+        fail_when: "such an element exists"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+  s12:
+    must_exist: [revision_plan, root_cause_candidates, rerun_closure, preserved_commitments]
+    must_not_be_decided: [coarse_enum_to_stage_mapping]
+    may_remain_unresolved: []
+    provenance_required: ["root_cause -> owning decision id"]
+    capability_gap_rule: >
+      A revision triggered by UNSUPPORTED must name the absent capability. It may
+      never be recorded as a physical infeasibility of the product
+      (NEG-BM-002-009).

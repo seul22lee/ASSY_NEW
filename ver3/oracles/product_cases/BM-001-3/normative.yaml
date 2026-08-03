@@ -1,0 +1,81 @@
+case_id: BM-001-3
+schema_version: "0.2.0"
+tier: product_case
+inherits: BM-001
+dossier: ver3/oracles/_dossiers/DOS-BM-001-3.md
+lock_status: STRUCTURALLY_COMPLETE
+
+invariants:
+  - id: NRM-BM-001-3-001
+    statement: >
+      The enclosure boundary has a region of non-zero curvature on the underside
+      and a planar region on the top containing the aperture.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_locators: ["DOS-BM-001-3 S1 REQ-011"]
+    conclusion_scope: "Existence of a curved underside region and a planar top region containing the aperture."
+    exclusions:
+      - "Does NOT fix the curvature profile, its radius, or whether curvature is single or double."
+      - "Does not fix the curvature axis orientation."
+    verification_predicate: "exists(boundary region with non-zero curvature on the underside) AND exists(planar boundary region containing the aperture) on opposite sides of the cavity."
+    requires_tags: [curved_underside_region, planar_top_with_aperture]
+    related_freedoms: [FRE-BM-001-3-001, FRE-BM-001-3-003]
+    related_unresolved: [UNR-BM-001-3-001]
+
+  - id: NRM-BM-001-3-002
+    statement: >
+      A resting configuration on a supporting surface exists and is derived from
+      contact geometry rather than asserted by a role name.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-001-3 S1 REQ-011"]
+    derivation_premises:
+      - "REQ-011 states the enclosure rests on its curved underside."
+      - "A resting orientation is produced by contact between the body and the supporting surface."
+      - "A name does not produce contact."
+    conclusion_scope: "Existence and derivation of the resting configuration."
+    exclusions:
+      - "Does NOT assert a stability criterion. None is stated in the source; see UNR-BM-001-3-002."
+      - "Does not require any particular stabilising provision."
+    verification_predicate: "the resting configuration references a contact region between the curved underside and the supporting surface, with derived_from terminating in metric geometry."
+    requires_tags: [resting_configuration_derived]
+    related_freedoms: [FRE-BM-001-3-002]
+    related_unresolved: [UNR-BM-001-3-002]
+
+  - id: NRM-BM-001-3-003
+    statement: >
+      The region swept by the closure clears the curved boundary region as well
+      as the planar one.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-001-3 S1 REQ-011"]
+    derivation_premises:
+      - "REQ-011 places the aperture in the planar top region while the underside is curved."
+      - "Solid bodies do not interpenetrate."
+      - "The parent already requires sweep clearance; the curved region is additional material to clear."
+    conclusion_scope: "Sweep clearance against the curved region."
+    exclusions: ["Does not constrain the closure's motion type or travel."]
+    verification_predicate: "clearance(swept_volume(closure), enclosure_solid including the curved region) > 0, at a declared fidelity."
+    requires_tags: [sweep_clears_curved_region]
+    related_freedoms: [FRE-BM-001-3-003]
+    related_unresolved: []
+
+overrides:
+  - overrides: NRM-BM-001-009
+    relation: narrows
+    rank1_support: "DOS-BM-001-3 S1 REQ-011"
+    reason: "The parent requires cavity access through the aperture at OPEN. REQ-011 fixes the aperture to the planar top region."
+
+required_unresolved:
+  - id: UNR-BM-001-3-001
+    decision: Curvature profile and magnitude of the resting boundary.
+    why_must_remain_open: "DOS-BM-001-3 S2: no profile, radius, or single/double curvature is stated."
+    resolvable_when: "A user-supplied profile, an envelope constraint, or a stability requirement forces it."
+    blocks: []
+    source_locators: ["DOS-BM-001-3 S2"]
+  - id: UNR-BM-001-3-002
+    decision: What stability on a curved underside requires, and how it is achieved.
+    why_must_remain_open: "AMB-001-3-01. DOS-BM-001-3 S4: a curved underside may rock; no stability criterion, tipping case or support condition is stated."
+    resolvable_when: "A stability criterion or tipping load case is supplied."
+    blocks: [NRM-BM-001-3-002]
+    source_locators: ["DOS-BM-001-3 S4"]

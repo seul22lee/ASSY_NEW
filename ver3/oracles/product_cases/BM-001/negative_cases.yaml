@@ -1,0 +1,147 @@
+case_id: BM-001
+schema_version: "0.2.0"
+note: >
+  Each case is a design a naive checker would accept. None is the bare inverse of
+  a normative statement; each names the mechanism by which the wrongness is
+  concealed. Cases whose defect is owned by a global architecture invariant cite
+  violates_invariant and no product invariant.
+
+negative_cases:
+  - id: NEG-BM-001-001
+    failure_class: determinant_only_in_analysis_model
+    fixture: INA-BM-001-A
+    description: "The open pose is declared and the analysis model halts the closure there via a joint range, but nothing in the design determines that pose."
+    why_wrong: "The analysis model was authored with a range; the product has nothing producing it. The simulation confirms the model, not the design."
+    concealment: "A passing kinematic result plus a populated limit field."
+    detect_stage: s05
+    detect_predicate: "the open pose must reference a realized determinant; a joint-range value alone fails."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-005]
+    sources: ["DOS-BM-001 S5 m0 stop/nostop pair"]
+  - id: NEG-BM-001-002
+    failure_class: label_without_realization
+    fixture: INA-BM-001-B
+    description: "A joint type and axis connect closure and enclosure with per-state coordinates. Neither body carries engagement geometry."
+    why_wrong: "A joint type classifies motion; it does not produce it."
+    concealment: "Schema-valid joint, correct axis, plausible poses, clean render."
+    detect_stage: s05
+    detect_predicate: "engagement geometry must exist on both participating bodies where the concept declares contact."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-002]
+    sources: ["DOS-BM-001 S7 RL-0012"]
+  - id: NEG-BM-001-003
+    failure_class: closure_does_not_clear_aperture
+    fixture: INA-BM-001-C
+    description: "At the open pose the closure still lies within the aperture prism, partly covering the opening."
+    why_wrong: "The open state does not open; cavity access is obstructed by the closure."
+    concealment: "Endpoint-only checking: both end poses clear the walls, so an endpoint bounding test passes."
+    detect_stage: s04
+    detect_predicate: "intersect(closure@OPEN, aperture_prism) must be empty."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-003, NRM-BM-001-009]
+    sources: ["DOS-BM-001 S5"]
+  - id: NEG-BM-001-004
+    failure_class: transition_passes_through_solid
+    description: "The open pose lies inside the cavity, so the transition passes through the enclosure wall."
+    why_wrong: "Solid bodies do not interpenetrate; the motion is unrealizable."
+    concealment: "Only the two end states are stored and neither is tested against the wall solid."
+    detect_stage: s04
+    detect_predicate: "clearance(swept_volume(closure), enclosure_solid) > 0."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-003]
+    sources: ["DOS-BM-001 S7 RL-0009"]
+  - id: NEG-BM-001-005
+    failure_class: extent_altered_to_achieve_clearance
+    fixture: INA-BM-001-D
+    description: "The closure is represented with a smaller extent at OPEN so it fits without interference."
+    why_wrong: "Material content is being changed to satisfy a clearance predicate."
+    concealment: "Each state is internally consistent; no per-state check compares extents across states."
+    detect_stage: s04
+    detect_predicate: "material content equal across states within tolerance; any shape change attributed to a declared compliant region."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-004]
+    sources: ["DOS-BM-001 S7 RL-0006"]
+  - id: NEG-BM-001-006
+    failure_class: relationship_without_localized_engagement
+    fixture: INA-BM-001-E
+    description: "A retention relation links closure and enclosure with no engagement site, no overlapping feature pair and no contact normal."
+    why_wrong: "Retention is produced by a localized interaction; a whole-body relation specifies no place where force is exchanged."
+    concealment: "The relation is typed, directional and schema-valid."
+    detect_stage: s05
+    detect_predicate: "retention must reference an engagement site with geometry on both bodies and a contact normal."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-006]
+    sources: ["DOS-BM-001 S7 RL-0010"]
+  - id: NEG-BM-001-007
+    failure_class: access_path_terminates_at_boundary
+    fixture: INA-BM-001-F
+    description: "The release access path reaches the enclosure exterior surface beside the actuator and is accepted as demonstrating operability."
+    why_wrong: "Reaching the outside of the product is not reaching the feature the user must move."
+    concealment: "A populated access path with a valid origin and a plausible endpoint."
+    detect_stage: s03
+    detect_predicate: "access_path.endpoint must equal the retention actuation feature id."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-008]
+    sources: ["DOS-BM-001 S7 RL-0011"]
+  - id: NEG-BM-001-008
+    failure_class: invented_placement
+    description: "A body has no derived placement and is given the world origin so the model is complete."
+    why_wrong: "An invented placement is indistinguishable downstream from a derived one; every clearance result computed against it is meaningless."
+    concealment: "The model is complete and every downstream stage runs successfully."
+    detect_stage: s04
+    detect_predicate: "every authoritative pose has non-empty derived_from terminating in metric quantities; otherwise UNRESOLVED."
+    must_not_be_reported_as: [PASS, SPATIALLY_INSTANTIATED]
+    expected_status: UNRESOLVED
+    violates_invariant: [INV-003, INV-004]
+    sources: ["DOS-BM-001 S7 RL-0011"]
+  - id: NEG-BM-001-009
+    failure_class: incomplete_candidate_wins_on_part_count
+    description: "Candidate A realizes connection, open-pose determinant and retention; candidate B realizes only the connection. B ranks above A on element count and is selected."
+    why_wrong: "B is not simpler, it is less finished. Ranking on element count rewards absent obligations."
+    concealment: "A deterministic, reproducible ranking with a written rationale."
+    detect_stage: s02
+    detect_predicate: "candidates may be compared only at equal obligation coverage; unequal coverage yields INDETERMINATE and no SelectionDecision."
+    must_not_be_reported_as: [PASS]
+    expected_status: INDETERMINATE
+    violates_invariant: [INV-007]
+    sources: ["DOS-BM-001 S7 s02_mechanical.py:408", "RL-0013"]
+  - id: NEG-BM-001-010
+    failure_class: unit_proxy_evidence_match
+    description: "REQ-003 is evaluated against a millimetre value produced for closure travel, because both are lengths, and reported PASS."
+    why_wrong: "Dimensional compatibility is not semantic identity; closure travel bears on nothing about actuation effort."
+    concealment: "A unit-consistent match and a populated evidence field."
+    detect_stage: s11
+    detect_predicate: "evidence matches on (requirement_id, criterion_id, scenario_id, observable_id); unit validated only after matching."
+    must_not_be_reported_as: [PASS]
+    expected_status: NOT_VERIFIED
+    violates_invariant: [INV-012]
+    sources: ["DOS-BM-001 S7 ERROR_TAXONOMY.md"]
+  - id: NEG-BM-001-011
+    failure_class: renderer_originated_commitment
+    description: "The closure axis does not exist in the spatial model; the renderer places it to draw the open state and it is read back into embodiment."
+    why_wrong: "An axis a renderer invents has no derivation from any constraint and is unfalsifiable."
+    concealment: "A legible drawing that appears to answer what moves about which axis."
+    detect_stage: s04
+    detect_predicate: "DesignState must be byte-identical with rendering disabled."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates_invariant: [INV-005]
+    sources: ["DOS-BM-001 S7 RL-0012", "RL-0005"]
+  - id: NEG-BM-001-012
+    failure_class: unsupported_reported_as_infeasible
+    description: "No retention realization is available to the system and the case is reported as physically infeasible."
+    why_wrong: "A reusable retention is trivially realizable; the system lacks a capability, physics does not forbid the product."
+    concealment: "A terminal verdict with a code, reading as a definitive engineering finding."
+    detect_stage: s02
+    detect_predicate: "INFEASIBLE requires a physical_argument; a knowledge-absence branch may emit only UNSUPPORTED."
+    must_not_be_reported_as: [INFEASIBLE]
+    expected_status: UNSUPPORTED
+    violates_invariant: [INV-011]
+    sources: ["DOS-BM-001 S7 KG_NO_PERMITTED_REALIZER"]

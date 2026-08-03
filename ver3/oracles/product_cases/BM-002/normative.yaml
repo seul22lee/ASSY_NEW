@@ -1,0 +1,240 @@
+case_id: BM-002
+schema_version: "0.2.0"
+tier: product_case
+inherits: null
+dossier: ver3/oracles/_dossiers/DOS-BM-002.md
+lock_status: STRUCTURALLY_COMPLETE
+
+invariants:
+  - id: NRM-BM-002-001
+    statement: >
+      A user-operated rotary input outside the housing drives a platform inside
+      the housing to rise and fall, through an uninterrupted motion chain.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_locators: ["DOS-BM-002 S1 REQ-001"]
+    conclusion_scope: "Existence of an external rotary input, an internal platform, and a continuous chain between them."
+    exclusions: ["Does not name a conversion mechanism, a ratio, or a chain topology."]
+    verification_predicate: "exists(external rotary input) and exists(internal platform) and a connected chain of realized couplings between them, traversable in both directions."
+    requires_tags: [external_rotary_input, internal_platform, continuous_motion_chain]
+    related_freedoms: [FRE-BM-002-001, FRE-BM-002-002]
+    related_unresolved: []
+
+  - id: NRM-BM-002-002
+    statement: >
+      The motion chain crosses the housing boundary at a realized crossing whose
+      moving element is supported by the housing.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-002 S1 REQ-001", "DOS-BM-002 S1 REQ-004"]
+    derivation_premises:
+      - "REQ-001 places the input outside; REQ-004 keeps the mechanism inside."
+      - "A chain connecting an outside element to an inside element passes through the boundary."
+      - "An element that moves relative to the boundary it passes through is located by that boundary or it is unconstrained."
+    conclusion_scope: "Existence and support of the boundary crossing."
+    exclusions:
+      - "Does NOT decide whether the crossing element counts as part of the enclosed mechanism; see AMB-002-01."
+      - "Does not name a sealing or support mechanism."
+    verification_predicate: "exists(boundary crossing) with engagement geometry between the moving element and the housing."
+    requires_tags: [boundary_crossing_realized, crossing_element_supported]
+    related_freedoms: [FRE-BM-002-004]
+    related_unresolved: [UNR-BM-002-001]
+    acknowledges_ambiguity: AMB-002-01
+
+  - id: NRM-BM-002-003
+    statement: >
+      Rotary motion is converted to platform translation at a realized conversion
+      with localized engagement on both participating bodies.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-002 S1 REQ-001"]
+    derivation_premises:
+      - "REQ-001 requires rotary input and translating output."
+      - "Rotation does not become translation without an interaction that constrains the two."
+      - "An interaction occurs at material in contact or engagement, not between whole bodies."
+    conclusion_scope: "Existence and locality of the conversion engagement."
+    exclusions: ["Does not name a conversion mechanism, a ratio, or an engagement geometry."]
+    verification_predicate: "exists(conversion realization) with engagement geometry on both participating bodies and a defined input/output relationship."
+    requires_tags: [conversion_realized, conversion_engagement_localized]
+    related_freedoms: [FRE-BM-002-002]
+    related_unresolved: []
+
+  - id: NRM-BM-002-004
+    statement: >
+      Rotating elements of the chain are supported against radial load, and any
+      element carrying axial load has a realized axial reaction.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-002 S1 REQ-001", "DOS-BM-002 S1 REQ-003", "DOS-BM-002 S1 REQ-007"]
+    derivation_premises:
+      - "A rotating element carrying transverse load requires a radial constraint or it displaces."
+      - "REQ-003 places a payload on the platform, producing load along the travel direction."
+      - "An unreacted axial force accelerates the element."
+    conclusion_scope: "Existence of radial support and of axial reaction where axial load occurs."
+    exclusions: ["Does not name a support type. Does not require a separate part."]
+    verification_predicate: "for each rotating element: exists(radial support realization); for each axially loaded element: exists(axial reaction path)."
+    requires_tags: [rotating_elements_radially_supported, axial_reaction_realized]
+    related_freedoms: [FRE-BM-002-005]
+    related_unresolved: []
+
+  - id: NRM-BM-002-005
+    statement: >
+      The platform's travel is guided so that its motion is confined to the
+      intended path, and rotation of the platform about the travel direction is
+      prevented by a realized constraint.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-002 S1 REQ-001", "DOS-BM-002 S1 REQ-007"]
+    derivation_premises:
+      - "REQ-001 requires the platform to rise and fall, i.e. to follow a defined path."
+      - "A rotary conversion applies a moment about the travel direction to the driven body."
+      - "An unconstrained body under an applied moment rotates, which REQ-007 excludes as unstable operation."
+    conclusion_scope: "Existence of travel guidance and of an anti-rotation constraint."
+    exclusions:
+      - "Does not name a guidance mechanism or a number of guides."
+      - "The anti-rotation constraint may be provided by the guidance itself."
+    verification_predicate: "exists(guidance realization constraining the platform to its path) AND exists(realized constraint removing rotation about the travel direction)."
+    requires_tags: [platform_guided, platform_anti_rotation]
+    related_freedoms: [FRE-BM-002-003]
+    related_unresolved: []
+
+  - id: NRM-BM-002-006
+    statement: >
+      The platform occupies a proper subset of its travel corridor at every point
+      of travel, so that both travel extremes are reachable.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-002 S1 REQ-002"]
+    derivation_premises:
+      - "REQ-002 requires the platform to move through a stated displacement."
+      - "A body filling its corridor has nowhere to move."
+    conclusion_scope: "Corridor occupancy and reachability of both extremes."
+    exclusions: ["Does not fix the travel value; see UNR-BM-002-002."]
+    verification_predicate: "swept_volume(platform) is a proper subset of the travel corridor, and both extreme poses are reachable along the path."
+    requires_tags: [both_extremes_reachable, corridor_not_fully_occupied]
+    related_freedoms: []
+    related_unresolved: [UNR-BM-002-002]
+
+  - id: NRM-BM-002-007
+    statement: >
+      Each travel extreme is determined by its own realized condition, evaluated
+      at that extreme's position.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-002 S1 REQ-002", "DOS-BM-002 S1 REQ-007"]
+    derivation_premises:
+      - "REQ-002 defines a bounded displacement, so the travel has two ends."
+      - "Two distinct positions cannot both be determined by one condition evaluated once."
+    conclusion_scope: "Distinctness of the two extreme determinants."
+    exclusions:
+      - "Distinctness is required of the CONDITION or CONTACT FEATURE, not of the manufactured part. One part carrying two abutment faces satisfies this."
+      - "Does not require hard contact; a determined end condition of any realized kind is admissible."
+    verification_predicate: "each extreme references its own contact feature or its own limit condition, evaluated at that extreme's coordinate."
+    requires_tags: [two_extremes_distinctly_determined]
+    related_freedoms: [FRE-BM-002-006]
+    related_unresolved: []
+
+  - id: NRM-BM-002-008
+    statement: >
+      A payload can be placed on and removed from the platform along an access
+      path that terminates at the platform.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-002 S1 REQ-003"]
+    derivation_premises:
+      - "REQ-003 requires the platform to support a payload."
+      - "A payload that cannot reach the platform cannot be supported by it."
+    conclusion_scope: "Existence of a payload access path terminating at the platform."
+    exclusions: ["Does not fix the access region, the opening, or the payload geometry."]
+    verification_predicate: "exists(access_path) whose endpoint is the platform surface, not the housing boundary, at a declared state."
+    requires_tags: [payload_access_reaches_platform]
+    related_freedoms: [FRE-BM-002-007]
+    related_unresolved: []
+
+  - id: NRM-BM-002-009
+    statement: >
+      The platform load has a realized path to a reaction site able to carry it.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-002 S1 REQ-003"]
+    derivation_premises:
+      - "REQ-003 places a payload on the platform."
+      - "An unreacted load accelerates the body."
+    conclusion_scope: "Existence of a load path from platform to a reaction site."
+    exclusions: ["Does not prescribe the site or the path topology."]
+    verification_predicate: "exists(load_path) from the platform to a reaction site."
+    requires_tags: [platform_load_reacted]
+    related_freedoms: []
+    related_unresolved: [UNR-BM-002-003]
+
+  - id: NRM-BM-002-010
+    statement: >
+      Each part installed as a discrete operation can reach its assembled
+      position without passing through already-placed material.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_locators: ["DOS-BM-002 S1 REQ-006"]
+    derivation_premises:
+      - "REQ-006 requires the product to be assemblable."
+      - "A part cannot occupy space already occupied."
+    conclusion_scope: "Existence of an installation path per discretely-installed part."
+    exclusions: ["Does not require a path for co-formed or permanently joined parts. Does not constrain assembly order."]
+    verification_predicate: "for each discretely-installed part: exists(installation_path) collision-free against already-placed parts."
+    requires_tags: [assembly_paths_exist]
+    related_freedoms: []
+    related_unresolved: []
+
+  - id: NRM-BM-002-011
+    statement: >
+      The product is driven only by the user's input; no stored or supplied
+      energy source drives the motion.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_locators: ["DOS-BM-002 S1 REQ-009"]
+    conclusion_scope: "Absence of a non-user energy source in the drive chain."
+    exclusions: ["Does not forbid springs or counterweights used for balance rather than as the driving source."]
+    verification_predicate: "no element of the drive chain is declared as a powered or stored-energy driving source."
+    requires_tags: [manually_driven_only]
+    related_freedoms: []
+    related_unresolved: []
+
+required_unresolved:
+  - id: UNR-BM-002-001
+    decision: Whether the boundary-crossing element counts as part of the enclosed mechanism.
+    why_must_remain_open: "AMB-002-01. REQ-004 requires the mechanism enclosed while REQ-001 requires an external input; the source does not classify the crossing element."
+    resolvable_when: "A rank-1 clarification of what REQ-004 encloses."
+    blocks: []
+    source_locators: ["DOS-BM-002 S4"]
+  - id: UNR-BM-002-002
+    decision: The compliance edge of "approximately 80-100 mm".
+    why_must_remain_open: "AMB-002-02. The source gives a range qualified by 'approximately'; whether 78 or 104 mm complies is undetermined."
+    resolvable_when: "A tolerance or a firm bound is supplied."
+    blocks: []
+    source_locators: ["DOS-BM-002 S4"]
+  - id: UNR-BM-002-003
+    decision: Crank effort, torque and mechanical advantage.
+    why_must_remain_open: "DOS-BM-002 S3: no torque, effort or speed is stated."
+    resolvable_when: "An ergonomic ceiling or a user-stated effort is supplied."
+    blocks: []
+    source_locators: ["DOS-BM-002 S3"]
+  - id: UNR-BM-002-004
+    decision: Whether the mechanism must hold position when the input is released.
+    why_must_remain_open: >
+      DOS-BM-002 S3: no source states a hold, self-locking or back-drive
+      requirement. The legacy lift realization used a holding feature, but that
+      is a rank-4 realization decision, not a requirement.
+    resolvable_when: "A hold or back-drive requirement is stated."
+    blocks: []
+    source_locators: ["DOS-BM-002 S3", "DOS-BM-002 S6"]
+  - id: UNR-BM-002-005
+    decision: Definition of "safe to use" and of "obvious jamming".
+    why_must_remain_open: "DOS-BM-002 S3: no criterion or standard is cited for either."
+    resolvable_when: "A standard or an explicit criterion is supplied."
+    blocks: []
+    source_locators: ["DOS-BM-002 S3"]
+  - id: UNR-BM-002-006
+    decision: The numeric envelope implied by "desktop-sized".
+    why_must_remain_open: "DOS-BM-002 S3: REQ-008 states no dimensions and cites no reference envelope."
+    resolvable_when: "An envelope or a reference surface is supplied."
+    blocks: []
+    source_locators: ["DOS-BM-002 S1 REQ-008", "DOS-BM-002 S3"]

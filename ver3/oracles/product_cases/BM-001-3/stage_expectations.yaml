@@ -1,0 +1,36 @@
+case_id: BM-001-3
+schema_version: "0.2.0"
+inherits: BM-001
+note: Deltas only; absent keys inherit the parent entry.
+stages:
+  s01:
+    must_exist: ["requirement REQ-011", "ambiguity record AMB-001-3-01"]
+    must_not_be_decided: [curvature_profile, curvature_magnitude, stabilisation_strategy]
+    may_remain_unresolved: [UNR-BM-001-3-001, UNR-BM-001-3-002]
+    provenance_required: ["REQ-011 -> spec clause"]
+  s03:
+    must_exist: [curved_underside_region, planar_top_region, aperture_in_top_region, resting_configuration]
+    must_not_be_decided: ["resting orientation from a role name"]
+    may_remain_unresolved: [UNR-BM-001-3-002]
+    provenance_required: ["boundary region -> REQ-011"]
+  s04:
+    must_exist: [metric_curved_surface_geometry, curvature_predicate_inputs, complete_enclosure_solid_for_sweep]
+    must_not_be_decided: ["curvature asserted by annotation only"]
+    may_remain_unresolved: [UNR-BM-001-3-001]
+    provenance_required: ["curved region -> REQ-011", "resting_configuration -> contact geometry"]
+  s07:
+    must_exist: ["curved surface compiled as geometry, or an explicit build failure"]
+    must_not_be_decided: ["substituting a prismatic region for the curved one"]
+    may_remain_unresolved: []
+    provenance_required: ["cad_entity -> construction statement id"]
+  s11:
+    must_exist: []
+    must_not_be_decided: []
+    may_remain_unresolved: []
+    provenance_required: []
+    outcome_rules:
+      REQ-011:
+        pass_requires: "metric geometric evidence of a curved underside region and a planar top region containing the aperture, at a declared fidelity"
+        fail_when: "no curved underside region exists, or the aperture is not in a planar top region"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED

@@ -1,0 +1,30 @@
+case_id: BM-001-2
+schema_version: "0.2.0"
+inherits: BM-001
+note: All BM-001 freedoms apply. Narrowings recorded below.
+
+freedoms:
+  - id: FRE-BM-001-2-001
+    decision: The exposed-boundary profile that achieves non-projection.
+    why_free: "DOS-BM-001-2 S3: the statement requires non-projection; the observable offers 'rounded' as one way to see it."
+    example_realizations: [single-curvature shell, filleted prism, domed cover, chamfered prism, recessed arris]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-2-002
+    decision: Which boundary region seats.
+    why_free: "See UNR-BM-001-2-001."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-2-003
+    decision: How the release is realized given the constraint on its origin.
+    why_free: >
+      REQ-010 constrains WHERE the action originates, not HOW it is realized.
+      Corrected at CLS-2-003: this freedom no longer offers a non-exposed
+      exterior side, which the source does not permit.
+    must_not_be_asserted_by_tests: true
+
+narrowed_from_parent:
+  - freedom: FRE-BM-001-006
+    was: "Enclosure boundary form entirely free, including fully prismatic."
+    now: "A fully prismatic enclosure with projecting exposed arrises is excluded by NRM-BM-001-2-001. The non-projecting form itself remains free."
+  - freedom: FRE-BM-001-003
+    was: "Where the closure connects and which region carries the aperture is free."
+    now: "Unchanged for the aperture. The actuator's reachable side is constrained by NRM-BM-001-2-002."

@@ -1,0 +1,61 @@
+case_id: BM-001-2
+schema_version: "0.2.0"
+inherits: BM-001
+note: >
+  All BM-001 negative cases apply. These are additional. Each is evaluated on the
+  child design alone; none compares against a generated parent design.
+
+negative_cases:
+  - id: NEG-BM-001-2-001
+    failure_class: requirement_absorbed_without_geometric_effect
+    fixture: INA-BM-001-2-A
+    description: "REQ-009 appears in the requirement model and is traced to an evaluation, while the produced enclosure has sharp projecting exposed arrises."
+    why_wrong: "A requirement is discharged by a realization, not by an appearance in a trace."
+    concealment: "A complete, unbroken requirement to evidence chain with every field populated."
+    detect_stage: s04
+    detect_predicate: "every exposed exterior edge is non-projecting, evaluated on the child design's own metric surface geometry."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-2-001]
+    sources: ["DOS-BM-001-2 S1 REQ-009"]
+  - id: NEG-BM-001-2-002
+    failure_class: label_as_geometry
+    fixture: INA-BM-001-2-B
+    description: "The exposed boundary carries a curvature annotation while the underlying solid is prismatic, and the annotation is accepted as satisfying REQ-009."
+    why_wrong: "A qualitative label may annotate geometry but is never the authority for it."
+    concealment: "A populated qualitative field that reads correctly in a report."
+    detect_stage: s04
+    detect_predicate: "the non-projecting-edge predicate takes only metric surface geometry as input; annotation-role fields are excluded from its input set."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-2-001]
+    violates_invariant: [INV-003]
+    sources: ["DOS-BM-001-2 S1 REQ-009"]
+  - id: NEG-BM-001-2-003
+    failure_class: access_from_forbidden_side
+    fixture: INA-BM-001-2-C
+    description: "The actuator is placed on the exposed side and reported as satisfying both REQ-003 and REQ-010 because an access path terminates at it."
+    why_wrong: "REQ-010 forbids exactly this path; satisfying the parent requirement does not satisfy the narrowed one."
+    concealment: "A valid access path that satisfies the parent invariant."
+    detect_stage: s03
+    detect_predicate: "no access_path originating in the exposed half-space may terminate at the retention actuation feature."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-2-002]
+    sources: ["DOS-BM-001-2 S1 REQ-010"]
+  - id: NEG-BM-001-2-004
+    failure_class: rank1_requirement_broadened
+    fixture: INA-BM-001-2-D
+    description: "The actuator is recessed on a non-exposed EXTERIOR side and reported compliant, on the reasoning that the exposed side is what REQ-010 protects."
+    why_wrong: >
+      REQ-010 states two things: not from the exposed side, AND only from inside
+      the enclosure. Satisfying the first while ignoring the second is a
+      broadening of a rank-1 requirement.
+    concealment: "Half of the source sentence is satisfied and cited."
+    detect_stage: s03
+    detect_predicate: "the declared release action must originate inside the enclosure, not merely off the exposed side."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-2-002]
+    sources: ["DOS-BM-001-2 S1 REQ-010"]
+    note: "This case exists because the pre-correction Oracle admitted exactly this design (correction CLS-2-002)."

@@ -1,0 +1,126 @@
+case_id: C4-drawer
+schema_version: "0.2.0"
+purpose: >
+  Designs and pipeline behaviours that must be rejected, each with the invariant
+  or unresolved decision that must do the rejecting. Process cases reproduce
+  recorded legacy behaviour.
+
+negative_cases:
+  - id: NEG-C4-001
+    kind: design
+    description: "Knob and drawer related by a declared ratio with no engagement geometry between them."
+    must_be_rejected_by: [NRM-C4-004]
+    fixture: INA-C4-A
+  - id: NEG-C4-002
+    kind: design
+    description: "Drawer lifted vertically out of the cabinet rather than travelling horizontally."
+    must_be_rejected_by: [NRM-C4-002]
+    fixture: INA-C4-B
+  - id: NEG-C4-003
+    kind: design
+    description: "Drawer translates horizontally but never leaves the cabinet envelope."
+    must_be_rejected_by: [NRM-C4-003]
+    fixture: INA-C4-C
+  - id: NEG-C4-004
+    kind: design
+    description: "Drawer weight reacted only at the retracted state; at full extension the drawer runs off its supports."
+    must_be_rejected_by: [NRM-C4-006]
+    fixture: INA-C4-D
+  - id: NEG-C4-005
+    kind: design
+    description: "Drawer free to rotate about the travel direction while the conversion applies a moment."
+    must_be_rejected_by: [NRM-C4-005]
+    fixture: INA-C4-E
+  - id: NEG-C4-006
+    kind: design
+    description: "A single limit condition credited to both travel extremes."
+    must_be_rejected_by: [NRM-C4-007]
+    fixture: INA-C4-F
+  - id: NEG-C4-007
+    kind: design
+    description: "Knob placed inside the cabinet, reachable only once the drawer is open."
+    must_be_rejected_by: [NRM-C4-008]
+    fixture: INA-C4-G
+  - id: NEG-C4-008
+    kind: design
+    description: "Drawer's emergence path passes through solid cabinet material."
+    must_be_rejected_by: [NRM-C4-010]
+    fixture: INA-C4-H
+  - id: NEG-C4-009
+    kind: design
+    description: "Knob shaft located only by the conversion engagement, with no radial support."
+    must_be_rejected_by: [NRM-C4-009]
+    fixture: INA-C4-I
+
+  - id: NEG-C4-010
+    kind: process
+    description: >
+      Guidance is reported as demonstrated because an off-axis deviation of 0.0
+      degrees was observed under a declared-pair model.
+    reproduced_from: "DOS-C4-drawer S5 E2 - tracks_straight = 0.0 exactly"
+    must_be_rejected_by: [evidence_scope.EV-C4-002]
+    required_outcome: >
+      The value is identified as a structural artifact of the declared prismatic
+      coupling and carries no evidential weight. Guidance remains NOT_VERIFIED at
+      contact fidelity.
+  - id: NEG-C4-011
+    kind: process
+    description: >
+      C4-drawer is reported as physics-verified on the strength of a result
+      produced for a different variant and carried across.
+    reproduced_from: "DOS-C4-drawer S5 E1 - stages.physics = 'reused - PASS'"
+    must_be_rejected_by: [evidence_scope.EV-C4-001]
+    required_outcome: "Evidence reuse across cases is declared as such, with the originating case named, or the requirement is NOT_VERIFIED."
+  - id: NEG-C4-012
+    kind: process
+    description: >
+      An invariant, freedom or test asserts a rail count, a rail spacing, a module,
+      a tooth count, a stroke, a body count, a cabinet size, a wall thickness, or a
+      derived width such as 115.30 mm.
+    reproduced_from: "DOS-C4-drawer S6 - anchor_hard('drawer') parameters"
+    must_be_rejected_by: [FRE-C4-002, FRE-C4-005, FRE-C4-009, UNR-C4-001, UNR-C4-006]
+    required_outcome: "Rejected as REFERENCE_REALIZATION_DETAIL."
+  - id: NEG-C4-013
+    kind: process
+    description: >
+      The travel direction is established by a frame-convention label such as
+      "+X = FRONT" rather than by a geometric relation to the gravity direction.
+    reproduced_from: "DOS-C4-drawer S6 - frame convention +X = FRONT"
+    must_be_rejected_by: [NRM-C4-002, FRE-C4-003]
+    required_outcome: "Rejected. A label may accompany the relation but may never be its authority (ARCHITECTURE_INVARIANTS INV-003)."
+  - id: NEG-C4-014
+    kind: process
+    description: >
+      The conflict about whether a toothed transmission is over-engineered is
+      resolved by the pipeline, in either direction, and used to require or
+      forbid a conversion family.
+    reproduced_from: "AMB-C4-01"
+    must_be_rejected_by: [UNR-C4-002, FRE-C4-002]
+    required_outcome: "The conflict is carried. Neither statement is rank-1, so neither may bind the family choice."
+  - id: NEG-C4-015
+    kind: process
+    description: >
+      C4-drawer is merged with, or its requirements imported from, the
+      hand-pulled latched drawer or the knob-and-rack fixture.
+    reproduced_from: "DOS-C4-drawer S8"
+    must_be_rejected_by: [UNR-C4-003, UNR-C4-007]
+    required_outcome: >
+      Rejected. The latched drawer states retention and hand release and states no
+      rotary input; the rack fixture states no cabinet, drawer or guidance
+      obligation. Importing either would silently decide UNR-C4-003 or UNR-C4-007.
+  - id: NEG-C4-016
+    kind: process
+    description: >
+      The pipeline reports INFEASIBLE because no permitted realizer for the
+      conversion exists in its library.
+    reproduced_from: "DOS-C4-drawer S7"
+    must_be_rejected_by: [FRE-C4-002]
+    required_outcome: "UNSUPPORTED with the missing capability named; never INFEASIBLE."
+  - id: NEG-C4-017
+    kind: process
+    description: >
+      A retention, latching or hold-closed obligation is imposed because drawers
+      commonly have one.
+    reproduced_from: "DOS-C4-drawer S3, S8"
+    must_be_rejected_by: [UNR-C4-003]
+    required_outcome: "Rejected as UNSUPPORTED_INFERENCE. The source states no retention requirement."

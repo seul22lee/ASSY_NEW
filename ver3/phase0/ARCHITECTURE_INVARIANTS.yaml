@@ -1,0 +1,628 @@
+# ARCHITECTURE_INVARIANTS — machine-checkable anti-regression rules
+#
+# Each invariant closes a specific observed failure in Ver1 or Ver2.
+# These are not implementation tests yet; every entry states how it WILL be
+# tested. An invariant with no stated detection strategy is not admissible.
+#
+# severity:
+#   BLOCKING  - pipeline must halt; a violation invalidates the run
+#   ERROR     - stage validation fails; run may continue for diagnosis only
+#   WARNING   - recorded in StageDiagnostics; must be triaged, never ignored
+#
+# stage_scope: "all" | list of stage ids | "build" (repo-level, not runtime)
+
+schema_version: "0.1.0"
+status: draft            # frozen with the Oracle lock; changes need a proposal
+legacy_roots:
+  ver1: /home/ftk3187/github/ASSY_Ver1.0
+  ver2: /home/ftk3187/github/ASSY_Ver2.0
+
+invariants:
+
+  # ------------------------------------------------------------------
+  # Identity and state
+  # ------------------------------------------------------------------
+  - invariant_id: INV-001
+    statement: >
+      Exactly one entity exists per real-world thing. A downstream stage extends
+      an entity by its stable ID; it never creates a second entity denoting the
+      same body, joint, interface, requirement, obligation, parameter or feature.
+    prohibited_symptom: >
+      Stage 03 or Stage 05 creates a body/joint that denotes something Stage 02
+      already created, under a new ID; or an entity is referenced by a free
+      string rather than a typed reference.
+    detection_strategy:
+      - name: ownership_check
+        method: >
+          Every entity carries created_by_stage. On patch application, reject any
+          CREATE whose entity_type is not owned by the emitting stage per
+          STAGE_OWNERSHIP_MATRIX.
+      - name: lineage_duplicate_check
+        method: >
+          AUTHORITATIVE, non-heuristic. A violation requires positive evidence of
+          re-denotation, not similarity. Exactly one of these must hold for a
+          finding:
+            (a) two entities carry the same instance_identity token but different
+                IDs and no supersedes/same_as relation;
+            (b) an entity's lineage cites an upstream entity as its source yet
+                declares itself a CREATE rather than an EXTEND of that entity;
+            (c) two entities are declared same_as yet have divergent
+                authoritative fields;
+            (d) a stage CREATEs an entity type it does not own per
+                STAGE_OWNERSHIP_MATRIX.
+          Legitimate multiplicity is explicitly NOT a violation: two rails, two
+          bearings, four fasteners, N identical guides are distinct instances
+          with distinct instance_identity and distinct lineage. Instance count is
+          never evidence of duplication.
+      - name: similarity_review_flag
+        method: >
+          HEURISTIC, non-blocking. Entities sharing (entity_type, canonical_role,
+          governing_obligation_id) and lacking any of {distinct instance_identity,
+          Alternative relation, distinct lineage} are emitted to
+          StageDiagnostics as REVIEW_CANDIDATE. This never fails a build; it
+          exists so a human can inspect suspicious clusters.
+      - name: reference_resolution
+        method: >
+          Every reference field must resolve to an existing entity ID. Free-string
+          subjects are a schema error, not a warning.
+    stage_scope: all
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/identity.py::check_single_denotation
+    closes: [R-19, R-20, "Ver2 B.1"]
+
+  - invariant_id: INV-002
+    statement: >
+      Only Stage 01 consumes the raw user request. No stage at or after Stage 02
+      reads, reparses, or pattern-matches the original request text.
+    prohibited_symptom: >
+      A raw_request / source_text / spec field present in a stage-02+ projection;
+      or a regex over user prose in a downstream stage.
+    detection_strategy:
+      - name: projection_schema_check
+        method: >
+          Stage projections for stages >= 02 have no field of type RawRequestText.
+          Enforced by the projection type itself, then asserted in a test.
+      - name: static_scan
+        method: >
+          AST scan of ver3/assy3/stages/s02..s12 for `re.` / `.search(` / `.match(`
+          applied to any value reachable from a request-text field.
+      - name: paraphrase_invariance
+        method: >
+          Re-run a case with the request text paraphrased but the Stage 01 output
+          held byte-identical. All downstream artifacts must be unchanged.
+    stage_scope: ["s02","s03","s04","s05","s06","s07","s08","s09","s10","s11","s12"]
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/projection.py::check_no_raw_request
+    closes: [R-13]
+
+  # ------------------------------------------------------------------
+  # Geometry must come from geometry
+  # ------------------------------------------------------------------
+  - invariant_id: INV-003
+    statement: >
+      Pose, orientation, extent, offset, motion path, contact, clearance and
+      geometric feasibility are represented and proven by metric geometry —
+      frames, transforms, unit-bearing vectors, paths and swept volumes — derived
+      from constraints, contacts, packaging and access obligations.
+      Qualitative or ordinal metadata (enums, ranks, coarse zones, ordinal
+      stations, discrete slots) MAY exist as annotation, indexing, grouping,
+      search heuristics, or human-facing summary. It may NEVER be the
+      authoritative representation of, or the proof of, any of those geometric
+      properties, and it may never be the sole basis on which a geometric
+      decision is made.
+    rationale: >
+      Ver2's failure was not that qualitative labels existed; it was that they
+      were the only spatial representation, so clearance and interference became
+      undecidable and downstream stages invented answers. Labels are permitted;
+      label-as-authority is not.
+    prohibited_symptom: >
+      A geometric property whose authoritative value is an enum/ordinal, or
+      whose provenance chain terminates in a role name, entity name, region type,
+      obligation name, keyword or declaration order — with no metric derivation
+      beneath it. E.g. Ver2 `_zone_of(pl) -> SpatialZone`
+      (assy/stages/s04_concept.py:308) producing the placement actually used;
+      `BodyPlacement.span: list[int]` (upstream.py) as the only travel
+      representation; a clearance verdict justified by two bodies being in
+      different `SpatialZone` values.
+    permitted_uses:
+      - Annotating a metric pose with a human-readable region label for reports.
+      - Grouping or indexing entities for search, diagnostics or rendering.
+      - Proposing a candidate arrangement, provided the arrangement is then
+        realized metrically and the metric realization is what is validated.
+      - Recording a qualitative UNRESOLVED hint before metric data exists,
+        provided maturity does not advance past PROPOSED on its basis.
+    detection_strategy:
+      - name: authoritative_field_typing
+        method: >
+          Fields marked authoritative_geometry=True must have metric types
+          (frame, transform, unit-bearing vector/scalar, path, swept volume).
+          An enum/ordinal field may exist alongside but must be marked
+          role=annotation and is excluded from every geometric predicate's input
+          set. Checked by schema audit.
+      - name: predicate_input_audit
+        method: >
+          Every geometric predicate (clearance, interference, reachability,
+          corridor occupancy, engagement) declares its input fields. If any input
+          resolves to an annotation-role field, the predicate is invalid.
+      - name: provenance_of_pose
+        method: >
+          Every authoritative pose carries derived_from citing constraint,
+          contact, packaging or access entity IDs, and terminates in metric
+          quantities. A chain terminating only in a role/name/enum entity is a
+          violation.
+      - name: role_rename_invariance
+        method: >
+          Rename every role/name string in a case to an opaque token. All
+          authoritative geometry must be byte-identical; only annotation fields
+          and report text may differ.
+      - name: annotation_ablation
+        method: >
+          Drop all annotation-role fields before Stage 04 validation. Every
+          geometric predicate must still evaluate to the same verdict.
+    stage_scope: ["s03","s04","s05"]
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/spatial.py::check_geometric_authority
+    closes: [R-02, R-03, R-04, R-05, R-10, R-11, R-12]
+
+  # ------------------------------------------------------------------
+  # Nothing is silently filled in
+  # ------------------------------------------------------------------
+  - invariant_id: INV-004
+    statement: >
+      Missing information is represented as UNRESOLVED, NOT_VERIFIED,
+      UNSUPPORTED, CONTRADICTION or BLOCKING_ERROR. No default unit, dimension,
+      face, axis, span, placement or form is ever substituted.
+    prohibited_symptom: >
+      `unit = value.unit or "mm"` (Ver2 assy/stages/s06_solver.py:51); missing
+      placement resolved to origin; unknown form resolved to a generic block;
+      a full-span body created to fill a gap.
+    detection_strategy:
+      - name: static_default_scan
+        method: >
+          AST scan for `or "<literal>"`, `.get(k, <literal>)`, `getattr(x,k,<lit>)`
+          and `if not x: x = <literal>` on any field typed Unit, Length, Pose,
+          Axis, Face or Form. Allowlist requires an explicit `# DEFAULT-OK:` note
+          with a reason, reviewed at contract level.
+      - name: unit_completeness
+        method: >
+          Every quantity has a unit token; `dimensionless` is explicit. A null or
+          absent unit is a schema error.
+      - name: unknown_propagation
+        method: >
+          Negative-case fixtures omit a unit, a placement and a form. Each must
+          surface as a typed unknown in the ValidationReport, never as a value.
+    stage_scope: all
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/defaults.py::check_no_silent_default
+    closes: [R-21, "Ver2 B.5"]
+
+  # ------------------------------------------------------------------
+  # Non-designers must not design
+  # ------------------------------------------------------------------
+  - invariant_id: INV-005
+    statement: >
+      The renderer originates no engineering commitment. It may choose only
+      camera, projection, transparency, section/cutaway, label layout, and
+      display-only substitutions explicitly isolated from DesignState.
+    prohibited_symptom: >
+      A DesignState entity whose provenance names a render step; a body position,
+      axis, dimension, engagement site, opening, support, reaction site or stop
+      first appearing in render output; Ver2 `ConceptVisualization` as Stage 04's
+      authoritative artifact (upstream.py:1724).
+    detection_strategy:
+      - name: render_provenance_ban
+        method: >
+          Renderer runs with a write-blocked DesignState handle. Any attempted
+          write raises. Asserted by a test that runs Stage 04 rendering and
+          diffs DesignState before/after — must be identical.
+      - name: render_ablation
+        method: >
+          Run the full pipeline with rendering disabled. All authoritative
+          artifacts must be byte-identical to the rendered run.
+      - name: display_substitution_isolation
+        method: >
+          Display substitutions live only in render_manifest.json and are absent
+          from every stage patch.
+    stage_scope: ["s04"]
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/render_boundary.py::check_render_is_projection
+    closes: [R-01, R-29]
+
+  - invariant_id: INV-006
+    statement: >
+      The CAD compiler originates no engineering commitment. It compiles the
+      ConstructionProgram and SolvedDesign, or it fails with the originating
+      construction statements and dependency cone preserved.
+    prohibited_symptom: >
+      CAD placing a missing body, inventing geometry, adding a fallback block,
+      choosing a missing dimension, or changing the selected mechanism.
+    detection_strategy:
+      - name: cad_input_closure
+        method: >
+          Stage 07 receives ONLY (ConstructionProgram, SolvedDesign). Any
+          reference to an unresolved symbol is a build failure, never a default.
+      - name: cad_provenance_ban
+        method: >
+          No DesignState entity may have created_by_stage == s07 other than
+          CAD artifacts (files, hashes, topology reports).
+      - name: missing_dimension_fixture
+        method: >
+          Fixture with one deliberately unsolved dimension must yield
+          geometry_build_report status=FAILED with the originating statement,
+          and must NOT produce a part file.
+    stage_scope: ["s07"]
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/cad_boundary.py::check_cad_compiles_only
+    closes: [R-24]
+
+  # ------------------------------------------------------------------
+  # Candidates and obligations
+  # ------------------------------------------------------------------
+  - invariant_id: INV-007
+    statement: >
+      No mechanism is selected before every retained candidate has reached
+      comparable completeness (obligations realized, packaging feasible, supports
+      and reactions present, access demonstrated, first-order parameters
+      feasible). Mandatory realization elements are never scored as complexity
+      penalties, and a stable tie-break is never a selection.
+    prohibited_symptom: >
+      Ver2 `selected_id=best.id` at s02_mechanical.py:408, ranked partly on
+      `element count`, with ties resolved by "an arbitrary stable pick".
+    detection_strategy:
+      - name: selection_gate
+        method: >
+          A SelectionDecision may be applied only if every candidate carries
+          Stage 03 and Stage 04 feasibility evidence. Otherwise the patch is
+          rejected.
+      - name: no_selection_field_before_gate
+        method: >
+          Stage 02 output schema has NO selected-candidate field at all. The
+          field cannot be populated because it does not exist.
+      - name: completeness_parity
+        method: >
+          Comparison requires equal obligation-realization coverage across
+          candidates; unequal coverage yields INDETERMINATE, not a winner.
+      - name: incomplete_candidate_fixture
+        method: >
+          Negative fixture: candidate A complete, candidate B missing its
+          bearing and stop. B must never rank above A; selection must not occur.
+    stage_scope: ["s02","s03","s04"]
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/selection.py::check_selection_gate
+    closes: [R-15, R-16, R-17]
+
+  - invariant_id: INV-008
+    statement: >
+      Every mandatory obligation reaches exactly one of: a Realization with a
+      verification predicate and an evidence status; UNRESOLVED; UNSUPPORTED; or
+      CONTRADICTION. A label, field, relationship or simulation side-effect never
+      discharges an obligation.
+    prohibited_symptom: >
+      A `revolute` label with no fixed-side and moving-side realization; a
+      shaft/screw/nut relation with no localized engagement; a guide permitting
+      translation with no anti-rotation realization; a stop present in the physics
+      model but absent from the design; an obligation silently omitted.
+    detection_strategy:
+      - name: obligation_closure
+        method: >
+          For each obligation: assert a terminal status exists. An obligation with
+          no status is a BLOCKING error (it must not be droppable).
+      - name: realization_cites_obligations
+        method: >
+          Every Realization declares the obligation IDs it discharges; an
+          obligation claimed by no realization and carrying no explicit non-pass
+          status is a violation.
+      - name: label_is_not_realization
+        method: >
+          A joint of type revolute must reference a fixed-side realization and a
+          moving-side realization, both with engagement geometry. Type alone
+          cannot satisfy the predicate.
+      - name: two_extremes_distinct
+        method: >
+          Where a motion has two travel extremes, each extreme must be discharged
+          by its OWN terminal contact feature or its OWN limit predicate,
+          evaluated at that extreme's joint coordinate.
+          Distinctness is required at the level of the contact/predicate, NOT at
+          the level of the manufactured part. One physical part legitimately
+          carrying two terminal faces (a slot with both ends closed, a shouldered
+          shaft, a single moulded stop-block with two abutment faces) SATISFIES
+          this check, provided each extreme cites a distinct contact feature with
+          its own geometry and its own predicate.
+          A violation is: both extremes citing the same contact feature; one
+          extreme citing no feature; or a single predicate evaluated once and
+          credited to both extremes.
+    stage_scope: ["s02","s03","s04","s05","s11"]
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/obligations.py::check_obligation_closure
+    closes: [R-09, R-18, R-28, "Ver2 B.6"]
+
+  # ------------------------------------------------------------------
+  # Verification honesty
+  # ------------------------------------------------------------------
+  - invariant_id: INV-009
+    statement: >
+      Every PASS names its model, assumptions, state/scenario, fidelity, evidence
+      and excluded properties. A PASS without a declared scope is invalid.
+    prohibited_symptom: >
+      An unscoped PASS; a V-A declared-pair result cited as contact-physics
+      (V-B) evidence; a structurally trivial measurement offered as evidence
+      (e.g. offaxis_max_deg == 0.0 under declared coupling, as in Ver1
+      m13_hard_anchor/out/t2_hard_verdict.json).
+    detection_strategy:
+      - name: pass_scope_required
+        method: >
+          RequirementEvaluation outcome PASS requires a non-empty scope block
+          with all six fields. Schema-enforced.
+      - name: fidelity_legality
+        method: >
+          A claim flagged contact_dependent may not cite evidence with
+          fidelity == V-A. Cross-checked against Oracle evidence_scope.
+      - name: structural_artifact_flag
+        method: >
+          Evidence items must declare structural_artifacts. An observable listed
+          there cannot be the sole support for a PASS.
+    stage_scope: ["s08","s09","s10","s11"]
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/verification.py::check_pass_scope
+    closes: ["Ver1 A.3 partial", R-08]
+
+  - invariant_id: INV-010
+    statement: >
+      Stage 06 either solves, or reports precisely why it did not. Copying values
+      is not solving; an unparsed constraint is not satisfied; an objective
+      recorded is not an objective optimized.
+    prohibited_symptom: >
+      Feasible reported with no residuals; constraints deferred to CAD time;
+      unparsed expressions treated as satisfied.
+    detection_strategy:
+      - name: status_partition
+        method: >
+          Status is exactly one of feasible | infeasible | underdetermined |
+          unsupported_formulation | solver_failure.
+      - name: residual_evidence
+        method: >
+          feasible requires constraint_residuals for every declared constraint,
+          within a declared tolerance. Missing residual => not feasible.
+      - name: unparsed_is_unsupported
+        method: >
+          Any constraint the parser cannot type maps to unsupported_formulation.
+          A fixture with a deliberately malformed expression asserts this.
+      - name: optimality_evidence
+        method: >
+          Objectives reported as optimized require an optimization trace.
+    stage_scope: ["s06"]
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/solver.py::check_solver_status
+    closes: [R-22, R-23]
+
+  - invariant_id: INV-011
+    statement: >
+      A capability the system lacks is reported as UNSUPPORTED. INFEASIBLE is
+      reserved for a physical or logical impossibility supported by an argument.
+    prohibited_symptom: >
+      "No realizer in the knowledge base" reported as INFEASIBLE — Ver1
+      KG_NO_PERMITTED_REALIZER (tasks/benchmark/benchmark.py:145-150) and
+      out-of-vocabulary V-03 (:159-162), the latter returned even though
+      knowledge/cards/lead_screw.py existed.
+    detection_strategy:
+      - name: infeasible_requires_argument
+        method: >
+          An INFEASIBLE verdict must carry a physical_argument referencing
+          conserved quantities, geometry, or a contradiction among user-stated
+          requirements. Absence => the verdict is rewritten UNSUPPORTED.
+      - name: knowledge_gap_channel
+        method: >
+          Any code path whose condition is "not found in knowledge/library/
+          provider" may emit only UNSUPPORTED. Enforced by type: the lookup
+          returns Optional[...] and the UNSUPPORTED constructor is the only one
+          reachable from a None branch.
+      - name: oracle_negative_case
+        method: >
+          Negative case "mechanism declared infeasible because the library lacks
+          it" must fail with reason UNSUPPORTED_MISREPORTED.
+    stage_scope: all
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/status.py::check_unsupported_vs_infeasible
+    closes: [R-27, "Ver1 A.3"]
+
+  - invariant_id: INV-012
+    statement: >
+      Requirements and evidence are linked by requirement ID, criterion ID,
+      scenario ID and observable semantics. Never by unit, and never by
+      dimensional compatibility alone.
+    prohibited_symptom: >
+      A requirement passing because an unrelated metric shares its unit.
+    detection_strategy:
+      - name: semantic_key_match
+        method: >
+          Evidence lookup keys on (requirement_id, criterion_id, scenario_id,
+          observable_id). Unit is validated for consistency AFTER matching, never
+          used to match.
+      - name: unit_collision_fixture
+        method: >
+          Fixture with two mm-valued observables (stroke, clearance) where only
+          stroke is measured. The clearance requirement must be NOT_VERIFIED,
+          not PASS.
+    stage_scope: ["s11"]
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/evidence_match.py::check_semantic_identity
+    closes: [R-25]
+
+  - invariant_id: INV-013
+    statement: >
+      Every planned observable receives exactly one explicit outcome: MEASURED,
+      NOT_MEASURED, INVALID, NOT_APPLICABLE or EXECUTION_FAILED. Missing evidence
+      never disappears.
+    prohibited_symptom: >
+      A metric absent from the report; a requirement evaluated on the subset of
+      observables that happened to be produced.
+    detection_strategy:
+      - name: observable_bijection
+        method: >
+          set(planned observables) == set(outcome records). Any asymmetry is a
+          BLOCKING error.
+      - name: crash_fixture
+        method: >
+          Fixture where the executor crashes mid-run. Every unproduced observable
+          must appear as EXECUTION_FAILED.
+    stage_scope: ["s08","s09","s10"]
+    severity: BLOCKING
+    planned_validator: ver3/assy3/validation/evidence_completeness.py::check_observable_bijection
+    closes: [R-26]
+
+  # ------------------------------------------------------------------
+  # Overfitting and external dependence
+  # ------------------------------------------------------------------
+  - invariant_id: INV-014
+    statement: >
+      No test or Oracle asserts an exact value for a decision the Oracle declares
+      free. Exact comparison is permitted only for IDs, schema versions, units,
+      user-stated requirements, provenance, declared equations, canonical
+      serialization and locked Oracle metadata.
+    prohibited_symptom: >
+      Asserting a coordinate, dimension, part count, mechanism family, face,
+      side or handedness that freedoms.yaml declares free; asserting equality to
+      a legacy golden output.
+    detection_strategy:
+      - name: freedom_assertion_scan
+        method: >
+          Cross-reference every assertion literal in ver3/tests against the union
+          of freedoms.yaml entries for the case under test. Overlap is a failure.
+      - name: order_and_rename_invariance
+        method: >
+          Permuting input entity order and renaming roles to opaque tokens must
+          leave canonical output unchanged.
+      - name: alternative_design_admission
+        method: >
+          A hand-authored alternative design that differs in a declared-free
+          dimension must PASS the same Oracle pack.
+    stage_scope: build
+    severity: ERROR
+    planned_validator: ver3/tests/meta/test_no_overfit_assertions.py
+    closes: [R-30, R-31, R-12]
+
+  - invariant_id: INV-015
+    statement: >
+      No behaviour branches on a benchmark ID, case ID, product name, or expected
+      output file name.
+    prohibited_symptom: >
+      `if case_id == "BM-001"`, `if "drawer" in name`, benchmark-keyed lookup
+      tables in production code.
+    detection_strategy:
+      - name: identifier_scan
+        method: >
+          Scan ver3/assy3 for case-ID literals (BM-*, C4-*, latched_drawer,
+          rack_pinion_fixture) and for product-name string comparisons. Any hit
+          in production code is a failure; Oracle packs and fixtures are exempt.
+      - name: case_rename_run
+        method: >
+          Re-run every case with its ID replaced by an opaque token. All
+          authoritative artifacts must be identical modulo the ID itself.
+    stage_scope: build
+    severity: BLOCKING
+    planned_validator: ver3/tests/meta/test_no_benchmark_branches.py
+    closes: [R-14]
+
+  - invariant_id: INV-016
+    statement: >
+      Ver3 has no runtime dependency on ASSY_NEW (the repository root ontology /
+      data / rules), and imports no Ver1 or Ver2 production module.
+    prohibited_symptom: >
+      An import of assy.*, ontology.*, knowledge.*, pipeline.* from the legacy
+      repos; a runtime read of the root ontology/, data/ or rules/ directories;
+      a test that fails when the root project is renamed.
+    detection_strategy:
+      - name: import_scan
+        method: >
+          AST import scan of ver3/assy3 for legacy package names and for any path
+          outside ver3/.
+      - name: absence_run
+        method: >
+          Temporarily rename root ontology/, data/, rules/ (restoring afterwards)
+          and run the full Ver3 suite. It must pass unchanged.
+      - name: filesystem_access_audit
+        method: >
+          Runtime open() audit: every path opened by Ver3 must be under ver3/ or
+          an explicitly configured input path.
+    stage_scope: build
+    severity: BLOCKING
+    planned_validator: ver3/tests/meta/test_no_external_dependency.py
+    closes: ["Part II boundary", U-05]
+
+  - invariant_id: INV-017
+    statement: >
+      Locked Oracle files are immutable to implementation work. Any content
+      change requires an ORACLE_CHANGE_PROPOSAL, never a code commit.
+    prohibited_symptom: >
+      An Oracle file edited to make a failing test pass.
+    detection_strategy:
+      - name: lock_hash_check
+        method: >
+          Recompute SHA-256 of every file listed in oracles/LOCK.json; any drift
+          fails the suite with the offending path.
+      - name: proposal_required
+        method: >
+          A changed Oracle hash without a corresponding ORACLE_CHANGE_PROPOSAL
+          entry is a failure.
+    stage_scope: build
+    severity: BLOCKING
+    planned_validator: ver3/tests/meta/test_oracle_lock.py
+    closes: ["ORACLE_METHOD §10"]
+
+  - invariant_id: INV-018
+    statement: >
+      Stage output is deterministic: the same input DesignState projection yields
+      byte-identical canonical serialization.
+    prohibited_symptom: >
+      Set/dict iteration order, timestamps, RNG or absolute paths leaking into a
+      patch; a stage whose second run differs from its first.
+    detection_strategy:
+      - name: double_run_compare
+        method: >
+          Run each stage twice from identical input; compare canonical
+          serialization byte-for-byte.
+      - name: nondeterminism_scan
+        method: >
+          Scan for time.time(), datetime.now(), random without a seeded generator,
+          and unsorted set iteration feeding output.
+    stage_scope: all
+    severity: ERROR
+    planned_validator: ver3/tests/meta/test_stage_determinism.py
+    closes: ["Part VI step 12"]
+
+# ----------------------------------------------------------------------
+# Coverage check: every retirement-matrix row maps to at least one invariant.
+# ----------------------------------------------------------------------
+retirement_coverage:
+  R-01: [INV-005]
+  R-02: [INV-003]
+  R-03: [INV-003, INV-008]
+  R-04: [INV-003]
+  R-05: [INV-003]
+  R-06: [INV-003, INV-008]
+  R-07: [INV-003, INV-008]
+  R-08: [INV-009]
+  R-09: [INV-008]
+  R-10: [INV-003]
+  R-11: [INV-003, INV-008]
+  R-12: [INV-003, INV-014]
+  R-13: [INV-002]
+  R-14: [INV-015]
+  R-15: [INV-007]
+  R-16: [INV-007]
+  R-17: [INV-007]
+  R-18: [INV-008]
+  R-19: [INV-001]
+  R-20: [INV-001]
+  R-21: [INV-004]
+  R-22: [INV-010]
+  R-23: [INV-010]
+  R-24: [INV-006]
+  R-25: [INV-012]
+  R-26: [INV-013]
+  R-27: [INV-011]
+  R-28: [INV-008]
+  R-29: [INV-005]
+  R-30: [INV-014]
+  R-31: [INV-014]
+  R-32: []          # not machine-checkable; governed by completion criteria

@@ -1,0 +1,55 @@
+case_id: BM-001-3
+schema_version: "0.2.0"
+inherits: BM-001
+note: >
+  All BM-001 negative cases apply. Each case below is evaluated on the child
+  design alone; none compares against a generated parent design.
+negative_cases:
+  - id: NEG-BM-001-3-001
+    failure_class: requirement_absorbed_without_geometric_effect
+    fixture: INA-BM-001-3-A
+    description: "REQ-011 appears in the requirement model and is traced to an evaluation, while the produced enclosure has no curved region."
+    why_wrong: "A requirement is discharged by a realization, not by an appearance in a trace."
+    concealment: "A complete requirement to evidence chain with every field populated."
+    detect_stage: s04
+    detect_predicate: "exists(boundary region with non-zero curvature on the underside), evaluated on the child design's own metric surface geometry."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-3-001]
+    sources: ["DOS-BM-001-3 S1 REQ-011"]
+  - id: NEG-BM-001-3-002
+    failure_class: capability_gap_masked_by_partial_completion
+    description: "Only prismatic shells can be generated. REQ-011 is honestly reported UNSUPPORTED, but the run continues to a complete design and evaluates the remaining requirements against the prismatic enclosure."
+    why_wrong: "Reporting UNSUPPORTED is correct; continuing to evaluate clearance and access against an enclosure known not to satisfy its boundary requirement is not. Every predicate consuming that geometry inherits the gap."
+    concealment: "One honest UNSUPPORTED status alongside genuine-looking PASSes elsewhere."
+    detect_stage: s04
+    detect_predicate: "an UNSUPPORTED boundary obligation blocks maturity advance for the enclosure, and every predicate consuming it inherits NOT_VERIFIED."
+    must_not_be_reported_as: [PASS]
+    expected_status: NOT_VERIFIED
+    violates: [NRM-BM-001-3-001]
+    sources: ["DOS-BM-001-3 S1 REQ-011"]
+  - id: NEG-BM-001-3-003
+    failure_class: orientation_named_not_derived
+    fixture: INA-BM-001-3-B
+    description: "The resting orientation is set by a role label rather than derived from contact geometry and the supporting surface."
+    why_wrong: "A curved body's resting orientation is a mechanical result. On a curve it may rock; a name cannot establish which orientation obtains."
+    concealment: "A plausible upright pose in every render."
+    detect_stage: s04
+    detect_predicate: "resting_configuration must derive from a contact region with derived_from terminating in metric geometry."
+    must_not_be_reported_as: [PASS]
+    expected_status: UNRESOLVED
+    violates: [NRM-BM-001-3-002]
+    violates_invariant: [INV-003]
+    sources: ["DOS-BM-001-3 S4"]
+  - id: NEG-BM-001-3-004
+    failure_class: partial_sweep_check
+    fixture: INA-BM-001-3-C
+    description: "The closure sweep is checked against the planar walls only and reported clear, while it interferes with the curved underside region."
+    why_wrong: "Clearance is a property of the whole solid, not of the faces the checker happened to sample."
+    concealment: "A clearance result that is genuinely computed, just against an incomplete solid."
+    detect_stage: s04
+    detect_predicate: "the swept-clearance predicate takes the complete enclosure solid, curved regions included, as input."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-3-003]
+    sources: ["DOS-BM-001-3 S1 REQ-011"]

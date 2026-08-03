@@ -1,0 +1,98 @@
+case_id: BM-001
+schema_version: "0.2.0"
+note: >
+  Machine-checked fixtures. Every admissible realization must satisfy EVERY
+  invariant; every inadmissible realization must fail AT LEAST ONE. These are
+  the inputs to audit passes 3B and 3C.
+
+tag_vocabulary:
+  two_states: "a closed and an open state exist"
+  continuous_transition: "a motion connects them, evaluable at intermediate values"
+  connection_realized: "engagement geometry exists on both bodies where the concept needs contact"
+  open_clears_aperture: "closure does not occupy the aperture at OPEN"
+  sweep_clears_enclosure: "swept region does not intersect the enclosure solid"
+  extent_conserved: "material content equal across states; deformation declared if present"
+  open_pose_determined: "a realized feature or condition determines the open pose"
+  retention_realized: "retention engagement localized on both bodies"
+  retention_release_action: "a deliberate user action releases it"
+  retention_reusable: "engage/release repeatable, no single-use feature"
+  actuator_reachable: "an access path terminates at the actuation feature"
+  cavity_access: "a path reaches the interior cavity at OPEN"
+  assembly_paths_exist: "each discretely-installed part has a collision-free installation path"
+  loads_reacted: "each named load-bearing interface has a reaction path"
+
+admissible_realizations:
+  - id: ADM-BM-001-A
+    summary: "Rigid prismatic box, rotating lid on a lateral axis, compressive catch, moulded abutment fixes the open pose."
+    materially_differs_by: [motion_type, connection_persistence, boundary_form]
+    tags: [two_states, continuous_transition, connection_realized, open_clears_aperture,
+           sweep_clears_enclosure, extent_conserved, open_pose_determined, retention_realized,
+           retention_release_action, retention_reusable, actuator_reachable, cavity_access,
+           assembly_paths_exist, loads_reacted]
+
+  - id: ADM-BM-001-B
+    summary: "Single-piece curved shell with a compliant flexing closure region and a magnetic catch; open pose set by an over-centre condition in the compliant region."
+    materially_differs_by: [compliance, part_count, retention_principle, boundary_form]
+    note: "Deforms between states. Admissible only because NRM-004 conserves material content rather than demanding rigid motion."
+    tags: [two_states, continuous_transition, connection_realized, open_clears_aperture,
+           sweep_clears_enclosure, extent_conserved, open_pose_determined, retention_realized,
+           retention_release_action, retention_reusable, actuator_reachable, cavity_access,
+           assembly_paths_exist, loads_reacted]
+
+  - id: ADM-BM-001-C
+    summary: "Detachable cover, captive only through its travel, guided by mating features; withdrawn clear of the aperture and set aside. Over-centre draw retention. Open pose set by a rest condition off the product."
+    materially_differs_by: [connection_persistence, motion_type, retention_principle]
+    note: "The cover is UNCONNECTED in the open state. Admissible only because NRM-002 requires engagement where the concept needs it, not a permanent connection."
+    tags: [two_states, continuous_transition, connection_realized, open_clears_aperture,
+           sweep_clears_enclosure, extent_conserved, open_pose_determined, retention_realized,
+           retention_release_action, retention_reusable, actuator_reachable, cavity_access,
+           assembly_paths_exist, loads_reacted]
+
+inadmissible_realizations:
+  - id: INA-BM-001-A
+    summary: "Open pose declared, bounded only by a range value in the analysis model; nothing in the design determines it."
+    from_negative_case: NEG-BM-001-001
+    missing_tags: [open_pose_determined]
+    tags: [two_states, continuous_transition, connection_realized, open_clears_aperture,
+           sweep_clears_enclosure, extent_conserved, retention_realized, retention_release_action,
+           retention_reusable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
+
+  - id: INA-BM-001-B
+    summary: "Joint type and axis recorded; neither body carries engagement geometry."
+    from_negative_case: NEG-BM-001-002
+    missing_tags: [connection_realized]
+    tags: [two_states, continuous_transition, open_clears_aperture, sweep_clears_enclosure,
+           extent_conserved, open_pose_determined, retention_realized, retention_release_action,
+           retention_reusable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
+
+  - id: INA-BM-001-C
+    summary: "Closure still lies within the aperture prism at the open pose."
+    from_negative_case: NEG-BM-001-003
+    missing_tags: [open_clears_aperture, cavity_access]
+    tags: [two_states, continuous_transition, connection_realized, sweep_clears_enclosure,
+           extent_conserved, open_pose_determined, retention_realized, retention_release_action,
+           retention_reusable, actuator_reachable, assembly_paths_exist, loads_reacted]
+
+  - id: INA-BM-001-D
+    summary: "Closure represented with a smaller extent at OPEN so it fits without interference."
+    from_negative_case: NEG-BM-001-005
+    missing_tags: [extent_conserved]
+    tags: [two_states, continuous_transition, connection_realized, open_clears_aperture,
+           sweep_clears_enclosure, open_pose_determined, retention_realized, retention_release_action,
+           retention_reusable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
+
+  - id: INA-BM-001-E
+    summary: "Retention recorded as a relation between whole bodies; no engagement site, no contact normal."
+    from_negative_case: NEG-BM-001-006
+    missing_tags: [retention_realized]
+    tags: [two_states, continuous_transition, connection_realized, open_clears_aperture,
+           sweep_clears_enclosure, extent_conserved, open_pose_determined, retention_release_action,
+           retention_reusable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
+
+  - id: INA-BM-001-F
+    summary: "Access path for release terminates on the enclosure exterior surface beside the catch, not at the actuator."
+    from_negative_case: NEG-BM-001-007
+    missing_tags: [actuator_reachable]
+    tags: [two_states, continuous_transition, connection_realized, open_clears_aperture,
+           sweep_clears_enclosure, extent_conserved, open_pose_determined, retention_realized,
+           retention_release_action, retention_reusable, cavity_access, assembly_paths_exist, loads_reacted]

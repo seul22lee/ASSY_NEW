@@ -1,0 +1,82 @@
+case_id: C4-drawer
+schema_version: "0.2.0"
+principle: >
+  Evidence bounds what may be claimed verified. Where no evidence of adequate
+  fidelity exists, the requirement is NOT_VERIFIED. NOT_VERIFIED is never
+  INFEASIBLE.
+
+evidence:
+  - id: EV-C4-001
+    what: "Drawer slide with rotary drive, V-A declared pairs, 5/5 seeds."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m13_hard_anchor/out/t2_hard_verdict.json"
+    fidelity: V-A_declared_pairs
+    decision_row_verbatim: "m13 Hard anchor - P-SLIDE V-A + P-GEAR V-A (declared pairs)"
+    seeds: "P-SLIDE-VA 5/5"
+    supports: [NRM-C4-001, NRM-C4-003]
+    does_not_support: [NRM-C4-004, NRM-C4-005, NRM-C4-006, NRM-C4-009]
+    reuse_note: >
+      DOS-C4-drawer S5 E1. The certification record gives
+      stages.physics = "reused - PASS". No simulation was executed for C4-drawer
+      itself; the m13 lift-variant result was carried across. Support recorded
+      above is therefore support-by-reuse and must be declared as such wherever
+      it is cited.
+  - id: EV-C4-002
+    what: "Off-axis deviation observed as tracks_straight = 0.0 deg against a 3.0 deg threshold."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m13_hard_anchor/out/t2_hard_verdict.json (P-SLIDE-VA seed 0)"
+    fidelity: V-A_declared_pairs
+    supports: []
+    does_not_support: [NRM-C4-005]
+    structural_artifact_note: >
+      DECISIVE. Under the declared-pair model the slide is a prismatic coupling,
+      so off-axis deviation is identically zero by construction of the model. The
+      value 0.0 is exact because the model cannot produce any other value. It is
+      an artifact of the representation, not an observation of guidance, and it
+      is not evidence for NRM-C4-005. Any pipeline that credits it is exhibiting
+      NEG-C4-010.
+  - id: EV-C4-003
+    what: "Stroke observed as reaches_stroke = 127.3 mm against a threshold of 120.0 mm."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m13_hard_anchor/out/t2_hard_verdict.json (P-SLIDE-VA seed 0)"
+    fidelity: V-A_declared_pairs
+    supports: []
+    does_not_support: [NRM-C4-003]
+    circularity_note: >
+      Both the 120.0 mm threshold and the geometry producing 127.3 mm come from
+      the legacy realization (DOS S6), not from the C4-drawer command, which
+      states no stroke (UNR-C4-001). This row records that travel was exercised;
+      it establishes no stroke requirement and no compliance.
+  - id: EV-C4-004
+    what: "Rack-and-pinion conversion card certification."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m11_rack_pinion/REVIEW.md:1-6"
+    fidelity: V-A_declared_pairs
+    verbatim: "P-GEAR passes V-A 5/5"
+    deferral_verbatim: "V-B is NAMED-DEFERRED, not silently dropped"
+    supports: []
+    does_not_support: [NRM-C4-004]
+    note: >
+      A reference realization of one conversion family (FRE-C4-002), cited as an
+      existence proof that such a family was exercised, never as a reason to
+      require it. Its own review records contact behaviour as deferred, so it
+      cannot support the existence or function of an engagement.
+
+not_verified:
+  - requirement: NRM-C4-004 (conversion engagement realized and localized)
+    why: "All conversion evidence is V-A declared-pair; DOS S5 E3 records mesh, engagement and backlash as unverified."
+    would_require: "Contact-resolved simulation or physical test of the conversion engagement."
+  - requirement: NRM-C4-005 (guidance and anti-rotation)
+    why: "The only observable is a structural artifact (EV-C4-002). No contact-fidelity guidance evidence exists."
+    would_require: "Contact-resolved travel with the guidance modelled as contact, not as a declared prismatic pair."
+  - requirement: NRM-C4-006 (weight reacted throughout travel, including extension)
+    why: "No evidence addresses load at extension, and no payload or margin is stated (UNR-C4-005)."
+    would_require: "A stated load case plus a static or contact analysis at the extended state."
+  - requirement: NRM-C4-009 (radial support and axial reaction)
+    why: "Declared-pair models supply reactions by construction; no support evidence exists."
+    would_require: "A load-resolved model of the rotating elements."
+  - requirement: NRM-C4-011 (assembly paths)
+    why: "The legacy record reports a compile stage producing 5 bodies; it reports no installation-path check."
+    would_require: "Collision-free path demonstration per discretely-installed part."
+  - requirement: "Effort at the knob"
+    why: "No torque or turns budget is stated (UNR-C4-004) and no evidence addresses effort."
+    would_require: "An ergonomic ceiling plus a measured or computed effort."
+  - requirement: "Desktop size"
+    why: "No envelope is stated (UNR-C4-006)."
+    would_require: "An envelope."

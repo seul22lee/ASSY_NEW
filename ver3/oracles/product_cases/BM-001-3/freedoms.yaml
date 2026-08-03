@@ -1,0 +1,25 @@
+case_id: BM-001-3
+schema_version: "0.2.0"
+inherits: BM-001
+note: All BM-001 freedoms apply. Narrowings recorded below.
+freedoms:
+  - id: FRE-BM-001-3-001
+    decision: Curvature profile family of the resting boundary.
+    why_free: "DOS-BM-001-3 S3: the source requires curvature to exist and says nothing about its form."
+    example_realizations: [single-curvature segment, elliptical arc, spherical cap, lofted freeform]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-3-002
+    decision: How resting stability is provided.
+    why_free: "AMB-001-3-01; see UNR-BM-001-3-002. Feet, a flat land, a cradle and mass distribution are all admissible."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-BM-001-3-003
+    decision: Curvature axis orientation relative to the aperture.
+    why_free: "DOS-BM-001-3 S2: not stated."
+    must_not_be_asserted_by_tests: true
+narrowed_from_parent:
+  - freedom: FRE-BM-001-006
+    was: "Enclosure boundary form entirely free, including fully prismatic."
+    now: "A fully prismatic enclosure is excluded by NRM-BM-001-3-001. The curve's form remains free."
+  - freedom: FRE-BM-001-003
+    was: "Which boundary region carries the aperture is free."
+    now: "The aperture is fixed to the planar top region by REQ-011. Where the closure connects remains free."

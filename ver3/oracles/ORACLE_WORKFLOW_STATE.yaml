@@ -1,0 +1,30 @@
+# Workflow state only. NEVER Oracle evidence. Not locked, not cited by any pack.
+schema_version: "0.1.0"
+current_pass: PASS_2_AUTHORING
+completed_artifacts:
+  pass_1_dossiers: 9        # _dossiers/DOS-*.md  FROZEN
+  authoring_policy: ORACLE_AUTHORING_POLICY.md
+  method: ORACLE_METHOD.md
+  auditor: ver3/oracle_tools/audit_oracles.py   # 3A/3B/3C/3D, read-only
+pack_status: {}
+unresolved_findings: []
+source_ambiguities:
+  - id: AMB-001-2-01
+    pack: BM-001-2
+    summary: "REQ-010 'can only be worked from inside the enclosure' vs REQ-001 repeated opening and REQ-003 easy operation."
+    resolution: NONE - preserved
+  - id: AMB-002-01
+    pack: BM-002
+    summary: "REQ-004 mechanism enclosed vs REQ-001 external crank; boundary-crossing element unclassified."
+    resolution: NONE - preserved
+  - id: AMB-002-02
+    pack: BM-002
+    summary: "'approximately 80-100 mm' - a range with an approximately qualifier; compliance edge undetermined."
+    resolution: NONE - preserved
+  - id: AMB-C4-01
+    pack: C4-drawer
+    summary: "build_goldens.py:1142 'drawer rack-pinion is over-engineered' vs manifest.json 'gear NOT over-engineered here'."
+    resolution: NONE - preserved
+correction_history: []
+clean_audit_count: 0
+next_executable_step: "Complete BM-001 freedoms/stage_expectations/negative_cases/evidence_scope."

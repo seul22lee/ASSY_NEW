@@ -1,0 +1,56 @@
+case_id: C4-drawer
+schema_version: "0.2.0"
+freedoms:
+  - id: FRE-C4-001
+    decision: Chain topology between knob and drawer.
+    why_free: "DOS-C4-drawer S3: not stated. Direct, reduced, reversed and multi-stage chains are equally admissible."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-002
+    decision: Mechanism family realizing the rotary-to-linear conversion, and whether it is toothed.
+    why_free: >
+      DOS-C4-drawer S3: no transmission type or ratio is stated. The two legacy
+      statements about whether a toothed transmission is over-engineered
+      contradict each other and neither is rank-1 (AMB-C4-01, UNR-C4-002), so
+      neither may require or forbid a family.
+    example_realizations: [toothed rack and driven wheel, helical thread pair, cable and drum, crank and connecting link, capstan and band, cam and follower]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-003
+    decision: Which horizontal direction the drawer travels, and which cabinet face it emerges from.
+    why_free: >
+      DOS-C4-drawer S3: not stated. The legacy realization fixed +X = FRONT
+      (DOS S6); that is a frame convention of one realization, not a requirement.
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-004
+    decision: Whether the drawer is fully enclosed when retracted, and how far it clears when extended.
+    why_free: "DOS-C4-drawer S3: no stroke, no flush condition and no clearance are stated."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-005
+    decision: Guidance and support strategy, including the number of guides and their placement.
+    why_free: >
+      DOS-C4-drawer S3: not stated. Two side rails, a single centre guide, a
+      dovetailed shell and rolling supports all satisfy NRM-C4-005 and
+      NRM-C4-006. The legacy rail_gap of 80 mm is a realization value (DOS S6).
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-006
+    decision: Which realized condition determines each travel extreme, and whether the two share a part.
+    why_free: "DOS-C4-drawer S3: no travel limit is stated. NRM-C4-007 requires distinct conditions, not distinct parts."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-007
+    decision: Knob location, form, grip and where the chain crosses the cabinet boundary.
+    why_free: "DOS-C4-drawer S3: not stated."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-008
+    decision: Support arrangement for rotating elements.
+    why_free: "DOS-C4-drawer S3: not stated."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-009
+    decision: Cabinet form, part count, material and process.
+    why_free: >
+      DOS-C4-drawer S3: not stated. The legacy realization produced 5 bodies
+      (DOS S6); part count is a realization outcome and may never be an
+      acceptance criterion.
+    must_not_be_asserted_by_tests: true
+  - id: FRE-C4-010
+    decision: Whether the drawer holds position when the knob is released.
+    why_free: "DOS-C4-drawer S3: no back-drive or hold statement. See UNR-C4-003."
+    must_not_be_asserted_by_tests: true

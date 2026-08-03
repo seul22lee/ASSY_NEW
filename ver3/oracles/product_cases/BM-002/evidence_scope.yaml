@@ -1,0 +1,65 @@
+case_id: BM-002
+schema_version: "0.2.0"
+principle: >
+  Evidence bounds what may be claimed verified. Where no evidence of adequate
+  fidelity exists, the requirement is NOT_VERIFIED. NOT_VERIFIED is never
+  INFEASIBLE.
+
+evidence:
+  - id: EV-BM-002-001
+    what: "Crank-driven lift raises a platform and holds it under load."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m13_hard_anchor/out/t2_hard_verdict.json"
+    fidelity: V-A_declared_pairs
+    decision_row_verbatim: "m13 Hard anchor - P-SLIDE V-A + P-GEAR V-A (declared pairs)"
+    seeds: "5/5"
+    supports: [NRM-BM-002-001]
+    does_not_support: [NRM-BM-002-003, NRM-BM-002-004]
+    structural_artifact_note: >
+      Under declared coupling the transmission relationship is exact by
+      construction of the model. Agreement between commanded input and observed
+      output is therefore a property of the declaration, not an observation of
+      the engagement. It is not evidence that a conversion engagement exists or
+      functions.
+  - id: EV-BM-002-002
+    what: "Hold-drift under load for a pawl-held lift: 3.37 mm <= 5 mm."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/tasks/benchmark/benchmark.py:138"
+    fidelity: reused_analytic
+    supports: []
+    does_not_support: [NRM-BM-002-001, NRM-BM-002-004]
+    circularity_note: >
+      The 5 mm limit is a threshold chosen in the legacy benchmark, not a BM-002
+      requirement, and the pawl is a realization choice (UNR-BM-002-004). This
+      row records that the evidence exists; it establishes nothing about BM-002.
+  - id: EV-BM-002-003
+    what: "Rack-and-pinion conversion card certification."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m11_rack_pinion/REVIEW.md:1-6"
+    fidelity: V-A_declared_pairs
+    verbatim: "P-GEAR passes V-A 5/5"
+    deferral_verbatim: "V-B is NAMED-DEFERRED, not silently dropped"
+    supports: []
+    does_not_support: [NRM-BM-002-003, NRM-BM-002-004]
+    note: >
+      This is a reference realization of one conversion family (FRE-BM-002-002).
+      It is cited as an existence proof that such a family was exercised, never
+      as a reason to require it. Its own review records contact behaviour as
+      deferred.
+
+not_verified:
+  - requirement: REQ-007 (avoid obvious jamming or unstable operation)
+    why: "DOS-BM-002 S5 E1/E2. All available kinematic evidence is V-A declared-pair; jamming is a contact-level phenomenon. No V-B evidence exists."
+    would_require: "Contact-resolved simulation or physical test of the conversion engagement, plus a stated jamming criterion (UNR-BM-002-005)."
+  - requirement: REQ-005 (safe to use)
+    why: "No criterion or standard is stated (UNR-BM-002-005), and no evidence addresses safety."
+    would_require: "A stated safety criterion and evidence against it."
+  - requirement: REQ-006 (easy to assemble, practical to manufacture)
+    why: "No evidence addresses assembly effort or manufacturability. NRM-BM-002-010 checks only that installation paths exist."
+    would_require: "Process evidence; no legacy artifact provides it."
+  - requirement: REQ-002 numeric compliance (approximately 80-100 mm)
+    why: "AMB-002-02 leaves the compliance edge undetermined (UNR-BM-002-002)."
+    would_require: "A tolerance or firm bound."
+  - requirement: REQ-003 payload capacity (approximately 1 kg)
+    why: "No strength or stiffness evidence exists at any fidelity. NRM-BM-002-009 checks only that a load path exists."
+    would_require: "Load-carrying analysis or test against a stated payload and margin."
+  - requirement: REQ-008 (desktop-sized)
+    why: "No envelope is stated (UNR-BM-002-006)."
+    would_require: "An envelope."

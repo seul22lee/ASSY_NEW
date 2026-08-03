@@ -1,0 +1,35 @@
+case_id: BM-001-3
+schema_version: "0.2.0"
+note: Each fixture is evaluated on its own geometry; none is compared to a generated parent design.
+
+admissible_realizations:
+  - id: ADM-BM-001-3-A
+    summary: "Single-curvature underside running front to back, planar top carrying the aperture, resting contact along a line derived from the profile."
+    materially_differs_by: [curvature_type, curvature_axis]
+    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
+  - id: ADM-BM-001-3-B
+    summary: "Doubly-curved (spherical-cap) underside with three derived contact patches, planar top carrying the aperture."
+    materially_differs_by: [curvature_type, contact_topology]
+    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
+  - id: ADM-BM-001-3-C
+    summary: "Curved underside interrupted by a narrow derived flat land, planar top with aperture; resting contact on the land."
+    materially_differs_by: [stabilisation_strategy, contact_topology]
+    note: "Admissible: the curved region exists; nothing in REQ-011 forbids a land. Tests that the Oracle does not require an uninterrupted curve."
+    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
+
+inadmissible_realizations:
+  - id: INA-BM-001-3-A
+    summary: "Fully prismatic enclosure; REQ-011 recorded in the trace and reported satisfied."
+    from_negative_case: NEG-BM-001-3-001
+    missing_tags: [curved_underside_region]
+    tags: [planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
+  - id: INA-BM-001-3-B
+    summary: "Resting orientation set by a role label 'bottom' rather than derived from contact geometry."
+    from_negative_case: NEG-BM-001-3-003
+    missing_tags: [resting_configuration_derived]
+    tags: [curved_underside_region, planar_top_with_aperture, sweep_clears_curved_region]
+  - id: INA-BM-001-3-C
+    summary: "Closure sweep checked against the planar walls only; it interferes with the curved underside region."
+    from_negative_case: NEG-BM-001-3-004
+    missing_tags: [sweep_clears_curved_region]
+    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived]
