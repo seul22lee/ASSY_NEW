@@ -1,0 +1,89 @@
+capability_id: bounded-two-state-closure
+schema_version: "0.2.0"
+principle: >
+  Evidence bounds what may be claimed verified. Where no evidence of adequate
+  fidelity exists, the criterion is NOT_VERIFIED. NOT_VERIFIED is never
+  INFEASIBLE.
+
+matched_pair_finding: >
+  DECISIVE, and recorded carefully because this is the strongest evidence in the
+  corpus. DOS S5 documents a genuine V-B contact pair differing in exactly one
+  feature — the presence of the limit — which is the closest thing to a
+  controlled experiment the legacy work produced.
+
+  And yet: **every seed-0 criterion passes in BOTH members.** Pin retention,
+  travel interference, pin/bore interface, settling, and the angle criterion all
+  pass with the limit and without it. The angle values differ, 115.37 against
+  219.65 degrees, but both exceed the >= 90 threshold, so the criterion as
+  thresholded does not separate them either. The verdicts differ only through
+  seed aggregation: 5/5 against 1/5.
+
+  What the pair supports is therefore: *removing the limit produced seed-level
+  instability across a five-seed sweep.* What it does not supply is a single-run
+  criterion distinguishing a bounded closure from an unbounded one. NRM-HS-007
+  and UNR-HS-004 exist because of this gap, not in spite of the evidence's
+  quality.
+
+evidence:
+  - id: EV-HS-001
+    what: "Bounded closure, V-B contact, ring strategy, 5/5 seeds, verdict True."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m0/out/stop/t2_verdict_V-B_ring.json"
+    fidelity: V-B_contact
+    setup: "16 wedges per knuckle, friction_mu 0.3, solref [0.001, 1.0], g_conv true, bore 2.150 / pin 2.000, min wall 2.192 mm"
+    seed_0_criteria:
+      pin_retention_radial_drift: "0.2452 <= 0.4 pass"
+      pin_retention_axial_drift: "0.0257 <= 3.0 pass"
+      theta_max: "115.37 >= 90 pass"
+      travel_interference_non_intended: "0.0 <= 0.2 pass"
+      pin_bore_interface: "0.0689 <= 0.3 pass"
+      settles_closed: "2.84 <= 5.0 pass"
+    supports: [NRM-HS-001, NRM-HS-002, NRM-HS-003]
+    does_not_support: [NRM-HS-004, NRM-HS-005]
+    note: >
+      Genuine contact evidence that a bounded closure traverses between two
+      states with its constraint intact. It does not establish that the bound is
+      what produced the extreme, because the unbounded control passes the same
+      criteria; see EV-HS-002.
+  - id: EV-HS-002
+    what: "Unbounded control, V-B contact, same setup, 1/5 seeds, verdict False."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m0/out/nostop/t2_verdict_V-B_ring.json"
+    fidelity: V-B_contact
+    seed_0_criteria:
+      pin_retention_radial_drift: "0.3367 <= 0.4 pass"
+      pin_retention_axial_drift: "0.0812 <= 3.0 pass"
+      theta_max: "219.65 >= 90 pass"
+      travel_interference_non_intended: "0.0434 <= 0.2 pass"
+      pin_bore_interface: "0.2347 <= 0.3 pass"
+      settles_closed: "2.70 <= 5.0 pass"
+    supports: []
+    does_not_support: [NRM-HS-004]
+    control_note: >
+      The control's seed-0 run passes every criterion, including the angle
+      criterion at 219.65 degrees — a closure that has plainly swung far past
+      any intended extreme, and that the thresholded criterion still accepts.
+      This is the specific observation NRM-HS-007 generalises.
+  - id: EV-HS-003
+    what: "Matched-pair verdict difference: 5/5 against 1/5 seeds."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m0/out/{stop,nostop}/t2_verdict_V-B_ring.json"
+    fidelity: V-B_contact_seed_sweep
+    supports: []
+    does_not_support: [NRM-HS-004, NRM-HS-005]
+    aggregation_note: >
+      The only place the two members differ in outcome. Any use of this evidence
+      must carry the aggregation rule that produced the difference (NEG-HS-014).
+      A five-seed pass rate is not a single-run criterion, and it is not
+      presented as one here.
+
+not_verified:
+  - criterion: NRM-HS-004 (each bound physically realized)
+    why: "matched_pair_finding. No available criterion distinguishes the bounded member from the unbounded control at seed 0."
+    would_require: "A criterion demonstrated to fail when the bound is removed, or a declared seed-sweep protocol adopted as the discriminator with its aggregation rule (UNR-HS-004)."
+  - criterion: NRM-HS-005 (bounds distinct per extreme)
+    why: "The corpus evaluates one extreme's angle only. No evidence addresses the other extreme's determinant separately."
+    would_require: "Each extreme evaluated against its own condition at its own configuration."
+  - criterion: "Load at the bound, life, duty"
+    why: "No capability-level load or life exists (UNR-HS-003) and no evidence addresses either."
+    would_require: "A stated load case and duty, plus a load-resolved model."
+  - criterion: "Holding at either state"
+    why: "Outside this capability (UNR-HS-002). The settles_closed observable addresses coming to rest, not being held against a disturbance."
+    would_require: "A latch-retention evaluation with a declared disturbance."

@@ -1,0 +1,125 @@
+capability_id: bounded-two-state-closure
+schema_version: "0.2.0"
+applies_when: >
+  A design instantiates a bounded closure motion between two states. These
+  expectations constrain how the pipeline must represent that capability wherever
+  it appears. They add no product requirement.
+note: >
+  Stage-11 rules are conditional. No outcome is fixed by current tooling
+  capability.
+
+stages:
+  s01:
+    must_exist: [state_pair_requirement, bounding_requirement]
+    must_not_be_decided: [joint_type, bounding_principle, open_angle]
+    may_remain_unresolved: [UNR-HS-001, UNR-HS-002, UNR-HS-003]
+    provenance_required: ["state pair -> source clause id"]
+  s02:
+    must_exist: [closure_obligation, bounding_obligation, candidate_bounding_principles, candidate_motion_types]
+    must_not_be_decided: [bounding_principle, joint_type]
+    may_remain_unresolved: [candidate_ranking]
+    provenance_required: ["obligation -> the requirement demanding it"]
+    plurality_note: >
+      More than one bounding principle must survive s02 (FRE-HS-004). Reduction
+      to one because only a discrete stop is implemented must be reported as a
+      capability gap, not as an elimination.
+  s04:
+    must_exist: [state_configurations, motion_path, constraint_engagement_along_path, extreme_determinants, swept_volumes_with_fidelity, interference_along_path]
+    must_not_be_decided: [angle_values_without_a_stated_requirement, feature_dimensions]
+    may_remain_unresolved: [state_separation, UNR-HS-001]
+    provenance_required: ["each extreme -> its own determinant id", "determinant -> the participating geometry realizing it"]
+    bound_representation_note: >
+      A numeric joint range may be used in a model, but the design must record
+      which realized condition that range stands for (NRM-HS-004). A range with
+      no such record is a model artifact standing in for a design decision.
+  s05:
+    must_exist: [joint_realization, bounding_realizations, participating_features, load_path_records]
+    must_not_be_decided: [new_independent_entities, parameter_values, stop_feature_by_default]
+    may_remain_unresolved: [embodiment_alternatives, UNR-HS-003]
+    provenance_required: ["realization -> obligation ids it discharges"]
+    double_discharge_rule: >
+      A bounding realization discharges NRM-HS-004 only. It may not also be
+      recorded as discharging a holding obligation (NEG-HS-011).
+  s06:
+    must_exist: [solved_values_or_explicit_status, active_constraints]
+    must_not_be_decided: [default_units, angle_defaults]
+    may_remain_unresolved: [underdetermined_degrees_of_freedom]
+    provenance_required: ["value -> constraint id", "value -> unit declared at its source"]
+  s08:
+    must_exist: [closure_observables_with_units, model_fidelity_declaration, criterion_discrimination_declaration, seed_protocol_declaration]
+    must_not_be_decided: [hidden_load, hidden_friction]
+    may_remain_unresolved: ["tests blocked by UNR-HS-001", "tests blocked by UNR-HS-004"]
+    provenance_required: ["test -> the criterion it addresses"]
+    discrimination_note: >
+      Each criterion mapped to NRM-HS-004 must declare the configuration in which
+      it fails when the bound is removed. A criterion with no such configuration
+      is recorded as non-discriminating (NRM-HS-007).
+    seed_note: >
+      Where a result is produced by a seed sweep, the sweep size and the
+      aggregation rule are declared with the plan, not attached afterwards.
+  s09:
+    must_exist: [results, raw_evidence, execution_environment, seed_records]
+    provenance_required: ["result -> plan item id", "aggregated result -> its per-seed records"]
+  s10:
+    must_exist: ["exactly one outcome per planned observable"]
+    must_not_be_decided: [which_criterion_passes]
+    provenance_required: ["evidence -> observable id"]
+    discrimination_rule: >
+      A criterion recorded as non-discriminating carries no evidential weight for
+      the presence of a bound (NEG-HS-008).
+  s11:
+    must_exist: [criterion_evaluation, evidence_coverage]
+    must_not_be_decided: [new_evidence]
+    provenance_required: ["evaluation -> evidence ids", "aggregated verdict -> its aggregation rule"]
+    outcome_rules:
+      HS-C1_two_states:
+        traces_to: NRM-HS-001
+        pass_requires: "both states given as relative configurations and both shown reached"
+        fail_when: "a state has no configuration or is unreachable"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      HS-C2_continuous_motion:
+        traces_to: NRM-HS-002
+        pass_requires: "a continuous path shown between the two states"
+        fail_when: "no continuous path exists"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      HS-C3_constraint_persists:
+        traces_to: NRM-HS-003
+        pass_requires: "the relative constraint shown engaged at the extremes and the interior of the motion"
+        fail_when: "the constraint lapses anywhere within the motion"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      HS-C4_bounds_physically_realized:
+        traces_to: NRM-HS-004
+        pass_requires: "each extreme shown produced by a realized condition, evidenced by a criterion demonstrated to discriminate against the bound's absence"
+        fail_when: "an extreme is produced only by a model limit, or the realized condition is not reached"
+        if_criterion_does_not_discriminate: NOT_VERIFIED
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+        note: "UNR-HS-004 is open: the corpus supplies no discriminating single-run criterion."
+      HS-C5_bounds_distinct:
+        traces_to: NRM-HS-005
+        pass_requires: "each extreme shown determined by its own condition, evaluated at its own configuration"
+        fail_when: "one condition is credited to both extremes"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      HS-C6_no_interference:
+        traces_to: NRM-HS-006
+        pass_requires: "swept volumes shown non-intersecting at every interior point of the motion, other than at declared interactions"
+        fail_when: "unaccounted interference occurs within the motion"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      HS-C7_criterion_admissibility:
+        traces_to: NRM-HS-007
+        pass_requires: "every criterion mapped to the presence of a bound carries a configuration in which it fails without the bound"
+        fail_when: "a non-discriminating criterion is counted as evidence of a bound"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+  s12:
+    must_exist: [root_cause_candidates, capability_gap_records]
+    provenance_required: ["root_cause -> owning decision id"]
+    capability_gap_rule: >
+      A revision triggered by UNSUPPORTED must name the absent capability, never
+      record a physical infeasibility (NEG-HS-013).

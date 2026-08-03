@@ -1,0 +1,40 @@
+capability_id: latch-retention
+schema_version: "0.2.0"
+freedoms:
+  - id: FRE-LR-001
+    decision: Which relative state is retained.
+    why_free: "DOS S1 defines retention of a state, not of a closed state. Retention of an open or an intermediate state is within scope."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-LR-002
+    decision: Retention principle.
+    why_free: >
+      DOS S7 records that the legacy corpus realizes retention exclusively by
+      snap features, and that magnetic, over-centre, detent, friction and
+      threaded retention are absent from the library but not from engineering.
+      That is a library state, not a design rule.
+    example_realizations: [cantilever snap and lip, annular snap bead, magnetic pair, over-centre link, spring detent and recess, friction fit, threaded fastener, quarter-turn cam, hook and keeper]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-LR-003
+    decision: What distinguishes the release action from the disturbance.
+    why_free: >
+      DOS S4: not defined. Direction, magnitude, point of application, sequence
+      and a separate actuating element are all admissible discriminants.
+    must_not_be_asserted_by_tests: true
+  - id: FRE-LR-004
+    decision: Whether the release path reverses the engagement path.
+    why_free: "DOS S1 requires both to exist; it does not relate them. A snap engaged by insertion and released by a lever satisfies NRM-LR-005."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-LR-005
+    decision: Whether release is tool-free, hand-operated, or requires an implement.
+    why_free: >
+      DOS S2: "removable by hand" is a property of the snap-panel fixture's own
+      command. It is not part of the capability. See UNR-LR-003.
+    must_not_be_asserted_by_tests: true
+  - id: FRE-LR-006
+    decision: Snap geometry, beam length, thickness, lip form and material.
+    why_free: "DOS S6: cantilever snap-hook geometry and its beam bounds are facts about one realization family."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-LR-007
+    decision: Which body carries the retention feature.
+    why_free: "DOS S1 defines retention between two bodies without assigning roles. Either body may carry either half, and the halves may be split across both."
+    must_not_be_asserted_by_tests: true

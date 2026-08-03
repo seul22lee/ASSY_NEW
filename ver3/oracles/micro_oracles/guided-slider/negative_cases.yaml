@@ -1,0 +1,86 @@
+capability_id: guided-slider
+schema_version: "0.2.0"
+purpose: >
+  Realizations and pipeline behaviours that must be rejected at capability level.
+  Process cases reproduce recorded legacy behaviour.
+
+negative_cases:
+  - id: NEG-GS-001
+    kind: design
+    description: "Travel line given only as an axis name, with no geometric direction in any frame."
+    must_be_rejected_by: [NRM-GS-001]
+    fixture: INA-GS-A
+  - id: NEG-GS-002
+    kind: design
+    description: "Rotation about the travel line left free with nothing removing it."
+    must_be_rejected_by: [NRM-GS-002]
+    fixture: INA-GS-B
+  - id: NEG-GS-003
+    kind: design
+    description: "Prismatic relationship asserted between whole bodies with no participating geometry."
+    must_be_rejected_by: [NRM-GS-003]
+    fixture: INA-GS-C
+  - id: NEG-GS-004
+    kind: design
+    description: "Guide disengages partway along the declared travel range."
+    must_be_rejected_by: [NRM-GS-004]
+    fixture: INA-GS-D
+  - id: NEG-GS-005
+    kind: design
+    description: "Transverse reaction path exists at one position only."
+    must_be_rejected_by: [NRM-GS-005]
+    fixture: INA-GS-E
+  - id: NEG-GS-006
+    kind: design
+    description: "Translating body fills its corridor."
+    must_be_rejected_by: [NRM-GS-006]
+    fixture: INA-GS-F
+  - id: NEG-GS-007
+    kind: design
+    description: "Guidance claimed on the strength of an observable that is zero by construction."
+    must_be_rejected_by: [NRM-GS-007]
+    fixture: INA-GS-G
+
+  - id: NEG-GS-008
+    kind: process
+    description: >
+      Anti-rotation is required to be realized by two guides, or a test asserts a
+      guide count, a rail gap, a rail width or a clearance value.
+    reproduced_from: "DOS-guided-slider S6, S7"
+    must_be_rejected_by: [FRE-GS-003, FRE-GS-006]
+    required_outcome: "Rejected as REFERENCE_REALIZATION_DETAIL."
+  - id: NEG-GS-009
+    kind: process
+    description: >
+      A travel limit, a stroke value or a minimum range is imposed at capability
+      level, e.g. by adopting the 50.0 mm minimum from a fixture.
+    reproduced_from: "DOS-guided-slider S3, S4"
+    must_be_rejected_by: [UNR-GS-001, UNR-GS-003]
+    required_outcome: >
+      Rejected. Bounding is outside this capability, and no capability-level
+      stroke exists. Importing one merges this micro-oracle with bounded-two-state-closure.
+  - id: NEG-GS-010
+    kind: process
+    description: >
+      A retention or hold obligation is attached to this capability because the
+      originating fixture was a latched drawer.
+    reproduced_from: "DOS-guided-slider S2 latched_drawer.json"
+    must_be_rejected_by: [normative.scope_exclusions]
+    required_outcome: "Rejected. Retention belongs to the latch-retention micro-oracle."
+  - id: NEG-GS-011
+    kind: process
+    description: >
+      The pipeline reports INFEASIBLE because no permitted guidance realizer
+      exists in its library.
+    reproduced_from: "DOS-guided-slider S7; the KG_NO_PERMITTED_REALIZER pattern"
+    must_be_rejected_by: [FRE-GS-003]
+    required_outcome: "UNSUPPORTED with the missing capability named; never INFEASIBLE."
+  - id: NEG-GS-012
+    kind: process
+    description: >
+      A construction limitation — that a guide operation replaces its mover piece,
+      so a guide part cannot also serve another function — is treated as a design
+      rule.
+    reproduced_from: "DOS-guided-slider S6 slide_rail.carve"
+    must_be_rejected_by: [FRE-GS-007]
+    required_outcome: "Rejected as CURRENT_TOOLING_LIMITATION."

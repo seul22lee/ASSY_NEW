@@ -1,0 +1,112 @@
+capability_id: latch-retention
+schema_version: "0.2.0"
+applies_when: >
+  A design instantiates retention of a relative state. These expectations
+  constrain how the pipeline must represent that capability wherever it appears.
+  They add no product requirement.
+note: >
+  Stage-11 rules are conditional. No outcome is fixed by current tooling
+  capability.
+
+stages:
+  s01:
+    must_exist: [retention_requirement, disturbance_declaration_or_unknown, release_action_declaration_or_unknown]
+    must_not_be_decided: [retention_principle, release_effort_ceiling]
+    may_remain_unresolved: [UNR-LR-001, UNR-LR-002, UNR-LR-003, UNR-LR-004]
+    provenance_required: ["retention requirement -> source clause id"]
+    disturbance_note: >
+      Where the instantiating case declares no disturbance, s01 records the
+      absence as an unknown. It may not supply one (NEG-LR-012).
+  s02:
+    must_exist: [retention_obligation, release_obligation, candidate_retention_principles]
+    must_not_be_decided: [retention_principle, retention_feature]
+    may_remain_unresolved: [candidate_ranking, UNR-LR-001]
+    provenance_required: ["retention obligation -> the requirement demanding it"]
+    plurality_note: >
+      More than one retention principle must survive s02 (FRE-LR-002). Reduction
+      to one because only one is implemented must be reported as a capability
+      gap, not as an elimination.
+  s04:
+    must_exist: [retained_state_configuration, engagement_path, release_path, swept_volumes_with_fidelity, interference_along_paths]
+    must_not_be_decided: [feature_dimensions, deflection_values]
+    may_remain_unresolved: [free_spatial_alternatives]
+    provenance_required: ["retained state -> the obligation it discharges", "path interference -> either a clearance or a declared deflection"]
+  s05:
+    must_exist: [retention_realization, participating_features_on_both_bodies, disturbance_load_path_records, release_discriminant_record]
+    must_not_be_decided: [new_independent_entities, parameter_values]
+    may_remain_unresolved: [embodiment_alternatives, UNR-LR-002]
+    provenance_required: ["realization -> obligation ids it discharges", "release discriminant -> the property the retention responds to"]
+  s06:
+    must_exist: [solved_values_or_explicit_status, active_constraints]
+    must_not_be_decided: [default_units, retention_force_defaults]
+    may_remain_unresolved: [underdetermined_degrees_of_freedom]
+    provenance_required: ["value -> constraint id", "value -> unit declared at its source"]
+  s08:
+    must_exist: [retention_observables_with_units, disturbance_case_declaration, model_fidelity_declaration, value_provenance_declaration]
+    must_not_be_decided: [hidden_disturbance, hidden_release_effort, hidden_material]
+    may_remain_unresolved: ["tests blocked by UNR-LR-001", "tests blocked by UNR-LR-002"]
+    provenance_required: ["test -> the criterion and the disturbance case it addresses"]
+    provenance_of_values_note: >
+      Every force appearing in a plan is marked as an input condition or as an
+      expected measurement. This marking is what makes NRM-LR-008 checkable at
+      s10 rather than only by inspection.
+  s09:
+    must_exist: [results, raw_evidence, execution_environment]
+    provenance_required: ["result -> plan item id"]
+  s10:
+    must_exist: ["exactly one outcome per planned observable"]
+    must_not_be_decided: [which_criterion_passes]
+    provenance_required: ["evidence -> observable id", "reported force -> its provenance marking"]
+    circularity_rule: >
+      A value whose provenance is an input condition may not be emitted as a
+      result (NRM-LR-008).
+  s11:
+    must_exist: [criterion_evaluation, evidence_coverage]
+    must_not_be_decided: [new_evidence]
+    provenance_required: ["evaluation -> evidence ids", "PASS -> the disturbance case it holds under"]
+    outcome_rules:
+      LR-C1_retained_state:
+        traces_to: NRM-LR-001
+        pass_requires: "the retained state given as a relative configuration, expressed geometrically"
+        fail_when: "the state exists only as a name"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      LR-C2_retention_holds:
+        traces_to: [NRM-LR-002, NRM-LR-003]
+        pass_requires: "a declared disturbance case (UNR-LR-001 resolved) plus evidence that the retention opposes it through a complete reaction path"
+        fail_when: "the retention releases under the declared disturbance, or the reaction path is incomplete"
+        if_unresolved: INDETERMINATE
+        if_evidence_is_an_input_parameter: NOT_VERIFIED
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      LR-C3_release_distinct:
+        traces_to: NRM-LR-004
+        pass_requires: "the release action and the declared disturbance shown to differ in a property the retention responds to, with that property named"
+        fail_when: "the two are indistinguishable to the retention"
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      LR-C4_paths_traversable:
+        traces_to: NRM-LR-005
+        pass_requires: "an engagement path and a release path, each with interference cleared or accounted for by a declared deflection"
+        fail_when: "either path is blocked by unaccounted interference"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      LR-C5_repeatable:
+        traces_to: NRM-LR-006
+        pass_requires: "an engage-release-engage sequence with every participating feature retaining the geometry its role depends on"
+        fail_when: "a participating feature is consumed, or the retained state is unreachable afterwards"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      LR-C6_claim_admissibility:
+        traces_to: [NRM-LR-007, NRM-LR-008]
+        pass_requires: "every retention result carries its disturbance case, and every cited force carries its provenance with only measurements counted"
+        fail_when: "a claim omits its disturbance, or an input condition is reported as a result"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+  s12:
+    must_exist: [root_cause_candidates, capability_gap_records]
+    provenance_required: ["root_cause -> owning decision id"]
+    capability_gap_rule: >
+      A revision triggered by UNSUPPORTED must name the absent capability, never
+      record a physical infeasibility (NEG-LR-010).

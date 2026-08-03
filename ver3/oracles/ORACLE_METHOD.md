@@ -350,7 +350,7 @@ deliberately not read for design content. Check C-12 enforces their absence.
 oracles/
   product_cases/   BM-001  BM-001-2  BM-001-3  BM-002  C4-drawer
   micro_oracles/   guided-slider  rotary-to-linear-engagement
-                   latch-retention  hinge-and-stop
+                   latch-retention  bounded-two-state-closure
 ```
 
 ### 13.1 What distinguishes them
@@ -459,7 +459,7 @@ end-to-end:
 | `guided-slider` | Guided translation, anti-rotation, travel limits, assembly access | `V1 tasks/latched_drawer.json`, `m10_slide_rail/`, `m22_composition/`, `m25_contact_layer/` | C4-drawer, BM-002 |
 | `rotary-to-linear-engagement` | Rotation→translation, localized engagement, ratio, radial+axial reaction, V-A vs V-B fidelity | `V1 tasks/rack_pinion_fixture.json`, `m7_rack_pinion/`, `m11_rack_pinion/REVIEW.md`, `m13_hard_anchor/out/t2_hard_verdict.json` | C4-drawer, BM-002 |
 | `latch-retention` | Retention, hand release, overload, repeated cycling | `V1 tasks/snap_panel.json`, `m6_ms_closeout/`, `m23_latch_physics/` | BM-001, BM-001-2, BM-001-3 |
-| `hinge-and-stop` | Hinged closure, aperture clearance, real vs absent travel stop | `V1 m0/` (`stop/` and `nostop/` variants), `tasks/m0_hinge_box_{stop,nostop}.json` | BM-001, BM-001-2, BM-001-3 |
+| `bounded-two-state-closure` | Hinged closure, aperture clearance, real vs absent travel stop | `V1 m0/` (`stop/` and `nostop/` variants), `tasks/m0_hinge_box_{stop,nostop}.json` | BM-001, BM-001-2, BM-001-3 |
 
 The `m0/out/stop` vs `m0/out/nostop` pair is particularly valuable: it is a
 matched pair differing only in whether a real stop exists, which is exactly the

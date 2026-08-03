@@ -1,0 +1,96 @@
+capability_id: guided-slider
+schema_version: "0.2.0"
+applies_when: >
+  A design instantiates guided translation. These expectations constrain how the
+  pipeline must represent that capability wherever it appears. They add no
+  product requirement and they do not apply to designs that do not instantiate
+  the capability.
+note: >
+  Stage-11 rules are conditional. No outcome is fixed by current tooling
+  capability.
+
+stages:
+  s02:
+    must_exist: [guidance_obligation, participating_body_hypotheses]
+    must_not_be_decided: [guidance_mechanism, guide_count]
+    may_remain_unresolved: [UNR-GS-001, UNR-GS-003]
+    provenance_required: ["guidance obligation -> the requirement that demands relative translation"]
+  s04:
+    must_exist: [travel_line_as_geometric_direction, travel_corridor, swept_volume_with_fidelity, freedom_accounting]
+    must_not_be_decided: [travel_limits_without_a_stated_requirement, final_dimensions]
+    may_remain_unresolved: [travel_range]
+    provenance_required: ["each removed freedom -> the constraint id removing it"]
+    freedom_accounting_note: >
+      All six relative freedoms must be accounted for explicitly: one translation
+      retained, five removed, each with the constraint that removes it named. A
+      silent account is the defect NRM-GS-002 exists to catch.
+  s05:
+    must_exist: [guidance_realization, engagement_features_on_both_bodies, transverse_load_path_records]
+    must_not_be_decided: [guide_part_count_as_criterion, clearance_defaults]
+    may_remain_unresolved: [engagement_length]
+    provenance_required: ["constraint -> engagement geometry on both bodies"]
+  s08:
+    must_exist: [guidance_observables_with_units, model_fidelity_declaration, observable_sensitivity_declaration]
+    must_not_be_decided: [hidden_load, hidden_friction]
+    may_remain_unresolved: ["tests blocked by UNR-GS-002"]
+    provenance_required: ["observable -> the criterion it addresses"]
+    sensitivity_note: >
+      Each guidance observable must declare whether the model producing it can
+      yield a non-conforming value (NRM-GS-007). An observable that cannot is
+      recorded as a structural artifact.
+  s10:
+    must_exist: ["exactly one outcome per planned observable"]
+    must_not_be_decided: [which_criterion_passes]
+    provenance_required: ["evidence -> observable id"]
+    artifact_rule: "An observable marked as a structural artifact carries no evidential weight."
+  s11:
+    must_exist: [criterion_evaluation, evidence_coverage]
+    must_not_be_decided: [new_evidence]
+    provenance_required: ["evaluation -> evidence ids"]
+    outcome_rules:
+      GS-C1_travel_line_geometric:
+        traces_to: NRM-GS-001
+        pass_requires: "the travel direction is expressed as a direction in a frame"
+        fail_when: "the direction exists only as a name or a label"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      GS-C2_freedoms_removed:
+        traces_to: [NRM-GS-002, NRM-GS-003]
+        pass_requires: "each of the five non-translational freedoms is shown removed by an engagement with geometry on both bodies, at contact fidelity"
+        fail_when: "a freedom is unaccounted for, or a constraint has no participating geometry"
+        if_evidence_is_declared_pair_only: NOT_VERIFIED
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      GS-C3_engagement_persists:
+        traces_to: NRM-GS-004
+        pass_requires: "engagement overlap shown at both extremes and the interior of a declared travel range"
+        fail_when: "overlap is lost anywhere in the declared range"
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+        note: "No travel range exists at capability level (UNR-GS-001); an instantiating case must supply one."
+      GS-C4_transverse_reaction:
+        traces_to: NRM-GS-005
+        pass_requires: "a load path shown across the travel range against a declared load case"
+        fail_when: "the path is incomplete at any point of the range"
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      GS-C5_corridor:
+        traces_to: NRM-GS-006
+        pass_requires: "swept volume shown to be a proper subset of the corridor and clear of guiding-body material"
+        fail_when: "the swept volume intersects material or fills the corridor"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      GS-C6_observable_admissibility:
+        traces_to: NRM-GS-007
+        pass_requires: "every observable mapped to a guidance criterion is shown able to take a non-conforming value under its own model"
+        fail_when: "an observable exact by construction is counted as evidence"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+  s12:
+    must_exist: [root_cause_candidates]
+    provenance_required: ["root_cause -> owning decision id"]
+    capability_gap_rule: >
+      A revision triggered by UNSUPPORTED must name the absent capability, never
+      record a physical infeasibility (NEG-GS-011).

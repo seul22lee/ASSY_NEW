@@ -1,0 +1,112 @@
+capability_id: bounded-two-state-closure
+schema_version: "0.2.0"
+purpose: >
+  Realizations and pipeline behaviours that must be rejected at capability level.
+  Process cases reproduce recorded legacy behaviour.
+
+negative_cases:
+  - id: NEG-HS-001
+    kind: design
+    description: "A state referred to but given no relative configuration."
+    must_be_rejected_by: [NRM-HS-001]
+    fixture: INA-HS-A
+  - id: NEG-HS-002
+    kind: design
+    description: "Two states with no continuous motion between them."
+    must_be_rejected_by: [NRM-HS-002]
+    fixture: INA-HS-B
+  - id: NEG-HS-003
+    kind: design
+    description: "Relative constraint lapses partway through the motion."
+    must_be_rejected_by: [NRM-HS-003]
+    fixture: INA-HS-C
+  - id: NEG-HS-004
+    kind: design
+    description: "Extremes set only by a numeric joint range, with no realized condition."
+    must_be_rejected_by: [NRM-HS-004]
+    fixture: INA-HS-D
+  - id: NEG-HS-005
+    kind: design
+    description: "One condition credited to both extremes."
+    must_be_rejected_by: [NRM-HS-005]
+    fixture: INA-HS-E
+  - id: NEG-HS-006
+    kind: design
+    description: "Unaccounted interference within the motion."
+    must_be_rejected_by: [NRM-HS-006]
+    fixture: INA-HS-F
+  - id: NEG-HS-007
+    kind: design
+    description: "Bound claimed on a criterion that passes with the bound removed."
+    must_be_rejected_by: [NRM-HS-007]
+    fixture: INA-HS-G
+
+  - id: NEG-HS-008
+    kind: process
+    description: >
+      The presence of a bound is reported as verified from criteria that all pass
+      on the unbounded control as well.
+    reproduced_from: >
+      DOS-bounded-two-state-closure S5 - every seed-0 criterion passes in both members of the
+      matched pair, including theta_max, since 115.37 and 219.65 both exceed the
+      90 degree threshold.
+    must_be_rejected_by: [NRM-HS-007, UNR-HS-004]
+    required_outcome: >
+      NOT_VERIFIED, with the finding stated: the pair supports "removing the
+      limit produced seed-level instability across a five-seed sweep" and does
+      not supply a single-run discriminating criterion.
+  - id: NEG-HS-009
+    kind: process
+    description: >
+      Bounding is required to be realized by a discrete stop feature, or an
+      invariant, freedom or test asserts a stop flange, a bore or pin diameter, a
+      wall thickness, a wedge count, a friction coefficient or a solver setting.
+    reproduced_from: "DOS-bounded-two-state-closure S6, S7"
+    must_be_rejected_by: [FRE-HS-004, FRE-HS-006, FRE-HS-007]
+    required_outcome: >
+      Rejected as REFERENCE_REALIZATION_DETAIL. The corpus bounds motion only by
+      a discrete stop; that is a library state, and treating it as the capability
+      is the catalogue-as-design-space failure.
+  - id: NEG-HS-010
+    kind: process
+    description: >
+      A 90 degree open angle, or any capability-level angular requirement, is
+      asserted.
+    reproduced_from: "DOS-bounded-two-state-closure S4, S6 - theta >= 90 is the m0 fixture's own threshold"
+    must_be_rejected_by: [UNR-HS-001, FRE-HS-001]
+    required_outcome: "Rejected as REFERENCE_REALIZATION_DETAIL."
+  - id: NEG-HS-011
+    kind: process
+    description: >
+      A holding obligation is attached to this capability, so a bound is required
+      to keep the closure at an extreme.
+    reproduced_from: "normative.scope_exclusions"
+    must_be_rejected_by: [UNR-HS-002]
+    required_outcome: >
+      Rejected. A bound determines where the motion ends, not that the closure
+      remains there. Holding is owned by latch-retention, and conflating them
+      would let one realization discharge two obligations.
+  - id: NEG-HS-012
+    kind: process
+    description: >
+      The capability is treated as requiring a rotary joint, so a bounded sliding
+      closure is rejected or reported as not instantiating it.
+    reproduced_from: "DOS-bounded-two-state-closure S6 - pin hinge realization"
+    must_be_rejected_by: [FRE-HS-002]
+    required_outcome: "Rejected. The capability names a closure, not a hinge."
+  - id: NEG-HS-013
+    kind: process
+    description: >
+      The pipeline reports INFEASIBLE because no permitted bounding realizer
+      exists in its library.
+    reproduced_from: "DOS-bounded-two-state-closure S7; the KG_NO_PERMITTED_REALIZER pattern"
+    must_be_rejected_by: [FRE-HS-004]
+    required_outcome: "UNSUPPORTED with the missing capability named; never INFEASIBLE."
+  - id: NEG-HS-014
+    kind: process
+    description: >
+      A seed-aggregated verdict is reported as a single-run result, or a
+      single-run result is reported without the aggregation rule that produced it.
+    reproduced_from: "DOS-bounded-two-state-closure S5 - verdicts differ only through 5/5 against 1/5"
+    must_be_rejected_by: [UNR-HS-004]
+    required_outcome: "The aggregation protocol is declared with the result, or the result is NOT_VERIFIED."

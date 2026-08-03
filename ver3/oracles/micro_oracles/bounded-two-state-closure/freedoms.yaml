@@ -1,0 +1,47 @@
+capability_id: bounded-two-state-closure
+schema_version: "0.2.0"
+freedoms:
+  - id: FRE-HS-001
+    decision: Which two states, and which is the rest state.
+    why_free: "DOS S4: no capability-level state pair exists. A closure bounded between two partly-open states instantiates the capability."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-HS-002
+    decision: Motion type and joint topology.
+    why_free: >
+      DOS S1 names a closure, not a hinge. A rotary path about a fixed axis, a
+      translating path, a four-bar path and a compliant path all satisfy
+      NRM-HS-002. DOS S6 records that the corpus used a pin hinge with
+      ring-meshed knuckles; that is one realization.
+    example_realizations: [pin and knuckle, living hinge, four-bar linkage, sliding closure, pivot pin in a slot, compliant flexure]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-HS-003
+    decision: What provides the relative constraint through the motion.
+    why_free: "DOS S4: not defined. A pin in a bore, a flexure, a linkage and a captured slider are equally admissible."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-HS-004
+    decision: Bounding principle at each extreme, and whether the two extremes use the same principle.
+    why_free: >
+      DOS S7 records the decisive gap: the corpus bounds motion only by a
+      discrete stop feature, while gravity rest, over-centre, detent, friction
+      and geometric run-out are absent from the library but not from
+      engineering.
+    example_realizations: [abutment contact, geometric run-out of the joint, a linkage reaching its dead point, gravity rest on a seat, an engagement ending, a detent seat, an over-centre position]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-HS-005
+    decision: Which body moves in the world frame.
+    why_free: "DOS S1 defines relative states. Either body may be the moving one."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-HS-006
+    decision: Joint dimensions, fits and mesh strategy.
+    why_free: >
+      DOS S6: bore 2.150, pin 2.000, min wall 2.192 mm, 16 wedges per knuckle,
+      friction_mu 0.3 and solref [0.001, 1.0] are values of one realization and
+      of one simulation setup.
+    must_not_be_asserted_by_tests: true
+  - id: FRE-HS-007
+    decision: Whether the bounding condition is carried by a dedicated part.
+    why_free: >
+      DOS S6 records a discrete stop flange. NRM-HS-005 requires distinct
+      conditions, not distinct parts; a single part carrying an abutment at each
+      extreme satisfies it.
+    must_not_be_asserted_by_tests: true

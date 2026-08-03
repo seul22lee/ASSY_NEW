@@ -1,0 +1,73 @@
+# Micro-oracle — rotary-to-linear-engagement
+
+**Status:** STRUCTURALLY_COMPLETE — not yet audited, not locked.
+**Tier:** micro_oracle.
+**Frozen dossier:** `../../_dossiers/DOS-rotary-to-linear-engagement.md`.
+
+## Capability
+
+> Conversion of rotary input motion into linear output motion through a localized
+> engagement, with the reaction of the resulting loads.
+
+The name is deliberate. This pack replaces a mechanism-named predecessor, and it
+names what is achieved rather than how. Rack-and-pinion appears here only as a
+cited reference realization and an evidence source — one member of the family,
+never the family.
+
+## The failure this pack is built around
+
+The legacy pipeline held exactly one conversion realizer. Asked for a
+hand-cranked lift without it, the pipeline answered **INFEASIBLE** — while a
+second conversion, a lead screw, existed in the same repository, and a third
+topology existed beside it.
+
+A hand-cranked lift without that one mechanism is entirely realizable. The
+verdict was a library gap reported as physics. That single confusion —
+**UNSUPPORTED mistaken for INFEASIBLE** — is what this micro-oracle exists to
+make impossible:
+
+- `FRE-RL-001` declares the conversion family free, and lists eight realizations.
+- `NEG-RL-008` makes the INFEASIBLE verdict a defect with a required outcome.
+- `stage_expectations.s02.plurality_note` requires more than one family to survive
+  candidate generation, and requires reduction-to-one-because-only-one-exists to
+  be reported as a capability gap.
+- `stage_expectations.s12.capability_gap_rule` requires the revision record to name
+  the missing realizer rather than the missing physics.
+
+`ADM-RL-C` (a band on a drum) and `ADM-RL-D` (a crank pin in a slot, whose
+input/output relation is not even linear) are admitted as fixtures. If any
+invariant rejected them, the pack would have quietly encoded the one card.
+
+## The second finding, corpus-wide
+
+DOS S5 records verbatim that the conversion card "passes V-A 5/5" and that "V-B
+is NAMED-DEFERRED, not silently dropped".
+
+**No contact-level evidence exists for any rotary-to-linear conversion anywhere
+in the legacy corpus.** Under declared pairs the ratio is exact by construction,
+so agreement between commanded input and observed output reports the declaration
+rather than the artifact. `NRM-RL-007` is the invariant form of this; the
+`corpus_level_finding` in `evidence_scope.yaml` states its reach. Engagement,
+backlash, friction, efficiency and jamming are NOT_VERIFIED for every
+realization — which is not INFEASIBLE either.
+
+## Files
+
+| File | Role |
+|---|---|
+| `normative.yaml` | 7 invariants + 3 required unresolved decisions + scope exclusions + naming note |
+| `freedoms.yaml` | 8 decisions no test may assert |
+| `realizations.yaml` | 4 admissible + 7 inadmissible fixtures |
+| `negative_cases.yaml` | 7 design + 6 process cases |
+| `evidence_scope.yaml` | Corpus-level fidelity finding; 4 not-verified criteria |
+| `stage_expectations.yaml` | Representation obligations; conditional s11 outcome rules |
+| `source_map.md` | Every statement traced; every legacy value ranked |
+
+## Boundary with guidance
+
+`NRM-RL-004` requires only the restraint without which the output would rotate
+instead of translating. It does **not** supply general guidance, and a guidance
+realization may not be credited to it unless it demonstrably removes rotation
+about the input axis. Guidance is owned by `guided-slider`. `NEG-RL-012` and the
+`double_discharge_rule` in `stage_expectations.s05` keep one realization from
+discharging two obligations.

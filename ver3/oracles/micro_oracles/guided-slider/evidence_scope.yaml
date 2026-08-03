@@ -1,0 +1,50 @@
+capability_id: guided-slider
+schema_version: "0.2.0"
+principle: >
+  Evidence bounds what may be claimed verified. Where no evidence of adequate
+  fidelity exists, the criterion is NOT_VERIFIED. NOT_VERIFIED is never
+  INFEASIBLE.
+
+evidence:
+  - id: EV-GS-001
+    what: "Guided translation exercised over a stroke, 5/5 seeds."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m13_hard_anchor/out/t2_hard_verdict.json (P-SLIDE-VA)"
+    fidelity: V-A_declared_pairs
+    supports: []
+    does_not_support: [NRM-GS-002, NRM-GS-003, NRM-GS-004, NRM-GS-005]
+    note: >
+      Under a declared prismatic pair the constrained freedoms are removed by the
+      declaration. The run therefore observes that a body declared to translate
+      translates. It is not evidence that an engagement removes those freedoms.
+  - id: EV-GS-002
+    what: "Off-axis deviation observed as 0.0 degrees against a 3.0 degree threshold."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m13_hard_anchor/out/t2_hard_verdict.json (P-SLIDE-VA seed 0)"
+    fidelity: V-A_declared_pairs
+    supports: []
+    does_not_support: [NRM-GS-002]
+    structural_artifact_note: >
+      DECISIVE for this capability. Off-axis deviation is identically zero by
+      construction of the declared coupling; the model admits no other value. The
+      observable cannot fail, so it cannot pass in any evidential sense. This is
+      the case that NRM-GS-007 exists to catch.
+  - id: EV-GS-003
+    what: "Contact-layer artifact for the latched-drawer composition."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m25_contact_layer/out/t2_contact_latched_drawer_verdict.json"
+    fidelity: contact_layer
+    supports: []
+    does_not_support: []
+    note: >
+      Recorded as the one place in the corpus where a slide was carried to a
+      contact layer. Its criteria and thresholds belong to that fixture, not to
+      this capability, so no capability-level claim is drawn from it here.
+
+not_verified:
+  - criterion: NRM-GS-002 / NRM-GS-003 (freedoms removed by attributable engagements)
+    why: "All slide evidence is declared-pair; the constraints are supplied by the model, not observed."
+    would_require: "Contact-resolved travel with the guide modelled as engagement geometry."
+  - criterion: NRM-GS-004 (engagement persists across travel)
+    why: "No evidence addresses engagement overlap at any position."
+    would_require: "Engagement geometry evaluated across the travel range."
+  - criterion: NRM-GS-005 (transverse load reacted across travel)
+    why: "No load case exists at capability level (UNR-GS-002) and no evidence addresses transverse load."
+    would_require: "A stated load case plus a load-resolved model at the travel extremes."

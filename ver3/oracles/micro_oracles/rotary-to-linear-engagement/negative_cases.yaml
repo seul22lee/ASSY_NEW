@@ -1,0 +1,105 @@
+capability_id: rotary-to-linear-engagement
+schema_version: "0.2.0"
+purpose: >
+  Realizations and pipeline behaviours that must be rejected at capability level.
+  Process cases reproduce recorded legacy behaviour.
+
+negative_cases:
+  - id: NEG-RL-001
+    kind: design
+    description: "Declared ratio with no engagement geometry on either body."
+    must_be_rejected_by: [NRM-RL-001]
+    fixture: INA-RL-A
+  - id: NEG-RL-002
+    kind: design
+    description: "Engagement present but no input/output relation and no identified driving body."
+    must_be_rejected_by: [NRM-RL-002]
+    fixture: INA-RL-B
+  - id: NEG-RL-003
+    kind: design
+    description: "Engagement lost partway along the declared output range."
+    must_be_rejected_by: [NRM-RL-003]
+    fixture: INA-RL-C
+  - id: NEG-RL-004
+    kind: design
+    description: "Output body free to rotate about the input axis; it turns instead of translating."
+    must_be_rejected_by: [NRM-RL-004]
+    fixture: INA-RL-D
+  - id: NEG-RL-005
+    kind: design
+    description: "Rotating body located only by its engagement."
+    must_be_rejected_by: [NRM-RL-005]
+    fixture: INA-RL-E
+  - id: NEG-RL-006
+    kind: design
+    description: "A force component of the engagement has no reaction path."
+    must_be_rejected_by: [NRM-RL-006]
+    fixture: INA-RL-F
+  - id: NEG-RL-007
+    kind: design
+    description: "Conversion credited as verified on declared-pair ratio agreement."
+    must_be_rejected_by: [NRM-RL-007]
+    fixture: INA-RL-G
+
+  - id: NEG-RL-008
+    kind: process
+    description: >
+      The pipeline reports INFEASIBLE because its library holds no permitted
+      realizer for the conversion.
+    reproduced_from: >
+      DOS S7 - benchmark.py:145-150 treated rack_pinion as "the ONLY
+      rot_to_trans realizer" and returned INFEASIBLE when it was forbidden, while
+      lead_screw.py existed in the same repository.
+    must_be_rejected_by: [FRE-RL-001]
+    required_outcome: >
+      UNSUPPORTED, naming the absent realizer capability. This is the single
+      failure class the whole micro-oracle exists to prevent: a library gap
+      reported as a physical impossibility.
+  - id: NEG-RL-009
+    kind: process
+    description: >
+      An invariant, freedom or test asserts a conversion family, a module, a
+      tooth count, a pressure angle, a thread form, a ratio, a mesh offset, or the
+      rack-length relation.
+    reproduced_from: "DOS S6"
+    must_be_rejected_by: [FRE-RL-001, FRE-RL-002, FRE-RL-003, FRE-RL-007]
+    required_outcome: "Rejected as REFERENCE_REALIZATION_DETAIL."
+  - id: NEG-RL-010
+    kind: process
+    description: >
+      Backlash, efficiency, friction or jamming is reported as verified from
+      declared-pair evidence.
+    reproduced_from: >
+      DOS S5 - "the card is built and P-GEAR passes V-A 5/5"; "V-B is
+      NAMED-DEFERRED, not silently dropped"
+    must_be_rejected_by: [NRM-RL-007, UNR-RL-003]
+    required_outcome: "NOT_VERIFIED with the fidelity gap named. No contact-level evidence exists for any rotary-to-linear conversion in the corpus."
+  - id: NEG-RL-011
+    kind: process
+    description: >
+      This capability is renamed, aliased or documented as a rack-and-pinion
+      capability, or a rack-and-pinion realization is treated as its definition.
+    reproduced_from: "DOS S6, S7"
+    must_be_rejected_by: [normative.naming_note, FRE-RL-001]
+    required_outcome: >
+      Rejected. The capability is named for what it does. Rack-and-pinion is a
+      cited reference realization and an evidence source, never the family.
+  - id: NEG-RL-012
+    kind: process
+    description: >
+      This capability is required to supply general guidance of the output body,
+      or a guidance obligation is discharged by pointing at the conversion.
+    reproduced_from: "normative.scope_exclusions"
+    must_be_rejected_by: [normative.scope_exclusions]
+    required_outcome: >
+      Rejected. NRM-RL-004 requires only the restraint without which conversion
+      would not occur. Guidance is owned by the guided-slider micro-oracle, and
+      conflating them would let one obligation appear discharged twice.
+  - id: NEG-RL-013
+    kind: process
+    description: >
+      A self-locking or holding property is required because a legacy realization
+      had one.
+    reproduced_from: "DOS S4"
+    must_be_rejected_by: [FRE-RL-004, UNR-RL-001]
+    required_outcome: "Rejected as UNSUPPORTED_INFERENCE."

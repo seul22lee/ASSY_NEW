@@ -1,0 +1,98 @@
+capability_id: latch-retention
+schema_version: "0.2.0"
+purpose: >
+  Realizations and pipeline behaviours that must be rejected at capability level.
+  Process cases reproduce recorded legacy behaviour.
+
+negative_cases:
+  - id: NEG-LR-001
+    kind: design
+    description: "No relative configuration given for the retained state."
+    must_be_rejected_by: [NRM-LR-001]
+    fixture: INA-LR-A
+  - id: NEG-LR-002
+    kind: design
+    description: "Retention asserted between whole bodies with no participating geometry."
+    must_be_rejected_by: [NRM-LR-002]
+    fixture: INA-LR-B
+  - id: NEG-LR-003
+    kind: design
+    description: "Disturbance load has no reaction path through the retention."
+    must_be_rejected_by: [NRM-LR-003]
+    fixture: INA-LR-C
+  - id: NEG-LR-004
+    kind: design
+    description: "Release action indistinguishable from the declared disturbance."
+    must_be_rejected_by: [NRM-LR-004]
+    fixture: INA-LR-D
+  - id: NEG-LR-005
+    kind: design
+    description: "Retained state unreachable: interference on the engagement path, unaccounted for."
+    must_be_rejected_by: [NRM-LR-005]
+    fixture: INA-LR-E
+  - id: NEG-LR-006
+    kind: design
+    description: "Release destroys a participating feature."
+    must_be_rejected_by: [NRM-LR-006]
+    fixture: INA-LR-F
+  - id: NEG-LR-007
+    kind: design
+    description: "Retention claimed with no disturbance named."
+    must_be_rejected_by: [NRM-LR-007]
+    fixture: INA-LR-G
+  - id: NEG-LR-008
+    kind: design
+    description: "A task-definition input force window reported as an achieved retention result."
+    must_be_rejected_by: [NRM-LR-008]
+    fixture: INA-LR-H
+
+  - id: NEG-LR-009
+    kind: process
+    description: >
+      Retention is required to be realized by a snap feature, or an invariant,
+      freedom or test asserts a beam length, thickness, deflection or lip form.
+    reproduced_from: "DOS-latch-retention S6, S7"
+    must_be_rejected_by: [FRE-LR-002, FRE-LR-006]
+    required_outcome: >
+      Rejected as REFERENCE_REALIZATION_DETAIL. The corpus realizes retention
+      exclusively by snaps; that is a library state, and treating it as the
+      capability is the catalogue-as-design-space failure.
+  - id: NEG-LR-010
+    kind: process
+    description: >
+      The pipeline reports INFEASIBLE because no permitted retention realizer
+      exists in its library.
+    reproduced_from: "DOS-latch-retention S7; the KG_NO_PERMITTED_REALIZER pattern"
+    must_be_rejected_by: [FRE-LR-002]
+    required_outcome: "UNSUPPORTED with the missing capability named; never INFEASIBLE."
+  - id: NEG-LR-011
+    kind: process
+    description: >
+      A hand-release or tool-free requirement is imposed at capability level
+      because the originating fixture said "removable by hand".
+    reproduced_from: "DOS-latch-retention S2 snap_panel.json"
+    must_be_rejected_by: [FRE-LR-005, UNR-LR-003]
+    required_outcome: "Rejected as REFERENCE_REALIZATION_DETAIL of one fixture's command."
+  - id: NEG-LR-012
+    kind: process
+    description: >
+      A disturbance case is assumed rather than declared, so a retention result is
+      produced with no stated condition.
+    reproduced_from: "DOS-latch-retention S4"
+    must_be_rejected_by: [NRM-LR-007, UNR-LR-001]
+    required_outcome: "INDETERMINATE until the instantiating case declares a disturbance."
+  - id: NEG-LR-013
+    kind: process
+    description: >
+      Analytic work performed for one snap geometry family is generalised to the
+      capability, so a non-snap retention inherits its criteria.
+    reproduced_from: "DOS-latch-retention S5 - m23_latch_physics covers one snap geometry family only"
+    must_be_rejected_by: [FRE-LR-002]
+    required_outcome: "Rejected. Evidence scope is bounded by the geometry family it was produced for."
+  - id: NEG-LR-014
+    kind: process
+    description: >
+      A cycle count, life or degradation limit is asserted at capability level.
+    reproduced_from: "DOS-latch-retention S4"
+    must_be_rejected_by: [UNR-LR-004]
+    required_outcome: "Rejected as UNSUPPORTED_INFERENCE."

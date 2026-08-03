@@ -1,4 +1,7 @@
-# Dossier hinge-and-stop — FROZEN (micro-oracle)
+# Dossier bounded-two-state-closure — FROZEN (micro-oracle)
+
+> Renamed from `DOS-hinge-and-stop.md` at correction F-3C-001. Evidence sections
+> S1-S7 are unchanged.
 
 **Tier:** micro_oracle. Constrains **one reusable mechanical capability**, never a
 product and never a mechanism. Legacy fixtures below are cited as evidence and as

@@ -1,0 +1,114 @@
+capability_id: rotary-to-linear-engagement
+schema_version: "0.2.0"
+applies_when: >
+  A design instantiates conversion of rotary motion into linear motion. These
+  expectations constrain how the pipeline must represent that capability wherever
+  it appears. They add no product requirement.
+note: >
+  Stage-11 rules are conditional. No outcome is fixed by current tooling
+  capability. In particular, the absence of a realizer in any library is a
+  tooling state, never a property of the capability.
+
+stages:
+  s02:
+    must_exist: [conversion_obligation, candidate_conversion_families, participating_body_hypotheses]
+    must_not_be_decided: [conversion_family, ratio, engagement_geometry]
+    may_remain_unresolved: [UNR-RL-001, UNR-RL-002]
+    provenance_required: ["conversion obligation -> the requirement stating a rotary input and a linear output"]
+    plurality_note: >
+      More than one conversion family must survive s02 (FRE-RL-001). Reduction to
+      one is admissible only with the obligation each rejected family failed
+      recorded. Reduction to one because only one is implemented is the defect
+      NEG-RL-008 describes, and must be reported as a capability gap.
+  s04:
+    must_exist: [input_axis, output_line, engagement_site, output_range, relation_between_input_and_output, swept_volumes_with_fidelity]
+    must_not_be_decided: [ratio_value, engagement_dimensions, final_dimensions]
+    may_remain_unresolved: [output_range, UNR-RL-001]
+    provenance_required: ["engagement site -> the bodies it acts between", "relation -> the geometry it follows from"]
+  s05:
+    must_exist: [conversion_realization, engagement_features_on_both_bodies, output_rotation_restraint, radial_support_realization, reaction_path_records]
+    must_not_be_decided: [new_independent_entities, parameter_values]
+    may_remain_unresolved: [embodiment_alternatives, UNR-RL-003]
+    provenance_required: ["realization -> obligation ids it discharges"]
+    double_discharge_rule: >
+      The output-rotation restraint discharges NRM-RL-004 only. It may not also
+      be recorded as discharging a general guidance obligation, and a guidance
+      realization may not be recorded as discharging NRM-RL-004 unless it
+      demonstrably removes rotation about the input axis (NEG-RL-012).
+  s06:
+    must_exist: [solved_values_or_explicit_status, active_constraints]
+    must_not_be_decided: [default_units, ratio_defaults]
+    may_remain_unresolved: [underdetermined_degrees_of_freedom]
+    provenance_required: ["value -> constraint id", "value -> unit declared at its source"]
+  s08:
+    must_exist: [conversion_observables_with_units, model_fidelity_declaration, contact_resolution_declaration]
+    must_not_be_decided: [hidden_friction, hidden_load, hidden_efficiency]
+    may_remain_unresolved: ["tests blocked by UNR-RL-003"]
+    provenance_required: ["observable -> the criterion it addresses"]
+    fidelity_note: >
+      Every test mapped to an engagement criterion must declare whether it
+      resolves contact. A declared-pair test may not be mapped to NRM-RL-001,
+      NRM-RL-003, NRM-RL-005 or NRM-RL-006.
+  s09:
+    must_exist: [results, raw_evidence, execution_environment]
+    provenance_required: ["result -> plan item id"]
+  s10:
+    must_exist: ["exactly one outcome per planned observable"]
+    must_not_be_decided: [which_criterion_passes]
+    provenance_required: ["evidence -> observable id"]
+    artifact_rule: >
+      Ratio agreement obtained under a declared-pair model is marked as a
+      structural artifact and carries no evidential weight for engagement
+      criteria (NRM-RL-007).
+  s11:
+    must_exist: [criterion_evaluation, evidence_coverage]
+    must_not_be_decided: [new_evidence]
+    provenance_required: ["evaluation -> evidence ids"]
+    outcome_rules:
+      RL-C1_engagement_exists:
+        traces_to: NRM-RL-001
+        pass_requires: "contact-resolving evidence that the engagement exists and transmits between the participating bodies"
+        fail_when: "the evidence shows the engagement does not transmit"
+        if_evidence_is_declared_pair_only: NOT_VERIFIED
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      RL-C2_relation_declared:
+        traces_to: NRM-RL-002
+        pass_requires: "a relation between input rotation and output translation over the output range, with the driving body identified"
+        fail_when: "no relation is declared, or the driving body is unstated"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      RL-C3_engagement_persists:
+        traces_to: NRM-RL-003
+        pass_requires: "engagement overlap shown at both extremes and the interior of a declared output range"
+        fail_when: "overlap is lost anywhere in the declared range"
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      RL-C4_output_rotation_restrained:
+        traces_to: NRM-RL-004
+        pass_requires: "a realized constraint shown to remove the output body's rotation about the input axis"
+        fail_when: "the output body can rotate about the input axis under the engagement moment"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      RL-C5_support_and_reaction:
+        traces_to: [NRM-RL-005, NRM-RL-006]
+        pass_requires: "radial support for the rotating body and a reaction path for every component of the engagement force, against a declared load case"
+        fail_when: "a force component has no reaction path"
+        if_unresolved: INDETERMINATE
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+      RL-C6_evidence_admissibility:
+        traces_to: NRM-RL-007
+        pass_requires: "every evidence item mapped to an engagement criterion declares its contact resolution, and declared-pair results are marked as structural artifacts"
+        fail_when: "declared-pair ratio agreement is counted as engagement evidence"
+        if_capability_absent: UNSUPPORTED
+        otherwise: NOT_VERIFIED
+  s12:
+    must_exist: [root_cause_candidates, capability_gap_records]
+    provenance_required: ["root_cause -> owning decision id"]
+    capability_gap_rule: >
+      A revision triggered by UNSUPPORTED must name the absent capability. Where
+      the absence is a missing conversion realizer, the record must state that a
+      realizer is missing from the library — never that the conversion is
+      infeasible (NEG-RL-008).

@@ -1,0 +1,64 @@
+capability_id: rotary-to-linear-engagement
+schema_version: "0.2.0"
+note: >
+  Four materially different conversion principles, each satisfying every
+  invariant. ADM-C and ADM-D have neither teeth nor threads; they exist to prove
+  the capability was not defined in terms of the one card the legacy library had
+  wired in.
+
+admissible_realizations:
+  - id: ADM-RL-A
+    summary: "Toothed wheel on the input shaft engaging a toothed linear member. Output rotation restrained by the linear member running in a channel. Shaft radially supported in two bores; tooth force reacted through them."
+    materially_differs_by: [conversion_principle, restraint_source]
+    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+  - id: ADM-RL-B
+    summary: "Helical thread on the input shaft engaging a follower on the output body. Output rotation restrained by the follower's non-circular section in a matching channel. Axial thread force reacted at a shoulder on the shaft."
+    materially_differs_by: [conversion_principle, dominant_force_direction, restraint_source]
+    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+  - id: ADM-RL-C
+    summary: "Band wound on a drum on the input shaft, anchored to each end of the output body, pulling it either way. Output rotation restrained by the pair of band anchors acting at a separation. Drum radially supported; band tension reacted through the drum bores."
+    materially_differs_by: [conversion_principle, engagement_type, restraint_source]
+    note: "Engagement is a wrapped band, not a tooth or thread. Admitted because NRM-RL-001 requires a localized engagement, not a meshing one."
+    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+  - id: ADM-RL-D
+    summary: "Crank pin on the input disc engaging a slot in the output body, driving it along its line. Output rotation restrained by the slot walls. Relation between input angle and output position is sinusoidal, not linear."
+    materially_differs_by: [conversion_principle, relation_linearity, engagement_type]
+    note: "Admitted because NRM-RL-002 requires a declared relation, not a constant ratio (FRE-RL-003)."
+    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+
+inadmissible_realizations:
+  - id: INA-RL-A
+    summary: "Input rotation and output translation related by a declared ratio, with no engagement geometry on either body."
+    from_negative_case: NEG-RL-001
+    missing_tags: [engagement_localized_both_bodies]
+    tags: ['rotating_body', 'translating_output_body', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+  - id: INA-RL-B
+    summary: "Engagement geometry exists on both bodies but no relation between input rotation and output translation is declared, and which body drives is unstated."
+    from_negative_case: NEG-RL-002
+    missing_tags: [input_output_relation_declared]
+    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+  - id: INA-RL-C
+    summary: "Engagement covers the first portion of the output range; beyond it the output body has disengaged and rotation no longer moves it."
+    from_negative_case: NEG-RL-003
+    missing_tags: [engagement_persists_over_output_range]
+    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+  - id: INA-RL-D
+    summary: "Follower on a threaded shaft with nothing restraining it about the shaft axis; it turns with the shaft instead of translating."
+    from_negative_case: NEG-RL-004
+    missing_tags: [output_rotation_restrained]
+    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+  - id: INA-RL-E
+    summary: "Rotating body located only by the engagement itself, with no radial support."
+    from_negative_case: NEG-RL-005
+    missing_tags: [rotating_body_radially_supported]
+    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'reaction_of_conversion_force_realized', 'ratio_evidence_not_structural_artifact']
+  - id: INA-RL-F
+    summary: "Thread engagement whose axial force component has no reaction path; the shaft is free to translate along its own axis."
+    from_negative_case: NEG-RL-006
+    missing_tags: [reaction_of_conversion_force_realized]
+    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'ratio_evidence_not_structural_artifact']
+  - id: INA-RL-G
+    summary: "Conversion reported as verified because commanded input and observed output agreed under a declared-pair model."
+    from_negative_case: NEG-RL-007
+    missing_tags: [ratio_evidence_not_structural_artifact]
+    tags: ['rotating_body', 'translating_output_body', 'engagement_localized_both_bodies', 'input_output_relation_declared', 'engagement_persists_over_output_range', 'output_rotation_restrained', 'rotating_body_radially_supported', 'reaction_of_conversion_force_realized']

@@ -1,0 +1,38 @@
+capability_id: guided-slider
+schema_version: "0.2.0"
+freedoms:
+  - id: FRE-GS-001
+    decision: Which of the two bodies is fixed in the world frame.
+    why_free: "DOS S1 defines relative translation. Neither role is fixed by the capability."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-GS-002
+    decision: Direction of the travel line.
+    why_free: "DOS S4: no capability-level direction. `axis_hint horizontal` in latched_drawer.json is that fixture's field."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-GS-003
+    decision: Number of guides and their placement.
+    why_free: >
+      DOS S6/S7: the legacy fixtures used two rails at a fixed gap, and removed
+      rotation by that choice. One profiled guide, one dovetailed channel, three
+      pads and four rollers satisfy NRM-GS-002 equally.
+    example_realizations: [two parallel round rails, one dovetailed channel, one non-circular guide bar, a pair of V-grooves with rollers, a plain box channel]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-GS-004
+    decision: Whether the engagement slides or rolls, and its material pairing.
+    why_free: "DOS S4: not defined at capability level."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-GS-005
+    decision: How engagement persistence is achieved — engagement length, overlap, or a second engagement.
+    why_free: "DOS S4: no engagement length is defined at capability level."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-GS-006
+    decision: Clearance, fit and preload.
+    why_free: "DOS S6: rail width 8.0, height 8.0, clearance 0.35 are realization values of one fixture."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-GS-007
+    decision: Whether a guide part may also serve another function.
+    why_free: >
+      DOS S6 records that `slide_rail.carve` REPLACES its mover piece, so in that
+      library a rail could not also be the drawer. That is a limitation of one
+      construction operation, not of the capability.
+    must_not_be_asserted_by_tests: true

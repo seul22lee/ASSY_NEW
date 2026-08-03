@@ -1,0 +1,64 @@
+capability_id: latch-retention
+schema_version: "0.2.0"
+principle: >
+  Evidence bounds what may be claimed verified. Where no evidence of adequate
+  fidelity exists, the criterion is NOT_VERIFIED. NOT_VERIFIED is never
+  INFEASIBLE.
+
+circularity_finding: >
+  DECISIVE. DOS S5 records that the force windows appearing in the task
+  definitions are **input parameters of those definitions, not measured product
+  properties**. Citing 15-60 N as an achieved retention result asserts as an
+  outcome what was supplied as a condition. NRM-LR-008 is the invariant form of
+  this finding.
+
+evidence:
+  - id: EV-LR-001
+    what: "Assembly snap event with event_force_window_N = [0.0, 80.0], verified_by PR-T1-MATE."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/tasks/snap_panel.json (B1)"
+    provenance: input_parameter_of_task_definition
+    fidelity: not_a_measurement
+    supports: []
+    does_not_support: [NRM-LR-002, NRM-LR-003, NRM-LR-005]
+    circularity_note: "The window is declared in the task, then read back. See circularity_finding."
+  - id: EV-LR-002
+    what: "Static snap event with event_force_window_N = [15.0, 60.0], verified_by PR-T1-SEP."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/tasks/snap_panel.json (B2)"
+    provenance: input_parameter_of_task_definition
+    fidelity: not_a_measurement
+    supports: []
+    does_not_support: [NRM-LR-002, NRM-LR-003, NRM-LR-004]
+    circularity_note: "Same window as EV-LR-003 in a different task. Its recurrence is a property of the task authoring, not of any artifact."
+  - id: EV-LR-003
+    what: "Static snap event with event_force_window_N = [15.0, 60.0], verified_by PR-LATCH."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/tasks/latched_drawer.json (B2)"
+    provenance: input_parameter_of_task_definition
+    fidelity: not_a_measurement
+    supports: []
+    does_not_support: [NRM-LR-002, NRM-LR-003, NRM-LR-004]
+    circularity_note: "See circularity_finding."
+  - id: EV-LR-004
+    what: "Tier-1 analytic and contact work for one snap geometry family."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m23_latch_physics/"
+    fidelity: analytic_plus_contact
+    scope_bound: "one snap geometry family"
+    supports: []
+    does_not_support: [NRM-LR-006]
+    note: >
+      The strongest retention evidence in the corpus, and still bounded to the
+      geometry family it was produced for. It cannot be generalised to the
+      capability (NEG-LR-013), and it addresses no repeatability criterion.
+
+not_verified:
+  - criterion: NRM-LR-002 / NRM-LR-003 (retention interaction and reaction path)
+    why: "circularity_finding. The available force figures are inputs, not measurements."
+    would_require: "A measured or computed retention force against a declared disturbance (UNR-LR-001, UNR-LR-002)."
+  - criterion: NRM-LR-004 (release distinguishable from disturbance)
+    why: "No evidence in the corpus evaluates a release action against a disturbance case."
+    would_require: "Both cases run against the same retention, with the discriminating property named."
+  - criterion: NRM-LR-006 (repeatability, no feature consumed)
+    why: "No evidence addresses a second cycle. No cycle count exists at capability level (UNR-LR-004)."
+    would_require: "At least an engage-release-engage sequence with the participating geometry checked afterwards."
+  - criterion: "Release effort"
+    why: "No release effort ceiling exists (UNR-LR-003) and no evidence measures release effort."
+    would_require: "A stated ceiling plus a measurement."

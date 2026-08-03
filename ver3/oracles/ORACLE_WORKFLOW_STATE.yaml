@@ -1,30 +1,110 @@
-# Workflow state only. NEVER Oracle evidence. Not locked, not cited by any pack.
-schema_version: "0.1.0"
-current_pass: PASS_2_AUTHORING
+# Workflow state ONLY. Never Oracle evidence. Nothing here may be cited by a pack.
+schema_version: "0.3.0"
+updated_after: "Pass 6 - two clean audit sequences"
+
+current_pass: 6_COMPLETE
+workflow_status: READY_FOR_HUMAN_REVIEW
+clean_audit_count: 2      # canonical order; shuffled order under 3 seeds
+lock_created: false
+production_pipeline_code_exists: false
+
 completed_artifacts:
-  pass_1_dossiers: 9        # _dossiers/DOS-*.md  FROZEN
-  authoring_policy: ORACLE_AUTHORING_POLICY.md
-  method: ORACLE_METHOD.md
-  auditor: ver3/oracle_tools/audit_oracles.py   # 3A/3B/3C/3D, read-only
-pack_status: {}
-unresolved_findings: []
+  pass_1_frozen_dossiers:
+    - _dossiers/DOS-BM-001.md
+    - _dossiers/DOS-BM-001-2.md
+    - _dossiers/DOS-BM-001-3.md
+    - _dossiers/DOS-BM-002.md
+    - _dossiers/DOS-C4-drawer.md
+    - _dossiers/DOS-guided-slider.md
+    - _dossiers/DOS-rotary-to-linear-engagement.md
+    - _dossiers/DOS-latch-retention.md
+    - _dossiers/DOS-bounded-two-state-closure.md   # renamed at F-3C-001; content unchanged
+  policy_and_method:
+    - ORACLE_METHOD.md
+    - ORACLE_AUTHORING_POLICY.md
+  pass_2_packs: all nine authored, 8 files each
+  index_and_report:
+    - ORACLE_INDEX.md
+    - ORACLE_VALIDATION_REPORT.md
+  auditor: ../oracle_tools/audit_oracles.py
+  audit_reports: _audit/
+
+pack_status:
+  BM-001:                       SEMANTICALLY_AUDITED
+  BM-001-2:                     BLOCKED_BY_SOURCE_AMBIGUITY   # AMB-001-2-01
+  BM-001-3:                     SEMANTICALLY_AUDITED
+  BM-002:                       SEMANTICALLY_AUDITED
+  C4-drawer:                    SEMANTICALLY_AUDITED
+  guided-slider:                SEMANTICALLY_AUDITED
+  rotary-to-linear-engagement:  SEMANTICALLY_AUDITED
+  latch-retention:              SEMANTICALLY_AUDITED
+  bounded-two-state-closure:    SEMANTICALLY_AUDITED
+
+totals:
+  invariants: 67
+  required_unresolved: 37
+  freedoms: 65
+  admissible_fixtures: 31
+  inadmissible_fixtures: 59
+  negative_cases: 104
+
+unresolved_findings: []      # 0 across 3A/3B/3C/3D, canonical and shuffled
+
 source_ambiguities:
-  - id: AMB-001-2-01
+  AMB-001-2-01:
+    status: OPEN_BLOCKING
     pack: BM-001-2
-    summary: "REQ-010 'can only be worked from inside the enclosure' vs REQ-001 repeated opening and REQ-003 easy operation."
-    resolution: NONE - preserved
-  - id: AMB-002-01
+    note: "Three candidate readings recorded in _ambiguities/AMB-001-2-01.md; none selected."
+  AMB-001-3-01:
+    status: OPEN_NON_BLOCKING
+    pack: BM-001-3
+  AMB-002-01:
+    status: OPEN_NON_BLOCKING
     pack: BM-002
-    summary: "REQ-004 mechanism enclosed vs REQ-001 external crank; boundary-crossing element unclassified."
-    resolution: NONE - preserved
-  - id: AMB-002-02
+    carried_as: UNR-BM-002-001
+    note: "REQ-004 encloses the mechanism; REQ-001 puts the input outside. The status of the crossing element is undetermined."
+  AMB-002-02:
+    status: OPEN_NON_BLOCKING
     pack: BM-002
-    summary: "'approximately 80-100 mm' - a range with an approximately qualifier; compliance edge undetermined."
-    resolution: NONE - preserved
-  - id: AMB-C4-01
+    carried_as: UNR-BM-002-002
+    note: "'approximately 80-100 mm' has no stated compliance edge."
+  AMB-C4-01:
+    status: OPEN_NON_BLOCKING
     pack: C4-drawer
-    summary: "build_goldens.py:1142 'drawer rack-pinion is over-engineered' vs manifest.json 'gear NOT over-engineered here'."
-    resolution: NONE - preserved
-correction_history: []
-clean_audit_count: 0
-next_executable_step: "Complete BM-001 freedoms/stage_expectations/negative_cases/evidence_scope."
+    carried_as: UNR-C4-002
+    note: "Two legacy statements contradict each other about a toothed transmission. Neither is rank-1, so neither may bind the family choice. The disagreement stands."
+
+correction_history:
+  # Oracle corrections from the manual classification report
+  - {id: CLS-002,  target: BM-001,        outcome: applied}
+  - {id: CLS-004,  target: BM-001,        outcome: applied}
+  - {id: CLS-005,  target: BM-001,        outcome: applied}
+  - {id: CLS-008,  target: BM-001,        outcome: applied}
+  - {id: CLS-010,  target: BM-001,        outcome: applied, note: "assembly_dependency_graph moved to stage_expectations"}
+  - {id: CLS-011,  target: BM-001,        outcome: applied, note: "load_path_records moved to stage_expectations"}
+  - {id: CLS-2-002, target: BM-001-2,     outcome: applied, note: "restored REQ-010 exact wording; recorded AMB-001-2-01"}
+  - {id: CLS-2-003, target: BM-001-2,     outcome: applied}
+  # Tool corrections - the auditor was defective, the Oracle was not
+  - {id: TOOL-001, target: auditor, outcome: applied, note: "exclusions-aware skip for freedom overlap"}
+  - {id: TOOL-002, target: auditor, outcome: applied, note: "unauthored packs passed silently; now BLOCKING"}
+  - {id: TOOL-003, target: auditor, outcome: applied, note: "rank-1 locators need not be REQ-numbered; added DIRECT_FROM_LEGACY_SECTION and MICRO_DIRECT_NOT_FROM_CAPABILITY"}
+  - {id: TOOL-004, target: auditor, outcome: applied, note: "a count behind a definite article is anaphoric, not prescriptive"}
+  - {id: TOOL-005, target: auditor, outcome: applied, note: "freedom-overlap keys deduplicated by stem"}
+  # Oracle corrections from the blind audit
+  - {id: ORA-001,  target: guided-slider, outcome: applied, note: "NRM-GS-001 stated a representation requirement; restated as a design property"}
+  - {id: F-3C-001, target: bounded-two-state-closure, outcome: applied,
+     note: "renamed from hinge-and-stop; mechanism name standing for a capability. FLAGGED FOR REVIEW - changes an identifier the operator had used in writing."}
+  - {id: SRCMAP-001, target: BM-001, outcome: applied, note: "source_map realigned to v0.2 ids; freedoms and requirement coverage added"}
+
+mutation_test:
+  performed: true
+  injected_defects: 12
+  caught: 12
+  controls: 1
+  controls_correctly_silent: 1
+  note: "Run on throwaway copies. Three checks were loosened at TOOL-003/004/005, so the auditor was re-tested for blindness before the clean result was accepted."
+
+next_executable_step: >
+  Await human review. On approval, Phase 1 closes with LOCK.json and Phase 2
+  (pipeline and stage contracts) begins. Nothing further should be authored
+  under oracles/ before that decision, and no production pipeline code exists yet.

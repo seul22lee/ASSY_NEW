@@ -1,0 +1,64 @@
+capability_id: bounded-two-state-closure
+schema_version: "0.2.0"
+note: >
+  Four materially different bounded closures, each satisfying every invariant.
+  Only ADM-A resembles the corpus realization. ADM-C is not rotary at all, and
+  ADM-D bounds by run-out rather than by any added feature.
+
+admissible_realizations:
+  - id: ADM-HS-A
+    summary: "Pin and knuckle joint between lid and body. Closed extreme bounded by the lid seating on the body rim; open extreme bounded by a flange on the lid meeting the body wall. Two distinct contact features on two parts."
+    materially_differs_by: [motion_type, bounding_principle]
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+  - id: ADM-HS-B
+    summary: "Four-bar linkage carrying the lid. Open extreme bounded by the linkage reaching its dead point; closed extreme bounded by the lid seating on the rim. Two different bounding principles on one closure."
+    materially_differs_by: [motion_type, bounding_principle, principle_mixing]
+    note: "Admitted because NRM-HS-005 permits the two extremes to use different principles."
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+  - id: ADM-HS-C
+    summary: "Sliding cover running in a channel. Closed extreme bounded by the cover face meeting the channel end; open extreme bounded by a boss on the cover meeting the other channel end. Both bounds on one channel part."
+    materially_differs_by: [motion_type, part_count, bounding_principle]
+    note: "Not a rotary closure, and both bounds are carried by one part. Admitted because the capability names a closure, not a hinge (FRE-HS-002), and requires distinct conditions rather than distinct parts (FRE-HS-007)."
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+  - id: ADM-HS-D
+    summary: "Lid on a pivot pin running in a curved slot. Both extremes bounded by the pin reaching an end of the slot — two different ends, two different contacts, no added stop feature."
+    materially_differs_by: [bounding_principle, feature_economy]
+    note: "Bounds by geometric run-out of the constraint itself. Admitted because NRM-HS-004 requires a realized condition, not an added feature."
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+
+inadmissible_realizations:
+  - id: INA-HS-A
+    summary: "One state defined; the other referred to but given no relative configuration."
+    from_negative_case: NEG-HS-001
+    missing_tags: [two_states_defined, both_states_reachable]
+    tags: ['motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+  - id: INA-HS-B
+    summary: "Two states defined with no continuous path between them; the closure is shown only in its two configurations."
+    from_negative_case: NEG-HS-002
+    missing_tags: [motion_continuous_between_states]
+    tags: ['two_states_defined', 'both_states_reachable', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+  - id: INA-HS-C
+    summary: "Constraint between the two bodies lapses partway through the motion; over that span the configuration is unlimited."
+    from_negative_case: NEG-HS-003
+    missing_tags: [relative_constraint_persists_through_motion]
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+  - id: INA-HS-D
+    summary: "Extremes set by a numeric range on a joint, with no realized condition at either configuration."
+    from_negative_case: NEG-HS-004
+    missing_tags: [each_bound_physically_realized]
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'bounds_distinct_per_extreme', 'transition_free_of_interference', 'bound_criterion_discriminates']
+  - id: INA-HS-E
+    summary: "One realized condition evaluated once and credited to both extremes."
+    from_negative_case: NEG-HS-005
+    missing_tags: [bounds_distinct_per_extreme]
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'transition_free_of_interference', 'bound_criterion_discriminates']
+  - id: INA-HS-F
+    summary: "Lid passes through the body wall partway through the motion; the interference is unaccounted for."
+    from_negative_case: NEG-HS-006
+    missing_tags: [transition_free_of_interference]
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'bound_criterion_discriminates']
+  - id: INA-HS-G
+    summary: "Presence of a bound claimed on a criterion that also passes when the bound is removed."
+    from_negative_case: NEG-HS-007
+    missing_tags: [bound_criterion_discriminates]
+    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'relative_constraint_persists_through_motion', 'each_bound_physically_realized', 'bounds_distinct_per_extreme', 'transition_free_of_interference']

@@ -36,7 +36,13 @@ REPRESENTATION_LEXICON = [
 TOOLING_LEXICON = ["currently", "not yet supported", "current implementation", "our solver", "the toolchain"]
 # Dimensional / count leakage
 NUMERIC_LEAK = re.compile(r"\b\d+(\.\d+)?\s*(mm|cm|m|kg|g|deg|degrees|N|newton)\b", re.I)
-COUNT_LEAK = re.compile(r"\b(two|three|four|exactly \d+)\s+(rails?|parts?|bodies|pieces|stops?)\b", re.I)
+# A count is a defect when it PRESCRIBES how many elements a design has. A count
+# preceded by a definite article is anaphoric — "between the two bodies" refers to
+# the participants the statement just named, and is the arity of a relation rather
+# than a realization decision. TOOL-004.
+COUNT_LEAK = re.compile(
+    r"(?<!the )\b(two|three|four|exactly \d+)\s+"
+    r"(rails?|parts?|bodies|pieces|stops?|guides?|fasteners?|springs?|bearings?)\b", re.I)
 
 STATUS_VALUES = {"PASS", "FAIL", "NOT_VERIFIED", "UNSUPPORTED", "INDETERMINATE", "NOT_APPLICABLE", "UNRESOLVED"}
 
@@ -68,6 +74,21 @@ def load_packs():
                 p[f] = yaml.safe_load(fp.read_text()) if fp.exists() else None
             packs[d.name] = p
     return packs
+
+
+def dossier_sections(case):
+    """Section ids (S1, S2, ...) present in a frozen dossier. TOOL-003.
+
+    Two of the three source shapes in this corpus are not REQ-numbered: a product
+    case whose whole rank-1 source is one free-text command, and a micro-oracle
+    whose rank-1 source is its declared capability statement. Requiring a
+    `REQ-nnn` locator would report those as ungrounded while they are in fact
+    grounded in a frozen section.
+    """
+    fp = DOSSIERS / f"DOS-{case}.md"
+    if not fp.exists():
+        return set()
+    return set(re.findall(r"^##\s*(S\d+)\b", fp.read_text(), re.M))
 
 
 def dossier_reqs(case):
@@ -109,18 +130,44 @@ def pass_3a(packs):
         for inv in n.get("invariants", []) or []:
             sid = inv.get("id", "?")
             locs = inv.get("source_locators") or []
-            # 3A.3 locator must resolve
-            cited = [l for l in locs if re.search(r"REQ-\d+", str(l))]
-            for l in cited:
-                rid = re.search(r"REQ-\d+", str(l)).group(0)
-                if reqs and rid not in reqs:
-                    f.append(Finding("3A", name, sid, "BLOCKING", "LOCATOR_DOES_NOT_RESOLVE",
-                                     f"cites {rid}, absent from frozen dossier DOS-{name}.md",
-                                     f"cite a requirement present in the dossier, or reclassify"))
-            if inv.get("basis_type") == "DIRECT_USER_REQUIREMENT" and not cited:
-                f.append(Finding("3A", name, sid, "BLOCKING", "DIRECT_WITHOUT_RANK1_LOCATOR",
-                                 f"basis_type=DIRECT_USER_REQUIREMENT, source_locators={locs}",
-                                 "supply a rank-1 REQ locator or change basis_type"))
+            sections = dossier_sections(name) | (dossier_sections(parent) if parent else set())
+            # 3A.3 every locator must resolve, whatever shape it has.
+            grounded = []
+            for l in locs:
+                st_l = str(l)
+                mreq = re.search(r"REQ-\d+", st_l)
+                if mreq:
+                    if reqs and mreq.group(0) not in reqs:
+                        f.append(Finding("3A", name, sid, "BLOCKING", "LOCATOR_DOES_NOT_RESOLVE",
+                                         f"cites {mreq.group(0)}, absent from frozen dossier DOS-{name}.md",
+                                         "cite a requirement present in the dossier, or reclassify"))
+                    else:
+                        grounded.append(st_l)
+                    continue
+                msec = re.search(r"\bS\d+\b", st_l)
+                if msec and "DOS-" in st_l:
+                    if sections and msec.group(0) not in sections:
+                        f.append(Finding("3A", name, sid, "BLOCKING", "LOCATOR_DOES_NOT_RESOLVE",
+                                         f"cites section {msec.group(0)}, absent from the frozen dossier",
+                                         "cite a section present in the dossier, or reclassify"))
+                    else:
+                        grounded.append(st_l)
+            if inv.get("basis_type") == "DIRECT_USER_REQUIREMENT":
+                if not grounded:
+                    f.append(Finding("3A", name, sid, "BLOCKING", "DIRECT_WITHOUT_RANK1_LOCATOR",
+                                     f"basis_type=DIRECT_USER_REQUIREMENT, source_locators={locs}",
+                                     "supply a locator that resolves in the frozen dossier, or change basis_type"))
+                # A direct statement may not be grounded in a realization or a
+                # legacy-behaviour section. Those are rank 4-6 by construction.
+                if any(re.search(r"\bS[67]\b", str(l)) for l in locs):
+                    f.append(Finding("3A", name, sid, "BLOCKING", "DIRECT_FROM_LEGACY_SECTION",
+                                     f"basis_type=DIRECT_USER_REQUIREMENT cites S6/S7: {locs}",
+                                     "S6 is realization detail and S7 is legacy behaviour; reclassify"))
+                # A micro-oracle's only rank-1 source is its capability statement.
+                if p["_tier"] == "micro_oracles" and not any("S1" in str(l) for l in grounded):
+                    f.append(Finding("3A", name, sid, "BLOCKING", "MICRO_DIRECT_NOT_FROM_CAPABILITY",
+                                     f"micro-oracle DIRECT statement not grounded in S1: {locs}",
+                                     "ground it in the capability statement, or reclassify as derived"))
             # 3A.4 derived statement must show premises
             if inv.get("support_type") == "derived" and not inv.get("derivation_premises"):
                 f.append(Finding("3A", name, sid, "BLOCKING", "DERIVED_WITHOUT_PREMISES",
@@ -242,6 +289,11 @@ def pass_3c(packs):
             for fid, dec in free_terms:
                 key = [w for w in re.findall(r"[a-z]{5,}", dec) if w not in
                        ("which", "whether", "realizing", "family", "decision", "achieves", "between")]
+                # 'states' and 'state' are one concept. A key set made of stem
+                # variants co-occurs trivially and is not evidence of overlap.
+                seen = set()
+                key = [w for w in key
+                       if not (w.rstrip("s") in seen or seen.add(w.rstrip("s")))]
                 if key and all(w in excl for w in key[:3]):
                     continue          # domain explicitly excluded by the invariant
                 if fid in (inv.get("related_freedoms") or []) and excl:

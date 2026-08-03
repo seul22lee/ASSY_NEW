@@ -1,0 +1,43 @@
+capability_id: rotary-to-linear-engagement
+schema_version: "0.2.0"
+freedoms:
+  - id: FRE-RL-001
+    decision: Conversion family.
+    why_free: >
+      DOS S4: no capability-level mechanism is defined. DOS S7 records the
+      decisive failure: the legacy pipeline treated one card as "the ONLY
+      rot_to_trans realizer" and returned INFEASIBLE when it was forbidden, while
+      a second conversion existed in the same repository. This freedom is the
+      pack's answer to that failure.
+    example_realizations: [toothed wheel and toothed linear member, helical thread and follower, cable or band on a drum, crank and connecting link, cam and follower, capstan, scotch yoke, wedge or inclined ramp]
+    must_not_be_asserted_by_tests: true
+  - id: FRE-RL-002
+    decision: Engagement geometry, including tooth or thread form, pressure angle, pitch and count.
+    why_free: "DOS S6: involute flanks, straight rack flanks, m=5 and z=12 are facts about one realization."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-RL-003
+    decision: Ratio and whether the relation is linear in the input angle.
+    why_free: "DOS S4: no ratio exists at capability level. A crank-and-link conversion is admissible though its relation is not linear."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-RL-004
+    decision: Whether the conversion is reversible or self-locking.
+    why_free: "DOS S4: no back-drive statement exists at capability level. See UNR-RL-001."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-RL-005
+    decision: How engagement persistence is achieved over the output range.
+    why_free: "DOS S4/S6: the legacy length rule is a rack-and-pinion relation, not a capability rule."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-RL-006
+    decision: What restrains the output body's rotation about the input axis.
+    why_free: >
+      DOS S4: not defined. The engagement geometry itself, a separate guide, a
+      keyed section or a non-circular bore all satisfy NRM-RL-004.
+    must_not_be_asserted_by_tests: true
+  - id: FRE-RL-007
+    decision: Support arrangement for the rotating body and where the reaction paths terminate.
+    why_free: "DOS S4: not defined. The legacy mesh offset axis_off = rack_pitchline + d/2 is a realization value (DOS S6)."
+    must_not_be_asserted_by_tests: true
+  - id: FRE-RL-008
+    decision: Which body rotates and which translates in the world frame.
+    why_free: "DOS S1 defines a relative conversion. A rotating nut driving a fixed screw and a rotating screw driving a fixed nut are both admissible."
+    must_not_be_asserted_by_tests: true

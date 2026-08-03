@@ -1,0 +1,63 @@
+capability_id: rotary-to-linear-engagement
+schema_version: "0.2.0"
+principle: >
+  Evidence bounds what may be claimed verified. Where no evidence of adequate
+  fidelity exists, the criterion is NOT_VERIFIED. NOT_VERIFIED is never
+  INFEASIBLE.
+
+corpus_level_finding: >
+  DECISIVE. DOS S5 records verbatim that the conversion card "passes V-A 5/5" and
+  that "V-B is NAMED-DEFERRED, not silently dropped". No contact-level evidence
+  exists for any rotary-to-linear conversion anywhere in the legacy corpus.
+  Every criterion of this capability that depends on the engagement behaving as
+  material is therefore NOT_VERIFIED at corpus level, for every realization.
+
+evidence:
+  - id: EV-RL-001
+    what: "Conversion card certification, 5 seeds."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m11_rack_pinion/REVIEW.md:1-6"
+    fidelity: V-A_declared_pairs
+    verbatim: "P-GEAR passes V-A 5/5"
+    deferral_verbatim: "V-B is NAMED-DEFERRED, not silently dropped"
+    supports: []
+    does_not_support: [NRM-RL-001, NRM-RL-003, NRM-RL-005, NRM-RL-006]
+    note: >
+      Cited as an existence proof that one member of the family was exercised
+      (FRE-RL-001), never as a reason to require that member. The review's own
+      deferral statement is the reason it supports no engagement criterion.
+  - id: EV-RL-002
+    what: "Combined slide-and-conversion run, declared pairs."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/m13_hard_anchor/out/t2_hard_verdict.json"
+    fidelity: V-A_declared_pairs
+    decision_row_verbatim: "P-SLIDE V-A + P-GEAR V-A (declared pairs)"
+    supports: []
+    does_not_support: [NRM-RL-001, NRM-RL-003, NRM-RL-005, NRM-RL-006]
+    structural_artifact_note: >
+      Under declared pairs the input/output relation is exact by construction of
+      the coupling. Agreement between commanded input and observed output is a
+      property of the declaration. This is the case NRM-RL-007 generalises.
+  - id: EV-RL-003
+    what: "A second and a third conversion topology exist in the legacy library."
+    source: "/home/ftk3187/github/ASSY_Ver1.0/knowledge/cards/lead_screw.py, /home/ftk3187/github/ASSY_Ver1.0/m19_lead_screw/, /home/ftk3187/github/ASSY_Ver1.0/m27_angled_screw_lift/"
+    fidelity: existence_only
+    supports: []
+    does_not_support: []
+    note: >
+      Recorded because of what it establishes about the legacy verdict, not about
+      any design: at the moment the pipeline reported that no permitted realizer
+      existed, a different realizer was present in the same repository
+      (NEG-RL-008). This row is process evidence, not design evidence.
+
+not_verified:
+  - criterion: NRM-RL-001 (engagement exists and is localized)
+    why: "corpus_level_finding. All conversion evidence is declared-pair."
+    would_require: "Contact-resolved engagement between the participating geometries."
+  - criterion: NRM-RL-003 (engagement persists over the output range)
+    why: "No evidence addresses engagement overlap at any output position, and no output range exists at capability level (UNR-RL-002)."
+    would_require: "Engagement geometry evaluated across a declared output range."
+  - criterion: NRM-RL-005 / NRM-RL-006 (support and reaction of the engagement force)
+    why: "Declared-pair models supply reactions by construction; no support or reaction evidence exists."
+    would_require: "A load-resolved model with a declared load case (UNR-RL-003)."
+  - criterion: "Backlash, friction, efficiency, jamming, life"
+    why: "corpus_level_finding, plus UNR-RL-003. None is defined and none is observed."
+    would_require: "Contact-resolved simulation or physical test, against stated criteria."
