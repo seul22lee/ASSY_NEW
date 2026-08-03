@@ -1,0 +1,95 @@
+schema_version: 0.1.0
+purpose: Exact toolchain used to build and validate the BM-001 executable CAD references. Recorded so
+  a rebuild can be attempted under the same stack and any divergence attributed.
+phase: CAD-1 positive realizability pilot
+geometry_representation: PARAMETRIC_B_REP
+representation_note: All bodies are OCCT B-rep solids. No mesh-only body is used and no STL is produced
+  as a substitute for B-rep. Tessellation is used only for rendering.
+interpreter:
+  python: 3.8.10
+  implementation: CPython
+  executable: /tmp/claude-1040/-home-ftk3187-github-ASSY-Ver3-0/6f9fb2e4-bcd0-4d48-a59c-38efe85c40e5/scratchpad/ver3cad/bin/python
+  isolation: dedicated virtualenv OUTSIDE the repository at /tmp/claude-1040/-home-ftk3187-github-ASSY-Ver3-0/6f9fb2e4-bcd0-4d48-a59c-38efe85c40e5/scratchpad/ver3cad;
+    the system Python was NOT modified
+packages:
+  cadquery: 2.4.0
+  cadquery-ocp: 7.7.0
+  numpy: 1.24.4
+  matplotlib: 3.7.5
+  pillow: 10.4.0
+  ezdxf: 1.1.4
+  multimethod: 1.9.1
+  nlopt: 2.7.1
+  casadi: 3.7.2
+  scipy: 1.10.1
+  typish: 1.9.3
+  nptyping: 2.0.1
+  path: 17.0.0
+  pyyaml: 6.0.2
+kernel:
+  name: OCCT via OCP (pythonocc-style binding shipped with cadquery-ocp)
+  ocp_wheel_version: 7.7.0
+  note: cadquery-ocp 7.7.0 wheels bundle OCCT 7.7.x. This OCP build exposes no queryable OCCT version
+    constant, so the wheel version is recorded as the authoritative kernel identifier rather than a guessed
+    OCCT string.
+operating_system:
+  system: Linux
+  release: 5.4.0-176-generic
+  machine: x86_64
+  distribution: Ubuntu 20.04.6 LTS (Focal Fossa)
+verified_capabilities:
+  solid_construction: true
+  boolean_operations: true
+  solid_validity_check: BRepCheck_Analyzer
+  volume_and_inertia: BRepGProp
+  minimum_distance: BRepExtrema_DistShapeShape
+  overlap_volume: BRepAlgoAPI_Common + BRepGProp (undeclared-overlap detection)
+  step_export: true
+  step_reimport: true
+  step_roundtrip_volume_exact: true
+  brep_export: true
+  brep_reimport: true
+  brep_roundtrip_volume_exact: true
+  headless_vector_render: cadquery SVG exporter
+  headless_raster_render: matplotlib Agg over OCCT tessellation
+probe_evidence:
+  test_solid: 40x30x20 box, 8 mm through hole, 3 mm vertical fillets
+  volume_mm3: 22840.177
+  valid: true
+  step_bytes: 36554
+  step_reimport_valid: true
+  step_reimport_volume_mm3: 22840.177
+  brep_bytes: 8082
+  brep_reimport_valid: true
+  brep_reimport_volume_mm3: 22840.177
+  boolean_common_check: two 10 mm cubes offset 5 mm -> common volume 500.0 mm3 (analytically exact)
+  distance_check: 10 mm cube to 2 mm cube at x=20 -> 14.0 mm (analytically exact)
+install_provenance:
+  method: pip into a dedicated virtualenv
+  pinned: true
+  base_environment_modified: false
+  venv_location_outside_repo: true
+  venv_committed: false
+  why_not_conda: conda is present but is a pip-installed conda that refuses to operate as an application.
+    Installing miniconda was not attempted, because a pinned virtualenv satisfies the isolation requirement
+    without adding a system-wide tool.
+limitations:
+- The venv is NOT committed. A rebuild requires recreating it from the pinned versions above.
+- STEP binary bytes may differ across exporter builds; the geometry SIGNATURE is the reproducibility criterion,
+  not the file hash.
+- No physics, FEA, contact-mechanics or tolerance-stack solver is present. This toolchain validates GEOMETRY
+  and KINEMATICS only.
+recreation_contract:
+  lock_file: ver3/cad_validation/requirements-cad.txt
+  lock_file_sha256: 26ab694b2130fabfc1d9acad67493fa0a32d095b54483cf699ed5812d9b6091d
+  script: ver3/cad_validation/tools/create_env.sh <env_path> [python]
+  script_sha256: 1773d49eb8326b87d5f96c79ffad1055288e90fbeb8264812de5b3b5f4ab7132
+  env_path_is_caller_supplied: true
+  committed_environment: false
+  note: 'The environment used during the CAD-1 run lived under the session scratchpad. That directory
+    is disposable and is NOT the reproduction path. requirements-cad.txt plus create_env.sh are: they
+    pin every version recorded in this lock, and create_env.sh runs a B-rep kernel probe before declaring
+    success. A reviewer who cannot recreate the environment from those two committed files should treat
+    that as a reproducibility defect in this pilot.'
+  interpreter_constraint: CPython 3.8 - cadquery-ocp 7.7.0 publishes cp38 wheels; the pinned set was verified
+    only there.

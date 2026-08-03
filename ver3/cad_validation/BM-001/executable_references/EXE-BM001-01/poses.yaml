@@ -1,0 +1,83 @@
+reference_id: EXE-BM001-01
+schema_version: 0.1.0
+units: mm
+angle_units: degrees
+
+frame: >
+  Enclosure-fixed. Origin at the enclosure's minimum outer corner. Transforms
+  are applied to a body's as-built shape; the as-built shape of every body is
+  its S_CLOSED_RETAINED pose.
+
+axis:
+  id: AX-CLOSURE
+  type: revolute
+  point: [0.0, 84.0, 50.0]
+  direction: [1.0, 0.0, 0.0]
+  sense: >
+    Opening is a rotation of -open_angle_deg about +X, which lifts the front of
+    the closure. Reported angles are positive in the opening sense.
+
+states:
+  - id: S_CLOSED_RETAINED
+    role: CLOSED
+    retained: true
+    transforms:
+      BODY-ENCLOSURE: identity
+      BODY-CLOSURE: identity
+      BODY-PIN: identity
+      BODY-BOLT: identity
+  - id: S_CLOSED_RELEASED
+    role: CLOSED
+    retained: false
+    transforms:
+      BODY-ENCLOSURE: identity
+      BODY-CLOSURE: identity
+      BODY-PIN: identity
+      BODY-BOLT: {translate: [0.0, 0.0, 10.0]}
+  - id: S_OPEN
+    role: OPEN
+    retained: false
+    terminal: true
+    transforms:
+      BODY-ENCLOSURE: identity
+      BODY-CLOSURE: {rotate: {axis: AX-CLOSURE, opening_angle: 110.0}}
+      BODY-PIN: identity
+      BODY-BOLT: {rotate: {axis: AX-CLOSURE, opening_angle: 110.0}, then_translate_before_rotation: [0.0, 0.0, 10.0]}
+
+terminal_condition:
+  state: S_OPEN
+  determinant: INT-09
+  kind: DISCRETE_TERMINAL_POSE
+  how_realized: >
+    FEA-C-STOPFACE is constructed in the open configuration coincident with
+    FEA-E-REARFACE and rotated back into the as-built closed configuration. The
+    terminal angle is therefore a property of the geometry, not an assumption
+    about it: at open_angle_deg the two faces are coincident, and beyond it they
+    interpenetrate.
+  causal_probe: >
+    validate.py evaluates the same model at angles either side of the terminal
+    angle and reports the boolean common volume. A positive common volume beyond
+    it, and none before, is direct causal evidence that INT-09 is what
+    terminates the rotation rather than a coincidence of the chosen number.
+
+motion_segments:
+  - id: M1_RELEASE
+    from: S_CLOSED_RETAINED
+    to: S_CLOSED_RELEASED
+    moving: [BODY-BOLT]
+    kind: prismatic
+    direction: [0.0, 0.0, 1.0]
+    travel: 10.0
+  - id: M2_OPEN
+    from: S_CLOSED_RELEASED
+    to: S_OPEN
+    moving: [BODY-CLOSURE, BODY-BOLT]
+    kind: revolute
+    axis: AX-CLOSURE
+    travel: 110.0
+    note: BODY-BOLT is carried by BODY-CLOSURE through this segment.
+
+ordering_constraint: >
+  M2_OPEN is not traversable from S_CLOSED_RETAINED. In that state BODY-BOLT
+  spans the guide bore and the socket, and any rotation drives it into the
+  enclosure. M1_RELEASE must precede it. That ordering is the release action.

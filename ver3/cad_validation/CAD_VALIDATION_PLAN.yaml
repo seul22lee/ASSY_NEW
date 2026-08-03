@@ -1,0 +1,125 @@
+schema_version: 0.1.0
+phase: CAD-1 positive realizability pilot
+objective: Establish a reproducible parametric B-rep toolchain and build TWO Oracle-aware admissible executable
+  reference CAD models for BM-001, then validate geometry, motion, contact, assembly and the Oracle predicates
+  against them.
+oracle_commit: 83fc12d46ad8c5fad36afcfe5b6e916822a41118
+final_state: BM001_EXECUTABLE_REFERENCE_PILOT_READY
+is_not:
+- CAD_CORPUS_COMPLETE
+- PACK_LOCK_READY
+- PHYSICALLY_PROVEN
+- PRODUCTION_READY
+this_run_creates:
+- B. ADMISSIBLE EXECUTABLE REFERENCE CAD (two BM-001 references)
+- a source-only authoring packet for a future fresh Demonstration CAD session
+this_run_does_not_create:
+- A. source-only Demonstration CAD
+- inadmissible CAD
+- failure CAD
+- mutation CAD
+- LOCK.json
+- production pipeline code
+- Ver3 stages
+- physically unsubstantiated PASS claims
+what_this_pilot_can_establish:
+- that at least two materially different designs satisfying the BM-001 rank-1 source can be built as valid
+  B-rep solids
+- that their required motion is traversable without undeclared volumetric overlap, by dense sampling
+- that their declared interaction regions behave as declared under a stated evaluation tolerance
+- that a realizable assembly process exists that passes through no undeclared rigid material
+- that the active BM-001 Oracle admits both, and which invariants remain unevaluable by geometry alone
+what_this_pilot_cannot_establish:
+- any strength, fatigue, wear, friction, holding-force or durability claim
+- manufacturing tolerance capability
+- that the Oracle is correct - two admissible designs passing is consistent with an over-permissive Oracle
+- a mathematical proof of non-interference; motion evidence is SAMPLED and is reported as such
+validation_chain:
+- step: 1
+  name: build
+  artifact: validation/build_report.json
+- step: 2
+  name: solid validity (BRepCheck_Analyzer, non-zero volume)
+  artifact: validation/solid_validity.json
+- step: 3
+  name: STEP + BREP export and independent re-import
+  artifact: validation/reimport_report.json
+- step: 4
+  name: geometry signature and rebuild determinism
+  artifact: geometry_signature.json
+- step: 5
+  name: motion sampling with refinement near contact events
+  artifact: validation/motion_report.json
+- step: 6
+  name: interaction-region classification and tolerance check
+  artifact: validation/interaction_report.json
+- step: 7
+  name: assembly process check
+  artifact: validation/assembly_report.json
+- step: 8
+  name: Oracle predicate evaluation
+  artifact: validation/predicate_report.json
+- step: 9
+  name: render + human review checklist
+  artifact: screenshots/, validation/human_review_checklist.md
+status_vocabulary:
+  PASS: computed or reviewed evidence supports the claim
+  FAIL: evidence contradicts the claim
+  NOT_VERIFIED: no evidence of adequate fidelity exists
+  NOT_EVALUABLE: the DesignState does not record what the predicate needs (REPRESENTATION_INCOMPLETE)
+  UNSUPPORTED: the toolchain cannot evaluate it
+evidence_rule: A PASS must cite a computed artifact or an explicit human review. A physical tag authored
+  in a manifest is NOT evidence for the predicate that requires it.
+tolerance_rule: contact_tolerance_mm <= min(0.02, 1% of the smallest local feature dimension). The tolerance
+  is an EVALUATION tolerance, not a material allowance, and may never hide macroscopic penetration.
+material_policy:
+  allowed_classes:
+  - GENERIC_RIGID_POLYMER
+  - GENERIC_RIGID_METAL
+  - GENERIC_COMPLIANT_POLYMER
+  note: Material classes are semantic assumptions, not verified engineering properties.
+  pilot_choice: Both references are RIGID-only; neither depends on flexure, friction, magnetic or strength
+    adequacy for its primary geometry.
+stop_conditions:
+- invalid solid
+- STEP or BREP cannot be re-imported
+- rebuild signature divergence beyond tolerance
+- undeclared volumetric overlap
+- blocked required motion
+- OPEN state without usable access
+- declared contact hiding macroscopic penetration
+- assembly requiring rigid material passage
+- a claimed PASS without computed or reviewed evidence
+oracle_conflict_rule: If a source-satisfying CAD cannot satisfy the Oracle, the CAD is NOT weakened to
+  obtain a PASS. The conflict is recorded as ORACLE_COUNTEREXAMPLE_CANDIDATE and no Oracle file is edited
+  in this run.
+claim_fidelity:
+  headline: This pilot can establish GEOMETRIC and KINEMATIC realizability. It cannot establish that the
+    rank-1 source is satisfied. Those are different claims and must never be reported as one.
+  may_reach_PASS:
+  - solid validity
+  - absence of undeclared volumetric overlap in every sampled configuration
+  - traversability of the required motion over the sampled interval
+  - behaviour of each declared interaction region under the stated evaluation tolerance
+  - existence of a terminal open condition and the geometry that produces it
+  - existence of an installation ordering that passes through no undeclared rigid material
+  - existence of a load PATH between bodies (existence only, never adequacy)
+  remains_NOT_VERIFIED_by_construction:
+  - rank1_requirement: REQ-002 / REQ-004 secure closure under handling and transport
+    why: requires a disturbance magnitude and a retention capacity. The source states neither and the
+      toolchain computes no forces.
+  - rank1_requirement: REQ-003 latch easy for a user to operate
+    why: requires a user effort ceiling and a measured operating effort. Neither exists.
+  - rank1_requirement: REQ-005 suitable for low-cost manufacturing
+    why: requires a process and a cost model. Geometry alone does not carry either.
+  - rank1_requirement: REQ-007 mechanically plausible and easy to assemble
+    why: the EXISTENCE of an assembly ordering is geometric and may PASS; EASE is an effort claim and
+      is not.
+  - rank1_requirement: REQ-008 / REQ-001 reusable, repeatable operation
+    why: a cycle can be shown to be geometrically repeatable. Durability over an unstated cycle count
+      is a wear and fatigue claim and is not.
+  - rank1_requirement: REQ-006 practical for desktop use
+    why: no envelope is stated in the source, so no dimensional criterion exists to test against.
+  reporting_rule: A reference that passes every check in this plan is reported as GEOMETRICALLY AND KINEMATICALLY
+    ADMISSIBLE. It is not reported as satisfying the source, as verified, or as proven. Any sentence combining
+    a computed geometric result with an unverified physical requirement is a defect in the report.

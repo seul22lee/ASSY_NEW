@@ -1,0 +1,92 @@
+reference_id: EXE-BM001-01
+schema_version: 0.1.0
+title: rigid rotating closure on a realized knuckle-and-pin axis
+kind: ADMISSIBLE_EXECUTABLE_REFERENCE
+author_awareness: ORACLE_AWARE
+is_not:
+  - a source-only Demonstration
+  - evidence that the source alone leads here
+  - evidence that the design satisfies the rank-1 source
+maps_to_semantic_fixture: ADM-BM-001-E
+mapping_fidelity: CLOSE
+units: mm
+
+bodies:
+  - id: BODY-ENCLOSURE
+    name: enclosure
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    role: >
+      Fixed reference body. Carries the cavity, the rim the closure seats on,
+      three knuckle segments with their webs, and the retention socket.
+    features:
+      - {id: FEA-E-RIM, what: rim plane at z = box_z that the closure seats on}
+      - {id: FEA-E-CAVITY, what: internal cavity opening upward through the rim plane}
+      - {id: FEA-E-KNUCKLE-1, what: outermost knuckle segment, counterbored to seat the pin head}
+      - {id: FEA-E-KNUCKLE-2, what: centre knuckle segment}
+      - {id: FEA-E-KNUCKLE-3, what: far outermost knuckle segment}
+      - {id: FEA-E-BORE, what: knuckle bore, diameter bore_d, coaxial with the closure axis}
+      - {id: FEA-E-CBORE, what: counterbore in FEA-E-KNUCKLE-1 seating the pin head}
+      - {id: FEA-E-REARFACE, what: rear outer face at y = box_y; the surface the stop block bears on}
+      - {id: FEA-E-SOCKET, what: blind retention socket, floor at socket_z}
+      - {id: FEA-E-BOLTBOSS-TOP, what: top of the retention boss, coplanar with the rim}
+  - id: BODY-CLOSURE
+    name: closure
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    role: >
+      Movable body. Plate covering the cavity, web joining plate to knuckles,
+      two knuckle segments interleaved with the enclosure's three, a guide boss
+      for the retention bolt, and the stop block that terminates opening.
+    features:
+      - {id: FEA-C-UNDERSIDE, what: plate underside at z = box_z; seats on FEA-E-RIM}
+      - {id: FEA-C-KNUCKLE-1, what: first closure knuckle segment}
+      - {id: FEA-C-KNUCKLE-2, what: second closure knuckle segment}
+      - {id: FEA-C-BORE, what: knuckle bore, diameter bore_d, coaxial with the closure axis}
+      - {id: FEA-C-RELIEF, what: cylindrical relief of radius relief_r about the closure axis}
+      - {id: FEA-C-STOPFACE, what: planar stop face; coincident with FEA-E-REARFACE at the terminal open angle}
+      - {id: FEA-C-GUIDE, what: through guide bore for the retention bolt}
+      - {id: FEA-C-BOSS-TOP, what: top of the guide boss}
+  - id: BODY-PIN
+    name: axis pin
+    material_class: GENERIC_RIGID_METAL
+    installed_as: DISCRETE
+    role: >
+      Realizes the rotation axis. Slip fit in every bore; the head seats in
+      FEA-E-CBORE and locates the pin in one axial direction.
+    features:
+      - {id: FEA-P-SHAFT, what: shaft, diameter pin_d}
+      - {id: FEA-P-HEAD, what: head, diameter pin_head_d}
+      - {id: FEA-P-SHOULDER, what: annular face between head and shaft; bears on the counterbore floor}
+  - id: BODY-BOLT
+    name: retention bolt
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    role: >
+      Realizes retention and its release action. In the retained state it spans
+      the guide bore and the enclosure socket; lifting it clears the enclosure.
+    features:
+      - {id: FEA-B-SHAFT, what: shaft, diameter bolt_d}
+      - {id: FEA-B-END, what: lower end face; seats on the socket floor when retained}
+      - {id: FEA-B-KNOB, what: knob; the surface the user acts on}
+
+known_limitations:
+  - id: LIM-01
+    what: >
+      The pin is located axially in one direction only, by FEA-P-SHOULDER on
+      FEA-E-CBORE. Nothing prevents it withdrawing the other way.
+    status: NOT_VERIFIED
+    why_not_corrected: >
+      Every captive alternative available without a second joining body needs
+      either an interference fit or a compliant feature, and the reference
+      selection excluded both so that the model stays independent of material
+      behaviour. Axial retention of the pin is a design freedom the source does
+      not constrain; recording it as a limitation is more honest than adding a
+      feature whose function this toolchain cannot evaluate.
+  - id: LIM-02
+    what: The retention bolt is fully removable upward.
+    status: DECLARED_DESIGN_CHOICE
+    why: >
+      The source requires retention and a release action, not captivity. In the
+      released state the shaft still spans 12 mm of the guide bore, so the
+      operating motion is guided; complete removal is a further, permitted act.

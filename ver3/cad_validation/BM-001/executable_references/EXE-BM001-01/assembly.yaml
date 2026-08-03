@@ -1,0 +1,56 @@
+reference_id: EXE-BM001-01
+schema_version: 0.1.0
+units: mm
+
+principle: >
+  Every step is a straight-line insertion of one rigid body along a stated
+  direction. No step requires a body to deform, and no step requires any body to
+  pass through the material of another. validate.py samples each insertion path
+  and reports the boolean common volume at every sample.
+
+steps:
+  - id: ASM-01
+    place: BODY-ENCLOSURE
+    from: base
+    direction: null
+    note: fixed reference body; nothing is inserted.
+  - id: ASM-02
+    place: BODY-CLOSURE
+    direction: [0.0, 0.0, -1.0]
+    approach_distance: 40.0
+    note: >
+      Lowered vertically onto the enclosure in the closed orientation. The
+      closure knuckle segments occupy the axial gaps between the enclosure
+      segments and never share an X band with them, so nothing has to be sprung
+      apart. FEA-C-RELIEF keeps the plate clear of the enclosure knuckles.
+    ends_in_contact_with:
+      - {body: BODY-ENCLOSURE, interaction: INT-07}
+      - {body: BODY-ENCLOSURE, interaction: INT-13}
+  - id: ASM-03
+    place: BODY-PIN
+    direction: [1.0, 0.0, 0.0]
+    approach_distance: 30.0
+    note: >
+      Inserted axially through the five aligned bores from the counterbored end.
+      Slip fit throughout; the head seats in FEA-E-CBORE.
+    ends_in_contact_with:
+      - {body: BODY-ENCLOSURE, interaction: INT-06}
+  - id: ASM-04
+    place: BODY-BOLT
+    direction: [0.0, 0.0, -1.0]
+    approach_distance: 30.0
+    note: >
+      Dropped through FEA-C-GUIDE into FEA-E-SOCKET until FEA-B-END seats on the
+      socket floor. This step requires the closure already in place and closed.
+    ends_in_contact_with:
+      - {body: BODY-ENCLOSURE, interaction: INT-12}
+
+disassembly: >
+  The reverse order is available and uses the same paths. No step is
+  irreversible and no body is permanently joined.
+
+not_established_here: >
+  Insertion FORCE, ease of assembly and process suitability. REQ-007 asks for a
+  product that is easy to assemble; what is shown here is that an assembly
+  ordering exists and is geometrically unobstructed. Ease is an effort claim and
+  remains NOT_VERIFIED (UNR-BM-001-009).

@@ -1,0 +1,49 @@
+schema_version: 0.2.0
+packet: BM-001 source-only Demonstration CAD input
+location: ver3/cad_validation/BM-001/source_only_packet/
+this_file_is_evaluator_only: true
+generation_commit: 83fc12d46ad8c5fad36afcfe5b6e916822a41118
+generated_on_branch: ver3-cad-positive-reference-pilot
+purpose: The ONLY product-specific input a fresh Demonstration CAD author may see. It exists to test whether
+  the rank-1 source alone leads a competent author to something the Oracle accepts.
+source_artifacts:
+  frozen_dossier: ver3/oracles/_dossiers/DOS-BM-001.md
+  sha256: 78bd0fe614033da1b90f29adf48397239b9a10426d6fa6f27e4a84b46b715bb1
+  sections_reproduced_verbatim:
+  - S1 (rank-1 requirements)
+  sections_withheld:
+  - S2 source silence - an analysis of what is missing, and of what the silence permits, which is not
+    itself rank-1 material
+  - S3 freedoms visible in the source
+  - S4 ambiguities
+  - S5 evidence and its fidelity
+  - S6 decisions made only by legacy realizations
+  - S7 legacy behaviour that must not define correctness
+included_files:
+  01_RANK1_SOURCE.md: f23b28b5bf88b7e39bab1e164084fcee36943ace9243381da0f75ec74c56388d
+  02_SOURCE_PRECEDENCE.md: 925be7e487335da23872e4f4dd9323fa394d5dc9a0495ff96665f3f02bba9226
+  03_SOURCE_AMBIGUITIES.md: 0c22da63bda59257ef5fdf3d688fe2658bda597154fb9f987c046656be00fa6a
+  04_CAD_ARTIFACT_REQUIREMENTS.md: 48d415a9f70b5ee038a3c0d049c4b05c1216b5dc4886964169a27a87ff0ea7a3
+  05_STATUS_VOCABULARY.md: e8e4eef3221667050b92c12ce07aa5c5bca062da41dc3ad172d516649f64efdb
+  06_MATERIAL_CLASS_POLICY.md: 6a0d6e8bc7d93fe68a47d5e31806c7d8e67c700fd8afb0860e6ceb6e6818eb9e
+  FRESH_SESSION_INSTRUCTIONS.md: 929af729e6d6fbc35ae16c94c9c25f122dd11a07bcbc73188eb276688f5e9ef8
+excluded_information_categories:
+- every file under ver3/oracles/ without exception
+- any normative statement, predicate, tag, freedom, realization, evidence case, negative case or stage
+  expectation
+- any evaluation outcome or expected result
+- DOS-BM-001 S2 through S7 (held in ../evaluator_only/)
+- ambiguity identifiers from any case
+- the existence, count, topology or content of any other CAD in this repository
+- any word naming a mechanism family or a motion topology that does not appear verbatim in S1
+- worked examples of intended interactions or of terminal conditions
+sufficiency_statement: This packet is INSUFFICIENT to expose any Oracle answer. It contains no invariant,
+  no predicate, no fixture, no tag vocabulary and no evaluation outcome, and it names no mechanism. An
+  author working from it can determine what the product must DO, and cannot determine what the acceptance
+  criteria will CHECK, nor what anyone else has built. That asymmetry is the point of the exercise.
+rank1_topology_words: 'S1 uses "latch", "mechanism", "box" and "storage" and is reproduced verbatim, so
+  those words are present. They name a FUNCTION and an object, not a mechanism family: S1 never says how
+  the latch works or how the closure moves. No other topology word was introduced anywhere in the packet.'
+contamination_rule: If a Demonstration author reads any excluded artifact, the run is CONTAMINATED and
+  must be declared so. A contaminated run declared as such is useful; one that is quietly contaminated
+  is worse than none, because it produces a false result about source sufficiency.

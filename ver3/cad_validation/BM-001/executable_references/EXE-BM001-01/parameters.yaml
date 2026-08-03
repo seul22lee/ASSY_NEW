@@ -1,0 +1,229 @@
+reference_id: EXE-BM001-01
+units: mm
+schema_version: 0.1.0
+
+frame:
+  description: >
+    Origin at the enclosure's minimum outer corner. X is width, Y is depth
+    (front to rear), Z is up. The enclosure is fixed; every pose in poses.yaml
+    is expressed in this frame.
+
+note_on_absolute_size: >
+  UNR-BM-001-003 leaves every absolute dimension open, so no number here is a
+  requirement. Each is a declared design choice made to keep the model
+  desktop-scale and to keep every wall thick enough to be a plausible moulding.
+  None of these values may be read back into the Oracle as a constraint.
+
+parameters:
+
+  # ---------------------------------------------------------------- enclosure
+  - name: box_x
+    value: 120.0
+    purpose: enclosure outer width
+    range: [60.0, 300.0]
+  - name: box_y
+    value: 80.0
+    purpose: enclosure outer depth
+    range: [40.0, 300.0]
+  - name: box_z
+    value: 45.0
+    purpose: enclosure outer height to the rim plane
+    range: [20.0, 200.0]
+  - name: wall
+    value: 3.0
+    purpose: uniform wall and floor thickness
+    range: [1.5, 10.0]
+
+  # ------------------------------------------------------------- closure axis
+  - name: axis_y
+    value: 84.0
+    purpose: >
+      depth of the closure rotation axis. Placed 4 mm behind the rear outer face
+      so that the rotating knuckle envelope never enters the enclosure.
+    range: [82.0, 92.0]
+  - name: axis_z
+    value: 50.0
+    purpose: >
+      height of the closure rotation axis. Placed 5 mm above the rim so the
+      closure plate lifts away from the rim immediately on opening.
+    range: [47.0, 60.0]
+
+  # ------------------------------------------------------------------ knuckle
+  - name: knuckle_r
+    value: 6.0
+    purpose: outer radius of every knuckle segment on both bodies
+    range: [4.0, 12.0]
+  - name: bore_d
+    value: 4.2
+    purpose: knuckle bore diameter
+    range: [2.2, 12.2]
+  - name: pin_d
+    value: 4.0
+    purpose: >
+      pin shaft diameter. bore_d - pin_d = 0.2, i.e. 0.1 radial running
+      clearance. Chosen as a clearance, never an interference: an interference
+      fit would make the model depend on material behaviour.
+    range: [2.0, 12.0]
+  - name: knuckle_x0
+    value: 20.0
+    purpose: X where the knuckle set begins
+    range: [5.0, 50.0]
+  - name: knuckle_seg
+    value: 15.6
+    purpose: axial length of each of the five knuckle segments
+    range: [6.0, 40.0]
+  - name: knuckle_gap
+    value: 0.4
+    purpose: axial clearance between adjacent knuckle segments of opposite bodies
+    range: [0.1, 2.0]
+  - name: pin_head_d
+    value: 7.0
+    purpose: pin head diameter, seats in a counterbore and locates the pin axially in one direction
+    range: [5.0, 11.0]
+  - name: pin_head_len
+    value: 2.8
+    purpose: pin head length
+    range: [1.0, 8.0]
+  - name: pin_cbore_d
+    value: 7.2
+    purpose: counterbore diameter in the outermost enclosure knuckle
+    range: [5.2, 11.4]
+  - name: pin_cbore_depth
+    value: 3.0
+    purpose: counterbore depth; pin_head_len is 0.2 shorter so the head sits recessed
+    range: [1.2, 9.0]
+  - name: pin_end_margin
+    value: 1.6
+    purpose: axial gap between the pin's far end and the far end of the last knuckle bore
+    range: [0.4, 6.0]
+
+  # ------------------------------------------------------------------ closure
+  - name: plate_t
+    value: 4.0
+    purpose: closure plate thickness
+    range: [2.0, 12.0]
+  - name: plate_rear_y
+    value: 79.0
+    purpose: >
+      rear edge of the closure plate, 1 mm short of the rear outer face so the
+      plate never has to clear the enclosure knuckle webs.
+    range: [70.0, 80.0]
+  - name: relief_r
+    value: 6.2
+    purpose: >
+      radius of the cylindrical relief cut into the closure plate about the
+      closure axis. knuckle_r + 0.2, so every point of the plate stands 0.2
+      clear of the enclosure knuckle envelope at every rotation angle.
+    range: [4.1, 12.5]
+  - name: web_front_y
+    value: 77.0
+    purpose: front edge of the closure web joining plate to knuckle
+    range: [70.0, 80.0]
+
+  # --------------------------------------------------------- terminal feature
+  - name: open_angle_deg
+    value: 110.0
+    purpose: >
+      the terminal open angle. Not a source requirement - the source states no
+      opening angle. It is realized, not assumed: the stop face is constructed
+      in the open configuration and rotated back, so the terminal angle is a
+      property of the geometry rather than a number asserted about it.
+    range: [60.0, 150.0]
+  - name: stop_y0
+    value: 80.0
+    purpose: depth of the stop face in the OPEN configuration; equals the rear outer face
+    range: [80.0, 80.0]
+  - name: stop_y1
+    value: 84.0
+    purpose: rear extent of the stop block in the OPEN configuration
+    range: [81.0, 92.0]
+  - name: stop_z0
+    value: 39.0
+    purpose: >
+      lower edge of the stop face in the OPEN configuration. 6 mm below the rim,
+      giving a 6 mm tall planar bearing band against the rear wall.
+    range: [10.0, 44.0]
+  - name: stop_z1
+    value: 47.0
+    purpose: upper edge of the stop block in the OPEN configuration; reaches inside the knuckle to attach
+    range: [45.0, 52.0]
+
+  # ---------------------------------------------------------------- retention
+  - name: bolt_x
+    value: 60.0
+    purpose: X of the retention bolt axis
+    range: [20.0, 100.0]
+  - name: bolt_y
+    value: 9.0
+    purpose: >
+      Y of the retention bolt axis. Set so the knob's full diameter stays within
+      the enclosure footprint rather than overhanging the front face.
+    range: [5.0, 20.0]
+  - name: bolt_d
+    value: 8.0
+    purpose: bolt shaft diameter
+    range: [4.0, 16.0]
+  - name: bolt_hole_d
+    value: 8.2
+    purpose: guide and socket bore diameter; 0.1 radial clearance on the shaft
+    range: [4.1, 16.4]
+  - name: bolt_boss_x
+    value: 16.0
+    purpose: width of both retention bosses
+    range: [10.0, 40.0]
+  - name: bolt_boss_y0
+    value: 2.0
+    purpose: front edge of both bosses; overlaps the front wall so the boss is one solid with it
+    range: [0.0, 5.0]
+  - name: bolt_boss_y1
+    value: 16.0
+    purpose: rear edge of both bosses; leaves 2.9 of material around the bore
+    range: [8.0, 30.0]
+  - name: socket_z
+    value: 37.0
+    purpose: >
+      floor of the enclosure socket. The bolt rests on it in the retained state,
+      giving 8 mm of engagement below the rim.
+    range: [10.0, 44.0]
+  - name: lid_boss_top_z
+    value: 59.0
+    purpose: top of the closure-side guide boss
+    range: [50.0, 80.0]
+  - name: bolt_top_z
+    value: 63.0
+    purpose: top of the bolt shaft in the retained state
+    range: [52.0, 90.0]
+  - name: knob_d
+    value: 16.0
+    purpose: bolt knob diameter; larger than bolt_hole_d so the bolt cannot pass down through the guide
+    range: [10.0, 30.0]
+  - name: knob_h
+    value: 6.0
+    purpose: bolt knob height
+    range: [3.0, 15.0]
+  - name: release_lift
+    value: 10.0
+    purpose: >
+      bolt travel from retained to released. Must exceed box_z - socket_z = 8 so
+      the shaft clears the enclosure entirely; 10 leaves 2 mm of margin.
+    range: [9.0, 20.0]
+
+  # --------------------------------------------------------------- evaluation
+  - name: contact_tol
+    value: 0.02
+    purpose: >
+      evaluation tolerance for declared contact. min(0.02, 1% of the smallest
+      local feature) - the smallest feature at any declared contact is the 4 mm
+      plate, whose 1% is 0.04, so 0.02 governs. An evaluation tolerance, never a
+      material allowance.
+    range: [0.001, 0.02]
+  - name: overlap_tol_mm3
+    value: 1.0e-6
+    purpose: volume below which a boolean common is treated as numerical noise rather than penetration
+    range: [1.0e-9, 1.0e-4]
+
+materials:
+  BODY-ENCLOSURE: GENERIC_RIGID_POLYMER
+  BODY-CLOSURE: GENERIC_RIGID_POLYMER
+  BODY-PIN: GENERIC_RIGID_METAL
+  BODY-BOLT: GENERIC_RIGID_POLYMER

@@ -1,0 +1,122 @@
+schema_version: 0.1.0
+frozen_before_geometry: true
+oracle_commit: 83fc12d46ad8c5fad36afcfe5b6e916822a41118
+author_awareness: ORACLE_AWARE - these are executable REFERENCES, not demonstrations
+selected:
+- reference_id: EXE-BM001-01
+  topology_class: rigid rotating closure on a realized pin-and-knuckle axis
+  maps_to_semantic_fixture: ADM-BM-001-E
+  mapping_fidelity: CLOSE
+  mapping_note: 'ADM-BM-001-E is the pin-and-knuckle fixture: pin/bore running fit as DECLARED_CONTACT,
+    lid seating on the rim at CLOSED, a flange meeting the wall as the open-pose terminal contact, and
+    skirt/wall declared clearance. This reference realizes exactly those four interaction regions. It
+    adds a retention mechanism, which ADM-BM-001-E does not specify and NRM-BM-001-006 requires; a rigid
+    sliding bolt was chosen so retention adds no force-adequacy dependence.'
+  closure_motion: revolute about a horizontal axis at the rear
+  retention_principle: rigid sliding bolt engaging a socket in the enclosure front wall
+  bodies:
+  - BODY-ENCLOSURE
+  - BODY-LID
+  - BODY-HINGE-PIN
+  - BODY-BOLT
+  open_state_form: DISCRETE terminal pose, produced by a flange meeting the rear wall
+- reference_id: EXE-BM001-02
+  topology_class: rigid captive sliding closure on realized rails with terminal bounds
+  maps_to_semantic_fixture: null
+  mapping_fidelity: NEW_ADMISSIBLE_REALIZATION
+  mapping_note: 'This matches no listed fixture and is not required to. The Oracle admits any design satisfying
+    its invariants; the seven listed fixtures are the machine-checked sample, not the permitted set. Building
+    a reference OUTSIDE the fixture list is deliberate: if the Oracle only ever sees designs drawn from
+    its own fixture list, it is being tested against itself. ADM-BM-001-C is the nearest listed relative
+    - a cover on mating guide features - but it is DETACHABLE in the open state, whereas this cover stays
+    captive, which is a different closure topology.'
+  closure_motion: prismatic along a horizontal axis, captive in two side channels
+  retention_principle: rigid quarter-turn cam engaging a keeper lip, inserted through a keyed bore
+  bodies:
+  - BODY-ENCLOSURE
+  - BODY-COVER
+  - BODY-CAM
+  open_state_form: DISCRETE terminal pose, produced by a boss meeting the channel end
+topology_difference: Revolute versus prismatic closure motion; a separate cylindrical pin versus integral
+  captive rails; a translating bolt versus a rotating cam for retention; a swung lid that leaves the aperture
+  versus a cover that slides clear of it. Neither is a cosmetic variation of the other - they differ in
+  the joint type, the number of bodies, the retention principle and the assembly process.
+rejected_alternatives:
+- fixture: ADM-BM-001-B
+  why_rejected: single-piece compliant shell. Its primary geometry depends on the band surviving the strain
+    of full opening and on an over-centre condition holding the open pose - both material questions this
+    toolchain cannot answer. Building it would make the pilot rest on assumptions rather than geometry.
+- fixture: ADM-BM-001-D
+  why_rejected: friction-pivoted lid held anywhere in a declared region. Its load-bearing assumption is
+    that pivot friction exceeds the lid gravity moment throughout - a friction margin, and PU-02 in the
+    pre-CAD baseline. Excellent later adversarial target; wrong for a first positive pilot.
+- fixture: ADM-BM-001-F
+  why_rejected: snap-fit catch. Requires a compliant beam to deflect past a lip. The deflection is representable
+    but its survivability is not, and the pilot brief asks for designs whose PRIMARY geometry does not
+    need flexure.
+- fixture: ADM-BM-001-G
+  why_rejected: 'interference-fit hinge pin. Depends on hoop strain in a knuckle wall of unresolved thickness
+    - PU-06. Rejected for the same reason as ADM-BM-001-B: it would convert a geometry pilot into a materials
+    argument.'
+- fixture: ADM-BM-001-A
+  why_rejected: rigid rotating lid with a compressive catch and a moulded abutment. Perfectly buildable,
+    but its closure topology duplicates EXE-BM001-01 and its "compressive catch" reintroduces a compliance
+    dependence. Kept as the nearest unbuilt rigid alternative.
+- fixture: ADM-BM-001-C
+  why_rejected: detachable cover. Admissible and interesting - it is UNCONNECTED in the open state - but
+    it has no retained motion to sample, so it would exercise far less of the motion and interaction machinery
+    than a captive slider. A good later reference.
+material_dependent_questions_avoided:
+- flexure strain survivability (ADM-BM-001-B, ADM-BM-001-F)
+- friction margin against a gravity moment (ADM-BM-001-D)
+- hoop strain from an interference fit (ADM-BM-001-G)
+- magnetic holding force (ADM-BM-001-B)
+- insertion force for any press or snap process - both references assemble by rigid clearance insertion
+  plus one keyed rotation
+oracle_ids_expected_geometrically_evaluable:
+- id: NRM-BM-001-001
+  why: two states and a traversable transition are sampled directly
+- id: NRM-BM-001-002
+  why: engagement geometry on both bodies is present and measurable; interaction coherence is inspectable
+    for rigid pairs
+- id: NRM-BM-001-003
+  why: declared access region and undeclared-overlap volume are both computable
+- id: NRM-BM-001-004
+  why: per-body volume is invariant across states by construction, and is measured at each state
+- id: NRM-BM-001-005
+  why: both references declare a DISCRETE terminal open pose, so the realized determinant must be shown
+    to produce it
+- id: NRM-BM-001-006
+  why: retention engagement geometry and a release action are realized; the HOLDING FORCE is not evaluable
+- id: NRM-BM-001-007
+  why: a full engage/release/engage cycle is sampled and every participating feature re-measured
+- id: NRM-BM-001-008
+  why: an access path to the actuator is a geometric query
+- id: NRM-BM-001-009
+  why: cavity existence and reachability at OPEN are computable
+- id: NRM-BM-001-010
+  why: the installation process is sampled for passage through undeclared rigid material
+- id: NRM-BM-001-011
+  why: existence of a load path is topological; ADEQUACY is not evaluable
+oracle_ids_expected_to_remain_not_verified:
+- id: NRM-BM-001-011
+  scope: adequacy only - existence PASSes, magnitude is quantitative (UNR-BM-001-001)
+- id: NRM-BM-001-012
+  why: a VERIFICATION_MINIMUM about admissible EVIDENCE FORMS. Under HSD-006 branch A, direct causal geometry
+    evidence is admissible, so this may reach PASS - but only if the determinant is shown to CAUSE the
+    termination, not merely to exist
+- id: NRM-BM-001-013
+  why: a VERIFICATION_MINIMUM about force-window provenance. No force window is cited by either reference,
+    so nothing triggers it
+unresolved_decisions_left_open:
+- UNR-BM-001-001 disturbance magnitude
+- UNR-BM-001-002 effort ceiling
+- UNR-BM-001-003 absolute dimensions
+- UNR-BM-001-004 process and material
+- UNR-BM-001-006 usable access adequacy
+- UNR-BM-001-007 cycle count
+- UNR-BM-001-008 discriminating criterion
+- UNR-BM-001-009 insertion force
+note_on_dimensions: UNR-BM-001-003 leaves absolute dimensions open. Both references therefore DECLARE
+  their dimensions as a design choice, not as a requirement. No dimension here should ever be read back
+  into the Oracle as a constraint.
