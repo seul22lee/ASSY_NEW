@@ -202,3 +202,102 @@ negative_cases:
     violates: [FRE-BM-001-009]
     sources: ["DOS-BM-001 S2", "DOS-BM-001 S6"]
     closes_finding: [SF-2.2]
+  - id: NEG-BM-001-016
+    kind: design
+    failure_class: undeclared_volumetric_overlap
+    fixture: INA-BM-001-H
+    description: "The lid solid and the body wall occupy the same space over part of the sweep, and nothing declares the region."
+    why_wrong: "Undeclared penetration is always FAIL. It is the one interaction outcome the contact semantics never admit."
+    detect_stage: s04
+    detect_predicate: "no volumetric overlap outside declared contact, interference-fit and compliant-interaction regions, under the declared tolerance."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-003]
+    gate: GATE-2
+
+  - id: NEG-BM-001-017
+    kind: design
+    failure_class: contact_label_hiding_penetration
+    fixture: INA-BM-001-I
+    description: "A 3 mm mutual penetration is labelled 'contact' with no contact surfaces, no declared tolerance and no deformation."
+    why_wrong: >
+      The contact semantics exist so that INTENDED touching is not treated as
+      collision. They do not make the word 'contact' a licence for arbitrary
+      overlap. The overlap must be at or below the declared numerical tolerance,
+      or be a declared interference fit with its assumptions.
+    detect_stage: s04
+    detect_predicate: "a declared contact region bounds penetration by the declared numerical tolerance; beyond it, the region must be a declared interference fit."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-003]
+    gate: GATE-2
+
+  - id: NEG-BM-001-018
+    kind: design
+    failure_class: rigid_part_through_rigid_wall
+    fixture: INA-BM-001-J
+    description: "A rigid hinge pin whose only installation route passes through an already-installed rigid wall."
+    why_wrong: "No declared interference, no compliant region and no alternative order. The process is not realizable."
+    detect_stage: s05
+    detect_predicate: "each discretely-installed part has a realizable installation process passing through no UNDECLARED rigid material."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-010]
+    gate: GATE-2
+
+  - id: NEG-BM-001-019
+    kind: design
+    failure_class: snap_fit_without_compliant_region
+    fixture: INA-BM-001-K
+    description: "A catch described as a snap fit, with a rigid hook and no compliant region anywhere."
+    why_wrong: "Nothing can deflect, so nothing can snap. The narrative asserts an insertion mode the geometry cannot perform."
+    detect_stage: s05
+    detect_predicate: "a declared compliant insertion must name the compliant region and represent its deformation."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-010]
+    gate: GATE-2
+
+  - id: NEG-BM-001-020
+    kind: design
+    failure_class: interference_fit_without_process_assumption
+    fixture: INA-BM-001-L
+    description: "A press fit declared with an interference value but no material assumption, no insertion direction and no process."
+    why_wrong: >
+      A declared interference fit is admissible ONLY with its process and
+      material assumptions explicit. Without them it is an overlap asserted to be
+      acceptable, which is the defect the declaration was supposed to prevent.
+    detect_stage: s05
+    detect_predicate: "a declared interference fit carries a material assumption, an insertion direction and a process assumption."
+    must_not_be_reported_as: [PASS]
+    expected_status: FAIL
+    violates: [NRM-BM-001-010]
+    gate: GATE-2
+
+  - id: NEG-BM-001-021
+    kind: process
+    failure_class: intended_contact_reported_as_interference
+    description: >
+      A guide face, a pin/bore pair, a seat or a stop is reported as an
+      interference failure because the two bodies touch there.
+    reproduced_from: "GATE-2 intended-contact semantics"
+    must_be_rejected_by: [NRM-BM-001-003]
+    required_outcome: >
+      Rejected. Declared contact is admissible and zero clearance at a declared
+      contact is correct. ADM-BM-001-E has three declared contacts and is
+      admissible; under the retired blanket-clearance predicate it failed at all
+      three.
+    gate: GATE-2
+
+  - id: NEG-BM-001-022
+    kind: process
+    failure_class: declared_compliant_assembly_reported_as_impossible
+    description: "A snap or press insertion is reported unassemblable because no collision-free path exists."
+    reproduced_from: "GATE-2 assembly semantics"
+    must_be_rejected_by: [NRM-BM-001-010]
+    required_outcome: >
+      Rejected. A press fit has no collision-free path and is still assemblable.
+      The requirement is a realizable PROCESS through no UNDECLARED rigid
+      material. Whether the insertion FORCE is achievable is quantitative and is
+      held at UNR-BM-001-009.
+    gate: GATE-2

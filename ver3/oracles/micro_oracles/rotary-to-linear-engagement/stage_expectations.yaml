@@ -25,10 +25,15 @@ stages:
         - an absent implemented realizer yields UNSUPPORTED, never INFEASIBLE
           (NEG-RL-008).
   s04:
-    must_exist: [input_axis, output_line, engagement_site, output_range, relation_between_input_and_output, swept_volumes_with_fidelity]
+    must_exist: [input_axis, output_line, interaction_sites, output_range, relation_between_input_and_output, swept_volumes_with_fidelity]
     must_not_be_decided: [ratio_value, engagement_dimensions, final_dimensions]
     may_remain_unresolved: [output_range, UNR-RL-001]
-    provenance_required: ["engagement site -> the bodies it acts between", "relation -> the geometry it follows from"]
+    provenance_required: ["each entry of interaction_sites -> the two bodies it acts between", "relation -> the geometry it follows from"]
+    chain_note: >
+      interaction_sites is a LIST and the chain may have any number of stages
+      (HSD-002). A single site between the input body and the output body is one
+      admissible shape, not the required shape: a crank-link-slider has no
+      interaction between those two bodies at all.
     representation_obligations:
       moved_at: SF-8.2
       note: >
@@ -41,7 +46,7 @@ stages:
           - directionality and reversibility are represented explicitly;
           - each interaction in the chain names its participating bodies.
   s05:
-    must_exist: [conversion_realization, engagement_features_on_both_bodies, output_rotation_restraint, radial_support_realization, reaction_path_records]
+    must_exist: [conversion_realization, interaction_features_on_participating_bodies, reaction_realizations_for_carried_loads, reaction_path_records]
     must_not_be_decided: [new_independent_entities, parameter_values]
     may_remain_unresolved: [embodiment_alternatives, UNR-RL-003]
     provenance_required: ["realization -> obligation ids it discharges"]
@@ -80,17 +85,26 @@ stages:
     must_not_be_decided: [new_evidence]
     provenance_required: ["evaluation -> evidence ids"]
     outcome_rules:
-      RL-C1_engagement_exists:
+      RL-C1_chain_exists:
         traces_to: NRM-RL-001
-        pass_requires: "contact-resolving evidence that the engagement exists and transmits between the participating bodies"
-        fail_when: "the evidence shows the engagement does not transmit"
+        human_decision_ref: HSD-002
+        pass_requires: "contact-resolving evidence that every interaction in the chain exists and transmits between its participating bodies"
+        fail_when: "the chain is interrupted, or an interaction does not transmit"
+        must_not_fail_when: "the rotating input body and the translating output body have no interaction with each other, provided the chain between them is uninterrupted"
         if_evidence_is_declared_pair_only: NOT_VERIFIED
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      RL-C2_relation_declared:
+      RL-C2_rotation_causes_translation:
         traces_to: NRM-RL-002
-        pass_requires: "a relation between input rotation and output translation over the output range, with the driving body identified"
-        fail_when: "no relation is declared, or the driving body is unstated"
+        human_decision_ref: HSD-002
+        pass_requires: "evidence that a change in input rotation produces a change in output translation over the declared operating range, evaluated on the realized kinematics"
+        fail_when: "input rotation produces no output translation over the declared range"
+        must_not_fail_when: "the relation is nonlinear, non-monotonic in its derivative, or not a constant ratio"
+        note: >
+          Corrected at SF-8.2 and HSD-002. That the relation is DECLARED and the
+          driving body RECORDED are representation obligations and are checked at
+          s04 under representation_obligations - not here, and never as a
+          physical failure.
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       RL-C3_engagement_persists:
@@ -100,16 +114,21 @@ stages:
         if_unresolved: INDETERMINATE
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      RL-C4_output_rotation_restrained:
+      RL-C4_output_rotation_restrained_where_needed:
         traces_to: NRM-RL-004
-        pass_requires: "a realized constraint shown to remove the output body's rotation about the input axis"
-        fail_when: "the output body can rotate about the input axis under the engagement moment"
+        human_decision_ref: HSD-002
+        pass_requires: "where the chain applies a net moment to the output body about the input axis, a realized constraint shown to remove that rotation"
+        fail_when: "such a moment acts and no realized constraint removes the rotation"
+        if_no_such_moment_acts: NOT_APPLICABLE
+        must_not_fail_when: "the chain produces no net moment about the input axis - a symmetric multi-point drive or a centred linkage"
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      RL-C5_support_and_reaction:
-        traces_to: [NRM-RL-005, NRM-RL-006]
-        pass_requires: "radial support for the rotating body and a reaction path for every component of the engagement force, against a declared load case"
-        fail_when: "a force component has no reaction path"
+      RL-C5_carried_loads_reacted:
+        traces_to: NRM-RL-005
+        human_decision_ref: HSD-002
+        pass_requires: "for each body and each load component it ACTUALLY carries in the declared scenario, a realized reaction path, against a declared load case"
+        fail_when: "a body carries a load component with no reaction path for it"
+        must_not_fail_when: "a body carries no radial load, or no axial load, and therefore has no corresponding reaction"
         if_unresolved: INDETERMINATE
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED

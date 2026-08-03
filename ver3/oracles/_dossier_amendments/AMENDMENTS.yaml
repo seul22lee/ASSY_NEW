@@ -1,0 +1,182 @@
+schema_version: 0.1.0
+purpose: Additive amendments to frozen dossiers. A frozen dossier is NEVER overwritten. Where human semantic
+  review changed a capability definition or a source classification, the original text is preserved verbatim
+  here alongside the amended statement, and normative authority transfers only within the declared scope_of_supersession.
+authority_note: An amendment carries the authority of a HUMAN SEMANTIC DECISION, not of a rank-1 user
+  source. Every amendment names the decision that approved it and is challengeable by CAD. The source
+  material itself is not challengeable; the reading of it is.
+integrity_rule: original_dossier_sha256 is the hash of the WHOLE dossier file at the time of amendment.
+  The auditor re-computes it; a mismatch means a frozen dossier was edited and is BLOCKING.
+amendments:
+- amendment_id: AMD-GS-001
+  pack: guided-slider
+  dossier: _dossiers/DOS-guided-slider.md
+  original_section: S1
+  original_section_text_verbatim: '## S1. Capability
+
+    Guided translation of one body relative to another along a defined line, with
+
+    the non-translational freedoms removed.'
+  original_dossier_sha256: 36231c4c915b70929b3ad64f9e2713c888224277678511463e20bddae04791dc
+  amended_statement: Guided translation of one body relative to another along a declared line or path,
+    with the freedoms constrained that the instantiating motion requirement depends on, and the freedoms
+    left unconstrained declared.
+  supersedes_for_normative_authority: DOS-guided-slider.md#S1
+  original_text_preserved: true
+  scope_of_supersession: The capability statement ONLY. Sections S2-S7 of the frozen dossier retain full
+    authority as evidence and as sources of negative cases.
+  rationale: 'The frozen S1 wording "with the non-translational freedoms removed" defines a strict one-degree-of-freedom
+    prismatic joint. That is narrower than the ordinary sense of "guided slider" and narrower than anything
+    any project source requires: it rejects a cylindrical rod in a plain round bore. The capability statement
+    was project-authored, so this is a project decision to correct a project definition - not a reinterpretation
+    of user language.'
+  human_decision_ref: HSD-001
+  falsified_by_fixtures:
+  - ADM-GS-E
+  affects_statements:
+  - NRM-GS-001
+  - NRM-GS-002
+  - NRM-GS-003
+  - NRM-GS-004
+  - NRM-GS-005
+  - NRM-GS-006
+  approval_status: APPROVED_BY_HUMAN_SEMANTIC_REVIEW
+  challengeable_by_cad: true
+- amendment_id: AMD-RL-001
+  pack: rotary-to-linear-engagement
+  dossier: _dossiers/DOS-rotary-to-linear-engagement.md
+  original_section: S1
+  original_section_text_verbatim: '## S1. Capability
+
+    Conversion of rotary input motion into linear output motion through a localized
+
+    engagement, with the reaction of the resulting loads.'
+  original_dossier_sha256: 9cc5b9e41cb4dea8447f99573c67814c9cc663fc60e572306dbac307d32dbf3f
+  amended_statement: Conversion of rotary input motion into linear output motion through an uninterrupted
+    chain of realized localized interactions, with the reaction of the load components those interactions
+    actually produce on each body.
+  supersedes_for_normative_authority: DOS-rotary-to-linear-engagement.md#S1
+  original_text_preserved: true
+  scope_of_supersession: The capability statement ONLY. Sections S2-S7 retain full authority.
+  rationale: The frozen S1 wording "through a localized engagement" was read as requiring DIRECT engagement
+    between the rotating input body and the translating output body, which rejects every multi-stage conversion
+    - crank-link-slider, cable/drum/output, cam/follower/pushrod. The reaction clause "the resulting loads"
+    was read as universal radial AND axial reaction, which is false for a cable drum and for a rotating
+    nut reacting through its screw.
+  human_decision_ref: HSD-002
+  falsified_by_fixtures:
+  - ADM-RL-E
+  - ADM-RL-F
+  - ADM-RL-C
+  - ADM-RL-D
+  affects_statements:
+  - NRM-RL-001
+  - NRM-RL-002
+  - NRM-RL-003
+  - NRM-RL-004
+  - NRM-RL-005
+  approval_status: APPROVED_BY_HUMAN_SEMANTIC_REVIEW
+  challengeable_by_cad: true
+- amendment_id: AMD-HS-001
+  pack: bounded-two-state-closure
+  dossier: _dossiers/DOS-bounded-two-state-closure.md
+  original_section: S1
+  original_section_text_verbatim: '## S1. Capability
+
+    A closure that reaches two defined states by a bounded motion, where the bound
+
+    at each extreme is physically produced.'
+  original_dossier_sha256: c2e2ae503c56e3636f302a3eb8d26ea41a1d227436aba0a09f87d239ef6c2720
+  amended_statement: A closure that reaches two defined states by a bounded motion, where at every configuration
+    along the declared path at least one realized constraint or interaction keeps the configuration within
+    the allowed motion manifold, and the bound at each extreme is physically produced and independently
+    evaluated at its own configuration.
+  supersedes_for_normative_authority: DOS-bounded-two-state-closure.md#S1
+  original_text_preserved: true
+  scope_of_supersession: The capability statement ONLY. Sections S2-S7 retain full authority. The bound-is-physically-produced
+    clause of the original is UNCHANGED and remains the grounding for the terminal-state exemption.
+  rationale: 'The frozen S1 wording was read as requiring one identical relative constraint to persist
+    through the whole motion, and as being about a HINGED closure with a stop. Both are narrower than
+    the capability: constraint mode may hand off along the path, and a sliding cover or a magnetic two-seat
+    detent instantiates it equally. HSD-003 additionally records the scope limit: a product closure need
+    not instantiate this capability at all.'
+  human_decision_ref: HSD-003
+  falsified_by_fixtures:
+  - ADM-HS-C
+  - ADM-HS-D
+  - ADM-HS-E
+  - ADM-HS-F
+  affects_statements:
+  - NRM-HS-003
+  - NRM-HS-005
+  approval_status: APPROVED_BY_HUMAN_SEMANTIC_REVIEW
+  challengeable_by_cad: true
+- amendment_id: AMD-C4-001
+  pack: C4-drawer
+  dossier: _dossiers/DOS-C4-drawer.md
+  original_section: S4
+  original_section_text_verbatim: "## S4. Source conflicts / ambiguities — **AMB-C4-01, recorded not resolved**\n\
+    Two rank-1/rank-5 legacy statements conflict about whether a gear transmission is\nappropriate for\
+    \ the drawer variant:\n- `/home/ftk3187/github/ASSY_Ver1.0/tasks/build_goldens.py:1142` docstring:\
+    \ \"a **drawer's rack-pinion is\n  over-engineered**; a good model would omit it - but a vertical\
+    \ lift needs it\".\n- `/home/ftk3187/github/ASSY_Ver1.0/tasks/benchmark/manifest.json` C4-drawer `scoring_note`:\
+    \ \"the drawer\n  alternate, **gear NOT over-engineered here**\".\n\nNote the command itself specifies\
+    \ \"**when you turn a knob**\", which makes a\nrotary-to-linear conversion a *stated user input*,\
+    \ not an elective addition.\nThis observation is recorded; the conflict between the two legacy statements\
+    \ is\n**not** resolved here."
+  original_dossier_sha256: a38f4bd3fcd632e47a7bd67fe2a818578122d9877ff2761ec4bb844b894b4d0e
+  amended_statement: The two statements recorded in S4 are CONFLICTING LOWER-RANK LEGACY COMMENTARY, not
+    a rank-1 source ambiguity. A rank-4 builder docstring and a rank-5 benchmark scoring note disagree
+    about whether a toothed transmission is over-engineered for a drawer. Neither is the rank-1 command,
+    which requires rotary-to-linear operation and never mentions a gear, so neither could bind the conversion
+    family and their disagreement creates no ambiguity in the acceptance model. Recorded as LEGACY-CONFLICT-C4-01,
+    blocking nothing, requiring no human ruling, and cited as support for FRE-C4-002.
+  supersedes_for_normative_authority: DOS-C4-drawer.md#S4
+  original_text_preserved: true
+  scope_of_supersession: The CLASSIFICATION of S4 only. The two quoted legacy statements and their locators
+    are unchanged and remain citable evidence.
+  rationale: 'S4 labelled the disagreement AMB-C4-01 and implied a human must rule on whether a toothed
+    transmission is required. That implication is withdrawn: rank precedence already disposes of it, and
+    leaving it recorded as an open ambiguity invited a decision the source does not call for.'
+  human_decision_ref: HSD-002
+  falsified_by_fixtures: []
+  affects_statements:
+  - NRM-C4-004
+  - FRE-C4-002
+  - LEGACY-CONFLICT-C4-01
+  approval_status: APPROVED_BY_HUMAN_SEMANTIC_REVIEW
+  challengeable_by_cad: true
+- amendment_id: AMD-C4-002
+  pack: C4-drawer
+  dossier: _dossiers/DOS-C4-drawer.md
+  original_section: S2
+  original_section_text_verbatim: '## S2. What the command states, decomposed (no interpretation added)
+
+    - artifact: a desktop **cabinet**
+
+    - moving part: a **drawer**
+
+    - motion: **slides out**, **horizontally**
+
+    - user input: **turn a knob** (rotary)
+
+    - therefore: rotary input, linear output'
+  original_dossier_sha256: a38f4bd3fcd632e47a7bd67fe2a818578122d9877ff2761ec4bb844b894b4d0e
+  amended_statement: The command fragment "slides out horizontally" is read, for this baseline, as STRAIGHT
+    TRANSLATION ALONG ONE HORIZONTAL AXIS perpendicular to the gravity direction.
+  supersedes_for_normative_authority: DOS-C4-drawer.md#S2
+  original_text_preserved: true
+  scope_of_supersession: The reading of the motion fragment ONLY. The decomposition in S2 is otherwise
+    unchanged.
+  rationale: S2 decomposes the command into "slides out" and "horizontally" without saying whether a curved
+    but generally-horizontal path qualifies. The normative statement previously said a curved path was
+    admissible while its predicate evaluated a single travel axis - a contradiction between statement
+    and predicate. The straight-axis reading is adopted and the curved-path reading is recorded as REJECTED
+    FOR THIS BASELINE rather than left ambiguous.
+  human_decision_ref: HSD-004
+  falsified_by_fixtures: []
+  affects_statements:
+  - NRM-C4-002
+  - NRM-C4-003
+  approval_status: APPROVED_BY_HUMAN_SEMANTIC_REVIEW
+  challengeable_by_cad: true

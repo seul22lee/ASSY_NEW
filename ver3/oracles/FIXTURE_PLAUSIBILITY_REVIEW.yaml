@@ -12,16 +12,22 @@ standing_caveat: 'EVERY fixture is NEEDS_GEOMETRY_VALIDATION. No CAD model and n
   fixtures were REVISED rather than validated during this review: ADM-BM-001-3-B, whose single spherical
   cap could not produce the three contacts it claimed; ADM-BM-001-3-C, whose load-bearing contact was
   on a flat land rather than the curved back; and ADM-BM-002-C, whose terminal was a drum stall, which
-  is an overload condition rather than a travel determinant.'
+  is an overload condition rather than a travel determinant. GATE-2 added three intended-contact and assembly
+  fixtures (ADM-BM-001-E/F/G); all three are likewise NEEDS_GEOMETRY_VALIDATION, and two of them rest
+  on material properties no source supplies.'
 summary:
-  total_admissible_fixtures: 41
+  total_admissible_fixtures: 44
   PHYSICALLY_PLAUSIBLE: 0
-  NEEDS_GEOMETRY_VALIDATION: 41
+  NEEDS_GEOMETRY_VALIDATION: 44
   REJECTED: 0
   revised_during_review:
   - ADM-BM-001-3-B
   - ADM-BM-001-3-C
   - ADM-BM-002-C
+  gate2_contact_and_assembly_fixtures:
+  - ADM-BM-001-E
+  - ADM-BM-001-F
+  - ADM-BM-001-G
 reviews:
 - fixture_id: ADM-BM-001-A
   pack: BM-001
@@ -537,3 +543,54 @@ reviews:
     may drift between states. Field-strength dependent and unverified.
   status: NEEDS_GEOMETRY_VALIDATION
   note: 'Second falsifiability fixture for SF-10.2: one physical field produces both bounds.'
+- fixture_id: ADM-BM-001-E
+  pack: BM-001
+  physical_operation: Lid rotates on a pin running in knuckle bores; it seats on the body rim at CLOSED
+    and a moulded flange meets the body wall at the open pose. Three regions are declared contact; the
+    lid skirt carries declared clearance against the wall through the sweep.
+  assumptions:
+  - the pin/bore running fit admits rotation without seizing under the declared tolerance
+  - the rim seat is continuous enough to define the closed pose
+  - the flange lies outside the lid sweep until the open pose
+  - the declared numerical tolerance is larger than the running-fit clearance and smaller than any real
+    overlap
+  assumptions_explicit: true
+  plausible_counterexample: If the declared numerical tolerance is set larger than a genuine overlap,
+    real penetration hides inside the contact declaration. The tolerance is a property of the evaluation
+    and must be justified separately - which CAD has not yet done.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: THE INTENDED-CONTACT FIXTURE (GATE-2). Failed three times under the retired blanket-clearance
+    predicate.
+- fixture_id: ADM-BM-001-F
+  pack: BM-001
+  physical_operation: A cantilever snap beam deflects past a lip during insertion and returns behind it.
+    The insertion overlap is a declared compliant interaction with its deflection represented; the retained
+    position is a declared contact at the hook face.
+  assumptions:
+  - the beam material admits the stated deflection without yield
+  - the beam returns fully, so the retained contact is re-established
+  - insertion is along the closure axis
+  - hand insertion is the intended process
+  assumptions_explicit: true
+  plausible_counterexample: A beam stiff enough to hold the declared disturbance may exceed its strain
+    limit at the deflection insertion requires. That is the classic snap trade and it is UNRESOLVED -
+    the force is held at UNR-BM-001-009 and the strain needs material data nobody has supplied.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: THE COMPLIANT-ASSEMBLY FIXTURE (GATE-2). Unassemblable by definition under the retired collision-free-path
+    predicate.
+- fixture_id: ADM-BM-001-G
+  pack: BM-001
+  physical_operation: The hinge pin is pressed into one knuckle with a declared interference and runs
+    freely in the other. The interference retains the pin axially; the running fit carries the rotation.
+  assumptions:
+  - the pin is stiffer than the knuckle wall
+  - the knuckle admits the hoop strain the interference produces without cracking
+  - insertion is by arbor press in one direction and is not intended to be reversed
+  - the running knuckle bore is large enough that the pressed end does not distort it
+  assumptions_explicit: true
+  plausible_counterexample: An interference large enough to retain the pin may split a thin knuckle wall,
+    and the knuckle wall thickness is itself unresolved (no dimensions are stated anywhere in BM-001).
+    This fixture is admissible because its assumptions are EXPLICIT, not because they are known to hold.
+  status: NEEDS_GEOMETRY_VALIDATION
+  note: THE INTERFERENCE-FIT FIXTURE (GATE-2). Strip the process and material assumptions and it becomes
+    INA-BM-001-L.

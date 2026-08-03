@@ -8,6 +8,8 @@ note: >
   of these, that invariant has encoded a family.
 
 physical_tag_vocabulary:
+  interaction_regions_declared: "every region where two bodies meet is classified as declared contact, declared clearance, declared interference fit or declared compliant interaction"
+  assembly_process_realizable: "each discretely-installed part has a realizable installation process passing through no undeclared rigid material, with any declared press/snap/compliant insertion carrying its deformation, material, direction and process assumptions"
   external_rotary_input: "a user-operated rotary input exists outside the housing"
   internal_platform: "a platform exists inside the housing"
   continuous_interaction_chain: "an uninterrupted chain of realized interactions connects them"
@@ -24,7 +26,7 @@ physical_tag_vocabulary:
   declared_terminals_physically_produced: "any terminal declared as a physical end of travel is produced by its own realized condition"
   payload_access_reaches_platform: "an access path terminates at the platform"
   platform_load_reacted: "the platform load has a path to a reaction site"
-  assembly_paths_exist: "each discretely-installed part has a collision-free installation path"
+  assembly_paths_exist: "DEPRECATED at GATE-2 in favour of assembly_process_realizable; retained so historical fixtures still resolve"
   manually_driven_only: "no powered or stored-energy source drives the motion"
 
 admissible_realizations:
@@ -37,7 +39,7 @@ admissible_realizations:
     family: direct_screw_drive
     load_profile: "screw carries axial payload load reacted at the thrust seat; radial load from guide misalignment reacted at the journal"
     materially_differs_by: [conversion_principle, guidance_count, terminal_form]
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
 
   - id: ADM-BM-002-B
     summary: >
@@ -53,7 +55,7 @@ admissible_realizations:
       no separate thrust feature on a rotating element here. Also falsifies the
       retired unconditional terminal requirement (SF-5.6): no physical end of
       travel is declared.
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
 
   - id: ADM-BM-002-C
     summary: >
@@ -70,7 +72,7 @@ admissible_realizations:
       four-point lift applies no net moment about the travel direction. Falsifies
       the retired universal axial-reaction premise (SF-5.3): nothing in this chain
       carries axial load.
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
 
   - id: ADM-BM-002-D
     summary: >
@@ -81,7 +83,7 @@ admissible_realizations:
     family: scissor_linkage
     load_profile: "pivot pins carry radial load; the cross-tie carries axial load reacted at its end seats; the platform sees no rotational drive"
     materially_differs_by: [conversion_principle, guidance_topology, load_path, terminal_form]
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
 
   - id: ADM-BM-002-E
     summary: >
@@ -100,14 +102,14 @@ admissible_realizations:
       required anti-rotation of the platform unconditionally and rejected this
       design. It also has no toothed element at all, which is the case the legacy
       pipeline reported INFEASIBLE.
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
 
 inadmissible_realizations:
   - id: INA-BM-002-A
     summary: "Crank and platform declared coupled by a ratio relationship; no participating geometry anywhere in the chain."
     from_negative_case: NEG-BM-002-001
     missing_tags: [conversion_engagement_localized]
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
   - id: INA-BM-002-B
     summary: >
       Screw-driven platform on a single guide, where the scenario requires the
@@ -116,52 +118,52 @@ inadmissible_realizations:
     from_negative_case: NEG-BM-002-002
     missing_tags: [required_orientation_preserved]
     note: "Rejected because the SCENARIO requires the orientation, not because anti-rotation is universally required. ADM-BM-002-E has an unrestrained platform and is admitted."
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
   - id: INA-BM-002-C
     summary: "Drive shaft that demonstrably carries radial load from its conversion engagement, with no radial reaction anywhere in the design."
     from_negative_case: NEG-BM-002-003
     missing_tags: [loaded_elements_reacted]
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
   - id: INA-BM-002-D
     summary: "Threaded element carries the payload axially with no axial reaction path anywhere; the screw is free to translate along its own axis."
     from_negative_case: NEG-BM-002-004
     missing_tags: [loaded_elements_reacted, platform_load_reacted]
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
   - id: INA-BM-002-E
     summary: "At the upper required pose the platform solid intersects a housing rib; the interference is unaccounted for."
     from_negative_case: NEG-BM-002-005
     missing_tags: [pose_clearances_satisfied]
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
   - id: INA-BM-002-F
     summary: "Both travel terminals are declared as physical ends of travel; one condition is evaluated once and its result copied to both."
     from_negative_case: NEG-BM-002-006
     missing_tags: [declared_terminals_physically_produced]
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
   - id: INA-BM-002-G
     summary: "Payload access path terminates at the housing opening and is accepted as reaching the platform."
     from_negative_case: NEG-BM-002-007
     missing_tags: [payload_access_reaches_platform]
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
   - id: INA-BM-002-H
     summary: "Crank inherits the platform's travel corridor, so the input element is modelled as travelling with the platform and no boundary crossing exists."
     from_negative_case: NEG-BM-002-008
     missing_tags: [external_rotary_input, boundary_crossing_realized]
-    tags: ['internal_platform', 'continuous_interaction_chain', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['internal_platform', 'continuous_interaction_chain', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
   - id: INA-BM-002-I
     summary: "Declared platform travel of 45 mm, well outside the source band, reported as satisfying REQ-002."
     from_negative_case: NEG-BM-002-015
     missing_tags: [travel_within_source_band]
     note: "Added at SF-5.1. The prior invariant set contained no travel requirement at all, so this design passed every invariant."
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
   - id: INA-BM-002-J
     summary: "No supported payload is declared anywhere in the design; REQ-003 is treated as satisfied by the existence of a platform."
     from_negative_case: NEG-BM-002-016
     missing_tags: [payload_capacity_declared]
     note: "Added at SF-5.1."
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'crossing_non_interfering', 'conversion_engagement_localized', 'travel_within_source_band', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]
   - id: INA-BM-002-K
     summary: "Shaft passes through an oversize clearance hole and interferes with the housing at the extremes of its motion; the interference is unmodelled."
     from_negative_case: NEG-BM-002-017
     missing_tags: [crossing_non_interfering]
     note: "Added at SF-5.2. Rejected for interference, not for lacking housing-local support: ADM-BM-002-A's shaft is supported elsewhere and is admitted."
-    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only']
+    tags: ['external_rotary_input', 'internal_platform', 'continuous_interaction_chain', 'boundary_crossing_realized', 'conversion_engagement_localized', 'travel_within_source_band', 'payload_capacity_declared', 'loaded_elements_reacted', 'platform_motion_guided', 'required_orientation_preserved', 'pose_clearances_satisfied', 'required_path_traversable', 'declared_terminals_physically_produced', 'payload_access_reaches_platform', 'platform_load_reacted', 'assembly_paths_exist', 'manually_driven_only', interaction_regions_declared, assembly_process_realizable]

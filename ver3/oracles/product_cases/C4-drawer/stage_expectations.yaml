@@ -41,9 +41,9 @@ stages:
     provenance_required: ["pose -> constraint/contact ids", "swept_volume -> fidelity declaration", "declared end of travel -> its own determinant id", "travel axis -> geometric relation to gravity direction"]
     orientation_note: >
       Horizontality (NRM-C4-002) must be established as a geometric relation
-      between the travel axis and the gravity direction. A face label or an axis
-      name such as FRONT may accompany it but may never be its authority
-      (NEG-C4-013).
+      between the travel axis and the gravity direction, and the path must be
+      straight (HSD-004). A face label or an axis name such as FRONT may accompany
+      the relation but may never be its authority (NEG-C4-013).
     selection_gate: "A SelectionDecision may be emitted only after every retained candidate carries s03 and s04 feasibility evidence at equal obligation coverage."
   s05:
     must_exist: [connection_realizations, conversion_engagement_features, guidance_realization, drawer_support_realizations, reaction_realizations_for_carried_loads, feature_graph, construction_program, solver_problem, load_path_records]
@@ -107,8 +107,9 @@ stages:
         otherwise: NOT_VERIFIED
       C4-R2_horizontal_travel:
         traces_to: NRM-C4-002
-        pass_requires: "the travel axis is shown perpendicular to the gravity direction by a geometric relation"
-        fail_when: "the relation shows a non-horizontal travel axis"
+        human_decision_ref: HSD-004
+        pass_requires: "the travel path shown straight, and its axis shown perpendicular to the gravity direction, both by geometric relation"
+        fail_when: "the path is not straight, or its axis is not perpendicular to gravity"
         if_established_only_by_label: NOT_VERIFIED
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED

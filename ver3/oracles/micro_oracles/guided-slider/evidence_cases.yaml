@@ -7,7 +7,7 @@ note: >
   inadmissible because no test has been authored for it.
 
 evidence_tag_vocabulary:
-  guidance_observable_can_fail: "every observable mapped to a guidance criterion can take a non-conforming value under its own model"
+  guidance_observable_can_fail: "evidence for guidance is either direct causal (realizing geometry + interaction at the relevant configuration + caused behaviour) or discriminating (a configuration where the criterion fails once the feature is removed) - HSD-006"
 
 admissible_evidence_cases:
   - id: ADM-EV-GS-A
@@ -19,6 +19,21 @@ admissible_evidence_cases:
       structural artifact and excluded from evidential weight, with guidance
       reported NOT_VERIFIED.
     note: "Admitted although it verifies nothing. Correctly declining to count an artifact is the behaviour the invariant is for."
+    tags: [guidance_observable_can_fail]
+
+  - id: ADM-EV-GUIDED-CAUSAL
+    summary: >
+      DIRECT CAUSAL evidence: the realizing geometry is shown to exist, the
+      interaction is shown to occur at the relevant configuration, and the
+      observed behaviour is shown to be caused by it. NO ablated control model is
+      built.
+    gate: GATE-2
+    human_decision_ref: HSD-006
+    note: >
+      THE CAUSAL-ALTERNATIVE FIXTURE. Under the pre-GATE-2 minimum this evidence
+      was inadmissible, because the only accepted proof was a control with the
+      feature removed. A control remains admissible and remains valuable; it is
+      no longer the only admissible form.
     tags: [guidance_observable_can_fail]
 
 inadmissible_evidence_cases:

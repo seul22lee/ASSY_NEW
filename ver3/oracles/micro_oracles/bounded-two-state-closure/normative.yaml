@@ -3,9 +3,13 @@ schema_version: "0.3.0"
 tier: micro_oracle
 inherits: null
 dossier: ver3/oracles/_dossiers/DOS-bounded-two-state-closure.md
-lock_status: SEMANTICALLY_AUDITED
-physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
-semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+pack_status: PRE_CAD_SEMANTIC_REVIEWED
+physical_validation: PENDING_CAD   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+baseline_note: >
+  PRE_CAD_SEMANTIC_REVIEWED is a semantic status only. It is NOT lock-ready, NOT
+  CAD-validated and NOT production authority. The next authorized phase is
+  adversarial CAD validation.   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED   # entailment, fixture-plausibility, cross-pack and cross-file drift reviews clean
 
 capability_statement: >
   A closure that reaches two defined states by a bounded motion, where the bound
@@ -19,6 +23,16 @@ naming_note: >
   realization of this capability, cited as a reference realization and an
   evidence source only. The frozen dossier was renamed with it; its evidence
   sections are unchanged.
+
+dossier_amendment:
+  amendment_id: AMD-HS-001
+  file: ver3/oracles/_dossier_amendments/AMENDMENTS.yaml
+  supersedes: "DOS-bounded-two-state-closure.md#S1"
+  scope: >
+    the constraint-persistence and bound-distinctness clauses only. The
+    "bound at each extreme is physically produced" clause of the original S1 is
+    UNCHANGED and remains the grounding for source_declares_terminal_states.
+  human_decision_ref: HSD-003
 
 basis_semantics: >
   A micro-oracle has no user. Its capability statement was PROJECT-AUTHORED and
@@ -171,7 +185,7 @@ invariants:
       - "Contact at a bounding condition is intended and is not interference."
       - "Does not fix a clearance value; none exists at capability level."
     verification_predicate: "swept volumes of the two bodies do not intersect at any interior point of the motion, other than at declared bounding or constraint interactions."
-    requires_tags: [transition_free_of_interference]
+    requires_tags: [transition_free_of_interference, interaction_regions_declared]
     related_freedoms: []
     related_unresolved: []
 
@@ -186,6 +200,8 @@ invariants:
       passes on an otherwise identical UNBOUNDED closure would be counted as
       showing that a bound is present - which is exactly what the corpus's matched
       pair does.
+      Satisfied by direct causal evidence OR by a discriminating control
+      (HSD-006); the two are alternatives, not a sequence.
     source_locators: ["DOS-bounded-two-state-closure S5", "DOS-bounded-two-state-closure S3"]
     derivation_premises:
       - "DOS S5 records a matched pair differing in exactly one feature: the presence of the limit."
@@ -193,9 +209,25 @@ invariants:
       - "A criterion that passes on the unbounded member as well as the bounded one separates nothing, so it is not evidence that a bound is present."
     conclusion_scope: "Admissibility of a criterion as evidence for NRM-HS-004. Says nothing about the design."
     exclusions:
+      - >
+        Corrected at GATE-2 / HSD-006. Either form of support is admissible:
+        A. DIRECT CAUSAL evidence - the feature's geometry exists, contact or
+        interaction occurs at the relevant configuration, and the observed
+        behaviour is caused by it; or
+        B. DISCRIMINATING evidence - a control, ablation or sensitivity result
+        showing the criterion fails when the feature is removed.
+        A control is no longer mandatory. Requiring one made ordinary direct
+        causal evidence inadmissible, and forced a second model to be built for
+        every feature claim.
       - "Does not invalidate the matched pair as evidence of something else. DOS S5 records what it does support: removing the limit produced seed-level instability across a five-seed sweep."
       - "Does not require a physical control specimen. A demonstrated sensitivity of the criterion to the bound's absence is sufficient."
-    verification_predicate: "for each criterion mapped to NRM-HS-004: a configuration is identified in which the criterion fails when the bound is removed."
+    verification_predicate: >
+      evidence offered for the bound at an extreme is EITHER (A) direct causal evidence - the
+      realizing geometry exists, the interaction occurs at the relevant
+      configuration, and the observed behaviour is caused by it - OR (B)
+      discriminating evidence, in which a configuration is identified where the
+      criterion fails once the feature is removed. Evidence that is neither is
+      inadmissible.
     requires_evidence_tags: [bound_criterion_discriminates]
     moved_at: SF-1.1
     move_note: "Whether a test distinguishes a bounded from an unbounded control is an evidence property, not a property of the physical closure (SF-10.4)."

@@ -7,6 +7,7 @@ note: >
   findings SF-4.2 and SF-4.3 rather than asserted by tag.
 
 physical_tag_vocabulary:
+  interaction_regions_declared: "every region where two bodies meet is classified as declared contact, declared clearance, declared interference fit or declared compliant interaction"
   curved_underside_region: "a boundary region of non-zero curvature exists on the underside"
   planar_top_with_aperture: "a planar boundary region on the top contains the aperture"
   resting_configuration_derived: "a load-bearing resting contact on the curved region is derived from contact geometry"
@@ -20,7 +21,7 @@ admissible_realizations:
       derived from the cylinder-plane intersection.
     materially_differs_by: [curvature_type, curvature_axis, contact_topology]
     contact_topology: "one line contact (cylindrical surface on a plane)"
-    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
+    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region, interaction_regions_declared]
 
   - id: ADM-BM-001-3-B
     summary: >
@@ -38,7 +39,7 @@ admissible_realizations:
       which is the geometric feature the prior narrative lacked. The coplanarity
       of the apexes is an explicit assumption, recorded in
       FIXTURE_PLAUSIBILITY_REVIEW.yaml and still pending CAD confirmation.
-    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
+    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region, interaction_regions_declared]
 
   - id: ADM-BM-001-3-C
     summary: >
@@ -56,24 +57,24 @@ admissible_realizations:
       tag assertion. Revised so the interruption carries no load. The point the
       fixture exists to test is preserved: the Oracle must not require an
       UNINTERRUPTED curve.
-    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
+    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region, interaction_regions_declared]
 
 inadmissible_realizations:
   - id: INA-BM-001-3-A
     summary: "Fully prismatic enclosure; REQ-011 recorded in the trace and reported satisfied."
     from_negative_case: NEG-BM-001-3-001
     missing_tags: [curved_underside_region]
-    tags: [planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region]
+    tags: [planar_top_with_aperture, resting_configuration_derived, sweep_clears_curved_region, interaction_regions_declared]
   - id: INA-BM-001-3-B
     summary: "Resting orientation set by a role label 'bottom' rather than derived from contact geometry."
     from_negative_case: NEG-BM-001-3-003
     missing_tags: [resting_configuration_derived]
-    tags: [curved_underside_region, planar_top_with_aperture, sweep_clears_curved_region]
+    tags: [curved_underside_region, planar_top_with_aperture, sweep_clears_curved_region, interaction_regions_declared]
   - id: INA-BM-001-3-C
     summary: "Closure sweep checked against the planar walls only; it interferes with the curved underside region."
     from_negative_case: NEG-BM-001-3-004
     missing_tags: [sweep_clears_curved_region]
-    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived]
+    tags: [curved_underside_region, planar_top_with_aperture, resting_configuration_derived, interaction_regions_declared]
   - id: INA-BM-001-3-D
     summary: >
       Underside carrying a LOAD-BEARING flat land that takes the whole weight,
@@ -84,4 +85,4 @@ inadmissible_realizations:
     note: >
       Added at SF-4.3. This is the design the prior ADM-BM-001-3-C actually
       described. Under RDG-BM-001-3-01 it does not rest on a curved back.
-    tags: [curved_underside_region, planar_top_with_aperture, sweep_clears_curved_region]
+    tags: [curved_underside_region, planar_top_with_aperture, sweep_clears_curved_region, interaction_regions_declared]

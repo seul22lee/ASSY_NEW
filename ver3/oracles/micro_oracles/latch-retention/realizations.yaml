@@ -9,6 +9,7 @@ note: >
   Only ADM-LR-A is a snap; the corpus contained nothing else.
 
 physical_tag_vocabulary:
+  interaction_regions_declared: "every region where two bodies meet is classified as declared contact, declared clearance, declared interference fit or declared compliant interaction"
   retained_state_defined: "the retained state is given as a relative configuration of the two bodies"
   retention_interaction_realized: "a realized interaction opposes departure, with participating material identified on both bodies"
   disturbance_opposed_with_reaction_path: "the disturbance load has a reaction path through the retention"
@@ -23,7 +24,7 @@ admissible_realizations:
     principle: contact_snap
     release_discriminant: direction
     materially_differs_by: [retention_principle, release_discriminant]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', interaction_regions_declared]
   - id: ADM-LR-B
     summary: >
       Magnetic pair, one element on each body, with a keeper face locating the
@@ -36,48 +37,48 @@ admissible_realizations:
     note: >
       Not a contact-engaged retention. Admissible under the SF-9.1 wording, which
       requires identified participating MATERIAL rather than touching surfaces.
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', interaction_regions_declared]
   - id: ADM-LR-C
     summary: "Over-centre link holding the two bodies past its dead point. The disturbance loads the link along the direction that drives it further over centre; release requires lifting the handle."
     principle: over_centre
     release_discriminant: sequence
     materially_differs_by: [retention_principle, release_discriminant, load_path]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', interaction_regions_declared]
   - id: ADM-LR-D
     summary: "Spring-loaded detent ball seating in a recess. Engagement and release share a path; the discriminant is force magnitude, with the release threshold above the declared disturbance."
     principle: detent
     release_discriminant: magnitude
     materially_differs_by: [retention_principle, path_symmetry, release_discriminant]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', interaction_regions_declared]
 
 inadmissible_realizations:
   - id: INA-LR-A
     summary: "Two bodies asserted to be retained, with no relative configuration given for the retained state."
     from_negative_case: NEG-LR-001
     missing_tags: [retained_state_defined]
-    tags: ['retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
+    tags: ['retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', interaction_regions_declared]
   - id: INA-LR-B
     summary: "Retention asserted between whole bodies with no participating material identified on either - neither contact regions nor field regions."
     from_negative_case: NEG-LR-002
     missing_tags: [retention_interaction_realized]
-    tags: ['retained_state_defined', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
+    tags: ['retained_state_defined', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', interaction_regions_declared]
   - id: INA-LR-C
     summary: "Retention feature present but the disturbance load passes through it to nothing; the feature is unsupported."
     from_negative_case: NEG-LR-003
     missing_tags: [disturbance_opposed_with_reaction_path]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', 'repeatable_no_feature_consumed', interaction_regions_declared]
   - id: INA-LR-D
     summary: "Retention released by a straight pull, and the declared disturbance is a straight pull of the same magnitude and direction."
     from_negative_case: NEG-LR-004
     missing_tags: [release_action_distinct_from_disturbance, deliberate_release_path_exists]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'engagement_path_exists', 'repeatable_no_feature_consumed']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'engagement_path_exists', 'repeatable_no_feature_consumed', interaction_regions_declared]
   - id: INA-LR-E
     summary: "Retention geometry interferes on the way in with no clearance and no declared deflection; the retained state cannot be reached."
     from_negative_case: NEG-LR-005
     missing_tags: [engagement_path_exists]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'repeatable_no_feature_consumed']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'repeatable_no_feature_consumed', interaction_regions_declared]
   - id: INA-LR-F
     summary: "Retention that must be broken to release, so a participating feature is destroyed and the retained state is unreachable afterwards."
     from_negative_case: NEG-LR-006
     missing_tags: [repeatable_no_feature_consumed]
-    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists']
+    tags: ['retained_state_defined', 'retention_interaction_realized', 'disturbance_opposed_with_reaction_path', 'release_action_distinct_from_disturbance', 'deliberate_release_path_exists', 'engagement_path_exists', interaction_regions_declared]

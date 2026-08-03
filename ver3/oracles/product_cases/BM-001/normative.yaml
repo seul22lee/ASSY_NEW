@@ -4,9 +4,13 @@ tier: product_case
 inherits: null
 policy: ver3/oracles/ORACLE_AUTHORING_POLICY.md
 dossier: ver3/oracles/_dossiers/DOS-BM-001.md
-lock_status: SEMANTICALLY_AUDITED
-physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
-semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+pack_status: PRE_CAD_SEMANTIC_REVIEWED
+physical_validation: PENDING_CAD   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+baseline_note: >
+  PRE_CAD_SEMANTIC_REVIEWED is a semantic status only. It is NOT lock-ready, NOT
+  CAD-validated and NOT production authority. The next authorized phase is
+  adversarial CAD validation.   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED   # entailment, fixture-plausibility, cross-pack and cross-file drift reviews clean
 
 correction_note: >
   Rewritten at semantic review findings SF-2.1, SF-2.2, SF-2.3, SF-2.4 and the
@@ -69,6 +73,10 @@ invariants:
       clearance along the transition. Nothing more.
     exclusions:
       - >
+        Does NOT require positive clearance everywhere. Declared contact is admissible and zero clearance at a declared contact region is correct, not a defect. The rule is no UNDECLARED volumetric overlap (ORACLE_AUTHORING_POLICY §13).
+      - >
+        A declared interference fit is admissible where its process and material assumptions are explicit; a declared compliant interaction is admissible where the deformation is represented.
+      - >
         Does NOT require the closure to vacate the whole aperture projection.
         DOS-BM-001 S2 states no aperture size and no access envelope, so a
         requirement to clear the entire aperture prism would be stronger than the
@@ -76,8 +84,10 @@ invariants:
         the declared usable access unobstructed satisfies this.
       - "Does not fix the usable access region; the design declares it (UNR-BM-001-006)."
       - "Does not constrain how far the closure travels."
-    verification_predicate: "intersect(closure@OPEN, declared_usable_access_region) is empty AND clearance(swept_volume(closure, CLOSED->OPEN), enclosure_solid) > 0, at a declared fidelity."
-    requires_tags: [declared_usable_access_unobstructed, sweep_clears_enclosure]
+    verification_predicate: >
+      at OPEN the closure does not overlap the declared usable access region; and along the CLOSED->OPEN transition there is no volumetric overlap between the closure and the enclosure solid outside declared contact, declared interference-fit and declared compliant-interaction regions, under the declared tolerance and at the declared fidelity.
+
+    requires_tags: [declared_usable_access_unobstructed, sweep_clears_enclosure, no_undeclared_overlap_on_transition, interaction_regions_declared]
     related_freedoms: [FRE-BM-001-003, FRE-BM-001-004]
     related_unresolved: [UNR-BM-001-006]
     closes_finding: [SF-2.1]
@@ -197,13 +207,18 @@ invariants:
       - "A feature a user cannot reach cannot be operated by that user."
     conclusion_scope: "Existence of an access path terminating at the actuator. Geometric reachability only."
     exclusions:
+      - >
+        Does NOT require positive clearance everywhere. Declared contact is admissible and zero clearance at a declared contact region is correct, not a defect. The rule is no UNDECLARED volumetric overlap (ORACLE_AUTHORING_POLICY 13).
+      - >
+        A declared interference fit is admissible where its process and material assumptions are explicit; a declared compliant interaction is admissible where the deformation is represented.
       - "Does NOT constrain the side, face or half-space the path originates from."
       - >
         Does not supply an effort ceiling, and is NOT blocked by its absence.
         Whether a user can reach the actuator is a geometric question; how hard
         the actuator is to work is a separate quantitative question held at
         UNR-BM-001-002.
-    verification_predicate: "exists(access_path) whose endpoint is the retention actuation feature and which does not intersect solid material."
+    verification_predicate: >
+      exists(access_path) whose endpoint is the retention actuation feature and which has no undeclared volumetric overlap with solid material along its length.
     requires_tags: [actuator_reachable]
     related_freedoms: [FRE-BM-001-003]
     related_unresolved: []
@@ -237,14 +252,22 @@ invariants:
     derivation_premises:
       - "REQ-007 requires the product to be assemblable."
       - "A part cannot occupy space already occupied by placed material."
-    conclusion_scope: "Existence of an installation path per discretely-installed part."
+    conclusion_scope: >
+      Existence of a realizable installation process per discretely-installed part. Geometric and declared-compliant feasibility only - not force adequacy, not process cost.
     exclusions:
+      - >
+        Does NOT require a fully collision-free installation path. A press fit has no collision-free path and is still assemblable. The requirement is a realizable PROCESS that passes through no UNDECLARED rigid material (ORACLE_AUTHORING_POLICY 14).
+      - >
+        Intended contact during insertion is admissible. Snap, press and interference insertion are admissible ONLY where declared with their deformation, material, direction and process assumptions.
+      - >
+        Does NOT assess whether the insertion FORCE is achievable. That is quantitative and is held separately; see the pack's assembly-process unresolved decision.
       - "Does NOT require a path for co-formed or permanently joined parts."
       - "Does not constrain assembly order, tooling, or how the order is recorded."
-    verification_predicate: "for each discretely-installed part: exists(installation_path) collision-free against already-placed parts."
-    requires_tags: [assembly_paths_exist]
+    verification_predicate: >
+      for each discretely-installed part: a realizable installation process exists in which the part passes through no UNDECLARED rigid material. Contact during insertion is admissible. Where insertion depends on a press fit, snap fit, interference fit or compliant deformation, that region is declared and its required deformation, material assumption, insertion direction and process assumption are represented. Co-formed, bonded or permanently joined regions declare that relationship instead of owing a process.
+    requires_tags: [assembly_paths_exist, assembly_process_realizable]
     related_freedoms: [FRE-BM-001-005]
-    related_unresolved: []
+    related_unresolved: [UNR-BM-001-009]
     closes_finding: [CLS-010]
 
   - id: NRM-BM-001-011
@@ -286,6 +309,8 @@ invariants:
       NRM-BM-001-005 may be reported PASS. Without this minimum, a criterion that
       also passes on a design with no determinant would be counted as showing
       that a determinant is present.
+      Satisfied by direct causal evidence OR by a discriminating control
+      (HSD-006); the two are alternatives, not a sequence.
     source_locators: ["DOS-BM-001 S5 E1"]
     derivation_premises:
       - "DOS-BM-001 S5 E1 records that in the m0 matched pair every seed-0 criterion passes in BOTH the limited and the unlimited member."
@@ -293,9 +318,25 @@ invariants:
       - "A criterion that separates nothing cannot be evidence of the feature that distinguishes them."
     conclusion_scope: "Admissibility of a criterion as evidence for NRM-BM-001-005. Says nothing about the design."
     exclusions:
+      - >
+        Corrected at GATE-2 / HSD-006. Either form of support is admissible:
+        A. DIRECT CAUSAL evidence - the feature's geometry exists, contact or
+        interaction occurs at the relevant configuration, and the observed
+        behaviour is caused by it; or
+        B. DISCRIMINATING evidence - a control, ablation or sensitivity result
+        showing the criterion fails when the feature is removed.
+        A control is no longer mandatory. Requiring one made ordinary direct
+        causal evidence inadmissible, and forced a second model to be built for
+        every feature claim.
       - "Does not require a physical control specimen; a demonstrated sensitivity of the criterion to the determinant's absence is sufficient."
       - "Does not invalidate the m0 pair as evidence of what DOS-BM-001 S5 E1 says it shows: seed-level instability without a limit."
-    verification_predicate: "for each criterion mapped to NRM-BM-001-005: a configuration is identified in which the criterion fails when the determinant is removed."
+    verification_predicate: >
+      evidence offered for the open state determinant is EITHER (A) direct causal evidence - the
+      realizing geometry exists, the interaction occurs at the relevant
+      configuration, and the observed behaviour is caused by it - OR (B)
+      discriminating evidence, in which a configuration is identified where the
+      criterion fails once the feature is removed. Evidence that is neither is
+      inadmissible.
     requires_evidence_tags: [determinant_criterion_discriminates]
     related_freedoms: []
     related_unresolved: [UNR-BM-001-008]
@@ -404,3 +445,14 @@ required_unresolved:
     does_not_block:
       - "NRM-BM-001-005 as a structural predicate — whether the design declares a realized determinant is inspectable without any test."
     source_locators: ["DOS-BM-001 S5 E1"]
+  - id: UNR-BM-001-009
+    decision: Assembly insertion force, press/snap fit process parameters and tooling.
+    kind: quantitative
+    why_must_remain_open: >
+      DOS-BM-001 S2 records no material and no process. Whether a declared snap or press insertion is achievable by hand or by tooling cannot be judged without one.
+    resolvable_when: "An insertion force ceiling, a material and a process are supplied."
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    does_not_block:
+      - "The existence of a realizable installation process is structural and is derivable without a force."
+    source_locators: ["ORACLE_AUTHORING_POLICY 14"]
+    added_at: GATE-2

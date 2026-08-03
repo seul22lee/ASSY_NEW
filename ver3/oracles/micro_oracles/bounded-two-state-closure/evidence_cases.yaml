@@ -8,7 +8,7 @@ note: >
   Tests NRM-HS-007 only.
 
 evidence_tag_vocabulary:
-  bound_criterion_discriminates: "every criterion mapped to the presence of a bound carries a configuration in which it fails when the bound is removed"
+  bound_criterion_discriminates: "evidence for the bound is either direct causal (realizing geometry + interaction at the relevant configuration + caused behaviour) or discriminating (a configuration where the criterion fails once the feature is removed) - HSD-006"
 
 admissible_evidence_cases:
   - id: ADM-EV-HS-A
@@ -22,6 +22,21 @@ admissible_evidence_cases:
     note: >
       Admitted because the discriminator is declared rather than selected after
       the fact. This is what the corpus's matched pair can legitimately support.
+    tags: [bound_criterion_discriminates]
+
+  - id: ADM-EV-BOUNDE-CAUSAL
+    summary: >
+      DIRECT CAUSAL evidence: the realizing geometry is shown to exist, the
+      interaction is shown to occur at the relevant configuration, and the
+      observed behaviour is shown to be caused by it. NO ablated control model is
+      built.
+    gate: GATE-2
+    human_decision_ref: HSD-006
+    note: >
+      THE CAUSAL-ALTERNATIVE FIXTURE. Under the pre-GATE-2 minimum this evidence
+      was inadmissible, because the only accepted proof was a control with the
+      feature removed. A control remains admissible and remains valuable; it is
+      no longer the only admissible form.
     tags: [bound_criterion_discriminates]
 
 inadmissible_evidence_cases:

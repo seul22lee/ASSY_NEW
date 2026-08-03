@@ -8,6 +8,9 @@ note: >
   been authored for it (finding SF-1.1).
 
 physical_tag_vocabulary:
+  interaction_regions_declared: "every region where two bodies meet is classified as declared contact, declared clearance, declared interference fit or declared compliant interaction"
+  no_undeclared_overlap_on_transition: "along the transition there is no volumetric overlap outside declared contact, declared interference-fit and declared compliant-interaction regions"
+  assembly_process_realizable: "each discretely-installed part has a realizable installation process passing through no undeclared rigid material, with any declared press/snap/compliant insertion carrying its deformation, material, direction and process assumptions"
   two_states: "a closed and an open state exist"
   continuous_transition: "a motion connects them, evaluable at intermediate values"
   connection_realized: "engagement geometry exists on both bodies where the concept needs contact"
@@ -20,24 +23,24 @@ physical_tag_vocabulary:
   retention_cycle_realizable: "a close-engage / release / close-engage-again cycle is realizable with no participating feature consumed"
   actuator_reachable: "an access path terminates at the actuation feature"
   cavity_access: "a path reaches the interior cavity at OPEN"
-  assembly_paths_exist: "each discretely-installed part has a collision-free installation path"
+  assembly_paths_exist: "DEPRECATED at GATE-2 in favour of assembly_process_realizable; retained so historical fixtures still resolve"
   loads_reacted: "each load-carrying interface has a reaction path"
 
 admissible_realizations:
   - id: ADM-BM-001-A
     summary: "Rigid prismatic box, rotating lid on a lateral axis, compressive catch, moulded abutment fixes a discrete open pose."
     materially_differs_by: [motion_type, connection_persistence, boundary_form, open_state_form]
-    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
   - id: ADM-BM-001-B
     summary: "Single-piece curved shell with a compliant flexing closure region and a magnetic catch; discrete open pose set by an over-centre condition in the compliant region."
     materially_differs_by: [compliance, part_count, retention_principle, boundary_form]
     note: "Deforms between states. Admissible only because NRM-BM-001-004 conserves material content rather than demanding rigid motion."
-    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
   - id: ADM-BM-001-C
     summary: "Detachable cover, captive only through its travel, guided by mating features; withdrawn clear and set aside. Over-centre draw retention; open state is a rest condition off the product."
     materially_differs_by: [connection_persistence, motion_type, retention_principle]
     note: "The cover is UNCONNECTED in the open state. Admissible only because NRM-BM-001-002 requires engagement where the concept needs it, not a permanent connection."
-    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
   - id: ADM-BM-001-D
     summary: >
       Friction-pivoted lid held by the user anywhere in a declared open
@@ -52,7 +55,69 @@ admissible_realizations:
       stronger than DOS-BM-001, which states no aperture size and records that no
       source bounds the motion at the open extreme. If a corrected invariant
       still rejects ADM-BM-001-D, the correction did not take.
-    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
+
+  - id: ADM-BM-001-E
+    summary: >
+      Lid on a pin-and-knuckle joint. The pin/bore pair is a DECLARED CONTACT
+      region with a running fit; the lid seats on the rim at CLOSED, a second
+      declared contact; a moulded abutment is a declared terminal contact at the
+      open pose. Everywhere else the lid and body carry declared clearance.
+    gate: GATE-2
+    interaction_regions:
+      - {pair: "pin / knuckle bore", kind: declared_contact, note: "running fit, zero nominal clearance at the bearing surface"}
+      - {pair: "lid rim / body rim", kind: declared_contact, note: "seat at CLOSED"}
+      - {pair: "lid flange / body wall", kind: declared_contact, note: "terminal contact at the open pose"}
+      - {pair: "lid skirt / body wall", kind: declared_clearance, note: "gap through the sweep"}
+    materially_differs_by: [interaction_declaration_completeness]
+    note: >
+      THE INTENDED-CONTACT FIXTURE. Under the retired predicate
+      "clearance(swept_volume, enclosure_solid) > 0" this design FAILED three
+      times over - at the bearing, at the seat and at the stop - for doing exactly
+      what it is designed to do. If it starts failing again, the blanket-clearance
+      formulation has returned.
+    tags: [interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable, two_states, continuous_transition, connection_realized, declared_usable_access_unobstructed, sweep_clears_enclosure, extent_conserved, open_state_admissible, retention_realized, retention_release_action, retention_cycle_realizable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
+
+  - id: ADM-BM-001-F
+    summary: >
+      Snap-fit lid catch. The hook beam is a DECLARED COMPLIANT INTERACTION
+      region: during insertion it overlaps the lip envelope and takes the overlap
+      up in elastic deflection, which is represented. The retained position is a
+      declared contact.
+    gate: GATE-2
+    interaction_regions:
+      - {pair: "snap beam / lip", kind: declared_compliant_interaction,
+         deflection_represented: true,
+         material_assumption: "a polymer whose elastic strain admits the stated deflection without yield",
+         insertion_direction: "along the closure axis",
+         process_assumption: "hand insertion"}
+      - {pair: "hook face / lip underside", kind: declared_contact, note: "the retained position"}
+    materially_differs_by: [insertion_mode, interaction_kind]
+    note: >
+      THE COMPLIANT-ASSEMBLY FIXTURE. Under the retired assembly predicate
+      "collision-free installation path" a snap fit is unassemblable by
+      definition. The overlap here is declared and its deformation represented,
+      so it is admissible; the FORCE required is a separate question held at
+      UNR-BM-001-009.
+    tags: [interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable, two_states, continuous_transition, connection_realized, declared_usable_access_unobstructed, sweep_clears_enclosure, extent_conserved, open_state_admissible, retention_realized, retention_release_action, retention_cycle_realizable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
+
+  - id: ADM-BM-001-G
+    summary: >
+      Hinge pin retained in its knuckle by a DECLARED INTERFERENCE FIT at one
+      end, free-running at the other. The interference is stated with its process
+      and material assumptions.
+    gate: GATE-2
+    interaction_regions:
+      - {pair: "pin / anchor knuckle", kind: declared_interference_fit,
+         nominal_interference: "declared by the design, value unresolved",
+         material_assumption: "pin stiffer than knuckle wall; knuckle admits the hoop strain",
+         process_assumption: "arbor press, single insertion, not intended to be reversed"}
+      - {pair: "pin / running knuckle", kind: declared_contact, note: "running fit"}
+    materially_differs_by: [insertion_mode, retention_of_the_joint_pin]
+    note: >
+      THE INTERFERENCE-FIT FIXTURE. Admissible ONLY because the process and
+      material assumptions are explicit. Strip them and it becomes INA-BM-001-J.
+    tags: [interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable, two_states, continuous_transition, connection_realized, declared_usable_access_unobstructed, sweep_clears_enclosure, extent_conserved, open_state_admissible, retention_realized, retention_release_action, retention_cycle_realizable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
 
 inadmissible_realizations:
   - id: INA-BM-001-A
@@ -60,35 +125,83 @@ inadmissible_realizations:
     from_negative_case: NEG-BM-001-001
     missing_tags: [open_state_admissible]
     note: "Rejected for declaring a discrete pose it cannot produce — not for lacking a stop. ADM-BM-001-D declares no discrete pose and is admitted."
-    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
   - id: INA-BM-001-B
     summary: "Joint type and axis recorded; neither body carries engagement geometry."
     from_negative_case: NEG-BM-001-002
     missing_tags: [connection_realized]
-    tags: ['two_states', 'continuous_transition', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
   - id: INA-BM-001-C
     summary: "At OPEN the closure lies across the region the design itself declares as its usable access, so nothing can be put in or taken out."
     from_negative_case: NEG-BM-001-003
     missing_tags: [declared_usable_access_unobstructed, cavity_access]
-    tags: ['two_states', 'continuous_transition', 'connection_realized', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'connection_realized', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
   - id: INA-BM-001-D
     summary: "Closure represented with a smaller extent at OPEN so it fits without interference."
     from_negative_case: NEG-BM-001-005
     missing_tags: [extent_conserved]
-    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
   - id: INA-BM-001-E
     summary: "Retention recorded as a relation between whole bodies; no participating geometry, no contact normal, no field region."
     from_negative_case: NEG-BM-001-006
     missing_tags: [retention_realized]
-    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_release_action', 'retention_cycle_realizable', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
   - id: INA-BM-001-F
     summary: "Access path for release terminates on the enclosure exterior beside the catch, not at the actuator."
     from_negative_case: NEG-BM-001-007
     missing_tags: [actuator_reachable]
-    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'retention_cycle_realizable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
   - id: INA-BM-001-G
     summary: "Retention released by breaking a moulded tab; after release the tab is gone and the closed state cannot be re-engaged."
     from_negative_case: NEG-BM-001-013
     missing_tags: [retention_cycle_realizable]
     note: "Added at SF-2.4. The prior wording accepted this design: nothing was marked single-use and the transition was declared repeatable."
-    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted']
+    tags: ['two_states', 'continuous_transition', 'connection_realized', 'declared_usable_access_unobstructed', 'sweep_clears_enclosure', 'extent_conserved', 'open_state_admissible', 'retention_realized', 'retention_release_action', 'actuator_reachable', 'cavity_access', 'assembly_paths_exist', 'loads_reacted', interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable]
+  - id: INA-BM-001-H
+    summary: >
+      The lid solid and the body wall occupy the same space over part of the
+      sweep. Nothing declares the region; no contact, no clearance, no
+      interference fit, no compliant deformation.
+    from_negative_case: NEG-BM-001-016
+    missing_tags: [no_undeclared_overlap_on_transition, interaction_regions_declared]
+    gate: GATE-2
+    tags: [assembly_process_realizable, two_states, continuous_transition, connection_realized, declared_usable_access_unobstructed, sweep_clears_enclosure, extent_conserved, open_state_admissible, retention_realized, retention_release_action, retention_cycle_realizable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
+
+  - id: INA-BM-001-I
+    summary: >
+      A 3 mm mutual penetration between lid and rim is labelled "contact" with no
+      contact surfaces, no declared tolerance and no deformation. The word is
+      being used to hide volumetric overlap.
+    from_negative_case: NEG-BM-001-017
+    missing_tags: [no_undeclared_overlap_on_transition]
+    gate: GATE-2
+    note: "Declaring a region 'contact' does not make an arbitrary penetration admissible; the overlap must be at or below the declared numerical tolerance, or be an interference fit with its assumptions."
+    tags: [interaction_regions_declared, assembly_process_realizable, two_states, continuous_transition, connection_realized, declared_usable_access_unobstructed, sweep_clears_enclosure, extent_conserved, open_state_admissible, retention_realized, retention_release_action, retention_cycle_realizable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
+
+  - id: INA-BM-001-J
+    summary: >
+      A rigid hinge pin whose only installation route passes straight through an
+      already-installed rigid wall. No aperture, no declared interference, no
+      compliant region, no alternative order.
+    from_negative_case: NEG-BM-001-018
+    missing_tags: [assembly_process_realizable]
+    gate: GATE-2
+    tags: [interaction_regions_declared, no_undeclared_overlap_on_transition, two_states, continuous_transition, connection_realized, declared_usable_access_unobstructed, sweep_clears_enclosure, extent_conserved, open_state_admissible, retention_realized, retention_release_action, retention_cycle_realizable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
+
+  - id: INA-BM-001-K
+    summary: >
+      A catch described as a snap fit, with a rigid hook and no compliant region
+      anywhere - nothing can deflect, so nothing can snap.
+    from_negative_case: NEG-BM-001-019
+    missing_tags: [assembly_process_realizable, interaction_regions_declared]
+    gate: GATE-2
+    tags: [no_undeclared_overlap_on_transition, two_states, continuous_transition, connection_realized, declared_usable_access_unobstructed, sweep_clears_enclosure, extent_conserved, open_state_admissible, retention_realized, retention_release_action, retention_cycle_realizable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]
+
+  - id: INA-BM-001-L
+    summary: >
+      A press fit declared with an interference value but no material assumption,
+      no insertion direction and no process - an overlap asserted to be fine.
+    from_negative_case: NEG-BM-001-020
+    missing_tags: [assembly_process_realizable]
+    gate: GATE-2
+    tags: [interaction_regions_declared, no_undeclared_overlap_on_transition, two_states, continuous_transition, connection_realized, declared_usable_access_unobstructed, sweep_clears_enclosure, extent_conserved, open_state_admissible, retention_realized, retention_release_action, retention_cycle_realizable, actuator_reachable, cavity_access, assembly_paths_exist, loads_reacted]

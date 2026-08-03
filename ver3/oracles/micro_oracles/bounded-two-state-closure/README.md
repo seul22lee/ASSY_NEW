@@ -1,6 +1,9 @@
 # Micro-oracle — bounded-two-state-closure
 
-**Status:** STRUCTURALLY_COMPLETE — not yet audited, not locked.
+**Status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; **not** lock-ready,
+**not** CAD-validated, **not** production authority. Every admissible fixture is
+`NEEDS_GEOMETRY_VALIDATION`. Next authorized phase: adversarial CAD validation.
+
 **Tier:** micro_oracle. **Frozen dossier:** `../../_dossiers/DOS-bounded-two-state-closure.md`.
 
 ## Capability

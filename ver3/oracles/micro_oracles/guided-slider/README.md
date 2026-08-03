@@ -1,6 +1,9 @@
 # Micro-oracle — guided-slider
 
-**Status:** STRUCTURALLY_COMPLETE — not yet audited, not locked.
+**Status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; **not** lock-ready,
+**not** CAD-validated, **not** production authority. Every admissible fixture is
+`NEEDS_GEOMETRY_VALIDATION`. Next authorized phase: adversarial CAD validation.
+
 **Tier:** micro_oracle. **Frozen dossier:** `../../_dossiers/DOS-guided-slider.md`.
 
 ## Capability
@@ -49,11 +52,12 @@ specific case; `NEG-GS-007` and `INA-GS-G` make crediting it a failure.
 | `stage_expectations.yaml` | Representation obligations where the capability is instantiated |
 | `source_map.md` | Every statement traced; every legacy value ranked and disposed of |
 
-## The freedom-accounting rule
+## The freedom-accounting rule (HSD-001)
 
 `stage_expectations.s04` requires all six relative freedoms to be accounted for
-explicitly — one retained, five removed, each with the constraint that removes
-it named. `ADM-GS-D` (a body located by three pads in a recess, with no guide
+explicitly — for each, either a realized constraint removing it is named, or it is
+DECLARED intentionally unconstrained (HSD-001). No fixed count of removed freedoms
+is required. `ADM-GS-D` (a body located by three pads in a recess, with no guide
 part at all) and `ADM-GS-B` (one non-circular bar) both satisfy this, which is
 how the pack demonstrates it did not encode the legacy two-rail arrangement.
 

@@ -3,9 +3,13 @@ schema_version: "0.3.0"
 tier: product_case
 inherits: BM-001
 dossier: ver3/oracles/_dossiers/DOS-BM-001-3.md
-lock_status: SEMANTICALLY_AUDITED
-physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
-semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+pack_status: PRE_CAD_SEMANTIC_REVIEWED
+physical_validation: PENDING_CAD   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+baseline_note: >
+  PRE_CAD_SEMANTIC_REVIEWED is a semantic status only. It is NOT lock-ready, NOT
+  CAD-validated and NOT production authority. The next authorized phase is
+  adversarial CAD validation.   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED   # entailment, fixture-plausibility, cross-pack and cross-file drift reviews clean
 
 correction_note: >
   Corrected at findings SF-4.1 (stability must not block derivation of the
@@ -86,9 +90,16 @@ invariants:
       - "Solid bodies do not interpenetrate."
       - "The parent already requires sweep clearance; the curved region is additional material to clear."
     conclusion_scope: "Sweep clearance against the curved region."
-    exclusions: ["Does not constrain the closure's motion type or travel."]
-    verification_predicate: "clearance(swept_volume(closure), enclosure_solid including the curved region) > 0, at a declared fidelity."
-    requires_tags: [sweep_clears_curved_region]
+    exclusions:
+      - "Does not constrain the closure's motion type or travel."
+      - >
+        Does NOT require positive clearance everywhere. Declared contact is admissible and zero clearance at a declared contact region is correct, not a defect. The rule is no UNDECLARED volumetric overlap (ORACLE_AUTHORING_POLICY §13).
+      - >
+        A declared interference fit is admissible where its process and material assumptions are explicit; a declared compliant interaction is admissible where the deformation is represented.
+    verification_predicate: >
+      along the closure transition there is no volumetric overlap between the closure and the enclosure solid including the curved region outside declared contact, declared interference-fit and declared compliant-interaction regions, under the declared tolerance and at the declared fidelity.
+
+    requires_tags: [sweep_clears_curved_region, interaction_regions_declared]
     related_freedoms: [FRE-BM-001-3-003]
     related_unresolved: []
 

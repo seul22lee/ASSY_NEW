@@ -437,6 +437,218 @@ def _(r):
     wy(r, "oracles/SOURCE_ENTAILMENT_REVIEW.yaml", e)
 
 
+# ---------------------------------------------------------------- 3G (GATE-2 contact / assembly)
+@case("blanket_clearance_predicate", "defect", "BLANKET_CLEARANCE_PREDICATE",
+      "GATE-2: the retired clearance>0 form returning to a motion predicate")
+def _(r):
+    d = ry(r, f"{P}/BM-002/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-BM-002-008":
+            i["verification_predicate"] = "clearance(swept_volume(platform), housing_solid) > 0 at every pose."
+    wy(r, f"{P}/BM-002/normative.yaml", d)
+
+
+@case("blanket_collision_free_assembly", "defect", "BLANKET_CLEARANCE_PREDICATE",
+      "GATE-2: the retired collision-free-path assembly form returning")
+def _(r):
+    d = ry(r, f"{P}/C4-drawer/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-C4-011":
+            i["verification_predicate"] = ("for each discretely-installed part: exists(installation_path) "
+                                           "collision-free against already-placed parts.")
+    wy(r, f"{P}/C4-drawer/normative.yaml", d)
+
+
+@case("no_undeclared_overlap_form_is_fine", "control", "BLANKET_CLEARANCE_PREDICATE",
+      "RELAXED HEURISTIC CONTROL: the baseline predicates mention overlap and must stay silent")
+def _(r):
+    pass  # baseline
+
+
+@case("interference_fit_without_assumptions", "defect", "DECLARED_FIT_WITHOUT_ASSUMPTIONS",
+      "GATE-2: a declared interference fit with no material or process assumption")
+def _(r):
+    d = ry(r, f"{P}/BM-001/realizations.yaml")
+    for a in d["admissible_realizations"]:
+        if a["id"] == "ADM-BM-001-G":
+            for reg in a["interaction_regions"]:
+                if reg["kind"] == "declared_interference_fit":
+                    reg.pop("material_assumption", None)
+                    reg.pop("process_assumption", None)
+    wy(r, f"{P}/BM-001/realizations.yaml", d)
+
+
+@case("compliant_interaction_without_deformation", "defect", "DECLARED_FIT_WITHOUT_ASSUMPTIONS",
+      "GATE-2: a declared compliant insertion with no represented deformation")
+def _(r):
+    d = ry(r, f"{P}/BM-001/realizations.yaml")
+    for a in d["admissible_realizations"]:
+        if a["id"] == "ADM-BM-001-F":
+            for reg in a["interaction_regions"]:
+                if reg["kind"] == "declared_compliant_interaction":
+                    reg.pop("deflection_represented", None)
+    wy(r, f"{P}/BM-001/realizations.yaml", d)
+
+
+@case("interaction_region_unclassified", "defect", "INTERACTION_REGION_UNCLASSIFIED",
+      "GATE-2: an interaction region with no admissible kind")
+def _(r):
+    d = ry(r, f"{P}/BM-001/realizations.yaml")
+    for a in d["admissible_realizations"]:
+        if a["id"] == "ADM-BM-001-E":
+            a["interaction_regions"][0]["kind"] = "touching"
+    wy(r, f"{P}/BM-001/realizations.yaml", d)
+
+
+@case("declared_contact_stays_admissible", "control", "NECESSITY_COUNTEREXAMPLE",
+      "RELAXED HEURISTIC CONTROL: ADM-BM-001-E has three declared contacts and must remain "
+      "admissible - it failed three times under the retired blanket-clearance predicate")
+def _(r):
+    pass  # baseline
+
+
+@case("ablation_only_verification_minimum", "defect", "ABLATION_ONLY_VERIFICATION_MINIMUM",
+      "GATE-2/HSD-006: a verification minimum accepting only an ablated control")
+def _(r):
+    d = ry(r, f"{M}/bounded-two-state-closure/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-HS-007":
+            i["verification_predicate"] = ("for each criterion mapped to the bound: a configuration is "
+                                           "identified in which the criterion fails when the bound is removed.")
+    wy(r, f"{M}/bounded-two-state-closure/normative.yaml", d)
+
+
+@case("direct_causal_evidence_is_admissible", "control", "ABLATION_ONLY_VERIFICATION_MINIMUM",
+      "RELAXED HEURISTIC CONTROL: the baseline minima mention removal as ALTERNATIVE B and "
+      "must stay silent because alternative A is offered")
+def _(r):
+    pass  # baseline
+
+
+# ---------------------------------------------------------------- 3F (cross-file drift)
+@case("stale_pack_status_normative", "defect", "STALE_PACK_STATUS",
+      "GATE-1: a pack still declaring a retired status")
+def _(r):
+    d = ry(r, f"{P}/BM-002/normative.yaml")
+    d["pack_status"] = "SEMANTICALLY_AUDITED"
+    wy(r, f"{P}/BM-002/normative.yaml", d)
+
+
+@case("stale_pack_status_readme", "defect", "STALE_PACK_STATUS",
+      "GATE-1: a README still declaring a retired status")
+def _(r):
+    fp = r / P / "C4-drawer" / "README.md"
+    fp.write_text(fp.read_text().replace(
+        "**Status: `PRE_CAD_SEMANTIC_REVIEWED`**", "**Status: STRUCTURALLY_COMPLETE**"))
+
+
+@case("retired_contract_freedom_count", "defect", "RETIRED_CONTRACT_PRESENT",
+      "GATE-1: the retired strict-prismatic rule returning to a stage expectation")
+def _(r):
+    d = ry(r, f"{M}/guided-slider/stage_expectations.yaml")
+    d["stages"]["s11"]["outcome_rules"]["GS-C2_freedoms_accounted"]["pass_requires"] = \
+        "each of the five non-translational freedoms is shown removed by an engagement"
+    wy(r, f"{M}/guided-slider/stage_expectations.yaml", d)
+
+
+@case("retired_contract_proper_subset", "defect", "RETIRED_CONTRACT_PRESENT",
+      "GATE-1: the retired proper-subset corridor rule returning")
+def _(r):
+    d = ry(r, f"{P}/BM-002/stage_expectations.yaml")
+    d["stages"]["s04"]["corridor_note"] = "the swept volume must be a proper subset of the corridor"
+    wy(r, f"{P}/BM-002/stage_expectations.yaml", d)
+
+
+@case("retired_contract_singular_engagement_site", "defect", "RETIRED_CONTRACT_PRESENT",
+      "GATE-1: a singular engagement_site expectation where the normative permits a chain")
+def _(r):
+    d = ry(r, f"{M}/rotary-to-linear-engagement/stage_expectations.yaml")
+    d["stages"]["s04"]["must_exist"] = ["input_axis", "engagement_site", "output_range"]
+    wy(r, f"{M}/rotary-to-linear-engagement/stage_expectations.yaml", d)
+
+
+@case("stage_demands_permitted_freedom", "defect", "STAGE_DEMANDS_PERMITTED_FREEDOM",
+      "GATE-1: a stage demanding removal of a freedom the normative permits to remain")
+def _(r):
+    d = ry(r, f"{M}/guided-slider/stage_expectations.yaml")
+    d["stages"]["s04"]["freedom_accounting_note"] = \
+        "All six relative freedoms: one translation retained and all five non-translational freedoms removed."
+    wy(r, f"{M}/guided-slider/stage_expectations.yaml", d)
+
+
+@case("freedom_accounting_is_not_removal", "control", "STAGE_DEMANDS_PERMITTED_FREEDOM",
+      "RELAXED HEURISTIC CONTROL: requiring all six freedoms to be ACCOUNTED FOR is correct; "
+      "only requiring them REMOVED conflicts with a permitted residual freedom")
+def _(r):
+    pass  # baseline wording
+
+
+@case("stage_unconditional_where_normative_conditional", "defect",
+      "STAGE_UNCONDITIONAL_WHERE_NORMATIVE_CONDITIONAL",
+      "GATE-1: an outcome rule quantifying support universally over a conditional invariant")
+def _(r):
+    d = ry(r, f"{P}/C4-drawer/stage_expectations.yaml")
+    rule = d["stages"]["s11"]["outcome_rules"]["C4-R9_carried_loads_reacted"]
+    rule["pass_requires"] = "a radial support realization for every rotating element and an axial reaction for each"
+    rule.pop("must_not_fail_when", None)
+    wy(r, f"{P}/C4-drawer/stage_expectations.yaml", d)
+
+
+@case("superseded_source_without_amendment_ref", "defect",
+      "SUPERSEDED_SOURCE_WITHOUT_AMENDMENT_REF",
+      "GATE-1: a pack whose capability was amended but which does not declare the amendment")
+def _(r):
+    d = ry(r, f"{M}/guided-slider/normative.yaml")
+    d.pop("dossier_amendment", None)
+    wy(r, f"{M}/guided-slider/normative.yaml", d)
+
+
+@case("frozen_dossier_mutated", "defect", "FROZEN_DOSSIER_MUTATED",
+      "GATE-1: a 'frozen' dossier edited after an amendment recorded its hash")
+def _(r):
+    fp = r / "oracles" / "_dossiers" / "DOS-guided-slider.md"
+    fp.write_text(fp.read_text() + "\n<!-- silent edit -->\n")
+
+
+@case("ambiguity_blocking_disagreement", "defect", "AMBIGUITY_BLOCKING_DISAGREEMENT",
+      "GATE-1: an ambiguity recorded blocking in one file and non-blocking in another")
+def _(r):
+    d = ry(r, "oracles/ORACLE_WORKFLOW_STATE.yaml")
+    d["source_ambiguities"]["AMB-002-01"]["status"] = "OPEN_BLOCKING"
+    wy(r, "oracles/ORACLE_WORKFLOW_STATE.yaml", d)
+
+
+@case("non_blocking_ambiguity_stays_silent", "control", "AMBIGUITY_BLOCKING_DISAGREEMENT",
+      "RELAXED HEURISTIC CONTROL: OPEN_NON_BLOCKING contains the substring BLOCK and must "
+      "not be read as blocking")
+def _(r):
+    pass  # baseline
+
+
+@case("human_decision_ref_unresolved", "defect", "HUMAN_DECISION_REF_UNRESOLVED",
+      "GATE-3: a pack citing a decision id that is not defined")
+def _(r):
+    d = ry(r, f"{P}/C4-drawer/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-C4-002":
+            i["human_decision_ref"] = "HSD-099"
+    wy(r, f"{P}/C4-drawer/normative.yaml", d)
+
+
+@case("human_decisions_file_missing", "defect", "HUMAN_DECISION_REF_UNRESOLVED",
+      "GATE-3: the decision record deleted while amendments still cite it")
+def _(r):
+    (r / "oracles" / "HUMAN_SEMANTIC_DECISIONS.yaml").unlink()
+
+
+@case("hsd_cited_in_prose_unresolved", "defect", "HUMAN_DECISION_REF_UNRESOLVED",
+      "GATE-3: a decision id cited in prose that does not resolve")
+def _(r):
+    d = ry(r, f"{M}/guided-slider/normative.yaml")
+    d["invariants"][1]["conclusion_scope"] = "Removal of the freedoms per HSD-042."
+    wy(r, f"{M}/guided-slider/normative.yaml", d)
+
+
 @case("pack_file_missing", "defect", "PACK_FILE_MISSING",
       "an unauthored pack file must never pass silently")
 def _(r):

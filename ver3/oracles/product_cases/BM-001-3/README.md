@@ -1,5 +1,9 @@
 # BM-001-3 — Latching storage box on a curved back, opening through a flat top
 
+**Status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; **not** lock-ready,
+**not** CAD-validated, **not** production authority. Every admissible fixture is
+`NEEDS_GEOMETRY_VALIDATION`. Next authorized phase: adversarial CAD validation.
+
 ## Problem intent
 
 BM-001 plus one environmental requirement: the enclosure rests on a curved back

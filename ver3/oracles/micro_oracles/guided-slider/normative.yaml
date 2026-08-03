@@ -3,9 +3,13 @@ schema_version: "0.3.0"
 tier: micro_oracle
 inherits: null
 dossier: ver3/oracles/_dossiers/DOS-guided-slider.md
-lock_status: SEMANTICALLY_AUDITED
-physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
-semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+pack_status: PRE_CAD_SEMANTIC_REVIEWED
+physical_validation: PENDING_CAD   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+baseline_note: >
+  PRE_CAD_SEMANTIC_REVIEWED is a semantic status only. It is NOT lock-ready, NOT
+  CAD-validated and NOT production authority. The next authorized phase is
+  adversarial CAD validation.   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED   # entailment, fixture-plausibility, cross-pack and cross-file drift reviews clean
 historical_aliases: []
 
 capability_statement: >
@@ -31,6 +35,17 @@ capability_statement_history:
       If a future project source genuinely requires strict single-degree-of-freedom
       guidance, that is a DIFFERENT capability and belongs in a separate pack
       named single-dof-linear-guidance. It is not this one.
+
+dossier_amendment:
+  amendment_id: AMD-GS-001
+  file: ver3/oracles/_dossier_amendments/AMENDMENTS.yaml
+  supersedes: "DOS-guided-slider.md#S1"
+  scope: "the capability statement only; S2-S7 retain full authority"
+  human_decision_ref: HSD-001
+  note: >
+    The frozen S1 wording is preserved verbatim in the amendment record. Normative
+    authority for the capability statement rests with the amendment; every other
+    section of the dossier is unchanged and still cited directly.
 
 basis_semantics: >
   A micro-oracle has no user. Its capability statement was PROJECT-AUTHORED and
@@ -164,13 +179,18 @@ invariants:
     conclusion_scope: "Non-intersection along the travel and traversability of the declared path."
     exclusions:
       - >
+        Does NOT require positive clearance everywhere. Declared contact is admissible and zero clearance at a declared contact region is correct, not a defect. The rule is no UNDECLARED volumetric overlap (ORACLE_AUTHORING_POLICY 13).
+      - >
+        A declared interference fit is admissible where its process and material assumptions are explicit; a declared compliant interaction is admissible where the deformation is represented.
+      - >
         Does NOT require the translating body to occupy a proper subset of a
         travel corridor. The corridor is in general defined by the swept volume,
         so proper-subset containment is either vacuous or contradictory. Replaced
         with executable non-intersection and traversability predicates at SF-7.2.
       - "Does not fix a clearance value; the legacy clearance of 0.35 is a realization detail."
-    verification_predicate: "for every configuration of the declared travel: intersect(translating_body, guiding_body_material) is empty outside the intended interaction; and the declared path is traversable."
-    requires_tags: [travel_clearances_satisfied, declared_path_traversable]
+    verification_predicate: >
+      for every configuration of the declared travel there is no volumetric overlap between the translating body and guiding-body material outside declared contact, declared interference-fit and declared compliant-interaction regions, under the declared tolerance and at the declared fidelity; and the declared path is traversable.
+    requires_tags: [travel_clearances_satisfied, declared_path_traversable, interaction_regions_declared]
     related_freedoms: []
     related_unresolved: []
     closes_finding: [SF-7.2]
@@ -186,6 +206,8 @@ invariants:
       off-axis deviation of 0.0 degrees produced by a declared prismatic pair - a
       value the model cannot vary - would be counted as showing that the freedoms
       are constrained by a realized interaction.
+      Satisfied by direct causal evidence OR by a discriminating control
+      (HSD-006); the two are alternatives, not a sequence.
     source_locators: ["DOS-guided-slider S5"]
     derivation_premises:
       - "DOS-guided-slider S5 records tracks_straight measured as 0.0 degrees exactly under a declared prismatic pair."
@@ -193,8 +215,24 @@ invariants:
       - "An observable that cannot take any other value distinguishes nothing, so it cannot be evidence."
     conclusion_scope: "Admissibility of an observable as evidence of guidance. Says nothing about the design."
     exclusions:
+      - >
+        Corrected at GATE-2 / HSD-006. Either form of support is admissible:
+        A. DIRECT CAUSAL evidence - the feature's geometry exists, contact or
+        interaction occurs at the relevant configuration, and the observed
+        behaviour is caused by it; or
+        B. DISCRIMINATING evidence - a control, ablation or sensitivity result
+        showing the criterion fails when the feature is removed.
+        A control is no longer mandatory. Requiring one made ordinary direct
+        causal evidence inadmissible, and forced a second model to be built for
+        every feature claim.
       - "Does not forbid declared-pair models and does not require contact modelling; it requires a value exact by construction to be marked as a structural artifact rather than counted."
-    verification_predicate: "for each observable mapped to a guidance criterion: the model that produced it admits at least one configuration in which the observable violates its threshold."
+    verification_predicate: >
+      evidence offered for guidance is EITHER (A) direct causal evidence - the
+      realizing geometry exists, the interaction occurs at the relevant
+      configuration, and the observed behaviour is caused by it - OR (B)
+      discriminating evidence, in which a configuration is identified where the
+      criterion fails once the feature is removed. Evidence that is neither is
+      inadmissible.
     requires_evidence_tags: [guidance_observable_can_fail]
     related_freedoms: []
     related_unresolved: []

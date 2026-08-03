@@ -1,5 +1,9 @@
 # rotary-to-linear-engagement — source map (micro-oracle)
 
+> **Pack status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; not lock-ready, not
+> CAD-validated. Every admissible fixture is `NEEDS_GEOMETRY_VALIDATION`.
+
+
 **Capability (rank 1 for this pack):** conversion of rotary input motion into
 linear output motion through a localized engagement, with the reaction of the
 resulting loads. Source: `ver3/oracles/_dossiers/DOS-rotary-to-linear-engagement.md` S1.
@@ -18,12 +22,12 @@ that way.
 
 | Statement | basis_type | Grounded in |
 |---|---|---|
-| NRM-RL-001 | DIRECT_USER_REQUIREMENT | S1, "through a localized engagement" |
-| NRM-RL-002 | DIRECT_USER_REQUIREMENT | S1, "conversion of rotary input into linear output" |
+| NRM-RL-001 | PROJECT_DEFINED_CAPABILITY | AMD-RL-001 (supersedes S1) — "an uninterrupted chain of realized localized interactions" — HSD-002 |
+| NRM-RL-002 | PROJECT_DEFINED_CAPABILITY | AMD-RL-001 (supersedes S1) — physical causation, not declaration — HSD-002 |
 | NRM-RL-003 | NECESSARY_PHYSICAL_CONSEQUENCE | S1 → derived (conversion over a range) |
 | NRM-RL-004 | NECESSARY_PHYSICAL_CONSEQUENCE | S1 → derived (an offset engagement force applies a moment) |
 | NRM-RL-005 | NECESSARY_PHYSICAL_CONSEQUENCE | S1 → derived |
-| NRM-RL-006 | NECESSARY_PHYSICAL_CONSEQUENCE | S1, "with the reaction of the resulting loads" → derived |
+| NRM-RL-005 | NECESSARY_PHYSICAL_CONSEQUENCE | AMD-RL-001 — reaction of load components ACTUALLY carried — HSD-002 |
 | NRM-RL-006 | VERIFICATION_MINIMUM | S5 (V-B named-deferred; ratio exact by construction) |
 
 ## Boundaries with neighbouring capabilities
@@ -50,7 +54,7 @@ that way.
 DOS S7 records a pipeline that held one conversion card, was asked for a
 conversion without it, and answered INFEASIBLE — with a second conversion sitting
 in the same repository. `FRE-RL-001` makes the family free, `NEG-RL-008` makes
-that answer a defect, and `stage_expectations.s02.plurality_note` and
+that answer a defect, and `stage_expectations.s02.open_search_note` and
 `s12.capability_gap_rule` place the obligation on specific stages.
 
 ---
@@ -69,3 +73,15 @@ corrected pack, not the reviewed one.
 | SF-8.2 | `NRM-RL-002` concerns the actual kinematic relation — rotation causes translation over the declared range, possibly nonlinearly. The requirement that the relation be DECLARED and the driving body RECORDED moved to `stage_expectations.s04.representation_obligations`, where DesignState obligations belong. |
 | SF-8.3 | The fixed-plurality rule is withdrawn. One candidate may legitimately remain after reasoned elimination; what must hold is open search, reasoned rejection, and UNSUPPORTED for an absent realizer. |
 | SF-1.1 | `NRM-RL-006` uses `requires_evidence_tags`; fixtures in `evidence_cases.yaml`. |
+
+## Capability authority after amendment AMD-RL-001
+
+The frozen S1 wording "through a localized engagement" was read as requiring
+DIRECT engagement between the rotating input body and the translating output body.
+`AMD-RL-001`, approved by **HSD-002**, supersedes it for normative authority with
+an uninterrupted-chain formulation. The original text is preserved verbatim in the
+amendment; S2–S7 are unchanged.
+
+`ADM-RL-E` (crank-link-slider) and `ADM-RL-F` (cam-follower-pushrod) have no
+interaction at all between input body and output body. If either starts failing,
+the retired reading has returned.

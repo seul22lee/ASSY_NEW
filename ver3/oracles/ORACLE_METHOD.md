@@ -27,7 +27,7 @@ may **fail** it.
 
 ---
 
-## 2. The seven-part content contract
+## 2. The content contract
 
 Every pack contains exactly these parts. A part may be empty only with a written
 reason; it may never be silently absent.
@@ -38,13 +38,33 @@ reason; it may never be silently absent.
 | 2. Allowed freedoms | `freedoms.yaml` | What may differ between two valid designs? |
 | 3. Required unresolved values | `normative.yaml` → `required_unresolved` | What must stay open until evidence exists? |
 | 4. Reference realizations | `reference_realizations/*.md` | What concrete example is known to satisfy part of the problem? |
-| 5. Negative cases | `negative_cases.yaml` | What known-wrong design must be rejected, and for which reason? |
-| 6. Evidence scope | `evidence_scope.yaml` | What was actually verified, by what model, and what was not? |
-| 7. Stage projections | `stage_expectations.yaml` | After each stage: what must exist, what must not yet be decided, what may stay unresolved, what provenance must survive? |
+| 5. **Physical** realization fixtures | `realizations.yaml` | Which designs must be admitted, and which rejected, on **physical** grounds alone? |
+| 6. **Evidence** admissibility cases | `evidence_cases.yaml` | Which evidence and verification arrangements are admissible? |
+| 7. Process negative cases | `negative_cases.yaml` | What known-wrong design, evidence use or pipeline behaviour must be rejected, and for which reason? |
+| 8. Evidence scope | `evidence_scope.yaml` | What was actually verified, by what model, and what was not? |
+| 9. Stage projections | `stage_expectations.yaml` | After each stage: what must exist, what must not yet be decided, what may stay unresolved, what provenance must survive? |
 
-Plus `source_map.md` (part 8) — the exact legacy files behind every statement —
+Plus `source_map.md` (part 10) — the exact legacy files behind every statement —
 and `README.md` (intent, freedoms, ambiguities, stressed capabilities,
 overfitting definition).
+
+### 2.1 Three fixture domains, never one
+
+Parts 5, 6 and 7 are **separate domains and never share a tag set**. This is the
+correction recorded at finding SF-1.1 and it is not a filing convention:
+
+| Domain | Vocabulary | Governs |
+|---|---|---|
+| physical design | `physical_tag_vocabulary` in `realizations.yaml` | whether a design may be BUILT |
+| evidence / verification | `evidence_tag_vocabulary` in `evidence_cases.yaml` | whether a CLAIM may be made |
+| pipeline / process | `negative_cases.yaml` | whether a RUN behaved correctly |
+
+A non-`VERIFICATION_MINIMUM` invariant may require only physical tags; a
+`VERIFICATION_MINIMUM` may require only evidence tags. Crossing them is
+`DESIGN_EVIDENCE_TAG_MIXED`, BLOCKING.
+
+**A physical realization must never become inadmissible because no test has yet
+been authored for it.** That is the whole point of the separation.
 
 ---
 
@@ -206,8 +226,9 @@ the negative cases must target:
 
 - a stop that exists in the physics model but not in the design;
 - a `revolute` label with no fixed-side and moving-side realization;
-- a coupling relationship with no localized engagement;
-- a guide that permits translation but realizes no anti-rotation;
+- a coupling relationship with no realized interaction anywhere in its chain;
+- a guide that leaves unaccounted for a freedom the instantiating requirement
+  depends on (note: a *declared* residual freedom is admissible — see §13.7);
 - a V-A declared-pair result reported as contact-physics evidence;
 - a metric that vanishes instead of becoming `NOT_MEASURED`;
 - a requirement passing because an unrelated metric shares its unit.
@@ -362,20 +383,35 @@ embodiment, parameters, CAD, verification, evaluation. Its Oracle constrains the
 
 A **micro-oracle** constrains **one reusable mechanical capability** in
 isolation: guided translation; rotation-to-translation conversion; retention and
-release; hinged closure with a travel limit. It exists to give a capability its
-own negative cases and its own evidence-scope discipline, independent of any
+release; bounded two-state closure. It exists to give a capability its own
+negative cases and its own evidence-scope discipline, independent of any
 product.
+
+Capability statements are **project-authored and then frozen**. They are not user
+language and they are not rank 1 — see §13.5. Where semantic review changed one,
+the original dossier text is preserved and an additive amendment carries the
+current authority; see §13.8.
 
 ### 13.2 The rule that keeps micro-oracles from becoming a card library
 
 This is the load-bearing constraint of the two-tier split.
 
 1. **A micro-oracle is not a solution.** It states obligations and predicates for
-   a capability — *"a guided translation must realize anti-rotation"*,
-   *"a rotation-to-translation realization must localize engagement and react
-   both radial and axial load"*. It does **not** name a mechanism, supply
-   geometry, or supply parameter bounds. If it did, it would be a Ver1 card with
-   a YAML extension.
+   a capability — *"a guided translation must constrain the freedoms the
+   instantiating requirement depends on, and declare those it leaves free"*,
+   *"a rotation-to-translation realization must connect input to output by an
+   uninterrupted chain of realized localized interactions, and react the load
+   components its bodies actually carry"*. It does **not** name a mechanism,
+   supply geometry, or supply parameter bounds. If it did, it would be a Ver1
+   card with a YAML extension.
+
+   > **Superseded wording.** Earlier revisions of this section illustrated the
+   > rule with *"a guided translation must realize anti-rotation"* and *"a
+   > rotation-to-translation realization must localize engagement and react both
+   > radial and axial load"*. Both examples are now **retired as false**:
+   > anti-rotation is conditional (HSD-001) and radial/axial reaction applies only
+   > to load components actually carried (HSD-002). They are recorded here as
+   > examples of the overfitting this document exists to prevent.
 2. **Micro-oracles are never a source of design.** They are acceptance criteria
    applied to whatever the pipeline produced. See §13.3 for the exact access
    boundary.
@@ -456,10 +492,18 @@ end-to-end:
 
 | Micro-oracle | Capability | Legacy evidence (rank 4–5) | Product case that must realize it |
 |---|---|---|---|
-| `guided-slider` | Guided translation, anti-rotation, travel limits, assembly access | `V1 tasks/latched_drawer.json`, `m10_slide_rail/`, `m22_composition/`, `m25_contact_layer/` | C4-drawer, BM-002 |
-| `rotary-to-linear-engagement` | Rotation→translation, localized engagement, ratio, radial+axial reaction, V-A vs V-B fidelity | `V1 tasks/rack_pinion_fixture.json`, `m7_rack_pinion/`, `m11_rack_pinion/REVIEW.md`, `m13_hard_anchor/out/t2_hard_verdict.json` | C4-drawer, BM-002 |
-| `latch-retention` | Retention, hand release, overload, repeated cycling | `V1 tasks/snap_panel.json`, `m6_ms_closeout/`, `m23_latch_physics/` | BM-001, BM-001-2, BM-001-3 |
-| `bounded-two-state-closure` | Hinged closure, aperture clearance, real vs absent travel stop | `V1 m0/` (`stop/` and `nostop/` variants), `tasks/m0_hinge_box_{stop,nostop}.json` | BM-001, BM-001-2, BM-001-3 |
+| `guided-slider` | Guided translation along a declared line or path; the freedoms the instantiating requirement depends on are constrained and residual freedoms declared (HSD-001) | `V1 tasks/latched_drawer.json`, `m10_slide_rail/`, `m22_composition/`, `m25_contact_layer/` | C4-drawer, BM-002 |
+| `rotary-to-linear-engagement` | Rotation→translation through an uninterrupted chain of realized localized interactions; reaction of load components actually carried; V-A vs V-B fidelity (HSD-002) | `V1 tasks/rack_pinion_fixture.json`, `m7_rack_pinion/`, `m11_rack_pinion/REVIEW.md`, `m13_hard_anchor/out/t2_hard_verdict.json` | C4-drawer, BM-002 |
+| `latch-retention` | Retention against a declared disturbance, deliberate release distinguishable from it, repeatable cycling | `V1 tasks/snap_panel.json`, `m6_ms_closeout/`, `m23_latch_physics/` | BM-001, BM-001-2, BM-001-3 |
+| `bounded-two-state-closure` | Bounded motion between two states with continuous constraint coverage and each bound physically produced (HSD-003) — **not** specifically a hinged closure with a stop | `V1 m0/` (`stop/` and `nostop/` variants), `tasks/m0_hinge_box_{stop,nostop}.json` | BM-001, BM-001-2, BM-001-3 |
+
+> The fourth row named a *mechanism* — "hinged closure … travel stop" — in a
+> table of *capabilities*. That is the defect that produced the rename from
+> `hinge-and-stop`, and the row is corrected above. A pin hinge with a discrete
+> stop flange is one realization of the capability, not the capability. Note
+> also (HSD-003) that not every product closure instantiates this micro-oracle:
+> a detachable or freely-positioned closure may satisfy its product source
+> without belonging to this capability at all.
 
 The `m0/out/stop` vs `m0/out/nostop` pair is particularly valuable: it is a
 matched pair differing only in whether a real stop exists, which is exactly the
@@ -497,6 +541,60 @@ Physical design admissibility and verification-process admissibility are separat
 questions and never share a tag set. A physical realization must not become
 inadmissible because no test has been authored for it. See
 `ORACLE_AUTHORING_POLICY.md` §9.
+
+## 13.7 Retired capability rules — kept visible, not deleted
+
+These rules appeared in earlier revisions of this document and in the packs. Each
+was **found false by counterexample** during human semantic review and is listed
+here so a reader can recognise it if it reappears.
+
+| Retired rule | Falsified by | Decision |
+|---|---|---|
+| Guided translation removes all non-translational freedoms | a cylindrical rod in a plain round bore (`ADM-GS-E`) | HSD-001 |
+| Guided translation universally requires anti-rotation | a rotationally symmetric platform whose scenario is indifferent (`ADM-BM-002-E`, `ADM-C4-D`) | HSD-001, SF-5.4, SF-6.1 |
+| Rotary-to-linear conversion needs one direct input/output engagement | a crank-link-slider, where input and output never touch (`ADM-RL-E`) | HSD-002 |
+| Rotary-to-linear conversion universally needs radial AND axial reaction | a cable drum, which carries no axial load (`ADM-RL-C`, `ADM-BM-002-C`) | HSD-002 |
+| Bounded two-state closure is a hinged closure with a stop | a sliding cover (`ADM-HS-C`), a pin in one continuous slot (`ADM-HS-D`), a magnetic two-seat detent (`ADM-HS-F`) | HSD-003 |
+| One relative constraint must persist through the whole bounded motion | a flexure handing off to a moulded rib (`ADM-HS-E`) | HSD-003 |
+| A swept volume must be a proper subset of a travel corridor | the swept volume generally *defines* the corridor | SF-5.5, SF-7.2 |
+| Physical realizations and verification cases share one fixture domain | a buildable latch rejected for want of an authored test | SF-1.1 |
+
+Each falsifying design is a live fixture in the pack set. If one starts failing,
+a retired rule has returned.
+
+## 13.8 Amending a frozen capability statement
+
+A frozen dossier is never overwritten. Where semantic review changed a capability
+definition, the pack carries an **additive amendment** under
+`_dossier_amendments/`, and the original dossier text stays byte-identical.
+
+An amendment records: the original section, its byte hash, the amended statement,
+the amendment hash, `supersedes_for_normative_authority`, and the human decision
+that approved it. Normative statements cite the amendment, not the superseded
+section. The auditor verifies the original hash still matches, so a silent edit
+to a "frozen" dossier is BLOCKING.
+
+## 13.9 Intended interaction and assembly semantics
+
+Defined normatively in `ORACLE_AUTHORING_POLICY.md` §13–§15 and summarised here
+because it changes how every motion and assembly predicate is written.
+
+**Contact is not interference.** The physical rule is *no undeclared volumetric
+overlap*, not *positive clearance everywhere*. A guide, a pin, a dovetail, a snap
+and a stop exist in order to touch; a predicate that fails them for touching is
+testing the wrong thing. Declared contact, declared interference fit and declared
+compliant interaction are all admissible, each with its own declaration
+requirements; undeclared penetration is always FAIL.
+
+**Assembly is a process, not a collision test.** "A collision-free installation
+path exists" excludes every press fit and every snap fit. The requirement is a
+realizable installation process that passes through no *undeclared rigid*
+material, with deformation, material, direction and process assumptions
+represented where insertion depends on them.
+
+**A control is not the only proof (HSD-006).** A feature claim may rest on direct
+causal geometry and contact evidence, or on a discriminating control. Requiring
+a control in every case made ordinary direct evidence inadmissible.
 
 ## 14. Relationship to the root ASSY_NEW knowledge project
 

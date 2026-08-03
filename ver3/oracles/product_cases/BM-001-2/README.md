@@ -1,5 +1,9 @@
 # BM-001-2 — Latching storage box, panel-mounted, no projecting corners
 
+**Status: `BLOCKED_BY_SOURCE_AMBIGUITY` (AMB-001-2-01)** — not lock-ready, not
+CAD-validated. The unaffected work is at `PRE_CAD_SEMANTIC_REVIEWED` quality but
+the pack cannot be locked until a reading is selected.
+
 ## Problem intent
 
 BM-001 plus one environmental requirement and one safety requirement: the
@@ -71,5 +75,6 @@ missing. Until "inside the enclosure" is fixed there is no set of poses the
 predicate ranges over, so it cannot separate compliant from non-compliant designs
 at any fidelity.
 
-That is why BM-001-2 alone remains **BLOCKED_BY_SOURCE_AMBIGUITY** and is not
-lock-ready.
+That is why BM-001-2 alone remains **BLOCKED_BY_SOURCE_AMBIGUITY**. No pack in
+this set is lock-ready; the other eight are `PRE_CAD_SEMANTIC_REVIEWED`, and
+BM-001-2 additionally carries a source-level blocker.

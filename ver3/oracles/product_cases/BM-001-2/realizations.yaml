@@ -7,6 +7,7 @@ note: >
   evidence_cases.yaml (finding SF-1.1).
 
 physical_tag_vocabulary:
+  interaction_regions_declared: "every region where two bodies meet is classified as declared contact, declared clearance, declared interference fit or declared compliant interaction"
   planar_seating_region: "a boundary region seats flat against a mounting surface"
   exposed_edges_non_projecting: "every edge of the exposed exterior boundary is non-projecting"
   actuator_not_reachable_from_exposed_side: "no access path from the exposed half-space terminates at the actuator"
@@ -17,18 +18,18 @@ admissible_realizations:
     summary: "Prismatic body with one flat seating region and all exposed arrises generously filleted; retention worked from the cavity interior."
     materially_differs_by: [boundary_form, retention_principle]
     tags: [planar_seating_region, exposed_edges_non_projecting,
-           actuator_not_reachable_from_exposed_side, release_worked_from_inside]
+           actuator_not_reachable_from_exposed_side, release_worked_from_inside, interaction_regions_declared]
   - id: ADM-BM-001-2-B
     summary: "Single-curvature exposed shell over a flat seating plate; retention worked from the cavity interior by a lever reachable only when open."
     materially_differs_by: [boundary_form, actuation_geometry]
     tags: [planar_seating_region, exposed_edges_non_projecting,
-           actuator_not_reachable_from_exposed_side, release_worked_from_inside]
+           actuator_not_reachable_from_exposed_side, release_worked_from_inside, interaction_regions_declared]
   - id: ADM-BM-001-2-C
     summary: "Flat seating region with the exposed boundary formed by chamfered, recessed arrises rather than curvature; interior-worked retention."
     materially_differs_by: [boundary_form]
     note: "Admits a non-rounded solution. Rejected by the pre-correction wording that demanded 'rounded'."
     tags: [planar_seating_region, exposed_edges_non_projecting,
-           actuator_not_reachable_from_exposed_side, release_worked_from_inside]
+           actuator_not_reachable_from_exposed_side, release_worked_from_inside, interaction_regions_declared]
   - id: ADM-BM-001-2-D
     summary: >
       L-shaped body seated on one narrow face, with the exposed boundary wrapping
@@ -40,27 +41,27 @@ admissible_realizations:
       the exposed boundary to be OPPOSITE the seating region, which rejected this
       design. REQ-009 never relates the two sides geometrically.
     tags: [planar_seating_region, exposed_edges_non_projecting,
-           actuator_not_reachable_from_exposed_side, release_worked_from_inside]
+           actuator_not_reachable_from_exposed_side, release_worked_from_inside, interaction_regions_declared]
 
 inadmissible_realizations:
   - id: INA-BM-001-2-A
     summary: "Prismatic enclosure with sharp exposed arrises; REQ-009 recorded in the trace and reported satisfied."
     from_negative_case: NEG-BM-001-2-001
     missing_tags: [exposed_edges_non_projecting]
-    tags: [planar_seating_region, actuator_not_reachable_from_exposed_side, release_worked_from_inside]
+    tags: [planar_seating_region, actuator_not_reachable_from_exposed_side, release_worked_from_inside, interaction_regions_declared]
   - id: INA-BM-001-2-B
     summary: "Exposed side annotated with a curvature label while the underlying solid is prismatic."
     from_negative_case: NEG-BM-001-2-002
     missing_tags: [exposed_edges_non_projecting]
-    tags: [planar_seating_region, actuator_not_reachable_from_exposed_side, release_worked_from_inside]
+    tags: [planar_seating_region, actuator_not_reachable_from_exposed_side, release_worked_from_inside, interaction_regions_declared]
   - id: INA-BM-001-2-C
     summary: "Actuator placed on the exposed side; an access path exists and terminates at it."
     from_negative_case: NEG-BM-001-2-003
     missing_tags: [actuator_not_reachable_from_exposed_side, release_worked_from_inside]
-    tags: [planar_seating_region, exposed_edges_non_projecting]
+    tags: [planar_seating_region, exposed_edges_non_projecting, interaction_regions_declared]
   - id: INA-BM-001-2-D
     summary: "Actuator recessed on a non-exposed EXTERIOR side, reported as compliant."
     from_negative_case: NEG-BM-001-2-004
     missing_tags: [release_worked_from_inside]
     note: "Admitted by the pre-correction broadened wording; rejected once REQ-010's exact terms were restored."
-    tags: [planar_seating_region, exposed_edges_non_projecting, actuator_not_reachable_from_exposed_side]
+    tags: [planar_seating_region, exposed_edges_non_projecting, actuator_not_reachable_from_exposed_side, interaction_regions_declared]

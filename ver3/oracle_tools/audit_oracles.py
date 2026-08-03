@@ -12,7 +12,12 @@ What this tool CAN establish:
     declared admissible and no fixture declared inadmissible passes every
     invariant;
   * that every normative statement has a recorded source-entailment review and
-    every admissible fixture a recorded plausibility review.
+    every admissible fixture a recorded plausibility review;
+  * that no file still asserts an explicitly RETIRED contract, and that pack
+    status, ambiguity blocking and amendment references agree across files;
+  * that no motion or assembly predicate uses a retired blanket-clearance form,
+    that declared interference and compliant regions carry their assumptions, and
+    that no verification minimum accepts ONLY an ablated control.
 
 What this tool CANNOT establish, and does not claim:
   * that any statement is physically true;
@@ -22,7 +27,10 @@ What this tool CANNOT establish, and does not claim:
     for validity;
   * that a predicate proves exactly its statement. Where that cannot be decided
     mechanically the tool demands a RECORDED SEMANTIC REVIEW instead of
-    pretending to check it.
+    pretending to check it;
+  * SEMANTIC EQUIVALENCE between files. Pass 3F detects explicit stale contracts
+    by pattern and by cross-file comparison. Two files can still disagree in ways
+    no pattern catches; 3F narrows the gap, it does not close it.
 
 A clean report from this tool means the pack set is internally consistent and
 every semantic question has been reviewed by a human-readable record. It is not
@@ -32,7 +40,7 @@ every fixture; see FIXTURE_PLAUSIBILITY_REVIEW.yaml.
 It never writes to a pack and never runs as part of any pipeline.
 """
 from __future__ import annotations
-import argparse, json, random, re, sys
+import argparse, hashlib, json, os, platform, random, re, subprocess, sys, datetime
 from pathlib import Path
 import yaml
 
@@ -40,6 +48,13 @@ ROOT = Path(__file__).resolve().parent.parent
 ORACLES, DOSSIERS = ROOT / "oracles", ROOT / "oracles" / "_dossiers"
 ENTAILMENT = ORACLES / "SOURCE_ENTAILMENT_REVIEW.yaml"
 PLAUSIBILITY = ORACLES / "FIXTURE_PLAUSIBILITY_REVIEW.yaml"
+AMENDMENTS = ORACLES / "_dossier_amendments" / "AMENDMENTS.yaml"
+DECISIONS = ORACLES / "HUMAN_SEMANTIC_DECISIONS.yaml"
+
+VALID_PACK_STATUS = {"PRE_CAD_SEMANTIC_REVIEWED", "BLOCKED_BY_SOURCE_AMBIGUITY"}
+RETIRED_PACK_STATUS = {"STRUCTURALLY_COMPLETE", "SEMANTICALLY_AUDITED",
+                       "UNDER_SEMANTIC_CORRECTION", "LOCK_READY", "CAD_VALIDATED",
+                       "PHYSICALLY_PROVEN", "LOCKED", "PRODUCTION_READY"}
 
 # ------------------------------------------------------------------ vocabulary
 PRODUCT_BASIS = {"DIRECT_USER_REQUIREMENT", "NECESSARY_PHYSICAL_CONSEQUENCE", "VERIFICATION_MINIMUM"}
@@ -654,13 +669,360 @@ def pass_3e(packs):
     return f
 
 
-PASSES = {"3A": pass_3a, "3B": pass_3b, "3C": pass_3c, "3D": pass_3d, "3E": pass_3e}
+# --------------------------------------------------------------- Pass 3G
+# GATE 2: intended-contact and assembly semantics.
+# [^)]* stops at the first ")" and so misses nested calls such as
+# clearance(swept_volume(x), y) > 0 — the exact form this check exists to catch.
+BLANKET_CLEARANCE = re.compile(
+    r"\bclearance\s*\(.*\)\s*>\s*0"
+    r"|\bintersect\s*\(.*\)\s+is\s+empty"
+    r"|\bcollision-free\b", re.I)
+CONTACT_SAFE = re.compile(r"no (undeclared )?volumetric overlap|outside declared contact", re.I)
+INTERACTION_KINDS = {"declared_contact", "declared_clearance", "declared_interference_fit",
+                     "declared_compliant_interaction"}
+DECLARED_INTERFERENCE_FIELDS = ("material_assumption", "process_assumption")
+DECLARED_COMPLIANT_FIELDS = ("deflection_represented", "material_assumption", "insertion_direction")
+
+
+def pass_3g(packs):
+    f = []
+    for name, p in packs.items():
+        n = p.get("normative")
+        if not n:
+            continue
+        for inv in n.get("invariants", []) or []:
+            sid = inv.get("id", "?")
+            pred = str(inv.get("verification_predicate", ""))
+            if BLANKET_CLEARANCE.search(pred) and not CONTACT_SAFE.search(pred):
+                f.append(Finding("3G", name, sid, "BLOCKING", "BLANKET_CLEARANCE_PREDICATE",
+                                 f"predicate uses a retired blanket form: '{pred.strip()[:130]}'",
+                                 "restate as: no volumetric overlap outside declared contact, "
+                                 "declared interference-fit and declared compliant-interaction regions"))
+        # fixtures that declare interaction regions must classify them and carry
+        # the assumptions each kind requires
+        for a in (p.get("realizations") or {}).get("admissible_realizations") or []:
+            for reg in a.get("interaction_regions") or []:
+                kind = reg.get("kind")
+                if kind not in INTERACTION_KINDS:
+                    f.append(Finding("3G", name, a["id"], "BLOCKING", "INTERACTION_REGION_UNCLASSIFIED",
+                                     f"region {reg.get('pair')} has kind '{kind}'",
+                                     f"use one of {sorted(INTERACTION_KINDS)}"))
+                    continue
+                if kind == "declared_interference_fit":
+                    miss = [k for k in DECLARED_INTERFERENCE_FIELDS if not reg.get(k)]
+                    if miss:
+                        f.append(Finding("3G", name, a["id"], "BLOCKING",
+                                         "DECLARED_FIT_WITHOUT_ASSUMPTIONS",
+                                         f"interference fit at {reg.get('pair')} lacks {miss}",
+                                         "state the material and process assumptions, or the fit is an "
+                                         "undeclared overlap"))
+                if kind == "declared_compliant_interaction":
+                    miss = [k for k in DECLARED_COMPLIANT_FIELDS if not reg.get(k)]
+                    if miss:
+                        f.append(Finding("3G", name, a["id"], "BLOCKING",
+                                         "DECLARED_FIT_WITHOUT_ASSUMPTIONS",
+                                         f"compliant interaction at {reg.get('pair')} lacks {miss}",
+                                         "represent the deformation and state its material and direction"))
+        # a verification minimum must not accept ONLY an ablated control
+        for inv in n.get("invariants", []) or []:
+            if inv.get("basis_type") != "VERIFICATION_MINIMUM":
+                continue
+            pred = str(inv.get("verification_predicate", "")).lower()
+            mentions_removal = re.search(r"\bremoved\b|\bablat", pred)
+            offers_alternative = ("either" in pred) or ("direct causal" in pred)
+            if mentions_removal and not offers_alternative:
+                f.append(Finding("3G", name, inv.get("id", "?"), "BLOCKING",
+                                 "ABLATION_ONLY_VERIFICATION_MINIMUM",
+                                 f"predicate admits only removal/ablation evidence: '{pred[:130]}'",
+                                 "admit direct causal evidence as an alternative (HSD-006)"))
+    return f
+
+
+# --------------------------------------------------------------- Pass 3F
+# Cross-file semantic drift. These checks CANNOT prove semantic equivalence -
+# nothing mechanical can. They detect explicit STALE CONTRACTS: a file still
+# asserting a rule another file has withdrawn.
+RETIRED_CONTRACT_PATTERNS = [
+    (r"five non-translational freedoms is shown removed",
+     "guided-slider: retired strict-prismatic rule (HSD-001)"),
+    (r"one translation\s+retained,?\s+five removed",
+     "guided-slider: retired freedom-count rule (HSD-001)"),
+    (r"proper subset of the corridor",
+     "retired proper-subset corridor rule (SF-5.5 / SF-7.2)"),
+    (r"\bengagement_site\b(?!s)",
+     "rotary-to-linear: singular engagement site where a chain is permitted (HSD-002)"),
+    (r"radial_support_realization\b",
+     "rotary-to-linear: unconditional radial support (HSD-002)"),
+    (r"must survive",
+     "retired fixed candidate plurality (SF-8.3)"),
+]
+
+
+def _walk_strings(x, path=""):
+    if isinstance(x, str):
+        yield path, x
+    elif isinstance(x, dict):
+        for k, v in x.items():
+            yield from _walk_strings(v, f"{path}.{k}" if path else str(k))
+    elif isinstance(x, list):
+        for i, v in enumerate(x):
+            yield from _walk_strings(v, f"{path}[{i}]")
+
+
+def pass_3f(packs):
+    f = []
+    amend_doc = yaml.safe_load(AMENDMENTS.read_text()) if AMENDMENTS.exists() else None
+    amend_ids = {a["amendment_id"] for a in (amend_doc or {}).get("amendments", [])}
+    amend_by_pack = {}
+    for a in (amend_doc or {}).get("amendments", []):
+        amend_by_pack.setdefault(a["pack"], []).append(a)
+    dec_doc = yaml.safe_load(DECISIONS.read_text()) if DECISIONS.exists() else None
+    dec_ids = {d["decision_id"] for d in (dec_doc or {}).get("decisions", [])}
+    if dec_doc is None:
+        f.append(Finding("3F", "-", "-", "BLOCKING", "HUMAN_DECISION_REF_UNRESOLVED",
+                         f"{DECISIONS.name} absent while amendments and packs cite HSD decisions",
+                         "create the human semantic decision record"))
+
+    # amendment integrity: a "frozen" dossier that changed under an amendment is BLOCKING
+    for a in (amend_doc or {}).get("amendments", []):
+        dp = Path(a.get("dossier", ""))
+        if not dp.is_absolute():
+            dp = ROOT.parent / dp if str(dp).startswith("ver3/") else ORACLES / "_dossiers" / dp.name
+        if not dp.exists():
+            f.append(Finding("3F", a.get("pack", "-"), a["amendment_id"], "BLOCKING",
+                             "AMENDMENT_DOSSIER_MISSING", f"{a.get('dossier')} not found",
+                             "fix the dossier path"))
+            continue
+        import hashlib
+        actual = hashlib.sha256(dp.read_bytes()).hexdigest()
+        if actual != a.get("original_dossier_sha256"):
+            f.append(Finding("3F", a.get("pack", "-"), a["amendment_id"], "BLOCKING",
+                             "FROZEN_DOSSIER_MUTATED",
+                             f"{dp.name} sha256 {actual[:16]} != recorded {str(a.get('original_dossier_sha256'))[:16]}",
+                             "a frozen dossier was edited; restore it and re-amend additively"))
+        if a.get("human_decision_ref") and dec_doc is not None \
+           and a["human_decision_ref"] not in dec_ids:
+            f.append(Finding("3F", a.get("pack", "-"), a["amendment_id"], "BLOCKING",
+                             "HUMAN_DECISION_REF_UNRESOLVED",
+                             f"human_decision_ref {a['human_decision_ref']} not in HUMAN_SEMANTIC_DECISIONS.yaml",
+                             "define the decision or fix the reference"))
+
+    for name, p in packs.items():
+        n = p.get("normative")
+        if not n:
+            continue
+        d = p["_dir"]
+
+        # (a) pack status must be current and consistent everywhere
+        st = n.get("pack_status") or n.get("lock_status")
+        if st in RETIRED_PACK_STATUS:
+            f.append(Finding("3F", name, "-", "BLOCKING", "STALE_PACK_STATUS",
+                             f"normative declares retired status '{st}'",
+                             f"use one of {sorted(VALID_PACK_STATUS)}"))
+        elif st not in VALID_PACK_STATUS:
+            f.append(Finding("3F", name, "-", "BLOCKING", "STALE_PACK_STATUS",
+                             f"unknown pack_status '{st}'", f"use one of {sorted(VALID_PACK_STATUS)}"))
+        for doc in ("README.md", "source_map.md"):
+            fp = d / doc
+            if not fp.exists():
+                continue
+            txt = fp.read_text()
+            for bad in RETIRED_PACK_STATUS:
+                if re.search(rf"\bStatus:?\**\s*`?{bad}`?", txt):
+                    f.append(Finding("3F", name, doc, "BLOCKING", "STALE_PACK_STATUS",
+                                     f"{doc} still declares status '{bad}'",
+                                     f"state '{st}'"))
+            if st and st not in txt:
+                f.append(Finding("3F", name, doc, "MAJOR", "STALE_PACK_STATUS",
+                                 f"{doc} does not state the current pack status '{st}'",
+                                 "add the current status"))
+
+        # (b) retired contracts surviving in any pack file
+        for fname in ("stage_expectations", "realizations", "evidence_cases", "freedoms"):
+            blob = json.dumps(p.get(fname) or {}, default=str)
+            for pat, why in RETIRED_CONTRACT_PATTERNS:
+                if re.search(pat, blob, re.I):
+                    f.append(Finding("3F", name, fname, "BLOCKING", "RETIRED_CONTRACT_PRESENT",
+                                     f"{why}; pattern /{pat}/ found in {fname}.yaml",
+                                     "remove the retired contract or restate it conditionally"))
+
+        # (c) stage expectation demanding what the normative explicitly permits
+        se = p.get("stage_expectations") or {}
+        se_blob = json.dumps(se, default=str).lower()
+        permits_residual = any("residual" in str(i.get("statement", "")).lower()
+                               or "residual" in " ".join(str(x) for x in (i.get("exclusions") or [])).lower()
+                               for i in (n.get("invariants") or []))
+        # Only a demand that freedoms be REMOVED conflicts with a permitted
+        # residual freedom. Requiring them all to be ACCOUNTED FOR does not.
+        demands_removal = re.search(
+            r"(all|each of the) (five|six)[^.\"]{0,60}freedoms?[^.\"]{0,40}"
+            r"(removed|constrained|eliminated)", se_blob) or \
+            re.search(r"(five|six)[^.\"]{0,30}freedoms? (is|are) shown removed", se_blob)
+        if permits_residual and demands_removal:
+            f.append(Finding("3F", name, "stage_expectations", "BLOCKING",
+                             "STAGE_DEMANDS_PERMITTED_FREEDOM",
+                             "stage expectation requires a fixed freedom count while the normative permits a declared residual freedom",
+                             "restate the stage expectation to match the normative"))
+
+        # (d) unconditional support/restraint in a stage where the normative conditions it
+        conditional_ids = {i["id"] for i in (n.get("invariants") or []) if i.get("applies_when")}
+        for sid, blk in (se.get("stages") or {}).items():
+            if not isinstance(blk, dict):
+                continue
+            for rid, rule in (blk.get("outcome_rules") or {}).items():
+                if not isinstance(rule, dict):
+                    continue
+                tr = rule.get("traces_to")
+                tr = tr if isinstance(tr, list) else ([tr] if tr else [])
+                if not (set(tr) & conditional_ids):
+                    continue
+                pr = str(rule.get("pass_requires", ""))
+                if SUPPORT_NOUNS.search(pr) and UNIVERSAL_QUANT.search(pr) \
+                   and not LOAD_QUALIFIER.search(pr) and "must_not_fail_when" not in rule:
+                    f.append(Finding("3F", name, f"{sid}:{rid}", "BLOCKING",
+                                     "STAGE_UNCONDITIONAL_WHERE_NORMATIVE_CONDITIONAL",
+                                     f"outcome rule quantifies support/restraint universally while {tr} is conditional",
+                                     "condition the rule on the load actually carried, or declare must_not_fail_when"))
+
+        # (e) normative citing a superseded dossier section without naming the amendment
+        for a in amend_by_pack.get(name, []):
+            sup = str(a.get("supersedes", ""))
+            sec = sup.split("#")[-1] if "#" in sup else None
+            declared = json.dumps({k: v for k, v in n.items() if "amend" in k.lower()}, default=str)
+            if a["amendment_id"] not in declared:
+                f.append(Finding("3F", name, a["amendment_id"], "BLOCKING",
+                                 "SUPERSEDED_SOURCE_WITHOUT_AMENDMENT_REF",
+                                 f"pack does not declare amendment {a['amendment_id']} which supersedes {sup}",
+                                 "add a dossier_amendment reference to normative.yaml"))
+                continue
+            if sec:
+                for pth, val in _walk_strings(n.get("invariants") or []):
+                    if pth.endswith("source_locators") or ".source_locators" in pth:
+                        pass
+                    if re.search(rf"\b{sec}\b", val) and a["amendment_id"] not in val \
+                       and "supersed" not in val.lower() and "original" not in val.lower():
+                        # a bare citation of the superseded section inside a locator
+                        if val.strip().startswith("DOS-"):
+                            f.append(Finding("3F", name, a["amendment_id"], "MAJOR",
+                                             "SUPERSEDED_SOURCE_WITHOUT_AMENDMENT_REF",
+                                             f"locator '{val}' cites superseded {sup} without naming {a['amendment_id']}",
+                                             "cite the amendment alongside the section"))
+                            break
+
+        # (f) human decision references must resolve — both the dedicated field
+        # and any HSD-nnn cited in prose, so a typo in a note cannot hide
+        if dec_doc is not None:
+            for pth, val in _walk_strings({k: v for k, v in p.items() if k not in ("_dir",)}):
+                if pth.endswith("human_decision_ref") and val not in dec_ids:
+                    f.append(Finding("3F", name, pth, "BLOCKING", "HUMAN_DECISION_REF_UNRESOLVED",
+                                     f"{val} is not defined in HUMAN_SEMANTIC_DECISIONS.yaml",
+                                     "define the decision or fix the reference"))
+                for cited in set(re.findall(r"\bHSD-\d+\b", val)):
+                    if cited not in dec_ids:
+                        f.append(Finding("3F", name, pth, "BLOCKING", "HUMAN_DECISION_REF_UNRESOLVED",
+                                         f"prose cites {cited}, which is not defined in HUMAN_SEMANTIC_DECISIONS.yaml",
+                                         "define the decision or fix the citation"))
+
+    # (g) an ambiguity blocking in one file and non-blocking in another
+    ws = ORACLES / "ORACLE_WORKFLOW_STATE.yaml"
+    if ws.exists():
+        w = yaml.safe_load(ws.read_text()) or {}
+        for aid, rec in (w.get("source_ambiguities") or {}).items():
+            wstat = str(rec.get("status", ""))
+            pack = rec.get("pack")
+            pn = (packs.get(pack) or {}).get("normative") or {}
+            pstat = str(pn.get("pack_status") or pn.get("lock_status") or "")
+            u = wstat.upper()
+            blocking_in_ws = ("BLOCK" in u) and ("NON_BLOCKING" not in u) and ("NON-BLOCKING" not in u)
+            blocking_in_pack = pstat == "BLOCKED_BY_SOURCE_AMBIGUITY" and \
+                str(pn.get("lock_blocker", "")) == aid
+            if blocking_in_ws != blocking_in_pack:
+                f.append(Finding("3F", pack or "-", aid, "BLOCKING", "AMBIGUITY_BLOCKING_DISAGREEMENT",
+                                 f"workflow state says '{wstat}' while pack status is '{pstat}'"
+                                 f" (lock_blocker={pn.get('lock_blocker')})",
+                                 "make the blocking classification agree across files"))
+    return f
+
+
+PASSES = {"3A": pass_3a, "3B": pass_3b, "3C": pass_3c, "3D": pass_3d, "3E": pass_3e,
+          "3F": pass_3f, "3G": pass_3g}
 
 SCOPE_NOTE = ("This auditor checks structural, referential, policy and tag-algebra "
               "consistency, and that every semantic question carries a recorded human "
               "review. It does NOT establish physical truth: fixture tags are authored "
               "by the same hand as the invariants and are not independent evidence. "
               "CAD/physics validation is pending for every fixture.")
+
+
+# ------------------------------------------------------------- provenance
+def _sha256(p: Path) -> str:
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def _git(*args):
+    try:
+        return subprocess.run(["git", *args], cwd=str(ROOT.parent), capture_output=True,
+                              text=True, timeout=20).stdout.strip()
+    except Exception:
+        return ""
+
+
+def snapshot_manifest():
+    """Deterministic manifest of every file the audit actually reads.
+
+    The worktree may be uncommitted, so a commit sha alone does not identify what
+    was audited. This hash does: it is over the sorted (relative path, sha256) of
+    every oracle file plus the two tools.
+    """
+    # Excluded: _audit reports (outputs, not inputs) and the two attestation
+    # files, which are ABOUT this manifest and cannot be inside it without
+    # making the hash self-referential.
+    ATTESTATIONS = {"SOURCE_FREEZE.yaml", "PRE_CAD_BASELINE.yaml",
+                    "POST_HUMAN_REVIEW_CORRECTION_REPORT.md"}
+    files = sorted([p for p in (ORACLES).rglob("*")
+                    if p.is_file() and p.suffix in (".yaml", ".md")
+                    and "_audit" not in p.parts and p.name not in ATTESTATIONS]
+                   + [ROOT / "oracle_tools" / "audit_oracles.py",
+                      ROOT / "oracle_tools" / "mutation_tests.py"],
+                   key=lambda p: str(p.relative_to(ROOT)))
+    entries = [(str(p.relative_to(ROOT)), _sha256(p)) for p in files]
+    blob = "\n".join(f"{a}  {b}" for a, b in entries).encode()
+    oracle_only = [e for e in entries if e[0].startswith("oracles/")]
+    tree_blob = "\n".join(f"{a}  {b}" for a, b in oracle_only).encode()
+    return {
+        "snapshot_manifest_hash": hashlib.sha256(blob).hexdigest(),
+        "oracle_tree_hash": hashlib.sha256(tree_blob).hexdigest(),
+        "file_count": len(entries),
+        "oracle_file_count": len(oracle_only),
+    }
+
+
+def provenance(cmd, mode, seed, pack_order):
+    dirty = _git("status", "--porcelain", "--untracked-files=no")
+    untracked = _git("status", "--porcelain")
+    man = snapshot_manifest()
+    order_digest = hashlib.sha256("\n".join(pack_order).encode()).hexdigest()
+    return {
+        "run_id": f"run-{hashlib.sha256((man['snapshot_manifest_hash'] + cmd).encode()).hexdigest()[:16]}",
+        "utc_timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        "base_commit_sha": _git("rev-parse", "HEAD"),
+        "base_commit_note": ("base_commit_sha identifies the STARTING commit only. The audit ran "
+                             "against the working tree, which is identified by "
+                             "snapshot_manifest_hash. No claim is made that the audited files are "
+                             "committed."),
+        "worktree_state": "dirty" if (dirty or untracked) else "clean",
+        "worktree_tracked_changes": len([l for l in dirty.splitlines() if l.strip()]),
+        **man,
+        "auditor_sha256": _sha256(ROOT / "oracle_tools" / "audit_oracles.py"),
+        "mutation_suite_sha256": _sha256(ROOT / "oracle_tools" / "mutation_tests.py"),
+        "python_version": sys.version.split()[0],
+        "runtime": f"{platform.system()} {platform.release()} {platform.machine()}",
+        "command": cmd,
+        "audit_mode": mode,
+        "shuffle_seed": seed,
+        "pack_order": pack_order,
+        "pack_order_digest": order_digest,
+    }
 
 
 def main(argv=None):
@@ -680,12 +1042,22 @@ def main(argv=None):
                 rnd.shuffle(n["invariants"])
 
     names = list(PASSES) if a.p == "all" else [a.p]
+    pack_order = list(packs)
     findings = [x for nm in names for x in PASSES[nm](packs)]
     blocking = [x for x in findings if x.sev == "BLOCKING"]
-    out = {"packs_audited": sorted(packs), "passes_run": names,
+    cmd = "python3 ver3/oracle_tools/audit_oracles.py --pass " + a.p + \
+          (f" --shuffle-seed {a.shuffle_seed}" if a.shuffle_seed is not None else "")
+    mode = "shuffled" if a.shuffle_seed is not None else "canonical"
+    by_pass = {}
+    for x in findings:
+        by_pass.setdefault(x.pas, {"BLOCKING": 0, "MAJOR": 0})
+        by_pass[x.pas][x.sev] = by_pass[x.pas].get(x.sev, 0) + 1
+    out = {"provenance": provenance(cmd, mode, a.shuffle_seed, pack_order),
+           "packs_audited": sorted(packs), "passes_run": names,
            "shuffle_seed": a.shuffle_seed, "auditor_scope": SCOPE_NOTE,
            "counts": {"total": len(findings), "BLOCKING": len(blocking),
                       "MAJOR": sum(1 for x in findings if x.sev == "MAJOR")},
+           "counts_by_pass": {k: by_pass.get(k, {"BLOCKING": 0, "MAJOR": 0}) for k in names},
            "findings": [x.d() for x in findings]}
     if a.json_out:
         a.json_out.write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")

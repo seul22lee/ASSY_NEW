@@ -1,5 +1,9 @@
 # bounded-two-state-closure — source map (micro-oracle)
 
+> **Pack status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; not lock-ready, not
+> CAD-validated. Every admissible fixture is `NEEDS_GEOMETRY_VALIDATION`.
+
+
 **Capability (rank 1 for this pack):** a closure that reaches two defined states
 by a bounded motion, where the bound at each extreme is physically produced.
 Source: `ver3/oracles/_dossiers/DOS-bounded-two-state-closure.md` S1.
@@ -81,3 +85,16 @@ corrected pack, not the reviewed one.
 
 The mechanism-neutral name is kept and `historical_aliases: [hinge-and-stop]`
 records the former identifier without making it authoritative.
+
+## Capability authority after amendment AMD-HS-001
+
+`AMD-HS-001`, approved by **HSD-003**, supersedes the frozen S1 for the
+constraint-persistence and bound-distinctness clauses only. The
+"bound at each extreme is physically produced" clause is **unchanged** and remains
+the grounding for `source_declares_terminal_states`.
+
+HSD-003 also records a scope limit that no earlier file stated: **not every
+product closure instantiates this micro-oracle.** A detachable or freely-positioned
+product closure may satisfy its product source without belonging to this
+capability at all. Two endpoint bounds with an unconstrained free-flight region
+between them do not instantiate it.

@@ -1,5 +1,9 @@
 # BM-001 — Latching storage box
 
+**Status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; **not** lock-ready,
+**not** CAD-validated, **not** production authority. Every admissible fixture is
+`NEEDS_GEOMETRY_VALIDATION`. Next authorized phase: adversarial CAD validation.
+
 ## Problem intent
 
 A compact desktop storage box with a reusable latch that opens and closes

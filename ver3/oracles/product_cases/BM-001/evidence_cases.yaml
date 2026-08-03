@@ -7,7 +7,7 @@ note: >
   never make a physical realization inadmissible (finding SF-1.1).
 
 evidence_tag_vocabulary:
-  determinant_criterion_discriminates: "every criterion mapped to the open-state determinant is shown able to fail when the determinant is removed"
+  determinant_criterion_discriminates: "evidence for the open-state determinant is either direct causal (realizing geometry + interaction at the relevant configuration + caused behaviour) or discriminating (a configuration where the criterion fails once the feature is removed) - HSD-006"
   force_provenance_declared: "every cited retention or release force is marked as an input condition or as a measurement, and only measurements are counted as results"
 
 admissible_evidence_cases:
@@ -25,6 +25,21 @@ admissible_evidence_cases:
     note: >
       Admitted although it reports no measured retention force. Declining to
       report a value is not a defect; reporting an input as an outcome is.
+    tags: [determinant_criterion_discriminates, force_provenance_declared]
+
+  - id: ADM-EV-BM001-CAUSAL
+    summary: >
+      DIRECT CAUSAL evidence: the realizing geometry is shown to exist, the
+      interaction is shown to occur at the relevant configuration, and the
+      observed behaviour is shown to be caused by it. NO ablated control model is
+      built.
+    gate: GATE-2
+    human_decision_ref: HSD-006
+    note: >
+      THE CAUSAL-ALTERNATIVE FIXTURE. Under the pre-GATE-2 minimum this evidence
+      was inadmissible, because the only accepted proof was a control with the
+      feature removed. A control remains admissible and remains valuable; it is
+      no longer the only admissible form.
     tags: [determinant_criterion_discriminates, force_provenance_declared]
 
 inadmissible_evidence_cases:

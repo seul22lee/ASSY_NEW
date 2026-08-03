@@ -1,5 +1,9 @@
 # latch-retention — source map (micro-oracle)
 
+> **Pack status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; not lock-ready, not
+> CAD-validated. Every admissible fixture is `NEEDS_GEOMETRY_VALIDATION`.
+
+
 **Capability (rank 1 for this pack):** holding two bodies in a defined relative
 state against a disturbance, and releasing them by a deliberate action,
 repeatably. Source: `ver3/oracles/_dossiers/DOS-latch-retention.md` S1.

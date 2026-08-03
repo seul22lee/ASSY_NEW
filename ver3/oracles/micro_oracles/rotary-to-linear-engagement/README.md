@@ -1,6 +1,9 @@
 # Micro-oracle — rotary-to-linear-engagement
 
-**Status:** STRUCTURALLY_COMPLETE — not yet audited, not locked.
+**Status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; **not** lock-ready,
+**not** CAD-validated, **not** production authority. Every admissible fixture is
+`NEEDS_GEOMETRY_VALIDATION`. Next authorized phase: adversarial CAD validation.
+
 **Tier:** micro_oracle.
 **Frozen dossier:** `../../_dossiers/DOS-rotary-to-linear-engagement.md`.
 
@@ -90,3 +93,20 @@ Two further corrections: the requirement that the input/output relation be
 Basis types are `PROJECT_DEFINED_CAPABILITY`, not `DIRECT_USER_REQUIREMENT`: a
 micro-oracle has no user, and this capability statement was written by the
 project and then frozen (SF-1.3).
+
+## Capability authority after amendment AMD-RL-001
+
+Normative authority for the **capability statement** rests with `AMD-RL-001`,
+approved by **HSD-002**. The frozen S1 text is preserved verbatim in the amendment
+record; S2–S7 retain full authority.
+
+Stage expectations were carrying the retired wording after the normative file had
+been corrected. Fixed in this pass:
+
+| Retired stage wording | Now |
+|---|---|
+| `engagement_site` (singular) at s04 | `interaction_sites` (a list), with a chain note |
+| `radial_support_realization` required at s05 | `reaction_realizations_for_carried_loads` |
+| `output_rotation_restraint` unconditional at s05 | required only where the chain applies the moment |
+| `RL-C2_relation_declared` — a physical FAIL for a missing declaration | `RL-C2_rotation_causes_translation` — physical causation; the declaration is a representation obligation at s04 |
+| `RL-C5` requiring radial support on the rotating body | reaction for load components actually carried |

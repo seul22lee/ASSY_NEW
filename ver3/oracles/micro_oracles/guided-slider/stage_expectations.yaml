@@ -16,14 +16,18 @@ stages:
     may_remain_unresolved: [UNR-GS-001, UNR-GS-003]
     provenance_required: ["guidance obligation -> the requirement that demands relative translation"]
   s04:
-    must_exist: [travel_line_as_geometric_direction, travel_corridor, swept_volume_with_fidelity, freedom_accounting]
-    must_not_be_decided: [travel_limits_without_a_stated_requirement, final_dimensions]
+    must_exist: [travel_line_as_geometric_direction, declared_travel_path, swept_volume_with_fidelity, freedom_accounting]
+    must_not_be_decided: [travel_limits_without_a_stated_requirement, final_dimensions, degree_of_freedom_count]
     may_remain_unresolved: [travel_range]
     provenance_required: ["each removed freedom -> the constraint id removing it"]
     freedom_accounting_note: >
-      All six relative freedoms must be accounted for explicitly: one translation
-      retained, five removed, each with the constraint that removes it named. A
-      silent account is the defect NRM-GS-002 exists to catch.
+      All six relative freedoms must be accounted for explicitly. For each: either
+      a realized constraint removing it is named, or it is DECLARED as
+      intentionally unconstrained. A silent account - a freedom neither
+      constrained nor declared - is the defect NRM-GS-002 exists to catch.
+      Corrected at HSD-001: the capability does NOT require a fixed count of
+      removed freedoms, and a design retaining a declared residual freedom
+      (typically rotation about the travel axis) is admissible.
   s05:
     must_exist: [guidance_realization, engagement_features_on_both_bodies, transverse_load_path_records]
     must_not_be_decided: [guide_part_count_as_criterion, clearance_defaults]
@@ -54,10 +58,12 @@ stages:
         fail_when: "the direction exists only as a name or a label"
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      GS-C2_freedoms_removed:
+      GS-C2_freedoms_accounted:
         traces_to: [NRM-GS-002, NRM-GS-003]
-        pass_requires: "each of the five non-translational freedoms is shown removed by an engagement with geometry on both bodies, at contact fidelity"
-        fail_when: "a freedom is unaccounted for, or a constraint has no participating geometry"
+        human_decision_ref: HSD-001
+        pass_requires: "every freedom the instantiating requirement depends on is shown removed by an interaction with participating material on both bodies, at contact fidelity, and every remaining freedom is declared as intentionally unconstrained"
+        fail_when: "a freedom the requirement depends on is unconstrained, a freedom is neither constrained nor declared, or a claimed constraint has no participating material"
+        must_not_fail_when: "a declared residual freedom remains and the instantiating requirement is indifferent to it"
         if_evidence_is_declared_pair_only: NOT_VERIFIED
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
@@ -76,10 +82,11 @@ stages:
         if_unresolved: INDETERMINATE
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      GS-C5_corridor:
+      GS-C5_clearance_and_traversability:
         traces_to: NRM-GS-006
-        pass_requires: "swept volume shown to be a proper subset of the corridor and clear of guiding-body material"
-        fail_when: "the swept volume intersects material or fills the corridor"
+        pass_requires: "no undeclared volumetric overlap between the translating body and guiding-body material at any configuration of the declared travel, and the declared path shown traversable"
+        fail_when: "undeclared volumetric overlap occurs at any configuration, or the path is blocked at an interior point"
+        must_not_fail_when: "the bodies touch at a declared contact region of the guiding interaction"
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       GS-C6_observable_admissibility:

@@ -1,5 +1,9 @@
 # BM-001-3 — source map
 
+> **Pack status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; not lock-ready, not
+> CAD-validated. Every admissible fixture is `NEEDS_GEOMETRY_VALIDATION`.
+
+
 Inherits `BM-001/source_map.md` in full. Delta sources only.
 
 ## Rank 1 — delta requirement

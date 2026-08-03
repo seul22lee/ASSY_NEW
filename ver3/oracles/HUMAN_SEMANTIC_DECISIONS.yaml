@@ -1,0 +1,265 @@
+schema_version: 0.1.0
+purpose: Approved human semantic and capability decisions. This is a DECISION RECORD. It is not physical
+  evidence, it is not a rank-1 user source, and no normative statement may cite it as if it were either.
+  It exists so that interpretations are explicit and rejectable in one place rather than silently embedded
+  in wording across nine packs.
+authority: A decision of kind PROJECT_DEFINED_CAPABILITY defines a capability this project chose. A decision
+  of kind PRODUCT_LANGUAGE_INTERPRETATION reads user language that does not settle the question by itself,
+  and is distinguishable from verbatim source on that basis. A decision of kind VERIFICATION_METHODOLOGY
+  governs what evidence is admissible and makes no claim about any design. None of the three is a user
+  requirement.
+challengeability: Every decision here is CHALLENGEABLE BY CAD. If geometry or physics shows an approved
+  interpretation admits an unbuildable design, or rejects a buildable one, the decision is revised and
+  the packs follow it. The SOURCE is not challengeable; the reading of it is.
+decision_kinds:
+  PROJECT_DEFINED_CAPABILITY: defines the scope of a project-authored capability
+  PRODUCT_LANGUAGE_INTERPRETATION: reads user language the source does not settle
+  VERIFICATION_METHODOLOGY: governs admissible evidence, not design
+summary:
+  total: 6
+  PROJECT_DEFINED_CAPABILITY: 3
+  PRODUCT_LANGUAGE_INTERPRETATION: 2
+  VERIFICATION_METHODOLOGY: 1
+  all_challengeable_by_cad: true
+decisions:
+- decision_id: HSD-001
+  title: guided-slider capability scope
+  decision_kind: PROJECT_DEFINED_CAPABILITY
+  decision: What does "guided translation" require of the non-translational freedoms?
+  alternatives_considered:
+  - 'A: all five non-translational freedoms are always removed (a strict 1-DOF prismatic joint)'
+  - 'B: only the freedoms the instantiating requirement depends on are constrained; the rest are declared'
+  - 'C: no freedom requirement at all - guidance means only that a path exists'
+  approved_interpretation:
+  - guidance is along a declared line or path
+  - only freedoms that would violate the instantiating requirement must be constrained
+  - residual axial rotation or another freedom may remain when permitted, and must be DECLARED
+  - the capability is NOT synonymous with a strict 1-DOF prismatic joint
+  rejected:
+  - A - all five non-translational freedoms must always be removed
+  - 'C - rejected separately: a freedom neither constrained nor declared is a silent account, which is
+    the defect NRM-GS-002 exists to catch'
+  rationale: 'Reading A rejected a cylindrical rod in a plain round bore, which is about as ordinary a
+    guided slider as exists. Nothing in any project source requires a prismatic joint, and the capability
+    statement that implied one was project-authored, so correcting it corrects a project definition rather
+    than reinterpreting a user. Reading C was rejected because an unaccounted-for freedom is exactly the
+    silent-omission defect the capability exists to prevent: the correction is to require DECLARATION,
+    not to drop the accounting.'
+  affected_files:
+  - _dossier_amendments/AMENDMENTS.yaml (AMD-GS-001)
+  - micro_oracles/guided-slider/normative.yaml
+  - micro_oracles/guided-slider/stage_expectations.yaml
+  - micro_oracles/guided-slider/realizations.yaml
+  - micro_oracles/guided-slider/README.md
+  - micro_oracles/guided-slider/source_map.md
+  - ORACLE_METHOD.md 13.7
+  affected_statement_ids:
+  - NRM-GS-001
+  - NRM-GS-002
+  - NRM-GS-003
+  - NRM-GS-004
+  - NRM-GS-005
+  - NRM-GS-006
+  - FRE-GS-008
+  - UNR-GS-004
+  challengeable_by_cad: true
+  approval_status: APPROVED
+  note: If strict single-degree-of-freedom guidance is later required by a project source, that is a DIFFERENT
+    capability and belongs in a separate pack named single-dof-linear-guidance. It is not this one.
+- decision_id: HSD-002
+  title: rotary-to-linear-engagement capability scope
+  decision_kind: PROJECT_DEFINED_CAPABILITY
+  decision: What connects the rotary input to the linear output, and what reactions does the conversion
+    owe?
+  alternatives_considered:
+  - 'A: one localized engagement directly between the rotating input body and the translating output body,
+    with radial AND axial reaction on rotating elements'
+  - 'B: an uninterrupted chain of localized interactions, with reaction only for load components actually
+    carried'
+  - 'C: any declared kinematic relation, with no locality requirement at all'
+  approved_interpretation:
+  - an uninterrupted chain of localized physical interactions connects rotary input to translating output
+  - multi-stage interaction chains are admissible
+  - direct input-output engagement is NOT required
+  - reaction requirements apply only to load components actually carried
+  rejected:
+  - A - one direct engagement between the input and output bodies
+  - A - universal radial and axial support requirements
+  - 'C - rejected: a relation with no participating material names no place where the conversion acts
+    and cannot be built'
+  rationale: 'Reading A rejected the crank-link-slider, in which the input body and the output body never
+    touch - the most common rotary-to-linear mechanism in engineering - and also the cable/drum and cam/follower
+    families. Its reaction clause was falsified twice: a cable drum carries no axial load, and a rotating
+    nut on a fixed screw reacts axially through the screw rather than through a thrust feature on a rotating
+    element. Reading C was rejected because locality is what distinguishes a design from a declaration.
+    The same decision reclassifies AMB-C4-01: rank precedence already disposes of the gear/no-gear disagreement,
+    so no human ruling on a transmission family is called for.'
+  affected_files:
+  - _dossier_amendments/AMENDMENTS.yaml (AMD-RL-001, AMD-C4-001)
+  - micro_oracles/rotary-to-linear-engagement/normative.yaml
+  - micro_oracles/rotary-to-linear-engagement/stage_expectations.yaml
+  - product_cases/C4-drawer/normative.yaml (LEGACY-CONFLICT-C4-01)
+  - ORACLE_METHOD.md 13.7
+  affected_statement_ids:
+  - NRM-RL-001
+  - NRM-RL-002
+  - NRM-RL-003
+  - NRM-RL-004
+  - NRM-RL-005
+  - NRM-C4-004
+  - FRE-C4-002
+  - LEGACY-CONFLICT-C4-01
+  - NRM-BM-002-003
+  - NRM-BM-002-006
+  challengeable_by_cad: true
+  approval_status: APPROVED
+  note: null
+- decision_id: HSD-003
+  title: bounded-two-state-closure capability scope
+  decision_kind: PROJECT_DEFINED_CAPABILITY
+  decision: What does a "bounded" motion require between the two states, and which products must instantiate
+    this capability?
+  alternatives_considered:
+  - 'A: one identical relative constraint persists through the whole motion'
+  - 'B: at every configuration at least one realized interaction keeps the configuration in the allowed
+    manifold; the active constraint may change'
+  - 'C: two endpoint bounds suffice, with no requirement on the interior of the path'
+  approved_interpretation:
+  - the capability represents a physically constrained bounded motion between two states
+  - at every intermediate configuration at least one realized interaction keeps the configuration in the
+    allowed motion manifold
+  - the active constraint MAY CHANGE along the path
+  - one identical persistent constraint is NOT required
+  - two endpoint bounds alone, with an unconstrained free-flight region between them, do NOT instantiate
+    this micro-oracle
+  rejected:
+  - A - one identical persistent constraint
+  - C - endpoint bounds with an unconstrained interior
+  rationale: Reading A rejected ordinary hand-off designs - a flexure taking the first part of a travel
+    and a moulded rib taking the rest - which are unremarkable mechanism design. Reading C was rejected
+    because it would admit a lid that flies free between its two ends, which is not a bounded motion in
+    any useful sense. The correction is continuity of COVERAGE, not identity of constraint.
+  affected_files:
+  - _dossier_amendments/AMENDMENTS.yaml (AMD-HS-001)
+  - micro_oracles/bounded-two-state-closure/normative.yaml
+  - micro_oracles/bounded-two-state-closure/realizations.yaml
+  - ORACLE_METHOD.md 13.7
+  affected_statement_ids:
+  - NRM-HS-003
+  - NRM-HS-005
+  - UNR-HS-002
+  challengeable_by_cad: true
+  approval_status: APPROVED
+  note: 'SCOPE LIMIT, recorded because no earlier file stated it: this is a project-defined capability
+    scope, and NOT every product closure is required to instantiate this micro-oracle. A detachable or
+    freely positioned product closure - BM-001 ADM-BM-001-C and ADM-BM-001-D - may satisfy its product
+    source without belonging to this capability at all. A product obligation is never discharged by pointing
+    at a micro-oracle, and a product is never faulted for not instantiating one.'
+- decision_id: HSD-004
+  title: C4-drawer horizontal motion reading
+  decision_kind: PRODUCT_LANGUAGE_INTERPRETATION
+  decision: What does "slides out horizontally" require of the drawer path?
+  alternatives_considered:
+  - 'A: straight translation along one horizontal axis perpendicular to gravity'
+  - 'B: any path whose general direction is horizontal, including a curved path'
+  - 'C: any path that ends outside the cabinet, with horizontality applying only to the net displacement'
+  approved_interpretation:
+  - '"drawer slides out horizontally" is represented as straight translation along one horizontal axis
+    perpendicular to the gravity direction'
+  rejected:
+  - B - a curved path described only as "generally horizontal", rejected FOR THIS BASELINE
+  - C - horizontality of net displacement only
+  rationale: The normative statement said a curved path was admissible while its verification predicate
+    evaluated a single travel axis. Statement and predicate disagreed, which is a defect regardless of
+    which reading is right. Reading A is adopted because "slides" most directly denotes translation and
+    because it is the reading the predicate can actually evaluate. Reading B is recorded as REJECTED rather
+    than left as an open alternative, so no contradiction remains in the normative statement.
+  affected_files:
+  - _dossier_amendments/AMENDMENTS.yaml (AMD-C4-002)
+  - product_cases/C4-drawer/normative.yaml
+  - product_cases/C4-drawer/realizations.yaml
+  - product_cases/C4-drawer/stage_expectations.yaml
+  - product_cases/C4-drawer/negative_cases.yaml
+  - product_cases/C4-drawer/source_map.md
+  affected_statement_ids:
+  - NRM-C4-002
+  - NRM-C4-003
+  - NEG-C4-023
+  challengeable_by_cad: true
+  approval_status: APPROVED
+  note: This is a HUMAN-APPROVED PRODUCT READING, not a verbatim geometric definition in the source. The
+    one-sentence command says "slides out horizontally" and nothing more. If a source clarification later
+    admits a curved path, this decision is the single place to revise.
+- decision_id: HSD-005
+  title: BM-001-3 curved-back reading
+  decision_kind: PRODUCT_LANGUAGE_INTERPRETATION
+  decision: What does "rests on a curved back" require of the resting contact?
+  alternatives_considered:
+  - 'A: the load-bearing resting contact lies ON the curved region'
+  - 'B: the underside is curved and the body rests on that underside somewhere, including on a flat land
+    set into it'
+  approved_interpretation:
+  - for "rests on a curved back", the LOAD-BEARING resting contact must lie on the curved region
+  - curvature elsewhere, on a non-load-bearing decorative region, is insufficient
+  - a flat land carrying all the weight does NOT satisfy this reading
+  rejected:
+  - B - resting anywhere on a curved underside, which would admit a body carried entirely by a flat land
+  rationale: 'Reading B makes REQ-011 vacuous: any body with curvature somewhere on its underside would
+    satisfy it. Reading A gives the requirement content and follows the plain sense of "rests on". Two
+    fixtures were revised under this reading - ADM-BM-001-3-C lost its load-bearing land, and the design
+    it used to describe became the inadmissible INA-BM-001-3-D.'
+  affected_files:
+  - product_cases/BM-001-3/normative.yaml (RDG-BM-001-3-01)
+  - product_cases/BM-001-3/realizations.yaml
+  - product_cases/BM-001-3/negative_cases.yaml
+  - FIXTURE_PLAUSIBILITY_REVIEW.yaml
+  affected_statement_ids:
+  - NRM-BM-001-3-002
+  - ADM-BM-001-3-C
+  - INA-BM-001-3-D
+  - NEG-BM-001-3-005
+  - UNR-BM-001-3-002
+  challengeable_by_cad: true
+  approval_status: APPROVED
+  note: 'PRESERVED UNRESOLVED: the stability criterion. A contact-derived resting configuration can be
+    evaluated from geometry; whether that configuration is ADEQUATELY STABLE, and what tipping margin
+    it has, remain unresolved at UNR-BM-001-3-002 and are not decided by this reading.'
+- decision_id: HSD-006
+  title: causal verification minimum
+  decision_kind: VERIFICATION_METHODOLOGY
+  decision: Must a physical feature claim always be supported by an ablated control?
+  alternatives_considered:
+  - 'A: only a control, ablation or sensitivity result proves a feature is real'
+  - 'B: either direct causal evidence or a discriminating control'
+  - 'C: direct causal evidence alone always suffices'
+  approved_interpretation:
+  - a physical feature claim may be supported by EITHER direct causal geometry/contact evidence OR a discriminating
+    control, ablation or sensitivity result
+  - a control is NOT mandatory when direct causal evidence is available
+  - a realized stop may be evidenced by explicit stop faces, contact at the terminal configuration, and
+    kinematic termination caused by that contact - without a second model with the stop removed
+  rejected:
+  - A - a control is the only admissible proof
+  - C - direct evidence always suffices, with no discrimination requirement at all
+  rationale: 'Reading A was adopted originally because the m0 matched pair showed that non-discriminating
+    criteria had been counted as evidence. That finding stands. But requiring a control in EVERY case
+    makes ordinary direct evidence inadmissible and forces a second model to be built for every feature
+    claim, which is a tooling burden with no epistemic gain when the geometry and the contact are directly
+    observable. Reading C was rejected because it would restore the original defect: an observable that
+    cannot fail must still be recognised as an artifact.'
+  affected_files:
+  - ORACLE_AUTHORING_POLICY.md 15
+  - ORACLE_METHOD.md 13.9
+  - product_cases/BM-001/normative.yaml
+  - micro_oracles/bounded-two-state-closure/normative.yaml
+  - micro_oracles/guided-slider/normative.yaml
+  - three evidence_cases.yaml files
+  affected_statement_ids:
+  - NRM-BM-001-012
+  - NRM-HS-007
+  - NRM-GS-007
+  challengeable_by_cad: true
+  approval_status: APPROVED
+  note: The discrimination requirement is NOT withdrawn. What changed is that satisfying it by direct
+    causal evidence is now admissible. A criterion that cannot fail under its own model is still inadmissible
+    under either branch.

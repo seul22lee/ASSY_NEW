@@ -1,9 +1,9 @@
 # Workflow state ONLY. Never Oracle evidence. Nothing here may be cited by a pack.
-schema_version: "0.4.0"
-updated_after: "independent semantic review and correction pass"
+schema_version: "0.5.0"
+updated_after: "GATE 1-6 post-human-review correction run"
 
-current_pass: SEMANTIC_CORRECTION_COMPLETE
-workflow_status: READY_FOR_SECOND_HUMAN_REVIEW
+current_pass: PRE_CAD_BASELINE_COMPLETE
+workflow_status: PRE_CAD_BASELINE_READY
 branch: ver3-oracle-phase1-review
 reviewed_commit: 3b64aee601985ba509d2420462af624ed5616cc2
 
@@ -19,15 +19,25 @@ clean_audit_note: >
   the 45-case mutation suite - was re-run in full after the last file change.
 
 pack_status:
-  BM-001:                       SEMANTICALLY_AUDITED
+  BM-001:                       PRE_CAD_SEMANTIC_REVIEWED
   BM-001-2:                     BLOCKED_BY_SOURCE_AMBIGUITY   # AMB-001-2-01
-  BM-001-3:                     SEMANTICALLY_AUDITED
-  BM-002:                       SEMANTICALLY_AUDITED
-  C4-drawer:                    SEMANTICALLY_AUDITED
-  guided-slider:                SEMANTICALLY_AUDITED
-  rotary-to-linear-engagement:  SEMANTICALLY_AUDITED
-  latch-retention:              SEMANTICALLY_AUDITED
-  bounded-two-state-closure:    SEMANTICALLY_AUDITED
+  BM-001-3:                     PRE_CAD_SEMANTIC_REVIEWED
+  BM-002:                       PRE_CAD_SEMANTIC_REVIEWED
+  C4-drawer:                    PRE_CAD_SEMANTIC_REVIEWED
+  guided-slider:                PRE_CAD_SEMANTIC_REVIEWED
+  rotary-to-linear-engagement:  PRE_CAD_SEMANTIC_REVIEWED
+  latch-retention:              PRE_CAD_SEMANTIC_REVIEWED
+  bounded-two-state-closure:    PRE_CAD_SEMANTIC_REVIEWED
+
+source_freeze: ver3/oracles/SOURCE_FREEZE.yaml
+pre_cad_baseline: ver3/oracles/PRE_CAD_BASELINE.yaml
+manifest_hash_note: >
+  The manifest hashes are recorded in SOURCE_FREEZE.yaml and PRE_CAD_BASELINE.yaml
+  themselves, not duplicated here. A hash cannot live inside a file that the hash
+  covers.
+
+human_semantic_decisions: ver3/oracles/HUMAN_SEMANTIC_DECISIONS.yaml
+dossier_amendments: ver3/oracles/_dossier_amendments/AMENDMENTS.yaml
 
 physical_validation_status: PENDING_FOR_EVERY_PACK
 physical_validation_note: >
@@ -54,10 +64,14 @@ semantic_reviews:
 
 audit_state:
   canonical: {BLOCKING: 0, MAJOR: 0}
-  per_pass: {"3A": 0, "3B": 0, "3C": 0, "3D": 0, "3E": 0}
+  per_pass: {"3A": 0, "3B": 0, "3C": 0, "3D": 0, "3E": 0, "3F": 0, "3G": 0}
   shuffled_seeds: [20260802, 4177, 90210]
   shuffled_result: {BLOCKING: 0, MAJOR: 0}
-  mutation_tests: {total: 45, defect_cases: 38, control_cases: 7, failed: 0}
+  mutation_tests: {total: 69, defect_cases: 57, control_cases: 12, failed: 0}
+  reports:
+    canonical: ver3/oracles/_audit/POST_HUMAN3_RESTART-canonical.json
+    shuffled: [POST_HUMAN3_RESTART-shuffled-20260802.json, POST_HUMAN3_RESTART-shuffled-4177.json, POST_HUMAN3_RESTART-shuffled-90210.json]
+    mutation: ver3/oracles/_audit/POST_HUMAN3_RESTART-mutation.json
 
 unresolved_findings: []
 
@@ -100,8 +114,11 @@ outstanding_human_decisions:
   - "RDG-BM-001-3-01 - confirm or reject the reading of 'rests on a curved back' this pass adopted."
   - "AMB-002-01, AMB-002-02, AMB-001-3-01 - non-blocking; each bounds one requirement's evaluation."
 
+next_authorized_phase: adversarial CAD validation
+explicitly_not_next: [production implementation, final Oracle lock]
 next_executable_step: >
-  Await the second human review. On approval, Phase 1 closes with LOCK.json and
-  Phase 2 (pipeline and stage contracts) begins. Physical validation of the
-  fixture set by CAD or simulation is a separate, still-outstanding activity and
-  is not a precondition for the semantic lock.
+  Adversarial CAD validation against PRE_CAD_BASELINE.yaml. Every admissible
+  fixture is NEEDS_GEOMETRY_VALIDATION and ten specific physical uncertainties
+  (PU-01..PU-10) are recorded in the baseline as first targets. A CAD
+  counterexample is handled by the revision procedure in the baseline; it never
+  edits a frozen dossier and never revises SOURCE_FREEZE.yaml.

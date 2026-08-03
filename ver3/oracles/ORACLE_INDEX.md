@@ -1,8 +1,20 @@
 # Oracle Pack index — Ver3 Phase 1
 
-**Workflow status: READY_FOR_SECOND_HUMAN_REVIEW.** No `LOCK.json`. No production
-pipeline code. No CAD fixtures. **Physical validation is pending for every
-fixture** — see `FIXTURE_PLAUSIBILITY_REVIEW.yaml`.
+**Status: `PRE_CAD_BASELINE_READY`.** No `LOCK.json`. No production pipeline code.
+No CAD fixtures. **Physical validation is pending for every fixture.**
+
+| Attestation | Path | Scope |
+|---|---|---|
+| Source-only freeze | [SOURCE_FREEZE.yaml](SOURCE_FREEZE.yaml) | `freeze_scope: SOURCE_ONLY`, `semantic_lock: false` |
+| Challengeable semantic baseline | [PRE_CAD_BASELINE.yaml](PRE_CAD_BASELINE.yaml) | `CHALLENGEABLE_SEMANTIC_BASELINE` |
+
+Each carries its own manifest hash; the hashes are not duplicated here, because a
+hash cannot live inside a file it covers.
+
+The freeze covers **sources only** — it is not a semantic lock, and the source is
+not challengeable by CAD. The baseline covers the **conclusions**, and every one
+of them is challengeable. Next authorized phase: **adversarial CAD validation** —
+not production implementation and not a final Oracle lock.
 
 Nine packs. Each is a *semantic acceptance specification* — normative invariants,
 declared freedoms, decisions that must stay open, machine-checked physical and
@@ -16,20 +28,20 @@ Corrected against 45 independent semantic review findings; see
 
 | Pack | Inv (VM) | Unres | Free | Phys adm/inadm | Evid adm/inadm | Neg | Status |
 |---|---|---|---|---|---|---|---|
-| [BM-001](product_cases/BM-001/) — latching storage box | 13 (2) | 8 | 13 | 4 / 7 | 2 / 2 | 15 | SEMANTICALLY_AUDITED |
+| [BM-001](product_cases/BM-001/) — latching storage box | 13 (2) | 8 | 13 | 4 / 7 | 2 / 2 | 15 | PRE_CAD_SEMANTIC_REVIEWED |
 | [BM-001-2](product_cases/BM-001-2/) — delta, flush mount | 2 (0) | 4 | 3 | 4 / 4 | 0 / 0 | 4 | **BLOCKED_BY_SOURCE_AMBIGUITY** |
-| [BM-001-3](product_cases/BM-001-3/) — delta, curved back | 3 (0) | 2 | 3 | 3 / 4 | 0 / 0 | 6 | SEMANTICALLY_AUDITED |
-| [BM-002](product_cases/BM-002/) — enclosed crank platform lift | 14 (1) | 7 | 11 | 5 / 11 | 2 / 2 | 22 | SEMANTICALLY_AUDITED |
-| [C4-drawer](product_cases/C4-drawer/) — knob-driven cabinet drawer | 13 (2) | 6 | 12 | 4 / 10 | 2 / 2 | 22 | SEMANTICALLY_AUDITED |
+| [BM-001-3](product_cases/BM-001-3/) — delta, curved back | 3 (0) | 2 | 3 | 3 / 4 | 0 / 0 | 6 | PRE_CAD_SEMANTIC_REVIEWED |
+| [BM-002](product_cases/BM-002/) — enclosed crank platform lift | 14 (1) | 7 | 11 | 5 / 11 | 2 / 2 | 22 | PRE_CAD_SEMANTIC_REVIEWED |
+| [C4-drawer](product_cases/C4-drawer/) — knob-driven cabinet drawer | 13 (2) | 6 | 12 | 4 / 10 | 2 / 2 | 22 | PRE_CAD_SEMANTIC_REVIEWED |
 
 ## Micro-oracles — reusable capabilities, never products, never mechanisms
 
 | Pack | Capability | Inv (VM) | Unres | Free | Phys | Evid | Neg | Status |
 |---|---|---|---|---|---|---|---|---|
-| [guided-slider](micro_oracles/guided-slider/) | guided translation along a declared line or path, with the freedoms constrained that the instantiating requirement depends on | 7 (1) | 4 | 8 | 5 / 6 | 2 / 1 | 13 | SEMANTICALLY_AUDITED |
-| [rotary-to-linear-engagement](micro_oracles/rotary-to-linear-engagement/) | rotary → linear conversion through an uninterrupted chain of localized interactions, with load reaction | 6 (1) | 3 | 8 | 6 / 5 | 2 / 2 | 16 | SEMANTICALLY_AUDITED |
-| [latch-retention](micro_oracles/latch-retention/) | holding two bodies in a state against a disturbance, releasing deliberately, repeatably | 8 (2) | 4 | 7 | 4 / 6 | 2 / 2 | 16 | SEMANTICALLY_AUDITED |
-| [bounded-two-state-closure](micro_oracles/bounded-two-state-closure/) | a closure reaching two states by a bounded motion, each bound physically produced | 7 (1) | 4 | 7 | 6 / 6 | 2 / 1 | 17 | SEMANTICALLY_AUDITED |
+| [guided-slider](micro_oracles/guided-slider/) | guided translation along a declared line or path, with the freedoms constrained that the instantiating requirement depends on | 7 (1) | 4 | 8 | 5 / 6 | 2 / 1 | 13 | PRE_CAD_SEMANTIC_REVIEWED |
+| [rotary-to-linear-engagement](micro_oracles/rotary-to-linear-engagement/) | rotary → linear conversion through an uninterrupted chain of localized interactions, with load reaction | 6 (1) | 3 | 8 | 6 / 5 | 2 / 2 | 16 | PRE_CAD_SEMANTIC_REVIEWED |
+| [latch-retention](micro_oracles/latch-retention/) | holding two bodies in a state against a disturbance, releasing deliberately, repeatably | 8 (2) | 4 | 7 | 4 / 6 | 2 / 2 | 16 | PRE_CAD_SEMANTIC_REVIEWED |
+| [bounded-two-state-closure](micro_oracles/bounded-two-state-closure/) | a closure reaching two states by a bounded motion, each bound physically produced | 7 (1) | 4 | 7 | 6 / 6 | 2 / 1 | 17 | PRE_CAD_SEMANTIC_REVIEWED |
 
 **Totals:** 73 invariants (10 VERIFICATION_MINIMUM), 42 required-unresolved
 decisions, 72 declared freedoms, 41 admissible + 59 inadmissible physical
@@ -94,6 +106,15 @@ cite either.
 The auditor never runs as part of any pipeline. Production synthesis stages
 S01–S12 **must not read these files**; test runners, evaluators and audit tools
 may, and Oracle content must never influence design generation or selection.
+
+## Decision and attestation records
+
+| Path | Role |
+|---|---|
+| [HUMAN_SEMANTIC_DECISIONS.yaml](HUMAN_SEMANTIC_DECISIONS.yaml) | six approved decisions (HSD-001…006), each challengeable by CAD |
+| [_dossier_amendments/AMENDMENTS.yaml](_dossier_amendments/AMENDMENTS.yaml) | five additive amendments; frozen dossiers are never overwritten |
+| [SOURCE_FREEZE.yaml](SOURCE_FREEZE.yaml) | `freeze_scope: SOURCE_ONLY`, `semantic_lock: false` |
+| [PRE_CAD_BASELINE.yaml](PRE_CAD_BASELINE.yaml) | `CHALLENGEABLE_SEMANTIC_BASELINE`, with PU-01…PU-10 and the revision procedure |
 
 ## Supporting material
 

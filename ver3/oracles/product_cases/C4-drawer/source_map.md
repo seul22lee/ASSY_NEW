@@ -1,5 +1,9 @@
 # C4-drawer — source map
 
+> **Pack status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; not lock-ready, not
+> CAD-validated. Every admissible fixture is `NEEDS_GEOMETRY_VALIDATION`.
+
+
 The rank-1 source is one sentence, quoted verbatim from
 `/home/ftk3187/github/ASSY_Ver1.0/tasks/benchmark/manifest.json`, record `id = "C4-drawer"`:
 
@@ -17,7 +21,7 @@ define correctness.
 |---|---|
 | "turn a knob" | NRM-C4-001 (direct), NRM-C4-004, NRM-C4-008, NRM-C4-009 (derived) |
 | "slides out" | NRM-C4-003 (direct), NRM-C4-007, NRM-C4-010 (derived) |
-| "horizontally" | NRM-C4-002 (direct) |
+| "horizontally" | NRM-C4-002 (direct, read as a straight horizontal axis per AMD-C4-002 / HSD-004) |
 | "drawer slides" | NRM-C4-005, NRM-C4-006 (derived) |
 | "Design a desktop cabinet" | NRM-C4-011 (derived); "desktop" carried unresolved as UNR-C4-006 |
 
@@ -26,7 +30,7 @@ define correctness.
 | Statement | basis_type | Rank |
 |---|---|---|
 | NRM-C4-001 | DIRECT_USER_REQUIREMENT | 1 |
-| NRM-C4-002 | DIRECT_USER_REQUIREMENT | 1 |
+| NRM-C4-002 | DIRECT_USER_REQUIREMENT | 1 + AMD-C4-002 (reading, HSD-004) |
 | NRM-C4-003 | DIRECT_USER_REQUIREMENT | 1 |
 | NRM-C4-004 | NECESSARY_PHYSICAL_CONSEQUENCE | 1 → derived |
 | NRM-C4-005 | NECESSARY_PHYSICAL_CONSEQUENCE | 1 → derived |
@@ -36,6 +40,8 @@ define correctness.
 | NRM-C4-009 | NECESSARY_PHYSICAL_CONSEQUENCE | 1 → derived |
 | NRM-C4-010 | NECESSARY_PHYSICAL_CONSEQUENCE | 1 → derived |
 | NRM-C4-011 | NECESSARY_PHYSICAL_CONSEQUENCE | 1 → derived |
+| NRM-C4-012 | VERIFICATION_MINIMUM | DOS S5 E2 |
+| NRM-C4-013 | VERIFICATION_MINIMUM | DOS S5 E1 |
 
 No invariant is grounded in a legacy realization, a benchmark field, or a
 scoring note.
@@ -48,25 +54,30 @@ scoring note.
 | `axis = "constraint"` | 5 | Benchmark taxonomy. |
 | `expected_class = "PASS"` | 5 | A prior expectation of the legacy run's outcome. Ver3 outcomes are conditional (s11 `outcome_rules`); a fixed expected outcome would freeze tooling capability. |
 | `physics_implied = "m13 drawer V-A 5/5"` | 6 | Recorded in `evidence_scope.yaml` with its fidelity and its reuse limitation, never as a requirement. |
-| `scoring_note` ("gear NOT over-engineered here") | 5 | One side of AMB-C4-01. Recorded in LEGACY-CONFLICT-C4-01; cannot bind FRE-C4-002. |
+| `scoring_note` ("gear NOT over-engineered here") | 5 | One side of LEGACY-CONFLICT-C4-01. Cannot bind FRE-C4-002. |
 | `certification_matrix` `verdict = "CERTIFIED"`, `"5 bodies"`, `"reused - PASS"` | 6 | Legacy run outcome. `"5 bodies"` is a realization outcome and may never be an acceptance criterion (NEG-C4-012). |
 
 ## Freedoms
 
-All ten freedoms are grounded in DOS S3 — criteria the command does not state —
-except FRE-C4-002, which is additionally grounded in DOS S4 (AMB-C4-01), and
+All twelve freedoms are grounded in DOS S3 — criteria the command does not state —
+except FRE-C4-002, which is additionally supported by LEGACY-CONFLICT-C4-01, and
 FRE-C4-003 / FRE-C4-005 / FRE-C4-009, which additionally name the DOS S6
 realization values they refuse to inherit.
 
-## Ambiguity carried, not resolved
+## Legacy conflict recorded — NOT a source ambiguity
 
-**AMB-C4-01** (DOS S4). `build_goldens.py:1142` calls the drawer's rack-pinion
-"over-engineered"; the manifest `scoring_note` calls it "NOT over-engineered
-here". Both statements are commentary about a realization, and neither is the
-command. Recorded as LEGACY-CONFLICT-C4-01 and `NRM-C4-004.acknowledges_ambiguity`; enforced
-by NEG-C4-014. What is settled here is only the *rank* of the two statements —
-which the precedence model already fixes — not the disagreement between them.
-The disagreement stands.
+**`LEGACY-CONFLICT-C4-01`** (formerly AMB-C4-01, DOS S4, reclassified by
+`AMD-C4-001` under **HSD-002**). `build_goldens.py:1142` calls the drawer's
+rack-pinion "over-engineered"; the manifest `scoring_note` calls it "NOT
+over-engineered here". Both are commentary about a realization; neither is the
+rank-1 command.
+
+Because neither could bind the conversion family, their disagreement creates **no
+ambiguity in the acceptance model**. It `blocks_nothing`, `requires_human_decision:
+false`, and is cited as support for `FRE-C4-002`. The disagreement itself stands
+and is preserved verbatim in DOS S4 and in the amendment record; what is withdrawn
+is the implication that a human must rule on whether a toothed transmission is
+required. Enforced by NEG-C4-014.
 
 ## Cases deliberately kept separate
 
@@ -117,3 +128,19 @@ It is recorded as `legacy_conflicts.LEGACY-CONFLICT-C4-01` with
 support for `FRE-C4-002`: two competent readers of the same corpus disagreed
 about a realization, which is evidence that mechanism choice must stay free. The
 former `UNR-C4-002` is listed under `retired_unresolved` with the reason.
+
+## Dossier amendments
+
+| Amendment | Supersedes | Scope | Decision |
+|---|---|---|---|
+| `AMD-C4-001` | `DOS-C4-drawer.md#S4` | the CLASSIFICATION of S4 only; the two quoted legacy statements are unchanged and still citable | HSD-002 |
+| `AMD-C4-002` | `DOS-C4-drawer.md#S2` | the reading of the motion fragment only | HSD-004 |
+
+`AMD-C4-002` records the reading adopted for `NRM-C4-002`: **"slides out
+horizontally" means straight translation along one horizontal axis perpendicular
+to gravity.** The curved-but-generally-horizontal reading is recorded as
+REJECTED FOR THIS BASELINE, not left as an open alternative — the statement and
+its predicate now agree, which they did not before (`NEG-C4-023`).
+
+This is a human-approved product reading, not a verbatim geometric definition in
+the one-sentence source.

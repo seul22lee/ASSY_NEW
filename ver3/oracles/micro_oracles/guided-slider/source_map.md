@@ -1,5 +1,9 @@
 # guided-slider — source map (micro-oracle)
 
+> **Pack status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; not lock-ready, not
+> CAD-validated. Every admissible fixture is `NEEDS_GEOMETRY_VALIDATION`.
+
+
 **Capability (rank 1 for this pack):** guided translation of one body relative to
 another along a defined line, with the non-translational freedoms removed.
 Source: `ver3/oracles/_dossiers/DOS-guided-slider.md` S1.
@@ -12,12 +16,12 @@ it. See `normative.yaml.basis_semantics`.
 
 | Statement | basis_type | Grounded in |
 |---|---|---|
-| NRM-GS-001 | DIRECT_USER_REQUIREMENT | S1, "one body relative to another along a defined line" |
-| NRM-GS-002 | DIRECT_USER_REQUIREMENT | S1, "with the non-translational freedoms removed" |
-| NRM-GS-003 | NECESSARY_PHYSICAL_CONSEQUENCE | S1 → derived (constraints act through material) |
-| NRM-GS-004 | NECESSARY_PHYSICAL_CONSEQUENCE | S1 → derived (guidance along the line, not at a point on it) |
-| NRM-GS-005 | NECESSARY_PHYSICAL_CONSEQUENCE | S1 → derived (removing a freedom means carrying its load) |
-| NRM-GS-006 | NECESSARY_PHYSICAL_CONSEQUENCE | S1 → derived |
+| NRM-GS-001 | PROJECT_DEFINED_CAPABILITY | AMD-GS-001 (supersedes S1) — "one body relative to another along a declared line or path" |
+| NRM-GS-002 | PROJECT_DEFINED_CAPABILITY | AMD-GS-001 (supersedes S1 for the capability statement) — HSD-001 |
+| NRM-GS-003 | NECESSARY_PHYSICAL_CONSEQUENCE | AMD-GS-001 → derived (constraints act through material) |
+| NRM-GS-004 | NECESSARY_PHYSICAL_CONSEQUENCE | AMD-GS-001 → derived (guidance along the line, not at a point on it) |
+| NRM-GS-005 | NECESSARY_PHYSICAL_CONSEQUENCE | AMD-GS-001 → derived (removing a freedom means carrying its load) |
+| NRM-GS-006 | NECESSARY_PHYSICAL_CONSEQUENCE | AMD-GS-001 → derived |
 | NRM-GS-007 | VERIFICATION_MINIMUM | S5 (structural artifact) |
 
 ## What is deliberately absent
@@ -67,3 +71,24 @@ If a future project source genuinely requires strict single-degree-of-freedom
 guidance, that is a DIFFERENT capability and belongs in a separate pack named
 `single-dof-linear-guidance`. The retired statement is preserved in
 `capability_statement_history`.
+
+## Capability authority after amendment AMD-GS-001
+
+Normative authority for the **capability statement** rests with amendment
+`AMD-GS-001` (`_dossier_amendments/AMENDMENTS.yaml`), approved by **HSD-001**.
+The frozen `DOS-guided-slider.md` S1 text is preserved verbatim inside that
+amendment and is **not** deleted; sections S2–S7 of the dossier retain full
+authority as evidence and as sources of negative cases.
+
+What changed: S1 said "with the non-translational freedoms removed", which defines
+a strict prismatic joint. The current capability requires only the freedoms the
+instantiating requirement depends on to be constrained, with the rest declared.
+
+| Retired wording | Where it survived until this pass |
+|---|---|
+| "one translation retained and five freedoms removed" | `stage_expectations.s04.freedom_accounting_note` |
+| "each of the five non-translational freedoms is shown removed" | `stage_expectations.s11 GS-C2` |
+| "swept volume shown to be a proper subset of the corridor" | `stage_expectations.s11 GS-C5` |
+
+All three are corrected. `ADM-GS-E` — a rod in a plain bore with declared free
+axial rotation — is the fixture that fails if any of them returns.

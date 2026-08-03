@@ -3,9 +3,13 @@ schema_version: "0.3.0"
 tier: micro_oracle
 inherits: null
 dossier: ver3/oracles/_dossiers/DOS-rotary-to-linear-engagement.md
-lock_status: SEMANTICALLY_AUDITED
-physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
-semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+pack_status: PRE_CAD_SEMANTIC_REVIEWED
+physical_validation: PENDING_CAD   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+baseline_note: >
+  PRE_CAD_SEMANTIC_REVIEWED is a semantic status only. It is NOT lock-ready, NOT
+  CAD-validated and NOT production authority. The next authorized phase is
+  adversarial CAD validation.   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED   # entailment, fixture-plausibility, cross-pack and cross-file drift reviews clean
 historical_aliases:
   - rack-pinion-conversion
 
@@ -24,6 +28,13 @@ capability_statement_history:
       - crank/link/slider, cable/drum/output, cam/follower/output - have no such
       direct engagement, and would have been rejected. Replaced with an
       interaction-chain formulation.
+
+dossier_amendment:
+  amendment_id: AMD-RL-001
+  file: ver3/oracles/_dossier_amendments/AMENDMENTS.yaml
+  supersedes: "DOS-rotary-to-linear-engagement.md#S1"
+  scope: "the capability statement only; S2-S7 retain full authority"
+  human_decision_ref: HSD-002
 
 basis_semantics: >
   A micro-oracle has no user. Its capability statement was PROJECT-AUTHORED and
@@ -66,7 +77,7 @@ invariants:
       exists(rotating input body), exists(translating output body), and a
       connected sequence of realized interactions between them with no gap, each
       naming participating material on both of its bodies.
-    requires_tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized]
+    requires_tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, interaction_regions_declared]
     related_freedoms: [FRE-RL-001, FRE-RL-002]
     related_unresolved: []
     closes_finding: [SF-8.1]

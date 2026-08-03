@@ -6,6 +6,11 @@
 > [INDEPENDENT_SEMANTIC_REVIEW_REPORT.md](INDEPENDENT_SEMANTIC_REVIEW_REPORT.md)
 > for the corrections and the current audit results. This document is preserved
 > as the record of the earlier pass, including the 24-finding blind run.
+>
+> **Status terminology has since changed.** Where this document says
+> `SEMANTICALLY_AUDITED`, the current status is `PRE_CAD_SEMANTIC_REVIEWED` —
+> semantic review clean, **not** lock-ready and **not** CAD-validated. See
+> `PRE_CAD_BASELINE.yaml`.
 
 **Result: 0 findings across 3A, 3B, 3C and 3D over all nine packs**, in canonical
 order and under three independent shuffle seeds. No `LOCK.json` was created. No
@@ -175,9 +180,11 @@ Each of these has an invariant. NOT_VERIFIED is never INFEASIBLE.
 - BM-001-2 remains **BLOCKED_BY_SOURCE_AMBIGUITY** (AMB-001-2-01). Its rank-1
   requirement's exact wording is preserved and three candidate readings are
   recorded with none selected.
-- AMB-002-01, AMB-002-02 and AMB-C4-01 are carried as required-unresolved
-  decisions. They bound the evaluation of specific requirements without blocking
-  their packs.
+- AMB-002-01 and AMB-002-02 are carried as required-unresolved decisions. They
+  bound the evaluation of specific requirements without blocking their packs.
+- AMB-C4-01 was later **reclassified** as `LEGACY-CONFLICT-C4-01` — conflicting
+  lower-rank legacy commentary, blocking nothing and requiring no human decision
+  (AMD-C4-001, HSD-002). It is no longer a required-unresolved decision.
 
 ---
 

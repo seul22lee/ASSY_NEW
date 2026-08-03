@@ -1,0 +1,259 @@
+schema_version: 0.1.0
+freeze_scope: SOURCE_ONLY
+semantic_lock: false
+cad_validated: false
+challengeable_by_cad: false
+challengeability_note: The SOURCE is not challengeable by CAD. A frozen dossier records what the source
+  says; geometry cannot change that. What CAD CAN challenge is every semantic conclusion derived from
+  it - the normative statements, the fixtures, and the readings recorded in HUMAN_SEMANTIC_DECISIONS.yaml.
+  Those live in PRE_CAD_BASELINE.yaml, which is explicitly challengeable.
+what_is_frozen:
+- rank-1 product source extracts as they appear in the frozen dossiers
+- the original frozen dossiers, byte-for-byte
+- approved additive dossier amendments
+- the source precedence / rank model
+- recorded source ambiguities
+- the human semantic decisions that define approved capability authority
+- the sha256 of every artifact above
+what_is_NOT_frozen:
+- normative conclusions as physically final
+- physical realization fixtures
+- evidence fixtures
+- stage expectations
+- CAD predicates
+- evaluator outputs
+- future CAD challenge results
+- pack status beyond PRE_CAD_SEMANTIC_REVIEWED
+source_manifest_hash: 771fd04413ec966da09666d765d193e11cdf4f74d7433d44411b6423b9199e1e
+artifact_count: 15
+base_commit_sha: abd4b6e1fcc58cbdca0b54c85b9c8085c93e6960
+base_commit_note: the starting commit; the frozen files themselves are identified by their sha256 below
+lock_blockers:
+  BM-001-2:
+    ambiguity_id: AMB-001-2-01
+    level: SOURCE_LEVEL
+    statement: 'REQ-010 "the latch can only be worked from inside the enclosure" has three incompatible
+      readings and no rank-1 source distinguishes them. This is a SOURCE-level blocker: not a missing
+      quantity but an undefined predicate DOMAIN, so no fidelity of evaluation can separate compliant
+      from non-compliant designs.'
+    consequence: BM-001-2 retains BLOCKED_BY_SOURCE_AMBIGUITY through this freeze and is not lock-ready.
+    resolvable_only_by: new rank-1 source material, or an explicit human selection among the three recorded
+      readings
+unresolved_ambiguities_carried:
+  AMB-001-2-01:
+    pack: BM-001-2
+    blocking: true
+  AMB-002-01:
+    pack: BM-002
+    blocking: false
+    carried_as: UNR-BM-002-001
+  AMB-002-02:
+    pack: BM-002
+    blocking: false
+    carried_as: UNR-BM-002-002
+  AMB-001-3-01:
+    pack: BM-001-3
+    blocking: false
+    carried_as: UNR-BM-001-3-002
+retired_ambiguities:
+  AMB-C4-01:
+    became: LEGACY-CONFLICT-C4-01
+    by: AMD-C4-001 under HSD-002
+    why: conflicting lower-rank legacy commentary; neither statement is rank-1, so neither could bind
+      a conversion family and their disagreement creates no acceptance ambiguity
+artifacts:
+- path: _dossiers/DOS-BM-001.md
+  role: frozen source dossier — rank-1 product extracts (S1) plus ranked legacy evidence (S2-S7)
+  artifact_kind: original
+  authority_rank: rank_1_for_S1_product_extracts; rank_4_to_6_for_S2_to_S7
+  applicable_pack: BM-001
+  unresolved_ambiguity_ids: []
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: null
+  sha256: 78bd0fe614033da1b90f29adf48397239b9a10426d6fa6f27e4a84b46b715bb1
+  note: ORIGINAL, byte-frozen. Where an amendment supersedes a section it does so ONLY within the amendment
+    declared scope; every other section retains full authority.
+- path: _dossiers/DOS-BM-001-2.md
+  role: frozen source dossier — rank-1 product extracts (S1) plus ranked legacy evidence (S2-S7)
+  artifact_kind: original
+  authority_rank: rank_1_for_S1_product_extracts; rank_4_to_6_for_S2_to_S7
+  applicable_pack: BM-001-2
+  unresolved_ambiguity_ids:
+  - AMB-001-2-01
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: null
+  sha256: 9926038766a9da5e1d038c4566dd556039a7cb8d9a32da38e65c675388d149e2
+  note: ORIGINAL, byte-frozen. Where an amendment supersedes a section it does so ONLY within the amendment
+    declared scope; every other section retains full authority.
+- path: _dossiers/DOS-BM-001-3.md
+  role: frozen source dossier — rank-1 product extracts (S1) plus ranked legacy evidence (S2-S7)
+  artifact_kind: original
+  authority_rank: rank_1_for_S1_product_extracts; rank_4_to_6_for_S2_to_S7
+  applicable_pack: BM-001-3
+  unresolved_ambiguity_ids:
+  - AMB-001-3-01
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: null
+  sha256: 6480ed59561e16955f52d548464a5466a2d65edda42d02b6be71948106e8cbfc
+  note: ORIGINAL, byte-frozen. Where an amendment supersedes a section it does so ONLY within the amendment
+    declared scope; every other section retains full authority.
+- path: _dossiers/DOS-BM-002.md
+  role: frozen source dossier — rank-1 product extracts (S1) plus ranked legacy evidence (S2-S7)
+  artifact_kind: original
+  authority_rank: rank_1_for_S1_product_extracts; rank_4_to_6_for_S2_to_S7
+  applicable_pack: BM-002
+  unresolved_ambiguity_ids:
+  - AMB-002-01
+  - AMB-002-02
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: null
+  sha256: 3803803e7fa7437e6994604b636a151d35a8059ded913fe98cfdadb26392d169
+  note: ORIGINAL, byte-frozen. Where an amendment supersedes a section it does so ONLY within the amendment
+    declared scope; every other section retains full authority.
+- path: _dossiers/DOS-C4-drawer.md
+  role: frozen source dossier — rank-1 product extracts (S1) plus ranked legacy evidence (S2-S7)
+  artifact_kind: original
+  authority_rank: rank_1_for_S1_product_extracts; rank_4_to_6_for_S2_to_S7
+  applicable_pack: C4-drawer
+  unresolved_ambiguity_ids: []
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: AMD-C4-001, AMD-C4-002
+  sha256: a38f4bd3fcd632e47a7bd67fe2a818578122d9877ff2761ec4bb844b894b4d0e
+  note: ORIGINAL, byte-frozen. Where an amendment supersedes a section it does so ONLY within the amendment
+    declared scope; every other section retains full authority.
+- path: _dossiers/DOS-guided-slider.md
+  role: frozen source dossier — rank-1 product extracts (S1) plus ranked legacy evidence (S2-S7)
+  artifact_kind: original
+  authority_rank: rank_1_for_S1_product_extracts; rank_4_to_6_for_S2_to_S7
+  applicable_pack: guided-slider
+  unresolved_ambiguity_ids: []
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: AMD-GS-001
+  sha256: 36231c4c915b70929b3ad64f9e2713c888224277678511463e20bddae04791dc
+  note: ORIGINAL, byte-frozen. Where an amendment supersedes a section it does so ONLY within the amendment
+    declared scope; every other section retains full authority.
+- path: _dossiers/DOS-rotary-to-linear-engagement.md
+  role: frozen source dossier — rank-1 product extracts (S1) plus ranked legacy evidence (S2-S7)
+  artifact_kind: original
+  authority_rank: rank_1_for_S1_product_extracts; rank_4_to_6_for_S2_to_S7
+  applicable_pack: rotary-to-linear-engagement
+  unresolved_ambiguity_ids: []
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: AMD-RL-001
+  sha256: 9cc5b9e41cb4dea8447f99573c67814c9cc663fc60e572306dbac307d32dbf3f
+  note: ORIGINAL, byte-frozen. Where an amendment supersedes a section it does so ONLY within the amendment
+    declared scope; every other section retains full authority.
+- path: _dossiers/DOS-latch-retention.md
+  role: frozen source dossier — rank-1 product extracts (S1) plus ranked legacy evidence (S2-S7)
+  artifact_kind: original
+  authority_rank: rank_1_for_S1_product_extracts; rank_4_to_6_for_S2_to_S7
+  applicable_pack: latch-retention
+  unresolved_ambiguity_ids: []
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: null
+  sha256: 2a5ddf0391b25a297c72e9ba926ccc61b111056f8f1b2c132e24fc72dd0151f6
+  note: ORIGINAL, byte-frozen. Where an amendment supersedes a section it does so ONLY within the amendment
+    declared scope; every other section retains full authority.
+- path: _dossiers/DOS-bounded-two-state-closure.md
+  role: frozen source dossier — rank-1 product extracts (S1) plus ranked legacy evidence (S2-S7)
+  artifact_kind: original
+  authority_rank: rank_1_for_S1_product_extracts; rank_4_to_6_for_S2_to_S7
+  applicable_pack: bounded-two-state-closure
+  unresolved_ambiguity_ids: []
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: AMD-HS-001
+  sha256: c2e2ae503c56e3636f302a3eb8d26ea41a1d227436aba0a09f87d239ef6c2720
+  note: ORIGINAL, byte-frozen. Where an amendment supersedes a section it does so ONLY within the amendment
+    declared scope; every other section retains full authority.
+- path: _dossiers/DOSSIER_README.md
+  role: dossier index and freezing rules
+  artifact_kind: original
+  authority_rank: n/a
+  applicable_pack: all
+  unresolved_ambiguity_ids: []
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: null
+  sha256: 194dd3ca5c5de760ae017070ce53216490e334c14fb8a9e6f8ab7aa594335975
+  note: null
+- path: _dossier_amendments/AMENDMENTS.yaml
+  role: additive amendments to frozen dossiers — approved capability and classification authority
+  artifact_kind: amendment
+  authority_rank: human_semantic_decision_authority (NOT rank-1)
+  applicable_pack: guided-slider, rotary-to-linear-engagement, bounded-two-state-closure, C4-drawer
+  unresolved_ambiguity_ids: []
+  human_decision_ids:
+  - HSD-001
+  - HSD-002
+  - HSD-003
+  - HSD-004
+  supersedes: DOS-guided-slider.md#S1; DOS-rotary-to-linear-engagement.md#S1; DOS-bounded-two-state-closure.md#S1;
+    DOS-C4-drawer.md#S4; DOS-C4-drawer.md#S2
+  superseded_by: null
+  sha256: 686063d48e18c70a57a50e8d191e03f6c1040e22ac9a299f6349451d22eb9b71
+  note: Carries the authority of a human semantic decision, NOT of a user source. Every amendment preserves
+    the original section verbatim and records the original dossier hash, so a silent edit to a frozen
+    dossier is BLOCKING.
+- path: HUMAN_SEMANTIC_DECISIONS.yaml
+  role: approved decisions defining amendment and capability authority
+  artifact_kind: decision_record
+  authority_rank: human_semantic_decision_authority (NOT rank-1)
+  applicable_pack: all
+  unresolved_ambiguity_ids: []
+  human_decision_ids:
+  - HSD-001
+  - HSD-002
+  - HSD-003
+  - HSD-004
+  - HSD-005
+  - HSD-006
+  supersedes: null
+  superseded_by: null
+  sha256: c070e99b661c75c4f57ffca59d6c6eea795b8595deab5642e0d443e320f165e5
+  note: Frozen for its role in defining approved authority. The DECISIONS remain challengeable by CAD;
+    what is frozen is the record of what was decided and why.
+- path: _ambiguities/AMB-001-2-01.md
+  role: recorded source ambiguity
+  artifact_kind: original
+  authority_rank: ambiguity_record
+  applicable_pack: BM-001-2
+  unresolved_ambiguity_ids:
+  - AMB-001-2-01
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: null
+  sha256: cebc412e8f120206b744bc22b812e745b4140f2c6b671184b65a14ce2f05c162
+  note: null
+- path: _ambiguities/AMB-001-3-01.md
+  role: recorded source ambiguity
+  artifact_kind: original
+  authority_rank: ambiguity_record
+  applicable_pack: BM-001-3
+  unresolved_ambiguity_ids:
+  - AMB-001-3-01
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: null
+  sha256: eeb723b5c63ea8b98c59eed9b29b6cf58464204788b43cd3ea502608ad54ab2b
+  note: null
+- path: ORACLE_METHOD.md
+  role: source precedence model — defines what rank means
+  artifact_kind: original
+  authority_rank: method
+  applicable_pack: all
+  unresolved_ambiguity_ids: []
+  human_decision_ids: []
+  supersedes: null
+  superseded_by: null
+  sha256: b5438c470b7813f9a516377c7942159b3aea86bdfc7627509b1288ddc96d392f
+  note: Frozen for its SOURCE PRECEDENCE content (sections 3, 3.1-3.3) only. Its remaining sections are
+    method guidance, not source, and are expected to evolve.

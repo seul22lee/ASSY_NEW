@@ -3,9 +3,13 @@ schema_version: "0.3.0"
 tier: micro_oracle
 inherits: null
 dossier: ver3/oracles/_dossiers/DOS-latch-retention.md
-lock_status: SEMANTICALLY_AUDITED
-physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
-semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+pack_status: PRE_CAD_SEMANTIC_REVIEWED
+physical_validation: PENDING_CAD   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+baseline_note: >
+  PRE_CAD_SEMANTIC_REVIEWED is a semantic status only. It is NOT lock-ready, NOT
+  CAD-validated and NOT production authority. The next authorized phase is
+  adversarial CAD validation.   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED   # entailment, fixture-plausibility, cross-pack and cross-file drift reviews clean
 
 capability_statement: >
   Holding two bodies in a defined relative state against a disturbance, and
@@ -69,7 +73,7 @@ invariants:
         field acts between - are explicit. What is required is identified
         participating material, not touching surfaces. Broadened at SF-9.1.
     verification_predicate: "exists(retention interaction) opposing departure from the retained state, with the participating material region identified on each body."
-    requires_tags: [retention_interaction_realized]
+    requires_tags: [retention_interaction_realized, interaction_regions_declared]
     related_freedoms: [FRE-LR-002]
     related_unresolved: []
     closes_finding: [SF-9.1]

@@ -3,9 +3,13 @@ schema_version: "0.3.0"
 tier: product_case
 inherits: BM-001
 dossier: ver3/oracles/_dossiers/DOS-BM-001-2.md
-lock_status: BLOCKED_BY_SOURCE_AMBIGUITY
-physical_validation: PENDING   # every fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
-semantic_review: PASSED_2026_08_02   # entailment, fixture-plausibility and cross-pack reviews all clean
+pack_status: BLOCKED_BY_SOURCE_AMBIGUITY
+physical_validation: PENDING_CAD   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+baseline_note: >
+  PRE_CAD_SEMANTIC_REVIEWED is a semantic status only. It is NOT lock-ready, NOT
+  CAD-validated and NOT production authority. The next authorized phase is
+  adversarial CAD validation.   # every admissible fixture is NEEDS_GEOMETRY_VALIDATION; no CAD or physics run exists
+semantic_review: PASSED   # entailment, fixture-plausibility, cross-pack and cross-file drift reviews clean
 lock_blocker: AMB-001-2-01
 
 correction_note: >
@@ -33,7 +37,7 @@ invariants:
         wraps several adjoining faces satisfies this. Corrected at SF-3.1.
       - "Does not fix how much of the exterior counts as exposed; that follows from what the mounting occludes (UNR-BM-001-2-004)."
     verification_predicate: "exists(planar boundary region) AND for every edge of the exposed exterior boundary: the edge is non-projecting, evaluated on metric surface geometry."
-    requires_tags: [planar_seating_region, exposed_edges_non_projecting]
+    requires_tags: [planar_seating_region, exposed_edges_non_projecting, interaction_regions_declared]
     related_freedoms: [FRE-BM-001-2-001, FRE-BM-001-2-002]
     related_unresolved: [UNR-BM-001-2-001, UNR-BM-001-2-002]
 

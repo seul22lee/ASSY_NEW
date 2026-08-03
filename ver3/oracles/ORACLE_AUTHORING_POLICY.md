@@ -166,3 +166,98 @@ elimination. What must hold instead:
 - each rejected candidate carries a source, physical or feasibility reason;
 - synthesis beyond the provider catalogue remained possible;
 - an absent implemented realizer yields **UNSUPPORTED**, never INFEASIBLE.
+
+---
+
+## 13. Intended interaction semantics — contact is not interference
+
+Adopted at GATE 2. This definition is common to every pack and every stage
+expectation, and the auditor enforces its schema.
+
+### 13.1 The six regions
+
+| Region | Meaning | Admissible? |
+|---|---|---|
+| `declared_contact` | two bodies are intended to touch here — a guide face, a pin/bore, a stop face, a seat | **yes**, and zero clearance here is correct |
+| `declared_clearance` | two bodies are intended not to touch, with a stated gap | yes; violating the gap is a defect |
+| `declared_interference_fit` | material overlap intended and taken up by elastic strain — a press fit | yes **only** with explicit process and material assumptions |
+| `declared_compliant_interaction` | overlap taken up by a represented deformation — a snap beam flexing past a lip | yes **only** where the deformation is represented |
+| `undeclared_volumetric_overlap` | solids occupy the same space and nothing declares it | **no — always FAIL** |
+| `numerical_tolerance` | the penetration depth below which a contact solver reports contact rather than overlap | a declared property of the evaluation, never of the design |
+
+### 13.2 The rule
+
+> **No undeclared volumetric overlap is permitted.**
+
+The rule is **not** "every pair of parts must maintain positive clearance
+everywhere". That formulation makes every guide, pin, dovetail, snap, flexure and
+stop into a collision, which is precisely backwards: those features exist in order
+to touch.
+
+- declared contact is admissible;
+- zero clearance at a declared contact is admissible;
+- a declared interference fit is admissible when its process and material
+  assumptions are explicit;
+- a declared compliant interaction is admissible when the deformation is
+  represented;
+- undeclared penetration remains FAIL, at any depth beyond the declared numerical
+  tolerance.
+
+### 13.3 Predicate form
+
+A motion or pose predicate must be written in the form:
+
+```
+no volumetric overlap between <bodies> outside declared contact, declared
+interference-fit and declared compliant-interaction regions, under the declared
+tolerance and at the declared fidelity
+```
+
+and **not** as `clearance(...) > 0` against a whole enclosing solid, nor as
+`intersect(a, b) is empty` everywhere. Both retired forms are detected as
+`BLANKET_CLEARANCE_PREDICATE`.
+
+## 14. Assembly semantics — insertion is a process, not a collision test
+
+Adopted at GATE 2.
+
+The requirement is **not** "a fully collision-free installation path exists".
+A press fit has no collision-free path and is still assemblable.
+
+An assembly predicate must require:
+
+- a **realizable installation process** exists;
+- no part passes through **undeclared rigid** material;
+- intended contact during insertion is allowed;
+- press fit, snap fit, interference fit and compliant insertion are allowed **only
+  when explicitly declared**, with their required deformation, material
+  assumptions, insertion direction and process assumptions represented;
+- co-formed, bonded or permanently joined regions declare that relationship
+  instead of owing a path.
+
+Four questions are kept apart and never conflated:
+
+| Question | Where it lives |
+|---|---|
+| geometric insertion feasibility | the physical invariant |
+| compliant assembly feasibility | the physical invariant, conditional on a declared compliant region |
+| force / process adequacy | `required_unresolved` — a quantitative question |
+| what evidence earns an assembly PASS | `stage_expectations` s11 |
+
+## 15. Causal verification minima — a control is not the only proof
+
+Adopted at GATE 2, approved as HSD-006.
+
+Where a verification minimum asks whether a feature is real, it must accept
+**either**:
+
+- **A. direct causal evidence** — the feature's geometry exists, contact occurs at
+  the relevant configuration, and the observed behaviour is caused by that
+  contact; or
+- **B. discriminating evidence** — a control, ablation or sensitivity result
+  showing the criterion fails when the feature is removed.
+
+A realized stop may be evidenced by explicit stop faces, contact at the terminal
+configuration, and kinematic termination caused by that contact, **without**
+building a second model with the stop deleted. A control remains valuable and is
+still admissible; it is no longer mandatory.

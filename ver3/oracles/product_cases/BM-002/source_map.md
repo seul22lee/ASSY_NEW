@@ -1,5 +1,9 @@
 # BM-002 — source map
 
+> **Pack status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; not lock-ready, not
+> CAD-validated. Every admissible fixture is `NEEDS_GEOMETRY_VALIDATION`.
+
+
 Every normative statement, freedom and unresolved decision traced to its origin.
 Rank 1 = explicit product intent / benchmark requirement. Rank 6 = legacy
 implementation behaviour, which never defines correctness.

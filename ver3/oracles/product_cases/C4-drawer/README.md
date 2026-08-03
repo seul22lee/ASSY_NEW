@@ -1,6 +1,9 @@
 # Oracle pack — C4-drawer (knob-driven cabinet drawer)
 
-**Status:** STRUCTURALLY_COMPLETE — not yet audited, not locked.
+**Status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; **not** lock-ready,
+**not** CAD-validated, **not** production authority. Every admissible fixture is
+`NEEDS_GEOMETRY_VALIDATION`. Next authorized phase: adversarial CAD validation.
+
 **Tier:** product case. **Parent:** none.
 **Frozen dossier:** `../../_dossiers/DOS-C4-drawer.md`.
 

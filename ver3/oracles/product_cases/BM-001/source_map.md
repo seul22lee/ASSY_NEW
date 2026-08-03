@@ -1,5 +1,9 @@
 # BM-001 — source map
 
+> **Pack status: `PRE_CAD_SEMANTIC_REVIEWED`** — semantic review clean; not lock-ready, not
+> CAD-validated. Every admissible fixture is `NEEDS_GEOMETRY_VALIDATION`.
+
+
 Every normative, unresolved, negative and evidence statement traces to an exact
 path. Ranks follow `ORACLE_METHOD.md` §3.
 
