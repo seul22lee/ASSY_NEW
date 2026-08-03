@@ -10,7 +10,6 @@ cad_validated: false
 physical_truth_proven: false
 production_authority: false
 lock_created: false
-rebuilt_at: PCF-001..011 - rebuilt, not patched
 purpose: A reproducible semantic candidate baseline for ADVERSARIAL CAD work. It records what was concluded,
   from which frozen sources, under which challengeable semantic authority, so a CAD counterexample attaches
   to a specific statement, fixture, amendment or decision.
@@ -29,13 +28,13 @@ authority_model:
   C_current_conclusions:
     manifest: this file
     cad_may_change_it: true
-base_commit_sha: f7e3a22844fa3d3eef0b56c90aeba6d29b1a15af
+base_commit_sha: 0b8442b4a0d16897c441ae700a24062ac0f23944
 worktree_state_at_baseline: dirty
 worktree_note: Taken from an UNCOMMITTED working tree. base_commit_sha identifies the starting commit;
   the audited content is identified by audited_snapshot_manifest_hash.
-baseline_manifest_hash: 8b2b07aa3a4d73fc4094859a75f8ef43d93806040219e6afb343a79f1ff17f30
-audited_snapshot_manifest_hash: 86d72c525e0a48415d27c178a64836dd60ceb2fd780a3b30af3114a30d097d86
-oracle_tree_hash: 5918f887266c70389d767938177fefe885f94ba7a4197542be22c45c8807cf9b
+baseline_manifest_hash: 7d09f0f3583fb5f5c743ac4c8421557cc0edf7cc74cf966a8bf2bd82418409f3
+audited_snapshot_manifest_hash: 8e0a81e33cfeec41cec69d5bba58264d14f5e9a5b05d9086ab3e249c6a246757
+oracle_tree_hash: f72ce6d660d8bfcbffa396118c776be48e88f0ee4fe5aa591ac5d5ced40e9c94
 inclusion_rule: 'baseline_manifest_hash covers every path in included_paths: policy, method, decisions,
   amendments, both authority manifests, index, workflow state, correction state, the five review records,
   all nine packs (normative, freedoms, realizations, evidence_cases, negative_cases, stage_expectations,
@@ -48,6 +47,9 @@ exclusion_rule:
     preserved but are not part of the ACTIVE baseline hash
   ver3/oracles/*/*/reference_realizations/: illustrative, never normative
   ver3/phase0/: pre-Oracle architecture record, superseded by the packs
+  ver3/oracles/FINAL_PRE_CAD_CORRECTION_REPORT.md: a report ABOUT this baseline
+  ver3/oracles/_audit/* except the five FINAL_PRECAD_RESTART reports: prior historical audit outputs are
+    preserved but are not part of the ACTIVE baseline hash
 included_paths:
   ORACLE_AUTHORING_POLICY.md: f8c6f9d0ffe2d8bd9d617736d1d5824534bc97f753237fd48c5e02fafa0433c4
   ORACLE_METHOD.md: 6edd01366b62174455c5c640dd36e864ac72eeea8af1c8b7fa59376ef0888161
@@ -55,29 +57,29 @@ included_paths:
   _dossier_amendments/AMENDMENTS.yaml: 686063d48e18c70a57a50e8d191e03f6c1040e22ac9a299f6349451d22eb9b71
   SEMANTIC_AUTHORITY.yaml: 33a86334b0e6d37d8d5001ef2e9723b4fd669a8c41a2432a3576f88d416bf730
   SOURCE_FREEZE.yaml: a7ecc76db384b65eec81da283486035f8b80a76cbc208f7f634dc01bd09c189b
-  ORACLE_INDEX.md: c7cdb873446a573bd4643fa0f3af9d52f25a22a0cab0c1d768196b69e0cff74d
-  ORACLE_WORKFLOW_STATE.yaml: b016c9e139b1357a90c56f8eeb4944dfad28e81829b67d19e3c3f4c91c4b62d8
+  ORACLE_INDEX.md: 547b909b92b5e21c108839a248aabe4bd602dfd4643fd4ea253fc68e48b055e2
+  ORACLE_WORKFLOW_STATE.yaml: 4bf9a304cbf2a6ac31b95262fd3678c06cd01220d3f8588db425d5e2fdc02768
   PRE_CAD_CORRECTION_STATE.yaml: 0f128fbe63793a37a1a634ed25bb18fb1826f7ecaf550c247e56801f80833fd1
   SOURCE_ENTAILMENT_REVIEW.yaml: fa0e0b3ddb95c06c43669624dbd3931378795f91bd9206617373ecf13c863629
   FIXTURE_PLAUSIBILITY_REVIEW.yaml: 2610c5551e97e4df4b1ff4621b3499aea8020af2fe64c4f53a538ac5adecbfcc
   PHYSICAL_FIXTURE_REVIEW.yaml: 3db57ca51fba4b62cfc82348da06b3abde6a409d90b5861433df74528eb2a6c9
   STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml: 9d240fe2466360ddc299b4194a4694ddf30f2d075cba27c63b5b74530ddf2200
   CROSS_PACK_OWNERSHIP_REVIEW.yaml: 8cef304d5792993dca93570bc7b4abd4abb6f7bf025c9ba27b1ccc09db3e2361
-  micro_oracles/bounded-two-state-closure/normative.yaml: 3352dc17f9ba5bf0dda700ee40058b0f146e8494def1bc29601d9e5eeef3223d
+  micro_oracles/bounded-two-state-closure/normative.yaml: be772b4dbb1f5e22dcc5d294bd3e37156af2cae64d6c05b4af0e3fd7ff8def5f
   micro_oracles/bounded-two-state-closure/freedoms.yaml: 75c9534d1fb05ddb5d329820120c22087a8866bd670cb180cf5e35284b069ffb
   micro_oracles/bounded-two-state-closure/realizations.yaml: c758bf058feb67f96b068282cd7ca7caf412cd7e2078cdf5c00125f6157ef007
   micro_oracles/bounded-two-state-closure/evidence_cases.yaml: b32d154748ad0545a6ce5de43e010ae6c2657f09c8e42f938ca127e62886e40e
-  micro_oracles/bounded-two-state-closure/negative_cases.yaml: d5c10ae3f9ea3715c45c8abc63a351e46a9c52641f3e74cb94c5e479ddbfb25d
-  micro_oracles/bounded-two-state-closure/stage_expectations.yaml: 6e4f9464823eab16ffdad5e3d5158c50c13de1276b9e1ab0b5b4e29c7c11d64c
+  micro_oracles/bounded-two-state-closure/negative_cases.yaml: f7ea2cab475916bd3ed5327cefb5711925ce6928c8313263bb07f96382e4dec8
+  micro_oracles/bounded-two-state-closure/stage_expectations.yaml: c51ad05ea51973b20c41aac7861c55a2d77df8b38abeb93cdbcdd2c7c934afc3
   micro_oracles/bounded-two-state-closure/evidence_scope.yaml: 1cb3953011ad57f59f4935710b68465c3b44684b7ba850b2b9fb7ab2aada900b
   micro_oracles/bounded-two-state-closure/source_map.md: b97c4236b2e5dd5fda5cb8f1665c015dbfb958e77c4f6e9307b7189f2bc5084a
   micro_oracles/bounded-two-state-closure/README.md: 3710616b7c2d0e0e169e46d357d2c16b4a588cc984bc14e5900394371ef18912
-  micro_oracles/guided-slider/normative.yaml: 98c6df494e4fccc3b0d28467b38466dd9a8ff8958db1531758d06dd8e37d945f
+  micro_oracles/guided-slider/normative.yaml: 283faed514f9e51b9e3e5667b5fc7c6b9a2613a5a4d79a2b056e73a3a4a2c118
   micro_oracles/guided-slider/freedoms.yaml: b7abe0c45946621666c4a8b041e8923273a7ce9511d5ad14256ad5b44b83151e
   micro_oracles/guided-slider/realizations.yaml: 3618a71d89a6fafccff169d75f02a713c4e8ca04407e6968e5de78d84706e12a
   micro_oracles/guided-slider/evidence_cases.yaml: 5a5af5b7dd520a7f0ac92c0fd19917b552f9442f5cae4a425d97a144af54d45a
   micro_oracles/guided-slider/negative_cases.yaml: 50561147f122205a723f92a9df7a999ea3bd4a5061f74430958f1f2cf2779eb0
-  micro_oracles/guided-slider/stage_expectations.yaml: 345bfe039dd97df7164dd3c9ea4735ed722aeef928df63b8c1c3dac164823672
+  micro_oracles/guided-slider/stage_expectations.yaml: c79786b6b288e0e3c0525729d68b90f55eccacdfcc2e144fb59b23b3d1b5909d
   micro_oracles/guided-slider/evidence_scope.yaml: 04618a31db4d8e0b20488f32ffb29dbc7e03aedea255a924bcee1ce704396480
   micro_oracles/guided-slider/source_map.md: b0700bd59e2ca950a660e4a638554cc104e38e376a7de02548458f493f487eed
   micro_oracles/guided-slider/README.md: 58c6f1b24286c23b261f30b16b2f9d725ba3b57e7b50e921cbe026abde061d4e
@@ -99,12 +101,12 @@ included_paths:
   micro_oracles/rotary-to-linear-engagement/evidence_scope.yaml: 656e218c2beb85bdde16473412d9b6ae186ebd1686f86cd7d002a497b39303cd
   micro_oracles/rotary-to-linear-engagement/source_map.md: da66aa69ec4b22473b3cd3c1a6493383e060f27bb93dbd3817896d56f6d57136
   micro_oracles/rotary-to-linear-engagement/README.md: 0af4353481014966381fcf73f233517e7422f3b1d04c77fa0e272200b16c0ca7
-  product_cases/BM-001/normative.yaml: dca3cf9a50d8c3a5d099fd34611d7a985072c2668f00efa704243f293d95e437
+  product_cases/BM-001/normative.yaml: 4e8598caf35e7a6d0020254fa64646185673663175ff9500322c9d932743297b
   product_cases/BM-001/freedoms.yaml: 09ffe149f2d3f33ec1267e5a8cc2935a58a20b753259230e8539f5fd5abbd439
   product_cases/BM-001/realizations.yaml: 8ba2a06f61aab0c6ff4cc73192fdbd8f7b84f35c0b6705200c19c47e3ade1d57
   product_cases/BM-001/evidence_cases.yaml: 2ae4532ec0e940cd5ab16c2423305db0237a940e5f511f06a70de5cd2df3bc92
   product_cases/BM-001/negative_cases.yaml: 3bf81de348023fb4f440858742a2bcff52d36396776b80fc58d147c1089ceabb
-  product_cases/BM-001/stage_expectations.yaml: 27a78dbaf9cabcc64a1d77934e617b3882ba8e941160159c3b99cafdf5369030
+  product_cases/BM-001/stage_expectations.yaml: ccaf814dec1542351528d25562d4b8e93288d8292896d85ef9dd8929ba5600e1
   product_cases/BM-001/evidence_scope.yaml: 114388f78b696510a711c9beccad54c58d22f41b65aedbad51d39f2cb9c631fe
   product_cases/BM-001/source_map.md: 92c2948d940a8f294126e15dc43f8b119c5d069b825da0c0a43a22f948852205
   product_cases/BM-001/README.md: b1ab9689f150fe01d1990a9092d7d96d76f09dc67178cf69f331c44c98bbdb9e
@@ -131,16 +133,16 @@ included_paths:
   product_cases/BM-002/realizations.yaml: 37fc6525da516508dc6c1e35a69f68d421bd14ecd8e925aff4b7796e7007546f
   product_cases/BM-002/evidence_cases.yaml: 86936842d524a44eac5a401d93f608afaf4c178602745241538c0e5ccdb5d24c
   product_cases/BM-002/negative_cases.yaml: 962ae2f7f7461be9fc3ffdc4890778790bc7a91b3dd4b928b4b37cc6845472fa
-  product_cases/BM-002/stage_expectations.yaml: 4efe10d96556faadb37ecfb2987ab62076f7ef00ecd209b7a83d9dbd557651ab
+  product_cases/BM-002/stage_expectations.yaml: ac871713febd53435732c84bbc26c5ce87132d44479afbd085aaf13bd0fda223
   product_cases/BM-002/evidence_scope.yaml: 0e70b513b0717e6a3670c94146a2eb042f5e4c6fdf87610235932f25cb9a6187
   product_cases/BM-002/source_map.md: 7e6a259f8e91a6a7075f0e031406eed5c47ce48949a25b3348166dc5b7fa8e27
   product_cases/BM-002/README.md: bcfbe898d4be33e3efc5dd5d2a11771facd474f492c293c04b84d6929ef2b515
-  product_cases/C4-drawer/normative.yaml: 73dbe64619fa2db53a34025e1a99174de015eb117b8fd1801baaf379178c39b6
+  product_cases/C4-drawer/normative.yaml: 74ee82d4e5db80cf50db068967d6d00b76ae287befa78f18b92d78d23aeb32e0
   product_cases/C4-drawer/freedoms.yaml: 3540040649ca7cde6b3e854fbeb25e7e357a436a7b016fd7983bd53a074d0692
   product_cases/C4-drawer/realizations.yaml: 3635cfff9d592c30d0d260f48e638030bfa75c2391cfe598b4ff495e2b2361ac
   product_cases/C4-drawer/evidence_cases.yaml: 5afe04accdf1d5a8f2f7791fc1fdcf48bfedb055d844df58133ba09166676f27
   product_cases/C4-drawer/negative_cases.yaml: ba08ae934a53295dc0bcad5dc7e9b6a5caaa3f03d55bb3e7c82eb92ac9cdd188
-  product_cases/C4-drawer/stage_expectations.yaml: dac04bb6dfca00586d7a6f70812b3a638f34b84054a61c259b35b1a8eb692ddd
+  product_cases/C4-drawer/stage_expectations.yaml: 9b205cac683a630a86131723577d5f72f215562d2fa0ae6169809463d900c0cc
   product_cases/C4-drawer/evidence_scope.yaml: 876ce7af2b08fa61dbaaa7cc979ab772e37ddcc60c67fadb882bcdb6755c21b7
   product_cases/C4-drawer/source_map.md: 8c535c2c62762eda34d2f5083d82c1020683b88cd077ae9daadab233081eb81b
   product_cases/C4-drawer/README.md: 3dab111b37e72c74ef28f818b3e8d3af5ed7926ecc5f18a9cbede037614ff46d
@@ -156,14 +158,16 @@ included_paths:
   _dossiers/DOSSIER_README.md: 194dd3ca5c5de760ae017070ce53216490e334c14fb8a9e6f8ab7aa594335975
   _ambiguities/AMB-001-2-01.md: cebc412e8f120206b744bc22b812e745b4140f2c6b671184b65a14ce2f05c162
   _ambiguities/AMB-001-3-01.md: eeb723b5c63ea8b98c59eed9b29b6cf58464204788b43cd3ea502608ad54ab2b
-  ../oracle_tools/audit_oracles.py: 6abf8233d118462ca773f2419168f73f9011abd16c6077ebce0b01ed15637e34
-  ../oracle_tools/mutation_tests.py: a73e30854ada8ae9b2462bea10ee163b64c946900d947bce2b7c41169729f122
-  _audit/PRECAD_V2_RESTART-canonical.json: ffaa2493f515b63324711849bcd6008ffab8eac83e2658512e486b5d0f9d4347
-  _audit/PRECAD_V2_RESTART-shuffled-20260802.json: 43edd716ec0e1fec89f999b9066d15ae688ed9e44a2d4456a6faa81de6c6ea8b
-  _audit/PRECAD_V2_RESTART-shuffled-4177.json: 88939b4533d70ca0c264ac0b9ecc2fd581958e6b80367aa3462146033a4b8d56
-  _audit/PRECAD_V2_RESTART-shuffled-90210.json: e403af46b4c68ba8e3c568f4212ebe1be308e74aa292e9d5a9444ec00af83317
-  _audit/PRECAD_V2_RESTART-mutation.json: e511e55a989be0d67cf7e5b595f67b941aada22f641c70f6b184b303dfaf83a8
-included_path_count: 114
+  ../oracle_tools/audit_oracles.py: 4b6d734d4595de8e56a0734091a237fcc187163115ed91ebae95d405ee3c3a29
+  ../oracle_tools/mutation_tests.py: 2aec2c99ce87fd57852d7f44fb59d042e742cdaacf36e482534bb904c590e6a3
+  FINAL_PRE_CAD_CORRECTION_STATE.yaml: cebe7d8c71b0849fb16cb918639ab8d422c599aaa6b17f068583bb0ed9e787e9
+  PRE_CAD_BACKLOG.yaml: 4cf051cb88f4438572e3cbbc59afd4c720315f386431494115ab6e45bbe98304
+  _audit/FINAL_PRECAD_RESTART-canonical.json: aab6f6a4841f7e8ae8359147858582a86aefff6e797b17a04185a8e46f9348d6
+  _audit/FINAL_PRECAD_RESTART-shuffled-20260802.json: bc62db38e9925fb498147b0a0ec17136db6c03f4439f8acfaf21abc248f6f00b
+  _audit/FINAL_PRECAD_RESTART-shuffled-4177.json: c57e105fa67820f92911deff2174072e257b80765d50d20133a966e2e16c03a7
+  _audit/FINAL_PRECAD_RESTART-shuffled-90210.json: 8865ca40374f661e3ea0a168434878b84812ec2714c723c89a758d6927de4fd2
+  _audit/FINAL_PRECAD_RESTART-mutation.json: 9a2688f072a6c8a29f853fcfa3e75c5b764467f97f5193626965ede4a1c386b7
+included_path_count: 116
 pack_status:
   BM-001: PRE_CAD_SEMANTIC_REVIEWED
   BM-001-2: BLOCKED_BY_SOURCE_AMBIGUITY
@@ -185,24 +189,24 @@ statuses_deliberately_not_used:
 - PRODUCTION_READY
 audit_provenance:
   canonical:
-    path: ver3/oracles/_audit/PRECAD_V2_RESTART-canonical.json
-    run_id: run-adfcb5409fa0cc3a
-    utc_timestamp: '2026-08-03T05:18:02+00:00'
+    path: ver3/oracles/_audit/FINAL_PRECAD_RESTART-canonical.json
+    run_id: run-f8cad74becb96985
+    utc_timestamp: '2026-08-03T12:18:11+00:00'
     result: 0 BLOCKING, 0 MAJOR
-    passes: 3A 3B 3C 3D 3E 3F 3G 3H
+    passes: 3A 3B 3C 3D 3E 3F 3G 3H 3I
   shuffled_seeds:
   - 20260802
   - 4177
   - 90210
   shuffled_result: 0 BLOCKING, 0 MAJOR at every seed
   mutation_suite:
-    total: 88
-    defect_cases: 70
-    control_cases: 18
+    total: 104
+    defect_cases: 81
+    control_cases: 23
     failed: 0
-    passed: 88
-  auditor_sha256: 6abf8233d118462ca773f2419168f73f9011abd16c6077ebce0b01ed15637e34
-  mutation_suite_sha256: a73e30854ada8ae9b2462bea10ee163b64c946900d947bce2b7c41169729f122
+    passed: 104
+  auditor_sha256: 4b6d734d4595de8e56a0734091a237fcc187163115ed91ebae95d405ee3c3a29
+  mutation_suite_sha256: 2aec2c99ce87fd57852d7f44fb59d042e742cdaacf36e482534bb904c590e6a3
   python_version: 3.8.10
   runtime: Linux 5.4.0-176-generic x86_64
 accepted_human_decisions:
@@ -298,3 +302,6 @@ next_authorized_phase: adversarial CAD validation
 explicitly_not_next:
 - production implementation
 - final Oracle lock
+last_correction: FPC-001..007 (final bounded pre-CAD correction)
+final_correction_state: ver3/oracles/FINAL_PRE_CAD_CORRECTION_STATE.yaml
+backlog: ver3/oracles/PRE_CAD_BACKLOG.yaml

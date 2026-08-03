@@ -1,0 +1,85 @@
+schema_version: 0.1.0
+purpose: Issues noticed during the final bounded pre-CAD correction that do NOT meet the scope test and
+  must not delay CAD entry.
+scope_test_reference: ver3/oracles/FINAL_PRE_CAD_CORRECTION_STATE.yaml#scope_test
+rule: Nothing in this file blocks CAD entry. An entry is promoted to an active correction only if a CAD
+  counterexample, new source material, or a demonstrated change in CAD classification makes it meet the
+  scope test.
+classifications:
+  DOCUMENTATION_ONLY: wording or record-keeping; no PASS/FAIL effect
+  FUTURE_AUDITOR_ENHANCEMENT: a check worth adding; no current active contract is wrong
+  POST_CAD_CLEANUP: tidy after CAD, when the vocabulary settles
+  PHYSICAL_QUESTION_FOR_CAD: a genuine physical unknown that CAD is the right tool to answer
+summary:
+  total: 8
+  DOCUMENTATION_ONLY: 2
+  FUTURE_AUDITOR_ENHANCEMENT: 2
+  POST_CAD_CLEANUP: 1
+  PHYSICAL_QUESTION_FOR_CAD: 3
+  blocking_cad_entry: 0
+entries:
+- backlog_id: BKL-001
+  title: pass 3I duplicate-key detection is not general
+  classification: FUTURE_AUDITOR_ENHANCEMENT
+  detail: The two duplicate keys corrected at FPC-007 were found by targeted inspection, not by a check.
+    YAML silently keeps the last duplicate, so a contradictory Stage field could hide. A general duplicate-key
+    linter over every mapping would catch the class.
+  why_not_corrected_now: It cannot misclassify a CAD design on the current snapshot - both duplicates
+    were identical values. Adding a general linter is an auditor enhancement, not an active-contract defect.
+  blocks_cad_entry: false
+- backlog_id: BKL-002
+  title: historical reports carry superseded totals and status names
+  classification: DOCUMENTATION_ONLY
+  detail: ORACLE_VALIDATION_REPORT.md, INDEPENDENT_SEMANTIC_REVIEW_REPORT.md and POST_HUMAN_REVIEW_CORRECTION_REPORT.md
+    quote fixture counts, pass scopes and the retired status SEMANTICALLY_AUDITED from the pass that produced
+    them.
+  why_not_corrected_now: They are explicitly labelled historical and carry superseded-terminology banners.
+    Rewriting them would destroy the record of what each pass actually found.
+  blocks_cad_entry: false
+- backlog_id: BKL-003
+  title: reference_realizations directories are empty
+  classification: DOCUMENTATION_ONLY
+  detail: Every pack has an empty reference_realizations/ directory; only BM-001 ever held a file.
+  why_not_corrected_now: Reference realizations are illustrative and are excluded from the baseline manifest.
+    No active contract depends on them.
+  blocks_cad_entry: false
+- backlog_id: BKL-004
+  title: evidence_scope.yaml predates the three-domain split
+  classification: POST_CAD_CLEANUP
+  detail: Some evidence_scope entries describe fidelity in the vocabulary used before physical, representation
+    and evidence were separated at PCF-004.
+  why_not_corrected_now: 'evidence_scope is descriptive: it records what the legacy corpus can and cannot
+    support. It carries no PASS/FAIL predicate and cannot misclassify a design.'
+  blocks_cad_entry: false
+- backlog_id: BKL-005
+  title: no auditor check that a Stage rule projects an existing invariant
+  classification: FUTURE_AUDITOR_ENHANCEMENT
+  detail: traces_to is read where present but never validated against the pack invariant ids, so a renamed
+    invariant could leave a Stage rule pointing at nothing.
+  why_not_corrected_now: Every current traces_to resolves. The check is worth adding but no active contract
+    is wrong today.
+  blocks_cad_entry: false
+- backlog_id: BKL-006
+  title: the declared numerical contact tolerance has no stated bound
+  classification: PHYSICAL_QUESTION_FOR_CAD
+  detail: The intended-contact semantics let a design declare the penetration depth below which contact
+    is reported rather than overlap. Nothing bounds that declaration, so a large tolerance could hide
+    real penetration inside a contact declaration.
+  why_not_corrected_now: This is PU-07 in the baseline and is a physical question CAD must answer. Inventing
+    a bound now would be a fabricated threshold with no source.
+  blocks_cad_entry: false
+- backlog_id: BKL-007
+  title: ADM-HS-E coverage overlap is asserted, not demonstrated
+  classification: PHYSICAL_QUESTION_FOR_CAD
+  detail: The flexure-to-rib hand-off fixture assumes the two constraint regimes OVERLAP so no configuration
+    is unconstrained. HS-C3 now admits hand-off, so the fixture is admissible on its narrative.
+  why_not_corrected_now: Whether the overlap exists is geometry. It is PU-03 in the baseline and is exactly
+    what the corrected HS-C3 sends to CAD rather than pre-judging.
+  blocks_cad_entry: false
+- backlog_id: BKL-008
+  title: ADM-HS-F two-minimum field barrier is unquantified
+  classification: PHYSICAL_QUESTION_FOR_CAD
+  detail: One magnetic arrangement producing two stable seats usually has a shallow barrier between them;
+    the cover may drift. HS-C5 now admits a shared field at both bounds.
+  why_not_corrected_now: A field-strength question for CAD and physics. PU-12 in the baseline.
+  blocks_cad_entry: false

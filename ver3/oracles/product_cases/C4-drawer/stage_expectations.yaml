@@ -175,12 +175,20 @@ stages:
         otherwise: NOT_VERIFIED
       C4-R7_declared_ends_of_travel:
         traces_to: NRM-C4-007
-        pass_requires: "each DECLARED physical end of travel shown produced by its own condition, evaluated at its own configuration"
-        fail_when: "a declared end has no realized condition, or one evaluation result is copied to both"
+        pass_requires: >
+          each DECLARED physical end of travel carries its own evaluation result and its own causal account, obtained at its own configuration
+        must_not_fail_when: >
+          one continuous feature, one physical field or one mechanism contributes to BOTH declared ends; or no end of travel is declared at all
+        fail_when: >
+          a declared end has no physically supported bound; or the evaluation result for one end is merely copied to the other
         if_no_end_of_travel_is_declared: NOT_APPLICABLE
-        note: "DOS-C4-drawer S3 records no stated travel limit; a design declaring none is not thereby deficient."
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
+        note: >
+          DOS-C4-drawer S3 records no stated travel limit; a design declaring none is not thereby deficient.
+        corrected_at: FPC-004
+        correction_note: >
+          The retired rule required each end "determined by its own condition" and failed when "one condition is credited to both ends", which rejects a single rail abutting at both extremes. Same defect class as HS-C5.
       C4-R8_knob_access_and_crossing:
         traces_to: NRM-C4-008
         pass_requires: "an access path from the user region to the knob in the retracted configuration, plus a realized crossing with no unintended interference"
@@ -196,21 +204,35 @@ stages:
         otherwise: NOT_VERIFIED
       C4-R10_clearance_and_traversability:
         traces_to: NRM-C4-010
-        pass_requires: "the drawer shown not to intersect cabinet material at any configuration of the travel, and the path shown traversable"
-        fail_when: "an intersection occurs at any configuration, or the path is blocked at an interior point"
+        pass_requires: >
+          along the required travel there is no UNDECLARED volumetric overlap between the drawer and cabinet - that is, no shared volume outside declared contact, declared interference-fit and declared compliant-interaction regions - and the required path is traversable at the declared fidelity
+        must_not_fail_when: >
+          the drawer and cabinet touch at a declared guide, bearing, stop or other intended interaction region; or zero clearance exists at a declared contact
+        if_representation_incomplete: NOT_EVALUABLE
+        representation_incomplete_reason: >
+          REPRESENTATION_INCOMPLETE - interaction-region classification or numerical tolerance absent from DesignState. This is NOT a physical FAIL.
+        fail_when: >
+          undeclared volumetric overlap occurs at any required configuration; or macroscopic penetration is presented as contact beyond the declared numerical tolerance; or the required path is blocked at an interior point
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
+        corrected_at: FPC-002
+        correction_note: >
+          The retired wording was "shown not to intersect cabinet material at any configuration ... an intersection occurs at any configuration". A drawer rides on the guides it touches, so that rule could FAIL every physically valid guided design. Now projects NRM-C4-010 as written.
       C4-R11_assembly:
         traces_to: NRM-C4-011
-        pass_requires: "installation paths demonstrated for every discretely-installed part, plus an acyclic assembly order"
-        fail_when: "a part has no collision-free installation path, or the order contains a cycle"
+        pass_requires: >
+          a physically realizable installation process demonstrated for every discretely-installed part, in which no component passes through UNDECLARED rigid material, plus an acyclic assembly order
+        must_not_fail_when: >
+          insertion involves intended contact; or a declared snap, press, interference or compliant insertion lacks a collision-free path but is physically coherent; or a co-formed, bonded or permanently joined region owes no discrete insertion path
+        if_representation_incomplete: NOT_EVALUABLE
+        representation_incomplete_reason: >
+          REPRESENTATION_INCOMPLETE - interaction classification, compliant region identity, material, insertion direction or process assumption missing from DesignState. This is NOT a physical FAIL.
+        fail_when: >
+          a rigid part must pass through UNDECLARED rigid material; or a claimed snap process has no physically compliant region; or a claimed interference process is physically incoherent; or no realizable assembly process exists under the declared assumptions; or the order contains a cycle
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-  s12:
-    must_exist: [revision_plan, root_cause_candidates, rerun_closure, preserved_commitments]
-    must_not_be_decided: [coarse_enum_to_stage_mapping]
-    may_remain_unresolved: []
-    provenance_required: ["root_cause -> owning decision id"]
-    capability_gap_rule: >
-      A revision triggered by UNSUPPORTED must name the absent capability. It may
-      never be recorded as a physical infeasibility of the product (NEG-C4-016).
+        force_adequacy_note: >
+          Insertion FORCE and process adequacy are NOT covered by this rule and are NOT structurally proven by a PASS. They remain quantitative and unresolved at UNR-C4-008.
+        corrected_at: FPC-001
+        correction_note: >
+          The retired requirement was "a part has no collision-free installation path". A press fit has no collision-free path and is still assemblable, so that rule could FAIL a physically valid design. Now projects the active contract NRM-C4-011 already carries: installation_process_physically_realizable.

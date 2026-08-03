@@ -115,42 +115,80 @@ stages:
         fail_when: "no continuous path exists"
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      HS-C3_constraint_persists:
+      HS-C3_constraint_coverage_continuous:
         traces_to: NRM-HS-003
-        pass_requires: "the relative constraint shown engaged at the extremes and the interior of the motion"
-        fail_when: "the constraint lapses anywhere within the motion"
+        human_decision_ref: HSD-003
+        pass_requires: >
+          at every intermediate configuration of the declared bounded path, at least one realized constraint or interaction keeps the two bodies within the allowed motion manifold
+        must_not_fail_when: >
+          the ACTIVE constraint changes along the path; or one constraint hands off to another; or an interval is covered by two constraints simultaneously
+        fail_when: >
+          an interval of the declared path has NO active constraint coverage; or the closure enters unconstrained free flight within the declared capability
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
+        corrected_at: FPC-003
+        correction_note: >
+          The retired rule required "THE relative constraint shown engaged at the extremes and the interior" and failed when "the constraint lapses anywhere". That rejects a flexure handing off to a moulded rib - the ADM-HS-E semantics AMD-HS-001 and HSD-003 explicitly admit. Coverage must be continuous; the constraint need not be the same one.
       HS-C4_bounds_physically_realized:
         traces_to: NRM-HS-004
-        pass_requires: "each extreme shown produced by a realized condition, evidenced by a criterion demonstrated to discriminate against the bound's absence"
-        fail_when: "an extreme is produced only by a model limit, or the realized condition is not reached"
-        if_criterion_does_not_discriminate: NOT_VERIFIED
+        human_decision_ref: HSD-006
+        pass_requires: >
+          each extreme shown produced by a realized physical condition, evidenced by EITHER branch A (direct causal: the bounding geometry or field exists, is active at that configuration, and the motion terminates because of it) OR branch B (a discriminating control, ablation or sensitivity result)
+        must_not_fail_when: >
+          no ablated control model exists, provided branch A is adequately supported
+        fail_when: >
+          an extreme is produced only by a limit imposed on the model; or the realized condition is not reached; or evidence contradicts the claimed bound
+        otherwise: NOT_VERIFIED
         if_unresolved: INDETERMINATE
         if_capability_absent: UNSUPPORTED
-        otherwise: NOT_VERIFIED
-        note: "UNR-HS-004 is open: the corpus supplies no discriminating single-run criterion."
-      HS-C5_bounds_distinct:
+        note: >
+          UNR-HS-004 records that the corpus supplies no discriminating single-run criterion. Under HSD-006 that no longer blocks a PASS, because branch A is an alternative route.
+        corrected_at: FPC-006
+        correction_note: >
+          The retired rule required a criterion "demonstrated to discriminate against the bound absence" - branch B only - and carried if_criterion_does_not_discriminate: NOT_VERIFIED, which made a control mandatory.
+      HS-C5_bounds_independently_evaluated:
         traces_to: NRM-HS-005
-        pass_requires: "each extreme shown determined by its own condition, evaluated at its own configuration"
-        fail_when: "one condition is credited to both extremes"
+        human_decision_ref: HSD-003
+        pass_requires: >
+          each terminal configuration carries its own evaluation result and its own causal account, obtained at its own configuration
+        must_not_fail_when: >
+          one continuous feature, one physical field or one mechanism contributes to BOTH bounds; or the active mechanism is shared between the two extremes
+        fail_when: >
+          the evaluation result for one endpoint is merely copied to the other; or an endpoint has no physically supported bound
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      HS-C6_no_interference:
+        corrected_at: FPC-004
+        correction_note: >
+          The retired rule required each extreme "determined by its OWN condition" and failed when "one condition is credited to both extremes". That rejects ADM-HS-D (one continuous slot arresting the pin at both ends) and ADM-HS-F (one magnetic field with two stable seats), both admitted under HSD-003. What is forbidden is copying an evaluation RESULT, not sharing a mechanism.
+      HS-C6_no_undeclared_overlap:
         traces_to: NRM-HS-006
-        pass_requires: "swept volumes shown non-intersecting at every interior point of the motion, other than at declared interactions"
-        fail_when: "unaccounted interference occurs within the motion"
+        pass_requires: >
+          along the required motion there is no UNDECLARED volumetric overlap between the two bodies - no shared volume outside declared contact, declared interference-fit and declared compliant-interaction regions - under the declared tolerance
+        must_not_fail_when: >
+          the two bodies touch at an intended bounding or constraining interaction, whatever its kind; or zero clearance exists at a declared contact
+        if_representation_incomplete: NOT_EVALUABLE
+        representation_incomplete_reason: >
+          REPRESENTATION_INCOMPLETE - interaction-region classification or numerical tolerance absent from DesignState. This is NOT a physical FAIL.
+        fail_when: >
+          undeclared volumetric overlap occurs at any configuration of the required motion; or macroscopic penetration is presented as contact beyond the declared numerical tolerance
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      HS-C7_criterion_admissibility:
+        corrected_at: FPC-005
+        correction_note: >
+          Renamed from HS-C6_no_interference and re-authored. The retired rule spoke of "swept volumes shown non-intersecting", which reads as blanket separation, and it projected a statement that asserted exactly two bounding contacts.
+      HS-C7_evidence_admissibility:
         traces_to: NRM-HS-007
-        pass_requires: "every criterion mapped to the presence of a bound carries a configuration in which it fails without the bound"
-        fail_when: "a non-discriminating criterion is counted as evidence of a bound"
-        if_capability_absent: UNSUPPORTED
+        human_decision_ref: HSD-006
+        pass_requires: >
+          the claim about the presence of a bound is supported by EITHER branch A (direct causal evidence: the realizing geometry or field exists, is active at the relevant configuration, and the observed behaviour is causally attributable to it) OR branch B (discriminating evidence: a control, ablation, sensitivity analysis or other comparison showing the behaviour is lost or changed)
+        must_not_fail_when: >
+          no control or ablation model exists, provided branch A is adequately supported
+        fail_when: >
+          the available evidence CONTRADICTS the claimed feature or behaviour
         otherwise: NOT_VERIFIED
-  s12:
-    must_exist: [root_cause_candidates, capability_gap_records]
-    provenance_required: ["root_cause -> owning decision id"]
-    capability_gap_rule: >
-      A revision triggered by UNSUPPORTED must name the absent capability, never
-      record a physical infeasibility (NEG-HS-013).
+        not_verified_reason: >
+          neither branch is adequately supported. Absence of a control is NOT_VERIFIED at worst, never a physical design FAIL.
+        if_capability_absent: UNSUPPORTED
+        corrected_at: FPC-006
+        correction_note: >
+          The retired rule required every criterion to carry "a configuration in which it fails without the bound" - branch B only.

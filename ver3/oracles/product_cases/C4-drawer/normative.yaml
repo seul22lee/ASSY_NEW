@@ -379,14 +379,16 @@ invariants:
 
   - id: NRM-C4-012
     statement: >
-      An observable offered as evidence of guidance must be able to take a
-      non-conforming value under the model that produces it.
+      Evidence offered for guidance must rest on either direct causal evidence or
+      discriminating evidence.
     basis_type: VERIFICATION_MINIMUM
     support_type: derived
     enables_claim: >
       NRM-C4-005 may be reported PASS. Without this minimum, an off-axis
       deviation of 0.0 degrees produced by a declared prismatic pair - a value the
       model cannot vary - would be counted as showing that the drawer is guided.
+      Satisfied by branch A OR branch B under HSD-006; the two are ALTERNATIVES. Absence of a
+      control is never a physical FAIL.
     source_locators: ["DOS-C4-drawer S5 E2"]
     current_authority: 'DOS-C4-drawer S5 (original, unchanged)'
     authority_note: >
@@ -397,11 +399,16 @@ invariants:
       - "An observable that cannot take any other value distinguishes nothing, so it cannot be evidence."
     conclusion_scope: "Admissibility of an observable as evidence of guidance. Says nothing about the design."
     exclusions: ["Does not forbid declared-pair models; it requires a value exact by construction to be marked as a structural artifact rather than counted."]
-    verification_predicate: "for each observable mapped to a guidance criterion: the model that produced it admits at least one configuration in which the observable violates its threshold."
+    verification_predicate: >
+      A claim about guidance may be supported by EITHER (A) direct causal evidence - the realizing geometry or field exists, it is active at the relevant configuration, and the observed behaviour is causally attributable to it - OR (B) discriminating evidence: a control, ablation, sensitivity analysis or other comparison showing the claimed behaviour is lost or changed. A control is useful but is not mandatory when direct causal evidence is adequate.
     requires_evidence_tags: [guidance_observable_can_fail]
     related_freedoms: []
     related_unresolved: []
-
+    evidence_branches:
+      A_direct_causal: "realizing geometry or field exists; active at the relevant configuration; behaviour causally attributable to it"
+      B_discriminating: "control, ablation, sensitivity analysis or other comparison showing the behaviour is lost or changed"
+      relation: ALTERNATIVES
+    corrected_at: FPC-006
   - id: NRM-C4-013
     statement: >
       Evidence produced for a different case may be cited only with its

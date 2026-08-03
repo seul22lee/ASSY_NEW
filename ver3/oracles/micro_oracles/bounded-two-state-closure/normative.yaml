@@ -69,10 +69,9 @@ invariants:
       - 'DOS-bounded-two-state-closure S1 (original, clause: reaches two defined states)'
     current_authority: 'DOS-bounded-two-state-closure S1 (original, unchanged clause)'
     authority_note: >
-      DOS-bounded-two-state-closure S1 remains CURRENT authority for this clause. AMD-HS-001 declares a PARTIAL scope - the constraint-persistence and bound-distinctness clauses only - so applying it here would exceed its declared supersession scope.
-    current_authority: DOS-bounded-two-state-closure S1 (original, unchanged clause)
-    authority_note: >
-      DOS-bounded-two-state-closure S1 remains CURRENT authority for this clause. AMD-HS-001 declares a PARTIAL scope - the constraint-persistence and bound-distinctness clauses only - so applying it here would exceed its declared supersession scope.
+      DOS-bounded-two-state-closure S1 remains CURRENT authority for this clause. AMD-HS-001 declares a
+      PARTIAL scope - the constraint-persistence and bound-distinctness clauses only - so applying it here
+      would exceed its declared supersession scope.
     conclusion_scope: "Existence and reachability of the two states."
     exclusions:
       - "Does not name the states, fix an angle or a displacement between them, or say which is the rest state. No capability-level open angle exists (DOS S4); see UNR-HS-001."
@@ -200,34 +199,53 @@ invariants:
 
   - id: NRM-HS-006
     statement: >
-      Along the motion between the two states the two bodies share no volume
-      outside the interaction regions the design declares, of which the bounding
-      contacts are two.
+      Along the required motion the two bodies have no undeclared volumetric
+      overlap. Intended bounding and constraining interactions are admissible and
+      are not treated as interference.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators:
       - 'DOS-bounded-two-state-closure S1 (original, clause: reaches two defined states by a bounded motion)'
     current_authority: 'DOS-bounded-two-state-closure S1 (original, unchanged clause)'
     authority_note: >
-      DOS-bounded-two-state-closure S1 remains CURRENT authority for this clause. AMD-HS-001 declares a PARTIAL scope - the constraint-persistence and bound-distinctness clauses only - so applying it here would exceed its declared supersession scope.
-
+      DOS-bounded-two-state-closure S1 remains CURRENT authority for this clause. AMD-HS-001 declares a
+      PARTIAL scope - the constraint-persistence and bound-distinctness clauses only - so applying it here
+      would exceed its declared supersession scope.
     derivation_premises:
       - "The capability requires both states to be reached by the motion."
-      - "Material cannot pass through material."
-      - "Interference within the motion would end it before an extreme is reached, which is a bound at that point and not at the declared one."
-    conclusion_scope: "Absence of unintended interference within the bounded motion."
+      - "Two solids cannot occupy the same space."
+      - >
+        They MAY touch, and in a bounded closure they must: whatever produces a
+        bound acts at the extreme. Treating that as interference would reject the
+        capability's own defining feature.
+    conclusion_scope: >
+      Absence of UNDECLARED volumetric overlap along the required motion. Nothing
+      about how many interactions there are, of what kind, or where.
     exclusions:
-      - "Contact at a bounding condition is intended and is not interference."
+      - >
+        Does NOT state how many bounding interactions exist, nor that they are
+        contacts. A bound may arise from contact, from geometric run-out, from an
+        engagement ending, from force or field equilibrium, or from ONE physical
+        field participating at both endpoints. The retired wording "of which the
+        bounding contacts are two" asserted both a count and a kind, and would
+        have rejected ADM-HS-D and ADM-HS-F, which the pack admits. Corrected at
+        FPC-005.
+      - "Contact at a bounding or constraining interaction is intended and is not interference."
       - "Does not fix a clearance value; none exists at capability level."
-    verification_predicate: "swept volumes of the two bodies do not intersect at any interior point of the motion, other than at declared bounding or constraint interactions."
+    verification_predicate: >
+      for every configuration of the required motion: the two bodies share no
+      volume outside declared contact, declared interference-fit and declared
+      compliant-interaction regions, under the declared tolerance.
     requires_tags: [no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    evaluability_prerequisites: [interaction_regions_declared, interaction_kind_recorded, numerical_tolerance_recorded]
     related_freedoms: []
     related_unresolved: []
+    closes_finding: [FPC-005]
 
   - id: NRM-HS-007
     statement: >
-      A criterion offered as evidence that a bound is present must be able to
-      distinguish a bounded closure from an otherwise identical unbounded one.
+      Evidence offered that a bound is present must rest on either direct causal evidence
+      or discriminating evidence.
     basis_type: VERIFICATION_MINIMUM
     support_type: derived
     enables_claim: >
@@ -237,6 +255,8 @@ invariants:
       pair does.
       Satisfied by direct causal evidence OR by a discriminating control
       (HSD-006); the two are alternatives, not a sequence.
+      Satisfied by branch A OR branch B under HSD-006; the two are ALTERNATIVES. Absence of a
+      control is never a physical FAIL.
     source_locators:
       - 'DOS-bounded-two-state-closure S5'
       - 'DOS-bounded-two-state-closure S3'
@@ -264,17 +284,17 @@ invariants:
       - "Does not invalidate the matched pair as evidence of something else. DOS S5 records what it does support: removing the limit produced seed-level instability across a five-seed sweep."
       - "Does not require a physical control specimen. A demonstrated sensitivity of the criterion to the bound's absence is sufficient."
     verification_predicate: >
-      evidence offered for the bound at an extreme is EITHER (A) direct causal evidence - the
-      realizing geometry exists, the interaction occurs at the relevant
-      configuration, and the observed behaviour is caused by it - OR (B)
-      discriminating evidence, in which a configuration is identified where the
-      criterion fails once the feature is removed. Evidence that is neither is
-      inadmissible.
+      A claim about the bound at an extreme may be supported by EITHER (A) direct causal evidence - the realizing geometry or field exists, it is active at the relevant configuration, and the observed behaviour is causally attributable to it - OR (B) discriminating evidence: a control, ablation, sensitivity analysis or other comparison showing the claimed behaviour is lost or changed. A control is useful but is not mandatory when direct causal evidence is adequate.
     requires_evidence_tags: [bound_criterion_discriminates]
     moved_at: SF-1.1
     move_note: "Whether a test distinguishes a bounded from an unbounded control is an evidence property, not a property of the physical closure (SF-10.4)."
     related_freedoms: []
     related_unresolved: []
+    evidence_branches:
+      A_direct_causal: "realizing geometry or field exists; active at the relevant configuration; behaviour causally attributable to it"
+      B_discriminating: "control, ablation, sensitivity analysis or other comparison showing the behaviour is lost or changed"
+      relation: ALTERNATIVES
+    corrected_at: FPC-006
 
 required_unresolved:
   - id: UNR-HS-001

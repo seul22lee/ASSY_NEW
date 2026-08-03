@@ -371,8 +371,7 @@ invariants:
 
   - id: NRM-BM-001-012
     statement: >
-      A criterion offered as evidence that the open state's determinant is
-      physically produced must be able to fail when that determinant is removed.
+      A criterion offered as evidence that the open state determinant is physically produced must rest on either direct causal evidence or discriminating evidence.
     basis_type: VERIFICATION_MINIMUM
     support_type: derived
     enables_claim: >
@@ -381,6 +380,7 @@ invariants:
       that a determinant is present.
       Satisfied by direct causal evidence OR by a discriminating control
       (HSD-006); the two are alternatives, not a sequence.
+      Satisfied by branch A OR branch B under HSD-006; the two are ALTERNATIVES. Absence of a control is never a physical FAIL.
     source_locators: ["DOS-BM-001 S5 E1"]
     current_authority: 'DOS-BM-001 S5 E1 (original, unchanged)'
     authority_note: >
@@ -404,16 +404,15 @@ invariants:
       - "Does not require a physical control specimen; a demonstrated sensitivity of the criterion to the determinant's absence is sufficient."
       - "Does not invalidate the m0 pair as evidence of what DOS-BM-001 S5 E1 says it shows: seed-level instability without a limit."
     verification_predicate: >
-      evidence offered for the open state determinant is EITHER (A) direct causal evidence - the
-      realizing geometry exists, the interaction occurs at the relevant
-      configuration, and the observed behaviour is caused by it - OR (B)
-      discriminating evidence, in which a configuration is identified where the
-      criterion fails once the feature is removed. Evidence that is neither is
-      inadmissible.
+      A claim about the open state's determinant is physically produced may be supported by EITHER (A) direct causal evidence - the realizing geometry or field exists, it is active at the relevant configuration, and the observed behaviour is causally attributable to it - OR (B) discriminating evidence: a control, ablation, sensitivity analysis or other comparison showing the claimed behaviour is lost or changed. A control is useful but is not mandatory when direct causal evidence is adequate.
     requires_evidence_tags: [determinant_criterion_discriminates]
     related_freedoms: []
     related_unresolved: [UNR-BM-001-008]
-
+    evidence_branches:
+      A_direct_causal: "realizing geometry or field exists; active at the relevant configuration; behaviour causally attributable to it"
+      B_discriminating: "control, ablation, sensitivity analysis or other comparison showing the behaviour is lost or changed"
+      relation: ALTERNATIVES
+    corrected_at: FPC-006
   - id: NRM-BM-001-013
     statement: >
       A force window that is an input of a task or test definition may not be

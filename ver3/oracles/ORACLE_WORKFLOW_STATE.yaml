@@ -1,11 +1,11 @@
 # Workflow state ONLY. Never Oracle evidence. Nothing here may be cited by a pack.
 schema_version: "0.6.0"
-updated_after: "pre-CAD authority and fixture rebuild (PCF-001..011)"
+updated_after: "final bounded pre-CAD correction (FPC-001..007)"
 
-current_pass: PRE_CAD_V2_REBUILD_COMPLETE
+current_pass: FINAL_PRE_CAD_CORRECTION_COMPLETE
 workflow_status: PRE_CAD_BASELINE_READY
 branch: ver3-oracle-phase1-review
-starting_commit: f7e3a22844fa3d3eef0b56c90aeba6d29b1a15af
+starting_commit: 0b8442b4a0d16897c441ae700a24062ac0f23944
 
 lock_created: false
 production_pipeline_code_exists: false
@@ -34,6 +34,8 @@ authority_model:
   B_challengeable_semantic_authority: ver3/oracles/SEMANTIC_AUTHORITY.yaml
   C_current_conclusions: ver3/oracles/PRE_CAD_BASELINE.yaml
 correction_state: ver3/oracles/PRE_CAD_CORRECTION_STATE.yaml
+final_correction_state: ver3/oracles/FINAL_PRE_CAD_CORRECTION_STATE.yaml
+backlog: ver3/oracles/PRE_CAD_BACKLOG.yaml
 pre_cad_baseline: ver3/oracles/PRE_CAD_BASELINE.yaml
 manifest_hash_note: >
   The manifest hashes are recorded in SOURCE_FREEZE.yaml and PRE_CAD_BASELINE.yaml
@@ -69,14 +71,14 @@ semantic_reviews:
 
 audit_state:
   canonical: {BLOCKING: 0, MAJOR: 0}
-  per_pass: {"3A": 0, "3B": 0, "3C": 0, "3D": 0, "3E": 0, "3F": 0, "3G": 0, "3H": 0}
+  per_pass: {"3A": 0, "3B": 0, "3C": 0, "3D": 0, "3E": 0, "3F": 0, "3G": 0, "3H": 0, "3I": 0}
   shuffled_seeds: [20260802, 4177, 90210]
   shuffled_result: {BLOCKING: 0, MAJOR: 0}
   mutation_tests: {see: ver3/oracles/_audit/PRECAD_V2_RESTART-mutation.json}
   reports:
-    canonical: ver3/oracles/_audit/PRECAD_V2_RESTART-canonical.json
-    shuffled: [PRECAD_V2_RESTART-shuffled-20260802.json, PRECAD_V2_RESTART-shuffled-4177.json, PRECAD_V2_RESTART-shuffled-90210.json]
-    mutation: ver3/oracles/_audit/PRECAD_V2_RESTART-mutation.json
+    canonical: ver3/oracles/_audit/FINAL_PRECAD_RESTART-canonical.json
+    shuffled: [FINAL_PRECAD_RESTART-shuffled-20260802.json, FINAL_PRECAD_RESTART-shuffled-4177.json, FINAL_PRECAD_RESTART-shuffled-90210.json]
+    mutation: ver3/oracles/_audit/FINAL_PRECAD_RESTART-mutation.json
 
 unresolved_findings: []
 

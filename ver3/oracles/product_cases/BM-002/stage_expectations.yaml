@@ -138,7 +138,6 @@ stages:
         fail_when: "measured displacement is clearly outside the band under any reading of the qualifier - for example 45 mm"
         if_near_band_edge: INDETERMINATE
         if_capability_absent: UNSUPPORTED
-        if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       REQ-003:
         traces_to: [NRM-BM-002-005, NRM-BM-002-011]
@@ -162,10 +161,22 @@ stages:
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       REQ-006:
-        pass_requires: "installation paths demonstrated for every discretely-installed part, an acyclic assembly order, and a manufacturability model with a declared scope"
-        fail_when: "a part has no collision-free installation path, or the order contains a cycle, or the model reports the design outside its declared envelope"
+        pass_requires: >
+          a physically realizable installation process demonstrated for every discretely-installed part, in which no component passes through UNDECLARED rigid material, plus an acyclic assembly order, and a manufacturability model with a declared scope
+        must_not_fail_when: >
+          insertion involves intended contact; or a declared snap, press, interference or compliant insertion lacks a collision-free path but is physically coherent; or a co-formed, bonded or permanently joined region owes no discrete insertion path
+        if_representation_incomplete: NOT_EVALUABLE
+        representation_incomplete_reason: >
+          REPRESENTATION_INCOMPLETE - interaction classification, compliant region identity, material, insertion direction or process assumption missing from DesignState. This is NOT a physical FAIL.
+        fail_when: >
+          a rigid part must pass through UNDECLARED rigid material; or a claimed snap process has no physically compliant region; or a claimed interference process is physically incoherent; or no realizable assembly process exists under the declared assumptions; or the order contains a cycle; or the manufacturability model reports the design outside its declared envelope
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
+        force_adequacy_note: >
+          Insertion FORCE and process adequacy are NOT covered by this rule and are NOT structurally proven by a PASS. They remain quantitative and unresolved at UNR-BM-002-008.
+        corrected_at: FPC-001
+        correction_note: >
+          The retired requirement was "a part has no collision-free installation path". A press fit has no collision-free path and is still assemblable, so that rule could FAIL a physically valid design. Now projects the active contract NRM-BM-002-012 already carries: installation_process_physically_realizable.
       REQ-007:
         pass_requires: "a declared jamming and stability criterion (UNR-BM-002-005 resolved) plus contact-resolving evidence at the conversion and guidance engagements"
         fail_when: "the declared criterion is violated"

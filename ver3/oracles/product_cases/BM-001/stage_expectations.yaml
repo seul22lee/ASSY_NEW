@@ -110,12 +110,20 @@ stages:
     provenance_required: ["evaluation -> evidence ids", "PASS -> declared scope"]
     outcome_rules:
       REQ-001:
-        pass_requires: "kinematic evidence that both states are reached and the transition is traversable, at a declared fidelity, with the declared usable access unobstructed at OPEN"
-        fail_when: "a state is unreachable, the transition interferes, or the closure obstructs its own declared usable access at OPEN"
+        pass_requires: >
+          kinematic evidence that both states are reached and the transition is traversable, at a declared fidelity, with the declared usable access unobstructed at OPEN and no UNDECLARED volumetric overlap along the transition
+        must_not_fail_when: >
+          the closure and the enclosure touch at a declared hinge, seat, stop or other intended interaction region; or zero clearance exists at a declared contact
+        fail_when: >
+          a state is unreachable; or undeclared volumetric overlap occurs along the transition; or the closure obstructs its own declared usable access at OPEN
         if_access_adequacy_asserted: INDETERMINATE
-        note: "No access envelope exists (UNR-BM-001-006), so a claim that the access is ADEQUATE is INDETERMINATE regardless of the geometry."
+        note: >
+          No access envelope exists (UNR-BM-001-006), so a claim that the access is ADEQUATE is INDETERMINATE regardless of the geometry.
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
+        corrected_at: FPC-002
+        correction_note: >
+          fail_when said "the transition interferes", which a naive reader applies to a hinge touching its own bore at every configuration. Narrowed to UNDECLARED volumetric overlap, matching NRM-BM-001-003 as written.
       REQ-002:
         pass_requires: "a declared disturbance case (UNR-BM-001-001 resolved) plus evidence the retention holds under it"
         fail_when: "retention releases under the declared disturbance"
@@ -142,10 +150,22 @@ stages:
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
       REQ-007:
-        pass_requires: "installation paths demonstrated for every discretely-installed part, plus an acyclic assembly order"
-        fail_when: "a part has no collision-free installation path, or the order contains a cycle"
+        pass_requires: >
+          a physically realizable installation process demonstrated for every discretely-installed part, in which no component passes through UNDECLARED rigid material, plus an acyclic assembly order
+        must_not_fail_when: >
+          insertion involves intended contact; or a declared snap, press, interference or compliant insertion has no collision-free path but is physically coherent; or a co-formed, bonded or permanently joined region owes no discrete insertion path
+        if_representation_incomplete: NOT_EVALUABLE
+        representation_incomplete_reason: >
+          REPRESENTATION_INCOMPLETE - interaction classification, compliant region identity, material, insertion direction or process assumption missing from DesignState. This is NOT a physical FAIL.
+        fail_when: >
+          a rigid part must pass through UNDECLARED rigid material; or a claimed snap process has no physically compliant region; or a claimed interference process is physically incoherent; or no realizable assembly process exists under the declared assumptions; or the order contains a cycle
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
+        force_adequacy_note: >
+          Insertion FORCE and process adequacy are NOT covered by this rule and are NOT structurally proven by a PASS. They remain quantitative and unresolved at UNR-BM-001-009.
+        corrected_at: FPC-001
+        correction_note: >
+          The retired requirement was "installation paths demonstrated ... a part has no collision-free installation path". A press fit has no collision-free path and is still assemblable, so that rule could FAIL a physically valid design. Replaced by the active contract NRM-BM-001-010 already carries: installation_process_physically_realizable.
       REQ-008:
         pass_requires: "a realized close-engage / release / close-engage-again cycle with every participating feature's retention-critical geometry present in the final state"
         fail_when: "a participating feature is consumed or permanently disabled, or the closed state is unreachable after release"

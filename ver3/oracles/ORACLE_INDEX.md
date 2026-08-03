@@ -130,6 +130,8 @@ may, and Oracle content must never influence design generation or selection.
 | [PHYSICAL_FIXTURE_REVIEW.yaml](PHYSICAL_FIXTURE_REVIEW.yaml) | every fixture reviewed individually; a tag is a review conclusion, not evidence |
 | [STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml](STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml) | all 73 invariants: statement vs predicate vs tag vs stage |
 | [PRE_CAD_CORRECTION_STATE.yaml](PRE_CAD_CORRECTION_STATE.yaml) | PCF-001…011 dispositions |
+| [FINAL_PRE_CAD_CORRECTION_STATE.yaml](FINAL_PRE_CAD_CORRECTION_STATE.yaml) | FPC-001…007 dispositions |
+| [PRE_CAD_BACKLOG.yaml](PRE_CAD_BACKLOG.yaml) | deferred items; none blocks CAD entry |
 | [_dossier_amendments/AMENDMENTS.yaml](_dossier_amendments/AMENDMENTS.yaml) | five additive amendments; frozen dossiers are never overwritten |
 | [SOURCE_FREEZE.yaml](SOURCE_FREEZE.yaml) | `freeze_scope: SOURCE_ONLY`, `semantic_lock: false` |
 | [PRE_CAD_BASELINE.yaml](PRE_CAD_BASELINE.yaml) | `CHALLENGEABLE_SEMANTIC_BASELINE`, with PU-01…PU-10 and the revision procedure |

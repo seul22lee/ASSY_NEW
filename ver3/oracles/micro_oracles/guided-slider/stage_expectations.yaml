@@ -116,15 +116,19 @@ stages:
         must_not_fail_when: "the bodies touch at a declared contact region of the guiding interaction"
         if_capability_absent: UNSUPPORTED
         otherwise: NOT_VERIFIED
-      GS-C6_observable_admissibility:
+      GS-C6_evidence_admissibility:
         traces_to: NRM-GS-007
-        pass_requires: "every observable mapped to a guidance criterion is shown able to take a non-conforming value under its own model"
-        fail_when: "an observable exact by construction is counted as evidence"
-        if_capability_absent: UNSUPPORTED
+        human_decision_ref: HSD-006
+        pass_requires: >
+          the claim about guidance is supported by EITHER branch A (direct causal evidence: the realizing geometry or field exists, is active at the relevant configuration, and the observed behaviour is causally attributable to it) OR branch B (discriminating evidence: a control, ablation, sensitivity analysis or other comparison showing the behaviour is lost or changed)
+        must_not_fail_when: >
+          no control or ablation model exists, provided branch A is adequately supported
+        fail_when: >
+          the available evidence CONTRADICTS the claimed feature or behaviour
         otherwise: NOT_VERIFIED
-  s12:
-    must_exist: [root_cause_candidates]
-    provenance_required: ["root_cause -> owning decision id"]
-    capability_gap_rule: >
-      A revision triggered by UNSUPPORTED must name the absent capability, never
-      record a physical infeasibility (NEG-GS-011).
+        not_verified_reason: >
+          neither branch is adequately supported. Absence of a control is NOT_VERIFIED at worst, never a physical design FAIL.
+        if_capability_absent: UNSUPPORTED
+        corrected_at: FPC-006
+        correction_note: >
+          The retired rule required every observable "shown able to take a non-conforming value under its own model" - branch B only. HSD-006 admits direct causal evidence as an alternative, and requiring a control made ordinary direct evidence inadmissible.

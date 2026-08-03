@@ -1,0 +1,145 @@
+schema_version: 0.1.0
+purpose: Final BOUNDED pre-CAD correction. Scope is limited to active-contract defects that can misclassify
+  a CAD design. This is not a general semantic review and adds no new review or authority layer.
+branch: ver3-oracle-phase1-review
+starting_commit: 0b8442b4a0d16897c441ae700a24062ac0f23944
+scope_test: A defect is in scope only if it (1) can make a physically valid design FAIL, (2) can make
+  a physically invalid design PASS, (3) leaves a retired contract active in Stage evaluation, (4) contradicts
+  an active statement against its Stage projection or predicate, or (5) prevents the baseline and audit
+  snapshot being reproduced. Everything else goes to PRE_CAD_BACKLOG.yaml and does not delay CAD entry.
+preflight:
+  branch_matches: true
+  head_matches_required_commit: true
+  worktree_initially_clean: true
+  tracked_changes_outside_ver3: 0
+  lock_json: false
+  cad_artifacts: false
+  ver3_assy3: false
+target_state: PRE_CAD_BASELINE_READY - STOPPED BEFORE CAD
+findings:
+- finding_id: FPC-001
+  title: product assembly Stage rules still require collision-free insertion
+  affected_files:
+  - product_cases/BM-001/stage_expectations.yaml
+  - product_cases/BM-002/stage_expectations.yaml
+  - product_cases/C4-drawer/stage_expectations.yaml
+  affected_ids:
+  - s11 REQ-007 (BM-001)
+  - s11 REQ-006 (BM-002)
+  - s11 C4-R11_assembly
+  - NRM-BM-001-010
+  - NRM-BM-002-012
+  - NRM-C4-011
+  active_authority: ORACLE_AUTHORING_POLICY 14; installation_process_physically_realizable
+  old_active_contract: pass_requires "installation paths demonstrated for every discretely-installed part";
+    fail_when "a part has no collision-free installation path"
+  corrected_active_contract: a realizable installation PROCESS with no passage through undeclared rigid
+    material; intended insertion contact admissible; declared snap/press/interference/compliant insertion
+    admissible when physically coherent; missing representation is NOT_EVALUABLE, not FAIL
+  targeted_regression: stage_assembly_requires_collision_free (x3)
+  status: OPEN
+- finding_id: FPC-002
+  title: C4 Stage clearance rule can reject intended guide contact
+  affected_files:
+  - product_cases/C4-drawer/stage_expectations.yaml
+  affected_ids:
+  - s11 C4-R10_clearance_and_traversability
+  - NRM-C4-010
+  active_authority: ORACLE_AUTHORING_POLICY 13; no_undeclared_volumetric_overlap
+  old_active_contract: pass_requires "the drawer shown not to intersect cabinet material at any configuration";
+    fail_when "an intersection occurs at any configuration"
+  corrected_active_contract: no UNDECLARED volumetric overlap outside declared contact / interference-fit
+    / compliant regions, with an explicit must_not_fail_when for declared guide, bearing and stop contact
+  targeted_regression: stage_clearance_rejects_intended_contact
+  status: OPEN
+- finding_id: FPC-003
+  title: bounded Stage rule rejects admissible constraint hand-off
+  affected_files:
+  - micro_oracles/bounded-two-state-closure/stage_expectations.yaml
+  affected_ids:
+  - s11 HS-C3_constraint_persists
+  - NRM-HS-003
+  active_authority: AMD-HS-001 / HSD-003
+  old_active_contract: pass_requires "THE relative constraint shown engaged at the extremes and the interior";
+    fail_when "the constraint lapses anywhere within the motion"
+  corrected_active_contract: at every configuration at least one realized interaction keeps the bodies
+    in the allowed manifold; the active constraint may CHANGE; hand-off and overlapping coverage admissible;
+    FAIL only on a coverage GAP
+  targeted_regression: stage_requires_single_persistent_constraint
+  status: OPEN
+- finding_id: FPC-004
+  title: bounded Stage rule rejects a shared feature or field at both bounds
+  affected_files:
+  - micro_oracles/bounded-two-state-closure/stage_expectations.yaml
+  affected_ids:
+  - s11 HS-C5_bounds_distinct
+  - NRM-HS-005
+  active_authority: AMD-HS-001 / HSD-003
+  old_active_contract: pass_requires "each extreme shown determined by its OWN condition"; fail_when "one
+    condition is credited to both extremes"
+  corrected_active_contract: each extreme independently EVALUATED at its own configuration with its own
+    causal account; one continuous feature, field or mechanism may contribute to both; FAIL only when
+    a RESULT is copied
+  targeted_regression: stage_rejects_shared_field_bound
+  status: OPEN
+- finding_id: FPC-005
+  title: NRM-HS-006 asserts exactly two bounding contacts
+  affected_files:
+  - micro_oracles/bounded-two-state-closure/normative.yaml
+  - micro_oracles/bounded-two-state-closure/stage_expectations.yaml
+  affected_ids:
+  - NRM-HS-006
+  - s11 HS-C6_no_interference
+  active_authority: DOS-bounded-two-state-closure S1 (original, unchanged clause)
+  old_active_contract: statement "...the interaction regions the design declares, OF WHICH THE BOUNDING
+    CONTACTS ARE TWO"
+  corrected_active_contract: no undeclared volumetric overlap along the required motion; intended bounding
+    or constraining interactions are admissible and are not interference; no count of bounding contacts,
+    since bounds may arise from contact, geometric run-out, engagement ending, force or field equilibrium,
+    or one field participating in both endpoints
+  targeted_regression: normative_asserts_two_bounding_contacts
+  status: OPEN
+- finding_id: FPC-006
+  title: HSD-006 statements and Stage projections still require discrimination only
+  affected_files:
+  - product_cases/BM-001/normative.yaml
+  - micro_oracles/guided-slider/normative.yaml
+  - micro_oracles/bounded-two-state-closure/normative.yaml
+  - 3 stage_expectations.yaml
+  affected_ids:
+  - NRM-BM-001-012
+  - NRM-GS-007
+  - NRM-HS-007
+  - s11 GS-C6_observable_admissibility
+  - s11 HS-C4_bounds_physically_realized
+  - s11 HS-C7_criterion_admissibility
+  active_authority: HSD-006
+  old_active_contract: the three PREDICATES were already two-branch, but the three STATEMENTS still say
+    the evidence "must be able to fail / take a non-conforming value / distinguish", and the three Stage
+    rules still require a discriminating criterion as the only route
+  corrected_active_contract: 'statement, enables_claim and Stage rule all state the two-branch contract:
+    PASS on branch A (direct causal) OR branch B (discriminating); NOT_VERIFIED when neither is supported;
+    FAIL only when evidence contradicts the claim. Absence of a control is never a physical FAIL'
+  targeted_regression: stage_requires_discrimination_only (x3)
+  status: OPEN
+- finding_id: FPC-007
+  title: duplicate keys and stale current-state bookkeeping
+  affected_files:
+  - micro_oracles/bounded-two-state-closure/normative.yaml
+  - product_cases/BM-002/stage_expectations.yaml
+  - ORACLE_WORKFLOW_STATE.yaml
+  - ORACLE_INDEX.md
+  affected_ids:
+  - NRM-HS-001 duplicate current_authority/authority_note
+  - s11 REQ-002 duplicate if_capability_absent
+  active_authority: the snapshot itself
+  old_active_contract: NRM-HS-001 carries current_authority and authority_note twice (YAML silently keeps
+    the last); BM-002 s11 REQ-002 carries if_capability_absent twice
+  corrected_active_contract: duplicates removed; workflow and index current-state recomputed from the
+    final snapshot
+  targeted_regression: duplicate_stage_rule_key
+  status: OPEN
+summary:
+  total: 7
+  open: 7
+  corrected: 0

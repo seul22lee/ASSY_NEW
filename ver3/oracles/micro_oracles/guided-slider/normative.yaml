@@ -215,8 +215,7 @@ invariants:
 
   - id: NRM-GS-007
     statement: >
-      An observable offered as evidence of guidance must be able to take a
-      non-conforming value under the model that produces it.
+      Evidence offered for guidance must rest on either direct causal evidence or discriminating evidence.
     basis_type: VERIFICATION_MINIMUM
     support_type: derived
     enables_claim: >
@@ -226,6 +225,7 @@ invariants:
       are constrained by a realized interaction.
       Satisfied by direct causal evidence OR by a discriminating control
       (HSD-006); the two are alternatives, not a sequence.
+      Satisfied by branch A OR branch B under HSD-006; the two are ALTERNATIVES. Absence of a control is never a physical FAIL.
     source_locators: ["DOS-guided-slider S5"]
     current_authority: DOS-guided-slider S5 (original, unchanged)
     authority_note: >
@@ -248,17 +248,17 @@ invariants:
         every feature claim.
       - "Does not forbid declared-pair models and does not require contact modelling; it requires a value exact by construction to be marked as a structural artifact rather than counted."
     verification_predicate: >
-      evidence offered for guidance is EITHER (A) direct causal evidence - the
-      realizing geometry exists, the interaction occurs at the relevant
-      configuration, and the observed behaviour is caused by it - OR (B)
-      discriminating evidence, in which a configuration is identified where the
-      criterion fails once the feature is removed. Evidence that is neither is
-      inadmissible.
+      A claim about guidance may be supported by EITHER (A) direct causal evidence - the realizing geometry or field exists, it is active at the relevant configuration, and the observed behaviour is causally attributable to it - OR (B) discriminating evidence: a control, ablation, sensitivity analysis or other comparison showing the claimed behaviour is lost or changed. A control is useful but is not mandatory when direct causal evidence is adequate.
     requires_evidence_tags: [guidance_observable_can_fail]
     related_freedoms: []
     related_unresolved: []
     moved_at: SF-1.1
     move_note: "The tag this invariant requires now lives in evidence_cases.yaml. It previously sat in the physical realization tag set, where a physical design became inadmissible for want of a test."
+    evidence_branches:
+      A_direct_causal: "realizing geometry or field exists; active at the relevant configuration; behaviour causally attributable to it"
+      B_discriminating: "control, ablation, sensitivity analysis or other comparison showing the behaviour is lost or changed"
+      relation: ALTERNATIVES
+    corrected_at: FPC-006
 
 required_unresolved:
   - id: UNR-GS-001

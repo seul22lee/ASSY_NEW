@@ -119,8 +119,11 @@ COUNT_LEAK = re.compile(
     r"(?<!the )\b(two|three|four|exactly \d+)\s+"
     r"(rails?|parts?|bodies|pieces|stops?|guides?|fasteners?|springs?|bearings?)\b", re.I)
 
+# NOT_EVALUABLE was defined by the three-domain model (policy 12.5.1) as the outcome
+# when a physically valid design has an incomplete DesignState. It was never added
+# to this vocabulary, so a Stage rule using it correctly was reported invalid.
 STATUS_VALUES = {"PASS", "FAIL", "NOT_VERIFIED", "UNSUPPORTED", "INDETERMINATE",
-                 "NOT_APPLICABLE", "UNRESOLVED"}
+                 "NOT_APPLICABLE", "UNRESOLVED", "NOT_EVALUABLE"}
 AMBIGUOUS_PACKS = {"BM-001-2": "REQ-010", "BM-002": "REQ-004"}
 
 # Support/reaction predicates must be conditional on the load actually carried.
@@ -1182,7 +1185,86 @@ def pass_3h(packs):
     return f
 
 
-PASSES = {"3A": pass_3a, "3B": pass_3b, "3C": pass_3c, "3D": pass_3d, "3E": pass_3e,
+# --------------------------------------------------------------- Pass 3I
+# FPC-001..007: active Stage-rule contracts that can misclassify a CAD design.
+# These read explicit SCHEMA FIELDS (pass_requires / fail_when / must_not_fail_when)
+# of named outcome rules, not free text anywhere in the tree.
+RETIRED_STAGE_PHRASES = [
+    (r"collision-free", "assembly rule requires a collision-free insertion path (FPC-001)",
+     "STAGE_ASSEMBLY_REQUIRES_COLLISION_FREE"),
+    (r"not to intersect|intersection occurs at any|does not intersect|non-intersecting",
+     "clearance rule rejects all contact rather than undeclared overlap (FPC-002)",
+     "STAGE_CLEARANCE_REJECTS_INTENDED_CONTACT"),
+    (r"\bthe relative constraint\b|constraint lapses",
+     "coverage rule requires one identical persistent constraint (FPC-003)",
+     "STAGE_REQUIRES_SINGLE_PERSISTENT_CONSTRAINT"),
+    (r"its own condition|credited to both extremes",
+     "bound rule rejects a shared feature or field at both extremes (FPC-004)",
+     "STAGE_REJECTS_SHARED_BOUND_MECHANISM"),
+]
+DISCRIMINATION_ONLY = re.compile(
+    r"demonstrated to discriminate|able to take a non-conforming value|"
+    r"carries a configuration in which it fails|fails without the bound|"
+    r"able to fail when", re.I)
+
+
+def pass_3i(packs):
+    f = []
+    for name, p in packs.items():
+        se = p.get("stage_expectations") or {}
+        for sid, blk in (se.get("stages") or {}).items():
+            if not isinstance(blk, dict):
+                continue
+            for rid, rule in (blk.get("outcome_rules") or {}).items():
+                if not isinstance(rule, dict):
+                    continue
+                active = " ".join(str(rule.get(k, "")) for k in
+                                  ("pass_requires", "fail_when", "must_not_fail_when"))
+                for pat, why, defect in RETIRED_STAGE_PHRASES:
+                    m = re.search(pat, active, re.I)
+                    if not m:
+                        continue
+                    # a phrase inside must_not_fail_when is the EXEMPTION, not the rule
+                    if re.search(pat, str(rule.get("must_not_fail_when", "")), re.I) and \
+                       not re.search(pat, str(rule.get("pass_requires", "")) +
+                                     str(rule.get("fail_when", "")), re.I):
+                        continue
+                    f.append(Finding("3I", name, f"{sid}:{rid}", "BLOCKING", defect,
+                                     f"{why}; matched {m.group(0)!r}",
+                                     "re-author the rule to the current active contract"))
+                # FPC-006: a two-branch evidence minimum projected as branch B only
+                pr = str(rule.get("pass_requires", ""))
+                if DISCRIMINATION_ONLY.search(pr) and "EITHER" not in pr.upper():
+                    f.append(Finding("3I", name, f"{sid}:{rid}", "BLOCKING",
+                                     "STAGE_REQUIRES_DISCRIMINATION_ONLY",
+                                     f"pass_requires admits only discriminating evidence: {pr[:110]!r}",
+                                     "admit direct causal evidence as branch A (HSD-006)"))
+        # FPC-005/FPC-006: the normative side of the same contracts
+        for inv in (p.get("normative") or {}).get("invariants", []) or []:
+            st = str(inv.get("statement", ""))
+            if re.search(r"bounding contacts are (two|2)\b|exactly two bounding", st, re.I):
+                f.append(Finding("3I", name, inv["id"], "BLOCKING",
+                                 "NORMATIVE_ASSERTS_BOUNDING_CONTACT_COUNT",
+                                 f"statement fixes the number and kind of bounding interactions: {st[:110]!r}",
+                                 "bounds may be contact, run-out, engagement end, or field equilibrium; "
+                                 "state no count"))
+            if inv.get("basis_type") == "VERIFICATION_MINIMUM":
+                joined = st + " " + str(inv.get("verification_predicate", ""))
+                if DISCRIMINATION_ONLY.search(joined) and "EITHER" not in joined.upper():
+                    f.append(Finding("3I", name, inv["id"], "BLOCKING",
+                                     "VERIFICATION_MINIMUM_DISCRIMINATION_ONLY",
+                                     "statement or predicate admits only discriminating evidence",
+                                     "state the two-branch contract (HSD-006)"))
+                br = inv.get("evidence_branches") or {}
+                if br and br.get("relation") != "ALTERNATIVES":
+                    f.append(Finding("3I", name, inv["id"], "BLOCKING",
+                                     "VERIFICATION_MINIMUM_DISCRIMINATION_ONLY",
+                                     f"evidence_branches.relation={br.get('relation')!r}",
+                                     "branches A and B are ALTERNATIVES"))
+    return f
+
+
+PASSES = {"3I": pass_3i, "3A": pass_3a, "3B": pass_3b, "3C": pass_3c, "3D": pass_3d, "3E": pass_3e,
           "3F": pass_3f, "3G": pass_3g, "3H": pass_3h}
 
 SCOPE_NOTE = ("This auditor checks structural, referential, policy and tag-algebra "
@@ -1222,7 +1304,8 @@ def snapshot_manifest():
     #           which is a statement ABOUT this manifest.
     ATTESTATIONS = {"SOURCE_FREEZE.yaml", "SEMANTIC_AUTHORITY.yaml", "PRE_CAD_BASELINE.yaml",
                     "POST_HUMAN_REVIEW_CORRECTION_REPORT.md",
-                    "PRE_CAD_V2_CORRECTION_REPORT.md"}
+                    "PRE_CAD_V2_CORRECTION_REPORT.md",
+                    "FINAL_PRE_CAD_CORRECTION_REPORT.md"}
     files = sorted([p for p in (ORACLES).rglob("*")
                     if p.is_file() and p.suffix in (".yaml", ".md")
                     and "_audit" not in p.parts and p.name not in ATTESTATIONS]

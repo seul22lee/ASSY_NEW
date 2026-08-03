@@ -822,6 +822,175 @@ def _(r):
     pass  # baseline
 
 
+# ---------------------------------------------------------------- 3I (FPC-001..007)
+def _rule(r, pack, rid):
+    d = ry(r, f"{pack}/stage_expectations.yaml")
+    return d, d["stages"]["s11"]["outcome_rules"][rid]
+
+
+@case("bm001_stage_assembly_requires_collision_free", "defect",
+      "STAGE_ASSEMBLY_REQUIRES_COLLISION_FREE",
+      "FPC-001: BM-001 assembly Stage rule requiring a collision-free insertion path")
+def _(r):
+    d, rule = _rule(r, f"{P}/BM-001", "REQ-007")
+    rule["fail_when"] = "a part has no collision-free installation path, or the order contains a cycle"
+    rule.pop("must_not_fail_when", None)
+    wy(r, f"{P}/BM-001/stage_expectations.yaml", d)
+
+
+@case("bm002_stage_assembly_requires_collision_free", "defect",
+      "STAGE_ASSEMBLY_REQUIRES_COLLISION_FREE",
+      "FPC-001: BM-002 assembly Stage rule requiring a collision-free insertion path")
+def _(r):
+    d, rule = _rule(r, f"{P}/BM-002", "REQ-006")
+    rule["fail_when"] = "a part has no collision-free installation path, or the order contains a cycle"
+    rule.pop("must_not_fail_when", None)
+    wy(r, f"{P}/BM-002/stage_expectations.yaml", d)
+
+
+@case("c4_stage_assembly_requires_collision_free", "defect",
+      "STAGE_ASSEMBLY_REQUIRES_COLLISION_FREE",
+      "FPC-001: C4 assembly Stage rule requiring a collision-free insertion path")
+def _(r):
+    d, rule = _rule(r, f"{P}/C4-drawer", "C4-R11_assembly")
+    rule["fail_when"] = "a part has no collision-free installation path, or the order contains a cycle"
+    rule.pop("must_not_fail_when", None)
+    wy(r, f"{P}/C4-drawer/stage_expectations.yaml", d)
+
+
+@case("c4_stage_clearance_rejects_all_contact", "defect",
+      "STAGE_CLEARANCE_REJECTS_INTENDED_CONTACT",
+      "FPC-002: C4 clearance Stage rule rejecting every drawer/cabinet contact")
+def _(r):
+    d, rule = _rule(r, f"{P}/C4-drawer", "C4-R10_clearance_and_traversability")
+    rule["pass_requires"] = ("the drawer shown not to intersect cabinet material at any configuration "
+                             "of the travel, and the path shown traversable")
+    rule["fail_when"] = "an intersection occurs at any configuration"
+    rule.pop("must_not_fail_when", None)
+    wy(r, f"{P}/C4-drawer/stage_expectations.yaml", d)
+
+
+@case("hs_c3_requires_single_persistent_constraint", "defect",
+      "STAGE_REQUIRES_SINGLE_PERSISTENT_CONSTRAINT",
+      "FPC-003: HS-C3 requiring one identical constraint throughout the motion")
+def _(r):
+    d, rule = _rule(r, f"{M}/bounded-two-state-closure", "HS-C3_constraint_coverage_continuous")
+    rule["pass_requires"] = ("the relative constraint shown engaged at the extremes and the interior "
+                             "of the motion")
+    rule["fail_when"] = "the constraint lapses anywhere within the motion"
+    rule.pop("must_not_fail_when", None)
+    wy(r, f"{M}/bounded-two-state-closure/stage_expectations.yaml", d)
+
+
+@case("hs_c5_rejects_shared_field_bound", "defect", "STAGE_REJECTS_SHARED_BOUND_MECHANISM",
+      "FPC-004: HS-C5 rejecting one field or feature contributing to both bounds")
+def _(r):
+    d, rule = _rule(r, f"{M}/bounded-two-state-closure", "HS-C5_bounds_independently_evaluated")
+    rule["pass_requires"] = "each extreme shown determined by its own condition, evaluated at its own configuration"
+    rule["fail_when"] = "one condition is credited to both extremes"
+    rule.pop("must_not_fail_when", None)
+    wy(r, f"{M}/bounded-two-state-closure/stage_expectations.yaml", d)
+
+
+@case("nrm_hs_006_asserts_two_bounding_contacts", "defect",
+      "NORMATIVE_ASSERTS_BOUNDING_CONTACT_COUNT",
+      "FPC-005: NRM-HS-006 asserting exactly two bounding contacts")
+def _(r):
+    d = ry(r, f"{M}/bounded-two-state-closure/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-HS-006":
+            i["statement"] = ("Along the motion the two bodies share no volume outside the interaction "
+                              "regions the design declares, of which the bounding contacts are two.")
+    wy(r, f"{M}/bounded-two-state-closure/normative.yaml", d)
+
+
+@case("bm001_012_discrimination_only", "defect", "VERIFICATION_MINIMUM_DISCRIMINATION_ONLY",
+      "FPC-006: NRM-BM-001-012 admitting only an ablation/control route")
+def _(r):
+    d = ry(r, f"{P}/BM-001/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-BM-001-012":
+            i["statement"] = ("A criterion offered as evidence must be able to fail when that "
+                              "determinant is removed.")
+            i["verification_predicate"] = ("a configuration is identified in which the criterion fails "
+                                           "when the determinant is removed.")
+            i.pop("evidence_branches", None)
+    wy(r, f"{P}/BM-001/normative.yaml", d)
+
+
+@case("gs_007_discrimination_only", "defect", "VERIFICATION_MINIMUM_DISCRIMINATION_ONLY",
+      "FPC-006: NRM-GS-007 admitting only a discriminating-failure route")
+def _(r):
+    d = ry(r, f"{M}/guided-slider/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-GS-007":
+            i["statement"] = ("An observable offered as evidence of guidance must be able to take a "
+                              "non-conforming value under the model that produces it.")
+            i["verification_predicate"] = ("the model admits at least one configuration in which the "
+                                           "observable violates its threshold.")
+            i.pop("evidence_branches", None)
+    wy(r, f"{M}/guided-slider/normative.yaml", d)
+
+
+@case("hs_007_discrimination_only", "defect", "VERIFICATION_MINIMUM_DISCRIMINATION_ONLY",
+      "FPC-006: NRM-HS-007 admitting only a discriminating-unbounded-case route")
+def _(r):
+    d = ry(r, f"{M}/bounded-two-state-closure/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-HS-007":
+            i["statement"] = ("A criterion offered as evidence that a bound is present must be able to "
+                              "distinguish a bounded closure from an otherwise identical unbounded one.")
+            i["verification_predicate"] = ("a configuration is identified in which the criterion fails "
+                                           "without the bound.")
+            i.pop("evidence_branches", None)
+    wy(r, f"{M}/bounded-two-state-closure/normative.yaml", d)
+
+
+@case("stage_projects_discrimination_only", "defect", "STAGE_REQUIRES_DISCRIMINATION_ONLY",
+      "FPC-006: a Stage rule projecting a two-branch minimum as branch B only")
+def _(r):
+    d, rule = _rule(r, f"{M}/bounded-two-state-closure", "HS-C7_evidence_admissibility")
+    rule["pass_requires"] = ("every criterion mapped to the presence of a bound carries a configuration "
+                             "in which it fails without the bound")
+    wy(r, f"{M}/bounded-two-state-closure/stage_expectations.yaml", d)
+
+
+# ---- FPC controls: these must all stay silent
+@case("declared_snap_insertion_is_admissible", "control", "STAGE_ASSEMBLY_REQUIRES_COLLISION_FREE",
+      "CONTROL: the corrected assembly rules name 'collision-free' only inside must_not_fail_when, "
+      "where it is the EXEMPTION for a declared snap or press insertion")
+def _(r):
+    pass  # baseline
+
+
+@case("intended_drawer_guide_contact_is_admissible", "control",
+      "STAGE_CLEARANCE_REJECTS_INTENDED_CONTACT",
+      "CONTROL: the corrected C4 clearance rule permits declared guide, bearing and stop contact")
+def _(r):
+    pass  # baseline
+
+
+@case("constraint_hand_off_is_admissible", "control",
+      "STAGE_REQUIRES_SINGLE_PERSISTENT_CONSTRAINT",
+      "CONTROL: HS-C3 permits the active constraint to change along the path (ADM-HS-E)")
+def _(r):
+    pass  # baseline
+
+
+@case("one_field_at_both_bounds_is_admissible", "control", "STAGE_REJECTS_SHARED_BOUND_MECHANISM",
+      "CONTROL: HS-C5 and C4-R7 permit one feature or field to contribute to both bounds "
+      "(ADM-HS-D, ADM-HS-F)")
+def _(r):
+    pass  # baseline
+
+
+@case("direct_causal_evidence_needs_no_ablation", "control",
+      "VERIFICATION_MINIMUM_DISCRIMINATION_ONLY",
+      "CONTROL: all four two-branch minima state EITHER/OR, so branch A alone is admissible")
+def _(r):
+    pass  # baseline
+
+
 @case("pack_file_missing", "defect", "PACK_FILE_MISSING",
       "an unauthored pack file must never pass silently")
 def _(r):
