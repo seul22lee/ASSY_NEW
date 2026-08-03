@@ -50,6 +50,39 @@ ENTAILMENT = ORACLES / "SOURCE_ENTAILMENT_REVIEW.yaml"
 PLAUSIBILITY = ORACLES / "FIXTURE_PLAUSIBILITY_REVIEW.yaml"
 AMENDMENTS = ORACLES / "_dossier_amendments" / "AMENDMENTS.yaml"
 DECISIONS = ORACLES / "HUMAN_SEMANTIC_DECISIONS.yaml"
+SEMANTIC_AUTHORITY = ORACLES / "SEMANTIC_AUTHORITY.yaml"
+PHYS_REVIEW = ORACLES / "PHYSICAL_FIXTURE_REVIEW.yaml"
+ALIGN_REVIEW = ORACLES / "STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml"
+
+# PCF-001: a micro-oracle capability statement is never rank-1 user source.
+VALID_AUTHORITY_TYPES = {"RANK_1_USER_SOURCE", "FROZEN_PRODUCT_DOSSIER",
+                         "PROJECT_CAPABILITY_ORIGINAL", "FROZEN_AMBIGUITY_RECORD",
+                         "SOURCE_PRECEDENCE_POLICY"}
+MICRO_ORACLE_DOSSIERS = {"DOS-guided-slider.md", "DOS-rotary-to-linear-engagement.md",
+                         "DOS-latch-retention.md", "DOS-bounded-two-state-closure.md"}
+# PCF-002: these are challengeable and must never be frozen as source authority.
+CHALLENGEABLE_ARTIFACTS = {"HUMAN_SEMANTIC_DECISIONS.yaml", "AMENDMENTS.yaml",
+                           "normative.yaml", "freedoms.yaml", "realizations.yaml",
+                           "evidence_cases.yaml", "stage_expectations.yaml"}
+# PCF-004: representation properties may never be physical tags.
+REPRESENTATION_ONLY_TAGS = {"interaction_regions_declared", "interaction_kind_recorded",
+                            "numerical_tolerance_recorded", "compliant_region_recorded",
+                            "assembly_assumptions_recorded"}
+# PCF-006: retired contracts must contribute nothing to evaluation.
+RETIRED_TAGS = {"assembly_paths_exist", "sweep_clears_enclosure", "pose_clearances_satisfied",
+                "travel_clearances_satisfied", "crossing_non_interfering",
+                "transition_free_of_interference", "assembly_process_realizable",
+                "no_undeclared_overlap_on_transition"}
+CANONICAL_PHYSICAL = {"no_undeclared_volumetric_overlap",
+                      "intended_interaction_physically_consistent",
+                      "installation_process_physically_realizable"}
+# PCF-007: a statement asserting blanket non-intersection beside a contact-permitting predicate.
+BLANKET_STATEMENT = re.compile(
+    r"does not intersect|never intersects|clears the .*solid|proper subset|"
+    r"collision-free|positive clearance|does not interfere with", re.I)
+CONTACT_PERMITTING = re.compile(
+    r"declared contact|no volumetric overlap|no undeclared|share no volume|"
+    r"outside the interaction regions", re.I)
 
 VALID_PACK_STATUS = {"PRE_CAD_SEMANTIC_REVIEWED", "BLOCKED_BY_SOURCE_AMBIGUITY"}
 RETIRED_PACK_STATUS = {"STRUCTURALLY_COMPLETE", "SEMANTICALLY_AUDITED",
@@ -944,8 +977,213 @@ def pass_3f(packs):
     return f
 
 
+# --------------------------------------------------------------- Pass 3H
+# PCF-001..011: the authority model, the physical/representation split, retired
+# contracts, and current-state staleness. Every check here fired on a defect that
+# actually existed in this repository while passes 3A-3G reported clean.
+def pass_3h(packs):
+    f = []
+    sf = yaml.safe_load(SOURCE_FREEZE.read_text()) if (SOURCE_FREEZE := ORACLES / "SOURCE_FREEZE.yaml").exists() else None
+    sa = yaml.safe_load(SEMANTIC_AUTHORITY.read_text()) if SEMANTIC_AUTHORITY.exists() else None
+    pr = yaml.safe_load(PHYS_REVIEW.read_text()) if PHYS_REVIEW.exists() else None
+    al = yaml.safe_load(ALIGN_REVIEW.read_text()) if ALIGN_REVIEW.exists() else None
+
+    # ---- PCF-002: the semantic-authority layer must exist
+    if sa is None:
+        f.append(Finding("3H", "-", "-", "BLOCKING", "SEMANTIC_AUTHORITY_MANIFEST_MISSING",
+                         "SEMANTIC_AUTHORITY.yaml absent; challengeable authority has no home",
+                         "create the layer-B manifest"))
+    elif sa.get("challengeable_by_cad") is not True:
+        f.append(Finding("3H", "-", "-", "BLOCKING", "SEMANTIC_AUTHORITY_MANIFEST_MISSING",
+                         "SEMANTIC_AUTHORITY.yaml does not declare challengeable_by_cad: true",
+                         "the layer exists precisely because it IS challengeable"))
+
+    if sf:
+        for a in sf.get("artifacts", []):
+            at, path = a.get("authority_type"), str(a.get("path", ""))
+            # ---- PCF-001
+            if at not in VALID_AUTHORITY_TYPES:
+                f.append(Finding("3H", a.get("applicable_pack", "-"), path, "BLOCKING",
+                                 "SOURCE_AUTHORITY_TYPE_INVALID",
+                                 f"authority_type={at!r}",
+                                 f"use one of {sorted(VALID_AUTHORITY_TYPES)}"))
+            base = path.rsplit("/", 1)[-1]
+            if base in MICRO_ORACLE_DOSSIERS:
+                rank = str(a.get("source_rank") or "")
+                if at == "RANK_1_USER_SOURCE" or re.search(r"rank[_ ]?1", rank, re.I) and "NOT" not in rank.upper():
+                    f.append(Finding("3H", a.get("applicable_pack", "-"), path, "BLOCKING",
+                                     "PROJECT_CAPABILITY_MISLABELLED_RANK1",
+                                     f"micro-oracle dossier declared {at} / rank {rank!r}",
+                                     "a micro-oracle has no user; use PROJECT_CAPABILITY_ORIGINAL"))
+            # ---- PCF-002 / PCF-009
+            if base in CHALLENGEABLE_ARTIFACTS:
+                f.append(Finding("3H", a.get("applicable_pack", "-"), path, "BLOCKING",
+                                 "CHALLENGEABLE_AUTHORITY_INSIDE_SOURCE_FREEZE",
+                                 f"{base} is challengeable semantic authority but is listed in the source freeze",
+                                 "move it to SEMANTIC_AUTHORITY.yaml"))
+        # ---- PCF-009: the revision procedure must be executable
+        if sf.get("challengeable_by_cad") is True:
+            f.append(Finding("3H", "-", "-", "BLOCKING", "SOURCE_FREEZE_REVISION_PARADOX",
+                             "SOURCE_FREEZE declares itself challengeable_by_cad; source bytes are not",
+                             "set challengeable_by_cad: false and put challengeable authority in layer B"))
+        frozen_names = {str(a.get("path", "")).rsplit("/", 1)[-1] for a in sf.get("artifacts", [])}
+        if sa:
+            proc = json.dumps(sa.get("revision_procedure", []), default=str).lower()
+            for nm in ("human_semantic_decisions.yaml", "amendments.yaml"):
+                if nm.replace(".yaml", "") in proc and nm.upper().replace(".YAML", ".yaml") in \
+                        {x.lower() for x in frozen_names}:
+                    f.append(Finding("3H", "-", "-", "BLOCKING", "SOURCE_FREEZE_REVISION_PARADOX",
+                                     f"the revision procedure revises {nm}, which the source freeze holds as immutable",
+                                     "a procedure may not require changing a hash the freeze forbids changing"))
+
+    review_ids = {r["fixture_id"] for r in (pr or {}).get("reviews", [])} if pr else None
+    review_tags = {r["fixture_id"]: set(r.get("physical_tags_assigned") or [])
+                   for r in (pr or {}).get("reviews", [])} if pr else {}
+
+    for name, p in packs.items():
+        n = p.get("normative")
+        if not n:
+            continue
+        r = p.get("realizations") or {}
+        vocab = set((r.get("physical_tag_vocabulary") or {}).keys())
+
+        # ---- PCF-004 / PCF-006 : vocabulary hygiene
+        for t in sorted(vocab & REPRESENTATION_ONLY_TAGS):
+            f.append(Finding("3H", name, "realizations", "BLOCKING",
+                             "REPRESENTATION_TAG_IN_PHYSICAL_DOMAIN",
+                             f"{t} is in the physical tag vocabulary",
+                             "move it to stage_expectations.evaluability_prerequisites"))
+        for t in sorted(vocab & RETIRED_TAGS):
+            f.append(Finding("3H", name, "realizations", "BLOCKING", "DEPRECATED_TAG_ACTIVE",
+                             f"retired contract {t} is still in the active physical vocabulary",
+                             "remove it; retired_contracts is the only place it may appear"))
+
+        for inv in n.get("invariants", []) or []:
+            sid = inv.get("id", "?")
+            tags = set(inv.get("requires_tags") or [])
+            for t in sorted(tags & REPRESENTATION_ONLY_TAGS):
+                f.append(Finding("3H", name, sid, "BLOCKING",
+                                 "REPRESENTATION_TAG_IN_PHYSICAL_DOMAIN",
+                                 f"physical requires_tags contains representation-only {t}",
+                                 "a design must not be physically inadmissible because its record is incomplete"))
+            for t in sorted(tags & RETIRED_TAGS):
+                f.append(Finding("3H", name, sid, "BLOCKING", "DEPRECATED_TAG_ACTIVE",
+                                 f"requires_tags contains retired contract {t}",
+                                 "use the current contract"))
+            # ---- PCF-007
+            st, pd = str(inv.get("statement", "")), str(inv.get("verification_predicate", ""))
+            if BLANKET_STATEMENT.search(st) and CONTACT_PERMITTING.search(pd):
+                f.append(Finding("3H", name, sid, "BLOCKING",
+                                 "STATEMENT_PREDICATE_INTERACTION_MISMATCH",
+                                 f"statement asserts blanket non-intersection while the predicate permits "
+                                 f"declared contact: '{st.strip()[:100]}'",
+                                 "re-author the statement to match the predicate"))
+            # ---- RR-H-01: a recording obligation inside a PHYSICAL predicate
+            if inv.get("basis_type") != "VERIFICATION_MINIMUM":
+                asserting = " ".join(str(inv.get(k, "")) for k in
+                                     ("statement", "verification_predicate", "conclusion_scope"))
+                if re.search(r"\bare represented\b|\bmust be recorded\b|\bis recorded\b", asserting, re.I):
+                    f.append(Finding("3H", name, sid, "BLOCKING",
+                                     "PHYSICAL_PREDICATE_REQUIRES_RECORDING",
+                                     "a physical predicate requires something to be RECORDED; a design that "
+                                     "is physically coherent but incompletely recorded would fail it",
+                                     "move the recording obligation to "
+                                     "stage_expectations.evaluability_prerequisites"))
+
+            # ---- PCF-008
+            ca = str(inv.get("current_authority") or "")
+            if not ca:
+                f.append(Finding("3H", name, sid, "BLOCKING",
+                                 "SUPERSEDED_LOCATOR_WITHOUT_CURRENT_AUTHORITY",
+                                 "no current_authority declared",
+                                 "state which authority currently governs this statement"))
+
+        # ---- PCF-005 : every physical tag needs an individual fixture review
+        if review_ids is not None:
+            for key in ("admissible_realizations", "inadmissible_realizations"):
+                for a in r.get(key) or []:
+                    fid = a["id"]
+                    carried = set(a.get("tags") or []) & CANONICAL_PHYSICAL
+                    if not carried:
+                        continue
+                    if fid not in review_ids:
+                        f.append(Finding("3H", name, fid, "BLOCKING",
+                                         "FIXTURE_TAG_WITHOUT_INDIVIDUAL_REVIEW",
+                                         f"carries {sorted(carried)} with no entry in PHYSICAL_FIXTURE_REVIEW.yaml",
+                                         "review the fixture narrative individually and record the decision"))
+                        continue
+                    extra = carried - review_tags.get(fid, set())
+                    if extra:
+                        f.append(Finding("3H", name, fid, "BLOCKING",
+                                         "FIXTURE_TAG_WITHOUT_INDIVIDUAL_REVIEW",
+                                         f"carries {sorted(extra)} which its review does not assign",
+                                         "a tag is a review conclusion; assign it in the review or drop it"))
+                    if not a.get("physical_review"):
+                        f.append(Finding("3H", name, fid, "MAJOR",
+                                         "FIXTURE_TAG_WITHOUT_INDIVIDUAL_REVIEW",
+                                         "no physical_review pointer",
+                                         "point the fixture at its review record"))
+        # ---- PCF-011
+        for u in n.get("required_unresolved") or []:
+            if "assembly" in str(u.get("decision", "")).lower() or "insertion" in str(u.get("decision", "")).lower():
+                locs = " ".join(str(x) for x in (u.get("source_locators") or []))
+                if not re.search(r"DOS-", locs):
+                    f.append(Finding("3H", name, u.get("id", "?"), "BLOCKING",
+                                     "ASSEMBLY_SOURCE_SILENCE_LOCATOR_MISSING",
+                                     f"assembly unresolved cites no dossier section: {locs!r}",
+                                     "cite the dossier section that records the silence, not only the policy"))
+
+    # ---- PCF-003 : current-state staleness
+    ws = ORACLES / "ORACLE_WORKFLOW_STATE.yaml"
+    if ws.exists():
+        w = yaml.safe_load(ws.read_text()) or {}
+        blob = json.dumps(w, default=str)
+        for pat, why in [(r"3b64aee", "a superseded reviewed_commit"),
+                         (r"SEMANTICALLY_AUDITED", "a retired pack status"),
+                         (r'"3A": 0, "3B": 0, "3C": 0, "3D": 0, "3E": 0\}', "an audit scope that predates 3F/3G/3H")]:
+            if re.search(pat, blob):
+                f.append(Finding("3H", "-", "workflow", "BLOCKING", "WORKFLOW_CURRENT_STATE_STALE",
+                                 f"workflow state carries {why}", "re-author the current-state section"))
+        # totals must match the snapshot
+        tot = w.get("totals") or {}
+        actual = {"invariants": 0, "admissible_physical_fixtures": 0}
+        for _, pp in packs.items():
+            nn = pp.get("normative") or {}
+            actual["invariants"] += len(nn.get("invariants") or [])
+            actual["admissible_physical_fixtures"] += len((pp.get("realizations") or {}).get("admissible_realizations") or [])
+        for k, v in actual.items():
+            if k in tot and tot[k] != v:
+                f.append(Finding("3H", "-", "workflow", "BLOCKING", "WORKFLOW_CURRENT_STATE_STALE",
+                                 f"totals.{k}={tot[k]} but the snapshot has {v}",
+                                 "compute totals from the snapshot, never carry them forward"))
+    idx = ORACLES / "ORACLE_INDEX.md"
+    if idx.exists():
+        t = idx.read_text()
+        na = sum(len((pp.get("realizations") or {}).get("admissible_realizations") or []) for pp in packs.values())
+        m = re.search(r"(\d+)\s+admissible \+", t)
+        if m and int(m.group(1)) != na:
+            f.append(Finding("3H", "-", "index", "BLOCKING", "INDEX_AUDIT_COUNT_STALE",
+                             f"index states {m.group(1)} admissible fixtures; the snapshot has {na}",
+                             "recompute the totals"))
+        if "SEMANTICALLY_AUDITED" in t:
+            f.append(Finding("3H", "-", "index", "BLOCKING", "INDEX_AUDIT_COUNT_STALE",
+                             "index carries the retired status SEMANTICALLY_AUDITED",
+                             "state the current pack statuses"))
+    # ---- alignment review must cover every invariant
+    if al is not None:
+        covered = {r["statement_id"] for r in al.get("reviews", [])}
+        for name, p in packs.items():
+            for inv in (p.get("normative") or {}).get("invariants", []) or []:
+                if inv["id"] not in covered:
+                    f.append(Finding("3H", name, inv["id"], "BLOCKING",
+                                     "STATEMENT_PREDICATE_INTERACTION_MISMATCH",
+                                     "no entry in STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml",
+                                     "review this invariant's statement/predicate/tag/stage alignment"))
+    return f
+
+
 PASSES = {"3A": pass_3a, "3B": pass_3b, "3C": pass_3c, "3D": pass_3d, "3E": pass_3e,
-          "3F": pass_3f, "3G": pass_3g}
+          "3F": pass_3f, "3G": pass_3g, "3H": pass_3h}
 
 SCOPE_NOTE = ("This auditor checks structural, referential, policy and tag-algebra "
               "consistency, and that every semantic question carries a recorded human "
@@ -977,8 +1215,14 @@ def snapshot_manifest():
     # Excluded: _audit reports (outputs, not inputs) and the two attestation
     # files, which are ABOUT this manifest and cannot be inside it without
     # making the hash self-referential.
-    ATTESTATIONS = {"SOURCE_FREEZE.yaml", "PRE_CAD_BASELINE.yaml",
-                    "POST_HUMAN_REVIEW_CORRECTION_REPORT.md"}
+    # Deterministic inclusion rule, stated once:
+    #   INCLUDE every .yaml and .md under ver3/oracles/, plus the two tools.
+    #   EXCLUDE _audit/ (audit OUTPUTS - including them would make a report's own
+    #           hash depend on itself), and the attestation files below, each of
+    #           which is a statement ABOUT this manifest.
+    ATTESTATIONS = {"SOURCE_FREEZE.yaml", "SEMANTIC_AUTHORITY.yaml", "PRE_CAD_BASELINE.yaml",
+                    "POST_HUMAN_REVIEW_CORRECTION_REPORT.md",
+                    "PRE_CAD_V2_CORRECTION_REPORT.md"}
     files = sorted([p for p in (ORACLES).rglob("*")
                     if p.is_file() and p.suffix in (".yaml", ".md")
                     and "_audit" not in p.parts and p.name not in ATTESTATIONS]
@@ -1022,6 +1266,11 @@ def provenance(cmd, mode, seed, pack_order):
         "shuffle_seed": seed,
         "pack_order": pack_order,
         "pack_order_digest": order_digest,
+        "snapshot_inclusion_rule": (
+            "every .yaml and .md under ver3/oracles/ plus ver3/oracle_tools/*.py; "
+            "EXCLUDING ver3/oracles/_audit/ (audit outputs) and the attestation files "
+            "SOURCE_FREEZE.yaml, SEMANTIC_AUTHORITY.yaml, PRE_CAD_BASELINE.yaml and the two "
+            "correction reports, each of which is a statement about this manifest"),
     }
 
 

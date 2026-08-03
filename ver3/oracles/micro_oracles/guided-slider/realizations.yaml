@@ -8,7 +8,8 @@ note: >
   the retired strict-prismatic reading (SF-7.1).
 
 physical_tag_vocabulary:
-  interaction_regions_declared: "every region where two bodies meet is classified as declared contact, declared clearance, declared interference fit or declared compliant interaction"
+  no_undeclared_volumetric_overlap: "no two solids occupy the same space outside a declared contact, interference-fit or compliant-interaction region, under the declared tolerance"
+  intended_interaction_physically_consistent: "each intended interaction is physically coherent: a compliant region can actually deflect, an interference fit is takeable up in strain, a contact face exists on both participating bodies"
   translating_body: "a translating body exists"
   guiding_body: "a guiding body exists"
   travel_direction_determinate: "the travel direction is determinate relative to both bodies, not established by a name"
@@ -17,7 +18,6 @@ physical_tag_vocabulary:
   constraints_attributable_to_interaction: "each claimed constraint names participating material on both bodies"
   engagement_persists_across_travel: "the guiding interaction stays engaged across the declared travel range"
   transverse_load_reacted_across_travel: "transverse load actually carried has a reaction path across the range"
-  travel_clearances_satisfied: "no unintended intersection at any configuration of the declared travel"
   declared_path_traversable: "the declared travel path is traversable"
 
 admissible_realizations:
@@ -25,22 +25,26 @@ admissible_realizations:
     summary: "Two parallel round rails on the guiding body; two carriages on the translating body. All five non-translational freedoms removed by the rail pair."
     materially_differs_by: [guide_count, constrained_freedom_set]
     constrained_freedoms: "all five non-translational"
-    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable', interaction_regions_declared]
+    tags: [translating_body, guiding_body, travel_direction_determinate, required_freedoms_constrained, residual_freedoms_declared, constraints_attributable_to_interaction, engagement_persists_across_travel, transverse_load_reacted_across_travel, declared_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-GS-A
   - id: ADM-GS-B
     summary: "One guide bar of non-circular section through a matching bore. Rotation about the travel axis removed by the section itself."
     materially_differs_by: [guide_count, part_count, constrained_freedom_set]
     constrained_freedoms: "all five non-translational"
-    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable', interaction_regions_declared]
+    tags: [translating_body, guiding_body, travel_direction_determinate, required_freedoms_constrained, residual_freedoms_declared, constraints_attributable_to_interaction, engagement_persists_across_travel, transverse_load_reacted_across_travel, declared_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-GS-B
   - id: ADM-GS-C
     summary: "Dovetailed channel in the guiding body; matching male form on the translating body. All five freedoms removed by one continuous interaction."
     materially_differs_by: [guide_count, engagement_continuity]
     constrained_freedoms: "all five non-translational"
-    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable', interaction_regions_declared]
+    tags: [translating_body, guiding_body, travel_direction_determinate, required_freedoms_constrained, residual_freedoms_declared, constraints_attributable_to_interaction, engagement_persists_across_travel, transverse_load_reacted_across_travel, declared_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-GS-C
   - id: ADM-GS-D
     summary: "Translating body runs in a rectangular recess of the guiding body, located by three pads bearing on three recess walls. No dedicated guide part exists."
     materially_differs_by: [guide_count, part_count, feature_sharing]
     constrained_freedoms: "all five non-translational"
-    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable', interaction_regions_declared]
+    tags: [translating_body, guiding_body, travel_direction_determinate, required_freedoms_constrained, residual_freedoms_declared, constraints_attributable_to_interaction, engagement_persists_across_travel, transverse_load_reacted_across_travel, declared_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-GS-D
   - id: ADM-GS-E
     summary: >
       A cylindrical rod through a plain round bore. Translation along the axis is
@@ -57,41 +61,60 @@ admissible_realizations:
       A rod in a bore is the most ordinary guided slider there is, and nothing in
       the project source demands a prismatic joint. If a corrected invariant
       still rejects ADM-GS-E, the correction did not take.
-    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable', interaction_regions_declared]
+    tags: [translating_body, guiding_body, travel_direction_determinate, required_freedoms_constrained, residual_freedoms_declared, constraints_attributable_to_interaction, engagement_persists_across_travel, transverse_load_reacted_across_travel, declared_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-GS-E
 
 inadmissible_realizations:
   - id: INA-GS-A
     summary: "Translating body declared to move along a named axis with no determinate direction relative to either body."
     from_negative_case: NEG-GS-001
-    missing_tags: [travel_direction_determinate]
-    tags: ['translating_body', 'guiding_body', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable', interaction_regions_declared]
+    missing_tags: [travel_direction_determinate, installation_process_physically_realizable]
+    tags: [translating_body, guiding_body, required_freedoms_constrained, residual_freedoms_declared, constraints_attributable_to_interaction, engagement_persists_across_travel, transverse_load_reacted_across_travel, declared_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-GS-A
   - id: INA-GS-B
     summary: >
       The instantiating requirement is that the carried platform stay square to
       the guiding body, and rotation about the travel axis is neither constrained
       nor declared free - it is simply unaccounted for.
     from_negative_case: NEG-GS-002
-    missing_tags: [required_freedoms_constrained, residual_freedoms_declared]
+    missing_tags: [required_freedoms_constrained, residual_freedoms_declared, installation_process_physically_realizable]
     note: "Rejected because a REQUIRED freedom is unconstrained and unaccounted for. ADM-GS-E leaves the same freedom free, declares it, and is admitted."
-    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable', interaction_regions_declared]
+    tags: [translating_body, guiding_body, travel_direction_determinate, constraints_attributable_to_interaction, engagement_persists_across_travel, transverse_load_reacted_across_travel, declared_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-GS-B
   - id: INA-GS-C
     summary: "A prismatic relationship asserted between the two bodies with no participating material on either."
     from_negative_case: NEG-GS-003
-    missing_tags: [constraints_attributable_to_interaction]
-    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable', interaction_regions_declared]
+    missing_tags: [constraints_attributable_to_interaction, installation_process_physically_realizable, intended_interaction_physically_consistent]
+    tags: [translating_body, guiding_body, travel_direction_determinate, required_freedoms_constrained, residual_freedoms_declared, engagement_persists_across_travel, transverse_load_reacted_across_travel, declared_path_traversable, no_undeclared_volumetric_overlap]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-GS-C
   - id: INA-GS-D
     summary: "Guide engages over the first part of the declared travel only; beyond that the translating body has left its guide."
     from_negative_case: NEG-GS-004
-    missing_tags: [engagement_persists_across_travel]
-    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'transverse_load_reacted_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable', interaction_regions_declared]
+    missing_tags: [engagement_persists_across_travel, installation_process_physically_realizable]
+    tags: [translating_body, guiding_body, travel_direction_determinate, required_freedoms_constrained, residual_freedoms_declared, constraints_attributable_to_interaction, transverse_load_reacted_across_travel, declared_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-GS-D
   - id: INA-GS-E
     summary: "Transverse load demonstrably carried by the guiding interaction is reacted at the retracted position only; at the far end the body is cantilevered past its supports."
     from_negative_case: NEG-GS-005
-    missing_tags: [transverse_load_reacted_across_travel]
-    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'travel_clearances_satisfied', 'declared_path_traversable', interaction_regions_declared]
+    missing_tags: [transverse_load_reacted_across_travel, installation_process_physically_realizable]
+    tags: [translating_body, guiding_body, travel_direction_determinate, required_freedoms_constrained, residual_freedoms_declared, constraints_attributable_to_interaction, engagement_persists_across_travel, declared_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-GS-E
   - id: INA-GS-F
     summary: "At an interior configuration of the declared travel the translating body intersects a boss on the guiding body; the interference is unaccounted for."
     from_negative_case: NEG-GS-006
-    missing_tags: [travel_clearances_satisfied, declared_path_traversable]
+    missing_tags: [declared_path_traversable, installation_process_physically_realizable, no_undeclared_volumetric_overlap]
     note: "Corrected at SF-7.2 from the retired 'fills its corridor' formulation."
-    tags: ['translating_body', 'guiding_body', 'travel_direction_determinate', 'required_freedoms_constrained', 'residual_freedoms_declared', 'constraints_attributable_to_interaction', 'engagement_persists_across_travel', 'transverse_load_reacted_across_travel', interaction_regions_declared]
+    tags: [translating_body, guiding_body, travel_direction_determinate, required_freedoms_constrained, residual_freedoms_declared, constraints_attributable_to_interaction, engagement_persists_across_travel, transverse_load_reacted_across_travel, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-GS-F
+
+retired_contracts:
+  note: >
+    Historical only. Nothing here contributes to any PASS/FAIL decision. Listed so a
+    reader recognises a retired contract if it reappears.
+  entries:
+    - tag: interaction_regions_declared
+      why: >
+        REPRESENTATION property; moved to stage_expectations evaluability_prerequisites at PCF-004
+    - tag: travel_clearances_satisfied
+      why: >
+        RETIRED at PCF-007; blanket non-intersection wording absorbed into no_undeclared_volumetric_overlap

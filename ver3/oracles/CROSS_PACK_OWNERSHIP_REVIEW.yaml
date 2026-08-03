@@ -1,33 +1,118 @@
-schema_version: 0.3.0
-purpose: Pass E cross-pack ownership review. A review record, never Oracle evidence.
-note: Recorded before the arbitration conclusions of earlier passes were re-read.
-checks:
-- question: Is guidance silently discharged by conversion?
-  verdict: 'no'
-  evidence: rotary-to-linear NRM-RL-004 excludes general guidance explicitly and stage_expectations.s05
-    carries a double_discharge_rule; NEG-RL-012 makes the conflation a defect. BM-002 and C4-drawer keep
-    guidance (NRM-BM-002-007 / NRM-C4-005) separate from conversion (NRM-BM-002-003 / NRM-C4-004).
-- question: Is bounding silently discharged by retention, or retention by a stop?
-  verdict: 'no'
-  evidence: bounded-two-state-closure UNR-HS-002 holds the holding question open and NEG-HS-011 forbids
-    crediting a bound as holding; latch-retention scope_exclusions disclaim how bodies reach the retained
-    state. BM-001 keeps NRM-BM-001-005 (open state) separate from NRM-BM-001-006 (retention).
-- question: Is load support conditional on actual loads?
-  verdict: 'yes'
-  evidence: NRM-BM-001-011, NRM-BM-002-006, NRM-C4-009, NRM-GS-005 and NRM-RL-005 all carry applies_when
-    and load-qualified predicates. The auditor enforces this as CONDITIONAL_LOAD_DOMAIN_VIOLATION.
-- question: Are product requirements copied into capability definitions?
-  verdict: 'no'
-  evidence: No micro-oracle statement cites a product dossier. Every PROJECT_DEFINED_CAPABILITY statement
-    is grounded in its own S1, enforced as CAPABILITY_NOT_FROM_CAPABILITY_STATEMENT. guided-slider UNR-GS-003
-    and UNR-GS-004 explicitly defer instantiating-case questions rather than answering them.
-- question: Do micro-oracles redefine product sources?
-  verdict: 'no'
-  evidence: Micro-oracles declare capabilities and defer instantiating detail to UNR entries; no product
-    REQ id appears in any micro-oracle locator.
-- question: Do BM-002 and C4-drawer double-count one realization across guidance and conversion?
-  verdict: 'no'
-  evidence: Their conversion invariants require an interaction with participating geometry; their guidance
-    invariants require the required behaviour to be preserved. A single realization may satisfy both,
-    but each obligation is evaluated on its own predicate.
-result: clean - no obligation is discharged by a neighbouring capability
+schema_version: 0.1.0
+purpose: Independent semantic re-review performed from the FINAL active files, not from the auditor output.
+passes:
+  A: authority review
+  B: source entailment (see SOURCE_ENTAILMENT_REVIEW.yaml)
+  C: physical/representation separation
+  D: necessity
+  E: sufficiency
+  F: fixture plausibility (see PHYSICAL_FIXTURE_REVIEW.yaml)
+  G: statement/predicate alignment (see STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml)
+  H: cross-pack ownership
+summary:
+  checks: 12
+  CLEAN: 12
+  DEFECT: 0
+findings:
+- finding_id: RR-A-01
+  pass_: A
+  checked: no micro-oracle statement claims user authority
+  verdict: CLEAN
+  detail: all four micro-oracles use PROJECT_DEFINED_CAPABILITY
+  action: none
+- finding_id: RR-A-02
+  pass_: A
+  checked: every superseded-capability statement cites its amendment
+  verdict: CLEAN
+  detail: guided-slider and rotary-to-linear statements all cite their amendment; the S5 evidence statements
+    correctly cite the unchanged original
+  action: none
+- finding_id: RR-A-03
+  pass_: A
+  checked: AMD-HS-001 applied only within its declared partial scope
+  verdict: CLEAN
+  detail: applied to exactly ['NRM-HS-003', 'NRM-HS-005'] - the constraint-persistence and bound-distinctness
+    clauses. NRM-HS-004 (bound physically produced) correctly retains the ORIGINAL S1, which the amendment
+    explicitly excludes.
+  action: none
+- finding_id: RR-C-01
+  pass_: C
+  checked: no physical invariant requires a representation property
+  verdict: CLEAN
+  detail: a physically valid design whose DesignState is incomplete is NOT_EVALUABLE, never physically
+    inadmissible
+  action: none
+- finding_id: RR-C-02
+  pass_: C
+  checked: every pack owns its representation prerequisites in stage expectations
+  verdict: CLEAN
+  detail: all 9 packs
+  action: none
+- finding_id: RR-D-01
+  pass_: D
+  checked: no admissible mechanism-neutral realization falsifies an invariant
+  verdict: CLEAN
+  detail: 44 admissible fixtures across 9 packs, each individually reviewed, satisfy every physical invariant
+    of their pack
+  action: none
+- finding_id: RR-E-01
+  pass_: E
+  checked: no source-violating design passes every invariant
+  verdict: CLEAN
+  detail: 64 inadmissible fixtures, each rejected by at least one physical invariant
+  action: none
+- finding_id: RR-F-01
+  pass_: F
+  checked: no fixture upgraded beyond geometry-pending
+  verdict: CLEAN
+  detail: all 108 fixtures remain NEEDS_GEOMETRY_VALIDATION; no CAD or physics work exists
+  action: none
+- finding_id: RR-F-02
+  pass_: F
+  checked: every reviewed tag is actually carried by its fixture
+  verdict: CLEAN
+  detail: the review and the fixtures agree in both directions
+  action: none
+- finding_id: RR-G-01
+  pass_: G
+  checked: statement, predicate, tags and stage projection share one scope
+  verdict: CLEAN
+  detail: 73 invariants reviewed, 15 corrected this pass, 0 mismatches remaining
+  action: none
+- finding_id: RR-H-01
+  pass_: H
+  checked: no architecture or representation rule sits in a product physical invariant
+  verdict: CLEAN
+  detail: 'after correction: no physical predicate requires anything to be RECORDED. The three assembly
+    predicates now require the insertion to be physically COHERENT; recording its assumptions is owned
+    by evaluability_prerequisites.'
+  action: 'CORRECTED: NRM-BM-001-010, NRM-BM-002-012 and NRM-C4-011 each embedded "...and its required
+    deformation, material assumption, insertion direction and process assumption are represented" inside
+    a PHYSICAL predicate. A press fit that is physically coherent but whose assumptions are unrecorded
+    would have failed a physical invariant. This is the PCF-004 defect class surviving inside the assembly
+    contract, and the auditor did not catch it - the independent review did.'
+  check_correction: 'The first run of this check searched the WHOLE invariant and flagged NRM-RL-002,
+    whose exclusion says "Does NOT require the relation to be declared... those are representation obligations".
+    The exclusion is correct content - it disclaims exactly the coupling this pass exists to prevent -
+    and the CHECK was wrong to read a disclaimer as an assertion. The check now searches only the asserting
+    fields: statement, verification_predicate and conclusion_scope.'
+- finding_id: RR-H-02
+  pass_: H
+  checked: no product obligation is discharged by pointing at a micro-oracle
+  verdict: CLEAN
+  detail: 'HSD-003 records the scope limit explicitly: not every product closure instantiates bounded-two-state-closure,
+    and BM-001 ADM-C/ADM-D are the cases in point.'
+  action: none
+check_defects_found_and_fixed:
+- check: RR-H-01
+  defect: read a disclaiming exclusion as an assertion
+  fix: search only the asserting fields
+  found_by: manual inspection of the reported finding
+findings_corrected_during_this_review:
+- finding: RR-H-01
+  statements:
+  - NRM-BM-001-010
+  - NRM-BM-002-012
+  - NRM-C4-011
+  defect: a recording obligation embedded in a physical assembly predicate
+  regression: PHYSICAL_PREDICATE_REQUIRES_RECORDING

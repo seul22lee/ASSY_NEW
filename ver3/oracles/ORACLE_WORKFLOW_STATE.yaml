@@ -1,11 +1,11 @@
 # Workflow state ONLY. Never Oracle evidence. Nothing here may be cited by a pack.
-schema_version: "0.5.0"
-updated_after: "GATE 1-6 post-human-review correction run"
+schema_version: "0.6.0"
+updated_after: "pre-CAD authority and fixture rebuild (PCF-001..011)"
 
-current_pass: PRE_CAD_BASELINE_COMPLETE
+current_pass: PRE_CAD_V2_REBUILD_COMPLETE
 workflow_status: PRE_CAD_BASELINE_READY
 branch: ver3-oracle-phase1-review
-reviewed_commit: 3b64aee601985ba509d2420462af624ed5616cc2
+starting_commit: f7e3a22844fa3d3eef0b56c90aeba6d29b1a15af
 
 lock_created: false
 production_pipeline_code_exists: false
@@ -29,7 +29,11 @@ pack_status:
   latch-retention:              PRE_CAD_SEMANTIC_REVIEWED
   bounded-two-state-closure:    PRE_CAD_SEMANTIC_REVIEWED
 
-source_freeze: ver3/oracles/SOURCE_FREEZE.yaml
+authority_model:
+  A_immutable_source: ver3/oracles/SOURCE_FREEZE.yaml
+  B_challengeable_semantic_authority: ver3/oracles/SEMANTIC_AUTHORITY.yaml
+  C_current_conclusions: ver3/oracles/PRE_CAD_BASELINE.yaml
+correction_state: ver3/oracles/PRE_CAD_CORRECTION_STATE.yaml
 pre_cad_baseline: ver3/oracles/PRE_CAD_BASELINE.yaml
 manifest_hash_note: >
   The manifest hashes are recorded in SOURCE_FREEZE.yaml and PRE_CAD_BASELINE.yaml
@@ -42,36 +46,37 @@ dossier_amendments: ver3/oracles/_dossier_amendments/AMENDMENTS.yaml
 physical_validation_status: PENDING_FOR_EVERY_PACK
 physical_validation_note: >
   All 41 admissible fixtures are NEEDS_GEOMETRY_VALIDATION. No CAD model and no
-  physics run exists for any of them. SEMANTICALLY_AUDITED means the semantic
+  physics run exists for any of them. PRE_CAD_SEMANTIC_REVIEWED means the semantic
   review passes are clean; it makes no claim about physical realizability.
 
-totals:
+totals:   # COMPUTED from the final snapshot, never carried forward
   invariants: 73
   verification_minima: 10
-  required_unresolved: 42
+  required_unresolved: 45
   freedoms: 72
-  admissible_physical_fixtures: 41
-  inadmissible_physical_fixtures: 59
-  admissible_evidence_cases: 14
+  admissible_physical_fixtures: 44
+  inadmissible_physical_fixtures: 64
+  admissible_evidence_cases: 17
   inadmissible_evidence_cases: 12
-  negative_cases: 131
+  negative_cases: 139
 
 semantic_reviews:
   source_entailment: {file: SOURCE_ENTAILMENT_REVIEW.yaml, statements: 73, unsupported: 0}
-  fixture_plausibility: {file: FIXTURE_PLAUSIBILITY_REVIEW.yaml, fixtures: 41, rejected: 0,
-                         needs_geometry_validation: 41}
+  fixture_plausibility: {file: FIXTURE_PLAUSIBILITY_REVIEW.yaml, note: "per-fixture physical narrative review"}
+  physical_fixture_review: {file: PHYSICAL_FIXTURE_REVIEW.yaml, fixtures: 108, all NEEDS_GEOMETRY_VALIDATION: true}
+  statement_predicate_alignment: {file: STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml, invariants: 73, mismatches: 0}
   cross_pack_ownership: {file: CROSS_PACK_OWNERSHIP_REVIEW.yaml, checks: 6, result: clean}
 
 audit_state:
   canonical: {BLOCKING: 0, MAJOR: 0}
-  per_pass: {"3A": 0, "3B": 0, "3C": 0, "3D": 0, "3E": 0, "3F": 0, "3G": 0}
+  per_pass: {"3A": 0, "3B": 0, "3C": 0, "3D": 0, "3E": 0, "3F": 0, "3G": 0, "3H": 0}
   shuffled_seeds: [20260802, 4177, 90210]
   shuffled_result: {BLOCKING: 0, MAJOR: 0}
-  mutation_tests: {total: 69, defect_cases: 57, control_cases: 12, failed: 0}
+  mutation_tests: {see: ver3/oracles/_audit/PRECAD_V2_RESTART-mutation.json}
   reports:
-    canonical: ver3/oracles/_audit/POST_HUMAN3_RESTART-canonical.json
-    shuffled: [POST_HUMAN3_RESTART-shuffled-20260802.json, POST_HUMAN3_RESTART-shuffled-4177.json, POST_HUMAN3_RESTART-shuffled-90210.json]
-    mutation: ver3/oracles/_audit/POST_HUMAN3_RESTART-mutation.json
+    canonical: ver3/oracles/_audit/PRECAD_V2_RESTART-canonical.json
+    shuffled: [PRECAD_V2_RESTART-shuffled-20260802.json, PRECAD_V2_RESTART-shuffled-4177.json, PRECAD_V2_RESTART-shuffled-90210.json]
+    mutation: ver3/oracles/_audit/PRECAD_V2_RESTART-mutation.json
 
 unresolved_findings: []
 

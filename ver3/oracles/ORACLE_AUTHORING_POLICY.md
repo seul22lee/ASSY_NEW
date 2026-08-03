@@ -169,6 +169,50 @@ elimination. What must hold instead:
 
 ---
 
+## 12.5 Three domains: physical, representation, evidence
+
+Adopted at PCF-004. The earlier passes had only two domains — physical and
+evidence — and quietly used the physical one for a third kind of statement.
+
+| Domain | Asks | Failure means |
+|---|---|---|
+| **PHYSICAL** | could this artifact exist and work? | the design is wrong |
+| **REPRESENTATION / EVALUABILITY** | does the DesignState say enough to evaluate it? | the RECORD is incomplete |
+| **EVIDENCE** | does something support the claim? | the CLAIM is unsupported |
+
+**Physical properties** — no undeclared volumetric overlap; intended interaction
+physically consistent; an installation process physically realizable; the
+required motion physically realizable.
+
+**Representation / evaluability properties** — interaction regions declared and
+classified; numerical tolerance recorded; compliant region identified;
+deformation assumptions represented; insertion direction recorded; process and
+material assumptions recorded; evidence fidelity declared.
+
+**Evidence properties** — geometry/contact evidence supports a claim;
+control/ablation supports a claim; quantitative force or capacity evidence exists.
+
+### 12.5.1 A physically valid design may be NOT_EVALUABLE
+
+A design can be perfectly buildable while its DesignState is incomplete. That is
+a **representation** failure, and reporting it as physical inadmissibility is a
+category error — it tells the designer their product is wrong when the record is
+wrong.
+
+The correct outcome is:
+
+```yaml
+physical_predicate: NOT_EVALUABLE
+reason: REPRESENTATION_INCOMPLETE
+```
+
+Never `FAIL`, and never a missing physical tag.
+
+`interaction_regions_declared` was carried as a **physical** tag in the previous
+pass. It is a representation property and is now owned by
+`stage_expectations.evaluability_prerequisites`. It is not deprecated in place —
+it is **removed from every physical contract**.
+
 ## 13. Intended interaction semantics — contact is not interference
 
 Adopted at GATE 2. This definition is common to every pack and every stage
@@ -202,6 +246,23 @@ to touch.
   represented;
 - undeclared penetration remains FAIL, at any depth beyond the declared numerical
   tolerance.
+
+### 13.2.1 Physical tag vocabulary for interaction
+
+Exactly three physical tags carry interaction meaning. Any other interaction
+concept is representation or evidence, not physical truth.
+
+| Physical tag | Means |
+|---|---|
+| `no_undeclared_volumetric_overlap` | no two solids occupy the same space outside a declared contact, interference-fit or compliant-interaction region, under the declared tolerance |
+| `intended_interaction_physically_consistent` | each intended interaction is physically coherent: a compliant region can actually deflect, an interference fit is takeable up in strain, a contact face exists on both bodies |
+| `installation_process_physically_realizable` | see §14 |
+
+The corresponding **representation** expectations live in stage expectations:
+
+`interaction_regions_declared`, `interaction_kind_recorded`,
+`numerical_tolerance_recorded`, `compliant_region_recorded`,
+`assembly_assumptions_recorded`.
 
 ### 13.3 Predicate form
 
@@ -243,6 +304,19 @@ Four questions are kept apart and never conflated:
 | compliant assembly feasibility | the physical invariant, conditional on a declared compliant region |
 | force / process adequacy | `required_unresolved` — a quantitative question |
 | what evidence earns an assembly PASS | `stage_expectations` s11 |
+
+## 14.1 The retired assembly contract
+
+`assembly_paths_exist` — *"each discretely-installed part has a collision-free
+installation path"* — is **retired**, not deprecated. It excluded every press fit
+and every snap fit from being assemblable.
+
+It must not appear in any active `requires_tags`, physical tag vocabulary, fixture
+tag list, negative-case rejection, stage PASS condition, or auditor-required tag
+set. It survives only in an explicit `retired_contracts` block that contributes
+nothing to evaluation. `DEPRECATED_TAG_ACTIVE` is BLOCKING.
+
+The active physical contract is `installation_process_physically_realizable`.
 
 ## 15. Causal verification minima — a control is not the only proof
 

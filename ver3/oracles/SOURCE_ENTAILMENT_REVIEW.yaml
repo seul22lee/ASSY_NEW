@@ -20,6 +20,7 @@ summary:
   physically_necessary: 35
   conditional: 18
   unsupported: 0
+  re_reviewed_this_pass: 10
 reviews:
 - statement_id: NRM-BM-001-001
   pack: BM-001
@@ -39,26 +40,30 @@ reviews:
   source_derived_proposition: Repeated relative motion between two bodies is produced by material interaction
     between them.
   review_result: physically_necessary
-  counterexample_considered: A magnetically levitated lid with no contact anywhere. Does it have engagement
-    geometry?
-  counterexample_outcome: Yes — the pole faces are participating material. The exclusion admitting field
-    interaction covers it. Held.
+  counterexample_considered: A rigid "snap" that cannot deflect, and a press fit with no material relation
+    - do they realize their declared interaction?
+  counterexample_outcome: Neither does. Scope extended at PCF-004 so the invariant owns interaction COHERENCE;
+    INA-BM-001-K and INA-BM-001-L are now rejected by it. Before the extension they passed every BM-001
+    physical invariant.
   predicate_scope_reviewed: true
   derivation_premises_reviewed: true
   note: null
+  re_reviewed_at: PCF pre-CAD rebuild
 - statement_id: NRM-BM-001-003
   pack: BM-001
   source_locator: DOS-BM-001 S1 REQ-001 + product_intent
   source_derived_proposition: The box must open, and it is a storage box; therefore at OPEN the declared
     usable access must not be obstructed by the closure.
   review_result: conditional
-  counterexample_considered: A lid that overhangs half the aperture at OPEN while leaving a clear working
-    region in front.
-  counterexample_outcome: Admitted (ADM-BM-001-D). Under the prior "clears the aperture prism" wording
-    it was rejected, which was stronger than the source. Conditioned on the DECLARED access region.
+  counterexample_considered: A lid whose hinge bore, rim seat and stop face all TOUCH the body - does
+    the statement reject it?
+  counterexample_outcome: It did. The statement said the swept region "does not intersect the enclosure
+    solid" while its own predicate already permitted declared contact. Re-authored at PCF-007 so statement
+    and predicate agree; ADM-BM-001-E has three declared contacts and is admissible.
   predicate_scope_reviewed: true
   derivation_premises_reviewed: true
   note: Corrected at SF-2.1. Adequacy of the declared region is held at UNR-BM-001-006.
+  re_reviewed_at: PCF pre-CAD rebuild
 - statement_id: NRM-BM-001-004
   pack: BM-001
   source_locator: DOS-BM-001 S1 REQ-001
@@ -139,12 +144,13 @@ reviews:
   source_derived_proposition: The product must be easy to assemble; a part cannot occupy space already
     occupied.
   review_result: physically_necessary
-  counterexample_considered: A single-piece moulding with a living hinge — no installation paths at all.
-  counterexample_outcome: Admitted; the predicate ranges over discretely-installed parts, of which there
-    are none.
+  counterexample_considered: A press fit, which has no collision-free installation path - is it unassemblable?
+  counterexample_outcome: No. The retired contract said yes, which excluded every press and snap fit.
+    Replaced at PCF-006 by a realizable PROCESS through no undeclared rigid material.
   predicate_scope_reviewed: true
   derivation_premises_reviewed: true
   note: null
+  re_reviewed_at: PCF pre-CAD rebuild
 - statement_id: NRM-BM-001-011
   pack: BM-001
   source_locator: DOS-BM-001 S1 REQ-002 + REQ-007
@@ -240,11 +246,12 @@ reviews:
   source_derived_proposition: The aperture is in the planar top while the underside is curved; solid bodies
     do not interpenetrate.
   review_result: physically_necessary
-  counterexample_considered: A closure whose sweep never approaches the underside at all.
-  counterexample_outcome: Admitted trivially; the predicate is satisfied where there is nothing to clear.
+  counterexample_considered: A closure resting against the curved region at its closed pose.
+  counterexample_outcome: Admissible as a declared contact, consistent with the parent after PCF-007.
   predicate_scope_reviewed: true
   derivation_premises_reviewed: true
   note: null
+  re_reviewed_at: PCF pre-CAD rebuild
 - statement_id: NRM-BM-002-001
   pack: BM-002
   source_locator: DOS-BM-002 S1 REQ-001
@@ -336,12 +343,13 @@ reviews:
   source_derived_proposition: The platform moves through a displacement; material cannot pass through
     material.
   review_result: physically_necessary
-  counterexample_considered: A platform whose swept volume IS the corridor.
-  counterexample_outcome: Admitted. The prior proper-subset wording was vacuous or contradictory here;
-    replaced with non-intersection and traversability.
+  counterexample_considered: A platform seated on a housing rib at its lower pose.
+  counterexample_outcome: Admissible as a declared contact. The blanket non-intersection wording was retired
+    at PCF-007.
   predicate_scope_reviewed: true
   derivation_premises_reviewed: true
   note: Corrected at SF-5.5.
+  re_reviewed_at: PCF pre-CAD rebuild
 - statement_id: NRM-BM-002-009
   pack: BM-002
   source_locator: DOS-BM-002 S1 REQ-002 + REQ-007
@@ -380,11 +388,12 @@ reviews:
   source_locator: DOS-BM-002 S1 REQ-006
   source_derived_proposition: The product must be easy to assemble; a part cannot occupy occupied space.
   review_result: physically_necessary
-  counterexample_considered: A fully co-moulded assembly.
-  counterexample_outcome: Admitted; no discretely-installed parts exist.
+  counterexample_considered: As NRM-BM-001-010.
+  counterexample_outcome: Same correction at PCF-006.
   predicate_scope_reviewed: true
   derivation_premises_reviewed: true
   note: null
+  re_reviewed_at: PCF pre-CAD rebuild
 - statement_id: NRM-BM-002-013
   pack: BM-002
   source_locator: DOS-BM-002 S1 REQ-009
@@ -519,22 +528,24 @@ reviews:
   source_derived_proposition: Material cannot pass through material; a path blocked at an interior point
     is not traversable.
   review_result: physically_necessary
-  counterexample_considered: A drawer whose swept volume defines its own corridor.
-  counterexample_outcome: Admitted; proper-subset containment was withdrawn in line with SF-5.5.
+  counterexample_considered: A drawer riding on rails it touches along its whole travel.
+  counterexample_outcome: Admissible as declared contacts. Blanket non-intersection retired at PCF-007.
   predicate_scope_reviewed: true
   derivation_premises_reviewed: true
   note: null
+  re_reviewed_at: PCF pre-CAD rebuild
 - statement_id: NRM-C4-011
   pack: C4-drawer
   source_locator: DOS-C4-drawer S1 command
   source_derived_proposition: A cabinet is a producible artifact assembled from parts; a part cannot occupy
     occupied space.
   review_result: physically_necessary
-  counterexample_considered: A single moulded shell.
-  counterexample_outcome: Admitted; no discretely-installed parts.
+  counterexample_considered: As NRM-BM-001-010.
+  counterexample_outcome: Same correction at PCF-006.
   predicate_scope_reviewed: true
   derivation_premises_reviewed: true
   note: null
+  re_reviewed_at: PCF pre-CAD rebuild
 - statement_id: NRM-C4-012
   pack: C4-drawer
   source_locator: DOS-C4-drawer S5 E2
@@ -623,11 +634,13 @@ reviews:
   source_derived_proposition: Material cannot pass through material; a path blocked at an interior point
     is not traversable.
   review_result: physically_necessary
-  counterexample_considered: A body whose swept volume defines its own corridor.
-  counterexample_outcome: Admitted after SF-7.2 replaced the proper-subset formulation.
+  counterexample_considered: A slider in continuous contact with its guide over the whole travel.
+  counterexample_outcome: Admissible - guidance REQUIRES contact. Retired wording would have rejected
+    every guide.
   predicate_scope_reviewed: true
   derivation_premises_reviewed: true
   note: null
+  re_reviewed_at: PCF pre-CAD rebuild
 - statement_id: NRM-GS-007
   pack: guided-slider
   source_locator: DOS-guided-slider S5
@@ -865,11 +878,12 @@ reviews:
   source_derived_proposition: Both states must be reached by the motion; material cannot pass through
     material.
   review_result: physically_necessary
-  counterexample_considered: Contact at a bounding condition - is that interference?
-  counterexample_outcome: No; excluded explicitly. Intended contact at a bound is the bound.
+  counterexample_considered: A lid seated on its rim at the closed extreme.
+  counterexample_outcome: 'Admissible: the bounding contacts are two of the declared interaction regions.'
   predicate_scope_reviewed: true
   derivation_premises_reviewed: true
   note: null
+  re_reviewed_at: PCF pre-CAD rebuild
 - statement_id: NRM-HS-007
   pack: bounded-two-state-closure
   source_locator: DOS-bounded-two-state-closure S5 + S3

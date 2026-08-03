@@ -3,13 +3,19 @@
 **Status: `PRE_CAD_BASELINE_READY`.** No `LOCK.json`. No production pipeline code.
 No CAD fixtures. **Physical validation is pending for every fixture.**
 
-| Attestation | Path | Scope |
-|---|---|---|
-| Source-only freeze | [SOURCE_FREEZE.yaml](SOURCE_FREEZE.yaml) | `freeze_scope: SOURCE_ONLY`, `semantic_lock: false` |
-| Challengeable semantic baseline | [PRE_CAD_BASELINE.yaml](PRE_CAD_BASELINE.yaml) | `CHALLENGEABLE_SEMANTIC_BASELINE` |
+| Layer | Path | What it fixes | CAD may change it |
+|---|---|---|---|
+| **A. immutable source** | [SOURCE_FREEZE.yaml](SOURCE_FREEZE.yaml) | what the source SAYS | no |
+| **B. challengeable semantic authority** | [SEMANTIC_AUTHORITY.yaml](SEMANTIC_AUTHORITY.yaml) | what it currently MEANS | **yes** |
+| **C. current conclusions** | [PRE_CAD_BASELINE.yaml](PRE_CAD_BASELINE.yaml) | what follows from it | **yes** |
 
 Each carries its own manifest hash; the hashes are not duplicated here, because a
 hash cannot live inside a file it covers.
+
+The three layers were separated at PCF-002. Previously `HUMAN_SEMANTIC_DECISIONS.yaml`
+sat inside the immutable freeze while declaring every decision challengeable by
+CAD — which made the documented revision procedure impossible to execute
+(PCF-009).
 
 The freeze covers **sources only** — it is not a semantic lock, and the source is
 not challengeable by CAD. The baseline covers the **conclusions**, and every one
@@ -28,24 +34,22 @@ Corrected against 45 independent semantic review findings; see
 
 | Pack | Inv (VM) | Unres | Free | Phys adm/inadm | Evid adm/inadm | Neg | Status |
 |---|---|---|---|---|---|---|---|
-| [BM-001](product_cases/BM-001/) — latching storage box | 13 (2) | 8 | 13 | 4 / 7 | 2 / 2 | 15 | PRE_CAD_SEMANTIC_REVIEWED |
-| [BM-001-2](product_cases/BM-001-2/) — delta, flush mount | 2 (0) | 4 | 3 | 4 / 4 | 0 / 0 | 4 | **BLOCKED_BY_SOURCE_AMBIGUITY** |
-| [BM-001-3](product_cases/BM-001-3/) — delta, curved back | 3 (0) | 2 | 3 | 3 / 4 | 0 / 0 | 6 | PRE_CAD_SEMANTIC_REVIEWED |
-| [BM-002](product_cases/BM-002/) — enclosed crank platform lift | 14 (1) | 7 | 11 | 5 / 11 | 2 / 2 | 22 | PRE_CAD_SEMANTIC_REVIEWED |
-| [C4-drawer](product_cases/C4-drawer/) — knob-driven cabinet drawer | 13 (2) | 6 | 12 | 4 / 10 | 2 / 2 | 22 | PRE_CAD_SEMANTIC_REVIEWED |
+| [BM-001](product_cases/BM-001/) | 13 (2) | 9 | 13 | 7 / 12 | 3 / 2 | 22 | PRE_CAD_SEMANTIC_REVIEWED |
+| [BM-001-2](product_cases/BM-001-2/) | 2 (0) | 4 | 3 | 4 / 4 | 0 / 0 | 4 | BLOCKED_BY_SOURCE_AMBIGUITY |
+| [BM-001-3](product_cases/BM-001-3/) | 3 (0) | 2 | 3 | 3 / 4 | 0 / 0 | 6 | PRE_CAD_SEMANTIC_REVIEWED |
+| [BM-002](product_cases/BM-002/) | 14 (1) | 8 | 11 | 5 / 11 | 2 / 2 | 22 | PRE_CAD_SEMANTIC_REVIEWED |
+| [C4-drawer](product_cases/C4-drawer/) | 13 (2) | 7 | 12 | 4 / 10 | 2 / 2 | 23 | PRE_CAD_SEMANTIC_REVIEWED |
 
 ## Micro-oracles — reusable capabilities, never products, never mechanisms
 
 | Pack | Capability | Inv (VM) | Unres | Free | Phys | Evid | Neg | Status |
 |---|---|---|---|---|---|---|---|---|
-| [guided-slider](micro_oracles/guided-slider/) | guided translation along a declared line or path, with the freedoms constrained that the instantiating requirement depends on | 7 (1) | 4 | 8 | 5 / 6 | 2 / 1 | 13 | PRE_CAD_SEMANTIC_REVIEWED |
-| [rotary-to-linear-engagement](micro_oracles/rotary-to-linear-engagement/) | rotary → linear conversion through an uninterrupted chain of localized interactions, with load reaction | 6 (1) | 3 | 8 | 6 / 5 | 2 / 2 | 16 | PRE_CAD_SEMANTIC_REVIEWED |
-| [latch-retention](micro_oracles/latch-retention/) | holding two bodies in a state against a disturbance, releasing deliberately, repeatably | 8 (2) | 4 | 7 | 4 / 6 | 2 / 2 | 16 | PRE_CAD_SEMANTIC_REVIEWED |
-| [bounded-two-state-closure](micro_oracles/bounded-two-state-closure/) | a closure reaching two states by a bounded motion, each bound physically produced | 7 (1) | 4 | 7 | 6 / 6 | 2 / 1 | 17 | PRE_CAD_SEMANTIC_REVIEWED |
+| [guided-slider](micro_oracles/guided-slider/) | 7 (1) | 4 | 8 | 5 / 6 | 3 / 1 | 13 | PRE_CAD_SEMANTIC_REVIEWED |
+| [rotary-to-linear-engagement](micro_oracles/rotary-to-linear-engagement/) | 6 (1) | 3 | 8 | 6 / 5 | 2 / 2 | 16 | PRE_CAD_SEMANTIC_REVIEWED |
+| [latch-retention](micro_oracles/latch-retention/) | 8 (2) | 4 | 7 | 4 / 6 | 2 / 2 | 16 | PRE_CAD_SEMANTIC_REVIEWED |
+| [bounded-two-state-closure](micro_oracles/bounded-two-state-closure/) | 7 (1) | 4 | 7 | 6 / 6 | 3 / 1 | 17 | PRE_CAD_SEMANTIC_REVIEWED |
 
-**Totals:** 73 invariants (10 VERIFICATION_MINIMUM), 42 required-unresolved
-decisions, 72 declared freedoms, 41 admissible + 59 inadmissible physical
-fixtures, 14 admissible + 12 inadmissible evidence cases, 131 negative cases.
+**Totals** (computed from this snapshot, never carried forward): 73 invariants (10 VERIFICATION_MINIMUM), 45 required-unresolved decisions, 72 declared freedoms, 44 admissible + 64 inadmissible physical fixtures, 17 admissible + 12 inadmissible evidence cases, 139 negative cases.
 
 ## Files in every pack
 
@@ -53,13 +57,23 @@ fixtures, 14 admissible + 12 inadmissible evidence cases, 131 negative cases.
 |---|---|
 | `normative.yaml` | invariants (`basis_type`, `source_locators`, `derivation_premises`, `conclusion_scope`, `exclusions`, `applies_when`, `verification_predicate`, `requires_tags` or `requires_evidence_tags`, `enables_claim`) + `required_unresolved` with `kind` and `block_scopes` |
 | `freedoms.yaml` | decisions no test may assert, each with why it is free |
-| `realizations.yaml` | **physical** fixtures and `physical_tag_vocabulary` |
+| `realizations.yaml` | **physical** fixtures and `physical_tag_vocabulary`; every fixture carries a `physical_review` pointer |
 | `evidence_cases.yaml` | **evidence** fixtures and `evidence_tag_vocabulary` |
 | `negative_cases.yaml` | design, evidence and process failures that must be rejected |
 | `evidence_scope.yaml` | what the legacy evidence can and cannot support, with fidelity |
-| `stage_expectations.yaml` | per-stage obligations; conditional `outcome_rules` |
+| `stage_expectations.yaml` | per-stage obligations; `evaluability_prerequisites` (representation domain); conditional `outcome_rules` |
 | `source_map.md` | every statement traced to a rank; every legacy value disposed of |
 | `README.md` | what the pack is for and which failure it exists to prevent |
+
+## Three domains, not two
+
+**Physical** (could it exist and work?) · **Representation** (does the DesignState
+say enough to evaluate it?) · **Evidence** (does anything support the claim?).
+
+A buildable design whose record is incomplete is `NOT_EVALUABLE` with reason
+`REPRESENTATION_INCOMPLETE` — never physically inadmissible. `interaction_regions_declared`
+was carried as a *physical* tag until PCF-004 and now lives in
+`stage_expectations.evaluability_prerequisites`.
 
 ## The three separations this model rests on
 
@@ -111,7 +125,11 @@ may, and Oracle content must never influence design generation or selection.
 
 | Path | Role |
 |---|---|
+| [SEMANTIC_AUTHORITY.yaml](SEMANTIC_AUTHORITY.yaml) | layer B manifest: decisions, amendments, supersession relations |
 | [HUMAN_SEMANTIC_DECISIONS.yaml](HUMAN_SEMANTIC_DECISIONS.yaml) | six approved decisions (HSD-001…006), each challengeable by CAD |
+| [PHYSICAL_FIXTURE_REVIEW.yaml](PHYSICAL_FIXTURE_REVIEW.yaml) | every fixture reviewed individually; a tag is a review conclusion, not evidence |
+| [STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml](STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml) | all 73 invariants: statement vs predicate vs tag vs stage |
+| [PRE_CAD_CORRECTION_STATE.yaml](PRE_CAD_CORRECTION_STATE.yaml) | PCF-001…011 dispositions |
 | [_dossier_amendments/AMENDMENTS.yaml](_dossier_amendments/AMENDMENTS.yaml) | five additive amendments; frozen dossiers are never overwritten |
 | [SOURCE_FREEZE.yaml](SOURCE_FREEZE.yaml) | `freeze_scope: SOURCE_ONLY`, `semantic_lock: false` |
 | [PRE_CAD_BASELINE.yaml](PRE_CAD_BASELINE.yaml) | `CHALLENGEABLE_SEMANTIC_BASELINE`, with PU-01…PU-10 and the revision procedure |
@@ -129,4 +147,4 @@ may, and Oracle content must never influence design generation or selection.
 | [ORACLE_VALIDATION_REPORT.md](ORACLE_VALIDATION_REPORT.md) | audit history |
 | [_dossiers/](_dossiers/) | nine frozen source dossiers — the only citable sources |
 | [_ambiguities/](_ambiguities/) | recorded source ambiguities, none resolved |
-| [_audit/](_audit/) | every audit report, pre- and post-correction |
+| [_audit/](_audit/) | every audit report, pre- and post-correction. Current: `PRECAD_V2_RESTART-*.json` |

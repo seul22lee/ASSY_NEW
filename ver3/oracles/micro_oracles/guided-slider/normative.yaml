@@ -66,7 +66,10 @@ invariants:
       direction is determinate relative to both bodies all exist.
     basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
-    source_locators: ["DOS-guided-slider S1"]
+    source_locators: ["AMD-GS-001 (supersedes DOS-guided-slider S1)", "HSD-001"]
+    current_authority: AMD-GS-001 / HSD-001
+    authority_note: >
+      Original DOS-guided-slider S1 is SUPERSEDED for the capability statement by AMD-GS-001 under HSD-001. The original bytes remain immutable in SOURCE_FREEZE.yaml; the current normative authority is the amendment, held in SEMANTIC_AUTHORITY.yaml. Citing the superseded S1 alone would assert the retired strict-prismatic reading.
     conclusion_scope: "Existence of the two participants and of a determinate travel direction."
     exclusions:
       - "Does not fix which body is fixed in the world frame; either may be."
@@ -84,7 +87,10 @@ invariants:
       realized constraint, and the freedoms left unconstrained are declared.
     basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
-    source_locators: ["DOS-guided-slider S1"]
+    source_locators: ["AMD-GS-001 (supersedes DOS-guided-slider S1)", "HSD-001"]
+    current_authority: AMD-GS-001 / HSD-001
+    authority_note: >
+      Original DOS-guided-slider S1 is SUPERSEDED for the capability statement by AMD-GS-001 under HSD-001. The original bytes remain immutable in SOURCE_FREEZE.yaml; the current normative authority is the amendment, held in SEMANTIC_AUTHORITY.yaml. Citing the superseded S1 alone would assert the retired strict-prismatic reading.
     conclusion_scope: >
       Removal of the freedoms the instantiating requirement depends on, and
       explicit declaration of those left free. NOT a fixed degree-of-freedom count.
@@ -111,7 +117,10 @@ invariants:
       bodies, with participating material identified on both.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-guided-slider S1"]
+    source_locators: ["AMD-GS-001 (supersedes DOS-guided-slider S1)", "HSD-001"]
+    current_authority: AMD-GS-001 / HSD-001
+    authority_note: >
+      Original DOS-guided-slider S1 is SUPERSEDED for the capability statement by AMD-GS-001 under HSD-001. The original bytes remain immutable in SOURCE_FREEZE.yaml; the current normative authority is the amendment, held in SEMANTIC_AUTHORITY.yaml. Citing the superseded S1 alone would assert the retired strict-prismatic reading.
     derivation_premises:
       - "A constraint between two bodies acts through material of both."
       - "A constraint asserted between whole bodies with no participating material names no place where the constraint acts."
@@ -131,7 +140,10 @@ invariants:
       travel range.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-guided-slider S1"]
+    source_locators: ["AMD-GS-001 (supersedes DOS-guided-slider S1)", "HSD-001"]
+    current_authority: AMD-GS-001 / HSD-001
+    authority_note: >
+      Original DOS-guided-slider S1 is SUPERSEDED for the capability statement by AMD-GS-001 under HSD-001. The original bytes remain immutable in SOURCE_FREEZE.yaml; the current normative authority is the amendment, held in SEMANTIC_AUTHORITY.yaml. Citing the superseded S1 alone would assert the retired strict-prismatic reading.
     derivation_premises:
       - "The capability is guidance along the path, not at one position on it."
       - "A body whose guiding interaction has ended is unguided from that point on."
@@ -149,7 +161,10 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     applies_when: "the guiding interaction carries transverse load in the declared scenario"
-    source_locators: ["DOS-guided-slider S1"]
+    source_locators: ["AMD-GS-001 (supersedes DOS-guided-slider S1)", "HSD-001"]
+    current_authority: AMD-GS-001 / HSD-001
+    authority_note: >
+      Original DOS-guided-slider S1 is SUPERSEDED for the capability statement by AMD-GS-001 under HSD-001. The original bytes remain immutable in SOURCE_FREEZE.yaml; the current normative authority is the amendment, held in SEMANTIC_AUTHORITY.yaml. Citing the superseded S1 alone would assert the retired strict-prismatic reading.
     derivation_premises:
       - "Constraining a freedom means resisting the load that would otherwise produce that motion."
       - "A constraint that carries no load does not remove a freedom."
@@ -167,12 +182,15 @@ invariants:
 
   - id: NRM-GS-006
     statement: >
-      At every configuration of the declared travel the translating body does not
-      intersect guiding-body material outside the intended interaction, and the
-      declared travel path is traversable.
+      At every configuration of the declared travel the translating body and the
+      guiding body share no volume outside the interaction regions the design
+      declares, and the declared travel path is traversable.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-guided-slider S1"]
+    source_locators: ["AMD-GS-001 (supersedes DOS-guided-slider S1)", "HSD-001"]
+    current_authority: AMD-GS-001 / HSD-001
+    authority_note: >
+      Original DOS-guided-slider S1 is SUPERSEDED for the capability statement by AMD-GS-001 under HSD-001. The original bytes remain immutable in SOURCE_FREEZE.yaml; the current normative authority is the amendment, held in SEMANTIC_AUTHORITY.yaml. Citing the superseded S1 alone would assert the retired strict-prismatic reading.
     derivation_premises:
       - "Material cannot pass through material."
       - "A path blocked at any interior point is not traversable, whatever its endpoints do."
@@ -190,7 +208,7 @@ invariants:
       - "Does not fix a clearance value; the legacy clearance of 0.35 is a realization detail."
     verification_predicate: >
       for every configuration of the declared travel there is no volumetric overlap between the translating body and guiding-body material outside declared contact, declared interference-fit and declared compliant-interaction regions, under the declared tolerance and at the declared fidelity; and the declared path is traversable.
-    requires_tags: [travel_clearances_satisfied, declared_path_traversable, interaction_regions_declared]
+    requires_tags: [declared_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
     related_freedoms: []
     related_unresolved: []
     closes_finding: [SF-7.2]
@@ -209,6 +227,9 @@ invariants:
       Satisfied by direct causal evidence OR by a discriminating control
       (HSD-006); the two are alternatives, not a sequence.
     source_locators: ["DOS-guided-slider S5"]
+    current_authority: DOS-guided-slider S5 (original, unchanged)
+    authority_note: >
+      S5 records the structural-artifact evidence limitation and is NOT superseded by AMD-GS-001, whose scope is the capability statement only.
     derivation_premises:
       - "DOS-guided-slider S5 records tracks_straight measured as 0.0 degrees exactly under a declared prismatic pair."
       - "Under that model off-axis deviation is identically zero by construction of the coupling."

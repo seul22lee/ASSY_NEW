@@ -65,7 +65,14 @@ invariants:
       both are reachable.
     basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
-    source_locators: ["DOS-bounded-two-state-closure S1"]
+    source_locators:
+      - 'DOS-bounded-two-state-closure S1 (original, clause: reaches two defined states)'
+    current_authority: 'DOS-bounded-two-state-closure S1 (original, unchanged clause)'
+    authority_note: >
+      DOS-bounded-two-state-closure S1 remains CURRENT authority for this clause. AMD-HS-001 declares a PARTIAL scope - the constraint-persistence and bound-distinctness clauses only - so applying it here would exceed its declared supersession scope.
+    current_authority: DOS-bounded-two-state-closure S1 (original, unchanged clause)
+    authority_note: >
+      DOS-bounded-two-state-closure S1 remains CURRENT authority for this clause. AMD-HS-001 declares a PARTIAL scope - the constraint-persistence and bound-distinctness clauses only - so applying it here would exceed its declared supersession scope.
     conclusion_scope: "Existence and reachability of the two states."
     exclusions:
       - "Does not name the states, fix an angle or a displacement between them, or say which is the rest state. No capability-level open angle exists (DOS S4); see UNR-HS-001."
@@ -79,7 +86,12 @@ invariants:
       A continuous motion connects the two states.
     basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
-    source_locators: ["DOS-bounded-two-state-closure S1 (\"reaches two defined states by a bounded motion\")"]
+    source_locators:
+      - 'DOS-bounded-two-state-closure S1 (original, clause: by a bounded motion)'
+    current_authority: 'DOS-bounded-two-state-closure S1 (original, unchanged clause)'
+    authority_note: >
+      DOS-bounded-two-state-closure S1 remains CURRENT authority for this clause. AMD-HS-001 declares a PARTIAL scope - the constraint-persistence and bound-distinctness clauses only - so applying it here would exceed its declared supersession scope.
+
     conclusion_scope: "Existence of a continuous path between the two states."
     exclusions:
       - "Does not fix a path shape, a joint type or a degree of freedom count. A rotary path, a translating path and a compound path are equally admissible."
@@ -95,7 +107,13 @@ invariants:
       allowed motion manifold.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-bounded-two-state-closure S1"]
+    source_locators:
+      - 'AMD-HS-001 (supersedes the constraint-persistence clause of DOS-bounded-two-state-closure S1)'
+      - 'HSD-003'
+    current_authority: 'AMD-HS-001 / HSD-003'
+    authority_note: >
+      The constraint-persistence clause IS within AMD-HS-001 declared scope. The original read as requiring ONE identical constraint throughout; the amendment requires continuous COVERAGE with hand-off permitted.
+
     derivation_premises:
       - "A bounded motion is a motion whose configuration space is limited."
       - "Where nothing constrains the configuration, it is not limited there, so the motion is not bounded at that configuration."
@@ -129,7 +147,12 @@ invariants:
       by a limit imposed on the model.
     basis_type: PROJECT_DEFINED_CAPABILITY
     support_type: direct
-    source_locators: ["DOS-bounded-two-state-closure S1 (\"where the bound at each extreme is physically produced\")"]
+    source_locators:
+      - 'DOS-bounded-two-state-closure S1 (original, clause: the bound at each extreme is physically produced)'
+    current_authority: 'DOS-bounded-two-state-closure S1 (original, UNCHANGED clause)'
+    authority_note: >
+      This clause is EXPLICITLY excluded from AMD-HS-001 scope and is unchanged. It also grounds source_declares_terminal_states, so its authority must remain the original section.
+
     conclusion_scope: "Physical origin of each bound."
     exclusions:
       - "Does not name a bounding principle. DOS S7 records that the corpus bounds motion only by a discrete stop feature, and that gravity rest, over-centre, detent, friction and geometric run-out are absent from the library. That is a library state, not a requirement."
@@ -145,7 +168,13 @@ invariants:
       own configuration.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-bounded-two-state-closure S1"]
+    source_locators:
+      - 'AMD-HS-001 (supersedes the bound-distinctness clause of DOS-bounded-two-state-closure S1)'
+      - 'HSD-003'
+    current_authority: 'AMD-HS-001 / HSD-003'
+    authority_note: >
+      The bound-distinctness clause IS within AMD-HS-001 declared scope. The original read as requiring a distinct determining FEATURE per extreme; the amendment requires independent EVALUATION per extreme, permitting one continuous geometry or one field to produce both.
+
     derivation_premises:
       - "The capability names two extremes, at two different configurations."
       - "A result obtained at one configuration is a fact about that configuration."
@@ -171,11 +200,17 @@ invariants:
 
   - id: NRM-HS-006
     statement: >
-      The two bodies do not interfere with each other along the motion between
-      the two states, except at the bounding conditions.
+      Along the motion between the two states the two bodies share no volume
+      outside the interaction regions the design declares, of which the bounding
+      contacts are two.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-bounded-two-state-closure S1"]
+    source_locators:
+      - 'DOS-bounded-two-state-closure S1 (original, clause: reaches two defined states by a bounded motion)'
+    current_authority: 'DOS-bounded-two-state-closure S1 (original, unchanged clause)'
+    authority_note: >
+      DOS-bounded-two-state-closure S1 remains CURRENT authority for this clause. AMD-HS-001 declares a PARTIAL scope - the constraint-persistence and bound-distinctness clauses only - so applying it here would exceed its declared supersession scope.
+
     derivation_premises:
       - "The capability requires both states to be reached by the motion."
       - "Material cannot pass through material."
@@ -185,7 +220,7 @@ invariants:
       - "Contact at a bounding condition is intended and is not interference."
       - "Does not fix a clearance value; none exists at capability level."
     verification_predicate: "swept volumes of the two bodies do not intersect at any interior point of the motion, other than at declared bounding or constraint interactions."
-    requires_tags: [transition_free_of_interference, interaction_regions_declared]
+    requires_tags: [no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
     related_freedoms: []
     related_unresolved: []
 
@@ -202,7 +237,14 @@ invariants:
       pair does.
       Satisfied by direct causal evidence OR by a discriminating control
       (HSD-006); the two are alternatives, not a sequence.
-    source_locators: ["DOS-bounded-two-state-closure S5", "DOS-bounded-two-state-closure S3"]
+    source_locators:
+      - 'DOS-bounded-two-state-closure S5'
+      - 'DOS-bounded-two-state-closure S3'
+      - 'HSD-006'
+    current_authority: 'DOS-bounded-two-state-closure S5 + HSD-006'
+    authority_note: >
+      S5 records the matched-pair non-discrimination finding and is unchanged. HSD-006 governs the admissible EVIDENCE FORMS (direct causal OR discriminating control), not the finding itself.
+
     derivation_premises:
       - "DOS S5 records a matched pair differing in exactly one feature: the presence of the limit."
       - "Every seed-0 criterion in that pair passes in BOTH members, including the angle criterion, since 115.37 and 219.65 both exceed the 90 degree threshold."

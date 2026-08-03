@@ -1,0 +1,279 @@
+schema_version: 0.1.0
+authority_type: CHALLENGEABLE_PRE_CAD_SEMANTIC_AUTHORITY
+authority_version: v1
+source_authority: false
+user_requirement: false
+physical_evidence: false
+challengeable_by_cad: true
+semantic_lock: false
+created_at: PCF-002 / PCF-009
+purpose: 'The CURRENT, CHALLENGEABLE interpretation layer. It sits between immutable source provenance
+  (SOURCE_FREEZE.yaml) and the Oracle conclusions that rest on it (the packs). Separating it makes the
+  CAD revision procedure possible: source bytes never change, this layer is versioned, and the packs follow
+  it.'
+three_layer_model:
+  A_immutable_source_and_provenance:
+    manifest: ver3/oracles/SOURCE_FREEZE.yaml
+    contains: rank-1 user extracts, original frozen dossiers (product and micro-oracle), ambiguity records,
+      the source precedence policy
+    cad_may_change_it: false
+    why: CAD cannot alter what a source says
+  B_challengeable_semantic_authority:
+    manifest: ver3/oracles/SEMANTIC_AUTHORITY.yaml
+    contains: human semantic decisions, dossier amendments, supersession relations
+    cad_may_change_it: true
+    why: these are readings and definitions; geometry can show a reading admits an unbuildable design
+      or rejects a buildable one
+  C_current_oracle_conclusions:
+    manifest: ver3/oracles/PRE_CAD_BASELINE.yaml
+    contains: normative, freedoms, physical realizations, evidence cases, negative cases, stage expectations,
+      source maps, reviews
+    cad_may_change_it: true
+    why: these are the conclusions under adversarial test
+semantic_authority_manifest_hash: 9d447f0092defe22c92f7fe2dda7cd93af4168a3f9ac0ebbef43b352a6d0c600
+manifest_hash_exclusion_rule: sha256 over the newline-joined, path-sorted "<path>  <sha256>" lines of
+  the artifacts list. SEMANTIC_AUTHORITY.yaml itself is EXCLUDED - a manifest cannot hash the file carrying
+  it.
+artifact_count: 2
+artifacts:
+- path: HUMAN_SEMANTIC_DECISIONS.yaml
+  role: approved human semantic and capability decisions
+  version: v1
+  sha256: c070e99b661c75c4f57ffca59d6c6eea795b8595deab5642e0d443e320f165e5
+  decision_ids:
+  - HSD-001
+  - HSD-002
+  - HSD-003
+  - HSD-004
+  - HSD-005
+  - HSD-006
+  challengeable_by_cad: true
+  note: 'Moved here from SOURCE_FREEZE at PCF-002. Every decision declares challengeable_by_cad: true;
+    holding it inside an immutable, non-challengeable freeze was a contradiction and made the CAD revision
+    procedure impossible (PCF-009).'
+- path: _dossier_amendments/AMENDMENTS.yaml
+  role: additive amendments transferring normative authority from superseded dossier sections
+  version: v1
+  sha256: 686063d48e18c70a57a50e8d191e03f6c1040e22ac9a299f6349451d22eb9b71
+  amendment_ids:
+  - AMD-GS-001
+  - AMD-RL-001
+  - AMD-HS-001
+  - AMD-C4-001
+  - AMD-C4-002
+  challengeable_by_cad: true
+  note: The original dossier BYTES stay in SOURCE_FREEZE and are immutable. What is challengeable is the
+    amendment - the claim about what the original now means.
+decisions:
+- decision_id: HSD-001
+  title: guided-slider capability scope
+  kind: PROJECT_DEFINED_CAPABILITY
+  accepted_readings:
+  - guidance is along a declared line or path
+  - only freedoms that would violate the instantiating requirement must be constrained
+  - residual axial rotation or another freedom may remain when permitted, and must be DECLARED
+  - the capability is NOT synonymous with a strict 1-DOF prismatic joint
+  rejected_readings:
+  - A - all five non-translational freedoms must always be removed
+  - 'C - rejected separately: a freedom neither constrained nor declared is a silent account, which is
+    the defect NRM-GS-002 exists to catch'
+  affected_statement_ids:
+  - NRM-GS-001
+  - NRM-GS-002
+  - NRM-GS-003
+  - NRM-GS-004
+  - NRM-GS-005
+  - NRM-GS-006
+  - FRE-GS-008
+  - UNR-GS-004
+  challengeable_by_cad: true
+  status: CURRENT
+- decision_id: HSD-002
+  title: rotary-to-linear-engagement capability scope
+  kind: PROJECT_DEFINED_CAPABILITY
+  accepted_readings:
+  - an uninterrupted chain of localized physical interactions connects rotary input to translating output
+  - multi-stage interaction chains are admissible
+  - direct input-output engagement is NOT required
+  - reaction requirements apply only to load components actually carried
+  rejected_readings:
+  - A - one direct engagement between the input and output bodies
+  - A - universal radial and axial support requirements
+  - 'C - rejected: a relation with no participating material names no place where the conversion acts
+    and cannot be built'
+  affected_statement_ids:
+  - NRM-RL-001
+  - NRM-RL-002
+  - NRM-RL-003
+  - NRM-RL-004
+  - NRM-RL-005
+  - NRM-C4-004
+  - FRE-C4-002
+  - LEGACY-CONFLICT-C4-01
+  - NRM-BM-002-003
+  - NRM-BM-002-006
+  challengeable_by_cad: true
+  status: CURRENT
+- decision_id: HSD-003
+  title: bounded-two-state-closure capability scope
+  kind: PROJECT_DEFINED_CAPABILITY
+  accepted_readings:
+  - the capability represents a physically constrained bounded motion between two states
+  - at every intermediate configuration at least one realized interaction keeps the configuration in the
+    allowed motion manifold
+  - the active constraint MAY CHANGE along the path
+  - one identical persistent constraint is NOT required
+  - two endpoint bounds alone, with an unconstrained free-flight region between them, do NOT instantiate
+    this micro-oracle
+  rejected_readings:
+  - A - one identical persistent constraint
+  - C - endpoint bounds with an unconstrained interior
+  affected_statement_ids:
+  - NRM-HS-003
+  - NRM-HS-005
+  - UNR-HS-002
+  challengeable_by_cad: true
+  status: CURRENT
+- decision_id: HSD-004
+  title: C4-drawer horizontal motion reading
+  kind: PRODUCT_LANGUAGE_INTERPRETATION
+  accepted_readings:
+  - '"drawer slides out horizontally" is represented as straight translation along one horizontal axis
+    perpendicular to the gravity direction'
+  rejected_readings:
+  - B - a curved path described only as "generally horizontal", rejected FOR THIS BASELINE
+  - C - horizontality of net displacement only
+  affected_statement_ids:
+  - NRM-C4-002
+  - NRM-C4-003
+  - NEG-C4-023
+  challengeable_by_cad: true
+  status: CURRENT
+- decision_id: HSD-005
+  title: BM-001-3 curved-back reading
+  kind: PRODUCT_LANGUAGE_INTERPRETATION
+  accepted_readings:
+  - for "rests on a curved back", the LOAD-BEARING resting contact must lie on the curved region
+  - curvature elsewhere, on a non-load-bearing decorative region, is insufficient
+  - a flat land carrying all the weight does NOT satisfy this reading
+  rejected_readings:
+  - B - resting anywhere on a curved underside, which would admit a body carried entirely by a flat land
+  affected_statement_ids:
+  - NRM-BM-001-3-002
+  - ADM-BM-001-3-C
+  - INA-BM-001-3-D
+  - NEG-BM-001-3-005
+  - UNR-BM-001-3-002
+  challengeable_by_cad: true
+  status: CURRENT
+- decision_id: HSD-006
+  title: causal verification minimum
+  kind: VERIFICATION_METHODOLOGY
+  accepted_readings:
+  - a physical feature claim may be supported by EITHER direct causal geometry/contact evidence OR a discriminating
+    control, ablation or sensitivity result
+  - a control is NOT mandatory when direct causal evidence is available
+  - a realized stop may be evidenced by explicit stop faces, contact at the terminal configuration, and
+    kinematic termination caused by that contact - without a second model with the stop removed
+  rejected_readings:
+  - A - a control is the only admissible proof
+  - C - direct evidence always suffices, with no discrimination requirement at all
+  affected_statement_ids:
+  - NRM-BM-001-012
+  - NRM-HS-007
+  - NRM-GS-007
+  challengeable_by_cad: true
+  status: CURRENT
+amendment_relations:
+- amendment_id: AMD-GS-001
+  original_frozen_artifact: _dossiers/DOS-guided-slider.md
+  original_section: S1
+  original_dossier_sha256: 36231c4c915b70929b3ad64f9e2713c888224277678511463e20bddae04791dc
+  supersedes_for_normative_authority: DOS-guided-slider.md#S1
+  scope_of_supersession: The capability statement ONLY. Sections S2-S7 of the frozen dossier retain full
+    authority as evidence and as sources of negative cases.
+  applicable_pack: guided-slider
+  affected_statement_ids:
+  - NRM-GS-001
+  - NRM-GS-002
+  - NRM-GS-003
+  - NRM-GS-004
+  - NRM-GS-005
+  - NRM-GS-006
+  approving_decision: HSD-001
+  original_bytes_status: IMMUTABLE - held in SOURCE_FREEZE.yaml, never edited
+  amendment_status: CURRENT, CHALLENGEABLE
+- amendment_id: AMD-RL-001
+  original_frozen_artifact: _dossiers/DOS-rotary-to-linear-engagement.md
+  original_section: S1
+  original_dossier_sha256: 9cc5b9e41cb4dea8447f99573c67814c9cc663fc60e572306dbac307d32dbf3f
+  supersedes_for_normative_authority: DOS-rotary-to-linear-engagement.md#S1
+  scope_of_supersession: The capability statement ONLY. Sections S2-S7 retain full authority.
+  applicable_pack: rotary-to-linear-engagement
+  affected_statement_ids:
+  - NRM-RL-001
+  - NRM-RL-002
+  - NRM-RL-003
+  - NRM-RL-004
+  - NRM-RL-005
+  approving_decision: HSD-002
+  original_bytes_status: IMMUTABLE - held in SOURCE_FREEZE.yaml, never edited
+  amendment_status: CURRENT, CHALLENGEABLE
+- amendment_id: AMD-HS-001
+  original_frozen_artifact: _dossiers/DOS-bounded-two-state-closure.md
+  original_section: S1
+  original_dossier_sha256: c2e2ae503c56e3636f302a3eb8d26ea41a1d227436aba0a09f87d239ef6c2720
+  supersedes_for_normative_authority: DOS-bounded-two-state-closure.md#S1
+  scope_of_supersession: The capability statement ONLY. Sections S2-S7 retain full authority. The bound-is-physically-produced
+    clause of the original is UNCHANGED and remains the grounding for the terminal-state exemption.
+  applicable_pack: bounded-two-state-closure
+  affected_statement_ids:
+  - NRM-HS-003
+  - NRM-HS-005
+  approving_decision: HSD-003
+  original_bytes_status: IMMUTABLE - held in SOURCE_FREEZE.yaml, never edited
+  amendment_status: CURRENT, CHALLENGEABLE
+- amendment_id: AMD-C4-001
+  original_frozen_artifact: _dossiers/DOS-C4-drawer.md
+  original_section: S4
+  original_dossier_sha256: a38f4bd3fcd632e47a7bd67fe2a818578122d9877ff2761ec4bb844b894b4d0e
+  supersedes_for_normative_authority: DOS-C4-drawer.md#S4
+  scope_of_supersession: The CLASSIFICATION of S4 only. The two quoted legacy statements and their locators
+    are unchanged and remain citable evidence.
+  applicable_pack: C4-drawer
+  affected_statement_ids:
+  - NRM-C4-004
+  - FRE-C4-002
+  - LEGACY-CONFLICT-C4-01
+  approving_decision: HSD-002
+  original_bytes_status: IMMUTABLE - held in SOURCE_FREEZE.yaml, never edited
+  amendment_status: CURRENT, CHALLENGEABLE
+- amendment_id: AMD-C4-002
+  original_frozen_artifact: _dossiers/DOS-C4-drawer.md
+  original_section: S2
+  original_dossier_sha256: a38f4bd3fcd632e47a7bd67fe2a818578122d9877ff2761ec4bb844b894b4d0e
+  supersedes_for_normative_authority: DOS-C4-drawer.md#S2
+  scope_of_supersession: The reading of the motion fragment ONLY. The decomposition in S2 is otherwise
+    unchanged.
+  applicable_pack: C4-drawer
+  affected_statement_ids:
+  - NRM-C4-002
+  - NRM-C4-003
+  approving_decision: HSD-004
+  original_bytes_status: IMMUTABLE - held in SOURCE_FREEZE.yaml, never edited
+  amendment_status: CURRENT, CHALLENGEABLE
+revision_procedure:
+- 1. A CAD counterexample is recorded against a specific statement, fixture, amendment or decision.
+- 2. SOURCE_FREEZE.yaml is PRESERVED UNCHANGED. The source bytes are not what was wrong.
+- '3. If a DECISION was wrong: revise it in HUMAN_SEMANTIC_DECISIONS.yaml, stating the old reading, the
+  new reading and why. A decision is never revised implicitly by editing a pack.'
+- '4. If an AMENDMENT was wrong: revise or withdraw it. The original dossier section it superseded is
+  still in SOURCE_FREEZE and can be re-adopted without any edit to a frozen file.'
+- 5. Issue a NEW SEMANTIC_AUTHORITY version with a new manifest hash, recording the superseded one.
+- 6. Propagate to every pack citing the changed authority; re-run every semantic review.
+- 7. Re-run the full audit sequence from the canonical audit. The clean count resets.
+- 8. Issue a new PRE_CAD_BASELINE version referencing the new semantic-authority version.
+paradox_resolved: 'The previous baseline said a CAD result revises HUMAN_SEMANTIC_DECISIONS.yaml (step
+  4) while the freeze holding that file said it was neither revisable by CAD nor challengeable. The procedure
+  required changing a hash it forbade changing. Resolved by moving the file to this layer: source bytes
+  immutable, semantic authority versioned.'

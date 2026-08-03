@@ -1,0 +1,269 @@
+schema_version: 0.1.0
+purpose: Correction inventory for the pre-CAD authority and fixture rebuild. Workflow state only - never
+  Oracle evidence, and no pack may cite it.
+branch: ver3-oracle-phase1-review
+starting_commit: f7e3a22844fa3d3eef0b56c90aeba6d29b1a15af
+preflight:
+  branch_matches: true
+  head_matches_required_commit: true
+  worktree_initially_clean: true
+  tracked_changes_outside_ver3: 0
+  lock_json_present: false
+  cad_artifacts_present: false
+  ver3_assy3_present: false
+  local_equals_remote: true
+  python_files_under_ver3:
+  - ver3/oracle_tools/audit_oracles.py
+  - ver3/oracle_tools/mutation_tests.py
+correction_rule: 'NON-PATCH. For each semantic unit: re-read its authority source, state what the file
+  owns, find every file projecting that meaning, re-author the complete active contract, remove obsolete
+  active fields, preserve history only in an explicitly historical location, re-review each fixture individually,
+  add a regression, re-run the clean sequence. No DEPRECATED-label-in-place, no second contradictory tag,
+  no bulk tag assignment, no auditor-only fix.'
+target_state: PRE_CAD_BASELINE_READY
+explicitly_not:
+- LOCK_READY
+- LOCKED
+- CAD_VALIDATED
+- PHYSICALLY_PROVEN
+- PRODUCTION_READY
+findings:
+- finding_id: PCF-001
+  title: SOURCE_FREEZE conflates rank-1 user authority with project capability
+  owning_file: ver3/oracles/SOURCE_FREEZE.yaml
+  affected_ids:
+  - all 9 _dossiers/DOS-*.md artifact entries
+  authority_source: ORACLE_METHOD 13.5 (micro-oracles have no user); HSD-001..003
+  required_correction: 'Every dossier carries authority_rank "rank_1_for_S1_product_extracts". That is
+    FALSE for the four micro-oracle dossiers: their S1 is a project-authored capability definition, not
+    user language. Re-author the manifest with explicit authority types: RANK_1_USER_SOURCE, FROZEN_PRODUCT_DOSSIER,
+    PROJECT_CAPABILITY_ORIGINAL, FROZEN_AMBIGUITY_RECORD, SOURCE_PRECEDENCE_POLICY.'
+  regression_test: PROJECT_CAPABILITY_MISLABELLED_RANK1 fires; control confirms frozen micro bytes are
+    allowed
+  status: CORRECTED
+  changed_files:
+  - SOURCE_FREEZE.yaml
+  final_verification_result: SOURCE_FREEZE rebuilt with five explicit authority types. The four micro-oracle
+    dossiers are PROJECT_CAPABILITY_ORIGINAL with source_rank explicitly "NOT APPLICABLE to S1".
+- finding_id: PCF-002
+  title: challengeable HSD and amendments placed inside the immutable source freeze
+  owning_file: ver3/oracles/SOURCE_FREEZE.yaml
+  affected_ids:
+  - HUMAN_SEMANTIC_DECISIONS.yaml
+  - _dossier_amendments/AMENDMENTS.yaml
+  authority_source: 'HSD file itself: every decision is challengeable_by_cad: true'
+  required_correction: 'SOURCE_FREEZE declares challengeable_by_cad: false while listing two challengeable
+    artifacts as frozen. Move both to a new SEMANTIC_AUTHORITY.yaml layer with authority_type: CHALLENGEABLE_PRE_CAD_SEMANTIC_AUTHORITY.'
+  regression_test: CHALLENGEABLE_AUTHORITY_INSIDE_SOURCE_FREEZE and SEMANTIC_AUTHORITY_MANIFEST_MISSING
+    both fire
+  status: CORRECTED
+  changed_files:
+  - SEMANTIC_AUTHORITY.yaml
+  - SOURCE_FREEZE.yaml
+  final_verification_result: SEMANTIC_AUTHORITY.yaml created as layer B. HUMAN_SEMANTIC_DECISIONS.yaml
+    and AMENDMENTS.yaml moved there; neither remains in the freeze.
+- finding_id: PCF-003
+  title: stale workflow and index current-state fields
+  owning_file: ver3/oracles/ORACLE_WORKFLOW_STATE.yaml, ver3/oracles/ORACLE_INDEX.md
+  affected_ids:
+  - 'reviewed_commit: 3b64aee'
+  - per_pass 3A-3E only
+  - mutation_tests total 45
+  - ORACLE_INDEX totals 41 admissible fixtures
+  authority_source: the final snapshot itself
+  required_correction: Re-author the current-state sections. Totals must be COMPUTED from the final snapshot,
+    never hard-coded from an earlier pass. Historical values may remain only in explicitly historical
+    files.
+  regression_test: WORKFLOW_CURRENT_STATE_STALE and INDEX_AUDIT_COUNT_STALE fire, including a totals-vs-snapshot
+    check
+  status: CORRECTED
+  changed_files:
+  - ORACLE_WORKFLOW_STATE.yaml
+  - ORACLE_INDEX.md
+  final_verification_result: Workflow state and index re-authored; totals COMPUTED from the snapshot.
+    starting_commit replaces reviewed_commit; audit scope now 3A-3H.
+- finding_id: PCF-004
+  title: representation declaration mixed into physical fixture tags
+  owning_file: all 9 realizations.yaml + all 9 normative.yaml
+  affected_ids:
+  - interaction_regions_declared (in 9 physical vocabularies and 9 normative requires_tags)
+  authority_source: ORACLE_AUTHORING_POLICY 13; the physical/representation distinction
+  required_correction: Whether a design DECLARES its interaction regions is a DesignState completeness
+    property, not a physical property. A physically valid artifact must not be physically inadmissible
+    because its record is incomplete. Remove from every physical contract; re-home in stage expectations
+    as an evaluability prerequisite, with outcome NOT_EVALUABLE / REPRESENTATION_INCOMPLETE.
+  regression_test: REPRESENTATION_TAG_IN_PHYSICAL_DOMAIN fires; control confirms the prerequisite in its
+    new home is silent
+  status: CORRECTED
+  changed_files:
+  - ORACLE_AUTHORING_POLICY.md
+  - ORACLE_METHOD.md
+  - 9 realizations.yaml
+  - 9 normative.yaml
+  - 9 stage_expectations.yaml
+  final_verification_result: Three-domain model added to policy 12.5 and method 13.85. interaction_regions_declared
+    removed from all 9 physical vocabularies and all requires_tags; re-homed in stage_expectations.evaluability_prerequisites
+    with outcome NOT_EVALUABLE / REPRESENTATION_INCOMPLETE.
+- finding_id: PCF-005
+  title: new physical tags bulk-certified across pre-existing fixtures
+  owning_file: all 9 realizations.yaml
+  affected_ids:
+  - interaction_regions_declared, no_undeclared_overlap_on_transition, assembly_process_realizable appended
+    to ~100 fixtures by script
+  authority_source: ORACLE_METHOD 9 (a tag is not evidence)
+  required_correction: The previous pass appended new tags to every admissible AND inadmissible fixture
+    without reading any narrative. That is certification by script. Withdraw the bulk assignment and review
+    every fixture individually against its own narrative, recording the decision per fixture.
+  regression_test: FIXTURE_TAG_WITHOUT_INDIVIDUAL_REVIEW fires on a tag the review does not assign
+  status: CORRECTED
+  changed_files:
+  - PHYSICAL_FIXTURE_REVIEW.yaml
+  - 9 realizations.yaml
+  final_verification_result: Bulk certification withdrawn. All 108 fixtures reviewed INDIVIDUALLY in PHYSICAL_FIXTURE_REVIEW.yaml;
+    each carries a physical_review pointer and its tags are the review conclusion.
+- finding_id: PCF-006
+  title: deprecated assembly_paths_exist remains an active contract
+  owning_file: BM-001, BM-002, C4-drawer realizations.yaml and normative.yaml
+  affected_ids:
+  - assembly_paths_exist
+  authority_source: ORACLE_AUTHORING_POLICY 14
+  required_correction: The tag was relabelled DEPRECATED in its vocabulary description but remains in
+    requires_tags and in every fixture tag list, so it still decides PASS/FAIL. Remove it from every active
+    contract. It may survive only in a retired_contracts section that contributes nothing to evaluation.
+  regression_test: DEPRECATED_TAG_ACTIVE fires; control confirms a retired_contracts mention is silent
+  status: CORRECTED
+  changed_files:
+  - 3 normative.yaml
+  - 9 realizations.yaml
+  - ORACLE_AUTHORING_POLICY.md 14.1
+  final_verification_result: assembly_paths_exist removed from every active contract; replaced by installation_process_physically_realizable.
+    Survives only in retired_contracts.
+- finding_id: PCF-007
+  title: statement, tag and predicate disagree on intended contact
+  owning_file: product_cases/BM-001/normative.yaml + realizations.yaml
+  affected_ids:
+  - NRM-BM-001-003
+  - sweep_clears_enclosure
+  authority_source: ORACLE_AUTHORING_POLICY 13
+  required_correction: The predicate was corrected to no-undeclared-overlap while the STATEMENT still
+    says the swept region "does not intersect the enclosure solid" and the TAG sweep_clears_enclosure
+    still means "swept region does not intersect the enclosure solid". Statement, tag vocabulary and predicate
+    must express one meaning. Retire the stale tag; do not add a second one beside it.
+  regression_test: STATEMENT_PREDICATE_INTERACTION_MISMATCH fires
+  status: CORRECTED
+  changed_files:
+  - 5 normative.yaml
+  - 9 realizations.yaml
+  - STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml
+  final_verification_result: Six statements re-authored to no-undeclared-overlap. Five blanket tags retired
+    (sweep_clears_enclosure, pose_clearances_satisfied, travel_clearances_satisfied, crossing_non_interfering,
+    transition_free_of_interference).
+- finding_id: PCF-008
+  title: superseded dossier sections cited as sole current authority
+  owning_file: 3 micro-oracle normative.yaml
+  affected_ids:
+  - NRM-GS-001..006
+  - NRM-RL-001..005
+  - NRM-HS-001,003,005,006
+  authority_source: AMD-GS-001, AMD-RL-001, AMD-HS-001
+  required_correction: 'Fifteen invariants cite a superseded S1 alone. A pack-level dossier_amendment
+    block is not a per-statement authority citation. Each statement must cite the authority that actually
+    governs it: the amendment where superseded, the original section where an unchanged clause still governs.
+    AMD-HS-001 supersedes only two clauses, so applying it to all four HS statements would exceed its
+    declared scope.'
+  regression_test: SUPERSEDED_LOCATOR_WITHOUT_CURRENT_AUTHORITY fires
+  status: CORRECTED
+  changed_files:
+  - 9 normative.yaml
+  final_verification_result: All 73 statements carry current_authority. Fifteen micro-oracle statements
+    now cite their amendment; AMD-HS-001 applied only within its declared partial scope, so NRM-HS-004
+    retains the unchanged original S1.
+- finding_id: PCF-009
+  title: the source-freeze / baseline revision procedure is internally impossible
+  owning_file: ver3/oracles/PRE_CAD_BASELINE.yaml, ver3/oracles/SOURCE_FREEZE.yaml
+  affected_ids:
+  - revision_procedure_after_a_cad_counterexample steps 4 and 6
+  authority_source: internal consistency
+  required_correction: 'Step 4 says a CAD counterexample revises HUMAN_SEMANTIC_DECISIONS.yaml. Step 6
+    and the freeze say SOURCE_FREEZE is not revised by CAD and is not challengeable. But HSD is INSIDE
+    the freeze, so the procedure requires changing a frozen hash it forbids changing. Resolve by the PCF-002
+    layering: source bytes immutable, semantic authority versioned and challengeable.'
+  regression_test: SOURCE_FREEZE_REVISION_PARADOX fires; control confirms layer B declaring challengeability
+    is correct
+  status: CORRECTED
+  changed_files:
+  - SOURCE_FREEZE.yaml
+  - SEMANTIC_AUTHORITY.yaml
+  - PRE_CAD_BASELINE.yaml
+  final_verification_result: Resolved by the layer split. Source bytes immutable; semantic authority versioned
+    and challengeable. The revision procedure no longer requires changing a hash it forbids changing.
+- finding_id: PCF-010
+  title: the auditor reported clean while all nine defects above were present
+  owning_file: ver3/oracle_tools/audit_oracles.py, ver3/oracle_tools/mutation_tests.py
+  affected_ids:
+  - passes 3A-3G
+  authority_source: the defects themselves
+  required_correction: Add checks for each real defect class, plus regression mutations and controls proving
+    the checks discriminate. The auditor must not be changed merely so the files pass; each check must
+    fire on the defect as it actually existed in this repository.
+  regression_test: all of the above
+  status: CORRECTED
+  changed_files:
+  - oracle_tools/audit_oracles.py
+  - oracle_tools/mutation_tests.py
+  final_verification_result: Pass 3H added with 14 checks, each firing on a defect that actually existed
+    here. Mutation suite grew from 69 to 88 cases (70 defects, 18 controls).
+- finding_id: PCF-011
+  title: assembly unresolved decisions cite methodology instead of source silence
+  owning_file: BM-001, BM-002, C4-drawer normative.yaml
+  affected_ids:
+  - UNR-BM-001-009
+  - UNR-BM-002-008
+  - UNR-C4-008
+  authority_source: DOS-BM-001 S2, DOS-BM-002 S3, DOS-C4-drawer S3
+  required_correction: All three cite only "ORACLE_AUTHORING_POLICY 14". A policy section is a methodology
+    reference, not the source that is silent. The primary locator must be the dossier section recording
+    the silence.
+  regression_test: ASSEMBLY_SOURCE_SILENCE_LOCATOR_MISSING fires
+  status: CORRECTED
+  changed_files:
+  - 3 normative.yaml
+  final_verification_result: The three assembly unresolved decisions now cite their dossier silence as
+    primary source, with the policy demoted to a methodology reference.
+summary:
+  total: 11
+  open: 0
+  corrected: 11
+additional_findings_from_independent_review:
+- finding_id: RR-H-01
+  title: a recording obligation embedded in a physical assembly predicate
+  affected_ids:
+  - NRM-BM-001-010
+  - NRM-BM-002-012
+  - NRM-C4-011
+  detail: The three assembly predicates required that deformation, material, insertion direction and process
+    assumptions "are represented". A physically coherent press fit whose assumptions were unrecorded would
+    have failed a PHYSICAL invariant - the PCF-004 defect class surviving inside the new assembly contract.
+    Found by GATE 7 pass H, not by the auditor.
+  status: CORRECTED
+  regression_test: PHYSICAL_PREDICATE_REQUIRES_RECORDING
+- finding_id: PCF-B-01
+  title: BM-001 had no invariant owning interaction coherence
+  affected_ids:
+  - NRM-BM-001-002
+  - INA-BM-001-K
+  - INA-BM-001-L
+  detail: After the representation tag was removed, INA-BM-001-K (a rigid snap that cannot deflect) and
+    INA-BM-001-L (an interference with no material relation) passed every BM-001 physical invariant. NRM-BM-001-002
+    was extended to own intended_interaction_physically_consistent. Found by pass 3B.
+  status: CORRECTED
+  regression_test: existing 3B ADMITS_INADMISSIBLE_REALIZATION
+check_defects_found_by_their_own_tests:
+- check: AMBIGUITY_BLOCKING_DISAGREEMENT (previous pass)
+  defect: '"NON_BLOCKING" contains "BLOCK"'
+- check: STAGE_DEMANDS_PERMITTED_FREEDOM (previous pass)
+  defect: matched "accounted for" as "removed"
+- check: BLANKET_CLEARANCE_PREDICATE (previous pass)
+  defect: '[^)]* stopped at the first paren'
+- check: RR-H-01 (this pass)
+  defect: read a disclaiming exclusion as an assertion

@@ -649,6 +649,179 @@ def _(r):
     wy(r, f"{M}/guided-slider/normative.yaml", d)
 
 
+# ---------------------------------------------------------------- 3H (PCF-001..011)
+@case("micro_oracle_s1_mislabelled_rank1", "defect", "PROJECT_CAPABILITY_MISLABELLED_RANK1",
+      "PCF-001: a micro-oracle capability definition labelled rank-1 user source")
+def _(r):
+    d = ry(r, "oracles/SOURCE_FREEZE.yaml")
+    for a in d["artifacts"]:
+        if a["path"].endswith("DOS-guided-slider.md"):
+            a["authority_type"] = "RANK_1_USER_SOURCE"
+            a["source_rank"] = "rank_1_for_S1_product_extracts"
+    wy(r, "oracles/SOURCE_FREEZE.yaml", d)
+
+
+@case("hsd_inside_source_freeze", "defect", "CHALLENGEABLE_AUTHORITY_INSIDE_SOURCE_FREEZE",
+      "PCF-002: the challengeable decision record listed as immutable source authority")
+def _(r):
+    d = ry(r, "oracles/SOURCE_FREEZE.yaml")
+    d["artifacts"].append({"path": "HUMAN_SEMANTIC_DECISIONS.yaml", "artifact_role": "decisions",
+                           "authority_type": "RANK_1_USER_SOURCE", "applicable_pack": "all",
+                           "artifact_status": "ORIGINAL_AND_CURRENT", "source_rank": None,
+                           "ambiguity_ids": [], "may_be_superseded_semantically": False,
+                           "superseding_authority": None, "sha256": "0" * 64, "note": None})
+    wy(r, "oracles/SOURCE_FREEZE.yaml", d)
+
+
+@case("semantic_authority_manifest_missing", "defect", "SEMANTIC_AUTHORITY_MANIFEST_MISSING",
+      "PCF-002: the layer-B manifest deleted")
+def _(r):
+    (r / "oracles" / "SEMANTIC_AUTHORITY.yaml").unlink()
+
+
+@case("representation_tag_in_physical_requires", "defect", "REPRESENTATION_TAG_IN_PHYSICAL_DOMAIN",
+      "PCF-004: interaction_regions_declared inserted into a physical requires_tags")
+def _(r):
+    d = ry(r, f"{P}/BM-001/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-BM-001-003":
+            i["requires_tags"] = list(i["requires_tags"]) + ["interaction_regions_declared"]
+    wy(r, f"{P}/BM-001/normative.yaml", d)
+
+
+@case("deprecated_assembly_tag_reactivated", "defect", "DEPRECATED_TAG_ACTIVE",
+      "PCF-006: the retired assembly_paths_exist contract put back into a requires_tags")
+def _(r):
+    d = ry(r, f"{P}/BM-002/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-BM-002-012":
+            i["requires_tags"] = ["assembly_paths_exist"]
+    wy(r, f"{P}/BM-002/normative.yaml", d)
+
+
+@case("fixture_tag_without_individual_review", "defect", "FIXTURE_TAG_WITHOUT_INDIVIDUAL_REVIEW",
+      "PCF-005: an old fixture given a physical tag its review does not assign")
+def _(r):
+    d = ry(r, f"{P}/BM-001-2/realizations.yaml")
+    a = d["admissible_realizations"][0]
+    a["tags"] = list(a["tags"]) + ["no_undeclared_volumetric_overlap"]
+    wy(r, f"{P}/BM-001-2/realizations.yaml", d)
+
+
+@case("statement_predicate_interaction_mismatch", "defect", "STATEMENT_PREDICATE_INTERACTION_MISMATCH",
+      "PCF-007: a statement asserting no intersection beside a contact-permitting predicate")
+def _(r):
+    d = ry(r, f"{P}/BM-001/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-BM-001-003":
+            i["statement"] = ("In the open state the closure does not obstruct the declared usable "
+                              "access, and the swept region does not intersect the enclosure solid.")
+    wy(r, f"{P}/BM-001/normative.yaml", d)
+
+
+@case("superseded_locator_without_current_authority", "defect",
+      "SUPERSEDED_LOCATOR_WITHOUT_CURRENT_AUTHORITY",
+      "PCF-008: a statement citing a superseded S1 with no current authority declared")
+def _(r):
+    d = ry(r, f"{M}/guided-slider/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-GS-002":
+            i["source_locators"] = ["DOS-guided-slider S1"]
+            i.pop("current_authority", None)
+    wy(r, f"{M}/guided-slider/normative.yaml", d)
+
+
+@case("workflow_records_old_audit_scope", "defect", "WORKFLOW_CURRENT_STATE_STALE",
+      "PCF-003: the workflow state carrying a superseded reviewed_commit")
+def _(r):
+    d = ry(r, "oracles/ORACLE_WORKFLOW_STATE.yaml")
+    d["reviewed_commit"] = "3b64aee601985ba509d2420462af624ed5616cc2"
+    wy(r, "oracles/ORACLE_WORKFLOW_STATE.yaml", d)
+
+
+@case("index_fixture_count_stale", "defect", "INDEX_AUDIT_COUNT_STALE",
+      "PCF-003: the index stating a fixture count the snapshot contradicts")
+def _(r):
+    fp = r / "oracles" / "ORACLE_INDEX.md"
+    fp.write_text(fp.read_text().replace("44 admissible +", "41 admissible +"))
+
+
+@case("source_freeze_revision_paradox", "defect", "SOURCE_FREEZE_REVISION_PARADOX",
+      "PCF-009: the freeze declaring itself challengeable, which source bytes are not")
+def _(r):
+    d = ry(r, "oracles/SOURCE_FREEZE.yaml")
+    d["challengeable_by_cad"] = True
+    wy(r, "oracles/SOURCE_FREEZE.yaml", d)
+
+
+@case("assembly_unresolved_cites_policy_only", "defect", "ASSEMBLY_SOURCE_SILENCE_LOCATOR_MISSING",
+      "PCF-011: an assembly unresolved citing the policy instead of the dossier silence")
+def _(r):
+    d = ry(r, f"{P}/C4-drawer/normative.yaml")
+    for u in d["required_unresolved"]:
+        if u["id"] == "UNR-C4-008":
+            u["source_locators"] = ["ORACLE_AUTHORING_POLICY 14"]
+    wy(r, f"{P}/C4-drawer/normative.yaml", d)
+
+
+@case("physical_predicate_requires_recording", "defect", "PHYSICAL_PREDICATE_REQUIRES_RECORDING",
+      "RR-H-01: a recording obligation embedded in a physical assembly predicate - a physically coherent "
+      "press fit whose assumptions are unrecorded would fail a PHYSICAL invariant")
+def _(r):
+    d = ry(r, f"{P}/BM-001/normative.yaml")
+    for i in d["invariants"]:
+        if i["id"] == "NRM-BM-001-010":
+            i["verification_predicate"] = ("a realizable installation process exists, and its required "
+                                           "deformation, material assumption, insertion direction and "
+                                           "process assumption are represented.")
+    wy(r, f"{P}/BM-001/normative.yaml", d)
+
+
+@case("conditional_on_a_declaration_is_not_a_recording_obligation", "control",
+      "PHYSICAL_PREDICATE_REQUIRES_RECORDING",
+      "CONTROL: 'where the design declares a terminal, it must be physically produced' is a SCOPE "
+      "CONDITION, not a requirement to record anything, and must stay silent")
+def _(r):
+    pass  # baseline: NRM-BM-001-005, NRM-BM-002-009, NRM-C4-007, NRM-GS-002
+
+
+# ---- controls: these must all stay silent
+@case("frozen_micro_dossier_bytes_are_allowed", "control", "PROJECT_CAPABILITY_MISLABELLED_RANK1",
+      "CONTROL: freezing the ORIGINAL bytes of a superseded micro-oracle dossier is correct when "
+      "labelled PROJECT_CAPABILITY_ORIGINAL and marked superseded")
+def _(r):
+    pass  # baseline
+
+
+@case("representation_prerequisite_is_not_physical_failure", "control",
+      "REPRESENTATION_TAG_IN_PHYSICAL_DOMAIN",
+      "CONTROL: interaction_regions_declared living in stage_expectations.evaluability_prerequisites "
+      "is correct and must not be read as a physical tag")
+def _(r):
+    pass  # baseline
+
+
+@case("retired_contract_in_historical_section_is_silent", "control", "DEPRECATED_TAG_ACTIVE",
+      "CONTROL: assembly_paths_exist named in a retired_contracts block contributes nothing to "
+      "evaluation and must stay silent")
+def _(r):
+    pass  # baseline
+
+
+@case("semantic_authority_is_revisable", "control", "SOURCE_FREEZE_REVISION_PARADOX",
+      "CONTROL: SEMANTIC_AUTHORITY declaring challengeable_by_cad: true is the resolution, not the "
+      "paradox - only the FREEZE claiming challengeability is a defect")
+def _(r):
+    pass  # baseline
+
+
+@case("source_bytes_remain_immutable", "control", "CHALLENGEABLE_AUTHORITY_INSIDE_SOURCE_FREEZE",
+      "CONTROL: the nine frozen dossiers and two ambiguity records legitimately sit in the source "
+      "freeze and must stay silent")
+def _(r):
+    pass  # baseline
+
+
 @case("pack_file_missing", "defect", "PACK_FILE_MISSING",
       "an unauthored pack file must never pass silently")
 def _(r):

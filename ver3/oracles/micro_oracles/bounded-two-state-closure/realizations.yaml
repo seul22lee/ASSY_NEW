@@ -11,28 +11,31 @@ note: >
   single-persistent-constraint and distinct-feature readings.
 
 physical_tag_vocabulary:
-  interaction_regions_declared: "every region where two bodies meet is classified as declared contact, declared clearance, declared interference fit or declared compliant interaction"
+  no_undeclared_volumetric_overlap: "no two solids occupy the same space outside a declared contact, interference-fit or compliant-interaction region, under the declared tolerance"
+  intended_interaction_physically_consistent: "each intended interaction is physically coherent: a compliant region can actually deflect, an interference fit is takeable up in strain, a contact face exists on both participating bodies"
   two_states_defined: "two states are given as relative configurations"
   both_states_reachable: "both are reachable along the motion"
   motion_continuous_between_states: "a continuous path connects them"
   constraint_coverage_continuous: "at every configuration along the path at least one realized constraint keeps it in the allowed manifold"
   each_bound_physically_realized: "each extreme is produced by a realized physical condition, not a model limit"
   each_extreme_independently_evaluated: "each extreme is evaluated at its own configuration, with no result copied between them"
-  transition_free_of_interference: "no unintended interference within the motion"
 
 admissible_realizations:
   - id: ADM-HS-A
     summary: "Pin and knuckle joint between lid and body. Closed extreme bounded by the lid seating on the rim; open extreme by a flange meeting the wall. Two contact features on two parts."
     materially_differs_by: [motion_type, bounding_principle]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference', interaction_regions_declared]
+    tags: [two_states_defined, both_states_reachable, motion_continuous_between_states, constraint_coverage_continuous, each_bound_physically_realized, each_extreme_independently_evaluated, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-HS-A
   - id: ADM-HS-B
     summary: "Four-bar linkage carrying the lid. Open extreme bounded by the linkage reaching its dead point; closed extreme by the lid seating on the rim. Two different bounding principles."
     materially_differs_by: [motion_type, bounding_principle, principle_mixing]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference', interaction_regions_declared]
+    tags: [two_states_defined, both_states_reachable, motion_continuous_between_states, constraint_coverage_continuous, each_bound_physically_realized, each_extreme_independently_evaluated, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-HS-B
   - id: ADM-HS-C
     summary: "Sliding cover in a channel. Both bounds carried by one channel part: the cover face meets one channel end, a boss meets the other. Not a rotary closure."
     materially_differs_by: [motion_type, part_count, bounding_principle]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference', interaction_regions_declared]
+    tags: [two_states_defined, both_states_reachable, motion_continuous_between_states, constraint_coverage_continuous, each_bound_physically_realized, each_extreme_independently_evaluated, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-HS-C
   - id: ADM-HS-D
     summary: "Lid on a pivot pin running in a curved slot. Both extremes bounded by the pin reaching an end of the SAME continuous slot - one feature, two configurations, two independent evaluations."
     materially_differs_by: [bounding_principle, feature_economy]
@@ -40,7 +43,8 @@ admissible_realizations:
       FALSIFIABILITY FIXTURE for SF-10.2. One continuous geometry produces both
       bounds. The prior wording required each extreme to have its "own condition",
       which read as a distinct feature per extreme and put this design at risk.
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference', interaction_regions_declared]
+    tags: [two_states_defined, both_states_reachable, motion_continuous_between_states, constraint_coverage_continuous, each_bound_physically_realized, each_extreme_independently_evaluated, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-HS-D
   - id: ADM-HS-E
     summary: >
       Compliant flexure closure. Over the first part of the travel the flexure's
@@ -53,7 +57,8 @@ admissible_realizations:
       through the whole motion. The prior wording required one to, and rejected
       this design. Hand-off between constraint regimes is ordinary mechanism
       design.
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference', interaction_regions_declared]
+    tags: [two_states_defined, both_states_reachable, motion_continuous_between_states, constraint_coverage_continuous, each_bound_physically_realized, each_extreme_independently_evaluated, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-HS-E
   - id: ADM-HS-F
     summary: >
       Magnetically detented cover with two stable seats produced by ONE field: the
@@ -61,38 +66,57 @@ admissible_realizations:
       arrangement, each evaluated at its own configuration.
     materially_differs_by: [bounding_principle, interaction_type, feature_economy]
     note: "Second falsifiability fixture for SF-10.2: one physical field produces both bounds."
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference', interaction_regions_declared]
+    tags: [two_states_defined, both_states_reachable, motion_continuous_between_states, constraint_coverage_continuous, each_bound_physically_realized, each_extreme_independently_evaluated, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-HS-F
 
 inadmissible_realizations:
   - id: INA-HS-A
     summary: "One state defined; the other referred to but given no relative configuration."
     from_negative_case: NEG-HS-001
-    missing_tags: [two_states_defined, both_states_reachable]
-    tags: ['motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference', interaction_regions_declared]
+    missing_tags: [two_states_defined, both_states_reachable, installation_process_physically_realizable]
+    tags: [motion_continuous_between_states, constraint_coverage_continuous, each_bound_physically_realized, each_extreme_independently_evaluated, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-HS-A
   - id: INA-HS-B
     summary: "Two states defined with no continuous path between them; the closure is shown only in its two configurations."
     from_negative_case: NEG-HS-002
-    missing_tags: [motion_continuous_between_states]
-    tags: ['two_states_defined', 'both_states_reachable', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference', interaction_regions_declared]
+    missing_tags: [motion_continuous_between_states, installation_process_physically_realizable]
+    tags: [two_states_defined, both_states_reachable, constraint_coverage_continuous, each_bound_physically_realized, each_extreme_independently_evaluated, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-HS-B
   - id: INA-HS-C
     summary: "Over a stretch of the path NOTHING constrains the configuration - no constraint is active and none takes over; the panel is free in that band."
     from_negative_case: NEG-HS-003
-    missing_tags: [constraint_coverage_continuous]
+    missing_tags: [constraint_coverage_continuous, installation_process_physically_realizable]
     note: "Rejected for a GAP in coverage, not for changing constraint mode. ADM-HS-E changes mode and is admitted."
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', 'transition_free_of_interference', interaction_regions_declared]
+    tags: [two_states_defined, both_states_reachable, motion_continuous_between_states, each_bound_physically_realized, each_extreme_independently_evaluated, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-HS-C
   - id: INA-HS-D
     summary: "Extremes set by a numeric range on a joint, with no realized condition at either configuration."
     from_negative_case: NEG-HS-004
-    missing_tags: [each_bound_physically_realized]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_extreme_independently_evaluated', 'transition_free_of_interference', interaction_regions_declared]
+    missing_tags: [each_bound_physically_realized, installation_process_physically_realizable]
+    tags: [two_states_defined, both_states_reachable, motion_continuous_between_states, constraint_coverage_continuous, each_extreme_independently_evaluated, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-HS-D
   - id: INA-HS-E
     summary: "One extreme is evaluated and the RESULT is copied to the other; the second configuration is never evaluated."
     from_negative_case: NEG-HS-005
-    missing_tags: [each_extreme_independently_evaluated]
+    missing_tags: [each_extreme_independently_evaluated, installation_process_physically_realizable]
     note: "Rejected for copying a result, not for sharing a feature. ADM-HS-D and ADM-HS-F share one feature and one field respectively, and are admitted."
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'transition_free_of_interference', interaction_regions_declared]
+    tags: [two_states_defined, both_states_reachable, motion_continuous_between_states, constraint_coverage_continuous, each_bound_physically_realized, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-HS-E
   - id: INA-HS-F
     summary: "Lid passes through the body wall partway through the motion; the interference is unaccounted for."
     from_negative_case: NEG-HS-006
-    missing_tags: [transition_free_of_interference]
-    tags: ['two_states_defined', 'both_states_reachable', 'motion_continuous_between_states', 'constraint_coverage_continuous', 'each_bound_physically_realized', 'each_extreme_independently_evaluated', interaction_regions_declared]
+    missing_tags: [installation_process_physically_realizable, no_undeclared_volumetric_overlap]
+    tags: [two_states_defined, both_states_reachable, motion_continuous_between_states, constraint_coverage_continuous, each_bound_physically_realized, each_extreme_independently_evaluated, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-HS-F
+
+retired_contracts:
+  note: >
+    Historical only. Nothing here contributes to any PASS/FAIL decision. Listed so a
+    reader recognises a retired contract if it reappears.
+  entries:
+    - tag: interaction_regions_declared
+      why: >
+        REPRESENTATION property; moved to stage_expectations evaluability_prerequisites at PCF-004
+    - tag: transition_free_of_interference
+      why: >
+        RETIRED at PCF-007; blanket non-interference wording absorbed into no_undeclared_volumetric_overlap

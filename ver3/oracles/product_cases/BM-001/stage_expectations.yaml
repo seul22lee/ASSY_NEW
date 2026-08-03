@@ -5,6 +5,37 @@ note: >
   Adds no product requirement. Stage-11 rules are conditional; no outcome is
   fixed by current tooling capability.
 
+evaluability_prerequisites:
+  added_at: PCF-004
+  domain: REPRESENTATION
+  note: >
+    These are DesignState completeness properties, not physical properties. A
+    design that fails one is NOT physically inadmissible: it is NOT_EVALUABLE
+    with reason REPRESENTATION_INCOMPLETE. They were carried as physical tags
+    until PCF-004 and are now owned here.
+  prerequisites:
+    interaction_regions_declared: >
+      every region where two bodies meet is classified as declared contact,
+      declared clearance, declared interference fit or declared compliant
+      interaction
+    interaction_kind_recorded: >
+      each region records which of the four kinds it is
+    numerical_tolerance_recorded: >
+      the penetration depth below which the evaluation reports contact rather
+      than overlap is declared, and is a property of the evaluation rather than
+      of the design
+    compliant_region_recorded: >
+      where an interaction is declared compliant, the compliant region and its
+      represented deformation are identified
+    assembly_assumptions_recorded: >
+      where insertion depends on a press, snap, interference or compliant
+      region, its material assumption, insertion direction and process
+      assumption are recorded
+  outcome_when_unsatisfied:
+    physical_predicate: NOT_EVALUABLE
+    reason: REPRESENTATION_INCOMPLETE
+    must_not_be_reported_as: [FAIL, physically_inadmissible]
+
 stages:
   s01:
     must_exist: [requirements, scenarios, actors, system_boundary, observables, assumptions, unknowns]

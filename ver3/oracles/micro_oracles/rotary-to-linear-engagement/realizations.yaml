@@ -7,7 +7,8 @@ note: >
   the retired direct-engagement reading (SF-8.1).
 
 physical_tag_vocabulary:
-  interaction_regions_declared: "every region where two bodies meet is classified as declared contact, declared clearance, declared interference fit or declared compliant interaction"
+  no_undeclared_volumetric_overlap: "no two solids occupy the same space outside a declared contact, interference-fit or compliant-interaction region, under the declared tolerance"
+  intended_interaction_physically_consistent: "each intended interaction is physically coherent: a compliant region can actually deflect, an interference fit is takeable up in strain, a contact face exists on both participating bodies"
   rotating_input_body: "a rotating input body exists"
   translating_output_body: "a translating output body exists"
   uninterrupted_interaction_chain: "a connected sequence of realized interactions joins them with no gap"
@@ -24,14 +25,16 @@ admissible_realizations:
     chain: "input shaft -> tooth engagement -> linear member"
     load_profile: "shaft carries radial tooth load; no axial load"
     materially_differs_by: [conversion_principle, chain_length]
-    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted', interaction_regions_declared]
+    tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, rotation_causes_translation, chain_persists_over_output_range, output_rotation_restrained_where_needed, carried_loads_reacted, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-RL-A
   - id: ADM-RL-B
     summary: "Helical thread on the input shaft engaging a follower on the output body. Output restrained by the follower's non-circular section."
     family: helical_thread
     chain: "input shaft -> thread engagement -> follower/output"
     load_profile: "shaft carries axial thrust and radial load"
     materially_differs_by: [conversion_principle, dominant_force_direction]
-    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted', interaction_regions_declared]
+    tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, rotation_causes_translation, chain_persists_over_output_range, output_rotation_restrained_where_needed, carried_loads_reacted, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-RL-B
   - id: ADM-RL-C
     summary: "Band wound on a drum on the input shaft, anchored to each end of the output body. Output rotation restrained by the pair of anchors acting at a separation."
     family: band_and_drum
@@ -39,14 +42,16 @@ admissible_realizations:
     load_profile: "drum carries radial band tension; NO axial load anywhere"
     materially_differs_by: [conversion_principle, engagement_type, chain_length]
     note: "Falsifies any universal axial-load premise."
-    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted', interaction_regions_declared]
+    tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, rotation_causes_translation, chain_persists_over_output_range, output_rotation_restrained_where_needed, carried_loads_reacted, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-RL-C
   - id: ADM-RL-D
     summary: "Rotating nut journalled in the frame driving a fixed non-rotating screw that carries the output. The output body itself never engages the input body."
     family: rotating_nut_fixed_screw
     chain: "input nut -> thread engagement -> screw -> output"
     load_profile: "axial load passes down the screw into the nut's journal seat"
     materially_differs_by: [which_body_rotates, axial_reaction_location, chain_length]
-    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted', interaction_regions_declared]
+    tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, rotation_causes_translation, chain_persists_over_output_range, output_rotation_restrained_where_needed, carried_loads_reacted, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-RL-D
   - id: ADM-RL-E
     summary: >
       Crank disc on the input shaft, a connecting link pinned to the crank pin,
@@ -62,7 +67,8 @@ admissible_realizations:
       input body and the output body. The retired wording required a localized
       engagement between them and rejected this design - which is the single most
       common rotary-to-linear mechanism in engineering.
-    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted', interaction_regions_declared]
+    tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, rotation_causes_translation, chain_persists_over_output_range, output_rotation_restrained_where_needed, carried_loads_reacted, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-RL-E
   - id: ADM-RL-F
     summary: >
       Cam on the input shaft acting on a roller follower carried by a pushrod
@@ -72,35 +78,50 @@ admissible_realizations:
     chain: "input shaft -> cam -> roller -> pushrod -> output"
     load_profile: "cam and roller carry contact normal load; pushrod carries axial load reacted at the output guide"
     materially_differs_by: [chain_length, relation_arbitrariness, direct_engagement_absence]
-    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted', interaction_regions_declared]
+    tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, rotation_causes_translation, chain_persists_over_output_range, output_rotation_restrained_where_needed, carried_loads_reacted, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#ADM-RL-F
 
 inadmissible_realizations:
   - id: INA-RL-A
     summary: "Input rotation and output translation related by a declared ratio, with no participating material anywhere in between."
     from_negative_case: NEG-RL-001
-    missing_tags: [uninterrupted_interaction_chain, interactions_localized]
-    tags: ['rotating_input_body', 'translating_output_body', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted', interaction_regions_declared]
+    missing_tags: [uninterrupted_interaction_chain, interactions_localized, installation_process_physically_realizable, intended_interaction_physically_consistent]
+    tags: [rotating_input_body, translating_output_body, rotation_causes_translation, chain_persists_over_output_range, output_rotation_restrained_where_needed, carried_loads_reacted, no_undeclared_volumetric_overlap]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-RL-A
   - id: INA-RL-B
     summary: >
       A chain of bodies exists and each interaction is localized, but at the
       declared operating range the geometry is such that input rotation produces
       no output translation at all - the link is at a dead point throughout.
     from_negative_case: NEG-RL-002
-    missing_tags: [rotation_causes_translation]
+    missing_tags: [rotation_causes_translation, installation_process_physically_realizable]
     note: "Corrected at SF-8.2: the defect is kinematic, not a missing declaration."
-    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', 'carried_loads_reacted', interaction_regions_declared]
+    tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, chain_persists_over_output_range, output_rotation_restrained_where_needed, carried_loads_reacted, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-RL-B
   - id: INA-RL-C
     summary: "One link of the chain disengages partway through the declared output range."
     from_negative_case: NEG-RL-003
-    missing_tags: [chain_persists_over_output_range]
-    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'output_rotation_restrained_where_needed', 'carried_loads_reacted', interaction_regions_declared]
+    missing_tags: [chain_persists_over_output_range, installation_process_physically_realizable]
+    tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, rotation_causes_translation, output_rotation_restrained_where_needed, carried_loads_reacted, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-RL-C
   - id: INA-RL-D
     summary: "Follower on a threaded shaft with nothing restraining it about the shaft axis, where the thread demonstrably applies that moment; it turns with the shaft instead of translating."
     from_negative_case: NEG-RL-004
-    missing_tags: [output_rotation_restrained_where_needed]
-    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'carried_loads_reacted', interaction_regions_declared]
+    missing_tags: [output_rotation_restrained_where_needed, installation_process_physically_realizable]
+    tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, rotation_causes_translation, chain_persists_over_output_range, carried_loads_reacted, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-RL-D
   - id: INA-RL-E
     summary: "A body in the chain demonstrably carries a load component with no reaction path for it."
     from_negative_case: NEG-RL-005
-    missing_tags: [carried_loads_reacted]
-    tags: ['rotating_input_body', 'translating_output_body', 'uninterrupted_interaction_chain', 'interactions_localized', 'rotation_causes_translation', 'chain_persists_over_output_range', 'output_rotation_restrained_where_needed', interaction_regions_declared]
+    missing_tags: [carried_loads_reacted, installation_process_physically_realizable]
+    tags: [rotating_input_body, translating_output_body, uninterrupted_interaction_chain, interactions_localized, rotation_causes_translation, chain_persists_over_output_range, output_rotation_restrained_where_needed, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
+    physical_review: PHYSICAL_FIXTURE_REVIEW.yaml#INA-RL-E
+
+retired_contracts:
+  note: >
+    Historical only. Nothing here contributes to any PASS/FAIL decision. Listed so a
+    reader recognises a retired contract if it reappears.
+  entries:
+    - tag: interaction_regions_declared
+      why: >
+        REPRESENTATION property; moved to stage_expectations evaluability_prerequisites at PCF-004

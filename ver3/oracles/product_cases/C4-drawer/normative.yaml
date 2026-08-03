@@ -43,6 +43,10 @@ invariants:
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ["DOS-C4-drawer S1 command", "DOS-C4-drawer S2"]
+    current_authority: 'DOS-C4-drawer S1 command (original, unchanged)'
+    authority_note: >
+      Neither AMD-C4-001 (S4 classification) nor AMD-C4-002 (S2 motion reading) touches this statement. The rank-1 command remains its sole authority.
+
     conclusion_scope: "Existence of a rotary user input, a translating drawer, and a continuous interaction chain between them."
     exclusions:
       - "Does not name a conversion mechanism, a ratio, or a number of turns."
@@ -60,6 +64,9 @@ invariants:
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ["DOS-C4-drawer S1 command", "DOS-C4-drawer S2", "AMD-C4-002"]
+    current_authority: 'DOS-C4-drawer S1 command + AMD-C4-002 / HSD-004'
+    authority_note: >
+      The rank-1 command is unchanged and remains the source. AMD-C4-002 supersedes only the READING of its motion fragment, adopting straight translation along one horizontal axis. The command itself is not superseded and is still cited.
     human_decision_ref: HSD-004
     reading_note: >
       "slides out horizontally" is read as STRAIGHT TRANSLATION ALONG ONE
@@ -95,6 +102,9 @@ invariants:
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ['DOS-C4-drawer S1 command ("slides out")', "DOS-C4-drawer S2"]
+    current_authority: 'DOS-C4-drawer S1 command (original, unchanged)'
+    authority_note: >
+      Neither AMD-C4-001 (S4 classification) nor AMD-C4-002 (S2 motion reading) touches this statement. The rank-1 command remains its sole authority.
     conclusion_scope: "Existence and reachability of the two named configurations."
     exclusions:
       - "Does not fix the stroke; see UNR-C4-001."
@@ -114,7 +124,10 @@ invariants:
       between.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-C4-drawer S1 command", "DOS-C4-drawer S2"]
+    source_locators: ["DOS-C4-drawer S1 command", "DOS-C4-drawer S2", "AMD-C4-001 (reclassifies DOS-C4-drawer S4)"]
+    current_authority: 'DOS-C4-drawer S1 command; LEGACY-CONFLICT-C4-01 reclassified by AMD-C4-001 / HSD-002'
+    authority_note: >
+      The conversion requirement rests on the rank-1 command. AMD-C4-001 supersedes only the CLASSIFICATION of DOS-C4-drawer S4 - from an open ambiguity to lower-rank legacy commentary that binds nothing. The two quoted legacy statements are unchanged and remain citable.
     derivation_premises:
       - "The command states a rotary input and a translating output."
       - "Rotation does not become translation without an interaction constraining the two."
@@ -139,6 +152,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-C4-drawer S1 command"]
+    current_authority: 'DOS-C4-drawer S1 command (original, unchanged)'
+    authority_note: >
+      Neither AMD-C4-001 (S4 classification) nor AMD-C4-002 (S2 motion reading) touches this statement. The rank-1 command remains its sole authority.
     derivation_premises:
       - "The command requires the drawer to slide out horizontally, which is a definite behaviour."
       - "A body whose path or orientation is unconstrained where that behaviour depends on it does not perform the behaviour."
@@ -173,6 +189,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-C4-drawer S1 command"]
+    current_authority: 'DOS-C4-drawer S1 command (original, unchanged)'
+    authority_note: >
+      Neither AMD-C4-001 (S4 classification) nor AMD-C4-002 (S2 motion reading) touches this statement. The rank-1 command remains its sole authority.
     derivation_premises:
       - "The drawer is a physical body in a gravity field, travelling horizontally."
       - "An unreacted weight accelerates the body downward."
@@ -206,6 +225,9 @@ invariants:
     support_type: derived
     applies_when: "the design declares a configuration as a physical end of travel"
     source_locators: ['DOS-C4-drawer S1 command ("slides out")']
+    current_authority: 'DOS-C4-drawer S1 command (original, unchanged)'
+    authority_note: >
+      Neither AMD-C4-001 (S4 classification) nor AMD-C4-002 (S2 motion reading) touches this statement. The rank-1 command remains its sole authority.
     derivation_premises:
       - "A declared physical end of travel is a claim about the artifact."
       - "An end of travel that nothing physical produces is a property of the model."
@@ -241,6 +263,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ['DOS-C4-drawer S1 command ("when you turn a knob")']
+    current_authority: 'DOS-C4-drawer S1 command (original, unchanged)'
+    authority_note: >
+      Neither AMD-C4-001 (S4 classification) nor AMD-C4-002 (S2 motion reading) touches this statement. The rank-1 command remains its sole authority.
     derivation_premises:
       - "The command requires a user to turn the knob, so the knob is accessible to the user."
       - "The drawer is inside the cabinet in the retracted configuration, so a chain from an accessible knob to the drawer crosses the cabinet boundary."
@@ -256,7 +281,7 @@ invariants:
       - "Does not fix which face carries the knob, nor a grip size or form."
       - "Does not require a seal."
     verification_predicate: "exists(access path from the user region to the knob in the retracted configuration) and exists(boundary crossing) with no interference between the moving element and the cabinet at any point of operation."
-    requires_tags: [knob_externally_reachable, boundary_crossing_realized, crossing_non_interfering]
+    requires_tags: [knob_externally_reachable, boundary_crossing_realized, no_undeclared_volumetric_overlap]
     related_freedoms: [FRE-C4-007, FRE-C4-012]
     related_unresolved: []
     closes_finding: [SF-6.4]
@@ -270,6 +295,9 @@ invariants:
     support_type: derived
     applies_when: "an element carries the relevant load component in the declared operating scenario"
     source_locators: ["DOS-C4-drawer S1 command"]
+    current_authority: 'DOS-C4-drawer S1 command (original, unchanged)'
+    authority_note: >
+      Neither AMD-C4-001 (S4 classification) nor AMD-C4-002 (S2 motion reading) touches this statement. The rank-1 command remains its sole authority.
     derivation_premises:
       - "An unreacted force accelerates the body carrying it."
       - "Which load components a given element carries depends on the conversion selected, not on the command."
@@ -289,12 +317,15 @@ invariants:
 
   - id: NRM-C4-010
     statement: >
-      At every configuration of the travel the drawer solid does not intersect
-      cabinet material, and the path between the retracted and extended
-      configurations is traversable.
+      At every configuration of the travel the drawer and the cabinet share no
+      volume outside the interaction regions the design declares, and the path
+      between the retracted and extended configurations is traversable.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ['DOS-C4-drawer S1 command ("slides out")']
+    current_authority: 'DOS-C4-drawer S1 command (original, unchanged)'
+    authority_note: >
+      Neither AMD-C4-001 (S4 classification) nor AMD-C4-002 (S2 motion reading) touches this statement. The rank-1 command remains its sole authority.
     derivation_premises:
       - "Material cannot pass through material."
       - "A path blocked at any interior point is not traversable, whatever its endpoints do."
@@ -311,7 +342,7 @@ invariants:
       - "Does not fix a clearance value; none is stated."
     verification_predicate: >
       for every configuration of the travel there is no volumetric overlap between the drawer solid and cabinet material outside declared contact, declared interference-fit and declared compliant-interaction regions, under the declared tolerance and at the declared fidelity; and the path is traversable at a declared fidelity.
-    requires_tags: [pose_clearances_satisfied, required_path_traversable, interaction_regions_declared]
+    requires_tags: [required_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
     related_freedoms: []
     related_unresolved: []
 
@@ -322,12 +353,17 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ['DOS-C4-drawer S1 command ("Design a desktop cabinet")']
+    current_authority: 'DOS-C4-drawer S1 command (original, unchanged)'
+    authority_note: >
+      Neither AMD-C4-001 (S4 classification) nor AMD-C4-002 (S2 motion reading) touches this statement. The rank-1 command remains its sole authority.
     derivation_premises:
       - "The command asks for a cabinet as a producible artifact, which is assembled from parts."
       - "A part cannot occupy space already occupied."
     conclusion_scope: >
       Existence of a realizable installation process per discretely-installed part. Geometric and declared-compliant feasibility only - not force adequacy, not process cost.
     exclusions:
+      - >
+        Does NOT require the deformation, material, insertion direction or process assumption to be RECORDED. Recording them is a DesignState completeness property and is owned by stage_expectations.evaluability_prerequisites.assembly_assumptions_recorded. A press fit that is physically coherent but whose assumptions are unrecorded is NOT_EVALUABLE with reason REPRESENTATION_INCOMPLETE - never physically inadmissible. Corrected at RR-H-01.
       - >
         Does NOT require a fully collision-free installation path. A press fit has no collision-free path and is still assemblable. The requirement is a realizable PROCESS that passes through no UNDECLARED rigid material (ORACLE_AUTHORING_POLICY 14).
       - >
@@ -336,8 +372,8 @@ invariants:
         Does NOT assess whether the insertion FORCE is achievable. That is quantitative and is held separately; see the pack's assembly-process unresolved decision.
       - "Does not require a path for co-formed or permanently joined parts. Does not constrain assembly order or part count."
     verification_predicate: >
-      for each discretely-installed part: a realizable installation process exists in which the part passes through no UNDECLARED rigid material. Contact during insertion is admissible. Where insertion depends on a press fit, snap fit, interference fit or compliant deformation, that region is declared and its required deformation, material assumption, insertion direction and process assumption are represented. Co-formed, bonded or permanently joined regions declare that relationship instead of owing a process.
-    requires_tags: [assembly_paths_exist, assembly_process_realizable]
+      for each discretely-installed part: a realizable installation process exists in which the part passes through no UNDECLARED rigid material. Contact during insertion is admissible. Where insertion depends on a press fit, snap fit, interference fit or compliant deformation, that insertion is PHYSICALLY COHERENT - a compliant region can actually deflect by the amount insertion needs, and an interference is takeable up in strain given the material relation that applies. Co-formed, bonded or permanently joined regions owe no discrete insertion process.
+    requires_tags: [installation_process_physically_realizable]
     related_freedoms: [FRE-C4-009]
     related_unresolved: [UNR-C4-008]
 
@@ -352,6 +388,9 @@ invariants:
       deviation of 0.0 degrees produced by a declared prismatic pair - a value the
       model cannot vary - would be counted as showing that the drawer is guided.
     source_locators: ["DOS-C4-drawer S5 E2"]
+    current_authority: 'DOS-C4-drawer S5 (original, unchanged)'
+    authority_note: >
+      Evidence-limitation sections are not superseded by either C4 amendment.
     derivation_premises:
       - "DOS-C4-drawer S5 E2 records tracks_straight measured as 0.0 degrees exactly under a declared prismatic pair."
       - "Under that model off-axis deviation is identically zero by construction of the coupling."
@@ -374,6 +413,9 @@ invariants:
       Without this minimum, a result produced for the lift variant would be
       reported as a C4-drawer verification with nothing marking it as reused.
     source_locators: ["DOS-C4-drawer S5 E1"]
+    current_authority: 'DOS-C4-drawer S5 (original, unchanged)'
+    authority_note: >
+      Evidence-limitation sections are not superseded by either C4 amendment.
     derivation_premises:
       - 'DOS-C4-drawer S5 E1 records stages.physics = "reused - PASS": no simulation was executed for C4-drawer.'
       - "A result obtained on a different geometry is evidence about that geometry."
@@ -485,7 +527,12 @@ required_unresolved:
     block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
     does_not_block:
       - "The existence of a realizable installation process is structural and is derivable without a force."
-    source_locators: ["ORACLE_AUTHORING_POLICY 14"]
+    source_locators: ["DOS-C4-drawer S3", "ORACLE_AUTHORING_POLICY 14 (methodology reference only)"]
+    primary_source_of_silence: "DOS-C4-drawer S3"
+    locator_note: >
+      Corrected at PCF-011. The primary locator must be the dossier section that RECORDS THE
+      SILENCE - DOS-C4-drawer S3 states no material and no process. A policy section describes how to
+      handle the silence; it is not the silence.
     added_at: GATE-2
 
 retired_unresolved:

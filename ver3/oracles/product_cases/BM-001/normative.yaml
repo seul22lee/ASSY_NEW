@@ -25,6 +25,9 @@ invariants:
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ["DOS-BM-001 S1 REQ-001"]
+    current_authority: 'DOS-BM-001 S1 REQ-001 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     conclusion_scope: "The two states and their connecting motion only."
     exclusions: ["Does not constrain motion type, axis, or whether the closure stays attached."]
     verification_predicate: "exists(state CLOSED) and exists(state OPEN) and exists(transition CLOSED<->OPEN) evaluable at intermediate parameter values."
@@ -37,40 +40,74 @@ invariants:
       The connection between the closure and the enclosure is physically
       realized: each participating body carries engagement geometry, and the
       guidance or support that the chosen closure concept depends on is present
-      wherever that concept depends on it.
+      wherever that concept depends on it. Every intended interaction the design
+      declares - contact, interference fit or compliant interaction - is
+      physically coherent.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-001 S1 REQ-001"]
+    current_authority: 'DOS-BM-001 S1 REQ-001 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-001 requires a mechanism that opens and closes repeatedly."
       - "Repeatable relative motion between two bodies is produced by material interaction between them."
       - "A type name or relationship record is not material and produces no interaction."
-    conclusion_scope: "Existence and locality of engagement geometry; presence of support where the concept needs it."
+      - >
+        An interaction that is DECLARED but cannot physically occur produces no
+        motion either. A snap with no deflectable region cannot snap; an
+        interference with no material relation is not shown to be takeable up in
+        strain. Declaring such an interaction does not realize it.
+    conclusion_scope: >
+      Existence and locality of engagement geometry; presence of support where the
+      concept needs it; and physical coherence of every intended interaction the
+      design declares. Coherence only - not adequacy, not margin, not force.
     exclusions:
       - "Does NOT require a permanent connection: a closure detached in the open state satisfies this if engagement exists where the concept requires it."
       - "Does NOT name a mechanism."
       - "Does NOT require support beyond what the selected concept depends on. Support is conditional on the concept, not universal."
-    verification_predicate: "for the closure connection: engagement geometry exists on both participating bodies at every state where the concept declares contact."
-    requires_tags: [connection_realized]
+    verification_predicate: >
+      for the closure connection: engagement geometry exists on both participating
+      bodies at every state where the concept declares contact; AND for each
+      declared intended interaction: a compliant region can actually deflect, an
+      interference is takeable up in strain given its stated material relation,
+      and a contact face exists on both participating bodies.
+    requires_tags: [connection_realized, intended_interaction_physically_consistent]
     related_freedoms: [FRE-BM-001-001]
     related_unresolved: []
-    closes_finding: [CLS-002]
+    closes_finding: [CLS-002, PCF-004]
+    scope_extended_at: PCF-004
+    scope_extension_note: >
+      Extended at PCF-004 to own intended_interaction_physically_consistent. BM-001
+      gained snap and interference fixtures at GATE 2 of the previous pass but no
+      invariant required their interactions to be COHERENT, so INA-BM-001-K (a
+      rigid snap that cannot deflect) and INA-BM-001-L (an interference with no
+      material relation) passed every physical invariant. Found by pass 3B, not by
+      inspection.
 
   - id: NRM-BM-001-003
     statement: >
       In the open state the closure does not obstruct the usable access the
-      design declares for the storage interaction, and the region swept by the
-      closure between states does not intersect the enclosure solid.
+      design declares for the storage interaction, and along the transition
+      between states the closure and the enclosure share no volume outside the
+      interaction regions the design declares.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-001 S1 REQ-001", "DOS-BM-001 S1 product_intent"]
+    current_authority: 'DOS-BM-001 S1 REQ-001, DOS-BM-001 S1 product_intent (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-001 requires the enclosure to open, and product_intent names it a storage box."
       - "An access region the closure still obstructs is not usable for storing into."
-      - "Solid bodies do not pass through one another."
+      - >
+        Two solids cannot occupy the same space. They MAY touch: a hinge bore, a
+        rim seat and a stop face are intended contacts, and a design in which the
+        closure never approached the enclosure could not be hinged, latched or
+        stopped at all.
     conclusion_scope: >
-      Non-obstruction of the DECLARED usable access region at OPEN, and sweep
-      clearance along the transition. Nothing more.
+      Non-obstruction of the DECLARED usable access region at OPEN, and absence of
+      UNDECLARED volumetric overlap along the transition. Nothing more.
     exclusions:
       - >
         Does NOT require positive clearance everywhere. Declared contact is admissible and zero clearance at a declared contact region is correct, not a defect. The rule is no UNDECLARED volumetric overlap (ORACLE_AUTHORING_POLICY §13).
@@ -84,10 +121,17 @@ invariants:
         the declared usable access unobstructed satisfies this.
       - "Does not fix the usable access region; the design declares it (UNR-BM-001-006)."
       - "Does not constrain how far the closure travels."
+      - >
+        Does NOT require the closure and enclosure to stay apart. Declared
+        contact, a declared interference fit and a declared compliant interaction
+        are all admissible, and zero clearance at a declared contact is correct.
+        The earlier wording "the region swept by the closure does not intersect
+        the enclosure solid" is retired at PCF-007: it contradicted the intended-
+        contact semantics its own predicate already used.
     verification_predicate: >
       at OPEN the closure does not overlap the declared usable access region; and along the CLOSED->OPEN transition there is no volumetric overlap between the closure and the enclosure solid outside declared contact, declared interference-fit and declared compliant-interaction regions, under the declared tolerance and at the declared fidelity.
 
-    requires_tags: [declared_usable_access_unobstructed, sweep_clears_enclosure, no_undeclared_overlap_on_transition, interaction_regions_declared]
+    requires_tags: [declared_usable_access_unobstructed, no_undeclared_volumetric_overlap]
     related_freedoms: [FRE-BM-001-003, FRE-BM-001-004]
     related_unresolved: [UNR-BM-001-006]
     closes_finding: [SF-2.1]
@@ -101,6 +145,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-001 S1 REQ-001"]
+    current_authority: 'DOS-BM-001 S1 REQ-001 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-001 requires the same closure to open and close repeatedly."
       - "A body does not gain or lose material by changing state."
@@ -124,6 +171,9 @@ invariants:
     support_type: derived
     applies_when: "the design declares either a discrete terminal open pose or an open configuration region"
     source_locators: ["DOS-BM-001 S1 REQ-001"]
+    current_authority: 'DOS-BM-001 S1 REQ-001 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-001 requires an open state to be reached, so the design must say what the open state is."
       - "A discrete pose that nothing physical produces is a property of the model, not of the artifact."
@@ -158,6 +208,9 @@ invariants:
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ["DOS-BM-001 S1 REQ-002", "DOS-BM-001 S1 REQ-004", "DOS-BM-001 S1 REQ-008"]
+    current_authority: 'DOS-BM-001 S1 REQ-002, DOS-BM-001 S1 REQ-004, DOS-BM-001 S1 REQ-008 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     conclusion_scope: "Existence, localization, holding and release of retention."
     exclusions:
       - "Does not name a retention mechanism."
@@ -176,6 +229,9 @@ invariants:
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ["DOS-BM-001 S1 REQ-008", "DOS-BM-001 S1 REQ-001"]
+    current_authority: 'DOS-BM-001 S1 REQ-008, DOS-BM-001 S1 REQ-001 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     conclusion_scope: >
       Physical repeatability of one full cycle. NOT a cycle count, NOT durability,
       NOT wear.
@@ -202,6 +258,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-001 S1 REQ-003"]
+    current_authority: 'DOS-BM-001 S1 REQ-003 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-003 requires the retention to be operable by a user."
       - "A feature a user cannot reach cannot be operated by that user."
@@ -231,6 +290,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-001 S1 product_intent", "DOS-BM-001 S1 REQ-006"]
+    current_authority: 'DOS-BM-001 S1 product_intent, DOS-BM-001 S1 REQ-006 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "product_intent names the product a storage box."
       - "A storage volume that cannot be reached cannot be stored into."
@@ -249,12 +311,17 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-001 S1 REQ-007"]
+    current_authority: 'DOS-BM-001 S1 REQ-007 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-007 requires the product to be assemblable."
       - "A part cannot occupy space already occupied by placed material."
     conclusion_scope: >
       Existence of a realizable installation process per discretely-installed part. Geometric and declared-compliant feasibility only - not force adequacy, not process cost.
     exclusions:
+      - >
+        Does NOT require the deformation, material, insertion direction or process assumption to be RECORDED. Recording them is a DesignState completeness property and is owned by stage_expectations.evaluability_prerequisites.assembly_assumptions_recorded. A press fit that is physically coherent but whose assumptions are unrecorded is NOT_EVALUABLE with reason REPRESENTATION_INCOMPLETE - never physically inadmissible. Corrected at RR-H-01.
       - >
         Does NOT require a fully collision-free installation path. A press fit has no collision-free path and is still assemblable. The requirement is a realizable PROCESS that passes through no UNDECLARED rigid material (ORACLE_AUTHORING_POLICY 14).
       - >
@@ -264,8 +331,8 @@ invariants:
       - "Does NOT require a path for co-formed or permanently joined parts."
       - "Does not constrain assembly order, tooling, or how the order is recorded."
     verification_predicate: >
-      for each discretely-installed part: a realizable installation process exists in which the part passes through no UNDECLARED rigid material. Contact during insertion is admissible. Where insertion depends on a press fit, snap fit, interference fit or compliant deformation, that region is declared and its required deformation, material assumption, insertion direction and process assumption are represented. Co-formed, bonded or permanently joined regions declare that relationship instead of owing a process.
-    requires_tags: [assembly_paths_exist, assembly_process_realizable]
+      for each discretely-installed part: a realizable installation process exists in which the part passes through no UNDECLARED rigid material. Contact during insertion is admissible. Where insertion depends on a press fit, snap fit, interference fit or compliant deformation, that insertion is PHYSICALLY COHERENT - a compliant region can actually deflect by the amount insertion needs, and an interference is takeable up in strain given the material relation that applies. Co-formed, bonded or permanently joined regions owe no discrete insertion process.
+    requires_tags: [installation_process_physically_realizable]
     related_freedoms: [FRE-BM-001-005]
     related_unresolved: [UNR-BM-001-009]
     closes_finding: [CLS-010]
@@ -278,6 +345,9 @@ invariants:
     support_type: derived
     applies_when: "an interface carries load in the declared scenario"
     source_locators: ["DOS-BM-001 S1 REQ-002", "DOS-BM-001 S1 REQ-007"]
+    current_authority: 'DOS-BM-001 S1 REQ-002, DOS-BM-001 S1 REQ-007 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-002 requires the closure to be held against a disturbance."
       - "A force that is applied and not reacted accelerates the body."
@@ -312,6 +382,9 @@ invariants:
       Satisfied by direct causal evidence OR by a discriminating control
       (HSD-006); the two are alternatives, not a sequence.
     source_locators: ["DOS-BM-001 S5 E1"]
+    current_authority: 'DOS-BM-001 S5 E1 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "DOS-BM-001 S5 E1 records that in the m0 matched pair every seed-0 criterion passes in BOTH the limited and the unlimited member."
       - "A criterion that passes on the control as well as the specimen separates nothing."
@@ -352,6 +425,9 @@ invariants:
       minimum, a value supplied to a run and read back from it would be reported
       as the retention the product achieves.
     source_locators: ["DOS-BM-001 S5 E2"]
+    current_authority: 'DOS-BM-001 S5 E2 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "DOS-BM-001 S5 E2 records that the snap force window is an input parameter of the task, not a measured product property."
       - "A value supplied to a run and read back from it reports the input."
@@ -454,5 +530,10 @@ required_unresolved:
     block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
     does_not_block:
       - "The existence of a realizable installation process is structural and is derivable without a force."
-    source_locators: ["ORACLE_AUTHORING_POLICY 14"]
+    source_locators: ["DOS-BM-001 S2", "ORACLE_AUTHORING_POLICY 14 (methodology reference only)"]
+    primary_source_of_silence: "DOS-BM-001 S2"
+    locator_note: >
+      Corrected at PCF-011. The primary locator must be the dossier section that RECORDS THE
+      SILENCE - DOS-BM-001 S2 states no material and no process. A policy section describes how to
+      handle the silence; it is not the silence.
     added_at: GATE-2

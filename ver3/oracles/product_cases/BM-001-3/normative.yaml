@@ -42,6 +42,9 @@ invariants:
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ["DOS-BM-001-3 S1 REQ-011"]
+    current_authority: 'DOS-BM-001-3 S1 REQ-011 (original, unchanged)'
+    authority_note: >
+      No amendment or decision supersedes this statement; REQ-011 is its sole authority.
     conclusion_scope: "Existence of a curved underside region and a planar top region containing the aperture."
     exclusions:
       - "Does NOT fix the curvature profile, its radius, or whether curvature is single or double."
@@ -57,7 +60,10 @@ invariants:
       contact geometry rather than asserted by a role name.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
-    source_locators: ["DOS-BM-001-3 S1 REQ-011"]
+    source_locators: ["DOS-BM-001-3 S1 REQ-011", "HSD-005"]
+    current_authority: 'DOS-BM-001-3 S1 REQ-011 + HSD-005 (adopted reading RDG-BM-001-3-01)'
+    authority_note: >
+      REQ-011 is rank-1 and unchanged. HSD-005 owns the ADOPTED READING that the LOAD-BEARING resting contact must lie on the curved region - a human-approved product reading, not a verbatim geometric definition in the source. The stability criterion remains a separate unresolved decision (UNR-BM-001-3-002) and is NOT settled by this reading.
     derivation_premises:
       - "REQ-011 states the enclosure rests on its curved underside."
       - "A resting orientation is produced by contact between the body and the supporting surface."
@@ -80,16 +86,23 @@ invariants:
 
   - id: NRM-BM-001-3-003
     statement: >
-      The region swept by the closure clears the curved boundary region as well
-      as the planar one.
+      Along the closure transition the closure and the enclosure share no volume
+      outside the declared interaction regions, over the curved boundary region
+      as well as the planar one.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-001-3 S1 REQ-011"]
+    current_authority: 'DOS-BM-001-3 S1 REQ-011 (original, unchanged)'
+    authority_note: >
+      No amendment or decision supersedes this statement; REQ-011 is its sole authority.
     derivation_premises:
       - "REQ-011 places the aperture in the planar top region while the underside is curved."
       - "Solid bodies do not interpenetrate."
       - "The parent already requires sweep clearance; the curved region is additional material to clear."
-    conclusion_scope: "Sweep clearance against the curved region."
+    conclusion_scope: >
+      Absence of UNDECLARED volumetric overlap against the curved region as well
+      as the planar one. Declared contact remains admissible, exactly as in the
+      parent (PCF-007).
     exclusions:
       - "Does not constrain the closure's motion type or travel."
       - >
@@ -99,7 +112,7 @@ invariants:
     verification_predicate: >
       along the closure transition there is no volumetric overlap between the closure and the enclosure solid including the curved region outside declared contact, declared interference-fit and declared compliant-interaction regions, under the declared tolerance and at the declared fidelity.
 
-    requires_tags: [sweep_clears_curved_region, interaction_regions_declared]
+    requires_tags: [sweep_clears_curved_region, no_undeclared_volumetric_overlap]
     related_freedoms: [FRE-BM-001-3-003]
     related_unresolved: []
 

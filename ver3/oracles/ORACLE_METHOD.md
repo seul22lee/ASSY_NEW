@@ -574,6 +574,17 @@ that approved it. Normative statements cite the amendment, not the superseded
 section. The auditor verifies the original hash still matches, so a silent edit
 to a "frozen" dossier is BLOCKING.
 
+## 13.85 Three domains, not two
+
+Defined normatively in `ORACLE_AUTHORING_POLICY.md` §12.5. Physical truth,
+representation completeness and evidence are three separate domains. The
+previous revision had only two and used the physical domain for representation
+statements, so a buildable design could be reported physically inadmissible
+because its DesignState was incomplete.
+
+A physically valid artifact whose record is incomplete is
+`NOT_EVALUABLE / REPRESENTATION_INCOMPLETE`, never physically wrong.
+
 ## 13.9 Intended interaction and assembly semantics
 
 Defined normatively in `ORACLE_AUTHORING_POLICY.md` §13–§15 and summarised here

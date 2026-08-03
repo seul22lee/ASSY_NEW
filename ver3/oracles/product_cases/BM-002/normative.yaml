@@ -30,6 +30,9 @@ invariants:
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ["DOS-BM-002 S1 REQ-001"]
+    current_authority: 'DOS-BM-002 S1 REQ-001 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     conclusion_scope: "Existence of an external rotary input, an internal platform, and a continuous interaction chain between them."
     exclusions:
       - "Does not name a conversion mechanism, a ratio, or a chain topology."
@@ -48,6 +51,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-002 S1 REQ-001", "DOS-BM-002 S1 REQ-004"]
+    current_authority: 'DOS-BM-002 S1 REQ-001, DOS-BM-002 S1 REQ-004 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-001 places the input outside; REQ-004 keeps the mechanism inside."
       - "A chain connecting an outside element to an inside element passes through the boundary."
@@ -62,7 +68,7 @@ invariants:
       - "Does NOT decide whether the crossing element counts as part of the enclosed mechanism; see AMB-002-01."
       - "Does not name a sealing method and does not require a seal."
     verification_predicate: "exists(boundary crossing) with no interference between the moving element and the housing at any point of operation, and every support the selected realization depends on is realized somewhere in the design."
-    requires_tags: [boundary_crossing_realized, crossing_non_interfering]
+    requires_tags: [boundary_crossing_realized, no_undeclared_volumetric_overlap]
     related_freedoms: [FRE-BM-002-004]
     related_unresolved: [UNR-BM-002-001]
     acknowledges_ambiguity: AMB-002-01
@@ -76,6 +82,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-002 S1 REQ-001"]
+    current_authority: 'DOS-BM-002 S1 REQ-001 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-001 requires rotary input and translating output."
       - "Rotation does not become translation without an interaction that constrains the two."
@@ -97,6 +106,9 @@ invariants:
     support_type: direct
     quantity_is_user_stated: true
     source_locators: ["DOS-BM-002 S1 REQ-002"]
+    current_authority: 'DOS-BM-002 S1 REQ-002 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     conclusion_scope: "The travel requirement in the source's own terms, including its qualifier."
     exclusions:
       - >
@@ -121,6 +133,9 @@ invariants:
     support_type: direct
     quantity_is_user_stated: true
     source_locators: ["DOS-BM-002 S1 REQ-003"]
+    current_authority: 'DOS-BM-002 S1 REQ-003 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     conclusion_scope: "The payload requirement in the source's own terms, including its qualifier."
     exclusions:
       - 'The qualifier "approximately" is preserved. No margin, factor or duty is invented; none is stated.'
@@ -148,6 +163,9 @@ invariants:
     support_type: derived
     applies_when: "an element carries the relevant load component in the declared operating scenario"
     source_locators: ["DOS-BM-002 S1 REQ-001", "DOS-BM-002 S1 REQ-003", "DOS-BM-002 S1 REQ-007"]
+    current_authority: 'DOS-BM-002 S1 REQ-001, DOS-BM-002 S1 REQ-003, DOS-BM-002 S1 REQ-007 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "An unreacted force accelerates the body carrying it."
       - "REQ-003 places a payload on the platform, producing load in the chain that carries it."
@@ -180,6 +198,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-002 S1 REQ-001", "DOS-BM-002 S1 REQ-003", "DOS-BM-002 S1 REQ-007"]
+    current_authority: 'DOS-BM-002 S1 REQ-001, DOS-BM-002 S1 REQ-003, DOS-BM-002 S1 REQ-007 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-001 requires the platform to rise and fall along a definite direction."
       - "REQ-003 requires it to carry a payload, which a platform must remain oriented to support."
@@ -213,11 +234,15 @@ invariants:
 
   - id: NRM-BM-002-008
     statement: >
-      At every pose the operation requires, the platform solid does not intersect
-      housing material, and the required path between poses is traversable.
+      At every pose the operation requires, the platform and the housing share no
+      volume outside the interaction regions the design declares, and the required
+      path between poses is traversable.
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-002 S1 REQ-002", "DOS-BM-002 S1 REQ-007"]
+    current_authority: 'DOS-BM-002 S1 REQ-002, DOS-BM-002 S1 REQ-007 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-002 requires the platform to move through a stated displacement."
       - "Material cannot pass through material."
@@ -237,7 +262,7 @@ invariants:
       - "Does not fix a clearance value. Required clearance is either solved or explicitly unresolved."
     verification_predicate: >
       for every required pose there is no volumetric overlap between the platform solid and housing material outside declared contact, declared interference-fit and declared compliant-interaction regions, under the declared tolerance and at the declared fidelity; the required path is traversable; and any required clearance is either solved or recorded as unresolved.
-    requires_tags: [pose_clearances_satisfied, required_path_traversable, interaction_regions_declared]
+    requires_tags: [required_path_traversable, no_undeclared_volumetric_overlap, intended_interaction_physically_consistent]
     related_freedoms: []
     related_unresolved: []
     closes_finding: [SF-5.5]
@@ -251,6 +276,9 @@ invariants:
     support_type: derived
     applies_when: "the design declares a terminal state as a physical end of travel"
     source_locators: ["DOS-BM-002 S1 REQ-002", "DOS-BM-002 S1 REQ-007"]
+    current_authority: 'DOS-BM-002 S1 REQ-002, DOS-BM-002 S1 REQ-007 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "A declared physical end of travel is a claim about the artifact."
       - "An end of travel that nothing physical produces is a property of the model."
@@ -285,6 +313,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-002 S1 REQ-003"]
+    current_authority: 'DOS-BM-002 S1 REQ-003 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-003 requires the platform to support a payload."
       - "A payload that cannot reach the platform cannot be supported by it."
@@ -301,6 +332,9 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-002 S1 REQ-003"]
+    current_authority: 'DOS-BM-002 S1 REQ-003 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-003 places a payload on the platform."
       - "An unreacted load accelerates the body."
@@ -320,12 +354,17 @@ invariants:
     basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
     support_type: derived
     source_locators: ["DOS-BM-002 S1 REQ-006"]
+    current_authority: 'DOS-BM-002 S1 REQ-006 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "REQ-006 requires the product to be assemblable."
       - "A part cannot occupy space already occupied."
     conclusion_scope: >
       Existence of a realizable installation process per discretely-installed part. Geometric and declared-compliant feasibility only - not force adequacy, not process cost.
     exclusions:
+      - >
+        Does NOT require the deformation, material, insertion direction or process assumption to be RECORDED. Recording them is a DesignState completeness property and is owned by stage_expectations.evaluability_prerequisites.assembly_assumptions_recorded. A press fit that is physically coherent but whose assumptions are unrecorded is NOT_EVALUABLE with reason REPRESENTATION_INCOMPLETE - never physically inadmissible. Corrected at RR-H-01.
       - >
         Does NOT require a fully collision-free installation path. A press fit has no collision-free path and is still assemblable. The requirement is a realizable PROCESS that passes through no UNDECLARED rigid material (ORACLE_AUTHORING_POLICY 14).
       - >
@@ -334,8 +373,8 @@ invariants:
         Does NOT assess whether the insertion FORCE is achievable. That is quantitative and is held separately; see the pack's assembly-process unresolved decision.
       - "Does not require a path for co-formed or permanently joined parts. Does not constrain assembly order."
     verification_predicate: >
-      for each discretely-installed part: a realizable installation process exists in which the part passes through no UNDECLARED rigid material. Contact during insertion is admissible. Where insertion depends on a press fit, snap fit, interference fit or compliant deformation, that region is declared and its required deformation, material assumption, insertion direction and process assumption are represented. Co-formed, bonded or permanently joined regions declare that relationship instead of owing a process.
-    requires_tags: [assembly_paths_exist, assembly_process_realizable]
+      for each discretely-installed part: a realizable installation process exists in which the part passes through no UNDECLARED rigid material. Contact during insertion is admissible. Where insertion depends on a press fit, snap fit, interference fit or compliant deformation, that insertion is PHYSICALLY COHERENT - a compliant region can actually deflect by the amount insertion needs, and an interference is takeable up in strain given the material relation that applies. Co-formed, bonded or permanently joined regions owe no discrete insertion process.
+    requires_tags: [installation_process_physically_realizable]
     related_freedoms: []
     related_unresolved: [UNR-BM-002-008]
 
@@ -346,6 +385,9 @@ invariants:
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_locators: ["DOS-BM-002 S1 REQ-009"]
+    current_authority: 'DOS-BM-002 S1 REQ-009 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     conclusion_scope: "Absence of a non-user energy source in the drive chain."
     exclusions: ["Does not forbid springs or counterweights used for balance rather than as the driving source."]
     verification_predicate: "no element of the drive chain is declared as a powered or stored-energy driving source."
@@ -366,6 +408,9 @@ invariants:
       input and observed output under a declared pair would be counted as showing
       that an engagement exists and does not jam.
     source_locators: ["DOS-BM-002 S5 E1", "DOS-BM-002 S5 E2"]
+    current_authority: 'DOS-BM-002 S5 E1, DOS-BM-002 S5 E2 (original, unchanged)'
+    authority_note: >
+      No dossier amendment applies to this pack; its frozen dossier sections remain the current authority in full.
     derivation_premises:
       - "DOS-BM-002 S5 E1 records that all lift kinematic evidence is V-A declared-pair."
       - "Under declared coupling the transmission relationship is exact by construction of the model."
@@ -448,5 +493,10 @@ required_unresolved:
     block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
     does_not_block:
       - "The existence of a realizable installation process is structural and is derivable without a force."
-    source_locators: ["ORACLE_AUTHORING_POLICY 14"]
+    source_locators: ["DOS-BM-002 S3", "ORACLE_AUTHORING_POLICY 14 (methodology reference only)"]
+    primary_source_of_silence: "DOS-BM-002 S3"
+    locator_note: >
+      Corrected at PCF-011. The primary locator must be the dossier section that RECORDS THE
+      SILENCE - DOS-BM-002 S3 states no material and no process. A policy section describes how to
+      handle the silence; it is not the silence.
     added_at: GATE-2

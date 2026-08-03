@@ -1,0 +1,2025 @@
+schema_version: 0.1.0
+purpose: Individual physical review of EVERY fixture in all nine packs. Created at PCF-005, which found
+  that the previous pass had appended new physical tags to ~100 fixtures by script without reading a single
+  narrative.
+the_tag_is_not_evidence: A tag records a REVIEW CONCLUSION. It is authored by the same hand as the invariant
+  it satisfies and is not independent physical evidence. This record exists so that each conclusion can
+  be checked against the narrative that is supposed to support it, one fixture at a time.
+method: 'For each fixture: re-read its narrative; identify its actual interaction regions; decide whether
+  each canonical physical property is supported BY THAT NARRATIVE; add an explicit assumption only where
+  one is necessary and justifiable; withhold a tag where the fixture is meant to violate that property;
+  and record the unresolved physical questions honestly.'
+canonical_physical_tags:
+  no_undeclared_volumetric_overlap: no two solids share space outside a declared contact, interference-fit
+    or compliant-interaction region
+  intended_interaction_physically_consistent: each intended interaction is physically coherent
+  installation_process_physically_realizable: a realizable installation process exists (product cases
+    with an assembly obligation only)
+scope_note: The five micro-oracles and BM-001-2 declare no assembly obligation, so installation_process_physically_realizable
+  is not in scope for them and is not assigned. BM-001-2 additionally declares no motion path, so it carries
+  only intended_interaction_physically_consistent.
+status_vocabulary:
+  NEEDS_GEOMETRY_VALIDATION: narrative coherent, assumptions explicit, CAD or physics required to confirm
+  NEEDS_NARRATIVE_CORRECTION: the narrative as written does not support the tags the fixture needs
+  NOT_EVALUABLE_FROM_CURRENT_FIXTURE_DESCRIPTION: the narrative is silent on the property
+summary:
+  total_fixtures: 108
+  admissible: 44
+  inadmissible: 64
+  NEEDS_GEOMETRY_VALIDATION: 108
+  NEEDS_NARRATIVE_CORRECTION: 0
+  NOT_EVALUABLE: 0
+reviews:
+- fixture_id: ADM-BM-001-A
+  pack: BM-001
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A rotating lid on a lateral axis with a compressive catch and a moulded abutment.
+    The narrative names three interactions - the pivot, the catch and the abutment - all of which are
+    intended contacts. It describes no region where lid and body would occupy the same space.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the pivot bore/pin pair is dimensioned as a running fit, so its contact is bounded by the declared
+    tolerance
+  - the abutment lies outside the lid sweep until the open pose, so it does not foul the lid earlier
+  - the lid and body are dimensioned so the catch deflection region can flex without the two solids overlapping
+  unresolved_physical_questions:
+  - whether the abutment position actually clears the sweep is geometry-dependent and unverified
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'IIPC is supportable: a compressive catch needs a deflectable region and the narrative implies
+    a moulded one, but the deflection is not quantified. IPPR is supportable: nothing in the narrative
+    requires a part to pass through installed rigid material, and lid/pin/body admit an ordinary insertion
+    order.'
+- fixture_id: ADM-BM-001-B
+  pack: BM-001
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A single moulded shell whose closure region is a thinned compliant band, with a magnetic
+    catch. The compliant band IS a declared compliant region, so IIPC has direct narrative support - this
+    is the one BM-001 admissible fixture whose interaction consistency is stated rather than assumed.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the band material admits the strain of full opening without yielding
+  - the magnet pair is recessed so the two pole regions meet at a declared contact rather than overlapping
+  - a single moulding has no discrete insertion for the shell itself
+  unresolved_physical_questions:
+  - whether a band stiff enough to hold the over-centre pose survives the opening strain is a material
+    question with no source data
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'IPPR is nearly trivial here: a single-piece moulding owes no discrete insertion process for its
+    own body, and the magnet is the only inserted part.'
+- fixture_id: ADM-BM-001-C
+  pack: BM-001
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A detachable cover withdrawn along mating guide features. The guide features are
+    intended sliding contacts; withdrawal is along their axis, so no overlap is implied.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the guide features disengage without interference at the withdrawal limit
+  - the over-centre draw latch has a deflectable or pivoting element - the narrative says "over-centre",
+    which requires a member that can pass its dead point
+  unresolved_physical_questions:
+  - whether the guides run out before the cover clears the aperture is geometry-dependent
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: IIPC rests on the over-centre latch being physically coherent. An over-centre mechanism inherently
+    needs a member that travels past a dead point, which the narrative implies but does not dimension.
+- fixture_id: ADM-BM-001-D
+  pack: BM-001
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'A friction-pivoted lid positioned anywhere in a declared open region, overhanging
+    part of the aperture. Overhang is NOT overlap: the lid projects over the opening without sharing space
+    with the body solid.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - pivot friction exceeds the lid gravity moment throughout the declared region
+  - the lid does not foul the body anywhere in the declared region
+  - the friction pivot is an intended contact whose normal force is what generates the holding torque
+  unresolved_physical_questions:
+  - the friction margin is unverified and is the fixture’s load-bearing assumption
+  - whether the declared usable access is genuinely reachable past the overhanging lid
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This fixture is the SF-2.1/SF-2.2 falsifier and its overhang is exactly the case a blanket-clearance
+    predicate would misread. It carries NUVO precisely because overhang and overlap are different things.
+- fixture_id: ADM-BM-001-E
+  pack: BM-001
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'DIRECT narrative support for all three tags: the fixture enumerates four interaction
+    regions with kinds - pin/bore declared contact, lid/body rim declared contact, flange/wall declared
+    contact, skirt/wall declared clearance. Nothing is left to inference.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the declared numerical tolerance is larger than the running-fit clearance and smaller than any real
+    overlap
+  unresolved_physical_questions:
+  - if the declared tolerance is set too large, real penetration hides inside a contact declaration -
+    this is the tolerance-abuse risk the semantics themselves create
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: THE intended-contact fixture. It is the only BM-001 fixture whose interaction_regions are enumerated
+    in the fixture itself, so its NUVO and IIPC assignments rest on stated regions rather than on assumption.
+- fixture_id: ADM-BM-001-F
+  pack: BM-001
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A snap-fit catch with an explicitly declared compliant interaction region, deflection
+    represented, material and insertion direction and process stated. IIPC and IPPR have direct narrative
+    support; the insertion overlap is declared, so NUVO holds by the declaration.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the beam material admits the stated deflection without yield
+  - the beam returns fully so the retained contact is re-established
+  unresolved_physical_questions:
+  - whether a beam stiff enough to hold the disturbance survives the insertion deflection - the classic
+    snap trade, with no material data in any source
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: THE compliant-assembly fixture. Under the retired assembly_paths_exist contract this design was
+    unassemblable by definition.
+- fixture_id: ADM-BM-001-G
+  pack: BM-001
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: An interference fit with nominal interference, material assumption and process assumption
+    all stated, plus a running fit at the other knuckle. The overlap is declared and its strain path named,
+    so NUVO holds by declaration and IIPC by the stated material relation.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the pin is stiffer than the knuckle wall
+  - the knuckle admits the hoop strain without cracking
+  - insertion is by arbor press in one direction
+  unresolved_physical_questions:
+  - the knuckle wall thickness is unresolved - BM-001 states no dimensions anywhere - so whether the interference
+    splits the wall cannot be judged
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: THE interference-fit fixture. Admissible because its assumptions are EXPLICIT, not because they
+    are known to hold. Strip them and it becomes INA-BM-001-L.
+- fixture_id: INA-BM-001-A
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: The defect is the absent physical determinant. Nothing in the narrative implies solids
+    sharing space, an incoherent interaction or an unbuildable insertion.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a discrete open pose produced only by a model range.'
+- fixture_id: INA-BM-001-B
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - installation_process_physically_realizable
+  narrative_support: 'IIPC is WITHHELD: an interaction asserted between whole bodies with no participating
+    geometry is not a physically coherent interaction. NUVO and IPPR are unaffected.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions:
+  - the fixture now fails two invariants rather than one; that is correct, because a joint with no geometry
+    is both unrealized and physically incoherent
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a joint label with no engagement geometry on either body.'
+- fixture_id: INA-BM-001-C
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: Blocking an access region is not overlapping a solid. The defect is functional, not
+    interference.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the closure blocks its own declared usable access at OPEN.'
+- fixture_id: INA-BM-001-D
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'NUVO is WITHHELD: the fixture achieves apparent clearance by altering the body extent,
+    which means the true solid DOES overlap and the representation hides it. This is exactly undeclared
+    overlap.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions:
+  - whether to treat extent alteration as an overlap defect or purely a conservation defect - reviewed
+    as both, since the physical consequence is real penetration
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: closure extent shrunk at OPEN to fit.'
+- fixture_id: INA-BM-001-E
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - installation_process_physically_realizable
+  narrative_support: 'IIPC is WITHHELD for the same reason as INA-BM-001-B: an interaction with no participating
+    material on either body is not physically coherent.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: retention as a whole-body relation with no participating material.'
+- fixture_id: INA-BM-001-F
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A path ending at the wrong point is a reachability defect, not an interference or
+    interaction defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: access path terminates beside the actuator.'
+- fixture_id: INA-BM-001-G
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: Breaking a tab is a repeatability defect. The tab itself is physically coherent and
+    buildable.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: retention consumed by its own release.'
+- fixture_id: INA-BM-001-H
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: NUVO is WITHHELD - this is the canonical undeclared-overlap fixture and the property
+    it violates.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: undeclared volumetric overlap over part of the sweep.'
+- fixture_id: INA-BM-001-I
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: NUVO is WITHHELD. A contact declaration bounds penetration by the declared tolerance;
+    3 mm with no contact surfaces and no tolerance is overlap wearing the word contact.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions:
+  - what tolerance magnitude separates a legitimate contact declaration from tolerance abuse - unresolved
+    and a genuine CAD question
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: 3 mm penetration labelled contact.'
+- fixture_id: INA-BM-001-J
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: IPPR is WITHHELD - no realizable installation process exists. NUVO holds at the assembled
+    state; the defect is the PROCESS, not the final configuration, which is exactly the distinction the
+    new contract was written to make.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: rigid pin through an installed rigid wall.'
+- fixture_id: INA-BM-001-K
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - installation_process_physically_realizable
+  narrative_support: 'IIPC is WITHHELD: a snap that cannot deflect is not a physically coherent interaction.
+    IPPR is carried because the defect is the interaction, not the process - the auditor should reject
+    this for incoherence rather than for unassemblability.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions:
+  - whether a rigid hook could be assembled by another route - immaterial, since the declared interaction
+    is itself incoherent
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: snap narrative with no compliant region.'
+- fixture_id: INA-BM-001-L
+  pack: BM-001
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - installation_process_physically_realizable
+  narrative_support: 'IIPC is WITHHELD: an interference with no material relation is not shown to be takeable
+    up in strain, so the interaction is not physically coherent. The overlap is declared, so NUVO is carried.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: press fit with no material or process assumption.'
+- fixture_id: ADM-BM-001-2-A
+  pack: BM-001-2
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: A filleted prismatic body with interior-worked retention. The only interaction the
+    narrative names is the retention, worked from the cavity. BM-001-2 states no motion path and no assembly,
+    so NUVO and IPPR are NOT assigned - they are not properties this delta’s narratives address. Assigning
+    them would be the bulk certification withdrawn at PCF-005.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: BM-001-2 carries only intended_interaction_physically_consistent. Its parent BM-001 owns the motion
+    and assembly properties.
+- fixture_id: ADM-BM-001-2-B
+  pack: BM-001-2
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: A curved shell over a flat seating plate. The shell/plate joint is an intended contact.
+    BM-001-2 states no motion path and no assembly, so NUVO and IPPR are NOT assigned - they are not properties
+    this delta’s narratives address. Assigning them would be the bulk certification withdrawn at PCF-005.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions:
+  - whether the shell/plate seam itself projects - a REQ-009 question, not an interaction question
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: BM-001-2 carries only intended_interaction_physically_consistent. Its parent BM-001 owns the motion
+    and assembly properties.
+- fixture_id: ADM-BM-001-2-C
+  pack: BM-001-2
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: Chamfered recessed arrises with interior-worked retention. BM-001-2 states no motion
+    path and no assembly, so NUVO and IPPR are NOT assigned - they are not properties this delta’s narratives
+    address. Assigning them would be the bulk certification withdrawn at PCF-005.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: BM-001-2 carries only intended_interaction_physically_consistent. Its parent BM-001 owns the motion
+    and assembly properties.
+- fixture_id: ADM-BM-001-2-D
+  pack: BM-001-2
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: An L-shaped body seated on one narrow face, exposed boundary wrapping three adjoining
+    faces. BM-001-2 states no motion path and no assembly, so NUVO and IPPR are NOT assigned - they are
+    not properties this delta’s narratives address. Assigning them would be the bulk certification withdrawn
+    at PCF-005.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions:
+  - whether an L-section mounted on a narrow face needs fastening the source does not specify
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: BM-001-2 carries only intended_interaction_physically_consistent. Its parent BM-001 owns the motion
+    and assembly properties.
+- fixture_id: INA-BM-001-2-A
+  pack: BM-001-2
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: Sharp exposed arrises. A profile defect; interactions unaffected. BM-001-2 states
+    no motion path and no assembly, so NUVO and IPPR are NOT assigned - they are not properties this delta’s
+    narratives address. Assigning them would be the bulk certification withdrawn at PCF-005.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: BM-001-2 carries only intended_interaction_physically_consistent. Its parent BM-001 owns the motion
+    and assembly properties.
+- fixture_id: INA-BM-001-2-B
+  pack: BM-001-2
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: A curvature LABEL over a prismatic solid. A representation-authority defect; the
+    solid itself is coherent. BM-001-2 states no motion path and no assembly, so NUVO and IPPR are NOT
+    assigned - they are not properties this delta’s narratives address. Assigning them would be the bulk
+    certification withdrawn at PCF-005.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: BM-001-2 carries only intended_interaction_physically_consistent. Its parent BM-001 owns the motion
+    and assembly properties.
+- fixture_id: INA-BM-001-2-C
+  pack: BM-001-2
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: Actuator on the exposed side. A placement defect. BM-001-2 states no motion path
+    and no assembly, so NUVO and IPPR are NOT assigned - they are not properties this delta’s narratives
+    address. Assigning them would be the bulk certification withdrawn at PCF-005.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: BM-001-2 carries only intended_interaction_physically_consistent. Its parent BM-001 owns the motion
+    and assembly properties.
+- fixture_id: INA-BM-001-2-D
+  pack: BM-001-2
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: Actuator on a non-exposed EXTERIOR side. A placement defect under the unresolved
+    reading of REQ-010. BM-001-2 states no motion path and no assembly, so NUVO and IPPR are NOT assigned
+    - they are not properties this delta’s narratives address. Assigning them would be the bulk certification
+    withdrawn at PCF-005.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: BM-001-2 carries only intended_interaction_physically_consistent. Its parent BM-001 owns the motion
+    and assembly properties.
+- fixture_id: ADM-BM-001-3-A
+  pack: BM-001-3
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'A cylindrical underside resting on a plane: a LINE contact along the lowest generator.
+    A line contact is an intended contact between two convex-on-one-side bodies and implies no shared
+    volume.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions:
+  - the cylinder axis is horizontal, so the contact is a true line rather than degenerating to a point
+  unresolved_physical_questions:
+  - if the axis is not horizontal the body rocks in two directions - a stability question held unresolved
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: NUVO is in scope for BM-001-3 because the delta introduces a resting contact with a supporting
+    surface.
+- fixture_id: ADM-BM-001-3-B
+  pack: BM-001-3
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'Three raised spherical lobes with coplanar apexes: three POINT contacts, all on
+    curved material. Three points on a plane is statically determinate and shares no volume.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions:
+  - the three lobe apexes are coplanar within manufacturing tolerance
+  - the centre of mass projects inside the triangle the apexes form
+  - each lobe is convex at its apex, so contact is a point rather than an edge
+  unresolved_physical_questions:
+  - coplanarity is the load-bearing assumption; if it fails the body rocks on two of three lobes
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Revised at SF-4.2 in the previous pass, when its single spherical cap could not produce the three
+    contacts claimed. Re-reviewed here: the lobed geometry does support three point contacts.'
+- fixture_id: ADM-BM-001-3-C
+  pack: BM-001-3
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: Two line contacts on curved bands flanking a NON-LOAD-BEARING relieved recess. The
+    recess floor is set above the contact envelope, so it never touches the supporting plane.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions:
+  - the recess floor lies strictly above the plane the two curved bands touch
+  - the bands are wide enough to carry the weight without local yield
+  unresolved_physical_questions:
+  - if the relief is insufficient the recess becomes the contact and the body rests on a flat land, which
+    under HSD-005 fails REQ-011
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: Revised at SF-4.3. The relief clearance is the whole point of the fixture and is unverified.
+- fixture_id: INA-BM-001-3-A
+  pack: BM-001-3
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A curvature-existence defect. Its resting contact - a plane on a plane - is itself
+    physically coherent.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a fully prismatic enclosure with REQ-011 reported satisfied.'
+- fixture_id: INA-BM-001-3-B
+  pack: BM-001-3
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A representation-authority defect. The physical contact, whatever it is, is not shown
+    incoherent.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: resting orientation set by a role label rather than contact geometry.'
+- fixture_id: INA-BM-001-3-C
+  pack: BM-001-3
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: NUVO is WITHHELD - the sweep genuinely overlaps the curved region and nothing declares
+    it.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: closure sweep interferes with the curved underside region.'
+- fixture_id: INA-BM-001-3-D
+  pack: BM-001-3
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A land carrying the weight is a coherent contact; the defect is that it is not ON
+    the curved region, which is a source-reading violation under HSD-005, not an interaction defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a load-bearing flat land with curvature only on decorative flanks.'
+- fixture_id: ADM-BM-002-A
+  pack: BM-002
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'Direct screw drive. Interactions: thread pair (contact), thrust seat (contact),
+    upper journal (contact), two guides (contact). All are intended running or bearing contacts.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the thread pair is dimensioned as a running fit so its contact is bounded by the declared tolerance
+  - the two guides are parallel to the screw axis within the nut clearance
+  - the platform, screw and guides are inserted in an order that needs no part to pass through another
+  unresolved_physical_questions:
+  - guide/screw misalignment binds the nut - the classic over-constraint of this family, unresolved
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'IPPR: a screw, a nut, a platform and two guides admit an ordinary bottom-up assembly order.'
+- fixture_id: ADM-BM-002-B
+  pack: BM-002
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'Rotating nut on a fixed screw. Interactions: thread pair (contact), nut journal
+    seat (contact), single profiled guide (contact). The axial load path runs down the screw into the
+    journal seat - stated in the fixture load_profile, so IIPC has direct support here.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the screw is restrained against rotation by the platform guidance
+  - the nut journal seat can carry the axial payload load
+  unresolved_physical_questions:
+  - if the guidance does not restrain the screw, the screw turns with the nut and nothing rises
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Falsifies the retired universal axial-reaction premise: no separate thrust feature exists.'
+- fixture_id: ADM-BM-002-C
+  pack: BM-002
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'Cable and drum. Interactions: drum journals (contact), four cable anchors (contact),
+    a deliberate stop collar (contact), platform seating on the floor (contact). Cables are flexible,
+    so no rigid overlap is implied anywhere.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the four cables are equal in length and stay in tension
+  - the stop collar arrests the drum without shock-loading the cables
+  unresolved_physical_questions:
+  - unequal cable stretch tilts the platform; cables cannot push, so descent is under the platform’s own
+    weight
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: The terminal is a DELIBERATE stop collar, replacing the drum stall corrected at SF-5.7. A stall
+    is an overload condition, not a travel determinant.
+- fixture_id: ADM-BM-002-D
+  pack: BM-002
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'Scissor linkage. Interactions: pivot pins (contact), cross-tie thread (contact).
+    A scissor mechanism is a well-formed linkage whose members share pin axes, not volume.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the pivots have clearance for the full angular sweep
+  - the linkage members are dimensioned so adjacent arms do not foul at full retraction
+  unresolved_physical_questions:
+  - near full retraction the mechanical advantage collapses and crank effort rises sharply; no effort
+    ceiling exists (UNR-BM-002-003)
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: null
+- fixture_id: ADM-BM-002-E
+  pack: BM-002
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'Non-geared crank and link. Interactions: crank pin journal (contact), wrist pin
+    (contact), carrier in housing channel (contact). A rotationally symmetric platform whose angular position
+    is immaterial.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the crank throw is at least half the required travel
+  - the channel carries the carrier through the full stroke without the link fouling the housing
+  unresolved_physical_questions:
+  - a crank of throw r gives 2r of travel, so 80-100 mm needs a 40-50 mm throw, which may exceed a desktop
+    envelope (UNR-BM-002-006)
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'THE SF-5.4 falsifier: the platform is free to rotate about the travel axis and the scenario does
+    not care.'
+- fixture_id: INA-BM-002-A
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - installation_process_physically_realizable
+  narrative_support: 'IIPC WITHHELD: a coupling with no participating material is not a physically coherent
+    interaction.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a declared ratio with no participating geometry anywhere in the chain.'
+- fixture_id: INA-BM-002-B
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A behaviour defect. The interactions present are coherent; what fails is the required
+    orientation.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the scenario requires the platform square and nothing restrains its rotation.'
+- fixture_id: INA-BM-002-C
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A load-path defect. The engagement itself is coherent; the reaction is missing.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a shaft carrying radial load with no radial reaction.'
+- fixture_id: INA-BM-002-D
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A load-path defect, as INA-BM-002-C.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: axial payload load with no axial reaction path.'
+- fixture_id: INA-BM-002-E
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: NUVO WITHHELD - this is the canonical undeclared-overlap fixture for BM-002.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the platform intersects a housing rib at the upper required pose.'
+- fixture_id: INA-BM-002-F
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: An evaluation defect; both terminals are physically realizable.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: one terminal condition evaluated once and credited to both.'
+- fixture_id: INA-BM-002-G
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A reachability defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: payload access terminating at the housing opening.'
+- fixture_id: INA-BM-002-H
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A topology defect; no overlap or incoherent interaction is implied.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the crank modelled as travelling with the platform.'
+- fixture_id: INA-BM-002-I
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A quantity defect; the mechanism itself is coherent.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: declared travel of 45 mm reported as satisfying REQ-002.'
+- fixture_id: INA-BM-002-J
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A quantity defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: no supported payload declared.'
+- fixture_id: INA-BM-002-K
+  pack: BM-002
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: NUVO WITHHELD - the shaft and housing genuinely share space and nothing declares
+    it.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the shaft fouls the housing at the extremes of its motion, unmodelled.'
+- fixture_id: ADM-C4-A
+  pack: C4-drawer
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'Toothed wheel on a knob shaft engaging a toothed member; drawer on two side rails;
+    abutments at each rail end. Interactions: tooth mesh (contact), two rail pairs (contact), two abutments
+    (contact).'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the mesh stays engaged over the full stroke
+  - the rails carry the drawer weight at full extension
+  - the abutments lie outside the drawer sweep until the ends
+  unresolved_physical_questions:
+  - at full extension the drawer overhangs its rails and the mesh may lift
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: null
+- fixture_id: ADM-C4-B
+  pack: C4-drawer
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'Threaded rod with a follower; dovetailed channel guiding the drawer. Interactions:
+    thread pair (contact), dovetail (contact), end seat (contact), shoulder (contact).'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the dovetail admits a sliding fit over the full stroke
+  - the rod thrust is reacted at an end seat
+  unresolved_physical_questions:
+  - a dovetail long enough for the stroke roughly doubles the cabinet depth - a packaging tension
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: null
+- fixture_id: ADM-C4-C
+  pack: C4-drawer
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: Band on a drum anchored to each end of the drawer; rolling supports in a tray recess.
+    Bands are flexible and rollers are line contacts, so no rigid overlap is implied. No end of travel
+    is declared.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the band stays in tension in both directions
+  - the rollers stay captive through the full stroke
+  unresolved_physical_questions:
+  - with no end of travel the user can overrun and pull the drawer off its rollers - a usability consequence,
+    not a source violation, since no travel limit is stated
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: Falsifies both the retired universal axial-load premise and the retired unconditional terminal
+    requirement.
+- fixture_id: ADM-C4-D
+  pack: C4-drawer
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'Centred crank and connecting link to a carrier in a single wide channel; a shallow
+    open tray whose angular position is immaterial. Interactions: crank pin journal (contact), wrist pin
+    (contact), carrier in channel (contact).'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions:
+  - the centred drive genuinely applies no net moment about the travel axis
+  - the crank throw gives the intended projection
+  unresolved_physical_questions:
+  - if the drive is not exactly centred a residual moment appears and the tray yaws
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'THE SF-6.1 falsifier: no dedicated anti-rotation provision, and none is owed.'
+- fixture_id: INA-C4-A
+  pack: C4-drawer
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - installation_process_physically_realizable
+  narrative_support: 'IIPC WITHHELD: a coupling with no participating material is not a coherent interaction.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a declared ratio with no participating geometry.'
+- fixture_id: INA-C4-B
+  pack: C4-drawer
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A direction defect; the mechanism is coherent.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a vertical travel axis.'
+- fixture_id: INA-C4-C
+  pack: C4-drawer
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A reachability defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the drawer never leaves the cabinet envelope.'
+- fixture_id: INA-C4-D
+  pack: C4-drawer
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A load-path defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: weight reacted only at the retracted position.'
+- fixture_id: INA-C4-E
+  pack: C4-drawer
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: 'NUVO WITHHELD: a drawer that skews and JAMS in its channel is in undeclared contact
+    with the channel walls at an unintended configuration. Reviewed individually: jamming is a genuine
+    overlap-adjacent condition, not merely a behaviour failure.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a deep drawer yawing in an oversize channel until it jams.'
+- fixture_id: INA-C4-F
+  pack: C4-drawer
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: An evaluation defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: one terminal condition credited to both ends.'
+- fixture_id: INA-C4-G
+  pack: C4-drawer
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A reachability defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the knob reachable only once the drawer is open.'
+- fixture_id: INA-C4-H
+  pack: C4-drawer
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: NUVO WITHHELD - the drawer and the panel genuinely share space.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the emergence path passes through a panel with no opening.'
+- fixture_id: INA-C4-I
+  pack: C4-drawer
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: A load-path defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a knob shaft carrying radial load with no radial reaction.'
+- fixture_id: INA-C4-J
+  pack: C4-drawer
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  - installation_process_physically_realizable
+  narrative_support: NUVO WITHHELD - shaft and wall share space and nothing declares it.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - assembly_assumptions_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the knob shaft fouls the cabinet wall over part of its rotation.'
+- fixture_id: ADM-GS-A
+  pack: guided-slider
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'Two parallel rails with two carriages: four intended sliding contacts.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions:
+  - the rails are parallel within the carriage clearance
+  unresolved_physical_questions:
+  - rail non-parallelism binds the carriages
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: guided-slider declares no assembly contract, so installation_process_physically_realizable is
+    not in scope for this pack and is not assigned.
+- fixture_id: ADM-GS-B
+  pack: guided-slider
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'One non-circular bar through a matching bore: one intended sliding contact over
+    a non-circular section.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions:
+  - bore and bar sections match closely enough to remove rotation
+  unresolved_physical_questions:
+  - a close non-circular fit binds on thermal expansion
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: guided-slider declares no assembly contract, so installation_process_physically_realizable is
+    not in scope for this pack and is not assigned.
+- fixture_id: ADM-GS-C
+  pack: guided-slider
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'A dovetail: one continuous intended sliding contact.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions:
+  - the dovetail angle is self-retaining under transverse load
+  unresolved_physical_questions:
+  - a shallow dovetail lifts out under load
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: guided-slider declares no assembly contract, so installation_process_physically_realizable is
+    not in scope for this pack and is not assigned.
+- fixture_id: ADM-GS-D
+  pack: guided-slider
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'Three pads bearing on three recess walls: three intended contacts, statically determinate
+    with a preload.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions:
+  - a preload holds the three pads in contact
+  unresolved_physical_questions:
+  - without a preload the body can lift off a wall
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: guided-slider declares no assembly contract, so installation_process_physically_realizable is
+    not in scope for this pack and is not assigned.
+- fixture_id: ADM-GS-E
+  pack: guided-slider
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'A rod in a plain round bore: one intended sliding contact over a cylindrical pair,
+    with axial rotation declared free.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions:
+  - the bore length gives enough moment arm to remove the lateral rotations
+  unresolved_physical_questions:
+  - a short bore relative to its diameter lets the rod cock in the bore
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: guided-slider declares no assembly contract, so installation_process_physically_realizable is
+    not in scope for this pack and is not assigned.
+- fixture_id: INA-GS-A
+  pack: guided-slider
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A representation-authority defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a named axis with no determinate direction.'
+- fixture_id: INA-GS-B
+  pack: guided-slider
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: An accounting defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a required freedom neither constrained nor declared.'
+- fixture_id: INA-GS-C
+  pack: guided-slider
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  narrative_support: 'IIPC WITHHELD: a constraint with no participating material is not a coherent interaction.'
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a prismatic relationship with no participating material.'
+- fixture_id: INA-GS-D
+  pack: guided-slider
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: An engagement-persistence defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the guide disengages partway along the declared travel.'
+- fixture_id: INA-GS-E
+  pack: guided-slider
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A load-path defect.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: transverse load reacted at one position only.'
+- fixture_id: INA-GS-F
+  pack: guided-slider
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: NUVO WITHHELD - the canonical undeclared-overlap fixture for this pack.
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the translating body intersects a boss at an interior configuration.'
+- fixture_id: ADM-LR-A
+  pack: latch-retention
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A cantilever snap hook engaging a lip. The insertion overlap is taken up in DECLARED
+    beam deflection, so IIPC has direct narrative support; the retained position is an intended contact
+    at the hook face.
+  representation_prerequisites: &id001
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  assumptions:
+  - the beam material admits the stated deflection without yield
+  - the beam returns fully
+  unresolved_physical_questions:
+  - a beam stiff enough to hold may exceed its strain limit at the insertion deflection
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-LR-B
+  pack: latch-retention
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A magnetic pair with an explicit keeper face. The narrative names the participating
+    material on both bodies - pole face and keeper area - so a FIELD interaction is coherent without the
+    bodies touching outside the keeper contact.
+  representation_prerequisites: *id001
+  assumptions:
+  - pole face and keeper area are large enough for the holding force
+  unresolved_physical_questions:
+  - a field strong enough to resist straight pull may also resist the peeling release if the offset is
+    small
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-LR-C
+  pack: latch-retention
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: An over-centre link held past its dead point. Pin joints are intended contacts; passing
+    a dead point is a kinematic condition, not an overlap.
+  representation_prerequisites: *id001
+  assumptions:
+  - the link geometry has a true dead point within its travel
+  unresolved_physical_questions:
+  - too small an over-centre offset lets the disturbance drive the link back through the dead point
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-LR-D
+  pack: latch-retention
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A spring-loaded detent ball seating in a recess. Ball-in-recess is an intended contact
+    whose seating force is generated by the spring.
+  representation_prerequisites: *id001
+  assumptions:
+  - the recess geometry gives a reproducible seating force
+  unresolved_physical_questions:
+  - with no declared disturbance (UNR-LR-001) the required separation between hold and release forces
+    cannot be set
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: INA-LR-A
+  pack: latch-retention
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A definition defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: no relative configuration given for the retained state. This micro-oracle declares
+    no assembly contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-LR-B
+  pack: latch-retention
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  narrative_support: 'IIPC WITHHELD: neither contact regions nor field regions are identified, so the
+    interaction is not coherent.'
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: retention between whole bodies with no participating material. This micro-oracle
+    declares no assembly contract, so installation_process_physically_realizable is not in scope and is
+    not assigned.'
+- fixture_id: INA-LR-C
+  pack: latch-retention
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A load-path defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the disturbance load passes through the feature to nothing. This micro-oracle declares
+    no assembly contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-LR-D
+  pack: latch-retention
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A discrimination defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: release indistinguishable from the disturbance. This micro-oracle declares no assembly
+    contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-LR-E
+  pack: latch-retention
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: 'NUVO WITHHELD: an interference on the way in that is neither cleared nor taken up
+    by a declared deflection is undeclared overlap. Reviewed individually - this is the one latch-retention
+    inadmissible fixture whose defect is genuinely an overlap.'
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: engagement interference with no clearance and no declared deflection. This micro-oracle
+    declares no assembly contract, so installation_process_physically_realizable is not in scope and is
+    not assigned.'
+- fixture_id: INA-LR-F
+  pack: latch-retention
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A repeatability defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a participating feature destroyed by release. This micro-oracle declares no assembly
+    contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: ADM-RL-A
+  pack: rotary-to-linear-engagement
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'A tooth mesh plus a channel: two intended contacts.'
+  representation_prerequisites: *id001
+  assumptions:
+  - the mesh stays engaged over the output range
+  unresolved_physical_questions:
+  - tooth separating force lifts the member if the channel does not react it
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-RL-B
+  pack: rotary-to-linear-engagement
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'A thread pair plus a non-circular follower section: two intended contacts.'
+  representation_prerequisites: *id001
+  assumptions:
+  - the follower section restrains rotation without binding
+  unresolved_physical_questions:
+  - a coarse lead may back-drive
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-RL-C
+  pack: rotary-to-linear-engagement
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A band on a drum with two anchors. A band is flexible; anchors are intended contacts.
+  representation_prerequisites: *id001
+  assumptions:
+  - both band runs stay in tension
+  unresolved_physical_questions:
+  - a band cannot push; the return run must be pretensioned
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-RL-D
+  pack: rotary-to-linear-engagement
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'A rotating nut on a fixed screw: a thread pair plus a journal seat.'
+  representation_prerequisites: *id001
+  assumptions:
+  - the screw is restrained against rotation downstream
+  unresolved_physical_questions:
+  - if nothing restrains the screw it turns with the nut
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-RL-E
+  pack: rotary-to-linear-engagement
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: Crank disc, connecting link, slider - three pin/sliding contacts and NO interaction
+    between input and output bodies.
+  representation_prerequisites: *id001
+  assumptions:
+  - both pins have clearance for the full sweep
+  - the link length avoids a toggle in the working range
+  unresolved_physical_questions:
+  - near dead centre the mechanical advantage collapses; if the working range includes one, the mechanism
+    stalls
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-RL-F
+  pack: rotary-to-linear-engagement
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: Cam, roller follower, pushrod - a rolling contact plus a sliding guide.
+  representation_prerequisites: *id001
+  assumptions:
+  - the follower stays in contact through the whole cam rotation
+  unresolved_physical_questions:
+  - a steep pressure angle jams the follower in its guide
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: INA-RL-A
+  pack: rotary-to-linear-engagement
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  narrative_support: 'IIPC WITHHELD: no participating material means no coherent interaction.'
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a declared ratio with no participating material anywhere. This micro-oracle declares
+    no assembly contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-RL-B
+  pack: rotary-to-linear-engagement
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A kinematic defect. The interactions themselves are coherent; the chain simply produces
+    no output.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a chain at a dead point throughout the declared range. This micro-oracle declares
+    no assembly contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-RL-C
+  pack: rotary-to-linear-engagement
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: An engagement-persistence defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a link disengaging partway through the output range. This micro-oracle declares
+    no assembly contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-RL-D
+  pack: rotary-to-linear-engagement
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A restraint defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a follower free to rotate where the thread applies the moment. This micro-oracle
+    declares no assembly contract, so installation_process_physically_realizable is not in scope and is
+    not assigned.'
+- fixture_id: INA-RL-E
+  pack: rotary-to-linear-engagement
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A load-path defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: a body carrying a load component with no reaction path. This micro-oracle declares
+    no assembly contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: ADM-HS-A
+  pack: bounded-two-state-closure
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'Pin and knuckle, a rim seat and a flange stop: three intended contacts.'
+  representation_prerequisites: *id001
+  assumptions:
+  - the flange lies outside the lid sweep until the open extreme
+  unresolved_physical_questions:
+  - a flange inside the sweep fouls the lid earlier
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-HS-B
+  pack: bounded-two-state-closure
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A four-bar linkage with a rim seat. Pin joints are intended contacts; a dead point
+    is a kinematic condition.
+  representation_prerequisites: *id001
+  assumptions:
+  - the coupler clears the body through the whole sweep
+  unresolved_physical_questions:
+  - a four-bar can pass through its dead point under momentum, overrunning the intended extreme
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-HS-C
+  pack: bounded-two-state-closure
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'A sliding cover in a channel with two abutments on one part: three intended contacts.'
+  representation_prerequisites: *id001
+  assumptions:
+  - the boss clears the channel until the far end
+  unresolved_physical_questions:
+  - a boss sized to arrest the cover may foul it earlier in the travel
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-HS-D
+  pack: bounded-two-state-closure
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: 'A pivot pin in a curved slot: one continuous intended sliding contact whose two
+    ends arrest the pin.'
+  representation_prerequisites: *id001
+  assumptions:
+  - the slot curvature matches the lid pivot path
+  unresolved_physical_questions:
+  - a mismatched slot curvature binds the pin partway
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-HS-E
+  pack: bounded-two-state-closure
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A flexure handing off to a moulded rib. The flexure is a declared compliant region
+    and the rib an intended contact, so IIPC has direct support - the changing constraint mode is the
+    point of the fixture.
+  representation_prerequisites: *id001
+  assumptions:
+  - the flexure and the rib OVERLAP in coverage so no configuration is unconstrained
+  - the buckling transition is repeatable and does not damage the flexure
+  unresolved_physical_questions:
+  - if the flexure buckles before the rib engages there is an unconstrained band - the coverage overlap
+    is the load-bearing assumption
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: ADM-HS-F
+  pack: bounded-two-state-closure
+  fixture_kind: admissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A magnetic detent with two stable seats produced by one field. Seats are intended
+    contacts; the field acts across a gap.
+  representation_prerequisites: *id001
+  assumptions:
+  - the field has two distinct stable minima at the intended configurations
+  unresolved_physical_questions:
+  - a two-minimum field usually has a shallow barrier; the cover may drift between states
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: This micro-oracle declares no assembly contract, so installation_process_physically_realizable
+    is not in scope and is not assigned.
+- fixture_id: INA-HS-A
+  pack: bounded-two-state-closure
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A definition defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: one state given no relative configuration. This micro-oracle declares no assembly
+    contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-HS-B
+  pack: bounded-two-state-closure
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A path-existence defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: no continuous path between the two states. This micro-oracle declares no assembly
+    contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-HS-C
+  pack: bounded-two-state-closure
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A constraint-coverage defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: an unconstrained stretch of the declared path. This micro-oracle declares no assembly
+    contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-HS-D
+  pack: bounded-two-state-closure
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: A determinant defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: extremes set only by a numeric joint range. This micro-oracle declares no assembly
+    contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-HS-E
+  pack: bounded-two-state-closure
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  narrative_support: An evaluation defect.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: one evaluation result copied to both extremes. This micro-oracle declares no assembly
+    contract, so installation_process_physically_realizable is not in scope and is not assigned.'
+- fixture_id: INA-HS-F
+  pack: bounded-two-state-closure
+  fixture_kind: inadmissible
+  physical_tags_assigned:
+  - intended_interaction_physically_consistent
+  narrative_support: NUVO WITHHELD - the canonical undeclared-overlap fixture for this pack.
+  representation_prerequisites: *id001
+  assumptions: []
+  unresolved_physical_questions: []
+  reviewer_status: NEEDS_GEOMETRY_VALIDATION
+  changed_during_this_pass: false
+  note: 'Rejected for: the lid passes through the body wall partway through the motion. This micro-oracle
+    declares no assembly contract, so installation_process_physically_realizable is not in scope and is
+    not assigned.'

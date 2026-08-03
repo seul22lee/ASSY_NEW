@@ -1,0 +1,1306 @@
+schema_version: 0.1.0
+purpose: Statement/predicate/tag/stage alignment review. EVERY invariant is reviewed, not only the ones
+  changed, because PCF-007 was a case where a predicate had been corrected and its statement and tag had
+  not.
+method: 'For each invariant: compare the statement, the verification predicate, the physical tags, the
+  representation prerequisites and the stage-11 outcome rule. A MISMATCH is recorded when the statement
+  asserts blanket non-intersection while the predicate admits declared contact - the exact PCF-007 shape.'
+summary:
+  total_invariants: 73
+  ALIGNED: 73
+  MISMATCH: 0
+  corrected_this_pass: 15
+  reviewed_unchanged: 58
+reviews:
+- statement_id: NRM-BM-001-001
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 REQ-001 (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: The enclosure has a closed state and an open state, and a motion that connects them
+    in both directions.
+  predicate_summary: exists(state CLOSED) and exists(state OPEN) and exists(transition CLOSED<->OPEN)
+    evaluable at intermediate parameter values.
+  physical_tags:
+  - two_states
+  - continuous_transition
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-002
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 REQ-001 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: 'The connection between the closure and the enclosure is physically realized: each
+    participating body carries engagement geometry, and the guidance or support that the chosen closur'
+  predicate_summary: 'for the closure connection: engagement geometry exists on both participating bodies
+    at every state where the concept declares contact; AND for each declared intended interaction: a'
+  physical_tags:
+  - connection_realized
+  - intended_interaction_physically_consistent
+  evidence_tags: []
+  representation_prerequisites: &id001
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - compliant_region_recorded
+  - assembly_assumptions_recorded
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: scope extended to own interaction coherence (PCF-004)
+- statement_id: NRM-BM-001-003
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 REQ-001, DOS-BM-001 S1 product_intent (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: In the open state the closure does not obstruct the usable access the design declares
+    for the storage interaction, and along the transition between states the closure and the enclo
+  predicate_summary: at OPEN the closure does not overlap the declared usable access region; and along
+    the CLOSED->OPEN transition there is no volumetric overlap between the closure and the enclosure s
+  physical_tags:
+  - declared_usable_access_unobstructed
+  - no_undeclared_volumetric_overlap
+  evidence_tags: []
+  representation_prerequisites: *id001
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: statement re-authored to no-undeclared-overlap; retired sweep_clears_enclosure (PCF-007)
+- statement_id: NRM-BM-001-004
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 REQ-001 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: 'The closure''s material content is conserved across states. Any change of shape
+    between states is an explicitly modelled deformation of a declared compliant region; a body''s extent '
+  predicate_summary: material content of the closure is equal across states within tolerance; any shape
+    change is attributed to a declared compliant region.
+  physical_tags:
+  - extent_conserved
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-005
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 REQ-001 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Where the design declares a discrete terminal open pose, that pose is produced by
+    a realized physical condition rather than by a limit imposed only on the model. Where the design i
+  predicate_summary: 'if a discrete terminal open pose is declared: it references a realized determinant
+    (contact, rest condition, over-centre, engagement run-out or equivalent); else if an open configu'
+  physical_tags:
+  - open_state_admissible
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-006
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 REQ-002, DOS-BM-001 S1 REQ-004, DOS-BM-001 S1 REQ-008 (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: 'A retention function holds the closure in the closed state against the disturbance
+    the design declares, and is released by a deliberate user action. Its engagement is localized on '
+  predicate_summary: 'retention realization has participating geometry on both bodies, a holding condition
+    at CLOSED under the declared disturbance, and a release condition reachable by a declared user '
+  physical_tags:
+  - retention_realized
+  - retention_release_action
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-007
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 REQ-008, DOS-BM-001 S1 REQ-001 (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: The retention completes a close-engage, release, close-engage-again cycle in which
+    every participating feature retains the geometry its retention role depends on, and the closed st
+  predicate_summary: 'a sequence CLOSED-engaged -> released -> CLOSED-engaged is realizable, with each
+    participating feature''s retention-critical geometry present in the final state. A declaration that '
+  physical_tags:
+  - retention_cycle_realizable
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-008
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 REQ-003 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: The user action that releases the retention is reachable along a realized access
+    path that terminates at the actuation feature.
+  predicate_summary: exists(access_path) whose endpoint is the retention actuation feature and which has
+    no undeclared volumetric overlap with solid material along its length.
+  physical_tags:
+  - actuator_reachable
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-009
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 product_intent, DOS-BM-001 S1 REQ-006 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: An interior cavity exists and is reachable through the aperture in the open state.
+  predicate_summary: exists(access_path) origin exterior, endpoint inside the cavity, valid at OPEN, not
+    intersecting the enclosure solid or the closure at OPEN.
+  physical_tags:
+  - cavity_access
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-010
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 REQ-007 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Each part installed as a discrete operation can reach its assembled position without
+    passing through already-placed material. Parts formed together or permanently joined declare th
+  predicate_summary: 'for each discretely-installed part: a realizable installation process exists in
+    which the part passes through no UNDECLARED rigid material. Contact during insertion is admissible. '
+  physical_tags:
+  - installation_process_physically_realizable
+  evidence_tags: []
+  representation_prerequisites: *id001
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: assembly contract replaced (PCF-006)
+- statement_id: NRM-BM-001-011
+  pack: BM-001
+  active_authority: DOS-BM-001 S1 REQ-002, DOS-BM-001 S1 REQ-007 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: 'Retention and closure-connection loads are reacted: for each interface that carries
+    load, a path exists to a reaction site.'
+  predicate_summary: 'for each load-carrying interface in the declared scenario: exists(load_path) terminating
+    at a reaction site.'
+  physical_tags:
+  - loads_reacted
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-012
+  pack: BM-001
+  active_authority: DOS-BM-001 S5 E1 (original, unchanged)
+  basis: VERIFICATION_MINIMUM
+  statement_summary: A criterion offered as evidence that the open state's determinant is physically produced
+    must be able to fail when that determinant is removed.
+  predicate_summary: 'evidence offered for the open state determinant is EITHER (A) direct causal evidence
+    - the realizing geometry exists, the interaction occurs at the relevant configuration, and the '
+  physical_tags: []
+  evidence_tags:
+  - determinant_criterion_discriminates
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-013
+  pack: BM-001
+  active_authority: DOS-BM-001 S5 E2 (original, unchanged)
+  basis: VERIFICATION_MINIMUM
+  statement_summary: A force window that is an input of a task or test definition may not be cited as
+    an achieved retention property.
+  predicate_summary: 'for every cited retention or release force: its provenance is recorded as either
+    an input condition or a measurement, and only measurements are counted as results.'
+  physical_tags: []
+  evidence_tags:
+  - force_provenance_declared
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-2-001
+  pack: BM-001-2
+  active_authority: DOS-BM-001-2 S1 REQ-009 (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: One boundary region of the enclosure seats flat against a mounting surface, and the
+    exposed exterior boundary presents no projecting corner.
+  predicate_summary: 'exists(planar boundary region) AND for every edge of the exposed exterior boundary:
+    the edge is non-projecting, evaluated on metric surface geometry.'
+  physical_tags:
+  - planar_seating_region
+  - exposed_edges_non_projecting
+  - intended_interaction_physically_consistent
+  evidence_tags: []
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - compliant_region_recorded
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: interaction-coherence tag assigned; representation tag removed (PCF-004)
+- statement_id: NRM-BM-001-2-002
+  pack: BM-001-2
+  active_authority: DOS-BM-001-2 S1 REQ-010 (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: The retention actuation feature is not reachable from the exposed side, and the release
+    action is worked from inside the enclosure.
+  predicate_summary: no access_path originating in the exposed half-space terminates at the retention
+    actuation feature, AND the declared release action originates inside the enclosure.
+  physical_tags:
+  - actuator_not_reachable_from_exposed_side
+  - release_worked_from_inside
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-3-001
+  pack: BM-001-3
+  active_authority: DOS-BM-001-3 S1 REQ-011 (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: The enclosure boundary has a region of non-zero curvature on the underside and a
+    planar region on the top containing the aperture.
+  predicate_summary: exists(boundary region with non-zero curvature on the underside) AND exists(planar
+    boundary region containing the aperture) on opposite sides of the cavity.
+  physical_tags:
+  - curved_underside_region
+  - planar_top_with_aperture
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-3-002
+  pack: BM-001-3
+  active_authority: DOS-BM-001-3 S1 REQ-011 + HSD-005 (adopted reading RDG-BM-001-3-01)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: A resting configuration on a supporting surface exists and is derived from contact
+    geometry rather than asserted by a role name.
+  predicate_summary: the resting configuration references a load-bearing contact region between the CURVED
+    underside and the supporting surface, with derived_from terminating in metric geometry.
+  physical_tags:
+  - resting_configuration_derived
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-001-3-003
+  pack: BM-001-3
+  active_authority: DOS-BM-001-3 S1 REQ-011 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Along the closure transition the closure and the enclosure share no volume outside
+    the declared interaction regions, over the curved boundary region as well as the planar one.
+  predicate_summary: along the closure transition there is no volumetric overlap between the closure and
+    the enclosure solid including the curved region outside declared contact, declared interference-
+  physical_tags:
+  - sweep_clears_curved_region
+  - no_undeclared_volumetric_overlap
+  evidence_tags: []
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - compliant_region_recorded
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: statement re-authored to no-undeclared-overlap (PCF-007)
+- statement_id: NRM-BM-002-001
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-001 (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: A user-operated rotary input outside the housing drives a platform inside the housing
+    to rise and fall, through an uninterrupted chain of realized interactions.
+  predicate_summary: exists(external rotary input) and exists(internal platform) and a connected chain
+    of realized interactions between them, traversable in both directions, each link naming its partic
+  physical_tags:
+  - external_rotary_input
+  - internal_platform
+  - continuous_interaction_chain
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-002-002
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-001, DOS-BM-002 S1 REQ-004 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: 'Where the chain crosses the housing boundary, the crossing is realized: the moving
+    element passes without unintended interference, and whatever support or reaction the selected rea'
+  predicate_summary: exists(boundary crossing) with no interference between the moving element and the
+    housing at any point of operation, and every support the selected realization depends on is realiz
+  physical_tags:
+  - boundary_crossing_realized
+  - no_undeclared_volumetric_overlap
+  evidence_tags: []
+  representation_prerequisites: &id002
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - compliant_region_recorded
+  - assembly_assumptions_recorded
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: no-undeclared-overlap tag replaces crossing_non_interfering (PCF-007)
+- statement_id: NRM-BM-002-003
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-001 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Rotary motion becomes platform translation through at least one realized interaction
+    whose participating geometry is identified on each body it acts between.
+  predicate_summary: at least one realized interaction in the chain converts rotation to translation,
+    with participating geometry identified on both bodies it acts between.
+  physical_tags:
+  - conversion_engagement_localized
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-002-004
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-002 (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: The platform moves approximately 80-100 mm during operation, observed as platform
+    vertical displacement in millimetres.
+  predicate_summary: the design's declared platform travel is expressed in millimetres and lies within
+    80-100 mm as qualified by "approximately". A value at or near a band edge yields INDETERMINATE unt
+  physical_tags:
+  - travel_within_source_band
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - REQ-002
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-002-005
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-003 (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: The platform supports a payload of approximately 1 kg, observed as maximum supported
+    payload.
+  predicate_summary: the design declares a supported payload, with unit, consistent with approximately
+    1 kg, and the platform load path (NRM-BM-002-011) carries it. A capacity PASS additionally require
+  physical_tags:
+  - payload_capacity_declared
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - REQ-003
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-002-006
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-001, DOS-BM-002 S1 REQ-003, DOS-BM-002 S1 REQ-007 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Every element that carries a transverse or radial load in the declared operating
+    scenario has a realized radial reaction, and every element that carries an axial load has a realize
+  predicate_summary: 'for each element and each load component it carries in the declared scenario: exists(reaction
+    path) for that component. Elements not carrying a component owe no reaction for it.'
+  physical_tags:
+  - loaded_elements_reacted
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-002-007
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-001, DOS-BM-002 S1 REQ-003, DOS-BM-002 S1 REQ-007 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: The platform's motion is guided sufficiently to preserve the travel and the orientation
+    the product scenario requires of it.
+  predicate_summary: the platform's path and orientation are constrained wherever the declared scenario
+    depends on them; and where rotation about the travel direction would violate the scenario or defe
+  physical_tags:
+  - platform_motion_guided
+  - required_orientation_preserved
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-002-008
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-002, DOS-BM-002 S1 REQ-007 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: At every pose the operation requires, the platform and the housing share no volume
+    outside the interaction regions the design declares, and the required path between poses is trave
+  predicate_summary: for every required pose there is no volumetric overlap between the platform solid
+    and housing material outside declared contact, declared interference-fit and declared compliant-in
+  physical_tags:
+  - required_path_traversable
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  evidence_tags: []
+  representation_prerequisites: *id002
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: statement re-authored; pose_clearances_satisfied retired (PCF-007)
+- statement_id: NRM-BM-002-009
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-002, DOS-BM-002 S1 REQ-007 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Where the design declares a travel extreme as a physical end of travel, that extreme
+    is produced by a realized condition evaluated at its own configuration.
+  predicate_summary: 'if a terminal state is declared as a physical end of travel: it references its own
+    realized condition, evaluated at its own configuration, and no evaluation result is copied betwee'
+  physical_tags:
+  - declared_terminals_physically_produced
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-002-010
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-003 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: A payload can be placed on and removed from the platform along an access path that
+    terminates at the platform.
+  predicate_summary: exists(access_path) whose endpoint is the platform surface, not the housing boundary,
+    at a declared state.
+  physical_tags:
+  - payload_access_reaches_platform
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-002-011
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-003 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: The platform load has a realized path to a reaction site.
+  predicate_summary: exists(load_path) from the platform to a reaction site.
+  physical_tags:
+  - platform_load_reacted
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - REQ-003
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-002-012
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-006 (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Each part installed as a discrete operation can reach its assembled position without
+    passing through already-placed material.
+  predicate_summary: 'for each discretely-installed part: a realizable installation process exists in
+    which the part passes through no UNDECLARED rigid material. Contact during insertion is admissible. '
+  physical_tags:
+  - installation_process_physically_realizable
+  evidence_tags: []
+  representation_prerequisites: *id002
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: assembly contract replaced (PCF-006)
+- statement_id: NRM-BM-002-013
+  pack: BM-002
+  active_authority: DOS-BM-002 S1 REQ-009 (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: The product is driven only by the user's input; no stored or supplied energy source
+    drives the motion.
+  predicate_summary: no element of the drive chain is declared as a powered or stored-energy driving source.
+  physical_tags:
+  - manually_driven_only
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-BM-002-014
+  pack: BM-002
+  active_authority: DOS-BM-002 S5 E1, DOS-BM-002 S5 E2 (original, unchanged)
+  basis: VERIFICATION_MINIMUM
+  statement_summary: Evidence obtained from a model that imposes the input/output relation by declaration
+    may not be cited in support of the existence, engagement or contact behaviour of the conversion
+  predicate_summary: every evidence item mapped to NRM-BM-002-003 or to REQ-007 declares its contact resolution;
+    declared-pair results are marked as structural artifacts for those criteria.
+  physical_tags: []
+  evidence_tags:
+  - contact_resolution_declared
+  - declared_pair_not_cited_for_engagement
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-C4-001
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: A user-operated rotary input drives the drawer's translation, through an uninterrupted
+    chain of realized interactions.
+  predicate_summary: exists(rotary user input) and exists(translating drawer) and a connected chain of
+    realized interactions between them, each link naming its participating bodies.
+  physical_tags:
+  - rotary_user_input
+  - translating_drawer
+  - continuous_interaction_chain
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - C4-R1_knob_drives_drawer
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-C4-002
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command + AMD-C4-002 / HSD-004
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: The drawer translates along a single straight axis that is perpendicular to the gravity
+    direction.
+  predicate_summary: the drawer travel path is a straight line, and its axis is perpendicular to the gravity
+    direction, both established as geometric relations and not by a face label.
+  physical_tags:
+  - travel_axis_horizontal
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - C4-R2_horizontal_travel
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-C4-003
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command (original, unchanged)
+  basis: DIRECT_USER_REQUIREMENT
+  statement_summary: The drawer has a retracted state within the cabinet and an extended state in which
+    part of it lies outside the cabinet boundary, and both are reachable along a traversable path.
+  predicate_summary: exists(retracted configuration) with the drawer inside the cabinet envelope, exists(extended
+    configuration) with part of the drawer outside it, and a traversable path between them.
+  physical_tags:
+  - retracted_state_inside
+  - extended_state_projects_outside
+  - transition_traversable
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - C4-R3_slides_out
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-C4-004
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command; LEGACY-CONFLICT-C4-01 reclassified by AMD-C4-001 / HSD-002
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Rotary motion becomes drawer translation through at least one realized interaction
+    whose participating geometry is identified on each body it acts between.
+  predicate_summary: at least one realized interaction in the chain converts rotation to translation,
+    with participating geometry identified on both bodies it acts between.
+  physical_tags:
+  - conversion_engagement_localized
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - C4-R4_conversion_engagement
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-C4-005
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: The drawer's motion is guided sufficiently to preserve the horizontal sliding behaviour
+    the command requires of it.
+  predicate_summary: the drawer's path and orientation are constrained wherever the required horizontal
+    sliding behaviour depends on them; and where rotation about the travel direction would violate th
+  physical_tags:
+  - drawer_motion_guided
+  - required_orientation_preserved
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - C4-R5_guidance
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-C4-006
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: The drawer's own weight has a realized reaction path at every configuration of its
+    travel, including the extended one.
+  predicate_summary: 'for the retracted configuration, the extended configuration and the interior of
+    the path: exists(load_path) from the drawer to a reaction site, for the drawer''s own weight; and
+    for'
+  physical_tags:
+  - drawer_weight_reacted_throughout_travel
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - C4-R6_weight_reacted
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-C4-007
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Where the design declares a travel configuration as a physical end of travel, that
+    end is produced by a realized condition evaluated at its own configuration.
+  predicate_summary: 'if a configuration is declared a physical end of travel: it references its own realized
+    condition, evaluated at its own configuration, with no result copied between ends. Otherwise'
+  physical_tags:
+  - declared_ends_physically_produced
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - C4-R7_declared_ends_of_travel
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-C4-008
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: The knob is reachable by the user from outside the cabinet, and where the chain crosses
+    the cabinet boundary the crossing is realized and the moving element passes without unintend
+  predicate_summary: exists(access path from the user region to the knob in the retracted configuration)
+    and exists(boundary crossing) with no interference between the moving element and the cabinet at
+  physical_tags:
+  - knob_externally_reachable
+  - boundary_crossing_realized
+  - no_undeclared_volumetric_overlap
+  evidence_tags: []
+  representation_prerequisites: &id003
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - compliant_region_recorded
+  - assembly_assumptions_recorded
+  stage11_rules:
+  - C4-R8_knob_access_and_crossing
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: no-undeclared-overlap tag replaces crossing_non_interfering (PCF-007)
+- statement_id: NRM-C4-009
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Every element that carries a transverse or radial load in the declared operating
+    scenario has a realized radial reaction, and every element that carries an axial load has a realize
+  predicate_summary: 'for each element and each load component it carries in the declared scenario: exists(reaction
+    path) for that component. Elements not carrying a component owe no reaction for it.'
+  physical_tags:
+  - loaded_elements_reacted
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - C4-R9_carried_loads_reacted
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-C4-010
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: At every configuration of the travel the drawer and the cabinet share no volume outside
+    the interaction regions the design declares, and the path between the retracted and extended
+  predicate_summary: 'for every configuration of the travel there is no volumetric overlap between the
+    drawer solid and cabinet material outside declared contact, declared interference-fit and declared '
+  physical_tags:
+  - required_path_traversable
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  evidence_tags: []
+  representation_prerequisites: *id003
+  stage11_rules:
+  - C4-R10_clearance_and_traversability
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: statement re-authored; pose_clearances_satisfied retired (PCF-007)
+- statement_id: NRM-C4-011
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S1 command (original, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Each part installed as a discrete operation can reach its assembled position without
+    passing through already-placed material.
+  predicate_summary: 'for each discretely-installed part: a realizable installation process exists in
+    which the part passes through no UNDECLARED rigid material. Contact during insertion is admissible. '
+  physical_tags:
+  - installation_process_physically_realizable
+  evidence_tags: []
+  representation_prerequisites: *id003
+  stage11_rules:
+  - C4-R11_assembly
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: assembly contract replaced (PCF-006)
+- statement_id: NRM-C4-012
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S5 (original, unchanged)
+  basis: VERIFICATION_MINIMUM
+  statement_summary: An observable offered as evidence of guidance must be able to take a non-conforming
+    value under the model that produces it.
+  predicate_summary: 'for each observable mapped to a guidance criterion: the model that produced it admits
+    at least one configuration in which the observable violates its threshold.'
+  physical_tags: []
+  evidence_tags:
+  - guidance_observable_can_fail
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-C4-013
+  pack: C4-drawer
+  active_authority: DOS-C4-drawer S5 (original, unchanged)
+  basis: VERIFICATION_MINIMUM
+  statement_summary: Evidence produced for a different case may be cited only with its originating case
+    named.
+  predicate_summary: every cited result carries the case it was produced for; results produced for another
+    case are marked as reused or are treated as absent.
+  physical_tags: []
+  evidence_tags:
+  - reuse_origin_declared
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-HS-001
+  pack: bounded-two-state-closure
+  active_authority: DOS-bounded-two-state-closure S1 (original, unchanged clause)
+  basis: PROJECT_DEFINED_CAPABILITY
+  statement_summary: Two states are defined as relative configurations of the two bodies, and both are
+    reachable.
+  predicate_summary: exists(state A) and exists(state B) as relative configurations, each reachable along
+    the motion.
+  physical_tags:
+  - two_states_defined
+  - both_states_reachable
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - HS-C1_two_states
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-HS-002
+  pack: bounded-two-state-closure
+  active_authority: DOS-bounded-two-state-closure S1 (original, unchanged clause)
+  basis: PROJECT_DEFINED_CAPABILITY
+  statement_summary: A continuous motion connects the two states.
+  predicate_summary: exists(path) from state A to state B along which the relative configuration varies
+    continuously.
+  physical_tags:
+  - motion_continuous_between_states
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - HS-C2_continuous_motion
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-HS-003
+  pack: bounded-two-state-closure
+  active_authority: AMD-HS-001 / HSD-003
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: At every configuration along the declared bounded path, at least one realized constraint
+    or interaction keeps the configuration within the allowed motion manifold.
+  predicate_summary: 'for every configuration along the declared bounded path: at least one realized constraint
+    or interaction is active and keeps the configuration within the allowed manifold. Hand-off'
+  physical_tags:
+  - constraint_coverage_continuous
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - HS-C3_constraint_persists
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-HS-004
+  pack: bounded-two-state-closure
+  active_authority: DOS-bounded-two-state-closure S1 (original, UNCHANGED clause)
+  basis: PROJECT_DEFINED_CAPABILITY
+  statement_summary: The bound at each extreme is produced by a realized physical condition, not by a
+    limit imposed on the model.
+  predicate_summary: each extreme references a realized condition — contact, geometric run-out, force
+    balance, or an engagement ending — with participating geometry, not a numeric range on a joint alon
+  physical_tags:
+  - each_bound_physically_realized
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - HS-C4_bounds_physically_realized
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-HS-005
+  pack: bounded-two-state-closure
+  active_authority: AMD-HS-001 / HSD-003
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Each extreme is physically determined and is evaluated independently at its own configuration.
+  predicate_summary: each extreme references a realized physical condition, and each is evaluated at its
+    own configuration; no evaluation result is reused across extremes. A single continuous feature o
+  physical_tags:
+  - each_extreme_independently_evaluated
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - HS-C5_bounds_distinct
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-HS-006
+  pack: bounded-two-state-closure
+  active_authority: DOS-bounded-two-state-closure S1 (original, unchanged clause)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Along the motion between the two states the two bodies share no volume outside the
+    interaction regions the design declares, of which the bounding contacts are two.
+  predicate_summary: swept volumes of the two bodies do not intersect at any interior point of the motion,
+    other than at declared bounding or constraint interactions.
+  physical_tags:
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  evidence_tags: []
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - compliant_region_recorded
+  stage11_rules:
+  - HS-C6_no_interference
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: statement re-authored; transition_free_of_interference retired (PCF-007)
+- statement_id: NRM-HS-007
+  pack: bounded-two-state-closure
+  active_authority: DOS-bounded-two-state-closure S5 + HSD-006
+  basis: VERIFICATION_MINIMUM
+  statement_summary: A criterion offered as evidence that a bound is present must be able to distinguish
+    a bounded closure from an otherwise identical unbounded one.
+  predicate_summary: evidence offered for the bound at an extreme is EITHER (A) direct causal evidence
+    - the realizing geometry exists, the interaction occurs at the relevant configuration, and the obs
+  physical_tags: []
+  evidence_tags:
+  - bound_criterion_discriminates
+  representation_prerequisites: []
+  stage11_rules:
+  - HS-C7_criterion_admissibility
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-GS-001
+  pack: guided-slider
+  active_authority: AMD-GS-001 / HSD-001
+  basis: PROJECT_DEFINED_CAPABILITY
+  statement_summary: A translating body, a guiding body, and a line or path of travel whose direction
+    is determinate relative to both bodies all exist.
+  predicate_summary: exists(translating body), exists(guiding body), and the travel direction is determinate
+    relative to both, not established by a name alone.
+  physical_tags:
+  - translating_body
+  - guiding_body
+  - travel_direction_determinate
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - GS-C1_travel_line_geometric
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-GS-002
+  pack: guided-slider
+  active_authority: AMD-GS-001 / HSD-001
+  basis: PROJECT_DEFINED_CAPABILITY
+  statement_summary: Every freedom of the translating body relative to the guiding body whose constraint
+    the instantiating motion requirement depends on is removed by a realized constraint, and the fre
+  predicate_summary: the six relative freedoms are accounted for explicitly; for each freedom the instantiating
+    requirement depends on, a realized constraint removing it is named; each remaining freedo
+  physical_tags:
+  - required_freedoms_constrained
+  - residual_freedoms_declared
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - GS-C2_freedoms_accounted
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-GS-003
+  pack: guided-slider
+  active_authority: AMD-GS-001 / HSD-001
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Each removed freedom is attributable to a named interaction between the two bodies,
+    with participating material identified on both.
+  predicate_summary: each claimed constraint references participating material on the translating body
+    and on the guiding body.
+  physical_tags:
+  - constraints_attributable_to_interaction
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - GS-C2_freedoms_accounted
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-GS-004
+  pack: guided-slider
+  active_authority: AMD-GS-001 / HSD-001
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: The guiding interaction remains engaged at every point of the declared travel range.
+  predicate_summary: 'for the ends and the interior of the declared travel range: the participating material
+    of the guiding interaction remains in engagement.'
+  physical_tags:
+  - engagement_persists_across_travel
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - GS-C3_engagement_persists
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-GS-005
+  pack: guided-slider
+  active_authority: AMD-GS-001 / HSD-001
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Load transverse to the travel direction that the guiding interaction carries has
+    a realized reaction path at every point of the travel range.
+  predicate_summary: 'for the ends and the interior of the travel range: exists(load_path) from the translating
+    body through the guiding interaction to a reaction site, for each transverse component act'
+  physical_tags:
+  - transverse_load_reacted_across_travel
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - GS-C4_transverse_reaction
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-GS-006
+  pack: guided-slider
+  active_authority: AMD-GS-001 / HSD-001
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: At every configuration of the declared travel the translating body and the guiding
+    body share no volume outside the interaction regions the design declares, and the declared travel
+  predicate_summary: for every configuration of the declared travel there is no volumetric overlap between
+    the translating body and guiding-body material outside declared contact, declared interference
+  physical_tags:
+  - declared_path_traversable
+  - no_undeclared_volumetric_overlap
+  - intended_interaction_physically_consistent
+  evidence_tags: []
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - compliant_region_recorded
+  stage11_rules:
+  - GS-C5_clearance_and_traversability
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: statement re-authored; travel_clearances_satisfied retired (PCF-007)
+- statement_id: NRM-GS-007
+  pack: guided-slider
+  active_authority: DOS-guided-slider S5 (original, unchanged)
+  basis: VERIFICATION_MINIMUM
+  statement_summary: An observable offered as evidence of guidance must be able to take a non-conforming
+    value under the model that produces it.
+  predicate_summary: evidence offered for guidance is EITHER (A) direct causal evidence - the realizing
+    geometry exists, the interaction occurs at the relevant configuration, and the observed behaviour
+  physical_tags: []
+  evidence_tags:
+  - guidance_observable_can_fail
+  representation_prerequisites: []
+  stage11_rules:
+  - GS-C6_observable_admissibility
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-LR-001
+  pack: latch-retention
+  active_authority: DOS-latch-retention S1 (original project-authored capability, unchanged)
+  basis: PROJECT_DEFINED_CAPABILITY
+  statement_summary: A retained state is defined as a relative configuration of the two bodies.
+  predicate_summary: exists(retained state) given as a relative configuration of the two bodies, expressed
+    geometrically.
+  physical_tags:
+  - retained_state_defined
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - LR-C1_retained_state
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-LR-002
+  pack: latch-retention
+  active_authority: DOS-latch-retention S1 (original project-authored capability, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: A realized interaction between the two bodies opposes departure from the retained
+    state, and the material regions through which it acts are identified on both bodies.
+  predicate_summary: exists(retention interaction) opposing departure from the retained state, with the
+    participating material region identified on each body.
+  physical_tags:
+  - retention_interaction_realized
+  - intended_interaction_physically_consistent
+  evidence_tags: []
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - compliant_region_recorded
+  stage11_rules:
+  - LR-C2_retention_holds
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: interaction-coherence tag assigned (PCF-004)
+- statement_id: NRM-LR-003
+  pack: latch-retention
+  active_authority: DOS-latch-retention S1 (original project-authored capability, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: The load applied by the disturbance has a realized reaction path through the retention
+    to a reaction site.
+  predicate_summary: exists(load_path) from the disturbed body through the retention interaction to a
+    reaction site.
+  physical_tags:
+  - disturbance_opposed_with_reaction_path
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - LR-C2_retention_holds
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-LR-004
+  pack: latch-retention
+  active_authority: DOS-latch-retention S1 (original project-authored capability, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: The release action is distinguishable from the disturbance the retention opposes.
+  predicate_summary: the release action and the declared disturbance differ in at least one property the
+    retention responds to, and that property is named.
+  physical_tags:
+  - release_action_distinct_from_disturbance
+  - deliberate_release_path_exists
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - LR-C3_release_distinct
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-LR-005
+  pack: latch-retention
+  active_authority: DOS-latch-retention S1 (original project-authored capability, unchanged)
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Both the path into the retained state and the path out of it are traversable by the
+    participating geometry.
+  predicate_summary: exists(engagement path) and exists(release path), each with the interference along
+    it either cleared or accounted for by a declared deflection.
+  physical_tags:
+  - engagement_path_exists
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - LR-C4_paths_traversable
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-LR-006
+  pack: latch-retention
+  active_authority: DOS-latch-retention S1 ("repeatably") (original project-authored capability, unchanged)
+  basis: PROJECT_DEFINED_CAPABILITY
+  statement_summary: Engaging and releasing consumes no participating feature, so the retained state is
+    reachable again.
+  predicate_summary: after an engage-release cycle, every participating feature retains the geometry its
+    retention role depends on, and the retained state is reachable again.
+  physical_tags:
+  - repeatable_no_feature_consumed
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - LR-C5_repeatable
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-LR-007
+  pack: latch-retention
+  active_authority: DOS-latch-retention S1, DOS-latch-retention S4 (original project-authored capability,
+    unchanged)
+  basis: VERIFICATION_MINIMUM
+  statement_summary: A retention claim names the disturbance it holds against.
+  predicate_summary: every retention result carries the disturbance case it was evaluated against.
+  physical_tags: []
+  evidence_tags:
+  - retention_claim_names_its_disturbance
+  representation_prerequisites: []
+  stage11_rules:
+  - LR-C6_claim_admissibility
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-LR-008
+  pack: latch-retention
+  active_authority: DOS-latch-retention S3, DOS-latch-retention S5 (original project-authored capability,
+    unchanged)
+  basis: VERIFICATION_MINIMUM
+  statement_summary: A force window that is an input of a task definition may not be cited as an achieved
+    retention property.
+  predicate_summary: 'for every cited retention or release force: its provenance is recorded as either
+    an input condition or a measurement, and only measurements are counted as results.'
+  physical_tags: []
+  evidence_tags:
+  - force_window_not_cited_as_result
+  representation_prerequisites: []
+  stage11_rules:
+  - LR-C6_claim_admissibility
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-RL-001
+  pack: rotary-to-linear-engagement
+  active_authority: AMD-RL-001 / HSD-002
+  basis: PROJECT_DEFINED_CAPABILITY
+  statement_summary: An uninterrupted chain of realized localized interactions connects a rotating input
+    body to a translating output body, each interaction identifying the participating material on bo
+  predicate_summary: exists(rotating input body), exists(translating output body), and a connected sequence
+    of realized interactions between them with no gap, each naming participating material on both
+  physical_tags:
+  - rotating_input_body
+  - translating_output_body
+  - uninterrupted_interaction_chain
+  - interactions_localized
+  - intended_interaction_physically_consistent
+  evidence_tags: []
+  representation_prerequisites:
+  - interaction_regions_declared
+  - interaction_kind_recorded
+  - numerical_tolerance_recorded
+  - compliant_region_recorded
+  stage11_rules:
+  - RL-C1_chain_exists
+  alignment_status: ALIGNED
+  counterexample_considered: a design that TOUCHES the other body at a declared contact - would the statement
+    reject it while the predicate admits it?
+  correction_made: interaction-coherence tag assigned (PCF-004)
+- statement_id: NRM-RL-002
+  pack: rotary-to-linear-engagement
+  active_authority: AMD-RL-001 / HSD-002
+  basis: PROJECT_DEFINED_CAPABILITY
+  statement_summary: Rotation of the input body causes translation of the output body over the declared
+    operating range.
+  predicate_summary: over the declared operating range, a change in input rotation produces a change in
+    output translation, evaluated on the realized kinematics.
+  physical_tags:
+  - rotation_causes_translation
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - RL-C2_rotation_causes_translation
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-RL-003
+  pack: rotary-to-linear-engagement
+  active_authority: AMD-RL-001 / HSD-002
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Every interaction in the chain remains engaged over the whole declared output range.
+  predicate_summary: 'for the ends and the interior of the declared output range: every interaction in
+    the chain remains engaged.'
+  physical_tags:
+  - chain_persists_over_output_range
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - RL-C3_engagement_persists
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-RL-004
+  pack: rotary-to-linear-engagement
+  active_authority: AMD-RL-001 / HSD-002
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Where the chain applies a moment to the output body about the input axis, a realized
+    restraint prevents the output body from following that rotation instead of translating.
+  predicate_summary: 'where a net moment about the input axis acts on the output body: exists(realized
+    constraint) removing that rotation, naming the interaction that provides it.'
+  physical_tags:
+  - output_rotation_restrained_where_needed
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - RL-C4_output_rotation_restrained_where_needed
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-RL-005
+  pack: rotary-to-linear-engagement
+  active_authority: AMD-RL-001 / HSD-002
+  basis: NECESSARY_PHYSICAL_CONSEQUENCE
+  statement_summary: Every body in the chain has a realized reaction for every load component it carries.
+  predicate_summary: 'for each body and each load component it carries in the declared scenario: exists(load_path)
+    to a reaction site. Bodies not carrying a component owe no reaction for it.'
+  physical_tags:
+  - carried_loads_reacted
+  evidence_tags: []
+  representation_prerequisites: []
+  stage11_rules:
+  - RL-C5_carried_loads_reacted
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
+- statement_id: NRM-RL-006
+  pack: rotary-to-linear-engagement
+  active_authority: DOS-rotary-to-linear-engagement S5 (original, unchanged)
+  basis: VERIFICATION_MINIMUM
+  statement_summary: Agreement between commanded input and observed output under a model that imposes
+    the input/output relation by declaration is not evidence that the chain's interactions exist or tra
+  predicate_summary: any evidence mapped to NRM-RL-001, NRM-RL-003 or NRM-RL-005 declares whether it resolves
+    contact; declared-pair results are marked as structural artifacts for those criteria.
+  physical_tags: []
+  evidence_tags:
+  - contact_resolution_declared
+  - declared_pair_not_cited_for_chain
+  representation_prerequisites: []
+  stage11_rules: []
+  alignment_status: ALIGNED
+  counterexample_considered: a design satisfying the source while violating this statement
+  correction_made: none - reviewed and left unchanged
