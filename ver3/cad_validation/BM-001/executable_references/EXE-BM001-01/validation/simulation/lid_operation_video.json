@@ -6,20 +6,19 @@
     "hinge_friction_Nm_per_rad_s": 0.0,
     "orientation": "enclosure sitting upright on a desk, hinge axis horizontal"
   },
-  "bolt_position_note": "BODY-BOLT is drawn in its released (lifted) position for the whole clip. The lid cannot swing until it is released, so any other position would be inconsistent with the motion being shown.",
   "camera": {
     "eye_mm": [
-      -191.545,
-      -143.647,
-      159.508
+      -189.316,
+      -144.616,
+      163.431
     ],
     "fixed_for_whole_clip": true,
-    "half_height_mm": 91.76,
+    "half_height_mm": 96.09,
     "projection": "orthographic",
     "target_mm": [
-      56.455,
-      54.353,
-      67.508
+      58.684,
+      53.384,
+      71.431
     ],
     "up": [
       0.0,
@@ -29,6 +28,7 @@
   },
   "claims_established": [
     "the lid reaches and returns from its declared 110 degree open pose along a smooth trajectory without any body passing through another",
+    "the latch is engaged at the start, released before the lid moves, recovered during opening, deflected again by the closing lead-in, and engaged again at the end - with three bodies and no separate part",
     "the hinge torque the solver needs is small and changes sign part way through the sweep, where the centre of mass crosses the hinge axis",
     "the visible lid is the CAD closure solid, so the picture and the inertial properties describe the same object"
   ],
@@ -45,16 +45,36 @@
   "codec": "H.264 (libx264), yuv420p, MP4 container",
   "container_readback": {
     "codec_reported": "h264",
-    "container_duration_s": 9.53,
+    "container_duration_s": 11.63,
     "container_fps": 30.0,
     "container_size_px": [
       1280,
       720
     ],
     "ffmpeg_version": "4.2.2-static",
-    "frames_read_back": 286
+    "frames_read_back": 349
   },
-  "duration_s": 9.5333,
+  "detail_inset_camera": {
+    "eye_mm": [
+      260.0,
+      -2.0,
+      37.0
+    ],
+    "fixed_for_whole_clip": true,
+    "half_height_mm": 13.0,
+    "projection": "orthographic",
+    "target_mm": [
+      60.0,
+      -2.0,
+      37.0
+    ],
+    "up": [
+      0.0,
+      0.0,
+      1.0
+    ]
+  },
+  "duration_s": 11.6333,
   "engine": "cadquery-ocp tessellation + matplotlib painter + ffmpeg (libx264)",
   "engine_versions": {
     "cadquery": "2.4.0",
@@ -66,29 +86,31 @@
   "file": "validation/simulation/lid_operation.mp4",
   "final_frame": {
     "angle_deg": 0.0,
-    "declared_state": "CLOSED",
-    "t_s": 9.499999
+    "declared_state": "CLOSED_REENGAGED",
+    "t_s": 11.599999
   },
   "first_frame": {
     "angle_deg": 0.0,
-    "declared_state": "CLOSED",
+    "declared_state": "CLOSED_LATCH_ENGAGED",
     "t_s": 0.0
   },
   "fps": 30,
-  "frame_count": 286,
+  "frame_count": 349,
   "geometry_source": "the reference's own B-rep solids, posed by the same functions the validator uses. No proxy geometry.",
   "gif": {
-    "bytes": 2402423,
+    "bytes": 2843047,
     "every_nth_frame": 2,
     "file": "validation/simulation/lid_operation.gif",
     "fps": 15,
     "scale": 0.5,
-    "sha256": "898083929c7fd7b8401ad94a7b83d7d98a7f4f6579942fed7466ad3541b6185f"
+    "sha256": "a5e4e15d26e7d24d6a1835b6b8e66199546a4749babfc53404d753771eb25965"
   },
   "human_review": "HUMAN_REVIEW_PENDING",
   "kind": "REVIEW_EVIDENCE",
-  "output_bytes": 1397758,
-  "output_sha256": "4ab03bb4b02e4e4731b0b3b96288d02e2f76a3f88ae7364669c2ceb6975b9a52",
+  "latch_note": "LATCH DEFLECTION IS A PRESCRIBED GEOMETRIC STATE. FORCE, STRAIN AND MATERIAL ADEQUACY ARE NOT VERIFIED. MuJoCo is used only for the assembled rigid-body lid motion; it does not simulate the beam bending, the snap engagement or any contact between the tooth and the keeper.",
+  "no_bolt": "BODY-BOLT does not exist in this reference. No frame contains it, its knob, the closure guide boss or the enclosure socket.",
+  "output_bytes": 1342436,
+  "output_sha256": "588e590f6efa8b97b945a41532df20ac84c9ba42ff56c35eff5aaf241dc00b33",
   "reference_id": "EXE-BM001-01",
   "resolution_px": [
     1280,
@@ -97,6 +119,7 @@
   "sample_columns": [
     "t_s",
     "angle_deg",
+    "latch_fraction",
     "torque_Nm",
     "torque_static_Nm"
   ],
@@ -107,27 +130,45 @@
     "timestep_s": 0.0003333333333333333,
     "version": "2.3.7"
   },
-  "source_geometry_signature_sha256": "f2bc9599cdd6832dcb52ea0f24645b6cf6c374308324320b08d93f7f6e8d8967",
+  "source_geometry_signature_sha256": "97613a0815b794fb14a92364a7f8d7ac70c4d4c34b10ace6eb26b1aba7aba109",
   "state_timeline": [
     {
       "angle_deg": 0.0,
       "row_index": 0,
-      "state": "OPENING",
+      "state": "LATCHED",
       "t_start_s": 0.0
     },
     {
-      "angle_deg": 110.0,
-      "row_index": 12100,
-      "state": "HOLD",
-      "t_start_s": 4.033333
+      "angle_deg": 0.0,
+      "row_index": 3100,
+      "state": "RELEASE",
+      "t_start_s": 1.033333
     },
     {
-      "angle_deg": 109.999371,
-      "row_index": 16600,
+      "angle_deg": 0.000861,
+      "row_index": 6100,
+      "state": "OPENING",
+      "t_start_s": 2.033333
+    },
+    {
+      "angle_deg": 110.0,
+      "row_index": 16900,
+      "state": "HOLD",
+      "t_start_s": 5.633333
+    },
+    {
+      "angle_deg": 109.999139,
+      "row_index": 20500,
       "state": "CLOSING",
-      "t_start_s": 5.533333
+      "t_start_s": 6.833333
+    },
+    {
+      "angle_deg": 0.0,
+      "row_index": 31300,
+      "state": "RE-ENGAGED",
+      "t_start_s": 10.433332
     }
   ],
-  "trajectory_sha256": "768b9215b9a4f934b681ad0745fd1d0355b4840654417edd780557948b8c2e75",
+  "trajectory_sha256": "954fef404d4028f1373aee5b0797b890077db15d0288545b8370080166dd1fd4",
   "video_id": "VID-BM001-01-LID"
 }

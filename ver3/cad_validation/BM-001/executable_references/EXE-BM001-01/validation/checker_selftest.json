@@ -6,7 +6,7 @@
       "detected": true,
       "injected_defect": "closure driven 0.5 mm into the enclosure",
       "measured": {
-        "common_volume_mm3": 615.194914,
+        "common_volume_mm3": 537.6,
         "threshold_mm3": 1e-06
       }
     },
@@ -111,19 +111,202 @@
       }
     },
     {
-      "check_under_test": "retention blocking probe",
+      "check_under_test": "latch blocking probe",
       "control_id": "CTL-07",
       "detected": true,
-      "injected_defect": "opening attempted with the bolt still retained",
+      "injected_defect": "opening attempted with the latch engaged",
       "measured": {
-        "block_onset_deg": 0.75,
-        "blocked_beyond_onset": true,
-        "free_after_release": true
+        "block_onset_deg": 0.257,
+        "engaged_blocks": true,
+        "note": "a latch that does not discriminate is not a latch",
+        "released_frees": true
+      }
+    },
+    {
+      "check_under_test": "three-body topology check",
+      "control_id": "CTL-13",
+      "detected": true,
+      "injected_defect": "a separate latch body added to the product",
+      "measured": {
+        "banned_present": [
+          "BODY-LATCH"
+        ],
+        "declared": [
+          "BODY-CLOSURE",
+          "BODY-ENCLOSURE",
+          "BODY-PIN"
+        ],
+        "mutated": [
+          "BODY-CLOSURE",
+          "BODY-ENCLOSURE",
+          "BODY-LATCH",
+          "BODY-PIN"
+        ]
+      }
+    },
+    {
+      "check_under_test": "three-body topology check",
+      "control_id": "CTL-14",
+      "detected": true,
+      "injected_defect": "BODY-BOLT reintroduced",
+      "measured": {
+        "banned_present": [
+          "BODY-BOLT"
+        ]
+      }
+    },
+    {
+      "check_under_test": "closed-state rotation block",
+      "control_id": "CTL-15",
+      "detected": true,
+      "injected_defect": "latch tooth removed, beam left in place",
+      "measured": {
+        "block_at_2deg_mm3": [
+          73.2926,
+          0.0
+        ],
+        "note": "a beam without a tooth hooks behind nothing"
+      }
+    },
+    {
+      "check_under_test": "closed-state rotation block",
+      "control_id": "CTL-16",
+      "detected": true,
+      "injected_defect": "keeper rib removed from the enclosure",
+      "measured": {
+        "block_at_2deg_mm3": [
+          73.2926,
+          0.0
+        ]
+      }
+    },
+    {
+      "check_under_test": "keeper connectivity check",
+      "control_id": "CTL-17",
+      "detected": true,
+      "injected_defect": "keeper replaced by a rib floating off the enclosure",
+      "measured": {
+        "enclosure_solid_count": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "check_under_test": "single-connected-solid check",
+      "control_id": "CTL-18",
+      "detected": true,
+      "injected_defect": "release pad and beam detached from the closure",
+      "measured": {
+        "solid_count": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "check_under_test": "released-state clearance",
+      "control_id": "CTL-19",
+      "detected": true,
+      "injected_defect": "release displacement cut to 40%% of the engagement",
+      "measured": {
+        "note": "a release that does not clear the keeper releases nothing",
+        "opening_interference_mm3": [
+          0.0,
+          20.6907
+        ]
+      }
+    },
+    {
+      "check_under_test": "re-engagement check",
+      "control_id": "CTL-20",
+      "detected": true,
+      "injected_defect": "closing sweep left in the deflected configuration",
+      "measured": {
+        "note": "if the beam stays out the closed state blocks nothing",
+        "reengages_declared": true
+      }
+    },
+    {
+      "check_under_test": "closing lead-in",
+      "control_id": "CTL-21",
+      "detected": true,
+      "injected_defect": "lead-in ramp check: relaxed tooth must foul the keeper on the way down",
+      "measured": {
+        "leadin_contact_samples": [
+          {
+            "deg": 0.5,
+            "relaxed_common_volume_mm3": 13.782955
+          },
+          {
+            "deg": 1.0,
+            "relaxed_common_volume_mm3": 39.979576
+          },
+          {
+            "deg": 2.0,
+            "relaxed_common_volume_mm3": 73.29255
+          },
+          {
+            "deg": 3.0,
+            "relaxed_common_volume_mm3": 48.358009
+          },
+          {
+            "deg": 4.0,
+            "relaxed_common_volume_mm3": 5.627309
+          },
+          {
+            "deg": 5.0,
+            "relaxed_common_volume_mm3": 0.0
+          },
+          {
+            "deg": 6.0,
+            "relaxed_common_volume_mm3": 0.0
+          }
+        ],
+        "note": "no interference on the way down means no ramp is doing anything"
+      }
+    },
+    {
+      "check_under_test": "exterior accessibility probe",
+      "control_id": "CTL-22",
+      "detected": true,
+      "injected_defect": "release pad relocated inside the cavity, behind the front wall",
+      "measured": {
+        "enclosure_material_in_reach_corridor_mm3": {
+          "declared_exterior_pad": 0.0,
+          "mutated_interior_pad": 410.4
+        },
+        "exterior_pad_reachable": true,
+        "note": "reaching an interior pad means going through the front wall"
+      }
+    },
+    {
+      "check_under_test": "material-model consistency",
+      "control_id": "CTL-23",
+      "detected": true,
+      "injected_defect": "metadata mutation: closure marked rigid while its latch is declared to flex",
+      "measured": {
+        "declared_material_class": "GENERIC_COMPLIANT_POLYMER",
+        "declares_latch_compliant_region": true,
+        "mutated_material_class": "GENERIC_RIGID_POLYMER"
+      }
+    },
+    {
+      "check_under_test": "claim-fidelity scan",
+      "control_id": "CTL-24",
+      "detected": true,
+      "injected_defect": "a force/strength clause injected with status PASS",
+      "measured": {
+        "injected_hits": [
+          "latch holding force is adequate"
+        ],
+        "live_hits": [],
+        "note": "geometric blockage is never holding force"
       }
     }
   ],
-  "controls_detected": 12,
-  "controls_run": 12,
+  "controls_detected": 24,
+  "controls_run": 24,
   "name": "checker self-test",
   "purpose": "Establishes that the checks in this chain can fail. Each control injects a defect in memory and passes only if the check reports it. No perturbed model is exported.",
   "status": "PASS",

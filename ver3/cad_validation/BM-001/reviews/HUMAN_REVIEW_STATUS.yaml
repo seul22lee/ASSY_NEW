@@ -8,17 +8,54 @@ status: HUMAN_REVIEW_PENDING
 
 EXE-BM001-01:
   revision_completed: true
-  driver: HCR-BM001-002
-  previous_geometry_signature: 5586b96cc2e92e113a87ecb7180e8f8e2a3f820585c2a9d75fa6c8fdb13f2ee8
-  revised_geometry_signature: f2bc9599cdd6832dcb52ea0f24645b6cf6c374308324320b08d93f7f6e8d8967
-  validation: all ten steps PASS, 0 findings, 12/12 negative controls detected
+  revision_rounds:
+    - round: 1
+      driver: HCR-BM001-002
+      what: hinge pin replaced with a headed pin carrying two snap arms
+      signature: f2bc9599cdd6832dcb52ea0f24645b6cf6c374308324320b08d93f7f6e8d8967
+    - round: 2
+      drivers: [HCR-BM001-008, HCR-BM001-009, HCR-BM001-010]
+      what: >
+        separate lift-bolt realization rejected as functionally excessive and
+        removed - BODY-BOLT, its knob and shaft, the closure guide boss and the
+        enclosure socket all gone. BODY-CLOSURE gained an integral exterior snap
+        latch and BODY-ENCLOSURE gained the keeper. Four bodies became three.
+      signature: 97613a0815b794fb14a92364a7f8d7ac70c4d4c34b10ace6eb26b1aba7aba109
+  product_bodies: [BODY-ENCLOSURE, BODY-CLOSURE, BODY-PIN]
+  body_bolt_absent: true
+  hinge_pin: >
+    UNCHANGED. Its sub-signature over volume, area, centre of mass and bounding
+    box is identical before and after (f5c3ec81480611b3). The accepted
+    head-plus-snap-barb hinge is carried through, not rebuilt.
+  latch:
+    architecture: >
+      release pad, compliant cantilever beam, lead-in ramp, tooth and retaining
+      shoulder, all integral to BODY-CLOSURE; keeper rib integral to
+      BODY-ENCLOSURE
+    compliant_region: REG-CLOSURE-LATCH-COMPLIANT
+    terminology: >
+      a latch. Not a key, not a lock, no keying, no authorization and no security
+      function is provided or claimed.
+    engagement_mm: 2.2
+    engaged_free_play_deg: 0.2570
+    release_direction: -Y, the exterior pad pulled outward
+    release_deflection_mm: 2.4
+    tooth_under_keeper_mm3: {engaged: 113.62, released: 0.0}
+    reengages_without_user_action: true
+  previous_geometry_signature: f2bc9599cdd6832dcb52ea0f24645b6cf6c374308324320b08d93f7f6e8d8967
+  revised_geometry_signature: 97613a0815b794fb14a92364a7f8d7ac70c4d4c34b10ace6eb26b1aba7aba109
+  validation: all ten steps PASS, 0 findings, 24/24 negative controls detected
   predicate_totals: {PASS: 12, FAIL: 0, NOT_VERIFIED: 0, NOT_EVALUABLE: 1}
   independently_reviewed: false
-  unchanged_by_the_EXE_BM001_02_redesign: >
-    rerun after the shared-tooling change that added direction arrows to the
-    section renderer. Same geometry signature, same twelve PASS and one
-    NOT_EVALUABLE, same 12/12 controls. This reference is the accepted regression
-    reference and was not redesigned or rewritten.
+  simulation_recomputed_from_the_revised_cad: >
+    the closure gained the latch and the front lip, so mass went 0.0523 ->
+    0.056264 kg, inertia about the hinge 1.401e-04 -> 1.803e-04 kg m^2, and peak
+    static torque 0.0221 -> 0.0258 N m. No previous torque result was carried
+    over on the grounds that the geometry change looked small.
+  stale_claim_corrected: >
+    manifest LIM-03 still said the compressed pin configuration was 4.08 mm^3
+    (0.38%) smaller than the relaxed one, from a superseded build that rotated
+    the arms about their roots. Measured now, both are 0.000 mm^3 apart.
 
 EXE-BM001-02:
   revision_completed: true
@@ -80,17 +117,23 @@ review_videos:
     lower bound, not a measurement; the two cover clips compute nothing at all.
   VID-BM001-01-LID:
     reference: EXE-BM001-01
-    states: CLOSED -> OPEN -> HOLD -> CLOSE
+    states: >
+      LATCHED -> RELEASE -> OPENING -> HOLD -> CLOSING -> RE-ENGAGED
+    regenerated_for: the integral snap latch revision; no frame contains BODY-BOLT
+    latch_note: >
+      LATCH DEFLECTION IS A PRESCRIBED GEOMETRIC STATE. FORCE, STRAIN AND
+      MATERIAL ADEQUACY ARE NOT VERIFIED. MuJoCo is used only for the assembled
+      rigid-body lid motion.
     file: validation/simulation/lid_operation.mp4
-    frames: 286
-    duration_s: 9.53
+    frames: 349
+    duration_s: 11.63
     fps: 30
     resolution_px: [1280, 720]
     codec: H.264 (libx264), yuv420p, MP4
-    source_geometry_signature_sha256: f2bc9599cdd6832dcb52ea0f24645b6cf6c374308324320b08d93f7f6e8d8967
-    trajectory_sha256: 768b9215b9a4f934b681ad0745fd1d0355b4840654417edd780557948b8c2e75
-    output_sha256: 4ab03bb4b02e4e4731b0b3b96288d02e2f76a3f88ae7364669c2ceb6975b9a52
-    frames_decoded_back_from_the_file: 286
+    source_geometry_signature_sha256: 97613a0815b794fb14a92364a7f8d7ac70c4d4c34b10ace6eb26b1aba7aba109
+    trajectory_sha256: 954fef404d4028f1373aee5b0797b890077db15d0288545b8370080166dd1fd4
+    output_sha256: 588e590f6efa8b97b945a41532df20ac84c9ba42ff56c35eff5aaf241dc00b33
+    frames_decoded_back_from_the_file: 349
     shares_samples_with_plots: >
       one frame per 100 solver steps of the same row list the plots are drawn
       from - no resampling, so a torque read off a frame is a point on the curve

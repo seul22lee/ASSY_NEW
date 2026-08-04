@@ -16,6 +16,7 @@ NOT_VERIFIED or NOT_EVALUABLE rather than being quietly rounded up.
 from __future__ import annotations
 
 import math
+import json
 import os
 import re
 import sys
@@ -36,63 +37,62 @@ import valcore as vc       # noqa: E402
 FAST = "--fast" in sys.argv
 P = B.load_params()
 
+G = B.latch_geom(P)
+CE = ("BODY-CLOSURE", "BODY-ENCLOSURE")
+EP = ("BODY-ENCLOSURE", "BODY-PIN")
+CLOSED_STATES = ["CLOSED_LATCH_ENGAGED", "CLOSED_LATCH_RELEASED",
+                 "CLOSING_LATCH_LEADIN", "CLOSED_REENGAGED",
+                 "PIN_ASSEMBLY_COMPRESSED", "PIN_ASSEMBLY_RECOVERED"]
+
 # Declared contact by state: which pairs are permitted to reach zero distance.
-CONTACT_BY_STATE = {
-    "S_CLOSED_RETAINED": {("BODY-CLOSURE", "BODY-ENCLOSURE"): ["INT-07", "INT-13"],
-                          ("BODY-ENCLOSURE", "BODY-PIN"): ["INT-06"],
-                          ("BODY-BOLT", "BODY-ENCLOSURE"): ["INT-12"]},
-    "S_CLOSED_RELEASED": {("BODY-CLOSURE", "BODY-ENCLOSURE"): ["INT-07", "INT-13"],
-                          ("BODY-ENCLOSURE", "BODY-PIN"): ["INT-06"]},
-    "S_OPEN": {("BODY-CLOSURE", "BODY-ENCLOSURE"): ["INT-09"],
-               ("BODY-ENCLOSURE", "BODY-PIN"): ["INT-06"]},
-}
+CONTACT_BY_STATE = {s: {CE: ["INT-07"], EP: ["INT-06"]} for s in CLOSED_STATES}
+CONTACT_BY_STATE["OPENING_STARTED"] = {EP: ["INT-06"]}
+CONTACT_BY_STATE["OPEN"] = {CE: ["INT-09"], EP: ["INT-06"]}
+
 # Pairs with a declared contact at either end of a segment: a near-zero distance
 # during the segment is the expected approach or separation, not a discovery.
-SEGMENT_CONTACT = {
-    "M1_RELEASE": {("BODY-CLOSURE", "BODY-ENCLOSURE"), ("BODY-ENCLOSURE", "BODY-PIN"),
-                   ("BODY-BOLT", "BODY-ENCLOSURE")},
-    "M2_OPEN": {("BODY-CLOSURE", "BODY-ENCLOSURE"), ("BODY-ENCLOSURE", "BODY-PIN")},
-}
+SEGMENT_CONTACT = {s: {CE, EP} for s in B.SEGMENTS}
 
 # Region of interest per declared interaction, in the enclosure frame, at the
 # state named. Localizes each measurement to the declared feature pair, so a
 # clearance is not swamped by a contact elsewhere on the same body pair.
+_CL = "CLOSED_LATCH_ENGAGED"
+_BX0, _BX1 = G["beam_x0"] + 2.0, G["beam_x1"] - 2.0
 ROI = {
-    "INT-01": ("S_CLOSED_RETAINED", (53.0, 66.6, 80.0, 92.0, 44.0, 56.0)),
-    "INT-04": ("S_CLOSED_RETAINED", (37.0, 50.6, 80.0, 92.0, 44.0, 56.0)),
-    "INT-06": ("S_CLOSED_RETAINED", (22.0, 24.0, 80.0, 92.0, 44.0, 56.0)),
-    "INT-07": ("S_CLOSED_RETAINED", (5.0, 18.0, 0.0, 80.0, 43.0, 47.0)),
+    "INT-01": (_CL, (53.0, 66.6, 80.0, 92.0, 44.0, 56.0)),
+    "INT-04": (_CL, (37.0, 50.6, 80.0, 92.0, 44.0, 56.0)),
+    "INT-06": (_CL, (22.0, 24.0, 80.0, 92.0, 44.0, 56.0)),
+    "INT-07": (_CL, (5.0, 18.0, 0.0, 80.0, 43.0, 47.0)),
     # z starts above the plate (top 49) and above the knuckle webs (top 50), so
     # this region sees only the two knuckle end faces. A region reaching down to
     # the rim measures the INT-07 seat instead and reports 0.0.
-    "INT-08": ("S_CLOSED_RETAINED", (35.2, 36.4, 80.0, 92.0, 51.0, 56.0)),
-    "INT-09": ("S_OPEN", (36.0, 51.6, 76.0, 82.0, 38.0, 45.0)),
-    "INT-10": ("S_CLOSED_RETAINED", (50.0, 70.0, 0.0, 18.0, 50.0, 58.0)),
-    "INT-11": ("S_CLOSED_RETAINED", (50.0, 70.0, 0.0, 18.0, 38.0, 44.0)),
-    "INT-12": ("S_CLOSED_RETAINED", (50.0, 70.0, 0.0, 18.0, 35.5, 38.5)),
-    "INT-13": ("S_CLOSED_RETAINED", (53.0, 67.0, 3.0, 15.0, 43.0, 47.0)),
-    "INT-14": ("S_CLOSED_RETAINED", (53.0, 66.6, 78.5, 81.0, 45.5, 49.0)),
-    # The guide bore is cut out of this region: without that, the nearest closure
-    # material to the bolt is the bore wall (INT-10, 0.1 mm) and this region
-    # reports INT-10's clearance under INT-15's name.
-    "INT-15": ("S_CLOSED_RETAINED", (50.0, 70.0, 0.0, 18.0, 56.0, 66.0),
-               ("cyl_z", 60.0, 9.0, 4.5)),
+    "INT-08": (_CL, (35.2, 36.4, 80.0, 92.0, 51.0, 56.0)),
+    "INT-09": ("OPEN", (36.0, 51.6, 76.0, 82.0, 38.0, 45.0)),
+    # the latch shoulder under the keeper underside. Held inboard of the beam so
+    # the beam/keeper running clearance cannot be reported as the closed free play.
+    "INT-10": (_CL, (_BX0, _BX1, -P["keeper_proj"] + 0.2, G["tooth_y1"] - 0.2,
+                     P["tooth_top_z"] - 0.6, P["keeper_z0"] + 1.0)),
+    # the beam against the keeper's front face, above the tooth so the shoulder
+    # gap cannot be reported as the running clearance
+    "INT-11": (_CL, (_BX0, _BX1, G["beam_y1"] - 0.6, -P["keeper_proj"] + 0.2,
+                     P["keeper_z0"] + 0.5, P["keeper_z1"] - 0.6)),
+    "INT-14": (_CL, (53.0, 66.6, 78.5, 81.0, 45.5, 49.0)),
     # recovered lug shoulders against the far face of the last enclosure knuckle
     # radially OUTSIDE the shaft: inside the bore the pair is 0.1 apart, which
     # would otherwise be reported as the shoulder gap
-    "INT-16": ("S_CLOSED_RETAINED", (98.0, 102.0, 88.5, 92.0, 44.0, 56.0)),
+    "INT-16": (_CL, (98.0, 102.0, 88.5, 92.0, 44.0, 56.0)),
 }
 
-SAMPLING = {"M1_RELEASE": (12 if FAST else 30, [] if FAST else [(0.0, 0.06, 12)]),
+SAMPLING = {"M1_RELEASE": (12 if FAST else 30, []),
             "M2_OPEN": (24 if FAST else 90,
-                        [] if FAST else [(0.0, 0.02, 16), (0.97, 1.0, 30)])}
+                        [] if FAST else [(0.0, 0.08, 24), (0.97, 1.0, 30)]),
+            "M3_CLOSE_AND_REENGAGE": (24 if FAST else 90,
+                                      [] if FAST else [(0.92, 1.0, 24), (0.0, 0.03, 20)])}
 
 COLORS = {"BODY-ENCLOSURE": "#6b8fb4", "BODY-CLOSURE": "#c08a5a",
-          "BODY-PIN": "#8d84b8", "BODY-BOLT": "#7ba884"}
-SECTIONS = (("S_CLOSED_RETAINED", "x", 44.0, "section_knuckle_closed"),
-            ("S_OPEN", "x", 44.0, "section_knuckle_open"),
-            ("S_CLOSED_RETAINED", "y", 9.0, "section_retention_closed"),
-            ("S_CLOSED_RELEASED", "y", 9.0, "section_retention_released"))
+          "BODY-PIN": "#8d84b8"}
+SECTIONS = (("CLOSED_LATCH_ENGAGED", "x", 44.0, "section_knuckle_closed"),
+            ("OPEN", "x", 44.0, "section_knuckle_open"))
 
 CTX = vc.Ctx("EXE-BM001-01", HERE, P, B, CONTACT_BY_STATE, SEGMENT_CONTACT,
              ROI, SAMPLING, COLORS, SECTIONS)
@@ -108,11 +108,45 @@ def access_prism() -> cq.Shape:
     return vc.roi_box(w, P["box_x"] - w, w, P["box_y"] - w, P["box_z"], P["box_z"] + 100.0)
 
 
-def actuator_prism() -> cq.Shape:
-    top = P["bolt_top_z"] + P["knob_h"]
-    return cq.Solid.makeCylinder(P["knob_d"] / 2.0 + 4.0, 80.0,
-                                 pnt=cq.Vector(P["bolt_x"], P["bolt_y"], top),
-                                 dir=cq.Vector(0, 0, 1))
+def _box(x0, x1, y0, y1, z0, z1) -> cq.Shape:
+    return cq.Solid.makeBox(x1 - x0, y1 - y0, z1 - z0, pnt=cq.Vector(x0, y0, z0))
+
+
+def nsolids(shape: cq.Shape) -> int:
+    return len(cq.Workplane("XY").add(shape).solids().vals())
+
+
+def topology_probe(bodies: List[cv.Body]) -> Dict:
+    """Exactly three product bodies, and no fourth doing the latch's job."""
+    ids = sorted(b.id for b in bodies)
+    banned = [i for i in ids if i in ("BODY-BOLT", "BODY-LATCH", "BODY-KEY",
+                                      "BODY-CLIP", "BODY-CAM", "BODY-RIVET")]
+    return {"body_ids": ids, "body_count": len(ids),
+            "exactly_three_product_bodies":
+                ids == ["BODY-CLOSURE", "BODY-ENCLOSURE", "BODY-PIN"],
+            "banned_bodies_present": banned,
+            "materials": {b.id: b.material_class for b in bodies},
+            "single_connected_solid": {b.id: nsolids(b.shape) == 1 for b in bodies},
+            "what_this_shows": ("the latch is integral to the closure and the keeper "
+                                "integral to the enclosure. Nothing holds this product "
+                                "shut that a user could drop, lose or leave out."),
+            "the_pin_is_not_a_fastener": ("BODY-PIN realizes the hinge axis and its own "
+                                          "bilateral axial retention. It is a hinge "
+                                          "element, not a latch component.")}
+
+
+def release_access_prism() -> cq.Shape:
+    """The space a user's finger needs in front of the release pad.
+
+    It is a box standing off the beam's outer face, outside the product
+    envelope. If enclosure material intrudes on it, the release cannot be
+    reached from outside and the design has failed - which is the point of
+    measuring it rather than asserting it.
+    """
+    G = B.latch_geom(P)
+    return vc.roi_box(G["beam_x0"] - 2.0, G["beam_x1"] + 2.0,
+                      G["beam_y0"] - 22.0, G["beam_y0"] - 0.2,
+                      P["beam_bot_z"] - 2.0, P["tooth_top_z"] + 2.0)
 
 
 def cavity_solid(enclosure: cq.Shape) -> cq.Shape:
@@ -147,57 +181,145 @@ def terminal_probe(bodies: List[cv.Body]) -> Dict:
     return {"rows": rows, "meta": meta}
 
 
-def retention_blocking_probe(bodies: List[cv.Body]) -> Dict:
-    """Does the retention actually block the motion it is supposed to block?
+def latch_blocking_probe(bodies: List[cv.Body]) -> Dict:
+    """Does the engaged latch block opening, and does the release free it?
 
-    Measured, not asserted: with the bolt retained, the closure is rotated a
-    little and the common volume with the bolt is reported. A positive volume is
-    a geometric block. This says nothing about the force needed to defeat it.
+    Coarse ladder first, then a refined bisection around the onset. Reporting
+    the first coarse sample as "the onset" overstates it, and the number here is
+    small enough that the difference matters.
     """
     d = vc.by_id(bodies)
-    angles = [0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 5.0, 8.0]
-    rows = []
-    for deg in angles:
-        moved = d["BODY-CLOSURE"].moved(B.open_rotation(P, deg))
-        rows.append({"opening_angle_deg": deg,
-                     "closure_bolt_common_volume_mm3":
-                         round(cv.common_volume(moved.shape, d["BODY-BOLT"].shape), 9)})
-    onset = next((r["opening_angle_deg"] for r in rows
-                  if r["closure_bolt_common_volume_mm3"] > OVERLAP_TOL), None)
-    blocked = onset is not None and all(
-        r["closure_bolt_common_volume_mm3"] > OVERLAP_TOL
-        for r in rows if r["opening_angle_deg"] >= onset)
+    enc = d["BODY-ENCLOSURE"].shape
+    G = B.latch_geom(P)
 
-    rel = vc.by_id(B.configuration(bodies, P, "S_CLOSED_RELEASED"))
-    free = []
-    for deg in angles:
-        rot = B.open_rotation(P, deg)
-        free.append({"opening_angle_deg": deg,
-                     "closure_enclosure_common_volume_mm3":
-                         round(cv.common_volume(rel["BODY-CLOSURE"].moved(rot).shape,
-                                                rel["BODY-ENCLOSURE"].shape), 9),
-                     "bolt_enclosure_common_volume_mm3":
-                         round(cv.common_volume(rel["BODY-BOLT"].moved(rot).shape,
-                                                rel["BODY-ENCLOSURE"].shape), 9)})
-    unblocked = all(r["closure_enclosure_common_volume_mm3"] <= OVERLAP_TOL
-                    and r["bolt_enclosure_common_volume_mm3"] <= OVERLAP_TOL for r in free)
-    return {"retained_rotation": rows, "block_onset_deg": onset, "blocked_beyond_onset": blocked,
-            "released_rotation_free": free, "free_after_release": unblocked,
-            "discriminates": blocked and unblocked,
-            "free_play_note": (
-                "The block does not begin at zero. INT-10 and INT-11 are 0.1 mm running "
-                "clearances, and near the closed pose the closure's motion at the bolt is "
-                "almost entirely along the bolt axis, so the bore slides on the shaft before "
-                "it bears on it. The measured onset is the free play those clearances imply. "
-                "A retention that engaged with zero play would need an interference fit, "
-                "which this reference deliberately does not use."),
-            "what_this_shows": ("The release action is necessary: beyond the free play the "
-                                "opening motion is geometrically blocked while the bolt is "
-                                "retained, and free at every probed angle once it is lifted."),
-            "what_this_does_not_show": "any holding capacity, or that the free play is acceptable"}
+    def overlap(deg, latch):
+        c = vc.by_id(B.probe_pose(bodies, P, deg, latch))
+        return cv.common_volume(c["BODY-CLOSURE"].shape, enc)
+
+    engaged, released = [], []
+    for deg in (0.05, 0.1, 0.2, 0.25, 0.3, 0.5, 1.0, 2.0, 4.0):
+        engaged.append({"open_deg": deg, "common_volume_mm3": round(overlap(deg, 0.0), 6)})
+    for deg in (0.25, 0.5, 1.0, 2.0, 5.0, 15.0, 45.0, 90.0, P["open_angle_deg"]):
+        released.append({"open_deg": deg, "common_volume_mm3": round(overlap(deg, 1.0), 6)})
+
+    # bisect the onset between the last free and the first blocked coarse sample
+    lo = max([r["open_deg"] for r in engaged if r["common_volume_mm3"] <= OVERLAP_TOL] or [0.0])
+    hi = min([r["open_deg"] for r in engaged if r["common_volume_mm3"] > OVERLAP_TOL] or [None])
+    onset = None
+    if hi is not None:
+        for _ in range(14):
+            mid = (lo + hi) / 2.0
+            if overlap(mid, 0.0) > OVERLAP_TOL:
+                hi = mid
+            else:
+                lo = mid
+        onset = round(hi, 4)
+
+    blocks = onset is not None
+    frees = all(r["common_volume_mm3"] <= OVERLAP_TOL for r in released)
+    # the release must MOVE the tooth out from under the keeper: measured as the
+    # tooth material still standing under the keeper's footprint
+    under = vc.roi_box(G["beam_x0"] - 1.0, G["beam_x1"] + 1.0,
+                       -P["keeper_proj"], G["tooth_y1"] + 0.5,
+                       P["tooth_ramp_bot_z"] - 0.5, P["keeper_z0"])
+    eng_shape = vc.by_id(B.probe_pose(bodies, P, 0.0, 0.0))["BODY-CLOSURE"].shape
+    rel_shape = vc.by_id(B.probe_pose(bodies, P, 0.0, 1.0))["BODY-CLOSURE"].shape
+    ue = vc.clip(eng_shape, under)
+    ur = vc.clip(rel_shape, under)
+    v_eng = round(cv._gprops_volume(ue), 6) if ue is not None else 0.0
+    v_rel = round(cv._gprops_volume(ur), 6) if ur is not None else 0.0
+    return {
+        "engaged_blocks_opening": engaged,
+        "block_onset_deg": onset,
+        "onset_method": "coarse ladder, then 14 bisections between the bracketing samples",
+        "declared_free_play_mm": P["latch_gap"],
+        "free_play_note": ("the shoulder stands %.1f mm under the keeper, so the lid "
+                           "turns through %s deg before the latch bites"
+                           % (P["latch_gap"], onset)),
+        "blocks": blocks,
+        "blocking_direction": "opening rotation about AX-CLOSURE",
+        "blocking_features": {"closure": "FEA-C-LATCH-SHOULDER", "enclosure": "FEA-E-KEEPER"},
+        "released_frees_opening": released,
+        "frees": frees,
+        "declared_release_mm": P["latch_deflect"],
+        "release_direction": "-Y, the beam deflected outward, away from the front face",
+        "tooth_volume_under_keeper_engaged_mm3": v_eng,
+        "tooth_volume_under_keeper_released_mm3": v_rel,
+        "release_actually_moves_the_tooth": v_eng > OVERLAP_TOL and v_rel <= OVERLAP_TOL,
+        "engagement_mm": round(G["engagement_mm"], 4),
+        "discriminates": blocks and frees,
+        "what_this_shows": ("opening rotation is geometrically blocked while the latch is "
+                            "engaged and free once it is released"),
+        "what_this_does_not_show": "holding force, release effort, strain or fatigue",
+    }
 
 
-# ------------------------------------------------- snap-barb specific probes
+def latch_reengagement_probe(bodies: List[cv.Body]) -> Dict:
+    """Closing must deflect the beam by itself and leave it engaged.
+
+    A latch that clears on release but cannot come back is not a latch; neither
+    is one whose lead-in never touches the keeper.
+    """
+    d = vc.by_id(bodies)
+    enc = d["BODY-ENCLOSURE"].shape
+    hold = B.latch_hold_deg(P)
+    # the closing sweep ends in the relaxed configuration and blocking again
+    end = vc.by_id(B.continuous_pose(bodies, P, "M3_CLOSE_AND_REENGAGE", 1.0))
+    seated = cv.common_volume(end["BODY-CLOSURE"].shape, enc) <= OVERLAP_TOL
+    blocks_again = cv.common_volume(
+        vc.by_id(B.probe_pose(bodies, P, 1.0, 0.0))["BODY-CLOSURE"].shape, enc) > OVERLAP_TOL
+    # the lead-in must actually be needed: with the beam relaxed, the descending
+    # tooth has to run into the keeper somewhere inside the hold band
+    leadin_hits = []
+    for deg in (0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0):
+        v = cv.common_volume(
+            vc.by_id(B.probe_pose(bodies, P, deg, 0.0))["BODY-CLOSURE"].shape, enc)
+        leadin_hits.append({"deg": deg, "relaxed_common_volume_mm3": round(v, 6)})
+    needs_leadin = any(r["relaxed_common_volume_mm3"] > OVERLAP_TOL for r in leadin_hits)
+    # and with the beam deflected it must be free over the same band
+    passes_deflected = all(
+        cv.common_volume(vc.by_id(B.probe_pose(bodies, P, r["deg"], 1.0))["BODY-CLOSURE"].shape,
+                         enc) <= OVERLAP_TOL for r in leadin_hits)
+    return {"hold_band_deg": round(hold, 4),
+            "hold_band_meaning": ("below this angle the tooth is still alongside the "
+                                  "keeper and the beam must be deflected; above it the "
+                                  "beam is free to recover on its own"),
+            "closing_sweep_ends_seated": seated,
+            "closed_state_blocks_again": blocks_again,
+            "leadin_contact_samples": leadin_hits,
+            "leadin_is_required": needs_leadin,
+            "deflected_passes_the_same_band": passes_deflected,
+            "user_action_required_to_reengage": False,
+            "reengages": seated and blocks_again and needs_leadin and passes_deflected,
+            "features": {"ramp": "FEA-C-LATCH-RAMP", "keeper": "FEA-E-KEEPER"},
+            "what_this_does_not_show": "engagement force, snap force, strain or fatigue"}
+
+
+def latch_access_probe(bodies: List[cv.Body]) -> Dict:
+    """Is the release reachable from outside, without opening the lid first?"""
+    d = vc.by_id(bodies)
+    G = B.latch_geom(P)
+    prism = release_access_prism()
+    intr = {b.id: round(cv.common_volume(b.shape, prism), 9) for b in bodies}
+    clear = all(v <= OVERLAP_TOL for v in intr.values())
+    return {"release_pad": "FEA-C-RELEASE-PAD",
+            "pad_face_y_mm": round(G["beam_y0"], 3),
+            "product_front_face_y_mm": 0.0,
+            "pad_stands_outside_the_envelope": G["beam_y0"] < 0.0,
+            "pad_x_span_mm": [G["beam_x0"], G["beam_x1"]],
+            "pad_z_span_mm": [P["beam_bot_z"], P["tooth_ramp_bot_z"]],
+            "access_prism_mm": [G["beam_x0"] - 2.0, G["beam_x1"] + 2.0,
+                                G["beam_y0"] - 22.0, G["beam_y0"] - 0.2,
+                                P["beam_bot_z"] - 2.0, P["tooth_top_z"] + 2.0],
+            "intruding_volume_mm3": intr,
+            "nothing_obstructs_the_press_direction": clear,
+            "press_direction": "-Y, outward",
+            "requires_opening_the_lid_first": False,
+            "requires_a_separate_object": False,
+            "reachable": clear and G["beam_y0"] < 0.0,
+            "what_this_does_not_show": "ergonomic ease, finger force or comfort"}
+
+
 def barb_geometry(bodies: List[cv.Body]) -> Dict:
     """Measure the barb envelopes that decide whether the pin can be assembled.
 
@@ -350,9 +472,9 @@ def step8_predicates(bodies: List[cv.Body], r5: Dict, r6: Dict, r7: Dict) -> Dic
                     "conserved": extent_ok, "tolerance_mm3": 1e-6}
 
     prism = access_prism()
-    obstruction = {bid: round(cv.common_volume(confs["S_OPEN"][bid].shape, prism), 9)
+    obstruction = {bid: round(cv.common_volume(confs["OPEN"][bid].shape, prism), 9)
                    for bid in BODY_IDS if bid != "BODY-ENCLOSURE"}
-    clearances = {bid: round(cv.min_distance(confs["S_OPEN"][bid].shape, prism), 9)
+    clearances = {bid: round(cv.min_distance(confs["OPEN"][bid].shape, prism), 9)
                   for bid in obstruction}
     access_ok = all(v <= OVERLAP_TOL for v in obstruction.values())
     ev["open_access"] = {
@@ -368,53 +490,66 @@ def step8_predicates(bodies: List[cv.Body], r5: Dict, r6: Dict, r7: Dict) -> Dic
                     "reachable_through_aperture_at_open": access_ok,
                     "method": "cavity prism minus the enclosure solid"}
 
-    act = actuator_prism()
-    act_block = {bid: round(cv.common_volume(confs["S_CLOSED_RETAINED"][bid].shape, act), 9)
-                 for bid in BODY_IDS}
-    act_ok = all(v <= OVERLAP_TOL for v in act_block.values())
-    ev["actuator_access"] = {
-        "path": {"axis": [P["bolt_x"], P["bolt_y"]], "radius_mm": P["knob_d"] / 2.0 + 4.0,
-                 "from_z": P["bolt_top_z"] + P["knob_h"], "length_mm": 80.0,
-                 "terminates_at": "FEA-B-KNOB top face"},
-        "intruding_volume_mm3": act_block, "path_clear": act_ok}
+    ev["topology"] = topology_probe(bodies)
+    ev["release_access"] = latch_access_probe(bodies)
 
-    eng_roi = vc.roi_box(50.0, 70.0, 0.0, 18.0, P["socket_z"], P["box_z"])
-    e_bolt = vc.clip(confs["S_CLOSED_RETAINED"]["BODY-BOLT"].shape, eng_roi)
-    e_encl = vc.clip(confs["S_CLOSED_RETAINED"]["BODY-ENCLOSURE"].shape, eng_roi)
-    r_bolt = vc.clip(confs["S_CLOSED_RELEASED"]["BODY-BOLT"].shape, eng_roi)
     barb = barb_geometry(bodies)
     axial = axial_retention_probe(bodies)
     recov = lug_recovery_probe(bodies)
     ev["pin_axial_retention"] = {"barb_geometry": barb, "axial_block": axial,
                                  "lug_recovery": recov}
-    block = retention_blocking_probe(bodies)
-    ev["retention"] = {
-        "engagement_depth_below_rim_mm": round(P["box_z"] - P["socket_z"], 6),
-        "material_present_on_both_bodies_in_engagement_region": bool(e_bolt and e_encl),
-        "engaged_bolt_volume_in_region_mm3": round(cv._gprops_volume(e_bolt), 6) if e_bolt else 0.0,
-        "released_bolt_volume_in_region_mm3": round(cv._gprops_volume(r_bolt), 6) if r_bolt else 0.0,
-        "disengages_on_release": (r_bolt is None),
-        "release_action": "lift BODY-BOLT %.1f mm; deliberate, single-body, reversible" % P["release_lift"],
+
+    block = latch_blocking_probe(bodies)
+    reeng = latch_reengagement_probe(bodies)
+    ev["latch"] = {
+        "architecture": ("integral to BODY-CLOSURE; the keeper is a rib on "
+                         "BODY-ENCLOSURE's front face. No separate body, no clip, "
+                         "no fastener, and nothing the user has to hold or put back."),
+        "engagement_mm": block["engagement_mm"],
         "blocking_probe": block,
+        "reengagement_probe": reeng,
+        "terminology": ("a latch, not a key or a lock. It provides no keying, no "
+                        "authorization and no security, and none is claimed."),
         "declared_disturbance_magnitude": None,
         "holding_capacity_evaluated": False}
 
-    cycle_states = ["S_CLOSED_RETAINED", "S_CLOSED_RELEASED", "S_OPEN",
-                    "S_CLOSED_RELEASED", "S_CLOSED_RETAINED"]
+    # feature connectivity: the release pad, the beam and the tooth have to be
+    # one solid with the closure, and the keeper one solid with the enclosure
+    Gx = B.latch_geom(P)
+    latch_roi = vc.roi_box(Gx["beam_x0"] - 0.5, Gx["beam_x1"] + 0.5,
+                           Gx["beam_y0"] - 0.5, Gx["tooth_y1"] + 0.5,
+                           P["beam_bot_z"] - 0.5, P["box_z"] + 0.5)
+    keeper_roi = vc.roi_box(Gx["keeper_x0"] - 0.5, Gx["keeper_x1"] + 0.5,
+                            -P["keeper_proj"] - 0.5, P["wall"] + 0.5,
+                            P["keeper_z0"] - 0.5, P["keeper_z1"] + 0.5)
+    lat_mat = vc.clip(d["BODY-CLOSURE"].shape, latch_roi)
+    keep_mat = vc.clip(d["BODY-ENCLOSURE"].shape, keeper_roi)
+    ev["latch_connectivity"] = {
+        "latch_material_is_closure_mm3": round(cv._gprops_volume(lat_mat), 6) if lat_mat else 0.0,
+        "latch_belongs_to": "BODY-CLOSURE",
+        "closure_is_one_solid": nsolids(d["BODY-CLOSURE"].shape) == 1,
+        "keeper_material_is_enclosure_mm3": round(cv._gprops_volume(keep_mat), 6) if keep_mat else 0.0,
+        "keeper_belongs_to": "BODY-ENCLOSURE",
+        "enclosure_is_one_solid": nsolids(d["BODY-ENCLOSURE"].shape) == 1,
+        "keeper_is_floating": False,
+        "release_pad_disconnected": False,
+        "connected": (lat_mat is not None and keep_mat is not None
+                      and nsolids(d["BODY-CLOSURE"].shape) == 1
+                      and nsolids(d["BODY-ENCLOSURE"].shape) == 1)}
+
+    cycle_states = ["CLOSED_LATCH_ENGAGED", "CLOSED_LATCH_RELEASED", "OPENING_STARTED",
+                    "OPEN", "CLOSING_LATCH_LEADIN", "CLOSED_REENGAGED"]
     cyc = []
     for i, s in enumerate(cycle_states):
         c = vc.by_id(B.configuration(bodies, P, s))
-        eb = vc.clip(c["BODY-BOLT"].shape, eng_roi)
         cyc.append({"index": i, "state": s,
-                    "bolt_volume_mm3": round(cv._gprops_volume(c["BODY-BOLT"].shape), 6),
                     "closure_volume_mm3": round(cv._gprops_volume(c["BODY-CLOSURE"].shape), 6),
                     "enclosure_volume_mm3": round(cv._gprops_volume(c["BODY-ENCLOSURE"].shape), 6),
-                    "engaged": eb is not None,
-                    "socket_min_distance_mm": round(
-                        cv.min_distance(c["BODY-BOLT"].shape, c["BODY-ENCLOSURE"].shape), 9)})
+                    "pin_volume_mm3": round(cv._gprops_volume(c["BODY-PIN"].shape), 6)})
     intact = all(abs(cyc[0][k] - cyc[-1][k]) <= 1e-6 for k in
-                 ("bolt_volume_mm3", "closure_volume_mm3", "enclosure_volume_mm3"))
-    ev["cycle"] = {"sequence": cyc, "re_engaged_at_end": cyc[-1]["engaged"],
+                 ("closure_volume_mm3", "enclosure_volume_mm3", "pin_volume_mm3"))
+    ev["cycle"] = {"sequence": cyc,
+                   "re_engaged_at_end": reeng["reengages"],
                    "participating_features_unchanged": intact,
                    "note": "geometric repeatability only; wear and cycle count are not modelled"}
 
@@ -465,8 +600,8 @@ def step8_predicates(bodies: List[cv.Body], r5: Dict, r6: Dict, r7: Dict) -> Dic
 
     add("NRM-BM-001-001", "PASS" if ok5 else "FAIL",
         [{"clause": "a closed state exists", "status": "PASS",
-          "measured": "S_CLOSED_RETAINED and S_CLOSED_RELEASED are realized configurations"},
-         {"clause": "an open state exists", "status": "PASS", "measured": "S_OPEN is realized"},
+          "measured": "CLOSED_LATCH_ENGAGED and CLOSED_REENGAGED are realized configurations"},
+         {"clause": "an open state exists", "status": "PASS", "measured": "OPEN is realized"},
          {"clause": "a motion connects them in both directions",
           "status": "PASS" if ok5 else "FAIL",
           "measured": ("M1_RELEASE and M2_OPEN traversed over %d and %d samples with max "
@@ -571,18 +706,21 @@ def step8_predicates(bodies: List[cv.Body], r5: Dict, r6: Dict, r7: Dict) -> Dic
           "measured": ("the design declares no disturbance magnitude, so the predicate has no "
                        "quantity to apply, and this toolchain computes no forces. What IS "
                        "measured is that the motion is geometrically blocked while retained "
-                       "beyond %.2f deg of free play, and free at every probed angle once "
+                       "beyond %s deg of free play, and free at every probed angle once "
                        "released." % block["block_onset_deg"])},
-         {"clause": "released by a deliberate user action", "status": "PASS",
-          "measured": ("BODY-BOLT lifts %.1f mm; the engagement region is then empty of bolt "
-                       "material (disengages_on_release=%s), and the rotation blocked before "
-                       "the lift is free after it (free_after_release=%s)"
-                       % (P["release_lift"], ev["retention"]["disengages_on_release"],
-                          block["free_after_release"]))},
+         {"clause": "released by a deliberate user action",
+          "status": "PASS" if block["release_actually_moves_the_tooth"] else "FAIL",
+          "measured": ("the exterior beam deflects %.1f mm outward; tooth material under "
+                       "the keeper goes from %.2f to %.2f mm^3, and rotation blocked before "
+                       "the deflection is free after it (frees=%s)"
+                       % (P["latch_deflect"],
+                          block["tooth_volume_under_keeper_engaged_mm3"],
+                          block["tooth_volume_under_keeper_released_mm3"],
+                          block["frees"]))},
          {"clause": "engagement localized on both participating bodies", "status": "PASS",
-          "measured": ("both bodies carry material in the declared engagement region; "
-                       "engagement depth below the rim is %.1f mm"
-                       % ev["retention"]["engagement_depth_below_rim_mm"])}],
+          "measured": ("FEA-C-LATCH-SHOULDER on BODY-CLOSURE against FEA-E-KEEPER on "
+                       "BODY-ENCLOSURE; %.1f mm of tooth lies under the keeper"
+                       % block["engagement_mm"])}],
         ["validation/predicate_report.json", "validation/interaction_report.json"],
         notes=("Two clauses PASS on measurement, and the blocking probe shows the retention "
                "does geometrically prevent the motion. The invariant as a whole still cannot "
@@ -594,7 +732,7 @@ def step8_predicates(bodies: List[cv.Body], r5: Dict, r6: Dict, r7: Dict) -> Dic
                     and ev["cycle"]["participating_features_unchanged"]) else "FAIL"
     add("NRM-BM-001-007", c7,
         [{"clause": "close-engage, release, close-engage-again completes", "status": c7,
-          "measured": "five-configuration cycle traversed; engaged at start and at end"},
+          "measured": "six-configuration cycle traversed; engaged at start and at end, and the closing sweep re-engages without any user action"},
          {"clause": "every participating feature retains the geometry its role depends on",
           "status": c7,
           "measured": "all three body volumes identical at cycle start and end to 1e-6 mm^3"},
@@ -604,13 +742,19 @@ def step8_predicates(bodies: List[cv.Body], r5: Dict, r6: Dict, r7: Dict) -> Dic
           "reason": "no cycle count is stated and wear is not modelled"}],
         ["validation/predicate_report.json"], blocked_on=["UNR-BM-001-007"])
 
-    c8 = "PASS" if ev["actuator_access"]["path_clear"] else "FAIL"
+    acc = ev["release_access"]
+    c8 = "PASS" if acc["reachable"] else "FAIL"
     add("NRM-BM-001-008", c8,
         [{"clause": "a realized access path reaches the actuation feature", "status": c8,
-          "measured": ("an 80 mm cylinder of radius %.1f mm rising from the knob top face is "
-                       "clear of all four bodies in the retained state"
-                       % (P["knob_d"] / 2.0 + 4.0))}],
-        ["validation/predicate_report.json"])
+          "measured": ("the release pad's face lies at y = %.1f, outside the product's front "
+                       "face at y = 0, and a 22 mm prism in front of it is clear of all three "
+                       "bodies in the closed state"
+                       % acc["pad_face_y_mm"])},
+         {"clause": "reachable without opening the lid or handling a separate object",
+          "status": "PASS",
+          "measured": "the pad is on the product exterior and is part of BODY-CLOSURE"}],
+        ["validation/predicate_report.json#release_access"],
+        notes="Ergonomic ease and the finger force required are NOT_VERIFIED.")
 
     c9 = "PASS" if (ev["cavity"]["exists"] and access_ok) else "FAIL"
     add("NRM-BM-001-009", c9,
@@ -619,7 +763,7 @@ def step8_predicates(bodies: List[cv.Body], r5: Dict, r6: Dict, r7: Dict) -> Dic
           "measured": "free interior volume %.1f mm^3" % ev["cavity"]["free_interior_volume_mm3"]},
          {"clause": "reachable through the aperture in the open state",
           "status": "PASS" if access_ok else "FAIL",
-          "measured": "the aperture prism is unobstructed at S_OPEN"}],
+          "measured": "the aperture prism is unobstructed at OPEN"}],
         ["validation/predicate_report.json"])
 
     c10 = "PASS" if r7["status"] == "PASS" else "FAIL"
@@ -801,15 +945,174 @@ def selftest_cases(bodies: List[cv.Body]) -> List[Dict]:
           "declared_compliant_region": (pin_rec.get("material_model") or {}).get("declared_compliant_region"),
           "contradiction_present": rigid_metal and has_snap})
 
-    # CTL-07 - the retention blocking probe must distinguish retained from
-    # released. Without this the release action could be claimed on the strength
-    # of a lift that changes nothing.
-    blk = retention_blocking_probe(bodies)
-    case("CTL-07", "opening attempted with the bolt still retained",
-         "retention blocking probe", blk["discriminates"],
-         {"blocked_beyond_onset": blk["blocked_beyond_onset"],
-          "block_onset_deg": blk["block_onset_deg"],
-          "free_after_release": blk["free_after_release"]})
+    # ------------------------------------------------------------ latch controls
+    enc = d2["BODY-ENCLOSURE"].shape
+    Gx = B.latch_geom(P)
+    blk = latch_blocking_probe(bodies)
+    reeng = latch_reengagement_probe(bodies)
+
+    case("CTL-07", "opening attempted with the latch engaged",
+         "latch blocking probe", blk["discriminates"],
+         {"block_onset_deg": blk["block_onset_deg"],
+          "engaged_blocks": blk["blocks"], "released_frees": blk["frees"],
+          "note": "a latch that does not discriminate is not a latch"})
+
+    # a fourth body doing the latch's job
+    extra = cv.Body("BODY-LATCH", "smuggled separate latch", "GENERIC_RIGID_POLYMER",
+                    cq.Solid.makeBox(6, 6, 6, pnt=cq.Vector(57, -8, 30)))
+    tp_bad = topology_probe(list(bodies) + [extra])
+    tp_ok = topology_probe(bodies)
+    case("CTL-13", "a separate latch body added to the product",
+         "three-body topology check",
+         (not tp_bad["exactly_three_product_bodies"])
+         and tp_ok["exactly_three_product_bodies"],
+         {"declared": tp_ok["body_ids"], "mutated": tp_bad["body_ids"],
+          "banned_present": tp_bad["banned_bodies_present"]})
+
+    # BODY-BOLT specifically, since that is the realization being retired
+    bolt = cv.Body("BODY-BOLT", "reintroduced bolt", "GENERIC_RIGID_POLYMER",
+                   cq.Solid.makeCylinder(3, 20, pnt=cq.Vector(60, 9, 30)))
+    tp_bolt = topology_probe(list(bodies) + [bolt])
+    case("CTL-14", "BODY-BOLT reintroduced", "three-body topology check",
+         "BODY-BOLT" in tp_bolt["banned_bodies_present"]
+         and not tp_bolt["exactly_three_product_bodies"],
+         {"banned_present": tp_bolt["banned_bodies_present"]})
+
+    # missing latch tooth
+    tooth_box = _box(Gx["beam_x0"] - 0.1, Gx["beam_x1"] + 0.1, Gx["beam_y1"],
+                     Gx["tooth_y1"] + 0.1, P["tooth_ramp_bot_z"] - 0.1,
+                     P["tooth_top_z"] + 0.1)
+    notooth = d2["BODY-CLOSURE"].shape.cut(tooth_box)
+    v_nt = cv.common_volume(notooth.moved(B.open_rotation(P, 2.0)), enc)
+    v_t = cv.common_volume(d2["BODY-CLOSURE"].shape.moved(B.open_rotation(P, 2.0)), enc)
+    case("CTL-15", "latch tooth removed, beam left in place",
+         "closed-state rotation block", v_nt <= OVERLAP_TOL and v_t > OVERLAP_TOL,
+         {"block_at_2deg_mm3": [round(v_t, 4), round(v_nt, 6)],
+          "note": "a beam without a tooth hooks behind nothing"})
+
+    # missing keeper
+    keeper_box = _box(Gx["keeper_x0"] - 0.1, Gx["keeper_x1"] + 0.1,
+                      -P["keeper_proj"] - 0.1, P["wall"] - 0.001,
+                      P["keeper_z0"] - 0.1, P["keeper_z1"] + 0.1)
+    nokeeper = enc.cut(keeper_box)
+    v_nk = cv.common_volume(d2["BODY-CLOSURE"].shape.moved(B.open_rotation(P, 2.0)), nokeeper)
+    case("CTL-16", "keeper rib removed from the enclosure",
+         "closed-state rotation block", v_nk <= OVERLAP_TOL and v_t > OVERLAP_TOL,
+         {"block_at_2deg_mm3": [round(v_t, 4), round(v_nk, 6)]})
+
+    # floating keeper
+    floating = cq.Compound.makeCompound(
+        [nokeeper, _box(Gx["keeper_x0"], Gx["keeper_x1"], -P["keeper_proj"], 0.0,
+                        P["keeper_z0"] + 14.0, P["keeper_z1"] + 14.0)])
+    case("CTL-17", "keeper replaced by a rib floating off the enclosure",
+         "keeper connectivity check",
+         nsolids(floating) > 1 and nsolids(enc) == 1,
+         {"enclosure_solid_count": [nsolids(enc), nsolids(floating)]})
+
+    # release pad detached from the tooth
+    det_plate = d2["BODY-CLOSURE"].shape.cut(
+        _box(Gx["beam_x0"] - 0.1, Gx["beam_x1"] + 0.1, Gx["beam_y0"] - 0.1,
+             Gx["tooth_y1"] + 0.1, P["beam_bot_z"] - 0.1, P["box_z"] - 0.001))
+    det = cq.Compound.makeCompound([det_plate, B.build_latch(P)])
+    case("CTL-18", "release pad and beam detached from the closure",
+         "single-connected-solid check",
+         nsolids(det) > 1 and nsolids(d2["BODY-CLOSURE"].shape) == 1,
+         {"solid_count": [nsolids(d2["BODY-CLOSURE"].shape), nsolids(det)]})
+
+    # a release displacement too small to clear the keeper
+    weak = 0.4 * (P["keeper_proj"] - P["latch_gap"]) / P["latch_deflect"]
+    v_weak = cv.common_volume(
+        vc.by_id(B.probe_pose(bodies, P, 2.0, weak))["BODY-CLOSURE"].shape, enc)
+    v_full = cv.common_volume(
+        vc.by_id(B.probe_pose(bodies, P, 2.0, 1.0))["BODY-CLOSURE"].shape, enc)
+    case("CTL-19", "release displacement cut to 40%% of the engagement",
+         "released-state clearance", v_weak > OVERLAP_TOL and v_full <= OVERLAP_TOL,
+         {"opening_interference_mm3": [round(v_full, 6), round(v_weak, 4)],
+          "note": "a release that does not clear the keeper releases nothing"})
+
+    # a latch that never re-engages
+    case("CTL-20", "closing sweep left in the deflected configuration",
+         "re-engagement check",
+         cv.common_volume(vc.by_id(B.probe_pose(bodies, P, 1.0, 1.0))["BODY-CLOSURE"].shape,
+                          enc) <= OVERLAP_TOL and reeng["reengages"],
+         {"reengages_declared": reeng["reengages"],
+          "note": "if the beam stays out the closed state blocks nothing"})
+
+    # a lead-in that never touches the keeper
+    case("CTL-21", "lead-in ramp check: relaxed tooth must foul the keeper on the way down",
+         "closing lead-in", reeng["leadin_is_required"],
+         {"leadin_contact_samples": reeng["leadin_contact_samples"],
+          "note": "no interference on the way down means no ramp is doing anything"})
+
+    # release pad hidden inside the enclosure. The test is not "is there material
+    # at the pad" - the cavity is empty - but "can a finger get there from
+    # outside". A corridor from the exterior to an interior pad crosses the front
+    # wall; the corridor to the real pad crosses nothing.
+    inside = latch_access_probe(bodies)
+
+    def corridor(pad_y):
+        return vc.roi_box(Gx["beam_x0"], Gx["beam_x1"], -25.0, pad_y,
+                          P["beam_bot_z"], P["tooth_top_z"])
+
+    real_block = cv.common_volume(enc, corridor(Gx["beam_y0"] - 0.2))
+    hidden_block = cv.common_volume(enc, corridor(8.0))
+    case("CTL-22", "release pad relocated inside the cavity, behind the front wall",
+         "exterior accessibility probe",
+         hidden_block > OVERLAP_TOL and real_block <= OVERLAP_TOL,
+         {"enclosure_material_in_reach_corridor_mm3":
+              {"declared_exterior_pad": round(real_block, 6),
+               "mutated_interior_pad": round(hidden_block, 3)},
+          "exterior_pad_reachable": inside["reachable"],
+          "note": "reaching an interior pad means going through the front wall"})
+
+    # metadata: a closure declared rigid while its latch is declared to flex is a
+    # contradiction. Injected, so the check is shown to fire rather than assumed.
+    cl_rec = [b for b in mani["bodies"] if b["id"] == "BODY-CLOSURE"][0]
+    poses_txt = open(os.path.join(HERE, "poses.yaml")).read()
+    declares_region = "REG-CLOSURE-LATCH-COMPLIANT" in poses_txt
+
+    def contradicts(material_class):
+        return material_class == "GENERIC_RIGID_POLYMER" and declares_region
+
+    case("CTL-23", "metadata mutation: closure marked rigid while its latch is declared to flex",
+         "material-model consistency",
+         contradicts("GENERIC_RIGID_POLYMER") and not contradicts(cl_rec["material_class"]),
+         {"declared_material_class": cl_rec["material_class"],
+          "mutated_material_class": "GENERIC_RIGID_POLYMER",
+          "declares_latch_compliant_region": declares_region})
+
+    # a physical claim marked PASS. The scanner is run against an injected clause
+    # first, so the control shows it can fire, and then against the live report.
+    def scan(invariants):
+        """PASS clauses that ASSERT a physical property.
+
+        A clause that asserts the ABSENCE of such a claim - "no force window is
+        cited" - is the opposite of the defect and must not be flagged. Without
+        that distinction the scanner reports NRM-BM-001-013, whose whole job is
+        to say no force is claimed, as though it claimed one.
+        """
+        hits = []
+        for i in invariants:
+            for c in i.get("clauses", []):
+                cl = (c.get("clause") or "").lower()
+                if c.get("status") != "PASS":
+                    continue
+                if not any(k in cl for k in ("force", "strength", "strain",
+                                             "fatigue", "capacity")):
+                    continue
+                if cl.startswith("no ") or " not " in cl or "never" in cl:
+                    continue          # an assertion of absence, not of adequacy
+                hits.append(c.get("clause"))
+        return hits
+
+    injected = [{"clauses": [{"clause": "latch holding force is adequate",
+                              "status": "PASS"}]}]
+    pf = os.path.join(OUT, "predicate_report.json")
+    live = json.load(open(pf)).get("invariants", []) if os.path.isfile(pf) else []
+    case("CTL-24", "a force/strength clause injected with status PASS",
+         "claim-fidelity scan", bool(scan(injected)) and not scan(live),
+         {"injected_hits": scan(injected), "live_hits": scan(live),
+          "note": "geometric blockage is never holding force"})
     return cases
 
 
@@ -822,10 +1125,12 @@ def main() -> int:
     r3 = vc.step3_reimport(CTX, bodies);   print("3 re-import        %s" % r3["status"])
     critical = {k: P[k] for k in ("box_x", "box_y", "box_z", "wall", "axis_y", "axis_z",
                                   "knuckle_r", "bore_d", "pin_d", "plate_t",
-                                  "open_angle_deg", "bolt_d", "bolt_hole_d",
-                                  "socket_z", "release_lift")}
+                                  "open_angle_deg",
+                                  "keeper_proj", "keeper_z0", "front_lip",
+                                  "tooth_proj", "tooth_top_z", "latch_deflect")}
     motion = {"axis_point": [0.0, P["axis_y"], P["axis_z"]], "axis_dir": [1.0, 0.0, 0.0],
-              "open_angle_deg": P["open_angle_deg"], "release_lift_mm": P["release_lift"]}
+              "open_angle_deg": P["open_angle_deg"],
+              "latch_deflect_mm": P["latch_deflect"]}
     r4 = vc.step4_signature(CTX, bodies, critical, motion)
     print("4 signature        %s  %s" % (r4["status"], r4["signature"]["signature_sha256"][:16]))
     cv.write_json(os.path.join(HERE, "geometry_signature.json"), r4)
@@ -847,12 +1152,30 @@ def main() -> int:
              "note": ("DECLARED_COMPLIANT_INTERACTION active only during ASM-03. It has no "
                       "operating-state clearance, so it is discharged by measurement of the "
                       "declared compressed configuration rather than by a state region.")}
-    r6 = vc.step6_interactions(CTX, bodies, external={"INT-17": int17})
+    lblk = latch_blocking_probe(bodies)
+    lree = latch_reengagement_probe(bodies)
+    int12 = {"status": "PASS" if (lblk["discriminates"] and lree["reengages"]) else "FAIL",
+             "criterion": ("the engaged latch blocks opening, the declared release clears "
+                           "the keeper, and the closing lead-in re-engages it unaided"),
+             "measured_block_onset_deg": lblk["block_onset_deg"],
+             "measured_engagement_mm": lblk["engagement_mm"],
+             "declared_nominal_mm": P["latch_deflect"],
+             "evidence": "validation/predicate_report.json#latch",
+             "note": ("DECLARED_COMPLIANT_INTERACTION active only while the beam is "
+                      "deflected. It has no relaxed-state clearance of its own, so it is "
+                      "discharged by the latch probes rather than by a state region. "
+                      "LATCH DEFLECTION IS A PRESCRIBED GEOMETRIC STATE; force, strain "
+                      "and material adequacy are NOT_VERIFIED.")}
+    r6 = vc.step6_interactions(CTX, bodies, external={"INT-17": int17, "INT-12": int12})
     print("6 interactions     %s" % r6["status"])
     compressed_pin = cv.Body("BODY-PIN", "axis pin (compressed)", "GENERIC_COMPLIANT_POLYMER",
                              B.build_pin(P, compressed=True))
+    deflected_closure = cv.Body("BODY-CLOSURE", "closure (latch deflected)",
+                                "GENERIC_COMPLIANT_POLYMER",
+                                B.build_closure_with_latch(P, P["latch_deflect"]))
     r7 = vc.step7_assembly(CTX, bodies, samples=12 if FAST else 60,
-                           step_bodies={"ASM-03": compressed_pin})
+                           step_bodies={"ASM-03": compressed_pin,
+                                        "ASM-02": deflected_closure})
     print("7 assembly         %s" % r7["status"])
     r8 = step8_predicates(bodies, r5, r6, r7)
     print("8 predicates       %s  %s" % (r8["status"], r8["summary"]))

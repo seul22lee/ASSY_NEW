@@ -222,66 +222,102 @@ parameters:
     range: [45.0, 52.0]
 
   # ---------------------------------------------------------------- retention
-  - name: bolt_x
+  # ------------------------------------------- integral exterior snap latch
+  # A latch on the closure and a keeper on the enclosure, and nothing else. What
+  # this replaced, and why it was rejected, is in the report - not here, because
+  # a parameter file should describe the product that exists.
+  - name: latch_x_centre
     value: 60.0
-    purpose: X of the retention bolt axis
+    purpose: X centreline of the latch, mid-span on the front face
     range: [20.0, 100.0]
-  - name: bolt_y
-    value: 9.0
+  - name: keeper_w
+    value: 24.0
     purpose: >
-      Y of the retention bolt axis. Set so the knob's full diameter stays within
-      the enclosure footprint rather than overhanging the front face.
-    range: [5.0, 20.0]
-  - name: bolt_d
-    value: 8.0
-    purpose: bolt shaft diameter
-    range: [4.0, 16.0]
-  - name: bolt_hole_d
-    value: 8.2
-    purpose: guide and socket bore diameter; 0.1 radial clearance on the shaft
-    range: [4.1, 16.4]
-  - name: bolt_boss_x
-    value: 16.0
-    purpose: width of both retention bosses
-    range: [10.0, 40.0]
-  - name: bolt_boss_y0
-    value: 2.0
-    purpose: front edge of both bosses; overlaps the front wall so the boss is one solid with it
-    range: [0.0, 5.0]
-  - name: bolt_boss_y1
-    value: 16.0
-    purpose: rear edge of both bosses; leaves 2.9 of material around the bore
-    range: [8.0, 30.0]
-  - name: socket_z
-    value: 37.0
+      X width of the enclosure keeper. Wider than the beam, so the tooth stays
+      under it even with the beam at either end of its X tolerance.
+    range: [6.0, 60.0]
+  - name: keeper_proj
+    value: 3.2
     purpose: >
-      floor of the enclosure socket. The bolt rests on it in the retained state,
-      giving 8 mm of engagement below the rim.
-    range: [10.0, 44.0]
-  - name: lid_boss_top_z
-    value: 59.0
-    purpose: top of the closure-side guide boss
-    range: [50.0, 80.0]
-  - name: bolt_top_z
-    value: 63.0
-    purpose: top of the bolt shaft in the retained state
-    range: [52.0, 90.0]
-  - name: knob_d
-    value: 16.0
-    purpose: bolt knob diameter; larger than bolt_hole_d so the bolt cannot pass down through the guide
-    range: [10.0, 30.0]
-  - name: knob_h
-    value: 6.0
-    purpose: bolt knob height
-    range: [3.0, 15.0]
-  - name: release_lift
-    value: 10.0
+      how far the keeper rib stands proud of the enclosure's front face. The
+      tooth hooks under it, so this less the beam clearance is the engagement.
+    range: [1.0, 10.0]
+  - name: keeper_z0
+    value: 36.0
     purpose: >
-      bolt travel from retained to released. Must exceed box_z - socket_z = 8 so
-      the shaft clears the enclosure entirely; 10 leaves 2 mm of margin.
-    range: [9.0, 20.0]
+      underside of the keeper rib. This face is what the latch shoulder bears on
+      when the lid is pulled open, so it is the blocking face.
+    range: [20.0, 54.0]
+  - name: keeper_z1
+    value: 39.6
+    purpose: top of the keeper rib
+    range: [22.0, 55.0]
 
-  # --------------------------------------------------------------- evaluation
+  - name: front_lip
+    value: 8.4
+    purpose: >
+      how far the closure plate overhangs the enclosure's front face. The latch
+      beam hangs from this lip, which is what puts it on the outside of the
+      product where a user can reach it.
+    range: [2.0, 20.0]
+  - name: beam_w
+    value: 18.0
+    purpose: X width of the latch beam
+    range: [4.0, 50.0]
+  - name: beam_t
+    value: 2.0
+    purpose: >
+      thickness of the latch beam in Y. Thin in the direction it has to flex and
+      nowhere else; this is the only compliant member on the closure.
+    range: [0.8, 6.0]
+  - name: beam_bot_z
+    value: 28.0
+    purpose: >
+      bottom of the latch beam. Below the tooth, so the lowest part of the beam
+      is a bare face the user pulls on - no separate pad is added for it. The
+      beam runs from here up to the plate underside at box_z; the part inside the
+      plate is plate material and does not move, which is what keeps the
+      deflected configuration volume-conserving and connected.
+    range: [10.0, 50.0]
+  - name: latch_gap
+    value: 0.4
+    purpose: >
+      clearance between the beam and the keeper's front face, and between the
+      latch shoulder and the keeper's underside. The second one is the closed
+      free play.
+    range: [0.05, 2.0]
+  - name: tooth_proj
+    value: 2.6
+    purpose: >
+      how far the tooth reaches inboard from the beam's inner face. Less the
+      beam clearance, this is how much of it lies under the keeper.
+    range: [0.8, 8.0]
+  - name: tooth_top_z
+    value: 35.6
+    purpose: >
+      the latch retaining shoulder: the tooth's flat top face, standing
+      latch_gap below the keeper underside.
+    range: [18.0, 53.0]
+  - name: tooth_ramp_bot_z
+    value: 31.0
+    purpose: >
+      outboard bottom of the tooth. The lead-in ramp runs from here up to
+      tooth_ramp_top_z at the inboard tip, so closing the lid cams the beam out
+      without the user touching it.
+    range: [10.0, 50.0]
+  - name: tooth_ramp_top_z
+    value: 34.0
+    purpose: inboard bottom of the tooth, where the lead-in ramp ends
+    range: [11.0, 51.0]
+  - name: latch_deflect
+    value: 2.4
+    purpose: >
+      outward (-Y) deflection of the beam in the declared released
+      configuration. It must exceed keeper_proj - latch_gap or the tooth would
+      still be under the keeper; it is also what the lead-in ramp produces
+      during closing.
+    range: [0.2, 10.0]
+
   - name: contact_tol
     value: 0.02
     purpose: >
@@ -297,6 +333,5 @@ parameters:
 
 materials:
   BODY-ENCLOSURE: GENERIC_RIGID_POLYMER
-  BODY-CLOSURE: GENERIC_RIGID_POLYMER
+  BODY-CLOSURE: GENERIC_COMPLIANT_POLYMER
   BODY-PIN: GENERIC_COMPLIANT_POLYMER
-  BODY-BOLT: GENERIC_RIGID_POLYMER

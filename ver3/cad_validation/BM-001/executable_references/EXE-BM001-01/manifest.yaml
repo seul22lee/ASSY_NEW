@@ -18,7 +18,7 @@ bodies:
     installed_as: DISCRETE
     role: >
       Fixed reference body. Carries the cavity, the rim the closure seats on,
-      three knuckle segments with their webs, and the retention socket.
+      three knuckle segments with their webs, and the latch keeper rib.
     features:
       - {id: FEA-E-RIM, what: rim plane at z = box_z that the closure seats on}
       - {id: FEA-E-CAVITY, what: internal cavity opening upward through the rim plane}
@@ -30,16 +30,15 @@ bodies:
       - {id: FEA-E-FARFACE, what: far face of FEA-E-KNUCKLE-3; the recovered lug shoulders bear on it}
       - {id: FEA-E-REARFACE, what: rear outer face at y = box_y; the surface the stop block bears on}
       - {id: FEA-E-WEB, what: front faces of the knuckle webs, web_gap behind the rear outer face}
-      - {id: FEA-E-SOCKET, what: blind retention socket, floor at socket_z}
-      - {id: FEA-E-BOLTBOSS-TOP, what: top of the retention boss, coplanar with the rim}
+      - {id: FEA-E-KEEPER, what: keeper rib on the front face; its UNDERSIDE is the blocking face}
   - id: BODY-CLOSURE
     name: closure
-    material_class: GENERIC_RIGID_POLYMER
+    material_class: GENERIC_COMPLIANT_POLYMER
     installed_as: DISCRETE
     role: >
       Movable body. Plate covering the cavity, web joining plate to knuckles,
-      two knuckle segments interleaved with the enclosure's three, a guide boss
-      for the retention bolt, and the stop block that terminates opening.
+      two knuckle segments interleaved with the enclosure's three, the front lip,
+      the integral exterior snap latch, and the stop block that terminates opening.
     features:
       - {id: FEA-C-UNDERSIDE, what: plate underside at z = box_z; seats on FEA-E-RIM}
       - {id: FEA-C-KNUCKLE-1, what: first closure knuckle segment}
@@ -47,8 +46,12 @@ bodies:
       - {id: FEA-C-BORE, what: knuckle bore, diameter bore_d, coaxial with the closure axis}
       - {id: FEA-C-PLATE-REAR, what: plate rear face, a plane of constant y at plate_rear_y}
       - {id: FEA-C-STOPFACE, what: planar stop face; coincident with FEA-E-REARFACE at the terminal open angle}
-      - {id: FEA-C-GUIDE, what: through guide bore for the retention bolt}
-      - {id: FEA-C-BOSS-TOP, what: top of the guide boss}
+      - {id: FEA-C-FRONT-LIP, what: front overhang of the plate; the latch hangs from it}
+      - {id: FEA-C-LATCH-BEAM, what: compliant cantilever hanging down outside the front face}
+      - {id: FEA-C-LATCH-TOOTH, what: tooth projecting inboard from the beam, under the keeper}
+      - {id: FEA-C-LATCH-SHOULDER, what: the tooth's flat top face; what bears on the keeper}
+      - {id: FEA-C-LATCH-RAMP, what: the tooth's sloped underside; deflects the beam on closing}
+      - {id: FEA-C-RELEASE-PAD, what: the beam's outer face below the tooth; where the user acts}
   - id: BODY-PIN
     name: axis pin
     material_class: GENERIC_COMPLIANT_POLYMER
@@ -96,17 +99,6 @@ bodies:
       FEATURE-PIN-LUG-A: FEA-P-LUG-A
       FEATURE-PIN-LUG-B: FEA-P-LUG-B
       REGION-PIN-SNAP-COMPLIANT: REG-P-SNAP-COMPLIANT
-  - id: BODY-BOLT
-    name: retention bolt
-    material_class: GENERIC_RIGID_POLYMER
-    installed_as: DISCRETE
-    role: >
-      Realizes retention and its release action. In the retained state it spans
-      the guide bore and the enclosure socket; lifting it clears the enclosure.
-    features:
-      - {id: FEA-B-SHAFT, what: shaft, diameter bolt_d}
-      - {id: FEA-B-END, what: lower end face; seats on the socket floor when retained}
-      - {id: FEA-B-KNOB, what: knob; the surface the user acts on}
 
 known_limitations:
   - id: LIM-01
@@ -120,23 +112,50 @@ known_limitations:
     what_this_cost: >
       The reference selection originally avoided compliant features so the model
       would not depend on material behaviour. That avoidance is now partly given
-      up: the pin is compliant polymer and its assembly needs a real deflection.
+      up: the pin is compliant polymer and its assembly needs a real deflection,
+      and the closure is now compliant polymer too because its latch must flex.
       The consequence is recorded rather than hidden - every force, strain and
       life question about the snap is NOT_VERIFIED.
   - id: LIM-03
     what: >
-      The compressed configuration is a kinematic approximation, not a continuum
-      deformation, and it is 4.08 mm^3 (0.38%) smaller than the relaxed one.
+      Both compliant configurations - the pin's snap arms and the closure's latch
+      beam - are kinematic approximations, not continuum deformations.
     status: DECLARED_MODELLING_APPROXIMATION
     why: >
-      The arms are rotated about their roots, which opens a small wedge. The
-      compressed configuration exists to test geometric passage through the bore,
-      not to predict strain or to conserve volume exactly. Exact volume
-      conservation between the two configurations is NOT claimed.
+      Each is a rigid translation of a declared region, so each conserves volume
+      exactly (0.000 mm^3 difference, measured, for both). They exist to test
+      geometric passage and engagement. They do not predict strain, and no force
+      is computed anywhere in this reference.
+    correction_note: >
+      An earlier version of this entry claimed the compressed pin was 4.08 mm^3
+      (0.38%) smaller than the relaxed one, from a version that rotated the arms
+      about their roots. That approach was replaced by a rigid inward translation
+      and the figure is now 0.000 mm^3. The stale claim is corrected here rather
+      than left standing.
   - id: LIM-02
-    what: The retention bolt is fully removable upward.
+    what: >
+      Releasing the latch needs the exterior beam deflected 2.4 mm outward and
+      held while the lid starts to open.
     status: DECLARED_DESIGN_CHOICE
     why: >
-      The source requires retention and a release action, not captivity. In the
-      released state the shaft still spans 12 mm of the guide bore, so the
-      operating motion is guided; complete removal is a further, permitted act.
+      The source requires retention and a deliberate release action, not one-hand
+      operation. The beam springs back on its own after 6.2 deg of opening and
+      re-engages on its own when the lid is pushed shut, so nothing has to be put
+      back. Whether a 2.4 mm deflection is comfortable, or survivable by the
+      material, is NOT_VERIFIED.
+# -------------------------------------------------- what the latch is, and is not
+latch_terminology:
+  it_is: >
+    a latch. An integral compliant feature of BODY-CLOSURE that holds the lid
+    shut until a user deliberately deflects it, and re-engages on its own when
+    the lid is pushed closed.
+  it_is_not: >
+    a key, a lock or an access control. It provides no keying, no authorization
+    and no security, and nothing in this reference may describe it as though it
+    did. The realization it replaces - a separate lift-bolt with a knob - could
+    be mistaken for one, which is part of why it was rejected.
+  replaces: >
+    a separate lift-bolt realization, rejected by HCR-BM001-008 as functionally
+    excessive: a whole extra body and four extra features for one function. It is
+    named in BM001_EXECUTABLE_REFERENCE_REPORT.md and held in git history. No
+    current geometry, feature or active interaction depends on it.

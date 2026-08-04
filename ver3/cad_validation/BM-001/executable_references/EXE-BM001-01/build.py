@@ -6,16 +6,25 @@ B-rep solids and moved through its required states without undeclared
 volumetric overlap. It is not a demonstration and it proves nothing about
 whether the source alone leads anywhere.
 
-Four rigid bodies:
+Three product bodies and no others:
 
-    BODY-ENCLOSURE   fixed shell with a cavity, five knuckle segments and a
-                     retention socket
-    BODY-CLOSURE     plate, web, two knuckle segments, a guide boss and a stop
-                     block
+    BODY-ENCLOSURE   fixed shell with a cavity, five knuckle segments and the
+                     latch keeper rib on its front face
+    BODY-CLOSURE     plate, front lip, web, two knuckle segments, a stop block,
+                     and the integral exterior snap latch
     BODY-PIN         headed shaft with two integral cantilever snap arms
-    BODY-BOLT        headed bolt realizing retention
 
-Nothing here depends on a body deforming or on a force being large enough. The
+An earlier realization held the lid shut with a separate lift-bolt - a fourth
+body with a knob, a shaft, a closure guide boss and an enclosure socket, four
+features and an extra part to do one thing. It also read as a key, which it
+never was: it gave no keying, no authorization and no security. It is gone. The
+closure now carries its own latch and the enclosure carries the keeper.
+
+Two features deform, each only in its own declared region and only during its
+own declared action: the pin's snap arms during insertion, and the latch beam
+during release and the closing lead-in. Both are rigid translations of a
+declared region - DECLARED_KINEMATIC_APPROXIMATIONs that conserve volume
+exactly and model no strain. No force is computed anywhere here. The
 terminal open condition is *constructed*: the stop face is drawn in the open
 configuration and rotated back into the closed configuration, so the open angle
 is a consequence of the geometry rather than a number asserted about it.
@@ -89,13 +98,13 @@ def build_enclosure(p: Dict[str, float]) -> cq.Shape:
 
     shell = _box(0, bx, 0, by, 0, bz).cut(_box(w, bx - w, w, by - w, w, bz))
 
-    # Retention socket boss, inside the cavity against the front wall.
-    bxh = p["bolt_boss_x"] / 2.0
-    boss = _box(p["bolt_x"] - bxh, p["bolt_x"] + bxh,
-                p["bolt_boss_y0"], p["bolt_boss_y1"], 20.0, bz)
-    shell = shell.fuse(boss)
-    shell = shell.cut(_cyl_z(p["socket_z"], bz + 1.0, p["bolt_x"], p["bolt_y"],
-                             p["bolt_hole_d"] / 2.0))
+    # Latch keeper: a rib standing proud of the front face. Its UNDERSIDE is the
+    # blocking face - the closure's latch shoulder bears on it when the lid is
+    # pulled. It is fused to the wall, so it is enclosure material and not a
+    # bridge, a bracket or anything that could float.
+    kxh = p["keeper_w"] / 2.0
+    shell = shell.fuse(_box(p["latch_x_centre"] - kxh, p["latch_x_centre"] + kxh,
+                            -p["keeper_proj"], w, p["keeper_z0"], p["keeper_z1"]))
 
     # Knuckle segments and the webs tying them to the rear wall.
     for x0, x1 in knuckle_bands(p)["enclosure"]:
@@ -119,7 +128,9 @@ def build_closure(p: Dict[str, float]) -> cq.Shape:
     # The plate needs no relief: the axis stands knuckle_r behind the rear outer
     # face, so the enclosure knuckle envelope never reaches forward of y = box_y
     # and the plate's rear edge stops short of it by web_gap.
-    body = _box(0, bx, 0, p["plate_rear_y"], bz, bz + pt)
+    # The plate overhangs the front face by front_lip. That overhang is what the
+    # latch beam hangs from, which is what puts the release on the outside.
+    body = _box(0, bx, -p["front_lip"], p["plate_rear_y"], bz, bz + pt)
 
     for x0, x1 in knuckle_bands(p)["closure"]:
         body = body.fuse(_cyl_x(x0, x1, ay, az, kr))
@@ -131,13 +142,58 @@ def build_closure(p: Dict[str, float]) -> cq.Shape:
     for x0, x1 in knuckle_bands(p)["closure"]:
         body = body.cut(_cyl_x(x0 - 0.5, x1 + 0.5, ay, az, p["bore_d"] / 2.0))
 
-    bxh = p["bolt_boss_x"] / 2.0
-    body = body.fuse(_box(p["bolt_x"] - bxh, p["bolt_x"] + bxh,
-                          p["bolt_boss_y0"], p["bolt_boss_y1"],
-                          bz + pt, p["lid_boss_top_z"]))
-    body = body.cut(_cyl_z(bz - 1.0, p["lid_boss_top_z"] + 1.0,
-                           p["bolt_x"], p["bolt_y"], p["bolt_hole_d"] / 2.0))
     return body
+
+
+def latch_geom(p: Dict[str, float]) -> Dict[str, float]:
+    """Where the latch features are. Derived once so the builder, the validator
+    and the drawings cannot disagree about them."""
+    g = {}
+    g["beam_x0"] = p["latch_x_centre"] - p["beam_w"] / 2.0
+    g["beam_x1"] = p["latch_x_centre"] + p["beam_w"] / 2.0
+    g["keeper_x0"] = p["latch_x_centre"] - p["keeper_w"] / 2.0
+    g["keeper_x1"] = p["latch_x_centre"] + p["keeper_w"] / 2.0
+    # beam sits latch_gap outboard of the keeper's front face
+    g["beam_y1"] = -p["keeper_proj"] - p["latch_gap"]
+    g["beam_y0"] = g["beam_y1"] - p["beam_t"]
+    g["tooth_y1"] = g["beam_y1"] + p["tooth_proj"]      # inboard tip
+    g["lip_y"] = -p["front_lip"]
+    # How much of the tooth actually lies under the keeper: the tooth's inboard
+    # tip against the keeper's front face. It is the tooth's projection less the
+    # beam's running clearance - NOT keeper_proj less that clearance, which is a
+    # different pair of numbers that happens to land nearby.
+    g["engagement_mm"] = g["tooth_y1"] - (-p["keeper_proj"])
+    return g
+
+
+def build_latch(p: Dict[str, float], deflect: float = 0.0) -> cq.Shape:
+    """The closure's integral snap latch: beam, tooth, lead-in ramp, shoulder.
+
+    `deflect` is the outward (-Y) displacement of the declared compliant region
+    REG-CLOSURE-LATCH-COMPLIANT. It is a rigid translation of that region: a
+    DECLARED_KINEMATIC_APPROXIMATION that conserves volume exactly and models no
+    strain. Nothing here computes a force.
+    """
+    g = latch_geom(p)
+    # The beam runs up to the plate underside only. Its root is plate material and
+    # never moves; translating the free length keeps the two solids face-to-face
+    # at z = box_z, so the closure stays one connected solid and the deflected
+    # configuration conserves volume exactly.
+    beam = _box(g["beam_x0"], g["beam_x1"], g["beam_y0"], g["beam_y1"],
+                p["beam_bot_z"], p["box_z"])
+    # tooth section in the YZ plane, extruded through X. The bottom face slopes
+    # up as it goes inboard: that slope is the lead-in, and closing the lid drives
+    # the keeper's top corner along it and cams the beam out on its own.
+    pts = [(g["beam_y1"], p["tooth_ramp_bot_z"]),
+           (g["tooth_y1"], p["tooth_ramp_top_z"]),
+           (g["tooth_y1"], p["tooth_top_z"]),
+           (g["beam_y1"], p["tooth_top_z"])]
+    wp = cq.Workplane("YZ", origin=(g["beam_x0"], 0, 0)).polyline(pts).close()
+    tooth = wp.extrude(g["beam_x1"] - g["beam_x0"]).val()
+    latch = beam.fuse(tooth)
+    if deflect:
+        latch = latch.moved(cv.translation((0.0, -deflect, 0.0)))
+    return latch
 
 
 def _cone_x(x0, x1, y, z, r0, r1) -> cq.Shape:
@@ -241,22 +297,24 @@ def _ramp(x0, x1, ay, az, sign, r_out, r_in, hw) -> cq.Shape:
     return wp.extrude(2 * hw).val()
 
 
-def build_bolt(p: Dict[str, float]) -> cq.Shape:
-    """Built in the RETAINED state: seated on the socket floor."""
-    shaft = _cyl_z(p["socket_z"], p["bolt_top_z"], p["bolt_x"], p["bolt_y"],
-                   p["bolt_d"] / 2.0)
-    knob = _cyl_z(p["bolt_top_z"], p["bolt_top_z"] + p["knob_h"],
-                  p["bolt_x"], p["bolt_y"], p["knob_d"] / 2.0)
-    return shaft.fuse(knob)
+def build_closure_with_latch(p: Dict[str, float], deflect: float = 0.0) -> cq.Shape:
+    return build_closure(p).fuse(build_latch(p, deflect))
 
 
 def build(p: Dict[str, float] = None) -> List[cv.Body]:
     p = p or load_params()
     return [
         cv.Body("BODY-ENCLOSURE", "enclosure", "GENERIC_RIGID_POLYMER",
-                build_enclosure(p), role="fixed reference body; cavity, knuckle segments, retention socket"),
-        cv.Body("BODY-CLOSURE", "closure", "GENERIC_RIGID_POLYMER",
-                build_closure(p), role="movable closure; plate, web, knuckle segments, guide boss, stop block"),
+                build_enclosure(p),
+                role=("fixed reference body; cavity, knuckle segments, and the latch "
+                      "keeper rib on the front face")),
+        cv.Body("BODY-CLOSURE", "closure", "GENERIC_COMPLIANT_POLYMER",
+                build_closure_with_latch(p),
+                role=("movable closure; plate, front lip, web, knuckle segments, stop "
+                      "block, and the integral exterior snap latch"),
+                notes=("kinematically rigid everywhere except "
+                       "REG-CLOSURE-LATCH-COMPLIANT, which is the beam and its tooth "
+                       "and deflects only during release and the closing lead-in")),
         cv.Body("BODY-PIN", "axis pin", "GENERIC_COMPLIANT_POLYMER",
                 build_pin(p),
                 role=("realizes the rotation axis and its own bilateral axial retention; "
@@ -264,79 +322,108 @@ def build(p: Dict[str, float] = None) -> List[cv.Body]:
                       "REGION-PIN-SNAP-COMPLIANT during the declared insertion step"),
                 notes=("as-built in the RELAXED configuration, which is the one used for "
                        "every operating state; the compressed configuration is assembly-only")),
-        cv.Body("BODY-BOLT", "retention bolt", "GENERIC_RIGID_POLYMER",
-                build_bolt(p), role="realizes retention and its release action"),
     ]
 
 
 # --------------------------------------------------------------------- states
+# The lid angle and the latch deflection each declared state stands for. The
+# latch deflection is a PRESCRIBED GEOMETRIC STATE of a declared compliant
+# region - never a simulated deformation, and never a force.
+STATE_TABLE = {
+    "CLOSED_LATCH_ENGAGED":   {"deg": 0.0,  "latch": 0.0, "pin": "relaxed"},
+    "CLOSED_LATCH_RELEASED":  {"deg": 0.0,  "latch": 1.0, "pin": "relaxed"},
+    "OPENING_STARTED":        {"deg": 6.0,  "latch": 0.0, "pin": "relaxed"},
+    "OPEN":                   {"deg": None, "latch": 0.0, "pin": "relaxed"},
+    "CLOSING_LATCH_LEADIN":   {"deg": 0.0,  "latch": 1.0, "pin": "relaxed"},
+    "CLOSED_REENGAGED":       {"deg": 0.0,  "latch": 0.0, "pin": "relaxed"},
+    "PIN_ASSEMBLY_COMPRESSED": {"deg": 0.0, "latch": 0.0, "pin": "compressed"},
+    "PIN_ASSEMBLY_RECOVERED": {"deg": 0.0,  "latch": 0.0, "pin": "relaxed"},
+}
+STATES = list(STATE_TABLE)
+SEGMENTS = ["M1_RELEASE", "M2_OPEN", "M3_CLOSE_AND_REENGAGE"]
+
+# How far the lid must swing before the latch tooth is clear of the keeper in Z.
+# Below it the beam has to stay deflected; above it the beam is free to recover.
+def latch_hold_deg(p: Dict[str, float]) -> float:
+    g = latch_geom(p)
+    r = math.hypot(g["tooth_y1"] - p["axis_y"], p["tooth_top_z"] - p["axis_z"])
+    rise = p["keeper_z1"] - p["tooth_ramp_bot_z"] + 1.0
+    return math.degrees(min(rise / r, 0.6))
+
+
+def state_bodies(bodies: List[cv.Body], p: Dict[str, float], deg: float,
+                 latch: float, pin: str = "relaxed") -> List[cv.Body]:
+    """Bodies at an arbitrary lid angle and latch deflection.
+
+    Every state and every motion sample goes through here, so a state cannot
+    drift from the geometry a segment sweeps through it.
+    """
+    rot = open_rotation(p, deg)
+    out = []
+    for b in bodies:
+        if b.id == "BODY-CLOSURE":
+            shape = (build_closure_with_latch(p, latch * p["latch_deflect"])
+                     if latch else b.shape)
+            nb = cv.Body(b.id, b.name, b.material_class, shape,
+                         installed_as=b.installed_as, role=b.role, notes=b.notes)
+            out.append(nb.moved(rot))
+        elif b.id == "BODY-PIN" and pin == "compressed":
+            nb = cv.Body(b.id, b.name, b.material_class, build_pin(p, compressed=True),
+                         installed_as=b.installed_as, role=b.role, notes=b.notes)
+            out.append(nb)
+        else:
+            out.append(b)
+    return out
+
+
 def pose(p: Dict[str, float], body_id: str, state: str) -> cq.Location:
-    """Transform applied to a body's as-built shape to reach `state`."""
-    ident = cq.Location()
-    lift = cv.translation((0.0, 0.0, p["release_lift"]))
-    if state == "S_CLOSED_RETAINED":
-        return ident
-    if state == "S_CLOSED_RELEASED":
-        return lift if body_id == "BODY-BOLT" else ident
-    if state == "S_OPEN":
-        rot = open_rotation(p, p["open_angle_deg"])
-        if body_id == "BODY-CLOSURE":
-            return rot
-        if body_id == "BODY-BOLT":
-            return rot * lift
-        return ident
-    raise KeyError(state)
+    """Rigid placement of a body in a state, for the signature record.
+
+    Configuration changes - a deflected latch beam, a compressed pin barb - are
+    not poses and do not appear here. They are recorded separately as declared
+    compliant configurations.
+    """
+    st = STATE_TABLE[state]
+    deg = p["open_angle_deg"] if st["deg"] is None else st["deg"]
+    if body_id == "BODY-CLOSURE":
+        return open_rotation(p, deg)
+    return cq.Location()
 
 
 def configuration(bodies: List[cv.Body], p: Dict[str, float], state: str) -> List[cv.Body]:
-    return [b.moved(pose(p, b.id, state)) for b in bodies]
+    st = STATE_TABLE[state]
+    deg = p["open_angle_deg"] if st["deg"] is None else st["deg"]
+    return state_bodies(bodies, p, deg, st["latch"], st["pin"])
 
 
 def continuous_pose(bodies: List[cv.Body], p: Dict[str, float],
                     segment: str, t: float) -> List[cv.Body]:
     """Configuration part-way through a motion segment. t runs 0 -> 1."""
-    out = []
-    for b in bodies:
-        if segment == "M1_RELEASE":
-            loc = cv.translation((0.0, 0.0, p["release_lift"] * t)) if b.id == "BODY-BOLT" else cq.Location()
-        elif segment == "M2_OPEN":
-            rot = open_rotation(p, p["open_angle_deg"] * t)
-            lift = cv.translation((0.0, 0.0, p["release_lift"]))
-            if b.id == "BODY-CLOSURE":
-                loc = rot
-            elif b.id == "BODY-BOLT":
-                loc = rot * lift
-            else:
-                loc = cq.Location()
-        else:
-            raise KeyError(segment)
-        out.append(b.moved(loc))
-    return out
+    hold = latch_hold_deg(p)
+    if segment == "M1_RELEASE":
+        # the beam is deflected outward in place; the lid has not moved yet
+        return state_bodies(bodies, p, 0.0, t)
+    if segment == "M2_OPEN":
+        deg = p["open_angle_deg"] * t
+        # the user holds the beam out only until the tooth is above the keeper
+        return state_bodies(bodies, p, deg, 1.0 if deg <= hold else 0.0)
+    if segment == "M3_CLOSE_AND_REENGAGE":
+        deg = p["open_angle_deg"] * (1.0 - t)
+        # coming down, the lead-in ramp deflects the beam over the same band and
+        # it recovers on its own once the tooth is past
+        return state_bodies(bodies, p, deg, 1.0 if 1e-9 < deg <= hold else 0.0)
+    raise KeyError(segment)
 
 
-def probe_pose(bodies: List[cv.Body], p: Dict[str, float], deg: float) -> List[cv.Body]:
-    """Configuration at an arbitrary closure angle, including beyond the terminal one.
+def probe_pose(bodies: List[cv.Body], p: Dict[str, float], deg: float,
+               latch: float = 0.0) -> List[cv.Body]:
+    """Configuration at an arbitrary lid angle, including beyond the terminal one.
 
-    Used only to show that the stop block is what terminates the rotation. This
-    evaluates the same admissible model outside its declared range; it exports
-    nothing and creates no artifact.
+    Used to show that the stop block is what terminates the rotation, and that
+    the latch is what blocks it near closed. This evaluates the same admissible
+    model outside its declared range; it exports nothing.
     """
-    out = []
-    for b in bodies:
-        rot = open_rotation(p, deg)
-        lift = cv.translation((0.0, 0.0, p["release_lift"]))
-        if b.id == "BODY-CLOSURE":
-            loc = rot
-        elif b.id == "BODY-BOLT":
-            loc = rot * lift
-        else:
-            loc = cq.Location()
-        out.append(b.moved(loc))
-    return out
-
-
-STATES = ["S_CLOSED_RETAINED", "S_CLOSED_RELEASED", "S_OPEN"]
-SEGMENTS = ["M1_RELEASE", "M2_OPEN"]
+    return state_bodies(bodies, p, deg, latch)
 
 
 if __name__ == "__main__":

@@ -88,7 +88,8 @@ interactions:
     features: [FEA-C-UNDERSIDE, FEA-E-RIM]
     type: DECLARED_CONTACT
     nominal_clearance_mm: 0.0
-    active: [S_CLOSED_RETAINED, S_CLOSED_RELEASED]
+    active: [CLOSED_LATCH_ENGAGED, CLOSED_LATCH_RELEASED, CLOSING_LATCH_LEADIN,
+             CLOSED_REENGAGED, PIN_ASSEMBLY_COMPRESSED, PIN_ASSEMBLY_RECOVERED]
     role: >
       The closure seats on the rim. This is the load path from closure to
       enclosure in the closed state and the reason the closed pose is definite
@@ -111,7 +112,7 @@ interactions:
     features: [FEA-C-STOPFACE, FEA-E-REARFACE]
     type: DECLARED_CONTACT
     nominal_clearance_mm: 0.0
-    active: [S_OPEN]
+    active: [OPEN]
     role: >
       Terminal condition of the opening rotation. Planar face pair, a 6 mm band
       on each of two segments, so the contact is areal rather than a knife edge.
@@ -119,54 +120,56 @@ interactions:
     determines: DISCRETE_TERMINAL_POSE
     approaches_during: M2_OPEN
 
+  # ------------------------------------------- integral exterior snap latch
   - id: INT-10
-    bodies: [BODY-BOLT, BODY-CLOSURE]
-    features: [FEA-B-SHAFT, FEA-C-GUIDE]
+    bodies: [BODY-CLOSURE, BODY-ENCLOSURE]
+    features: [FEA-C-LATCH-SHOULDER, FEA-E-KEEPER]
     type: DECLARED_CLEARANCE
-    nominal_clearance_mm: 0.1
-    active: ALL_STATES
+    nominal_clearance_mm: 0.4
+    active: [CLOSED_LATCH_ENGAGED, CLOSED_REENGAGED, PIN_ASSEMBLY_COMPRESSED,
+             PIN_ASSEMBLY_RECOVERED]
     role: >
-      Guides the bolt along its release travel and keeps it aligned with the
-      socket. Engaged over 12 mm even in the released state.
+      the latch retaining shoulder stands 0.4 mm below the keeper's underside.
+      That gap is the closed free play: the lid lifts through it and then the
+      shoulder meets solid keeper. Declaring it a CONTACT would contradict the
+      measurement. Whether the latch WITHSTANDS a pull is a force question and is
+      NOT_VERIFIED.
+    determines: CLOSED_STATE_ROTATION_BLOCK
 
   - id: INT-11
-    bodies: [BODY-BOLT, BODY-ENCLOSURE]
-    features: [FEA-B-SHAFT, FEA-E-SOCKET]
+    bodies: [BODY-CLOSURE, BODY-ENCLOSURE]
+    features: [FEA-C-LATCH-BEAM, FEA-E-KEEPER]
     type: DECLARED_CLEARANCE
-    nominal_clearance_mm: 0.1
-    active: [S_CLOSED_RETAINED]
+    nominal_clearance_mm: 0.4
+    active: [CLOSED_LATCH_ENGAGED, CLOSED_REENGAGED, PIN_ASSEMBLY_COMPRESSED,
+             PIN_ASSEMBLY_RECOVERED]
     role: >
-      The engagement that realizes retention. With the shaft spanning both the
-      closure guide and the enclosure socket, the closure cannot rotate. Whether
-      the engagement WITHSTANDS a given disturbance is a force question and is
-      NOT_VERIFIED (UNR-BM-001-001).
-    disengages_during: M1_RELEASE
+      running clearance between the beam and the keeper's front face. It is what
+      decides how much of the tooth lies under the keeper: the tooth reaches
+      2.6 mm inboard of the beam, 0.4 mm of that is this clearance, so 2.2 mm is
+      engagement.
 
   - id: INT-12
-    bodies: [BODY-BOLT, BODY-ENCLOSURE]
-    features: [FEA-B-END, FEA-E-SOCKET]
-    type: DECLARED_CONTACT
-    nominal_clearance_mm: 0.0
-    active: [S_CLOSED_RETAINED]
-    role: Seats the bolt at the bottom of its travel and defines the retained state.
-
-  - id: INT-13
     bodies: [BODY-CLOSURE, BODY-ENCLOSURE]
-    features: [FEA-C-UNDERSIDE, FEA-E-BOLTBOSS-TOP]
-    type: DECLARED_CONTACT
-    nominal_clearance_mm: 0.0
-    active: [S_CLOSED_RETAINED, S_CLOSED_RELEASED]
+    features: [FEA-C-LATCH-RAMP, FEA-E-KEEPER]
+    type: DECLARED_COMPLIANT_INTERACTION
+    active: [M1_RELEASE, M2_OPEN, M3_CLOSE_AND_REENGAGE]
+    compliant_region: REG-CLOSURE-LATCH-COMPLIANT
+    deflection_mm: 2.4
     role: >
-      The retention boss is coplanar with the rim, so the closure seats on it
-      too. Declared because a coplanar face pair that is not declared would be
-      an undeclared contact.
+      the declared compliant passage of the latch past the keeper. Closing drives
+      the keeper's top corner along the tooth's lead-in ramp and deflects the beam
+      outward on its own; opening needs the user to deflect it. Measured by the
+      latch probe, not assumed.
+    not_established: strain, release force, engagement force, holding capacity, fatigue
 
   - id: INT-14
     bodies: [BODY-CLOSURE, BODY-ENCLOSURE]
     features: [FEA-C-PLATE-REAR, FEA-E-WEB]
     type: DECLARED_CLEARANCE
     nominal_clearance_mm: 0.5
-    active: [S_CLOSED_RETAINED, S_CLOSED_RELEASED]
+    active: [CLOSED_LATCH_ENGAGED, CLOSED_LATCH_RELEASED, CLOSING_LATCH_LEADIN,
+             CLOSED_REENGAGED, PIN_ASSEMBLY_COMPRESSED, PIN_ASSEMBLY_RECOVERED]
     role: >
       Two planes of constant y, so this clearance is invariant under the
       straight-line insertion that installs the closure. It opens up under the
@@ -180,21 +183,15 @@ interactions:
       knuckle envelope entirely behind that face and makes the relief
       unnecessary.
 
-  - id: INT-15
-    bodies: [BODY-BOLT, BODY-CLOSURE]
-    features: [FEA-B-KNOB, FEA-C-BOSS-TOP]
-    type: NOT_INTENDED_TO_INTERACT
-    nominal_clearance_mm: 4.0
-    active: [S_CLOSED_RETAINED]
-    role: >
-      The gap under the knob in the retained state is finger access, not a
-      bearing surface. Declared so that a reviewer can see it was considered
-      rather than overlooked.
+pairs_not_declared: []
 
-pairs_not_declared:
-  - bodies: [BODY-PIN, BODY-BOLT]
-    reason: >
-      Geometrically remote in every state and at every sampled point of both
-      motion segments. validate.py measures the pair anyway; it is listed here
-      so that an unexpected approach shows up as an undeclared interaction
-      rather than passing unremarked.
+undeclared_contact_policy: >
+  validate.py scans all three body pairs in every state and at every sampled
+  point of all three motion segments, so the declaration cannot be completed by
+  omission.
+
+no_separate_retention_part: >
+  Every interaction above is between BODY-ENCLOSURE, BODY-CLOSURE and BODY-PIN.
+  There is no fourth body. The pin is a hinge element - it realizes the axis and
+  its own bilateral axial retention - and nothing in this reference is held shut
+  by a separate part.

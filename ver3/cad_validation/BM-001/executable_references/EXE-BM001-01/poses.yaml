@@ -6,7 +6,7 @@ angle_units: degrees
 frame: >
   Enclosure-fixed. Origin at the enclosure's minimum outer corner. Transforms
   are applied to a body's as-built shape; the as-built shape of every body is
-  its S_CLOSED_RETAINED pose.
+  its CLOSED_LATCH_ENGAGED pose.
 
 pin_configuration:
   every_operating_state: CFG-PIN-RELAXED
@@ -26,66 +26,104 @@ axis:
     the closure. Reported angles are positive in the opening sense.
 
 states:
-  - id: S_CLOSED_RETAINED
-    role: CLOSED
-    retained: true
-    transforms:
-      BODY-ENCLOSURE: identity
-      BODY-CLOSURE: identity
-      BODY-PIN: identity
-      BODY-BOLT: identity
-  - id: S_CLOSED_RELEASED
-    role: CLOSED
-    retained: false
-    transforms:
-      BODY-ENCLOSURE: identity
-      BODY-CLOSURE: identity
-      BODY-PIN: identity
-      BODY-BOLT: {translate: [0.0, 0.0, 10.0]}
-  - id: S_OPEN
-    role: OPEN
-    retained: false
-    terminal: true
-    transforms:
-      BODY-ENCLOSURE: identity
-      BODY-CLOSURE: {rotate: {axis: AX-CLOSURE, opening_angle: 110.0}}
-      BODY-PIN: identity
-      BODY-BOLT: {rotate: {axis: AX-CLOSURE, opening_angle: 110.0}, then_translate_before_rotation: [0.0, 0.0, 10.0]}
+  - id: CLOSED_LATCH_ENGAGED
+    what: lid seated, latch tooth recovered behind the keeper
+    lid_angle_deg: 0.0
+    latch: relaxed
+    pin: relaxed
+  - id: CLOSED_LATCH_RELEASED
+    what: the user has deflected the exterior latch beam outward; the tooth is clear
+    lid_angle_deg: 0.0
+    latch: deflected 2.4 mm along -Y
+    pin: relaxed
+  - id: OPENING_STARTED
+    what: >
+      the lid has begun to rotate. The tooth is above the keeper, so the beam has
+      already sprung back on its own.
+    lid_angle_deg: 6.0
+    latch: relaxed
+    pin: relaxed
+  - id: OPEN
+    what: terminal open pose, stop block on the rear wall
+    lid_angle_deg: 110.0
+    latch: relaxed
+    pin: relaxed
+  - id: CLOSING_LATCH_LEADIN
+    what: >
+      coming down, the keeper's top corner is riding the tooth's lead-in ramp and
+      holding the beam out. The user is doing nothing.
+    lid_angle_deg: 0.0
+    latch: deflected 2.4 mm along -Y
+    pin: relaxed
+  - id: CLOSED_REENGAGED
+    what: >
+      the tooth is past the keeper and the beam has recovered. Identical to
+      CLOSED_LATCH_ENGAGED, which is the point: the cycle returns what it started
+      with, and the user pushes nothing back into place.
+    lid_angle_deg: 0.0
+    latch: relaxed
+    pin: relaxed
+  - id: PIN_ASSEMBLY_COMPRESSED
+    what: >
+      the declared compressed configuration of REG-P-SNAP-COMPLIANT, during pin
+      insertion. Never an operating state.
+    lid_angle_deg: 0.0
+    latch: relaxed
+    pin: compressed 1.05 mm per arm
+  - id: PIN_ASSEMBLY_RECOVERED
+    what: the arms released; the lugs stand behind the far knuckle face
+    lid_angle_deg: 0.0
+    latch: relaxed
+    pin: relaxed
 
-terminal_condition:
-  state: S_OPEN
-  determinant: INT-09
-  kind: DISCRETE_TERMINAL_POSE
-  how_realized: >
-    FEA-C-STOPFACE is constructed in the open configuration coincident with
-    FEA-E-REARFACE and rotated back into the as-built closed configuration. The
-    terminal angle is therefore a property of the geometry, not an assumption
-    about it: at open_angle_deg the two faces are coincident, and beyond it they
-    interpenetrate.
-  causal_probe: >
-    validate.py evaluates the same model at angles either side of the terminal
-    angle and reports the boolean common volume. A positive common volume beyond
-    it, and none before, is direct causal evidence that INT-09 is what
-    terminates the rotation rather than a coincidence of the chosen number.
+compliant_configurations:
+  - id: REG-P-SNAP-COMPLIANT
+    body: BODY-PIN
+    members: [FEA-P-ARM-A, FEA-P-ARM-B, FEA-P-LUG-A, FEA-P-LUG-B]
+    deflection_mm: 1.05
+    direction: inward, toward the pin axis
+    active_only_during: [ASM-03]
+  - id: REG-CLOSURE-LATCH-COMPLIANT
+    body: BODY-CLOSURE
+    members: [FEA-C-LATCH-BEAM, FEA-C-LATCH-TOOTH, FEA-C-LATCH-RAMP,
+              FEA-C-LATCH-SHOULDER, FEA-C-RELEASE-PAD]
+    deflection_mm: 2.4
+    direction: outward, -Y, away from the front face
+    active_only_during: [release, the first 6.2 deg of opening, the closing lead-in]
+
+modelling_statement: >
+  Both compliant configurations are rigid translations of a declared region -
+  DECLARED_KINEMATIC_APPROXIMATIONs. They conserve volume exactly and test
+  geometric passage and engagement. They do not model continuum deformation and
+  predict nothing about strain. LATCH DEFLECTION IS A PRESCRIBED GEOMETRIC
+  STATE; FORCE, STRAIN AND MATERIAL ADEQUACY ARE NOT VERIFIED.
 
 motion_segments:
   - id: M1_RELEASE
-    from: S_CLOSED_RETAINED
-    to: S_CLOSED_RELEASED
-    moving: [BODY-BOLT]
-    kind: prismatic
-    direction: [0.0, 0.0, 1.0]
-    travel: 10.0
+    from: CLOSED_LATCH_ENGAGED
+    to: CLOSED_LATCH_RELEASED
+    moving: [REG-CLOSURE-LATCH-COMPLIANT]
+    kind: prescribed deflection of a declared compliant region
+    note: the lid does not move; only the latch beam does
   - id: M2_OPEN
-    from: S_CLOSED_RELEASED
-    to: S_OPEN
-    moving: [BODY-CLOSURE, BODY-BOLT]
-    kind: revolute
-    axis: AX-CLOSURE
-    travel: 110.0
-    note: BODY-BOLT is carried by BODY-CLOSURE through this segment.
+    from: CLOSED_LATCH_RELEASED
+    to: OPEN
+    moving: [BODY-CLOSURE]
+    kind: rotation about AX-CLOSURE, 0 to 110 degrees
+    note: >
+      the beam is held out for the first 6.2 deg, until the tooth is above the
+      keeper, and springs back after that without the user doing anything
+  - id: M3_CLOSE_AND_REENGAGE
+    from: OPEN
+    to: CLOSED_REENGAGED
+    moving: [BODY-CLOSURE]
+    kind: rotation about AX-CLOSURE, 110 to 0 degrees
+    note: >
+      the lead-in ramp deflects the beam over the same 6.2 deg band on the way
+      down and it recovers on its own once the tooth is past the keeper
 
-ordering_constraint: >
-  M2_OPEN is not traversable from S_CLOSED_RETAINED. In that state BODY-BOLT
-  spans the guide bore and the socket, and any rotation drives it into the
-  enclosure. M1_RELEASE must precede it. That ordering is the release action.
+removal_probes:
+  - what: opening rotation attempted with the latch engaged
+    expected: blocked; free play 0.25 to 0.30 deg, then solid keeper
+  - what: opening rotation attempted with the latch released
+    expected: free throughout 0 to 110 deg

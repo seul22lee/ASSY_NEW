@@ -141,36 +141,51 @@ def run(P):
     data = mujoco.MjData(model)
 
     open_rad = math.radians(P["open_angle_deg"])
-    # 9.5 s total at a 1/3000 s step, so one video frame at 30 fps is exactly 100
-    # steps. The video and the plots therefore read the SAME rows - no resampling,
-    # no interpolation, nothing that could drift between the two.
-    T_open, T_hold, T_close = 4.0, 1.5, 4.0
-    total = T_open + T_hold + T_close
+    # Six phases, 11.6 s total, at a 1/3000 s step, so one video frame at 30 fps is
+    # exactly 100 steps. The video and the plots therefore read the SAME rows - no
+    # resampling, no interpolation, nothing that could drift between the two.
+    #
+    # The two latch phases sit at zero lid angle. MuJoCo has nothing to say about
+    # them beyond the static gravity torque, which is the honest answer: the latch
+    # deflection is a PRESCRIBED GEOMETRIC STATE and no force is computed for it.
+    T_latched, T_release, T_open, T_hold, T_close, T_reeng = 1.0, 1.0, 3.6, 1.2, 3.6, 1.2
+    total = T_latched + T_release + T_open + T_hold + T_close + T_reeng
     dt = model.opt.timestep
-    n = int(total / dt)
+    n = int(round(total / dt))
+    t_rel, t_op, t_hold, t_cl = (T_latched, T_latched + T_release,
+                                 T_latched + T_release + T_open,
+                                 T_latched + T_release + T_open + T_hold)
+    t_re = t_cl + T_close
+    hold_deg = B.latch_hold_deg(P)
+
+    def profile(tt):
+        """(lid angle fraction, latch fraction, phase) at time tt."""
+        if tt <= t_rel:
+            return 0.0, 0.0, "LATCHED"
+        if tt <= t_op:
+            return 0.0, minimum_jerk(tt - t_rel, T_release), "RELEASE"
+        if tt <= t_hold:
+            s = minimum_jerk(tt - t_op, T_open)
+            return s, 1.0 if s * P["open_angle_deg"] <= hold_deg else 0.0, "OPENING"
+        if tt <= t_cl:
+            return 1.0, 0.0, "HOLD"
+        if tt <= t_re:
+            s = 1.0 - minimum_jerk(tt - t_cl, T_close)
+            d = s * P["open_angle_deg"]
+            return s, 1.0 if 1e-9 < d <= hold_deg else 0.0, "CLOSING"
+        return 0.0, 0.0, "RE-ENGAGED"
 
     # Inverse dynamics along a prescribed trajectory: drive the joint exactly and
     # read the torque MuJoCo needs to produce it. This is the operating effort.
     rows = []
     for k in range(n + 1):
         t = k * dt
-        if t <= T_open:
-            s = minimum_jerk(t, T_open)
-        elif t <= T_open + T_hold:
-            s = 1.0
-        else:
-            s = 1.0 - minimum_jerk(t - T_open - T_hold, T_close)
+        s, latch, phase = profile(t)
         q = -open_rad * s
         # finite-difference the prescribed trajectory for velocity and acceleration
         h = dt
         def qs(tt):
-            if tt <= T_open:
-                u = minimum_jerk(tt, T_open)
-            elif tt <= T_open + T_hold:
-                u = 1.0
-            else:
-                u = 1.0 - minimum_jerk(min(tt - T_open - T_hold, T_close), T_close)
-            return -open_rad * u
+            return -open_rad * profile(max(tt, 0.0))[0]
         qd = (qs(t + h) - qs(t - h)) / (2 * h)
         qdd = (qs(t + h) - 2 * qs(t) + qs(t - h)) / (h * h)
 
@@ -188,13 +203,14 @@ def run(P):
 
         rows.append({"t_s": round(t, 6), "angle_deg": round(-math.degrees(q), 6),
                      "omega_rad_s": round(-qd, 6), "alpha_rad_s2": round(-qdd, 6),
-                     "torque_Nm": round(tau, 9), "torque_static_Nm": round(tau_static, 9)})
+                     "torque_Nm": round(tau, 9), "torque_static_Nm": round(tau_static, 9),
+                     "latch_fraction": round(latch, 6), "phase": phase})
 
     # Where the static torque changes sign the centre of mass passes over the
     # hinge axis. Beyond it gravity tends to HOLD the lid open rather than shut
     # it - an operating property of this geometry, not an assumption.
     over_centre = None
-    opening = [r for r in rows if r["t_s"] <= T_open]
+    opening = [r for r in rows if t_op < r["t_s"] <= t_hold]
     for a, b_ in zip(opening, opening[1:]):
         if a["torque_static_Nm"] == 0 or a["torque_static_Nm"] * b_["torque_static_Nm"] < 0:
             over_centre = round((a["angle_deg"] + b_["angle_deg"]) / 2.0, 3)
@@ -212,8 +228,13 @@ def run(P):
             min(rows, key=lambda r: abs(r["angle_deg"] - P["open_angle_deg"]))["torque_static_Nm"]), 6),
         "sample_count": len(rows),
         "duration_s": total,
-        "phase_boundaries_s": {"open_ends": T_open, "hold_ends": T_open + T_hold,
-                               "close_ends": total},
+        "phase_boundaries_s": {"latched_ends": t_rel, "release_ends": t_op,
+                               "open_ends": t_hold, "hold_ends": t_cl,
+                               "close_ends": t_re, "reengaged_ends": total},
+        "latch_hold_band_deg": round(hold_deg, 4),
+        "latch_note": ("LATCH DEFLECTION IS A PRESCRIBED GEOMETRIC STATE. FORCE, "
+                       "STRAIN AND MATERIAL ADEQUACY ARE NOT VERIFIED. MuJoCo is "
+                       "used only for the assembled rigid-body lid motion."),
         "steps_per_video_frame": int(round((1.0 / 30.0) / dt)),
         "over_centre_angle_deg": over_centre,
         "over_centre_meaning": (
@@ -277,7 +298,7 @@ def plots(P, rows, summary):
 FPS = 30
 W, H = 1280, 720
 COLORS = {"BODY-ENCLOSURE": "#7f97ad", "BODY-CLOSURE": "#d89b56",
-          "BODY-PIN": "#8d84b8", "BODY-BOLT": "#7ba884"}
+          "BODY-PIN": "#8d84b8"}
 # Fixed for the whole clip. Placed off the hinge side so the lid sweeps across the
 # frame rather than toward the viewer. The scale is FITTED once, to the union of
 # every pose in the sweep, so the framing is derived from the motion instead of
@@ -312,16 +333,21 @@ def fit_camera(P, margin=1.06):
                       target=tuple(centre), scale=round(float(scale), 2))
 
 
+# A second FIXED camera on the latch. A 2.4 mm release on a 120 mm product is
+# about 2% of the main frame; without this the release action is not visible, and
+# a video that cannot show its own mechanism is not evidence of anything.
+DETAIL_CAM = vid.Camera(eye=(260.0, -2.0, 37.0), target=(60.0, -2.0, 37.0),
+                        up=(0.0, 0.0, 1.0), scale=13.0)
+
 CAM = None
 
 
-def phase_of(t, summary):
-    b = summary["phase_boundaries_s"]
-    if t <= b["open_ends"]:
-        return "OPENING", "#b03a2e"
-    if t <= b["hold_ends"]:
-        return "HOLD", "#1e8449"
-    return "CLOSING", "#2874a6"
+PHASE_COLOR = {"LATCHED": "#8e44ad", "RELEASE": "#b03a2e", "OPENING": "#b03a2e",
+               "HOLD": "#1e8449", "CLOSING": "#2874a6", "RE-ENGAGED": "#8e44ad"}
+
+
+def phase_of(row):
+    return row["phase"], PHASE_COLOR[row["phase"]]
 
 
 def render_video(P, rows, summary, inert):
@@ -344,33 +370,46 @@ def render_video(P, rows, summary, inert):
     last_phase = None
     for idx in picked:
         r = rows[idx]
-        phase, col = phase_of(r["t_s"], summary)
+        phase, col = phase_of(r)
         if phase != last_phase:
             timeline.append({"state": phase, "t_start_s": r["t_s"],
                              "row_index": idx, "angle_deg": r["angle_deg"]})
             last_phase = phase
-        samples.append([r["t_s"], r["angle_deg"], r["torque_Nm"],
-                        r["torque_static_Nm"]])
+        samples.append([r["t_s"], r["angle_deg"], r["latch_fraction"],
+                        r["torque_Nm"], r["torque_static_Nm"]])
 
-        posed = B.probe_pose(bodies, P, r["angle_deg"])
+        posed = B.probe_pose(bodies, P, r["angle_deg"], r["latch_fraction"])
         img, ext = vid.rasterise(vid.body_patches(posed), CAM, COLORS, W, H)
+        det, _dx = vid.rasterise(vid.body_patches(posed), DETAIL_CAM, COLORS, 380, 320)
         fig, ax = vid.new_canvas(img, ext, W, H)
+        ax2 = fig.add_axes([0.762, 0.055, 0.225, 0.305])
+        ax2.imshow(det, origin="upper", interpolation="none")
+        ax2.set_xticks([]); ax2.set_yticks([])
+        for sp in ax2.spines.values():
+            sp.set_edgecolor("#3a3f45"); sp.set_linewidth(1.4)
+        ax2.set_title("LATCH DETAIL  (fixed inset camera)", fontsize=9.5,
+                      color="#1b1f24", pad=3)
         vid.state_banner(ax, phase, color=col)
         vid.title_block(ax, [
-            "EXE-BM001-01   lid on its hinge",
+            "EXE-BM001-01   hinged lid with an integral snap latch",
+            "three bodies: enclosure, closure, hinge pin",
             "MuJoCo rigid-body inverse dynamics",
             "",
             "t                %6.2f s" % r["t_s"],
             "lid angle        %6.2f deg   of %.0f" % (r["angle_deg"], P["open_angle_deg"]),
+            "latch beam       %6.2f mm out (declared max %.1f)"
+            % (r["latch_fraction"] * P["latch_deflect"], P["latch_deflect"]),
             "hinge torque     %+7.4f N m   (instantaneous)" % r["torque_Nm"],
             "gravity torque   %+7.4f N m   (static, at rest)" % r["torque_static_Nm"],
             "",
-            "lid mass         %6.4f kg   from the CAD solid" % inert["mass_kg"],
+            "lid mass         %6.4f kg   from the revised CAD solid" % inert["mass_kg"],
         ], size=10.5)
         vid.title_block(ax, [
             "DENSITY IS ASSUMED (%.0f kg/m3) - FRICTION IS ZERO"
             % ASSUMPTIONS["density_kg_m3"]["value"],
             "torques are a LOWER BOUND, not a measurement",
+            "LATCH DEFLECTION IS A PRESCRIBED GEOMETRIC STATE -",
+            "IT IS NOT FORCE-SIMULATED",
         ], x=0.986, y=0.938, size=10.5, ha="right", weight="bold", color="#8e44ad")
         vid.caveat(ax, "Rigid-body result under declared assumptions. Nothing here "
                        "establishes snap force, strain, fatigue or material adequacy.")
@@ -394,6 +433,9 @@ def render_video(P, rows, summary, inert):
         establishes=[
             "the lid reaches and returns from its declared 110 degree open pose "
             "along a smooth trajectory without any body passing through another",
+            "the latch is engaged at the start, released before the lid moves, "
+            "recovered during opening, deflected again by the closing lead-in, and "
+            "engaged again at the end - with three bodies and no separate part",
             "the hinge torque the solver needs is small and changes sign part way "
             "through the sweep, where the centre of mass crosses the hinge axis",
             "the visible lid is the CAD closure solid, so the picture and the "
@@ -406,6 +448,7 @@ def render_video(P, rows, summary, inert):
             "ceiling, so no torque here can pass or fail anything",
         ],
         extra={
+            "detail_inset_camera": DETAIL_CAM.as_dict(),
             "solver": {"name": "mujoco", "version": mujoco.__version__,
                        "method": "mj_inverse along a prescribed trajectory",
                        "timestep_s": 1.0 / 3000.0},
@@ -413,21 +456,25 @@ def render_video(P, rows, summary, inert):
                     "fps": 15, "every_nth_frame": 2, "scale": 0.5,
                     "sha256": cv.sha256_file(gif),
                     "bytes": os.path.getsize(gif)},
-            "sample_columns": ["t_s", "angle_deg", "torque_Nm", "torque_static_Nm"],
+            "sample_columns": ["t_s", "angle_deg", "latch_fraction", "torque_Nm",
+                               "torque_static_Nm"],
             "samples_shared_with_plots": (
                 "the frames are rows[::%d] of the SAME row list the plots are drawn "
                 "from. No resampling and no interpolation happens between them."
                 % stride),
-            "bolt_position_note": ("BODY-BOLT is drawn in its released (lifted) "
-                                  "position for the whole clip. The lid cannot swing "
-                                  "until it is released, so any other position would "
-                                  "be inconsistent with the motion being shown."),
+            "latch_note": ("LATCH DEFLECTION IS A PRESCRIBED GEOMETRIC STATE. FORCE, "
+                           "STRAIN AND MATERIAL ADEQUACY ARE NOT VERIFIED. MuJoCo is "
+                           "used only for the assembled rigid-body lid motion; it does "
+                           "not simulate the beam bending, the snap engagement or any "
+                           "contact between the tooth and the keeper."),
+            "no_bolt": ("BODY-BOLT does not exist in this reference. No frame contains "
+                        "it, its knob, the closure guide boss or the enclosure socket."),
             "first_frame": {"t_s": rows[picked[0]]["t_s"],
                             "angle_deg": rows[picked[0]]["angle_deg"],
-                            "declared_state": "CLOSED"},
+                            "declared_state": "CLOSED_LATCH_ENGAGED"},
             "final_frame": {"t_s": rows[picked[-1]]["t_s"],
                             "angle_deg": rows[picked[-1]]["angle_deg"],
-                            "declared_state": "CLOSED"},
+                            "declared_state": "CLOSED_REENGAGED"},
         })
     cv.write_json(os.path.join(OUT, "lid_operation_video.json"), man)
 

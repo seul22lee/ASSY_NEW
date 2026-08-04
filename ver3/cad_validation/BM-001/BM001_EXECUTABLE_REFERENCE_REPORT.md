@@ -45,12 +45,12 @@ CAD exist as later phases.
 |---|---|---|
 | Closure motion | revolute, 110° | prismatic, 84 mm |
 | Guidance | five interleaved knuckles on a separate pin | two captive C-section rails, integral |
-| Retention | rigid sliding bolt, lift to release | the rails themselves: four integral cover tabs under two retaining lips |
-| Snap features | headed pin with two integral cantilever snap arms | four retention tabs and one latch finger, all part of the cover |
-| Bodies | 4 | **2** |
+| Retention | integral snap latch on the closure, keeper on the enclosure | the rails themselves: four integral cover tabs under two retaining lips |
+| Snap features | headed pin with two cantilever snap arms, plus the closure's latch beam | four retention tabs and one latch finger, all part of the cover |
+| Bodies | **3** | **2** |
 | Semantic fixture | ADM-BM-001-E (close) | **none** |
 | Terminal bounds | one (open), constructed stop face | two (open and closed), stop faces |
-| Geometry signature | `f2bc9599cdd6832d…` (was `5586b96cc2e92e11…`) | `1eba7a573b5787ba…` (was `870af742b622b856…`) |
+| Geometry signature | `97613a0815b794fb…` (was `f2bc9599cdd6832d…`) | `1eba7a573b5787ba…` (unchanged) |
 
 They differ in joint type, body count, retention principle and assembly process.
 Neither is a variation of the other.
@@ -244,12 +244,14 @@ caught by the chain rather than by review:
    `NOT_INTENDED_TO_INTERACT` never compared against its declared nominal, so a
    wrong declaration passed — now it does.
 
-3. **An overclaim about retention.** The report asserted the opening rotation was
-   blocked while retained, without measuring it. Measured, the block begins at
-   **0.75°**, not zero: near the closed pose the closure's motion at the bolt is
-   almost entirely *along* the bolt axis, so the bore slides on the shaft before
-   it bears on it. The declared 0.1 mm running clearances imply exactly that free
-   play. The claim now states the measured onset.
+3. **An overclaim about retention** *(in the superseded bolt realization)*. The
+   report asserted the opening rotation was blocked while retained, without
+   measuring it. Measured, the block began at **0.75°**, not zero, because near
+   the closed pose the closure's motion at the bolt was almost entirely *along*
+   the bolt axis. The lesson carried into the latch that replaced it: its free
+   play is measured too, and by bisection rather than by reporting the first
+   coarse sample — **0.257°**, from the 0.4 mm gap between the shoulder and the
+   keeper underside.
 
 4. **A shared-primitive property nobody had noticed.** `cadval.bbox_of` returns a
    box inflated ~1e-7 mm per face by OCCT's `Bnd_Box` gap. Harmless — it is
@@ -305,6 +307,55 @@ its own declaration. **That would be a finding about NRM-BM-001-003, not about
 this CAD**, and belongs in `PRE_CAD_BACKLOG.yaml`. It is flagged here rather than
 left for someone to discover.
 
+## EXE-BM001-01: the bolt is gone
+
+The first pilot held the lid shut with a separate lift-bolt. It worked, and it
+was overdesigned. Two functions - let the user release the lid, and stop it
+rotating open while closed - cost a whole extra body plus a knob, a shaft, a
+closure guide boss, an enclosure socket, an extra assembly step and a manual
+re-engagement the user had to remember. It could also be mistaken for a key,
+which it never was: it gave no keying, no authorization and no security.
+
+Human decisions **HCR-BM001-008**, **-009** and **-010** rejected it and directed
+an integral latch. The product is now three bodies:
+
+| | |
+|---|---|
+| `BODY-ENCLOSURE` | cavity, five knuckle segments, and the **keeper rib** on its front face |
+| `BODY-CLOSURE` | plate, front lip, web, two knuckle segments, stop block, and the **integral snap latch** |
+| `BODY-PIN` | headed shaft with two cantilever snap arms — **unchanged** |
+
+The latch hangs from the closure's front lip, outside the product. Pull the pad
+2.4 mm outward, the tooth clears the keeper, the lid opens. Push the lid shut and
+the tooth's lead-in ramp rides the keeper and deflects the beam by itself; past
+it, the beam recovers and the tooth drops back under the keeper. Nothing is put
+back by hand.
+
+| | |
+|---|---|
+| Engagement, tooth under keeper | 2.2 mm |
+| Closed free play before the latch bites | **0.257°** (bisected, not the first coarse sample) |
+| Tooth material under the keeper | 113.62 mm³ engaged → **0.000 mm³** released |
+| Released opening | free at every probed angle to 110° |
+| Re-engages unaided | yes; lead-in required over a 6.24° band |
+| Release pad | y = −5.6, outside the front face at y = 0, 22 mm corridor clear |
+
+**BODY-PIN was not touched.** Its sub-signature over volume, area, centre of mass
+and bounding box is byte-identical before and after (`f5c3ec81480611b3`), so the
+accepted head-plus-snap-barb hinge is carried through rather than rebuilt.
+
+One stale claim was corrected on the way. The manifest still said the compressed
+pin configuration was 4.08 mm³ (0.38%) smaller than the relaxed one — a figure
+from a superseded build that rotated the arms about their roots. Measured now,
+both configurations are **0.000 mm³** apart.
+
+The negative-control set grew from 12 to **24**, adding controls for a
+reintroduced `BODY-BOLT`, a separate latch body, a missing tooth, a missing
+keeper, a floating keeper, a detached release pad, a release too small to clear,
+a latch that never re-engages, an absent lead-in, a pad hidden inside the
+enclosure, a closure declared rigid while its latch is declared to flex, and a
+force clause marked PASS.
+
 ## Motion videos
 
 Three review videos, all 30 fps, 1280×720, H.264, rendered from the references'
@@ -312,17 +363,27 @@ own B-rep solids by the same posing functions the validators call.
 
 | Clip | Reference | Frames | Duration |
 |---|---|---|---|
-| `lid_operation.mp4` — CLOSED → OPEN → HOLD → CLOSE | EXE-BM001-01 | 286 | 9.53 s |
+| `lid_operation.mp4` — LATCHED → RELEASE → OPENING → HOLD → CLOSING → RE-ENGAGED | EXE-BM001-01 | 349 | 11.63 s |
 | `cover_operation.mp4` — closed → press → open → captive → close → snap | EXE-BM001-02 | 301 | 10.03 s |
 | `cover_snap_assembly.mp4` — aligned → tabs in → past the lips → captive | EXE-BM001-02 | 271 | 9.03 s |
 
 The lid clip is driven by the MuJoCo simulation and shares its samples with the
 plots exactly — one frame per 100 solver steps, no resampling — so a torque read
 off a frame is a point on the published curve. Its overlay carries the time, the
-angle, the instantaneous hinge torque, the static gravity torque, the phase, and
-the statement that density is assumed and friction is zero. The simulation was
-retimed to 4.0 s open, 1.5 s hold, 4.0 s close to carry a reviewable clip; the
-gravity term is unchanged by that and the inertial term is smaller.
+angle, the latch beam deflection, the instantaneous hinge torque, the static
+gravity torque, the phase, and the statement that density is assumed and friction
+is zero. It also carries, on every frame, that **latch deflection is a prescribed
+geometric state and is not force-simulated**.
+
+Everything in it was recomputed from the revised CAD. The lid gained the latch
+and the front lip, so its mass went from 0.0523 to **0.0563 kg**, its inertia
+about the hinge from 1.401e-04 to **1.803e-04 kg·m²**, and its peak static torque
+from 0.0221 to **0.0258 N·m**. None of the previous numbers was carried over on
+the grounds that the change looked small.
+
+MuJoCo is used only for the assembled rigid-body lid motion. It does not simulate
+the beam bending, the snap engagement, or any contact between the tooth and the
+keeper, and the manifest says so.
 
 Two rendering decisions are worth recording because the first attempt at each was
 wrong. A painter's-algorithm depth sort was discarded — a large far wall has a

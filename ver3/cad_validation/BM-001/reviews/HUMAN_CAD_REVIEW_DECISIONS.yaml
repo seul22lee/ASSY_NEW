@@ -91,6 +91,70 @@ decisions:
       - cover captive at 0, 10, 40, 70 and 84 mm
       - ordinary upward translation blocked at 84 mm
 
+  # ------------------------------------------- EXE-BM001-01, second review round
+  - id: HCR-BM001-008
+    reference: EXE-BM001-01
+    subject: separate lift-bolt retention realization
+    decision: REJECT_CURRENT_GEOMETRY
+    reason: >
+      The bolt does two things: it lets the user deliberately release the lid, and
+      it stops the lid rotating open while closed. Implementing that took a whole
+      separate body plus a knob, a shaft, a closure guide boss, an enclosure
+      socket, an extra assembly step and a manual re-engagement the user has to
+      remember. The functionality is disproportionate to the part and feature
+      count. It can also be mistaken for a key or a lock, although it provides no
+      keying, no authorization and no security whatsoever.
+    required_correction: >
+      Replace BODY-BOLT with an integral exterior-accessible snap latch belonging
+      to BODY-CLOSURE, engaging a keeper belonging to BODY-ENCLOSURE.
+    terminology:
+      - it is a latch, not a key
+      - do not call it a lock
+      - do not imply authorized access
+      - do not claim security performance
+    required_final_product_bodies: [BODY-ENCLOSURE, BODY-CLOSURE, BODY-PIN]
+    no_fourth_latch_body: true
+
+  - id: HCR-BM001-009
+    reference: EXE-BM001-01
+    subject: the accepted head-plus-snap-barb hinge pin
+    decision: APPROVE
+    consequence: >
+      BODY-PIN stays. It realizes the hinge axis, the enclosure/closure connection
+      and its own bilateral axial retention through the head and the snap barb.
+      It is a hinge element, not a fastener holding the lid shut, and removing the
+      bolt does not touch it. It must not be altered merely to accommodate the
+      latch.
+    required_unchanged:
+      - pin shaft, head, cantilever arms and retaining lugs
+      - the 4.2 mm bore relation
+      - bilateral axial retention
+      - the declared compressed assembly configuration and the relaxed operating one
+
+  - id: HCR-BM001-010
+    reference: EXE-BM001-01
+    subject: replacement latch design direction
+    decision: DIRECTED
+    required_architecture:
+      closure: [exterior release pad, compliant cantilever beam, lead-in ramp,
+                latch tooth, retaining shoulder]
+      enclosure: [structurally connected keeper face]
+    constraints:
+      - the keeper must be visibly and physically part of the enclosure, not floating
+      - no separate latch body, clip, pin, removable fastener or loose tool
+      - the release pad must be reachable from the product exterior
+      - the release must not require opening the lid first
+      - closing must re-engage the latch without the user pushing anything back
+      - use the minimum coherent geometry
+    what_stays_not_verified:
+      - latch strain, root stress, release force, engagement force
+      - holding capacity, impact capacity, fatigue, creep, wear, cycle life
+      - moulding feasibility, tolerance robustness, cost
+    note: >
+      The snap-fit material and force engineering is a later task, to be done with
+      engineering calculation, FEA and/or physical test. It is deliberately not
+      attempted here.
+
 final_independent_human_review: PENDING
 note_on_status: >
   These decisions authorize the revisions. They do not approve their result. No

@@ -4,17 +4,17 @@
       "clauses": [
         {
           "clause": "a closed state exists",
-          "measured": "S_CLOSED_RETAINED and S_CLOSED_RELEASED are realized configurations",
+          "measured": "CLOSED_LATCH_ENGAGED and CLOSED_REENGAGED are realized configurations",
           "status": "PASS"
         },
         {
           "clause": "an open state exists",
-          "measured": "S_OPEN is realized",
+          "measured": "OPEN is realized",
           "status": "PASS"
         },
         {
           "clause": "a motion connects them in both directions",
-          "measured": "M1_RELEASE and M2_OPEN traversed over 43 and 137 samples with max common volume 0.000e+00 and 0.000e+00 mm^3",
+          "measured": "M1_RELEASE and M2_OPEN traversed over 31 and 143 samples with max common volume 0.000e+00 and 0.000e+00 mm^3",
           "reversibility": "the path is a one-parameter family of rigid transforms; traversal in the reverse direction visits the same configurations",
           "status": "PASS"
         }
@@ -39,7 +39,7 @@
         },
         {
           "clause": "every declared intended interaction is physically coherent",
-          "measured": "14 declared interactions, all measured inside their declared regions",
+          "measured": "12 declared interactions, all measured inside their declared regions",
           "status": "PASS"
         },
         {
@@ -69,7 +69,7 @@
       "clauses": [
         {
           "clause": "in the open state the closure does not obstruct the declared usable access",
-          "measured": "intruding volume into the declared access region: {'BODY-BOLT': 0.0, 'BODY-CLOSURE': 0.0, 'BODY-PIN': 0.0}; nearest approach 3.000 mm",
+          "measured": "intruding volume into the declared access region: {'BODY-CLOSURE': 0.0, 'BODY-PIN': 0.0}; nearest approach 3.000 mm",
           "status": "PASS"
         },
         {
@@ -133,18 +133,18 @@
       "clauses": [
         {
           "clause": "holds the closure in the closed state against the declared disturbance",
-          "measured": "the design declares no disturbance magnitude, so the predicate has no quantity to apply, and this toolchain computes no forces. What IS measured is that the motion is geometrically blocked while retained beyond 0.75 deg of free play, and free at every probed angle once released.",
+          "measured": "the design declares no disturbance magnitude, so the predicate has no quantity to apply, and this toolchain computes no forces. What IS measured is that the motion is geometrically blocked while retained beyond 0.257 deg of free play, and free at every probed angle once released.",
           "reason": "REPRESENTATION_INCOMPLETE",
           "status": "NOT_EVALUABLE"
         },
         {
           "clause": "released by a deliberate user action",
-          "measured": "BODY-BOLT lifts 10.0 mm; the engagement region is then empty of bolt material (disengages_on_release=True), and the rotation blocked before the lift is free after it (free_after_release=True)",
+          "measured": "the exterior beam deflects 2.4 mm outward; tooth material under the keeper goes from 113.62 to 0.00 mm^3, and rotation blocked before the deflection is free after it (frees=True)",
           "status": "PASS"
         },
         {
           "clause": "engagement localized on both participating bodies",
-          "measured": "both bodies carry material in the declared engagement region; engagement depth below the rim is 8.0 mm",
+          "measured": "FEA-C-LATCH-SHOULDER on BODY-CLOSURE against FEA-E-KEEPER on BODY-ENCLOSURE; 2.2 mm of tooth lies under the keeper",
           "status": "PASS"
         }
       ],
@@ -163,7 +163,7 @@
       "clauses": [
         {
           "clause": "close-engage, release, close-engage-again completes",
-          "measured": "five-configuration cycle traversed; engaged at start and at end",
+          "measured": "six-configuration cycle traversed; engaged at start and at end, and the closing sweep re-engages without any user action",
           "status": "PASS"
         },
         {
@@ -192,26 +192,32 @@
       "clauses": [
         {
           "clause": "a realized access path reaches the actuation feature",
-          "measured": "an 80 mm cylinder of radius 12.0 mm rising from the knob top face is clear of all four bodies in the retained state",
+          "measured": "the release pad's face lies at y = -5.6, outside the product's front face at y = 0, and a 22 mm prism in front of it is clear of all three bodies in the closed state",
+          "status": "PASS"
+        },
+        {
+          "clause": "reachable without opening the lid or handling a separate object",
+          "measured": "the pad is on the product exterior and is part of BODY-CLOSURE",
           "status": "PASS"
         }
       ],
       "evidence": [
-        "validation/predicate_report.json"
+        "validation/predicate_report.json#release_access"
       ],
       "invariant_id": "NRM-BM-001-008",
+      "notes": "Ergonomic ease and the finger force required are NOT_VERIFIED.",
       "status": "PASS"
     },
     {
       "clauses": [
         {
           "clause": "an interior cavity exists",
-          "measured": "free interior volume 349534.5 mm^3",
+          "measured": "free interior volume 354312.0 mm^3",
           "status": "PASS"
         },
         {
           "clause": "reachable through the aperture in the open state",
-          "measured": "the aperture prism is unobstructed at S_OPEN",
+          "measured": "the aperture prism is unobstructed at OPEN",
           "status": "PASS"
         }
       ],
@@ -225,7 +231,7 @@
       "clauses": [
         {
           "clause": "each discrete part reaches its assembled position without passing through already-placed material",
-          "measured": "3 insertion steps swept; max common volume 0.000e+00 mm^3",
+          "measured": "1 insertion steps swept; max common volume 0.000e+00 mm^3",
           "status": "PASS"
         },
         {
@@ -247,7 +253,7 @@
       "clauses": [
         {
           "clause": "for each interface that carries load, a path exists to a reaction site",
-          "measured": "every body is connected to BODY-ENCLOSURE through declared load-bearing interfaces: BODY-BOLT, BODY-CLOSURE, BODY-ENCLOSURE, BODY-PIN",
+          "measured": "every body is connected to BODY-ENCLOSURE through declared load-bearing interfaces: BODY-CLOSURE, BODY-ENCLOSURE, BODY-PIN",
           "status": "PASS"
         },
         {
@@ -315,28 +321,9 @@
     "PASS": 12
   },
   "supporting_measurements": {
-    "actuator_access": {
-      "intruding_volume_mm3": {
-        "BODY-BOLT": 0.0,
-        "BODY-CLOSURE": 0.0,
-        "BODY-ENCLOSURE": 0.0,
-        "BODY-PIN": 0.0
-      },
-      "path": {
-        "axis": [
-          60.0,
-          9.0
-        ],
-        "from_z": 69.0,
-        "length_mm": 80.0,
-        "radius_mm": 12.0,
-        "terminates_at": "FEA-B-KNOB top face"
-      },
-      "path_clear": true
-    },
     "cavity": {
       "exists": true,
-      "free_interior_volume_mm3": 349534.48138,
+      "free_interior_volume_mm3": 354312.0,
       "method": "cavity prism minus the enclosure solid",
       "reachable_through_aperture_at_open": true
     },
@@ -346,77 +333,95 @@
       "re_engaged_at_end": true,
       "sequence": [
         {
-          "bolt_volume_mm3": 2513.274123,
-          "closure_volume_mm3": 43598.651223,
-          "enclosure_volume_mm3": 94247.266221,
-          "engaged": true,
+          "closure_volume_mm3": 46887.073638,
+          "enclosure_volume_mm3": 89746.227601,
           "index": 0,
-          "socket_min_distance_mm": 0.0,
-          "state": "S_CLOSED_RETAINED"
+          "pin_volume_mm3": 1049.761996,
+          "state": "CLOSED_LATCH_ENGAGED"
         },
         {
-          "bolt_volume_mm3": 2513.274123,
-          "closure_volume_mm3": 43598.651223,
-          "enclosure_volume_mm3": 94247.266221,
-          "engaged": false,
+          "closure_volume_mm3": 46887.073638,
+          "enclosure_volume_mm3": 89746.227601,
           "index": 1,
-          "socket_min_distance_mm": 2.002498439,
-          "state": "S_CLOSED_RELEASED"
+          "pin_volume_mm3": 1049.761996,
+          "state": "CLOSED_LATCH_RELEASED"
         },
         {
-          "bolt_volume_mm3": 2513.274123,
-          "closure_volume_mm3": 43598.651223,
-          "enclosure_volume_mm3": 94247.266221,
-          "engaged": false,
+          "closure_volume_mm3": 46887.073638,
+          "enclosure_volume_mm3": 89746.227601,
           "index": 2,
-          "socket_min_distance_mm": 66.732386184,
-          "state": "S_OPEN"
+          "pin_volume_mm3": 1049.761996,
+          "state": "OPENING_STARTED"
         },
         {
-          "bolt_volume_mm3": 2513.274123,
-          "closure_volume_mm3": 43598.651223,
-          "enclosure_volume_mm3": 94247.266221,
-          "engaged": false,
+          "closure_volume_mm3": 46887.073638,
+          "enclosure_volume_mm3": 89746.227601,
           "index": 3,
-          "socket_min_distance_mm": 2.002498439,
-          "state": "S_CLOSED_RELEASED"
+          "pin_volume_mm3": 1049.761996,
+          "state": "OPEN"
         },
         {
-          "bolt_volume_mm3": 2513.274123,
-          "closure_volume_mm3": 43598.651223,
-          "enclosure_volume_mm3": 94247.266221,
-          "engaged": true,
+          "closure_volume_mm3": 46887.073638,
+          "enclosure_volume_mm3": 89746.227601,
           "index": 4,
-          "socket_min_distance_mm": 0.0,
-          "state": "S_CLOSED_RETAINED"
+          "pin_volume_mm3": 1049.761996,
+          "state": "CLOSING_LATCH_LEADIN"
+        },
+        {
+          "closure_volume_mm3": 46887.073638,
+          "enclosure_volume_mm3": 89746.227601,
+          "index": 5,
+          "pin_volume_mm3": 1049.761996,
+          "state": "CLOSED_REENGAGED"
         }
       ]
     },
     "extent": {
       "as_built_mm3": {
-        "BODY-BOLT": 2513.274123,
-        "BODY-CLOSURE": 43598.651223,
-        "BODY-ENCLOSURE": 94247.266221,
+        "BODY-CLOSURE": 46887.073638,
+        "BODY-ENCLOSURE": 89746.227601,
         "BODY-PIN": 1049.761996
       },
       "conserved": true,
       "per_state_mm3": {
-        "S_CLOSED_RELEASED": {
-          "BODY-BOLT": 2513.274123,
-          "BODY-CLOSURE": 43598.651223,
-          "BODY-ENCLOSURE": 94247.266221,
+        "CLOSED_LATCH_ENGAGED": {
+          "BODY-CLOSURE": 46887.073638,
+          "BODY-ENCLOSURE": 89746.227601,
           "BODY-PIN": 1049.761996
         },
-        "S_CLOSED_RETAINED": {
-          "BODY-BOLT": 2513.274123,
-          "BODY-CLOSURE": 43598.651223,
-          "BODY-ENCLOSURE": 94247.266221,
+        "CLOSED_LATCH_RELEASED": {
+          "BODY-CLOSURE": 46887.073638,
+          "BODY-ENCLOSURE": 89746.227601,
           "BODY-PIN": 1049.761996
         },
-        "S_OPEN": {
-          "BODY-BOLT": 2513.274123,
-          "BODY-CLOSURE": 43598.651223,
-          "BODY-ENCLOSURE": 94247.266221,
+        "CLOSED_REENGAGED": {
+          "BODY-CLOSURE": 46887.073638,
+          "BODY-ENCLOSURE": 89746.227601,
+          "BODY-PIN": 1049.761996
+        },
+        "CLOSING_LATCH_LEADIN": {
+          "BODY-CLOSURE": 46887.073638,
+          "BODY-ENCLOSURE": 89746.227601,
+          "BODY-PIN": 1049.761996
+        },
+        "OPEN": {
+          "BODY-CLOSURE": 46887.073638,
+          "BODY-ENCLOSURE": 89746.227601,
+          "BODY-PIN": 1049.761996
+        },
+        "OPENING_STARTED": {
+          "BODY-CLOSURE": 46887.073638,
+          "BODY-ENCLOSURE": 89746.227601,
+          "BODY-PIN": 1049.761996
+        },
+        "PIN_ASSEMBLY_COMPRESSED": {
+          "BODY-CLOSURE": 46887.073638,
+          "BODY-ENCLOSURE": 89746.227601,
+          "BODY-PIN": 1049.761996
+        },
+        "PIN_ASSEMBLY_RECOVERED": {
+          "BODY-CLOSURE": 46887.073638,
+          "BODY-ENCLOSURE": 89746.227601,
           "BODY-PIN": 1049.761996
         }
       },
@@ -428,24 +433,176 @@
       "note": "Matches are inspected. A line recording that a force is NOT verified is not a citation of an achieved property.",
       "pattern": "\\b(newton|newtons|\\d+\\s*N\\b|kgf|lbf|torque|force window|holding force|preload|retention force)\\b"
     },
+    "latch": {
+      "architecture": "integral to BODY-CLOSURE; the keeper is a rib on BODY-ENCLOSURE's front face. No separate body, no clip, no fastener, and nothing the user has to hold or put back.",
+      "blocking_probe": {
+        "block_onset_deg": 0.257,
+        "blocking_direction": "opening rotation about AX-CLOSURE",
+        "blocking_features": {
+          "closure": "FEA-C-LATCH-SHOULDER",
+          "enclosure": "FEA-E-KEEPER"
+        },
+        "blocks": true,
+        "declared_free_play_mm": 0.4,
+        "declared_release_mm": 2.4,
+        "discriminates": true,
+        "engaged_blocks_opening": [
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 0.05
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 0.1
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 0.2
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 0.25
+          },
+          {
+            "common_volume_mm3": 2.345135,
+            "open_deg": 0.3
+          },
+          {
+            "common_volume_mm3": 13.782955,
+            "open_deg": 0.5
+          },
+          {
+            "common_volume_mm3": 39.979576,
+            "open_deg": 1.0
+          },
+          {
+            "common_volume_mm3": 73.29255,
+            "open_deg": 2.0
+          },
+          {
+            "common_volume_mm3": 5.627309,
+            "open_deg": 4.0
+          }
+        ],
+        "engagement_mm": 2.2,
+        "free_play_note": "the shoulder stands 0.4 mm under the keeper, so the lid turns through 0.257 deg before the latch bites",
+        "frees": true,
+        "onset_method": "coarse ladder, then 14 bisections between the bracketing samples",
+        "release_actually_moves_the_tooth": true,
+        "release_direction": "-Y, the beam deflected outward, away from the front face",
+        "released_frees_opening": [
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 0.25
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 0.5
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 1.0
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 2.0
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 5.0
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 15.0
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 45.0
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 90.0
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "open_deg": 110.0
+          }
+        ],
+        "tooth_volume_under_keeper_engaged_mm3": 113.621538,
+        "tooth_volume_under_keeper_released_mm3": 0.0,
+        "what_this_does_not_show": "holding force, release effort, strain or fatigue",
+        "what_this_shows": "opening rotation is geometrically blocked while the latch is engaged and free once it is released"
+      },
+      "declared_disturbance_magnitude": null,
+      "engagement_mm": 2.2,
+      "holding_capacity_evaluated": false,
+      "reengagement_probe": {
+        "closed_state_blocks_again": true,
+        "closing_sweep_ends_seated": true,
+        "deflected_passes_the_same_band": true,
+        "features": {
+          "keeper": "FEA-E-KEEPER",
+          "ramp": "FEA-C-LATCH-RAMP"
+        },
+        "hold_band_deg": 6.2374,
+        "hold_band_meaning": "below this angle the tooth is still alongside the keeper and the beam must be deflected; above it the beam is free to recover on its own",
+        "leadin_contact_samples": [
+          {
+            "deg": 0.5,
+            "relaxed_common_volume_mm3": 13.782955
+          },
+          {
+            "deg": 1.0,
+            "relaxed_common_volume_mm3": 39.979576
+          },
+          {
+            "deg": 2.0,
+            "relaxed_common_volume_mm3": 73.29255
+          },
+          {
+            "deg": 3.0,
+            "relaxed_common_volume_mm3": 48.358009
+          },
+          {
+            "deg": 4.0,
+            "relaxed_common_volume_mm3": 5.627309
+          },
+          {
+            "deg": 5.0,
+            "relaxed_common_volume_mm3": 0.0
+          },
+          {
+            "deg": 6.0,
+            "relaxed_common_volume_mm3": 0.0
+          }
+        ],
+        "leadin_is_required": true,
+        "reengages": true,
+        "user_action_required_to_reengage": false,
+        "what_this_does_not_show": "engagement force, snap force, strain or fatigue"
+      },
+      "terminology": "a latch, not a key or a lock. It provides no keying, no authorization and no security, and none is claimed."
+    },
+    "latch_connectivity": {
+      "closure_is_one_solid": true,
+      "connected": true,
+      "enclosure_is_one_solid": true,
+      "keeper_belongs_to": "BODY-ENCLOSURE",
+      "keeper_is_floating": false,
+      "keeper_material_is_enclosure_mm3": 621.48,
+      "latch_belongs_to": "BODY-CLOSURE",
+      "latch_material_is_closure_mm3": 810.28,
+      "release_pad_disconnected": false
+    },
     "load_path": {
       "adequacy_evaluated": false,
       "all_bodies_connected": true,
       "bodies_connected_to_enclosure": [
-        "BODY-BOLT",
         "BODY-CLOSURE",
         "BODY-ENCLOSURE",
         "BODY-PIN"
       ],
       "load_bearing_edges": [
-        [
-          "BODY-BOLT",
-          "BODY-CLOSURE"
-        ],
-        [
-          "BODY-BOLT",
-          "BODY-ENCLOSURE"
-        ],
         [
           "BODY-CLOSURE",
           "BODY-ENCLOSURE"
@@ -477,12 +634,10 @@
         ]
       },
       "intruding_volume_mm3": {
-        "BODY-BOLT": 0.0,
         "BODY-CLOSURE": 0.0,
         "BODY-PIN": 0.0
       },
       "min_distance_to_region_mm": {
-        "BODY-BOLT": 31.1483926,
         "BODY-CLOSURE": 3.0,
         "BODY-PIN": 5.5
       },
@@ -611,127 +766,60 @@
         "lugs_recovered_clear_of_solid": true
       }
     },
-    "retention": {
-      "blocking_probe": {
-        "block_onset_deg": 0.75,
-        "blocked_beyond_onset": true,
-        "discriminates": true,
-        "free_after_release": true,
-        "free_play_note": "The block does not begin at zero. INT-10 and INT-11 are 0.1 mm running clearances, and near the closed pose the closure's motion at the bolt is almost entirely along the bolt axis, so the bore slides on the shaft before it bears on it. The measured onset is the free play those clearances imply. A retention that engaged with zero play would need an interference fit, which this reference deliberately does not use.",
-        "released_rotation_free": [
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 0.1
-          },
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 0.25
-          },
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 0.5
-          },
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 0.75
-          },
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 1.0
-          },
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 1.25
-          },
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 1.5
-          },
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 2.0
-          },
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 3.0
-          },
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 5.0
-          },
-          {
-            "bolt_enclosure_common_volume_mm3": 0.0,
-            "closure_enclosure_common_volume_mm3": 0.0,
-            "opening_angle_deg": 8.0
-          }
-        ],
-        "retained_rotation": [
-          {
-            "closure_bolt_common_volume_mm3": 0.0,
-            "opening_angle_deg": 0.1
-          },
-          {
-            "closure_bolt_common_volume_mm3": 0.0,
-            "opening_angle_deg": 0.25
-          },
-          {
-            "closure_bolt_common_volume_mm3": 0.0,
-            "opening_angle_deg": 0.5
-          },
-          {
-            "closure_bolt_common_volume_mm3": 0.066045653,
-            "opening_angle_deg": 0.75
-          },
-          {
-            "closure_bolt_common_volume_mm3": 0.585760746,
-            "opening_angle_deg": 1.0
-          },
-          {
-            "closure_bolt_common_volume_mm3": 1.533670714,
-            "opening_angle_deg": 1.25
-          },
-          {
-            "closure_bolt_common_volume_mm3": 2.807398225,
-            "opening_angle_deg": 1.5
-          },
-          {
-            "closure_bolt_common_volume_mm3": 6.142854131,
-            "opening_angle_deg": 2.0
-          },
-          {
-            "closure_bolt_common_volume_mm3": 30.370777651,
-            "opening_angle_deg": 3.0
-          },
-          {
-            "closure_bolt_common_volume_mm3": 389.554144092,
-            "opening_angle_deg": 5.0
-          },
-          {
-            "closure_bolt_common_volume_mm3": 793.083565577,
-            "opening_angle_deg": 8.0
-          }
-        ],
-        "what_this_does_not_show": "any holding capacity, or that the free play is acceptable",
-        "what_this_shows": "The release action is necessary: beyond the free play the opening motion is geometrically blocked while the bolt is retained, and free at every probed angle once it is lifted."
+    "release_access": {
+      "access_prism_mm": [
+        49.0,
+        71.0,
+        -27.6,
+        -5.8,
+        26.0,
+        37.6
+      ],
+      "intruding_volume_mm3": {
+        "BODY-CLOSURE": 0.0,
+        "BODY-ENCLOSURE": 0.0,
+        "BODY-PIN": 0.0
       },
-      "declared_disturbance_magnitude": null,
-      "disengages_on_release": true,
-      "engaged_bolt_volume_in_region_mm3": 402.12386,
-      "engagement_depth_below_rim_mm": 8.0,
-      "holding_capacity_evaluated": false,
-      "material_present_on_both_bodies_in_engagement_region": true,
-      "release_action": "lift BODY-BOLT 10.0 mm; deliberate, single-body, reversible",
-      "released_bolt_volume_in_region_mm3": 0.0
+      "nothing_obstructs_the_press_direction": true,
+      "pad_face_y_mm": -5.6,
+      "pad_stands_outside_the_envelope": true,
+      "pad_x_span_mm": [
+        51.0,
+        69.0
+      ],
+      "pad_z_span_mm": [
+        28.0,
+        31.0
+      ],
+      "press_direction": "-Y, outward",
+      "product_front_face_y_mm": 0.0,
+      "reachable": true,
+      "release_pad": "FEA-C-RELEASE-PAD",
+      "requires_a_separate_object": false,
+      "requires_opening_the_lid_first": false,
+      "what_this_does_not_show": "ergonomic ease, finger force or comfort"
+    },
+    "topology": {
+      "banned_bodies_present": [],
+      "body_count": 3,
+      "body_ids": [
+        "BODY-CLOSURE",
+        "BODY-ENCLOSURE",
+        "BODY-PIN"
+      ],
+      "exactly_three_product_bodies": true,
+      "materials": {
+        "BODY-CLOSURE": "GENERIC_COMPLIANT_POLYMER",
+        "BODY-ENCLOSURE": "GENERIC_RIGID_POLYMER",
+        "BODY-PIN": "GENERIC_COMPLIANT_POLYMER"
+      },
+      "single_connected_solid": {
+        "BODY-CLOSURE": true,
+        "BODY-ENCLOSURE": true,
+        "BODY-PIN": true
+      },
+      "the_pin_is_not_a_fastener": "BODY-PIN realizes the hinge axis and its own bilateral axial retention. It is a hinge element, not a latch component.",
+      "what_this_shows": "the latch is integral to the closure and the keeper integral to the enclosure. Nothing holds this product shut that a user could drop, lose or leave out."
     }
   }
 }

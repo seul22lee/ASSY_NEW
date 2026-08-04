@@ -13,26 +13,59 @@ any table here as a claim to be checked, not as a finding.
 
 ---
 
-## EXE-BM001-01 — revised, awaiting review
+## EXE-BM001-01 — revised twice, awaiting review
 
-Human decision **HCR-BM001-002** rejected the previous hinge pin: its head
-blocked axial removal in one direction only, and the far end could walk out. The
-pin has been replaced with a headed pin carrying two integral cantilever snap
-arms.
+**Round 1 (HCR-BM001-002).** The previous hinge pin blocked axial removal in one
+direction only and the far end could walk out. It was replaced with a headed pin
+carrying two integral cantilever snap arms.
+
+**Round 2 (HCR-BM001-008, -009, -010).** The separate lift-bolt that held the lid
+shut was rejected as functionally excessive: a whole extra body plus a knob, a
+shaft, a closure guide boss, an enclosure socket, an extra assembly step and a
+manual re-engagement, all to let the user open a lid. It could also be mistaken
+for a key, which it never was — no keying, no authorization, no security.
+
+`BODY-BOLT` is gone, with its knob, shaft, guide boss and socket. The product is
+now **three bodies**: the closure carries an **integral exterior snap latch** and
+the enclosure carries the **keeper**. The hinge pin is untouched — its
+sub-signature is identical before and after.
+
+Pull the pad 2.4 mm outward, the tooth clears the keeper, the lid opens. Push the
+lid shut and the tooth's lead-in ramp deflects the beam by itself; past the
+keeper the beam recovers and the tooth drops back under it. Nothing is put back
+by hand, and nothing can be dropped or lost.
 
 ### Review evidence — these five images only
 
 | View | File |
 |---|---|
-| Overview, with the detail cuts located | [review_overview_section_lines.png](../executable_references/EXE-BM001-01/screenshots/review_overview_section_lines.png) |
+| Overview: three bodies, latch operation, and where the cuts are taken | [review_overview_latch_operation_and_sections.png](../executable_references/EXE-BM001-01/screenshots/review_overview_latch_operation_and_sections.png) |
 | Knuckle set in side context | [review_section_knuckle_side_context.png](../executable_references/EXE-BM001-01/screenshots/review_section_knuckle_side_context.png) |
 | Closure knuckle and pin | [review_section_closure_knuckle_pin.png](../executable_references/EXE-BM001-01/screenshots/review_section_closure_knuckle_pin.png) |
 | Enclosure knuckle and pin | [review_section_enclosure_knuckle_pin.png](../executable_references/EXE-BM001-01/screenshots/review_section_enclosure_knuckle_pin.png) |
 | Longitudinal: head, knuckles, recovered barb | [review_section_pin_head_and_snap_barb.png](../executable_references/EXE-BM001-01/screenshots/review_section_pin_head_and_snap_barb.png) |
 
-All five are orthographic, viewed normal to the cutting plane, showing the cut
-face only, with cut faces hatched. No perspective, no isometric inset, no general
-product view.
+**The latch**
+
+| View | File |
+|---|---|
+| E-E — latch ENGAGED, tooth under the keeper | [review_section_latch_engaged.png](../executable_references/EXE-BM001-01/screenshots/review_section_latch_engaged.png) |
+| E-E — latch RELEASED, same plane and scale | [review_section_latch_released.png](../executable_references/EXE-BM001-01/screenshots/review_section_latch_released.png) |
+
+**Operation sequence**
+
+| View | File |
+|---|---|
+| 1 — closed and latched | [review_operation_01_closed_latched.png](../executable_references/EXE-BM001-01/screenshots/review_operation_01_closed_latched.png) |
+| 2 — release pad pulled out | [review_operation_02_release_pressed.png](../executable_references/EXE-BM001-01/screenshots/review_operation_02_release_pressed.png) |
+| 3 — opening started | [review_operation_03_opening_started.png](../executable_references/EXE-BM001-01/screenshots/review_operation_03_opening_started.png) |
+| 4 — open, 110° | [review_operation_04_open.png](../executable_references/EXE-BM001-01/screenshots/review_operation_04_open.png) |
+| 5 — reclosed, snap re-engaged | [review_operation_05_reclosed_latched.png](../executable_references/EXE-BM001-01/screenshots/review_operation_05_reclosed_latched.png) |
+
+All are orthographic, viewed normal to the cutting plane, showing the cut face
+only, with cut faces hatched. No perspective, no isometric inset, no general
+product view. The engaged and released latch sections use the same plane and the
+same scale, so the 2.4 mm release is a comparison and not a claim.
 
 The general product views under the same directory (`s_closed_retained_*`,
 `section_knuckle_*`, and so on) are produced by the machine artifact contract.
@@ -42,7 +75,7 @@ The general product views under the same directory (`s_closed_retained_*`,
 
 | Clip | File |
 |---|---|
-| Lid: CLOSED → OPEN → HOLD → CLOSE, 286 frames, 9.53 s, 30 fps, 1280×720, H.264 | [lid_operation.mp4](../executable_references/EXE-BM001-01/validation/simulation/lid_operation.mp4) |
+| Lid: LATCHED → RELEASE → OPENING → HOLD → CLOSING → RE-ENGAGED, 349 frames, 11.63 s, 30 fps, 1280×720, H.264 | [lid_operation.mp4](../executable_references/EXE-BM001-01/validation/simulation/lid_operation.mp4) |
 | The same clip as a GIF, for quick viewing | [lid_operation.gif](../executable_references/EXE-BM001-01/validation/simulation/lid_operation.gif) |
 | Record: engine, signature, camera, timeline, hashes, claims | [lid_operation_video.json](../executable_references/EXE-BM001-01/validation/simulation/lid_operation_video.json) |
 
@@ -87,6 +120,11 @@ compared against. See [VIDEO_REVIEW_AUDIT.md](VIDEO_REVIEW_AUDIT.md).
 | 4 | Is any intended pin / closure / enclosure interaction missing from the declaration? | PENDING |
 | 5 | Is a 1.05 mm deflection on a 6 mm arm credible for a moulded polymer, or is this asking too much of the material? | PENDING |
 | 6 | Are the unknown snap force, strain and fatigue correctly left NOT_VERIFIED? | PENDING |
+| 8 | Is the integral latch clearly a **latch** — not a key, a lock or an access control? | PENDING |
+| 9 | Is pulling a pad outward the right release action, or would a user expect to press? | PENDING |
+| 10 | Is 0.257° of free play before the latch bites acceptable, or is the lid loose? | PENDING |
+| 11 | Is 2.4 mm of deflection on this beam credible for a moulded polymer? | PENDING |
+| 12 | Is an 8.4 mm front lip acceptable, or does the latch cost too much overhang? | PENDING |
 | 7 | Watching `lid_operation.mp4`, does the lid motion and the reported effort look credible for this geometry? | PENDING |
 
 ### What the author could not check

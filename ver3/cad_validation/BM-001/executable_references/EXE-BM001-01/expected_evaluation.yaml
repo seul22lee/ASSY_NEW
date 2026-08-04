@@ -123,3 +123,59 @@ weakening_check: >
   design could not be assembled, which is a defect in the CAD. The change made
   the model harder to satisfy, not easier: it removed a clearance feature and
   left the plate to clear the knuckle on its own.
+
+# ---------------------------------------------- second revision: the snap latch
+latch_revision:
+  driver: [HCR-BM001-008, HCR-BM001-009, HCR-BM001-010]
+  what_changed: >
+    BODY-BOLT, its knob and shaft, the closure guide boss and the enclosure
+    socket were removed. BODY-CLOSURE gained an integral exterior snap latch -
+    release pad, compliant cantilever beam, lead-in ramp, tooth and retaining
+    shoulder - and BODY-ENCLOSURE gained a keeper rib on its front face. The
+    product went from four bodies to three.
+  what_did_not_change: >
+    BODY-PIN. Its sub-signature over volume, area, centre of mass and bounding
+    box is identical before and after (f5c3ec81480611b3), so the accepted
+    head-plus-snap-barb hinge is carried through untouched, not rebuilt.
+  geometry_signature:
+    before: f2bc9599cdd6832dcb52ea0f24645b6cf6c374308324320b08d93f7f6e8d8967
+    after: 97613a0815b794fb14a92364a7f8d7ac70c4d4c34b10ace6eb26b1aba7aba109
+  measured:
+    engaged_free_play_deg: 0.2570
+    engaged_free_play_source: the 0.4 mm gap between the shoulder and the keeper underside
+    blocking_onset_method: coarse ladder then 14 bisections
+    engagement_mm: 2.2
+    release_deflection_mm: 2.4
+    release_direction: -Y, the exterior beam pulled outward
+    tooth_under_keeper_mm3: {engaged: 113.62, released: 0.0}
+    released_opening: free at every probed angle to 110 deg
+    reengages_unaided: true
+    latch_hold_band_deg: 6.2374
+  expected_and_observed:
+    - invariant: NRM-BM-001-006
+      expected: NOT_EVALUABLE on the holding clause; PASS on release and localization
+      observed: NOT_EVALUABLE
+      divergence: false
+      reading: >
+        Unchanged by the revision, and for the same reason as before: the source
+        declares no disturbance magnitude. Replacing a bolt with a latch changes
+        what does the holding, not whether anything says how hard it must hold.
+    - invariant: NRM-BM-001-008
+      expected: PASS
+      observed: PASS
+      note: >
+        The actuation feature is now the closure's own release pad, standing at
+        y = -5.6 outside the product's front face at y = 0, with a clear 22 mm
+        corridor in front of it. No separate object is handled at all.
+  what_is_not_claimed:
+    - latch holding force, release force or engagement force
+    - latch strain, root stress, creep, fatigue, wear or cycle life
+    - impact capacity, tolerance robustness, moulding feasibility or cost
+    - any keying, authorization or security function. It is a latch.
+  weakening_check: >
+    No check was relaxed to accommodate the latch. Two were added - a three-body
+    topology check and a latch/keeper connectivity check - and the negative
+    control set grew from 12 to 24. One stale claim was corrected on the way: the
+    manifest still said the compressed pin configuration was 4.08 mm^3 smaller
+    than the relaxed one, from a superseded build that rotated the arms. Measured
+    now, both are 0.000 mm^3 apart.
