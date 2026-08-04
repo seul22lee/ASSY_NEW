@@ -165,7 +165,7 @@ def build_enclosure(p: Dict[str, float]) -> cq.Shape:
 
 # -------------------------------------------------------------------- cover
 def _tab_solid(p: Dict[str, float], g: Dict[str, float],
-               x0: float, near: bool, compressed: bool) -> cq.Shape:
+               x0: float, near: bool, compressed) -> cq.Shape:
     """One retention tab: a cantilever beam rooted at its +X end, carrying an
     ear that projects outward under the rail lip."""
     if near:
@@ -179,8 +179,12 @@ def _tab_solid(p: Dict[str, float], g: Dict[str, float],
     beam = _box(x0, x0 + p["tab_len"], beam_y0, beam_y1, p["box_z"], g["cover_top"])
     ear = _box(x0, x0 + p["tab_ear_len"], ear_y0, ear_y1, p["box_z"], g["cover_top"])
     tab = beam.fuse(ear)
-    if compressed:
-        tab = tab.moved(cv.translation((0.0, sign * p["tab_deflection"], 0.0)))
+    # `compressed` may be a bool or a fraction in 0..1. The fraction exists so a
+    # video can show the tab part-way in; True is exactly 1.0, so the geometry the
+    # validator sees is unchanged by its existence.
+    frac = 1.0 if compressed is True else (0.0 if compressed is False else float(compressed))
+    if frac:
+        tab = tab.moved(cv.translation((0.0, sign * frac * p["tab_deflection"], 0.0)))
     return tab
 
 
@@ -196,8 +200,8 @@ def _tab_void(p: Dict[str, float], g: Dict[str, float],
     return _box(x0 - sw, x0 + p["tab_len"], y0, y1, p["box_z"], g["cover_top"])
 
 
-def build_cover(p: Dict[str, float], *, tabs_compressed: bool = False,
-                latch_released: bool = False) -> cq.Shape:
+def build_cover(p: Dict[str, float], *, tabs_compressed=False,
+                latch_released=False) -> cq.Shape:
     """Built in the CLOSED position.
 
     `tabs_compressed` is the declared assembly configuration: the four retention
@@ -228,8 +232,10 @@ def build_cover(p: Dict[str, float], *, tabs_compressed: bool = False,
                        g["lug_y0"]), (g["tooth_x1"], g["lug_y1"]),
                        (g["tooth_x0"], g["lug_y1"])], p["box_z"], g["cover_top"])
     latch = finger.fuse(tooth)
-    if latch_released:
-        latch = latch.moved(cv.translation((0.0, p["latch_shift"], 0.0)))
+    lf = (1.0 if latch_released is True else
+          (0.0 if latch_released is False else float(latch_released)))
+    if lf:
+        latch = latch.moved(cv.translation((0.0, lf * p["latch_shift"], 0.0)))
     return plate.fuse(latch)
 
 

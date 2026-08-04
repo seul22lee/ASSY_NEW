@@ -21,7 +21,7 @@ failure-CAD corpus.
 | Oracle commit these were built against | `83fc12d46ad8c5fad36afcfe5b6e916822a41118` |
 | Active Oracle scope commit | `0af83c90bbda611182d0544cc736f09ae89fc718` |
 | Oracle files modified | none |
-| Toolchain | CadQuery 2.4.0 / cadquery-ocp 7.7.0 / OCCT, CPython 3.8.10 |
+| Toolchain | CadQuery 2.4.0 / cadquery-ocp 7.7.0 / OCCT, CPython 3.8.10, MuJoCo 2.3.7, ffmpeg 4.2.2 (libx264) via imageio-ffmpeg 0.5.1 |
 | Recreate with | `ver3/cad_validation/tools/create_env.sh <path> python3.8` |
 
 ## What these are, and are not
@@ -304,6 +304,45 @@ A reviewer may still judge that a design should not be able to pass by narrowing
 its own declaration. **That would be a finding about NRM-BM-001-003, not about
 this CAD**, and belongs in `PRE_CAD_BACKLOG.yaml`. It is flagged here rather than
 left for someone to discover.
+
+## Motion videos
+
+Three review videos, all 30 fps, 1280×720, H.264, rendered from the references'
+own B-rep solids by the same posing functions the validators call.
+
+| Clip | Reference | Frames | Duration |
+|---|---|---|---|
+| `lid_operation.mp4` — CLOSED → OPEN → HOLD → CLOSE | EXE-BM001-01 | 286 | 9.53 s |
+| `cover_operation.mp4` — closed → press → open → captive → close → snap | EXE-BM001-02 | 301 | 10.03 s |
+| `cover_snap_assembly.mp4` — aligned → tabs in → past the lips → captive | EXE-BM001-02 | 271 | 9.03 s |
+
+The lid clip is driven by the MuJoCo simulation and shares its samples with the
+plots exactly — one frame per 100 solver steps, no resampling — so a torque read
+off a frame is a point on the published curve. Its overlay carries the time, the
+angle, the instantaneous hinge torque, the static gravity torque, the phase, and
+the statement that density is assumed and friction is zero. The simulation was
+retimed to 4.0 s open, 1.5 s hold, 4.0 s close to carry a reviewable clip; the
+gravity term is unchanged by that and the inertial term is smaller.
+
+Two rendering decisions are worth recording because the first attempt at each was
+wrong. A painter's-algorithm depth sort was discarded — a large far wall has a
+nearer centroid than a small near feature, so back faces bled through and the
+result read as the transparent wireframe these clips are required not to be; a
+real z-buffer replaced it. And shading is per B-rep face with **no triangle edge
+ever drawn**, only each face's own rim, which is what keeps mesh diagonals out of
+every frame.
+
+Each clip carries a manifest recording engine and versions, source geometry
+signature, fps, resolution, frame count, duration, codec, camera definition,
+state timeline, a trajectory hash over the exact pose samples, and the file's own
+SHA-256. Every one was decoded back from its own MP4 and inspected; the audit is
+`reviews/VIDEO_REVIEW_AUDIT.md`.
+
+**No video establishes a force.** The lid torques are computed under an assumed
+density and zero friction and are a lower bound, not a measurement. The two cover
+clips compute nothing at all: their motion is prescribed, their pacing is
+arbitrary, and their compliant states are declared kinematic approximations that
+conserve volume exactly and model no strain.
 
 ## Review status
 

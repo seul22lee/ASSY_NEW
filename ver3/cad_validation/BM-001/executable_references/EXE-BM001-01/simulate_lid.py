@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "..", "..", "tools")
 
 import build as B          # noqa: E402
 import cadval as cv        # noqa: E402
+import cadvideo as vid     # noqa: E402
 
 OUT = os.path.join(HERE, "validation", "simulation")
 
@@ -49,7 +50,10 @@ ASSUMPTIONS = {
         "affects": "reported torque is optimistic"},
     "gravity_m_s2": {"value": 9.81, "why": "standard, lid opening upward against it"},
     "actuation_profile": {
-        "value": "minimum-jerk sweep over 2.0 s, closed to open and back",
+        "value": ("minimum-jerk sweep, 4.0 s open, 1.5 s hold, 4.0 s close. Slower "
+                  "than the first version of this simulation so the same samples "
+                  "can carry a 30 fps review video; the gravity term is unchanged "
+                  "by the retiming and the inertial term is smaller."),
         "why": ("a smooth user-like motion. A different profile changes the inertial "
                 "part of the torque but not the gravity part.")},
     "orientation": {
@@ -107,7 +111,7 @@ def mjcf(P, inert):
     # operating effort - it is not. The terminal open pose is a CAD result
     # (INT-09), established by geometry, and nothing here is asked to reproduce it.
     return f"""<mujoco model="EXE-BM001-01-lid">\n  <compiler autolimits="true"/>
-  <option gravity="0 0 -{ASSUMPTIONS['gravity_m_s2']['value']}" integrator="RK4" timestep="0.0005"/>
+  <option gravity="0 0 -{ASSUMPTIONS['gravity_m_s2']['value']}" integrator="RK4" timestep="{1.0 / 3000.0:.10f}"/>
   <worldbody>
     <body name="lid" pos="0 {ay} {az}">
       <joint name="hinge" type="hinge" axis="1 0 0" pos="0 0 0" damping="0" limited="false"/>
@@ -137,7 +141,10 @@ def run(P):
     data = mujoco.MjData(model)
 
     open_rad = math.radians(P["open_angle_deg"])
-    T_open, T_hold, T_close = 2.0, 0.5, 2.0
+    # 9.5 s total at a 1/3000 s step, so one video frame at 30 fps is exactly 100
+    # steps. The video and the plots therefore read the SAME rows - no resampling,
+    # no interpolation, nothing that could drift between the two.
+    T_open, T_hold, T_close = 4.0, 1.5, 4.0
     total = T_open + T_hold + T_close
     dt = model.opt.timestep
     n = int(total / dt)
@@ -187,7 +194,7 @@ def run(P):
     # hinge axis. Beyond it gravity tends to HOLD the lid open rather than shut
     # it - an operating property of this geometry, not an assumption.
     over_centre = None
-    opening = [r for r in rows if r["t_s"] <= 2.0]
+    opening = [r for r in rows if r["t_s"] <= T_open]
     for a, b_ in zip(opening, opening[1:]):
         if a["torque_static_Nm"] == 0 or a["torque_static_Nm"] * b_["torque_static_Nm"] < 0:
             over_centre = round((a["angle_deg"] + b_["angle_deg"]) / 2.0, 3)
@@ -205,6 +212,9 @@ def run(P):
             min(rows, key=lambda r: abs(r["angle_deg"] - P["open_angle_deg"]))["torque_static_Nm"]), 6),
         "sample_count": len(rows),
         "duration_s": total,
+        "phase_boundaries_s": {"open_ends": T_open, "hold_ends": T_open + T_hold,
+                               "close_ends": total},
+        "steps_per_video_frame": int(round((1.0 / 30.0) / dt)),
         "over_centre_angle_deg": over_centre,
         "over_centre_meaning": (
             "beyond this angle the centre of mass has passed the hinge axis, so "
@@ -263,11 +273,182 @@ def plots(P, rows, summary):
     return written
 
 
+# ------------------------------------------------------------------- video
+FPS = 30
+W, H = 1280, 720
+COLORS = {"BODY-ENCLOSURE": "#7f97ad", "BODY-CLOSURE": "#d89b56",
+          "BODY-PIN": "#8d84b8", "BODY-BOLT": "#7ba884"}
+# Fixed for the whole clip. Placed off the hinge side so the lid sweeps across the
+# frame rather than toward the viewer. The scale is FITTED once, to the union of
+# every pose in the sweep, so the framing is derived from the motion instead of
+# guessed - and then never touched again.
+EYE, TARGET = (-190.0, -150.0, 150.0), (58.0, 48.0, 58.0)
+
+
+def fit_camera(P, margin=1.06):
+    """Fit the framing to the whole sweep, once, then never touch it again.
+
+    Both the centre and the scale are fitted. Fitting only the scale about a
+    guessed target wastes most of the frame, and a 110 degree swing has no
+    obvious centre to guess.
+    """
+    import numpy as _np
+    probe = vid.Camera(eye=EYE, target=TARGET, scale=1.0)
+    bodies = B.build(P)
+    umin = vmin = 1e9
+    umax = vmax = -1e9
+    # fitted on the actual surface points, not on bounding boxes: the box of a
+    # body rotated 110 degrees is far larger than the body, and fitting to it
+    # would zoom out until the mechanism was too small to review
+    for deg in range(0, int(P["open_angle_deg"]) + 1, 5):
+        for pt in vid.body_patches(B.probe_pose(bodies, P, float(deg)), tol=1.2):
+            q = probe.project(pt["points"])
+            umin, umax = min(umin, q[:, 0].min()), max(umax, q[:, 0].max())
+            vmin, vmax = min(vmin, q[:, 1].min()), max(vmax, q[:, 1].max())
+    du, dv = (umin + umax) / 2.0, (vmin + vmax) / 2.0
+    centre = _np.array(TARGET) + du * probe.right + dv * probe.upv
+    scale = max((vmax - vmin) / 2.0, (umax - umin) / 2.0 * 9.0 / 16.0) * margin
+    return vid.Camera(eye=tuple(_np.array(EYE) + du * probe.right + dv * probe.upv),
+                      target=tuple(centre), scale=round(float(scale), 2))
+
+
+CAM = None
+
+
+def phase_of(t, summary):
+    b = summary["phase_boundaries_s"]
+    if t <= b["open_ends"]:
+        return "OPENING", "#b03a2e"
+    if t <= b["hold_ends"]:
+        return "HOLD", "#1e8449"
+    return "CLOSING", "#2874a6"
+
+
+def render_video(P, rows, summary, inert):
+    """One frame per `steps_per_video_frame` rows - the same rows the plots use.
+
+    The visible lid is the CAD closure solid, not the point-mass box the solver
+    integrates. The solver only ever needed a mass and an inertia; showing its
+    1 mm placeholder would be showing the wrong object entirely.
+    """
+    import matplotlib.pyplot as plt
+
+    global CAM
+    CAM = CAM or fit_camera(P)
+    stride = summary["steps_per_video_frame"]
+    picked = list(range(0, len(rows), stride))
+    if picked[-1] != len(rows) - 1:
+        picked.append(len(rows) - 1)
+    bodies = B.build(P)
+    frames, samples, timeline = [], [], []
+    last_phase = None
+    for idx in picked:
+        r = rows[idx]
+        phase, col = phase_of(r["t_s"], summary)
+        if phase != last_phase:
+            timeline.append({"state": phase, "t_start_s": r["t_s"],
+                             "row_index": idx, "angle_deg": r["angle_deg"]})
+            last_phase = phase
+        samples.append([r["t_s"], r["angle_deg"], r["torque_Nm"],
+                        r["torque_static_Nm"]])
+
+        posed = B.probe_pose(bodies, P, r["angle_deg"])
+        img, ext = vid.rasterise(vid.body_patches(posed), CAM, COLORS, W, H)
+        fig, ax = vid.new_canvas(img, ext, W, H)
+        vid.state_banner(ax, phase, color=col)
+        vid.title_block(ax, [
+            "EXE-BM001-01   lid on its hinge",
+            "MuJoCo rigid-body inverse dynamics",
+            "",
+            "t                %6.2f s" % r["t_s"],
+            "lid angle        %6.2f deg   of %.0f" % (r["angle_deg"], P["open_angle_deg"]),
+            "hinge torque     %+7.4f N m   (instantaneous)" % r["torque_Nm"],
+            "gravity torque   %+7.4f N m   (static, at rest)" % r["torque_static_Nm"],
+            "",
+            "lid mass         %6.4f kg   from the CAD solid" % inert["mass_kg"],
+        ], size=10.5)
+        vid.title_block(ax, [
+            "DENSITY IS ASSUMED (%.0f kg/m3) - FRICTION IS ZERO"
+            % ASSUMPTIONS["density_kg_m3"]["value"],
+            "torques are a LOWER BOUND, not a measurement",
+        ], x=0.986, y=0.938, size=10.5, ha="right", weight="bold", color="#8e44ad")
+        vid.caveat(ax, "Rigid-body result under declared assumptions. Nothing here "
+                       "establishes snap force, strain, fatigue or material adequacy.")
+        frames.append(vid.frame_rgb(fig))
+        plt.close(fig)
+
+    mp4 = os.path.join(OUT, "lid_operation.mp4")
+    gif = os.path.join(OUT, "lid_operation.gif")
+    vid.write_mp4(frames, mp4, FPS)
+    vid.write_gif(frames, gif, fps=15, every=2, scale=0.5)
+
+    import mujoco
+    sigpath = os.path.join(HERE, "geometry_signature.json")
+    gsig = json.load(open(sigpath))["signature"]["signature_sha256"]
+    man = vid.manifest(
+        video_id="VID-BM001-01-LID", reference_id="EXE-BM001-01", path=mp4,
+        here=HERE, geometry_signature=gsig, fps=FPS, width=W, height=H,
+        frame_count=len(frames), camera=CAM, timeline=timeline,
+        traj_hash=vid.trajectory_hash(samples),
+        assumptions={k: v["value"] for k, v in ASSUMPTIONS.items()},
+        establishes=[
+            "the lid reaches and returns from its declared 110 degree open pose "
+            "along a smooth trajectory without any body passing through another",
+            "the hinge torque the solver needs is small and changes sign part way "
+            "through the sweep, where the centre of mass crosses the hinge axis",
+            "the visible lid is the CAD closure solid, so the picture and the "
+            "inertial properties describe the same object",
+        ],
+        does_not_establish=NOT_ESTABLISHED + [
+            "any snap-fit property: the barb's strain, insertion force, pull-out "
+            "force and fatigue life are untouched by this and remain NOT_VERIFIED",
+            "compliance with any source requirement - the source states no effort "
+            "ceiling, so no torque here can pass or fail anything",
+        ],
+        extra={
+            "solver": {"name": "mujoco", "version": mujoco.__version__,
+                       "method": "mj_inverse along a prescribed trajectory",
+                       "timestep_s": 1.0 / 3000.0},
+            "gif": {"file": os.path.relpath(gif, HERE),
+                    "fps": 15, "every_nth_frame": 2, "scale": 0.5,
+                    "sha256": cv.sha256_file(gif),
+                    "bytes": os.path.getsize(gif)},
+            "sample_columns": ["t_s", "angle_deg", "torque_Nm", "torque_static_Nm"],
+            "samples_shared_with_plots": (
+                "the frames are rows[::%d] of the SAME row list the plots are drawn "
+                "from. No resampling and no interpolation happens between them."
+                % stride),
+            "bolt_position_note": ("BODY-BOLT is drawn in its released (lifted) "
+                                  "position for the whole clip. The lid cannot swing "
+                                  "until it is released, so any other position would "
+                                  "be inconsistent with the motion being shown."),
+            "first_frame": {"t_s": rows[picked[0]]["t_s"],
+                            "angle_deg": rows[picked[0]]["angle_deg"],
+                            "declared_state": "CLOSED"},
+            "final_frame": {"t_s": rows[picked[-1]]["t_s"],
+                            "angle_deg": rows[picked[-1]]["angle_deg"],
+                            "declared_state": "CLOSED"},
+        })
+    cv.write_json(os.path.join(OUT, "lid_operation_video.json"), man)
+
+    import imageio
+    for tl in timeline:
+        k = picked.index(tl["row_index"])
+        imageio.imwrite(os.path.join(OUT, "frame_lid_%s.png" % tl["state"].lower()),
+                        frames[k])
+    imageio.imwrite(os.path.join(OUT, "frame_lid_first.png"), frames[0])
+    imageio.imwrite(os.path.join(OUT, "frame_lid_last.png"), frames[-1])
+    mid = min(range(len(samples)), key=lambda i: abs(samples[i][1] - P["open_angle_deg"]))
+    imageio.imwrite(os.path.join(OUT, "frame_lid_full_open.png"), frames[mid])
+    return man
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     P = B.load_params()
     inert, rows, summary = run(P)
     imgs = plots(P, rows, summary)
+    video_manifest = render_video(P, rows, summary, inert)
     import mujoco
     rec = {
         "reference_id": "EXE-BM001-01",
@@ -288,7 +469,14 @@ def main():
                                    "computed quantity at a declared fidelity, not "
                                    "evidence against a stated requirement."),
         "plots": [os.path.relpath(p, HERE) for p in imgs],
-        "trajectory_samples": rows[::40],
+        "trajectory_samples": rows[::summary["steps_per_video_frame"]],
+        "trajectory_samples_note": ("decimated at exactly the video frame stride, so "
+                                    "these rows ARE the video's frames"),
+        "video": {"file": video_manifest["file"],
+                  "frame_count": video_manifest["frame_count"],
+                  "duration_s": video_manifest["duration_s"],
+                  "trajectory_sha256": video_manifest["trajectory_sha256"],
+                  "manifest": "validation/simulation/lid_operation_video.json"},
     }
     cv.write_json(os.path.join(OUT, "lid_operation_simulation.json"), rec)
     print("mujoco %s  |  lid mass %.4f kg  |  I about hinge %.3e kg m2"

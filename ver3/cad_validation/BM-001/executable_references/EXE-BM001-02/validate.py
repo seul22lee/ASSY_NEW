@@ -1006,8 +1006,22 @@ def main() -> int:
     print("- checker self-test %s  %d/%d controls detected"
           % (rs["status"], rs["controls_detected"], rs["controls_run"]))
 
+    steps = {"1_build": "PASS", "2_solid_validity": r2["status"], "3_reimport": r3["status"],
+             "4_signature": r4["status"], "5_motion": r5["status"],
+             "6_interactions": r6["status"], "7_assembly": r7["status"],
+             "8_predicates": r8["status"], "9_render": r9["status"],
+             "checker_selftest": rs["status"]}
+    summary = vc.write_summary(
+        CTX, steps, r4["signature"]["signature_sha256"], time.time() - t0, FAST,
+        ("GEOMETRICALLY AND KINEMATICALLY ADMISSIBLE AT THE EVALUATED FIDELITY. Snap "
+         "force, strain, release effort, retention capacity, fatigue, creep, wear, cost, "
+         "tolerance robustness, manufacturing feasibility and durability are NOT_VERIFIED "
+         "by construction."))
     # ---- artifact hashes: same scheme as the rest of the pilot, a sha256 over
-    # newline-joined, path-sorted "<path>  <sha256>" lines
+    # newline-joined, path-sorted "<path>  <sha256>" lines.
+    # Written LAST, after SUMMARY.json exists - computing it earlier recorded a
+    # hash for a summary that had not been written yet, so the manifest could
+    # never verify against its own directory.
     import hashlib
     rows = []
     for root, _dirs, files in os.walk(HERE):
@@ -1034,17 +1048,6 @@ def main() -> int:
             fh.write("  %s: %s\n" % (a, b))
     print("- artifact hashes   %d files" % len(rows))
 
-    steps = {"1_build": "PASS", "2_solid_validity": r2["status"], "3_reimport": r3["status"],
-             "4_signature": r4["status"], "5_motion": r5["status"],
-             "6_interactions": r6["status"], "7_assembly": r7["status"],
-             "8_predicates": r8["status"], "9_render": r9["status"],
-             "checker_selftest": rs["status"]}
-    summary = vc.write_summary(
-        CTX, steps, r4["signature"]["signature_sha256"], time.time() - t0, FAST,
-        ("GEOMETRICALLY AND KINEMATICALLY ADMISSIBLE AT THE EVALUATED FIDELITY. Snap "
-         "force, strain, release effort, retention capacity, fatigue, creep, wear, cost, "
-         "tolerance robustness, manufacturing feasibility and durability are NOT_VERIFIED "
-         "by construction."))
     print("\noverall: %s   (%.1fs)   findings: %d"
           % (summary["overall"], summary["run_seconds"], len(CTX.findings)))
     for f in CTX.findings:

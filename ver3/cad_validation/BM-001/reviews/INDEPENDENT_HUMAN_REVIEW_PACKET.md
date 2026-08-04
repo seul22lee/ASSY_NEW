@@ -3,6 +3,11 @@
 **Status: `HUMAN_REVIEW_PENDING`.** Nothing below is approved. Every reviewer
 decision in this file is `PENDING` and must be filled in by a person.
 
+This packet contains **drawings**, **motion videos** and **measurements**. The
+measurements are the evidence; the drawings and videos exist so that a person can
+see what was measured. No geometric claim in this pilot rests on an image or a
+frame, and nothing in any video establishes a force, a strain or a life.
+
 The author of this geometry also wrote this packet. Treat the middle column of
 any table here as a claim to be checked, not as a finding.
 
@@ -32,6 +37,25 @@ product view.
 The general product views under the same directory (`s_closed_retained_*`,
 `section_knuckle_*`, and so on) are produced by the machine artifact contract.
 **They are not review evidence and are deliberately not linked here.**
+
+### Motion video
+
+| Clip | File |
+|---|---|
+| Lid: CLOSED → OPEN → HOLD → CLOSE, 286 frames, 9.53 s, 30 fps, 1280×720, H.264 | [lid_operation.mp4](../executable_references/EXE-BM001-01/validation/simulation/lid_operation.mp4) |
+| The same clip as a GIF, for quick viewing | [lid_operation.gif](../executable_references/EXE-BM001-01/validation/simulation/lid_operation.gif) |
+| Record: engine, signature, camera, timeline, hashes, claims | [lid_operation_video.json](../executable_references/EXE-BM001-01/validation/simulation/lid_operation_video.json) |
+
+The visible lid is the CAD closure solid, not the point mass MuJoCo integrates.
+Every frame carries the simulation time, the lid angle, the instantaneous hinge
+torque, the static gravity torque, the OPENING / HOLD / CLOSING phase, and the
+statement that **density is assumed and friction is zero**. The video frames and
+the three plots are drawn from the *same* solver rows — one frame per 100 solver
+steps, no resampling — so a number read off a frame is a number on the curve.
+
+The torques are a **lower bound** on real effort under those assumptions. They
+are not a measurement, and the source states no effort ceiling for them to be
+compared against. See [VIDEO_REVIEW_AUDIT.md](VIDEO_REVIEW_AUDIT.md).
 
 ### Supporting reports
 
@@ -63,6 +87,7 @@ The general product views under the same directory (`s_closed_retained_*`,
 | 4 | Is any intended pin / closure / enclosure interaction missing from the declaration? | PENDING |
 | 5 | Is a 1.05 mm deflection on a 6 mm arm credible for a moulded polymer, or is this asking too much of the material? | PENDING |
 | 6 | Are the unknown snap force, strain and fatigue correctly left NOT_VERIFIED? | PENDING |
+| 7 | Watching `lid_operation.mp4`, does the lid motion and the reported effort look credible for this geometry? | PENDING |
 
 ### What the author could not check
 
@@ -146,6 +171,27 @@ artifact contract. **They are not review evidence and are deliberately not linke
 here.** Their disposition is recorded in
 [validation/PNG_REVIEW_AUDIT.md](../executable_references/EXE-BM001-02/validation/PNG_REVIEW_AUDIT.md).
 
+### Motion videos
+
+| Clip | File |
+|---|---|
+| Operation: closed → press → slide open → full open (captive) → slide closed → snap re-engaged. 301 frames, 10.03 s | [cover_operation.mp4](../executable_references/EXE-BM001-02/validation/simulation/cover_operation.mp4) |
+| Snap-in assembly: aligned → tabs compressed → past the lips → ears recovered → captive. 271 frames, 9.03 s | [cover_snap_assembly.mp4](../executable_references/EXE-BM001-02/validation/simulation/cover_snap_assembly.mp4) |
+| Records for both: engine, signature, cameras, timelines, hashes, claims | [cover_videos.json](../executable_references/EXE-BM001-02/validation/simulation/cover_videos.json) |
+
+Both are rendered from the final two-body CAD, 30 fps, 1280×720, H.264. There is
+no rivet, pin, cam or floating keeper in any frame, because none exists in the
+model. The operating clip carries a second **fixed** camera as an inset on the
+latch, because a 2.6 mm release on a 190 mm product is invisible at product
+scale; in that inset the tooth is plainly behind the keeper when closed and clear
+of it when the pad is pushed.
+
+The assembly clip is a **prescribed geometric-state animation**, labelled
+`GEOMETRIC COMPLIANT-STATE REPRESENTATION / FORCE / STRAIN NOT VERIFIED` on every
+frame. It is sectioned at X = 118 mm, stated on every frame, because a rail lip
+is exactly what hides the thing it retains. See
+[VIDEO_REVIEW_AUDIT.md](VIDEO_REVIEW_AUDIT.md).
+
 ### Supporting reports
 
 - [DESIGN_AND_OPERATION_RATIONALE.md](../executable_references/EXE-BM001-02/DESIGN_AND_OPERATION_RATIONALE.md) — the mechanism in plain terms
@@ -190,6 +236,8 @@ here.** Their disposition is recorded in
 | 9 | Is service removal (four tabs deflected at once through the rail channels) acceptable, or is `LIM-01` a defect dressed as captivity? | PENDING |
 | 10 | Is any intended cover / enclosure interaction missing from the declaration? | PENDING |
 | 11 | Are the unknown snap force, release effort, strain and fatigue correctly left NOT_VERIFIED? | PENDING |
+| 12 | Watching `cover_operation.mp4`, is the mechanism understandable without the drawings or the code? | PENDING |
+| 13 | Watching `cover_snap_assembly.mp4`, is the snap-in process plausible as a real assembly step? | PENDING |
 
 ### What the author could not check
 

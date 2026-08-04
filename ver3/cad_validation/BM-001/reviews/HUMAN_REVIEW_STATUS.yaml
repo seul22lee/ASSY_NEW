@@ -69,6 +69,64 @@ EXE-BM001-02:
     and every review image depicting a superseded topology. Nothing in the
     directory now describes a design that no longer exists.
 
+review_videos:
+  status: HUMAN_REVIEW_PENDING
+  audit: reviews/VIDEO_REVIEW_AUDIT.md
+  every_mp4_was_decoded_and_inspected: true
+  no_video_establishes_a_force: >
+    Snap force, pull-out capacity, release effort, strain, fatigue, wear and
+    material adequacy are NOT_VERIFIED and are not claimed by any clip. The lid
+    torques are computed under an assumed density and zero friction and are a
+    lower bound, not a measurement; the two cover clips compute nothing at all.
+  VID-BM001-01-LID:
+    reference: EXE-BM001-01
+    states: CLOSED -> OPEN -> HOLD -> CLOSE
+    file: validation/simulation/lid_operation.mp4
+    frames: 286
+    duration_s: 9.53
+    fps: 30
+    resolution_px: [1280, 720]
+    codec: H.264 (libx264), yuv420p, MP4
+    source_geometry_signature_sha256: f2bc9599cdd6832dcb52ea0f24645b6cf6c374308324320b08d93f7f6e8d8967
+    trajectory_sha256: 768b9215b9a4f934b681ad0745fd1d0355b4840654417edd780557948b8c2e75
+    output_sha256: 4ab03bb4b02e4e4731b0b3b96288d02e2f76a3f88ae7364669c2ceb6975b9a52
+    frames_decoded_back_from_the_file: 286
+    shares_samples_with_plots: >
+      one frame per 100 solver steps of the same row list the plots are drawn
+      from - no resampling, so a torque read off a frame is a point on the curve
+  VID-BM001-02-OPERATION:
+    reference: EXE-BM001-02
+    states: >
+      closed and latched -> release pressed -> slide open -> full open 84 mm and
+      still captive -> slide closed -> snap re-engaged
+    file: validation/simulation/cover_operation.mp4
+    frames: 301
+    duration_s: 10.03
+    fps: 30
+    resolution_px: [1280, 720]
+    codec: H.264 (libx264), yuv420p, MP4
+    source_geometry_signature_sha256: 1eba7a573b5787ba86257e007512832b0538688e76b9268c12c2717b15b7b111
+    trajectory_sha256: 553e92aa81dc261908d40509f9bd6824dc9054b559cf64fc655827fda157f09d
+    output_sha256: 1de6830f44ded11991cf6e0a26200e0ad894c9819a5e80ccce017f375963fbe3
+    frames_decoded_back_from_the_file: 301
+  VID-BM001-02-ASSEMBLY:
+    reference: EXE-BM001-02
+    states: >
+      aligned -> integral tabs compressed -> tabs pass the rail lips -> tabs
+      recovered under the lips -> captive assembly
+    kind: >
+      PRESCRIBED GEOMETRIC-STATE ANIMATION, labelled on every frame. Not FEA.
+    file: validation/simulation/cover_snap_assembly.mp4
+    frames: 271
+    duration_s: 9.03
+    fps: 30
+    resolution_px: [1280, 720]
+    codec: H.264 (libx264), yuv420p, MP4
+    source_geometry_signature_sha256: 1eba7a573b5787ba86257e007512832b0538688e76b9268c12c2717b15b7b111
+    trajectory_sha256: 76c4fc48bbc865ec038e2bf35b4328fc420caf564b20be1658b2ccf49687bc92
+    output_sha256: 3e1a2651ec33185b0ac003666caef5305fd6690a847152992f640d9d523938e5
+    frames_decoded_back_from_the_file: 271
+
 note: >
   Decisions HCR-BM001-001..007 authorize the revisions. They do not approve their
   result. No person has seen the revised geometry or the new drawings of either

@@ -1,0 +1,133 @@
+{
+  "assumptions": {
+    "actuation_profile": "minimum-jerk sweep, 4.0 s open, 1.5 s hold, 4.0 s close. Slower than the first version of this simulation so the same samples can carry a 30 fps review video; the gravity term is unchanged by the retiming and the inertial term is smaller.",
+    "density_kg_m3": 1200.0,
+    "gravity_m_s2": 9.81,
+    "hinge_friction_Nm_per_rad_s": 0.0,
+    "orientation": "enclosure sitting upright on a desk, hinge axis horizontal"
+  },
+  "bolt_position_note": "BODY-BOLT is drawn in its released (lifted) position for the whole clip. The lid cannot swing until it is released, so any other position would be inconsistent with the motion being shown.",
+  "camera": {
+    "eye_mm": [
+      -191.545,
+      -143.647,
+      159.508
+    ],
+    "fixed_for_whole_clip": true,
+    "half_height_mm": 91.76,
+    "projection": "orthographic",
+    "target_mm": [
+      56.455,
+      54.353,
+      67.508
+    ],
+    "up": [
+      0.0,
+      0.0,
+      1.0
+    ]
+  },
+  "claims_established": [
+    "the lid reaches and returns from its declared 110 degree open pose along a smooth trajectory without any body passing through another",
+    "the hinge torque the solver needs is small and changes sign part way through the sweep, where the centre of mass crosses the hinge axis",
+    "the visible lid is the CAD closure solid, so the picture and the inertial properties describe the same object"
+  ],
+  "claims_not_established": [
+    "snap-arm strain, stress or insertion force",
+    "pull-out force of the retained pin",
+    "fatigue, creep or repeated-use life",
+    "whether any user finds the effort acceptable (no effort ceiling is stated)",
+    "friction, wear or lubrication behaviour",
+    "manufacturing tolerance robustness",
+    "any snap-fit property: the barb's strain, insertion force, pull-out force and fatigue life are untouched by this and remain NOT_VERIFIED",
+    "compliance with any source requirement - the source states no effort ceiling, so no torque here can pass or fail anything"
+  ],
+  "codec": "H.264 (libx264), yuv420p, MP4 container",
+  "container_readback": {
+    "codec_reported": "h264",
+    "container_duration_s": 9.53,
+    "container_fps": 30.0,
+    "container_size_px": [
+      1280,
+      720
+    ],
+    "ffmpeg_version": "4.2.2-static",
+    "frames_read_back": 286
+  },
+  "duration_s": 9.5333,
+  "engine": "cadquery-ocp tessellation + matplotlib painter + ffmpeg (libx264)",
+  "engine_versions": {
+    "cadquery": "2.4.0",
+    "ffmpeg": "4.2.2-static",
+    "imageio_ffmpeg": "0.5.1",
+    "matplotlib": "3.7.5",
+    "numpy": "1.24.4"
+  },
+  "file": "validation/simulation/lid_operation.mp4",
+  "final_frame": {
+    "angle_deg": 0.0,
+    "declared_state": "CLOSED",
+    "t_s": 9.499999
+  },
+  "first_frame": {
+    "angle_deg": 0.0,
+    "declared_state": "CLOSED",
+    "t_s": 0.0
+  },
+  "fps": 30,
+  "frame_count": 286,
+  "geometry_source": "the reference's own B-rep solids, posed by the same functions the validator uses. No proxy geometry.",
+  "gif": {
+    "bytes": 2402423,
+    "every_nth_frame": 2,
+    "file": "validation/simulation/lid_operation.gif",
+    "fps": 15,
+    "scale": 0.5,
+    "sha256": "898083929c7fd7b8401ad94a7b83d7d98a7f4f6579942fed7466ad3541b6185f"
+  },
+  "human_review": "HUMAN_REVIEW_PENDING",
+  "kind": "REVIEW_EVIDENCE",
+  "output_bytes": 1397758,
+  "output_sha256": "4ab03bb4b02e4e4731b0b3b96288d02e2f76a3f88ae7364669c2ceb6975b9a52",
+  "reference_id": "EXE-BM001-01",
+  "resolution_px": [
+    1280,
+    720
+  ],
+  "sample_columns": [
+    "t_s",
+    "angle_deg",
+    "torque_Nm",
+    "torque_static_Nm"
+  ],
+  "samples_shared_with_plots": "the frames are rows[::100] of the SAME row list the plots are drawn from. No resampling and no interpolation happens between them.",
+  "solver": {
+    "method": "mj_inverse along a prescribed trajectory",
+    "name": "mujoco",
+    "timestep_s": 0.0003333333333333333,
+    "version": "2.3.7"
+  },
+  "source_geometry_signature_sha256": "f2bc9599cdd6832dcb52ea0f24645b6cf6c374308324320b08d93f7f6e8d8967",
+  "state_timeline": [
+    {
+      "angle_deg": 0.0,
+      "row_index": 0,
+      "state": "OPENING",
+      "t_start_s": 0.0
+    },
+    {
+      "angle_deg": 110.0,
+      "row_index": 12100,
+      "state": "HOLD",
+      "t_start_s": 4.033333
+    },
+    {
+      "angle_deg": 109.999371,
+      "row_index": 16600,
+      "state": "CLOSING",
+      "t_start_s": 5.533333
+    }
+  ],
+  "trajectory_sha256": "768b9215b9a4f934b681ad0745fd1d0355b4840654417edd780557948b8c2e75",
+  "video_id": "VID-BM001-01-LID"
+}
