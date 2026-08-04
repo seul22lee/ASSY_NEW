@@ -15,6 +15,7 @@ NOT_VERIFIED or NOT_EVALUABLE rather than being quietly rounded up.
 """
 from __future__ import annotations
 
+import math
 import os
 import re
 import sys
@@ -76,6 +77,10 @@ ROI = {
     # reports INT-10's clearance under INT-15's name.
     "INT-15": ("S_CLOSED_RETAINED", (50.0, 70.0, 0.0, 18.0, 56.0, 66.0),
                ("cyl_z", 60.0, 9.0, 4.5)),
+    # recovered lug shoulders against the far face of the last enclosure knuckle
+    # radially OUTSIDE the shaft: inside the bore the pair is 0.1 apart, which
+    # would otherwise be reported as the shoulder gap
+    "INT-16": ("S_CLOSED_RETAINED", (98.0, 102.0, 88.5, 92.0, 44.0, 56.0)),
 }
 
 SAMPLING = {"M1_RELEASE": (12 if FAST else 30, [] if FAST else [(0.0, 0.06, 12)]),
@@ -192,6 +197,144 @@ def retention_blocking_probe(bodies: List[cv.Body]) -> Dict:
             "what_this_does_not_show": "any holding capacity, or that the free play is acceptable"}
 
 
+# ------------------------------------------------- snap-barb specific probes
+def barb_geometry(bodies: List[cv.Body]) -> Dict:
+    """Measure the barb envelopes that decide whether the pin can be assembled.
+
+    Every number here is measured off the solids, not read back from parameters:
+    a parameter says what was intended, and the whole point of the check is
+    whether the geometry delivered it.
+    """
+    relaxed, compressed = B.build_pin(P, False), B.build_pin(P, True)
+    bands = B.knuckle_bands(P)["enclosure"]
+    kxN = bands[-1][1]
+    shoulder_x = kxN + P["barb_shoulder_gap"]
+
+    def envelope(shape, x0, x1):
+        """Greatest distance from the pin axis, doubled.
+
+        NOT the bounding box. A bore is round: what constrains passage is the
+        arm's greatest distance from the axis, and a rectangular arm's diagonal
+        exceeds its flat span. Measuring the span passes geometry that fouls.
+        """
+        roi = vc.roi_box(x0, x1, P["axis_y"] - 20, P["axis_y"] + 20,
+                         P["axis_z"] - 20, P["axis_z"] + 20)
+        clipped = vc.clip(shape, roi)
+        if clipped is None:
+            return None
+        verts, _ = clipped.tessellate(0.02)
+        return round(2.0 * max(math.hypot(v.y - P["axis_y"], v.z - P["axis_z"])
+                               for v in verts), 6)
+
+    lug_dia = envelope(relaxed, shoulder_x, shoulder_x + P["barb_lug_len"])
+    comp_dia = envelope(compressed, shoulder_x - 6.0, shoulder_x + P["barb_len"])
+    vr, vc_ = cv._gprops_volume(relaxed), cv._gprops_volume(compressed)
+    return {
+        "bore_d_mm": P["bore_d"],
+        "measurement": "greatest distance from the pin axis, doubled (circumscribed diameter)",
+        "relaxed_lug_envelope_dia_mm": lug_dia,
+        "compressed_envelope_dia_mm": comp_dia,
+        "compressed_diametral_clearance_mm": round(P["bore_d"] - comp_dia, 6),
+        "compressed_radial_clearance_mm": round((P["bore_d"] - comp_dia) / 2.0, 6),
+        "compressed_fits_bore": comp_dia <= P["bore_d"],
+        "shoulder_projection_beyond_bore_mm": round((lug_dia - P["bore_d"]) / 2.0, 6),
+        "shoulder_blocks_return": lug_dia > P["bore_d"],
+        "arm_gap_mm": round(2.0 * P["barb_arm_inner_r"], 6),
+        "arms_cannot_bottom_out": 2.0 * P["barb_arm_inner_r"] > 2.0 * P["barb_deflection"],
+        "deformation": {
+            "relaxed_volume_mm3": round(vr, 6),
+            "compressed_volume_mm3": round(vc_, 6),
+            "difference_mm3": round(abs(vr - vc_), 6),
+            "difference_percent": round(100.0 * abs(vr - vc_) / vr, 4),
+            "declared_deflection_per_arm_mm": P["barb_deflection"],
+            "kind": "DECLARED_KINEMATIC_APPROXIMATION",
+            "representation": "rigid inward translation of each arm",
+            "statement": (
+                "The compressed configuration is a declared kinematic approximation of "
+                "local compliant deformation. It is used to test geometric passage "
+                "through the bore, not to predict continuum strain. It does not model "
+                "how the material actually bends."),
+            "superseded_measurement": (
+                "An earlier representation rotated each arm about its root, which "
+                "differed from the relaxed solid by 4.08 mm^3 (0.38%). That "
+                "representation was replaced: rotating swung the arm's far end across "
+                "the axis so the envelope GREW with deflection, and it did not conserve "
+                "volume. The rigid translation used now conserves it exactly, so the "
+                "earlier figure no longer applies and is recorded here only so the "
+                "change is traceable."),
+            "not_verified": ["material strain", "stress", "insertion force",
+                             "recovery force", "pull-out force", "fatigue", "creep",
+                             "repeated-use life", "manufacturing tolerance robustness"]},
+    }
+
+
+def axial_retention_probe(bodies: List[cv.Body]) -> Dict:
+    """Is the pin actually blocked in BOTH axial directions, and by what?
+
+    Measured by translating the pin along its own axis and reporting the common
+    volume with the enclosure. A positive common volume is a geometric block. It
+    says nothing whatever about the force needed to defeat it.
+    """
+    d = vc.by_id(bodies)
+    pin, encl = d["BODY-PIN"], d["BODY-ENCLOSURE"]
+    out = {}
+    for name, sign, feature, against in (
+            ("toward_barb_end", +1.0, "FEA-P-SHOULDER", "FEA-E-CBORE"),
+            ("toward_head_end", -1.0, "FEA-P-LUG-SHOULDER", "FEA-E-FARFACE")):
+        rows, onset = [], None
+        for s in (0.05, 0.1, 0.2, 0.4, 0.6, 1.0, 2.0):
+            moved = pin.moved(cv.translation((sign * s, 0.0, 0.0)))
+            v = round(cv.common_volume(moved.shape, encl.shape), 9)
+            rows.append({"travel_mm": s, "pin_enclosure_common_volume_mm3": v})
+            if onset is None and v > OVERLAP_TOL:
+                onset = s
+        out[name] = {
+            "blocking_feature": feature, "bears_on": against,
+            "samples": rows, "block_onset_mm": onset,
+            "blocked": onset is not None and all(
+                r["pin_enclosure_common_volume_mm3"] > OVERLAP_TOL
+                for r in rows if r["travel_mm"] >= onset)}
+    out["bilateral"] = out["toward_barb_end"]["blocked"] and out["toward_head_end"]["blocked"]
+    out["what_this_shows"] = (
+        "Both axial directions are blocked by realized geometry: the head shoulder "
+        "one way, the recovered lug shoulders the other. The onsets are the declared "
+        "axial float, not slack in the check.")
+    out["what_this_does_not_show"] = (
+        "any pull-out capacity. Geometric blockage is NOT verified holding strength.")
+    return out
+
+
+def lug_recovery_probe(bodies: List[cv.Body]) -> Dict:
+    """Are the recovered lugs clear of solid material, or buried in the knuckle?
+
+    A barb that recovers inside the bore retains nothing. This measures the
+    common volume between the relaxed pin's lug band and the enclosure, which
+    must be zero, and the free space beyond the last knuckle.
+    """
+    d = vc.by_id(bodies)
+    bands = B.knuckle_bands(P)["enclosure"]
+    kxN = bands[-1][1]
+    shoulder_x = kxN + P["barb_shoulder_gap"]
+    # Kept close to the axis on purpose. A generous region reaches the enclosure
+    # shell (y <= 80, z <= 45) and reports it as material in the recovery space,
+    # which is true of the box and irrelevant to the barb.
+    roi = vc.roi_box(shoulder_x, shoulder_x + P["barb_len"] + 1.0,
+                     P["axis_y"] - 4.0, P["axis_y"] + 4.0,
+                     P["axis_z"] - 4.0, P["axis_z"] + 4.0)
+    lug = vc.clip(d["BODY-PIN"].shape, roi)
+    encl_here = vc.clip(d["BODY-ENCLOSURE"].shape, roi)
+    return {
+        "last_knuckle_far_face_x_mm": kxN,
+        "lug_shoulder_x_mm": shoulder_x,
+        "axial_gap_to_far_face_mm": round(P["barb_shoulder_gap"], 6),
+        "lug_material_present": lug is not None,
+        "enclosure_material_in_recovery_space": encl_here is not None,
+        "lug_enclosure_common_volume_mm3": round(
+            cv.common_volume(d["BODY-PIN"].shape, d["BODY-ENCLOSURE"].shape), 9),
+        "lugs_recovered_clear_of_solid": lug is not None and encl_here is None,
+    }
+
+
 # ------------------------------------------------------------------ step 8
 def step8_predicates(bodies: List[cv.Body], r5: Dict, r6: Dict, r7: Dict) -> Dict:
     d = vc.by_id(bodies)
@@ -239,6 +382,11 @@ def step8_predicates(bodies: List[cv.Body], r5: Dict, r6: Dict, r7: Dict) -> Dic
     e_bolt = vc.clip(confs["S_CLOSED_RETAINED"]["BODY-BOLT"].shape, eng_roi)
     e_encl = vc.clip(confs["S_CLOSED_RETAINED"]["BODY-ENCLOSURE"].shape, eng_roi)
     r_bolt = vc.clip(confs["S_CLOSED_RELEASED"]["BODY-BOLT"].shape, eng_roi)
+    barb = barb_geometry(bodies)
+    axial = axial_retention_probe(bodies)
+    recov = lug_recovery_probe(bodies)
+    ev["pin_axial_retention"] = {"barb_geometry": barb, "axial_block": axial,
+                                 "lug_recovery": recov}
     block = retention_blocking_probe(bodies)
     ev["retention"] = {
         "engagement_depth_below_rim_mm": round(P["box_z"] - P["socket_z"], 6),
@@ -345,8 +493,33 @@ def step8_predicates(bodies: List[cv.Body], r5: Dict, r6: Dict, r7: Dict) -> Dic
          {"clause": "every declared intended interaction is physically coherent",
           "status": "PASS" if r6["status"] == "PASS" else "FAIL",
           "measured": "%d declared interactions, all measured inside their declared regions"
-                      % len(r6["interactions"])}],
-        ["validation/interaction_report.json"])
+                      % len(r6["interactions"])},
+         {"clause": "the connection is retained rather than merely assembled",
+          "status": "PASS" if axial["bilateral"] else "FAIL",
+          "measured": ("axial travel is blocked in BOTH directions by realized geometry: "
+                       "%s on %s at %s mm, and %s on %s at %s mm"
+                       % (axial["toward_barb_end"]["blocking_feature"],
+                          axial["toward_barb_end"]["bears_on"],
+                          axial["toward_barb_end"]["block_onset_mm"],
+                          axial["toward_head_end"]["blocking_feature"],
+                          axial["toward_head_end"]["bears_on"],
+                          axial["toward_head_end"]["block_onset_mm"]))},
+         {"clause": "the declared compliant passage is coherent",
+          "status": "PASS" if (barb["compressed_fits_bore"]
+                               and barb["shoulder_blocks_return"]
+                               and recov["lugs_recovered_clear_of_solid"]) else "FAIL",
+          "measured": ("compressed envelope %.3f dia fits the %.1f bore with %.3f "
+                       "radial clearance; recovered lugs span %.3f dia, standing %.3f "
+                       "proud of the bore, and sit clear of solid material"
+                       % (barb["compressed_envelope_dia_mm"], barb["bore_d_mm"],
+                          barb["compressed_radial_clearance_mm"],
+                          barb["relaxed_lug_envelope_dia_mm"],
+                          barb["shoulder_projection_beyond_bore_mm"]))},
+         {"clause": "pull-out capacity of the snap", "status": "NOT_VERIFIED",
+          "reason": ("geometric blockage is not holding strength; insertion force, "
+                     "recovery force, pull-out force, strain, fatigue and creep are all "
+                     "outside this toolchain")}],
+        ["validation/interaction_report.json", "validation/predicate_report.json"])
 
     c3a = "PASS" if ev["open_access"]["unobstructed"] else "FAIL"
     c3b = "PASS" if ok5 and r6["status"] == "PASS" else "FAIL"
@@ -580,6 +753,54 @@ def selftest_cases(bodies: List[cv.Body]) -> List[Dict]:
          "terminal-condition causal probe", vb > OVERLAP_TOL >= vl,
          {"common_volume_beyond_mm3": round(vb, 6), "common_volume_below_mm3": round(vl, 6)})
 
+    # CTL-08..CTL-12 - the snap-barb checks must be able to fail.
+    q = dict(P); q["barb_deflection"] = 0.2          # arms barely move
+    over = B.build_pin(q, compressed=True)
+    roi = vc.roi_box(99.0, 107.0, P["axis_y"] - 20, P["axis_y"] + 20,
+                     P["axis_z"] - 20, P["axis_z"] + 20)
+    clipped = vc.clip(over, roi)
+    verts, _ = clipped.tessellate(0.02)
+    dia = 2.0 * max(math.hypot(v.y - P["axis_y"], v.z - P["axis_z"]) for v in verts)
+    case("CTL-08", "arm deflection reduced to 0.2 mm, so the barb no longer compresses enough",
+         "compressed-envelope check", dia > P["bore_d"],
+         {"compressed_envelope_dia_mm": round(dia, 4), "bore_d_mm": P["bore_d"]})
+
+    q = dict(P); q["pin_head_d"] = q["pin_d"]        # head no larger than the shaft
+    nohead = B.build_pin(q, False)
+    d2 = vc.by_id(bodies)
+    v = cv.common_volume(nohead.moved(cv.translation((1.0, 0.0, 0.0))), d2["BODY-ENCLOSURE"].shape)
+    v_ok = cv.common_volume(d2["BODY-PIN"].moved(cv.translation((1.0, 0.0, 0.0))).shape,
+                            d2["BODY-ENCLOSURE"].shape)
+    case("CTL-09", "pin head reduced to shaft diameter, so nothing seats in the counterbore",
+         "head-side axial block", v < v_ok,
+         {"headless_common_mm3": round(v, 4), "with_head_common_mm3": round(v_ok, 4)})
+
+    q = dict(P); q["barb_d"] = P["bore_d"] - 0.1     # lug no wider than the bore
+    nolug = B.build_pin(q, False)
+    v = cv.common_volume(nolug.moved(cv.translation((-1.0, 0.0, 0.0))), d2["BODY-ENCLOSURE"].shape)
+    case("CTL-10", "lug span reduced below the bore, so the shoulder cannot catch",
+         "barb-side axial block", v <= OVERLAP_TOL,
+         {"common_volume_on_withdrawal_mm3": round(v, 6),
+          "note": "no shoulder to bear on the far face, so withdrawal is unopposed"})
+
+    q = dict(P); q["barb_shoulder_gap"] = -3.0       # shoulder still inside the knuckle
+    trapped = B.build_pin(q, False)
+    v = cv.common_volume(trapped, d2["BODY-ENCLOSURE"].shape)
+    case("CTL-11", "shoulder placed 3 mm back inside the final bore",
+         "lug recovery check", v > OVERLAP_TOL,
+         {"lug_enclosure_common_volume_mm3": round(v, 4),
+          "note": "a lug buried in the knuckle retains nothing and overlaps solid material"})
+
+    mani = yaml.safe_load(open(os.path.join(HERE, "manifest.yaml")))
+    pin_rec = [b for b in mani["bodies"] if b["id"] == "BODY-PIN"][0]
+    rigid_metal = pin_rec["material_class"] == "GENERIC_RIGID_METAL"
+    has_snap = bool((pin_rec.get("material_model") or {}).get("declared_compliant_region"))
+    case("CTL-12", "metadata check: a rigid-metal pin that also claims an elastic snap",
+         "material-model consistency", not (rigid_metal and has_snap),
+         {"material_class": pin_rec["material_class"],
+          "declared_compliant_region": (pin_rec.get("material_model") or {}).get("declared_compliant_region"),
+          "contradiction_present": rigid_metal and has_snap})
+
     # CTL-07 - the retention blocking probe must distinguish retained from
     # released. Without this the release action could be claimed on the strength
     # of a lift that changes nothing.
@@ -611,8 +832,27 @@ def main() -> int:
     tp = terminal_probe(bodies)
     r5 = vc.step5_motion(CTX, bodies, tp["rows"], tp["meta"])
     print("5 motion           %s" % r5["status"])
-    r6 = vc.step6_interactions(CTX, bodies);  print("6 interactions     %s" % r6["status"])
-    r7 = vc.step7_assembly(CTX, bodies, samples=12 if FAST else 60)
+    barb0 = barb_geometry(bodies)
+    recov0 = lug_recovery_probe(bodies)
+    int17 = {"status": "PASS" if (barb0["compressed_fits_bore"]
+                                  and barb0["arms_cannot_bottom_out"]
+                                  and recov0["lugs_recovered_clear_of_solid"]) else "FAIL",
+             "criterion": ("compressed envelope fits the bore, the arms cannot bottom out "
+                           "against each other, and the lugs recover clear of solid material"),
+             "measured_compressed_envelope_dia_mm": barb0["compressed_envelope_dia_mm"],
+             "measured_radial_clearance_mm": barb0["compressed_radial_clearance_mm"],
+             "declared_nominal_mm": barb0["compressed_radial_clearance_mm"],
+             "arm_gap_mm": barb0["arm_gap_mm"],
+             "evidence": "validation/predicate_report.json#pin_axial_retention",
+             "note": ("DECLARED_COMPLIANT_INTERACTION active only during ASM-03. It has no "
+                      "operating-state clearance, so it is discharged by measurement of the "
+                      "declared compressed configuration rather than by a state region.")}
+    r6 = vc.step6_interactions(CTX, bodies, external={"INT-17": int17})
+    print("6 interactions     %s" % r6["status"])
+    compressed_pin = cv.Body("BODY-PIN", "axis pin (compressed)", "GENERIC_COMPLIANT_POLYMER",
+                             B.build_pin(P, compressed=True))
+    r7 = vc.step7_assembly(CTX, bodies, samples=12 if FAST else 60,
+                           step_bodies={"ASM-03": compressed_pin})
     print("7 assembly         %s" % r7["status"])
     r8 = step8_predicates(bodies, r5, r6, r7)
     print("8 predicates       %s  %s" % (r8["status"], r8["summary"]))

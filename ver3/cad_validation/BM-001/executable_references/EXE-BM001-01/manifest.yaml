@@ -27,6 +27,7 @@ bodies:
       - {id: FEA-E-KNUCKLE-3, what: far outermost knuckle segment}
       - {id: FEA-E-BORE, what: knuckle bore, diameter bore_d, coaxial with the closure axis}
       - {id: FEA-E-CBORE, what: counterbore in FEA-E-KNUCKLE-1 seating the pin head}
+      - {id: FEA-E-FARFACE, what: far face of FEA-E-KNUCKLE-3; the recovered lug shoulders bear on it}
       - {id: FEA-E-REARFACE, what: rear outer face at y = box_y; the surface the stop block bears on}
       - {id: FEA-E-WEB, what: front faces of the knuckle webs, web_gap behind the rear outer face}
       - {id: FEA-E-SOCKET, what: blind retention socket, floor at socket_z}
@@ -50,15 +51,51 @@ bodies:
       - {id: FEA-C-BOSS-TOP, what: top of the guide boss}
   - id: BODY-PIN
     name: axis pin
-    material_class: GENERIC_RIGID_METAL
-    installed_as: DISCRETE
+    material_class: GENERIC_COMPLIANT_POLYMER
+    installed_as: DISCRETE_SNAP_IN
     role: >
-      Realizes the rotation axis. Slip fit in every bore; the head seats in
-      FEA-E-CBORE and locates the pin in one axial direction.
+      Realizes the rotation axis AND its own bilateral axial retention. Slip fit
+      in every bore; the head seats in FEA-E-CBORE and blocks travel toward the
+      barb end, and the recovered lug shoulders bear on FEA-E-FARFACE and block
+      travel toward the head end.
+    material_model:
+      kinematically_rigid: [FEA-P-SHAFT, FEA-P-HEAD, FEA-P-SHOULDER]
+      declared_compliant_region: REG-P-SNAP-COMPLIANT
+      compliant_members: [FEA-P-ARM-A, FEA-P-ARM-B, FEA-P-LUG-A, FEA-P-LUG-B]
+      statement: >
+        The pin is compliant polymer, but only REG-P-SNAP-COMPLIANT is treated as
+        deformable and only during ASM-03. Everywhere else, and in every operating
+        state, the pin is used as a rigid guide. The whole pin is NOT claimed to
+        undergo arbitrary deformation.
+      why_not_rigid_metal: >
+        A rigid metal pin cannot elastically snap. Declaring the pin metal while
+        asking it to deflect past a bore would be a contradiction between the
+        material model and the assembly process, so the material class follows the
+        function.
+    configurations:
+      - {id: CFG-PIN-RELAXED, what: as-built; used in every operating state}
+      - {id: CFG-PIN-COMPRESSED, what: arms deflected inward; ASSEMBLY ONLY, never exported}
     features:
-      - {id: FEA-P-SHAFT, what: shaft, diameter pin_d}
+      - {id: FEA-P-SHAFT, what: shaft, diameter pin_d; the kinematic guide}
       - {id: FEA-P-HEAD, what: head, diameter pin_head_d}
       - {id: FEA-P-SHOULDER, what: annular face between head and shaft; bears on the counterbore floor}
+      - {id: FEA-P-ARM-A, what: first cantilever snap arm, barb_beam_t thick and barb_beam_w wide}
+      - {id: FEA-P-ARM-B, what: second cantilever snap arm, diametrically opposite}
+      - {id: FEA-P-LUG-A, what: retaining lug on FEA-P-ARM-A, spanning to barb_d}
+      - {id: FEA-P-LUG-B, what: retaining lug on FEA-P-ARM-B}
+      - {id: FEA-P-LUG-SHOULDER, what: rear faces of both lugs; bear on FEA-E-FARFACE and block reverse extraction}
+      - {id: FEA-P-LEADIN, what: tapered lead-in on both lugs; deflects the arms on insertion}
+    requested_id_mapping:
+      note: >
+        The review request named these FEATURE-PIN-*/REGION-PIN-*. This file keeps
+        the repository's existing FEA-*/REG-* convention; the mapping is one to one.
+      FEATURE-PIN-SHAFT: FEA-P-SHAFT
+      FEATURE-PIN-HEAD: FEA-P-HEAD
+      FEATURE-PIN-SNAP-ARM-A: FEA-P-ARM-A
+      FEATURE-PIN-SNAP-ARM-B: FEA-P-ARM-B
+      FEATURE-PIN-LUG-A: FEA-P-LUG-A
+      FEATURE-PIN-LUG-B: FEA-P-LUG-B
+      REGION-PIN-SNAP-COMPLIANT: REG-P-SNAP-COMPLIANT
   - id: BODY-BOLT
     name: retention bolt
     material_class: GENERIC_RIGID_POLYMER
@@ -73,17 +110,29 @@ bodies:
 
 known_limitations:
   - id: LIM-01
+    what: The pin was located axially in one direction only.
+    status: CORRECTED
+    corrected_by: HCR-BM001-002
+    how: >
+      Two integral cantilever snap arms were added at the far end. FEA-P-SHOULDER
+      still blocks travel toward the barb; FEA-P-LUG-SHOULDER now blocks travel
+      toward the head. Retention is bilateral and both directions are geometric.
+    what_this_cost: >
+      The reference selection originally avoided compliant features so the model
+      would not depend on material behaviour. That avoidance is now partly given
+      up: the pin is compliant polymer and its assembly needs a real deflection.
+      The consequence is recorded rather than hidden - every force, strain and
+      life question about the snap is NOT_VERIFIED.
+  - id: LIM-03
     what: >
-      The pin is located axially in one direction only, by FEA-P-SHOULDER on
-      FEA-E-CBORE. Nothing prevents it withdrawing the other way.
-    status: NOT_VERIFIED
-    why_not_corrected: >
-      Every captive alternative available without a second joining body needs
-      either an interference fit or a compliant feature, and the reference
-      selection excluded both so that the model stays independent of material
-      behaviour. Axial retention of the pin is a design freedom the source does
-      not constrain; recording it as a limitation is more honest than adding a
-      feature whose function this toolchain cannot evaluate.
+      The compressed configuration is a kinematic approximation, not a continuum
+      deformation, and it is 4.08 mm^3 (0.38%) smaller than the relaxed one.
+    status: DECLARED_MODELLING_APPROXIMATION
+    why: >
+      The arms are rotated about their roots, which opens a small wedge. The
+      compressed configuration exists to test geometric passage through the bore,
+      not to predict strain or to conserve volume exactly. Exact volume
+      conservation between the two configurations is NOT claimed.
   - id: LIM-02
     what: The retention bolt is fully removable upward.
     status: DECLARED_DESIGN_CHOICE

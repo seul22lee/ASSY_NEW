@@ -339,6 +339,92 @@ ISO = [("iso", (24.0, -55.0)), ("front", (0.0, -90.0)),
        ("top", (89.9, -90.0)), ("side", (0.0, 0.0))]
 
 
+def render_section(bodies, out_path: str, *, plane: str, at: float,
+                   colors=None, title: str = "", annotations=(),
+                   extent=None) -> str:
+    """True orthographic section: the cut face only, viewed normal to the plane.
+
+    The 3-D renderer above is a projection of whole solids and is useless for
+    judging a fit. This slices every body with the plane, projects the resulting
+    faces onto it, and draws them flat. Nothing behind the plane is drawn, there
+    is no perspective and no inset, so what a reviewer measures on the image is
+    what the model says.
+
+    `plane` is the axis normal to the cut: "x", "y" or "z".
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Polygon as MplPolygon
+
+    axis = {"x": 0, "y": 1, "z": 2}[plane]
+    keep = [i for i in (0, 1, 2) if i != axis]
+    labels = ["X (mm)", "Y (mm)", "Z (mm)"]
+    palette = colors or {}
+    cycle = ["#6b8fb4", "#c08a5a", "#7ba884", "#b06f8a", "#8d84b8"]
+
+    fig, ax = plt.subplots(figsize=(9.0, 6.0), dpi=150)
+    drawn = 0
+    for i, b in enumerate(bodies):
+        try:
+            sect = b.shape.intersect(_plane_slab(b.shape, axis, at))
+        except Exception:
+            continue
+        if sect is None:
+            continue
+        try:
+            verts, tris = sect.tessellate(0.05)
+        except Exception:
+            continue
+        if not tris:
+            continue
+        col = palette.get(b.id, cycle[i % len(cycle)])
+        def coord(v, idx):
+            return (v.x, v.y, v.z)[idx]
+
+        for tri in tris:
+            pts = [(coord(verts[k], keep[0]), coord(verts[k], keep[1])) for k in tri]
+            ax.add_patch(MplPolygon(pts, closed=True, facecolor=col,
+                                    edgecolor=col, linewidth=0.0, zorder=2))
+        drawn += 1
+    if not drawn:
+        plt.close(fig)
+        return ""
+
+    ax.set_aspect("equal", adjustable="box")
+    ax.autoscale_view()
+    if extent:
+        ax.set_xlim(extent[0], extent[1])
+        ax.set_ylim(extent[2], extent[3])
+    ax.set_xlabel(labels[keep[0]], fontsize=9)
+    ax.set_ylabel(labels[keep[1]], fontsize=9)
+    ax.set_title("%s\nsection at %s = %.2f mm - orthographic, cut face only"
+                 % (title, plane.upper(), at), fontsize=10)
+    ax.grid(True, alpha=0.25, linewidth=0.4, zorder=1)
+    ax.tick_params(labelsize=8)
+    for a in annotations:
+        ax.annotate(a["text"], xy=a["xy"], xytext=a["xytext"], fontsize=8,
+                    arrowprops=dict(arrowstyle="->", linewidth=0.9, color="#c0392b"),
+                    color="#c0392b", zorder=5,
+                    bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="#c0392b", lw=0.7))
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    fig.tight_layout()
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+    return out_path
+
+
+def _plane_slab(shape: cq.Shape, axis: int, at: float, half: float = 0.02) -> cq.Shape:
+    """A thin slab at the cutting plane; intersecting with it yields the cut face."""
+    bb = bbox_of(shape)
+    lo = [bb["xmin"] - 10, bb["ymin"] - 10, bb["zmin"] - 10]
+    size = [bb["dx"] + 20, bb["dy"] + 20, bb["dz"] + 20]
+    lo[axis] = at - half
+    size[axis] = 2 * half
+    return cq.Solid.makeBox(size[0], size[1], size[2],
+                            pnt=cq.Vector(lo[0], lo[1], lo[2]))
+
+
 # ------------------------------------------------------------------- hashes
 def sha256_file(path: str) -> str:
     return hashlib.sha256(open(path, "rb").read()).hexdigest()

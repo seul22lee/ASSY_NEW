@@ -60,6 +60,57 @@
       }
     },
     {
+      "check_under_test": "compressed-envelope check",
+      "control_id": "CTL-08",
+      "detected": true,
+      "injected_defect": "arm deflection reduced to 0.2 mm, so the barb no longer compresses enough",
+      "measured": {
+        "bore_d_mm": 4.2,
+        "compressed_envelope_dia_mm": 5.6357
+      }
+    },
+    {
+      "check_under_test": "head-side axial block",
+      "control_id": "CTL-09",
+      "detected": true,
+      "injected_defect": "pin head reduced to shaft diameter, so nothing seats in the counterbore",
+      "measured": {
+        "headless_common_mm3": 0.0,
+        "with_head_common_mm3": 24.6301
+      }
+    },
+    {
+      "check_under_test": "barb-side axial block",
+      "control_id": "CTL-10",
+      "detected": true,
+      "injected_defect": "lug span reduced below the bore, so the shoulder cannot catch",
+      "measured": {
+        "common_volume_on_withdrawal_mm3": 0.0,
+        "note": "no shoulder to bear on the far face, so withdrawal is unopposed"
+      }
+    },
+    {
+      "check_under_test": "lug recovery check",
+      "control_id": "CTL-11",
+      "detected": true,
+      "injected_defect": "shoulder placed 3 mm back inside the final bore",
+      "measured": {
+        "lug_enclosure_common_volume_mm3": 7.765,
+        "note": "a lug buried in the knuckle retains nothing and overlaps solid material"
+      }
+    },
+    {
+      "check_under_test": "material-model consistency",
+      "control_id": "CTL-12",
+      "detected": true,
+      "injected_defect": "metadata check: a rigid-metal pin that also claims an elastic snap",
+      "measured": {
+        "contradiction_present": false,
+        "declared_compliant_region": "REG-P-SNAP-COMPLIANT",
+        "material_class": "GENERIC_COMPLIANT_POLYMER"
+      }
+    },
+    {
       "check_under_test": "retention blocking probe",
       "control_id": "CTL-07",
       "detected": true,
@@ -71,8 +122,8 @@
       }
     }
   ],
-  "controls_detected": 7,
-  "controls_run": 7,
+  "controls_detected": 12,
+  "controls_run": 12,
   "name": "checker self-test",
   "purpose": "Establishes that the checks in this chain can fail. Each control injects a defect in memory and passes only if the check reports it. No perturbed model is exported.",
   "status": "PASS",

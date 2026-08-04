@@ -1,6 +1,44 @@
 reference_id: EXE-BM001-01
 schema_version: 0.1.0
 oracle_commit: 83fc12d46ad8c5fad36afcfe5b6e916822a41118
+active_oracle_scope_commit: 0af83c90bbda611182d0544cc736f09ae89fc718
+
+revision:
+  driver: HCR-BM001-002 (human review rejected the one-direction pin retention)
+  what_changed: the hinge pin only
+  previous_geometry_signature: 5586b96cc2e92e113a87ecb7180e8f8e2a3f820585c2a9d75fa6c8fdb13f2ee8
+  revised_geometry_signature: f2bc9599cdd6832dcb52ea0f24645b6cf6c374308324320b08d93f7f6e8d8967
+  change_reason: bilateral snap-barb axial retention
+  what_did_not_change: >
+    enclosure, closure, retention bolt, approved rear stop arm, open-state
+    determinant and the 110 degree motion range are untouched. BODY-PIN's volume
+    moved from 1050.234 to 1049.762, which is why the signature moved.
+  errors_found_during_the_revision:
+    - id: REV-01
+      what: a full-diameter cone split by one slot was tried first
+      measured: compressed extent 5.09 x 5.58 mm against a 4.2 mm bore
+      why_it_failed: >
+        splitting a cone compresses it only across the slot; perpendicular to the
+        slot its extent is unchanged, so it cannot enter a round bore at all
+    - id: REV-02
+      what: the compressed envelope was first measured as a bounding box
+      why_it_failed: >
+        a bore is round, so what constrains passage is the greatest distance from
+        the axis. The flat span fitted while the diagonal did not, and the check
+        passed geometry that fouls. The measurement is now the circumscribed
+        diameter.
+    - id: REV-03
+      what: the arms were first deflected by rotating them about their roots
+      why_it_failed: >
+        rotation swings the far end across the axis and out the other side, so the
+        envelope GREW with deflection, and it did not conserve volume. A rigid
+        inward translation does both correctly.
+    - id: REV-04
+      what: rectangular arm sections fouled the bore even after the lug was sized
+      measured: beam corners at radius 2.33 against a 2.1 bore radius
+      how_fixed: >
+        the beam is now clipped to the shaft radius and only the lug reaches the
+        retaining radius
 
 status: >
   This file records what the reference EXPECTS the Oracle to conclude, written
@@ -17,6 +55,11 @@ expected_and_observed:
   - invariant: NRM-BM-001-002
     expected: PASS
     observed: PASS
+    note: >
+      Gained two clauses at this revision. The connection is now retained rather
+      than merely assembled - axial travel is blocked in both directions by
+      realized geometry - and the declared compliant passage is measured rather
+      than assumed. Pull-out capacity remains NOT_VERIFIED.
   - invariant: NRM-BM-001-003
     expected: PASS
     observed: PASS

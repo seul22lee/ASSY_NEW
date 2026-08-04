@@ -42,10 +42,10 @@
     },
     {
       "bbox_mm": {
-        "dx": 77.8,
+        "dx": 85.8,
         "dy": 7.0,
         "dz": 7.0,
-        "xmax": 98.0,
+        "xmax": 106.0,
         "xmin": 20.2,
         "ymax": 89.5,
         "ymin": 82.5,
@@ -54,11 +54,11 @@
       },
       "body_id": "BODY-PIN",
       "installed_as": "DISCRETE",
-      "material_class": "GENERIC_RIGID_METAL",
+      "material_class": "GENERIC_COMPLIANT_POLYMER",
       "name": "axis pin",
-      "notes": "",
-      "role": "realizes the rotation axis between enclosure and closure",
-      "volume_mm3": 1050.234424
+      "notes": "as-built in the RELAXED configuration, which is the one used for every operating state; the compressed configuration is assembly-only",
+      "role": "realizes the rotation axis and its own bilateral axial retention; kinematically rigid along FEATURE-PIN-SHAFT, compliant only in REGION-PIN-SNAP-COMPLIANT during the declared insertion step",
+      "volume_mm3": 1049.761996
     },
     {
       "bbox_mm": {
@@ -81,11 +81,22 @@
       "volume_mm3": 2513.274123
     }
   ],
-  "build_seconds": 0.202,
+  "build_seconds": 0.357,
   "name": "build",
   "parameters": {
     "axis_y": 86.0,
     "axis_z": 50.0,
+    "barb_arm_inner_r": 1.2,
+    "barb_beam_w": 2.4,
+    "barb_d": 6.0,
+    "barb_deflection": 1.05,
+    "barb_leadin_len": 2.0,
+    "barb_len": 6.0,
+    "barb_lug_len": 2.6,
+    "barb_shoulder_gap": 0.4,
+    "barb_slot_root_x": 94.0,
+    "barb_slot_w": 2.2,
+    "barb_tip_d": 2.8,
     "bolt_boss_x": 16.0,
     "bolt_boss_y0": 2.0,
     "bolt_boss_y1": 16.0,
@@ -111,7 +122,6 @@
     "pin_cbore_d": 7.2,
     "pin_cbore_depth": 3.0,
     "pin_d": 4.0,
-    "pin_end_margin": 1.6,
     "pin_head_d": 7.0,
     "pin_head_len": 2.8,
     "plate_rear_y": 79.0,

@@ -8,6 +8,14 @@ frame: >
   are applied to a body's as-built shape; the as-built shape of every body is
   its S_CLOSED_RETAINED pose.
 
+pin_configuration:
+  every_operating_state: CFG-PIN-RELAXED
+  assembly_only: CFG-PIN-COMPRESSED
+  note: >
+    The compressed configuration is never an operating state. It exists only
+    inside ASM-03 and is never exported, so no state transform below refers to
+    it. BODY-PIN is stationary in every state; it is the axis, not a mover.
+
 axis:
   id: AX-CLOSURE
   type: revolute

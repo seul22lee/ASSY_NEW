@@ -3,13 +3,24 @@
 Two Oracle-aware executable reference CAD models for BM-001, built and validated
 under phase CAD-1.
 
-**State: `BM001_EXECUTABLE_REFERENCE_PILOT_READY`.**
+**State: EXE-BM001-01 revised and validated; EXE-BM001-02 pending redesign.**
 Not `CAD_CORPUS_COMPLETE`, not `PACK_LOCK_READY`, not `PHYSICALLY_PROVEN`, not
-`PRODUCTION_READY`.
+`PRODUCTION_READY`, and not human-approved.
+
+Two Oracle-aware BM-001 designs were built as valid B-rep solids and found
+geometrically and kinematically admissible under the active BM-001 Oracle at the
+evaluated fidelity. EXE-BM001-02's result predates the human decisions that
+rejected its retention concept, and stands only as the record of the design that
+was rejected.
+
+Failure CAD is not part of the current positive-reference plan. Local
+counterfactual validation probes may be used without creating a curated
+failure-CAD corpus.
 
 | | |
 |---|---|
 | Oracle commit these were built against | `83fc12d46ad8c5fad36afcfe5b6e916822a41118` |
+| Active Oracle scope commit | `0af83c90bbda611182d0544cc736f09ae89fc718` |
 | Oracle files modified | none |
 | Toolchain | CadQuery 2.4.0 / cadquery-ocp 7.7.0 / OCCT, CPython 3.8.10 |
 | Recreate with | `ver3/cad_validation/tools/create_env.sh <path> python3.8` |
@@ -35,11 +46,12 @@ CAD exist as later phases.
 |---|---|---|
 | Closure motion | revolute, 110° | prismatic, 84 mm |
 | Guidance | five interleaved knuckles on a separate pin | two lipped rails, integral |
-| Retention | rigid sliding bolt, lift to release | rigid quarter-turn cam |
+| Retention | rigid sliding bolt, lift to release | rigid quarter-turn cam (REJECTED, awaiting redesign) |
+| Hinge pin | headed, with two integral cantilever snap arms | n/a |
 | Bodies | 4 | 3 |
 | Semantic fixture | ADM-BM-001-E (close) | **none** |
 | Terminal bounds | one (open), constructed stop face | two (open and closed), end walls |
-| Geometry signature | `5586b96cc2e92e11…` | `11bcc694d0261737…` |
+| Geometry signature | `f2bc9599cdd6832d…` (was `5586b96cc2e92e11…`) | `11bcc694d0261737…` |
 
 They differ in joint type, body count, retention principle and assembly process.
 Neither is a variation of the other.
@@ -48,6 +60,57 @@ EXE-BM001-02 deliberately matches no listed fixture. The seven admissible
 fixtures are the machine-checked sample, not the permitted set, and an Oracle
 that only ever sees designs drawn from its own fixture list is being tested
 against itself.
+
+## Human review, and what it changed
+
+A person reviewed the first pilot and recorded seven decisions
+(`reviews/HUMAN_CAD_REVIEW_DECISIONS.yaml`). Two references were affected very
+differently.
+
+**EXE-BM001-01.** The rear stop-arm projection was APPROVED and is unchanged. The
+one-direction hinge-pin retention was REJECTED: the head blocked removal one way
+and the far end could walk out. The pin was replaced with a headed pin carrying
+two integral cantilever snap arms, giving bilateral axial retention — the head
+shoulder blocks travel toward the barb, the recovered lug shoulders block travel
+toward the head. The revision has been built and validated; **independent human
+review of the result is PENDING.**
+
+**EXE-BM001-02.** The 84 mm of 90 mm usable opening was APPROVED. The full-open
+lift-out, the separate quarter-turn cam, and the cam's missing orientation
+retention were all REJECTED, and a guided captive sliding cover with an
+integrated assembly snap and an integrated releasable latch was directed.
+**That redesign has not been done.** The reference in the tree is still the
+rejected cam design.
+
+### What the pin revision cost
+
+The original reference selection deliberately avoided compliant features so the
+model would not depend on material behaviour. Bilateral retention without a
+second part cannot be had that way, so the pin is now
+`GENERIC_COMPLIANT_POLYMER` and its assembly needs a real 1.05 mm deflection per
+arm. Only `REG-P-SNAP-COMPLIANT` is treated as deformable, and only during
+insertion; everywhere else the pin is a rigid guide. Every force, strain and life
+question the change introduces is NOT_VERIFIED.
+
+### Four errors the checks caught before they reached the report
+
+1. A full-diameter cone split by one slot measured **5.09 × 5.58 mm** compressed
+   against a 4.2 mm bore — unassemblable. Splitting a cone compresses it only
+   across the slot.
+2. The compressed envelope was first measured as a **bounding box**. A bore is
+   round, so the constraint is the greatest distance from the axis; the flat span
+   fitted while the diagonal did not. The measurement is now the circumscribed
+   diameter.
+3. The arms were first deflected by **rotating** them about their roots, which
+   swung the far end across the axis so the envelope grew with deflection, and
+   which did not conserve volume. A rigid inward translation does both correctly
+   and conserves volume exactly.
+4. Rectangular arm sections put the beam corners at radius **2.33** against a 2.1
+   bore radius. The beam is now clipped to the shaft radius; only the lug reaches
+   the retaining radius.
+
+None of these would have shown as a failure — each would have produced a clean
+report about geometry that cannot be built.
 
 ## Results
 
@@ -60,11 +123,11 @@ Both references, full sampling, on the locked interpreter:
 | 3 STEP + BREP re-import | PASS | PASS |
 | 4 signature and rebuild determinism | PASS | PASS |
 | 5 motion sampling | PASS (180 samples, 2 segments) | PASS (231 samples, 3 segments) |
-| 6 interactions | PASS (15 declared) | PASS (13 declared) |
+| 6 interactions | PASS (16 declared) | PASS (13 declared) |
 | 7 assembly | PASS | PASS |
 | 8 Oracle predicates | PASS | PASS |
 | 9 render | 20 images | 20 images |
-| checker self-test | PASS 7/7 | PASS 8/8 |
+| checker self-test | PASS 12/12 | PASS 8/8 |
 | **overall** | **PASS**, 0 findings | **PASS**, 0 findings |
 
 Maximum boolean common volume over every body pair, every state and every

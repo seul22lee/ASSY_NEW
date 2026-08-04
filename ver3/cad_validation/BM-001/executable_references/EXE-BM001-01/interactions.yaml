@@ -45,8 +45,43 @@ interactions:
     nominal_clearance_mm: 0.0
     active: ALL_STATES
     role: >
-      Locates the pin axially in one direction. See manifest.yaml LIM-01: the
-      other direction is unretained and recorded as NOT_VERIFIED.
+      Blocks pin travel toward the barb end. One half of the bilateral axial
+      retention; the other half is INT-16.
+
+  - id: INT-16
+    bodies: [BODY-PIN, BODY-ENCLOSURE]
+    features: [FEA-P-LUG-SHOULDER, FEA-E-FARFACE]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.4
+    active: ALL_STATES
+    role: >
+      Blocks pin travel toward the head end. The recovered lug shoulders stand
+      0.9 radially proud of the bore, so they cannot re-enter it; the 0.4 axial
+      gap is the pin's permitted float, which is what keeps the shoulder clear of
+      solid material rather than jammed against it.
+      Whether the shoulder WITHSTANDS a pull-out load is a force question and is
+      NOT_VERIFIED.
+    determines: AXIAL_RETENTION_TOWARD_HEAD
+
+  - id: INT-17
+    bodies: [BODY-PIN, BODY-ENCLOSURE]
+    features: [FEA-P-LEADIN, FEA-E-BORE]
+    type: DECLARED_COMPLIANT_INTERACTION
+    nominal_clearance_mm: 0.023
+    active: [ASM-03]
+    compliant_region: REG-P-SNAP-COMPLIANT
+    deflection_mm: 0.9
+    role: >
+      The only declared compliant interaction in this reference, and it exists
+      only during the insertion step. The lead-in taper deflects each arm inward
+      by barb_deflection; the compressed envelope is then 4.154 across the arms
+      against a 4.2 bore, a radial clearance of 0.023 per side.
+      This is a DECLARED compliant passage, not undeclared rigid penetration: the
+      arms are members of REG-P-SNAP-COMPLIANT, the deflection is stated, and
+      validate.py measures the resulting envelope rather than assuming it fits.
+    not_established: >
+      that the material tolerates the deflection. Strain, insertion force,
+      recovery force and fatigue are all NOT_VERIFIED.
 
   - id: INT-07
     bodies: [BODY-CLOSURE, BODY-ENCLOSURE]

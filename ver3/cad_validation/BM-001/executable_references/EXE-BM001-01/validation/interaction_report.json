@@ -76,6 +76,46 @@
     },
     {
       "bodies": [
+        "BODY-PIN",
+        "BODY-ENCLOSURE"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.4,
+      "evaluated_in_state": "S_CLOSED_RETAINED",
+      "interaction_id": "INT-16",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.4,
+      "roi_box_mm": [
+        98.0,
+        102.0,
+        88.5,
+        92.0,
+        44.0,
+        56.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "arm_gap_mm": 2.4,
+      "bodies": [
+        "BODY-PIN",
+        "BODY-ENCLOSURE"
+      ],
+      "criterion": "compressed envelope fits the bore, the arms cannot bottom out against each other, and the lugs recover clear of solid material",
+      "declared_nominal_mm": 0.019506,
+      "evaluated_in_state": "ASSEMBLY_ONLY",
+      "evidence": "validation/predicate_report.json#pin_axial_retention",
+      "interaction_id": "INT-17",
+      "measured_compressed_envelope_dia_mm": 4.160988,
+      "measured_radial_clearance_mm": 0.019506,
+      "note": "DECLARED_COMPLIANT_INTERACTION active only during ASM-03. It has no operating-state clearance, so it is discharged by measurement of the declared compressed configuration rather than by a state region.",
+      "status": "PASS",
+      "type": "DECLARED_COMPLIANT_INTERACTION"
+    },
+    {
+      "bodies": [
         "BODY-CLOSURE",
         "BODY-ENCLOSURE"
       ],

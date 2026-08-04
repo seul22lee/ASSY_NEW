@@ -299,12 +299,26 @@ def step5_motion(ctx: Ctx, bodies: List[cv.Body], probes: List[Dict],
 
 
 # ------------------------------------------------------------------ step 6
-def step6_interactions(ctx: Ctx, bodies: List[cv.Body]) -> Dict:
+def step6_interactions(ctx: Ctx, bodies: List[cv.Body],
+                       external: Optional[Dict[str, Dict]] = None) -> Dict:
     decl = yaml.safe_load(open(os.path.join(ctx.HERE, "interactions.yaml")))
     confs = {s: by_id(ctx.M.configuration(bodies, ctx.P, s)) for s in ctx.M.STATES}
+    external = external or {}
     rows = []
     for it in decl["interactions"]:
         iid, (a, b), typ = it["id"], it["bodies"], it["type"]
+        # An interaction that exists only during an assembly step has no operating
+        # state to measure it in. It is discharged by a cited probe instead, and
+        # only if that probe actually reports a result.
+        if iid in external:
+            ext = dict(external[iid])
+            ext.update({"interaction_id": iid, "bodies": [a, b], "type": typ,
+                        "evaluated_in_state": "ASSEMBLY_ONLY"})
+            if ext.get("status") != "PASS":
+                ctx.finding("6", "FAIL", "assembly-only interaction not discharged",
+                            interaction=iid)
+            rows.append(ext)
+            continue
         state, roi, box, cut = build_roi(ctx, ctx.ROI[iid])
         ca, cb = clip(confs[state][a].shape, roi), clip(confs[state][b].shape, roi)
         row = {"interaction_id": iid, "bodies": [a, b], "type": typ,
@@ -382,9 +396,14 @@ def step6_interactions(ctx: Ctx, bodies: List[cv.Body]) -> Dict:
 
 
 # ------------------------------------------------------------------ step 7
-def step7_assembly(ctx: Ctx, bodies: List[cv.Body], samples: int = 60) -> Dict:
+def step7_assembly(ctx: Ctx, bodies: List[cv.Body], samples: int = 60,
+                   step_bodies: Optional[Dict[str, cv.Body]] = None) -> Dict:
     decl = yaml.safe_load(open(os.path.join(ctx.HERE, "assembly.yaml")))
     d = by_id(bodies)
+    # A step may declare that the part is in a different CONFIGURATION while it is
+    # being inserted - a snap feature deflected, for instance. The swept solid is
+    # then that configuration, and the placed solid afterwards is the normal one.
+    step_bodies = step_bodies or {}
     at: Dict[str, cq.Location] = {}
     placed: List[str] = []
     steps = []
@@ -410,10 +429,11 @@ def step7_assembly(ctx: Ctx, bodies: List[cv.Body], samples: int = 60) -> Dict:
         direc, dist = st["direction"], float(st["approach_distance"])
         worst, worst_s, contacts = 0.0, None, {}
         others = [o for o in placed if o != bid]
+        swept = step_bodies.get(st["id"], d[bid])
         for i in range(samples + 1):
             s = dist * (1.0 - i / float(samples))
             loc = cv.translation((-direc[0] * s, -direc[1] * s, -direc[2] * s)) * seat
-            moving = d[bid].moved(loc)
+            moving = swept.moved(loc) if i < samples else d[bid].moved(loc)
             for other in others:
                 cvol = cv.common_volume(moving.shape, d[other].moved(at[other]).shape)
                 if cvol > worst:
@@ -430,6 +450,9 @@ def step7_assembly(ctx: Ctx, bodies: List[cv.Body], samples: int = 60) -> Dict:
         if bid not in placed:
             placed.append(bid)
         steps.append({"step_id": st["id"], "body": bid, "kind": "linear insertion",
+                      "swept_configuration": ("declared alternate configuration"
+                                              if st["id"] in step_bodies else "as-built"),
+                      "seated_configuration": "as-built",
                       "direction": direc, "approach_distance_mm": dist,
                       "seated_at_offset_mm": off, "samples": samples + 1,
                       "placed_before": others,

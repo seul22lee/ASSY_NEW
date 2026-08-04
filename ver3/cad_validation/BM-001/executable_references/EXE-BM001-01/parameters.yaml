@@ -143,10 +143,13 @@ parameters:
       width of each cantilever arm across Z. Narrow in the direction the arm
       does not move, which is what lets the pair enter a round bore at all.
     range: [0.8, 4.0]
-  - name: barb_beam_t
+  - name: barb_arm_inner_r
     value: 1.2
-    purpose: radial thickness of each cantilever arm
-    range: [0.4, 3.0]
+    purpose: >
+      inner radius of each cantilever arm. The two arms therefore stand
+      2 x barb_arm_inner_r = 2.4 apart, which must exceed 2 x barb_deflection so
+      they cannot bottom out against each other before the lugs clear the bore.
+    range: [0.3, 3.0]
   - name: barb_lug_len
     value: 2.6
     purpose: axial length of the retaining lug measured from the shoulder
@@ -156,12 +159,14 @@ parameters:
     purpose: axial length of the tapered lead-in that deflects the arms on insertion
     range: [0.5, 8.0]
   - name: barb_deflection
-    value: 0.9
+    value: 1.05
     purpose: >
-      inward radial deflection of each arm in the declared compressed state,
-      (barb_d - bore_d)/2. The compressed envelope is therefore bore_d, and the
-      insertion check requires it to fit the bore with the declared clearance.
-      Whether the material tolerates this strain is NOT_VERIFIED.
+      inward radial deflection of each arm in the declared compressed state.
+      NOT (barb_d - bore_d)/2: that would size the deflection against the arm's
+      flat span, but a round bore is constrained by the arm's greatest distance
+      from the axis, which is larger. 1.05 brings the measured envelope to 4.161
+      against a 4.2 bore. Whether the material tolerates the strain is
+      NOT_VERIFIED.
     range: [0.0, 5.0]
 
   # ------------------------------------------------------------------ closure

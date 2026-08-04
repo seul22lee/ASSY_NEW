@@ -12,7 +12,7 @@ Four rigid bodies:
                      retention socket
     BODY-CLOSURE     plate, web, two knuckle segments, a guide boss and a stop
                      block
-    BODY-PIN         headed shaft realizing the rotation axis
+    BODY-PIN         headed shaft with two integral cantilever snap arms
     BODY-BOLT        headed bolt realizing retention
 
 Nothing here depends on a body deforming or on a force being large enough. The
@@ -171,7 +171,8 @@ def build_pin(p: Dict[str, float], compressed: bool = False) -> cq.Shape:
     root = p["barb_slot_root_x"]
     shoulder_x = kxN + p["barb_shoulder_gap"]
     tip_x = shoulder_x + p["barb_len"]
-    r_beam = p["pin_d"] / 2.0 - p["barb_slot_w"] / 2.0      # beam outer radius
+    r_in = p["barb_arm_inner_r"]                            # arm inner radius
+    r_beam = p["pin_d"] / 2.0                               # arm outer radius, flush with the shaft
     r_lug = p["barb_d"] / 2.0
     hw = p["barb_beam_w"] / 2.0                            # beam half-width in z
     defl = p["barb_deflection"]
@@ -185,9 +186,9 @@ def build_pin(p: Dict[str, float], compressed: bool = False) -> cq.Shape:
         def yspan(a, b):
             lo, hi = sorted((ay + sign * a, ay + sign * b))
             return lo, hi
-        y0, y1 = yspan(r_beam - p["barb_beam_t"], r_beam)
+        y0, y1 = yspan(r_in, r_beam)
         beam = _box(root, tip_x, y0, y1, az - hw, az + hw)
-        ly0, ly1 = yspan(r_beam - p["barb_beam_t"], r_lug)
+        ly0, ly1 = yspan(r_in, r_lug)
         lug = _box(shoulder_x, shoulder_x + p["barb_lug_len"], ly0, ly1, az - hw, az + hw)
         # lead-in: taper the lug back to the beam line over the remaining length
         ramp = cq.Solid.makeWedge(
@@ -209,9 +210,23 @@ def build_pin(p: Dict[str, float], compressed: bool = False) -> cq.Shape:
         arm = arm.fuse(_ramp(shoulder_x + p["barb_lug_len"] - p["barb_leadin_len"],
                              shoulder_x + p["barb_lug_len"], ay, az, sign,
                              r_lug, r_beam, hw))
+        # Round the arm's outer surface to the lug radius. A rectangular arm has a
+        # DIAGONAL larger than its flat span, and a round bore is constrained by
+        # the diagonal, not the span - flat corners foul the bore even when the
+        # measured width fits.
+        # Stepped clip: the beam is rounded to the SHAFT radius so it runs inside
+        # the bore, and only the lug is allowed out to the retaining radius. A
+        # single clip at the lug radius leaves the beam's corners at
+        # sqrt(r_beam^2 + hw^2), which is larger than the bore radius and fouls it.
+        clip = _cyl_x(root - 1.0, shoulder_x, ay, az, r_beam).fuse(
+            _cyl_x(shoulder_x, tip_x + 1.0, ay, az, r_lug))
+        arm = arm.intersect(clip)
         if compressed:
-            a = math.degrees(math.atan2(defl, shoulder_x - root)) * sign * -1.0
-            arm = arm.moved(cv.rotation((root, ay, az), (0.0, 0.0, 1.0), a))
+            # Rigid inward translation, not a rotation about the root. Rotating
+            # swings the arm's far end across the axis and OUT the other side, so
+            # the envelope grows with deflection instead of shrinking. Translation
+            # also conserves volume exactly, which a root rotation does not.
+            arm = arm.moved(cv.translation((0.0, -sign * defl, 0.0)))
         arms.append(arm)
     out = core
     for a in arms:
@@ -242,8 +257,13 @@ def build(p: Dict[str, float] = None) -> List[cv.Body]:
                 build_enclosure(p), role="fixed reference body; cavity, knuckle segments, retention socket"),
         cv.Body("BODY-CLOSURE", "closure", "GENERIC_RIGID_POLYMER",
                 build_closure(p), role="movable closure; plate, web, knuckle segments, guide boss, stop block"),
-        cv.Body("BODY-PIN", "axis pin", "GENERIC_RIGID_METAL",
-                build_pin(p), role="realizes the rotation axis between enclosure and closure"),
+        cv.Body("BODY-PIN", "axis pin", "GENERIC_COMPLIANT_POLYMER",
+                build_pin(p),
+                role=("realizes the rotation axis and its own bilateral axial retention; "
+                      "kinematically rigid along FEATURE-PIN-SHAFT, compliant only in "
+                      "REGION-PIN-SNAP-COMPLIANT during the declared insertion step"),
+                notes=("as-built in the RELAXED configuration, which is the one used for "
+                       "every operating state; the compressed configuration is assembly-only")),
         cv.Body("BODY-BOLT", "retention bolt", "GENERIC_RIGID_POLYMER",
                 build_bolt(p), role="realizes retention and its release action"),
     ]

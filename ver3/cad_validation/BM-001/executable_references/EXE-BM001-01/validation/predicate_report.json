@@ -39,12 +39,28 @@
         },
         {
           "clause": "every declared intended interaction is physically coherent",
-          "measured": "12 declared interactions, all measured inside their declared regions",
+          "measured": "14 declared interactions, all measured inside their declared regions",
           "status": "PASS"
+        },
+        {
+          "clause": "the connection is retained rather than merely assembled",
+          "measured": "axial travel is blocked in BOTH directions by realized geometry: FEA-P-SHOULDER on FEA-E-CBORE at 0.05 mm, and FEA-P-LUG-SHOULDER on FEA-E-FARFACE at 0.6 mm",
+          "status": "PASS"
+        },
+        {
+          "clause": "the declared compliant passage is coherent",
+          "measured": "compressed envelope 4.161 dia fits the 4.2 bore with 0.020 radial clearance; recovered lugs span 6.000 dia, standing 0.900 proud of the bore, and sit clear of solid material",
+          "status": "PASS"
+        },
+        {
+          "clause": "pull-out capacity of the snap",
+          "reason": "geometric blockage is not holding strength; insertion force, recovery force, pull-out force, strain, fatigue and creep are all outside this toolchain",
+          "status": "NOT_VERIFIED"
         }
       ],
       "evidence": [
-        "validation/interaction_report.json"
+        "validation/interaction_report.json",
+        "validation/predicate_report.json"
       ],
       "invariant_id": "NRM-BM-001-002",
       "status": "PASS"
@@ -381,7 +397,7 @@
         "BODY-BOLT": 2513.274123,
         "BODY-CLOSURE": 43598.651223,
         "BODY-ENCLOSURE": 94247.266221,
-        "BODY-PIN": 1050.234424
+        "BODY-PIN": 1049.761996
       },
       "conserved": true,
       "per_state_mm3": {
@@ -389,19 +405,19 @@
           "BODY-BOLT": 2513.274123,
           "BODY-CLOSURE": 43598.651223,
           "BODY-ENCLOSURE": 94247.266221,
-          "BODY-PIN": 1050.234424
+          "BODY-PIN": 1049.761996
         },
         "S_CLOSED_RETAINED": {
           "BODY-BOLT": 2513.274123,
           "BODY-CLOSURE": 43598.651223,
           "BODY-ENCLOSURE": 94247.266221,
-          "BODY-PIN": 1050.234424
+          "BODY-PIN": 1049.761996
         },
         "S_OPEN": {
           "BODY-BOLT": 2513.274123,
           "BODY-CLOSURE": 43598.651223,
           "BODY-ENCLOSURE": 94247.266221,
-          "BODY-PIN": 1050.234424
+          "BODY-PIN": 1049.761996
         }
       },
       "tolerance_mm3": 1e-06
@@ -471,6 +487,129 @@
         "BODY-PIN": 5.5
       },
       "unobstructed": true
+    },
+    "pin_axial_retention": {
+      "axial_block": {
+        "bilateral": true,
+        "toward_barb_end": {
+          "bears_on": "FEA-E-CBORE",
+          "block_onset_mm": 0.05,
+          "blocked": true,
+          "blocking_feature": "FEA-P-SHOULDER",
+          "samples": [
+            {
+              "pin_enclosure_common_volume_mm3": 1.23150432,
+              "travel_mm": 0.05
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 2.46300864,
+              "travel_mm": 0.1
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 4.926017281,
+              "travel_mm": 0.2
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 9.852034562,
+              "travel_mm": 0.4
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 14.778051842,
+              "travel_mm": 0.6
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 24.630086404,
+              "travel_mm": 1.0
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 49.260172808,
+              "travel_mm": 2.0
+            }
+          ]
+        },
+        "toward_head_end": {
+          "bears_on": "FEA-E-FARFACE",
+          "block_onset_mm": 0.6,
+          "blocked": true,
+          "blocking_feature": "FEA-P-LUG-SHOULDER",
+          "samples": [
+            {
+              "pin_enclosure_common_volume_mm3": 0.0,
+              "travel_mm": 0.05
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 0.0,
+              "travel_mm": 0.1
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 0.0,
+              "travel_mm": 0.2
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 0.0,
+              "travel_mm": 0.4
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 0.901080224,
+              "travel_mm": 0.6
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 2.703240671,
+              "travel_mm": 1.0
+            },
+            {
+              "pin_enclosure_common_volume_mm3": 6.343702876,
+              "travel_mm": 2.0
+            }
+          ]
+        },
+        "what_this_does_not_show": "any pull-out capacity. Geometric blockage is NOT verified holding strength.",
+        "what_this_shows": "Both axial directions are blocked by realized geometry: the head shoulder one way, the recovered lug shoulders the other. The onsets are the declared axial float, not slack in the check."
+      },
+      "barb_geometry": {
+        "arm_gap_mm": 2.4,
+        "arms_cannot_bottom_out": true,
+        "bore_d_mm": 4.2,
+        "compressed_diametral_clearance_mm": 0.039012,
+        "compressed_envelope_dia_mm": 4.160988,
+        "compressed_fits_bore": true,
+        "compressed_radial_clearance_mm": 0.019506,
+        "deformation": {
+          "compressed_volume_mm3": 1049.761996,
+          "declared_deflection_per_arm_mm": 1.05,
+          "difference_mm3": 0.0,
+          "difference_percent": 0.0,
+          "kind": "DECLARED_KINEMATIC_APPROXIMATION",
+          "not_verified": [
+            "material strain",
+            "stress",
+            "insertion force",
+            "recovery force",
+            "pull-out force",
+            "fatigue",
+            "creep",
+            "repeated-use life",
+            "manufacturing tolerance robustness"
+          ],
+          "relaxed_volume_mm3": 1049.761996,
+          "representation": "rigid inward translation of each arm",
+          "statement": "The compressed configuration is a declared kinematic approximation of local compliant deformation. It is used to test geometric passage through the bore, not to predict continuum strain. It does not model how the material actually bends.",
+          "superseded_measurement": "An earlier representation rotated each arm about its root, which differed from the relaxed solid by 4.08 mm^3 (0.38%). That representation was replaced: rotating swung the arm's far end across the axis so the envelope GREW with deflection, and it did not conserve volume. The rigid translation used now conserves it exactly, so the earlier figure no longer applies and is recorded here only so the change is traceable."
+        },
+        "measurement": "greatest distance from the pin axis, doubled (circumscribed diameter)",
+        "relaxed_lug_envelope_dia_mm": 6.0,
+        "shoulder_blocks_return": true,
+        "shoulder_projection_beyond_bore_mm": 0.9
+      },
+      "lug_recovery": {
+        "axial_gap_to_far_face_mm": 0.4,
+        "enclosure_material_in_recovery_space": false,
+        "last_knuckle_far_face_x_mm": 99.6,
+        "lug_enclosure_common_volume_mm3": 0.0,
+        "lug_material_present": true,
+        "lug_shoulder_x_mm": 100.0,
+        "lugs_recovered_clear_of_solid": true
+      }
     },
     "retention": {
       "blocking_probe": {

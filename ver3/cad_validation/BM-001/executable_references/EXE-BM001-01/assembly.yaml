@@ -31,11 +31,33 @@ steps:
     kind: insertion
     direction: [1.0, 0.0, 0.0]
     approach_distance: 30.0
+    configuration_during_step: CFG-PIN-COMPRESSED
+    configuration_after_step: CFG-PIN-RELAXED
+    compliant_region: REG-P-SNAP-COMPLIANT
+    steps:
+      - 1. align the enclosure and closure knuckles so all five bores are coaxial
+      - 2. orient the pin with its lead-in leading and its arms across the slot plane
+      - 3. insert the barb end into the first bore
+      - 4. compress ONLY REG-P-SNAP-COMPLIANT; the lead-in taper does the work
+      - 5. pass the compressed arms through the final bore
+      - 6. recover the lugs beyond FEA-E-FARFACE
+      - 7. seat FEA-P-SHOULDER in FEA-E-CBORE
     note: >
-      Inserted axially through the five aligned bores from the counterbored end.
-      Slip fit throughout; the head seats in FEA-E-CBORE.
+      The shaft is a slip fit throughout. The arms are deflected only while the
+      lugs are inside a bore, and they recover as soon as the last one clears.
+      Step 5 is a DECLARED compliant passage (INT-17), not undeclared rigid
+      penetration: validate.py sweeps the compressed configuration along this path
+      and requires zero common volume against every placed body, so the passage is
+      measured rather than assumed.
     ends_in_contact_with:
       - {body: BODY-ENCLOSURE, interaction: INT-06}
+    ends_retained_by:
+      - {body: BODY-ENCLOSURE, interaction: INT-16, direction: toward the head}
+      - {body: BODY-ENCLOSURE, interaction: INT-06, direction: toward the barb}
+    reversibility: >
+      Withdrawal requires deliberate re-compression of both arms from the far
+      side. It is not a slip fit any more, which is the point of the correction.
+      The force needed is NOT_VERIFIED.
   - id: ASM-04
     place: BODY-BOLT
     kind: insertion
@@ -48,8 +70,11 @@ steps:
       - {body: BODY-ENCLOSURE, interaction: INT-12}
 
 disassembly: >
-  The reverse order is available and uses the same paths. No step is
-  irreversible and no body is permanently joined.
+  The reverse order is available for BODY-CLOSURE and BODY-BOLT and uses the same
+  paths. BODY-PIN is different after this revision: removing it requires
+  compressing REG-P-SNAP-COMPLIANT from the far side, which is a deliberate act
+  rather than a pull. No body is permanently joined, and no step consumes
+  material.
 
 not_established_here: >
   Insertion FORCE, ease of assembly and process suitability. REQ-007 asks for a
