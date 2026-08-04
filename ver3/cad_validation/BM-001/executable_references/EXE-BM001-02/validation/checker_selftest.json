@@ -6,14 +6,14 @@
       "detected": true,
       "injected_defect": "cover driven 0.5 mm into the ledges",
       "measured": {
-        "common_volume_mm3": 82.6542
+        "common_volume_mm3": 753.0611
       }
     },
     {
       "check_under_test": "lug projection check",
       "control_id": "CTL-02",
       "detected": true,
-      "injected_defect": "barb span reduced below the slot width, so nothing retains the pin",
+      "injected_defect": "lug span reduced below the slot width, so nothing retains the rivet",
       "measured": {
         "lug_span_mm": 5.2,
         "note": "a lug narrower than its slot retains nothing",
@@ -24,9 +24,9 @@
       "check_under_test": "compressed-envelope check",
       "control_id": "CTL-03",
       "detected": true,
-      "injected_defect": "arm deflection cut to 0.2 mm, so the barb cannot enter the slot",
+      "injected_defect": "arm deflection cut to 0.2 mm, so the arms cannot enter the slot",
       "measured": {
-        "compressed_envelope_mm": 7.2254,
+        "compressed_envelope_mm": 7.2,
         "slot_w_mm": 5.4
       }
     },
@@ -76,8 +76,19 @@
         "body_ids": [
           "BODY-COVER",
           "BODY-ENCLOSURE",
-          "BODY-PIN"
+          "BODY-RIVET"
         ]
+      }
+    },
+    {
+      "check_under_test": "declared-region control check",
+      "control_id": "CTL-09",
+      "detected": true,
+      "injected_defect": "usable-access region declared outside the product footprint, where the cover never reaches",
+      "measured": {
+        "covered_when_closed_mm3": 0.0,
+        "note": "a region the cover never fills cannot be a region it controls",
+        "real_region_covered_mm3": 18160.0
       }
     },
     {
@@ -91,8 +102,8 @@
       }
     }
   ],
-  "controls_detected": 8,
-  "controls_run": 8,
+  "controls_detected": 9,
+  "controls_run": 9,
   "name": "checker self-test",
   "purpose": "Establishes that the checks in this chain can fail. Each control injects a defect in memory and passes only if the check reports it. No perturbed model is exported.",
   "status": "PASS",

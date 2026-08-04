@@ -63,12 +63,12 @@
       "measured_common_volume_mm3": 0.0,
       "measured_min_distance_mm": 0.2,
       "roi_box_mm": [
-        136.0,
-        148.0,
+        120.0,
+        150.0,
+        1.5,
         4.0,
-        11.5,
-        44.0,
-        46.5
+        41.0,
+        44.0
       ],
       "roi_excludes": null,
       "status": "PASS",
@@ -79,47 +79,51 @@
         "BODY-COVER",
         "BODY-ENCLOSURE"
       ],
-      "declared_nominal_mm": 0.4,
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.2,
       "evaluated_in_state": "S_CLOSED_LATCHED",
       "interaction_id": "INT-04",
-      "reason": "one or both bodies have no material in the declared region",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.2,
       "roi_box_mm": [
         120.0,
         150.0,
-        56.0,
-        59.5,
+        66.0,
+        68.5,
         41.0,
-        44.5
+        44.0
       ],
       "roi_excludes": null,
-      "status": "NOT_EVALUABLE",
+      "status": "PASS",
       "type": "DECLARED_CLEARANCE"
     },
     {
       "bodies": [
-        "BODY-PIN",
-        "BODY-COVER"
+        "BODY-COVER",
+        "BODY-RIVET"
       ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
       "declared_nominal_mm": 0.3,
       "evaluated_in_state": "S_CLOSED_LATCHED",
       "interaction_id": "INT-05",
-      "reason": "one or both bodies have no material in the declared region",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.3,
       "roi_box_mm": [
-        137.0,
-        147.0,
-        3.0,
-        13.0,
-        36.5,
-        39.0
+        136.0,
+        148.0,
+        2.0,
+        14.0,
+        40.2,
+        42.6
       ],
       "roi_excludes": null,
-      "status": "NOT_EVALUABLE",
+      "status": "PASS",
       "type": "DECLARED_CLEARANCE"
     },
     {
       "bodies": [
-        "BODY-PIN",
-        "BODY-ENCLOSURE"
+        "BODY-ENCLOSURE",
+        "BODY-RIVET"
       ],
       "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
       "declared_nominal_mm": 0.2,
@@ -128,10 +132,10 @@
       "measured_common_volume_mm3": 0.0,
       "measured_min_distance_mm": 0.2,
       "roi_box_mm": [
-        137.0,
-        147.0,
-        3.0,
-        13.0,
+        136.0,
+        148.0,
+        2.0,
+        14.0,
         35.0,
         39.0
       ],
@@ -141,25 +145,30 @@
     },
     {
       "bodies": [
-        "BODY-PIN",
-        "BODY-ENCLOSURE"
+        "BODY-ENCLOSURE",
+        "BODY-RIVET"
       ],
       "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
       "declared_nominal_mm": 0.3,
       "evaluated_in_state": "S_CLOSED_LATCHED",
       "interaction_id": "INT-07",
       "measured_common_volume_mm3": 0.0,
-      "measured_min_distance_mm": 3.9,
+      "measured_min_distance_mm": 0.3,
       "roi_box_mm": [
         136.0,
         148.0,
         2.0,
         14.0,
-        42.0,
-        43.7
+        33.1,
+        34.900000000000006
       ],
-      "roi_excludes": null,
-      "status": "FAIL",
+      "roi_excludes": [
+        "cyl_z",
+        142.0,
+        8.0,
+        2.75
+      ],
+      "status": "PASS",
       "type": "DECLARED_CLEARANCE"
     },
     {
@@ -178,7 +187,7 @@
         103.0,
         25.0,
         35.0,
-        44.5,
+        44.8,
         48.0
       ],
       "roi_excludes": null,
@@ -195,43 +204,45 @@
       "evaluated_in_state": "ASSEMBLY_ONLY",
       "evidence": "validation/predicate_report.json#latch",
       "interaction_id": "INT-09",
-      "measured_block_onset_mm": 2.0,
+      "measured_block_onset_mm": 1.05,
       "status": "PASS",
       "type": "DECLARED_COMPLIANT_INTERACTION"
     },
     {
       "bodies": [
-        "BODY-PIN",
-        "BODY-ENCLOSURE"
+        "BODY-ENCLOSURE",
+        "BODY-RIVET"
       ],
       "criterion": "compressed envelope fits the slot; arms cannot bottom out",
-      "declared_nominal_mm": 0.0834865,
+      "declared_nominal_mm": 0.2,
       "evaluated_in_state": "ASSEMBLY_ONLY",
       "evidence": "validation/predicate_report.json#barb",
       "interaction_id": "INT-10",
-      "measured_compressed_envelope_mm": 5.233027,
+      "measured_compressed_envelope_mm": 5.0,
       "status": "PASS",
       "type": "DECLARED_COMPLIANT_INTERACTION"
     },
     {
       "bodies": [
-        "BODY-PIN",
-        "BODY-COVER"
+        "BODY-COVER",
+        "BODY-RIVET"
       ],
+      "criterion": "min distance <= contact_tol (0.020) and no overlap",
       "declared_nominal_mm": 0.0,
       "evaluated_in_state": "S_CLOSED_LATCHED",
       "interaction_id": "INT-11",
-      "reason": "one or both bodies have no material in the declared region",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
       "roi_box_mm": [
         136.0,
         148.0,
         2.0,
         14.0,
-        32.5,
-        34.5
+        42.7,
+        45.5
       ],
       "roi_excludes": null,
-      "status": "NOT_EVALUABLE",
+      "status": "PASS",
       "type": "DECLARED_CONTACT"
     }
   ],
@@ -245,7 +256,7 @@
           "INT-02",
           "INT-08"
         ],
-        "BODY-COVER|BODY-PIN": [
+        "BODY-COVER|BODY-RIVET": [
           "INT-11"
         ]
       },
@@ -255,13 +266,13 @@
           "common_volume_mm3": 0.0,
           "min_distance_mm": 0.0
         },
-        "BODY-COVER|BODY-PIN": {
+        "BODY-COVER|BODY-RIVET": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-ENCLOSURE|BODY-RIVET": {
           "common_volume_mm3": 0.0,
           "min_distance_mm": 0.2
-        },
-        "BODY-ENCLOSURE|BODY-PIN": {
-          "common_volume_mm3": 0.0,
-          "min_distance_mm": 0.1
         }
       },
       "state": "S_CLOSED_LATCHED"
@@ -272,7 +283,7 @@
           "INT-01",
           "INT-02"
         ],
-        "BODY-COVER|BODY-PIN": [
+        "BODY-COVER|BODY-RIVET": [
           "INT-11"
         ]
       },
@@ -282,13 +293,13 @@
           "common_volume_mm3": 0.0,
           "min_distance_mm": 0.0
         },
-        "BODY-COVER|BODY-PIN": {
+        "BODY-COVER|BODY-RIVET": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-ENCLOSURE|BODY-RIVET": {
           "common_volume_mm3": 0.0,
           "min_distance_mm": 0.2
-        },
-        "BODY-ENCLOSURE|BODY-PIN": {
-          "common_volume_mm3": 0.0,
-          "min_distance_mm": 0.1
         }
       },
       "state": "S_CLOSED_RELEASED"
@@ -299,7 +310,7 @@
           "INT-01",
           "INT-02"
         ],
-        "BODY-COVER|BODY-PIN": [
+        "BODY-COVER|BODY-RIVET": [
           "INT-11"
         ]
       },
@@ -309,18 +320,18 @@
           "common_volume_mm3": 0.0,
           "min_distance_mm": 0.0
         },
-        "BODY-COVER|BODY-PIN": {
+        "BODY-COVER|BODY-RIVET": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-ENCLOSURE|BODY-RIVET": {
           "common_volume_mm3": 0.0,
           "min_distance_mm": 0.2
-        },
-        "BODY-ENCLOSURE|BODY-PIN": {
-          "common_volume_mm3": 0.0,
-          "min_distance_mm": 0.1
         }
       },
       "state": "S_OPEN"
     }
   ],
-  "status": "FAIL",
+  "status": "PASS",
   "step": 6
 }

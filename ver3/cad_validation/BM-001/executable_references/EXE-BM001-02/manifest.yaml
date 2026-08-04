@@ -1,20 +1,28 @@
 reference_id: EXE-BM001-02
-schema_version: 0.2.0
-title: guided captive sliding cover with integral snap features
+schema_version: 0.3.0
+title: snap-riveted captive sliding cover
 kind: ADMISSIBLE_EXECUTABLE_REFERENCE
 author_awareness: ORACLE_AWARE
-revision:
-  supersedes: quarter-turn cam design (v0.1)
-  driver: HCR-BM001-004, -005, -006, -007
-  removed: [BODY-CAM, quarter-turn cam, keyed cam bore, cam keeper, cam poses,
-            cam assembly steps, full-open lift-out]
-is_not:
-  - a source-only Demonstration
-  - evidence that the source alone leads here
-  - evidence that the design satisfies the rank-1 source
-maps_to_semantic_fixture: null
-mapping_fidelity: NEW_ADMISSIBLE_REALIZATION
 units: mm
+
+concept:
+  name: snap-riveted captive sliding cover
+  every_part_has_one_job:
+    ledges: carry the cover
+    guide_walls: locate it sideways
+    rivet: hold it down, everywhere, for its whole life
+    slot_ends: bound the travel
+    latch: hold it shut until deliberately released
+  supersedes:
+    - v0.1 quarter-turn cam, rejected by HCR-BM001-005 and -006
+    - v0.2 lipped rails with a loading relief outside the operating range
+  why_the_lips_went: >
+    They came from the cam design. A lipped channel closed at both ends cannot be
+    entered by any translation, so v0.2 needed a relief cut in the lips and a
+    loading position beyond the open bound just to get the cover in. Once the
+    rivet does the retaining the lips have no job, so the relief, the loading
+    position and the deck pocket they forced all went with them. Assembly is now
+    two straight presses.
 
 bodies:
   - id: BODY-ENCLOSURE
@@ -22,105 +30,103 @@ bodies:
     material_class: GENERIC_RIGID_POLYMER
     installed_as: DISCRETE
     role: >
-      Fixed body. Cavity; solid top panel; two ledges the cover runs on; two
-      lipped rails; the slot the captive pin runs in; the latch keeper bridge;
-      and the loading relief through which the cover is fitted.
+      Fixed body. Cavity; solid top panel the cover parks over; two ledges it
+      runs on; two guide walls that locate it sideways and nothing more; the
+      rivet slot whose ends bound the travel; the latch keeper bridge.
     features:
       - {id: FEA-E-LEDGE-F, what: front ledge top face; the cover runs on it}
       - {id: FEA-E-LEDGE-R, what: rear ledge top face}
-      - {id: FEA-E-LEDGE-UNDER, what: front ledge underside; the barb lugs recover against it}
-      - {id: FEA-E-LIP-F, what: front retaining lip, overhanging the channel}
-      - {id: FEA-E-LIP-R, what: rear retaining lip}
-      - {id: FEA-E-SLOT, what: slot through the front ledge; its ends are the terminal bounds}
+      - {id: FEA-E-LEDGE-UNDER, what: front ledge underside; the rivet lugs recover against it}
+      - {id: FEA-E-GUIDE-F, what: front guide wall inner face}
+      - {id: FEA-E-GUIDE-R, what: rear guide wall inner face}
+      - {id: FEA-E-SLOT, what: slot through the front ledge}
       - {id: FEA-E-SLOT-END-NEAR, what: near slot end; the open terminal bound}
       - {id: FEA-E-SLOT-END-FAR, what: far slot end; the closed terminal bound}
-      - {id: FEA-E-KEEPER, what: bridge across the aperture; the latch hook catches on its near face}
-      - {id: FEA-E-LATCH-RELIEF, what: pocket in the top panel giving the deflected beam room}
-      - {id: FEA-E-LOAD-RELIEF, what: lip relief through which the pin ear is lowered at assembly}
-      - {id: FEA-E-DECK, what: solid top panel; the cover parks over it when open}
+      - {id: FEA-E-KEEPER, what: bridge across the guide walls; the latch hook catches its near face}
+      - {id: FEA-E-LATCH-RELIEF, what: pocket under the beam path over the solid panel}
+      - {id: FEA-E-DECK, what: solid top panel}
       - {id: FEA-E-APERTURE, what: opening in the top}
   - id: BODY-COVER
     name: sliding cover
     material_class: GENERIC_COMPLIANT_POLYMER
-    installed_as: DISCRETE_SNAP_IN
-    role: >
-      Movable cover. Plate, the ear carrying the captive pin, and an integral
-      compliant latch beam cut from the plate with a hook and a lead-in ramp.
+    installed_as: DISCRETE
+    role: Movable cover with an integral compliant latch beam cut from the plate.
     material_model:
-      kinematically_rigid: [FEA-C-PLATE, FEA-C-EAR]
+      kinematically_rigid: [FEA-C-PLATE]
       declared_compliant_region: REG-C-LATCH-COMPLIANT
       compliant_members: [FEA-C-LATCH-BEAM, FEA-C-LATCH-HOOK, FEA-C-LATCH-RAMP]
       statement: >
         Only the latch beam is treated as deformable, and only while the hook is
-        alongside the keeper. The plate is a rigid slider everywhere else. The
-        whole cover is NOT claimed to deform.
+        alongside the keeper. The plate is a rigid slider everywhere else.
     configurations:
-      - {id: CFG-COVER-RELAXED, what: latch recovered; the state at rest and through most of the travel}
-      - {id: CFG-COVER-LATCH-DEFLECTED, what: beam pressed down; release and the first 10.5 mm of travel}
+      - {id: CFG-COVER-RELAXED, what: latch recovered; at rest and through most of the travel}
+      - {id: CFG-COVER-LATCH-DEFLECTED, what: beam pressed down; release and the first 10.5 mm}
     features:
       - {id: FEA-C-PLATE, what: the plate covering the aperture}
-      - {id: FEA-C-EAR, what: lateral ear over the front ledge, carrying the pin bore}
-      - {id: FEA-C-BORE, what: pin bore with a counterbore for the head}
+      - {id: FEA-C-BORE, what: rivet bore with a counterbore sinking the head flush}
       - {id: FEA-C-LATCH-BEAM, what: cantilever cut from the plate, rooted at its +X end}
-      - {id: FEA-C-LATCH-HOOK, what: hook standing above the beam tip; catches the keeper}
-      - {id: FEA-C-LATCH-RAMP, what: lead-in on the hook so closing deflects the beam}
-      - {id: FEA-C-RELEASE-FACE, what: the beam's own top face; the release surface, reached through the aperture}
-      - {id: FEA-C-LEAD, what: leading end face}
-      - {id: FEA-C-TRAIL, what: trailing end face}
-  - id: BODY-PIN
-    name: captive retention pin
+      - {id: FEA-C-LATCH-HOOK, what: hook standing above the beam tip}
+      - {id: FEA-C-LATCH-RAMP, what: lead-in so closing deflects the beam}
+      - {id: FEA-C-RELEASE-FACE, what: the beam's own top face; reached through the aperture}
+      - {id: FEA-C-EDGE-F, what: front edge, running against the front guide wall}
+      - {id: FEA-C-EDGE-R, what: rear edge}
+  - id: BODY-RIVET
+    name: snap rivet
     material_class: GENERIC_COMPLIANT_POLYMER
     installed_as: DISCRETE_SNAP_IN
     role: >
-      Fixed in the cover ear and running in the enclosure slot. Its head caps the
-      ear and its recovered snap lugs bear under the ledge, so the cover cannot
-      lift; the slot ends bound the travel.
+      Pressed once through the cover and the slot. Its head caps the cover and
+      its recovered lugs bear under the ledge, so the cover cannot lift at any
+      position; the slot ends bound the travel.
     material_model:
-      kinematically_rigid: [FEA-P-SHAFT, FEA-P-HEAD]
-      declared_compliant_region: REG-P-SNAP-COMPLIANT
-      compliant_members: [FEA-P-ARM-A, FEA-P-ARM-B, FEA-P-LUG-A, FEA-P-LUG-B]
-      statement: same principle as EXE-BM001-01; compliant only during ASM-03
+      kinematically_rigid: [FEA-R-HEAD, FEA-R-SHAFT]
+      declared_compliant_region: REG-R-SNAP-COMPLIANT
+      compliant_members: [FEA-R-ARM-A, FEA-R-ARM-B, FEA-R-LUG-A, FEA-R-LUG-B]
     configurations:
-      - {id: CFG-PIN-RELAXED, what: as-built; every operating state}
-      - {id: CFG-PIN-COMPRESSED, what: arms deflected inward; assembly only, never exported}
+      - {id: CFG-RIVET-RELAXED, what: as-built; every operating state}
+      - {id: CFG-RIVET-COMPRESSED, what: arms deflected across the slot; assembly only, never exported}
     features:
-      - {id: FEA-P-HEAD, what: head capping the cover ear}
-      - {id: FEA-P-SHAFT, what: shaft running in the enclosure slot}
-      - {id: FEA-P-ARM-A, what: first cantilever snap arm}
-      - {id: FEA-P-ARM-B, what: second cantilever snap arm}
-      - {id: FEA-P-LUG-A, what: retaining lug on arm A}
-      - {id: FEA-P-LUG-B, what: retaining lug on arm B}
-      - {id: FEA-P-LUG-SHOULDER, what: lug upper faces; bear under FEA-E-LEDGE-UNDER}
+      - {id: FEA-R-HEAD, what: head sunk flush in the cover counterbore}
+      - {id: FEA-R-SHAFT, what: shaft running in the slot}
+      - {id: FEA-R-ARM-A, what: first cantilever arm, deflecting across the slot width}
+      - {id: FEA-R-ARM-B, what: second cantilever arm}
+      - {id: FEA-R-LUG-A, what: retaining lug on arm A}
+      - {id: FEA-R-LUG-B, what: retaining lug on arm B}
+      - {id: FEA-R-LUG-SHOULDER, what: lug upper faces; the anti-withdrawal surfaces}
+      - {id: FEA-R-LEADIN, what: tapered tip that deflects the arms on insertion}
 
 declared_usable_access:
   region: {x: [103.0, 187.0], y: [13.0, 57.0], z: [45.0, 145.0]}
-  what: the part of the aperture open in the open state
   fraction: 84 of 90 mm
   human_decision: APPROVED (HCR-BM001-003)
 
-how_the_cover_is_captive_and_still_assemblable:
-  problem: >
-    A cover that cannot come out at full open cannot have gone in at full open
-    either. The two requirements fight, and something has to give.
-  resolution: >
-    The loading position is OUTSIDE the operating range. The lips carry a relief
-    at FEA-E-LOAD-RELIEF; the pin ear passes down through it only when the cover
-    is pushed well beyond its open bound. The pin is fitted afterwards, and from
-    then on FEA-E-SLOT limits travel to 0..84 mm, which never brings the ear back
-    under the relief.
-  consequence: >
-    Captive at every operating position including full open, and still
-    assemblable. Service removal needs the pin's arms compressed from below - a
-    deliberate act with a tool, not an ordinary lift.
+how_the_human_decisions_are_met:
+  HCR-BM001-003_84_of_90: travel 84 mm of a 90 mm aperture, unchanged
+  HCR-BM001-004_not_removable_at_full_open: >
+    the rivet lugs bear under FEA-E-LEDGE-UNDER at every position; measured at
+    0, 10, 40, 70 and 84 mm
+  HCR-BM001-005_no_separate_cam: >
+    no cam exists. The rivet is pressed in once at assembly and cannot be
+    withdrawn, so nothing is ever removed, set aside or managed by the user
+  HCR-BM001-006_no_orientation_free_cam: >
+    no cam. The latch has one engaged and one released state and no orientation
+    to lose
+  pin_retention_required: BODY-RIVET running in FEA-E-SLOT
+  snap_fit_solution: >
+    two snap features - the rivet's arms and the cover's latch beam - each with
+    a declared compliant region
+  anti_withdrawal_snap_barb: >
+    the lugs span 7.6 mm across a 5.4 mm slot once recovered, so they cannot pass
+    back through the opening they entered
 
 known_limitations:
   - id: LIM-01
-    what: Service removal requires access under the front ledge to compress the pin arms.
+    what: The rivet cannot be removed without destroying it.
     status: DECLARED_DESIGN_CHOICE
     why: >
-      That is the price of the cover being captive at full open, which
-      HCR-BM001-004 requires. Whether the access is practical is a judgement
-      nobody has made.
+      That is what makes the cover captive at full open, which HCR-BM001-004
+      requires. A serviceable version would need a released state for the arms,
+      and nothing in the source asks for one.
   - id: LIM-02
     what: The latch release is the beam's own face, not a shaped finger pad.
     status: DECLARED_DESIGN_CHOICE
@@ -129,10 +135,8 @@ known_limitations:
       it. Whether a bare beam face is comfortable to press is an ergonomics
       question this pilot does not answer.
   - id: LIM-03
-    what: >
-      The compliant states are declared kinematic configurations, not continuum
-      deformations.
+    what: The compliant states are declared kinematic configurations.
     status: DECLARED_MODELLING_APPROXIMATION
     why: >
       They test geometric passage and engagement. They do not predict strain, and
-      exact volume behaviour under real bending is not claimed.
+      no force is computed anywhere in this reference.

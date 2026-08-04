@@ -1,12 +1,12 @@
 reference_id: EXE-BM001-02
-schema_version: 0.2.0
+schema_version: 0.3.0
 units: mm
 
 rule: >
   The prohibition is undeclared volumetric overlap, not positive clearance
-  everywhere. Two bodies may touch wherever this file says they touch. Any pair
-  whose common volume exceeds overlap_tol_mm3 in any state or at any sampled
-  point of any motion segment is a failure regardless of what is declared here.
+  everywhere. Any pair whose common volume exceeds overlap_tol_mm3 in any state
+  or at any sampled point of any motion segment is a failure regardless of what
+  is declared here.
 
 evaluation_tolerance:
   contact_tol_mm: 0.02
@@ -31,37 +31,33 @@ interactions:
 
   - id: INT-03
     bodies: [BODY-COVER, BODY-ENCLOSURE]
-    features: [FEA-C-EAR, FEA-E-LIP-F]
+    features: [FEA-C-EDGE-F, FEA-E-GUIDE-F]
     type: DECLARED_CLEARANCE
     nominal_clearance_mm: 0.2
     active: ALL_STATES
     role: >
-      the front lip caps the pin ear. The PLATE deliberately does not reach under
-      the lips - it has to pass between them to be loaded at all - so the ear is
-      what the lip overlaps, and the pin lugs are what actually hold the cover
-      down.
+      lateral running clearance against the front guide wall. Guidance only:
+      nothing overhangs the cover, because the rivet does the holding down.
 
   - id: INT-04
     bodies: [BODY-COVER, BODY-ENCLOSURE]
-    features: [FEA-C-PLATE, FEA-E-LIP-R]
+    features: [FEA-C-EDGE-R, FEA-E-GUIDE-R]
     type: DECLARED_CLEARANCE
-    nominal_clearance_mm: 0.4
+    nominal_clearance_mm: 0.2
     active: ALL_STATES
-    role: >
-      lateral guide clearance between the plate edge and the rear lip edge. Not
-      an anti-lift relation on this side; that is the pin's job.
+    role: lateral running clearance against the rear guide wall
 
   - id: INT-05
-    bodies: [BODY-PIN, BODY-COVER]
-    features: [FEA-P-SHAFT, FEA-C-BORE]
+    bodies: [BODY-COVER, BODY-RIVET]
+    features: [FEA-C-BORE, FEA-R-SHAFT]
     type: DECLARED_CLEARANCE
     nominal_clearance_mm: 0.3
     active: ALL_STATES
-    role: locates the pin in the cover ear; the pin travels with the cover
+    role: the shaft in the cover bore; the rivet travels with the cover
 
   - id: INT-06
-    bodies: [BODY-PIN, BODY-ENCLOSURE]
-    features: [FEA-P-SHAFT, FEA-E-SLOT]
+    bodies: [BODY-ENCLOSURE, BODY-RIVET]
+    features: [FEA-E-SLOT, FEA-R-SHAFT]
     type: DECLARED_CLEARANCE
     nominal_clearance_mm: 0.2
     active: ALL_STATES
@@ -71,16 +67,17 @@ interactions:
     determines: TERMINAL_BOUNDS
 
   - id: INT-07
-    bodies: [BODY-PIN, BODY-ENCLOSURE]
-    features: [FEA-P-LUG-SHOULDER, FEA-E-LEDGE-UNDER]
+    bodies: [BODY-ENCLOSURE, BODY-RIVET]
+    features: [FEA-E-LEDGE-UNDER, FEA-R-LUG-SHOULDER]
     type: DECLARED_CLEARANCE
     nominal_clearance_mm: 0.3
     active: ALL_STATES
     role: >
       the recovered lugs stand under the ledge. They are what stops the cover
-      lifting at any position, including full open. Whether they WITHSTAND a
-      pull is a force question and is NOT_VERIFIED.
-    determines: COVER_CAPTIVITY
+      lifting at any position, full open included, and what stops the rivet
+      withdrawing. Whether they WITHSTAND a pull is a force question and is
+      NOT_VERIFIED.
+    determines: COVER_CAPTIVITY_AND_ANTI_WITHDRAWAL
 
   - id: INT-08
     bodies: [BODY-COVER, BODY-ENCLOSURE]
@@ -91,44 +88,43 @@ interactions:
     role: >
       the recovered hook stands 1.0 mm clear of the keeper's near face. That gap
       is the closed-state free play: the cover can shift 1 mm before the hook
-      bites, and then it is blocked. Declaring it a CONTACT would be wrong - the
-      measurement says otherwise, and the latch probe reports the block onset.
+      bites, and then it is blocked. Declaring it a CONTACT would contradict the
+      measurement.
     determines: CLOSED_STATE_RETENTION
 
   - id: INT-09
     bodies: [BODY-COVER, BODY-ENCLOSURE]
     features: [FEA-C-LATCH-RAMP, FEA-E-KEEPER]
     type: DECLARED_COMPLIANT_INTERACTION
-    nominal_clearance_mm: 0.0
     active: [M1_RELEASE, M2_OPEN, M3_CLOSE]
     compliant_region: REG-C-LATCH-COMPLIANT
-    deflection_mm: 2.4
+    deflection_mm: 2.6
     role: >
       the declared compliant passage of the latch past the keeper. On closing the
-      ramp deflects the beam; on opening the beam is held down until the ramp
+      ramp deflects the beam; on opening the beam stays down until the ramp
       clears. Measured by the latch probe, not assumed.
     not_established: strain, release effort, snap force, fatigue
 
   - id: INT-10
-    bodies: [BODY-PIN, BODY-ENCLOSURE]
-    features: [FEA-P-LUG-A, FEA-E-SLOT]
+    bodies: [BODY-ENCLOSURE, BODY-RIVET]
+    features: [FEA-E-SLOT, FEA-R-LEADIN]
     type: DECLARED_COMPLIANT_INTERACTION
-    nominal_clearance_mm: 0.083
     active: [ASM-03]
-    compliant_region: REG-P-SNAP-COMPLIANT
+    compliant_region: REG-R-SNAP-COMPLIANT
     deflection_mm: 1.30
     role: >
-      the declared compliant passage of the barb through the slot at assembly.
-      The compressed envelope is measured against the slot rather than assumed.
+      the declared compliant passage of the arms through the slot as the rivet is
+      pressed home. The compressed envelope is measured against the slot width
+      rather than assumed.
     not_established: strain, insertion force, pull-out force, fatigue
 
   - id: INT-11
-    bodies: [BODY-PIN, BODY-COVER]
-    features: [FEA-P-HEAD, FEA-C-BORE]
+    bodies: [BODY-COVER, BODY-RIVET]
+    features: [FEA-C-BORE, FEA-R-HEAD]
     type: DECLARED_CONTACT
     nominal_clearance_mm: 0.0
     active: ALL_STATES
-    role: the head seats in the ear counterbore and caps it
+    role: the head seats in the counterbore and caps the cover
 
 pairs_not_declared: []
 

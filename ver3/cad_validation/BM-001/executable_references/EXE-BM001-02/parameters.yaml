@@ -1,20 +1,33 @@
 reference_id: EXE-BM001-02
 units: mm
-schema_version: 0.2.0
+schema_version: 0.3.0
 
-revision:
-  supersedes: quarter-turn cam design (v0.1)
-  driver: HCR-BM001-004, -005, -006, -007
-  what_changed: >
-    BODY-CAM and every cam feature removed. The cover is now held captive by a
-    snap-retained pin running in an enclosure slot, and the closed state is held
-    by an integral compliant snap latch. No part is handled separately by the
-    user.
+concept:
+  name: snap-riveted captive sliding cover
+  one_line: >
+    A cover that slides on two ledges between guide walls, held down for its
+    whole life by a single snap rivet running in a slot, and held shut by a
+    compliant latch cut from the cover itself.
+  supersedes:
+    - v0.1 quarter-turn cam (rejected by HCR-BM001-005 and -006)
+    - v0.2 lipped rails with a loading relief outside the operating range
+  why_v0_2_was_abandoned: >
+    It kept the cam design's lipped rails, then needed a relief cut in those lips
+    and a loading position beyond the open bound to get the cover in at all. That
+    is a workaround wearing the shape of a feature. With the rivet doing the
+    retaining, the lips have no job left - so they are gone, and with them the
+    relief, the loading position and the deck pocket they forced.
+  what_each_part_does:
+    ledges: carry the cover
+    guide_walls: locate it sideways
+    rivet: hold it down, everywhere, for its whole life
+    slot_ends: bound the travel
+    latch: hold it shut until deliberately released
 
 frame:
   description: >
     Origin at the enclosure's minimum outer corner. X is length (the sliding
-    direction), Y is depth, Z is up. The enclosure is fixed.
+    direction), Y is depth, Z is up.
 
 note_on_absolute_size: >
   UNR-BM-001-003 leaves every absolute dimension open. None of these numbers is a
@@ -33,75 +46,51 @@ parameters:
     range: [40.0, 200.0]
   - name: box_z
     value: 40.0
-    purpose: height to the plane the cover runs on
+    purpose: height of the plane the cover slides on
     range: [20.0, 150.0]
   - name: wall
     value: 3.0
     purpose: uniform wall and floor thickness
     range: [1.5, 10.0]
-  - name: rail_top_z
-    value: 48.0
-    purpose: top of the side rails
-    range: [42.0, 80.0]
+  - name: guide_top_z
+    value: 46.0
+    purpose: >
+      top of the two side guide walls. They locate the cover sideways and nothing
+      more. There is no overhanging lip: the rivet holds the cover down, and a
+      lip would only make the cover impossible to fit.
+    range: [41.0, 80.0]
   - name: far_wall_x
     value: 187.0
-    purpose: >
-      inner face of the far end wall. The closed terminal bound; the near end is
-      deliberately open so the cover can be loaded, and the near travel bound is
-      the pin slot instead of a wall.
+    purpose: inner face of the far end wall
     range: [40.0, 380.0]
 
-  # -------------------------------------------------------------------- deck
+  # ------------------------------------------------------- deck and aperture
   - name: deck_x1
     value: 97.0
     purpose: >
-      the solid top panel runs from the near wall to here. Beyond it is the
-      aperture. The panel is what the cover parks over when open.
+      the solid top panel runs from the near wall to here; beyond it is the
+      aperture. A sliding cover has to park somewhere and this is that surface.
     range: [20.0, 320.0]
   - name: deck_z0
     value: 37.0
     purpose: underside of the top panel
     range: [10.0, 39.0]
-
-  # ------------------------------------------------------------------- rails
   - name: ledge_y
     value: 13.0
     purpose: >
-      inboard edge of the two ledges the cover runs on. The aperture between
-      them is y = ledge_y to box_y - ledge_y.
+      inboard edge of the two ledges the cover runs on. The aperture between them
+      is y = ledge_y to box_y - ledge_y.
     range: [6.0, 30.0]
   - name: ledge_z0
     value: 34.0
-    purpose: underside of the ledges; the snap barb recovers against this face
+    purpose: >
+      underside of the ledges. The rivet lugs recover against this face, so it is
+      what actually keeps the cover down.
     range: [10.0, 39.0]
-  - name: lip_inner_y
-    value: 12.0
-    purpose: >
-      inboard edge of the retaining lips. Deliberately INBOARD of the cover
-      plate edge, so the lips overlap the plate and resist lift directly.
-    range: [5.0, 29.0]
-  - name: lip_z0
-    value: 45.2
-    purpose: underside of the retaining lips; cover top plus slot_gap
-    range: [40.5, 60.0]
-  - name: slot_gap
+  - name: guide_gap
     value: 0.2
-    purpose: running clearance between the cover and its channel
+    purpose: running clearance between the cover edge and each guide wall
     range: [0.05, 1.0]
-  - name: load_relief_x0
-    value: 34.0
-    purpose: >
-      start of the lip relief through which the cover's pin ear is lowered during
-      assembly.
-    range: [4.0, 300.0]
-  - name: load_relief_x1
-    value: 50.0
-    purpose: >
-      end of the lip relief. The ear only reaches this band when the cover is
-      pushed BEYOND its open bound, which the pin slot prevents once the pin is
-      fitted. That is what makes the cover captive at full open while still being
-      assemblable.
-    range: [5.0, 320.0]
 
   # ----------------------------------------------------------------- closure
   - name: cover_len
@@ -115,72 +104,68 @@ parameters:
   - name: travel
     value: 84.0
     purpose: >
-      slide from closed to open. Set by the pin slot, not by an end wall.
-      Approved at 84 of a 90 mm aperture by HCR-BM001-003.
+      slide from closed to open, set by the slot ends. 84 of a 90 mm aperture,
+      approved by HCR-BM001-003.
     range: [10.0, 350.0]
 
-  # ------------------------------------------------- captive pin and its slot
-  - name: pin_offset_x
+  # ------------------------------------------------------ snap rivet and slot
+  - name: rivet_offset_x
     value: 45.0
     purpose: >
-      pin position measured from the cover's trailing end. Mid-cover, so the
-      slot it needs sits over solid ledge at every point of the travel.
+      rivet position from the cover's trailing end. Mid-cover, so the slot it
+      needs lies over solid ledge at every point of the travel.
     range: [10.0, 300.0]
-  - name: pin_y
+  - name: rivet_y
     value: 8.0
-    purpose: Y of the pin axis, over the centre of the front ledge
+    purpose: Y of the rivet axis, over the centre of the front ledge
     range: [4.0, 30.0]
-  - name: pin_shaft_d
+  - name: rivet_shaft_d
     value: 5.0
-    purpose: pin shaft diameter, running in the enclosure slot
+    purpose: shaft diameter, running in the enclosure slot
     range: [2.0, 14.0]
-  - name: pin_head_d
-    value: 7.5
+  - name: rivet_head_d
+    value: 9.0
     purpose: >
-      pin head diameter. Wider than the cover's bore so the head caps the ear,
-      and small enough to stay inside the running channel - at 11.0 it fouled
-      the rail, which the interference check caught.
+      head diameter. Wider than the cover counterbore, so the head caps the cover
+      and the cover cannot rise off the rivet.
     range: [6.0, 24.0]
-  - name: pin_head_h
-    value: 2.5
-    purpose: pin head height, sitting in a counterbore in the cover ear
+  - name: rivet_head_h
+    value: 2.0
+    purpose: head height, sunk in a counterbore so it sits flush with the cover
     range: [1.0, 8.0]
-  - name: pin_bore_d
+  - name: cover_bore_d
     value: 5.6
     purpose: >
-      bore through the cover ear. Wider than the slot, because the compressed
-      barb has to pass through the COVER before it reaches the slot - at 5.2 it
-      did not fit and the assembly sweep caught it.
-    range: [2.1, 14.5]
+      bore through the cover. Wider than the slot, because the compressed barb
+      passes through the COVER before it reaches the slot.
+    range: [2.1, 16.0]
   - name: slot_w
     value: 5.4
     purpose: >
-      width of the enclosure slot the shaft runs in; 0.2 radial clearance so the
-      pin slides without binding
+      width of the enclosure slot; 0.2 radial clearance on the shaft. The slot
+      ENDS are the terminal bounds, which is why it is exactly travel + slot_w
+      long and no longer.
     range: [2.2, 15.0]
-  - name: slot_end_margin
-    value: 0.0
-    purpose: >
-      extra slot length beyond the travel. Zero on purpose: the slot ends ARE the
-      terminal bounds, so lengthening it would move them.
-    range: [0.0, 5.0]
 
-  # ---------------------------------------------------- pin snap-barb retention
+  # ------------------------------------------------ anti-withdrawal snap barb
   - name: barb_d
     value: 7.6
     purpose: >
-      recovered span across the barb lugs. Wider than slot_w, so the lugs cannot
-      re-enter the slot and the pin cannot withdraw upward.
+      recovered span across the barb lugs. Wider than the slot, so once recovered
+      the lugs cannot pass back through it and the rivet cannot withdraw. This is
+      the anti-withdrawal feature.
     range: [3.0, 16.0]
   - name: barb_arm_inner_r
     value: 1.4
     purpose: >
       inner radius of each cantilever arm. The arms stand 2.8 apart, which must
-      exceed 2 x barb_deflection so they cannot bottom out during insertion.
+      exceed 2 x barb_deflection or they bottom out before the lugs clear.
     range: [0.3, 4.0]
   - name: barb_beam_w
     value: 2.6
-    purpose: width of each cantilever arm across the slot
+    purpose: >
+      arm width across the slot. Narrow in the direction the arm does not move,
+      which is what lets the pair enter a bounded opening at all.
     range: [0.8, 5.0]
   - name: barb_lug_len
     value: 2.4
@@ -188,84 +173,76 @@ parameters:
     range: [1.0, 8.0]
   - name: barb_leadin_len
     value: 2.2
-    purpose: tapered lead-in that deflects the arms on insertion
+    purpose: tapered lead-in that deflects the arms as the rivet is pressed in
     range: [0.5, 8.0]
   - name: barb_deflection
     value: 1.30
     purpose: >
       inward deflection of each arm in the declared compressed state. Sized
-      against the arm's greatest distance from the pin axis, not its flat span:
-      a slot is bounded in one direction but the lug corners are not.
+      against the arm's greatest distance from the axis, not its flat span: a
+      bounded opening bounds the corners too.
     range: [0.0, 5.0]
   - name: barb_gap
     value: 0.3
     purpose: >
       gap between the recovered lug shoulders and the ledge underside. The cover
-      is located by the pin head on the ear, not by the barb, so this stays a
-      clearance.
+      is located by the head, not by the barb, so this stays a clearance.
     range: [0.05, 2.0]
 
-  # --------------------------------------------- integral closed-state latch
+  # ----------------------------------------------- integral closed-state latch
   - name: latch_y0
     value: 25.0
-    purpose: >
-      inboard edge of the latch beam. Well clear of the lips: at the rail the
-      only space above the cover is 0.2 mm, so a latch there cannot exist.
+    purpose: inboard edge of the latch beam, well clear of the guide walls
     range: [13.0, 50.0]
+  - name: latch_w
+    value: 10.0
+    purpose: width of the latch beam across Y
+    range: [3.0, 30.0]
   - name: latch_slot_w
     value: 1.6
     purpose: width of the two slots that free the beam from the plate
     range: [0.4, 4.0]
   - name: latch_len
-    value: 24.0
-    purpose: free length of the compliant latch beam, rooted at its +X end
+    value: 26.0
+    purpose: free length of the compliant beam, rooted at its +X end
     range: [6.0, 60.0]
-  - name: latch_w
-    value: 10.0
-    purpose: width of the latch beam across Y
-    range: [3.0, 30.0]
-  - name: latch_t
-    value: 2.0
-    purpose: thickness of the latch beam; the compliant member
-    range: [0.6, 6.0]
   - name: latch_hook_h
     value: 2.2
-    purpose: >
-      height the hook stands above the beam. Must exceed the keeper's downward
-      projection so the hook can catch behind it.
+    purpose: height the hook stands above the cover top
     range: [0.6, 6.0]
   - name: latch_hook_len
     value: 3.0
     purpose: axial length of the hook
     range: [1.0, 8.0]
   - name: latch_deflection
-    value: 2.4
+    value: 2.6
     purpose: >
-      downward deflection of the latch beam needed to clear the keeper. The
-      release travel; larger than latch_hook_h so the hook fully clears.
+      downward deflection needed for the hook to clear the keeper. Larger than
+      latch_hook_h so the hook fully clears; this is also the release travel.
     range: [0.2, 8.0]
   - name: keeper_x0
     value: 93.0
     purpose: >
-      X of the keeper bridge. Chosen so it is always over the cover - at full
-      open the cover reaches x = 103 - and therefore never obstructs the open
-      aperture.
+      X of the keeper bridge. It has to sit where the cover always is - at full
+      open the cover still reaches x = 103 - or it would stand in the opening.
     range: [20.0, 380.0]
   - name: keeper_len
     value: 3.0
-    purpose: axial length of the keeper rib
+    purpose: axial length of the keeper bridge
     range: [1.0, 10.0]
+  - name: keeper_z0
+    value: 45.4
+    purpose: underside of the keeper bridge; cover top plus running clearance
+    range: [41.0, 60.0]
   - name: keeper_z1
-    value: 47.0
+    value: 47.5
     purpose: top of the keeper bridge
-    range: [45.5, 60.0]
+    range: [42.0, 62.0]
 
   # --------------------------------------------------------------- evaluation
   - name: contact_tol
     value: 0.02
-    purpose: >
-      evaluation tolerance for declared contact. An evaluation tolerance, never a
-      material allowance.
+    purpose: evaluation tolerance for declared contact; never a material allowance
     range: [0.001, 0.02]
   - name: overlap_tol_mm3
     value: 1.0e-6
@@ -275,4 +252,4 @@ parameters:
 materials:
   BODY-ENCLOSURE: GENERIC_RIGID_POLYMER
   BODY-COVER: GENERIC_COMPLIANT_POLYMER
-  BODY-PIN: GENERIC_COMPLIANT_POLYMER
+  BODY-RIVET: GENERIC_COMPLIANT_POLYMER

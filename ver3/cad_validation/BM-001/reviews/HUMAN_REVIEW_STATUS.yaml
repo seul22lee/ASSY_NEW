@@ -1,8 +1,8 @@
-schema_version: 0.1.0
+schema_version: 0.2.0
 human_decisions_recorded: true
 revisions_completed:
   EXE-BM001-01: true
-  EXE-BM001-02: false
+  EXE-BM001-02: true
 independent_human_review_complete: false
 status: HUMAN_REVIEW_PENDING
 
@@ -16,14 +16,51 @@ EXE-BM001-01:
   independently_reviewed: false
 
 EXE-BM001-02:
-  revision_completed: false
-  status: PENDING_REDESIGN
-  outstanding_decisions: [HCR-BM001-004, HCR-BM001-005, HCR-BM001-006, HCR-BM001-007]
-  note: >
-    Untouched in this session. It still contains BODY-CAM, the quarter-turn cam
-    geometry and the full-open lift-out that human review rejected. Nothing about
-    it should be read as revised.
+  revision_completed: true
+  drivers: [HCR-BM001-004, HCR-BM001-005, HCR-BM001-006, HCR-BM001-007]
+  topology: snap-riveted captive sliding cover
+  previous_geometry_signature: e99b88b70ec523a42e73685a2542b0a0678f66ca920cd193d302db9146d83c39
+  revised_geometry_signature: 870af742b622b85628ceb5beb4f6fc8561993abdd9c6b6883f9e735174106649
+  validation: all ten steps PASS, 0 findings, 9/9 negative controls detected
+  predicate_totals: {PASS: 12, FAIL: 0, NOT_VERIFIED: 0, NOT_EVALUABLE: 1}
+  independently_reviewed: false
+  how_each_decision_is_met:
+    HCR-BM001-004_captive_at_full_open: >
+      a 3 mm upward translation is blocked at 0, 10, 40, 70 and 84 mm by
+      14.222 mm^3 of rivet-lug interference at every one of them
+    HCR-BM001-005_no_user_handled_separate_part: >
+      the rivet is pressed in once at assembly and cannot be withdrawn; the
+      release feature is the latch beam's own top face, integral to the cover
+    HCR-BM001-006_no_orientation_free_cam: >
+      no cam exists. The latch has one engaged and one released configuration and
+      no orientation to lose
+    HCR-BM001-007_directed_topology: >
+      guided captive sliding cover (ledges plus guide walls), integrated snap-in
+      captive retention (the rivet, anti-withdrawal lugs spanning 7.6 mm across a
+      5.4 mm slot), integrated releasable closed-state snap latch (the compliant
+      beam against the keeper)
+  superseded_versions:
+    - version: v0.1
+      what: rigid quarter-turn cam retention
+      why: rejected by HCR-BM001-005 and HCR-BM001-006
+    - version: v0.2
+      what: >
+        lipped rails with a relief cut in the lips and a loading position beyond
+        the open bound
+      why: >
+        it kept the cam design's lips and then needed a contrivance to be
+        assemblable at all. Rejected in rework, not by a human decision.
+  artifacts_deleted: >
+    BODY-CAM geometry, pin.step, pin.brep, the s_closed_retained_* and
+    section_pin_* renders, and REDESIGN_STATUS.md. Nothing in the directory now
+    describes a superseded topology.
+  check_strengthened_this_revision: >
+    NRM-BM-001-003's "is this a region the cover controls" clause was being
+    measured in the clear prism above the aperture, where the cover never goes. It
+    read 0 mm^3 and passed vacuously. It is now measured in the aperture band
+    (18160 mm^3) and guarded by the new control CTL-09.
 
 note: >
   Decisions HCR-BM001-001..007 authorize the revisions. They do not approve their
-  result. No person has seen the revised geometry or the new section views.
+  result. No person has seen the revised geometry or the new section views of
+  either reference, and nothing downstream may describe either as human-approved.

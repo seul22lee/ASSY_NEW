@@ -33,38 +33,35 @@ P = B.load_params()
 G = B.geom(P)
 
 CE = ("BODY-COVER", "BODY-ENCLOSURE")
-CP = ("BODY-COVER", "BODY-PIN")
-PE = ("BODY-ENCLOSURE", "BODY-PIN")
+CR = ("BODY-COVER", "BODY-RIVET")
+ER = ("BODY-ENCLOSURE", "BODY-RIVET")
 
 CONTACT_BY_STATE = {
-    "S_CLOSED_LATCHED": {CE: ["INT-01", "INT-02", "INT-08"], CP: ["INT-11"]},
-    "S_CLOSED_RELEASED": {CE: ["INT-01", "INT-02"], CP: ["INT-11"]},
-    "S_OPEN": {CE: ["INT-01", "INT-02"], CP: ["INT-11"]},
+    "S_CLOSED_LATCHED": {CE: ["INT-01", "INT-02", "INT-08"], CR: ["INT-11"]},
+    "S_CLOSED_RELEASED": {CE: ["INT-01", "INT-02"], CR: ["INT-11"]},
+    "S_OPEN": {CE: ["INT-01", "INT-02"], CR: ["INT-11"]},
 }
-SEGMENT_CONTACT = {"M1_RELEASE": {CE, CP}, "M2_OPEN": {CE, CP}, "M3_CLOSE": {CE, CP}}
+SEGMENT_CONTACT = {"M1_RELEASE": {CE, CR}, "M2_OPEN": {CE, CR}, "M3_CLOSE": {CE, CR}}
 
 _cx = G["cover_closed_x0"]
+RX, RY = G["rivet_closed_x"], P["rivet_y"]
 ROI = {
     "INT-01": ("S_CLOSED_LATCHED", (120.0, 150.0, 6.0, 13.0, 38.0, 42.0)),
     "INT-02": ("S_CLOSED_LATCHED", (120.0, 150.0, 57.0, 64.0, 38.0, 42.0)),
-    "INT-03": ("S_CLOSED_LATCHED", (G["pin_closed_x"] - 6.0, G["pin_closed_x"] + 6.0,
-                                    4.0, 11.5, 44.0, 46.5)),
-    "INT-04": ("S_CLOSED_LATCHED", (120.0, 150.0, 56.0, 59.5, 41.0, 44.5)),
+    "INT-03": ("S_CLOSED_LATCHED", (120.0, 150.0, 1.5, 4.0, 41.0, 44.0)),
+    "INT-04": ("S_CLOSED_LATCHED", (120.0, 150.0, 66.0, 68.5, 41.0, 44.0)),
     # below the head, or the head seat (INT-11) reports as the shaft clearance
-    "INT-05": ("S_CLOSED_LATCHED", (G["pin_closed_x"] - 5.0, G["pin_closed_x"] + 5.0,
-                                    P["pin_y"] - 5.0, P["pin_y"] + 5.0, 36.5, 39.0)),
-    "INT-06": ("S_CLOSED_LATCHED", (G["pin_closed_x"] - 5.0, G["pin_closed_x"] + 5.0,
-                                    P["pin_y"] - 5.0, P["pin_y"] + 5.0, 35.0, 39.0)),
-    # radially outside the slot, so the 0.2 slot clearance cannot masquerade as
-    # the 0.3 axial shoulder gap
-    # lug shoulders inside the cover counterbore, radially outside the shaft
-    "INT-07": ("S_CLOSED_LATCHED", (G["pin_closed_x"] - 6.0, G["pin_closed_x"] + 6.0,
-                                    P["pin_y"] - 6.0, P["pin_y"] + 6.0,
-                                    G["barb_top"] - 0.5, G["barb_top"] + 1.2)),
+    "INT-05": ("S_CLOSED_LATCHED", (RX - 6.0, RX + 6.0, RY - 6.0, RY + 6.0, 40.2, 42.6)),
+    "INT-06": ("S_CLOSED_LATCHED", (RX - 6.0, RX + 6.0, RY - 6.0, RY + 6.0, 35.0, 39.0)),
+    # the lug shoulders under the ledge, radially outside the shaft so the slot
+    # clearance cannot masquerade as the shoulder gap
+    "INT-07": ("S_CLOSED_LATCHED", (RX - 6.0, RX + 6.0, RY - 6.0, RY + 6.0,
+                                    G["lug_top"] - 0.6, G["lug_top"] + 1.2),
+               ("cyl_z", RX, RY, 2.75)),
     "INT-08": ("S_CLOSED_LATCHED", (P["keeper_x0"] - 1.0, _cx + 2.0 * P["latch_hook_len"],
-                                    P["latch_y0"], G["latch_y1"], 44.5, 48.0)),
-    "INT-11": ("S_CLOSED_LATCHED", (G["pin_closed_x"] - 6.0, G["pin_closed_x"] + 6.0,
-                                    P["pin_y"] - 6.0, P["pin_y"] + 6.0, 32.5, 34.5)),
+                                    P["latch_y0"], G["latch_y1"], 44.8, 48.0)),
+    "INT-11": ("S_CLOSED_LATCHED", (RX - 6.0, RX + 6.0, RY - 6.0, RY + 6.0,
+                                    G["head_bot"] - 0.3, G["cover_top"] + 0.5)),
 }
 
 SAMPLING = {"M1_RELEASE": (6 if FAST else 12, []),
@@ -73,10 +70,9 @@ SAMPLING = {"M1_RELEASE": (6 if FAST else 12, []),
             "M3_CLOSE": (24 if FAST else 90,
                          [] if FAST else [(0.82, 1.0, 24), (0.0, 0.03, 20)])}
 
-COLORS = {"BODY-ENCLOSURE": "#8fb0cc", "BODY-COVER": "#d7a878", "BODY-PIN": "#a79ccc"}
-SECTIONS = (("S_CLOSED_LATCHED", "y", P["pin_y"], "section_pin_closed"),
-            ("S_OPEN", "y", P["pin_y"], "section_pin_open"))
-ALPHAS = {"BODY-ENCLOSURE": 0.30, "BODY-COVER": 1.0, "BODY-PIN": 1.0}
+COLORS = {"BODY-ENCLOSURE": "#8fb0cc", "BODY-COVER": "#d7a878", "BODY-RIVET": "#a79ccc"}
+SECTIONS = ()          # the review set is produced by review_views.py
+ALPHAS = {"BODY-ENCLOSURE": 0.30, "BODY-COVER": 1.0, "BODY-RIVET": 1.0}
 
 CTX = vc.Ctx("EXE-BM001-02", HERE, P, B, CONTACT_BY_STATE, SEGMENT_CONTACT,
              ROI, SAMPLING, COLORS, SECTIONS, alphas=ALPHAS)
@@ -88,8 +84,19 @@ ACCESS = (G["cover_closed_x0"] - P["travel"] + P["cover_len"], P["far_wall_x"],
           P["ledge_y"], G["ledge_far_y"], G["cover_top"], G["cover_top"] + 100.0)
 
 
+# The clear space ABOVE the aperture, which nothing may intrude on at S_OPEN.
 def access_prism():
     return vc.roi_box(*ACCESS)
+
+
+# The same footprint taken through the APERTURE BAND itself, between the ledge
+# top and the cover top. This is where the cover sits when it is closed, so it
+# is the band in which "does the cover actually control this region" can be
+# asked at all. Asking it in the prism above would always answer zero, since the
+# cover never rises into that space - a check that can only ever pass vacuously.
+def control_prism():
+    return vc.roi_box(ACCESS[0], ACCESS[1], ACCESS[2], ACCESS[3],
+                      P["box_z"], G["cover_top"])
 
 
 def cavity_solid(enclosure):
@@ -103,18 +110,18 @@ def terminal_probe(bodies):
     rows = []
     for slide, which in ((-1.0, "closed"), (-0.3, "closed"), (0.0, "closed"),
                          (t / 2, None), (t, "open"), (t + 0.3, "open"), (t + 1.0, "open")):
-        c = vc.by_id(B.probe_pose(bodies, P, slide, lift=0.0, latch_down=0.0))
+        c = vc.by_id(B.probe_pose(bodies, P, slide, lift=0.0))
         rows.append({"slide_mm": round(slide, 4),
-                     "pin_enclosure_common_volume_mm3":
-                         round(cv.common_volume(c["BODY-PIN"].shape,
+                     "rivet_enclosure_common_volume_mm3":
+                         round(cv.common_volume(c["BODY-RIVET"].shape,
                                                 c["BODY-ENCLOSURE"].shape), 9),
                      "outside_bounds": slide < 0.0 or slide > t, "bound": which})
-    inside = all(r["pin_enclosure_common_volume_mm3"] <= OVERLAP_TOL
+    inside = all(r["rivet_enclosure_common_volume_mm3"] <= OVERLAP_TOL
                  for r in rows if not r["outside_bounds"])
-    outside = all(r["pin_enclosure_common_volume_mm3"] > OVERLAP_TOL
+    outside = all(r["rivet_enclosure_common_volume_mm3"] > OVERLAP_TOL
                   for r in rows if r["outside_bounds"])
     return {"rows": rows,
-            "meta": {"determinant": "INT-06 (pin shaft in FEA-E-SLOT)", "travel_mm": t,
+            "meta": {"determinant": "INT-06 (rivet shaft in FEA-E-SLOT)", "travel_mm": t,
                      "clear_within_bounds": inside,
                      "interpenetrates_outside_bounds": outside,
                      "supports_direct_causal_branch_A": inside and outside,
@@ -133,17 +140,19 @@ def captivity_probe(bodies):
     d = vc.by_id(bodies)
     rows = []
     for slide in (0.0, 10.0, 40.0, 70.0, P["travel"]):
-        c = vc.by_id(B.probe_pose(bodies, P, slide, lift=3.0, latch_down=0.0))
+        c = vc.by_id(B.probe_pose(bodies, P, slide, lift=3.0))
         vc_ = cv.common_volume(c["BODY-COVER"].shape, d["BODY-ENCLOSURE"].shape)
-        vp = cv.common_volume(c["BODY-PIN"].shape, d["BODY-ENCLOSURE"].shape)
+        vp = cv.common_volume(c["BODY-RIVET"].shape, d["BODY-ENCLOSURE"].shape)
         rows.append({"slide_mm": slide, "lift_mm": 3.0,
                      "cover_enclosure_common_volume_mm3": round(vc_, 6),
-                     "pin_enclosure_common_volume_mm3": round(vp, 6),
+                     "rivet_enclosure_common_volume_mm3": round(vp, 6),
                      "captive": (vc_ > OVERLAP_TOL or vp > OVERLAP_TOL),
-                     "blocked_by": ("lip (INT-03/04) and pin lugs (INT-07)"
-                                    if (vc_ > OVERLAP_TOL and vp > OVERLAP_TOL)
-                                    else ("pin lugs (INT-07)" if vp > OVERLAP_TOL
-                                          else "lip (INT-03/04)"))})
+                     "blocked_by": ("rivet lugs under the ledge (INT-07)"
+                                    + (" and the keeper bridge over the cover"
+                                       if vc_ > OVERLAP_TOL else "")
+                                    if vp > OVERLAP_TOL else
+                                    ("the keeper bridge over the cover"
+                                     if vc_ > OVERLAP_TOL else "nothing - NOT captive here"))})
     return {"samples": rows,
             "captive_everywhere": all(r["captive"] for r in rows),
             "captive_at_full_open": rows[-1]["captive"],
@@ -159,7 +168,9 @@ def latch_probe(bodies):
     lat = vc.by_id(B.configuration(bodies, P, "S_CLOSED_LATCHED"))
     rel = vc.by_id(B.configuration(bodies, P, "S_CLOSED_RELEASED"))
     engaged, released = [], []
-    for s in (0.5, 1.0, 2.0, 4.0, 6.0):
+    # sampled finely around the declared 1.0 mm hook clearance: a coarse ladder
+    # reports the first sampled blocking value as the onset, which overstates it
+    for s in (0.5, 0.9, 1.0, 1.05, 1.1, 1.2, 1.5, 2.0, 4.0, 6.0):
         ve = cv.common_volume(lat["BODY-COVER"].moved(cv.translation((-s, 0, 0))).shape,
                               d["BODY-ENCLOSURE"].shape)
         vr = cv.common_volume(rel["BODY-COVER"].moved(cv.translation((-s, 0, 0))).shape,
@@ -185,22 +196,24 @@ def latch_probe(bodies):
 
 
 def barb_geometry(bodies):
-    relaxed, compressed = B.build_pin(P, False), B.build_pin(P, True)
+    relaxed, compressed = B.build_rivet(P, False), B.build_rivet(P, True)
 
     def envelope(shape, z0, z1):
-        roi = vc.roi_box(G["pin_closed_x"] - 12, G["pin_closed_x"] + 12,
-                         P["pin_y"] - 12, P["pin_y"] + 12, z0, z1)
+        roi = vc.roi_box(G["rivet_closed_x"] - 12, G["rivet_closed_x"] + 12,
+                         P["rivet_y"] - 12, P["rivet_y"] + 12, z0, z1)
         c = vc.clip(shape, roi)
         if c is None:
             return None
-        verts, _ = c.tessellate(0.02)
-        return round(2.0 * max(math.hypot(v.x - G["pin_closed_x"], v.y - P["pin_y"])
-                               for v in verts), 6)
+        bb = cv.bbox_of(c)
+        # ACROSS the slot width. The slot is 89 mm long and 5.4 wide; its width
+        # is the only dimension that bounds anything, so that is what the lugs
+        # must exceed when recovered and fit within when compressed.
+        return round(bb["dy"], 6)
 
-    lug = envelope(relaxed, G["barb_bot"], G["barb_top"])
-    comp = envelope(compressed, G["barb_bot"] - P["barb_leadin_len"], G["barb_top"])
+    lug = envelope(relaxed, G["lug_bot"], G["lug_top"])
+    comp = envelope(compressed, G["tip_z"], G["lug_top"])
     vr, vcp = cv._gprops_volume(relaxed), cv._gprops_volume(compressed)
-    return {"measurement": "greatest distance from the pin axis, doubled",
+    return {"measurement": "span across the slot width",
             "slot_w_mm": P["slot_w"],
             "relaxed_lug_envelope_mm": lug,
             "compressed_envelope_mm": comp,
@@ -231,7 +244,7 @@ def no_cam_check():
     hist = re.findall(r"\bBODY-CAM\b|quarter[- ]turn", text, re.I)
     return {"body_ids": ids, "body_cam_present": "BODY-CAM" in ids,
             "separate_retention_part_present": False,
-            "bodies_are_product_plus_one_captive_pin": ids == ["BODY-COVER", "BODY-ENCLOSURE", "BODY-PIN"],
+            "bodies_are_product_plus_one_captive_rivet": ids == ["BODY-COVER", "BODY-ENCLOSURE", "BODY-RIVET"],
             "textual_mentions": len(live),
             "mentions_are_history_only": True,
             "note": ("BODY-CAM does not exist. The remaining textual mentions are in "
@@ -263,13 +276,16 @@ def step8_predicates(bodies, r5, r6, r7):
                    for bid in BODY_IDS}
     access_ok = all(v <= OVERLAP_TOL for v in obstruction.values())
     closed_cover = round(cv.common_volume(confs["S_CLOSED_LATCHED"]["BODY-COVER"].shape,
-                                          prism), 6)
+                                          control_prism()), 6)
     ev["open_access"] = {"declared_region": {"x": [ACCESS[0], ACCESS[1]],
                                              "y": [ACCESS[2], ACCESS[3]]},
                          "fraction": "84 of 90 mm, APPROVED by HCR-BM001-003",
                          "intruding_volume_mm3": obstruction,
                          "unobstructed_at_open": access_ok,
                          "covered_when_closed_mm3": closed_cover,
+                         "covered_when_closed_measured_in": (
+                             "the aperture band z %.1f to %.1f, not the clear prism "
+                             "above it" % (P["box_z"], G["cover_top"])),
                          "region_is_one_the_cover_controls": closed_cover > OVERLAP_TOL}
 
     cav = cv._gprops_volume(cavity_solid(d["BODY-ENCLOSURE"].shape))
@@ -350,15 +366,19 @@ def step8_predicates(bodies, r5, r6, r7):
           "reason": "geometric blockage is not holding strength"}],
         ["validation/interaction_report.json", "validation/predicate_report.json"])
 
-    c3 = "PASS" if (ev["open_access"]["unobstructed_at_open"] and ok5
+    controls = ev["open_access"]["region_is_one_the_cover_controls"]
+    c3 = "PASS" if (ev["open_access"]["unobstructed_at_open"] and controls and ok5
                     and r6["status"] == "PASS") else "FAIL"
     add("NRM-BM-001-003", c3,
         [{"clause": "the closure does not obstruct the declared usable access at open",
           "status": "PASS" if ev["open_access"]["unobstructed_at_open"] else "FAIL",
-          "measured": ("intrusion %s; the same region is covered by %.0f mm^3 of cover "
-                       "when closed, so it is a region the cover controls"
-                       % (ev["open_access"]["intruding_volume_mm3"],
-                          ev["open_access"]["covered_when_closed_mm3"]))},
+          "measured": "intrusion %s" % ev["open_access"]["intruding_volume_mm3"]},
+         {"clause": "the declared region is one the cover genuinely controls, "
+                    "not one it never reaches",
+          "status": "PASS" if controls else "FAIL",
+          "measured": ("the cover fills %.0f mm^3 of the same footprint in the "
+                       "aperture band when closed"
+                       % ev["open_access"]["covered_when_closed_mm3"])},
          {"clause": "no volume shared outside declared regions along the transition",
           "status": "PASS" if ok5 else "FAIL",
           "measured": "max common volume %.3e mm^3 over all segments"
@@ -436,11 +456,13 @@ def step8_predicates(bodies, r5, r6, r7):
                     "placed material", "status": c10,
           "measured": "%d insertion steps swept; max common volume %.3e mm^3"
                       % (len(ins), max([s["max_common_volume_mm3"] for s in ins] or [0.0]))},
-         {"clause": "the loading position is outside the operating range", "status": "PASS",
-          "measured": ("the cover is lowered 16 mm beyond the open bound, through the "
-                       "only break in the lips. Once the pin is fitted the slot ends "
-                       "make that position unreachable, which is how the cover is both "
-                       "assemblable and captive at full open.")}],
+         {"clause": "no step needs a position outside the operating range",
+          "status": "PASS",
+          "measured": ("both parts are lowered straight down at the CLOSED position, "
+                       "which is inside the travel. Nothing overhangs the cover, so no "
+                       "loading relief and no out-of-range loading position exist. "
+                       "Captivity is created by the rivet in ASM-03, not by where the "
+                       "cover was put in ASM-02.")}],
         ["validation/assembly_report.json"])
 
     c11 = "PASS" if ev["load_path"]["all_bodies_connected"] else "FAIL"
@@ -484,7 +506,7 @@ def step8_predicates(bodies, r5, r6, r7):
 
 
 # --------------------------------------------------------------- self-test
-def selftest_cases(bodies):
+def selftest_cases(bodies, ev_open_access_covered=None):
     d = vc.by_id(bodies)
     cases = []
 
@@ -499,26 +521,24 @@ def selftest_cases(bodies):
          v > OVERLAP_TOL, {"common_volume_mm3": round(v, 4)})
 
     q = dict(P); q["barb_d"] = P["slot_w"] - 0.2
-    nolug = B.build_pin(q, False)
-    roi_l = vc.roi_box(G["pin_closed_x"] - 12, G["pin_closed_x"] + 12,
-                       P["pin_y"] - 12, P["pin_y"] + 12, G["barb_bot"], G["barb_top"])
+    nolug = B.build_rivet(q, False)
+    roi_l = vc.roi_box(G["rivet_closed_x"] - 12, G["rivet_closed_x"] + 12,
+                       P["rivet_y"] - 12, P["rivet_y"] + 12, G["lug_bot"], G["lug_top"])
     cl = vc.clip(nolug, roi_l)
-    verts, _ = cl.tessellate(0.02)
-    span = 2.0 * max(math.hypot(w.x - G["pin_closed_x"], w.y - P["pin_y"]) for w in verts)
-    case("CTL-02", "barb span reduced below the slot width, so nothing retains the pin",
+    span = cv.bbox_of(cl)["dy"]
+    case("CTL-02", "lug span reduced below the slot width, so nothing retains the rivet",
          "lug projection check", span <= P["slot_w"],
          {"lug_span_mm": round(span, 4), "slot_w_mm": P["slot_w"],
           "note": "a lug narrower than its slot retains nothing"})
 
     q = dict(P); q["barb_deflection"] = 0.2
-    over = B.build_pin(q, True)
-    roi = vc.roi_box(G["pin_closed_x"] - 12, G["pin_closed_x"] + 12,
-                     P["pin_y"] - 12, P["pin_y"] + 12,
-                     G["barb_bot"] - P["barb_leadin_len"], G["barb_top"])
+    over = B.build_rivet(q, True)
+    roi = vc.roi_box(G["rivet_closed_x"] - 12, G["rivet_closed_x"] + 12,
+                     P["rivet_y"] - 12, P["rivet_y"] + 12,
+                     G["tip_z"], G["lug_top"])
     cl = vc.clip(over, roi)
-    verts, _ = cl.tessellate(0.02)
-    dia = 2.0 * max(math.hypot(v_.x - G["pin_closed_x"], v_.y - P["pin_y"]) for v_ in verts)
-    case("CTL-03", "arm deflection cut to 0.2 mm, so the barb cannot enter the slot",
+    dia = cv.bbox_of(cl)["dy"]
+    case("CTL-03", "arm deflection cut to 0.2 mm, so the arms cannot enter the slot",
          "compressed-envelope check", dia > P["slot_w"],
          {"compressed_envelope_mm": round(dia, 4), "slot_w_mm": P["slot_w"]})
 
@@ -543,10 +563,25 @@ def selftest_cases(bodies):
 
     cam = no_cam_check()
     case("CTL-07", "metadata check: a separate cam body still present", "cam removal",
-         not cam["body_cam_present"] and cam["bodies_are_product_plus_one_captive_pin"],
+         not cam["body_cam_present"] and cam["bodies_are_product_plus_one_captive_rivet"],
          {"body_ids": cam["body_ids"]})
 
     tp = terminal_probe(bodies)
+    # CTL-09 guards the fix to NRM-BM-001-003: the "region the cover controls"
+    # clause used to be measured in the clear prism ABOVE the aperture, where the
+    # cover never goes, so it read 0 mm^3 and passed anyway. Declaring a region
+    # the cover genuinely cannot reach must now be caught.
+    far = vc.roi_box(P["box_x"] + 50.0, P["box_x"] + 130.0, ACCESS[2], ACCESS[3],
+                     P["box_z"], G["cover_top"])
+    vfar = cv.common_volume(vc.by_id(B.configuration(
+        bodies, P, "S_CLOSED_LATCHED"))["BODY-COVER"].shape, far)
+    case("CTL-09", "usable-access region declared outside the product footprint, "
+         "where the cover never reaches", "declared-region control check",
+         vfar <= OVERLAP_TOL,
+         {"covered_when_closed_mm3": round(vfar, 6),
+          "real_region_covered_mm3": ev_open_access_covered,
+          "note": "a region the cover never fills cannot be a region it controls"})
+
     case("CTL-08", "cover pushed 1 mm past each slot end", "terminal-bound probe",
          tp["meta"]["discriminates"],
          {"clear_within": tp["meta"]["clear_within_bounds"],
@@ -562,7 +597,7 @@ def main():
     r2 = vc.step2_validity(CTX, bodies);  print("2 solid validity   %s" % r2["status"])
     r3 = vc.step3_reimport(CTX, bodies);  print("3 re-import        %s" % r3["status"])
     critical = {k: P[k] for k in ("box_x", "box_y", "box_z", "wall", "deck_x1", "ledge_y",
-                                  "lip_inner_y", "cover_len", "cover_t", "travel",
+                                  "guide_top_z", "cover_len", "cover_t", "travel",
                                   "slot_w", "barb_d", "latch_hook_h", "keeper_x0")}
     motion = {"slide_axis": [-1.0, 0.0, 0.0], "travel_mm": P["travel"],
               "latch_deflection_mm": P["latch_deflection"],
@@ -590,16 +625,17 @@ def main():
     }
     r6 = vc.step6_interactions(CTX, bodies, external=ext)
     print("6 interactions     %s" % r6["status"])
-    compressed_pin = cv.Body("BODY-PIN", "pin (compressed)", "GENERIC_COMPLIANT_POLYMER",
-                             B.build_pin(P, compressed=True))
+    compressed_rivet = cv.Body("BODY-RIVET", "rivet (compressed)",
+                               "GENERIC_COMPLIANT_POLYMER", B.build_rivet(P, compressed=True))
     r7 = vc.step7_assembly(CTX, bodies, samples=12 if FAST else 60,
-                           step_bodies={"ASM-04": compressed_pin})
+                           step_bodies={"ASM-03": compressed_rivet})
     print("7 assembly         %s" % r7["status"])
     r8 = step8_predicates(bodies, r5, r6, r7)
     print("8 predicates       %s  %s" % (r8["status"], r8["summary"]))
     r9 = vc.step9_render(CTX, bodies)
     print("9 render           %s  %d images" % (r9["status"], r9["count"]))
-    rs = vc.run_selftest(CTX, selftest_cases(bodies))
+    rs = vc.run_selftest(CTX, selftest_cases(
+        bodies, r8["supporting_measurements"]["open_access"]["covered_when_closed_mm3"]))
     print("- checker self-test %s  %d/%d controls detected"
           % (rs["status"], rs["controls_detected"], rs["controls_run"]))
 

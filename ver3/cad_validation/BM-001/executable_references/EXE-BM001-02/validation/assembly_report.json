@@ -3,7 +3,7 @@
   "establishes": "an unobstructed insertion ordering exists",
   "method": "Each discrete part is swept along its declared straight-line insertion direction, from its approach distance to its seated offset, and the boolean common with every already-placed body is measured at each sample.",
   "name": "assembly process check",
-  "status": "FAIL",
+  "status": "PASS",
   "step": 7,
   "steps": [
     {
@@ -22,14 +22,14 @@
         -1.0
       ],
       "kind": "linear insertion",
-      "max_common_volume_at_offset_mm": 4.999999999999999,
-      "max_common_volume_mm3": 307.44,
+      "max_common_volume_at_offset_mm": null,
+      "max_common_volume_mm3": 0.0,
       "placed_before": [
         "BODY-ENCLOSURE"
       ],
-      "samples": 13,
+      "samples": 61,
       "seated_at_offset_mm": [
-        -100.0,
+        0.0,
         0.0,
         0.0
       ],
@@ -37,26 +37,17 @@
       "seated_min_distance_to_mm": {
         "BODY-ENCLOSURE": 0.0
       },
-      "status": "FAIL",
+      "status": "PASS",
       "step_id": "ASM-02",
       "swept_configuration": "as-built"
     },
     {
-      "body": "BODY-COVER",
-      "kind": "operation",
-      "note": "moves an installed body along a path validated in step 5",
-      "status": "PASS",
-      "step_id": "ASM-03",
-      "swept_here": false,
-      "validated_by": "motion segment M3_CLOSE"
-    },
-    {
       "approach_distance_mm": 25.0,
-      "body": "BODY-PIN",
+      "body": "BODY-RIVET",
       "direction": [
         0.0,
         0.0,
-        1.0
+        -1.0
       ],
       "kind": "linear insertion",
       "max_common_volume_at_offset_mm": null,
@@ -65,7 +56,7 @@
         "BODY-ENCLOSURE",
         "BODY-COVER"
       ],
-      "samples": 13,
+      "samples": 61,
       "seated_at_offset_mm": [
         0.0,
         0.0,
@@ -73,11 +64,11 @@
       ],
       "seated_configuration": "as-built",
       "seated_min_distance_to_mm": {
-        "BODY-COVER": 0.2,
-        "BODY-ENCLOSURE": 0.1
+        "BODY-COVER": 0.0,
+        "BODY-ENCLOSURE": 0.2
       },
       "status": "PASS",
-      "step_id": "ASM-04",
+      "step_id": "ASM-03",
       "swept_configuration": "declared alternate configuration"
     }
   ]

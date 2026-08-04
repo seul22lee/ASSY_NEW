@@ -1,5 +1,5 @@
 reference_id: EXE-BM001-02
-schema_version: 0.2.0
+schema_version: 0.3.0
 units: mm
 
 frame: Enclosure-fixed. Transforms apply to a body's as-built shape.
@@ -12,9 +12,9 @@ cover_configurations:
     not by a pose. Moving the whole cover down instead would drive the plate into
     the ledges and report an interference the product does not have.
 
-pin_configurations:
-  CFG-PIN-RELAXED: every operating state
-  CFG-PIN-COMPRESSED: assembly only, never exported
+rivet_configurations:
+  CFG-RIVET-RELAXED: every operating state
+  CFG-RIVET-COMPRESSED: assembly only, never exported
 
 states:
   - id: S_CLOSED_LATCHED
@@ -22,12 +22,12 @@ states:
     retained: true
     terminal: true
     cover_configuration: CFG-COVER-RELAXED
-    transforms: {BODY-ENCLOSURE: identity, BODY-COVER: identity, BODY-PIN: identity}
+    transforms: {BODY-ENCLOSURE: identity, BODY-COVER: identity, BODY-RIVET: identity}
   - id: S_CLOSED_RELEASED
     role: CLOSED
     retained: false
     cover_configuration: CFG-COVER-LATCH-DEFLECTED
-    transforms: {BODY-ENCLOSURE: identity, BODY-COVER: identity, BODY-PIN: identity}
+    transforms: {BODY-ENCLOSURE: identity, BODY-COVER: identity, BODY-RIVET: identity}
   - id: S_OPEN
     role: OPEN
     retained: false
@@ -36,17 +36,13 @@ states:
     transforms:
       BODY-ENCLOSURE: identity
       BODY-COVER: {translate: [-84.0, 0.0, 0.0]}
-      BODY-PIN: {translate: [-84.0, 0.0, 0.0]}
+      BODY-RIVET: {translate: [-84.0, 0.0, 0.0]}
 
 terminal_conditions:
-  - state: S_OPEN
-    determinant: INT-06
-    kind: DISCRETE_TERMINAL_POSE
-    how_realized: the pin shaft meets FEA-E-SLOT-END-NEAR
-  - state: S_CLOSED_LATCHED
-    determinant: INT-06
-    kind: DISCRETE_TERMINAL_POSE
-    how_realized: the pin shaft meets FEA-E-SLOT-END-FAR
+  - {state: S_OPEN, determinant: INT-06, kind: DISCRETE_TERMINAL_POSE,
+     how_realized: the rivet shaft meets FEA-E-SLOT-END-NEAR}
+  - {state: S_CLOSED_LATCHED, determinant: INT-06, kind: DISCRETE_TERMINAL_POSE,
+     how_realized: the rivet shaft meets FEA-E-SLOT-END-FAR}
 terminal_condition_causal_probe: >
   validate.py evaluates the model at slide distances either side of both bounds.
   Common volume is zero across 0..84 and positive outside it at both ends, which
@@ -56,28 +52,28 @@ motion_segments:
   - id: M1_RELEASE
     from: S_CLOSED_LATCHED
     to: S_CLOSED_RELEASED
-    moving: [BODY-COVER latch region only]
+    moving: [the cover's latch region only]
     kind: declared compliant deflection
-    travel: 2.4
+    travel: 2.6
   - id: M2_OPEN
     from: S_CLOSED_RELEASED
     to: S_OPEN
-    moving: [BODY-COVER, BODY-PIN]
+    moving: [BODY-COVER, BODY-RIVET]
     kind: prismatic
     travel: 84.0
     latch_held_down_for_first: 10.5
     note: >
-      The beam is held down only while the hook and its ramp are alongside the
+      The beam stays down only while the hook and its ramp are alongside the
       keeper. Past that it recovers; holding it down for the whole slide would
-      drag the deflected strip over the top panel.
+      drag the deflected strip over the solid top panel.
   - id: M3_CLOSE
     from: S_OPEN
     to: S_CLOSED_LATCHED
-    moving: [BODY-COVER, BODY-PIN]
+    moving: [BODY-COVER, BODY-RIVET]
     kind: prismatic
     travel: 84.0
     note: the ramp re-deflects the beam and the hook recovers behind the keeper
 
 ordering_constraint: >
-  M2_OPEN is not traversable while the latch is engaged. That ordering - press,
-  then slide - is the release action, and validate.py measures both halves of it.
+  M2_OPEN is not traversable while the latch is engaged. Press, then slide -
+  that ordering is the release action, and validate.py measures both halves.

@@ -1,11 +1,11 @@
 reference_id: EXE-BM001-02
-schema_version: 0.2.0
+schema_version: 0.3.0
 units: mm
 
 principle: >
-  Every insertion is a straight-line translation of one rigid body, or a declared
-  compliant passage that is measured rather than assumed. No separate part is
-  handled by the user in service: the pin is fitted once and snap-retained.
+  Two straight presses, in the same direction. Nothing overhangs the cover, so
+  nothing has to be threaded past anything; the only compliant passage is the
+  rivet's arms through the slot, and that is measured rather than assumed.
 
 steps:
   - id: ASM-01
@@ -18,49 +18,46 @@ steps:
     kind: insertion
     direction: [0.0, 0.0, -1.0]
     approach_distance: 30.0
-    at_offset: [-100.0, 0.0, 0.0]
+    at_offset: [0.0, 0.0, 0.0]
     note: >
-      Lowered into the channel at the LOADING position, which is 16 mm beyond the
-      open bound. The pin ear passes down through FEA-E-LOAD-RELIEF, the only
-      break in the lips. This position is outside the operating range and the pin
-      makes it unreachable once fitted.
+      Lowered straight down between the guide walls onto the ledges, at the
+      closed position. Nothing obstructs it: the guide walls locate it sideways
+      and there is no lip over it. This is the step that two earlier versions
+      could not perform without a relief and a loading position outside the
+      operating range.
+    ends_in_contact_with:
+      - {body: BODY-ENCLOSURE, interaction: INT-01}
+      - {body: BODY-ENCLOSURE, interaction: INT-02}
 
   - id: ASM-03
-    place: BODY-COVER
-    kind: operation
-    note: slide to the closed position; same path as M3_CLOSE
-    validated_by: motion segment M3_CLOSE
-
-  - id: ASM-04
-    place: BODY-PIN
+    place: BODY-RIVET
     kind: insertion
-    direction: [0.0, 0.0, 1.0]
+    direction: [0.0, 0.0, -1.0]
     approach_distance: 25.0
     at_offset: [0.0, 0.0, 0.0]
-    configuration_during_step: CFG-PIN-COMPRESSED
-    configuration_after_step: CFG-PIN-RELAXED
-    compliant_region: REG-P-SNAP-COMPLIANT
+    configuration_during_step: CFG-RIVET-COMPRESSED
+    configuration_after_step: CFG-RIVET-RELAXED
+    compliant_region: REG-R-SNAP-COMPLIANT
     steps:
-      - 1. reach in through the open aperture, under the front ledge
-      - 2. enter the barb UPWARD into the slot, lead-in first
-      - 3. compress ONLY REG-P-SNAP-COMPLIANT
-      - 4. pass the lugs up through the slot and the cover bore
-      - 5. recover the lugs in the cover counterbore
-      - 6. seat FEA-P-HEAD under FEA-E-LEDGE-UNDER
+      - 1. align the cover bore over the slot
+      - 2. enter the tapered tip into the bore and the slot
+      - 3. compress ONLY REG-R-SNAP-COMPLIANT, across the slot's width
+      - 4. pass the lugs down through the slot
+      - 5. recover the lugs under FEA-E-LEDGE-UNDER
+      - 6. seat FEA-R-HEAD flush in the cover counterbore
     note: >
-      Fitted from BELOW, through the cavity. A top-down pin cannot work here: its
-      head would have to pass through the lips the cover is already under, which
-      the assembly sweep caught.
-      From this point the cover is captive at every operating position and the
-      slot ends bound the travel. The loading position can no longer be reached.
+      After this step the cover is captive at every position of its travel and
+      the slot ends bound it. The rivet cannot be withdrawn: its recovered lugs
+      span 7.6 mm across a 5.4 mm slot.
     ends_retained_by:
-      - {body: BODY-ENCLOSURE, interaction: INT-07, direction: upward, what: cover captivity}
+      - {body: BODY-ENCLOSURE, interaction: INT-07, direction: upward,
+         what: cover captivity and rivet anti-withdrawal}
       - {body: BODY-COVER, interaction: INT-11, direction: downward}
 
 disassembly: >
-  Service removal requires compressing the pin arms from under the front ledge, a
-  deliberate act with a tool. It is not an ordinary lift-out, which is the point
-  of HCR-BM001-004.
+  The rivet cannot be removed without destroying it, which is what makes the
+  cover captive at full open. That is a declared consequence, recorded as LIM-01
+  rather than presented as a feature.
 
 not_established_here: >
   Insertion force, snap strain, release effort and process suitability. What is

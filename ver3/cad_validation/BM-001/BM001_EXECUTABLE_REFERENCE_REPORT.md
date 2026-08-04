@@ -3,15 +3,14 @@
 Two Oracle-aware executable reference CAD models for BM-001, built and validated
 under phase CAD-1.
 
-**State: EXE-BM001-01 revised and validated; EXE-BM001-02 pending redesign.**
+**State: both references revised and validated.**
 Not `CAD_CORPUS_COMPLETE`, not `PACK_LOCK_READY`, not `PHYSICALLY_PROVEN`, not
 `PRODUCTION_READY`, and not human-approved.
 
 Two Oracle-aware BM-001 designs were built as valid B-rep solids and found
 geometrically and kinematically admissible under the active BM-001 Oracle at the
-evaluated fidelity. EXE-BM001-02's result predates the human decisions that
-rejected its retention concept, and stands only as the record of the design that
-was rejected.
+evaluated fidelity. Both have since been reworked to satisfy the human CAD review
+decisions, and both have been rebuilt and revalidated after that rework.
 
 Failure CAD is not part of the current positive-reference plan. Local
 counterfactual validation probes may be used without creating a curated
@@ -45,16 +44,22 @@ CAD exist as later phases.
 | | EXE-BM001-01 | EXE-BM001-02 |
 |---|---|---|
 | Closure motion | revolute, 110° | prismatic, 84 mm |
-| Guidance | five interleaved knuckles on a separate pin | two lipped rails, integral |
-| Retention | rigid sliding bolt, lift to release | rigid quarter-turn cam (REJECTED, awaiting redesign) |
-| Hinge pin | headed, with two integral cantilever snap arms | n/a |
+| Guidance | five interleaved knuckles on a separate pin | two ledges plus two guide walls, integral |
+| Retention | rigid sliding bolt, lift to release | snap rivet in a slot, plus an integral compliant latch |
+| Snap features | headed pin with two integral cantilever snap arms | rivet arms, and a latch beam cut from the cover |
 | Bodies | 4 | 3 |
 | Semantic fixture | ADM-BM-001-E (close) | **none** |
-| Terminal bounds | one (open), constructed stop face | two (open and closed), end walls |
-| Geometry signature | `f2bc9599cdd6832d…` (was `5586b96cc2e92e11…`) | `11bcc694d0261737…` |
+| Terminal bounds | one (open), constructed stop face | two (open and closed), slot ends |
+| Geometry signature | `f2bc9599cdd6832d…` (was `5586b96cc2e92e11…`) | `870af742b622b856…` (was `e99b88b70ec523a4…`) |
 
 They differ in joint type, body count, retention principle and assembly process.
 Neither is a variation of the other.
+
+A correction to this table: it previously gave EXE-BM001-02's signature as
+`11bcc694d0261737…`, which was the v0.1 cam geometry. By then the tree already
+held v0.2 at `e99b88b70ec523a4…`, so the report was describing geometry that was
+no longer there. The predecessor column now names the signature that was actually
+committed.
 
 EXE-BM001-02 deliberately matches no listed fixture. The seven admissible
 fixtures are the machine-checked sample, not the permitted set, and an Oracle
@@ -78,11 +83,29 @@ review of the result is PENDING.**
 **EXE-BM001-02.** The 84 mm of 90 mm usable opening was APPROVED. The full-open
 lift-out, the separate quarter-turn cam, and the cam's missing orientation
 retention were all REJECTED, and a guided captive sliding cover with an
-integrated assembly snap and an integrated releasable latch was directed.
-**That redesign has not been done.** The reference in the tree is still the
-rejected cam design.
+integrated assembly snap and an integrated releasable latch was directed. That
+redesign has been done, and then done again.
 
-### What the pin revision cost
+The first attempt at it kept the cam design's lipped rails and bolted a snap onto
+them. A lipped channel closed at both ends cannot be entered by any translation,
+so it needed a relief cut in the lips and a loading position beyond the open
+bound just to get the cover in — a workaround wearing the shape of a feature, and
+an assembly path that was implausible rather than merely awkward.
+
+The current design, **v0.3**, starts from the retention question instead. If a
+snap rivet holds the cover down at every position, the lips have no job; removing
+them removed the relief, the loading position and the deck pocket they forced.
+What is left is a cover carried on two ledges, located by two guide walls, held
+down for its whole life by one snap rivet running in a slot whose ends are the
+travel bounds, and held shut by a compliant latch cut from the cover itself.
+Assembly is two straight downward presses at the closed position. The version
+history is recorded in `EXE-BM001-02/expected_evaluation.yaml#version_history`,
+and the superseded artifacts have been deleted rather than left in the tree.
+
+The revision has been built and validated; **independent human review of the
+result is PENDING.**
+
+### What the two revisions cost
 
 The original reference selection deliberately avoided compliant features so the
 model would not depend on material behaviour. Bilateral retention without a
@@ -91,6 +114,18 @@ second part cannot be had that way, so the pin is now
 arm. Only `REG-P-SNAP-COMPLIANT` is treated as deformable, and only during
 insertion; everywhere else the pin is a rigid guide. Every force, strain and life
 question the change introduces is NOT_VERIFIED.
+
+EXE-BM001-02 paid the same price twice over. Two of its three bodies are now
+`GENERIC_COMPLIANT_POLYMER`, with two declared compliant regions:
+`REG-R-SNAP-COMPLIANT` (the rivet arms, 1.30 mm inward deflection each, assembly
+only) and `REG-C-LATCH-COMPLIANT` (the latch beam, 2.6 mm downward deflection,
+release only). Both are modelled as rigid translations of a declared region, so
+volume is conserved to 0.000 mm³ — which makes them a
+`DECLARED_KINEMATIC_APPROXIMATION` of a snap, testing geometric passage and
+engagement and predicting nothing about strain. It also cost the reference its
+serviceability: the rivet cannot be removed without destroying it. That is
+recorded as `LIM-01`, a declared design choice and the price of captivity at full
+open, rather than presented as a feature.
 
 ### Four errors the checks caught before they reached the report
 
@@ -122,12 +157,12 @@ Both references, full sampling, on the locked interpreter:
 | 2 solid validity | PASS | PASS |
 | 3 STEP + BREP re-import | PASS | PASS |
 | 4 signature and rebuild determinism | PASS | PASS |
-| 5 motion sampling | PASS (180 samples, 2 segments) | PASS (231 samples, 3 segments) |
-| 6 interactions | PASS (16 declared) | PASS (13 declared) |
+| 5 motion sampling | PASS (180 samples, 2 segments) | PASS (283 samples, 3 segments) |
+| 6 interactions | PASS (16 declared) | PASS (11 declared) |
 | 7 assembly | PASS | PASS |
 | 8 Oracle predicates | PASS | PASS |
-| 9 render | 20 images | 20 images |
-| checker self-test | PASS 12/12 | PASS 8/8 |
+| 9 render | 20 images | 12 images |
+| checker self-test | PASS 12/12 | PASS 9/9 |
 | **overall** | **PASS**, 0 findings | **PASS**, 0 findings |
 
 Maximum boolean common volume over every body pair, every state and every
@@ -176,8 +211,8 @@ What remains `NOT_VERIFIED` **by construction**, for both references:
 | REQ-001 / REQ-008 reusable | geometric repeatability passes; durability over an unstated cycle count does not |
 | REQ-006 practical for desktop use | the source states no envelope |
 
-Also unmodelled: cam holding torque, friction, wear, flexure, magnetic force,
-manufacturing tolerance capability.
+Also unmodelled: snap-in force, pull-out capacity, latch release effort, friction,
+wear, flexure, creep, manufacturing tolerance capability.
 
 **No sentence in this pilot may combine a computed geometric result with an
 unverified physical requirement.** These references are reported as
@@ -217,7 +252,7 @@ caught by the chain rather than by review:
    documented and pinned rather than latent.
 
 Each reference also carries negative controls that inject a defect in memory and
-pass only if the check reports it: 7 for EXE-BM001-01, 8 for EXE-BM001-02, all
+pass only if the check reports it: 12 for EXE-BM001-01, 9 for EXE-BM001-02, all
 detected. `tools/test_primitives.py` adds 29 closed-form checks on the shared
 primitives, including an explicit assertion that the naive three-argument
 `cq.Location` does **not** fix an arbitrary axis — pinning the rotation bug that
@@ -232,9 +267,16 @@ somewhere, and the only place is over the rest of the enclosure.
 
 `NRM-BM-001-003` asks whether the closure obstructs the access *the design
 declares*, so this passes. The evaluator blocks the crudest way of gaming that —
-it measures that the declared region is covered by 21367 mm³ of closure in the
-closed state, so it is a region the closure genuinely controls rather than one
-drawn where the closure never reaches.
+it measures that the declared region is covered by 18160 mm³ of cover in the
+closed state, so it is a region the cover genuinely controls rather than one drawn
+where the cover never reaches.
+
+That second measurement was itself wrong until this revision, and the way it was
+wrong is worth recording: it was taken in the clear prism *above* the aperture,
+where the cover never goes. It read 0 mm³ and the clause passed anyway — a check
+that could only ever pass. It is now taken in the aperture band between the ledge
+top and the cover top, the clause is load-bearing, and `CTL-09` injects a declared
+region outside the product footprint to confirm it can fail.
 
 A reviewer may still judge that a design should not be able to pass by narrowing
 its own declaration. **That would be a finding about NRM-BM-001-003, not about
