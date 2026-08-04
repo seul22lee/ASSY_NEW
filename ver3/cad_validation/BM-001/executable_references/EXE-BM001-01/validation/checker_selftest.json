@@ -58,10 +58,21 @@
         "common_volume_below_mm3": 0.0,
         "common_volume_beyond_mm3": 1.305762
       }
+    },
+    {
+      "check_under_test": "retention blocking probe",
+      "control_id": "CTL-07",
+      "detected": true,
+      "injected_defect": "opening attempted with the bolt still retained",
+      "measured": {
+        "block_onset_deg": 0.75,
+        "blocked_beyond_onset": true,
+        "free_after_release": true
+      }
     }
   ],
-  "controls_detected": 6,
-  "controls_run": 6,
+  "controls_detected": 7,
+  "controls_run": 7,
   "name": "checker self-test",
   "purpose": "Establishes that the checks in this chain can fail. Each control injects a defect in memory and passes only if the check reports it. No perturbed model is exported.",
   "status": "PASS",

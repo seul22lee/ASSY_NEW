@@ -53,7 +53,7 @@
       "clauses": [
         {
           "clause": "in the open state the closure does not obstruct the declared usable access",
-          "measured": "intruding volume into the declared access region: {'BODY-BOLT': 0.0, 'BODY-CLOSURE': 0.0, 'BODY-PIN': 0.0}",
+          "measured": "intruding volume into the declared access region: {'BODY-BOLT': 0.0, 'BODY-CLOSURE': 0.0, 'BODY-PIN': 0.0}; nearest approach 3.000 mm",
           "status": "PASS"
         },
         {
@@ -98,7 +98,7 @@
         },
         {
           "clause": "that pose is produced by a realized physical condition, not a model limit",
-          "measured": "INT-09 face pair in contact at 110.0 deg (min distance 0.000000 mm); common volume is <= 1.0e-06 mm^3 at every probed angle below the terminal angle and > 0 at every probed angle above it",
+          "measured": "INT-09 face pair in contact at 110.0 deg (min distance 0.000000 mm); common volume <= 1.0e-06 mm^3 at every probed angle below the terminal angle and > 0 at every angle above it",
           "status": "PASS"
         }
       ],
@@ -117,13 +117,13 @@
       "clauses": [
         {
           "clause": "holds the closure in the closed state against the declared disturbance",
-          "measured": "the design declares no disturbance magnitude, so the predicate has no quantity to apply. Even if one were declared, this toolchain computes no forces.",
+          "measured": "the design declares no disturbance magnitude, so the predicate has no quantity to apply, and this toolchain computes no forces. What IS measured is that the motion is geometrically blocked while retained beyond 0.75 deg of free play, and free at every probed angle once released.",
           "reason": "REPRESENTATION_INCOMPLETE",
           "status": "NOT_EVALUABLE"
         },
         {
           "clause": "released by a deliberate user action",
-          "measured": "BODY-BOLT lifts 10.0 mm; the engagement region is empty of bolt material afterwards (disengages_on_release=True), and M2_OPEN is not traversable before that lift",
+          "measured": "BODY-BOLT lifts 10.0 mm; the engagement region is then empty of bolt material (disengages_on_release=True), and the rotation blocked before the lift is free after it (free_after_release=True)",
           "status": "PASS"
         },
         {
@@ -137,7 +137,7 @@
         "validation/interaction_report.json"
       ],
       "invariant_id": "NRM-BM-001-006",
-      "notes": "Two clauses PASS on measurement. The invariant as a whole cannot be discharged because its first clause needs a quantity the design does not declare. NOT_EVALUABLE is not FAIL and is not a defect in the geometry.",
+      "notes": "Two clauses PASS on measurement, and the blocking probe shows the retention does geometrically prevent the motion. The invariant as a whole still cannot be discharged, because its first clause needs a quantity the design does not declare. NOT_EVALUABLE is not FAIL and is not a defect in the geometry.",
       "status": "NOT_EVALUABLE"
     },
     {
@@ -176,7 +176,7 @@
       "clauses": [
         {
           "clause": "a realized access path reaches the actuation feature",
-          "measured": "a 80 mm cylinder of radius 12.0 mm rising from the knob top face is clear of all four bodies in the retained state",
+          "measured": "an 80 mm cylinder of radius 12.0 mm rising from the knob top face is clear of all four bodies in the retained state",
           "status": "PASS"
         }
       ],
@@ -269,7 +269,7 @@
       "clauses": [
         {
           "clause": "no force window is cited as an achieved retention property",
-          "measured": "keyword scan over the five authored contract files returned 0 candidate lines, all of which either declare a quantity absent or record it as NOT_VERIFIED. No force value is asserted as an outcome anywhere in this reference.",
+          "measured": "keyword scan over the five authored contract files returned 0 candidate lines. No force value is asserted as an outcome anywhere in this reference.",
           "status": "PASS"
         }
       ],
@@ -409,7 +409,7 @@
     "force_window_scan": {
       "any_force_window_cited_as_achieved": false,
       "hits": [],
-      "note": "Matches are inspected below. A line that says a force is NOT verified is not a citation of an achieved property.",
+      "note": "Matches are inspected. A line recording that a force is NOT verified is not a citation of an achieved property.",
       "pattern": "\\b(newton|newtons|\\d+\\s*N\\b|kgf|lbf|torque|force window|holding force|preload|retention force)\\b"
     },
     "load_path": {
@@ -446,7 +446,7 @@
     },
     "open_access": {
       "declared_region": {
-        "what": "prism over the cavity aperture, 100 mm tall",
+        "what": "prism over the whole cavity aperture, 100 mm tall",
         "x": [
           3.0,
           117.0
@@ -473,6 +473,118 @@
       "unobstructed": true
     },
     "retention": {
+      "blocking_probe": {
+        "block_onset_deg": 0.75,
+        "blocked_beyond_onset": true,
+        "discriminates": true,
+        "free_after_release": true,
+        "free_play_note": "The block does not begin at zero. INT-10 and INT-11 are 0.1 mm running clearances, and near the closed pose the closure's motion at the bolt is almost entirely along the bolt axis, so the bore slides on the shaft before it bears on it. The measured onset is the free play those clearances imply. A retention that engaged with zero play would need an interference fit, which this reference deliberately does not use.",
+        "released_rotation_free": [
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 0.1
+          },
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 0.25
+          },
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 0.5
+          },
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 0.75
+          },
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 1.0
+          },
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 1.25
+          },
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 1.5
+          },
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 2.0
+          },
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 3.0
+          },
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 5.0
+          },
+          {
+            "bolt_enclosure_common_volume_mm3": 0.0,
+            "closure_enclosure_common_volume_mm3": 0.0,
+            "opening_angle_deg": 8.0
+          }
+        ],
+        "retained_rotation": [
+          {
+            "closure_bolt_common_volume_mm3": 0.0,
+            "opening_angle_deg": 0.1
+          },
+          {
+            "closure_bolt_common_volume_mm3": 0.0,
+            "opening_angle_deg": 0.25
+          },
+          {
+            "closure_bolt_common_volume_mm3": 0.0,
+            "opening_angle_deg": 0.5
+          },
+          {
+            "closure_bolt_common_volume_mm3": 0.066045653,
+            "opening_angle_deg": 0.75
+          },
+          {
+            "closure_bolt_common_volume_mm3": 0.585760746,
+            "opening_angle_deg": 1.0
+          },
+          {
+            "closure_bolt_common_volume_mm3": 1.533670714,
+            "opening_angle_deg": 1.25
+          },
+          {
+            "closure_bolt_common_volume_mm3": 2.807398225,
+            "opening_angle_deg": 1.5
+          },
+          {
+            "closure_bolt_common_volume_mm3": 6.142854131,
+            "opening_angle_deg": 2.0
+          },
+          {
+            "closure_bolt_common_volume_mm3": 30.370777651,
+            "opening_angle_deg": 3.0
+          },
+          {
+            "closure_bolt_common_volume_mm3": 389.554144092,
+            "opening_angle_deg": 5.0
+          },
+          {
+            "closure_bolt_common_volume_mm3": 793.083565577,
+            "opening_angle_deg": 8.0
+          }
+        ],
+        "what_this_does_not_show": "any holding capacity, or that the free play is acceptable",
+        "what_this_shows": "The release action is necessary: beyond the free play the opening motion is geometrically blocked while the bolt is retained, and free at every probed angle once it is lifted."
+      },
       "declared_disturbance_magnitude": null,
       "disengages_on_release": true,
       "engaged_bolt_volume_in_region_mm3": 402.12386,

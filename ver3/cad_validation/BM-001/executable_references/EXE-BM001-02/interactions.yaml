@@ -1,0 +1,164 @@
+reference_id: EXE-BM001-02
+schema_version: 0.1.0
+units: mm
+
+rule: >
+  The prohibition is undeclared volumetric overlap, not positive clearance
+  everywhere. Two bodies may touch wherever this file says they touch. Any pair
+  whose boolean common volume exceeds overlap_tol_mm3 anywhere, in any state or
+  at any sampled point of any motion segment, is a failure regardless of what is
+  declared here.
+
+evaluation_tolerance:
+  contact_tol_mm: 0.02
+  overlap_tol_mm3: 1.0e-6
+  basis: >
+    min(0.02, 1% of the smallest local feature dimension). The smallest feature
+    at a declared contact is the 3 mm cam blade, whose 1% is 0.03, so 0.02
+    governs. This is an evaluation tolerance and never a material allowance.
+
+interactions:
+
+  - id: INT-01
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-EDGE-F, FEA-E-CHAN-F]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.2
+    active: ALL_STATES
+    role: Running clearance on the front edge; sets the closure's depth location.
+
+  - id: INT-02
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-EDGE-R, FEA-E-CHAN-R]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.2
+    active: ALL_STATES
+    role: Running clearance on the rear edge.
+
+  - id: INT-03
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-UNDER, FEA-E-LEDGE-F]
+    type: DECLARED_CONTACT
+    nominal_clearance_mm: 0.0
+    active: ALL_STATES
+    role: >
+      The closure rides on the front ledge. This is the load path from closure
+      to enclosure and it is present throughout the travel, not only at the ends.
+
+  - id: INT-04
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-UNDER, FEA-E-LEDGE-R]
+    type: DECLARED_CONTACT
+    nominal_clearance_mm: 0.0
+    active: ALL_STATES
+    role: The closure rides on the rear ledge.
+
+  - id: INT-05
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-TOP, FEA-E-LIP-F]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.2
+    active: [S_CLOSED_RETAINED, S_CLOSED_RELEASED]
+    role: >
+      The front lip is what makes the closure captive. The gap is a clearance,
+      so the closure is free to slide but not to lift. Absent over the loading
+      zone by design - see manifest.yaml LIM-01.
+
+  - id: INT-06
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-TOP, FEA-E-LIP-R]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.2
+    active: [S_CLOSED_RETAINED, S_CLOSED_RELEASED]
+    role: The rear lip; same role as INT-05.
+
+  - id: INT-07
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-LEAD, FEA-E-ENDWALL-FAR]
+    type: DECLARED_CONTACT
+    nominal_clearance_mm: 0.0
+    active: [S_CLOSED_RETAINED, S_CLOSED_RELEASED]
+    role: >
+      Terminal bound of the slide in the closing direction. A full-height face
+      pair across the closure's whole depth.
+    determines: DISCRETE_TERMINAL_POSE
+
+  - id: INT-08
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-TRAIL, FEA-E-ENDWALL-NEAR]
+    type: DECLARED_CONTACT
+    nominal_clearance_mm: 0.0
+    active: [S_OPEN]
+    role: >
+      Terminal bound of the slide in the opening direction, and the determinant
+      of the discrete open pose. Same construction as INT-07 at the other end.
+    determines: DISCRETE_TERMINAL_POSE
+    approaches_during: M3_OPEN
+
+  - id: INT-09
+    bodies: [BODY-CAM, BODY-COVER]
+    features: [FEA-M-SHAFT, FEA-C-KEYWAY]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.1
+    active: [S_CLOSED_RETAINED]
+    role: >
+      Locates the cam in the closure. With the shaft in both this bore and the
+      keeper's, the closure cannot slide: the shaft carries the restraint in
+      shear.
+
+  - id: INT-10
+    bodies: [BODY-CAM, BODY-ENCLOSURE]
+    features: [FEA-M-SHAFT, FEA-E-KEYWAY]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.2
+    active: [S_CLOSED_RETAINED]
+    role: >
+      The other half of the shear restraint. Whether the engagement WITHSTANDS a
+      given disturbance is a force question and is NOT_VERIFIED
+      (UNR-BM-001-001); what is shown here is that the slide is geometrically
+      blocked while the cam is in place.
+    disengages_during: M2_WITHDRAW
+
+  - id: INT-11
+    bodies: [BODY-CAM, BODY-COVER]
+    features: [FEA-M-KNOB, FEA-C-TOP]
+    type: DECLARED_CONTACT
+    nominal_clearance_mm: 0.0
+    active: [S_CLOSED_RETAINED]
+    role: >
+      Locates the cam vertically. The cam hangs from its knob rather than
+      standing on its blade, which is why INT-12 stays a clearance.
+
+  - id: INT-12
+    bodies: [BODY-CAM, BODY-ENCLOSURE]
+    features: [FEA-M-BLADE-TOP, FEA-E-KEEPER-UNDER]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.1
+    active: [S_CLOSED_RETAINED]
+    role: >
+      The quarter-turn capture. In the locked orientation the blade lies across
+      the keyway, so the cam cannot be lifted out; the gap is what keeps the cam
+      located by its knob rather than jammed between two faces. Rotating the cam
+      back aligns the blade with the keyway and the capture opens.
+    becomes_inactive_during: M1_UNLOCK
+
+  - id: INT-13
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-UNDER, FEA-E-DECK]
+    type: DECLARED_CONTACT
+    nominal_clearance_mm: 0.0
+    active: ALL_STATES
+    role: >
+      The closure also rides on the solid top panel wherever it overlaps it.
+      Declared because the two faces are coplanar, and a coplanar face pair that
+      is not declared would be an undeclared contact. In the closed state the
+      overlap degenerates to the line at x = deck_x1; in the open state it is
+      the full parked footprint.
+
+pairs_not_declared: []
+
+undeclared_contact_policy: >
+  validate.py scans all three body pairs in every state and at every sampled
+  point of all three motion segments. A pair that reaches within contact_tol
+  where nothing above declares it is reported as an undeclared approach, so the
+  declaration cannot be completed by omission.

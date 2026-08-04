@@ -1,0 +1,100 @@
+{
+  "controls": [
+    {
+      "check_under_test": "undeclared volumetric overlap (step 5, step 6)",
+      "control_id": "CTL-01",
+      "detected": true,
+      "injected_defect": "closure driven 0.5 mm into the ledges",
+      "measured": {
+        "common_volume_mm3": 743.672442,
+        "threshold_mm3": 1e-06
+      }
+    },
+    {
+      "check_under_test": "INT-03 DECLARED_CONTACT",
+      "control_id": "CTL-02",
+      "detected": true,
+      "injected_defect": "closure lifted 0.1 mm off the front ledge",
+      "measured": {
+        "contact_tol_mm": 0.02,
+        "min_distance_mm": 0.1
+      }
+    },
+    {
+      "check_under_test": "INT-01 DECLARED_CLEARANCE",
+      "control_id": "CTL-03",
+      "detected": true,
+      "injected_defect": "running clearance opened from 0.2 to 0.6 mm",
+      "measured": {
+        "declared_nominal_mm": 0.2,
+        "min_distance_mm": 0.6
+      }
+    },
+    {
+      "check_under_test": "quarter-turn capture probe",
+      "control_id": "CTL-04",
+      "detected": true,
+      "injected_defect": "cam blade shortened to 9.0 mm, shorter than the keyway opening",
+      "measured": {
+        "cam_enclosure_common_volume_on_lift_mm3": 0.0,
+        "note": "a short blade lifts straight out, so the capture is not realized"
+      }
+    },
+    {
+      "check_under_test": "assembly path sweep (step 7)",
+      "control_id": "CTL-05",
+      "detected": true,
+      "injected_defect": "closure inserted along +y instead of -z",
+      "measured": {
+        "max_common_volume_mm3": 1260.0
+      }
+    },
+    {
+      "check_under_test": "terminal-condition causal probe",
+      "control_id": "CTL-06",
+      "detected": true,
+      "injected_defect": "closure slid 0.05 mm past the open terminal bound",
+      "measured": {
+        "common_volume_beyond_mm3": 16.0,
+        "common_volume_inside_mm3": 0.0
+      }
+    },
+    {
+      "check_under_test": "retention blocking probe",
+      "control_id": "CTL-07",
+      "detected": true,
+      "injected_defect": "slide attempted with the cam still locked",
+      "measured": {
+        "capture_holds": true,
+        "capture_opens_on_quarter_turn": true,
+        "slide_block_onset_mm": 0.25,
+        "slide_blocked": true,
+        "slide_free_after_withdrawal": true
+      }
+    },
+    {
+      "check_under_test": "captivity probe",
+      "control_id": "CTL-08",
+      "detected": true,
+      "injected_defect": "closure lifted 3 mm at each point of the travel",
+      "measured": {
+        "captive_over_mm": [
+          0.0,
+          10.0,
+          40.0,
+          70.0
+        ],
+        "not_captive_at_mm": [
+          84.0
+        ],
+        "note": "LIM-01 declares the closure liftable only at full open"
+      }
+    }
+  ],
+  "controls_detected": 8,
+  "controls_run": 8,
+  "name": "checker self-test",
+  "purpose": "Establishes that the checks in this chain can fail. Each control injects a defect in memory and passes only if the check reports it. No perturbed model is exported.",
+  "status": "PASS",
+  "undetected": []
+}

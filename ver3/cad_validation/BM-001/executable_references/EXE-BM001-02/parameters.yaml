@@ -1,0 +1,203 @@
+reference_id: EXE-BM001-02
+units: mm
+schema_version: 0.1.0
+
+frame:
+  description: >
+    Origin at the enclosure's minimum outer corner. X is length (the sliding
+    direction), Y is depth, Z is up. The enclosure is fixed.
+
+note_on_absolute_size: >
+  UNR-BM-001-003 leaves every absolute dimension open. None of these numbers is a
+  requirement; each is a declared design choice. They differ from EXE-BM001-01's
+  deliberately, so that nothing downstream can mistake a shared number for a
+  constraint the Oracle imposes.
+
+parameters:
+
+  # ---------------------------------------------------------------- enclosure
+  - name: box_x
+    value: 180.0
+    purpose: enclosure outer length, along the sliding direction
+    range: [80.0, 400.0]
+  - name: box_y
+    value: 70.0
+    purpose: enclosure outer depth
+    range: [40.0, 200.0]
+  - name: box_z
+    value: 40.0
+    purpose: height to the rim plane the closure runs on
+    range: [20.0, 150.0]
+  - name: wall
+    value: 3.0
+    purpose: uniform wall and floor thickness
+    range: [1.5, 10.0]
+  - name: end_wall_x
+    value: 3.0
+    purpose: >
+      thickness of the two raised end walls. Their inner faces at x = end_wall_x
+      and x = box_x - end_wall_x are the two terminal bounds of the slide.
+    range: [2.0, 12.0]
+  - name: rail_top_z
+    value: 48.0
+    purpose: top of the rails and end walls
+    range: [42.0, 80.0]
+
+  # -------------------------------------------------------------------- deck
+  - name: deck_x1
+    value: 87.0
+    purpose: >
+      the solid top panel runs from the wall to here. Beyond it is the aperture.
+      The panel is what the closure slides over when open, which is what lets a
+      captive slide uncover anything at all.
+    range: [20.0, 300.0]
+  - name: deck_z0
+    value: 37.0
+    purpose: underside of the solid top panel; wall thick, flush with the rim
+    range: [10.0, 47.0]
+
+  # ------------------------------------------------------------------- rails
+  - name: ledge_y
+    value: 9.0
+    purpose: >
+      inboard edge of the two ledges the closure runs on. The aperture between
+      them is what the design declares as usable access.
+    range: [5.0, 25.0]
+  - name: ledge_z0
+    value: 34.0
+    purpose: underside of the ledges; they are 6 thick and hang inside the cavity
+    range: [10.0, 39.0]
+  - name: slot_gap
+    value: 0.2
+    purpose: >
+      running clearance between the closure and its channel, on both the depth
+      faces and the underside of the lips. A clearance and never an
+      interference: the slide must not depend on material behaviour.
+    range: [0.05, 1.0]
+  - name: lip_z0
+    value: 45.2
+    purpose: underside of the retaining lips; closure top plus slot_gap
+    range: [40.5, 60.0]
+  - name: lip_relief_x1
+    value: 93.4
+    purpose: >
+      the lips are absent from the near end wall to here, so the closure can be
+      lowered vertically into its channel at the open position. 0.4 beyond the
+      open-position leading face, which is the insertion clearance. The closure
+      is therefore captive everywhere except at full open - permitted explicitly
+      by NRM-BM-001-002, which does not require a permanent connection.
+    range: [10.0, 300.0]
+
+  # ----------------------------------------------------------------- closure
+  - name: cover_len
+    value: 90.0
+    purpose: closure length; equal to the aperture length, so the closed state covers it exactly
+    range: [30.0, 350.0]
+  - name: cover_t
+    value: 5.0
+    purpose: closure thickness
+    range: [2.0, 15.0]
+  - name: travel
+    value: 84.0
+    purpose: >
+      slide from closed to open. Equal to deck_x1 - end_wall_x, so the open
+      terminal bound is reached exactly when the closure's trailing face meets
+      the near end wall.
+    range: [10.0, 350.0]
+
+  # --------------------------------------------------------------- retention
+  - name: cam_x
+    value: 165.0
+    purpose: >
+      X of the retention cam axis. Far enough from the end wall that the knob
+      does not foul it.
+    range: [20.0, 350.0]
+  - name: cam_y
+    value: 20.0
+    purpose: >
+      Y of the retention cam axis. Inboard of the lips, so the knob clears them.
+    range: [12.0, 60.0]
+  - name: cam_shaft_d
+    value: 10.0
+    purpose: cam shaft diameter; the member that blocks the slide in shear
+    range: [4.0, 24.0]
+  - name: cover_hole_d
+    value: 10.2
+    purpose: closure bore; locates the cam, slot_gap/2 radial clearance
+    range: [4.1, 24.5]
+  - name: keeper_hole_d
+    value: 10.4
+    purpose: keeper opening in the enclosure; 0.2 radial clearance on the shaft
+    range: [4.2, 25.0]
+  - name: blade_len
+    value: 12.0
+    purpose: >
+      cam blade length. Longer than keeper_hole_d, so a quarter turn puts the
+      blade ends under solid keeper material and the cam can no longer be lifted.
+    range: [6.0, 40.0]
+  - name: blade_w
+    value: 5.0
+    purpose: cam blade width; passes through the keyway when aligned
+    range: [2.0, 15.0]
+  - name: blade_t
+    value: 3.0
+    purpose: cam blade thickness
+    range: [1.5, 10.0]
+  - name: keyway_clear
+    value: 0.2
+    purpose: keyway clearance on the blade, total across each dimension
+    range: [0.05, 1.0]
+  - name: blade_gap
+    value: 0.1
+    purpose: >
+      gap between the blade's upper face and the keeper's underside in the
+      locked state. The cam is located vertically by its knob on the closure,
+      not by the blade, so this stays a clearance.
+    range: [0.02, 1.0]
+  - name: knob_d
+    value: 18.0
+    purpose: cam knob diameter; the surface the user turns
+    range: [10.0, 40.0]
+  - name: knob_h
+    value: 5.0
+    purpose: cam knob height
+    range: [2.0, 15.0]
+  - name: lock_angle_deg
+    value: 90.0
+    purpose: >
+      quarter turn from the insertion orientation to the locked orientation. A
+      quarter turn is what makes the blade cross the keyway rather than align
+      with it.
+    range: [30.0, 150.0]
+  - name: cam_lift
+    value: 20.0
+    purpose: >
+      vertical withdrawal of the cam. Must clear rail_top_z; 20 puts the blade
+      2.9 above the rails.
+    range: [12.0, 60.0]
+  - name: cam_park_y
+    value: 40.0
+    purpose: >
+      lateral distance the withdrawn cam is set aside, clear of the enclosure
+      and of the declared access region. The cam is a discrete part and is not
+      installed in the open state.
+    range: [20.0, 200.0]
+
+  # --------------------------------------------------------------- evaluation
+  - name: contact_tol
+    value: 0.02
+    purpose: >
+      evaluation tolerance for declared contact. min(0.02, 1% of the smallest
+      local feature) - the smallest feature at a declared contact is the 3 mm
+      blade, whose 1% is 0.03, so 0.02 governs. An evaluation tolerance, never a
+      material allowance.
+    range: [0.001, 0.02]
+  - name: overlap_tol_mm3
+    value: 1.0e-6
+    purpose: volume below which a boolean common is treated as numerical noise
+    range: [1.0e-9, 1.0e-4]
+
+materials:
+  BODY-ENCLOSURE: GENERIC_RIGID_POLYMER
+  BODY-COVER: GENERIC_RIGID_POLYMER
+  BODY-CAM: GENERIC_RIGID_POLYMER

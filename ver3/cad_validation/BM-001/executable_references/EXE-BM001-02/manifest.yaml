@@ -1,0 +1,116 @@
+reference_id: EXE-BM001-02
+schema_version: 0.1.0
+title: rigid captive sliding closure on realized rails, quarter-turn cam retention
+kind: ADMISSIBLE_EXECUTABLE_REFERENCE
+author_awareness: ORACLE_AWARE
+is_not:
+  - a source-only Demonstration
+  - evidence that the source alone leads here
+  - evidence that the design satisfies the rank-1 source
+maps_to_semantic_fixture: null
+mapping_fidelity: NEW_ADMISSIBLE_REALIZATION
+why_no_fixture: >
+  The seven admissible fixtures listed for BM-001 are the machine-checked
+  sample, not the permitted set. Building a reference outside that list is
+  deliberate: an Oracle that only ever sees designs drawn from its own fixture
+  list is being tested against itself. ADM-BM-001-C is the nearest relative -
+  a cover on mating guide features - but it is detachable in the open state,
+  whereas this closure stays in its rails.
+units: mm
+
+bodies:
+  - id: BODY-ENCLOSURE
+    name: enclosure
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    role: >
+      Fixed reference body. Cavity; a solid top panel over the front of the
+      interior; two ledges the closure runs on; two lipped rails; two raised end
+      walls whose inner faces are the terminal bounds; and a keeper for the cam.
+    features:
+      - {id: FEA-E-LEDGE-F, what: front ledge top face at z = box_z; the closure runs on it}
+      - {id: FEA-E-LEDGE-R, what: rear ledge top face at z = box_z}
+      - {id: FEA-E-LIP-F, what: front retaining lip, underside at lip_z0}
+      - {id: FEA-E-LIP-R, what: rear retaining lip, underside at lip_z0}
+      - {id: FEA-E-CHAN-F, what: outboard face of the front running channel}
+      - {id: FEA-E-CHAN-R, what: outboard face of the rear running channel}
+      - {id: FEA-E-ENDWALL-NEAR, what: inner face of the near end wall at x = end_wall_x}
+      - {id: FEA-E-ENDWALL-FAR, what: inner face of the far end wall at x = box_x - end_wall_x}
+      - {id: FEA-E-DECK, what: top face of the solid panel, coplanar with the ledges}
+      - {id: FEA-E-APERTURE, what: opening in the top, from deck_x1 to the far end wall}
+      - {id: FEA-E-KEEPER, what: keeper block carrying the cam keyway}
+      - {id: FEA-E-KEEPER-UNDER, what: keeper underside; the blade crosses beneath it when locked}
+      - {id: FEA-E-KEYWAY, what: circular bore plus radial extensions the blade passes through}
+  - id: BODY-COVER
+    name: sliding closure
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    role: Movable closure. A flat plate running in the two rails, with a keyway bore for the cam.
+    features:
+      - {id: FEA-C-UNDER, what: underside at z = box_z; runs on the ledges and the deck}
+      - {id: FEA-C-TOP, what: top face at box_z + cover_t}
+      - {id: FEA-C-EDGE-F, what: front edge face}
+      - {id: FEA-C-EDGE-R, what: rear edge face}
+      - {id: FEA-C-LEAD, what: leading end face; meets FEA-E-ENDWALL-FAR in the closed state}
+      - {id: FEA-C-TRAIL, what: trailing end face; meets FEA-E-ENDWALL-NEAR in the open state}
+      - {id: FEA-C-KEYWAY, what: circular bore plus radial extensions, locating the cam shaft}
+  - id: BODY-CAM
+    name: quarter-turn retention cam
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    role: >
+      Realizes retention and its release action. The shaft blocks the slide in
+      shear; the blade, after a quarter turn, lies across the keeper's keyway so
+      the cam cannot be lifted out.
+    as_built_orientation: >
+      Built with the blade aligned with the keyway, which is the orientation it
+      is inserted in. The locked state is a pose, not a different shape, so the
+      same solid is demonstrably able to pass through the keyway it later cannot
+      pass through.
+    features:
+      - {id: FEA-M-BLADE, what: rectangular blade, blade_len by blade_w by blade_t}
+      - {id: FEA-M-BLADE-TOP, what: blade upper face; crosses beneath FEA-E-KEEPER-UNDER when locked}
+      - {id: FEA-M-SHAFT, what: shaft, diameter cam_shaft_d; the member that blocks the slide}
+      - {id: FEA-M-KNOB, what: knob; the surface the user turns, and what locates the cam vertically}
+
+declared_usable_access:
+  region:
+    x: [93.0, 177.0]
+    y: [9.0, 61.0]
+    z: [40.0, 140.0]
+  what: >
+    The part of the aperture that is open in the open state, between the two
+    ledges, extruded 100 mm upward.
+  honesty_note: >
+    This is 84 mm of a 90 mm aperture, not all of it. A captive sliding closure
+    cannot uncover the whole of its own aperture - it has to go somewhere, and
+    the only place available is over the rest of the enclosure. That is a
+    property of the topology, not an oversight, and it is declared here rather
+    than hidden by drawing the region generously. NRM-BM-001-003 asks whether
+    the closure obstructs the usable access THE DESIGN DECLARES; this is that
+    declaration, and a reviewer is entitled to judge it insufficient.
+
+known_limitations:
+  - id: LIM-01
+    what: The closure is not captive at the fully open position.
+    status: DECLARED_DESIGN_CHOICE
+    why: >
+      The lips are relieved over the loading zone so the closure can be lowered
+      vertically into its channel; at full open it sits in that zone and can be
+      lifted out. NRM-BM-001-002 explicitly does not require a permanent
+      connection. Everywhere else in the travel it is captive under the lips.
+  - id: LIM-02
+    what: The cam is fully removable once unlocked, and is not installed in the open state.
+    status: DECLARED_DESIGN_CHOICE
+    why: >
+      The source requires retention and a release action, not captivity of the
+      retention part. The park pose in poses.yaml is nominal - it records that
+      the cam is set aside, not where a user would put it.
+  - id: LIM-03
+    what: Nothing holds the cam in the locked orientation.
+    status: NOT_VERIFIED
+    why_not_corrected: >
+      A detent would need either a compliant feature or a friction assumption,
+      and the reference selection excluded both so the model stays independent
+      of material behaviour. Whether the cam stays locked under vibration is a
+      force question this toolchain cannot answer.

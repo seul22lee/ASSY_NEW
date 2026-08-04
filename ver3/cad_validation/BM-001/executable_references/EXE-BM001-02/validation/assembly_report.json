@@ -15,7 +15,7 @@
     },
     {
       "approach_distance_mm": 40.0,
-      "body": "BODY-CLOSURE",
+      "body": "BODY-COVER",
       "direction": [
         0.0,
         0.0,
@@ -29,7 +29,7 @@
       ],
       "samples": 61,
       "seated_at_offset_mm": [
-        0.0,
+        -84.0,
         0.0,
         0.0
       ],
@@ -40,36 +40,17 @@
       "step_id": "ASM-02"
     },
     {
-      "approach_distance_mm": 30.0,
-      "body": "BODY-PIN",
-      "direction": [
-        1.0,
-        0.0,
-        0.0
-      ],
-      "kind": "linear insertion",
-      "max_common_volume_at_offset_mm": null,
-      "max_common_volume_mm3": 0.0,
-      "placed_before": [
-        "BODY-ENCLOSURE",
-        "BODY-CLOSURE"
-      ],
-      "samples": 61,
-      "seated_at_offset_mm": [
-        0.0,
-        0.0,
-        0.0
-      ],
-      "seated_min_distance_to_mm": {
-        "BODY-CLOSURE": 0.1,
-        "BODY-ENCLOSURE": 0.0
-      },
+      "body": "BODY-COVER",
+      "kind": "operation",
+      "note": "moves an installed body along a path validated in step 5",
       "status": "PASS",
-      "step_id": "ASM-03"
+      "step_id": "ASM-03",
+      "swept_here": false,
+      "validated_by": "motion segment M3_OPEN"
     },
     {
-      "approach_distance_mm": 30.0,
-      "body": "BODY-BOLT",
+      "approach_distance_mm": 40.0,
+      "body": "BODY-CAM",
       "direction": [
         0.0,
         0.0,
@@ -80,8 +61,7 @@
       "max_common_volume_mm3": 0.0,
       "placed_before": [
         "BODY-ENCLOSURE",
-        "BODY-CLOSURE",
-        "BODY-PIN"
+        "BODY-COVER"
       ],
       "samples": 61,
       "seated_at_offset_mm": [
@@ -90,12 +70,20 @@
         0.0
       ],
       "seated_min_distance_to_mm": {
-        "BODY-CLOSURE": 0.1,
-        "BODY-ENCLOSURE": 0.0,
-        "BODY-PIN": 68.213958726
+        "BODY-COVER": 0.0,
+        "BODY-ENCLOSURE": 0.141421356
       },
       "status": "PASS",
       "step_id": "ASM-04"
+    },
+    {
+      "body": "BODY-CAM",
+      "kind": "operation",
+      "note": "moves an installed body along a path validated in step 5",
+      "status": "PASS",
+      "step_id": "ASM-05",
+      "swept_here": false,
+      "validated_by": "motion segment M1_UNLOCK"
     }
   ]
 }

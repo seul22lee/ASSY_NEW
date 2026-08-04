@@ -79,6 +79,18 @@ def _com(shape: cq.Shape) -> Tuple[float, float, float]:
 
 
 def bbox_of(shape: cq.Shape) -> Dict[str, float]:
+    """Axis-aligned bounding box, INFLATED by OCCT's default Bnd_Box gap.
+
+    Bnd_Box carries a gap of about 1e-7 mm, so every face of the returned box
+    stands roughly 1e-7 outside the true extent. That is deterministic, and both
+    the geometry signature and compare_signatures (len_tol 1e-6) tolerate it, so
+    it is left in place rather than removed - removing it would change every
+    recorded signature for a tenth-of-a-micron cosmetic gain.
+
+    Do not use this for a geometric claim. Overlap and clearance claims go
+    through common_volume and min_distance, which are exact. test_primitives.py
+    pins the inflation so it cannot silently grow.
+    """
     b = Bnd_Box()
     BRepBndLib.Add_s(shape.wrapped, b)
     xm, ym, zm, xM, yM, zM = b.Get()
@@ -239,7 +251,8 @@ def sample_motion(fixed: Sequence[Body], moving: Sequence[Body], pose_fn,
 def render_views(bodies: Sequence[Body], out_dir: str, stem: str,
                  views: Sequence[Tuple[str, Tuple[float, float, float]]],
                  colors: Optional[Dict[str, str]] = None,
-                 section: Optional[Tuple[str, float]] = None) -> List[str]:
+                 section: Optional[Tuple[str, float]] = None,
+                 alphas: Optional[Dict[str, float]] = None) -> List[str]:
     """Headless raster views via OCCT tessellation + matplotlib Agg.
 
     Images are review aids. They are never the evidence for a geometric claim;
@@ -253,6 +266,7 @@ def render_views(bodies: Sequence[Body], out_dir: str, stem: str,
 
     os.makedirs(out_dir, exist_ok=True)
     palette = colors or {}
+    opacity = alphas or {}
     default_cycle = ["#6b8fb4", "#c08a5a", "#7ba884", "#b06f8a", "#8d84b8", "#b9a04e"]
     written = []
 
@@ -279,7 +293,11 @@ def render_views(bodies: Sequence[Body], out_dir: str, stem: str,
         f = np.array(tris)
         col = palette.get(b.id, default_cycle[i % len(default_cycle)])
         if len(f):
-            tess.append((v[f], col, b.id))
+            # A body may be drawn translucent so bodies nested inside it stay
+            # visible. matplotlib's 3D depth sorting puts a large enclosing body
+            # in front of a thin one inside it, which reads as "the inner body is
+            # missing" when it is merely hidden.
+            tess.append((v[f], col, b.id, opacity.get(b.id, 0.94)))
 
     if not tess:
         return written
@@ -290,8 +308,8 @@ def render_views(bodies: Sequence[Body], out_dir: str, stem: str,
     for label, eye in views:
         fig = plt.figure(figsize=(7.2, 5.4), dpi=130)
         ax = fig.add_subplot(111, projection="3d")
-        for tri, col, _ in tess:
-            pc = Poly3DCollection(tri, alpha=0.94, linewidths=0.18)
+        for tri, col, _, alpha in tess:
+            pc = Poly3DCollection(tri, alpha=alpha, linewidths=0.18)
             pc.set_facecolor(col)
             pc.set_edgecolor("#33383d")
             ax.add_collection3d(pc)

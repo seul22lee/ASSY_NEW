@@ -1,0 +1,109 @@
+reference_id: EXE-BM001-02
+schema_version: 0.1.0
+oracle_commit: 83fc12d46ad8c5fad36afcfe5b6e916822a41118
+
+status: >
+  What this reference EXPECTED the Oracle to conclude, from the selection frozen
+  before any geometry was written, set against what was observed. It exists so
+  that a surprising result is visible as a surprise rather than being absorbed
+  silently.
+
+expectation_source: BM-001/reviews/REFERENCE_SELECTION.yaml, frozen before geometry
+
+topology_as_frozen:
+  declared: rigid captive sliding closure, realized guidance, terminal bounds, rigid quarter-turn cam retention
+  built: the same
+  redesigned: false
+  note: >
+    The frozen topology was buildable as specified. No redesign was needed and
+    none was made.
+
+expected_and_observed:
+  - invariant: NRM-BM-001-001
+    expected: PASS
+    observed: PASS
+  - invariant: NRM-BM-001-002
+    expected: PASS
+    observed: PASS
+    note: >
+      The frozen selection called this closure "captive". It is captive over the
+      operating travel and NOT captive at full open, where the lips are relieved
+      so the closure can be installed at all. That is declared as LIM-01 and
+      measured by the captivity probe, and NRM-BM-001-002's own exclusion admits
+      a closure detached in the open state.
+  - invariant: NRM-BM-001-003
+    expected: PASS, on a DECLARED usable access region rather than the whole aperture
+    observed: PASS
+    divergence: false
+    reading: >
+      This is the interesting case of the pilot. A captive sliding closure cannot
+      uncover the whole of its own aperture; it has to go somewhere, and the only
+      place is over the rest of the enclosure. The design therefore declares 84
+      of the 90 mm aperture as its usable access. The invariant asks about the
+      access THE DESIGN DECLARES, so this passes - but the check would be hollow
+      if a design could declare a region the closure never reaches, so the
+      evaluator also measures that the same region is covered by 21367 mm^3 of
+      closure in the closed state. It is a region the closure genuinely controls.
+      A reviewer is still entitled to judge 84 of 90 mm insufficient for a
+      storage box; that would be a finding about this design.
+  - invariant: NRM-BM-001-004
+    expected: PASS
+    observed: PASS
+  - invariant: NRM-BM-001-005
+    expected: PASS
+    observed: PASS
+    note: >
+      Both bounds are realized, not just the open one. Common volume is zero
+      across the whole 0 to 84 mm travel and positive 0.05 mm outside it at each
+      end.
+  - invariant: NRM-BM-001-006
+    expected: NOT_EVALUABLE on the holding clause; PASS on release and localization
+    observed: NOT_EVALUABLE
+    divergence: false
+    reading: >
+      Same outcome as EXE-BM001-01 and for the same reason: the first clause asks
+      what the design holds against, and this design declares no disturbance.
+      That is a missing declaration, not missing evidence. Two references with
+      entirely different retention mechanisms reaching the same NOT_EVALUABLE is
+      evidence that the gap is in UNR-BM-001-001 rather than in either design.
+  - invariant: NRM-BM-001-007
+    expected: PASS geometrically; durability NOT_VERIFIED
+    observed: PASS with the durability clause NOT_VERIFIED
+  - invariant: NRM-BM-001-008
+    expected: PASS
+    observed: PASS
+    note: >
+      The actuation here is a rotation, not a lift. What is checked is that the
+      knob can be reached from outside. The effort to turn it is NOT_VERIFIED.
+  - invariant: NRM-BM-001-009
+    expected: PASS
+    observed: PASS
+  - invariant: NRM-BM-001-010
+    expected: PASS
+    observed: PASS
+    note: >
+      Only after the lips were relieved over the loading zone. A lipped channel
+      closed at both ends cannot be entered by any translation, so without that
+      relief the closure could not be installed at all.
+  - invariant: NRM-BM-001-011
+    expected: PASS for existence; adequacy NOT_VERIFIED
+    observed: PASS with the adequacy clause NOT_VERIFIED
+  - invariant: NRM-BM-001-012
+    expected: PASS via HSD-006 branch A
+    observed: PASS
+  - invariant: NRM-BM-001-013
+    expected: PASS vacuously
+    observed: PASS
+    note: >
+      Worth stating plainly: this reference has a cam whose usefulness depends on
+      a holding torque nobody has computed. That is recorded as NOT_VERIFIED, not
+      quietly claimed, which is exactly what this invariant exists to enforce.
+
+oracle_counterexample_candidates: []
+
+no_oracle_file_was_modified: true
+weakening_check: >
+  No CAD was weakened to obtain a PASS, and no check was relaxed. Nothing in this
+  reference altered any EXE-BM001-01 result: that reference was rerun after every
+  shared-code change and produced the same geometry signature and the same twelve
+  PASS and one NOT_EVALUABLE throughout.

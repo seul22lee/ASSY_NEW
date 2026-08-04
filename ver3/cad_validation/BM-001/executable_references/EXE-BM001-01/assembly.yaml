@@ -11,11 +11,11 @@ principle: >
 steps:
   - id: ASM-01
     place: BODY-ENCLOSURE
-    from: base
-    direction: null
+    kind: base
     note: fixed reference body; nothing is inserted.
   - id: ASM-02
     place: BODY-CLOSURE
+    kind: insertion
     direction: [0.0, 0.0, -1.0]
     approach_distance: 40.0
     note: >
@@ -28,6 +28,7 @@ steps:
       - {body: BODY-ENCLOSURE, interaction: INT-13}
   - id: ASM-03
     place: BODY-PIN
+    kind: insertion
     direction: [1.0, 0.0, 0.0]
     approach_distance: 30.0
     note: >
@@ -37,6 +38,7 @@ steps:
       - {body: BODY-ENCLOSURE, interaction: INT-06}
   - id: ASM-04
     place: BODY-BOLT
+    kind: insertion
     direction: [0.0, 0.0, -1.0]
     approach_distance: 30.0
     note: >
