@@ -1,22 +1,58 @@
 {
-  "fast_mode": false,
-  "findings": [],
-  "geometry_signature_sha256": "11bcc694d02617379fa69c7ecf78d5a7bdd550f382b6a9cada35b85f361926d7",
+  "fast_mode": true,
+  "findings": [
+    {
+      "interaction": "INT-04",
+      "severity": "FAIL",
+      "step": "6",
+      "what": "declared interaction region contains no geometry"
+    },
+    {
+      "interaction": "INT-05",
+      "severity": "FAIL",
+      "step": "6",
+      "what": "declared interaction region contains no geometry"
+    },
+    {
+      "interaction": "INT-07",
+      "measured": 3.9000000000000004,
+      "nominal": 0.3,
+      "severity": "FAIL",
+      "step": "6",
+      "what": "declared clearance does not match nominal"
+    },
+    {
+      "interaction": "INT-11",
+      "severity": "FAIL",
+      "step": "6",
+      "what": "declared interaction region contains no geometry"
+    },
+    {
+      "assembly_step": "ASM-02",
+      "at_offset_mm": 4.999999999999999,
+      "body": "BODY-COVER",
+      "common_volume_mm3": 307.44000000000005,
+      "severity": "FAIL",
+      "step": "7",
+      "what": "insertion path passes through placed material"
+    }
+  ],
+  "geometry_signature_sha256": "e99b88b70ec523a42e73685a2542b0a0678f66ca920cd193d302db9146d83c39",
   "human_review": "HUMAN_REVIEW_PENDING",
-  "overall": "PASS",
+  "overall": "FAIL",
   "reference_id": "EXE-BM001-02",
-  "run_seconds": 31.4,
+  "run_seconds": 23.2,
   "steps": {
     "1_build": "PASS",
     "2_solid_validity": "PASS",
     "3_reimport": "PASS",
     "4_signature": "PASS",
     "5_motion": "PASS",
-    "6_interactions": "PASS",
-    "7_assembly": "PASS",
-    "8_predicates": "PASS",
+    "6_interactions": "FAIL",
+    "7_assembly": "FAIL",
+    "8_predicates": "FAIL",
     "9_render": "PASS",
     "checker_selftest": "PASS"
   },
-  "what_this_means": "GEOMETRICALLY AND KINEMATICALLY ADMISSIBLE. Not verified against the rank-1 source: cam holding torque, friction, wear, user effort, strength, manufacturing cost, disturbance capacity and durability are NOT_VERIFIED by construction."
+  "what_this_means": "GEOMETRICALLY AND KINEMATICALLY ADMISSIBLE. Snap force, strain, release effort, retention capacity, fatigue, creep, wear, cost, tolerance robustness and durability are NOT_VERIFIED by construction."
 }

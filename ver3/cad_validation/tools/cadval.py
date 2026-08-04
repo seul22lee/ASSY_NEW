@@ -425,6 +425,179 @@ def _plane_slab(shape: cq.Shape, axis: int, at: float, half: float = 0.02) -> cq
                             pnt=cq.Vector(lo[0], lo[1], lo[2]))
 
 
+# ------------------------------------------------------ drawing-style sections
+def section_polygons(shape: cq.Shape, axis: int, at: float, tol: float = 0.05):
+    """Exact section outlines: outer boundary plus holes, per cut face.
+
+    Tessellating a thin slab and drawing its triangles produces the diagonal
+    noise that makes a review image unreadable - those diagonals are mesh edges,
+    not geometry. This takes the planar faces the cut actually produces and
+    walks their wires, so what is drawn is the boundary of the cut face and
+    nothing else.
+
+    Returns a list of (outer_points, [hole_points, ...]) in the two in-plane
+    coordinates, ordered as (u, v) with the cut axis dropped.
+    """
+    keep = [i for i in (0, 1, 2) if i != axis]
+    bb = bbox_of(shape)
+    lo = [bb["xmin"] - 10, bb["ymin"] - 10, bb["zmin"] - 10]
+    size = [bb["dx"] + 20, bb["dy"] + 20, bb["dz"] + 20]
+    half = 0.01
+    lo[axis] = at - half
+    size[axis] = 2 * half
+    slab = cq.Solid.makeBox(size[0], size[1], size[2], pnt=cq.Vector(*lo))
+    try:
+        sect = shape.intersect(slab)
+    except Exception:
+        return []
+    if sect is None:
+        return []
+
+    def uv(v):
+        c = (v.x, v.y, v.z)
+        return (c[keep[0]], c[keep[1]])
+
+    def wire_pts(w):
+        """Walk the wire in connectivity order.
+
+        Wire.Edges() is a bag, not a path. Concatenating each edge's samples in
+        list order makes the polygon jump between disconnected ends, which draws
+        as spurious wedges across the cut face - the artifact this replaces.
+        """
+        edges = list(w.Edges())
+        if not edges:
+            return []
+
+        def ends(e):
+            return e.startPoint(), e.endPoint()
+
+        def near(a, b, eps=1e-6):
+            return (abs(a.x - b.x) < eps and abs(a.y - b.y) < eps
+                    and abs(a.z - b.z) < eps)
+
+        def sample(e, rev):
+            n = min(max(2, int(e.Length() / tol) + 1), 400)
+            ts = [i / float(n) for i in range(n + 1)]
+            if rev:
+                ts.reverse()
+            return [uv(e.positionAt(s)) for s in ts]
+
+        cur = edges.pop(0)
+        s0, e0 = ends(cur)
+        pts = sample(cur, False)
+        tail = e0
+        while edges:
+            for i, e in enumerate(edges):
+                a, b = ends(e)
+                if near(a, tail):
+                    pts.extend(sample(e, False)[1:]); tail = b; edges.pop(i); break
+                if near(b, tail):
+                    pts.extend(sample(e, True)[1:]); tail = a; edges.pop(i); break
+            else:
+                break                     # open wire; draw what is connected
+        return pts
+
+    out = []
+    for f in sect.Faces():
+        c = f.Center()
+        if abs((c.x, c.y, c.z)[axis] - at) > half * 1.5:
+            continue                      # not the cut face; a slab side wall
+        try:
+            outer = wire_pts(f.outerWire())
+            holes = [wire_pts(w) for w in f.innerWires()]
+        except Exception:
+            continue
+        if len(outer) >= 3:
+            out.append((outer, holes))
+    return out
+
+
+def render_review_section(bodies, out_path: str, *, plane: str, at: float,
+                          colors=None, hatches=None, title: str = "",
+                          label: str = "", extent=None, annotations=(),
+                          section_lines=(), context_note: str = "") -> str:
+    """Orthographic review section drawn as a drawing, not as a render.
+
+    Cut faces are filled and hatched so they read as cut material. Nothing
+    behind the plane is drawn. `section_lines` marks where OTHER cuts are taken,
+    which is what lets a reviewer place a detail cut inside the whole product.
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.path import Path as MplPath
+    from matplotlib.patches import PathPatch
+
+    axis = {"x": 0, "y": 1, "z": 2}[plane]
+    keep = [i for i in (0, 1, 2) if i != axis]
+    names = ["X (mm)", "Y (mm)", "Z (mm)"]
+    palette = colors or {}
+    hat = hatches or {}
+    cycle = ["#6b8fb4", "#c08a5a", "#7ba884", "#b06f8a", "#8d84b8"]
+
+    fig, ax = plt.subplots(figsize=(11.0, 6.4), dpi=150)
+    drawn = 0
+    for i, b in enumerate(bodies):
+        polys = section_polygons(b.shape, axis, at)
+        if not polys:
+            continue
+        col = palette.get(b.id, cycle[i % len(cycle)])
+        hh = hat.get(b.id, "///")
+        for outer, holes in polys:
+            verts, codes = [], []
+            for ring in [outer] + holes:
+                verts.extend(ring + [ring[0]])
+                codes.extend([MplPath.MOVETO] + [MplPath.LINETO] * (len(ring) - 1)
+                             + [MplPath.CLOSEPOLY])
+            path = MplPath(verts, codes)
+            ax.add_patch(PathPatch(path, facecolor=col, edgecolor="#1b1b1b",
+                                   lw=0.9, hatch=hh, alpha=0.95, zorder=3))
+        drawn += 1
+    if not drawn:
+        plt.close(fig)
+        return ""
+
+    for sl in section_lines:
+        pos, lab = sl["at"], sl["label"]
+        if sl.get("along", "u") == "u":
+            ax.axvline(pos, color="#c0392b", lw=1.1, ls=(0, (9, 4, 2, 4)), zorder=6)
+            y = ax.get_ylim()[1]
+            for dy, va in ((0, "bottom"),):
+                ax.text(pos, y, " %s " % lab, color="#c0392b", fontsize=9,
+                        ha="center", va=va, fontweight="bold", zorder=7,
+                        bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="#c0392b", lw=0.8))
+        else:
+            ax.axhline(pos, color="#c0392b", lw=1.1, ls=(0, (9, 4, 2, 4)), zorder=6)
+            ax.text(ax.get_xlim()[1], pos, " %s " % lab, color="#c0392b", fontsize=9,
+                    ha="left", va="center", fontweight="bold", zorder=7,
+                    bbox=dict(boxstyle="square,pad=0.15", fc="white", ec="#c0392b", lw=0.8))
+
+    ax.set_aspect("equal", adjustable="box")
+    ax.autoscale_view()
+    if extent:
+        ax.set_xlim(extent[0], extent[1])
+        ax.set_ylim(extent[2], extent[3])
+    ax.set_xlabel(names[keep[0]], fontsize=9)
+    ax.set_ylabel(names[keep[1]], fontsize=9)
+    head = title if not label else "%s   %s" % (label, title)
+    ax.set_title("%s\ncut at %s = %.2f mm  -  orthographic, normal to the cut, "
+                 "cut faces hatched%s"
+                 % (head, plane.upper(), at, ("  -  " + context_note) if context_note else ""),
+                 fontsize=10)
+    ax.grid(True, alpha=0.20, lw=0.4, zorder=1)
+    ax.tick_params(labelsize=8)
+    for a in annotations:
+        ax.annotate(a["text"], xy=a["xy"], xytext=a["xytext"], fontsize=8.5,
+                    arrowprops=dict(arrowstyle="->", lw=1.0, color="#0b6b3a"),
+                    color="#0b6b3a", zorder=8, ha=a.get("ha", "left"),
+                    bbox=dict(boxstyle="round,pad=0.28", fc="white", ec="#0b6b3a", lw=0.8))
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    fig.tight_layout()
+    fig.savefig(out_path, bbox_inches="tight")
+    plt.close(fig)
+    return out_path
+
+
 # ------------------------------------------------------------------- hashes
 def sha256_file(path: str) -> str:
     return hashlib.sha256(open(path, "rb").read()).hexdigest()

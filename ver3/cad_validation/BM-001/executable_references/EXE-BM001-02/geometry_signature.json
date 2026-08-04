@@ -11,58 +11,35 @@
   "signature": {
     "bodies": [
       {
-        "area_mm2": 1266.736986,
-        "bbox_mm": {
-          "dx": 18.0,
-          "dy": 18.0,
-          "dz": 19.1,
-          "xmax": 174.0,
-          "xmin": 156.0,
-          "ymax": 29.0,
-          "ymin": 11.0,
-          "zmax": 50.0,
-          "zmin": 30.9
-        },
-        "body_id": "BODY-CAM",
-        "centre_of_mass_mm": [
-          165.0,
-          20.0,
-          43.31095
-        ],
-        "material_class": "GENERIC_RIGID_POLYMER",
-        "name": "quarter-turn retention cam",
-        "volume_mm3": 2324.136986
-      },
-      {
-        "area_mm2": 13062.887058,
+        "area_mm2": 10228.934892,
         "bbox_mm": {
           "dx": 90.0,
-          "dy": 64.0,
-          "dz": 5.0,
-          "xmax": 177.0,
-          "xmin": 87.0,
-          "ymax": 67.0,
-          "ymin": 3.0,
-          "zmax": 45.0,
+          "dy": 54.4,
+          "dz": 7.2,
+          "xmax": 187.0,
+          "xmin": 97.0,
+          "ymax": 57.6,
+          "ymin": 3.2,
+          "zmax": 47.2,
           "zmin": 40.0
         },
         "body_id": "BODY-COVER",
         "centre_of_mass_mm": [
-          131.449507,
-          35.250224,
-          42.5
+          142.413617,
+          34.575006,
+          42.516857
         ],
-        "material_class": "GENERIC_RIGID_POLYMER",
-        "name": "sliding closure",
-        "volume_mm3": 28327.45269
+        "material_class": "GENERIC_COMPLIANT_POLYMER",
+        "name": "sliding cover",
+        "volume_mm3": 20424.672588
       },
       {
-        "area_mm2": 86009.780051,
+        "area_mm2": 95948.8,
         "bbox_mm": {
-          "dx": 180.0,
+          "dx": 190.0,
           "dy": 70.0,
           "dz": 48.0,
-          "xmax": 180.0,
+          "xmax": 190.0,
           "xmin": -0.0,
           "ymax": 70.0,
           "ymin": -0.0,
@@ -71,52 +48,58 @@
         },
         "body_id": "BODY-ENCLOSURE",
         "centre_of_mass_mm": [
-          87.947995,
-          34.715343,
-          21.669141
+          92.227034,
+          35.648826,
+          22.721044
         ],
         "material_class": "GENERIC_RIGID_POLYMER",
         "name": "enclosure",
-        "volume_mm3": 134101.8613
+        "volume_mm3": 147252.24
+      },
+      {
+        "area_mm2": 332.917868,
+        "bbox_mm": {
+          "dx": 7.6,
+          "dy": 7.5,
+          "dz": 13.5,
+          "xmax": 145.8,
+          "xmin": 138.2,
+          "ymax": 11.75,
+          "ymin": 4.25,
+          "zmax": 44.7,
+          "zmin": 31.2
+        },
+        "body_id": "BODY-PIN",
+        "centre_of_mass_mm": [
+          142.0,
+          8.0,
+          35.567647
+        ],
+        "material_class": "GENERIC_COMPLIANT_POLYMER",
+        "name": "captive retention pin",
+        "volume_mm3": 226.985921
       }
     ],
     "body_count": 3,
     "critical_dimensions_mm": {
-      "blade_len": 12.0,
-      "blade_t": 3.0,
-      "blade_w": 5.0,
-      "box_x": 180.0,
+      "barb_d": 7.6,
+      "box_x": 190.0,
       "box_y": 70.0,
       "box_z": 40.0,
-      "cam_lift": 20.0,
-      "cam_shaft_d": 10.0,
-      "cam_x": 165.0,
-      "cam_y": 20.0,
       "cover_len": 90.0,
       "cover_t": 5.0,
-      "deck_x1": 87.0,
-      "ledge_y": 9.0,
-      "ledge_z0": 34.0,
-      "lip_relief_x1": 93.4,
-      "lip_z0": 45.2,
-      "lock_angle_deg": 90.0,
-      "slot_gap": 0.2,
+      "deck_x1": 97.0,
+      "keeper_x0": 93.0,
+      "latch_hook_h": 2.2,
+      "ledge_y": 13.0,
+      "lip_inner_y": 12.0,
+      "slot_w": 5.4,
       "travel": 84.0,
       "wall": 3.0
     },
     "motion": {
-      "cam_axis_dir": [
-        0.0,
-        0.0,
-        1.0
-      ],
-      "cam_axis_point": [
-        165.0,
-        20.0,
-        0.0
-      ],
-      "cam_lift_mm": 20.0,
-      "lock_angle_deg": 90.0,
+      "barb_deflection_mm": 1.3,
+      "latch_deflection_mm": 2.4,
       "slide_axis": [
         -1.0,
         0.0,
@@ -125,44 +108,24 @@
       "travel_mm": 84.0
     },
     "overall_bbox_mm": {
-      "dx": 180.0,
+      "dx": 190.0,
       "dy": 70.0,
-      "dz": 50.0,
-      "xmax": 180.0,
+      "dz": 48.0,
+      "xmax": 190.0,
       "xmin": -0.0,
       "ymax": 70.0,
       "ymin": -0.0,
-      "zmax": 50.0,
+      "zmax": 48.0,
       "zmin": -0.0
     },
     "semantic_body_ids": [
-      "BODY-CAM",
       "BODY-COVER",
-      "BODY-ENCLOSURE"
+      "BODY-ENCLOSURE",
+      "BODY-PIN"
     ],
-    "signature_sha256": "11bcc694d02617379fa69c7ecf78d5a7bdd550f382b6a9cada35b85f361926d7",
+    "signature_sha256": "e99b88b70ec523a42e73685a2542b0a0678f66ca920cd193d302db9146d83c39",
     "state_transforms": {
-      "S_CLOSED_RELEASED": {
-        "BODY-CAM": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            -40.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            20.0
-          ]
-        ],
+      "S_CLOSED_LATCHED": {
         "BODY-COVER": [
           [
             1.0,
@@ -184,6 +147,26 @@
           ]
         ],
         "BODY-ENCLOSURE": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "BODY-PIN": [
           [
             1.0,
             0.0,
@@ -204,27 +187,7 @@
           ]
         ]
       },
-      "S_CLOSED_RETAINED": {
-        "BODY-CAM": [
-          [
-            0.0,
-            -1.0,
-            0.0,
-            185.0
-          ],
-          [
-            1.0,
-            0.0,
-            0.0,
-            -145.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            0.0
-          ]
-        ],
+      "S_CLOSED_RELEASED": {
         "BODY-COVER": [
           [
             1.0,
@@ -246,6 +209,26 @@
           ]
         ],
         "BODY-ENCLOSURE": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "BODY-PIN": [
           [
             1.0,
             0.0,
@@ -267,26 +250,6 @@
         ]
       },
       "S_OPEN": {
-        "BODY-CAM": [
-          [
-            1.0,
-            0.0,
-            0.0,
-            0.0
-          ],
-          [
-            0.0,
-            1.0,
-            0.0,
-            -40.0
-          ],
-          [
-            0.0,
-            0.0,
-            1.0,
-            20.0
-          ]
-        ],
         "BODY-COVER": [
           [
             1.0,
@@ -313,6 +276,26 @@
             0.0,
             0.0,
             0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ]
+        ],
+        "BODY-PIN": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -84.0
           ],
           [
             0.0,

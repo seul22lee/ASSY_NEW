@@ -1,93 +1,93 @@
 {
   "controls": [
     {
-      "check_under_test": "undeclared volumetric overlap (step 5, step 6)",
+      "check_under_test": "undeclared overlap",
       "control_id": "CTL-01",
       "detected": true,
-      "injected_defect": "closure driven 0.5 mm into the ledges",
+      "injected_defect": "cover driven 0.5 mm into the ledges",
       "measured": {
-        "common_volume_mm3": 743.672442,
-        "threshold_mm3": 1e-06
+        "common_volume_mm3": 82.6542
       }
     },
     {
-      "check_under_test": "INT-03 DECLARED_CONTACT",
+      "check_under_test": "lug projection check",
       "control_id": "CTL-02",
       "detected": true,
-      "injected_defect": "closure lifted 0.1 mm off the front ledge",
+      "injected_defect": "barb span reduced below the slot width, so nothing retains the pin",
       "measured": {
-        "contact_tol_mm": 0.02,
-        "min_distance_mm": 0.1
+        "lug_span_mm": 5.2,
+        "note": "a lug narrower than its slot retains nothing",
+        "slot_w_mm": 5.4
       }
     },
     {
-      "check_under_test": "INT-01 DECLARED_CLEARANCE",
+      "check_under_test": "compressed-envelope check",
       "control_id": "CTL-03",
       "detected": true,
-      "injected_defect": "running clearance opened from 0.2 to 0.6 mm",
+      "injected_defect": "arm deflection cut to 0.2 mm, so the barb cannot enter the slot",
       "measured": {
-        "declared_nominal_mm": 0.2,
-        "min_distance_mm": 0.6
+        "compressed_envelope_mm": 7.2254,
+        "slot_w_mm": 5.4
       }
     },
     {
-      "check_under_test": "quarter-turn capture probe",
+      "check_under_test": "latch probe",
       "control_id": "CTL-04",
       "detected": true,
-      "injected_defect": "cam blade shortened to 9.0 mm, shorter than the keyway opening",
+      "injected_defect": "latch hook flattened, so nothing catches the keeper",
       "measured": {
-        "cam_enclosure_common_volume_on_lift_mm3": 0.0,
-        "note": "a short blade lifts straight out, so the capture is not realized"
+        "flat_hook_common_mm3": 0.0,
+        "with_hook_common_mm3": 36.0
       }
     },
     {
-      "check_under_test": "assembly path sweep (step 7)",
+      "check_under_test": "latch discrimination",
       "control_id": "CTL-05",
       "detected": true,
-      "injected_defect": "closure inserted along +y instead of -z",
+      "injected_defect": "opening attempted with the latch engaged",
       "measured": {
-        "max_common_volume_mm3": 1260.0
-      }
-    },
-    {
-      "check_under_test": "terminal-condition causal probe",
-      "control_id": "CTL-06",
-      "detected": true,
-      "injected_defect": "closure slid 0.05 mm past the open terminal bound",
-      "measured": {
-        "common_volume_beyond_mm3": 16.0,
-        "common_volume_inside_mm3": 0.0
-      }
-    },
-    {
-      "check_under_test": "retention blocking probe",
-      "control_id": "CTL-07",
-      "detected": true,
-      "injected_defect": "slide attempted with the cam still locked",
-      "measured": {
-        "capture_holds": true,
-        "capture_opens_on_quarter_turn": true,
-        "slide_block_onset_mm": 0.25,
-        "slide_blocked": true,
-        "slide_free_after_withdrawal": true
+        "blocks": true,
+        "frees": true,
+        "re_engages": true
       }
     },
     {
       "check_under_test": "captivity probe",
-      "control_id": "CTL-08",
+      "control_id": "CTL-06",
       "detected": true,
-      "injected_defect": "closure lifted 3 mm at each point of the travel",
+      "injected_defect": "3 mm lift attempted at every operating position",
       "measured": {
-        "captive_over_mm": [
+        "captive_at_full_open": true,
+        "positions": [
           0.0,
           10.0,
           40.0,
-          70.0
-        ],
-        "not_captive_at_mm": [
+          70.0,
           84.0
-        ],
-        "note": "LIM-01 declares the closure liftable only at full open"
+        ]
+      }
+    },
+    {
+      "check_under_test": "cam removal",
+      "control_id": "CTL-07",
+      "detected": true,
+      "injected_defect": "metadata check: a separate cam body still present",
+      "measured": {
+        "body_ids": [
+          "BODY-COVER",
+          "BODY-ENCLOSURE",
+          "BODY-PIN"
+        ]
+      }
+    },
+    {
+      "check_under_test": "terminal-bound probe",
+      "control_id": "CTL-08",
+      "detected": true,
+      "injected_defect": "cover pushed 1 mm past each slot end",
+      "measured": {
+        "blocked_outside": true,
+        "clear_within": true
       }
     }
   ],

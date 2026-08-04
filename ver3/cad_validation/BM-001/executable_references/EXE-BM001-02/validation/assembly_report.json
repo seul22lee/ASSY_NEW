@@ -3,7 +3,7 @@
   "establishes": "an unobstructed insertion ordering exists",
   "method": "Each discrete part is swept along its declared straight-line insertion direction, from its approach distance to its seated offset, and the boolean common with every already-placed body is measured at each sample.",
   "name": "assembly process check",
-  "status": "PASS",
+  "status": "FAIL",
   "step": 7,
   "steps": [
     {
@@ -14,7 +14,7 @@
       "step_id": "ASM-01"
     },
     {
-      "approach_distance_mm": 40.0,
+      "approach_distance_mm": 30.0,
       "body": "BODY-COVER",
       "direction": [
         0.0,
@@ -22,22 +22,24 @@
         -1.0
       ],
       "kind": "linear insertion",
-      "max_common_volume_at_offset_mm": null,
-      "max_common_volume_mm3": 0.0,
+      "max_common_volume_at_offset_mm": 4.999999999999999,
+      "max_common_volume_mm3": 307.44,
       "placed_before": [
         "BODY-ENCLOSURE"
       ],
-      "samples": 61,
+      "samples": 13,
       "seated_at_offset_mm": [
-        -84.0,
+        -100.0,
         0.0,
         0.0
       ],
+      "seated_configuration": "as-built",
       "seated_min_distance_to_mm": {
         "BODY-ENCLOSURE": 0.0
       },
-      "status": "PASS",
-      "step_id": "ASM-02"
+      "status": "FAIL",
+      "step_id": "ASM-02",
+      "swept_configuration": "as-built"
     },
     {
       "body": "BODY-COVER",
@@ -46,15 +48,15 @@
       "status": "PASS",
       "step_id": "ASM-03",
       "swept_here": false,
-      "validated_by": "motion segment M3_OPEN"
+      "validated_by": "motion segment M3_CLOSE"
     },
     {
-      "approach_distance_mm": 40.0,
-      "body": "BODY-CAM",
+      "approach_distance_mm": 25.0,
+      "body": "BODY-PIN",
       "direction": [
         0.0,
         0.0,
-        -1.0
+        1.0
       ],
       "kind": "linear insertion",
       "max_common_volume_at_offset_mm": null,
@@ -63,27 +65,20 @@
         "BODY-ENCLOSURE",
         "BODY-COVER"
       ],
-      "samples": 61,
+      "samples": 13,
       "seated_at_offset_mm": [
         0.0,
         0.0,
         0.0
       ],
+      "seated_configuration": "as-built",
       "seated_min_distance_to_mm": {
-        "BODY-COVER": 0.0,
-        "BODY-ENCLOSURE": 0.141421356
+        "BODY-COVER": 0.2,
+        "BODY-ENCLOSURE": 0.1
       },
       "status": "PASS",
-      "step_id": "ASM-04"
-    },
-    {
-      "body": "BODY-CAM",
-      "kind": "operation",
-      "note": "moves an installed body along a path validated in step 5",
-      "status": "PASS",
-      "step_id": "ASM-05",
-      "swept_here": false,
-      "validated_by": "motion segment M1_UNLOCK"
+      "step_id": "ASM-04",
+      "swept_configuration": "declared alternate configuration"
     }
   ]
 }

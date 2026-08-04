@@ -1,65 +1,67 @@
 reference_id: EXE-BM001-02
-schema_version: 0.1.0
+schema_version: 0.2.0
 units: mm
 
 principle: >
-  Every insertion is a straight-line translation of one rigid body. No step
-  requires a body to deform, and no step requires any body to pass through the
-  material of another. Steps that only move an already-installed body along a
-  path already validated in step 5 are marked as operations and cite the segment
-  that validated them, rather than being swept again.
+  Every insertion is a straight-line translation of one rigid body, or a declared
+  compliant passage that is measured rather than assumed. No separate part is
+  handled by the user in service: the pin is fitted once and snap-retained.
 
 steps:
   - id: ASM-01
     place: BODY-ENCLOSURE
     kind: base
-    note: fixed reference body; nothing is inserted.
+    note: fixed reference body
+
   - id: ASM-02
     place: BODY-COVER
     kind: insertion
     direction: [0.0, 0.0, -1.0]
-    approach_distance: 40.0
-    at_offset: [-84.0, 0.0, 0.0]
+    approach_distance: 30.0
+    at_offset: [-100.0, 0.0, 0.0]
     note: >
-      Lowered vertically into the channel at the open position, where the lips
-      are relieved. This is why the lips stop at lip_relief_x1: without that
-      relief there is no way to get the closure into its own rails, because a
-      lipped channel closed at both ends cannot be entered by any translation.
-    ends_in_contact_with:
-      - {body: BODY-ENCLOSURE, interaction: INT-03}
-      - {body: BODY-ENCLOSURE, interaction: INT-04}
-      - {body: BODY-ENCLOSURE, interaction: INT-08}
-      - {body: BODY-ENCLOSURE, interaction: INT-13}
+      Lowered into the channel at the LOADING position, which is 16 mm beyond the
+      open bound. The pin ear passes down through FEA-E-LOAD-RELIEF, the only
+      break in the lips. This position is outside the operating range and the pin
+      makes it unreachable once fitted.
+
   - id: ASM-03
     place: BODY-COVER
     kind: operation
-    note: Slide to the closed position. Same path as M3_OPEN reversed.
-    validated_by: motion segment M3_OPEN
+    note: slide to the closed position; same path as M3_CLOSE
+    validated_by: motion segment M3_CLOSE
+
   - id: ASM-04
-    place: BODY-CAM
+    place: BODY-PIN
     kind: insertion
-    direction: [0.0, 0.0, -1.0]
-    approach_distance: 40.0
+    direction: [0.0, 0.0, 1.0]
+    approach_distance: 25.0
     at_offset: [0.0, 0.0, 0.0]
-    requires: BODY-COVER at the closed position
+    configuration_during_step: CFG-PIN-COMPRESSED
+    configuration_after_step: CFG-PIN-RELAXED
+    compliant_region: REG-P-SNAP-COMPLIANT
+    steps:
+      - 1. reach in through the open aperture, under the front ledge
+      - 2. enter the barb UPWARD into the slot, lead-in first
+      - 3. compress ONLY REG-P-SNAP-COMPLIANT
+      - 4. pass the lugs up through the slot and the cover bore
+      - 5. recover the lugs in the cover counterbore
+      - 6. seat FEA-P-HEAD under FEA-E-LEDGE-UNDER
     note: >
-      Lowered through FEA-C-KEYWAY and FEA-E-KEYWAY with the blade aligned. The
-      cam is as-built in this orientation, so the insertion sweep is a check on
-      the same solid that is later locked.
-    ends_in_contact_with:
-      - {body: BODY-COVER, interaction: INT-11}
-  - id: ASM-05
-    place: BODY-CAM
-    kind: operation
-    note: Quarter turn to the locked orientation. Same path as M1_UNLOCK reversed.
-    validated_by: motion segment M1_UNLOCK
+      Fitted from BELOW, through the cavity. A top-down pin cannot work here: its
+      head would have to pass through the lips the cover is already under, which
+      the assembly sweep caught.
+      From this point the cover is captive at every operating position and the
+      slot ends bound the travel. The loading position can no longer be reached.
+    ends_retained_by:
+      - {body: BODY-ENCLOSURE, interaction: INT-07, direction: upward, what: cover captivity}
+      - {body: BODY-COVER, interaction: INT-11, direction: downward}
 
 disassembly: >
-  The reverse order is available and uses the same paths. No step is
-  irreversible and no body is permanently joined.
+  Service removal requires compressing the pin arms from under the front ledge, a
+  deliberate act with a tool. It is not an ordinary lift-out, which is the point
+  of HCR-BM001-004.
 
 not_established_here: >
-  Insertion force, ease of assembly and process suitability. REQ-007 asks for a
-  product that is easy to assemble; what is shown is that an assembly ordering
-  exists and is geometrically unobstructed. Ease is an effort claim and remains
-  NOT_VERIFIED.
+  Insertion force, snap strain, release effort and process suitability. What is
+  shown is that an assembly ordering exists and is geometrically unobstructed.

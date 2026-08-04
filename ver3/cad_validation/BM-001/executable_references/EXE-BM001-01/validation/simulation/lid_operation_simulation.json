@@ -1,0 +1,1888 @@
+{
+  "assumptions": {
+    "actuation_profile": {
+      "value": "minimum-jerk sweep over 2.0 s, closed to open and back",
+      "why": "a smooth user-like motion. A different profile changes the inertial part of the torque but not the gravity part."
+    },
+    "density_kg_m3": {
+      "affects": "lid mass, and therefore every torque below, linearly",
+      "value": 1200.0,
+      "why": "a generic rigid polymer. UNR-BM-001-004 leaves material and process open, so this is a stated assumption and not a source value."
+    },
+    "gravity_m_s2": {
+      "value": 9.81,
+      "why": "standard, lid opening upward against it"
+    },
+    "hinge_friction_Nm_per_rad_s": {
+      "affects": "reported torque is optimistic",
+      "value": 0.0,
+      "why": "no friction is modelled. A friction torque would ADD to the effort computed here, so these curves are a lower bound on the effort a real hinge would need, not a prediction of it."
+    },
+    "orientation": {
+      "value": "enclosure sitting upright on a desk, hinge axis horizontal",
+      "why": "the only orientation in which the source's desktop use makes sense"
+    }
+  },
+  "engine": {
+    "name": "mujoco",
+    "version": "2.3.7"
+  },
+  "model": {
+    "bodies": 1,
+    "inertial_from_cad": {
+      "I_about_com_kgm2": 4.3186e-05,
+      "I_about_hinge_kgm2": 0.000140081,
+      "com_mm": [
+        59.9808,
+        43.0365,
+        47.5178
+      ],
+      "com_offset_from_axis_m": 0.043035,
+      "inertia_note": "I about the centre of mass uses the bounding-box slab formula, which OVERSTATES it for a plate with cut-outs. The inertial term is therefore conservative; the gravity term, which dominates a quasi-static open, is exact.",
+      "mass_kg": 0.052318,
+      "volume_mm3": 43598.6512
+    },
+    "joint": "hinge, axis +X, unlimited (see mjcf comment)",
+    "trajectory_sweep_deg": 110.0
+  },
+  "not_established": [
+    "snap-arm strain, stress or insertion force",
+    "pull-out force of the retained pin",
+    "fatigue, creep or repeated-use life",
+    "whether any user finds the effort acceptable (no effort ceiling is stated)",
+    "friction, wear or lubrication behaviour",
+    "manufacturing tolerance robustness"
+  ],
+  "oracle_status_if_cited": "NOT_VERIFIED for REQ-003 user effort. This is a computed quantity at a declared fidelity, not evidence against a stated requirement.",
+  "plots": [
+    "validation/simulation/plot_angle_vs_time.png",
+    "validation/simulation/plot_torque_vs_angle.png",
+    "validation/simulation/plot_torque_vs_time.png"
+  ],
+  "reference_id": "EXE-BM001-01",
+  "results": {
+    "duration_s": 4.5,
+    "over_centre_angle_deg": 93.296,
+    "over_centre_meaning": "beyond this angle the centre of mass has passed the hinge axis, so gravity tends to hold the lid open instead of closing it. The lid therefore rests against the INT-09 stop under its own weight rather than falling shut. This is a consequence of the geometry; whether it is DESIRABLE is a design judgement nobody has made.",
+    "peak_static_at_angle_deg": 3.302911,
+    "peak_static_torque_Nm": 0.022088,
+    "peak_total_at_angle_deg": 4.456119,
+    "peak_total_torque_Nm": 0.022462,
+    "sample_count": 9001,
+    "torque_at_closed_Nm": 0.022051,
+    "torque_at_full_open_Nm": 0.006345
+  },
+  "status": "COMPUTED_UNDER_DECLARED_ASSUMPTIONS",
+  "trajectory_samples": [
+    {
+      "alpha_rad_s2": 0.001199,
+      "angle_deg": 0.0,
+      "omega_rad_s": 0.0,
+      "t_s": 0.0,
+      "torque_Nm": -0.022050993,
+      "torque_static_Nm": -0.022050825
+    },
+    {
+      "alpha_rad_s2": 0.279397,
+      "angle_deg": 0.001084,
+      "omega_rad_s": 0.002823,
+      "t_s": 0.02,
+      "torque_Nm": -0.022089988,
+      "torque_static_Nm": -0.022050849
+    },
+    {
+      "alpha_rad_s2": 0.541861,
+      "angle_deg": 0.008538,
+      "omega_rad_s": 0.011064,
+      "t_s": 0.04,
+      "torque_Nm": -0.02212692,
+      "torque_static_Nm": -0.022051015
+    },
+    {
+      "alpha_rad_s2": 0.787738,
+      "angle_deg": 0.02838,
+      "omega_rad_s": 0.024387,
+      "t_s": 0.06,
+      "torque_Nm": -0.022161802,
+      "torque_static_Nm": -0.022051454
+    },
+    {
+      "alpha_rad_s2": 1.017373,
+      "angle_deg": 0.066244,
+      "omega_rad_s": 0.042465,
+      "t_s": 0.08,
+      "torque_Nm": -0.022194799,
+      "torque_static_Nm": -0.022052283
+    },
+    {
+      "alpha_rad_s2": 1.231111,
+      "angle_deg": 0.127394,
+      "omega_rad_s": 0.064976,
+      "t_s": 0.1,
+      "torque_Nm": -0.02222606,
+      "torque_static_Nm": -0.022053603
+    },
+    {
+      "alpha_rad_s2": 1.429298,
+      "angle_deg": 0.216729,
+      "omega_rad_s": 0.091605,
+      "t_s": 0.12,
+      "torque_Nm": -0.022255706,
+      "torque_static_Nm": -0.022055486
+    },
+    {
+      "alpha_rad_s2": 1.61228,
+      "angle_deg": 0.338793,
+      "omega_rad_s": 0.122046,
+      "t_s": 0.14,
+      "torque_Nm": -0.022283824,
+      "torque_static_Nm": -0.022057972
+    },
+    {
+      "alpha_rad_s2": 1.780403,
+      "angle_deg": 0.497779,
+      "omega_rad_s": 0.155998,
+      "t_s": 0.16,
+      "torque_Nm": -0.022310463,
+      "torque_static_Nm": -0.02206106
+    },
+    {
+      "alpha_rad_s2": 1.934011,
+      "angle_deg": 0.697541,
+      "omega_rad_s": 0.193166,
+      "t_s": 0.18,
+      "torque_Nm": -0.02233562,
+      "torque_static_Nm": -0.022064699
+    },
+    {
+      "alpha_rad_s2": 2.07345,
+      "angle_deg": 0.9416,
+      "omega_rad_s": 0.233264,
+      "t_s": 0.2,
+      "torque_Nm": -0.022359235,
+      "torque_static_Nm": -0.022068781
+    },
+    {
+      "alpha_rad_s2": 2.199067,
+      "angle_deg": 1.233153,
+      "omega_rad_s": 0.276011,
+      "t_s": 0.22,
+      "torque_Nm": -0.022381183,
+      "torque_static_Nm": -0.022073133
+    },
+    {
+      "alpha_rad_s2": 2.311206,
+      "angle_deg": 1.575079,
+      "omega_rad_s": 0.321136,
+      "t_s": 0.24,
+      "torque_Nm": -0.022401267,
+      "torque_static_Nm": -0.022077508
+    },
+    {
+      "alpha_rad_s2": 2.410214,
+      "angle_deg": 1.969949,
+      "omega_rad_s": 0.368372,
+      "t_s": 0.26,
+      "torque_Nm": -0.022419211,
+      "torque_static_Nm": -0.022081583
+    },
+    {
+      "alpha_rad_s2": 2.496435,
+      "angle_deg": 2.420032,
+      "omega_rad_s": 0.41746,
+      "t_s": 0.28,
+      "torque_Nm": -0.022434654,
+      "torque_static_Nm": -0.022084948
+    },
+    {
+      "alpha_rad_s2": 2.570215,
+      "angle_deg": 2.927306,
+      "omega_rad_s": 0.468147,
+      "t_s": 0.3,
+      "torque_Nm": -0.022447148,
+      "torque_static_Nm": -0.022087107
+    },
+    {
+      "alpha_rad_s2": 2.6319,
+      "angle_deg": 3.493462,
+      "omega_rad_s": 0.520188,
+      "t_s": 0.32,
+      "torque_Nm": -0.022456155,
+      "torque_static_Nm": -0.022087472
+    },
+    {
+      "alpha_rad_s2": 2.681836,
+      "angle_deg": 4.119914,
+      "omega_rad_s": 0.573344,
+      "t_s": 0.34,
+      "torque_Nm": -0.02246104,
+      "torque_static_Nm": -0.022085363
+    },
+    {
+      "alpha_rad_s2": 2.720367,
+      "angle_deg": 4.807807,
+      "omega_rad_s": 0.627385,
+      "t_s": 0.36,
+      "torque_Nm": -0.022461081,
+      "torque_static_Nm": -0.022080005
+    },
+    {
+      "alpha_rad_s2": 2.747841,
+      "angle_deg": 5.558026,
+      "omega_rad_s": 0.682085,
+      "t_s": 0.38,
+      "torque_Nm": -0.022455458,
+      "torque_static_Nm": -0.022070534
+    },
+    {
+      "alpha_rad_s2": 2.764601,
+      "angle_deg": 6.3712,
+      "omega_rad_s": 0.737227,
+      "t_s": 0.4,
+      "torque_Nm": -0.022443267,
+      "torque_static_Nm": -0.022055995
+    },
+    {
+      "alpha_rad_s2": 2.770994,
+      "angle_deg": 7.247714,
+      "omega_rad_s": 0.7926,
+      "t_s": 0.42,
+      "torque_Nm": -0.022423516,
+      "torque_static_Nm": -0.022035348
+    },
+    {
+      "alpha_rad_s2": 2.767366,
+      "angle_deg": 8.187716,
+      "omega_rad_s": 0.848,
+      "t_s": 0.44,
+      "torque_Nm": -0.022395135,
+      "torque_static_Nm": -0.022007476
+    },
+    {
+      "alpha_rad_s2": 2.754061,
+      "angle_deg": 9.191122,
+      "omega_rad_s": 0.90323,
+      "t_s": 0.46,
+      "torque_Nm": -0.022356982,
+      "torque_static_Nm": -0.021971187
+    },
+    {
+      "alpha_rad_s2": 2.731426,
+      "angle_deg": 10.257629,
+      "omega_rad_s": 0.9581,
+      "t_s": 0.48,
+      "torque_Nm": -0.022307854,
+      "torque_static_Nm": -0.021925229
+    },
+    {
+      "alpha_rad_s2": 2.699806,
+      "angle_deg": 11.386719,
+      "omega_rad_s": 1.012427,
+      "t_s": 0.5,
+      "torque_Nm": -0.022246492,
+      "torque_static_Nm": -0.021868297
+    },
+    {
+      "alpha_rad_s2": 2.659546,
+      "angle_deg": 12.577667,
+      "omega_rad_s": 1.066035,
+      "t_s": 0.52,
+      "torque_Nm": -0.022171598,
+      "torque_static_Nm": -0.021799043
+    },
+    {
+      "alpha_rad_s2": 2.610993,
+      "angle_deg": 13.829551,
+      "omega_rad_s": 1.118754,
+      "t_s": 0.54,
+      "torque_Nm": -0.022081847,
+      "torque_static_Nm": -0.021716093
+    },
+    {
+      "alpha_rad_s2": 2.554491,
+      "angle_deg": 15.14126,
+      "omega_rad_s": 1.170422,
+      "t_s": 0.56,
+      "torque_Nm": -0.021975897,
+      "torque_static_Nm": -0.021618058
+    },
+    {
+      "alpha_rad_s2": 2.490387,
+      "angle_deg": 16.511499,
+      "omega_rad_s": 1.220883,
+      "t_s": 0.58,
+      "torque_Nm": -0.02185241,
+      "torque_static_Nm": -0.02150355
+    },
+    {
+      "alpha_rad_s2": 2.419026,
+      "angle_deg": 17.9388,
+      "omega_rad_s": 1.269989,
+      "t_s": 0.6,
+      "torque_Nm": -0.021710061,
+      "torque_static_Nm": -0.021371198
+    },
+    {
+      "alpha_rad_s2": 2.340753,
+      "angle_deg": 19.421527,
+      "omega_rad_s": 1.317598,
+      "t_s": 0.62,
+      "torque_Nm": -0.021547561,
+      "torque_static_Nm": -0.021219663
+    },
+    {
+      "alpha_rad_s2": 2.255915,
+      "angle_deg": 20.957889,
+      "omega_rad_s": 1.363575,
+      "t_s": 0.64,
+      "torque_Nm": -0.021363672,
+      "torque_static_Nm": -0.021047658
+    },
+    {
+      "alpha_rad_s2": 2.164855,
+      "angle_deg": 22.545939,
+      "omega_rad_s": 1.407793,
+      "t_s": 0.66,
+      "torque_Nm": -0.021157221,
+      "torque_static_Nm": -0.020853963
+    },
+    {
+      "alpha_rad_s2": 2.067922,
+      "angle_deg": 24.183594,
+      "omega_rad_s": 1.45013,
+      "t_s": 0.68,
+      "torque_Nm": -0.02092712,
+      "torque_static_Nm": -0.020637441
+    },
+    {
+      "alpha_rad_s2": 1.965459,
+      "angle_deg": 25.868631,
+      "omega_rad_s": 1.490473,
+      "t_s": 0.7,
+      "torque_Nm": -0.020672385,
+      "torque_static_Nm": -0.020397059
+    },
+    {
+      "alpha_rad_s2": 1.857812,
+      "angle_deg": 27.598704,
+      "omega_rad_s": 1.528714,
+      "t_s": 0.72,
+      "torque_Nm": -0.020392147,
+      "torque_static_Nm": -0.020131901
+    },
+    {
+      "alpha_rad_s2": 1.745327,
+      "angle_deg": 29.371345,
+      "omega_rad_s": 1.564753,
+      "t_s": 0.74,
+      "torque_Nm": -0.020085672,
+      "torque_static_Nm": -0.019841183
+    },
+    {
+      "alpha_rad_s2": 1.62835,
+      "angle_deg": 31.183977,
+      "omega_rad_s": 1.598497,
+      "t_s": 0.76,
+      "torque_Nm": -0.019752374,
+      "torque_static_Nm": -0.019524271
+    },
+    {
+      "alpha_rad_s2": 1.507226,
+      "angle_deg": 33.033921,
+      "omega_rad_s": 1.629859,
+      "t_s": 0.78,
+      "torque_Nm": -0.019391827,
+      "torque_static_Nm": -0.019180691
+    },
+    {
+      "alpha_rad_s2": 1.382301,
+      "angle_deg": 34.9184,
+      "omega_rad_s": 1.658761,
+      "t_s": 0.8,
+      "torque_Nm": -0.019003779,
+      "torque_static_Nm": -0.018810143
+    },
+    {
+      "alpha_rad_s2": 1.253919,
+      "angle_deg": 36.834553,
+      "omega_rad_s": 1.685128,
+      "t_s": 0.82,
+      "torque_Nm": -0.018588158,
+      "torque_static_Nm": -0.018412506
+    },
+    {
+      "alpha_rad_s2": 1.122428,
+      "angle_deg": 38.779437,
+      "omega_rad_s": 1.708897,
+      "t_s": 0.84,
+      "torque_Nm": -0.018145085,
+      "torque_static_Nm": -0.017987853
+    },
+    {
+      "alpha_rad_s2": 0.988172,
+      "angle_deg": 40.750041,
+      "omega_rad_s": 1.730007,
+      "t_s": 0.86,
+      "torque_Nm": -0.017674874,
+      "torque_static_Nm": -0.017536449
+    },
+    {
+      "alpha_rad_s2": 0.851497,
+      "angle_deg": 42.743287,
+      "omega_rad_s": 1.748407,
+      "t_s": 0.88,
+      "torque_Nm": -0.017178039,
+      "torque_static_Nm": -0.017058759
+    },
+    {
+      "alpha_rad_s2": 0.712749,
+      "angle_deg": 44.756044,
+      "omega_rad_s": 1.764053,
+      "t_s": 0.9,
+      "torque_Nm": -0.016655292,
+      "torque_static_Nm": -0.016555448
+    },
+    {
+      "alpha_rad_s2": 0.572272,
+      "angle_deg": 46.785132,
+      "omega_rad_s": 1.776906,
+      "t_s": 0.92,
+      "torque_Nm": -0.016107543,
+      "torque_static_Nm": -0.016027377
+    },
+    {
+      "alpha_rad_s2": 0.430414,
+      "angle_deg": 48.827334,
+      "omega_rad_s": 1.786935,
+      "t_s": 0.94,
+      "torque_Nm": -0.015535895,
+      "torque_static_Nm": -0.015475601
+    },
+    {
+      "alpha_rad_s2": 0.287519,
+      "angle_deg": 50.879398,
+      "omega_rad_s": 1.794116,
+      "t_s": 0.96,
+      "torque_Nm": -0.014941637,
+      "torque_static_Nm": -0.01490136
+    },
+    {
+      "alpha_rad_s2": 0.143932,
+      "angle_deg": 52.93805,
+      "omega_rad_s": 1.798431,
+      "t_s": 0.98,
+      "torque_Nm": -0.014326234,
+      "torque_static_Nm": -0.014306072
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 55.0,
+      "omega_rad_s": 1.79987,
+      "t_s": 1.0,
+      "torque_Nm": -0.013691319,
+      "torque_static_Nm": -0.013691319
+    },
+    {
+      "alpha_rad_s2": -0.143932,
+      "angle_deg": 57.06195,
+      "omega_rad_s": 1.798431,
+      "t_s": 1.02,
+      "torque_Nm": -0.013038674,
+      "torque_static_Nm": -0.013058837
+    },
+    {
+      "alpha_rad_s2": -0.287519,
+      "angle_deg": 59.120602,
+      "omega_rad_s": 1.794116,
+      "t_s": 1.04,
+      "torque_Nm": -0.012370218,
+      "torque_static_Nm": -0.012410494
+    },
+    {
+      "alpha_rad_s2": -0.430414,
+      "angle_deg": 61.172666,
+      "omega_rad_s": 1.786935,
+      "t_s": 1.06,
+      "torque_Nm": -0.01168799,
+      "torque_static_Nm": -0.011748283
+    },
+    {
+      "alpha_rad_s2": -0.572272,
+      "angle_deg": 63.214868,
+      "omega_rad_s": 1.776906,
+      "t_s": 1.08,
+      "torque_Nm": -0.010994128,
+      "torque_static_Nm": -0.011074293
+    },
+    {
+      "alpha_rad_s2": -0.712749,
+      "angle_deg": 65.243956,
+      "omega_rad_s": 1.764053,
+      "t_s": 1.1,
+      "torque_Nm": -0.010290853,
+      "torque_static_Nm": -0.010390697
+    },
+    {
+      "alpha_rad_s2": -0.851497,
+      "angle_deg": 67.256713,
+      "omega_rad_s": 1.748407,
+      "t_s": 1.12,
+      "torque_Nm": -0.009580447,
+      "torque_static_Nm": -0.009699726
+    },
+    {
+      "alpha_rad_s2": -0.988172,
+      "angle_deg": 69.249959,
+      "omega_rad_s": 1.730007,
+      "t_s": 1.14,
+      "torque_Nm": -0.008865231,
+      "torque_static_Nm": -0.009003656
+    },
+    {
+      "alpha_rad_s2": -1.122428,
+      "angle_deg": 71.220563,
+      "omega_rad_s": 1.708897,
+      "t_s": 1.16,
+      "torque_Nm": -0.008147547,
+      "torque_static_Nm": -0.008304779
+    },
+    {
+      "alpha_rad_s2": -1.253919,
+      "angle_deg": 73.165447,
+      "omega_rad_s": 1.685128,
+      "t_s": 1.18,
+      "torque_Nm": -0.007429736,
+      "torque_static_Nm": -0.007605388
+    },
+    {
+      "alpha_rad_s2": -1.382301,
+      "angle_deg": 75.0816,
+      "omega_rad_s": 1.658761,
+      "t_s": 1.2,
+      "torque_Nm": -0.006714121,
+      "torque_static_Nm": -0.006907757
+    },
+    {
+      "alpha_rad_s2": -1.507226,
+      "angle_deg": 76.966079,
+      "omega_rad_s": 1.629859,
+      "t_s": 1.22,
+      "torque_Nm": -0.006002982,
+      "torque_static_Nm": -0.006214117
+    },
+    {
+      "alpha_rad_s2": -1.62835,
+      "angle_deg": 78.816023,
+      "omega_rad_s": 1.598497,
+      "t_s": 1.24,
+      "torque_Nm": -0.005298545,
+      "torque_static_Nm": -0.005526648
+    },
+    {
+      "alpha_rad_s2": -1.745327,
+      "angle_deg": 80.628655,
+      "omega_rad_s": 1.564753,
+      "t_s": 1.26,
+      "torque_Nm": -0.004602961,
+      "torque_static_Nm": -0.004847451
+    },
+    {
+      "alpha_rad_s2": -1.857812,
+      "angle_deg": 82.401296,
+      "omega_rad_s": 1.528714,
+      "t_s": 1.28,
+      "torque_Nm": -0.003918296,
+      "torque_static_Nm": -0.004178542
+    },
+    {
+      "alpha_rad_s2": -1.965459,
+      "angle_deg": 84.131369,
+      "omega_rad_s": 1.490473,
+      "t_s": 1.3,
+      "torque_Nm": -0.003246509,
+      "torque_static_Nm": -0.003521836
+    },
+    {
+      "alpha_rad_s2": -2.067922,
+      "angle_deg": 85.816406,
+      "omega_rad_s": 1.45013,
+      "t_s": 1.32,
+      "torque_Nm": -0.002589453,
+      "torque_static_Nm": -0.002879132
+    },
+    {
+      "alpha_rad_s2": -2.164855,
+      "angle_deg": 87.454061,
+      "omega_rad_s": 1.407793,
+      "t_s": 1.34,
+      "torque_Nm": -0.001948852,
+      "torque_static_Nm": -0.00225211
+    },
+    {
+      "alpha_rad_s2": -2.255915,
+      "angle_deg": 89.042111,
+      "omega_rad_s": 1.363575,
+      "t_s": 1.36,
+      "torque_Nm": -0.001326304,
+      "torque_static_Nm": -0.001642318
+    },
+    {
+      "alpha_rad_s2": -2.340753,
+      "angle_deg": 90.578473,
+      "omega_rad_s": 1.317598,
+      "t_s": 1.38,
+      "torque_Nm": -0.000723271,
+      "torque_static_Nm": -0.001051169
+    },
+    {
+      "alpha_rad_s2": -2.419026,
+      "angle_deg": 92.0612,
+      "omega_rad_s": 1.269989,
+      "t_s": 1.4,
+      "torque_Nm": -0.000141072,
+      "torque_static_Nm": -0.000479935
+    },
+    {
+      "alpha_rad_s2": -2.490387,
+      "angle_deg": 93.488501,
+      "omega_rad_s": 1.220883,
+      "t_s": 1.42,
+      "torque_Nm": 0.000419112,
+      "torque_static_Nm": 7.0253e-05
+    },
+    {
+      "alpha_rad_s2": -2.554491,
+      "angle_deg": 94.85874,
+      "omega_rad_s": 1.170422,
+      "t_s": 1.44,
+      "torque_Nm": 0.000956248,
+      "torque_static_Nm": 0.000598409
+    },
+    {
+      "alpha_rad_s2": -2.610993,
+      "angle_deg": 96.170449,
+      "omega_rad_s": 1.118754,
+      "t_s": 1.46,
+      "torque_Nm": 0.001469442,
+      "torque_static_Nm": 0.001103687
+    },
+    {
+      "alpha_rad_s2": -2.659546,
+      "angle_deg": 97.422333,
+      "omega_rad_s": 1.066035,
+      "t_s": 1.48,
+      "torque_Nm": 0.001957941,
+      "torque_static_Nm": 0.001585386
+    },
+    {
+      "alpha_rad_s2": -2.699806,
+      "angle_deg": 98.613281,
+      "omega_rad_s": 1.012427,
+      "t_s": 1.5,
+      "torque_Nm": 0.002421133,
+      "torque_static_Nm": 0.002042938
+    },
+    {
+      "alpha_rad_s2": -2.731426,
+      "angle_deg": 99.742371,
+      "omega_rad_s": 0.9581,
+      "t_s": 1.52,
+      "torque_Nm": 0.002858537,
+      "torque_static_Nm": 0.002475913
+    },
+    {
+      "alpha_rad_s2": -2.754061,
+      "angle_deg": 100.808878,
+      "omega_rad_s": 0.90323,
+      "t_s": 1.54,
+      "torque_Nm": 0.003269804,
+      "torque_static_Nm": 0.002884009
+    },
+    {
+      "alpha_rad_s2": -2.767366,
+      "angle_deg": 101.812284,
+      "omega_rad_s": 0.848,
+      "t_s": 1.56,
+      "torque_Nm": 0.003654709,
+      "torque_static_Nm": 0.00326705
+    },
+    {
+      "alpha_rad_s2": -2.770994,
+      "angle_deg": 102.752286,
+      "omega_rad_s": 0.7926,
+      "t_s": 1.58,
+      "torque_Nm": 0.004013147,
+      "torque_static_Nm": 0.00362498
+    },
+    {
+      "alpha_rad_s2": -2.764601,
+      "angle_deg": 103.6288,
+      "omega_rad_s": 0.737227,
+      "t_s": 1.6,
+      "torque_Nm": 0.00434513,
+      "torque_static_Nm": 0.003957858
+    },
+    {
+      "alpha_rad_s2": -2.747841,
+      "angle_deg": 104.441974,
+      "omega_rad_s": 0.682085,
+      "t_s": 1.62,
+      "torque_Nm": 0.004650779,
+      "torque_static_Nm": 0.004265855
+    },
+    {
+      "alpha_rad_s2": -2.720367,
+      "angle_deg": 105.192193,
+      "omega_rad_s": 0.627385,
+      "t_s": 1.64,
+      "torque_Nm": 0.004930322,
+      "torque_static_Nm": 0.004549246
+    },
+    {
+      "alpha_rad_s2": -2.681836,
+      "angle_deg": 105.880086,
+      "omega_rad_s": 0.573344,
+      "t_s": 1.66,
+      "torque_Nm": 0.005184088,
+      "torque_static_Nm": 0.00480841
+    },
+    {
+      "alpha_rad_s2": -2.6319,
+      "angle_deg": 106.506538,
+      "omega_rad_s": 0.520188,
+      "t_s": 1.68,
+      "torque_Nm": 0.005412507,
+      "torque_static_Nm": 0.005043824
+    },
+    {
+      "alpha_rad_s2": -2.570215,
+      "angle_deg": 107.072694,
+      "omega_rad_s": 0.468147,
+      "t_s": 1.7,
+      "torque_Nm": 0.005616103,
+      "torque_static_Nm": 0.005256061
+    },
+    {
+      "alpha_rad_s2": -2.496435,
+      "angle_deg": 107.579968,
+      "omega_rad_s": 0.41746,
+      "t_s": 1.72,
+      "torque_Nm": 0.005795496,
+      "torque_static_Nm": 0.00544579
+    },
+    {
+      "alpha_rad_s2": -2.410214,
+      "angle_deg": 108.030051,
+      "omega_rad_s": 0.368372,
+      "t_s": 1.74,
+      "torque_Nm": 0.0059514,
+      "torque_static_Nm": 0.005613771
+    },
+    {
+      "alpha_rad_s2": -2.311206,
+      "angle_deg": 108.424921,
+      "omega_rad_s": 0.321136,
+      "t_s": 1.76,
+      "torque_Nm": 0.00608462,
+      "torque_static_Nm": 0.005760861
+    },
+    {
+      "alpha_rad_s2": -2.199067,
+      "angle_deg": 108.766847,
+      "omega_rad_s": 0.276011,
+      "t_s": 1.78,
+      "torque_Nm": 0.006196059,
+      "torque_static_Nm": 0.005888008
+    },
+    {
+      "alpha_rad_s2": -2.07345,
+      "angle_deg": 109.0584,
+      "omega_rad_s": 0.233264,
+      "t_s": 1.8,
+      "torque_Nm": 0.006286712,
+      "torque_static_Nm": 0.005996259
+    },
+    {
+      "alpha_rad_s2": -1.934011,
+      "angle_deg": 109.302459,
+      "omega_rad_s": 0.193166,
+      "t_s": 1.82,
+      "torque_Nm": 0.006357676,
+      "torque_static_Nm": 0.006086756
+    },
+    {
+      "alpha_rad_s2": -1.780403,
+      "angle_deg": 109.502221,
+      "omega_rad_s": 0.155998,
+      "t_s": 1.84,
+      "torque_Nm": 0.006410148,
+      "torque_static_Nm": 0.006160745
+    },
+    {
+      "alpha_rad_s2": -1.61228,
+      "angle_deg": 109.661207,
+      "omega_rad_s": 0.122046,
+      "t_s": 1.86,
+      "torque_Nm": 0.00644543,
+      "torque_static_Nm": 0.006219578
+    },
+    {
+      "alpha_rad_s2": -1.429298,
+      "angle_deg": 109.783271,
+      "omega_rad_s": 0.091605,
+      "t_s": 1.88,
+      "torque_Nm": 0.006464935,
+      "torque_static_Nm": 0.006264716
+    },
+    {
+      "alpha_rad_s2": -1.231111,
+      "angle_deg": 109.872606,
+      "omega_rad_s": 0.064976,
+      "t_s": 1.9,
+      "torque_Nm": 0.00647019,
+      "torque_static_Nm": 0.006297733
+    },
+    {
+      "alpha_rad_s2": -1.017373,
+      "angle_deg": 109.933756,
+      "omega_rad_s": 0.042465,
+      "t_s": 1.92,
+      "torque_Nm": 0.00646284,
+      "torque_static_Nm": 0.006320324
+    },
+    {
+      "alpha_rad_s2": -0.787738,
+      "angle_deg": 109.97162,
+      "omega_rad_s": 0.024387,
+      "t_s": 1.94,
+      "torque_Nm": 0.006444657,
+      "torque_static_Nm": 0.006334309
+    },
+    {
+      "alpha_rad_s2": -0.541861,
+      "angle_deg": 109.991462,
+      "omega_rad_s": 0.011064,
+      "t_s": 1.96,
+      "torque_Nm": 0.006417541,
+      "torque_static_Nm": 0.006341636
+    },
+    {
+      "alpha_rad_s2": -0.279397,
+      "angle_deg": 109.998916,
+      "omega_rad_s": 0.002823,
+      "t_s": 1.98,
+      "torque_Nm": 0.006383527,
+      "torque_static_Nm": 0.006344389
+    },
+    {
+      "alpha_rad_s2": -0.001199,
+      "angle_deg": 110.0,
+      "omega_rad_s": 0.0,
+      "t_s": 2.0,
+      "torque_Nm": 0.006344957,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.02,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.04,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.06,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.08,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.1,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.12,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.14,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.16,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.18,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.2,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.22,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.24,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.26,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.28,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.3,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.32,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.34,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.36,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.38,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.4,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.42,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.44,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.46,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.48,
+      "torque_Nm": 0.006344789,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.001199,
+      "angle_deg": 110.0,
+      "omega_rad_s": -0.0,
+      "t_s": 2.5,
+      "torque_Nm": 0.006344957,
+      "torque_static_Nm": 0.006344789
+    },
+    {
+      "alpha_rad_s2": -0.279397,
+      "angle_deg": 109.998916,
+      "omega_rad_s": -0.002823,
+      "t_s": 2.52,
+      "torque_Nm": 0.006383527,
+      "torque_static_Nm": 0.006344389
+    },
+    {
+      "alpha_rad_s2": -0.541861,
+      "angle_deg": 109.991462,
+      "omega_rad_s": -0.011064,
+      "t_s": 2.54,
+      "torque_Nm": 0.006417541,
+      "torque_static_Nm": 0.006341636
+    },
+    {
+      "alpha_rad_s2": -0.787738,
+      "angle_deg": 109.97162,
+      "omega_rad_s": -0.024387,
+      "t_s": 2.56,
+      "torque_Nm": 0.006444657,
+      "torque_static_Nm": 0.006334309
+    },
+    {
+      "alpha_rad_s2": -1.017373,
+      "angle_deg": 109.933756,
+      "omega_rad_s": -0.042465,
+      "t_s": 2.58,
+      "torque_Nm": 0.00646284,
+      "torque_static_Nm": 0.006320324
+    },
+    {
+      "alpha_rad_s2": -1.231111,
+      "angle_deg": 109.872606,
+      "omega_rad_s": -0.064976,
+      "t_s": 2.6,
+      "torque_Nm": 0.00647019,
+      "torque_static_Nm": 0.006297733
+    },
+    {
+      "alpha_rad_s2": -1.429298,
+      "angle_deg": 109.783271,
+      "omega_rad_s": -0.091605,
+      "t_s": 2.62,
+      "torque_Nm": 0.006464935,
+      "torque_static_Nm": 0.006264716
+    },
+    {
+      "alpha_rad_s2": -1.61228,
+      "angle_deg": 109.661207,
+      "omega_rad_s": -0.122046,
+      "t_s": 2.64,
+      "torque_Nm": 0.00644543,
+      "torque_static_Nm": 0.006219578
+    },
+    {
+      "alpha_rad_s2": -1.780403,
+      "angle_deg": 109.502221,
+      "omega_rad_s": -0.155998,
+      "t_s": 2.66,
+      "torque_Nm": 0.006410148,
+      "torque_static_Nm": 0.006160745
+    },
+    {
+      "alpha_rad_s2": -1.934011,
+      "angle_deg": 109.302459,
+      "omega_rad_s": -0.193166,
+      "t_s": 2.68,
+      "torque_Nm": 0.006357676,
+      "torque_static_Nm": 0.006086756
+    },
+    {
+      "alpha_rad_s2": -2.07345,
+      "angle_deg": 109.0584,
+      "omega_rad_s": -0.233264,
+      "t_s": 2.7,
+      "torque_Nm": 0.006286712,
+      "torque_static_Nm": 0.005996259
+    },
+    {
+      "alpha_rad_s2": -2.199067,
+      "angle_deg": 108.766847,
+      "omega_rad_s": -0.276011,
+      "t_s": 2.72,
+      "torque_Nm": 0.006196059,
+      "torque_static_Nm": 0.005888008
+    },
+    {
+      "alpha_rad_s2": -2.311206,
+      "angle_deg": 108.424921,
+      "omega_rad_s": -0.321136,
+      "t_s": 2.74,
+      "torque_Nm": 0.00608462,
+      "torque_static_Nm": 0.005760861
+    },
+    {
+      "alpha_rad_s2": -2.410214,
+      "angle_deg": 108.030051,
+      "omega_rad_s": -0.368372,
+      "t_s": 2.76,
+      "torque_Nm": 0.0059514,
+      "torque_static_Nm": 0.005613771
+    },
+    {
+      "alpha_rad_s2": -2.496435,
+      "angle_deg": 107.579968,
+      "omega_rad_s": -0.41746,
+      "t_s": 2.78,
+      "torque_Nm": 0.005795496,
+      "torque_static_Nm": 0.00544579
+    },
+    {
+      "alpha_rad_s2": -2.570215,
+      "angle_deg": 107.072694,
+      "omega_rad_s": -0.468147,
+      "t_s": 2.8,
+      "torque_Nm": 0.005616103,
+      "torque_static_Nm": 0.005256061
+    },
+    {
+      "alpha_rad_s2": -2.6319,
+      "angle_deg": 106.506538,
+      "omega_rad_s": -0.520188,
+      "t_s": 2.82,
+      "torque_Nm": 0.005412507,
+      "torque_static_Nm": 0.005043824
+    },
+    {
+      "alpha_rad_s2": -2.681836,
+      "angle_deg": 105.880086,
+      "omega_rad_s": -0.573344,
+      "t_s": 2.84,
+      "torque_Nm": 0.005184088,
+      "torque_static_Nm": 0.00480841
+    },
+    {
+      "alpha_rad_s2": -2.720367,
+      "angle_deg": 105.192193,
+      "omega_rad_s": -0.627385,
+      "t_s": 2.86,
+      "torque_Nm": 0.004930322,
+      "torque_static_Nm": 0.004549246
+    },
+    {
+      "alpha_rad_s2": -2.747841,
+      "angle_deg": 104.441974,
+      "omega_rad_s": -0.682085,
+      "t_s": 2.88,
+      "torque_Nm": 0.004650779,
+      "torque_static_Nm": 0.004265855
+    },
+    {
+      "alpha_rad_s2": -2.764601,
+      "angle_deg": 103.6288,
+      "omega_rad_s": -0.737227,
+      "t_s": 2.9,
+      "torque_Nm": 0.00434513,
+      "torque_static_Nm": 0.003957858
+    },
+    {
+      "alpha_rad_s2": -2.770994,
+      "angle_deg": 102.752286,
+      "omega_rad_s": -0.7926,
+      "t_s": 2.92,
+      "torque_Nm": 0.004013147,
+      "torque_static_Nm": 0.00362498
+    },
+    {
+      "alpha_rad_s2": -2.767366,
+      "angle_deg": 101.812284,
+      "omega_rad_s": -0.848,
+      "t_s": 2.94,
+      "torque_Nm": 0.003654709,
+      "torque_static_Nm": 0.00326705
+    },
+    {
+      "alpha_rad_s2": -2.754061,
+      "angle_deg": 100.808878,
+      "omega_rad_s": -0.90323,
+      "t_s": 2.96,
+      "torque_Nm": 0.003269804,
+      "torque_static_Nm": 0.002884009
+    },
+    {
+      "alpha_rad_s2": -2.731426,
+      "angle_deg": 99.742371,
+      "omega_rad_s": -0.9581,
+      "t_s": 2.98,
+      "torque_Nm": 0.002858537,
+      "torque_static_Nm": 0.002475913
+    },
+    {
+      "alpha_rad_s2": -2.699806,
+      "angle_deg": 98.613281,
+      "omega_rad_s": -1.012427,
+      "t_s": 3.0,
+      "torque_Nm": 0.002421133,
+      "torque_static_Nm": 0.002042938
+    },
+    {
+      "alpha_rad_s2": -2.659546,
+      "angle_deg": 97.422333,
+      "omega_rad_s": -1.066035,
+      "t_s": 3.02,
+      "torque_Nm": 0.001957941,
+      "torque_static_Nm": 0.001585386
+    },
+    {
+      "alpha_rad_s2": -2.610993,
+      "angle_deg": 96.170449,
+      "omega_rad_s": -1.118754,
+      "t_s": 3.04,
+      "torque_Nm": 0.001469442,
+      "torque_static_Nm": 0.001103687
+    },
+    {
+      "alpha_rad_s2": -2.554491,
+      "angle_deg": 94.85874,
+      "omega_rad_s": -1.170422,
+      "t_s": 3.06,
+      "torque_Nm": 0.000956248,
+      "torque_static_Nm": 0.000598409
+    },
+    {
+      "alpha_rad_s2": -2.490387,
+      "angle_deg": 93.488501,
+      "omega_rad_s": -1.220883,
+      "t_s": 3.08,
+      "torque_Nm": 0.000419112,
+      "torque_static_Nm": 7.0253e-05
+    },
+    {
+      "alpha_rad_s2": -2.419026,
+      "angle_deg": 92.0612,
+      "omega_rad_s": -1.269989,
+      "t_s": 3.1,
+      "torque_Nm": -0.000141072,
+      "torque_static_Nm": -0.000479935
+    },
+    {
+      "alpha_rad_s2": -2.340753,
+      "angle_deg": 90.578473,
+      "omega_rad_s": -1.317598,
+      "t_s": 3.12,
+      "torque_Nm": -0.000723271,
+      "torque_static_Nm": -0.001051169
+    },
+    {
+      "alpha_rad_s2": -2.255915,
+      "angle_deg": 89.042111,
+      "omega_rad_s": -1.363575,
+      "t_s": 3.14,
+      "torque_Nm": -0.001326304,
+      "torque_static_Nm": -0.001642318
+    },
+    {
+      "alpha_rad_s2": -2.164855,
+      "angle_deg": 87.454061,
+      "omega_rad_s": -1.407793,
+      "t_s": 3.16,
+      "torque_Nm": -0.001948852,
+      "torque_static_Nm": -0.00225211
+    },
+    {
+      "alpha_rad_s2": -2.067922,
+      "angle_deg": 85.816406,
+      "omega_rad_s": -1.45013,
+      "t_s": 3.18,
+      "torque_Nm": -0.002589453,
+      "torque_static_Nm": -0.002879132
+    },
+    {
+      "alpha_rad_s2": -1.965459,
+      "angle_deg": 84.131369,
+      "omega_rad_s": -1.490473,
+      "t_s": 3.2,
+      "torque_Nm": -0.003246509,
+      "torque_static_Nm": -0.003521836
+    },
+    {
+      "alpha_rad_s2": -1.857812,
+      "angle_deg": 82.401296,
+      "omega_rad_s": -1.528714,
+      "t_s": 3.22,
+      "torque_Nm": -0.003918296,
+      "torque_static_Nm": -0.004178542
+    },
+    {
+      "alpha_rad_s2": -1.745327,
+      "angle_deg": 80.628655,
+      "omega_rad_s": -1.564753,
+      "t_s": 3.24,
+      "torque_Nm": -0.004602961,
+      "torque_static_Nm": -0.004847451
+    },
+    {
+      "alpha_rad_s2": -1.62835,
+      "angle_deg": 78.816023,
+      "omega_rad_s": -1.598497,
+      "t_s": 3.26,
+      "torque_Nm": -0.005298545,
+      "torque_static_Nm": -0.005526648
+    },
+    {
+      "alpha_rad_s2": -1.507226,
+      "angle_deg": 76.966079,
+      "omega_rad_s": -1.629859,
+      "t_s": 3.28,
+      "torque_Nm": -0.006002982,
+      "torque_static_Nm": -0.006214117
+    },
+    {
+      "alpha_rad_s2": -1.382301,
+      "angle_deg": 75.0816,
+      "omega_rad_s": -1.658761,
+      "t_s": 3.3,
+      "torque_Nm": -0.006714121,
+      "torque_static_Nm": -0.006907757
+    },
+    {
+      "alpha_rad_s2": -1.253919,
+      "angle_deg": 73.165447,
+      "omega_rad_s": -1.685128,
+      "t_s": 3.32,
+      "torque_Nm": -0.007429736,
+      "torque_static_Nm": -0.007605388
+    },
+    {
+      "alpha_rad_s2": -1.122428,
+      "angle_deg": 71.220563,
+      "omega_rad_s": -1.708897,
+      "t_s": 3.34,
+      "torque_Nm": -0.008147547,
+      "torque_static_Nm": -0.008304779
+    },
+    {
+      "alpha_rad_s2": -0.988172,
+      "angle_deg": 69.249959,
+      "omega_rad_s": -1.730007,
+      "t_s": 3.36,
+      "torque_Nm": -0.008865231,
+      "torque_static_Nm": -0.009003656
+    },
+    {
+      "alpha_rad_s2": -0.851497,
+      "angle_deg": 67.256713,
+      "omega_rad_s": -1.748407,
+      "t_s": 3.38,
+      "torque_Nm": -0.009580447,
+      "torque_static_Nm": -0.009699726
+    },
+    {
+      "alpha_rad_s2": -0.712749,
+      "angle_deg": 65.243956,
+      "omega_rad_s": -1.764053,
+      "t_s": 3.4,
+      "torque_Nm": -0.010290853,
+      "torque_static_Nm": -0.010390697
+    },
+    {
+      "alpha_rad_s2": -0.572272,
+      "angle_deg": 63.214868,
+      "omega_rad_s": -1.776906,
+      "t_s": 3.42,
+      "torque_Nm": -0.010994128,
+      "torque_static_Nm": -0.011074293
+    },
+    {
+      "alpha_rad_s2": -0.430414,
+      "angle_deg": 61.172666,
+      "omega_rad_s": -1.786935,
+      "t_s": 3.44,
+      "torque_Nm": -0.01168799,
+      "torque_static_Nm": -0.011748283
+    },
+    {
+      "alpha_rad_s2": -0.287519,
+      "angle_deg": 59.120602,
+      "omega_rad_s": -1.794116,
+      "t_s": 3.46,
+      "torque_Nm": -0.012370218,
+      "torque_static_Nm": -0.012410494
+    },
+    {
+      "alpha_rad_s2": -0.143932,
+      "angle_deg": 57.06195,
+      "omega_rad_s": -1.798431,
+      "t_s": 3.48,
+      "torque_Nm": -0.013038674,
+      "torque_static_Nm": -0.013058837
+    },
+    {
+      "alpha_rad_s2": -0.0,
+      "angle_deg": 55.0,
+      "omega_rad_s": -1.79987,
+      "t_s": 3.5,
+      "torque_Nm": -0.013691319,
+      "torque_static_Nm": -0.013691319
+    },
+    {
+      "alpha_rad_s2": 0.143932,
+      "angle_deg": 52.93805,
+      "omega_rad_s": -1.798431,
+      "t_s": 3.52,
+      "torque_Nm": -0.014326234,
+      "torque_static_Nm": -0.014306072
+    },
+    {
+      "alpha_rad_s2": 0.287519,
+      "angle_deg": 50.879398,
+      "omega_rad_s": -1.794116,
+      "t_s": 3.54,
+      "torque_Nm": -0.014941637,
+      "torque_static_Nm": -0.01490136
+    },
+    {
+      "alpha_rad_s2": 0.430414,
+      "angle_deg": 48.827334,
+      "omega_rad_s": -1.786935,
+      "t_s": 3.56,
+      "torque_Nm": -0.015535895,
+      "torque_static_Nm": -0.015475601
+    },
+    {
+      "alpha_rad_s2": 0.572272,
+      "angle_deg": 46.785132,
+      "omega_rad_s": -1.776906,
+      "t_s": 3.58,
+      "torque_Nm": -0.016107543,
+      "torque_static_Nm": -0.016027377
+    },
+    {
+      "alpha_rad_s2": 0.712749,
+      "angle_deg": 44.756044,
+      "omega_rad_s": -1.764053,
+      "t_s": 3.6,
+      "torque_Nm": -0.016655292,
+      "torque_static_Nm": -0.016555448
+    },
+    {
+      "alpha_rad_s2": 0.851497,
+      "angle_deg": 42.743287,
+      "omega_rad_s": -1.748407,
+      "t_s": 3.62,
+      "torque_Nm": -0.017178039,
+      "torque_static_Nm": -0.017058759
+    },
+    {
+      "alpha_rad_s2": 0.988172,
+      "angle_deg": 40.750041,
+      "omega_rad_s": -1.730007,
+      "t_s": 3.64,
+      "torque_Nm": -0.017674874,
+      "torque_static_Nm": -0.017536449
+    },
+    {
+      "alpha_rad_s2": 1.122428,
+      "angle_deg": 38.779437,
+      "omega_rad_s": -1.708897,
+      "t_s": 3.66,
+      "torque_Nm": -0.018145085,
+      "torque_static_Nm": -0.017987853
+    },
+    {
+      "alpha_rad_s2": 1.253919,
+      "angle_deg": 36.834553,
+      "omega_rad_s": -1.685128,
+      "t_s": 3.68,
+      "torque_Nm": -0.018588158,
+      "torque_static_Nm": -0.018412506
+    },
+    {
+      "alpha_rad_s2": 1.382301,
+      "angle_deg": 34.9184,
+      "omega_rad_s": -1.658761,
+      "t_s": 3.7,
+      "torque_Nm": -0.019003779,
+      "torque_static_Nm": -0.018810143
+    },
+    {
+      "alpha_rad_s2": 1.507226,
+      "angle_deg": 33.033921,
+      "omega_rad_s": -1.629859,
+      "t_s": 3.72,
+      "torque_Nm": -0.019391827,
+      "torque_static_Nm": -0.019180691
+    },
+    {
+      "alpha_rad_s2": 1.62835,
+      "angle_deg": 31.183977,
+      "omega_rad_s": -1.598497,
+      "t_s": 3.74,
+      "torque_Nm": -0.019752374,
+      "torque_static_Nm": -0.019524271
+    },
+    {
+      "alpha_rad_s2": 1.745327,
+      "angle_deg": 29.371345,
+      "omega_rad_s": -1.564753,
+      "t_s": 3.76,
+      "torque_Nm": -0.020085672,
+      "torque_static_Nm": -0.019841183
+    },
+    {
+      "alpha_rad_s2": 1.857812,
+      "angle_deg": 27.598704,
+      "omega_rad_s": -1.528714,
+      "t_s": 3.78,
+      "torque_Nm": -0.020392147,
+      "torque_static_Nm": -0.020131901
+    },
+    {
+      "alpha_rad_s2": 1.965459,
+      "angle_deg": 25.868631,
+      "omega_rad_s": -1.490473,
+      "t_s": 3.8,
+      "torque_Nm": -0.020672385,
+      "torque_static_Nm": -0.020397059
+    },
+    {
+      "alpha_rad_s2": 2.067922,
+      "angle_deg": 24.183594,
+      "omega_rad_s": -1.45013,
+      "t_s": 3.82,
+      "torque_Nm": -0.02092712,
+      "torque_static_Nm": -0.020637441
+    },
+    {
+      "alpha_rad_s2": 2.164855,
+      "angle_deg": 22.545939,
+      "omega_rad_s": -1.407793,
+      "t_s": 3.84,
+      "torque_Nm": -0.021157221,
+      "torque_static_Nm": -0.020853963
+    },
+    {
+      "alpha_rad_s2": 2.255915,
+      "angle_deg": 20.957889,
+      "omega_rad_s": -1.363575,
+      "t_s": 3.86,
+      "torque_Nm": -0.021363672,
+      "torque_static_Nm": -0.021047658
+    },
+    {
+      "alpha_rad_s2": 2.340753,
+      "angle_deg": 19.421527,
+      "omega_rad_s": -1.317598,
+      "t_s": 3.88,
+      "torque_Nm": -0.021547561,
+      "torque_static_Nm": -0.021219663
+    },
+    {
+      "alpha_rad_s2": 2.419026,
+      "angle_deg": 17.9388,
+      "omega_rad_s": -1.269989,
+      "t_s": 3.9,
+      "torque_Nm": -0.021710061,
+      "torque_static_Nm": -0.021371198
+    },
+    {
+      "alpha_rad_s2": 2.490387,
+      "angle_deg": 16.511499,
+      "omega_rad_s": -1.220883,
+      "t_s": 3.92,
+      "torque_Nm": -0.02185241,
+      "torque_static_Nm": -0.02150355
+    },
+    {
+      "alpha_rad_s2": 2.554491,
+      "angle_deg": 15.14126,
+      "omega_rad_s": -1.170422,
+      "t_s": 3.94,
+      "torque_Nm": -0.021975897,
+      "torque_static_Nm": -0.021618058
+    },
+    {
+      "alpha_rad_s2": 2.610993,
+      "angle_deg": 13.829551,
+      "omega_rad_s": -1.118754,
+      "t_s": 3.96,
+      "torque_Nm": -0.022081847,
+      "torque_static_Nm": -0.021716093
+    },
+    {
+      "alpha_rad_s2": 2.659546,
+      "angle_deg": 12.577667,
+      "omega_rad_s": -1.066035,
+      "t_s": 3.98,
+      "torque_Nm": -0.022171598,
+      "torque_static_Nm": -0.021799043
+    },
+    {
+      "alpha_rad_s2": 2.699806,
+      "angle_deg": 11.386719,
+      "omega_rad_s": -1.012427,
+      "t_s": 4.0,
+      "torque_Nm": -0.022246492,
+      "torque_static_Nm": -0.021868297
+    },
+    {
+      "alpha_rad_s2": 2.731426,
+      "angle_deg": 10.257629,
+      "omega_rad_s": -0.9581,
+      "t_s": 4.02,
+      "torque_Nm": -0.022307854,
+      "torque_static_Nm": -0.021925229
+    },
+    {
+      "alpha_rad_s2": 2.754061,
+      "angle_deg": 9.191122,
+      "omega_rad_s": -0.90323,
+      "t_s": 4.04,
+      "torque_Nm": -0.022356982,
+      "torque_static_Nm": -0.021971187
+    },
+    {
+      "alpha_rad_s2": 2.767366,
+      "angle_deg": 8.187716,
+      "omega_rad_s": -0.848,
+      "t_s": 4.06,
+      "torque_Nm": -0.022395135,
+      "torque_static_Nm": -0.022007476
+    },
+    {
+      "alpha_rad_s2": 2.770994,
+      "angle_deg": 7.247714,
+      "omega_rad_s": -0.7926,
+      "t_s": 4.08,
+      "torque_Nm": -0.022423516,
+      "torque_static_Nm": -0.022035348
+    },
+    {
+      "alpha_rad_s2": 2.764601,
+      "angle_deg": 6.3712,
+      "omega_rad_s": -0.737227,
+      "t_s": 4.1,
+      "torque_Nm": -0.022443267,
+      "torque_static_Nm": -0.022055995
+    },
+    {
+      "alpha_rad_s2": 2.747841,
+      "angle_deg": 5.558026,
+      "omega_rad_s": -0.682085,
+      "t_s": 4.12,
+      "torque_Nm": -0.022455458,
+      "torque_static_Nm": -0.022070534
+    },
+    {
+      "alpha_rad_s2": 2.720367,
+      "angle_deg": 4.807807,
+      "omega_rad_s": -0.627385,
+      "t_s": 4.14,
+      "torque_Nm": -0.022461081,
+      "torque_static_Nm": -0.022080005
+    },
+    {
+      "alpha_rad_s2": 2.681836,
+      "angle_deg": 4.119914,
+      "omega_rad_s": -0.573344,
+      "t_s": 4.16,
+      "torque_Nm": -0.02246104,
+      "torque_static_Nm": -0.022085363
+    },
+    {
+      "alpha_rad_s2": 2.6319,
+      "angle_deg": 3.493462,
+      "omega_rad_s": -0.520188,
+      "t_s": 4.18,
+      "torque_Nm": -0.022456155,
+      "torque_static_Nm": -0.022087472
+    },
+    {
+      "alpha_rad_s2": 2.570215,
+      "angle_deg": 2.927306,
+      "omega_rad_s": -0.468147,
+      "t_s": 4.2,
+      "torque_Nm": -0.022447148,
+      "torque_static_Nm": -0.022087107
+    },
+    {
+      "alpha_rad_s2": 2.496435,
+      "angle_deg": 2.420032,
+      "omega_rad_s": -0.41746,
+      "t_s": 4.22,
+      "torque_Nm": -0.022434654,
+      "torque_static_Nm": -0.022084948
+    },
+    {
+      "alpha_rad_s2": 2.410214,
+      "angle_deg": 1.969949,
+      "omega_rad_s": -0.368372,
+      "t_s": 4.24,
+      "torque_Nm": -0.022419211,
+      "torque_static_Nm": -0.022081583
+    },
+    {
+      "alpha_rad_s2": 2.311206,
+      "angle_deg": 1.575079,
+      "omega_rad_s": -0.321136,
+      "t_s": 4.26,
+      "torque_Nm": -0.022401267,
+      "torque_static_Nm": -0.022077508
+    },
+    {
+      "alpha_rad_s2": 2.199067,
+      "angle_deg": 1.233153,
+      "omega_rad_s": -0.276011,
+      "t_s": 4.28,
+      "torque_Nm": -0.022381183,
+      "torque_static_Nm": -0.022073133
+    },
+    {
+      "alpha_rad_s2": 2.07345,
+      "angle_deg": 0.9416,
+      "omega_rad_s": -0.233264,
+      "t_s": 4.3,
+      "torque_Nm": -0.022359235,
+      "torque_static_Nm": -0.022068781
+    },
+    {
+      "alpha_rad_s2": 1.934011,
+      "angle_deg": 0.697541,
+      "omega_rad_s": -0.193166,
+      "t_s": 4.32,
+      "torque_Nm": -0.02233562,
+      "torque_static_Nm": -0.022064699
+    },
+    {
+      "alpha_rad_s2": 1.780403,
+      "angle_deg": 0.497779,
+      "omega_rad_s": -0.155998,
+      "t_s": 4.34,
+      "torque_Nm": -0.022310463,
+      "torque_static_Nm": -0.02206106
+    },
+    {
+      "alpha_rad_s2": 1.61228,
+      "angle_deg": 0.338793,
+      "omega_rad_s": -0.122046,
+      "t_s": 4.36,
+      "torque_Nm": -0.022283824,
+      "torque_static_Nm": -0.022057972
+    },
+    {
+      "alpha_rad_s2": 1.429298,
+      "angle_deg": 0.216729,
+      "omega_rad_s": -0.091605,
+      "t_s": 4.38,
+      "torque_Nm": -0.022255706,
+      "torque_static_Nm": -0.022055486
+    },
+    {
+      "alpha_rad_s2": 1.231111,
+      "angle_deg": 0.127394,
+      "omega_rad_s": -0.064976,
+      "t_s": 4.4,
+      "torque_Nm": -0.02222606,
+      "torque_static_Nm": -0.022053603
+    },
+    {
+      "alpha_rad_s2": 1.017373,
+      "angle_deg": 0.066244,
+      "omega_rad_s": -0.042465,
+      "t_s": 4.42,
+      "torque_Nm": -0.022194799,
+      "torque_static_Nm": -0.022052283
+    },
+    {
+      "alpha_rad_s2": 0.787738,
+      "angle_deg": 0.02838,
+      "omega_rad_s": -0.024387,
+      "t_s": 4.44,
+      "torque_Nm": -0.022161802,
+      "torque_static_Nm": -0.022051454
+    },
+    {
+      "alpha_rad_s2": 0.541861,
+      "angle_deg": 0.008538,
+      "omega_rad_s": -0.011064,
+      "t_s": 4.46,
+      "torque_Nm": -0.02212692,
+      "torque_static_Nm": -0.022051015
+    },
+    {
+      "alpha_rad_s2": 0.279397,
+      "angle_deg": 0.001084,
+      "omega_rad_s": -0.002823,
+      "t_s": 4.48,
+      "torque_Nm": -0.022089988,
+      "torque_static_Nm": -0.022050849
+    },
+    {
+      "alpha_rad_s2": 0.001199,
+      "angle_deg": 0.0,
+      "omega_rad_s": -0.0,
+      "t_s": 4.5,
+      "torque_Nm": -0.022050993,
+      "torque_static_Nm": -0.022050825
+    }
+  ],
+  "what_this_is": "a rigid-body operating simulation of the lid on its hinge, producing an effort-vs-angle curve",
+  "what_this_is_not": "evidence about the snap-fit, and not a verification of any source requirement. No effort ceiling is stated in the source, so no torque here can pass or fail anything."
+}

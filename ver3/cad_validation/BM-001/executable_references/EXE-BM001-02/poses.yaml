@@ -1,94 +1,83 @@
 reference_id: EXE-BM001-02
-schema_version: 0.1.0
+schema_version: 0.2.0
 units: mm
-angle_units: degrees
 
-frame: >
-  Enclosure-fixed. Transforms are applied to a body's as-built shape.
-  BODY-ENCLOSURE and BODY-COVER are as-built in the closed state; BODY-CAM is
-  as-built in its insertion orientation.
+frame: Enclosure-fixed. Transforms apply to a body's as-built shape.
 
-axes:
-  - id: AX-SLIDE
-    type: prismatic
-    direction: [-1.0, 0.0, 0.0]
-    travel: 84.0
-  - id: AX-CAM
-    type: revolute
-    point: [165.0, 20.0, 0.0]
-    direction: [0.0, 0.0, 1.0]
-    travel: 90.0
+cover_configurations:
+  CFG-COVER-RELAXED: latch recovered
+  CFG-COVER-LATCH-DEFLECTED: beam pressed down by latch_deflection
+  note: >
+    The released state differs from the latched state by COVER CONFIGURATION,
+    not by a pose. Moving the whole cover down instead would drive the plate into
+    the ledges and report an interference the product does not have.
+
+pin_configurations:
+  CFG-PIN-RELAXED: every operating state
+  CFG-PIN-COMPRESSED: assembly only, never exported
 
 states:
-  - id: S_CLOSED_RETAINED
+  - id: S_CLOSED_LATCHED
     role: CLOSED
     retained: true
     terminal: true
-    transforms:
-      BODY-ENCLOSURE: identity
-      BODY-COVER: identity
-      BODY-CAM: {rotate: {axis: AX-CAM, angle: 90.0}}
+    cover_configuration: CFG-COVER-RELAXED
+    transforms: {BODY-ENCLOSURE: identity, BODY-COVER: identity, BODY-PIN: identity}
   - id: S_CLOSED_RELEASED
     role: CLOSED
     retained: false
-    transforms:
-      BODY-ENCLOSURE: identity
-      BODY-COVER: identity
-      BODY-CAM: {translate: [0.0, -40.0, 20.0], note: withdrawn and set aside; nominal park pose}
+    cover_configuration: CFG-COVER-LATCH-DEFLECTED
+    transforms: {BODY-ENCLOSURE: identity, BODY-COVER: identity, BODY-PIN: identity}
   - id: S_OPEN
     role: OPEN
     retained: false
     terminal: true
+    cover_configuration: CFG-COVER-RELAXED
     transforms:
       BODY-ENCLOSURE: identity
       BODY-COVER: {translate: [-84.0, 0.0, 0.0]}
-      BODY-CAM: {translate: [0.0, -40.0, 20.0], note: not installed in this state}
+      BODY-PIN: {translate: [-84.0, 0.0, 0.0]}
 
 terminal_conditions:
   - state: S_OPEN
-    determinant: INT-08
+    determinant: INT-06
     kind: DISCRETE_TERMINAL_POSE
-    how_realized: FEA-C-TRAIL meets FEA-E-ENDWALL-NEAR.
-  - state: S_CLOSED_RETAINED
-    determinant: INT-07
+    how_realized: the pin shaft meets FEA-E-SLOT-END-NEAR
+  - state: S_CLOSED_LATCHED
+    determinant: INT-06
     kind: DISCRETE_TERMINAL_POSE
-    how_realized: FEA-C-LEAD meets FEA-E-ENDWALL-FAR.
-
+    how_realized: the pin shaft meets FEA-E-SLOT-END-FAR
 terminal_condition_causal_probe: >
-    validate.py evaluates the same model at slide distances either side of both
-    bounds. Common volume is zero throughout 0 to 84 and positive immediately
-    outside it at both ends, which is direct causal evidence that the end walls
-    are what terminate the slide rather than a range chosen for the model.
+  validate.py evaluates the model at slide distances either side of both bounds.
+  Common volume is zero across 0..84 and positive outside it at both ends, which
+  is direct causal evidence that the slot ends are what terminate the slide.
 
 motion_segments:
-  - id: M1_UNLOCK
-    from: S_CLOSED_RETAINED
-    to: intermediate (cam aligned, still seated)
-    moving: [BODY-CAM]
-    kind: revolute
-    axis: AX-CAM
-    travel: 90.0
-  - id: M2_WITHDRAW
-    from: intermediate
+  - id: M1_RELEASE
+    from: S_CLOSED_LATCHED
     to: S_CLOSED_RELEASED
-    moving: [BODY-CAM]
-    kind: two-phase prismatic
-    phase_1: lift +z by cam_lift, t 0.0 to 0.5
-    phase_2: translate -y by cam_park_y, t 0.5 to 1.0
-    note: >
-      The lift must complete before the lateral move; the phases are ordered,
-      not simultaneous, and are sampled as one continuous path.
-  - id: M3_OPEN
+    moving: [BODY-COVER latch region only]
+    kind: declared compliant deflection
+    travel: 2.4
+  - id: M2_OPEN
     from: S_CLOSED_RELEASED
     to: S_OPEN
-    moving: [BODY-COVER]
+    moving: [BODY-COVER, BODY-PIN]
     kind: prismatic
-    axis: AX-SLIDE
     travel: 84.0
+    latch_held_down_for_first: 10.5
+    note: >
+      The beam is held down only while the hook and its ramp are alongside the
+      keeper. Past that it recovers; holding it down for the whole slide would
+      drag the deflected strip over the top panel.
+  - id: M3_CLOSE
+    from: S_OPEN
+    to: S_CLOSED_LATCHED
+    moving: [BODY-COVER, BODY-PIN]
+    kind: prismatic
+    travel: 84.0
+    note: the ramp re-deflects the beam and the hook recovers behind the keeper
 
 ordering_constraint: >
-  M3_OPEN is not traversable while the cam is locked, and M2_WITHDRAW is not
-  traversable while it is locked either. That ordering - turn, lift, slide - is
-  the release action. validate.py measures both blocks rather than asserting
-  them: it evaluates the locked cam against a slid closure and against a lifted
-  cam, and reports the resulting common volumes.
+  M2_OPEN is not traversable while the latch is engaged. That ordering - press,
+  then slide - is the release action, and validate.py measures both halves of it.

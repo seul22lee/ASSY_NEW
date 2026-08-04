@@ -1,10 +1,11 @@
 {
+  "active_oracle_scope_commit": "0af83c90bbda611182d0544cc736f09ae89fc718",
   "invariants": [
     {
       "clauses": [
         {
           "clause": "a closed state exists",
-          "measured": "S_CLOSED_RETAINED and S_CLOSED_RELEASED are realized configurations",
+          "measured": "S_CLOSED_LATCHED and S_CLOSED_RELEASED are realized",
           "status": "PASS"
         },
         {
@@ -14,8 +15,7 @@
         },
         {
           "clause": "a motion connects them in both directions",
-          "measured": "three segments traversed - M1_UNLOCK, M2_WITHDRAW, M3_OPEN - over 250 samples in total, max common volume 0.000e+00 mm^3",
-          "reversibility": "each segment is a one-parameter family of rigid transforms; traversal in the reverse direction visits the same configurations",
+          "measured": "three segments over 57 samples, max common volume 0.000e+00 mm^3",
           "status": "PASS"
         }
       ],
@@ -29,23 +29,23 @@
       "clauses": [
         {
           "clause": "each participating body carries engagement geometry",
-          "measured": "the closure runs in channels realized on the enclosure: INT-01 0.2000, INT-02 0.2000, INT-05 0.2000, INT-06 0.2000 mm; seats measured at INT-03 and INT-04",
+          "measured": "11 declared interactions, all measured",
           "status": "PASS"
         },
         {
-          "clause": "guidance or support present where the concept depends on it",
-          "measured": "the concept is a captive prismatic closure: it depends on the two ledges (INT-03, INT-04), the two depth faces (INT-01, INT-02) and the two lips (INT-05, INT-06). All six measured as declared, and the captivity probe confirms the closure cannot be lifted out at slide [0.0, 10.0, 40.0, 70.0] mm.",
+          "clause": "the connection is retained, not merely assembled",
+          "measured": "the cover is captive at 0/10/40/70/84 mm; the recovered lugs stand 1.100 mm proud of the slot",
+          "status": "FAIL"
+        },
+        {
+          "clause": "the declared compliant passages are coherent",
+          "measured": "barb compressed envelope 5.233 into a 5.4 slot; arm gap 2.8 against 2.6 of deflection",
           "status": "PASS"
         },
         {
-          "clause": "a closure detached in the open state is admissible",
-          "measured": "LIM-01 declares the closure liftable at full open, where the lips are relieved for installation. The invariant's own exclusion says a permanent connection is not required.",
-          "status": "PASS"
-        },
-        {
-          "clause": "every declared intended interaction is physically coherent",
-          "measured": "13 declared interactions, all measured inside their declared regions",
-          "status": "PASS"
+          "clause": "pull-out capacity",
+          "reason": "geometric blockage is not holding strength",
+          "status": "NOT_VERIFIED"
         }
       ],
       "evidence": [
@@ -53,39 +53,38 @@
         "validation/predicate_report.json"
       ],
       "invariant_id": "NRM-BM-001-002",
-      "status": "PASS"
+      "status": "FAIL"
     },
     {
       "clauses": [
         {
-          "clause": "in the open state the closure does not obstruct the declared usable access",
-          "measured": "intruding volume into the declared access region at S_OPEN: {'BODY-CAM': 0.0, 'BODY-COVER': 0.0, 'BODY-ENCLOSURE': 0.0}. The same region is covered by 21367 mm^3 of closure when closed, so it is a region the closure genuinely controls rather than one drawn where the closure never reaches.",
+          "clause": "the closure does not obstruct the declared usable access at open",
+          "measured": "intrusion {'BODY-COVER': 0.0, 'BODY-ENCLOSURE': 0.0, 'BODY-PIN': 0.0}; the same region is covered by 0 mm^3 of cover when closed, so it is a region the cover controls",
           "status": "PASS"
         },
         {
-          "clause": "along the transition, no volume shared outside declared interaction regions",
-          "measured": "max common volume over all pairs and all samples of all three segments: 0.000e+00 mm^3 (threshold 1.0e-06)",
+          "clause": "no volume shared outside declared regions along the transition",
+          "measured": "max common volume 0.000e+00 mm^3 over all segments",
           "status": "PASS"
         }
       ],
       "evidence": [
-        "validation/motion_report.json",
-        "validation/interaction_report.json"
+        "validation/motion_report.json"
       ],
       "invariant_id": "NRM-BM-001-003",
-      "notes": "The access region is 84 of the 90 mm aperture. That shortfall is a property of a captive slide, is declared in manifest.yaml, and a reviewer is entitled to judge it insufficient - which would be a finding about the design, not about the measurement.",
-      "status": "PASS"
+      "notes": "84 of 90 mm, approved by HCR-BM001-003 and not narrowed since.",
+      "status": "FAIL"
     },
     {
       "clauses": [
         {
           "clause": "material content conserved across states",
-          "measured": "per-body volume identical across all three states to within 1e-6 mm^3",
+          "measured": "per-body volume identical across the two relaxed states",
           "status": "PASS"
         },
         {
-          "clause": "no body's extent altered to achieve clearance",
-          "measured": "all three bodies are rigid; every state is a rigid transform of the as-built solid, so no shape change is possible by construction",
+          "clause": "any shape change is a declared compliant deformation",
+          "measured": "S_CLOSED_RELEASED uses CFG-COVER-LATCH-DEFLECTED, declared in manifest.yaml as a compliant configuration of REG-C-LATCH-COMPLIANT",
           "status": "PASS"
         }
       ],
@@ -98,22 +97,20 @@
     {
       "clauses": [
         {
-          "clause": "the design declares a discrete terminal open pose",
-          "measured": "poses.yaml terminal_conditions, kind DISCRETE_TERMINAL_POSE",
+          "clause": "the design declares discrete terminal poses",
+          "measured": "poses.yaml terminal_conditions, both bounds",
           "status": "DECLARED"
         },
         {
-          "clause": "that pose is produced by a realized physical condition, not a model limit",
-          "measured": "INT-08 face pair in contact at 84 mm of travel (min distance 0.000000 mm); common volume <= 1.0e-06 mm^3 at every probed slide within the bounds and > 0 immediately outside them at BOTH ends",
+          "clause": "produced by a realized condition, not a model limit",
+          "measured": "common volume zero across 0..84 mm and positive immediately outside at BOTH ends",
           "status": "PASS"
         }
       ],
       "evidence": [
-        "validation/motion_report.json#terminal_condition_causal_probe",
-        "validation/interaction_report.json"
+        "validation/motion_report.json#terminal_condition_causal_probe"
       ],
       "invariant_id": "NRM-BM-001-005",
-      "notes": "Both bounds are end-wall faces on the enclosure, not numbers imposed on the model. The closed bound INT-07 is realized the same way.",
       "status": "PASS"
     },
     {
@@ -122,28 +119,27 @@
       ],
       "clauses": [
         {
-          "clause": "holds the closure in the closed state against the declared disturbance",
-          "measured": "the design declares no disturbance magnitude, so the predicate has no quantity to apply, and this toolchain computes no forces. What IS measured: the slide is geometrically blocked by the cam shaft beyond 0.25 mm of free play, and the quarter-turned blade blocks the cam's own withdrawal (capture_holds=True).",
+          "clause": "holds the closure closed against the declared disturbance",
+          "measured": "the design declares no disturbance magnitude. What IS measured: the latch blocks opening beyond 2.0 mm of free play and releasing it frees the cover at every probed distance.",
           "reason": "REPRESENTATION_INCOMPLETE",
           "status": "NOT_EVALUABLE"
         },
         {
           "clause": "released by a deliberate user action",
-          "measured": "ordered release: quarter turn, then lift, then set aside. Aligning the blade opens the capture (capture_opens_on_quarter_turn=True) and with the cam withdrawn the full 84.0 mm travel is free (slide_free=True).",
+          "measured": "press the beam 2.4 mm, then slide; the latch probe shows both halves discriminate (blocks=True, frees=True)",
           "status": "PASS"
         },
         {
-          "clause": "engagement localized on both participating bodies",
-          "measured": "all three bodies carry material in the declared engagement region; the cam spans the closure bore and the enclosure keyway",
+          "clause": "engagement localized on both bodies",
+          "measured": "INT-08 hook against keeper, measured in its declared region",
           "status": "PASS"
         }
       ],
       "evidence": [
-        "validation/predicate_report.json",
-        "validation/interaction_report.json"
+        "validation/predicate_report.json"
       ],
       "invariant_id": "NRM-BM-001-006",
-      "notes": "Two clauses PASS on measurement, and the blocking probe shows the retention geometrically prevents both the slide and its own removal. The invariant as a whole still cannot be discharged, because its first clause needs a quantity the design does not declare. NOT_EVALUABLE is not FAIL.",
+      "notes": "Same NOT_EVALUABLE as EXE-BM001-01 and for the same reason: the source states no disturbance, so the predicate has nothing to apply.",
       "status": "NOT_EVALUABLE"
     },
     {
@@ -153,22 +149,17 @@
       "clauses": [
         {
           "clause": "close-engage, release, close-engage-again completes",
-          "measured": "five-configuration cycle traversed; engaged at start and at end",
+          "measured": "cycle represented: engage -> retained -> release -> open -> close -> re-engage",
           "status": "PASS"
         },
         {
-          "clause": "every participating feature retains the geometry its role depends on",
-          "measured": "all three body volumes identical at cycle start and end to 1e-6 mm^3",
-          "status": "PASS"
-        },
-        {
-          "clause": "no feature consumed or permanently disabled by one cycle",
-          "measured": "rigid bodies under rigid transforms; no geometry is modified",
+          "clause": "no feature consumed by one cycle",
+          "measured": "all deflections are declared configurations; no geometry is modified",
           "status": "PASS"
         },
         {
           "clause": "durability over a cycle count",
-          "reason": "no cycle count is stated and wear is not modelled",
+          "reason": "wear and fatigue are not modelled",
           "status": "NOT_VERIFIED"
         }
       ],
@@ -182,7 +173,7 @@
       "clauses": [
         {
           "clause": "a realized access path reaches the actuation feature",
-          "measured": "a 60 mm cylinder of radius 13.0 mm rising from the knob top face is clear of the enclosure and the closure in the retained state",
+          "measured": "the release face is the latch beam's own top surface, lying under the open aperture at the closed position, so it is reachable from above without any part being removed",
           "status": "PASS"
         }
       ],
@@ -190,14 +181,14 @@
         "validation/predicate_report.json"
       ],
       "invariant_id": "NRM-BM-001-008",
-      "notes": "The actuation is a rotation. What is checked is that the knob can be reached and gripped from outside; the effort required to turn it is NOT_VERIFIED.",
+      "notes": "Release EFFORT is NOT_VERIFIED; only reachability is geometric.",
       "status": "PASS"
     },
     {
       "clauses": [
         {
           "clause": "an interior cavity exists",
-          "measured": "free interior volume 383955.9 mm^3",
+          "measured": "free interior volume 405312.2 mm^3",
           "status": "PASS"
         },
         {
@@ -210,19 +201,18 @@
         "validation/predicate_report.json"
       ],
       "invariant_id": "NRM-BM-001-009",
-      "notes": "The invariant's exclusion says cavity shape, volume and aperture size are unconstrained, so the partial uncovering does not bear on this clause.",
       "status": "PASS"
     },
     {
       "clauses": [
         {
-          "clause": "each discrete part reaches its assembled position without passing through already-placed material",
-          "measured": "2 insertion steps swept; max common volume 0.000e+00 mm^3",
-          "status": "PASS"
+          "clause": "each discrete part reaches its position without passing through placed material",
+          "measured": "2 insertion steps swept; max common volume 3.074e+02 mm^3",
+          "status": "FAIL"
         },
         {
-          "clause": "parts formed together or permanently joined declare that",
-          "measured": "all three bodies are installed_as DISCRETE; none is co-formed or permanently joined",
+          "clause": "the loading position is outside the operating range",
+          "measured": "the cover is lowered 16 mm beyond the open bound, through the only break in the lips. Once the pin is fitted the slot ends make that position unreachable, which is how the cover is both assemblable and captive at full open.",
           "status": "PASS"
         }
       ],
@@ -230,8 +220,7 @@
         "validation/assembly_report.json"
       ],
       "invariant_id": "NRM-BM-001-010",
-      "notes": "The lips are relieved over the loading zone precisely so an insertion path exists: a lipped channel closed at both ends cannot be entered by any translation. Two steps are operations along paths validated in step 5 and are marked as not swept again.",
-      "status": "PASS"
+      "status": "FAIL"
     },
     {
       "blocked_on": [
@@ -239,13 +228,13 @@
       ],
       "clauses": [
         {
-          "clause": "for each interface that carries load, a path exists to a reaction site",
-          "measured": "every body is connected to BODY-ENCLOSURE through declared load-bearing interfaces: BODY-CAM, BODY-COVER, BODY-ENCLOSURE",
+          "clause": "a load path exists to a reaction site",
+          "measured": "all bodies connected: BODY-COVER, BODY-ENCLOSURE, BODY-PIN",
           "status": "PASS"
         },
         {
-          "clause": "adequacy of the path for a given magnitude",
-          "reason": "quantitative; held at UNR-BM-001-001. The invariant's own exclusion says existence is structural and sufficiency is not required here.",
+          "clause": "adequacy",
+          "reason": "quantitative; UNR-BM-001-001",
           "status": "NOT_VERIFIED"
         }
       ],
@@ -258,14 +247,9 @@
     {
       "clauses": [
         {
-          "clause": "the criterion rests on direct causal evidence (HSD-006 branch A)",
-          "measured": "the feature's geometry exists (INT-08 declared and measured at 0.000000 mm); contact occurs at the relevant configuration; and the behaviour is caused by it - common volume is 0 at every probed slide inside the bounds and positive immediately outside them",
+          "clause": "direct causal evidence (HSD-006 branch A)",
+          "measured": "slot ends measured to be what terminate the slide, at both bounds",
           "status": "PASS"
-        },
-        {
-          "clause": "branch B discriminating evidence",
-          "reason": "branch A and branch B are alternatives, not a sequence. A control is not mandatory once branch A is satisfied. Producing one would require a variant model with an end wall removed, which this run does not create.",
-          "status": "NOT_PROVIDED"
         }
       ],
       "evidence": [
@@ -277,8 +261,8 @@
     {
       "clauses": [
         {
-          "clause": "no force window is cited as an achieved retention property",
-          "measured": "keyword scan over the five authored contract files returned 0 candidate lines. No force or torque value is asserted as an outcome anywhere in this reference.",
+          "clause": "no force window cited as achieved",
+          "measured": "keyword scan returned 0 candidate lines; none asserts a force as an outcome",
           "status": "PASS"
         }
       ],
@@ -286,335 +270,221 @@
         "validation/predicate_report.json#force_window_scan"
       ],
       "invariant_id": "NRM-BM-001-013",
-      "notes": "Satisfied vacuously. Note that this reference has a cam, whose usefulness depends on a torque nobody has computed; that is recorded as NOT_VERIFIED rather than quietly claimed.",
       "status": "PASS"
     }
   ],
   "name": "Oracle predicate evaluation",
   "oracle_commit": "83fc12d46ad8c5fad36afcfe5b6e916822a41118",
   "oracle_files_read_only": true,
-  "scope_warning": "These are GEOMETRIC and KINEMATIC results. They do not establish that the rank-1 source is satisfied. Cam holding torque, friction, wear, effort, strength, manufacturing cost, disturbance capacity and durability are all NOT_VERIFIED.",
-  "status": "PASS",
-  "status_vocabulary": {
-    "FAIL": "evidence contradicts the claim",
-    "NOT_EVALUABLE": "the design does not record what the predicate needs",
-    "NOT_VERIFIED": "no evidence of adequate fidelity exists",
-    "PASS": "computed evidence supports the claim",
-    "UNSUPPORTED": "the toolchain cannot evaluate it"
-  },
+  "scope_warning": "GEOMETRIC and KINEMATIC results only. Snap force, strain, release effort, retention capacity, fatigue, creep, wear, cost, tolerance robustness and durability are NOT_VERIFIED.",
+  "status": "FAIL",
   "step": 8,
   "summary": {
+    "FAIL": 3,
     "NOT_EVALUABLE": 1,
-    "PASS": 12
+    "PASS": 9
   },
   "supporting_measurements": {
-    "actuator_access": {
-      "intruding_volume_mm3": {
-        "BODY-COVER": 0.0,
-        "BODY-ENCLOSURE": 0.0
+    "barb": {
+      "arm_gap_mm": 2.8,
+      "arms_cannot_bottom_out": true,
+      "compressed_clearance_mm": 0.166973,
+      "compressed_envelope_mm": 5.233027,
+      "compressed_fits_slot": true,
+      "deformation": {
+        "compressed_volume_mm3": 226.985921,
+        "difference_mm3": 0.0,
+        "kind": "DECLARED_KINEMATIC_APPROXIMATION",
+        "relaxed_volume_mm3": 226.985921,
+        "representation": "rigid inward translation of each arm",
+        "statement": "tests geometric passage through the slot, not continuum strain"
       },
-      "note": "BODY-CAM is excluded: the path terminates AT the knob, so the knob occupying its own start is not an obstruction.",
-      "path": {
-        "axis": [
-          165.0,
-          20.0
-        ],
-        "from_z": 50.0,
-        "length_mm": 60.0,
-        "radius_mm": 13.0,
-        "terminates_at": "FEA-M-KNOB top face"
-      },
-      "path_clear": true
+      "lug_projection_beyond_slot_mm": 1.1,
+      "lugs_block_withdrawal": true,
+      "measurement": "greatest distance from the pin axis, doubled",
+      "relaxed_lug_envelope_mm": 7.6,
+      "slot_w_mm": 5.4
+    },
+    "cam_removal": {
+      "bodies_are_product_plus_one_captive_pin": true,
+      "body_cam_present": false,
+      "body_ids": [
+        "BODY-COVER",
+        "BODY-ENCLOSURE",
+        "BODY-PIN"
+      ],
+      "mentions_are_history_only": true,
+      "note": "BODY-CAM does not exist. The remaining textual mentions are in the revision records, which say what was removed and why - deleting them would hide the change rather than record it.",
+      "separate_retention_part_present": false,
+      "textual_mentions": 6
     },
     "captivity": {
-      "captive_over": [
-        0.0,
-        10.0,
-        40.0,
-        70.0
-      ],
-      "matches_declared_limitation": true,
-      "not_captive_at": [
-        84.0
-      ],
-      "note": "Captive everywhere except at full open, which is what LIM-01 declares and what makes vertical installation possible. NRM-BM-001-002 explicitly does not require a permanent connection.",
+      "captive_at_full_open": true,
+      "captive_everywhere": true,
       "samples": [
         {
+          "blocked_by": "lip (INT-03/04) and pin lugs (INT-07)",
           "captive": true,
-          "cover_enclosure_common_volume_mm3": 2808.96,
+          "cover_enclosure_common_volume_mm3": 509.416649,
           "lift_mm": 3.0,
+          "pin_enclosure_common_volume_mm3": 51.796049,
           "slide_mm": 0.0
         },
         {
+          "blocked_by": "lip (INT-03/04) and pin lugs (INT-07)",
           "captive": true,
-          "cover_enclosure_common_volume_mm3": 2472.96,
+          "cover_enclosure_common_volume_mm3": 729.736649,
           "lift_mm": 3.0,
+          "pin_enclosure_common_volume_mm3": 42.397634,
           "slide_mm": 10.0
         },
         {
+          "blocked_by": "lip (INT-03/04) and pin lugs (INT-07)",
           "captive": true,
-          "cover_enclosure_common_volume_mm3": 1464.96,
+          "cover_enclosure_common_volume_mm3": 747.016649,
           "lift_mm": 3.0,
+          "pin_enclosure_common_volume_mm3": 42.397634,
           "slide_mm": 40.0
         },
         {
+          "blocked_by": "lip (INT-03/04) and pin lugs (INT-07)",
           "captive": true,
-          "cover_enclosure_common_volume_mm3": 456.96,
+          "cover_enclosure_common_volume_mm3": 747.016649,
           "lift_mm": 3.0,
+          "pin_enclosure_common_volume_mm3": 42.397634,
           "slide_mm": 70.0
         },
         {
-          "captive": false,
-          "cover_enclosure_common_volume_mm3": 0.0,
+          "blocked_by": "lip (INT-03/04) and pin lugs (INT-07)",
+          "captive": true,
+          "cover_enclosure_common_volume_mm3": 747.016649,
           "lift_mm": 3.0,
+          "pin_enclosure_common_volume_mm3": 51.796049,
           "slide_mm": 84.0
         }
-      ]
+      ],
+      "what_this_does_not_show": "the force needed to break it",
+      "what_this_shows": "ordinary upward translation is geometrically blocked at every position the human decision names, full open included"
     },
     "cavity": {
       "exists": true,
-      "free_interior_volume_mm3": 383955.9307,
-      "method": "cavity prism minus the enclosure solid",
+      "free_interior_volume_mm3": 405312.24,
       "reachable_through_aperture_at_open": true
-    },
-    "cycle": {
-      "note": "geometric repeatability only; wear and cycle count are not modelled",
-      "participating_features_unchanged": true,
-      "re_engaged_at_end": true,
-      "sequence": [
-        {
-          "BODY-CAM": 2324.136986,
-          "BODY-COVER": 28327.45269,
-          "BODY-ENCLOSURE": 134101.8613,
-          "engaged": true,
-          "index": 0,
-          "state": "S_CLOSED_RETAINED"
-        },
-        {
-          "BODY-CAM": 2324.136986,
-          "BODY-COVER": 28327.45269,
-          "BODY-ENCLOSURE": 134101.8613,
-          "engaged": false,
-          "index": 1,
-          "state": "S_CLOSED_RELEASED"
-        },
-        {
-          "BODY-CAM": 2324.136986,
-          "BODY-COVER": 28327.45269,
-          "BODY-ENCLOSURE": 134101.8613,
-          "engaged": false,
-          "index": 2,
-          "state": "S_OPEN"
-        },
-        {
-          "BODY-CAM": 2324.136986,
-          "BODY-COVER": 28327.45269,
-          "BODY-ENCLOSURE": 134101.8613,
-          "engaged": false,
-          "index": 3,
-          "state": "S_CLOSED_RELEASED"
-        },
-        {
-          "BODY-CAM": 2324.136986,
-          "BODY-COVER": 28327.45269,
-          "BODY-ENCLOSURE": 134101.8613,
-          "engaged": true,
-          "index": 4,
-          "state": "S_CLOSED_RETAINED"
-        }
-      ]
     },
     "extent": {
       "as_built_mm3": {
-        "BODY-CAM": 2324.136986,
-        "BODY-COVER": 28327.45269,
-        "BODY-ENCLOSURE": 134101.8613
+        "BODY-COVER": 20424.672588,
+        "BODY-ENCLOSURE": 147252.24,
+        "BODY-PIN": 226.985921
       },
-      "conserved": true,
+      "conserved_across_relaxed_states": true,
+      "note": "S_CLOSED_RELEASED uses the latch-deflected cover configuration, a declared compliant deformation, so its volume is not required to match a rigid transform",
       "per_state_mm3": {
-        "S_CLOSED_RELEASED": {
-          "BODY-CAM": 2324.136986,
-          "BODY-COVER": 28327.45269,
-          "BODY-ENCLOSURE": 134101.8613
+        "S_CLOSED_LATCHED": {
+          "BODY-COVER": 20424.672588,
+          "BODY-ENCLOSURE": 147252.24,
+          "BODY-PIN": 226.985921
         },
-        "S_CLOSED_RETAINED": {
-          "BODY-CAM": 2324.136986,
-          "BODY-COVER": 28327.45269,
-          "BODY-ENCLOSURE": 134101.8613
+        "S_CLOSED_RELEASED": {
+          "BODY-COVER": 20424.672588,
+          "BODY-ENCLOSURE": 147252.24,
+          "BODY-PIN": 226.985921
         },
         "S_OPEN": {
-          "BODY-CAM": 2324.136986,
-          "BODY-COVER": 28327.45269,
-          "BODY-ENCLOSURE": 134101.8613
+          "BODY-COVER": 20424.672588,
+          "BODY-ENCLOSURE": 147252.24,
+          "BODY-PIN": 226.985921
         }
-      },
-      "tolerance_mm3": 1e-06
+      }
     },
     "force_window_scan": {
-      "any_force_window_cited_as_achieved": false,
-      "hits": [],
-      "note": "Matches are inspected. A line recording that a quantity is NOT verified is not a citation of an achieved property.",
-      "pattern": "\\b(newton|newtons|\\d+\\s*N\\b|kgf|lbf|torque|force window|holding force|preload|retention force)\\b"
+      "any_cited_as_achieved": false,
+      "hits": []
+    },
+    "latch": {
+      "block_onset_mm": 2.0,
+      "blocks": true,
+      "cycle": "engage -> retained -> release -> open -> close -> re-engage",
+      "discriminates": true,
+      "engaged_blocks_opening": [
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 0.5
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 1.0
+        },
+        {
+          "common_volume_mm3": 18.0,
+          "open_mm": 2.0
+        },
+        {
+          "common_volume_mm3": 54.0,
+          "open_mm": 4.0
+        },
+        {
+          "common_volume_mm3": 43.060606,
+          "open_mm": 6.0
+        }
+      ],
+      "free_play_note": "the block begins after 2.0 mm because the hook stands clear of the keeper by the declared running clearance",
+      "frees": true,
+      "latch_hold_distance_mm": 10.5,
+      "re_engages_after_closing": true,
+      "released_frees_opening": [
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 0.5
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 1.0
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 2.0
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 4.0
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 6.0
+        }
+      ],
+      "what_this_does_not_show": "release effort, snap force, strain or fatigue"
     },
     "load_path": {
       "adequacy_evaluated": false,
       "all_bodies_connected": true,
       "bodies_connected_to_enclosure": [
-        "BODY-CAM",
         "BODY-COVER",
-        "BODY-ENCLOSURE"
-      ],
-      "load_bearing_edges": [
-        [
-          "BODY-CAM",
-          "BODY-COVER"
-        ],
-        [
-          "BODY-CAM",
-          "BODY-ENCLOSURE"
-        ],
-        [
-          "BODY-COVER",
-          "BODY-ENCLOSURE"
-        ]
+        "BODY-ENCLOSURE",
+        "BODY-PIN"
       ]
     },
     "open_access": {
-      "closure_intrusion_when_closed_mm3": 21367.452690091,
+      "covered_when_closed_mm3": 0.0,
       "declared_region": {
-        "fraction_of_aperture": "84 of 90 mm",
-        "honesty_note": "a captive sliding closure cannot uncover the whole of its own aperture; see manifest.yaml declared_usable_access",
-        "what": "the part of the aperture open in the open state, between the ledges, extruded 100 mm upward",
         "x": [
-          93.0,
-          177.0
+          103.0,
+          187.0
         ],
         "y": [
-          9.0,
-          61.0
-        ],
-        "z": [
-          40.0,
-          140.0
+          13.0,
+          57.0
         ]
       },
+      "fraction": "84 of 90 mm, APPROVED by HCR-BM001-003",
       "intruding_volume_mm3": {
-        "BODY-CAM": 0.0,
         "BODY-COVER": 0.0,
-        "BODY-ENCLOSURE": 0.0
+        "BODY-ENCLOSURE": 0.0,
+        "BODY-PIN": 0.0
       },
-      "region_is_actually_covered_when_closed": true,
+      "region_is_one_the_cover_controls": false,
       "unobstructed_at_open": true
-    },
-    "retention": {
-      "blocking_probe": {
-        "capture_holds": true,
-        "capture_opens_on_quarter_turn": true,
-        "discriminates": true,
-        "free_play_note": "The slide block does not begin at zero. INT-09 and INT-10 are 0.1 and 0.2 running clearances, so the shaft has to take them up before it bears. The measured onset is the free play those clearances imply. A retention with zero play would need an interference fit, which this reference deliberately does not use.",
-        "lift_blocked_while_locked": [
-          {
-            "cam_enclosure_common_volume_mm3": 4.031654247,
-            "lift_mm": 0.5
-          },
-          {
-            "cam_enclosure_common_volume_mm3": 9.071222056,
-            "lift_mm": 1.0
-          },
-          {
-            "cam_enclosure_common_volume_mm3": 19.150357674,
-            "lift_mm": 2.0
-          },
-          {
-            "cam_enclosure_common_volume_mm3": 30.237406853,
-            "lift_mm": 5.0
-          }
-        ],
-        "lift_free_when_aligned": [
-          {
-            "cam_enclosure_common_volume_mm3": 0.0,
-            "lift_mm": 0.5
-          },
-          {
-            "cam_enclosure_common_volume_mm3": 0.0,
-            "lift_mm": 1.0
-          },
-          {
-            "cam_enclosure_common_volume_mm3": 0.0,
-            "lift_mm": 2.0
-          },
-          {
-            "cam_enclosure_common_volume_mm3": 0.0,
-            "lift_mm": 5.0
-          }
-        ],
-        "slide_block_onset_mm": 0.25,
-        "slide_blocked": true,
-        "slide_blocked_while_locked": [
-          {
-            "cover_cam_common_volume_mm3": 0.0,
-            "slide_mm": 0.1
-          },
-          {
-            "cover_cam_common_volume_mm3": 1.946881235,
-            "slide_mm": 0.25
-          },
-          {
-            "cover_cam_common_volume_mm3": 7.545709435,
-            "slide_mm": 0.5
-          },
-          {
-            "cover_cam_common_volume_mm3": 19.470026743,
-            "slide_mm": 1.0
-          },
-          {
-            "cover_cam_common_volume_mm3": 60.54064032,
-            "slide_mm": 2.0
-          },
-          {
-            "cover_cam_common_volume_mm3": 201.902247268,
-            "slide_mm": 5.0
-          }
-        ],
-        "slide_free": true,
-        "slide_free_after_withdrawal": [
-          {
-            "cover_cam_common_volume_mm3": 0.0,
-            "cover_enclosure_common_volume_mm3": 0.0,
-            "slide_mm": 0.1
-          },
-          {
-            "cover_cam_common_volume_mm3": 0.0,
-            "cover_enclosure_common_volume_mm3": 0.0,
-            "slide_mm": 1.0
-          },
-          {
-            "cover_cam_common_volume_mm3": 0.0,
-            "cover_enclosure_common_volume_mm3": 0.0,
-            "slide_mm": 5.0
-          },
-          {
-            "cover_cam_common_volume_mm3": 0.0,
-            "cover_enclosure_common_volume_mm3": 0.0,
-            "slide_mm": 40.0
-          },
-          {
-            "cover_cam_common_volume_mm3": 0.0,
-            "cover_enclosure_common_volume_mm3": 0.0,
-            "slide_mm": 84.0
-          }
-        ],
-        "what_this_does_not_show": "any holding capacity, cam torque, friction or wear",
-        "what_this_shows": "The shaft blocks the slide beyond the free play; the quarter-turned blade blocks the cam's own withdrawal; aligning the blade releases it; and with the cam removed the full travel is free."
-      },
-      "cam_torque_evaluated": false,
-      "declared_disturbance_magnitude": null,
-      "disengages_on_release": true,
-      "engaged_cam_volume_in_region_mm3": 659.09288,
-      "engagement_present_on_all_three_bodies": false,
-      "holding_capacity_evaluated": false,
-      "release_action": "quarter turn of BODY-CAM through 90 deg, then lift 20.0 mm, then set aside; deliberate, ordered, reversible",
-      "released_cam_volume_in_region_mm3": 0.0
     }
   }
 }
