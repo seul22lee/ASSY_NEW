@@ -16,54 +16,54 @@ purpose: A reproducible semantic candidate baseline for ADVERSARIAL CAD work. It
 authority_model:
   A_immutable_source:
     manifest: ver3/oracles/SOURCE_FREEZE.yaml
-    manifest_hash: cb74bd8711bbd3a4c71a8038838ca997a559ac6902a099d04a6dda48acfcb1a5
-    artifact_count: 13
+    manifest_hash: 52af18a3e20799a26156500dba21ebf8a8f142f20ed70406c8f3fff7e36b0caf
+    artifact_count: 11
     cad_may_change_it: false
   B_challengeable_semantic_authority:
     manifest: ver3/oracles/SEMANTIC_AUTHORITY.yaml
-    manifest_hash: 9d447f0092defe22c92f7fe2dda7cd93af4168a3f9ac0ebbef43b352a6d0c600
+    manifest_hash: 3040c2bcb138a7f92bfb77f52e73b350f30f9762df5d79138d6fc14be2ae25f6
     artifact_count: 2
     version: v1
     cad_may_change_it: true
   C_current_conclusions:
     manifest: this file
     cad_may_change_it: true
-base_commit_sha: 94f3128bd74dc19f89679bbe2d9d817b5a54e42c
+base_commit_sha: 1530a397fac02bc423d15b28d8ff290d40eb72e8
 worktree_state_at_baseline: dirty
 worktree_note: Taken from an UNCOMMITTED working tree. base_commit_sha identifies the starting commit;
   the audited content is identified by audited_snapshot_manifest_hash.
-baseline_manifest_hash: 534c4f032c7f9b93922a15243a86e285b1b25c11ec52f628b24c16a30498ad4c
-audited_snapshot_manifest_hash: 75cb19640d2829dded302e33ca7995a0772c5d606191501cb8a22f9d71b03092
-oracle_tree_hash: 67066143d38de29c55043ed56324af2a7b13b2f2f711ab57aec3019e74152025
+baseline_manifest_hash: c004056fec057b78ae00a315d009b7f48da3f9e15a7a43714a5a920641d4dad8
+audited_snapshot_manifest_hash: 92bfab02ee4739be4f7cb86dcc510d061cc1075f9f0e1a8979bac234e504d6ed
+oracle_tree_hash: f07224815a491bd10012dc91a658779f4e1e4813bb99ff768c33361dc4467b2f
 inclusion_rule: 'baseline_manifest_hash covers every path in included_paths: policy, method, decisions,
   amendments, both authority manifests, index, workflow state, correction state, the five review records,
   all eight packs (normative, freedoms, realizations, evidence_cases, negative_cases, stage_expectations,
   evidence_scope, source_map, README), the frozen dossiers and ambiguity records, both tools, and the
-  five POST_BM0013_REMOVAL_RESTART reports.'
+  five POST_SCOPE_ATTESTATION_RESTART reports.'
 exclusion_rule:
   ver3/oracles/PRE_CAD_BASELINE.yaml: this file - an attestation cannot hash itself
   ver3/oracles/PRE_CAD_V2_CORRECTION_REPORT.md: a report ABOUT this baseline
-  ver3/oracles/_audit/* except the five POST_BM0013_REMOVAL_RESTART reports: prior historical audit outputs are
+  ver3/oracles/_audit/* except the five POST_SCOPE_ATTESTATION_RESTART reports: prior historical audit outputs are
     preserved but are not part of the ACTIVE baseline hash
   ver3/oracles/*/*/reference_realizations/: illustrative, never normative
   ver3/phase0/: pre-Oracle architecture record, superseded by the packs
   ver3/oracles/FINAL_PRE_CAD_CORRECTION_REPORT.md: a report ABOUT this baseline
-  ver3/oracles/_audit/* superseded by the POST_BM0013_REMOVAL_RESTART set: prior historical audit outputs are
+  ver3/oracles/_audit/* superseded by the POST_SCOPE_ATTESTATION_RESTART set: prior historical audit outputs are
     preserved but are not part of the ACTIVE baseline hash
 included_paths:
-  _audit/POST_BM0013_REMOVAL_RESTART-canonical.json: 3c9ecd36f62930932fbae385c42cf8cc90c8f186606a4706d00df19bedabba9e
-  _audit/POST_BM0013_REMOVAL_RESTART-shuffled-20260802.json: 4a1ef61824e921a96fa0d196739f329f73884f00d26b882895b30b38891db01a
-  _audit/POST_BM0013_REMOVAL_RESTART-shuffled-4177.json: a0772a7718ac97615949850a2d2bc10cbd2871a5c945fabb762ed61c45c2ba99
-  _audit/POST_BM0013_REMOVAL_RESTART-shuffled-90210.json: 5b118a8692624edd9e68febac39c22781df045c2c5d969387a3fa6ed790d913c
-  _audit/POST_BM0013_REMOVAL_RESTART-mutation.json: 9a2688f072a6c8a29f853fcfa3e75c5b764467f97f5193626965ede4a1c386b7
+  _audit/POST_SCOPE_ATTESTATION_RESTART-canonical.json: 2c2fa453d300b3924106c1a447b37feb4e161a60b801dac8768fdcf953baffac
+  _audit/POST_SCOPE_ATTESTATION_RESTART-shuffled-20260802.json: c4400afb03c6dd9f2c1f22da252d3c09726fe14cf308335210051c7378025350
+  _audit/POST_SCOPE_ATTESTATION_RESTART-shuffled-4177.json: 155020ae14efb967bc48a9cdb6f0a43574c8e872a7726d034bae35fcf84861f2
+  _audit/POST_SCOPE_ATTESTATION_RESTART-shuffled-90210.json: 90a59f8eb2bd3d2407919744d4b7ba9202a2e71b434b96f894906928e8605070
+  _audit/POST_SCOPE_ATTESTATION_RESTART-mutation.json: 8ddd82c203c206fe9378f18c1d4c8d6bf20eb7fa97576403673f11734cf1ae6e
   ORACLE_AUTHORING_POLICY.md: f8c6f9d0ffe2d8bd9d617736d1d5824534bc97f753237fd48c5e02fafa0433c4
   ORACLE_METHOD.md: 06454a7747edcf7a4dde5c4c73fbac43df0382cbb9896a12c006e478f4493a76
   HUMAN_SEMANTIC_DECISIONS.yaml: f83aa08d9a007058d378276a5463933ee55a271bb2480dbbe949f744889e7eb0
   _dossier_amendments/AMENDMENTS.yaml: 686063d48e18c70a57a50e8d191e03f6c1040e22ac9a299f6349451d22eb9b71
   SEMANTIC_AUTHORITY.yaml: 2af51eb2c7054d5904e6a4c576ffa05ecaf1165d1cebbe7b514b69b6dd207392
   SOURCE_FREEZE.yaml: e2f880fe28c350989032dc9e9882eff83579c40ed9c4fff62a32d11cc035b25c
-  ORACLE_INDEX.md: 2ee7b7cf98dd35f94f6d478df2bdfbb2591ba8af697c9a45d774fb4988bf08ee
-  ORACLE_WORKFLOW_STATE.yaml: 2b435a9c7fafb73fba7b2c425884eccd39ddb1f1333610a58acbd698204709c2
+  ORACLE_INDEX.md: be50023571c9c0355eabf69234e211930c2bcbbc57385e72b56e3c59e37958de
+  ORACLE_WORKFLOW_STATE.yaml: c96a656bd5f095792eebb150387544e0441bcb1da18f3b1d901cebcfc832074b
   PRE_CAD_CORRECTION_STATE.yaml: 0f128fbe63793a37a1a634ed25bb18fb1826f7ecaf550c247e56801f80833fd1
   SOURCE_ENTAILMENT_REVIEW.yaml: fb341f8c25e564cf175b2f8faac2dd36d37b44654d43e55a3ee541c29e457910
   FIXTURE_PLAUSIBILITY_REVIEW.yaml: 4d9e9da46fa0450b651a93fffee6b5e25c773333e09dd0221b314db3eb0a5fb3
@@ -152,8 +152,8 @@ included_paths:
   _dossiers/DOS-rotary-to-linear-engagement.md: 9cc5b9e41cb4dea8447f99573c67814c9cc663fc60e572306dbac307d32dbf3f
   _dossiers/DOSSIER_README.md: 194dd3ca5c5de760ae017070ce53216490e334c14fb8a9e6f8ab7aa594335975
   _ambiguities/AMB-001-2-01.md: cebc412e8f120206b744bc22b812e745b4140f2c6b671184b65a14ce2f05c162
-  ../oracle_tools/audit_oracles.py: 4b6d734d4595de8e56a0734091a237fcc187163115ed91ebae95d405ee3c3a29
-  ../oracle_tools/mutation_tests.py: 45247875bad52faf2a1c0d63c360952278d19f29b8be823de899a8434e7b4e32
+  ../oracle_tools/audit_oracles.py: ebe17afb5f31d233fd7a43d405daf77d14918f7b16aa501342099faecf40ac14
+  ../oracle_tools/mutation_tests.py: bdc59d9b029564c211a2f28daa4d473d096cb106b5cb48c907edcbb2069d5e5f
   FINAL_PRE_CAD_CORRECTION_STATE.yaml: cebe7d8c71b0849fb16cb918639ab8d422c599aaa6b17f068583bb0ed9e787e9
   PRE_CAD_BACKLOG.yaml: 4cf051cb88f4438572e3cbbc59afd4c720315f386431494115ab6e45bbe98304
 included_path_count: 105
@@ -177,8 +177,8 @@ statuses_deliberately_not_used:
 - PRODUCTION_READY
 audit_provenance:
   canonical:
-    path: ver3/oracles/_audit/POST_BM0013_REMOVAL_RESTART-canonical.json
-    run_id: run-49cc1e6d7a1583ef
+    path: ver3/oracles/_audit/POST_SCOPE_ATTESTATION_RESTART-canonical.json
+    run_id: run-fd0611879f73d816
     utc_timestamp: '2026-08-04T12:44:48+00:00'
     result: 0 BLOCKING, 0 MAJOR
     passes: 3A 3B 3C 3D 3E 3F 3G 3H 3I
@@ -188,13 +188,13 @@ audit_provenance:
   - 90210
   shuffled_result: 0 BLOCKING, 0 MAJOR at every seed
   mutation_suite:
-    total: 104
-    defect_cases: 81
-    control_cases: 23
+    total: 112
+    defect_cases: 87
+    control_cases: 25
     failed: 0
-    passed: 104
-  auditor_sha256: 4b6d734d4595de8e56a0734091a237fcc187163115ed91ebae95d405ee3c3a29
-  mutation_suite_sha256: 45247875bad52faf2a1c0d63c360952278d19f29b8be823de899a8434e7b4e32
+    passed: 112
+  auditor_sha256: ebe17afb5f31d233fd7a43d405daf77d14918f7b16aa501342099faecf40ac14
+  mutation_suite_sha256: bdc59d9b029564c211a2f28daa4d473d096cb106b5cb48c907edcbb2069d5e5f
   python_version: 3.8.10
   runtime: Linux 5.4.0-176-generic x86_64
 accepted_human_decisions:

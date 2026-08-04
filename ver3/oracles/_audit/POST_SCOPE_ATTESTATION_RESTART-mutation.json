@@ -1,10 +1,10 @@
 {
   "summary": {
-    "total": 104,
-    "defect_cases": 81,
-    "control_cases": 23,
+    "total": 112,
+    "defect_cases": 87,
+    "control_cases": 25,
     "failed": 0,
-    "passed": 104
+    "passed": 112
   },
   "cases": [
     {
@@ -174,6 +174,7 @@
       "note": "a capability pack named after one of its realizations",
       "passed": true,
       "reported": [
+        "ACTIVE_PACK_SET_STALE",
         "MICRO_ORACLE_NAMED_FOR_MECHANISM"
       ]
     },
@@ -776,6 +777,82 @@
       "reported": [
         "INDEX_AUDIT_COUNT_STALE"
       ]
+    },
+    {
+      "name": "baseline_authority_hash_stale",
+      "kind": "defect",
+      "expect": "BASELINE_AUTHORITY_HASH_STALE",
+      "note": "ATT-001: the baseline quoting a source-manifest hash the manifest no longer has",
+      "passed": true,
+      "reported": [
+        "BASELINE_AUTHORITY_HASH_STALE"
+      ]
+    },
+    {
+      "name": "baseline_authority_count_stale",
+      "kind": "defect",
+      "expect": "BASELINE_AUTHORITY_COUNT_STALE",
+      "note": "ATT-002: the baseline stating an artifact count the manifest contradicts",
+      "passed": true,
+      "reported": [
+        "BASELINE_AUTHORITY_COUNT_STALE"
+      ]
+    },
+    {
+      "name": "workflow_pack_set_stale",
+      "kind": "defect",
+      "expect": "ACTIVE_PACK_SET_STALE",
+      "note": "ATT-003: the workflow listing a pack set the directory contradicts",
+      "passed": true,
+      "reported": [
+        "ACTIVE_PACK_SET_STALE"
+      ]
+    },
+    {
+      "name": "index_pack_prose_stale",
+      "kind": "defect",
+      "expect": "ACTIVE_PACK_SET_STALE",
+      "note": "ATT-003: index prose stating a pack count the tree contradicts",
+      "passed": true,
+      "reported": [
+        "ACTIVE_PACK_SET_STALE"
+      ]
+    },
+    {
+      "name": "workflow_cites_missing_audit_report",
+      "kind": "defect",
+      "expect": "WORKFLOW_AUDIT_REPORT_MISSING",
+      "note": "ATT-004: the workflow citing an audit report that is not in _audit/",
+      "passed": true,
+      "reported": [
+        "WORKFLOW_AUDIT_REPORT_MISSING"
+      ]
+    },
+    {
+      "name": "workflow_denies_existing_cad",
+      "kind": "defect",
+      "expect": "CAD_EXISTENCE_CLAIM_STALE",
+      "note": "ATT-005: current state claiming no CAD while executable references exist",
+      "passed": true,
+      "reported": [
+        "CAD_EXISTENCE_CLAIM_STALE"
+      ]
+    },
+    {
+      "name": "demonstration_absent_is_fine",
+      "kind": "control",
+      "expect": "CAD_EXISTENCE_CLAIM_STALE",
+      "note": "RELAXED HEURISTIC CONTROL: references existing while the Demonstration does not is the expected state, not a stale claim",
+      "passed": true,
+      "reported": []
+    },
+    {
+      "name": "baseline_authority_untouched_is_fine",
+      "kind": "control",
+      "expect": "BASELINE_AUTHORITY_HASH_STALE",
+      "note": "RELAXED HEURISTIC CONTROL: re-writing the baseline without changing the authority block must not read as drift",
+      "passed": true,
+      "reported": []
     },
     {
       "name": "source_freeze_revision_paradox",

@@ -758,6 +758,79 @@ def _(r):
     fp.write_text(out)
 
 
+# ------------------------------------------------------- 3J attestation drift
+@case("baseline_authority_hash_stale", "defect", "BASELINE_AUTHORITY_HASH_STALE",
+      "ATT-001: the baseline quoting a source-manifest hash the manifest no longer has")
+def _(r):
+    d = ry(r, "oracles/PRE_CAD_BASELINE.yaml")
+    d["authority_model"]["A_immutable_source"]["manifest_hash"] = "0" * 64
+    wy(r, "oracles/PRE_CAD_BASELINE.yaml", d)
+
+
+@case("baseline_authority_count_stale", "defect", "BASELINE_AUTHORITY_COUNT_STALE",
+      "ATT-002: the baseline stating an artifact count the manifest contradicts")
+def _(r):
+    d = ry(r, "oracles/PRE_CAD_BASELINE.yaml")
+    sa = ry(r, "oracles/SEMANTIC_AUTHORITY.yaml")
+    d["authority_model"]["B_challengeable_semantic_authority"]["artifact_count"] = \
+        int(sa["artifact_count"]) + 7
+    wy(r, "oracles/PRE_CAD_BASELINE.yaml", d)
+
+
+@case("workflow_pack_set_stale", "defect", "ACTIVE_PACK_SET_STALE",
+      "ATT-003: the workflow listing a pack set the directory contradicts")
+def _(r):
+    d = ry(r, "oracles/ORACLE_WORKFLOW_STATE.yaml")
+    d["pack_status"]["BM-999-phantom"] = "PRE_CAD_SEMANTIC_REVIEWED"
+    wy(r, "oracles/ORACLE_WORKFLOW_STATE.yaml", d)
+
+
+@case("index_pack_prose_stale", "defect", "ACTIVE_PACK_SET_STALE",
+      "ATT-003: index prose stating a pack count the tree contradicts")
+def _(r):
+    fp = r / "oracles" / "ORACLE_INDEX.md"
+    txt = fp.read_text()
+    out = txt.replace("Eight packs.", "Nine packs.", 1)
+    assert out != txt, "index prose no longer states a spelled-out pack count"
+    fp.write_text(out)
+
+
+@case("workflow_cites_missing_audit_report", "defect", "WORKFLOW_AUDIT_REPORT_MISSING",
+      "ATT-004: the workflow citing an audit report that is not in _audit/")
+def _(r):
+    (r / "oracles" / "_audit").mkdir(exist_ok=True)
+    d = ry(r, "oracles/ORACLE_WORKFLOW_STATE.yaml")
+    d["audit_state"]["reports"]["canonical"] = "ver3/oracles/_audit/NO_SUCH_REPORT.json"
+    wy(r, "oracles/ORACLE_WORKFLOW_STATE.yaml", d)
+
+
+@case("workflow_denies_existing_cad", "defect", "CAD_EXISTENCE_CLAIM_STALE",
+      "ATT-005: current state claiming no CAD while executable references exist")
+def _(r):
+    d = ry(r, "oracles/ORACLE_WORKFLOW_STATE.yaml")
+    d["cad_executable_references_exist"] = False
+    wy(r, "oracles/ORACLE_WORKFLOW_STATE.yaml", d)
+
+
+@case("demonstration_absent_is_fine", "control", "CAD_EXISTENCE_CLAIM_STALE",
+      "RELAXED HEURISTIC CONTROL: references existing while the Demonstration does "
+      "not is the expected state, not a stale claim")
+def _(r):
+    d = ry(r, "oracles/ORACLE_WORKFLOW_STATE.yaml")
+    d["cad_demonstration_exists"] = False
+    d["cad_validation_finally_approved"] = False
+    wy(r, "oracles/ORACLE_WORKFLOW_STATE.yaml", d)
+
+
+@case("baseline_authority_untouched_is_fine", "control", "BASELINE_AUTHORITY_HASH_STALE",
+      "RELAXED HEURISTIC CONTROL: re-writing the baseline without changing the "
+      "authority block must not read as drift")
+def _(r):
+    d = ry(r, "oracles/PRE_CAD_BASELINE.yaml")
+    d["worktree_note"] = d.get("worktree_note", "") + " "
+    wy(r, "oracles/PRE_CAD_BASELINE.yaml", d)
+
+
 @case("source_freeze_revision_paradox", "defect", "SOURCE_FREEZE_REVISION_PARADOX",
       "PCF-009: the freeze declaring itself challengeable, which source bytes are not")
 def _(r):

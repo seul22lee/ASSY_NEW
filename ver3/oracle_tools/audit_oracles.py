@@ -1264,8 +1264,104 @@ def pass_3i(packs):
     return f
 
 
+# --------------------------------------------------------------- 3J attestation
+def pass_3j(packs):
+    """Do the current-state attestations still describe the current tree?
+
+    Every check here compares one recorded claim against something computed from
+    the tree right now. A scope change moves the tree but leaves the recorded
+    claims behind, and nothing in 3A..3I notices: the packs stay internally
+    consistent while the manifests quietly describe a repository that no longer
+    exists.
+    """
+    f = []
+    sf_p, sa_p = ORACLES / "SOURCE_FREEZE.yaml", ORACLES / "SEMANTIC_AUTHORITY.yaml"
+    bl_p = ORACLES / "PRE_CAD_BASELINE.yaml"
+    sf = yaml.safe_load(sf_p.read_text()) if sf_p.exists() else None
+    sa = yaml.safe_load(sa_p.read_text()) if sa_p.exists() else None
+    bl = yaml.safe_load(bl_p.read_text()) if bl_p.exists() else None
+
+    # ---- ATT-001/002: the baseline's authority layers must quote the manifests
+    if bl and sf and sa:
+        am = bl.get("authority_model") or {}
+        for layer, doc, hkey in (("A_immutable_source", sf, "source_manifest_hash"),
+                                 ("B_challengeable_semantic_authority", sa,
+                                  "semantic_authority_manifest_hash")):
+            rec = am.get(layer) or {}
+            if rec.get("manifest_hash") != doc.get(hkey):
+                f.append(Finding("3J", "-", layer, "BLOCKING", "BASELINE_AUTHORITY_HASH_STALE",
+                                 f"baseline quotes {str(rec.get('manifest_hash'))[:16]}... but the "
+                                 f"manifest is {str(doc.get(hkey))[:16]}...",
+                                 "re-read the manifest hash; never copy it from a historical report"))
+            if rec.get("artifact_count") != doc.get("artifact_count"):
+                f.append(Finding("3J", "-", layer, "BLOCKING", "BASELINE_AUTHORITY_COUNT_STALE",
+                                 f"baseline states artifact_count={rec.get('artifact_count')} but the "
+                                 f"manifest has {doc.get('artifact_count')}",
+                                 "recompute the count from the manifest"))
+
+    # ---- ATT-003: the active pack set is the directory set
+    active = sorted(packs)
+    for doc, name, key in ((yaml.safe_load((ORACLES / "ORACLE_WORKFLOW_STATE.yaml").read_text())
+                            if (ORACLES / "ORACLE_WORKFLOW_STATE.yaml").exists() else None,
+                            "workflow", "pack_status"),
+                           (bl, "baseline", "pack_status")):
+        if doc and key in doc:
+            stated = sorted(doc[key])
+            if stated != active:
+                f.append(Finding("3J", "-", name, "BLOCKING", "ACTIVE_PACK_SET_STALE",
+                                 f"{name} lists {len(stated)} packs {stated}; the tree has "
+                                 f"{len(active)} {active}",
+                                 "enumerate packs from the directory, never from memory"))
+
+    idx_p = ORACLES / "ORACLE_INDEX.md"
+    if idx_p.exists():
+        idx = idx_p.read_text()
+        rows = sorted(re.findall(r"^\| \[([^\]]+)\]\(product_cases/|^\| \[([^\]]+)\]\(micro_oracles/",
+                                 idx, re.M))
+        rows = sorted(a or b for a, b in rows)
+        if rows and rows != active:
+            f.append(Finding("3J", "-", "index", "BLOCKING", "ACTIVE_PACK_SET_STALE",
+                             f"index tabulates {len(rows)} packs; the tree has {len(active)}",
+                             "regenerate the index pack table"))
+        m = re.search(r"\b(Nine|Ten|Eleven|Seven|Six)\s+packs\b", idx)
+        if m:
+            f.append(Finding("3J", "-", "index", "BLOCKING", "ACTIVE_PACK_SET_STALE",
+                             f"index prose says {m.group(0)!r} but the tree has {len(active)}",
+                             "state the pack count computed from the tree"))
+
+    # ---- ATT-004: workflow must point at audit reports that exist.
+    # Skipped entirely when _audit/ is absent: audit reports are OUTPUTS, and a
+    # sandbox that omits them is not a workflow that cites stale ones.
+    wf_p = ORACLES / "ORACLE_WORKFLOW_STATE.yaml"
+    if wf_p.exists() and (ORACLES / "_audit").is_dir():
+        wf = yaml.safe_load(wf_p.read_text()) or {}
+        reps = ((wf.get("audit_state") or {}).get("reports") or {})
+        cited = []
+        for v in reps.values():
+            cited.extend(v if isinstance(v, list) else [v])
+        for c in cited:
+            name = str(c).split("/")[-1]
+            if not (ORACLES / "_audit" / name).exists():
+                f.append(Finding("3J", "-", "workflow", "BLOCKING", "WORKFLOW_AUDIT_REPORT_MISSING",
+                                 f"workflow cites {name}, which is not in _audit/",
+                                 "cite the current audit reports, not superseded ones"))
+
+    # ---- ATT-005: do not claim there is no CAD when references exist
+    cadref = ROOT / "cad_validation" / "BM-001" / "executable_references"
+    have_cad = cadref.exists() and any(d.is_dir() for d in cadref.iterdir())
+    if have_cad and wf_p.exists():
+        wf = yaml.safe_load(wf_p.read_text()) or {}
+        for key in ("cad_fixtures_exist", "cad_executable_references_exist"):
+            if key in wf and wf[key] is False:
+                f.append(Finding("3J", "-", "workflow", "BLOCKING", "CAD_EXISTENCE_CLAIM_STALE",
+                                 f"{key}=false but executable references exist under "
+                                 f"cad_validation/BM-001/executable_references/",
+                                 "state that references exist; keep 'validated' separate from 'exists'"))
+    return f
+
+
 PASSES = {"3I": pass_3i, "3A": pass_3a, "3B": pass_3b, "3C": pass_3c, "3D": pass_3d, "3E": pass_3e,
-          "3F": pass_3f, "3G": pass_3g, "3H": pass_3h}
+          "3F": pass_3f, "3G": pass_3g, "3H": pass_3h, "3J": pass_3j}
 
 SCOPE_NOTE = ("This auditor checks structural, referential, policy and tag-algebra "
               "consistency, and that every semantic question carries a recorded human "

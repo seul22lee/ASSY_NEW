@@ -1,22 +1,25 @@
 # Workflow state ONLY. Never Oracle evidence. Nothing here may be cited by a pack.
 schema_version: "0.6.0"
-updated_after: "final bounded pre-CAD correction (FPC-001..007)"
+updated_after: "delta-pack scope removal and attestation synchronization"
 
-current_pass: FINAL_PRE_CAD_CORRECTION_COMPLETE
+current_pass: POST_SCOPE_ATTESTATION_SYNCHRONIZED
 workflow_status: PRE_CAD_BASELINE_READY
-branch: ver3-oracle-phase1-review
-starting_commit: 0b8442b4a0d16897c441ae700a24062ac0f23944
+branch: ver3-cad-positive-reference-pilot
+active_oracle_scope_commit: 1530a397fac02bc423d15b28d8ff290d40eb72e8
 
 lock_created: false
 production_pipeline_code_exists: false
-cad_fixtures_exist: false
+cad_executable_references_exist: true     # EXE-BM001-01, EXE-BM001-02 under ver3/cad_validation/
+cad_demonstration_exists: false          # source-only Demonstration not authored
+cad_validation_finally_approved: false   # references are under revision after human review
+cad_failure_corpus_exists: false         # failure CAD is not part of the current plan
 files_outside_ver3_modified: false
 
 clean_audit_count: 1
 clean_audit_note: >
-  Reset to 1 by the correction pass, as required. The complete sequence - YAML
-  parse, per-pass 3A/3B/3C/3D/3E, canonical full audit, three shuffled audits and
-  the 45-case mutation suite - was re-run in full after the last file change.
+  Reset to 1 by the scope-removal pass. The complete sequence - YAML parse,
+  per-pass 3A..3J, canonical full audit, three shuffled audits and the 112-case
+  mutation suite - was re-run in full after the last file change.
 
 pack_status:
   BM-001:                       PRE_CAD_SEMANTIC_REVIEWED
@@ -70,14 +73,14 @@ semantic_reviews:
 
 audit_state:
   canonical: {BLOCKING: 0, MAJOR: 0}
-  per_pass: {"3A": 0, "3B": 0, "3C": 0, "3D": 0, "3E": 0, "3F": 0, "3G": 0, "3H": 0, "3I": 0}
+  per_pass: {"3A": 0, "3B": 0, "3C": 0, "3D": 0, "3E": 0, "3F": 0, "3G": 0, "3H": 0, "3I": 0, "3J": 0}
   shuffled_seeds: [20260802, 4177, 90210]
   shuffled_result: {BLOCKING: 0, MAJOR: 0}
-  mutation_tests: {see: ver3/oracles/_audit/PRECAD_V2_RESTART-mutation.json}
+  mutation_tests: {total: 112, defect_cases: 87, control_cases: 25, failed: 0, passed: 112}
   reports:
-    canonical: ver3/oracles/_audit/FINAL_PRECAD_RESTART-canonical.json
-    shuffled: [FINAL_PRECAD_RESTART-shuffled-20260802.json, FINAL_PRECAD_RESTART-shuffled-4177.json, FINAL_PRECAD_RESTART-shuffled-90210.json]
-    mutation: ver3/oracles/_audit/FINAL_PRECAD_RESTART-mutation.json
+    canonical: ver3/oracles/_audit/POST_SCOPE_ATTESTATION_RESTART-canonical.json
+    shuffled: [POST_SCOPE_ATTESTATION_RESTART-shuffled-20260802.json, POST_SCOPE_ATTESTATION_RESTART-shuffled-4177.json, POST_SCOPE_ATTESTATION_RESTART-shuffled-90210.json]
+    mutation: ver3/oracles/_audit/POST_SCOPE_ATTESTATION_RESTART-mutation.json
 
 unresolved_findings: []
 
@@ -117,7 +120,11 @@ outstanding_human_decisions:
   - "AMB-001-2-01 - blocking; BM-001-2 cannot be locked until a reading is selected."
   - "AMB-002-01, AMB-002-02 - non-blocking; each bounds one requirement's evaluation."
 
-next_authorized_phase: adversarial CAD validation
+next_authorized_phase: source-only Demonstration CAD for BM-001
+cad_plan:
+  A_source_only_demonstration: not started
+  B_admissible_executable_reference: two BM-001 references exist, under revision after human review
+  failure_cad: not part of the current positive-reference plan
 explicitly_not_next: [production implementation, final Oracle lock]
 next_executable_step: >
   Adversarial CAD validation against PRE_CAD_BASELINE.yaml. Every admissible

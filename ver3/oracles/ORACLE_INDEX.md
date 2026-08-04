@@ -19,10 +19,12 @@ CAD — which made the documented revision procedure impossible to execute
 
 The freeze covers **sources only** — it is not a semantic lock, and the source is
 not challengeable by CAD. The baseline covers the **conclusions**, and every one
-of them is challengeable. Next authorized phase: **adversarial CAD validation** —
-not production implementation and not a final Oracle lock.
+of them is challengeable. Next authorized phase: **positive CAD validation** —
+two kinds of model, A. source-only Demonstration CAD and B. admissible Executable
+Reference CAD. Failure CAD is not part of the current plan. Not production
+implementation and not a final Oracle lock.
 
-Nine packs. Each is a *semantic acceptance specification* — normative invariants,
+Eight packs. Each is a *semantic acceptance specification* — normative invariants,
 declared freedoms, decisions that must stay open, machine-checked physical and
 evidence fixtures, negative cases, evidence limits, and per-stage representation
 obligations. None is a golden output and none contains an expected design.
@@ -113,8 +115,8 @@ cite either.
 
 | Path | Role |
 |---|---|
-| `../oracle_tools/audit_oracles.py` | read-only auditor, passes 3A–3E; states its own scope |
-| `../oracle_tools/mutation_tests.py` | 45 reproducible cases — 38 injected defects, 7 controls |
+| `../oracle_tools/audit_oracles.py` | read-only auditor, passes 3A–3J; states its own scope |
+| `../oracle_tools/mutation_tests.py` | 112 reproducible cases — 87 injected defects, 25 controls |
 
 The auditor never runs as part of any pipeline. Production synthesis stages
 S01–S12 **must not read these files**; test runners, evaluators and audit tools
