@@ -1,0 +1,86 @@
+{
+  "does_not_establish": "insertion force, ease of assembly or process suitability; those are NOT_VERIFIED (UNR-BM-001-009)",
+  "establishes": "an unobstructed insertion ordering exists",
+  "method": "Each discrete part is swept along its declared straight-line insertion direction and the boolean common with every already-placed body is measured at each sample.",
+  "name": "assembly process check",
+  "status": "PASS",
+  "step": 7,
+  "steps": [
+    {
+      "body": "BODY-ENCLOSURE",
+      "kind": "base",
+      "note": "fixed reference body; nothing inserted",
+      "status": "PASS",
+      "step_id": "ASM-01"
+    },
+    {
+      "approach_distance_mm": 40.0,
+      "body": "BODY-CLOSURE",
+      "direction": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "kind": "linear insertion",
+      "max_common_volume_at_offset_mm": null,
+      "max_common_volume_mm3": 0.0,
+      "placed_before": [
+        "BODY-ENCLOSURE"
+      ],
+      "samples": 61,
+      "seated_min_distance_to_mm": {
+        "BODY-ENCLOSURE": 0.0
+      },
+      "status": "PASS",
+      "step_id": "ASM-02"
+    },
+    {
+      "approach_distance_mm": 30.0,
+      "body": "BODY-PIN",
+      "direction": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "linear insertion",
+      "max_common_volume_at_offset_mm": null,
+      "max_common_volume_mm3": 0.0,
+      "placed_before": [
+        "BODY-ENCLOSURE",
+        "BODY-CLOSURE"
+      ],
+      "samples": 61,
+      "seated_min_distance_to_mm": {
+        "BODY-CLOSURE": 0.1,
+        "BODY-ENCLOSURE": 0.0
+      },
+      "status": "PASS",
+      "step_id": "ASM-03"
+    },
+    {
+      "approach_distance_mm": 30.0,
+      "body": "BODY-BOLT",
+      "direction": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "kind": "linear insertion",
+      "max_common_volume_at_offset_mm": null,
+      "max_common_volume_mm3": 0.0,
+      "placed_before": [
+        "BODY-ENCLOSURE",
+        "BODY-CLOSURE",
+        "BODY-PIN"
+      ],
+      "samples": 61,
+      "seated_min_distance_to_mm": {
+        "BODY-CLOSURE": 0.1,
+        "BODY-ENCLOSURE": 0.0,
+        "BODY-PIN": 68.213958726
+      },
+      "status": "PASS",
+      "step_id": "ASM-04"
+    }
+  ]
+}

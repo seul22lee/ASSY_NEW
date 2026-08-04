@@ -1,0 +1,82 @@
+reference_id: EXE-BM001-01
+schema_version: 0.1.0
+oracle_commit: 83fc12d46ad8c5fad36afcfe5b6e916822a41118
+
+status: >
+  This file records what the reference EXPECTS the Oracle to conclude, written
+  before the predicate evaluator ran and left unchanged afterwards where it was
+  right. It exists so that a surprising result is visible as a surprise rather
+  than being absorbed silently.
+
+expectation_source: BM-001/reviews/REFERENCE_SELECTION.yaml, frozen before geometry
+
+expected_and_observed:
+  - invariant: NRM-BM-001-001
+    expected: PASS
+    observed: PASS
+  - invariant: NRM-BM-001-002
+    expected: PASS
+    observed: PASS
+  - invariant: NRM-BM-001-003
+    expected: PASS
+    observed: PASS
+  - invariant: NRM-BM-001-004
+    expected: PASS
+    observed: PASS
+  - invariant: NRM-BM-001-005
+    expected: PASS
+    observed: PASS
+  - invariant: NRM-BM-001-006
+    expected: PASS for engagement and release; holding force NOT_VERIFIED
+    observed: NOT_EVALUABLE
+    divergence: true
+    reading: >
+      The frozen selection expected the geometric clauses to carry the invariant.
+      They do not. The first clause asks whether retention holds against the
+      disturbance THE DESIGN DECLARES, and this design declares none, so the
+      predicate has nothing to apply rather than something it cannot measure.
+      That is NOT_EVALUABLE with reason REPRESENTATION_INCOMPLETE, not
+      NOT_VERIFIED. The distinction matters: NOT_VERIFIED would say the evidence
+      is missing, while what is actually missing is the declaration. Blocked on
+      UNR-BM-001-001.
+  - invariant: NRM-BM-001-007
+    expected: PASS geometrically; durability NOT_VERIFIED
+    observed: PASS with the durability clause NOT_VERIFIED
+  - invariant: NRM-BM-001-008
+    expected: PASS
+    observed: PASS
+  - invariant: NRM-BM-001-009
+    expected: PASS
+    observed: PASS
+  - invariant: NRM-BM-001-010
+    expected: PASS
+    observed: PASS
+    note: >
+      Passed only after the axis was moved. As first parameterized the design
+      could not be assembled at all; see interactions.yaml INT-14 history.
+  - invariant: NRM-BM-001-011
+    expected: PASS for existence; adequacy NOT_VERIFIED
+    observed: PASS with the adequacy clause NOT_VERIFIED
+  - invariant: NRM-BM-001-012
+    expected: >
+      PASS only if the determinant is shown to CAUSE the termination rather than
+      merely to exist
+    observed: PASS
+    how: >
+      HSD-006 branch A. Common volume is zero at every probed angle up to and
+      including 110.00 deg and positive at every angle beyond it, so the stop
+      face is what ends the rotation.
+  - invariant: NRM-BM-001-013
+    expected: PASS vacuously - no force window is cited
+    observed: PASS
+    how: keyword scan over the five authored contract files returned zero hits
+
+oracle_counterexample_candidates: []
+
+no_oracle_file_was_modified: true
+weakening_check: >
+  No CAD was weakened to obtain a PASS. One geometric change was made during
+  validation - axis_y 84.0 to 86.0 - and it was made because step 7 proved the
+  design could not be assembled, which is a defect in the CAD. The change made
+  the model harder to satisfy, not easier: it removed a clearance feature and
+  left the plate to clear the knuckle on its own.

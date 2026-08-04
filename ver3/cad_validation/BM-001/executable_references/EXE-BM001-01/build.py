@@ -100,7 +100,7 @@ def build_enclosure(p: Dict[str, float]) -> cq.Shape:
     # Knuckle segments and the webs tying them to the rear wall.
     for x0, x1 in knuckle_bands(p)["enclosure"]:
         shell = shell.fuse(_cyl_x(x0, x1, ay, az, kr))
-        shell = shell.fuse(_box(x0, x1, by - 0.5, ay, 20.0, az))
+        shell = shell.fuse(_box(x0, x1, by - p["web_gap"], ay, 20.0, az))
 
     # Bores, and the counterbore that seats the pin head.
     for x0, x1 in knuckle_bands(p)["enclosure"]:
@@ -116,12 +116,10 @@ def build_closure(p: Dict[str, float]) -> cq.Shape:
     bx, bz, ay, az, kr = p["box_x"], p["box_z"], p["axis_y"], p["axis_z"], p["knuckle_r"]
     pt = p["plate_t"]
 
-    plate = _box(0, bx, 0, p["plate_rear_y"], bz, bz + pt)
-    # Cylindrical relief about the closure axis: everything the plate keeps then
-    # stands clear of the enclosure knuckle envelope at every rotation angle,
-    # because the relief is concentric with the rotation.
-    plate = plate.cut(_cyl_x(-1.0, bx + 1.0, ay, az, p["relief_r"]))
-    body = plate
+    # The plate needs no relief: the axis stands knuckle_r behind the rear outer
+    # face, so the enclosure knuckle envelope never reaches forward of y = box_y
+    # and the plate's rear edge stops short of it by web_gap.
+    body = _box(0, bx, 0, p["plate_rear_y"], bz, bz + pt)
 
     for x0, x1 in knuckle_bands(p)["closure"]:
         body = body.fuse(_cyl_x(x0, x1, ay, az, kr))

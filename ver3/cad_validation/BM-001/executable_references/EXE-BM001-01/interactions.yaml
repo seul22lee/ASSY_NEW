@@ -128,14 +128,22 @@ interactions:
 
   - id: INT-14
     bodies: [BODY-CLOSURE, BODY-ENCLOSURE]
-    features: [FEA-C-RELIEF, FEA-E-KNUCKLE-2]
+    features: [FEA-C-PLATE-REAR, FEA-E-WEB]
     type: DECLARED_CLEARANCE
-    nominal_clearance_mm: 0.2
-    active: ALL_STATES
+    nominal_clearance_mm: 0.5
+    active: [S_CLOSED_RETAINED, S_CLOSED_RELEASED]
     role: >
-      The relief is concentric with the rotation axis, so this clearance is
-      invariant under the opening rotation. It is what allows a full-width plate
-      to pass the enclosure knuckles without a notch.
+      Two planes of constant y, so this clearance is invariant under the
+      straight-line insertion that installs the closure. It opens up under the
+      rotation, because the plate rotates away from the webs.
+    history: >
+      This pair originally carried a cylindrical relief cut in the plate,
+      concentric with the axis, at 0.2 clearance. Step 7 showed the resulting
+      design could not be assembled: a concentric relief only aligns with the
+      knuckle in the seated position, so no straight-line insertion existed. The
+      axis was moved back to knuckle_r behind the rear face, which puts the
+      knuckle envelope entirely behind that face and makes the relief
+      unnecessary.
 
   - id: INT-15
     bodies: [BODY-BOLT, BODY-CLOSURE]

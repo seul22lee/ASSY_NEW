@@ -1,0 +1,486 @@
+{
+  "invariants": [
+    {
+      "clauses": [
+        {
+          "clause": "a closed state exists",
+          "measured": "S_CLOSED_RETAINED and S_CLOSED_RELEASED are realized configurations",
+          "status": "PASS"
+        },
+        {
+          "clause": "an open state exists",
+          "measured": "S_OPEN is realized",
+          "status": "PASS"
+        },
+        {
+          "clause": "a motion connects them in both directions",
+          "measured": "M1_RELEASE and M2_OPEN traversed over 43 and 137 samples with max common volume 0.000e+00 and 0.000e+00 mm^3",
+          "reversibility": "the path is a one-parameter family of rigid transforms; traversal in the reverse direction visits the same configurations",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/motion_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-001",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "each participating body carries engagement geometry",
+          "measured": "bores on BODY-CLOSURE and BODY-ENCLOSURE both engaged by BODY-PIN; INT-01 measured 0.1000 mm, INT-04 measured 0.1000 mm",
+          "status": "PASS"
+        },
+        {
+          "clause": "guidance or support present where the concept depends on it",
+          "measured": "the concept is a revolute closure: it depends on the axis (INT-01, INT-04, INT-06) and on the closed-state seat (INT-07, INT-13). All five measured as declared.",
+          "status": "PASS"
+        },
+        {
+          "clause": "every declared intended interaction is physically coherent",
+          "measured": "12 declared interactions, all measured inside their declared regions",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/interaction_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-002",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "in the open state the closure does not obstruct the declared usable access",
+          "measured": "intruding volume into the declared access region: {'BODY-BOLT': 0.0, 'BODY-CLOSURE': 0.0, 'BODY-PIN': 0.0}",
+          "status": "PASS"
+        },
+        {
+          "clause": "along the transition, no volume shared outside declared interaction regions",
+          "measured": "max common volume over all pairs and all samples: 0.000e+00 mm^3 (threshold 1.0e-06)",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/motion_report.json",
+        "validation/interaction_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-003",
+      "notes": "The rule applied is no UNDECLARED volumetric overlap. Declared contacts reach zero distance and that is correct, not a defect.",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "material content conserved across states",
+          "measured": "per-body volume identical across all three states to within 1e-6 mm^3",
+          "status": "PASS"
+        },
+        {
+          "clause": "no body's extent altered to achieve clearance",
+          "measured": "all four bodies are rigid; every state is a rigid transform of the as-built solid, so no shape change is possible by construction",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-004",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "the design declares a discrete terminal open pose",
+          "measured": "poses.yaml terminal_condition, kind DISCRETE_TERMINAL_POSE",
+          "status": "DECLARED"
+        },
+        {
+          "clause": "that pose is produced by a realized physical condition, not a model limit",
+          "measured": "INT-09 face pair in contact at 110.0 deg (min distance 0.000000 mm); common volume is <= 1.0e-06 mm^3 at every probed angle below the terminal angle and > 0 at every probed angle above it",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/motion_report.json#terminal_condition_causal_probe",
+        "validation/interaction_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-005",
+      "notes": "The stop face is constructed in the open configuration and rotated back, so the terminal angle is a consequence of the geometry rather than a limit imposed on the model.",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-001-001"
+      ],
+      "clauses": [
+        {
+          "clause": "holds the closure in the closed state against the declared disturbance",
+          "measured": "the design declares no disturbance magnitude, so the predicate has no quantity to apply. Even if one were declared, this toolchain computes no forces.",
+          "reason": "REPRESENTATION_INCOMPLETE",
+          "status": "NOT_EVALUABLE"
+        },
+        {
+          "clause": "released by a deliberate user action",
+          "measured": "BODY-BOLT lifts 10.0 mm; the engagement region is empty of bolt material afterwards (disengages_on_release=True), and M2_OPEN is not traversable before that lift",
+          "status": "PASS"
+        },
+        {
+          "clause": "engagement localized on both participating bodies",
+          "measured": "both bodies carry material in the declared engagement region; engagement depth below the rim is 8.0 mm",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json",
+        "validation/interaction_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-006",
+      "notes": "Two clauses PASS on measurement. The invariant as a whole cannot be discharged because its first clause needs a quantity the design does not declare. NOT_EVALUABLE is not FAIL and is not a defect in the geometry.",
+      "status": "NOT_EVALUABLE"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-001-007"
+      ],
+      "clauses": [
+        {
+          "clause": "close-engage, release, close-engage-again completes",
+          "measured": "five-configuration cycle traversed; engaged at start and at end",
+          "status": "PASS"
+        },
+        {
+          "clause": "every participating feature retains the geometry its role depends on",
+          "measured": "all three body volumes identical at cycle start and end to 1e-6 mm^3",
+          "status": "PASS"
+        },
+        {
+          "clause": "no feature consumed or permanently disabled by one cycle",
+          "measured": "rigid bodies under rigid transforms; no geometry is modified",
+          "status": "PASS"
+        },
+        {
+          "clause": "durability over a cycle count",
+          "reason": "no cycle count is stated and wear is not modelled",
+          "status": "NOT_VERIFIED"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-007",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "a realized access path reaches the actuation feature",
+          "measured": "a 80 mm cylinder of radius 12.0 mm rising from the knob top face is clear of all four bodies in the retained state",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-008",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "an interior cavity exists",
+          "measured": "free interior volume 349534.5 mm^3",
+          "status": "PASS"
+        },
+        {
+          "clause": "reachable through the aperture in the open state",
+          "measured": "the aperture prism is unobstructed at S_OPEN",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-009",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "each discrete part reaches its assembled position without passing through already-placed material",
+          "measured": "3 insertion steps swept; max common volume 0.000e+00 mm^3",
+          "status": "PASS"
+        },
+        {
+          "clause": "parts formed together or permanently joined declare that",
+          "measured": "all four bodies are installed_as DISCRETE; none is co-formed or permanently joined",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/assembly_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-010",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-001-001"
+      ],
+      "clauses": [
+        {
+          "clause": "for each interface that carries load, a path exists to a reaction site",
+          "measured": "every body is connected to BODY-ENCLOSURE through declared load-bearing interfaces: BODY-BOLT, BODY-CLOSURE, BODY-ENCLOSURE, BODY-PIN",
+          "status": "PASS"
+        },
+        {
+          "clause": "adequacy of the path for a given magnitude",
+          "reason": "quantitative; held at UNR-BM-001-001. The invariant's own exclusion says existence is structural and sufficiency is not required here.",
+          "status": "NOT_VERIFIED"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json"
+      ],
+      "invariant_id": "NRM-BM-001-011",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "the criterion rests on direct causal evidence (HSD-006 branch A)",
+          "measured": "the feature's geometry exists (INT-09 declared and measured); contact occurs at the relevant configuration (min distance 0.000000 mm at 110.0 deg); and the behaviour is caused by it (common volume 0 below the terminal angle, positive above it)",
+          "status": "PASS"
+        },
+        {
+          "clause": "branch B discriminating evidence",
+          "reason": "branch A and branch B are alternatives, not a sequence. A control is not mandatory once branch A is satisfied. Producing one would require a variant model with the stop removed, which this run does not create.",
+          "status": "NOT_PROVIDED"
+        }
+      ],
+      "evidence": [
+        "validation/motion_report.json#terminal_condition_causal_probe"
+      ],
+      "invariant_id": "NRM-BM-001-012",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "no force window is cited as an achieved retention property",
+          "measured": "keyword scan over the five authored contract files returned 0 candidate lines, all of which either declare a quantity absent or record it as NOT_VERIFIED. No force value is asserted as an outcome anywhere in this reference.",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json#force_window_scan"
+      ],
+      "invariant_id": "NRM-BM-001-013",
+      "notes": "Satisfied vacuously: the reference cites no force window at all.",
+      "status": "PASS"
+    }
+  ],
+  "name": "Oracle predicate evaluation",
+  "oracle_commit": "83fc12d46ad8c5fad36afcfe5b6e916822a41118",
+  "oracle_files_read_only": true,
+  "scope_warning": "These are GEOMETRIC and KINEMATIC results. They do not establish that the rank-1 source is satisfied. See CAD_VALIDATION_PLAN.yaml claim_fidelity.",
+  "status": "PASS",
+  "status_vocabulary": {
+    "FAIL": "evidence contradicts the claim",
+    "NOT_EVALUABLE": "the design does not record what the predicate needs",
+    "NOT_VERIFIED": "no evidence of adequate fidelity exists",
+    "PASS": "computed evidence supports the claim",
+    "UNSUPPORTED": "the toolchain cannot evaluate it"
+  },
+  "step": 8,
+  "summary": {
+    "NOT_EVALUABLE": 1,
+    "PASS": 12
+  },
+  "supporting_measurements": {
+    "actuator_access": {
+      "intruding_volume_mm3": {
+        "BODY-BOLT": 0.0,
+        "BODY-CLOSURE": 0.0,
+        "BODY-ENCLOSURE": 0.0,
+        "BODY-PIN": 0.0
+      },
+      "path": {
+        "axis": [
+          60.0,
+          9.0
+        ],
+        "from_z": 69.0,
+        "length_mm": 80.0,
+        "radius_mm": 12.0,
+        "terminates_at": "FEA-B-KNOB top face"
+      },
+      "path_clear": true
+    },
+    "cavity": {
+      "exists": true,
+      "free_interior_volume_mm3": 349534.48138,
+      "method": "cavity prism minus the enclosure solid",
+      "reachable_through_aperture_at_open": true
+    },
+    "cycle": {
+      "note": "geometric repeatability only; wear and cycle count are not modelled",
+      "participating_features_unchanged": true,
+      "re_engaged_at_end": true,
+      "sequence": [
+        {
+          "bolt_volume_mm3": 2513.274123,
+          "closure_volume_mm3": 43598.651223,
+          "enclosure_volume_mm3": 94247.266221,
+          "engaged": true,
+          "index": 0,
+          "socket_min_distance_mm": 0.0,
+          "state": "S_CLOSED_RETAINED"
+        },
+        {
+          "bolt_volume_mm3": 2513.274123,
+          "closure_volume_mm3": 43598.651223,
+          "enclosure_volume_mm3": 94247.266221,
+          "engaged": false,
+          "index": 1,
+          "socket_min_distance_mm": 2.002498439,
+          "state": "S_CLOSED_RELEASED"
+        },
+        {
+          "bolt_volume_mm3": 2513.274123,
+          "closure_volume_mm3": 43598.651223,
+          "enclosure_volume_mm3": 94247.266221,
+          "engaged": false,
+          "index": 2,
+          "socket_min_distance_mm": 66.732386184,
+          "state": "S_OPEN"
+        },
+        {
+          "bolt_volume_mm3": 2513.274123,
+          "closure_volume_mm3": 43598.651223,
+          "enclosure_volume_mm3": 94247.266221,
+          "engaged": false,
+          "index": 3,
+          "socket_min_distance_mm": 2.002498439,
+          "state": "S_CLOSED_RELEASED"
+        },
+        {
+          "bolt_volume_mm3": 2513.274123,
+          "closure_volume_mm3": 43598.651223,
+          "enclosure_volume_mm3": 94247.266221,
+          "engaged": true,
+          "index": 4,
+          "socket_min_distance_mm": 0.0,
+          "state": "S_CLOSED_RETAINED"
+        }
+      ]
+    },
+    "extent": {
+      "as_built_mm3": {
+        "BODY-BOLT": 2513.274123,
+        "BODY-CLOSURE": 43598.651223,
+        "BODY-ENCLOSURE": 94247.266221,
+        "BODY-PIN": 1050.234424
+      },
+      "conserved": true,
+      "per_state_mm3": {
+        "S_CLOSED_RELEASED": {
+          "BODY-BOLT": 2513.274123,
+          "BODY-CLOSURE": 43598.651223,
+          "BODY-ENCLOSURE": 94247.266221,
+          "BODY-PIN": 1050.234424
+        },
+        "S_CLOSED_RETAINED": {
+          "BODY-BOLT": 2513.274123,
+          "BODY-CLOSURE": 43598.651223,
+          "BODY-ENCLOSURE": 94247.266221,
+          "BODY-PIN": 1050.234424
+        },
+        "S_OPEN": {
+          "BODY-BOLT": 2513.274123,
+          "BODY-CLOSURE": 43598.651223,
+          "BODY-ENCLOSURE": 94247.266221,
+          "BODY-PIN": 1050.234424
+        }
+      },
+      "tolerance_mm3": 1e-06
+    },
+    "force_window_scan": {
+      "any_force_window_cited_as_achieved": false,
+      "hits": [],
+      "note": "Matches are inspected below. A line that says a force is NOT verified is not a citation of an achieved property.",
+      "pattern": "\\b(newton|newtons|\\d+\\s*N\\b|kgf|lbf|torque|force window|holding force|preload|retention force)\\b"
+    },
+    "load_path": {
+      "adequacy_evaluated": false,
+      "all_bodies_connected": true,
+      "bodies_connected_to_enclosure": [
+        "BODY-BOLT",
+        "BODY-CLOSURE",
+        "BODY-ENCLOSURE",
+        "BODY-PIN"
+      ],
+      "load_bearing_edges": [
+        [
+          "BODY-BOLT",
+          "BODY-CLOSURE"
+        ],
+        [
+          "BODY-BOLT",
+          "BODY-ENCLOSURE"
+        ],
+        [
+          "BODY-CLOSURE",
+          "BODY-ENCLOSURE"
+        ],
+        [
+          "BODY-CLOSURE",
+          "BODY-PIN"
+        ],
+        [
+          "BODY-ENCLOSURE",
+          "BODY-PIN"
+        ]
+      ]
+    },
+    "open_access": {
+      "declared_region": {
+        "what": "prism over the cavity aperture, 100 mm tall",
+        "x": [
+          3.0,
+          117.0
+        ],
+        "y": [
+          3.0,
+          77.0
+        ],
+        "z": [
+          45.0,
+          145.0
+        ]
+      },
+      "intruding_volume_mm3": {
+        "BODY-BOLT": 0.0,
+        "BODY-CLOSURE": 0.0,
+        "BODY-PIN": 0.0
+      },
+      "min_distance_to_region_mm": {
+        "BODY-BOLT": 31.1483926,
+        "BODY-CLOSURE": 3.0,
+        "BODY-PIN": 5.5
+      },
+      "unobstructed": true
+    },
+    "retention": {
+      "declared_disturbance_magnitude": null,
+      "disengages_on_release": true,
+      "engaged_bolt_volume_in_region_mm3": 402.12386,
+      "engagement_depth_below_rim_mm": 8.0,
+      "holding_capacity_evaluated": false,
+      "material_present_on_both_bodies_in_engagement_region": true,
+      "release_action": "lift BODY-BOLT 10.0 mm; deliberate, single-body, reversible",
+      "released_bolt_volume_in_region_mm3": 0.0
+    }
+  }
+}

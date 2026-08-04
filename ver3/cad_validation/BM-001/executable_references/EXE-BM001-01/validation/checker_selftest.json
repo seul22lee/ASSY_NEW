@@ -1,0 +1,69 @@
+{
+  "controls": [
+    {
+      "check_under_test": "undeclared volumetric overlap (step 5, step 6)",
+      "control_id": "CTL-01",
+      "detected": true,
+      "injected_defect": "closure driven 0.5 mm into the enclosure",
+      "measured": {
+        "common_volume_mm3": 615.194914,
+        "threshold_mm3": 1e-06
+      }
+    },
+    {
+      "check_under_test": "INT-07 DECLARED_CONTACT",
+      "control_id": "CTL-02",
+      "detected": true,
+      "injected_defect": "closure lifted 0.5 mm off the rim",
+      "measured": {
+        "contact_tol_mm": 0.02,
+        "min_distance_mm": 0.5
+      }
+    },
+    {
+      "check_under_test": "INT-01 DECLARED_CLEARANCE",
+      "control_id": "CTL-03",
+      "detected": true,
+      "injected_defect": "knuckle bore opened from 4.2 to 4.6 mm",
+      "measured": {
+        "declared_nominal_mm": 0.1,
+        "min_distance_mm": 0.3
+      }
+    },
+    {
+      "check_under_test": "undeclared volumetric overlap in the closed state",
+      "control_id": "CTL-04",
+      "detected": true,
+      "injected_defect": "axis_y returned to 84.0, the value step 7 rejected",
+      "measured": {
+        "common_volume_mm3": 59.841872,
+        "note": "at 84.0 the knuckle envelope reaches in front of the plate's rear edge"
+      }
+    },
+    {
+      "check_under_test": "assembly path sweep (step 7)",
+      "control_id": "CTL-05",
+      "detected": true,
+      "injected_defect": "closure inserted along +y instead of -z",
+      "measured": {
+        "max_common_volume_mm3": 1988.791933
+      }
+    },
+    {
+      "check_under_test": "terminal-condition causal probe",
+      "control_id": "CTL-06",
+      "detected": true,
+      "injected_defect": "closure rotated 0.05 deg past the terminal angle",
+      "measured": {
+        "common_volume_below_mm3": 0.0,
+        "common_volume_beyond_mm3": 1.305762
+      }
+    }
+  ],
+  "controls_detected": 6,
+  "controls_run": 6,
+  "name": "checker self-test",
+  "purpose": "Establishes that the checks in this chain can fail. Each control injects a defect in memory and passes only if the check reports it. No perturbed model is exported.",
+  "status": "PASS",
+  "undetected": []
+}

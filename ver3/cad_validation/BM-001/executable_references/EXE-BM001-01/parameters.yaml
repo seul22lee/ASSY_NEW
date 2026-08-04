@@ -36,10 +36,14 @@ parameters:
 
   # ------------------------------------------------------------- closure axis
   - name: axis_y
-    value: 84.0
+    value: 86.0
     purpose: >
-      depth of the closure rotation axis. Placed 4 mm behind the rear outer face
-      so that the rotating knuckle envelope never enters the enclosure.
+      depth of the closure rotation axis. Placed knuckle_r behind the rear outer
+      face, so the knuckle envelope is tangent to that face and never reaches
+      forward of it. That is what lets the closure be inserted by a single
+      straight translation: at 84.0 the knuckle envelope reached y = 78, one
+      millimetre in front of the plate's rear edge, and the plate could only
+      clear it in the seated position. The assembly check found this.
     range: [82.0, 92.0]
   - name: axis_z
     value: 50.0
@@ -108,13 +112,14 @@ parameters:
       rear edge of the closure plate, 1 mm short of the rear outer face so the
       plate never has to clear the enclosure knuckle webs.
     range: [70.0, 80.0]
-  - name: relief_r
-    value: 6.2
+  - name: web_gap
+    value: 0.5
     purpose: >
-      radius of the cylindrical relief cut into the closure plate about the
-      closure axis. knuckle_r + 0.2, so every point of the plate stands 0.2
-      clear of the enclosure knuckle envelope at every rotation angle.
-    range: [4.1, 12.5]
+      clearance between the closure plate's rear face and the front face of the
+      enclosure knuckle webs. Invariant under the opening rotation because the
+      plate rotates away from the webs, and invariant under the insertion
+      translation because both faces are planes of constant y.
+    range: [0.2, 3.0]
   - name: web_front_y
     value: 77.0
     purpose: front edge of the closure web joining plate to knuckle
