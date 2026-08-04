@@ -1,0 +1,98 @@
+schema_version: 0.1.0
+what_this_is: >
+  Decisions supplied by a human after reviewing the first BM-001 executable
+  reference pilot. These are recorded verbatim in substance and are the authority
+  for the revisions that follow. They are NOT independent approval of the revised
+  geometry - that review has not happened. See HUMAN_REVIEW_STATUS.yaml.
+recorded_against_pilot_commit: 94f3128bd74dc19f89679bbe2d9d817b5a54e42c
+active_oracle_scope_commit: 1530a397fac02bc423d15b28d8ff290d40eb72e8
+
+decisions:
+
+  # ------------------------------------------------------------ EXE-BM001-01
+  - id: HCR-BM001-001
+    reference: EXE-BM001-01
+    subject: rear stop-arm projection
+    decision: APPROVE
+    consequence: >
+      The stop arm and the terminal open pose it produces are retained unchanged.
+      The projection behind the enclosure is accepted as the cost of a realized
+      110 degree stop.
+
+  - id: HCR-BM001-002
+    reference: EXE-BM001-01
+    subject: existing one-direction hinge-pin axial retention
+    decision: REJECT_CURRENT_GEOMETRY
+    reason: >
+      The present pin head prevents axial removal in only one direction. The
+      opposite end has no geometric keeper and can walk out axially.
+    required_correction: >
+      Use a hinge pin with an enlarged head at the insertion side and an integral
+      snap barb at the opposite side.
+    required_final_relation:
+      - the head blocks axial removal in one direction
+      - the recovered snap-barb shoulder blocks removal in the other direction
+      - assembly occurs by a declared compliant snap-in process
+    supersedes: manifest.yaml LIM-01, which recorded the one-direction limitation as accepted
+    requested_views:
+      - closure-knuckle and pin section
+      - enclosure-knuckle and pin section
+      - longitudinal section through pin head, alternating knuckles and snap barb
+    view_requirements:
+      - orthographic
+      - viewed normal to the cutting plane
+      - cut section only
+      - no perspective
+      - no isometric inset
+      - no general front/side/top product view in the human-review packet
+
+  # ------------------------------------------------------------ EXE-BM001-02
+  - id: HCR-BM001-003
+    reference: EXE-BM001-02
+    subject: 84 mm usable access from a 90 mm aperture
+    decision: APPROVE
+    consequence: >
+      The declared usable opening stays at 84 mm and must not be narrowed to make
+      the revised geometry easier.
+
+  - id: HCR-BM001-004
+    reference: EXE-BM001-02
+    subject: full-open cover removability
+    decision: REJECT_CURRENT_GEOMETRY
+    required_correction: The cover must remain captive at full open.
+    supersedes: manifest.yaml LIM-01, which declared the cover liftable at full open
+
+  - id: HCR-BM001-005
+    reference: EXE-BM001-02
+    subject: separate quarter-turn cam
+    decision: REJECT_CURRENT_GEOMETRY
+    required_correction: >
+      No separate cam or retention component that the user must remove, place
+      aside or separately manage.
+
+  - id: HCR-BM001-006
+    reference: EXE-BM001-02
+    subject: cam without an orientation-retention feature
+    decision: REJECT_CURRENT_GEOMETRY
+    reason: >
+      Nothing held the cam in its locked orientation; this was recorded as
+      LIM-03 and is not accepted.
+
+  - id: HCR-BM001-007
+    reference: EXE-BM001-02
+    subject: replacement design direction
+    decision: DIRECTED
+    required_topology:
+      - guided captive sliding cover
+      - integrated snap-in captive assembly retention
+      - integrated releasable closed-state snap latch
+    constraints:
+      - no separate cam, key or removable latch component may remain
+      - cover captive at 0, 10, 40, 70 and 84 mm
+      - ordinary upward translation blocked at 84 mm
+
+final_independent_human_review: PENDING
+note_on_status: >
+  These decisions authorize the revisions. They do not approve their result. No
+  person has seen the revised geometry or the new section views, and nothing
+  downstream may describe the revised references as human-approved.

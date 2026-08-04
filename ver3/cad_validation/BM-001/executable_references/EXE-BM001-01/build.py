@@ -140,15 +140,90 @@ def build_closure(p: Dict[str, float]) -> cq.Shape:
     return body
 
 
-def build_pin(p: Dict[str, float]) -> cq.Shape:
+def _cone_x(x0, x1, y, z, r0, r1) -> cq.Shape:
+    """Truncated cone with its axis along +X."""
+    return cq.Solid.makeCone(r0, r1, x1 - x0, pnt=cq.Vector(x0, y, z), dir=cq.Vector(1, 0, 0))
+
+
+def build_pin(p: Dict[str, float], compressed: bool = False) -> cq.Shape:
+    """Headed hinge pin with two integral cantilever snap arms.
+
+    Axial retention is bilateral and both directions are geometric:
+
+      * toward the barb end - FEA-P-SHOULDER bears on the counterbore floor
+      * toward the head end - FEA-P-BARB-SHOULDER bears on the far face of the
+                              last enclosure knuckle
+
+    The arms are CANTILEVER BEAMS, not a split cone. A cone split by one slot
+    compresses only across the slot: its extent perpendicular to the slot is
+    unchanged, so it still cannot enter a round bore. Two beams carrying lugs
+    do fit, because each beam is narrow in the direction it does not move.
+
+    `compressed=True` returns the declared compliant configuration used for the
+    insertion check - the same two arms, deflected inward about their roots. It
+    is a configuration of this pin, never a separate part, and never exported.
+    """
+    ay, az = p["axis_y"], p["axis_z"]
     bands = knuckle_bands(p)["enclosure"]
     kx0, kxN = bands[0][0], bands[-1][1]
     head_x0 = kx0 + p["pin_cbore_depth"] - p["pin_head_len"]
     shaft_x0 = kx0 + p["pin_cbore_depth"]
-    shaft_x1 = kxN - p["pin_end_margin"]
-    head = _cyl_x(head_x0, shaft_x0, p["axis_y"], p["axis_z"], p["pin_head_d"] / 2.0)
-    shaft = _cyl_x(shaft_x0, shaft_x1, p["axis_y"], p["axis_z"], p["pin_d"] / 2.0)
-    return head.fuse(shaft)
+    root = p["barb_slot_root_x"]
+    shoulder_x = kxN + p["barb_shoulder_gap"]
+    tip_x = shoulder_x + p["barb_len"]
+    r_beam = p["pin_d"] / 2.0 - p["barb_slot_w"] / 2.0      # beam outer radius
+    r_lug = p["barb_d"] / 2.0
+    hw = p["barb_beam_w"] / 2.0                            # beam half-width in z
+    defl = p["barb_deflection"]
+
+    head = _cyl_x(head_x0, shaft_x0, ay, az, p["pin_head_d"] / 2.0)
+    shaft = _cyl_x(shaft_x0, root, ay, az, p["pin_d"] / 2.0)
+    core = head.fuse(shaft)
+
+    arms = []
+    for sign in (+1.0, -1.0):
+        def yspan(a, b):
+            lo, hi = sorted((ay + sign * a, ay + sign * b))
+            return lo, hi
+        y0, y1 = yspan(r_beam - p["barb_beam_t"], r_beam)
+        beam = _box(root, tip_x, y0, y1, az - hw, az + hw)
+        ly0, ly1 = yspan(r_beam - p["barb_beam_t"], r_lug)
+        lug = _box(shoulder_x, shoulder_x + p["barb_lug_len"], ly0, ly1, az - hw, az + hw)
+        # lead-in: taper the lug back to the beam line over the remaining length
+        ramp = cq.Solid.makeWedge(
+            p["barb_lug_len"], abs(ly1 - ly0), 2 * hw, 0.0, 0.0,
+            p["barb_lug_len"], abs(ly1 - ly0)) if False else None
+        arm = beam.fuse(lug)
+        # chamfer the leading face of the lug into a lead-in ramp
+        cut = _box(shoulder_x + p["barb_lug_len"] - p["barb_leadin_len"], tip_x + 1.0,
+                   *yspan(r_beam, r_lug + 1.0), az - hw - 1.0, az + hw + 1.0)
+        wedge_keep = cq.Solid.makeBox(1, 1, 1)  # placeholder, replaced by rotation cut below
+        arm = arm.cut(cut)
+        lead = _box(shoulder_x + p["barb_lug_len"] - p["barb_leadin_len"],
+                    shoulder_x + p["barb_lug_len"], *yspan(r_beam, r_lug),
+                    az - hw, az + hw)
+        ang = math.degrees(math.atan2(r_lug - r_beam, p["barb_leadin_len"]))
+        lead = lead.cut(_box(shoulder_x + p["barb_lug_len"] - p["barb_leadin_len"] - 20.0,
+                             shoulder_x + p["barb_lug_len"] - p["barb_leadin_len"],
+                             *yspan(r_beam - 1.0, r_lug + 1.0), az - hw - 1, az + hw + 1))
+        arm = arm.fuse(_ramp(shoulder_x + p["barb_lug_len"] - p["barb_leadin_len"],
+                             shoulder_x + p["barb_lug_len"], ay, az, sign,
+                             r_lug, r_beam, hw))
+        if compressed:
+            a = math.degrees(math.atan2(defl, shoulder_x - root)) * sign * -1.0
+            arm = arm.moved(cv.rotation((root, ay, az), (0.0, 0.0, 1.0), a))
+        arms.append(arm)
+    out = core
+    for a in arms:
+        out = out.fuse(a)
+    return out
+
+
+def _ramp(x0, x1, ay, az, sign, r_out, r_in, hw) -> cq.Shape:
+    """Triangular lead-in prism: r_out at x0 falling to r_in at x1."""
+    pts = [(x0, ay + sign * r_in), (x0, ay + sign * r_out), (x1, ay + sign * r_in)]
+    wp = cq.Workplane("XY", origin=(0, 0, az - hw)).polyline(pts).close()
+    return wp.extrude(2 * hw).val()
 
 
 def build_bolt(p: Dict[str, float]) -> cq.Shape:

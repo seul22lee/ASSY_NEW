@@ -96,10 +96,73 @@ parameters:
     value: 3.0
     purpose: counterbore depth; pin_head_len is 0.2 shorter so the head sits recessed
     range: [1.2, 9.0]
-  - name: pin_end_margin
-    value: 1.6
-    purpose: axial gap between the pin's far end and the far end of the last knuckle bore
-    range: [0.4, 6.0]
+  - name: barb_shoulder_gap
+    value: 0.4
+    purpose: >
+      axial gap between the far face of the last enclosure knuckle and the
+      recovered barb shoulder. Small enough that the pin cannot walk far, large
+      enough that the shoulder is clear of solid material rather than buried in
+      it.
+    range: [0.1, 3.0]
+  - name: barb_d
+    value: 6.0
+    purpose: >
+      recovered diameter of the snap barb. Larger than bore_d, so the shoulder
+      overhangs the retaining bore by (barb_d - bore_d)/2 = 0.9 radially and
+      blocks reverse extraction. This is a geometric block; the force needed to
+      defeat it is NOT_VERIFIED.
+    range: [4.3, 12.0]
+  - name: barb_len
+    value: 6.0
+    purpose: axial length of the tapered lead-in from the shoulder to the tip
+    range: [2.0, 20.0]
+  - name: barb_tip_d
+    value: 2.8
+    purpose: >
+      diameter at the very tip. Smaller than bore_d so the barb enters the bore
+      before any deflection is required, which is what makes the lead-in a
+      lead-in.
+    range: [1.0, 4.1]
+  - name: barb_slot_w
+    value: 2.2
+    purpose: >
+      width of the slot that splits the tip into two compliant arms. Must exceed
+      2 x the required inward deflection, which is barb_d - bore_d = 1.8; at 2.2
+      the arms still stand 0.4 apart when fully compressed, so they cannot bottom
+      out against each other before the barb clears the bore.
+    range: [0.5, 6.0]
+  - name: barb_slot_root_x
+    value: 94.0
+    purpose: >
+      X where the splitting slot begins. The 6 mm of slotted shaft between here
+      and the shoulder is the arm length over which the deflection is taken.
+    range: [60.0, 99.0]
+  - name: barb_beam_w
+    value: 2.4
+    purpose: >
+      width of each cantilever arm across Z. Narrow in the direction the arm
+      does not move, which is what lets the pair enter a round bore at all.
+    range: [0.8, 4.0]
+  - name: barb_beam_t
+    value: 1.2
+    purpose: radial thickness of each cantilever arm
+    range: [0.4, 3.0]
+  - name: barb_lug_len
+    value: 2.6
+    purpose: axial length of the retaining lug measured from the shoulder
+    range: [1.0, 8.0]
+  - name: barb_leadin_len
+    value: 2.0
+    purpose: axial length of the tapered lead-in that deflects the arms on insertion
+    range: [0.5, 8.0]
+  - name: barb_deflection
+    value: 0.9
+    purpose: >
+      inward radial deflection of each arm in the declared compressed state,
+      (barb_d - bore_d)/2. The compressed envelope is therefore bore_d, and the
+      insertion check requires it to fit the bore with the declared clearance.
+      Whether the material tolerates this strain is NOT_VERIFIED.
+    range: [0.0, 5.0]
 
   # ------------------------------------------------------------------ closure
   - name: plate_t
@@ -230,5 +293,5 @@ parameters:
 materials:
   BODY-ENCLOSURE: GENERIC_RIGID_POLYMER
   BODY-CLOSURE: GENERIC_RIGID_POLYMER
-  BODY-PIN: GENERIC_RIGID_METAL
+  BODY-PIN: GENERIC_COMPLIANT_POLYMER
   BODY-BOLT: GENERIC_RIGID_POLYMER
