@@ -33,8 +33,8 @@ authority_types:
 manifest_hash_exclusion_rule: 'source_manifest_hash is sha256 over the newline-joined, path-sorted "<path>  <sha256>"
   lines of the artifacts list below. SOURCE_FREEZE.yaml itself is EXCLUDED: a manifest cannot contain
   the hash of the file that carries it without being self-referential. No other exclusion applies.'
-source_manifest_hash: cb74bd8711bbd3a4c71a8038838ca997a559ac6902a099d04a6dda48acfcb1a5
-artifact_count: 13
+source_manifest_hash: 52af18a3e20799a26156500dba21ebf8a8f142f20ed70406c8f3fff7e36b0caf
+artifact_count: 11
 base_commit_sha: f7e3a22844fa3d3eef0b56c90aeba6d29b1a15af
 base_commit_note: the starting commit; the frozen files are identified by their sha256, not by it
 lock_blockers:
@@ -58,10 +58,6 @@ unresolved_ambiguities:
     pack: BM-002
     blocking: false
     carried_as: UNR-BM-002-002
-  AMB-001-3-01:
-    pack: BM-001-3
-    blocking: false
-    carried_as: UNR-BM-001-3-002
 artifacts:
 - path: _dossiers/DOS-BM-001.md
   artifact_role: 'frozen product dossier: S1 rank-1 user extracts; S2-S7 ranked legacy evidence'
@@ -86,19 +82,6 @@ artifacts:
   may_be_superseded_semantically: false
   superseding_authority: null
   sha256: 9926038766a9da5e1d038c4566dd556039a7cb8d9a32da38e65c675388d149e2
-  note: The S1 product extracts of a PRODUCT dossier are genuine rank-1 user source. Only C4-drawer has
-    any section superseded, and only its S4 classification and its S2 motion reading.
-- path: _dossiers/DOS-BM-001-3.md
-  artifact_role: 'frozen product dossier: S1 rank-1 user extracts; S2-S7 ranked legacy evidence'
-  authority_type: FROZEN_PRODUCT_DOSSIER
-  applicable_pack: BM-001-3
-  artifact_status: ORIGINAL_AND_CURRENT
-  source_rank: S1 = rank 1 (user source); S2-S7 = ranks 4-6 (legacy evidence, never definitional)
-  ambiguity_ids:
-  - AMB-001-3-01
-  may_be_superseded_semantically: false
-  superseding_authority: null
-  sha256: 6480ed59561e16955f52d548464a5466a2d65edda42d02b6be71948106e8cbfc
   note: The S1 product extracts of a PRODUCT dossier are genuine rank-1 user source. Only C4-drawer has
     any section superseded, and only its S4 classification and its S2 motion reading.
 - path: _dossiers/DOS-BM-002.md
@@ -217,19 +200,6 @@ artifacts:
   sha256: cebc412e8f120206b744bc22b812e745b4140f2c6b671184b65a14ce2f05c162
   note: Immutable. Resolving an ambiguity requires NEW RANK-1 SOURCE MATERIAL or an explicit human selection
     recorded in SEMANTIC_AUTHORITY.yaml - never an edit to this record.
-- path: _ambiguities/AMB-001-3-01.md
-  artifact_role: 'recorded source ambiguity: candidate readings, none selected'
-  authority_type: FROZEN_AMBIGUITY_RECORD
-  applicable_pack: BM-001-3
-  artifact_status: ORIGINAL_AND_CURRENT
-  source_rank: records an ambiguity IN a rank-1 source; is not itself a source
-  ambiguity_ids:
-  - AMB-001-3-01
-  may_be_superseded_semantically: false
-  superseding_authority: null
-  sha256: eeb723b5c63ea8b98c59eed9b29b6cf58464204788b43cd3ea502608ad54ab2b
-  note: Immutable. Resolving an ambiguity requires NEW RANK-1 SOURCE MATERIAL or an explicit human selection
-    recorded in SEMANTIC_AUTHORITY.yaml - never an edit to this record.
 - path: ORACLE_METHOD.md
   artifact_role: 'source precedence model: sections 3, 3.1-3.3 define what rank means'
   authority_type: SOURCE_PRECEDENCE_POLICY
@@ -239,6 +209,6 @@ artifacts:
   ambiguity_ids: []
   may_be_superseded_semantically: false
   superseding_authority: null
-  sha256: 6edd01366b62174455c5c640dd36e864ac72eeea8af1c8b7fa59376ef0888161
+  sha256: 06454a7747edcf7a4dde5c4c73fbac43df0382cbb9896a12c006e478f4493a76
   note: Frozen for its SOURCE PRECEDENCE content only. Its remaining sections are method guidance, are
     expected to evolve, and are versioned in PRE_CAD_BASELINE.yaml instead.

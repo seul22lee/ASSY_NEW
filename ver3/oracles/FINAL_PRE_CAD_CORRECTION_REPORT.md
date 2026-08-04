@@ -1,4 +1,9 @@
 # Final bounded pre-CAD correction — FPC-001…007
+> **Scope note.** A later pass removed one BM-001 delta pack from active project
+> scope. Rows and mentions belonging only to that pack have been dropped from this
+> historical report so the current tree carries no reference to it. Everything stated
+> here about the remaining packs is unchanged, and git history holds the original.
+
 
 **Branch:** `ver3-oracle-phase1-review`
 **Starting commit:** `0b8442b4a0d16897c441ae700a24062ac0f23944`
@@ -216,7 +221,7 @@ source bytes immutable, semantic authority versioned and challengeable.
 ## Remaining ambiguities
 
 `AMB-001-2-01` (BM-001-2, **blocking, source-level**), `AMB-002-01`, `AMB-002-02`,
-`AMB-001-3-01` (non-blocking). BM-001-2 remains `BLOCKED_BY_SOURCE_AMBIGUITY`; no
+BM-001-2 remains `BLOCKED_BY_SOURCE_AMBIGUITY`; no
 new rank-1 source material was supplied.
 
 ## Unresolved CAD questions

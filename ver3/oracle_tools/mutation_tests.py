@@ -204,17 +204,17 @@ def _(r):
 @case("child_references_parent_unresolved", "control", "UNRESOLVED_REF_NOT_FOUND",
       "RELAXED HEURISTIC CONTROL: a delta pack may reference an unresolved id defined by its parent")
 def _(r):
-    d = ry(r, f"{P}/BM-001-3/normative.yaml")
-    d["invariants"][0]["related_unresolved"] = ["UNR-BM-001-3-001", "UNR-BM-001-001"]
-    wy(r, f"{P}/BM-001-3/normative.yaml", d)
+    d = ry(r, f"{P}/BM-001-2/normative.yaml")
+    d["invariants"][0]["related_unresolved"] = ["UNR-BM-001-2-001", "UNR-BM-001-001"]
+    wy(r, f"{P}/BM-001-2/normative.yaml", d)
 
 
 @case("override_without_rank1", "defect", "OVERRIDE_WITHOUT_RANK1_SUPPORT",
       "a delta override with no rank-1 delta source")
 def _(r):
-    d = ry(r, f"{P}/BM-001-3/normative.yaml")
+    d = ry(r, f"{P}/BM-001-2/normative.yaml")
     d["overrides"][0].pop("rank1_support", None)
-    wy(r, f"{P}/BM-001-3/normative.yaml", d)
+    wy(r, f"{P}/BM-001-2/normative.yaml", d)
 
 
 # ---------------------------------------------------------------- 3E (new rules)
@@ -360,7 +360,7 @@ def _(r):
 def _(r):
     d = ry(r, "oracles/FIXTURE_PLAUSIBILITY_REVIEW.yaml")
     for x in d["reviews"]:
-        if x["fixture_id"] == "ADM-BM-001-3-B":
+        if x["fixture_id"] == "ADM-BM-001-B":
             x["status"] = "REJECTED"
     wy(r, "oracles/FIXTURE_PLAUSIBILITY_REVIEW.yaml", d)
 
@@ -742,8 +742,20 @@ def _(r):
 @case("index_fixture_count_stale", "defect", "INDEX_AUDIT_COUNT_STALE",
       "PCF-003: the index stating a fixture count the snapshot contradicts")
 def _(r):
+    # Derive the corruption from whatever the index currently states. A
+    # hard-coded pair silently becomes a no-op the moment the real count
+    # changes, and a no-op mutation reports nothing and looks like a checker
+    # regression. This one cannot rot: it reads the live number and writes a
+    # different one, and fails loudly if it matched nothing.
+    import re as _re
     fp = r / "oracles" / "ORACLE_INDEX.md"
-    fp.write_text(fp.read_text().replace("44 admissible +", "41 admissible +"))
+    txt = fp.read_text()
+    m = _re.search(r"(\d+) admissible \+", txt)
+    assert m, "ORACLE_INDEX.md no longer states an admissible fixture count"
+    wrong = int(m.group(1)) + 3
+    out = txt.replace(m.group(0), "%d admissible +" % wrong, 1)
+    assert out != txt, "mutation changed nothing"
+    fp.write_text(out)
 
 
 @case("source_freeze_revision_paradox", "defect", "SOURCE_FREEZE_REVISION_PARADOX",

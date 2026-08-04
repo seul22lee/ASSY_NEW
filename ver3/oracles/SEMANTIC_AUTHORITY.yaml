@@ -30,7 +30,7 @@ three_layer_model:
       source maps, reviews
     cad_may_change_it: true
     why: these are the conclusions under adversarial test
-semantic_authority_manifest_hash: 9d447f0092defe22c92f7fe2dda7cd93af4168a3f9ac0ebbef43b352a6d0c600
+semantic_authority_manifest_hash: 3040c2bcb138a7f92bfb77f52e73b350f30f9762df5d79138d6fc14be2ae25f6
 manifest_hash_exclusion_rule: sha256 over the newline-joined, path-sorted "<path>  <sha256>" lines of
   the artifacts list. SEMANTIC_AUTHORITY.yaml itself is EXCLUDED - a manifest cannot hash the file carrying
   it.
@@ -39,13 +39,12 @@ artifacts:
 - path: HUMAN_SEMANTIC_DECISIONS.yaml
   role: approved human semantic and capability decisions
   version: v1
-  sha256: c070e99b661c75c4f57ffca59d6c6eea795b8595deab5642e0d443e320f165e5
+  sha256: f83aa08d9a007058d378276a5463933ee55a271bb2480dbbe949f744889e7eb0
   decision_ids:
   - HSD-001
   - HSD-002
   - HSD-003
   - HSD-004
-  - HSD-005
   - HSD-006
   challengeable_by_cad: true
   note: 'Moved here from SOURCE_FREEZE at PCF-002. Every decision declares challengeable_by_cad: true;
@@ -147,23 +146,6 @@ decisions:
   - NRM-C4-002
   - NRM-C4-003
   - NEG-C4-023
-  challengeable_by_cad: true
-  status: CURRENT
-- decision_id: HSD-005
-  title: BM-001-3 curved-back reading
-  kind: PRODUCT_LANGUAGE_INTERPRETATION
-  accepted_readings:
-  - for "rests on a curved back", the LOAD-BEARING resting contact must lie on the curved region
-  - curvature elsewhere, on a non-load-bearing decorative region, is insufficient
-  - a flat land carrying all the weight does NOT satisfy this reading
-  rejected_readings:
-  - B - resting anywhere on a curved underside, which would admit a body carried entirely by a flat land
-  affected_statement_ids:
-  - NRM-BM-001-3-002
-  - ADM-BM-001-3-C
-  - INA-BM-001-3-D
-  - NEG-BM-001-3-005
-  - UNR-BM-001-3-002
   challengeable_by_cad: true
   status: CURRENT
 - decision_id: HSD-006

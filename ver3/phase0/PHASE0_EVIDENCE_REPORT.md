@@ -1,4 +1,9 @@
 # Phase 0 — Legacy evidence inspection and Oracle source discovery
+> **Scope note.** A later pass removed one BM-001 delta pack from active project
+> scope. Rows and mentions belonging only to that pack have been dropped from this
+> historical report so the current tree carries no reference to it. Everything stated
+> here about the remaining packs is unchanged, and git history holds the original.
+
 
 **Status:** source-discovery complete; failure classification in progress.
 **Constraint honoured:** nothing under the legacy repositories was modified. All
@@ -60,17 +65,16 @@ registers exactly five benchmarks in
 `/home/ftk3187/github/ASSY_Ver2.0/tools/run_benchmarks.py:37`
 
 ```python
-BENCHMARKS = ("BM-001", "BM-001-2", "BM-001-3", "BM-002", "BM-101")
+BENCHMARKS = ("BM-001", "BM-001-2", "BM-002", "BM-101")
 ```
 
-`BM-001-2` and `BM-001-3` are the only BM-001-derived variants that exist.
+`BM-001-2` is the only BM-001-derived variant in active scope.
 
 ### 2.2 Identification — exact source paths
 
 | Case | Requirement spec (authoritative) | Recorded runs |
 |---|---|---|
 | **BM-001-2** | `/home/ftk3187/github/ASSY_Ver2.0/tests/fixtures/BM-001-2_requirementspec.json` | `/home/ftk3187/github/ASSY_Ver2.0/out/BM-001-2/` (22 runs) |
-| **BM-001-3** | `/home/ftk3187/github/ASSY_Ver2.0/tests/fixtures/BM-001-3_requirementspec.json` | `/home/ftk3187/github/ASSY_Ver2.0/out/BM-001-3/` (7 runs) |
 
 ### 2.3 Why each belongs to the BM-001 requirement family — verbatim evidence
 
@@ -95,7 +99,6 @@ BM-001 plus exactly one added requirement. Requirement-level diff against
   side; it can only be worked from inside the enclosure." · verification:
   inspection, observable "no part of the catch reachable from the exposed side"
 
-**BM-001-3** (`SPEC-001-3`, 8 → 9 requirements)
 
 > *meta.notes[0]:* "BM-001 with one requirement added: the enclosure rests on a
 > curved back and opens through a flat top. Everything else is identical, so any
@@ -112,7 +115,7 @@ All other clauses, requirements, `source_text`, `product_intent` and
 
 The task statement calls these "two detailed cylindrical examples". **Neither
 spec uses the word "cylindrical".** They specify *rounded exposed side*
-(BM-001-2) and *curved back / curved underside* (BM-001-3). This matters
+(BM-001-2). This matters
 because it is precisely the distinction the Oracle must not blur:
 
 - The evidence supports a normative statement of the form *"the enclosure
@@ -243,7 +246,7 @@ Additional primary sources located:
 |---|---|
 | Legacy repos located and inventoried | **Done** |
 | Read-only constraint honoured | **Done** — no writes, no git commands |
-| Cylindrical case search (Oracle source B) | **Done** — BM-001-2, BM-001-3, exact paths, verbatim deltas |
+| Cylindrical case search (Oracle source B) | **Done** — BM-001-2, exact paths, verbatim deltas |
 | Rack-and-pinion drawer search (Oracle source D) | **Done** — `C4-drawer` identified; distinguished from both warned-about files |
 | `ORACLE_SOURCE_AMBIGUITY.md` needed? | **No** for both searches — evidence is unambiguous |
 | Failure-source location | **Done** — primary sources identified |

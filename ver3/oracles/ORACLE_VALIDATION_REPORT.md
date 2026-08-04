@@ -1,4 +1,9 @@
 # Oracle validation report — Passes 3A–6, then the independent semantic review
+> **Scope note.** A later pass removed one BM-001 delta pack from active project
+> scope. Rows and mentions belonging only to that pack have been dropped from this
+> historical report so the current tree carries no reference to it. Everything stated
+> here about the remaining packs is unchanged, and git history holds the original.
+
 
 > **SUPERSEDED IN PART.** The clean result described below was real but
 > insufficient: it proved internal structural consistency, not source fidelity.
@@ -37,7 +42,7 @@ opinion of an invariant has no role in the verdict.
 
 | Run | Scope | Findings | Report |
 |---|---|---|---|
-| pre-correction (blind) | BM-001, BM-001-2, BM-001-3 before the v0.2 rewrite | **32 BLOCKING** | reproduced every defect class found in the manual classification report |
+| pre-correction (blind) | BM-001, BM-001-2 before the v0.2 rewrite | **32 BLOCKING** | reproduced every defect class found in the manual classification report |
 | run 1 | all nine packs, first full sweep | **24** (21 BLOCKING, 3 MAJOR) | `_audit/AUDIT-run1.json` |
 | run 2 | after arbitration and correction | 1 BLOCKING | `_audit/AUDIT-run2.json` |
 | run 3 | after the rename | 0 | `_audit/AUDIT-run3.json` |

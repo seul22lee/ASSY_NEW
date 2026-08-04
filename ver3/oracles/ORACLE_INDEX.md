@@ -36,7 +36,6 @@ Corrected against 45 independent semantic review findings; see
 |---|---|---|---|---|---|---|---|
 | [BM-001](product_cases/BM-001/) | 13 (2) | 9 | 13 | 7 / 12 | 3 / 2 | 22 | PRE_CAD_SEMANTIC_REVIEWED |
 | [BM-001-2](product_cases/BM-001-2/) | 2 (0) | 4 | 3 | 4 / 4 | 0 / 0 | 4 | BLOCKED_BY_SOURCE_AMBIGUITY |
-| [BM-001-3](product_cases/BM-001-3/) | 3 (0) | 2 | 3 | 3 / 4 | 0 / 0 | 6 | PRE_CAD_SEMANTIC_REVIEWED |
 | [BM-002](product_cases/BM-002/) | 14 (1) | 8 | 11 | 5 / 11 | 2 / 2 | 22 | PRE_CAD_SEMANTIC_REVIEWED |
 | [C4-drawer](product_cases/C4-drawer/) | 13 (2) | 7 | 12 | 4 / 10 | 2 / 2 | 23 | PRE_CAD_SEMANTIC_REVIEWED |
 
@@ -49,7 +48,7 @@ Corrected against 45 independent semantic review findings; see
 | [latch-retention](micro_oracles/latch-retention/) | 8 (2) | 4 | 7 | 4 / 6 | 2 / 2 | 16 | PRE_CAD_SEMANTIC_REVIEWED |
 | [bounded-two-state-closure](micro_oracles/bounded-two-state-closure/) | 7 (1) | 4 | 7 | 6 / 6 | 3 / 1 | 17 | PRE_CAD_SEMANTIC_REVIEWED |
 
-**Totals** (computed from this snapshot, never carried forward): 73 invariants (10 VERIFICATION_MINIMUM), 45 required-unresolved decisions, 72 declared freedoms, 44 admissible + 64 inadmissible physical fixtures, 17 admissible + 12 inadmissible evidence cases, 139 negative cases.
+**Totals** (computed from this snapshot, never carried forward): 70 invariants (10 VERIFICATION_MINIMUM), 43 required-unresolved decisions, 69 declared freedoms, 41 admissible + 60 inadmissible physical fixtures, 17 admissible + 12 inadmissible evidence cases, 133 negative cases.
 
 ## Files in every pack
 
@@ -105,7 +104,7 @@ against every fixture mechanically.
 
 But tags are written by the same hand as the invariants, so tag algebra is not
 independent evidence. Two further records carry the weight:
-`SOURCE_ENTAILMENT_REVIEW.yaml` (73 statements, each with the counterexample
+`SOURCE_ENTAILMENT_REVIEW.yaml` (70 statements, each with the counterexample
 tried) and `FIXTURE_PLAUSIBILITY_REVIEW.yaml` (41 fixtures, each with its
 physical operation and assumptions). Neither is Oracle evidence and no pack may
 cite either.
@@ -128,7 +127,7 @@ may, and Oracle content must never influence design generation or selection.
 | [SEMANTIC_AUTHORITY.yaml](SEMANTIC_AUTHORITY.yaml) | layer B manifest: decisions, amendments, supersession relations |
 | [HUMAN_SEMANTIC_DECISIONS.yaml](HUMAN_SEMANTIC_DECISIONS.yaml) | six approved decisions (HSD-001…006), each challengeable by CAD |
 | [PHYSICAL_FIXTURE_REVIEW.yaml](PHYSICAL_FIXTURE_REVIEW.yaml) | every fixture reviewed individually; a tag is a review conclusion, not evidence |
-| [STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml](STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml) | all 73 invariants: statement vs predicate vs tag vs stage |
+| [STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml](STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml) | all 70 invariants: statement vs predicate vs tag vs stage |
 | [PRE_CAD_CORRECTION_STATE.yaml](PRE_CAD_CORRECTION_STATE.yaml) | PCF-001…011 dispositions |
 | [FINAL_PRE_CAD_CORRECTION_STATE.yaml](FINAL_PRE_CAD_CORRECTION_STATE.yaml) | FPC-001…007 dispositions |
 | [PRE_CAD_BACKLOG.yaml](PRE_CAD_BACKLOG.yaml) | deferred items; none blocks CAD entry |
@@ -147,6 +146,6 @@ may, and Oracle content must never influence design generation or selection.
 | [CROSS_PACK_OWNERSHIP_REVIEW.yaml](CROSS_PACK_OWNERSHIP_REVIEW.yaml) | Pass E ownership boundaries |
 | [ORACLE_METHOD.md](ORACLE_METHOD.md) / [ORACLE_AUTHORING_POLICY.md](ORACLE_AUTHORING_POLICY.md) | method and policy |
 | [ORACLE_VALIDATION_REPORT.md](ORACLE_VALIDATION_REPORT.md) | audit history |
-| [_dossiers/](_dossiers/) | nine frozen source dossiers — the only citable sources |
+| [_dossiers/](_dossiers/) | eight frozen source dossiers — the only citable sources |
 | [_ambiguities/](_ambiguities/) | recorded source ambiguities, none resolved |
 | [_audit/](_audit/) | every audit report, pre- and post-correction. Current: `PRECAD_V2_RESTART-*.json` |

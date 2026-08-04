@@ -1,4 +1,9 @@
 # Pre-CAD V2 correction report — authority and fixture rebuild
+> **Scope note.** A later pass removed one BM-001 delta pack from active project
+> scope. Rows and mentions belonging only to that pack have been dropped from this
+> historical report so the current tree carries no reference to it. Everything stated
+> here about the remaining packs is unchanged, and git history holds the original.
+
 
 **Branch:** `ver3-oracle-phase1-review`
 **Starting commit:** `f7e3a22844fa3d3eef0b56c90aeba6d29b1a15af`
@@ -25,7 +30,7 @@ explicit authority types:
 |---|---|---|
 | `FROZEN_PRODUCT_DOSSIER` | 6 | the five product dossiers + the index |
 | `PROJECT_CAPABILITY_ORIGINAL` | 4 | the four micro-oracle dossiers |
-| `FROZEN_AMBIGUITY_RECORD` | 2 | AMB-001-2-01, AMB-001-3-01 |
+| `FROZEN_AMBIGUITY_RECORD` | 1 | AMB-001-2-01 |
 | `SOURCE_PRECEDENCE_POLICY` | 1 | ORACLE_METHOD §3 |
 
 Each micro-oracle dossier records `source_rank: "NOT APPLICABLE to S1"`, whether
@@ -230,7 +235,7 @@ lists itself, and confirmed the two layers share no artifact.
 ## Remaining ambiguities
 
 `AMB-001-2-01` (BM-001-2, **blocking, source-level**), `AMB-002-01`, `AMB-002-02`,
-`AMB-001-3-01` (non-blocking). `AMB-C4-01` remains retired to
+`AMB-C4-01` remains retired to
 `LEGACY-CONFLICT-C4-01`.
 
 ## Physical questions deferred to CAD

@@ -21,7 +21,6 @@ clean_audit_note: >
 pack_status:
   BM-001:                       PRE_CAD_SEMANTIC_REVIEWED
   BM-001-2:                     BLOCKED_BY_SOURCE_AMBIGUITY   # AMB-001-2-01
-  BM-001-3:                     PRE_CAD_SEMANTIC_REVIEWED
   BM-002:                       PRE_CAD_SEMANTIC_REVIEWED
   C4-drawer:                    PRE_CAD_SEMANTIC_REVIEWED
   guided-slider:                PRE_CAD_SEMANTIC_REVIEWED
@@ -52,21 +51,21 @@ physical_validation_note: >
   review passes are clean; it makes no claim about physical realizability.
 
 totals:   # COMPUTED from the final snapshot, never carried forward
-  invariants: 73
+  invariants: 70
   verification_minima: 10
-  required_unresolved: 45
-  freedoms: 72
-  admissible_physical_fixtures: 44
-  inadmissible_physical_fixtures: 64
+  required_unresolved: 43
+  freedoms: 69
+  admissible_physical_fixtures: 41
+  inadmissible_physical_fixtures: 60
   admissible_evidence_cases: 17
   inadmissible_evidence_cases: 12
-  negative_cases: 139
+  negative_cases: 133
 
 semantic_reviews:
-  source_entailment: {file: SOURCE_ENTAILMENT_REVIEW.yaml, statements: 73, unsupported: 0}
+  source_entailment: {file: SOURCE_ENTAILMENT_REVIEW.yaml, statements: 70, unsupported: 0}
   fixture_plausibility: {file: FIXTURE_PLAUSIBILITY_REVIEW.yaml, note: "per-fixture physical narrative review"}
-  physical_fixture_review: {file: PHYSICAL_FIXTURE_REVIEW.yaml, fixtures: 108, all NEEDS_GEOMETRY_VALIDATION: true}
-  statement_predicate_alignment: {file: STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml, invariants: 73, mismatches: 0}
+  physical_fixture_review: {file: PHYSICAL_FIXTURE_REVIEW.yaml, fixtures: 101, all NEEDS_GEOMETRY_VALIDATION: true}
+  statement_predicate_alignment: {file: STATEMENT_PREDICATE_ALIGNMENT_REVIEW.yaml, invariants: 70, mismatches: 0}
   cross_pack_ownership: {file: CROSS_PACK_OWNERSHIP_REVIEW.yaml, checks: 6, result: clean}
 
 audit_state:
@@ -85,7 +84,6 @@ unresolved_findings: []
 source_ambiguities:
   AMB-001-2-01: {status: OPEN_BLOCKING, pack: BM-001-2,
     note: "Three readings recorded, none selected. The only unresolved in the set that legitimately blocks a structural predicate, because the predicate's DOMAIN is undefined."}
-  AMB-001-3-01: {status: OPEN_NON_BLOCKING, pack: BM-001-3, carried_as: UNR-BM-001-3-002}
   AMB-002-01:   {status: OPEN_NON_BLOCKING, pack: BM-002, carried_as: UNR-BM-002-001}
   AMB-002-02:   {status: OPEN_NON_BLOCKING, pack: BM-002, carried_as: UNR-BM-002-002}
 
@@ -107,7 +105,6 @@ correction_history:
   - {id: "SF-1.1..SF-1.7", target: common model, outcome: applied}
   - {id: "SF-2.1..SF-2.4", target: BM-001, outcome: applied}
   - {id: "SF-3.1", target: BM-001-2, outcome: applied}
-  - {id: "SF-4.1..SF-4.3", target: BM-001-3, outcome: applied}
   - {id: "SF-5.1..SF-5.8", target: BM-002, outcome: applied}
   - {id: "SF-6.1..SF-6.6", target: C4-drawer, outcome: applied}
   - {id: "SF-7.1..SF-7.2", target: guided-slider, outcome: applied}
@@ -118,8 +115,7 @@ correction_history:
 
 outstanding_human_decisions:
   - "AMB-001-2-01 - blocking; BM-001-2 cannot be locked until a reading is selected."
-  - "RDG-BM-001-3-01 - confirm or reject the reading of 'rests on a curved back' this pass adopted."
-  - "AMB-002-01, AMB-002-02, AMB-001-3-01 - non-blocking; each bounds one requirement's evaluation."
+  - "AMB-002-01, AMB-002-02 - non-blocking; each bounds one requirement's evaluation."
 
 next_authorized_phase: adversarial CAD validation
 explicitly_not_next: [production implementation, final Oracle lock]

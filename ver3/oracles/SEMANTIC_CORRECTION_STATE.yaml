@@ -269,66 +269,6 @@ findings:
   audit_status: clean; falsified by ADM-BM-001-2-D
   unresolved_human_decisions:
   - 'AMB-001-2-01 remains open: three readings of "inside the enclosure", none selected. Pack stays BLOCKED_BY_SOURCE_AMBIGUITY.'
-- finding_id: SF-4.1
-  area: 'BM-001-3: stability must not block contact derivation'
-  affected_packs:
-  - BM-001-3
-  affected_statements:
-  - UNR-BM-001-3-002
-  - NRM-BM-001-3-002
-  - NEG-BM-001-3-006
-  source_passages:
-  - DOS-BM-001-3 S4 (AMB-001-3-01)
-  correction_status: CORRECTED
-  semantic_rationale: Contact between a curved underside and a supporting plane is computable from geometry
-    alone. The missing stability criterion blocks a stability PASS, a tipping-margin claim and any adequacy
-    claim - listed explicitly as blocked_claims - but not the derivation.
-  files_changed:
-  - BM-001-3/normative.yaml
-  - BM-001-3/negative_cases.yaml
-  audit_status: clean
-  unresolved_human_decisions: []
-- finding_id: SF-4.2
-  area: 'BM-001-3: spherical-cap contact topology'
-  affected_packs:
-  - BM-001-3
-  affected_statements:
-  - ADM-BM-001-3-B
-  source_passages:
-  - physical review, no source change
-  correction_status: CORRECTED
-  semantic_rationale: A single spherical cap on a rigid plane produces ONE ideal point contact, not three
-    patches. The fixture was retained by tag assertion alone. Revised to three raised spherical lobes
-    with coplanar apexes, which makes three point contacts physically possible. Coplanarity is now an
-    explicit assumption in the plausibility review, pending CAD.
-  files_changed:
-  - BM-001-3/realizations.yaml
-  - FIXTURE_PLAUSIBILITY_REVIEW.yaml
-  audit_status: clean
-  unresolved_human_decisions: []
-- finding_id: SF-4.3
-  area: 'BM-001-3: resting contact on the curved region'
-  affected_packs:
-  - BM-001-3
-  affected_statements:
-  - ADM-BM-001-3-C
-  - INA-BM-001-3-D
-  - NEG-BM-001-3-005
-  - RDG-BM-001-3-01
-  source_passages:
-  - DOS-BM-001-3 S1 REQ-011
-  correction_status: CORRECTED
-  semantic_rationale: Resting on a flat land puts the load-bearing contact off the curved back. The land
-    became a NON-LOAD-BEARING relieved recess so the resting contact stays on the two curved bands flanking
-    it. The design the old fixture actually described is now the inadmissible INA-BM-001-3-D. The source
-    reading used is recorded explicitly as RDG-BM-001-3-01, with the rejected alternative stated.
-  files_changed:
-  - BM-001-3/normative.yaml
-  - BM-001-3/realizations.yaml
-  - BM-001-3/negative_cases.yaml
-  - FIXTURE_PLAUSIBILITY_REVIEW.yaml
-  audit_status: clean
-  unresolved_human_decisions: []
 - finding_id: SF-5.1
   area: 'BM-002: restore the direct numerical requirements'
   affected_packs:
@@ -1073,18 +1013,6 @@ unresolved_human_decisions:
   status: OPEN_NON_BLOCKING
   carried_as: UNR-BM-002-002
   question: Where is the compliance edge of the source qualifier "approximately"?
-- id: AMB-001-3-01
-  pack: BM-001-3
-  status: OPEN_NON_BLOCKING
-  carried_as: UNR-BM-001-3-002
-  question: What does "rests" require of stability on a curved underside?
-- id: RDG-BM-001-3-01
-  pack: BM-001-3
-  status: READING_RECORDED_FOR_REVIEW
-  question: Confirm or reject the reading that "rests on a curved back" requires the LOAD-BEARING contact
-    to lie on the curved region.
-  note: Not an ambiguity - a reading this correction pass adopted and recorded in one place so it can
-    be rejected in one place.
 - id: REVIEW-NAMING-01
   pack: bounded-two-state-closure
   status: PREVIOUSLY_FLAGGED_NOW_CONFIRMED

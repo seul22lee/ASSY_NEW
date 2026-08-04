@@ -1,4 +1,9 @@
 # Independent semantic review — corrections, finding by finding
+> **Scope note.** A later pass removed one BM-001 delta pack from active project
+> scope. Rows and mentions belonging only to that pack have been dropped from this
+> historical report so the current tree carries no reference to it. Everything stated
+> here about the remaining packs is unchanged, and git history holds the original.
+
 
 **Branch:** `ver3-oracle-phase1-review`
 **Reviewed commit:** `3b64aee601985ba509d2420462af624ed5616cc2`
@@ -96,7 +101,6 @@ run exists for any of them. Nothing was upgraded to make the record look better.
 | `NRM-BM-001-007` | repeatability declared, nothing marked single-use | a realizable engage/release/engage cycle | SF-2.4 |
 | `NRM-BM-001-011` | all named interfaces reacted | conditional on interfaces that carry load | SF-2.3 |
 | `NRM-BM-001-2-001` | the OPPOSITE exposed boundary | the exposed exterior boundary | SF-3.1 |
-| `NRM-BM-001-3-002` | blocked by the missing stability criterion | structural; stability blocks only PASS and margin claims | SF-4.1 |
 | `NRM-BM-002-002` | housing must support the crossing element | crossing realized and non-interfering | SF-5.2 |
 | `NRM-BM-002-006` | for each rotating element: radial support | conditional on load components actually carried | SF-5.3 |
 | `NRM-BM-002-007` | anti-rotation always required | guidance sufficient for the required behaviour | SF-5.4 |
@@ -173,8 +177,6 @@ narratives did not hold. None was rescued by its tags.
 
 | Fixture | Problem | Resolution |
 |---|---|---|
-| `ADM-BM-001-3-B` | claimed three contact patches from a single spherical cap, which gives one ideal point contact | three raised lobes with coplanar apexes; coplanarity is now an explicit assumption pending CAD |
-| `ADM-BM-001-3-C` | rested on a flat land, so its load-bearing contact was not on the curved back | the land became a non-load-bearing relieved recess; the old design is now `INA-BM-001-3-D` |
 | `ADM-BM-002-C` | used *drum stall* as a travel determinant — an overload condition, conflicting with REQ-007 | a deliberate cable-length stop collar |
 
 Six fixtures were added specifically so a future reader can tell whether a
@@ -293,8 +295,6 @@ the semantic corrections, 6 findings).
 | `AMB-001-2-01` | BM-001-2 | **OPEN, BLOCKING** | **Yes.** Three readings of "worked from inside the enclosure", none selected. The predicate's domain is undefined. |
 | `AMB-002-01` | BM-002 | open, non-blocking | eventually — is the crossing element part of the enclosed mechanism? |
 | `AMB-002-02` | BM-002 | open, non-blocking | eventually — where is the compliance edge of "approximately"? |
-| `AMB-001-3-01` | BM-001-3 | open, non-blocking | eventually — what does "rests" require of stability? |
-| `RDG-BM-001-3-01` | BM-001-3 | reading recorded | **confirm or reject** — this pass adopted a reading of "rests on a curved back" and recorded it in one place so it can be rejected in one place |
 | `LEGACY-CONFLICT-C4-01` | C4-drawer | reclassified | **No** — this is the withdrawal of a previously implied human decision |
 
 **BM-001-2 is the only pack that is not lock-ready**, and it is blocked by a
@@ -308,8 +308,7 @@ genuine source ambiguity, not by a defect.
 pack.** All 41 admissible fixtures are `NEEDS_GEOMETRY_VALIDATION`. Their
 physical operation is described and their assumptions are explicit, but nothing
 has been drawn and nothing has been simulated. Several assumptions are load
-bearing and openly uncertain — the coplanarity of `ADM-BM-001-3-B`'s three lobes,
-the friction margin of `ADM-BM-001-D`, the coverage overlap of `ADM-HS-E`, the
+bearing and openly uncertain — the friction margin of `ADM-BM-001-D`, the coverage overlap of `ADM-HS-E`, the
 crank throw of `ADM-BM-002-E` against a desktop envelope.
 
 Also still absent, and deliberately: `LOCK.json`, any production pipeline code,

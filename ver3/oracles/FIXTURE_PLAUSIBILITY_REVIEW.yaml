@@ -7,22 +7,20 @@ status_vocabulary:
   NEEDS_GEOMETRY_VALIDATION: operation is coherent and assumptions are explicit, but CAD or physics is
     required to confirm them
   REJECTED: the described operation is not physically realizable as stated
-standing_caveat: 'EVERY fixture is NEEDS_GEOMETRY_VALIDATION. No CAD model and no physics run exists for
-  any of them. That is the honest status and none is an upgrade candidate until geometry exists. Three
-  fixtures were REVISED rather than validated during this review: ADM-BM-001-3-B, whose single spherical
-  cap could not produce the three contacts it claimed; ADM-BM-001-3-C, whose load-bearing contact was
-  on a flat land rather than the curved back; and ADM-BM-002-C, whose terminal was a drum stall, which
+standing_caveat: 'EVERY fixture is NEEDS_GEOMETRY_VALIDATION. No physics run exists for any of them.
+  That is the honest status and none is an upgrade candidate on this evidence alone. One fixture was
+  REVISED rather than validated during this review: ADM-BM-002-C, whose terminal was a drum stall, which
   is an overload condition rather than a travel determinant. GATE-2 added three intended-contact and assembly
   fixtures (ADM-BM-001-E/F/G); all three are likewise NEEDS_GEOMETRY_VALIDATION, and two of them rest
-  on material properties no source supplies.'
+  on material properties no source supplies. Two BM-001 fixtures now have executable reference CAD
+  (ADM-BM-001-E via EXE-BM001-01); that establishes geometric and kinematic admissibility only, and does
+  not discharge the material questions recorded here.'
 summary:
-  total_admissible_fixtures: 44
+  total_admissible_fixtures: 41
   PHYSICALLY_PLAUSIBLE: 0
   NEEDS_GEOMETRY_VALIDATION: 44
   REJECTED: 0
   revised_during_review:
-  - ADM-BM-001-3-B
-  - ADM-BM-001-3-C
   - ADM-BM-002-C
   gate2_contact_and_assembly_fixtures:
   - ADM-BM-001-E
@@ -132,47 +130,6 @@ reviews:
     Not a defect of the fixture.
   status: NEEDS_GEOMETRY_VALIDATION
   note: null
-- fixture_id: ADM-BM-001-3-A
-  pack: BM-001-3
-  physical_operation: Cylindrical underside resting on a plane; the contact is a LINE along the lowest
-    generator. Planar top carries the aperture.
-  assumptions:
-  - the cylinder axis is horizontal so the line contact is a true line, not a point
-  - the centre of mass lies over the contact line
-  assumptions_explicit: true
-  plausible_counterexample: If the axis is not horizontal the contact degenerates to a point and the body
-    rocks in two directions. Assumed, not proven.
-  status: NEEDS_GEOMETRY_VALIDATION
-  note: null
-- fixture_id: ADM-BM-001-3-B
-  pack: BM-001-3
-  physical_operation: Three raised spherical lobes on a doubly-curved underside; the enclosure rests on
-    the three lobe apexes - three point contacts on curved material.
-  assumptions:
-  - the three lobe apexes are COPLANAR to within manufacturing tolerance
-  - the centre of mass projects inside the triangle the apexes form
-  - each lobe is convex at its apex so contact is a point, not an edge
-  assumptions_explicit: true
-  plausible_counterexample: If the apexes are not coplanar the body rocks on two of three lobes. This
-    is the assumption the fixture stands on and exactly what CAD must confirm.
-  status: NEEDS_GEOMETRY_VALIDATION
-  note: REVISED at SF-4.2. The prior version claimed three contact patches from a SINGLE spherical cap,
-    which yields one ideal point contact - the fixture was held together by its tags alone.
-- fixture_id: ADM-BM-001-3-C
-  pack: BM-001-3
-  physical_operation: Single-curvature underside interrupted by a shallow NON-LOAD-BEARING recess set
-    above the contact envelope; the enclosure rests on the two curved bands flanking it - two line contacts
-    on curved material.
-  assumptions:
-  - the recess floor lies strictly above the plane the two curved bands touch
-  - the bands are wide enough to carry the weight without local yield
-  assumptions_explicit: true
-  plausible_counterexample: If the recess is not relieved far enough it becomes the contact and the body
-    rests on a flat land, which under RDG-BM-001-3-01 fails REQ-011. The clearance is the whole point
-    and is unverified.
-  status: NEEDS_GEOMETRY_VALIDATION
-  note: REVISED at SF-4.3. The prior version rested on a flat LAND, whose load-bearing contact is not
-    on the curved back.
 - fixture_id: ADM-BM-002-A
   pack: BM-002
   physical_operation: Crank turns a threaded column on a lower thrust seat and an upper journal; a nut

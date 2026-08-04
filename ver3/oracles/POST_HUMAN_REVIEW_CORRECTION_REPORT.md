@@ -1,4 +1,9 @@
 # Post-human-review correction report — GATES 1–6
+> **Scope note.** A later pass removed one BM-001 delta pack from active project
+> scope. Rows and mentions belonging only to that pack have been dropped from this
+> historical report so the current tree carries no reference to it. Everything stated
+> here about the remaining packs is unchanged, and git history holds the original.
+
 
 **Branch:** `ver3-oracle-phase1-review`
 **Starting commit:** `abd4b6e1fcc58cbdca0b54c85b9c8085c93e6960`
@@ -133,7 +138,6 @@ Six regions are now distinguished: `declared_contact`, `declared_clearance`,
 |---|---|---|
 | `NRM-BM-001-003` | `clearance(swept_volume(closure), enclosure_solid) > 0` | no volumetric overlap outside declared contact / interference-fit / compliant regions |
 | `NRM-BM-001-008` | *"does not intersect solid material"* | no undeclared volumetric overlap along the access path |
-| `NRM-BM-001-3-003` | `clearance(...) > 0` | same no-undeclared-overlap form |
 | `NRM-BM-002-008` | `intersect(platform_solid, housing_material) is empty` | same |
 | `NRM-C4-010` | `intersect(drawer_solid, cabinet_material) is empty` | same |
 | `NRM-GS-006` | `intersect(...) is empty outside the intended interaction` | same |
@@ -204,7 +208,6 @@ statement IDs, and `challengeable_by_cad: true`.
 | **HSD-002** | PROJECT_DEFINED_CAPABILITY | rotary-to-linear is an uninterrupted **chain**; reactions apply only to loads actually carried. Rejected: one direct engagement, universal radial/axial support. Also reclassifies AMB-C4-01. |
 | **HSD-003** | PROJECT_DEFINED_CAPABILITY | bounded-two-state-closure requires continuous constraint **coverage**; the active constraint may change. Rejected: one persistent constraint; endpoint bounds with free flight between. **Scope limit: not every product closure instantiates this micro-oracle.** |
 | **HSD-004** | PRODUCT_LANGUAGE_INTERPRETATION | "slides out horizontally" = straight translation along one horizontal axis. Rejected for this baseline: a curved generally-horizontal path. |
-| **HSD-005** | PRODUCT_LANGUAGE_INTERPRETATION | "rests on a curved back" requires the **load-bearing** contact on the curved region. Stability remains unresolved. |
 | **HSD-006** | VERIFICATION_METHODOLOGY | direct causal evidence **or** a discriminating control; a control is not mandatory. |
 
 The three decision kinds keep project-defined capabilities distinguishable from
@@ -309,7 +312,6 @@ implicitly by editing a pack, and a CAD result never revises the source freeze.
 | `AMB-001-2-01` | BM-001-2 | **yes, source-level** | three readings of "worked from inside the enclosure"; none selected |
 | `AMB-002-01` | BM-002 | no | is the crossing element part of the enclosed mechanism? |
 | `AMB-002-02` | BM-002 | no | where is the compliance edge of "approximately"? |
-| `AMB-001-3-01` | BM-001-3 | no | what does "rests" require of stability? |
 
 `AMB-C4-01` is retired to `LEGACY-CONFLICT-C4-01` — conflicting lower-rank legacy
 commentary, blocking nothing, requiring no human ruling.
@@ -320,7 +322,7 @@ commentary, blocking nothing, requiring no human ruling.
 
 All 44 admissible fixtures are `NEEDS_GEOMETRY_VALIDATION`; none was upgraded.
 `PU-01…PU-10` in the baseline name the ten sharpest, including whether
-`ADM-BM-001-3-B`'s three lobe apexes are coplanar, whether `ADM-HS-E`'s flexure
+`ADM-HS-E`'s flexure
 and rib overlap in coverage or leave an unconstrained band, whether
 `ADM-BM-002-E`'s required 40–50 mm crank throw fits a desktop envelope, and
 whether `ADM-BM-001-E`'s declared numerical contact tolerance is small enough that
