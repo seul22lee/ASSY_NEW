@@ -1,4 +1,4 @@
-schema_version: 0.2.0
+schema_version: 0.3.0
 human_decisions_recorded: true
 revisions_completed:
   EXE-BM001-01: true
@@ -14,53 +14,62 @@ EXE-BM001-01:
   validation: all ten steps PASS, 0 findings, 12/12 negative controls detected
   predicate_totals: {PASS: 12, FAIL: 0, NOT_VERIFIED: 0, NOT_EVALUABLE: 1}
   independently_reviewed: false
+  unchanged_by_the_EXE_BM001_02_redesign: >
+    rerun after the shared-tooling change that added direction arrows to the
+    section renderer. Same geometry signature, same twelve PASS and one
+    NOT_EVALUABLE, same 12/12 controls. This reference is the accepted regression
+    reference and was not redesigned or rewritten.
 
 EXE-BM001-02:
   revision_completed: true
   drivers: [HCR-BM001-004, HCR-BM001-005, HCR-BM001-006, HCR-BM001-007]
-  topology: snap-riveted captive sliding cover
-  previous_geometry_signature: e99b88b70ec523a42e73685a2542b0a0678f66ca920cd193d302db9146d83c39
-  revised_geometry_signature: 870af742b622b85628ceb5beb4f6fc8561993abdd9c6b6883f9e735174106649
-  validation: all ten steps PASS, 0 findings, 9/9 negative controls detected
+  topology: integrated snap-rail captive sliding cover
+  product_bodies: [BODY-ENCLOSURE, BODY-COVER]
+  no_third_product_body: true
+  previous_geometry_signature: 870af742b622b85628ceb5beb4f6fc8561993abdd9c6b6883f9e735174106649
+  revised_geometry_signature: 1eba7a573b5787ba86257e007512832b0538688e76b9268c12c2717b15b7b111
+  artifact_manifest_sha256: 6938358b3422b59ec6b788e815c8d6c41cd3f75e6399f57c707cd4b9d0d87d32
+  validation: all ten steps PASS, 0 findings, 16/16 negative controls detected
   predicate_totals: {PASS: 12, FAIL: 0, NOT_VERIFIED: 0, NOT_EVALUABLE: 1}
   independently_reviewed: false
+  reason_for_complete_redesign: >
+    The previous realization put retention on a separate snap rivet pressed
+    through cover and enclosure, and the closed-state latch on a keeper bridge
+    spanning the top of the product. That is a fastener compensating for rails
+    with no overhang: a third body doing the rail's job. The rails are now
+    complete - ledge, guide wall and overhanging retaining lip on both sides -
+    and every snap feature is integral to one of the two product bodies.
   how_each_decision_is_met:
-    HCR-BM001-004_captive_at_full_open: >
-      a 3 mm upward translation is blocked at 0, 10, 40, 70 and 84 mm by
-      14.222 mm^3 of rivet-lug interference at every one of them
+    HCR-BM001-003_84_of_90: >
+      84.0 mm of a 90.0 mm aperture, unchanged, with 0.000 mm^3 of intrusion into
+      the declared region in both the aperture band and the prism above it
+    HCR-BM001-004_not_removable_at_full_open: >
+      the retaining lips run the whole rail length and all four tabs are under
+      them at every position. A 3 mm lift is blocked at 0, 10, 40, 70 and 84 mm
+      (124.8 to 133.6 mm^3), and 12 pitch/roll probes are blocked as well.
     HCR-BM001-005_no_user_handled_separate_part: >
-      the rivet is pressed in once at assembly and cannot be withdrawn; the
-      release feature is the latch beam's own top face, integral to the cover
-    HCR-BM001-006_no_orientation_free_cam: >
-      no cam exists. The latch has one engaged and one released configuration and
-      no orientation to lose
+      two product bodies. Nothing is inserted, removed, set aside or managed by
+      the user; the release feature is the cover's own finger.
+    HCR-BM001-006_no_orientation_free_retainer: >
+      one engaged and one released configuration and no orientation to lose. The
+      latch recovers on its own through its lead-in ramp.
     HCR-BM001-007_directed_topology: >
-      guided captive sliding cover (ledges plus guide walls), integrated snap-in
-      captive retention (the rivet, anti-withdrawal lugs spanning 7.6 mm across a
-      5.4 mm slot), integrated releasable closed-state snap latch (the compliant
-      beam against the keeper)
-  superseded_versions:
-    - version: v0.1
-      what: rigid quarter-turn cam retention
-      why: rejected by HCR-BM001-005 and HCR-BM001-006
-    - version: v0.2
-      what: >
-        lipped rails with a relief cut in the lips and a loading position beyond
-        the open bound
-      why: >
-        it kept the cam design's lips and then needed a contrivance to be
-        assemblable at all. Rejected in rework, not by a human decision.
+      guided captive sliding cover on real captive rails; integrated snap-in
+      captive retention through four integral cover tabs; integrated releasable
+      closed-state snap latch reachable from outside the product envelope.
+  drawings_caught_what_the_checker_missed: >
+    An earlier arrangement of this redesign put the latch finger on the
+    centreline, where it retracted INTO the declared 84 mm opening at full open.
+    The access probe missed it because the probe sampled only the prism above the
+    cover, and the finger sits level with it. It was found by looking at the
+    full-open drawing. The latch was moved out over the near rail and the probe
+    now measures the aperture band as well.
   artifacts_deleted: >
-    BODY-CAM geometry, pin.step, pin.brep, the s_closed_retained_* and
-    section_pin_* renders, and REDESIGN_STATUS.md. Nothing in the directory now
-    describes a superseded topology.
-  check_strengthened_this_revision: >
-    NRM-BM-001-003's "is this a region the cover controls" clause was being
-    measured in the clear prism above the aperture, where the cover never goes. It
-    read 0 mm^3 and passed vacuously. It is now measured in the aperture band
-    (18160 mm^3) and guarded by the new control CTL-09.
+    all rivet geometry and metadata, the keeper bridge, rivet.step, rivet.brep,
+    and every review image depicting a superseded topology. Nothing in the
+    directory now describes a design that no longer exists.
 
 note: >
   Decisions HCR-BM001-001..007 authorize the revisions. They do not approve their
-  result. No person has seen the revised geometry or the new section views of
-  either reference, and nothing downstream may describe either as human-approved.
+  result. No person has seen the revised geometry or the new drawings of either
+  reference, and nothing downstream may describe either as human-approved.

@@ -1,5 +1,5 @@
 reference_id: EXE-BM001-02
-schema_version: 0.3.0
+schema_version: 0.4.0
 units: mm
 
 rule: >
@@ -13,122 +13,187 @@ evaluation_tolerance:
   overlap_tol_mm3: 1.0e-6
 
 interactions:
+
+  # ---------------------------------------------- rail function 1: support
   - id: INT-01
     bodies: [BODY-COVER, BODY-ENCLOSURE]
-    features: [FEA-C-PLATE, FEA-E-LEDGE-F]
+    features: [FEA-C-PLATE, FEA-E-RAIL-L-LEDGE]
     type: DECLARED_CONTACT
     nominal_clearance_mm: 0.0
     active: ALL_STATES
-    role: the cover rides on the front ledge throughout the travel
+    role: the cover rides on the near rail ledge throughout the travel
+    rail_function: vertical support
 
   - id: INT-02
     bodies: [BODY-COVER, BODY-ENCLOSURE]
-    features: [FEA-C-PLATE, FEA-E-LEDGE-R]
+    features: [FEA-C-PLATE, FEA-E-RAIL-R-LEDGE]
     type: DECLARED_CONTACT
     nominal_clearance_mm: 0.0
     active: ALL_STATES
-    role: the cover rides on the rear ledge
+    role: the cover rides on the far rail ledge
+    rail_function: vertical support
 
+  # ------------------------------------------- rail function 2: lateral guidance
   - id: INT-03
     bodies: [BODY-COVER, BODY-ENCLOSURE]
-    features: [FEA-C-EDGE-F, FEA-E-GUIDE-F]
+    features: [FEA-C-TAB-L1-EAR, FEA-E-RAIL-L-GUIDE]
     type: DECLARED_CLEARANCE
     nominal_clearance_mm: 0.2
     active: ALL_STATES
     role: >
-      lateral running clearance against the front guide wall. Guidance only:
-      nothing overhangs the cover, because the rivet does the holding down.
+      the near tab tips run on the near guide wall. Lateral location is taken on
+      the tabs, not on the plate edges, because the tabs are what reach the wall.
+    rail_function: lateral guidance
 
   - id: INT-04
     bodies: [BODY-COVER, BODY-ENCLOSURE]
-    features: [FEA-C-EDGE-R, FEA-E-GUIDE-R]
+    features: [FEA-C-TAB-R1-EAR, FEA-E-RAIL-R-GUIDE]
     type: DECLARED_CLEARANCE
     nominal_clearance_mm: 0.2
     active: ALL_STATES
-    role: lateral running clearance against the rear guide wall
+    role: the far tab tips run on the far guide wall
+    rail_function: lateral guidance
 
+  # --------------------------------------------- rail function 3: anti-lift
   - id: INT-05
-    bodies: [BODY-COVER, BODY-RIVET]
-    features: [FEA-C-BORE, FEA-R-SHAFT]
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-TAB-L1-SHOULDER, FEA-E-RAIL-L-LIP]
     type: DECLARED_CLEARANCE
-    nominal_clearance_mm: 0.3
+    nominal_clearance_mm: 0.4
     active: ALL_STATES
-    role: the shaft in the cover bore; the rivet travels with the cover
+    role: >
+      the near tab shoulders stand under the near retaining lip. This clearance
+      is the free vertical play; past it the lip is solid and the cover cannot
+      rise, at any position of the travel. Whether the tabs WITHSTAND a pull is a
+      force question and is NOT_VERIFIED.
+    rail_function: anti-lift capture
+    determines: COVER_CAPTIVITY
 
   - id: INT-06
-    bodies: [BODY-ENCLOSURE, BODY-RIVET]
-    features: [FEA-E-SLOT, FEA-R-SHAFT]
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-TAB-R1-SHOULDER, FEA-E-RAIL-R-LIP]
     type: DECLARED_CLEARANCE
-    nominal_clearance_mm: 0.2
+    nominal_clearance_mm: 0.4
     active: ALL_STATES
-    role: >
-      the shaft runs in the slot. The slot ends are the terminal bounds, so this
-      clearance is what sets both of them.
-    determines: TERMINAL_BOUNDS
+    role: the far tab shoulders stand under the far retaining lip
+    rail_function: anti-lift capture
+    determines: COVER_CAPTIVITY
 
+  # ------------------------------------------------- the plate between the lips
   - id: INT-07
-    bodies: [BODY-ENCLOSURE, BODY-RIVET]
-    features: [FEA-E-LEDGE-UNDER, FEA-R-LUG-SHOULDER]
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-PLATE, FEA-E-RAIL-L-LIP]
     type: DECLARED_CLEARANCE
-    nominal_clearance_mm: 0.3
+    nominal_clearance_mm: 0.5
     active: ALL_STATES
     role: >
-      the recovered lugs stand under the ledge. They are what stops the cover
-      lifting at any position, full open included, and what stops the rivet
-      withdrawing. Whether they WITHSTAND a pull is a force question and is
-      NOT_VERIFIED.
-    determines: COVER_CAPTIVITY_AND_ANTI_WITHDRAWAL
+      the plate edge against the near lip. 0.5 mm is the true corner-to-corner
+      distance: the lateral gap that lets the plate pass down between the lips is
+      0.3 mm, and the vertical gap under the lip is 0.4 mm. The lateral component
+      is what matters for assembly and is measured by the tab-passage probe.
 
   - id: INT-08
     bodies: [BODY-COVER, BODY-ENCLOSURE]
-    features: [FEA-C-LATCH-HOOK, FEA-E-KEEPER]
+    features: [FEA-C-PLATE, FEA-E-RAIL-R-LIP]
     type: DECLARED_CLEARANCE
-    nominal_clearance_mm: 1.0
-    active: [S_CLOSED_LATCHED]
-    role: >
-      the recovered hook stands 1.0 mm clear of the keeper's near face. That gap
-      is the closed-state free play: the cover can shift 1 mm before the hook
-      bites, and then it is blocked. Declaring it a CONTACT would contradict the
-      measurement.
-    determines: CLOSED_STATE_RETENTION
+    nominal_clearance_mm: 0.5
+    active: ALL_STATES
+    role: the plate edge against the far lip
 
+  # ------------------------------------------------------- terminal bounds
   - id: INT-09
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-PLATE-END-CLOSE, FEA-E-STOP-CLOSED]
+    type: DECLARED_CONTACT
+    nominal_clearance_mm: 0.0
+    active: [CLOSED_LATCH_ENGAGED, CLOSED_LATCH_RELEASED, CLOSED_REENGAGED]
+    role: the cover's +X face on the far wall's inner face; the closed bound
+    determines: TERMINAL_BOUND_CLOSED
+
+  - id: INT-10
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-PLATE-END-OPEN, FEA-E-STOP-OPEN]
+    type: DECLARED_CONTACT
+    nominal_clearance_mm: 0.0
+    active: [OPEN_84]
+    role: >
+      the cover's -X face on the solid rail fill at x = 13; the open bound. It is
+      a stop face, not a relief: there is no opening in the lips anywhere.
+    determines: TERMINAL_BOUND_OPEN
+
+  # --------------------------------------------------- the closed-state latch
+  - id: INT-11
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-LATCH-TOOTH, FEA-E-KEEPER]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.6
+    active: [CLOSED_LATCH_ENGAGED, CLOSED_REENGAGED]
+    role: >
+      the tooth's blocking face stands 0.6 mm behind the end wall's outer face,
+      outboard of the latch slot where the wall is still standing. That gap is
+      the closed-state free play: the cover shifts 0.6 mm before the latch bites,
+      and then it is blocked by 2.2 mm of solid wall. Declaring it a CONTACT
+      would contradict the measurement.
+    determines: CLOSED_STATE_TRANSLATION_BLOCK
+
+  - id: INT-12
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-LATCH-FINGER, FEA-E-LATCH-SLOT]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.4
+    active: ALL_STATES
+    role: >
+      the finger against the outboard edge of its slot. This clearance is what
+      decides how much of the tooth stands behind solid wall: the tooth projects
+      2.6 mm outboard, 0.4 mm of it is slot clearance, so 2.2 mm is engagement.
+      The slot is open inboard for the 2.6 mm release travel.
+
+  # ------------------------------------------------------------ parking surface
+  - id: INT-13
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-PLATE, FEA-E-DECK]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.4
+    active: [OPEN_84]
+    role: >
+      the cover parks over the solid top panel without touching it. The panel is
+      a surface to park over; the ledges alone carry the cover.
+
+  # --------------------------------------------- declared compliant passages
+  - id: INT-14
+    bodies: [BODY-COVER, BODY-ENCLOSURE]
+    features: [FEA-C-TAB-L1-EAR, FEA-E-RAIL-L-LIP]
+    type: DECLARED_COMPLIANT_INTERACTION
+    active: [ASM-02]
+    compliant_region: REG-COVER-RETAIN-LEFT-COMPLIANT
+    deflection_mm: 2.2
+    role: >
+      the declared compliant passage of the retention tabs between the rail lips
+      as the cover is pressed down. The compressed span is measured against the
+      actual lip gap rather than assumed.
+    not_established: strain, insertion force, pull-out force, fatigue
+
+  - id: INT-15
     bodies: [BODY-COVER, BODY-ENCLOSURE]
     features: [FEA-C-LATCH-RAMP, FEA-E-KEEPER]
     type: DECLARED_COMPLIANT_INTERACTION
-    active: [M1_RELEASE, M2_OPEN, M3_CLOSE]
-    compliant_region: REG-C-LATCH-COMPLIANT
+    active: [M1_RELEASE_AND_OPEN, M2_CLOSE_AND_REENGAGE]
+    compliant_region: REG-COVER-LATCH-COMPLIANT
     deflection_mm: 2.6
     role: >
-      the declared compliant passage of the latch past the keeper. On closing the
-      ramp deflects the beam; on opening the beam stays down until the ramp
-      clears. Measured by the latch probe, not assumed.
+      the declared compliant passage of the latch past the end wall. On closing
+      the tooth's ramp rides the corner of the keeper strip and pushes the finger
+      inboard on its own; on opening the user pushes it. Measured by the latch
+      probe, not assumed.
     not_established: strain, release effort, snap force, fatigue
-
-  - id: INT-10
-    bodies: [BODY-ENCLOSURE, BODY-RIVET]
-    features: [FEA-E-SLOT, FEA-R-LEADIN]
-    type: DECLARED_COMPLIANT_INTERACTION
-    active: [ASM-03]
-    compliant_region: REG-R-SNAP-COMPLIANT
-    deflection_mm: 1.30
-    role: >
-      the declared compliant passage of the arms through the slot as the rivet is
-      pressed home. The compressed envelope is measured against the slot width
-      rather than assumed.
-    not_established: strain, insertion force, pull-out force, fatigue
-
-  - id: INT-11
-    bodies: [BODY-COVER, BODY-RIVET]
-    features: [FEA-C-BORE, FEA-R-HEAD]
-    type: DECLARED_CONTACT
-    nominal_clearance_mm: 0.0
-    active: ALL_STATES
-    role: the head seats in the counterbore and caps the cover
 
 pairs_not_declared: []
 
 undeclared_contact_policy: >
-  validate.py scans all three body pairs in every state and at every sampled
-  point of all three motion segments, so the declaration cannot be completed by
+  validate.py scans the single body pair in every state and at every sampled
+  point of both motion segments, so the declaration cannot be completed by
   omission.
+
+no_separate_retention_part: >
+  Every interaction above is between BODY-COVER and BODY-ENCLOSURE. There is no
+  third body, and nothing in this reference is held together by a fastener.

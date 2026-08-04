@@ -1,109 +1,203 @@
 {
   "controls": [
     {
-      "check_under_test": "undeclared overlap",
+      "check_under_test": "captivity probe",
       "control_id": "CTL-01",
       "detected": true,
-      "injected_defect": "cover driven 0.5 mm into the ledges",
+      "injected_defect": "retaining lip reduced to nothing, side wall left in place",
       "measured": {
-        "common_volume_mm3": 753.0611
+        "lip_interference_with_lip_mm3": 124.8,
+        "lip_interference_without_lip_mm3": 0.0,
+        "note": "a side wall retains nothing; only the overhang does"
       }
     },
     {
-      "check_under_test": "lug projection check",
+      "check_under_test": "rail continuity check and captivity at full open",
       "control_id": "CTL-02",
       "detected": true,
-      "injected_defect": "lug span reduced below the slot width, so nothing retains the rivet",
+      "injected_defect": "retaining lips end 50 mm short of the open bound",
       "measured": {
-        "lug_span_mm": 5.2,
-        "note": "a lug narrower than its slot retains nothing",
-        "slot_w_mm": 5.4
+        "full_open_lift_interference_mm3": [
+          133.566,
+          71.166
+        ],
+        "lip_continuous": false
       }
     },
     {
-      "check_under_test": "compressed-envelope check",
+      "check_under_test": "per-tab engagement check",
       "control_id": "CTL-03",
       "detected": true,
-      "injected_defect": "arm deflection cut to 0.2 mm, so the arms cannot enter the slot",
+      "injected_defect": "one of the four retention tabs deleted",
       "measured": {
-        "compressed_envelope_mm": 7.2,
-        "slot_w_mm": 5.4
+        "engagement_with_tab_mm3": 31.2,
+        "engagement_without_tab_mm3": 0.0
       }
     },
     {
-      "check_under_test": "latch probe",
+      "check_under_test": "per-tab engagement check",
       "control_id": "CTL-04",
       "detected": true,
-      "injected_defect": "latch hook flattened, so nothing catches the keeper",
+      "injected_defect": "tab ear trimmed back inboard of the lip inner edge",
       "measured": {
-        "flat_hook_common_mm3": 0.0,
-        "with_hook_common_mm3": 36.0
+        "engagement_mm3": 0.0,
+        "lip_inner_edge_y": 5.2,
+        "note": "an ear that stops short of the lip is not under anything"
       }
     },
     {
-      "check_under_test": "latch discrimination",
+      "check_under_test": "assembly snap-passage check",
       "control_id": "CTL-05",
       "detected": true,
-      "injected_defect": "opening attempted with the latch engaged",
+      "injected_defect": "tab deflection cut to 0.5 mm, so the tabs cannot pass the lips",
       "measured": {
-        "blocks": true,
-        "frees": true,
-        "re_engages": true
+        "compressed_span_declared_mm": 59.2,
+        "compressed_span_mutated_mm": 62.6,
+        "limiting_opening_mm": 59.6
       }
     },
     {
-      "check_under_test": "captivity probe",
+      "check_under_test": "captivity at full open",
       "control_id": "CTL-06",
       "detected": true,
-      "injected_defect": "3 mm lift attempted at every operating position",
+      "injected_defect": "3 mm lift at the full-open bound with no retaining lip",
       "measured": {
-        "captive_at_full_open": true,
-        "positions": [
-          0.0,
-          10.0,
-          40.0,
-          70.0,
-          84.0
-        ]
+        "declared_geometry_gives_mm3": 133.566,
+        "full_open_lift_interference_mm3": 0.0
       }
     },
     {
-      "check_under_test": "cam removal",
+      "check_under_test": "tilt disengagement probe",
       "control_id": "CTL-07",
       "detected": true,
-      "injected_defect": "metadata check: a separate cam body still present",
+      "injected_defect": "1.5 degree pitch with a 1.5 mm lift, lips removed",
       "measured": {
-        "body_ids": [
-          "BODY-COVER",
-          "BODY-ENCLOSURE",
-          "BODY-RIVET"
+        "tilt_interference_mm3": [
+          60.2938,
+          0.0
         ]
       }
     },
     {
-      "check_under_test": "declared-region control check",
-      "control_id": "CTL-09",
+      "check_under_test": "two-body topology check",
+      "control_id": "CTL-08",
       "detected": true,
-      "injected_defect": "usable-access region declared outside the product footprint, where the cover never reaches",
+      "injected_defect": "a separate fastener body added to the product",
       "measured": {
-        "covered_when_closed_mm3": 0.0,
-        "note": "a region the cover never fills cannot be a region it controls",
-        "real_region_covered_mm3": 18160.0
+        "banned_present": [],
+        "declared_bodies": [
+          "BODY-COVER",
+          "BODY-ENCLOSURE"
+        ],
+        "mutated_bodies": [
+          "BODY-COVER",
+          "BODY-ENCLOSURE",
+          "BODY-FASTENER"
+        ]
       }
     },
     {
-      "check_under_test": "terminal-bound probe",
-      "control_id": "CTL-08",
+      "check_under_test": "single-connected-solid check",
+      "control_id": "CTL-09",
       "detected": true,
-      "injected_defect": "cover pushed 1 mm past each slot end",
+      "injected_defect": "release tab detached from the cover and left floating",
       "measured": {
-        "blocked_outside": true,
-        "clear_within": true
+        "declared_solid_count": 1,
+        "mutated_solid_count": 2
+      }
+    },
+    {
+      "check_under_test": "release clearance check",
+      "control_id": "CTL-10",
+      "detected": true,
+      "injected_defect": "release shift reduced to 0.8 mm, below the 2.2 mm engagement",
+      "measured": {
+        "opening_interference_after_release_mm3": [
+          0.0,
+          11.4323
+        ]
+      }
+    },
+    {
+      "check_under_test": "keeper connectivity check",
+      "control_id": "CTL-11",
+      "detected": true,
+      "injected_defect": "keeper replaced by a block floating over the product",
+      "measured": {
+        "enclosure_solid_count": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "check_under_test": "closed-state translation block",
+      "control_id": "CTL-12",
+      "detected": true,
+      "injected_defect": "latch tooth removed, finger left in place",
+      "measured": {
+        "block_at_3mm_open_mm3": [
+          21.0323,
+          0.0
+        ],
+        "note": "a finger without a tooth is decoration"
+      }
+    },
+    {
+      "check_under_test": "re-engagement check",
+      "control_id": "CTL-13",
+      "detected": true,
+      "injected_defect": "latch left in the lifted configuration after closing",
+      "measured": {
+        "block_after_closing_mm3": [
+          21.0323,
+          0.0
+        ],
+        "note": "if it does not drop back it does not latch"
+      }
+    },
+    {
+      "check_under_test": "usable-opening check",
+      "control_id": "CTL-14",
+      "detected": true,
+      "injected_defect": "travel cut to 70 mm, narrowing the usable opening",
+      "measured": {
+        "usable_mm": [
+          84.0,
+          70.0
+        ]
+      }
+    },
+    {
+      "check_under_test": "obsolete-metadata scan",
+      "control_id": "CTL-15",
+      "detected": true,
+      "injected_defect": "a superseded BODY-RIVET / cam declaration injected into metadata",
+      "measured": {
+        "injected_hits": {
+          "<injected>": [
+            "BODY-RIVET",
+            "quarter-turn"
+          ]
+        },
+        "live_product_files_clean": true
+      }
+    },
+    {
+      "check_under_test": "PNG evidence check",
+      "control_id": "CTL-16",
+      "detected": true,
+      "injected_defect": "review set stripped of its assembly and operation sequences",
+      "measured": {
+        "live_set_complete": true,
+        "missing_in_mutated_set": [
+          "review_does_not_exist.png"
+        ]
       }
     }
   ],
-  "controls_detected": 9,
-  "controls_run": 9,
+  "controls_detected": 16,
+  "controls_run": 16,
   "name": "checker self-test",
   "purpose": "Establishes that the checks in this chain can fail. Each control injects a defect in memory and passes only if the check reports it. No perturbed model is exported.",
   "status": "PASS",

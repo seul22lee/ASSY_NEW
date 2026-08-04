@@ -44,22 +44,20 @@ CAD exist as later phases.
 | | EXE-BM001-01 | EXE-BM001-02 |
 |---|---|---|
 | Closure motion | revolute, 110° | prismatic, 84 mm |
-| Guidance | five interleaved knuckles on a separate pin | two ledges plus two guide walls, integral |
-| Retention | rigid sliding bolt, lift to release | snap rivet in a slot, plus an integral compliant latch |
-| Snap features | headed pin with two integral cantilever snap arms | rivet arms, and a latch beam cut from the cover |
-| Bodies | 4 | 3 |
+| Guidance | five interleaved knuckles on a separate pin | two captive C-section rails, integral |
+| Retention | rigid sliding bolt, lift to release | the rails themselves: four integral cover tabs under two retaining lips |
+| Snap features | headed pin with two integral cantilever snap arms | four retention tabs and one latch finger, all part of the cover |
+| Bodies | 4 | **2** |
 | Semantic fixture | ADM-BM-001-E (close) | **none** |
-| Terminal bounds | one (open), constructed stop face | two (open and closed), slot ends |
-| Geometry signature | `f2bc9599cdd6832d…` (was `5586b96cc2e92e11…`) | `870af742b622b856…` (was `e99b88b70ec523a4…`) |
+| Terminal bounds | one (open), constructed stop face | two (open and closed), stop faces |
+| Geometry signature | `f2bc9599cdd6832d…` (was `5586b96cc2e92e11…`) | `1eba7a573b5787ba…` (was `870af742b622b856…`) |
 
 They differ in joint type, body count, retention principle and assembly process.
 Neither is a variation of the other.
 
-A correction to this table: it previously gave EXE-BM001-02's signature as
-`11bcc694d0261737…`, which was the v0.1 cam geometry. By then the tree already
-held v0.2 at `e99b88b70ec523a4…`, so the report was describing geometry that was
-no longer there. The predecessor column now names the signature that was actually
-committed.
+EXE-BM001-02 has been through four topologies. The three that are gone are
+recorded in `EXE-BM001-02/DESIGN_AND_OPERATION_RATIONALE.md`; their artifacts
+have been deleted rather than left in the tree, and git history holds them.
 
 EXE-BM001-02 deliberately matches no listed fixture. The seven admissible
 fixtures are the machine-checked sample, not the permitted set, and an Oracle
@@ -92,18 +90,25 @@ so it needed a relief cut in the lips and a loading position beyond the open
 bound just to get the cover in — a workaround wearing the shape of a feature, and
 an assembly path that was implausible rather than merely awkward.
 
-The current design, **v0.3**, starts from the retention question instead. If a
-snap rivet holds the cover down at every position, the lips have no job; removing
-them removed the relief, the loading position and the deck pocket they forced.
-What is left is a cover carried on two ledges, located by two guide walls, held
-down for its whole life by one snap rivet running in a slot whose ends are the
-travel bounds, and held shut by a compliant latch cut from the cover itself.
-Assembly is two straight downward presses at the closed position. The version
-history is recorded in `EXE-BM001-02/expected_evaluation.yaml#version_history`,
-and the superseded artifacts have been deleted rather than left in the tree.
+The attempt after that removed the lips and put the retention on a **separate
+snap rivet** pressed through cover and enclosure, with a keeper bridge across the
+top of the product for the latch. It measured clean, but it was the wrong answer
+to the question: a fastener compensating for rails that had no overhang. A third
+body was doing the rail's job, and "snap-fit" had come to mean "a snap-fit part"
+rather than an integral compliant feature.
 
-The revision has been built and validated; **independent human review of the
-result is PENDING.**
+**The current design is two bodies and nothing else.** The rails are complete —
+ledge, guide wall and overhanging retaining lip on both sides — and they carry
+all three retention functions between them: support, lateral guidance and
+anti-lift. The cover has four integral snap tabs that deflect 2.2 mm inboard,
+pass between the lip inner edges, and recover underneath them. Assembly is one
+straight downward press at the closed position. The closed state is held by a
+second integral snap: a finger at the cover's exposed end reaching out through
+the end wall, with a tooth standing behind the strip of wall beside the slot.
+Push the pad sideways, the tooth clears, slide the cover open.
+
+Both references have been built and validated; **independent human review of the
+result is PENDING for both.**
 
 ### What the two revisions cost
 
@@ -115,17 +120,17 @@ arm. Only `REG-P-SNAP-COMPLIANT` is treated as deformable, and only during
 insertion; everywhere else the pin is a rigid guide. Every force, strain and life
 question the change introduces is NOT_VERIFIED.
 
-EXE-BM001-02 paid the same price twice over. Two of its three bodies are now
-`GENERIC_COMPLIANT_POLYMER`, with two declared compliant regions:
-`REG-R-SNAP-COMPLIANT` (the rivet arms, 1.30 mm inward deflection each, assembly
-only) and `REG-C-LATCH-COMPLIANT` (the latch beam, 2.6 mm downward deflection,
-release only). Both are modelled as rigid translations of a declared region, so
-volume is conserved to 0.000 mm³ — which makes them a
-`DECLARED_KINEMATIC_APPROXIMATION` of a snap, testing geometric passage and
-engagement and predicting nothing about strain. It also cost the reference its
-serviceability: the rivet cannot be removed without destroying it. That is
-recorded as `LIM-01`, a declared design choice and the price of captivity at full
-open, rather than presented as a feature.
+EXE-BM001-02 paid it across five features. Its cover is
+`GENERIC_COMPLIANT_POLYMER` with three declared compliant regions:
+`REG-COVER-RETAIN-LEFT-COMPLIANT` and `REG-COVER-RETAIN-RIGHT-COMPLIANT` (two
+tabs each, 2.2 mm inboard, assembly only) and `REG-COVER-LATCH-COMPLIANT` (the
+latch finger, 2.6 mm inboard, release and lead-in only). All are modelled as
+rigid translations of a declared region, so volume is conserved to 0.000 mm³ —
+which makes them a `DECLARED_KINEMATIC_APPROXIMATION` of a snap, testing
+geometric passage and engagement and predicting nothing about strain. Service
+removal survives, unlike the rivet version, but it now needs all four tabs
+deflected at once through the rail channels: a deliberate action, recorded as
+`LIM-01`, not an ordinary pull.
 
 ### Four errors the checks caught before they reached the report
 
@@ -153,16 +158,16 @@ Both references, full sampling, on the locked interpreter:
 
 | Step | EXE-BM001-01 | EXE-BM001-02 |
 |---|---|---|
-| 1 build | 4 bodies | 3 bodies |
+| 1 build | 4 bodies | 2 bodies |
 | 2 solid validity | PASS | PASS |
 | 3 STEP + BREP re-import | PASS | PASS |
 | 4 signature and rebuild determinism | PASS | PASS |
-| 5 motion sampling | PASS (180 samples, 2 segments) | PASS (283 samples, 3 segments) |
-| 6 interactions | PASS (16 declared) | PASS (11 declared) |
+| 5 motion sampling | PASS (180 samples, 2 segments) | PASS (2 segments) |
+| 6 interactions | PASS (16 declared) | PASS (15 declared) |
 | 7 assembly | PASS | PASS |
 | 8 Oracle predicates | PASS | PASS |
-| 9 render | 20 images | 12 images |
-| checker self-test | PASS 12/12 | PASS 9/9 |
+| 9 render | 20 images | 28 images |
+| checker self-test | PASS 12/12 | PASS 16/16 |
 | **overall** | **PASS**, 0 findings | **PASS**, 0 findings |
 
 Maximum boolean common volume over every body pair, every state and every
@@ -212,7 +217,7 @@ What remains `NOT_VERIFIED` **by construction**, for both references:
 | REQ-006 practical for desktop use | the source states no envelope |
 
 Also unmodelled: snap-in force, pull-out capacity, latch release effort, friction,
-wear, flexure, creep, manufacturing tolerance capability.
+wear, flexure, creep, impact resistance, manufacturing tolerance capability.
 
 **No sentence in this pilot may combine a computed geometric result with an
 unverified physical requirement.** These references are reported as
@@ -252,8 +257,14 @@ caught by the chain rather than by review:
    documented and pinned rather than latent.
 
 Each reference also carries negative controls that inject a defect in memory and
-pass only if the check reports it: 12 for EXE-BM001-01, 9 for EXE-BM001-02, all
-detected. `tools/test_primitives.py` adds 29 closed-form checks on the shared
+pass only if the check reports it: 12 for EXE-BM001-01, 16 for EXE-BM001-02, all
+detected. EXE-BM001-02's set includes a missing retaining lip, a lip that stops
+short of the open bound, a missing tab, a tab that never reaches under a lip, a
+tab that cannot pass at assembly, lift-out and tilt-out at full open, a
+reintroduced third body, a detached release tab, a release that does not clear
+the keeper, a floating keeper, a missing tooth, a latch that never re-engages, a
+narrowed opening, obsolete metadata, and a review-image set missing its assembly
+and operation evidence. `tools/test_primitives.py` adds 29 closed-form checks on the shared
 primitives, including an explicit assertion that the naive three-argument
 `cq.Location` does **not** fix an arbitrary axis — pinning the rotation bug that
 was found and fixed earlier in this phase, and which would have silently
@@ -267,16 +278,27 @@ somewhere, and the only place is over the rest of the enclosure.
 
 `NRM-BM-001-003` asks whether the closure obstructs the access *the design
 declares*, so this passes. The evaluator blocks the crudest way of gaming that —
-it measures that the declared region is covered by 18160 mm³ of cover in the
+it measures that the declared region is covered by 18480 mm³ of cover in the
 closed state, so it is a region the cover genuinely controls rather than one drawn
 where the cover never reaches.
 
-That second measurement was itself wrong until this revision, and the way it was
-wrong is worth recording: it was taken in the clear prism *above* the aperture,
-where the cover never goes. It read 0 mm³ and the clause passed anyway — a check
-that could only ever pass. It is now taken in the aperture band between the ledge
-top and the cover top, the clause is load-bearing, and `CTL-09` injects a declared
-region outside the product footprint to confirm it can fail.
+That second measurement was itself wrong until an earlier revision, and the way
+it was wrong is worth recording: it was taken in the clear prism *above* the
+aperture, where the cover never goes. It read 0 mm³ and the clause passed anyway —
+a check that could only ever pass. It is now taken in the aperture band between
+the ledge tops and the cover top, the clause is load-bearing, and `CTL-09` in the
+previous topology injected an out-of-footprint region to prove it could fail.
+
+The redesign then found a defect the *drawings* caught rather than the checker.
+An earlier arrangement put the latch finger on the cover's centreline; at full
+open it retracted **into** the declared 84 mm opening at cover level. The access
+probe missed it because the probe measured only the prism above the cover, and
+the finger sits level with it. It was visible the moment the full-open view was
+cut in a plane where the aperture actually exists. The latch was moved out over
+the near rail, where it retracts over the ledge instead — intrusion is now
+0.000 mm³ in the aperture band and in the prism above it alike. The lesson is
+about the probe, not the CAD: a region-based access check that samples only one
+band can be satisfied by geometry that obstructs another.
 
 A reviewer may still judge that a design should not be able to pass by narrowing
 its own declaration. **That would be a finding about NRM-BM-001-003, not about

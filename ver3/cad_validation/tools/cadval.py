@@ -515,7 +515,8 @@ def section_polygons(shape: cq.Shape, axis: int, at: float, tol: float = 0.05):
 def render_review_section(bodies, out_path: str, *, plane: str, at: float,
                           colors=None, hatches=None, title: str = "",
                           label: str = "", extent=None, annotations=(),
-                          section_lines=(), context_note: str = "") -> str:
+                          section_lines=(), context_note: str = "",
+                          arrows=()) -> str:
     """Orthographic review section drawn as a drawing, not as a render.
 
     Cut faces are filled and hatched so they read as cut material. Nothing
@@ -586,6 +587,19 @@ def render_review_section(bodies, out_path: str, *, plane: str, at: float,
                  fontsize=10)
     ax.grid(True, alpha=0.20, lw=0.4, zorder=1)
     ax.tick_params(labelsize=8)
+    for a in arrows:
+        x, y = a["xy"]
+        dx, dy = a["dxy"]
+        col = a.get("color", "#c0392b")
+        ax.annotate("", xy=(x + dx, y + dy), xytext=(x, y), zorder=9,
+                    arrowprops=dict(arrowstyle="-|>,head_width=0.42,head_length=0.85",
+                                    lw=3.0, color=col, shrinkA=0, shrinkB=0))
+        if a.get("text"):
+            ax.text(x + dx * a.get("tpos", 0.5) + a.get("toff", (0.0, 0.0))[0],
+                    y + dy * a.get("tpos", 0.5) + a.get("toff", (0.0, 0.0))[1],
+                    a["text"], color=col, fontsize=9, fontweight="bold", zorder=10,
+                    ha=a.get("tha", "center"), va=a.get("tva", "bottom"),
+                    bbox=dict(boxstyle="round,pad=0.22", fc="white", ec=col, lw=1.0))
     for a in annotations:
         ax.annotate(a["text"], xy=a["xy"], xytext=a["xytext"], fontsize=8.5,
                     arrowprops=dict(arrowstyle="->", lw=1.0, color="#0b6b3a"),

@@ -1,79 +1,112 @@
 reference_id: EXE-BM001-02
-schema_version: 0.3.0
+schema_version: 0.4.0
 units: mm
 
-frame: Enclosure-fixed. Transforms apply to a body's as-built shape.
+frame: >
+  Origin at the enclosure's minimum outer corner. X is the slide axis; the cover
+  opens toward -X. Slide is measured from the closed position.
 
-cover_configurations:
-  CFG-COVER-RELAXED: latch recovered
-  CFG-COVER-LATCH-DEFLECTED: beam pressed down by latch_deflection
-  note: >
-    The released state differs from the latched state by COVER CONFIGURATION,
-    not by a pose. Moving the whole cover down instead would drive the plate into
-    the ledges and report an interference the product does not have.
+configurations:
+  - id: CFG-COVER-RELAXED
+    what: every tab and the latch finger at rest
+    used_in: all operating states except those listing another configuration
+  - id: CFG-TABS-COMPRESSED
+    what: >
+      the four retention tabs translated 2.2 mm inboard as rigid regions, so the
+      whole cover fits between the rail lips
+    used_in: [ASM-02]
+    never_an_operating_state: true
+  - id: CFG-LATCH-DEFLECTED
+    what: >
+      the latch finger and its tooth translated 2.6 mm inboard (+Y) as one rigid
+      region. The latch works sideways, not up: it sits in the near rail channel
+      where there is no room to move vertically, and being out there is what
+      keeps it clear of the aperture at full open.
+    used_in: [CLOSED_LATCH_RELEASED, OPENING_STARTED, CLOSING_LATCH_LEADIN]
 
-rivet_configurations:
-  CFG-RIVET-RELAXED: every operating state
-  CFG-RIVET-COMPRESSED: assembly only, never exported
+assembly_states:
+  - id: ASSEMBLY_ALIGNED
+    slide_mm: 0.0
+    lift_mm: 30.0
+    configuration: CFG-TABS-COMPRESSED
+    what: >
+      cover held above the closed position, tabs already deflected inboard. The
+      plate and the compressed tabs together span 59.2 mm across a 59.6 mm gap
+      between the lip inner edges, so the whole cover can come straight down.
+  - id: ASSEMBLY_TABS_COMPRESSED
+    slide_mm: 0.0
+    lift_mm: 0.0
+    configuration: CFG-TABS-COMPRESSED
+    what: >
+      cover seated on the ledges with the tabs still held in. This is the moment
+      of passage; it is not an operating state and the cover is not captive yet.
+  - id: ASSEMBLY_TABS_RECOVERED
+    slide_mm: 0.0
+    lift_mm: 0.0
+    configuration: CFG-COVER-RELAXED
+    what: >
+      tabs released. Each ear springs outward under its rail lip and the cover
+      becomes captive, here and at every other position of the travel.
 
-states:
-  - id: S_CLOSED_LATCHED
-    role: CLOSED
-    retained: true
-    terminal: true
-    cover_configuration: CFG-COVER-RELAXED
-    transforms: {BODY-ENCLOSURE: identity, BODY-COVER: identity, BODY-RIVET: identity}
-  - id: S_CLOSED_RELEASED
-    role: CLOSED
-    retained: false
-    cover_configuration: CFG-COVER-LATCH-DEFLECTED
-    transforms: {BODY-ENCLOSURE: identity, BODY-COVER: identity, BODY-RIVET: identity}
-  - id: S_OPEN
-    role: OPEN
-    retained: false
-    terminal: true
-    cover_configuration: CFG-COVER-RELAXED
-    transforms:
-      BODY-ENCLOSURE: identity
-      BODY-COVER: {translate: [-84.0, 0.0, 0.0]}
-      BODY-RIVET: {translate: [-84.0, 0.0, 0.0]}
-
-terminal_conditions:
-  - {state: S_OPEN, determinant: INT-06, kind: DISCRETE_TERMINAL_POSE,
-     how_realized: the rivet shaft meets FEA-E-SLOT-END-NEAR}
-  - {state: S_CLOSED_LATCHED, determinant: INT-06, kind: DISCRETE_TERMINAL_POSE,
-     how_realized: the rivet shaft meets FEA-E-SLOT-END-FAR}
-terminal_condition_causal_probe: >
-  validate.py evaluates the model at slide distances either side of both bounds.
-  Common volume is zero across 0..84 and positive outside it at both ends, which
-  is direct causal evidence that the slot ends are what terminate the slide.
+operating_states:
+  - id: CLOSED_LATCH_ENGAGED
+    slide_mm: 0.0
+    configuration: CFG-COVER-RELAXED
+    what: >
+      cover shut. Its +X face is on the far wall's inner face, and the latch
+      tooth stands 0.6 mm behind the wall's outer face.
+  - id: CLOSED_LATCH_RELEASED
+    slide_mm: 0.0
+    configuration: CFG-LATCH-DEFLECTED
+    what: the user has pushed the exterior release pad inboard; the tooth is clear
+  - id: OPENING_STARTED
+    slide_mm: 4.3
+    configuration: CFG-LATCH-DEFLECTED
+    what: >
+      mid-way through the window in which the tooth is still alongside the end
+      wall, so the deflected configuration is doing real work here rather than
+      merely being declared. The finger may be let go after 8.0 mm.
+  - id: OPEN_INTERMEDIATE
+    slide_mm: 42.0
+    configuration: CFG-COVER-RELAXED
+    what: mid travel; tabs still under both lips
+  - id: OPEN_84
+    slide_mm: 84.0
+    configuration: CFG-COVER-RELAXED
+    what: >
+      open terminal bound. The cover's -X face is on the solid rail fill at
+      x = 13, and 84 mm of the 90 mm aperture is uncovered.
+  - id: CLOSING_LATCH_LEADIN
+    slide_mm: 4.3
+    configuration: CFG-LATCH-DEFLECTED
+    what: >
+      closing. The tooth's ramp is riding the corner of the keeper strip, which
+      pushes the finger inboard without the user doing anything.
+  - id: CLOSED_REENGAGED
+    slide_mm: 0.0
+    configuration: CFG-COVER-RELAXED
+    what: >
+      the tooth has dropped back behind the wall. Identical to
+      CLOSED_LATCH_ENGAGED, which is the point: the cycle returns the same state.
 
 motion_segments:
-  - id: M1_RELEASE
-    from: S_CLOSED_LATCHED
-    to: S_CLOSED_RELEASED
-    moving: [the cover's latch region only]
-    kind: declared compliant deflection
-    travel: 2.6
-  - id: M2_OPEN
-    from: S_CLOSED_RELEASED
-    to: S_OPEN
-    moving: [BODY-COVER, BODY-RIVET]
-    kind: prismatic
-    travel: 84.0
-    latch_held_down_for_first: 10.5
-    note: >
-      The beam stays down only while the hook and its ramp are alongside the
-      keeper. Past that it recovers; holding it down for the whole slide would
-      drag the deflected strip over the solid top panel.
-  - id: M3_CLOSE
-    from: S_OPEN
-    to: S_CLOSED_LATCHED
-    moving: [BODY-COVER, BODY-RIVET]
-    kind: prismatic
-    travel: 84.0
-    note: the ramp re-deflects the beam and the hook recovers behind the keeper
+  - id: M1_RELEASE_AND_OPEN
+    from: CLOSED_LATCH_RELEASED
+    to: OPEN_84
+    kind: straight translation along -X
+    note: the finger is held deflected for the first 8.0 mm, then springs back
+  - id: M2_CLOSE_AND_REENGAGE
+    from: OPEN_84
+    to: CLOSED_REENGAGED
+    kind: straight translation along +X
+    note: the lead-in ramp deflects the finger for the last 8.0 mm
 
-ordering_constraint: >
-  M2_OPEN is not traversable while the latch is engaged. Press, then slide -
-  that ordering is the release action, and validate.py measures both halves.
+removal_probes:
+  - what: straight upward translation, 3.0 mm
+    at_slide_mm: [0.0, 10.0, 40.0, 70.0, 84.0]
+    expected: blocked by the retaining lips at every position
+  - what: pitch and roll of 1.5 degrees with a 1.5 mm lift
+    at_slide_mm: [0.0, 40.0, 84.0]
+    expected: >
+      blocked. Two tabs a side spaced 52 mm apart mean a tilt cannot walk the
+      cover out the way a single central retainer could.

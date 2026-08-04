@@ -1,28 +1,22 @@
 reference_id: EXE-BM001-02
-schema_version: 0.3.0
-title: snap-riveted captive sliding cover
+schema_version: 0.4.0
+title: integrated snap-rail captive sliding cover
 kind: ADMISSIBLE_EXECUTABLE_REFERENCE
 author_awareness: ORACLE_AWARE
 units: mm
 
 concept:
-  name: snap-riveted captive sliding cover
-  every_part_has_one_job:
-    ledges: carry the cover
-    guide_walls: locate it sideways
-    rivet: hold it down, everywhere, for its whole life
-    slot_ends: bound the travel
-    latch: hold it shut until deliberately released
-  supersedes:
-    - v0.1 quarter-turn cam, rejected by HCR-BM001-005 and -006
-    - v0.2 lipped rails with a loading relief outside the operating range
-  why_the_lips_went: >
-    They came from the cam design. A lipped channel closed at both ends cannot be
-    entered by any translation, so v0.2 needed a relief cut in the lips and a
-    loading position beyond the open bound just to get the cover in. Once the
-    rivet does the retaining the lips have no job, so the relief, the loading
-    position and the deck pocket they forced all went with them. Assembly is now
-    two straight presses.
+  name: integrated snap-rail captive sliding cover
+  product_bodies: [BODY-ENCLOSURE, BODY-COVER]
+  no_other_product_body_exists: true
+  one_line: >
+    Two captive C-section rails carry the whole retention job - the ledge
+    supports, the guide wall locates, the retaining lip holds down - and the
+    cover snaps past those lips on four integral tabs. A second integral snap, a
+    finger at the cover's exposed end, holds it shut.
+  supersedes: >
+    two earlier topologies for this reference, both rejected. What replaced them
+    and why is in DESIGN_AND_OPERATION_RATIONALE.md.
 
 bodies:
   - id: BODY-ENCLOSURE
@@ -30,113 +24,183 @@ bodies:
     material_class: GENERIC_RIGID_POLYMER
     installed_as: DISCRETE
     role: >
-      Fixed body. Cavity; solid top panel the cover parks over; two ledges it
-      runs on; two guide walls that locate it sideways and nothing more; the
-      rivet slot whose ends bound the travel; the latch keeper bridge.
+      Fixed body. Cavity, solid top panel, and two captive rails. Its far end
+      wall carries the latch slot, and the strip of wall standing outboard of
+      that slot is the keeper.
+    material_model:
+      kinematically_rigid: ALL
+      declared_compliant_region: none
     features:
-      - {id: FEA-E-LEDGE-F, what: front ledge top face; the cover runs on it}
-      - {id: FEA-E-LEDGE-R, what: rear ledge top face}
-      - {id: FEA-E-LEDGE-UNDER, what: front ledge underside; the rivet lugs recover against it}
-      - {id: FEA-E-GUIDE-F, what: front guide wall inner face}
-      - {id: FEA-E-GUIDE-R, what: rear guide wall inner face}
-      - {id: FEA-E-SLOT, what: slot through the front ledge}
-      - {id: FEA-E-SLOT-END-NEAR, what: near slot end; the open terminal bound}
-      - {id: FEA-E-SLOT-END-FAR, what: far slot end; the closed terminal bound}
-      - {id: FEA-E-KEEPER, what: bridge across the guide walls; the latch hook catches its near face}
-      - {id: FEA-E-LATCH-RELIEF, what: pocket under the beam path over the solid panel}
-      - {id: FEA-E-DECK, what: solid top panel}
+      - {id: FEA-E-RAIL-L-LEDGE, what: near rail ledge; its top face carries the cover}
+      - {id: FEA-E-RAIL-L-GUIDE, what: near guide wall inner face; the tab tips run on it}
+      - {id: FEA-E-RAIL-L-LIP, what: near retaining lip; overhangs the tabs, blocks lift}
+      - {id: FEA-E-RAIL-R-LEDGE, what: far rail ledge}
+      - {id: FEA-E-RAIL-R-GUIDE, what: far guide wall inner face}
+      - {id: FEA-E-RAIL-R-LIP, what: far retaining lip}
+      - {id: FEA-E-STOP-OPEN, what: solid rail fill at x = 13; the open terminal bound}
+      - {id: FEA-E-STOP-CLOSED, what: far end wall inner face; the closed terminal bound}
+      - {id: FEA-E-LATCH-SLOT, what: open-topped slot through the far end wall the finger reaches through}
+      - {id: FEA-E-KEEPER, what: the strip of far end wall standing OUTBOARD of that slot; the tooth hooks behind its outer face}
+      - {id: FEA-E-DECK, what: solid top panel the cover parks over}
       - {id: FEA-E-APERTURE, what: opening in the top}
+      - {id: FEA-E-CAVITY, what: interior volume}
   - id: BODY-COVER
     name: sliding cover
     material_class: GENERIC_COMPLIANT_POLYMER
-    installed_as: DISCRETE
-    role: Movable cover with an integral compliant latch beam cut from the plate.
-    material_model:
-      kinematically_rigid: [FEA-C-PLATE]
-      declared_compliant_region: REG-C-LATCH-COMPLIANT
-      compliant_members: [FEA-C-LATCH-BEAM, FEA-C-LATCH-HOOK, FEA-C-LATCH-RAMP]
-      statement: >
-        Only the latch beam is treated as deformable, and only while the hook is
-        alongside the keeper. The plate is a rigid slider everywhere else.
-    configurations:
-      - {id: CFG-COVER-RELAXED, what: latch recovered; at rest and through most of the travel}
-      - {id: CFG-COVER-LATCH-DEFLECTED, what: beam pressed down; release and the first 10.5 mm}
-    features:
-      - {id: FEA-C-PLATE, what: the plate covering the aperture}
-      - {id: FEA-C-BORE, what: rivet bore with a counterbore sinking the head flush}
-      - {id: FEA-C-LATCH-BEAM, what: cantilever cut from the plate, rooted at its +X end}
-      - {id: FEA-C-LATCH-HOOK, what: hook standing above the beam tip}
-      - {id: FEA-C-LATCH-RAMP, what: lead-in so closing deflects the beam}
-      - {id: FEA-C-RELEASE-FACE, what: the beam's own top face; reached through the aperture}
-      - {id: FEA-C-EDGE-F, what: front edge, running against the front guide wall}
-      - {id: FEA-C-EDGE-R, what: rear edge}
-  - id: BODY-RIVET
-    name: snap rivet
-    material_class: GENERIC_COMPLIANT_POLYMER
     installed_as: DISCRETE_SNAP_IN
     role: >
-      Pressed once through the cover and the slot. Its head caps the cover and
-      its recovered lugs bear under the ledge, so the cover cannot lift at any
-      position; the slot ends bound the travel.
+      Movable cover. Four integral retention tabs run under the rail lips; an
+      integral latch finger reaches out through the end wall over the near rail
+      and hooks behind the keeper strip. Everything that retains or latches this
+      cover is part of it.
     material_model:
-      kinematically_rigid: [FEA-R-HEAD, FEA-R-SHAFT]
-      declared_compliant_region: REG-R-SNAP-COMPLIANT
-      compliant_members: [FEA-R-ARM-A, FEA-R-ARM-B, FEA-R-LUG-A, FEA-R-LUG-B]
+      kinematically_rigid: [FEA-C-PLATE]
+      declared_compliant_regions:
+        - REG-COVER-RETAIN-LEFT-COMPLIANT
+        - REG-COVER-RETAIN-RIGHT-COMPLIANT
+        - REG-COVER-LATCH-COMPLIANT
+      statement: >
+        Only the four tabs and the latch finger are treated as deformable, and
+        each only during its own declared action. The plate is a rigid slider
+        everywhere else and throughout normal operation.
     configurations:
-      - {id: CFG-RIVET-RELAXED, what: as-built; every operating state}
-      - {id: CFG-RIVET-COMPRESSED, what: arms deflected across the slot; assembly only, never exported}
+      - {id: CFG-COVER-RELAXED, what: everything at rest; every operating state}
+      - {id: CFG-TABS-COMPRESSED, what: tabs 2.2 mm inboard; assembly only, never exported}
+      - {id: CFG-LATCH-DEFLECTED, what: finger 2.6 mm inboard; release and lead-in only}
     features:
-      - {id: FEA-R-HEAD, what: head sunk flush in the cover counterbore}
-      - {id: FEA-R-SHAFT, what: shaft running in the slot}
-      - {id: FEA-R-ARM-A, what: first cantilever arm, deflecting across the slot width}
-      - {id: FEA-R-ARM-B, what: second cantilever arm}
-      - {id: FEA-R-LUG-A, what: retaining lug on arm A}
-      - {id: FEA-R-LUG-B, what: retaining lug on arm B}
-      - {id: FEA-R-LUG-SHOULDER, what: lug upper faces; the anti-withdrawal surfaces}
-      - {id: FEA-R-LEADIN, what: tapered tip that deflects the arms on insertion}
+      - {id: FEA-C-PLATE, what: the plate covering the aperture}
+      - {id: FEA-C-PLATE-END-CLOSE, what: its +X face; lands on the closed bound}
+      - {id: FEA-C-PLATE-END-OPEN, what: its -X face; lands on the open bound}
+      - {id: FEA-C-TAB-L1-BEAM, what: near trailing cantilever, rooted at its +X end}
+      - {id: FEA-C-TAB-L1-EAR, what: its ear; projects outward under the near lip}
+      - {id: FEA-C-TAB-L1-SHOULDER, what: the ear's top face; the anti-lift surface}
+      - {id: FEA-C-TAB-L2-BEAM, what: near leading cantilever}
+      - {id: FEA-C-TAB-L2-EAR, what: its ear}
+      - {id: FEA-C-TAB-L2-SHOULDER, what: its anti-lift surface}
+      - {id: FEA-C-TAB-R1-BEAM, what: far trailing cantilever}
+      - {id: FEA-C-TAB-R1-EAR, what: its ear}
+      - {id: FEA-C-TAB-R1-SHOULDER, what: its anti-lift surface}
+      - {id: FEA-C-TAB-R2-BEAM, what: far leading cantilever}
+      - {id: FEA-C-TAB-R2-EAR, what: its ear}
+      - {id: FEA-C-TAB-R2-SHOULDER, what: its anti-lift surface}
+      - {id: FEA-C-LATCH-FINGER, what: cantilever reaching out through the end wall, over the NEAR RAIL}
+      - {id: FEA-C-LATCH-TOOTH, what: lug projecting outboard from the finger, behind the keeper strip}
+      - {id: FEA-C-LATCH-FACE, what: the tooth's -X face; what blocks opening}
+      - {id: FEA-C-LATCH-RAMP, what: the tooth's sloped face; deflects the finger inboard on closing}
+      - {id: FEA-C-RELEASE-PAD, what: the finger beyond the tooth, outside the product; where the user pushes}
+
+# ------------------------------------------------------ no redundant feature
+feature_function_table:
+  rule: >
+    Every feature below carries at least one required function and cannot be
+    deleted without losing it. There is no feature here whose only purpose is to
+    make a validator report PASS, and no feature that duplicates another's job.
+  entries:
+    - features: [FEA-E-RAIL-L-LEDGE, FEA-E-RAIL-R-LEDGE]
+      body: BODY-ENCLOSURE
+      functions: [vertical support]
+      cannot_be_deleted_because: the cover would have nothing to sit on
+    - features: [FEA-E-RAIL-L-GUIDE, FEA-E-RAIL-R-GUIDE]
+      body: BODY-ENCLOSURE
+      functions: [lateral guidance]
+      cannot_be_deleted_because: the cover would wander across the aperture
+    - features: [FEA-E-RAIL-L-LIP, FEA-E-RAIL-R-LIP]
+      body: BODY-ENCLOSURE
+      functions: [anti-lift capture]
+      cannot_be_deleted_because: >
+        the cover would lift straight off at every position. CTL-01 removes the
+        lip while leaving the guide wall and the checker reports the lift-out.
+    - features: [FEA-C-TAB-L1-EAR, FEA-C-TAB-L2-EAR, FEA-C-TAB-R1-EAR, FEA-C-TAB-R2-EAR]
+      body: BODY-COVER
+      functions: [snap-in assembly, engagement beneath the lips]
+      cannot_be_deleted_because: >
+        nothing would reach under a lip. Two per side, spaced 52 mm apart,
+        because a single pair would let the cover pitch out.
+    - features: [FEA-C-TAB-L1-BEAM, FEA-C-TAB-L2-BEAM, FEA-C-TAB-R1-BEAM, FEA-C-TAB-R2-BEAM]
+      body: BODY-COVER
+      functions: [compliance for the ears]
+      cannot_be_deleted_because: the ears could not deflect to enter
+    - features: [FEA-E-STOP-OPEN, FEA-E-STOP-CLOSED]
+      body: BODY-ENCLOSURE
+      functions: [terminal bounds]
+      cannot_be_deleted_because: >
+        travel would be unbounded in one or both directions. FEA-E-STOP-OPEN is
+        a stop face, not a relief; there is no break in either lip anywhere.
+    - features: [FEA-C-LATCH-TOOTH, FEA-E-KEEPER]
+      body: both
+      functions: [closed-state translation block]
+      cannot_be_deleted_because: >
+        the cover would slide open unaided. CTL-12 removes the tooth and the
+        checker reports the loss of the block.
+    - features: [FEA-C-LATCH-RAMP]
+      body: BODY-COVER
+      functions: [automatic deflection on closing]
+      cannot_be_deleted_because: >
+        closing would jam against the end wall instead of snapping over it
+    - features: [FEA-C-RELEASE-PAD, FEA-E-LATCH-SLOT]
+      body: both
+      functions: [exterior-reachable release]
+      cannot_be_deleted_because: >
+        there would be no way to release the latch from outside, and the user
+        would be back to handling something separate
+    - features: [FEA-E-DECK]
+      body: BODY-ENCLOSURE
+      functions: [closes the top where the aperture is not, gives the cover somewhere to park]
+      cannot_be_deleted_because: the box would be open along its whole length
 
 declared_usable_access:
-  region: {x: [103.0, 187.0], y: [13.0, 57.0], z: [45.0, 145.0]}
-  fraction: 84 of 90 mm
+  region: {x: [103.0, 187.0], y: [13.0, 57.0], z: [45.0, 105.0]}
+  nominal_aperture_mm: 90.0
+  usable_mm: 84.0
   human_decision: APPROVED (HCR-BM001-003)
+  not_narrowed_since: true
 
 how_the_human_decisions_are_met:
   HCR-BM001-003_84_of_90: travel 84 mm of a 90 mm aperture, unchanged
   HCR-BM001-004_not_removable_at_full_open: >
-    the rivet lugs bear under FEA-E-LEDGE-UNDER at every position; measured at
-    0, 10, 40, 70 and 84 mm
-  HCR-BM001-005_no_separate_cam: >
-    no cam exists. The rivet is pressed in once at assembly and cannot be
-    withdrawn, so nothing is ever removed, set aside or managed by the user
-  HCR-BM001-006_no_orientation_free_cam: >
-    no cam. The latch has one engaged and one released state and no orientation
-    to lose
-  pin_retention_required: BODY-RIVET running in FEA-E-SLOT
-  snap_fit_solution: >
-    two snap features - the rivet's arms and the cover's latch beam - each with
-    a declared compliant region
-  anti_withdrawal_snap_barb: >
-    the lugs span 7.6 mm across a 5.4 mm slot once recovered, so they cannot pass
-    back through the opening they entered
+    the retaining lips run the whole rail length and the tabs are under them at
+    every position. A 3 mm lift is blocked at 0, 10, 40, 70 and 84 mm, and a
+    1.5 degree tilt with a 1.5 mm lift is blocked too.
+  HCR-BM001-005_no_user_handled_separate_part: >
+    the product is two bodies. Nothing is inserted, removed, set aside or
+    managed by the user; the release feature is the cover's own finger.
+  HCR-BM001-006_no_orientation_free_retainer: >
+    the latch has one engaged and one released configuration and no orientation
+    to lose. It recovers on its own through its lead-in ramp.
+  HCR-BM001-007_directed_topology: >
+    guided captive sliding cover on real captive rails; integrated snap-in
+    captive retention through four integral cover tabs; integrated releasable
+    closed-state snap latch reachable from outside.
+  snap_fit_means: >
+    an integral compliant geometric feature belonging to one of the two product
+    bodies. All five compliant features here - four tabs and one latch finger -
+    are part of BODY-COVER.
+  no_fastener_compensating_for_rail_geometry: >
+    the rails are complete: ledge, guide wall and overhanging lip on both sides.
+    Nothing is added to make up for a missing overhang.
 
 known_limitations:
   - id: LIM-01
-    what: The rivet cannot be removed without destroying it.
+    what: >
+      Removing the cover for service needs all four tabs deflected inboard at
+      once, reached through the rail channels.
     status: DECLARED_DESIGN_CHOICE
     why: >
-      That is what makes the cover captive at full open, which HCR-BM001-004
-      requires. A serviceable version would need a released state for the arms,
-      and nothing in the source asks for one.
+      That is the price of captivity at full open, which HCR-BM001-004 requires.
+      It is non-destructive but it is not a one-hand job, and whether it is
+      acceptable is a human judgement this pilot does not make.
   - id: LIM-02
-    what: The latch release is the beam's own face, not a shaped finger pad.
+    what: The release pad stands 11 mm proud of the product's end face.
     status: DECLARED_DESIGN_CHOICE
     why: >
-      A raised pad was tried and struck the keeper bridge as the cover slid under
-      it. Whether a bare beam face is comfortable to press is an ergonomics
-      question this pilot does not answer.
+      An exterior-reachable release has to be somewhere. It is on the end face,
+      over the near rail rather than on the centreline, so the top surface stays
+      flush, nothing bridges over the cover, and at full open the finger retracts
+      over the ledge instead of into the 84 mm opening. It is still a protrusion
+      and a reviewer may object to it.
   - id: LIM-03
     what: The compliant states are declared kinematic configurations.
     status: DECLARED_MODELLING_APPROXIMATION
     why: >
-      They test geometric passage and engagement. They do not predict strain, and
-      no force is computed anywhere in this reference.
+      They test geometric passage and engagement, conserve volume exactly, and
+      predict nothing about strain. No force is computed anywhere here.

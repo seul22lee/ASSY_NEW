@@ -78,100 +78,136 @@ recorded in `manifest.yaml` LIM-01 rather than hidden.
 
 ---
 
-## EXE-BM001-02 — reworked, awaiting review
+## EXE-BM001-02 — redesigned as two bodies, awaiting review
 
 Human decisions **HCR-BM001-004**, **-005**, **-006** and **-007** rejected the
 full-open lift-out, the separate quarter-turn cam, and the cam's missing
 orientation retention, and directed a guided captive sliding cover with an
 integrated assembly snap and an integrated releasable latch.
 
-The reference has been reworked twice. The first attempt kept the cam design's
-lipped rails and added a snap to them; it needed a relief in the lips and a
-loading position beyond the open bound to be assemblable at all, which is a
-workaround, not a design. **The reference in the tree now is v0.3**, derived from
-the retention question rather than from the old geometry:
+The reference has been rebuilt from the concept up. **It is now two product
+bodies and nothing else:**
 
-> A cover that slides on two ledges between guide walls, held down for its whole
-> life by a single snap rivet running in a slot, and held shut by a compliant
-> latch cut from the cover itself.
+> `BODY-ENCLOSURE` — cavity, top panel, and two captive C-section rails
+> `BODY-COVER` — plate, four integral retention tabs, one integral latch finger
 
-There are no lips, no relief, no loading position outside the operating range and
-no cam. The superseded artifacts have been deleted; the version history is in
-[expected_evaluation.yaml](../executable_references/EXE-BM001-02/expected_evaluation.yaml).
+Each rail carries all three retention functions: a **ledge** that supports, a
+**guide wall** that locates, and an **overhanging retaining lip** that blocks
+lift. The cover's plate passes *between* the two lips; its four tabs deflect
+2.2 mm inboard to pass with it, then recover underneath. That is the assembly and
+the retention in one feature set. Nothing is fastened, riveted, pinned or
+clipped, and no third body exists at any point.
 
-### Review evidence — these six images only
+`DESIGN_AND_OPERATION_RATIONALE.md` in the reference directory explains the
+mechanism in plain terms and is worth reading before the drawings.
+
+### Review evidence — these fourteen images only
+
+**Overview**
 
 | View | File |
 |---|---|
-| Overview (plan), with the detail cuts located | [review_overview_section_lines.png](../executable_references/EXE-BM001-02/screenshots/review_overview_section_lines.png) |
-| A-A cover support and lateral guidance | [review_section_cover_support_and_guides.png](../executable_references/EXE-BM001-02/screenshots/review_section_cover_support_and_guides.png) |
-| B-B what prevents removal at full open | [review_section_captive_at_full_open.png](../executable_references/EXE-BM001-02/screenshots/review_section_captive_at_full_open.png) |
-| C-C snap rivet in its slot: bounds and anti-withdrawal | [review_section_rivet_and_slot.png](../executable_references/EXE-BM001-02/screenshots/review_section_rivet_and_slot.png) |
-| D-D latch engaged | [review_section_latch_engaged.png](../executable_references/EXE-BM001-02/screenshots/review_section_latch_engaged.png) |
-| D-D latch released | [review_section_latch_released.png](../executable_references/EXE-BM001-02/screenshots/review_section_latch_released.png) |
+| Plan: both bodies, operation arrows, where A-A / C-C / D-D are taken | [review_overview_operation_and_sections.png](../executable_references/EXE-BM001-02/screenshots/review_overview_operation_and_sections.png) |
+
+**Assembly sequence**
+
+| View | File |
+|---|---|
+| 1 — cover aligned, tabs already deflected | [review_assembly_01_aligned.png](../executable_references/EXE-BM001-02/screenshots/review_assembly_01_aligned.png) |
+| 2 — tabs passing the lips, the actual limiting opening | [review_assembly_02_tabs_compressed.png](../executable_references/EXE-BM001-02/screenshots/review_assembly_02_tabs_compressed.png) |
+| 3 — tabs recovered under the lips, cover captive | [review_assembly_03_tabs_recovered.png](../executable_references/EXE-BM001-02/screenshots/review_assembly_03_tabs_recovered.png) |
+
+**Operating sequence**
+
+| View | File |
+|---|---|
+| 1 — closed and latched | [review_operation_01_closed_latched.png](../executable_references/EXE-BM001-02/screenshots/review_operation_01_closed_latched.png) |
+| 2 — release pressed | [review_operation_02_release_pressed.png](../executable_references/EXE-BM001-02/screenshots/review_operation_02_release_pressed.png) |
+| 3 — sliding open | [review_operation_03_slide_open.png](../executable_references/EXE-BM001-02/screenshots/review_operation_03_slide_open.png) |
+| 4 — full open, 84 mm clear, still captive | [review_operation_04_full_open_captive.png](../executable_references/EXE-BM001-02/screenshots/review_operation_04_full_open_captive.png) |
+| 5 — reclosed and latched | [review_operation_05_reclosed_and_latched.png](../executable_references/EXE-BM001-02/screenshots/review_operation_05_reclosed_and_latched.png) |
+
+**Sections**
+
+| View | File |
+|---|---|
+| A-A — the captive rail, closed: all three rail functions | [review_section_AA_captive_rail_closed.png](../executable_references/EXE-BM001-02/screenshots/review_section_AA_captive_rail_closed.png) |
+| B-B — the same capture at full open | [review_section_BB_captive_rail_full_open.png](../executable_references/EXE-BM001-02/screenshots/review_section_BB_captive_rail_full_open.png) |
+| C-C — the assembly snap against the limiting gap | [review_section_CC_assembly_snap.png](../executable_references/EXE-BM001-02/screenshots/review_section_CC_assembly_snap.png) |
+| D-D — latch engaged | [review_section_DD_latch_engaged.png](../executable_references/EXE-BM001-02/screenshots/review_section_DD_latch_engaged.png) |
+| D-D — latch released, same plane and scale | [review_section_DD_latch_released.png](../executable_references/EXE-BM001-02/screenshots/review_section_DD_latch_released.png) |
 
 Same standard as EXE-BM001-01: orthographic, normal to the cut, cut faces
-hatched, nothing behind the plane drawn, every detail cut located on the
-overview. The general product views under the same directory (`s_closed_*`,
-`s_open_*`) are produced by the machine artifact contract. **They are not review
-evidence and are deliberately not linked here.**
+hatched, nothing behind the plane drawn, every detail cut located on an overview.
+Direction of motion and direction of press are drawn as heavy arrows rather than
+described in words. The per-state general views under the same directory
+(`closed_latch_engaged_*`, `open_84_*`, and so on) are produced by the machine
+artifact contract. **They are not review evidence and are deliberately not linked
+here.** Their disposition is recorded in
+[validation/PNG_REVIEW_AUDIT.md](../executable_references/EXE-BM001-02/validation/PNG_REVIEW_AUDIT.md).
 
 ### Supporting reports
 
-- [validation/predicate_report.json](../executable_references/EXE-BM001-02/validation/predicate_report.json) — `supporting_measurements.captivity`, `.barb`, `.latch`, `.open_access`
-- [validation/assembly_report.json](../executable_references/EXE-BM001-02/validation/assembly_report.json) — two straight insertions, ASM-03 swept in the declared compressed configuration
-- [validation/motion_report.json](../executable_references/EXE-BM001-02/validation/motion_report.json) — 283 samples over three segments, plus the terminal-bound causal probe
-- [validation/checker_selftest.json](../executable_references/EXE-BM001-02/validation/checker_selftest.json) — 9 negative controls, all detected
-- [validation/human_review_checklist.md](../executable_references/EXE-BM001-02/validation/human_review_checklist.md) — the author's own reading, to be checked rather than trusted
+- [DESIGN_AND_OPERATION_RATIONALE.md](../executable_references/EXE-BM001-02/DESIGN_AND_OPERATION_RATIONALE.md) — the mechanism in plain terms
+- [validation/predicate_report.json](../executable_references/EXE-BM001-02/validation/predicate_report.json) — `supporting_measurements.rails`, `.assembly_snap`, `.captivity`, `.latch`, `.release`, `.keeper`, `.opening`
+- [validation/assembly_report.json](../executable_references/EXE-BM001-02/validation/assembly_report.json) — one insertion, swept in the declared compressed configuration
+- [validation/checker_selftest.json](../executable_references/EXE-BM001-02/validation/checker_selftest.json) — 16 negative controls, all detected
+- [validation/PNG_REVIEW_AUDIT.md](../executable_references/EXE-BM001-02/validation/PNG_REVIEW_AUDIT.md) — what was seen when every image was opened
 
 ### What was measured
 
 | | |
 |---|---|
-| Slot width vs shaft | 5.400 mm vs 5.000 mm |
-| Compressed lug envelope across the slot | 5.000 mm — fits, 0.400 mm clearance |
-| Relaxed lug envelope | 7.600 mm across a 5.400 mm slot |
-| Lug projection beyond the slot | 1.100 mm each side |
-| Arm gap vs required deflection | 2.80 mm vs 2×1.30 mm — arms cannot bottom out |
-| Deformation volume difference | 0.000 mm³ |
-| Captivity: 3 mm lift at 0 / 10 / 40 / 70 / 84 mm | blocked at all five, 14.222 mm³ of lug interference at each |
-| Terminal bounds | 0.0 mm³ inside 0–84 mm; 0.61 mm³ 1 mm outside each end |
-| Latch: block onset when engaged | 1.05 mm (the hook stands 1.0 mm clear by running clearance) |
-| Latch: released, over a 6 mm sweep | 0.000 mm³ — genuinely frees the cover |
-| Assembly: swept common volume, both presses | 0.000 mm³ |
-| Declared usable access covered when closed | 18160 mm³ in the aperture band |
+| Rails: ledge, guide wall, overhanging lip | present on both sides, lips continuous over x 13–187 |
+| Limiting opening (gap between lip inner edges) | 59.600 mm |
+| Cover span, tabs relaxed | 63.600 mm — larger than the opening, which is why it stays in |
+| Cover span, tabs deflected 2.2 mm | 59.200 mm — 0.400 mm clearance, so it goes in |
+| Assembly sweep, one straight press | 0.000 mm³ common volume |
+| Ear engagement under a lip | 2.0 mm each, 31.2 mm³ per tab at a 3 mm lift, four for four |
+| Free vertical play before the lips bite | 0.450 mm |
+| Captivity at 0 / 10 / 40 / 70 / 84 mm | 124.8 / 133.6 / 133.6 / 133.6 / 133.6 mm³ — blocked at every one |
+| Pitch and roll probes (±1.5° with a 1.5 mm lift) | 12 of 12 blocked |
+| Latch engagement behind the keeper | 2.200 mm |
+| Closed free play before the latch bites | 0.600 mm declared, 0.620 mm measured |
+| Release shift, and what it does | 2.6 mm inboard; tooth behind the keeper goes 23.23 → 0.000 mm³ |
+| Re-engagement after a full closing sweep | seated 0.000 mm³, blocking again 9.88 mm³ |
+| Terminal bounds | free inside 0–84 mm, interference 1 mm outside each end |
+| Usable opening | 84.0 mm of a 90.0 mm aperture; 0.000 mm³ of intrusion |
+| Release pad outside the product envelope | 357.55 mm³, x 194.5–201.0 |
 
 ### Reviewer decisions — all PENDING
 
 | # | Question | Decision |
 |---|---|---|
-| 1 | Does this read as one integrated snap-fit closure, or as an old mechanism with a snap feature bolted on? | PENDING |
-| 2 | At full open, can you see what physically stops the cover lifting? | PENDING |
-| 3 | Is the rivet's anti-withdrawal barb real geometry with a credible recovery space, not a symbol? | PENDING |
-| 4 | Is the assembly path plausible as a real process — two straight presses, nothing threaded past anything? | PENDING |
-| 5 | Is the keeper bridge standing 2.5 mm above the closed cover acceptable, or does it defeat a flush sliding cover? | PENDING |
-| 6 | Is 1.05 mm of free play before the latch bites a latch, or a rattle? | PENDING |
-| 7 | Is a permanent, non-removable rivet acceptable, or is `LIM-01` a defect dressed as captivity? | PENDING |
-| 8 | Is 1.30 mm of deflection per arm, and 2.6 mm on the latch beam, credible for a moulded polymer? | PENDING |
-| 9 | Is any intended cover / enclosure / rivet interaction missing from the declaration? | PENDING |
-| 10 | Are the unknown snap force, release effort, strain and fatigue correctly left NOT_VERIFIED? | PENDING |
+| 1 | Does this read as one integrated snap-fit mechanism, or as a rail with something added to it? | PENDING |
+| 2 | Is the rail cross-section a real captive rail — ledge, guide wall **and** overhanging lip? | PENDING |
+| 3 | At full open, can you see what physically stops the cover lifting? | PENDING |
+| 4 | Is the assembly plausible as a real process: deflect four tabs, press once, let go? | PENDING |
+| 5 | Is 2.2 mm of deflection on a 20 mm tab credible for a moulded polymer, and are four tabs enough? | PENDING |
+| 6 | Is the release intuitive — push a pad sideways, then slide? Or would a user look for a lift? | PENDING |
+| 7 | Is 0.62 mm of free play before the latch bites a latch, or a rattle? | PENDING |
+| 8 | Is an 11 mm pad protruding from the end face acceptable? | PENDING |
+| 9 | Is service removal (four tabs deflected at once through the rail channels) acceptable, or is `LIM-01` a defect dressed as captivity? | PENDING |
+| 10 | Is any intended cover / enclosure interaction missing from the declaration? | PENDING |
+| 11 | Are the unknown snap force, release effort, strain and fatigue correctly left NOT_VERIFIED? | PENDING |
 
 ### What the author could not check
 
-Snap-in force, pull-out capacity, release effort, strain, creep, fatigue,
-repeated-use life and tolerance robustness are all **NOT_VERIFIED**. Geometric
+Snap insertion force, pull-out capacity, release effort, material strain, root
+stress, creep, fatigue, repeated-cycle life, wear, impact resistance, tolerance
+robustness, moulding feasibility and cost are all **NOT_VERIFIED**. Geometric
 blockage is not holding strength, and nothing in this pilot computes a force.
 
-Questions 5, 6 and 7 are the ones the author most wants answered and is least
-able to answer. Each is a judgement about whether a measured, honestly reported
-number is *good enough* — and none of them is the author's to make.
+Questions 5, 6, 7, 8 and 9 are the ones the author most wants answered and is
+least able to answer. Each is a judgement about whether a measured, honestly
+reported number is *good enough*, and none of them is the author's to make.
 
-One check in this reference was found to be vacuous during the rework and has
-been strengthened: `NRM-BM-001-003`'s "is this a region the cover controls"
-clause was being measured in the clear space above the aperture, where the cover
-never goes, so it read 0 mm³ and passed regardless. It is now measured in the
-aperture band, and `CTL-09` confirms it can fail. A reviewer should assume other
-checks may be vacuous in ways nobody has noticed yet.
+One defect in this redesign was caught by looking at a drawing rather than by the
+checker: an earlier arrangement put the latch finger on the centreline, where it
+retracted **into** the declared 84 mm opening at full open. The access probe
+missed it because the probe sampled only the space above the cover, and the
+finger sits level with it. The latch was moved out over the near rail. A reviewer
+should assume other checks may be blind in ways nobody has noticed yet.
 
 ---
 

@@ -1,54 +1,46 @@
 reference_id: EXE-BM001-02
-schema_version: 0.3.0
+schema_version: 0.4.0
 oracle_commit: 83fc12d46ad8c5fad36afcfe5b6e916822a41118
 active_oracle_scope_commit: 0af83c90bbda611182d0544cc736f09ae89fc718
 
 status: >
-  What this reference EXPECTED the Oracle to conclude, from the selection frozen
-  before any geometry was written, set against what was observed. It exists so
-  that a surprising result is visible as a surprise rather than being absorbed
-  silently.
+  What this reference EXPECTED the Oracle to conclude, set against what was
+  observed. It exists so that a surprising result is visible as a surprise
+  rather than being absorbed silently.
 
 expectation_source: BM-001/reviews/REFERENCE_SELECTION.yaml, frozen before geometry
 
-# ---------------------------------------------------------------- supersession
-version_history:
-  - version: v0.1
-    topology: rigid captive sliding closure with a rigid quarter-turn cam retainer
-    outcome: REJECTED
-    by: HCR-BM001-005 (no user-handled separate part), HCR-BM001-006 (no
-        orientation-free cam)
-  - version: v0.2
-    topology: the same sliding closure with lipped rails, a relief cut in the
-              lips and a loading position beyond the open bound
-    outcome: REJECTED
-    by: this rework
-    reason: >
-      The lips were inherited from the cam design. A lipped channel closed at
-      both ends cannot be entered by any translation, so v0.2 needed a relief in
-      the lips and a loading position outside the operating range just to get the
-      cover in. That is a workaround wearing the shape of a feature, and it made
-      the assembly path implausible rather than merely awkward.
-  - version: v0.3
-    topology: snap-riveted captive sliding cover
-    outcome: CURRENT
-    note: >
-      With a snap rivet doing the retaining, the lips have no job. Removing them
-      removed the relief, the loading position and the deck pocket they forced,
-      and turned the assembly into two straight downward presses at the closed
-      position.
+geometry_signature:
+  current: 1eba7a573b5787ba86257e007512832b0538688e76b9268c12c2717b15b7b111
+  previous_rejected: 870af742b622b85628ceb5beb4f6fc8561993abdd9c6b6883f9e735174106649
+  artifact_manifest_sha256: 6938358b3422b59ec6b788e815c8d6c41cd3f75e6399f57c707cd4b9d0d87d32
+
+reason_for_complete_redesign: >
+  The previous realization put the retention on a separate fastener pressed
+  through cover and enclosure, and the closed-state latch on a bridge spanning
+  the top of the product. That is a fastener compensating for rails with no
+  overhang: a third body doing the rail's job. The required architecture
+  is two product bodies with integral compliant features, so the rails were
+  completed - ledge, guide wall and retaining lip on both sides - and the cover
+  was given four integral snap tabs that pass those lips and recover under them.
+  The rivet, the bridge and the third body are gone. See
+  DESIGN_AND_OPERATION_RATIONALE.md.
 
 topology_as_frozen:
-  declared: rigid captive sliding closure, realized guidance, terminal bounds,
-            rigid quarter-turn cam retention
-  built: sliding cover with realized guidance and terminal bounds; the cam
-         retention was replaced by a snap rivet plus an integral compliant latch
+  declared: >
+    rigid captive sliding closure, realized guidance, terminal bounds, and a
+    rigid separate-component retainer (the element HCR-BM001-005 and -006
+    rejected; named in DESIGN_AND_OPERATION_RATIONALE.md)
+  built: >
+    sliding cover with realized guidance and realized terminal bounds; retention
+    by two captive rails and four integral cover snap tabs; closed state held by
+    an integral, exterior-reachable snap latch
   redesigned: true
   redesign_authority: >
-    HCR-BM001-004, -005 and -006. The frozen topology's retention element was
-    rejected by human decision, not by an Oracle result. The parts of the frozen
-    topology that survived - captive sliding closure, realized guidance, realized
-    terminal bounds - are unchanged.
+    HCR-BM001-004, -005, -006 and -007. The frozen topology's retention element
+    was rejected by human decision, not by an Oracle result. What survived from
+    the frozen topology - captive sliding closure, realized guidance, realized
+    terminal bounds - is unchanged.
   note: >
     A redesigned topology is a weaker reference than one built as frozen. This is
     recorded here rather than presented as an original intent.
@@ -58,52 +50,58 @@ expected_and_observed:
   - invariant: NRM-BM-001-001
     expected: PASS
     observed: PASS
+    note: >
+      CLOSED_LATCH_ENGAGED and OPEN_84 both realized by a face landing on a face;
+      two motion segments connect them, max common volume 0.000 mm^3.
   - invariant: NRM-BM-001-002
     expected: PASS
     observed: PASS
     note: >
-      Captive at every sampled position, full open included: a 3 mm upward
-      translation is blocked by 14.222 mm^3 of rivet-lug interference at all five
-      sampled positions, and additionally by the keeper bridge at 10, 40, 70 and
-      84 mm. v0.2 had to declare a LIM-01 exception here because it was NOT
-      captive at full open; that exception is gone, and so is the limitation.
-      Whether the lugs WITHSTAND a pull is a force question and is NOT_VERIFIED.
+      Captive at every sampled position, full open included. 0.45 mm of free
+      vertical play, then 124.8 mm^3 of lip interference at a 3 mm lift when
+      closed and 133.566 mm^3 at 10, 40, 70 and 84 mm. All four ears engage,
+      31.2 mm^3 each. Twelve pitch/roll probes are blocked, so a tilt cannot walk
+      the cover out either. Retention depends on no separate part: the body list
+      is exactly BODY-COVER and BODY-ENCLOSURE. Whether the tabs WITHSTAND a pull
+      is a force question and is NOT_VERIFIED.
   - invariant: NRM-BM-001-003
     expected: PASS, on a DECLARED usable access region rather than the whole aperture
     observed: PASS
     divergence: false
     reading: >
-      A captive sliding cover cannot uncover the whole of its own aperture; it
-      has to go somewhere, and the only place is over the rest of the enclosure.
-      The design therefore declares 84 of the 90 mm aperture as its usable
-      access, which HCR-BM001-003 approved. The invariant asks about the access
-      THE DESIGN DECLARES, so this passes - but the check would be hollow if a
-      design could declare a region the cover never reaches, so the evaluator
-      also measures that the cover fills 18160 mm^3 of the same footprint in the
-      aperture band when closed. A reviewer is still entitled to judge 84 of
-      90 mm insufficient; that would be a finding about this design.
-    correction_this_revision: >
-      That second clause was previously measured in the clear prism ABOVE the
-      aperture, where the cover never goes. It read 0 mm^3 and passed anyway - a
-      vacuous check. It is now measured in the aperture band between the ledge
-      top and the cover top, and CTL-09 injects a region outside the product
-      footprint to confirm the clause can fail.
+      A captive sliding cover cannot uncover the whole of its own aperture; it has
+      to go somewhere, and the only place is over the rest of the enclosure. The
+      design declares 84 of the 90 mm aperture as usable access, which
+      HCR-BM001-003 approved and which has not been narrowed. The invariant asks
+      about the access THE DESIGN DECLARES, so this passes - but the check would
+      be hollow if a design could declare a region the cover never reaches, so the
+      evaluator also measures that the cover fills 18480 mm^3 of the same
+      footprint in the aperture band when closed.
+    what_the_drawings_caught: >
+      An earlier arrangement of this design put the latch finger on the
+      centreline. At full open it retracted INTO the declared 84 mm opening, at
+      cover level - a real obstruction that the access probe missed because the
+      probe only measured the prism above the cover. It was found by looking at
+      the full-open drawing. The latch was moved out over the near rail, where it
+      retracts over the ledge instead. Intrusion is now 0.000 mm^3 in both the
+      aperture band and the prism above it.
   - invariant: NRM-BM-001-004
     expected: PASS
     observed: PASS
     note: >
-      Volume is conserved exactly across the rigid states. The two declared
-      compliant configurations - the deflected latch beam and the compressed
-      rivet arms - are rigid translations of a declared region, so the rivet's
-      relaxed and compressed volumes agree to 0.000 mm^3. That makes them a
-      DECLARED_KINEMATIC_APPROXIMATION of a snap, not a continuum strain model.
+      Volume is conserved exactly across all states. The three declared compliant
+      configurations - the four tabs deflected 2.2 mm inboard, and the latch
+      finger deflected 2.6 mm inboard - are rigid translations of declared
+      regions, so relaxed, compressed and released volumes agree to 0.000 mm^3.
+      That makes them a DECLARED_KINEMATIC_APPROXIMATION of a snap, not a
+      continuum strain model.
   - invariant: NRM-BM-001-005
     expected: PASS
     observed: PASS
     note: >
-      Both bounds are realized by the slot ends, not just declared. Common volume
-      is zero across the whole 0 to 84 mm travel and positive 1 mm outside it at
-      each end.
+      Both bounds are realized. Free everywhere inside 0 to 84 mm; interference
+      1 mm outside each end. The open bound is a stop face on solid rail fill at
+      x = 13, not a relief - there is no break in either lip anywhere.
   - invariant: NRM-BM-001-006
     expected: NOT_EVALUABLE on the holding clause; PASS on release and localization
     observed: NOT_EVALUABLE
@@ -119,51 +117,57 @@ expected_and_observed:
     expected: PASS geometrically; durability NOT_VERIFIED
     observed: PASS with the durability clause NOT_VERIFIED
     note: >
-      The latch re-engages after a full close sweep and no feature is consumed by
-      one cycle. Cycle life, creep and wear are NOT_VERIFIED.
+      The closing sweep ends seated and blocking again, driven by the tooth's own
+      lead-in ramp with no user action. No feature is consumed by one cycle.
+      Cycle life, creep and wear are NOT_VERIFIED.
   - invariant: NRM-BM-001-008
     expected: PASS
     observed: PASS
     note: >
-      The actuation feature is the latch beam's own top face, which lies under
-      the open aperture at the closed position and is reachable from above
-      without removing anything. This is the clause HCR-BM001-005 was about: no
-      separate part is handled. Release EFFORT is NOT_VERIFIED.
+      The release pad is 357.55 mm^3 of cover standing outside the product
+      envelope, x 194.5 to 201, with no enclosure material over it. The release is
+      causally connected rather than decorative: the tooth material behind the
+      keeper goes from 23.23 mm^3 engaged to 0.000 mm^3 released. This is the
+      clause HCR-BM001-005 was about - no separate part is handled. Release
+      EFFORT is NOT_VERIFIED.
   - invariant: NRM-BM-001-009
     expected: PASS
     observed: PASS
-    note: free interior volume 405488.56 mm^3, unobstructed at S_OPEN
   - invariant: NRM-BM-001-010
     expected: PASS
     observed: PASS
     note: >
-      Two straight downward presses, both at the closed position, both with zero
-      swept common volume. No loading relief and no out-of-range loading position
-      exist, because nothing overhangs the cover. This is the invariant v0.2
-      could only satisfy by contrivance, and it is the reason for the rework.
+      One straight downward press, at the CLOSED position, using only the two
+      product bodies. Compressed span 59.2 mm through a 59.6 mm gap between the
+      lip inner edges - 0.4 mm clearance - measured on the part of the cover that
+      is actually between the rails rather than on a whole-body bounding box.
+      Swept common volume 0.000 mm^3. No loading relief and no out-of-range
+      loading position exist, because the cover snaps past the lips instead of
+      being threaded along them.
   - invariant: NRM-BM-001-011
     expected: PASS for existence; adequacy NOT_VERIFIED
     observed: PASS with the adequacy clause NOT_VERIFIED
   - invariant: NRM-BM-001-012
     expected: PASS via HSD-006 branch A
     observed: PASS
-    note: the slot ends are measured to be what terminate the slide, at both bounds
   - invariant: NRM-BM-001-013
     expected: PASS
     observed: PASS
     note: >
-      Worth stating plainly: this reference depends on a snap retention force and
-      a release effort that nobody has computed. Both are recorded as
-      NOT_VERIFIED rather than quietly claimed, which is what this invariant
-      exists to enforce.
+      Worth stating plainly: this reference depends on a snap-in force, a
+      retention strength and a release effort that nobody has computed. All are
+      recorded as NOT_VERIFIED rather than quietly claimed, which is what this
+      invariant exists to enforce.
 
 # ----------------------------------------------------------------- boundaries
 what_is_claimed: >
-  Geometric and kinematic admissibility only, at the fidelity the model supports.
+  GEOMETRICALLY AND KINEMATICALLY ADMISSIBLE AT THE EVALUATED FIDELITY.
 
 what_is_not_claimed:
-  - snap-in force, pull-out capacity, latch release effort
-  - strain, creep, fatigue or cycle life in any body
+  - snap insertion force, pull-out capacity, retention strength
+  - latch release effort and snap force
+  - material strain, root stress, creep, fatigue, repeated-cycle life, wear
+  - impact resistance
   - disturbance capacity: the source declares no magnitude (UNR-BM-001-001)
   - cost, tooling, moulding feasibility, tolerance robustness, durability
   - that the design is good. It is admissible, which is a much weaker claim.
@@ -172,9 +176,13 @@ oracle_counterexample_candidates: []
 
 no_oracle_file_was_modified: true
 weakening_check: >
-  No CAD was weakened to obtain a PASS and no check was relaxed. One check was
-  STRENGTHENED this revision: NRM-BM-001-003's second clause was vacuous and is
-  now load-bearing, guarded by CTL-09. Nothing in this reference altered any
-  EXE-BM001-01 result: that reference was rerun after every shared-code change
-  and produced the same geometry signature and the same twelve PASS and one
-  NOT_EVALUABLE throughout.
+  No CAD was weakened to obtain a PASS and no check was relaxed. Two checks were
+  STRENGTHENED in this redesign. The compressed-span check now measures the part
+  of the cover that is actually between the rails, because a whole-body bounding
+  box included the latch finger, which hangs outside the enclosure and never has
+  to fit anything (CTL-05 guards it). The captivity controls are now judged on
+  interference with the LIPS specifically, because a tab tip brushing a guide
+  wall could otherwise mask a missing lip (CTL-01, CTL-02, CTL-06, CTL-07 guard
+  it). Nothing in this reference altered any EXE-BM001-01 result: that reference
+  was rerun after the shared-tooling change and produced the same geometry
+  signature and the same twelve PASS and one NOT_EVALUABLE.

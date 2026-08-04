@@ -1,11 +1,13 @@
 reference_id: EXE-BM001-02
-schema_version: 0.3.0
+schema_version: 0.4.0
 units: mm
 
 principle: >
-  Two straight presses, in the same direction. Nothing overhangs the cover, so
-  nothing has to be threaded past anything; the only compliant passage is the
-  rivet's arms through the slot, and that is measured rather than assumed.
+  One straight press, at the closed position, with two bodies and nothing else.
+  The cover's own tabs are deflected inboard until the whole cover fits between
+  the rail lips, it is pressed down onto the ledges, and the tabs are let go.
+  There is no fastener, no separate retainer, and no loading position outside the
+  operating range.
 
 steps:
   - id: ASM-01
@@ -19,46 +21,50 @@ steps:
     direction: [0.0, 0.0, -1.0]
     approach_distance: 30.0
     at_offset: [0.0, 0.0, 0.0]
+    configuration_during_step: CFG-TABS-COMPRESSED
+    configuration_after_step: CFG-COVER-RELAXED
+    compliant_region: [REG-COVER-RETAIN-LEFT-COMPLIANT, REG-COVER-RETAIN-RIGHT-COMPLIANT]
+    steps:
+      - 1. hold the cover over the closed position, square to the rails
+      - 2. deflect all four retention tabs inboard by 2.2 mm; the cover now spans
+           59.2 mm across the 59.6 mm gap between the lip inner edges
+      - 3. lower it straight down; the plate, the tabs and the latch finger all
+           pass the lips and the end-wall slot without touching anything
+      - 4. seat the plate on the two rail ledges
+      - 5. release the tabs; each ear springs outward under its lip
+      - 6. the cover is now captive, at this position and at every other
     note: >
-      Lowered straight down between the guide walls onto the ledges, at the
-      closed position. Nothing obstructs it: the guide walls locate it sideways
-      and there is no lip over it. This is the step that two earlier versions
-      could not perform without a relief and a loading position outside the
-      operating range.
+      This is the only insertion step and it happens at the CLOSED position,
+      which is inside the travel. Nothing is threaded along a channel and no
+      relief is cut anywhere in the lips.
     ends_in_contact_with:
       - {body: BODY-ENCLOSURE, interaction: INT-01}
       - {body: BODY-ENCLOSURE, interaction: INT-02}
-
-  - id: ASM-03
-    place: BODY-RIVET
-    kind: insertion
-    direction: [0.0, 0.0, -1.0]
-    approach_distance: 25.0
-    at_offset: [0.0, 0.0, 0.0]
-    configuration_during_step: CFG-RIVET-COMPRESSED
-    configuration_after_step: CFG-RIVET-RELAXED
-    compliant_region: REG-R-SNAP-COMPLIANT
-    steps:
-      - 1. align the cover bore over the slot
-      - 2. enter the tapered tip into the bore and the slot
-      - 3. compress ONLY REG-R-SNAP-COMPLIANT, across the slot's width
-      - 4. pass the lugs down through the slot
-      - 5. recover the lugs under FEA-E-LEDGE-UNDER
-      - 6. seat FEA-R-HEAD flush in the cover counterbore
-    note: >
-      After this step the cover is captive at every position of its travel and
-      the slot ends bound it. The rivet cannot be withdrawn: its recovered lugs
-      span 7.6 mm across a 5.4 mm slot.
+      - {body: BODY-ENCLOSURE, interaction: INT-09}
     ends_retained_by:
-      - {body: BODY-ENCLOSURE, interaction: INT-07, direction: upward,
-         what: cover captivity and rivet anti-withdrawal}
-      - {body: BODY-COVER, interaction: INT-11, direction: downward}
+      - {body: BODY-ENCLOSURE, interaction: INT-05, direction: upward,
+         what: near-side anti-lift capture under the rail lip}
+      - {body: BODY-ENCLOSURE, interaction: INT-06, direction: upward,
+         what: far-side anti-lift capture under the rail lip}
 
-disassembly: >
-  The rivet cannot be removed without destroying it, which is what makes the
-  cover captive at full open. That is a declared consequence, recorded as LIM-01
-  rather than presented as a feature.
+bodies_used: [BODY-ENCLOSURE, BODY-COVER]
+no_third_body_at_any_point: true
+
+what_is_NOT_required:
+  - threading the cover along a channel closed at both ends
+  - a loading position outside the declared 0 to 84 mm travel
+  - a relief in the lips that would later allow ordinary lift-out
+  - rigid penetration of one body by another
+  - a separately inserted fastener, rivet, pin, clip or cam
+  - destructive assembly
+
+service_disassembly: >
+  Declared and non-destructive: deflect the four tabs inboard again and lift the
+  cover straight out at the closed position. That is a deliberate service action
+  requiring simultaneous access to all four tabs through the rail channels, not
+  an ordinary upward pull, and the captivity checks measure the ordinary pull.
 
 not_established_here: >
-  Insertion force, snap strain, release effort and process suitability. What is
-  shown is that an assembly ordering exists and is geometrically unobstructed.
+  Insertion force, snap strain, release effort, tool access and process
+  suitability. What is shown is that an assembly ordering exists using only the
+  two product bodies and that it is geometrically unobstructed.

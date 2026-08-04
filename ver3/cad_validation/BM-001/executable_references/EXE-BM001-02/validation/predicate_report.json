@@ -5,17 +5,17 @@
       "clauses": [
         {
           "clause": "a closed state exists",
-          "measured": "S_CLOSED_LATCHED and S_CLOSED_RELEASED are realized",
+          "measured": "CLOSED_LATCH_ENGAGED, cover face on the far wall inner face",
           "status": "PASS"
         },
         {
           "clause": "an open state exists",
-          "measured": "S_OPEN is realized",
+          "measured": "OPEN_84, cover face on the rail fill at x = 13.0",
           "status": "PASS"
         },
         {
           "clause": "a motion connects them in both directions",
-          "measured": "three segments over 283 samples, max common volume 0.000e+00 mm^3",
+          "measured": "270 samples over 2 segments, max common volume 0.000e+00 mm^3",
           "status": "PASS"
         }
       ],
@@ -29,17 +29,22 @@
       "clauses": [
         {
           "clause": "each participating body carries engagement geometry",
-          "measured": "11 declared interactions, all measured",
+          "measured": "two rails with ledge, guide wall and lip; four integral cover tabs",
           "status": "PASS"
         },
         {
           "clause": "the connection is retained, not merely assembled",
-          "measured": "the cover is captive at 0/10/40/70/84 mm; the recovered lugs stand 1.100 mm proud of the slot",
+          "measured": "3 mm lift blocked at 0/10/40/70/84 mm; 133.566 mm^3 at full open",
           "status": "PASS"
         },
         {
-          "clause": "the declared compliant passages are coherent",
-          "measured": "barb compressed envelope 5.000 into a 5.4 slot; arm gap 2.8 against 2.6 of deflection",
+          "clause": "retention does not depend on a separate part",
+          "measured": "body list ['BODY-COVER', 'BODY-ENCLOSURE']",
+          "status": "PASS"
+        },
+        {
+          "clause": "a tilt cannot disengage it either",
+          "measured": "12 pitch/roll probes, all blocked",
           "status": "PASS"
         },
         {
@@ -49,8 +54,8 @@
         }
       ],
       "evidence": [
-        "validation/interaction_report.json",
-        "validation/predicate_report.json"
+        "validation/predicate_report.json",
+        "validation/interaction_report.json"
       ],
       "invariant_id": "NRM-BM-001-002",
       "status": "PASS"
@@ -59,22 +64,23 @@
       "clauses": [
         {
           "clause": "the closure does not obstruct the declared usable access at open",
-          "measured": "intrusion {'BODY-COVER': 0.0, 'BODY-ENCLOSURE': 0.0, 'BODY-RIVET': 0.0}",
+          "measured": "intrusion {'BODY-COVER': 0.0, 'BODY-ENCLOSURE': 0.0}",
           "status": "PASS"
         },
         {
-          "clause": "the declared region is one the cover genuinely controls, not one it never reaches",
-          "measured": "the cover fills 18160 mm^3 of the same footprint in the aperture band when closed",
+          "clause": "the declared region is one the cover genuinely controls",
+          "measured": "the cover fills 18480 mm^3 of the same footprint when closed",
           "status": "PASS"
         },
         {
-          "clause": "no volume shared outside declared regions along the transition",
-          "measured": "max common volume 0.000e+00 mm^3 over all segments",
+          "clause": "the usable opening is not narrowed below the approved 84 mm",
+          "measured": "84.0 mm of a 90.0 mm aperture",
           "status": "PASS"
         }
       ],
       "evidence": [
-        "validation/motion_report.json"
+        "validation/motion_report.json",
+        "validation/predicate_report.json"
       ],
       "invariant_id": "NRM-BM-001-003",
       "notes": "84 of 90 mm, approved by HCR-BM001-003 and not narrowed since.",
@@ -84,17 +90,17 @@
       "clauses": [
         {
           "clause": "material content conserved across states",
-          "measured": "per-body volume identical across the two relaxed states",
+          "measured": "per-state volumes agree to 1e-6 mm^3",
           "status": "PASS"
         },
         {
-          "clause": "any shape change is a declared compliant deformation",
-          "measured": "S_CLOSED_RELEASED uses CFG-COVER-LATCH-DEFLECTED, declared in manifest.yaml as a compliant configuration of REG-C-LATCH-COMPLIANT",
+          "clause": "any shape change is a declared compliant configuration",
+          "measured": "two declared regions; the tab set and the latch finger each conserve volume to 0.000 mm^3",
           "status": "PASS"
         }
       ],
       "evidence": [
-        "validation/predicate_report.json"
+        "validation/predicate_report.json#extent"
       ],
       "invariant_id": "NRM-BM-001-004",
       "status": "PASS"
@@ -102,13 +108,13 @@
     {
       "clauses": [
         {
-          "clause": "the design declares discrete terminal poses",
-          "measured": "poses.yaml terminal_conditions, both bounds",
+          "clause": "the design declares discrete terminal positions",
+          "measured": "closed at 0 mm and open at 84.0 mm",
           "status": "DECLARED"
         },
         {
-          "clause": "produced by a realized condition, not a model limit",
-          "measured": "common volume zero across 0..84 mm and positive immediately outside at BOTH ends",
+          "clause": "produced by a realized condition, not a declared number",
+          "measured": "free inside the travel; interference 1 mm outside each end",
           "status": "PASS"
         }
       ],
@@ -125,51 +131,46 @@
       "clauses": [
         {
           "clause": "holds the closure closed against the declared disturbance",
-          "measured": "the design declares no disturbance magnitude. What IS measured: the latch blocks opening beyond 1.05 mm of free play and releasing it frees the cover at every probed distance.",
-          "reason": "REPRESENTATION_INCOMPLETE",
+          "reason": "the source declares no disturbance magnitude (UNR-BM-001-001). That is a missing declaration, not missing evidence.",
           "status": "NOT_EVALUABLE"
         },
         {
           "clause": "released by a deliberate user action",
-          "measured": "press the beam 2.6 mm, then slide; the latch probe shows both halves discriminate (blocks=True, frees=True)",
+          "measured": "pushing the exterior pad 2.6 mm inboard frees the cover",
           "status": "PASS"
         },
         {
           "clause": "engagement localized on both bodies",
-          "measured": "INT-08 hook against keeper, measured in its declared region",
+          "measured": "FEA-C-LATCH-TOOTH on FEA-E-KEEPER",
           "status": "PASS"
         }
       ],
       "evidence": [
-        "validation/predicate_report.json"
+        "validation/predicate_report.json#latch"
       ],
       "invariant_id": "NRM-BM-001-006",
-      "notes": "Same NOT_EVALUABLE as EXE-BM001-01 and for the same reason: the source states no disturbance, so the predicate has nothing to apply.",
       "status": "NOT_EVALUABLE"
     },
     {
-      "blocked_on": [
-        "UNR-BM-001-007"
-      ],
       "clauses": [
         {
-          "clause": "close-engage, release, close-engage-again completes",
-          "measured": "cycle represented: engage -> retained -> release -> open -> close -> re-engage",
+          "clause": "close-engage, release, close-engage-again",
+          "measured": "the closing sweep ends seated and blocking again",
           "status": "PASS"
         },
         {
           "clause": "no feature consumed by one cycle",
-          "measured": "all deflections are declared configurations; no geometry is modified",
+          "measured": "every configuration is a rigid translation; volume is conserved",
           "status": "PASS"
         },
         {
           "clause": "durability over a cycle count",
-          "reason": "wear and fatigue are not modelled",
+          "reason": "no cycle count is stated and none is modelled",
           "status": "NOT_VERIFIED"
         }
       ],
       "evidence": [
-        "validation/predicate_report.json"
+        "validation/predicate_report.json#latch"
       ],
       "invariant_id": "NRM-BM-001-007",
       "status": "PASS"
@@ -178,27 +179,32 @@
       "clauses": [
         {
           "clause": "a realized access path reaches the actuation feature",
-          "measured": "the release face is the latch beam's own top surface, lying under the open aperture at the closed position, so it is reachable from above without any part being removed",
+          "measured": "the release pad stands 11.0 mm beyond the product envelope with nothing over it and clear of the aperture in Y",
+          "status": "PASS"
+        },
+        {
+          "clause": "the actuation is causally connected to the release",
+          "measured": "tooth material behind the keeper: 23.23 mm^3 engaged, 0.00 mm^3 released",
           "status": "PASS"
         }
       ],
       "evidence": [
-        "validation/predicate_report.json"
+        "validation/predicate_report.json#release"
       ],
       "invariant_id": "NRM-BM-001-008",
-      "notes": "Release EFFORT is NOT_VERIFIED; only reachability is geometric.",
+      "notes": "Release EFFORT is NOT_VERIFIED; only reachability and causality are geometric.",
       "status": "PASS"
     },
     {
       "clauses": [
         {
           "clause": "an interior cavity exists",
-          "measured": "free interior volume 405488.6 mm^3",
+          "measured": "free interior volume 390470.4 mm^3",
           "status": "PASS"
         },
         {
           "clause": "reachable through the aperture in the open state",
-          "measured": "the declared access prism is unobstructed at S_OPEN",
+          "measured": "the declared access prism is unobstructed at OPEN_84",
           "status": "PASS"
         }
       ],
@@ -212,17 +218,23 @@
       "clauses": [
         {
           "clause": "each discrete part reaches its position without passing through placed material",
-          "measured": "2 insertion steps swept; max common volume 0.000e+00 mm^3",
+          "measured": "1 insertion step swept; max common volume 0.000e+00 mm^3",
+          "status": "PASS"
+        },
+        {
+          "clause": "the compliant feature really fits the limiting opening",
+          "measured": "compressed span 59.200 mm through a 59.600 mm gap between the lip inner edges, 0.400 mm clearance",
           "status": "PASS"
         },
         {
           "clause": "no step needs a position outside the operating range",
-          "measured": "both parts are lowered straight down at the CLOSED position, which is inside the travel. Nothing overhangs the cover, so no loading relief and no out-of-range loading position exist. Captivity is created by the rivet in ASM-03, not by where the cover was put in ASM-02.",
+          "measured": "the single insertion happens at the CLOSED position, inside the travel. Nothing is threaded along a channel, no relief is cut in either lip, and no third body is used.",
           "status": "PASS"
         }
       ],
       "evidence": [
-        "validation/assembly_report.json"
+        "validation/assembly_report.json",
+        "validation/predicate_report.json#assembly_snap"
       ],
       "invariant_id": "NRM-BM-001-010",
       "status": "PASS"
@@ -234,7 +246,7 @@
       "clauses": [
         {
           "clause": "a load path exists to a reaction site",
-          "measured": "all bodies connected: BODY-COVER, BODY-ENCLOSURE, BODY-RIVET",
+          "measured": "the cover reacts into both rails through INT-01/02 and INT-05/06",
           "status": "PASS"
         },
         {
@@ -253,7 +265,7 @@
       "clauses": [
         {
           "clause": "direct causal evidence (HSD-006 branch A)",
-          "measured": "slot ends measured to be what terminate the slide, at both bounds",
+          "measured": "both bounds measured to be produced by the faces that make them",
           "status": "PASS"
         }
       ],
@@ -267,7 +279,7 @@
       "clauses": [
         {
           "clause": "no force window cited as achieved",
-          "measured": "keyword scan returned 0 candidate lines; none asserts a force as an outcome",
+          "measured": "keyword scan returned 6 candidate lines; none asserts a force as an outcome",
           "status": "PASS"
         }
       ],
@@ -289,177 +301,400 @@
     "PASS": 12
   },
   "supporting_measurements": {
-    "barb": {
-      "arm_gap_mm": 2.8,
-      "arms_cannot_bottom_out": true,
+    "assembly_snap": {
+      "all_four_tabs_engage": true,
+      "bodies_used": [
+        "BODY-ENCLOSURE",
+        "BODY-COVER"
+      ],
       "compressed_clearance_mm": 0.4,
-      "compressed_envelope_mm": 5.0,
-      "compressed_fits_slot": true,
+      "compressed_fits_between_lips": true,
+      "compressed_span_mm": 59.2,
       "deformation": {
-        "compressed_volume_mm3": 268.273362,
+        "compressed_volume_mm3": 26057.35,
         "difference_mm3": 0.0,
         "kind": "DECLARED_KINEMATIC_APPROXIMATION",
-        "relaxed_volume_mm3": 268.273362,
-        "representation": "rigid inward translation of each arm",
-        "statement": "tests geometric passage through the slot, not continuum strain"
+        "relaxed_volume_mm3": 26057.35,
+        "representation": "rigid inboard translation of each tab",
+        "statement": "tests geometric passage between the lips, not continuum strain"
       },
-      "lug_projection_beyond_slot_mm": 1.1,
-      "lugs_block_withdrawal": true,
-      "measurement": "span across the slot width",
-      "relaxed_lug_envelope_mm": 7.6,
-      "slot_w_mm": 5.4
-    },
-    "cam_removal": {
-      "bodies_are_product_plus_one_captive_rivet": true,
-      "body_cam_present": false,
-      "body_ids": [
-        "BODY-COVER",
-        "BODY-ENCLOSURE",
-        "BODY-RIVET"
+      "insertion_unobstructed": true,
+      "limiting_opening_is": "the gap between the two rail lip inner edges",
+      "limiting_opening_mm": 59.6,
+      "per_tab_engagement": [
+        {
+          "engaged": true,
+          "overlap_under_lip_on_3mm_lift_mm3": 31.2,
+          "side": "near",
+          "tab_id": "FEA-C-TAB-L1-EAR"
+        },
+        {
+          "engaged": true,
+          "overlap_under_lip_on_3mm_lift_mm3": 31.2,
+          "side": "far",
+          "tab_id": "FEA-C-TAB-R1-EAR"
+        },
+        {
+          "engaged": true,
+          "overlap_under_lip_on_3mm_lift_mm3": 31.2,
+          "side": "near",
+          "tab_id": "FEA-C-TAB-L2-EAR"
+        },
+        {
+          "engaged": true,
+          "overlap_under_lip_on_3mm_lift_mm3": 31.2,
+          "side": "far",
+          "tab_id": "FEA-C-TAB-R2-EAR"
+        }
       ],
-      "mentions_are_history_only": true,
-      "note": "BODY-CAM does not exist. The remaining textual mentions are in the revision records, which say what was removed and why - deleting them would hide the change rather than record it.",
-      "separate_retention_part_present": false,
-      "textual_mentions": 3
+      "relaxed_span_exceeds_opening": true,
+      "relaxed_span_mm": 63.6,
+      "span_measured_on": "the part of the cover between the rails, clipped to x 12..187 - not a whole-body bounding box",
+      "swept_max_common_volume_mm3": 0.0,
+      "third_body_used": false,
+      "what_this_does_not_show": "insertion force, strain or whether the tabs survive it"
     },
     "captivity": {
       "captive_at_full_open": true,
       "captive_everywhere": true,
-      "samples": [
+      "lift_samples": [
         {
-          "blocked_by": "rivet lugs under the ledge (INT-07)",
+          "blocked_via_interactions": [
+            "INT-05",
+            "INT-06"
+          ],
+          "blocking_features": [
+            "FEA-E-RAIL-L-LIP",
+            "FEA-E-RAIL-R-LIP"
+          ],
+          "blocking_onset_mm": 0.45,
           "captive": true,
-          "cover_enclosure_common_volume_mm3": 0.0,
-          "lift_mm": 3.0,
-          "rivet_enclosure_common_volume_mm3": 14.222099,
+          "common_volume_at_3mm_lift_mm3": 124.8,
+          "free_vertical_play_mm": 0.45,
+          "guided_here": true,
+          "interference_with_the_lips_mm3": 124.8,
+          "slide_mm": 0.0,
+          "supported_here": true
+        },
+        {
+          "blocked_via_interactions": [
+            "INT-05",
+            "INT-06"
+          ],
+          "blocking_features": [
+            "FEA-E-RAIL-L-LIP",
+            "FEA-E-RAIL-R-LIP"
+          ],
+          "blocking_onset_mm": 0.45,
+          "captive": true,
+          "common_volume_at_3mm_lift_mm3": 133.566,
+          "free_vertical_play_mm": 0.45,
+          "guided_here": true,
+          "interference_with_the_lips_mm3": 133.566,
+          "slide_mm": 10.0,
+          "supported_here": true
+        },
+        {
+          "blocked_via_interactions": [
+            "INT-05",
+            "INT-06"
+          ],
+          "blocking_features": [
+            "FEA-E-RAIL-L-LIP",
+            "FEA-E-RAIL-R-LIP"
+          ],
+          "blocking_onset_mm": 0.45,
+          "captive": true,
+          "common_volume_at_3mm_lift_mm3": 133.566,
+          "free_vertical_play_mm": 0.45,
+          "guided_here": true,
+          "interference_with_the_lips_mm3": 133.566,
+          "slide_mm": 40.0,
+          "supported_here": true
+        },
+        {
+          "blocked_via_interactions": [
+            "INT-05",
+            "INT-06"
+          ],
+          "blocking_features": [
+            "FEA-E-RAIL-L-LIP",
+            "FEA-E-RAIL-R-LIP"
+          ],
+          "blocking_onset_mm": 0.45,
+          "captive": true,
+          "common_volume_at_3mm_lift_mm3": 133.566,
+          "free_vertical_play_mm": 0.45,
+          "guided_here": true,
+          "interference_with_the_lips_mm3": 133.566,
+          "slide_mm": 70.0,
+          "supported_here": true
+        },
+        {
+          "blocked_via_interactions": [
+            "INT-05",
+            "INT-06"
+          ],
+          "blocking_features": [
+            "FEA-E-RAIL-L-LIP",
+            "FEA-E-RAIL-R-LIP"
+          ],
+          "blocking_onset_mm": 0.45,
+          "captive": true,
+          "common_volume_at_3mm_lift_mm3": 133.566,
+          "free_vertical_play_mm": 0.45,
+          "guided_here": true,
+          "interference_with_the_lips_mm3": 133.566,
+          "slide_mm": 84.0,
+          "supported_here": true
+        }
+      ],
+      "no_diagonal_disengagement": true,
+      "tilt_samples": [
+        {
+          "blocked": true,
+          "common_volume_mm3": 67.849308,
+          "lift_mm": 1.5,
+          "pitch_deg": 1.5,
+          "roll_deg": 0.0,
           "slide_mm": 0.0
         },
         {
-          "blocked_by": "rivet lugs under the ledge (INT-07) and the keeper bridge over the cover",
-          "captive": true,
-          "cover_enclosure_common_volume_mm3": 380.52,
-          "lift_mm": 3.0,
-          "rivet_enclosure_common_volume_mm3": 14.222099,
-          "slide_mm": 10.0
+          "blocked": true,
+          "common_volume_mm3": 45.320393,
+          "lift_mm": 1.5,
+          "pitch_deg": -1.5,
+          "roll_deg": 0.0,
+          "slide_mm": 0.0
         },
         {
-          "blocked_by": "rivet lugs under the ledge (INT-07) and the keeper bridge over the cover",
-          "captive": true,
-          "cover_enclosure_common_volume_mm3": 400.68,
-          "lift_mm": 3.0,
-          "rivet_enclosure_common_volume_mm3": 14.222099,
+          "blocked": true,
+          "common_volume_mm3": 51.060643,
+          "lift_mm": 1.5,
+          "pitch_deg": 0.0,
+          "roll_deg": 1.5,
+          "slide_mm": 0.0
+        },
+        {
+          "blocked": true,
+          "common_volume_mm3": 51.060643,
+          "lift_mm": 1.5,
+          "pitch_deg": 0.0,
+          "roll_deg": -1.5,
+          "slide_mm": 0.0
+        },
+        {
+          "blocked": true,
+          "common_volume_mm3": 60.516762,
+          "lift_mm": 1.5,
+          "pitch_deg": 1.5,
+          "roll_deg": 0.0,
           "slide_mm": 40.0
         },
         {
-          "blocked_by": "rivet lugs under the ledge (INT-07) and the keeper bridge over the cover",
-          "captive": true,
-          "cover_enclosure_common_volume_mm3": 400.68,
-          "lift_mm": 3.0,
-          "rivet_enclosure_common_volume_mm3": 14.222099,
-          "slide_mm": 70.0
+          "blocked": true,
+          "common_volume_mm3": 53.298549,
+          "lift_mm": 1.5,
+          "pitch_deg": -1.5,
+          "roll_deg": 0.0,
+          "slide_mm": 40.0
         },
         {
-          "blocked_by": "rivet lugs under the ledge (INT-07) and the keeper bridge over the cover",
-          "captive": true,
-          "cover_enclosure_common_volume_mm3": 400.68,
-          "lift_mm": 3.0,
-          "rivet_enclosure_common_volume_mm3": 14.222099,
+          "blocked": true,
+          "common_volume_mm3": 52.157427,
+          "lift_mm": 1.5,
+          "pitch_deg": 0.0,
+          "roll_deg": 1.5,
+          "slide_mm": 40.0
+        },
+        {
+          "blocked": true,
+          "common_volume_mm3": 56.970157,
+          "lift_mm": 1.5,
+          "pitch_deg": 0.0,
+          "roll_deg": -1.5,
+          "slide_mm": 40.0
+        },
+        {
+          "blocked": true,
+          "common_volume_mm3": 60.549924,
+          "lift_mm": 1.5,
+          "pitch_deg": 1.5,
+          "roll_deg": 0.0,
+          "slide_mm": 84.0
+        },
+        {
+          "blocked": true,
+          "common_volume_mm3": 55.583472,
+          "lift_mm": 1.5,
+          "pitch_deg": -1.5,
+          "roll_deg": 0.0,
+          "slide_mm": 84.0
+        },
+        {
+          "blocked": true,
+          "common_volume_mm3": 52.157427,
+          "lift_mm": 1.5,
+          "pitch_deg": 0.0,
+          "roll_deg": 1.5,
+          "slide_mm": 84.0
+        },
+        {
+          "blocked": true,
+          "common_volume_mm3": 56.970157,
+          "lift_mm": 1.5,
+          "pitch_deg": 0.0,
+          "roll_deg": -1.5,
           "slide_mm": 84.0
         }
       ],
       "what_this_does_not_show": "the force needed to break it",
-      "what_this_shows": "ordinary upward translation is geometrically blocked at every position the human decision names, full open included"
+      "what_this_shows": "ordinary upward translation is geometrically blocked at every position the human decision names, full open included, and a tilt does not walk the cover out either"
     },
     "cavity": {
       "exists": true,
-      "free_interior_volume_mm3": 405488.56,
+      "free_interior_volume_mm3": 390470.4,
       "reachable_through_aperture_at_open": true
     },
     "extent": {
-      "as_built_mm3": {
-        "BODY-COVER": 28096.15754,
-        "BODY-ENCLOSURE": 136058.64,
-        "BODY-RIVET": 268.273362
-      },
-      "conserved_across_relaxed_states": true,
-      "note": "S_CLOSED_RELEASED uses the latch-deflected cover configuration, a declared compliant deformation, so its volume is not required to match a rigid transform",
+      "conserved_across_states": true,
       "per_state_mm3": {
-        "S_CLOSED_LATCHED": {
-          "BODY-COVER": 28096.15754,
-          "BODY-ENCLOSURE": 136058.64,
-          "BODY-RIVET": 268.273362
+        "CLOSED_LATCH_ENGAGED": {
+          "BODY-COVER": 26057.35,
+          "BODY-ENCLOSURE": 158071.12
         },
-        "S_CLOSED_RELEASED": {
-          "BODY-COVER": 28096.15754,
-          "BODY-ENCLOSURE": 136058.64,
-          "BODY-RIVET": 268.273362
+        "CLOSED_LATCH_RELEASED": {
+          "BODY-COVER": 26057.35,
+          "BODY-ENCLOSURE": 158071.12
         },
-        "S_OPEN": {
-          "BODY-COVER": 28096.15754,
-          "BODY-ENCLOSURE": 136058.64,
-          "BODY-RIVET": 268.273362
+        "CLOSED_REENGAGED": {
+          "BODY-COVER": 26057.35,
+          "BODY-ENCLOSURE": 158071.12
+        },
+        "CLOSING_LATCH_LEADIN": {
+          "BODY-COVER": 26057.35,
+          "BODY-ENCLOSURE": 158071.12
+        },
+        "OPENING_STARTED": {
+          "BODY-COVER": 26057.35,
+          "BODY-ENCLOSURE": 158071.12
+        },
+        "OPEN_84": {
+          "BODY-COVER": 26057.35,
+          "BODY-ENCLOSURE": 158071.12
+        },
+        "OPEN_INTERMEDIATE": {
+          "BODY-COVER": 26057.35,
+          "BODY-ENCLOSURE": 158071.12
         }
       }
     },
     "force_window_scan": {
-      "any_cited_as_achieved": false,
-      "hits": []
+      "asserts_a_force_as_achieved": false,
+      "candidate_lines": 6
+    },
+    "keeper": {
+      "enclosure_solid_count": 1,
+      "is_a_bridge_over_the_product": false,
+      "keeper_connected_to_enclosure": true,
+      "keeper_id": "FEA-E-KEEPER",
+      "keeper_is": "the strip of far end wall standing outboard of the latch slot",
+      "keeper_material_present": true,
+      "keeper_region_mm": [
+        187.0,
+        190.0,
+        3.4,
+        5.6,
+        40.0,
+        45.0
+      ],
+      "keeper_volume_mm3": 33.0,
+      "note": "the keeper is the end wall itself. Nothing spans the top of the product and nothing stands proud of the cover."
     },
     "latch": {
-      "block_onset_mm": 1.05,
+      "block_onset_mm": 0.62,
+      "blocking_direction": "-X, the rail travel direction, which is the opening direction",
+      "blocking_features": {
+        "cover": "FEA-C-LATCH-TOOTH",
+        "enclosure": "FEA-E-KEEPER"
+      },
       "blocks": true,
-      "cycle": "engage -> retained -> release -> open -> close -> re-engage",
+      "declared_free_play_mm": 0.6,
+      "declared_release_shift_mm": 2.6,
       "discriminates": true,
       "engaged_blocks_opening": [
         {
           "common_volume_mm3": 0.0,
-          "open_mm": 0.5
+          "open_mm": 0.2
         },
         {
           "common_volume_mm3": 0.0,
+          "open_mm": 0.4
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 0.55
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 0.6
+        },
+        {
+          "common_volume_mm3": 0.22,
+          "open_mm": 0.62
+        },
+        {
+          "common_volume_mm3": 1.1,
+          "open_mm": 0.7
+        },
+        {
+          "common_volume_mm3": 3.3,
           "open_mm": 0.9
         },
         {
-          "common_volume_mm3": 0.0,
-          "open_mm": 1.0
-        },
-        {
-          "common_volume_mm3": 0.9,
-          "open_mm": 1.05
-        },
-        {
-          "common_volume_mm3": 1.8,
-          "open_mm": 1.1
-        },
-        {
-          "common_volume_mm3": 3.6,
-          "open_mm": 1.2
-        },
-        {
-          "common_volume_mm3": 9.0,
+          "common_volume_mm3": 9.879032,
           "open_mm": 1.5
         },
         {
-          "common_volume_mm3": 18.0,
-          "open_mm": 2.0
+          "common_volume_mm3": 21.032258,
+          "open_mm": 3.0
         },
         {
-          "common_volume_mm3": 54.0,
-          "open_mm": 4.0
-        },
-        {
-          "common_volume_mm3": 39.333333,
-          "open_mm": 6.0
+          "common_volume_mm3": 8.581762,
+          "open_mm": 5.0
         }
       ],
-      "free_play_note": "the block begins after 1.05 mm because the hook stands clear of the keeper by the declared running clearance",
+      "engagement_width_mm": 2.2,
+      "free_play_note": "the block begins after 0.62 mm because the tooth stands clear of the end wall by the declared running clearance",
       "frees": true,
-      "latch_hold_distance_mm": 10.5,
+      "latch_hold_travel_mm": 8.0,
       "re_engages_after_closing": true,
+      "release_actually_moves_the_tooth": true,
+      "release_direction": "+Y, pushed inboard",
       "released_frees_opening": [
         {
           "common_volume_mm3": 0.0,
-          "open_mm": 0.5
+          "open_mm": 0.2
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 0.4
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 0.55
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 0.6
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 0.62
+        },
+        {
+          "common_volume_mm3": 0.0,
+          "open_mm": 0.7
         },
         {
           "common_volume_mm3": 0.0,
@@ -467,51 +702,49 @@
         },
         {
           "common_volume_mm3": 0.0,
-          "open_mm": 1.0
-        },
-        {
-          "common_volume_mm3": 0.0,
-          "open_mm": 1.05
-        },
-        {
-          "common_volume_mm3": 0.0,
-          "open_mm": 1.1
-        },
-        {
-          "common_volume_mm3": 0.0,
-          "open_mm": 1.2
-        },
-        {
-          "common_volume_mm3": 0.0,
           "open_mm": 1.5
         },
         {
           "common_volume_mm3": 0.0,
-          "open_mm": 2.0
+          "open_mm": 3.0
         },
         {
           "common_volume_mm3": 0.0,
-          "open_mm": 4.0
-        },
-        {
-          "common_volume_mm3": 0.0,
-          "open_mm": 6.0
+          "open_mm": 5.0
         }
       ],
+      "tooth_volume_behind_keeper_engaged_mm3": 23.226923,
+      "tooth_volume_behind_keeper_released_mm3": 0.0,
       "what_this_does_not_show": "release effort, snap force, strain or fatigue"
     },
     "load_path": {
-      "adequacy_evaluated": false,
       "all_bodies_connected": true,
       "bodies_connected_to_enclosure": [
-        "BODY-COVER",
-        "BODY-ENCLOSURE",
-        "BODY-RIVET"
+        "BODY-COVER"
+      ],
+      "via": [
+        "INT-01",
+        "INT-02",
+        "INT-05",
+        "INT-06"
       ]
     },
-    "open_access": {
-      "covered_when_closed_measured_in": "the aperture band z 40.0 to 45.0, not the clear prism above it",
-      "covered_when_closed_mm3": 18160.0,
+    "metadata": {
+      "clean": true,
+      "files_scanned": [
+        "build.py",
+        "parameters.yaml",
+        "manifest.yaml",
+        "interactions.yaml",
+        "assembly.yaml",
+        "poses.yaml"
+      ],
+      "obsolete_token_hits": {},
+      "tokens": "BODY-RIVET|BODY-PIN|BODY-CAM|snap rivet|quarter[- ]turn|rivet_[a-z_]+|cam_[a-z_]+"
+    },
+    "opening": {
+      "covered_measured_in": "the aperture band between the ledge tops and the cover top, not the clear prism above it",
+      "covered_when_closed_mm3": 18480.0,
       "declared_region": {
         "x": [
           103.0,
@@ -522,14 +755,175 @@
           57.0
         ]
       },
-      "fraction": "84 of 90 mm, APPROVED by HCR-BM001-003",
+      "human_decision": "84 of 90 mm, APPROVED by HCR-BM001-003",
       "intruding_volume_mm3": {
         "BODY-COVER": 0.0,
-        "BODY-ENCLOSURE": 0.0,
-        "BODY-RIVET": 0.0
+        "BODY-ENCLOSURE": 0.0
       },
+      "meets_84": true,
+      "nominal_aperture_mm": 90.0,
+      "note": "the open bound is the solid rail fill at x = 13.0. There is no break in either lip anywhere along the rails.",
+      "open_terminal_is_a_stop_not_a_relief": true,
       "region_is_one_the_cover_controls": true,
-      "unobstructed_at_open": true
+      "unobstructed_at_open": true,
+      "usable_opening_mm": 84.0
+    },
+    "png_evidence": {
+      "assembly_sequence_present": true,
+      "audit_file_present": true,
+      "complete": true,
+      "missing": [],
+      "operation_sequence_present": true,
+      "required": [
+        "review_overview_operation_and_sections.png",
+        "review_assembly_01_aligned.png",
+        "review_assembly_02_tabs_compressed.png",
+        "review_assembly_03_tabs_recovered.png",
+        "review_operation_01_closed_latched.png",
+        "review_operation_02_release_pressed.png",
+        "review_operation_03_slide_open.png",
+        "review_operation_04_full_open_captive.png",
+        "review_operation_05_reclosed_and_latched.png",
+        "review_section_AA_captive_rail_closed.png",
+        "review_section_BB_captive_rail_full_open.png",
+        "review_section_CC_assembly_snap.png",
+        "review_section_DD_latch_engaged.png",
+        "review_section_DD_latch_released.png"
+      ]
+    },
+    "rails": {
+      "both_rails_complete": true,
+      "lip_inner_edges_y": [
+        5.2,
+        64.8
+      ],
+      "operating_interval_mm": [
+        0.0,
+        84.0
+      ],
+      "rails": [
+        {
+          "guide_wall_volume_mm3": 4280.4,
+          "has_guide_wall": true,
+          "has_overhanging_lip": true,
+          "has_support_ledge": true,
+          "ledge_volume_mm3": 10092.0,
+          "lip_continuous_over_operating_interval": true,
+          "lip_gap_positions": [],
+          "lip_overhang_mm": 2.2,
+          "lip_span_mm": [
+            13.0,
+            187.0
+          ],
+          "lip_volume_mm3": 1071.84,
+          "rail": "L"
+        },
+        {
+          "guide_wall_volume_mm3": 4280.4,
+          "has_guide_wall": true,
+          "has_overhanging_lip": true,
+          "has_support_ledge": true,
+          "ledge_volume_mm3": 10092.0,
+          "lip_continuous_over_operating_interval": true,
+          "lip_gap_positions": [],
+          "lip_overhang_mm": 2.2,
+          "lip_span_mm": [
+            13.0,
+            187.0
+          ],
+          "lip_volume_mm3": 1071.84,
+          "rail": "R"
+        }
+      ],
+      "what_this_does_not_show": "the strength of the lip",
+      "what_this_shows": "both rails carry a support ledge, a guide wall and an overhanging retaining lip, and the lip runs the whole operating length. A rail without the overhang is only a side wall and would not retain anything."
+    },
+    "release": {
+      "enclosure_material_over_the_pad_mm3": 0.0,
+      "envelope_x_max_mm": 190.0,
+      "nothing_obstructs_the_pad": true,
+      "pad_is_part_of": "BODY-COVER, region REG-COVER-LATCH-COMPLIANT",
+      "pad_reachable_from_outside": true,
+      "pad_volume_outside_envelope_mm3": 357.55,
+      "press_direction": "+Y, pushed inboard toward the aperture",
+      "release_pad_x_span_mm": [
+        194.5,
+        201.0
+      ],
+      "separate_tool_or_component_required": false,
+      "slide_direction_after_release": "-X"
+    },
+    "terminal": {
+      "meta": {
+        "blocked_outside_declared_travel": true,
+        "branch": "HSD-006 branch A, direct causal evidence",
+        "determinant": "FEA-E-STOP-CLOSED at the closed bound and FEA-E-STOP-OPEN at the open bound",
+        "discriminates": true,
+        "free_inside_declared_travel": true,
+        "what_this_shows": "both bounds are produced by a realized face landing on a face, not by a declared number"
+      },
+      "rows": [
+        {
+          "blocked": true,
+          "common_volume_mm3": 248.0,
+          "inside_declared_travel": false,
+          "slide_mm": -1.0
+        },
+        {
+          "blocked": true,
+          "common_volume_mm3": 24.8,
+          "inside_declared_travel": false,
+          "slide_mm": -0.1
+        },
+        {
+          "blocked": false,
+          "common_volume_mm3": 0.0,
+          "inside_declared_travel": true,
+          "slide_mm": 0.0
+        },
+        {
+          "blocked": false,
+          "common_volume_mm3": 0.0,
+          "inside_declared_travel": true,
+          "slide_mm": 42.0
+        },
+        {
+          "blocked": false,
+          "common_volume_mm3": 0.0,
+          "inside_declared_travel": true,
+          "slide_mm": 84.0
+        },
+        {
+          "blocked": true,
+          "common_volume_mm3": 7.5,
+          "inside_declared_travel": false,
+          "slide_mm": 84.1
+        },
+        {
+          "blocked": true,
+          "common_volume_mm3": 75.0,
+          "inside_declared_travel": false,
+          "slide_mm": 85.0
+        }
+      ]
+    },
+    "topology": {
+      "banned_bodies_present": [],
+      "body_count": 2,
+      "body_ids": [
+        "BODY-COVER",
+        "BODY-ENCLOSURE"
+      ],
+      "exactly_two_product_bodies": true,
+      "materials": {
+        "BODY-COVER": "GENERIC_COMPLIANT_POLYMER",
+        "BODY-ENCLOSURE": "GENERIC_RIGID_POLYMER"
+      },
+      "single_connected_solid": {
+        "BODY-COVER": true,
+        "BODY-ENCLOSURE": true
+      },
+      "what_this_shows": "the product is two bodies. Nothing is held together by a third part, so no fastener can be compensating for incomplete rail geometry."
     }
   }
 }
