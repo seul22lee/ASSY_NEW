@@ -1,0 +1,143 @@
+{
+  "assumptions": {
+    "display_cutaway": "housing and rear panel intersected with y <= 74 for display; the model is unchanged",
+    "engine_is_not_mujoco": true,
+    "inset_camera": {
+      "eye_mm": [
+        760.0,
+        70.0,
+        128.0
+      ],
+      "fixed_for_whole_clip": true,
+      "half_height_mm": 146.0,
+      "projection": "orthographic",
+      "target_mm": [
+        40.0,
+        70.0,
+        128.0
+      ],
+      "up": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "kind": "PRESCRIBED CAD KINEMATIC ANIMATION",
+    "not_a_contact_simulation": true,
+    "not_a_dynamics_simulation": true,
+    "payload": "SCENARIO-PAYLOAD-1KG is a declared envelope, not a product body. It is drawn moving rigidly with the platform for visualisation. It has no mass distribution, no stiffness and no friction here.",
+    "pose_law": "build.py pose_at(): the crank shaft and crank joint pin rotate about the shaft axis; the connecting rod rotates about the crank-pin axis by asin(R sin theta / L) and translates onto the crank pin; the platform and platform joint pin translate vertically."
+  },
+  "camera": {
+    "eye_mm": [
+      -380.0,
+      -320.0,
+      250.0
+    ],
+    "fixed_for_whole_clip": true,
+    "half_height_mm": 150.0,
+    "projection": "orthographic",
+    "target_mm": [
+      14.0,
+      74.0,
+      124.0
+    ],
+    "up": [
+      0.0,
+      0.0,
+      1.0
+    ]
+  },
+  "claims_established": [
+    "the declared bodies pass through a complete 0-360 degree crank cycle",
+    "the external handle rotates and the platform rises and then lowers in response",
+    "the connecting rod changes orientation through the cycle, reaching 31.97 degrees",
+    "the platform support surface moves between z = 126.0 and z = 216.0",
+    "no body is drawn passing through another at any sampled frame"
+  ],
+  "claims_not_established": [
+    "any force, torque, pressure, stress, strain or deflection",
+    "that a human can turn the crank, or with what effort",
+    "that the mechanism does not jam - jamming is contact-level and NOT_VERIFIED",
+    "that the platform holds position when the crank is released",
+    "that the platform carries 1 kg - capacity is UNSUPPORTED",
+    "safety, manufacturability, wear or life"
+  ],
+  "codec": "H.264 (libx264), yuv420p, MP4 container",
+  "container_readback": {
+    "codec_reported": "h264",
+    "container_duration_s": 10.0,
+    "container_fps": 30.0,
+    "container_size_px": [
+      1280,
+      720
+    ],
+    "ffmpeg_version": "4.2.2-static",
+    "frames_read_back": 300
+  },
+  "duration_s": 10.0,
+  "engine": "cadquery-ocp tessellation + matplotlib painter + ffmpeg (libx264)",
+  "engine_versions": {
+    "cadquery": "2.4.0",
+    "ffmpeg": "4.2.2-static",
+    "imageio_ffmpeg": "0.5.1",
+    "matplotlib": "3.7.5",
+    "numpy": "1.24.4"
+  },
+  "file": "validation/review/lift_cad_operation.mp4",
+  "fps": 30,
+  "frame_count": 300,
+  "geometry_source": "the reference's own B-rep solids, posed by the same functions the validator uses. No proxy geometry.",
+  "gif": "validation/review/lift_cad_operation.gif",
+  "gif_sha256": "129485aa00ebd1d9a430dc53f8c27207ef75cea02ff71bddd48411794f662d00",
+  "human_review": "HUMAN_REVIEW_PENDING",
+  "kind": "REVIEW_EVIDENCE",
+  "output_bytes": 1931801,
+  "output_sha256": "8f662627b15fd7d4fcb79070402bed98cfe4189a4c92776d2b09b7e0789c7b3c",
+  "reference_id": "EXE-BM002-01",
+  "resolution_px": [
+    1280,
+    720
+  ],
+  "sequence": "BOTTOM -> RISING -> TOP -> LOWERING -> BOTTOM RETURN",
+  "source_geometry_signature_sha256": "6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee",
+  "state_timeline": [
+    {
+      "crank_angle_deg": 0.0,
+      "frame": 0,
+      "state": "BOTTOM",
+      "support_surface_z_mm": 126.0,
+      "t_s": 0.0
+    },
+    {
+      "crank_angle_deg": 1.2,
+      "frame": 1,
+      "state": "RISING",
+      "support_surface_z_mm": 126.0081,
+      "t_s": 0.033
+    },
+    {
+      "crank_angle_deg": 180.0,
+      "frame": 150,
+      "state": "TOP",
+      "support_surface_z_mm": 216.0034,
+      "t_s": 5.0
+    },
+    {
+      "crank_angle_deg": 181.2,
+      "frame": 151,
+      "state": "LOWERING",
+      "support_surface_z_mm": 215.9883,
+      "t_s": 5.033
+    },
+    {
+      "crank_angle_deg": 358.8,
+      "frame": 299,
+      "state": "BOTTOM RETURN",
+      "support_surface_z_mm": 126.0081,
+      "t_s": 9.967
+    }
+  ],
+  "trajectory_sha256": "89b83806d33223f63096fdd5cf15c2c1cde9a0df3814277494a6fd4f9494b312",
+  "video_id": "lift_cad_operation"
+}

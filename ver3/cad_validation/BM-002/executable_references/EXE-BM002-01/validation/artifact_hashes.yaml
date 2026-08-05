@@ -1,7 +1,7 @@
 reference_id: EXE-BM002-01
 purpose: Provenance for every artifact this reference produced. STEP bytes vary between exporter builds,
   so these hashes are provenance, not the reproducibility criterion; that is the geometry signature.
-file_count: 39
+file_count: 91
 files:
 - path: DESIGN_AND_OPERATION_RATIONALE.md
   bytes: 24938
@@ -20,19 +20,19 @@ files:
   sha256: 049cce434d5597bd6988e9b6d084e968fceae9501cda97235c91c3efb2ee7960
 - path: connecting_rod.step
   bytes: 23842
-  sha256: 5621e180a29703bcbcaaddfe97ac852445de01fb546b2b4987bce7f00f593214
+  sha256: 69ecff312c457d91deb703ace1b6ea3d9a67ba0d7ddd61aac6c820704aaaa5bd
 - path: crank_joint_pin.brep
   bytes: 1966
   sha256: 6edddd358dab556658dd101f04c99f045b229504a3e7ac80b1ecbe457bb9fa4d
 - path: crank_joint_pin.step
   bytes: 9466
-  sha256: 6a4e059e56a4e6cc62be9d9efd8e21688a006ffc8a3743572b43cbe9646beced
+  sha256: 19f74855e8237ca7d2b1e89ba0837c9092b00742183bd124faa3b295e17bb4a8
 - path: crank_shaft.brep
   bytes: 11203
   sha256: 110c586247a1fb79bd53340317b4a627bece7d40fcec1cee6585782cd22bba33
 - path: crank_shaft.step
   bytes: 45817
-  sha256: 3880a702ee86aa81e10d473ab53c46b75c9b720b2a904518651e83064caca12c
+  sha256: 777f0e3a723f721b246ec020d51ab5c88881bde161f3920809bbb6192f8e8b07
 - path: expected_evaluation.yaml
   bytes: 11709
   sha256: ca042206d00c046685289fb2681c096ea404aa42a67ff1e7b2c875271058c5ce
@@ -44,10 +44,13 @@ files:
   sha256: 1f051b252fb7c2156268d910ccf7d2ab94a4eb709d951ef81991c65078c8cc63
 - path: housing.step
   bytes: 101779
-  sha256: fccac8ea138845ac758395bb45575bc247f6e8e717b10ded96eb41fb566094a9
+  sha256: 716792eb7d1b39a5386b0b28bdd180e361a141a82eeafa8ede72a41c57bab663
 - path: interactions.yaml
   bytes: 9110
   sha256: 5713d15b60444d69cbd11e63c1c27a2a1d79ebc671142dfb6f2ad5e0fd61d658
+- path: make_videos.py
+  bytes: 20103
+  sha256: c8c8763599489dc061f1c34c629bbfe390227c46f8402be3a670782845eeae46
 - path: manifest.yaml
   bytes: 12232
   sha256: 57599a6605a6b8283209d2463b7683f9f96b7fe1f7c0dfaafb632a96a6a164d3
@@ -56,7 +59,7 @@ files:
   sha256: b1c6bf30745c35e55420ddc2fe7f89a6a286dceb2e60654527d824e3d84c8d68
 - path: model.step
   bytes: 345717
-  sha256: 781e7ec43f2eca01f8927954249632096bc4c8805f12477b803d8eb67128d598
+  sha256: f8abfc2f7991985161accb90bca487d732875eefb05bf4aa24b4e14bcc2dcb11
 - path: parameters.yaml
   bytes: 10988
   sha256: 84a8ff29f8a785a7cf7b0dfbddbfb676906be883e68da525acec840045482b8f
@@ -65,13 +68,13 @@ files:
   sha256: eacd6f32380337f7d0531987637002748c8e2277115fb5d2c5c4735b62c9f37e
 - path: platform.step
   bytes: 98366
-  sha256: 382db1721e251ba2bc8c53093f24ccff830a76f4caa347225444a48a78b0bee0
+  sha256: 02ce4b336bb67d712dfe7ad33d9e6fc8d82f4484977dee50c297820a5e05ff7b
 - path: platform_joint_pin.brep
   bytes: 1979
   sha256: b569a960abd084e1b8c6f09007ce39fb1ee8696623e8a1ab1ad4a9520508ff2b
 - path: platform_joint_pin.step
   bytes: 9480
-  sha256: 5c95adc71fe9c177b8d8649570efd7a3daf3eb15cdbed50cb150a236f80b9a44
+  sha256: fd05afee99e23b0a272ac78a855e00569fdc41e7b1eb2f54e6de363792fe5d0a
 - path: poses.yaml
   bytes: 5420
   sha256: a52094180b9041de4a5da1c465cfc8331c0b73d96a6b9a6e48778c5e21615dc6
@@ -80,19 +83,154 @@ files:
   sha256: 2d50285910c33e6622f8308660d6881d19d5ec81c90edc5640ef42a6ed19feca
 - path: rear_panel.step
   bytes: 44395
-  sha256: 333a639ce2d810d12d94139c7f6bb54ac336eaea38843af6e5a336aa3c00f251
+  sha256: dd02da8d0395f38044761966e6e406d6ffe683681ecb3187bc4f89e2c6dba001
+- path: review_views.py
+  bytes: 74108
+  sha256: 66736c0cd5efcf0dc2683f3a463e8fe2f4a69380f4ad51466a60d1e813dcb614
+- path: screenshots/review_assembly_01_empty_housing.png
+  bytes: 68327
+  sha256: b0beb018748753915bd897a657fc36acdbb081193a593b9f8090205a2d86a105
+- path: screenshots/review_assembly_02_crank_shaft_inserted.png
+  bytes: 93764
+  sha256: bdf904ec0867db729ae020df7bdaabc1d7e41fcf107b066b0173421cc5adc8ed
+- path: screenshots/review_assembly_03_connecting_rod_and_crank_pin.png
+  bytes: 95801
+  sha256: 3f246ff6f8e92a7eabb3ec1553cf695408efca42792ba07cb10f9d8752537c06
+- path: screenshots/review_assembly_04_platform_entering_guides.png
+  bytes: 127308
+  sha256: 334642f87bdc7cb23920bc729b2fa75dd0ec1588eb7dfe0ed28c80dc15e2a459
+- path: screenshots/review_assembly_05_platform_joint_pin.png
+  bytes: 94886
+  sha256: 2da0f9de9c41eff8b4b0534b1ccc2a75424453ed55b6a8c705a13a55a9ba70be
+- path: screenshots/review_assembly_06_open_side_cycle_check.png
+  bytes: 103664
+  sha256: 0bb15ea49f048adc7256e104365d14cd9c4add80fccbee2fe37580b51a85c2ad
+- path: screenshots/review_assembly_07_rear_panel_approach.png
+  bytes: 122837
+  sha256: 5624a5d54bcf242447e2401532b4e0f6ad7001ebbac3c380ea52d1b8471b1736
+- path: screenshots/review_assembly_08_rear_panel_installed.png
+  bytes: 88976
+  sha256: b101ebb0828c44c8f06842643d086120abb47b873e9e16be5e85e07d3a53d116
+- path: screenshots/review_assembly_09_completed_lift.png
+  bytes: 86395
+  sha256: c00472e6d5ab37eaaaa5d6f6b1edd5419a5266f8686f74b0413377d42391199f
+- path: screenshots/review_body_identification.png
+  bytes: 161634
+  sha256: 87ba727f89d6f65036452bd63698556bbb3a4d689e1f2da44e40fd76adc0f141
+- path: screenshots/review_external_crank_user_interface.png
+  bytes: 230306
+  sha256: 025e1aaebf233181b85aa9f080029d55b2b00575fdb599c79c1fc2536e44c63c
+- path: screenshots/review_internal_mechanism_cutaway_iso.png
+  bytes: 143644
+  sha256: 8543a71e9b866d2c5fb5259ef30e2e2773a70f8cc8e5aa682929b7194a5cbc7f
+- path: screenshots/review_internal_mechanism_rear_panel_removed.png
+  bytes: 158351
+  sha256: a5aa2aa464dacd227fd5fc174a910ff578d59877f3563761cf9464424accc5ee
+- path: screenshots/review_kinematic_chain_annotated.png
+  bytes: 197170
+  sha256: b09cf5a2a516e89ba2d1c45e04cab93fe8f397d6bf0a4efaea9bc1eda2da2513
+- path: screenshots/review_operation_01_bottom.png
+  bytes: 123364
+  sha256: 60514570843ebb6c7a6b05ce027ba2bdce7be347f5e826da2415c70056921ca1
+- path: screenshots/review_operation_02_rising_45.png
+  bytes: 124465
+  sha256: a7ebf0f07eb3816751f7296676ef8d29980ce093219cc896399df8c54a7398dd
+- path: screenshots/review_operation_03_rising_90.png
+  bytes: 117966
+  sha256: 1eb9d39bd4874f265a239cb5244b176743a2505c17f90b8f5187d85d201b7f70
+- path: screenshots/review_operation_04_rising_135.png
+  bytes: 120475
+  sha256: 54265d4a8b66e7baacc829564b1cfa0a78bbd3c06f946923d5e3fc58aea35cdc
+- path: screenshots/review_operation_05_top.png
+  bytes: 117239
+  sha256: 22cfcc9a62e1a2064c4f7a57760d7e8cc6438186ec74311840a0c884eb9d3792
+- path: screenshots/review_operation_06_lowering_225.png
+  bytes: 119495
+  sha256: 29ddca6603f5cf4ff9ae4b73cfcafd0bb7b666ba7951b94b143440d3c19109bc
+- path: screenshots/review_operation_07_lowering_270.png
+  bytes: 118901
+  sha256: dd2d84ec73ef629faa1ff7dbf892ca09f4d52adf8e83649528d7bb0b206ea4ff
+- path: screenshots/review_operation_08_lowering_315.png
+  bytes: 125953
+  sha256: d2fe3dbebfe96970ef4742ba9c1d8bd902c3b612f692ebc567cd38c2da346e59
+- path: screenshots/review_operation_09_bottom_return.png
+  bytes: 126917
+  sha256: 609884367da04fdd08d09c5b0ca35c71e64001a7772d5ea0d8fd694e8a97cda3
+- path: screenshots/review_overall_front.png
+  bytes: 58509
+  sha256: a5af529856aa2b40657c732e9d7aa601fdcad176bee474d2f21e53447ca85950
+- path: screenshots/review_overall_front_iso.png
+  bytes: 121305
+  sha256: 276d543da65965304c8d13a1a3513d0ab1657156684c5824ea6e3a5feb1fed7d
+- path: screenshots/review_overall_left.png
+  bytes: 88963
+  sha256: 91389af98a0f0234071895b896c6fc648b2e018a5922ebb0e9b11251d5cc8944
+- path: screenshots/review_overall_rear.png
+  bytes: 47329
+  sha256: d5c63c6ef076b57cae92a9cc90918bb0cc6fe5220bfd52d7d6cab3f840cfb3a4
+- path: screenshots/review_overall_rear_iso.png
+  bytes: 67682
+  sha256: 9aa46de127ab84df712e4ae0b98b69e2e90232d24d82af889df7eb5d6503cee5
+- path: screenshots/review_overall_right.png
+  bytes: 77464
+  sha256: 89cace3d68e8c506c1f27d40926a105dd3f9bc91676796cf6a11def5205e2d10
+- path: screenshots/review_overall_top.png
+  bytes: 77811
+  sha256: 6b5773bdfeac735b95a6fae25fce4c5aa0fb275a46952090c8ab24b5c8da5bf4
+- path: screenshots/review_overview_operation_and_sections.png
+  bytes: 124594
+  sha256: a518aa9b00ff13a4ecc8f935d1d87d27109c0d368c03def181559028b2d705a0
+- path: screenshots/review_section_AA_shaft_and_dual_journals.png
+  bytes: 293347
+  sha256: a65639aa2841c545268c966244d405c848381f253bd2362e6e6be977e962e05c
+- path: screenshots/review_section_BB_crank_link_platform_bottom.png
+  bytes: 165691
+  sha256: 56048be742a53d4ff8e51cf4528b6c18a45ff1ad568c5ab7384d66455b60bf07
+- path: screenshots/review_section_BB_crank_link_platform_mid.png
+  bytes: 155771
+  sha256: 488a23f1190591648cb127c6cca61e9a80f33d9ccacd067000148fc8bb4e2230
+- path: screenshots/review_section_BB_crank_link_platform_top.png
+  bytes: 159376
+  sha256: 1b7397bbd436fc5843de4485114b5c34f1034ace3d188af2178d482bf5dd8afe
+- path: screenshots/review_section_CC_platform_guides_bottom.png
+  bytes: 218089
+  sha256: 971723575bc56135607b7771ab4f7cadd1095bacd21fb59591a813c7bc8f1d53
+- path: screenshots/review_section_CC_platform_guides_mid.png
+  bytes: 223406
+  sha256: 5ce2a97f4ad504319a763012c18f5c8f60e99dae26aa434d053133ec88d5758a
+- path: screenshots/review_section_CC_platform_guides_top.png
+  bytes: 229340
+  sha256: bce2a367598c9666c656fc43c91b83ca9491e3b186f71eb47358bcc2b4414631
+- path: screenshots/review_section_DD_crank_joint_retention.png
+  bytes: 224629
+  sha256: 0622e7bf64e21b9e5d138d35f0a90c5c23ca4eaead90f350943a92df307bc33e
+- path: screenshots/review_section_EE_platform_joint_retention.png
+  bytes: 314255
+  sha256: 71dbe3847610b2754702c5b65c55dfe80bb129459059a8140cc514eba049b0a1
+- path: screenshots/review_section_FF_payload_access_bottom.png
+  bytes: 202529
+  sha256: 6088c5c90c19ab3142eef2a7d38cea4e203e09d6a1da5a7c5b161ce23dd8367e
+- path: screenshots/review_section_FF_payload_access_top.png
+  bytes: 206126
+  sha256: 0a7106f32f13bffec93a8d2059b19135f549c7686febd3f2ce7d3a7d2419a346
 - path: validate.py
   bytes: 98122
   sha256: 580a9a83edb4b91e74f4e8c09bd943ef24becf4c815c63c8eeb3fe13739a0d0d
+- path: validation/PNG_REVIEW_AUDIT.md
+  bytes: 17543
+  sha256: a5acf01cb64d7e295c6f37d2378b1ff204684c53090b296542511ce0e80c5c7a
 - path: validation/SUMMARY.json
   bytes: 1370
   sha256: 9b422fe3044f4e2a45e4145d3dede9ca588a0e35ced80c655634dab38bd89709
+- path: validation/VIDEO_REVIEW_AUDIT.md
+  bytes: 11436
+  sha256: d9902f230bff07d6ea873ff16834d44d01cec6b201b14c047502d42211bb7f9a
 - path: validation/assembly_report.json
   bytes: 5980
   sha256: 46c43d41f3b61e6a25bcb2ef815e1ecd92035ea63948341f8eaa5dac509e8918
 - path: validation/build_report.json
-  bytes: 6145
-  sha256: 1ef2408c9d515cc8a2916689cb40d11e7a78efef4f1d4a9c1d2d081149c2fff8
+  bytes: 6146
+  sha256: cb1caffc02ba2e14af81e8761fb1d6391c7e318c2a92787d65c6cca1d74c4f3a
 - path: validation/checker_selftest.json
   bytes: 8018
   sha256: 827031da26f2df493f90f83557e8a41cb8babdc95999518b05d93bdc68c45881
@@ -107,7 +245,7 @@ files:
   sha256: df32cbcd17b4e441d357a58125d53ace0bb4ca2c00035caf484216f2255401a5
 - path: validation/motion_report.json
   bytes: 731700
-  sha256: a9855a9a5a6c5543643181668eae9206a76ac448bb2f0b830d8b0f6e04feaa5a
+  sha256: 56221f2d1e71f7b413944fc16d4641f9c214d33c50c7c031c6ac10cb721ec4ec
 - path: validation/payload_access_report.json
   bytes: 4772
   sha256: 887dbead1951dd7bde9fb61684858094424ba3966f325dea4a7658f56f30064d
@@ -116,7 +254,25 @@ files:
   sha256: a9a89b6eaaf3fda0ccff9d192e0a5c34bb5df7ec8c75d278f7c286a94bd318fa
 - path: validation/reimport_report.json
   bytes: 5643
-  sha256: a621eb738d3e6831a4af3eefdf4ba0fa0fc20c1a9dda1ddc1682f0905f0b7407
+  sha256: b35bf4717ef1ecf119af6ba3b3913e2f0e1bde72e88129736de44eef55c7912e
+- path: validation/render_report.json
+  bytes: 30736
+  sha256: fac345f5bb2e8aa9804b0e219c02c02a8cc4c10f54187dccbe482180cb8e4606
+- path: validation/review/lift_cad_assembly.mp4
+  bytes: 861837
+  sha256: 10efdf10ae35950920ec7567d8a82380832c5bae7487e720afb79fe3a8ef8e78
+- path: validation/review/lift_cad_assembly_video.json
+  bytes: 4162
+  sha256: 018e5be7228a625a160cd173af33f9a8e8a6bd13a3f8dc8a2ee23d87e0ba4e84
+- path: validation/review/lift_cad_operation.gif
+  bytes: 3899444
+  sha256: 129485aa00ebd1d9a430dc53f8c27207ef75cea02ff71bddd48411794f662d00
+- path: validation/review/lift_cad_operation.mp4
+  bytes: 1931801
+  sha256: 8f662627b15fd7d4fcb79070402bed98cfe4189a4c92776d2b09b7e0789c7b3c
+- path: validation/review/lift_cad_operation_video.json
+  bytes: 4493
+  sha256: 624c30a702d5ba6da5d573446d9061add066be4e4b84ae60819b525b7ec2c95e
 - path: validation/solid_validity.json
   bytes: 1670
   sha256: 9544bec42ffa8499efc9016faebbcf674804685722df69c0d6e3d15833938e7d

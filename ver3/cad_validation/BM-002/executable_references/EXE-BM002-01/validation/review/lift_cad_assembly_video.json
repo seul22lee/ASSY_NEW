@@ -1,0 +1,147 @@
+{
+  "assumptions": {
+    "display_cutaway": "housing and rear panel intersected with y <= 74 for display; the model is unchanged",
+    "engine_is_not_mujoco": true,
+    "kind": "GEOMETRIC ASSEMBLY SEQUENCE",
+    "motion_law": "each body translates along the straight-line insertion direction declared for it in assembly.yaml. The offsets are display approach distances; the SEATED positions are the as-built ones the validator swept in step 7.",
+    "not_a_contact_or_force_simulation": true
+  },
+  "camera": {
+    "eye_mm": [
+      -350.0,
+      -330.0,
+      285.0
+    ],
+    "fixed_for_whole_clip": true,
+    "half_height_mm": 158.0,
+    "projection": "orthographic",
+    "target_mm": [
+      20.0,
+      76.0,
+      112.0
+    ],
+    "up": [
+      0.0,
+      0.0,
+      1.0
+    ]
+  },
+  "claims_established": [
+    "an ordering exists in which each body reaches its seated position",
+    "the crank shaft enters from the open +X side and its grip emerges outside",
+    "the connecting rod and the platform enter vertically through the open top",
+    "both followers enter the two guide channels before the panel is installed",
+    "both joint pins are installed before the rear panel closes the +X side",
+    "the rear panel's two retention lands arrive behind the two pin heads in the same motion that seats the panel"
+  ],
+  "claims_not_established": [
+    "insertion force, ease of assembly, tooling or fixturing",
+    "manufacturability of any body",
+    "that the sequence is the only possible one",
+    "any contact, friction or deformation - none is modelled"
+  ],
+  "codec": "H.264 (libx264), yuv420p, MP4 container",
+  "container_readback": {
+    "codec_reported": "h264",
+    "container_duration_s": 12.5,
+    "container_fps": 30.0,
+    "container_size_px": [
+      1280,
+      720
+    ],
+    "ffmpeg_version": "4.2.2-static",
+    "frames_read_back": 375
+  },
+  "duration_s": 12.5,
+  "engine": "cadquery-ocp tessellation + matplotlib painter + ffmpeg (libx264)",
+  "engine_versions": {
+    "cadquery": "2.4.0",
+    "ffmpeg": "4.2.2-static",
+    "imageio_ffmpeg": "0.5.1",
+    "matplotlib": "3.7.5",
+    "numpy": "1.24.4"
+  },
+  "file": "validation/review/lift_cad_assembly.mp4",
+  "fps": 30,
+  "frame_count": 375,
+  "geometry_source": "the reference's own B-rep solids, posed by the same functions the validator uses. No proxy geometry.",
+  "human_review": "HUMAN_REVIEW_PENDING",
+  "kind": "REVIEW_EVIDENCE",
+  "note": "step 7 turns the crank with the +X side open",
+  "output_bytes": 861837,
+  "output_sha256": "10efdf10ae35950920ec7567d8a82380832c5bae7487e720afb79fe3a8ef8e78",
+  "reference_id": "EXE-BM002-01",
+  "resolution_px": [
+    1280,
+    720
+  ],
+  "source_geometry_signature_sha256": "6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee",
+  "state_timeline": [
+    {
+      "bodies_placed": 1,
+      "frame": 0,
+      "state": "empty housing",
+      "step": 1,
+      "t_s": 0.0
+    },
+    {
+      "bodies_placed": 2,
+      "frame": 27,
+      "state": "crank shaft inserted -X",
+      "step": 2,
+      "t_s": 0.9
+    },
+    {
+      "bodies_placed": 3,
+      "frame": 78,
+      "state": "connecting rod lowered -Z",
+      "step": 3,
+      "t_s": 2.6
+    },
+    {
+      "bodies_placed": 4,
+      "frame": 120,
+      "state": "crank joint pin inserted -X",
+      "step": 4,
+      "t_s": 4.0
+    },
+    {
+      "bodies_placed": 5,
+      "frame": 156,
+      "state": "platform lowered into both guides -Z",
+      "step": 5,
+      "t_s": 5.2
+    },
+    {
+      "bodies_placed": 6,
+      "frame": 201,
+      "state": "platform joint pin inserted -X",
+      "step": 6,
+      "t_s": 6.7
+    },
+    {
+      "bodies_placed": 6,
+      "frame": 237,
+      "state": "open-side cycle check",
+      "step": 7,
+      "t_s": 7.9
+    },
+    {
+      "bodies_placed": 7,
+      "frame": 291,
+      "state": "rear panel installed -X",
+      "step": 8,
+      "t_s": 9.7
+    },
+    {
+      "bodies_placed": 7,
+      "frame": 339,
+      "state": "completed lift",
+      "step": 9,
+      "t_s": 11.3
+    }
+  ],
+  "steps": 9,
+  "trajectory_sha256": "7fd9d3b23b2a2bbc8fba49eafd7f0ff6af5ea70def1d812ee6659b31f1ca5320",
+  "video_id": "lift_cad_assembly"
+}

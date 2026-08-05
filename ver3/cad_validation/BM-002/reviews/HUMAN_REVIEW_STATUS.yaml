@@ -1,0 +1,189 @@
+case_id: BM-002
+reference_id: EXE-BM002-01
+schema_version: 0.1.0
+
+status: HUMAN_REVIEW_PENDING
+author_self_review_complete: true
+independent_human_review_complete: false
+
+what_author_self_review_covered: >
+  Legibility and correctness of the CAD-derived review media only: that every
+  image and video frame was rendered from the accepted B-rep geometry, that the
+  features they claim to show are actually visible in them, that the annotations
+  match the measured values in validation/, and that nothing is claimed on an
+  image that the Phase A evidence does not support. It did NOT review the design.
+
+what_author_self_review_did_not_cover: >
+  Whether the design is good. Proportions, the overhung crank architecture, the
+  Ø70 hub, the 26 mm hand radius, the 8 mm top recess, whether the rear panel
+  earns its place, and whether further engineering is required before treating
+  this as a practical 1 kg product are all human decisions and all remain PENDING.
+
+geometry:
+  signature_sha256: 6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee
+  changed_in_this_phase: false
+  phase_a_result: 14 invariants PASS, 0 FAIL, 20 of 20 negative controls detected
+  measured_travel_mm: 90.000000
+  product_bodies: 7
+  scenario_objects: 1
+
+media:
+  review_images: 42
+  sections: 13
+  operation_storyboard_frames: 9
+  assembly_storyboard_frames: 9
+  videos: 2
+  all_media_from_actual_brep: true
+  generative_imagery_used: false
+  proxy_or_redrawn_geometry_used: false
+  mujoco_used: false
+  png_audit: ../executable_references/EXE-BM002-01/validation/PNG_REVIEW_AUDIT.md
+  png_audit_conclusion: YES - READY FOR INDEPENDENT HUMAN CAD REVIEW
+  video_audit: ../executable_references/EXE-BM002-01/validation/VIDEO_REVIEW_AUDIT.md
+  video_audit_conclusion: >
+    both clips decode as written, match their manifests exactly, and show what
+    they claim to show; review evidence for geometry and prescribed kinematics only
+  packet: INDEPENDENT_HUMAN_REVIEW_PACKET.md
+
+# ------------------------------------------------- reviewer decisions, all PENDING
+reviewer_decisions:
+  product_and_scale:
+    - id: P1
+      question: Does this read as a coherent desktop lift?
+      decision: PENDING
+    - id: P2
+      question: Are the overall proportions (125 x 140 x 224 mm) acceptable?
+      decision: PENDING
+    - id: P3
+      question: Is the open-top payload arrangement acceptable?
+      decision: PENDING
+  user_input:
+    - id: U1
+      question: Is the external crank accessible?
+      decision: PENDING
+    - id: U2
+      question: Is a 26 mm hand radius credible for this product?
+      decision: PENDING
+    - id: U3
+      question: >
+        Is its sweep acceptable? The grip's lowest point is z = 34, i.e. 34 mm
+        above the surface the housing stands on.
+      decision: PENDING
+    - id: U4
+      question: Should the handle be larger, or shaped differently?
+      decision: PENDING
+  mechanism:
+    - id: M1
+      question: Is the overhung crank shaft credible as a reference architecture?
+      decision: PENDING
+    - id: M2
+      question: Are two housing-side journal lands understandable and mechanically plausible?
+      decision: PENDING
+    - id: M3
+      question: Is the crank / link / platform chain clear?
+      decision: PENDING
+    - id: M4
+      question: Does any body appear unnecessary?
+      decision: PENDING
+  guidance_and_payload:
+    - id: G1
+      question: Do the front and back guide channels appear sufficient to maintain orientation?
+      decision: PENDING
+    - id: G2
+      question: Is payload access adequate at BOTTOM (98 mm below the rim) and at TOP (8 mm)?
+      decision: PENDING
+    - id: G3
+      question: Is the 8 mm top recess acceptable?
+      decision: PENDING
+  joints_and_assembly:
+    - id: J1
+      question: Are both joint pins sufficiently retained geometrically?
+      decision: PENDING
+    - id: J2
+      question: Are the rear-panel retention lands understandable?
+      decision: PENDING
+    - id: J3
+      question: Is the assembly sequence credible?
+      decision: PENDING
+    - id: J4
+      question: Does the rear panel perform enough necessary functions to justify being a body?
+      decision: PENDING
+  claims:
+    - id: C1
+      question: Are strength, effort, jamming, safety and manufacture correctly left unverified?
+      decision: PENDING
+    - id: C2
+      question: >
+        Is further engineering analysis required before treating this as a
+        practical 1 kg product?
+      decision: PENDING
+
+author_raised_concerns:
+  note: >
+    Raised by the author while producing the media. None is a defect in the CAD;
+    each is a design question only a human can settle.
+  items:
+    - id: SC-01
+      concern: >
+        The O70 hub is load-bearing in three ways at once - exterior crank body,
+        boundary-crossing element, and journal surface for both lands. It is that
+        large because the shaft is inserted from the open +X side, so the handle
+        end must pass through the whole journal bore.
+      relates_to: [M1, M2]
+    - id: SC-02
+      concern: >
+        26 mm is a small hand-crank radius, and it is bounded above by the hub
+        radius of 35 mm for the same assembly reason.
+      relates_to: [U2, U4]
+    - id: SC-03
+      concern: >
+        The grip reaches z = 34 at its lowest, 34 mm above the desk. Whether
+        knuckles clear the surface is not measured anywhere.
+      relates_to: [U3]
+    - id: SC-04
+      concern: The 8 mm recess at TOP is tight for placing a payload by hand.
+      relates_to: [G2, G3]
+    - id: SC-05
+      concern: >
+        The overhung crank is a consequence of the connecting rod occupying the
+        crank axis, not a preference. A reviewer may still judge it the wrong
+        architecture.
+      relates_to: [M1]
+    - id: SC-06
+      concern: >
+        No holding feature. Release the crank and nothing holds the platform. The
+        source states no such requirement (UNR-BM-002-004) so none was added.
+      relates_to: [C2]
+    - id: SC-07
+      concern: >
+        The product is tall and narrow. "Desktop-sized" has no stated envelope
+        (UNR-BM-002-006).
+      relates_to: [P1, P2]
+
+not_established:
+  - payload capacity, strength, stress, deflection, margin (REQ-003 UNSUPPORTED)
+  - crank torque, effort, mechanical advantage (UNR-BM-002-003)
+  - jamming, stability, smooth operation (REQ-007 NOT_VERIFIED)
+  - safety and pinch hazards (REQ-005 INDETERMINATE)
+  - manufacturability, assembly force, tooling, tolerance capability, cost
+  - wear, fatigue, life
+  - position holding after release, self-locking
+  - whether the boundary-crossing hub counts as enclosed (REQ-004 INDETERMINATE, AMB-002-01)
+  - the compliance edge of "approximately" (UNR-BM-002-002 carried unresolved)
+
+deferred_in_this_phase:
+  items:
+    - MuJoCo models and runs
+    - torque and force plots
+    - FEA
+    - demonstration CAD
+    - failure-CAD corpus
+    - mutation-product CAD
+    - LOCK.json and production pipeline code
+  note: >
+    None of these was run and no result from any of them is implied anywhere in
+    this packet.
+
+self_approval: >
+  NONE. The author does not approve this design. Recording the decisions above is
+  the reviewer's act, not the author's.
