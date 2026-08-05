@@ -1,0 +1,140 @@
+{
+  "invariants": [
+    {
+      "blocked_on": null,
+      "invariant_id": "NRM-BM-002-001",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-002-001"
+      ],
+      "invariant_id": "NRM-BM-002-002",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": null,
+      "invariant_id": "NRM-BM-002-003",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-002-002"
+      ],
+      "invariant_id": "NRM-BM-002-004",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-002-002",
+        "UNR-BM-002-007"
+      ],
+      "invariant_id": "NRM-BM-002-005",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-002-007"
+      ],
+      "invariant_id": "NRM-BM-002-006",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": null,
+      "invariant_id": "NRM-BM-002-007",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": null,
+      "invariant_id": "NRM-BM-002-008",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": null,
+      "invariant_id": "NRM-BM-002-009",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": null,
+      "invariant_id": "NRM-BM-002-010",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-002-007"
+      ],
+      "invariant_id": "NRM-BM-002-011",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": null,
+      "invariant_id": "NRM-BM-002-012",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": null,
+      "invariant_id": "NRM-BM-002-013",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": null,
+      "invariant_id": "NRM-BM-002-014",
+      "status": "PASS"
+    }
+  ],
+  "maximum_claim": "GEOMETRICALLY AND KINEMATICALLY ADMISSIBLE AT THE EVALUATED CAD FIDELITY",
+  "oracle_tree_sha256": "80d47f65edf964e6cc1c0b3251919aa3a45eb1be",
+  "phase": "PHASE_A_CAD_AND_CORE_VALIDATION",
+  "reference_id": "EXE-BM002-01",
+  "requirement_readings": [
+    {
+      "outcome": "PASS at the evaluated fidelity",
+      "requirement": "REQ-001 external crank raises and lowers an internal platform",
+      "why": "kinematic evidence over a complete cycle with the chain traversable"
+    },
+    {
+      "outcome": "PASS on the structural predicate; numeric acceptance bounded",
+      "requirement": "REQ-002 approximately 80-100 mm of travel",
+      "why": "measured 90.000000 mm, mid-band. The compliance edge of 'approximately' stays unresolved (UNR-BM-002-002); it does not bite at 90 mm."
+    },
+    {
+      "outcome": "UNSUPPORTED",
+      "requirement": "REQ-003 approximately 1 kg payload",
+      "why": "a payload is declared with its unit and a complete load path exists, but no strength evidence exists at any fidelity (DOS-BM-002 S5). Per s11 this is UNSUPPORTED: an evidence state, not a product verdict."
+    },
+    {
+      "outcome": "INDETERMINATE",
+      "requirement": "REQ-004 mechanism remains enclosed during normal operation",
+      "why": "the crank arm, connecting rod, both pins and the platform are inside the housing at every sampled state, and the +X side is closed by the rear panel. Whether the boundary-crossing hub itself counts as part of 'the mechanism' is AMB-002-01 and is not decided (UNR-BM-002-001)."
+    },
+    {
+      "outcome": "INDETERMINATE",
+      "requirement": "REQ-005 safe to use",
+      "why": "no safety criterion is stated (UNR-BM-002-005) and no evidence addresses safety"
+    },
+    {
+      "outcome": "PARTIAL: installation processes exist; the rest NOT_VERIFIED",
+      "requirement": "REQ-006 mechanically plausible, easy to assemble, practical to manufacture",
+      "why": "every discretely installed body has a swept, unobstructed installation path and the order is acyclic. Assembly effort, tooling and manufacturability have no evidence."
+    },
+    {
+      "outcome": "NOT_VERIFIED",
+      "requirement": "REQ-007 avoid obvious jamming or unstable operation",
+      "why": "jamming is contact-level. All corpus evidence is V-A declared-pair and may not be cited for engagement (NRM-BM-002-014). No V-B evidence exists, and no jamming criterion is stated (UNR-BM-002-005)."
+    },
+    {
+      "outcome": "INDETERMINATE",
+      "requirement": "REQ-008 desktop-sized",
+      "why": "produced envelope is 125 x 140 x 224 mm including the handle. No envelope is stated to compare it against (UNR-BM-002-006)."
+    },
+    {
+      "outcome": "PASS",
+      "requirement": "REQ-009 manual operation only",
+      "why": "no powered or stored-energy element exists in any body or scenario object"
+    }
+  ],
+  "scope_warning": "These are GEOMETRIC and KINEMATIC results. They do not establish that the rank-1 source is satisfied, and they establish nothing about strength, effort, jamming, safety or manufacturability.",
+  "summary": {
+    "PASS": 14
+  }
+}

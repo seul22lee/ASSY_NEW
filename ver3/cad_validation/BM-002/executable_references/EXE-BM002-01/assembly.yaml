@@ -1,0 +1,158 @@
+reference_id: EXE-BM002-01
+schema_version: 0.1.0
+units: mm
+
+method: >
+  Each discretely installed body is swept along its declared straight-line
+  insertion direction, from its approach distance to its seated position, and the
+  boolean common with every already-placed body is measured at each sample. A step
+  passes only if that common volume stays at or below overlap_tol_mm3 the whole
+  way. Steps of kind "operation" move a body that is already installed along a path
+  step 5 already validated; they are not swept again and they cite what validated
+  them.
+
+establishes: an unobstructed installation ordering exists, and the graph is acyclic
+does_not_establish: >
+  insertion force, ease of assembly, tooling, or process suitability. Those are
+  quantitative and unresolved at UNR-BM-002-008. REQ-006 remains NOT_VERIFIED.
+
+no_undeclared_rigid_passage: >
+  No body passes through undeclared rigid material at any point in this sequence.
+  There is no press fit, snap fit or interference fit anywhere in this design, so
+  no insertion here depends on a deformation, and none is claimed.
+
+why_this_order: >
+  The +X side is open until the last insertion. That is what makes the sequence
+  work: both joint pins are inserted along -X while nothing blocks their path, and
+  the rear panel then closes the side and simultaneously places the lands that stop
+  those pins coming back out. The crank shaft goes first because its hub has to
+  pass through the whole journal bore to reach the outside, and the connecting rod
+  and the platform drop in vertically because neither can be threaded on axially
+  past the crank arm.
+
+steps:
+  - id: AS-01
+    place: BODY-HOUSING
+    kind: base
+    what: fixed reference body; nothing is inserted
+
+  - id: AS-02
+    place: BODY-CRANK-SHAFT
+    kind: insertion
+    direction: [-1.0, 0.0, 0.0]
+    approach_distance: 130.0
+    at_offset: [0.0, 0.0, 0.0]
+    what: >
+      Insert the crank shaft from the open +X side, moving -X. The hub passes
+      through the second journal land, the relief and the first journal land in
+      turn, and the handle grip emerges outside the -X wall. This single motion
+      realizes the boundary crossing and engages both journals.
+    why_this_direction: >
+      The hub is the largest thing that has to reach the outside, and it is also
+      the journal diameter, so it fits the bore exactly as it passes. Coming the
+      other way is impossible: the crank arm reaches radius 54.0 and the bore
+      radius is 35.2.
+
+  - id: AS-03
+    place: BODY-CONNECTING-ROD
+    kind: insertion
+    direction: [0.0, 0.0, -1.0]
+    approach_distance: 150.0
+    at_offset: [0.0, 0.0, 0.0]
+    what: >
+      Lower the connecting rod through the open top into the 2 mm gap on the +X
+      side of the crank arm, with the crank at bottom dead centre so the rod stands
+      vertical and its bores line up with the crank pin bore and, later, the clevis.
+    why_this_direction: >
+      An axial approach would have to pass the rod's crank eye through the crank
+      arm's pin boss, which occupies the same place. Vertically there is nothing in
+      the way: the rod's x band, 42.0 to 54.0, lies entirely clear of the arm,
+      27.0 to 40.0.
+
+  - id: AS-04
+    place: BODY-CRANK-JOINT-PIN
+    kind: insertion
+    direction: [-1.0, 0.0, 0.0]
+    approach_distance: 90.0
+    at_offset: [0.0, 0.0, 0.0]
+    what: >
+      Push the crank joint pin in along -X through the rod's crank bore and on into
+      the crank arm bore, until its head seats on the rod's +X face. The crank joint
+      now exists as a physical revolute pair.
+
+  - id: AS-05
+    place: BODY-PLATFORM
+    kind: insertion
+    direction: [0.0, 0.0, -1.0]
+    approach_distance: 150.0
+    at_offset: [0.0, 0.0, 0.0]
+    what: >
+      Lower the platform through the open top. Both followers enter their channels
+      from the open upper ends and the two clevis lugs come down either side of the
+      connecting rod, bringing the clevis bores into line with the rod's platform
+      bore. The platform is engaged with its guides before the rear panel exists,
+      which is the provisional layout decision this step verifies.
+
+  - id: AS-06
+    place: BODY-PLATFORM-JOINT-PIN
+    kind: insertion
+    direction: [-1.0, 0.0, 0.0]
+    approach_distance: 90.0
+    at_offset: [0.0, 0.0, 0.0]
+    what: >
+      Push the platform joint pin in along -X through clevis lug B, the rod's
+      platform bore and clevis lug A, until its head seats on lug B's +X face. The
+      chain is now complete and the mechanism can be cycled.
+
+  - id: AS-07
+    place: BODY-CRANK-SHAFT
+    kind: operation
+    validated_by: validation/motion_report.json
+    what: >
+      Turn the crank through a full revolution with the +X side still open, to
+      confirm the mechanism runs before it is closed up. Not swept again here; the
+      same configurations are sampled densely in step 5, and the rear panel is not
+      a participant in any of them.
+
+  - id: AS-08
+    place: BODY-REAR-PANEL
+    kind: insertion
+    direction: [-1.0, 0.0, 0.0]
+    approach_distance: 80.0
+    at_offset: [0.0, 0.0, 0.0]
+    what: >
+      Close the +X side. The panel's inner face seats on the housing's +X end faces,
+      and in the same motion the annular land comes to 2.0 mm of the crank joint pin
+      head and the vertical land to 2.0 mm of the platform joint pin head. Both pins
+      are captured from that moment: their heads block travel one way and these
+      lands block it the other.
+    engages:
+      - FEATURE-PANEL-CRANK-PIN-LAND against FEATURE-CRANK-PIN-HEAD
+      - FEATURE-PANEL-PLATFORM-PIN-LAND against FEATURE-PLATFORM-PIN-HEAD
+      - FEATURE-PANEL-SEAT-FACE against FEATURE-HOUSING-PANEL-SEAT
+
+  - id: AS-09
+    place: BODY-CRANK-SHAFT
+    kind: operation
+    validated_by: validation/motion_report.json
+    what: >
+      Turn the crank through a full revolution with the product closed. This is the
+      configuration step 5 actually samples: all seven bodies present, 0 to 360
+      degrees, every pair measured at every sample.
+
+dependency_graph:
+  BODY-HOUSING: []
+  BODY-CRANK-SHAFT: [BODY-HOUSING]
+  BODY-CONNECTING-ROD: [BODY-HOUSING, BODY-CRANK-SHAFT]
+  BODY-CRANK-JOINT-PIN: [BODY-HOUSING, BODY-CRANK-SHAFT, BODY-CONNECTING-ROD]
+  BODY-PLATFORM: [BODY-HOUSING, BODY-CRANK-SHAFT, BODY-CONNECTING-ROD, BODY-CRANK-JOINT-PIN]
+  BODY-PLATFORM-JOINT-PIN: [BODY-HOUSING, BODY-CONNECTING-ROD, BODY-PLATFORM]
+  BODY-REAR-PANEL: [BODY-HOUSING, BODY-CRANK-SHAFT, BODY-CONNECTING-ROD, BODY-CRANK-JOINT-PIN, BODY-PLATFORM, BODY-PLATFORM-JOINT-PIN]
+acyclic: true
+
+no_loose_retainer: >
+  Nothing was added to this sequence to make assembly easier. There is no circlip,
+  no washer, no screw and no separate retainer anywhere in the product. Both joint
+  pins are retained by geometry that already had another job: a head that also
+  locates the joint axially, and lands on a panel that has to exist anyway to close
+  the side.

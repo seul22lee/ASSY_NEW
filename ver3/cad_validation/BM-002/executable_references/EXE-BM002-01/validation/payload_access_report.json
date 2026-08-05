@@ -1,0 +1,152 @@
+{
+  "access": {
+    "access_reaches_platform": true,
+    "aperture": "FEATURE-HOUSING-TOP-OPENING at z = 224.000",
+    "declared_mass": 1.0,
+    "declared_mass_unit": "kg",
+    "envelope_mm": {
+      "x": 36.0,
+      "y": 60.0,
+      "z": 40.0
+    },
+    "footprint_mm": {
+      "x0": 19.0,
+      "x1": 55.0,
+      "y0": 40.0,
+      "y1": 100.0
+    },
+    "states": [
+      {
+        "clear_height_above_support_mm": 8.0,
+        "crank_angle_deg": 180.0,
+        "descent_from_z_mm": 284.0,
+        "descent_samples": 41,
+        "endpoint_is_housing_rim": false,
+        "endpoint_is_platform_support_surface": true,
+        "housing_rim_z_mm": 224.0,
+        "max_overlap_at_z_mm": null,
+        "max_overlap_during_descent_mm3": 0.0,
+        "max_overlap_with": null,
+        "path_endpoint_z_mm": 216.0,
+        "path_unobstructed": true,
+        "seated_min_distance_to": {
+          "BODY-CONNECTING-ROD": 16.5,
+          "BODY-CRANK-JOINT-PIN": 102.5,
+          "BODY-CRANK-SHAFT": 102.0,
+          "BODY-HOUSING": 11.0,
+          "BODY-PLATFORM": 0.0,
+          "BODY-PLATFORM-JOINT-PIN": 18.5,
+          "BODY-REAR-PANEL": 16.0
+        },
+        "seats_on_platform": true,
+        "state": "TOP",
+        "support_surface_z_mm": 216.0
+      },
+      {
+        "clear_height_above_support_mm": 98.0,
+        "crank_angle_deg": 0.0,
+        "descent_from_z_mm": 284.0,
+        "descent_samples": 41,
+        "endpoint_is_housing_rim": false,
+        "endpoint_is_platform_support_surface": true,
+        "housing_rim_z_mm": 224.0,
+        "max_overlap_at_z_mm": null,
+        "max_overlap_during_descent_mm3": 0.0,
+        "max_overlap_with": null,
+        "path_endpoint_z_mm": 126.0,
+        "path_unobstructed": true,
+        "seated_min_distance_to": {
+          "BODY-CONNECTING-ROD": 16.5,
+          "BODY-CRANK-JOINT-PIN": 102.5,
+          "BODY-CRANK-SHAFT": 26.0,
+          "BODY-HOUSING": 11.0,
+          "BODY-PLATFORM": 0.0,
+          "BODY-PLATFORM-JOINT-PIN": 18.5,
+          "BODY-REAR-PANEL": 12.0
+        },
+        "seats_on_platform": true,
+        "state": "BOTTOM",
+        "support_surface_z_mm": 126.0
+      }
+    ],
+    "what_this_does_not_establish": "that the platform carries the payload. This is a fit and reach result only; capacity is NOT_VERIFIED (UNR-BM-002-007)."
+  },
+  "is_product_body": false,
+  "load_path": {
+    "adequacy_evaluated": false,
+    "adequacy_status": "NOT_VERIFIED",
+    "edges": [
+      {
+        "component": "vertical",
+        "evidence": "INT-P1",
+        "from": "SCENARIO-PAYLOAD-1KG",
+        "to": "BODY-PLATFORM",
+        "via": "FEATURE-PLATFORM-SUPPORT-SURFACE"
+      },
+      {
+        "component": "vertical and lateral",
+        "evidence": "INT-09, INT-10",
+        "from": "BODY-PLATFORM",
+        "to": "BODY-PLATFORM-JOINT-PIN",
+        "via": "FEATURE-PLATFORM-CLEVIS-LUG-A / LUG-B"
+      },
+      {
+        "component": "lateral, pitch and roll only; the guides carry no vertical load",
+        "evidence": "INT-14, INT-15",
+        "from": "BODY-PLATFORM",
+        "to": "BODY-HOUSING",
+        "via": "guide followers in the guide channels"
+      },
+      {
+        "component": "along the rod",
+        "evidence": "INT-11",
+        "from": "BODY-PLATFORM-JOINT-PIN",
+        "to": "BODY-CONNECTING-ROD",
+        "via": "FEATURE-ROD-PLATFORM-BORE"
+      },
+      {
+        "component": "along the rod",
+        "evidence": "INT-06",
+        "from": "BODY-CONNECTING-ROD",
+        "to": "BODY-CRANK-JOINT-PIN",
+        "via": "FEATURE-ROD-CRANK-BORE"
+      },
+      {
+        "component": "radial",
+        "evidence": "INT-05",
+        "from": "BODY-CRANK-JOINT-PIN",
+        "to": "BODY-CRANK-SHAFT",
+        "via": "FEATURE-SHAFT-CRANK-PIN-BORE"
+      },
+      {
+        "component": "radial",
+        "evidence": "INT-01, INT-02",
+        "from": "BODY-CRANK-SHAFT",
+        "to": "BODY-HOUSING",
+        "via": "FEATURE-HOUSING-JOURNAL-1 and FEATURE-HOUSING-JOURNAL-2"
+      },
+      {
+        "component": "vertical",
+        "evidence": "geometry",
+        "from": "BODY-HOUSING",
+        "to": "SUPPORT-SURFACE",
+        "via": "FEATURE-HOUSING-SUPPORT-FACE at z = 0"
+      }
+    ],
+    "reachable_nodes": [
+      "BODY-CONNECTING-ROD",
+      "BODY-CRANK-JOINT-PIN",
+      "BODY-CRANK-SHAFT",
+      "BODY-HOUSING",
+      "BODY-PLATFORM",
+      "BODY-PLATFORM-JOINT-PIN",
+      "SCENARIO-PAYLOAD-1KG",
+      "SUPPORT-SURFACE"
+    ],
+    "reaches_reaction_site": true,
+    "why": "DOS-BM-002 S5 records no strength evidence at any fidelity. This establishes that a path EXISTS (NRM-BM-002-011), which is structural, and nothing about whether it is adequate (UNR-BM-002-007)."
+  },
+  "name": "payload access and load path",
+  "scenario": "SCENARIO-PAYLOAD-1KG",
+  "status": "PASS"
+}

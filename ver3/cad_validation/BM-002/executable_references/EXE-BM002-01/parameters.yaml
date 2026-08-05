@@ -1,0 +1,337 @@
+reference_id: EXE-BM002-01
+units: mm
+schema_version: 0.1.0
+
+frame:
+  description: >
+    Origin at the housing's minimum outer corner. X is width, +X is the side the
+    rear panel closes. Y is depth (front to back). Z is up; z = 0 is the surface
+    the housing stands on. The housing is the fixed reference body; every pose in
+    poses.yaml is expressed in this frame. Negative X is outside the housing and is
+    where the crank handle lives.
+
+note_on_absolute_size: >
+  UNR-BM-002-006 leaves "desktop-sized" undefined, so no absolute dimension here is
+  a requirement. Each is a declared design choice. Two values ARE traceable to the
+  source: the crank radius (2 x 45 = 90 mm of travel, inside the source's
+  approximately 80-100 mm band, NRM-BM-002-004) and the declared payload
+  (SCENARIO-PAYLOAD-1KG, NRM-BM-002-005). Nothing else here may be read back into
+  the Oracle as a constraint.
+
+derived_values_note: >
+  Only primitives appear below. Everything that follows from them - the crank-pin
+  and platform-pin heights, the plate heights, the housing rim, the guide-channel
+  extent, the groove and follower faces - is computed in build.py from these
+  numbers, so a change to one parameter cannot leave a stale derived value behind.
+
+parameters:
+
+  # ------------------------------------------------------------------ housing
+  - name: housing_x1
+    value: 71.0
+    purpose: housing outer +X face; the rear panel seats here
+    range: [50.0, 120.0]
+  - name: housing_y
+    value: 140.0
+    purpose: housing outer depth
+    range: [100.0, 220.0]
+  - name: wall_x
+    value: 8.0
+    purpose: -X wall thickness; carries the boundary crossing and the first journal land
+    range: [5.0, 15.0]
+  - name: wall_y
+    value: 5.0
+    purpose: front and back wall thickness
+    range: [3.0, 10.0]
+  - name: floor_z
+    value: 4.0
+    purpose: housing floor top; FROZEN STARTING PARAMETER
+    range: [3.0, 12.0]
+  - name: top_clearance
+    value: 8.0
+    purpose: clear height above the platform support surface at TOP, up to the housing rim
+    range: [4.0, 40.0]
+
+  # ------------------------------------------------------------- crank layout
+  - name: crank_axis_y
+    value: 70.0
+    purpose: crank-shaft axis, Y
+    range: [40.0, 110.0]
+  - name: crank_axis_z
+    value: 60.0
+    purpose: >
+      crank-shaft axis height. Frozen starting value was 55.0; raised to 60.0
+      because at 55.0 the crank arm's pin boss reaches z = 1.0 at bottom dead
+      centre, 3 mm inside the housing floor. See DESIGN_AND_OPERATION_RATIONALE.md,
+      change CHG-01.
+    range: [40.0, 90.0]
+  - name: crank_radius
+    value: 45.0
+    purpose: crank throw; platform travel is exactly twice this
+    range: [40.0, 50.0]
+  - name: rod_length
+    value: 85.0
+    purpose: connecting-rod centre distance
+    range: [60.0, 140.0]
+
+  # ------------------------------------------------------------- crank shaft
+  - name: hub_d
+    value: 70.0
+    purpose: crank hub diameter; this is the journal diameter and the boundary-crossing diameter
+    range: [40.0, 110.0]
+  - name: hub_x0
+    value: -18.0
+    purpose: hub outboard face, outside the housing
+    range: [-40.0, -5.0]
+  - name: hub_x1
+    value: 27.0
+    purpose: hub inboard face
+    range: [20.0, 40.0]
+  - name: grip_d
+    value: 12.0
+    purpose: exterior handle grip diameter
+    range: [8.0, 20.0]
+  - name: grip_offset
+    value: 26.0
+    purpose: radial offset of the handle grip from the crank axis; the user's crank radius
+    range: [12.0, 30.0]
+  - name: grip_x0
+    value: -46.0
+    purpose: outboard end of the handle grip
+    range: [-70.0, -25.0]
+  - name: collar_d
+    value: 80.0
+    purpose: thrust collar diameter; bears on the second journal land's inboard end face
+    range: [72.0, 92.0]
+  - name: collar_x0
+    value: 27.0
+    purpose: thrust collar inboard start
+    range: [20.0, 40.0]
+  - name: collar_x1
+    value: 30.0
+    purpose: thrust collar end
+    range: [22.0, 44.0]
+  - name: arm_x0
+    value: 30.0
+    purpose: crank arm -X face
+    range: [22.0, 44.0]
+  - name: arm_x1
+    value: 40.0
+    purpose: crank arm +X face
+    range: [30.0, 54.0]
+  - name: arm_hub_r
+    value: 14.0
+    purpose: crank arm radius at the shaft axis
+    range: [10.0, 20.0]
+  - name: arm_pin_boss_r
+    value: 9.0
+    purpose: crank arm material radius around the crank pin bore
+    range: [7.0, 14.0]
+
+  # ---------------------------------------------------------------- journals
+  - name: journal_clearance
+    value: 0.2
+    purpose: radial running clearance of every crank-shaft journal land
+    range: [0.05, 0.5]
+  - name: relief_x1
+    value: 14.0
+    purpose: end of the relief between the first and second journal lands
+    range: [9.0, 20.0]
+  - name: relief_extra_r
+    value: 3.0
+    purpose: extra radius of the relief bore; makes the two journal lands physically distinct
+    range: [1.0, 8.0]
+  - name: j2_x1
+    value: 26.0
+    purpose: inboard end of the second journal land
+    range: [18.0, 34.0]
+  - name: j2_boss_d
+    value: 84.0
+    purpose: outer diameter of the internal journal boss
+    range: [76.0, 100.0]
+
+  # ---------------------------------------------------------- connecting rod
+  - name: rod_x0
+    value: 42.0
+    purpose: connecting rod -X face
+    range: [34.0, 54.0]
+  - name: rod_x1
+    value: 54.0
+    purpose: connecting rod +X face
+    range: [40.0, 66.0]
+  - name: rod_eye_r
+    value: 9.5
+    purpose: connecting rod material radius around each bore
+    range: [7.0, 14.0]
+
+  # ------------------------------------------------------------------- pins
+  - name: pin_d
+    value: 10.0
+    purpose: joint pin shank diameter, both joints
+    range: [6.0, 16.0]
+  - name: pin_bore_clearance
+    value: 0.1
+    purpose: radial running clearance of every joint pin in its bore
+    range: [0.05, 0.4]
+  - name: pin_head_d
+    value: 17.0
+    purpose: joint pin head diameter; the head is the axial stop in one direction
+    range: [13.0, 24.0]
+  - name: crank_pin_head_x1
+    value: 65.0
+    purpose: +X end of the crank joint pin head
+    range: [56.0, 68.0]
+  - name: plat_pin_head_x1
+    value: 65.0
+    purpose: +X end of the platform joint pin head
+    range: [56.0, 68.0]
+
+  # --------------------------------------------------------------- platform
+  - name: plate_x0
+    value: 11.0
+    purpose: platform plate -X edge
+    range: [9.0, 20.0]
+  - name: plate_x1
+    value: 63.0
+    purpose: platform plate +X edge
+    range: [40.0, 66.0]
+  - name: plate_t
+    value: 8.0
+    purpose: platform plate thickness; its top face is the payload support surface
+    range: [4.0, 16.0]
+  - name: clevis_offset
+    value: 18.0
+    purpose: height of the plate underside above the platform joint pin centre
+    range: [12.0, 30.0]
+  - name: lug_a_x0
+    value: 35.0
+    purpose: -X clevis lug, -X face
+    range: [26.0, 44.0]
+  - name: lug_a_x1
+    value: 41.0
+    purpose: -X clevis lug, +X face
+    range: [30.0, 48.0]
+  - name: lug_b_x0
+    value: 55.0
+    purpose: +X clevis lug, -X face
+    range: [44.0, 62.0]
+  - name: lug_b_x1
+    value: 61.0
+    purpose: +X clevis lug, +X face
+    range: [48.0, 66.0]
+  - name: lug_r
+    value: 11.0
+    purpose: clevis lug material radius around the platform pin bore
+    range: [8.0, 16.0]
+
+  # ----------------------------------------------------------------- guides
+  - name: guide_boss_t
+    value: 9.0
+    purpose: thickness of the guide boss standing off each inner wall
+    range: [6.0, 16.0]
+  - name: guide_groove_depth
+    value: 6.0
+    purpose: depth of the guide channel cut into each guide boss
+    range: [3.0, 10.0]
+  - name: guide_x0
+    value: 20.0
+    purpose: guide boss -X end
+    range: [12.0, 30.0]
+  - name: guide_x1
+    value: 50.0
+    purpose: guide boss +X end
+    range: [38.0, 62.0]
+  - name: follower_x0
+    value: 22.0
+    purpose: guide follower -X face
+    range: [14.0, 32.0]
+  - name: follower_x1
+    value: 48.0
+    purpose: guide follower +X face
+    range: [36.0, 60.0]
+  - name: guide_side_clearance
+    value: 0.2
+    purpose: running clearance between each follower side face and the channel side wall
+    range: [0.05, 0.5]
+  - name: guide_depth_clearance
+    value: 0.4
+    purpose: running clearance between the follower tip and the channel floor
+    range: [0.1, 1.0]
+  - name: plate_edge_gap
+    value: 0.4
+    purpose: gap between the plate edge and the guide boss inner face
+    range: [0.1, 1.5]
+  - name: follower_over
+    value: 4.0
+    purpose: how far each follower stands above and below the plate
+    range: [2.0, 20.0]
+  - name: guide_z_below
+    value: 24.0
+    purpose: how far the guide channel extends below the plate underside at BOTTOM
+    range: [8.0, 40.0]
+
+  # ------------------------------------------------------------- rear panel
+  - name: panel_t
+    value: 8.0
+    purpose: rear panel thickness
+    range: [4.0, 16.0]
+  - name: land_t
+    value: 4.0
+    purpose: how far the pin-retention lands stand proud of the panel inner face
+    range: [2.0, 10.0]
+  - name: crank_land_r0
+    value: 36.0
+    purpose: inner radius of the annular land that retains the crank joint pin
+    range: [28.0, 42.0]
+  - name: crank_land_r1
+    value: 54.0
+    purpose: outer radius of the annular land that retains the crank joint pin
+    range: [48.0, 60.0]
+  - name: plat_land_hw
+    value: 9.0
+    purpose: half-width in Y of the land that retains the platform joint pin
+    range: [6.0, 16.0]
+  - name: plat_land_z_below
+    value: 6.0
+    purpose: how far the platform-pin land extends below the pin centre at BOTTOM
+    range: [2.0, 14.0]
+  - name: plat_land_z_above
+    value: 10.0
+    purpose: how far the platform-pin land extends above the pin centre at TOP
+    range: [2.0, 20.0]
+
+  # ------------------------------------------- scenario payload, not a body
+  - name: payload_x
+    value: 36.0
+    purpose: SCENARIO-PAYLOAD-1KG envelope, X
+    range: [20.0, 48.0]
+  - name: payload_y
+    value: 60.0
+    purpose: SCENARIO-PAYLOAD-1KG envelope, Y
+    range: [30.0, 100.0]
+  - name: payload_z
+    value: 40.0
+    purpose: SCENARIO-PAYLOAD-1KG envelope, Z
+    range: [10.0, 80.0]
+  - name: payload_mass_kg
+    value: 1.0
+    purpose: >
+      declared supported payload for SCENARIO-PAYLOAD-1KG, in kilograms. Declaring
+      it discharges the structural half of NRM-BM-002-005 only. Whether the
+      structure carries it is NOT_VERIFIED; no strength evidence exists at any
+      fidelity (DOS-BM-002 S5, UNR-BM-002-007).
+    range: [1.0, 1.0]
+
+  # ------------------------------------------------- evaluation tolerances
+  - name: contact_tol
+    value: 0.05
+    purpose: >
+      distance at or below which a measurement is reported as contact rather than
+      clearance. This is a property of the EVALUATION, never a material allowance.
+    range: [0.005, 0.2]
+  - name: overlap_tol_mm3
+    value: 1.0e-6
+    purpose: >
+      boolean-common volume at or below which an intersection is treated as
+      numerical noise rather than penetration. Evaluation tolerance.
+    range: [1.0e-9, 1.0e-3]

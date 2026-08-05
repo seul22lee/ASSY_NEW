@@ -1,0 +1,233 @@
+{
+  "does_not_establish": "insertion force, ease of assembly or process suitability; those remain NOT_VERIFIED",
+  "establishes": "an unobstructed insertion ordering exists",
+  "method": "Each discrete part is swept along its declared straight-line insertion direction, from its approach distance to its seated offset, and the boolean common with every already-placed body is measured at each sample.",
+  "name": "assembly process check",
+  "status": "PASS",
+  "step": 7,
+  "steps": [
+    {
+      "body": "BODY-HOUSING",
+      "kind": "base",
+      "note": "fixed reference body; nothing inserted",
+      "status": "PASS",
+      "step_id": "AS-01"
+    },
+    {
+      "approach_distance_mm": 130.0,
+      "body": "BODY-CRANK-SHAFT",
+      "direction": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "linear insertion",
+      "max_common_volume_at_offset_mm": null,
+      "max_common_volume_mm3": 0.0,
+      "placed_before": [
+        "BODY-HOUSING"
+      ],
+      "samples": 61,
+      "seated_at_offset_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seated_configuration": "as-built",
+      "seated_min_distance_to_mm": {
+        "BODY-HOUSING": 0.2
+      },
+      "status": "PASS",
+      "step_id": "AS-02",
+      "swept_configuration": "as-built"
+    },
+    {
+      "approach_distance_mm": 150.0,
+      "body": "BODY-CONNECTING-ROD",
+      "direction": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "kind": "linear insertion",
+      "max_common_volume_at_offset_mm": null,
+      "max_common_volume_mm3": 0.0,
+      "placed_before": [
+        "BODY-HOUSING",
+        "BODY-CRANK-SHAFT"
+      ],
+      "samples": 61,
+      "seated_at_offset_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seated_configuration": "as-built",
+      "seated_min_distance_to_mm": {
+        "BODY-CRANK-SHAFT": 2.0,
+        "BODY-HOUSING": 1.5
+      },
+      "status": "PASS",
+      "step_id": "AS-03",
+      "swept_configuration": "as-built"
+    },
+    {
+      "approach_distance_mm": 90.0,
+      "body": "BODY-CRANK-JOINT-PIN",
+      "direction": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "linear insertion",
+      "max_common_volume_at_offset_mm": null,
+      "max_common_volume_mm3": 0.0,
+      "placed_before": [
+        "BODY-HOUSING",
+        "BODY-CRANK-SHAFT",
+        "BODY-CONNECTING-ROD"
+      ],
+      "samples": 61,
+      "seated_at_offset_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seated_configuration": "as-built",
+      "seated_min_distance_to_mm": {
+        "BODY-CONNECTING-ROD": 0.0,
+        "BODY-CRANK-SHAFT": 0.1,
+        "BODY-HOUSING": 2.5
+      },
+      "status": "PASS",
+      "step_id": "AS-04",
+      "swept_configuration": "as-built"
+    },
+    {
+      "approach_distance_mm": 150.0,
+      "body": "BODY-PLATFORM",
+      "direction": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "kind": "linear insertion",
+      "max_common_volume_at_offset_mm": null,
+      "max_common_volume_mm3": 0.0,
+      "placed_before": [
+        "BODY-HOUSING",
+        "BODY-CRANK-SHAFT",
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN"
+      ],
+      "samples": 61,
+      "seated_at_offset_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seated_configuration": "as-built",
+      "seated_min_distance_to_mm": {
+        "BODY-CONNECTING-ROD": 1.0,
+        "BODY-CRANK-JOINT-PIN": 65.5,
+        "BODY-CRANK-SHAFT": 5.0,
+        "BODY-HOUSING": 0.2
+      },
+      "status": "PASS",
+      "step_id": "AS-05",
+      "swept_configuration": "as-built"
+    },
+    {
+      "approach_distance_mm": 90.0,
+      "body": "BODY-PLATFORM-JOINT-PIN",
+      "direction": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "linear insertion",
+      "max_common_volume_at_offset_mm": null,
+      "max_common_volume_mm3": 0.0,
+      "placed_before": [
+        "BODY-HOUSING",
+        "BODY-CRANK-SHAFT",
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN",
+        "BODY-PLATFORM"
+      ],
+      "samples": 61,
+      "seated_at_offset_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seated_configuration": "as-built",
+      "seated_min_distance_to_mm": {
+        "BODY-CONNECTING-ROD": 0.1,
+        "BODY-CRANK-JOINT-PIN": 68.0,
+        "BODY-CRANK-SHAFT": 5.0,
+        "BODY-HOUSING": 9.0,
+        "BODY-PLATFORM": 0.0
+      },
+      "status": "PASS",
+      "step_id": "AS-06",
+      "swept_configuration": "as-built"
+    },
+    {
+      "body": "BODY-CRANK-SHAFT",
+      "kind": "operation",
+      "note": "moves an installed body along a path validated in step 5",
+      "status": "PASS",
+      "step_id": "AS-07",
+      "swept_here": false,
+      "validated_by": "validation/motion_report.json"
+    },
+    {
+      "approach_distance_mm": 80.0,
+      "body": "BODY-REAR-PANEL",
+      "direction": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "linear insertion",
+      "max_common_volume_at_offset_mm": null,
+      "max_common_volume_mm3": 0.0,
+      "placed_before": [
+        "BODY-HOUSING",
+        "BODY-CRANK-SHAFT",
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN",
+        "BODY-PLATFORM",
+        "BODY-PLATFORM-JOINT-PIN"
+      ],
+      "samples": 61,
+      "seated_at_offset_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seated_configuration": "as-built",
+      "seated_min_distance_to_mm": {
+        "BODY-CONNECTING-ROD": 13.0,
+        "BODY-CRANK-JOINT-PIN": 2.0,
+        "BODY-CRANK-SHAFT": 27.0,
+        "BODY-HOUSING": 0.0,
+        "BODY-PLATFORM": 4.0,
+        "BODY-PLATFORM-JOINT-PIN": 2.0
+      },
+      "status": "PASS",
+      "step_id": "AS-08",
+      "swept_configuration": "as-built"
+    },
+    {
+      "body": "BODY-CRANK-SHAFT",
+      "kind": "operation",
+      "note": "moves an installed body along a path validated in step 5",
+      "status": "PASS",
+      "step_id": "AS-09",
+      "swept_here": false,
+      "validated_by": "validation/motion_report.json"
+    }
+  ]
+}

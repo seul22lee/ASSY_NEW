@@ -1,0 +1,170 @@
+{
+  "controls": [
+    {
+      "checked_by": "external rotary input check (NRM-BM-002-001 clause 1)",
+      "control_id": "NC-01",
+      "detected": true,
+      "measured": "material beyond the hub face falls from 3166.7 to 0.0 mm3",
+      "mutation": "build the crank shaft without FEATURE-SHAFT-GRIP",
+      "what": "remove external crank geometry"
+    },
+    {
+      "checked_by": "boundary crossing check (NRM-BM-002-002 clause 1)",
+      "control_id": "NC-02",
+      "detected": true,
+      "measured": "outside 0.0 mm3 (was 72438.8), in the wall band 0.0 mm3 (was 30787.6); this is INA-BM-002-H, an input with no crossing",
+      "mutation": "pull the whole crank shaft inboard so it lies entirely inside the housing",
+      "what": "remove the shaft boundary crossing"
+    },
+    {
+      "checked_by": "INT-02 declared clearance and the two-distinct-lands check",
+      "control_id": "NC-03",
+      "detected": true,
+      "measured": "journal-2 clearance measures 3.2 mm against a declared 0.200 mm",
+      "mutation": "bore the second land out to the relief diameter, leaving one land",
+      "what": "remove the second shaft journal"
+    },
+    {
+      "checked_by": "no-undeclared-overlap scan (NRM-BM-002-002, NRM-BM-002-008)",
+      "control_id": "NC-04",
+      "detected": true,
+      "measured": "crank shaft / housing common volume 1332.664 mm3 against a tolerance of 1.0e-06",
+      "mutation": "grow the hub 0.5 mm past its journal bore",
+      "what": "create shaft/housing interference"
+    },
+    {
+      "checked_by": "crank joint engagement scan (NRM-BM-002-003)",
+      "control_id": "NC-05",
+      "detected": true,
+      "measured": "pin material inside the crank arm bore region falls to 0.0000 mm3",
+      "mutation": "shorten the crank joint pin so it never enters the crank arm bore",
+      "what": "remove the crank joint"
+    },
+    {
+      "checked_by": "platform joint engagement scan (NRM-BM-002-003)",
+      "control_id": "NC-06",
+      "detected": true,
+      "measured": "pin material inside the lug A bore region falls to 0.0000 mm3",
+      "mutation": "shorten the platform joint pin so it never enters clevis lug A",
+      "what": "remove the platform joint"
+    },
+    {
+      "checked_by": "bilateral axial retention probe (NRM-BM-002-003)",
+      "control_id": "NC-07",
+      "detected": true,
+      "measured": "-X travel becomes 4.0001 mm blocked by BODY-HOUSING, against a declared 0.0 mm blocked by BODY-CONNECTING-ROD",
+      "mutation": "build the pin without its head",
+      "what": "remove crank-joint-pin axial retention"
+    },
+    {
+      "checked_by": "bilateral axial retention probe (NRM-BM-002-003)",
+      "control_id": "NC-08",
+      "detected": true,
+      "measured": "-X travel becomes 5.0001 mm blocked by BODY-CRANK-SHAFT, against a declared 0.0 mm blocked by BODY-PLATFORM",
+      "mutation": "build the pin without its head",
+      "what": "remove platform-joint-pin axial retention"
+    },
+    {
+      "checked_by": "link integrity check and the platform-joint clearance",
+      "control_id": "NC-09",
+      "detected": true,
+      "measured": "rod centre distance measures 87.0000 mm against 85.0000, and the rod now shares 222.077 mm3 with the platform joint pin",
+      "mutation": "build the rod with a 2.0 mm longer centre distance and place it at BOTTOM",
+      "what": "alter the connecting-rod length in one pose"
+    },
+    {
+      "checked_by": "travel measurement against the source band (NRM-BM-002-004)",
+      "control_id": "NC-10",
+      "detected": true,
+      "measured": "measured travel 45.0000 mm, outside the 80-100 mm band under any reading of 'approximately'",
+      "mutation": "rebuild with crank_radius 22.5 mm and measure the built solids",
+      "what": "reduce platform travel to approximately 45 mm"
+    },
+    {
+      "checked_by": "guide engagement check (NRM-BM-002-007)",
+      "control_id": "NC-11",
+      "detected": true,
+      "measured": "front channel wall material falls from 14508.0 to 0.0 mm3",
+      "mutation": "build the housing with the back channel only",
+      "what": "remove one guide"
+    },
+    {
+      "checked_by": "pitch and roll probes (NRM-BM-002-007)",
+      "control_id": "NC-12",
+      "detected": true,
+      "measured": "the largest pitch/roll probe overlap falls from 154.3716 mm3 to 0.0000 mm3, so nothing obstructs the rotation",
+      "mutation": "build the platform with no guide followers and its plate edges pulled 6 mm clear of the guide bosses, so no feature engages a channel",
+      "what": "allow pitch or roll escape"
+    },
+    {
+      "checked_by": "payload declaration check (NRM-BM-002-005)",
+      "control_id": "NC-13",
+      "detected": true,
+      "measured": "no supported payload is declared, so NRM-BM-002-005 has nothing to evaluate",
+      "mutation": "remove payload_mass_kg from the declared parameters",
+      "what": "omit the 1 kg scenario"
+    },
+    {
+      "checked_by": "access endpoint check (NRM-BM-002-010)",
+      "control_id": "NC-14",
+      "detected": true,
+      "measured": "the rim is z = 224.000 and the support surface is z = 216.000; an endpoint at the rim is 8.000 mm short of the platform",
+      "mutation": "declare the access path endpoint at z = rim instead of the support surface",
+      "what": "terminate payload access at the housing rim rather than the platform"
+    },
+    {
+      "checked_by": "independent-extremes check (NRM-BM-002-009, NEG-BM-002-006)",
+      "control_id": "NC-15",
+      "detected": true,
+      "measured": "travel computed from a copied extreme is 0.0000 mm instead of 90.0000 mm",
+      "mutation": "replace the TOP measurement with the BOTTOM measurement",
+      "what": "copy the bottom terminal result into the top result"
+    },
+    {
+      "checked_by": "unsupported-claim scan (NRM-BM-002-014)",
+      "control_id": "NC-16",
+      "detected": true,
+      "measured": "the scan flags 1 unsupported claim(s)",
+      "mutation": "inject a PASS row claiming an adequate strength margin, citing geometry",
+      "what": "report strength PASS without strength evidence"
+    },
+    {
+      "checked_by": "unsupported-claim scan (NRM-BM-002-014, NEG-BM-002-011)",
+      "control_id": "NC-17",
+      "detected": true,
+      "measured": "the scan flags 1 unsupported claim(s)",
+      "mutation": "inject a PASS row on jamming citing only the kinematic relation",
+      "what": "report jamming PASS from the kinematic equation alone"
+    },
+    {
+      "checked_by": "manual-drive check (NRM-BM-002-013)",
+      "control_id": "NC-18",
+      "detected": true,
+      "measured": "the topology check names ['BODY-DRIVE-MOTOR'] as a powered element",
+      "mutation": "append a body with material class POWERED_ACTUATOR to the product set",
+      "what": "add a motor or battery"
+    },
+    {
+      "checked_by": "topology check (NRM-BM-002-005, NRM-BM-002-013)",
+      "control_id": "NC-19",
+      "detected": true,
+      "measured": "the body set becomes 8 bodies including a payload, against the declared 7",
+      "mutation": "append BODY-PAYLOAD-1KG to the product body set",
+      "what": "count the scenario payload as a product body"
+    },
+    {
+      "checked_by": "chain check, which is built only from measured engagements (NRM-BM-002-014)",
+      "control_id": "NC-20",
+      "detected": true,
+      "measured": "crank arm material in the joint region falls to 0.0000 mm3 while the pose relation still returns a platform height for every angle, so the relation alone cannot carry the chain",
+      "mutation": "build the crank shaft without its arm, leaving the crank-angle relation intact",
+      "what": "replace actual mechanism geometry with only a declared crank/platform ratio"
+    }
+  ],
+  "controls_detected": 20,
+  "controls_run": 20,
+  "name": "checker self-test",
+  "purpose": "Establishes that the checks in this chain can fail. Each control injects a defect in memory and passes only if the check reports it. No perturbed model is exported.",
+  "status": "PASS",
+  "undetected": []
+}

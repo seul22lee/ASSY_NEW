@@ -158,7 +158,9 @@ def step2_validity(ctx: Ctx, bodies: List[cv.Body]) -> Dict:
 def step3_reimport(ctx: Ctx, bodies: List[cv.Body]) -> Dict:
     rows = []
     for b in bodies:
-        stem = b.id.lower().replace("body-", "")
+        # BODY-REAR-PANEL -> rear_panel. Single-word ids are unaffected, so this
+        # leaves every existing reference's export filenames unchanged.
+        stem = b.id.lower().replace("body-", "").replace("-", "_")
         sp = os.path.join(ctx.HERE, "%s.step" % stem)
         bp = os.path.join(ctx.HERE, "%s.brep" % stem)
         n_step, n_brep = cv.export_step(b.shape, sp), cv.export_brep(b.shape, bp)

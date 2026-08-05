@@ -1,0 +1,2540 @@
+{
+  "base_commit": "014de6e2833b65afc1c12a9e0c907e55f7d618a1",
+  "invariants": [
+    {
+      "clauses": [
+        {
+          "clause": "a user-operated rotary input exists outside the housing",
+          "measured": "72438.8 mm3 of crank-shaft material lies outside the housing, of which 3166.7 mm3 is the handle grip standing 26.000 mm off the shaft axis; the grip centre moves from ([70.0, 34.0]) to ([96.0, 60.0]) between 0 and 90 degrees, so it orbits",
+          "status": "PASS"
+        },
+        {
+          "clause": "a platform exists inside the housing",
+          "measured": "BODY-PLATFORM support surface at z = 126.000 (BOTTOM) and z = 216.000 (TOP), inside the cavity at every state",
+          "status": "PASS"
+        },
+        {
+          "clause": "an uninterrupted chain of realized interactions connects them",
+          "measured": "7 of 7 links realized, each a measured material relation",
+          "status": "PASS"
+        },
+        {
+          "clause": "the platform rises and falls in response to the input",
+          "measured": "a complete 0-360 degree cycle sampled at 228 configurations with maximum undeclared overlap 0.000e+00 mm3",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/motion_report.json",
+        "validation/predicate_report.json#chain"
+      ],
+      "invariant_id": "NRM-BM-002-001",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-002-001"
+      ],
+      "clauses": [
+        {
+          "clause": "a boundary crossing exists",
+          "measured": "crank-shaft material outside the wall 72438.8 mm3, within the wall band x 0-8.0 30787.6 mm3, inside 100579.2 mm3, all one solid",
+          "status": "PASS"
+        },
+        {
+          "clause": "no interference between the moving element and the housing at any point of operation",
+          "measured": "the BODY-CRANK-SHAFT / BODY-HOUSING pair is measured at every motion sample; maximum common volume over all pairs and all samples 0.000e+00 mm3",
+          "status": "PASS"
+        },
+        {
+          "clause": "every support the selected realization depends on is realized",
+          "measured": "two journal lands, 6.0 mm apart, measured at 0.2 and 0.2 mm clearance, separated by a relief measured at 3.2 mm",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/interaction_report.json",
+        "validation/motion_report.json"
+      ],
+      "invariant_id": "NRM-BM-002-002",
+      "notes": "Whether the crossing element itself counts as part of the enclosed mechanism is NOT decided here. AMB-002-01 is carried.",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "at least one realized interaction converts rotation to translation",
+          "measured": "the crank joint (pin in the crank arm bore and in the rod's crank bore) and the platform joint (pin in the rod's platform bore and in both clevis lugs), each measured at all 9 states at 0.100 mm clearance with zero common volume",
+          "status": "PASS"
+        },
+        {
+          "clause": "participating geometry is identified on both bodies it acts between",
+          "measured": "FEATURE-SHAFT-CRANK-PIN-BORE and FEATURE-CRANK-PIN-SHANK; FEATURE-ROD-CRANK-BORE and FEATURE-CRANK-PIN-SHANK; FEATURE-ROD-PLATFORM-BORE, FEATURE-PLATFORM-CLEVIS-LUG-A/B and FEATURE-PLATFORM-PIN-SHANK - all of them material that carries measurement, not labels",
+          "status": "PASS"
+        },
+        {
+          "clause": "each joint pin is retained axially in both directions",
+          "measured": "BODY-CRANK-JOINT-PIN: -X blocked after 0.0 mm by BODY-CONNECTING-ROD, +X blocked after 2.0001 mm by BODY-REAR-PANEL; BODY-PLATFORM-JOINT-PIN: -X blocked after 0.0 mm by BODY-PLATFORM, +X blocked after 2.0001 mm by BODY-REAR-PANEL",
+          "status": "PASS"
+        },
+        {
+          "clause": "pull-out force of either joint",
+          "reason": "geometric blockage is not holding strength. No force, friction or wear is computed anywhere in this toolchain.",
+          "status": "NOT_VERIFIED"
+        }
+      ],
+      "evidence": [
+        "validation/contact_resolution_report.json",
+        "validation/predicate_report.json#joint_scans"
+      ],
+      "invariant_id": "NRM-BM-002-003",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-002-002"
+      ],
+      "clauses": [
+        {
+          "clause": "the declared platform travel is expressed in millimetres",
+          "measured": "90.000000 mm",
+          "status": "PASS"
+        },
+        {
+          "clause": "measured travel lies within the source band 80-100 mm",
+          "measured": "support surface 90.000000 mm (z 126.000000 at BOTTOM, z 216.000000 at TOP); platform pin 90.000000 mm (z 100.000000 to z 190.000000). The two extremes are separate measurements of separate configurations.",
+          "status": "PASS"
+        },
+        {
+          "clause": "the value is not at a band edge, so the qualifier does not decide it",
+          "measured": "90.0 mm sits 10 mm inside both edges of the 80-100 mm band",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json#travel"
+      ],
+      "invariant_id": "NRM-BM-002-004",
+      "notes": "The compliance edge of 'approximately' is NOT fixed here. 90 mm is mid-band, so the structural predicate is decidable without deciding the qualifier. NEG-BM-002-012 is avoided.",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-002-002",
+        "UNR-BM-002-007"
+      ],
+      "clauses": [
+        {
+          "clause": "a supported payload is declared, with unit, consistent with approximately 1 kg",
+          "measured": "SCENARIO-PAYLOAD-1KG, 1.0 kg, envelope 36 x 60 x 40 mm",
+          "status": "PASS"
+        },
+        {
+          "clause": "the platform load path carries it (NRM-BM-002-011)",
+          "measured": "8 realized edges from the payload to the support surface",
+          "status": "PASS"
+        },
+        {
+          "clause": "the structure achieves the declared capacity",
+          "reason": "DOS-BM-002 S5 records no strength evidence at any fidelity. Under stage_expectations s11 REQ-003 resolves to UNSUPPORTED. That is a tooling and evidence state, not a product verdict.",
+          "status": "NOT_VERIFIED"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json#load_path"
+      ],
+      "invariant_id": "NRM-BM-002-005",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-002-007"
+      ],
+      "clauses": [
+        {
+          "clause": "each element has a reaction for every load component it actually carries",
+          "measured": "BODY-CRANK-SHAFT radial -> FEATURE-HOUSING-JOURNAL-1 and -2; BODY-CRANK-SHAFT axial -> none owed; BODY-CRANK-JOINT-PIN radial -> FEATURE-SHAFT-CRANK-PIN-BORE and FEATURE-ROD-CRANK-BORE; BODY-PLATFORM-JOINT-PIN radial -> both clevis lug bores and the rod's platform bore; BODY-PLATFORM lateral and moment -> both guide channels; BODY-CONNECTING-ROD along its own axis -> its two bores, onto the two pins",
+          "status": "PASS"
+        },
+        {
+          "clause": "elements not carrying a component owe no reaction for it",
+          "measured": "no axial load is produced anywhere in this planar mechanism, so no thrust feature is required of any element; the shaft's axial location is a handling choice, recorded as such",
+          "status": "PASS"
+        },
+        {
+          "clause": "adequacy of any reaction",
+          "reason": "existence is structural; magnitude is quantitative and unresolved",
+          "status": "NOT_VERIFIED"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json#reactions",
+        "validation/contact_resolution_report.json"
+      ],
+      "invariant_id": "NRM-BM-002-006",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "the platform's path is constrained where the scenario depends on it",
+          "measured": "both followers carry material inside their channels at all 37 cycle samples, with no platform material beyond either channel floor",
+          "status": "PASS"
+        },
+        {
+          "clause": "orientation is constrained where the scenario requires it",
+          "measured": "the scenario requires the plate to stay square to accept a payload. All 18 pitch, roll and yaw probes at BOTTOM, MID-STROKE and TOP are obstructed by the channels",
+          "status": "PASS"
+        },
+        {
+          "clause": "lateral connecting-rod reaction has somewhere to go",
+          "measured": "the rod reaches 31.966 degrees from vertical at the quarter positions, and the resulting lateral component is reacted at the two guide channels",
+          "status": "PASS"
+        },
+        {
+          "clause": "the guides are stiff enough, or wear acceptably",
+          "reason": "geometric capture only; no stiffness, friction, wear or life model exists",
+          "status": "NOT_VERIFIED"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json#guidance"
+      ],
+      "invariant_id": "NRM-BM-002-007",
+      "notes": "Anti-rotation is required here because THIS scenario needs a square plate, not because anti-rotation is universal. NEG-BM-002-020 and ADM-BM-002-E's freedom are untouched.",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "no volumetric overlap outside declared regions at any required pose",
+          "measured": "all 21 body pairs measured in all 9 states; declared contacts are the three in interactions.yaml and nothing else came within 0.050 mm",
+          "status": "PASS"
+        },
+        {
+          "clause": "the required path between poses is traversable",
+          "measured": "four segments covering 0-360 degrees, 228 samples, maximum common volume 0.000e+00 mm3",
+          "status": "PASS"
+        },
+        {
+          "clause": "the evidence is sampled, not proven over the continuum",
+          "measured": "dense declared sampling with refinement at both ends of every segment, which is where the dead centres are. Reported as sampling, never as a proof of non-interference.",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/motion_report.json",
+        "validation/interaction_report.json"
+      ],
+      "invariant_id": "NRM-BM-002-008",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "does the design declare a physical end of travel?",
+          "measured": "no. manifest.yaml declares_physical_end_of_travel: false",
+          "status": "PASS"
+        },
+        {
+          "clause": "therefore: the required displacement is verified within the mechanically available range",
+          "measured": "the crank turns continuously through 360 degrees; the platform reverses at the two dead centres and nothing arrests it there. Measured displacement between the reversals: 90.000000 mm",
+          "status": "PASS"
+        },
+        {
+          "clause": "no evaluation result is copied between the extremes",
+          "measured": "BOTTOM measured at theta = 0 (support z 126.000000), TOP measured at theta = 180 (support z 216.000000), and BOTTOM measured again at theta = 360 (support z 126.000000). Three separate configurations, three separate measurements.",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json#travel"
+      ],
+      "invariant_id": "NRM-BM-002-009",
+      "notes": "Inferring two physical stops from a stated displacement is NEG-BM-002-021 and is not done. FRE-BM-002-010 is exercised: this design simply declares none.",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "an access path exists through the housing top",
+          "measured": "the declared envelope descends from z = 284.0 to the support surface at both TOP and BOTTOM with maximum overlap 0.000e+00 mm3",
+          "status": "PASS"
+        },
+        {
+          "clause": "the endpoint is the platform surface, not the housing boundary",
+          "measured": "endpoint z = 216.000 at TOP and z = 126.000 at BOTTOM; the housing rim is z = 224.000 and is never the endpoint",
+          "status": "PASS"
+        },
+        {
+          "clause": "the envelope fits at the selected loading state",
+          "measured": "seated on the support surface at TOP with min distance 0.000000 mm to the platform and clear of every other body",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/payload_access_report.json"
+      ],
+      "invariant_id": "NRM-BM-002-010",
+      "notes": "Accepting the rim as the endpoint is NEG-BM-002-007 and is control NC-14.",
+      "status": "PASS"
+    },
+    {
+      "blocked_on": [
+        "UNR-BM-002-007"
+      ],
+      "clauses": [
+        {
+          "clause": "a load path exists from the platform to a reaction site",
+          "measured": "SCENARIO-PAYLOAD-1KG -> BODY-PLATFORM -> BODY-PLATFORM-JOINT-PIN -> BODY-HOUSING -> BODY-CONNECTING-ROD -> BODY-CRANK-JOINT-PIN -> BODY-CRANK-SHAFT -> BODY-HOUSING -> SUPPORT-SURFACE",
+          "status": "PASS"
+        },
+        {
+          "clause": "adequacy of the path",
+          "reason": "quantitative and unresolved at UNR-BM-002-007; the invariant is explicitly not blocked by the absence of a margin",
+          "status": "NOT_VERIFIED"
+        }
+      ],
+      "evidence": [
+        "validation/predicate_report.json#load_path"
+      ],
+      "invariant_id": "NRM-BM-002-011",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "each discretely installed part has a realizable installation process",
+          "measured": "9 assembly steps, 6 of them swept insertions, maximum common volume with already-placed material 0.000e+00 mm3",
+          "status": "PASS"
+        },
+        {
+          "clause": "no part passes through undeclared rigid material",
+          "measured": "every swept insertion is collision-free; there is no press, snap or interference fit anywhere in this design",
+          "status": "PASS"
+        },
+        {
+          "clause": "the dependency graph is acyclic",
+          "measured": "declared in assembly.yaml and consistent with the step order",
+          "status": "PASS"
+        },
+        {
+          "clause": "insertion force or ease of assembly",
+          "reason": "quantitative and unresolved at UNR-BM-002-008",
+          "status": "NOT_VERIFIED"
+        }
+      ],
+      "evidence": [
+        "validation/assembly_report.json"
+      ],
+      "invariant_id": "NRM-BM-002-012",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "no element of the drive chain is a powered or stored-energy source",
+          "measured": "7 product bodies, material classes ['GENERIC_RIGID_POLYMER'], zero matches for motor, battery, actuator, solenoid, powered, spring drive or stored energy",
+          "status": "PASS"
+        },
+        {
+          "clause": "the scenario payload is not counted as a product body",
+          "measured": "body list is exactly ['BODY-CONNECTING-ROD', 'BODY-CRANK-JOINT-PIN', 'BODY-CRANK-SHAFT', 'BODY-HOUSING', 'BODY-PLATFORM', 'BODY-PLATFORM-JOINT-PIN', 'BODY-REAR-PANEL']",
+          "status": "PASS"
+        }
+      ],
+      "evidence": [
+        "validation/build_report.json",
+        "validation/predicate_report.json#topology"
+      ],
+      "invariant_id": "NRM-BM-002-013",
+      "status": "PASS"
+    },
+    {
+      "clauses": [
+        {
+          "clause": "every evidence item declares its contact resolution",
+          "measured": "18 interactions recorded in contact_resolution_report.json, each with its model fidelity and claim scope",
+          "status": "PASS"
+        },
+        {
+          "clause": "declared-pair results are not cited for engagement",
+          "measured": "zero declared-pair evidence items cited anywhere in this reference",
+          "status": "PASS"
+        },
+        {
+          "clause": "no PASS on a physical property lacks evidence of adequate fidelity",
+          "measured": "41 clauses scanned, 0 unsupported PASS claims found",
+          "status": "PASS"
+        },
+        {
+          "clause": "REQ-007 jamming",
+          "reason": "a contact-level phenomenon. All corpus evidence is V-A declared-pair (DOS-BM-002 S5 E1); none is cited here, and the kinematic relation is not evidence of engagement.",
+          "status": "NOT_VERIFIED"
+        }
+      ],
+      "evidence": [
+        "validation/contact_resolution_report.json"
+      ],
+      "invariant_id": "NRM-BM-002-014",
+      "status": "PASS"
+    }
+  ],
+  "maximum_claim": "GEOMETRICALLY AND KINEMATICALLY ADMISSIBLE AT THE EVALUATED CAD FIDELITY",
+  "name": "Oracle predicate evaluation",
+  "oracle_files_read_only": true,
+  "oracle_tree_sha256": "80d47f65edf964e6cc1c0b3251919aa3a45eb1be",
+  "requirement_readings": [
+    {
+      "outcome": "PASS at the evaluated fidelity",
+      "requirement": "REQ-001 external crank raises and lowers an internal platform",
+      "why": "kinematic evidence over a complete cycle with the chain traversable"
+    },
+    {
+      "outcome": "PASS on the structural predicate; numeric acceptance bounded",
+      "requirement": "REQ-002 approximately 80-100 mm of travel",
+      "why": "measured 90.000000 mm, mid-band. The compliance edge of 'approximately' stays unresolved (UNR-BM-002-002); it does not bite at 90 mm."
+    },
+    {
+      "outcome": "UNSUPPORTED",
+      "requirement": "REQ-003 approximately 1 kg payload",
+      "why": "a payload is declared with its unit and a complete load path exists, but no strength evidence exists at any fidelity (DOS-BM-002 S5). Per s11 this is UNSUPPORTED: an evidence state, not a product verdict."
+    },
+    {
+      "outcome": "INDETERMINATE",
+      "requirement": "REQ-004 mechanism remains enclosed during normal operation",
+      "why": "the crank arm, connecting rod, both pins and the platform are inside the housing at every sampled state, and the +X side is closed by the rear panel. Whether the boundary-crossing hub itself counts as part of 'the mechanism' is AMB-002-01 and is not decided (UNR-BM-002-001)."
+    },
+    {
+      "outcome": "INDETERMINATE",
+      "requirement": "REQ-005 safe to use",
+      "why": "no safety criterion is stated (UNR-BM-002-005) and no evidence addresses safety"
+    },
+    {
+      "outcome": "PARTIAL: installation processes exist; the rest NOT_VERIFIED",
+      "requirement": "REQ-006 mechanically plausible, easy to assemble, practical to manufacture",
+      "why": "every discretely installed body has a swept, unobstructed installation path and the order is acyclic. Assembly effort, tooling and manufacturability have no evidence."
+    },
+    {
+      "outcome": "NOT_VERIFIED",
+      "requirement": "REQ-007 avoid obvious jamming or unstable operation",
+      "why": "jamming is contact-level. All corpus evidence is V-A declared-pair and may not be cited for engagement (NRM-BM-002-014). No V-B evidence exists, and no jamming criterion is stated (UNR-BM-002-005)."
+    },
+    {
+      "outcome": "INDETERMINATE",
+      "requirement": "REQ-008 desktop-sized",
+      "why": "produced envelope is 125 x 140 x 224 mm including the handle. No envelope is stated to compare it against (UNR-BM-002-006)."
+    },
+    {
+      "outcome": "PASS",
+      "requirement": "REQ-009 manual operation only",
+      "why": "no powered or stored-energy element exists in any body or scenario object"
+    }
+  ],
+  "scope_warning": "These are GEOMETRIC and KINEMATIC results. They do not establish that the rank-1 source is satisfied, and they establish nothing about strength, effort, jamming, safety or manufacturability.",
+  "status": "PASS",
+  "status_vocabulary": {
+    "FAIL": "evidence contradicts the claim",
+    "INDETERMINATE": "an unresolved decision blocks the outcome",
+    "NOT_EVALUABLE": "the design does not record what the predicate needs",
+    "NOT_VERIFIED": "no evidence of adequate fidelity exists",
+    "PASS": "computed evidence supports the claim",
+    "UNSUPPORTED": "the toolchain cannot evaluate it"
+  },
+  "step": 8,
+  "summary": {
+    "PASS": 14
+  },
+  "supporting_measurements": {
+    "chain": {
+      "chain_complete": true,
+      "links": [
+        {
+          "link": "exterior handle -> crank shaft",
+          "measured": "handle grip is material of the same single solid as the hub",
+          "realized": true
+        },
+        {
+          "link": "crank shaft crosses the housing boundary",
+          "measured": "shaft material exists outside, within and inside the wall band",
+          "realized": true
+        },
+        {
+          "link": "crank shaft -> crank joint pin",
+          "measured": "pin in the crank arm bore at every state",
+          "realized": true
+        },
+        {
+          "link": "crank joint pin -> connecting rod",
+          "measured": "pin in the rod's crank bore at every state",
+          "realized": true
+        },
+        {
+          "link": "connecting rod -> platform joint pin",
+          "measured": "pin in the rod's platform bore at every state",
+          "realized": true
+        },
+        {
+          "link": "platform joint pin -> platform clevis",
+          "measured": "pin in both clevis lug bores at every state",
+          "realized": true
+        },
+        {
+          "link": "platform -> housing guides",
+          "measured": "follower material inside both channels at every sample",
+          "realized": true
+        }
+      ],
+      "note": "Each link is a measured material relation between two named bodies. None of them is a declared coupling.",
+      "traversable_both_ways": true
+    },
+    "evidence_fidelity": {
+      "declared_pair_note": "No V-A declared-pair result is cited anywhere in this reference for the existence, engagement or contact behaviour of the conversion (NRM-BM-002-014). EV-BM-002-001 and EV-BM-002-003 are not cited at all.",
+      "declared_pair_results_used": [],
+      "engagement_evidence_is": "measured material of two bodies inside a shared region, with a measured separation matching a declared clearance, at every sampled state",
+      "formula_status": "The crank-angle relation in poses.yaml positions bodies. It is not evidence. NC-20 keeps the relation and deletes the mechanism geometry, and the chain check must fail.",
+      "ideal_joint_declarations_used_as_evidence": false,
+      "measurements_and_their_contact_resolution": [
+        {
+          "contact_resolution": "EXACT_GEOMETRIC, rigid bodies, no deformation, no friction",
+          "method": "BRepAlgoAPI_Common volume on exact B-rep solids",
+          "what": "overlap between any two bodies"
+        },
+        {
+          "contact_resolution": "EXACT_GEOMETRIC, rigid bodies",
+          "method": "BRepExtrema_DistShapeShape inside a declared region",
+          "what": "clearance at any declared interaction"
+        },
+        {
+          "contact_resolution": "NOT_APPLICABLE, a length measurement",
+          "method": "bounding box of the built platform solid clipped to the payload footprint",
+          "what": "platform travel"
+        },
+        {
+          "contact_resolution": "EXACT_GEOMETRIC",
+          "method": "material of both bodies inside a region that follows the joint axis",
+          "what": "joint engagement"
+        }
+      ],
+      "req_003_capacity": "UNSUPPORTED - no strength evidence at any fidelity",
+      "req_007_jamming": "NOT_VERIFIED - contact-level phenomenon, no V-B evidence exists"
+    },
+    "guidance": {
+      "both_sides_engaged_at_every_sample": true,
+      "channel_back": {
+        "x0": 21.8,
+        "x1": 48.2,
+        "y0": 126.0,
+        "y1": 132.0,
+        "z0": 94.0,
+        "z1": 224.0
+      },
+      "channel_front": {
+        "x0": 21.8,
+        "x1": 48.2,
+        "y0": 8.0,
+        "y1": 14.0,
+        "z0": 94.0,
+        "z1": 224.0
+      },
+      "channel_wall_material_mm3": {
+        "back": 14508.0,
+        "front": 14508.0
+      },
+      "declared_depth_clearance_mm": 0.4,
+      "declared_side_clearance_mm": 0.2,
+      "sample_count": 37,
+      "samples": [
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              114.0,
+              130.0
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 0.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              114.0,
+              130.0
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            89.0,
+            130.0
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              114.3237,
+              130.3237
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 10.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              114.3237,
+              130.3237
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            89.3237,
+            130.3237
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              115.3088,
+              131.3088
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 20.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              115.3088,
+              131.3088
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            90.3088,
+            131.3088
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              116.9968,
+              132.9968
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 30.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              116.9968,
+              132.9968
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            91.9968,
+            132.9968
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              119.455,
+              135.455
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 40.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              119.455,
+              135.455
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            94.455,
+            135.455
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              122.7706,
+              138.7706
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 50.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              122.7706,
+              138.7706
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            97.7706,
+            138.7706
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              127.0397,
+              143.0397
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 60.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              127.0397,
+              143.0397
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            102.0397,
+            143.0397
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              132.3443,
+              148.3443
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 70.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              132.3443,
+              148.3443
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            107.3443,
+            148.3443
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              138.719,
+              154.719
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 80.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              138.719,
+              154.719
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            113.719,
+            154.719
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              146.111,
+              162.111
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 90.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              146.111,
+              162.111
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            121.111,
+            162.111
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              154.3473,
+              170.3473
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 100.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              154.3473,
+              170.3473
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            129.3473,
+            170.3473
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              163.1261,
+              179.1261
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 110.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              163.1261,
+              179.1261
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            138.1261,
+            179.1261
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              172.0397,
+              188.0397
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 120.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              172.0397,
+              188.0397
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            147.0397,
+            188.0397
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              180.6215,
+              196.6215
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 130.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              180.6215,
+              196.6215
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            155.6215,
+            196.6215
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              188.399,
+              204.399
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 140.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              188.399,
+              204.399
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            163.399,
+            204.399
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              194.9391,
+              210.9391
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 150.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              194.9391,
+              210.9391
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            169.9391,
+            210.9391
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              199.8811,
+              215.8811
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 160.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              199.8811,
+              215.8811
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            174.8811,
+            215.8811
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              202.9564,
+              218.9564
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 170.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              202.9564,
+              218.9564
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            177.9564,
+            218.9564
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              204.0,
+              220.0
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 180.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              204.0,
+              220.0
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            179.0,
+            220.0
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              202.9564,
+              218.9564
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 190.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              202.9564,
+              218.9564
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            177.9564,
+            218.9564
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              199.8811,
+              215.8811
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 200.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              199.8811,
+              215.8811
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            174.8811,
+            215.8811
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              194.9391,
+              210.9391
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 210.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              194.9391,
+              210.9391
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            169.9391,
+            210.9391
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              188.399,
+              204.399
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 220.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              188.399,
+              204.399
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            163.399,
+            204.399
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              180.6215,
+              196.6215
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 230.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              180.6215,
+              196.6215
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            155.6215,
+            196.6215
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              172.0397,
+              188.0397
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 240.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              172.0397,
+              188.0397
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            147.0397,
+            188.0397
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              163.1261,
+              179.1261
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 250.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              163.1261,
+              179.1261
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            138.1261,
+            179.1261
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              154.3473,
+              170.3473
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 260.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              154.3473,
+              170.3473
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            129.3473,
+            170.3473
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              146.111,
+              162.111
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 270.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              146.111,
+              162.111
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            121.111,
+            162.111
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              138.719,
+              154.719
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 280.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              138.719,
+              154.719
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            113.719,
+            154.719
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              132.3443,
+              148.3443
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 290.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              132.3443,
+              148.3443
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            107.3443,
+            148.3443
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              127.0397,
+              143.0397
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 300.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              127.0397,
+              143.0397
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            102.0397,
+            143.0397
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              122.7706,
+              138.7706
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 310.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              122.7706,
+              138.7706
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            97.7706,
+            138.7706
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              119.455,
+              135.455
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 320.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              119.455,
+              135.455
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            94.455,
+            135.455
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              116.9968,
+              132.9968
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 330.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              116.9968,
+              132.9968
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            91.9968,
+            132.9968
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              115.3088,
+              131.3088
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 340.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              115.3088,
+              131.3088
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            90.3088,
+            131.3088
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              114.3237,
+              130.3237
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 350.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              114.3237,
+              130.3237
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            89.3237,
+            130.3237
+          ]
+        },
+        {
+          "back": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              114.0,
+              130.0
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "crank_angle_deg": 360.0,
+          "front": {
+            "engaged": true,
+            "follower_stays_within_channel_z_range": true,
+            "follower_volume_in_channel_mm3": 2329.6,
+            "follower_z_extent": [
+              114.0,
+              130.0
+            ],
+            "platform_volume_beyond_channel_floor_mm3": 0.0
+          },
+          "platform_z_extent": [
+            89.0,
+            130.0
+          ]
+        }
+      ]
+    },
+    "joint_scans": {
+      "crank_pin_in_arm_bore": {
+        "bodies": [
+          "BODY-CRANK-JOINT-PIN",
+          "BODY-CRANK-SHAFT"
+        ],
+        "engaged_at_every_state": true,
+        "features": [
+          "FEATURE-CRANK-PIN-SHANK",
+          "FEATURE-SHAFT-CRANK-PIN-BORE"
+        ],
+        "nominal_clearance_mm": 0.1,
+        "samples": [
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 785.3982,
+            "material_b_mm3": 3335.2168,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_0_BOTTOM"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 785.3982,
+            "material_b_mm3": 3718.1518,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_45_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 785.3982,
+            "material_b_mm3": 3335.2168,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_90_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 785.3982,
+            "material_b_mm3": 3718.1518,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_135_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 785.3982,
+            "material_b_mm3": 3335.2168,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_180_TOP"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 785.3982,
+            "material_b_mm3": 3718.1518,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_225_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 785.3982,
+            "material_b_mm3": 3335.2168,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_270_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 785.3982,
+            "material_b_mm3": 3718.1518,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_315_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 785.3982,
+            "material_b_mm3": 3335.2168,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_360_BOTTOM"
+          }
+        ]
+      },
+      "crank_pin_in_rod_bore": {
+        "bodies": [
+          "BODY-CONNECTING-ROD",
+          "BODY-CRANK-JOINT-PIN"
+        ],
+        "engaged_at_every_state": true,
+        "features": [
+          "FEATURE-ROD-CRANK-BORE",
+          "FEATURE-CRANK-PIN-SHANK"
+        ],
+        "nominal_clearance_mm": 0.1,
+        "samples": [
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4186.5928,
+            "material_b_mm3": 903.2079,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_0_BOTTOM"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4453.6664,
+            "material_b_mm3": 903.2079,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_45_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4563.9722,
+            "material_b_mm3": 903.2079,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_90_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4453.6664,
+            "material_b_mm3": 903.2079,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_135_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4186.5928,
+            "material_b_mm3": 903.2079,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_180_TOP"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4453.6664,
+            "material_b_mm3": 903.2079,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_225_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4563.9722,
+            "material_b_mm3": 903.2079,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_270_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4453.6664,
+            "material_b_mm3": 903.2079,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_315_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4186.5928,
+            "material_b_mm3": 903.2079,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_360_BOTTOM"
+          }
+        ]
+      },
+      "platform_pin_in_lug_a": {
+        "bodies": [
+          "BODY-PLATFORM",
+          "BODY-PLATFORM-JOINT-PIN"
+        ],
+        "engaged_at_every_state": true,
+        "features": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-A",
+          "FEATURE-PLATFORM-PIN-SHANK"
+        ],
+        "nominal_clearance_mm": 0.1,
+        "samples": [
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2762.1212,
+            "material_b_mm3": 471.2389,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_0_BOTTOM"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2762.1212,
+            "material_b_mm3": 471.2389,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_45_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2762.1212,
+            "material_b_mm3": 471.2389,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_90_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2762.1212,
+            "material_b_mm3": 471.2389,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_135_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2762.1212,
+            "material_b_mm3": 471.2389,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_180_TOP"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2762.1212,
+            "material_b_mm3": 471.2389,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_225_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2762.1212,
+            "material_b_mm3": 471.2389,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_270_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2762.1212,
+            "material_b_mm3": 471.2389,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_315_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2762.1212,
+            "material_b_mm3": 471.2389,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_360_BOTTOM"
+          }
+        ]
+      },
+      "platform_pin_in_lug_b": {
+        "bodies": [
+          "BODY-PLATFORM",
+          "BODY-PLATFORM-JOINT-PIN"
+        ],
+        "engaged_at_every_state": true,
+        "features": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-B",
+          "FEATURE-PLATFORM-PIN-SHANK"
+        ],
+        "nominal_clearance_mm": 0.1,
+        "samples": [
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2531.9444,
+            "material_b_mm3": 431.969,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_0_BOTTOM"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2531.9444,
+            "material_b_mm3": 431.969,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_45_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2531.9444,
+            "material_b_mm3": 431.969,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_90_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2531.9444,
+            "material_b_mm3": 431.969,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_135_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2531.9444,
+            "material_b_mm3": 431.969,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_180_TOP"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2531.9444,
+            "material_b_mm3": 431.969,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_225_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2531.9444,
+            "material_b_mm3": 431.969,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_270_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2531.9444,
+            "material_b_mm3": 431.969,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_315_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 2531.9444,
+            "material_b_mm3": 431.969,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_360_BOTTOM"
+          }
+        ]
+      },
+      "platform_pin_in_rod_bore": {
+        "bodies": [
+          "BODY-CONNECTING-ROD",
+          "BODY-PLATFORM-JOINT-PIN"
+        ],
+        "engaged_at_every_state": true,
+        "features": [
+          "FEATURE-ROD-PLATFORM-BORE",
+          "FEATURE-PLATFORM-PIN-SHANK"
+        ],
+        "nominal_clearance_mm": 0.1,
+        "samples": [
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4368.6185,
+            "material_b_mm3": 942.4778,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_0_BOTTOM"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4647.304,
+            "material_b_mm3": 942.4778,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_45_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4762.4058,
+            "material_b_mm3": 942.4778,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_90_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4647.304,
+            "material_b_mm3": 942.4778,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_135_RISING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4368.6185,
+            "material_b_mm3": 942.4778,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_180_TOP"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4647.304,
+            "material_b_mm3": 942.4778,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_225_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4762.4058,
+            "material_b_mm3": 942.4778,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_270_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4647.304,
+            "material_b_mm3": 942.4778,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_315_LOWERING"
+          },
+          {
+            "common_volume_mm3": 0.0,
+            "material_a_mm3": 4368.6185,
+            "material_b_mm3": 942.4778,
+            "min_distance_mm": 0.1,
+            "state": "CRANK_360_BOTTOM"
+          }
+        ]
+      }
+    },
+    "journals": {
+      "axial_separation_mm": 6.0,
+      "journal_1": {
+        "feature": "FEATURE-HOUSING-JOURNAL-1",
+        "is_also_the_boundary_crossing": true,
+        "measured_clearance_mm": 0.2,
+        "nominal_mm": 0.2,
+        "status": "PASS",
+        "x_mm": [
+          0.0,
+          8.0
+        ]
+      },
+      "journal_2": {
+        "feature": "FEATURE-HOUSING-JOURNAL-2",
+        "measured_clearance_mm": 0.2,
+        "nominal_mm": 0.2,
+        "status": "PASS",
+        "x_mm": [
+          14.0,
+          26.0
+        ]
+      },
+      "relief_between_them": {
+        "feature": "FEATURE-HOUSING-JOURNAL-RELIEF",
+        "measured_clearance_mm": 3.2,
+        "nominal_mm": 3.2,
+        "status": "PASS",
+        "x_mm": [
+          8.0,
+          14.0
+        ]
+      },
+      "two_distinct_lands": true
+    },
+    "link_integrity": {
+      "as_built_centre_distance_from_rod_bbox_mm": 85.0,
+      "constant": true,
+      "declared_centre_distance_mm": 85.0,
+      "max_deviation_mm": 0.0,
+      "method": "two independent measurements: the rod solid's own extent minus its two eye radii, and the distance between the two pin bodies' axes in every state",
+      "per_state": [
+        {
+          "centre_distance_mm": 85.0,
+          "crank_pin_centre": [
+            70.0,
+            15.0
+          ],
+          "platform_pin_centre": [
+            70.0,
+            100.0
+          ],
+          "state": "CRANK_0_BOTTOM"
+        },
+        {
+          "centre_distance_mm": 85.0,
+          "crank_pin_centre": [
+            101.819805,
+            28.180195
+          ],
+          "platform_pin_centre": [
+            70.0,
+            106.999609
+          ],
+          "state": "CRANK_45_RISING"
+        },
+        {
+          "centre_distance_mm": 85.0,
+          "crank_pin_centre": [
+            115.0,
+            60.0
+          ],
+          "platform_pin_centre": [
+            70.0,
+            132.111026
+          ],
+          "state": "CRANK_90_RISING"
+        },
+        {
+          "centre_distance_mm": 85.0,
+          "crank_pin_centre": [
+            101.819805,
+            91.819805
+          ],
+          "platform_pin_centre": [
+            70.0,
+            170.639219
+          ],
+          "state": "CRANK_135_RISING"
+        },
+        {
+          "centre_distance_mm": 85.0,
+          "crank_pin_centre": [
+            70.0,
+            105.0
+          ],
+          "platform_pin_centre": [
+            70.0,
+            190.0
+          ],
+          "state": "CRANK_180_TOP"
+        },
+        {
+          "centre_distance_mm": 85.0,
+          "crank_pin_centre": [
+            38.180195,
+            91.819805
+          ],
+          "platform_pin_centre": [
+            70.0,
+            170.639219
+          ],
+          "state": "CRANK_225_LOWERING"
+        },
+        {
+          "centre_distance_mm": 85.0,
+          "crank_pin_centre": [
+            25.0,
+            60.0
+          ],
+          "platform_pin_centre": [
+            70.0,
+            132.111026
+          ],
+          "state": "CRANK_270_LOWERING"
+        },
+        {
+          "centre_distance_mm": 85.0,
+          "crank_pin_centre": [
+            38.180195,
+            28.180195
+          ],
+          "platform_pin_centre": [
+            70.0,
+            106.999609
+          ],
+          "state": "CRANK_315_LOWERING"
+        },
+        {
+          "centre_distance_mm": 85.0,
+          "crank_pin_centre": [
+            70.0,
+            15.0
+          ],
+          "platform_pin_centre": [
+            70.0,
+            100.0
+          ],
+          "state": "CRANK_360_BOTTOM"
+        }
+      ]
+    },
+    "load_path": {
+      "adequacy_evaluated": false,
+      "adequacy_status": "NOT_VERIFIED",
+      "edges": [
+        {
+          "component": "vertical",
+          "evidence": "INT-P1",
+          "from": "SCENARIO-PAYLOAD-1KG",
+          "to": "BODY-PLATFORM",
+          "via": "FEATURE-PLATFORM-SUPPORT-SURFACE"
+        },
+        {
+          "component": "vertical and lateral",
+          "evidence": "INT-09, INT-10",
+          "from": "BODY-PLATFORM",
+          "to": "BODY-PLATFORM-JOINT-PIN",
+          "via": "FEATURE-PLATFORM-CLEVIS-LUG-A / LUG-B"
+        },
+        {
+          "component": "lateral, pitch and roll only; the guides carry no vertical load",
+          "evidence": "INT-14, INT-15",
+          "from": "BODY-PLATFORM",
+          "to": "BODY-HOUSING",
+          "via": "guide followers in the guide channels"
+        },
+        {
+          "component": "along the rod",
+          "evidence": "INT-11",
+          "from": "BODY-PLATFORM-JOINT-PIN",
+          "to": "BODY-CONNECTING-ROD",
+          "via": "FEATURE-ROD-PLATFORM-BORE"
+        },
+        {
+          "component": "along the rod",
+          "evidence": "INT-06",
+          "from": "BODY-CONNECTING-ROD",
+          "to": "BODY-CRANK-JOINT-PIN",
+          "via": "FEATURE-ROD-CRANK-BORE"
+        },
+        {
+          "component": "radial",
+          "evidence": "INT-05",
+          "from": "BODY-CRANK-JOINT-PIN",
+          "to": "BODY-CRANK-SHAFT",
+          "via": "FEATURE-SHAFT-CRANK-PIN-BORE"
+        },
+        {
+          "component": "radial",
+          "evidence": "INT-01, INT-02",
+          "from": "BODY-CRANK-SHAFT",
+          "to": "BODY-HOUSING",
+          "via": "FEATURE-HOUSING-JOURNAL-1 and FEATURE-HOUSING-JOURNAL-2"
+        },
+        {
+          "component": "vertical",
+          "evidence": "geometry",
+          "from": "BODY-HOUSING",
+          "to": "SUPPORT-SURFACE",
+          "via": "FEATURE-HOUSING-SUPPORT-FACE at z = 0"
+        }
+      ],
+      "reachable_nodes": [
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN",
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING",
+        "BODY-PLATFORM",
+        "BODY-PLATFORM-JOINT-PIN",
+        "SCENARIO-PAYLOAD-1KG",
+        "SUPPORT-SURFACE"
+      ],
+      "reaches_reaction_site": true,
+      "why": "DOS-BM-002 S5 records no strength evidence at any fidelity. This establishes that a path EXISTS (NRM-BM-002-011), which is structural, and nothing about whether it is adequate (UNR-BM-002-007)."
+    },
+    "orientation_probes": {
+      "all_blocked": true,
+      "does_not_establish": "stiffness, friction, wear, life, or behaviour under load. A probe that finds material in the way says nothing about how hard it is to push past it.",
+      "establishes": "geometric capture of the platform's orientation",
+      "method": "the platform solid is rigidly rotated about its own centroid and the boolean common with the housing is measured. A positive common volume means the guide channels obstruct that rotation.",
+      "probes": [
+        {
+          "angle_deg": 4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 154.371609,
+          "probe": "pitch_about_X",
+          "state": "BOTTOM"
+        },
+        {
+          "angle_deg": -4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 154.371609,
+          "probe": "pitch_about_X",
+          "state": "BOTTOM"
+        },
+        {
+          "angle_deg": 4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 99.705045,
+          "probe": "roll_about_Y",
+          "state": "BOTTOM"
+        },
+        {
+          "angle_deg": -4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 130.33548,
+          "probe": "roll_about_Y",
+          "state": "BOTTOM"
+        },
+        {
+          "angle_deg": 0.5,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 55.659627,
+          "probe": "yaw_about_Z",
+          "state": "BOTTOM"
+        },
+        {
+          "angle_deg": -0.5,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 55.659627,
+          "probe": "yaw_about_Z",
+          "state": "BOTTOM"
+        },
+        {
+          "angle_deg": 4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 154.371609,
+          "probe": "pitch_about_X",
+          "state": "MID_STROKE"
+        },
+        {
+          "angle_deg": -4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 154.371609,
+          "probe": "pitch_about_X",
+          "state": "MID_STROKE"
+        },
+        {
+          "angle_deg": 4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 99.705045,
+          "probe": "roll_about_Y",
+          "state": "MID_STROKE"
+        },
+        {
+          "angle_deg": -4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 130.33548,
+          "probe": "roll_about_Y",
+          "state": "MID_STROKE"
+        },
+        {
+          "angle_deg": 0.5,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 55.659627,
+          "probe": "yaw_about_Z",
+          "state": "MID_STROKE"
+        },
+        {
+          "angle_deg": -0.5,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 55.659627,
+          "probe": "yaw_about_Z",
+          "state": "MID_STROKE"
+        },
+        {
+          "angle_deg": 4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 154.371609,
+          "probe": "pitch_about_X",
+          "state": "TOP"
+        },
+        {
+          "angle_deg": -4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 154.371609,
+          "probe": "pitch_about_X",
+          "state": "TOP"
+        },
+        {
+          "angle_deg": 4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 99.705045,
+          "probe": "roll_about_Y",
+          "state": "TOP"
+        },
+        {
+          "angle_deg": -4.0,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 130.33548,
+          "probe": "roll_about_Y",
+          "state": "TOP"
+        },
+        {
+          "angle_deg": 0.5,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 55.659627,
+          "probe": "yaw_about_Z",
+          "state": "TOP"
+        },
+        {
+          "angle_deg": -0.5,
+          "blocked_by_guides": true,
+          "overlap_with_housing_mm3": 55.659627,
+          "probe": "yaw_about_Z",
+          "state": "TOP"
+        }
+      ]
+    },
+    "pin_retention": {
+      "BODY-CRANK-JOINT-PIN": {
+        "bilateral_retention": true,
+        "criterion": "in both directions the travel before realized geometry blocks it is at most the declared free travel, AND the body that blocks it is the declared retention body",
+        "declared_blocker_minus_x": "BODY-CONNECTING-ROD",
+        "declared_blocker_plus_x": "BODY-REAR-PANEL",
+        "max_free_travel_mm": 3.0,
+        "minus_x": {
+          "blocked_by": "BODY-CONNECTING-ROD",
+          "bounded": true,
+          "onset_mm": 0.0
+        },
+        "plus_x": {
+          "blocked_by": "BODY-REAR-PANEL",
+          "bounded": true,
+          "onset_mm": 2.0001
+        }
+      },
+      "BODY-PLATFORM-JOINT-PIN": {
+        "bilateral_retention": true,
+        "criterion": "in both directions the travel before realized geometry blocks it is at most the declared free travel, AND the body that blocks it is the declared retention body",
+        "declared_blocker_minus_x": "BODY-PLATFORM",
+        "declared_blocker_plus_x": "BODY-REAR-PANEL",
+        "max_free_travel_mm": 3.0,
+        "minus_x": {
+          "blocked_by": "BODY-PLATFORM",
+          "bounded": true,
+          "onset_mm": 0.0
+        },
+        "plus_x": {
+          "blocked_by": "BODY-REAR-PANEL",
+          "bounded": true,
+          "onset_mm": 2.0001
+        }
+      }
+    },
+    "shaft_axial_location": {
+      "note": "No axial load is produced in the declared scenario, so no axial reaction is owed (SF-5.3, NEG-BM-002-019). This is recorded as a handling design choice, not as a discharge of NRM-BM-002-006.",
+      "pull_out_minus_x": {
+        "blocked_by": "BODY-HOUSING",
+        "bounded": true,
+        "onset_mm": 1.0001
+      },
+      "push_in_plus_x": {
+        "blocked_by": "BODY-CONNECTING-ROD",
+        "bounded": true,
+        "onset_mm": 2.0001
+      }
+    },
+    "shaft_crossing": {
+      "handle_grip_bbox_mm": {
+        "dx": 28.0,
+        "dy": 12.0,
+        "dz": 12.0,
+        "xmax": -18.0,
+        "xmin": -46.0,
+        "ymax": 76.0,
+        "ymin": 64.0,
+        "zmax": 40.0,
+        "zmin": 28.0
+      },
+      "handle_grip_centre_at_0_deg": [
+        70.0,
+        34.0
+      ],
+      "handle_grip_centre_at_90_deg": [
+        96.0,
+        60.0
+      ],
+      "handle_grip_radial_offset_mm": 26.0,
+      "single_connected_solid": true,
+      "volume_beyond_hub_face_mm3": 3166.725395,
+      "volume_in_wall_band_mm3": 30787.608005,
+      "volume_inside_housing_mm3": 100579.167079,
+      "volume_outside_housing_mm3": 72438.843406,
+      "wall_band_mm": [
+        0.0,
+        8.0
+      ]
+    },
+    "topology": {
+      "body_count": 7,
+      "body_ids": [
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN",
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING",
+        "BODY-PLATFORM",
+        "BODY-PLATFORM-JOINT-PIN",
+        "BODY-REAR-PANEL"
+      ],
+      "expected_body_ids": [
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN",
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING",
+        "BODY-PLATFORM",
+        "BODY-PLATFORM-JOINT-PIN",
+        "BODY-REAR-PANEL"
+      ],
+      "matches_declared_set": true,
+      "material_classes": [
+        "GENERIC_RIGID_POLYMER"
+      ],
+      "powered_or_stored_energy_bodies": [],
+      "scenario_payload_is_a_body": false
+    },
+    "travel": {
+      "bottom": {
+        "crank_angle_deg": 0.0,
+        "crank_pin_centre": [
+          70.0,
+          15.0
+        ],
+        "measured_from": "the built platform solid clipped to the payload footprint, and the built pin solid's own axis",
+        "platform_bbox_mm": {
+          "dx": 52.0,
+          "dy": 123.2,
+          "dz": 41.0,
+          "xmax": 63.0,
+          "xmin": 11.0,
+          "ymax": 131.6,
+          "ymin": 8.4,
+          "zmax": 130.0,
+          "zmin": 89.0
+        },
+        "platform_pin_y_mm": 70.0,
+        "platform_pin_z_mm": 100.0,
+        "support_surface_z_mm": 126.0
+      },
+      "bottom_after_full_turn": {
+        "crank_angle_deg": 360.0,
+        "crank_pin_centre": [
+          70.0,
+          15.0
+        ],
+        "measured_from": "the built platform solid clipped to the payload footprint, and the built pin solid's own axis",
+        "platform_bbox_mm": {
+          "dx": 52.0,
+          "dy": 123.2,
+          "dz": 41.0,
+          "xmax": 63.0,
+          "xmin": 11.0,
+          "ymax": 131.6,
+          "ymin": 8.4,
+          "zmax": 130.0,
+          "zmin": 89.0
+        },
+        "platform_pin_y_mm": 70.0,
+        "platform_pin_z_mm": 100.0,
+        "support_surface_z_mm": 126.0
+      },
+      "cycle_closes": true,
+      "extremes_evaluated_independently": true,
+      "not_copied_note": "Neither extreme's result is derived from the other's, and neither is 2 x crank_radius copied into the report. The two heights are separate measurements of separate configurations; their difference happens to equal 2 x crank_radius because that is what a slider-crank does. NC-15 copies one into the other and is detected.",
+      "platform_pin_travel_mm": 90.0,
+      "source_band_mm": [
+        80.0,
+        100.0
+      ],
+      "source_qualifier": "approximately",
+      "support_surface_travel_mm": 90.0,
+      "target_mm": 90.0,
+      "top": {
+        "crank_angle_deg": 180.0,
+        "crank_pin_centre": [
+          70.0,
+          105.0
+        ],
+        "measured_from": "the built platform solid clipped to the payload footprint, and the built pin solid's own axis",
+        "platform_bbox_mm": {
+          "dx": 52.0,
+          "dy": 123.2,
+          "dz": 41.0,
+          "xmax": 63.0,
+          "xmin": 11.0,
+          "ymax": 131.6,
+          "ymin": 8.4,
+          "zmax": 220.0,
+          "zmin": 179.0
+        },
+        "platform_pin_y_mm": 70.0,
+        "platform_pin_z_mm": 190.0,
+        "support_surface_z_mm": 216.0
+      },
+      "twice_crank_radius_mm": 90.0
+    },
+    "unsupported_claim_scan": {
+      "clean": true,
+      "criterion": "a PASS whose text concerns strength, capacity, stress, margin, jamming or stability must cite contact-resolving or physical evidence; none exists in this corpus, so no such PASS may appear",
+      "rows_scanned": 41,
+      "unsupported_claims": []
+    }
+  },
+  "unresolved_carried": [
+    {
+      "decision": "whether the boundary-crossing element counts as enclosed",
+      "effect": "REQ-004 is INDETERMINATE",
+      "id": "UNR-BM-002-001",
+      "status": "CARRIED_UNRESOLVED"
+    },
+    {
+      "decision": "the compliance edge of 'approximately'",
+      "effect": "REQ-002 numeric acceptance is bounded by it. 90 mm is mid-band so the structural predicate is still decidable.",
+      "id": "UNR-BM-002-002",
+      "status": "CARRIED_UNRESOLVED"
+    },
+    {
+      "decision": "crank effort, torque, mechanical advantage",
+      "effect": "no effort claim is made",
+      "id": "UNR-BM-002-003",
+      "status": "CARRIED_UNRESOLVED"
+    },
+    {
+      "decision": "whether the mechanism must hold position when released",
+      "effect": "this design declares no holding feature and claims none; imposing one would be NEG-BM-002-014",
+      "id": "UNR-BM-002-004",
+      "status": "CARRIED_UNRESOLVED"
+    },
+    {
+      "decision": "definitions of 'safe to use' and 'obvious jamming'",
+      "effect": "REQ-005 and REQ-007 are INDETERMINATE / NOT_VERIFIED",
+      "id": "UNR-BM-002-005",
+      "status": "CARRIED_UNRESOLVED"
+    },
+    {
+      "decision": "the numeric envelope implied by 'desktop-sized'",
+      "effect": "REQ-008 is INDETERMINATE",
+      "id": "UNR-BM-002-006",
+      "status": "CARRIED_UNRESOLVED"
+    },
+    {
+      "decision": "load margin, factor of safety, duty",
+      "effect": "REQ-003 is UNSUPPORTED",
+      "id": "UNR-BM-002-007",
+      "status": "CARRIED_UNRESOLVED"
+    },
+    {
+      "decision": "assembly insertion force and process parameters",
+      "effect": "REQ-006 process adequacy is NOT_VERIFIED. This design has no press or snap region at all, so no process parameter is even implied by it.",
+      "id": "UNR-BM-002-008",
+      "status": "CARRIED_UNRESOLVED"
+    }
+  ]
+}

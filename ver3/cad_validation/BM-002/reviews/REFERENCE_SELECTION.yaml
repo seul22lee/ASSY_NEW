@@ -1,0 +1,208 @@
+case_id: BM-002
+schema_version: 0.1.0
+status: FROZEN_BEFORE_GEOMETRY
+frozen_at: "Phase A, before any BM-002 CAD body was built"
+
+purpose: >
+  Records which design was selected as the first executable positive reference for
+  BM-002, why the mechanism family was chosen, what the reference is expected to
+  establish, and what it is expected NOT to establish. It is written before the
+  geometry exists so that a surprising validation result is visible as a surprise
+  rather than being absorbed into a rewritten expectation afterwards.
+
+oracle_scope:
+  pack: ver3/oracles/product_cases/BM-002
+  dossier: ver3/oracles/_dossiers/DOS-BM-002.md
+  oracle_files_are_read_only: true
+  pack_status_at_selection: PRE_CAD_SEMANTIC_REVIEWED
+
+# ---------------------------------------------------------------- selection
+selected_reference:
+  id: EXE-BM002-01
+  mechanism_family: crank_and_link
+  summary: >
+    In-line slider-crank platform lift. An external hand crank on a large-diameter
+    hub crosses the housing boundary through the -X wall, runs in two axially
+    separated journal lands inside the housing, and carries an internal crank arm.
+    A crank joint pin couples the crank arm to a fixed-length connecting rod; a
+    platform joint pin couples the rod to a clevis under the platform. The platform
+    runs in two vertical guide channels integrated into the front and back inner
+    walls. A rear panel closes the +X side after internal assembly and carries the
+    integral lands that retain both joint pins axially.
+
+  why_this_family:
+    - >
+      FRE-BM-002-002 leaves the conversion family free and names crank-and-link
+      among the admissible realizations. ADM-BM-002-E is the pack's own
+      falsifiability fixture for the crank-and-link family.
+    - >
+      DOS-BM-002 S7 records that the legacy pipeline returned INFEASIBLE for a
+      hand-cranked lift without gearing because its library held exactly one
+      conversion card. A non-geared crank-and-link reference is therefore the
+      single most useful positive reference this case can carry: it is the design
+      the legacy run declared impossible.
+    - >
+      A crank of radius R delivers exactly 2R of slider travel, so the source's
+      approximately 80-100 mm band (NRM-BM-002-004) is met by geometry rather than
+      by a declared ratio, and the travel can be measured from the built solids at
+      both extremes independently.
+    - >
+      Every interaction in the chain is a plain revolute pair or a prismatic
+      channel. Nothing in the chain needs contact-level engagement modelling to be
+      shown to EXIST, which keeps the Phase A claim inside what a B-rep kernel can
+      actually support.
+
+  selection_did_not_close_the_space:
+    note: >
+      NEG-BM-002-022 and stage_expectations s02 forbid faulting a run for arriving
+      at one candidate, and forbid closing the space by library availability. The
+      space was not closed here: four other families remain admissible and
+      unbuilt.
+    families_considered_and_not_built:
+      - family: direct_screw_drive
+        why_not_selected_here: >
+          A helical pair is a contact-level engagement. Its existence can be drawn,
+          but nothing in this toolchain resolves thread contact, so the reference
+          would carry a conversion whose central interaction is unmeasurable at the
+          available fidelity. Not rejected as infeasible; deferred.
+      - family: rotating_nut_fixed_screw
+        why_not_selected_here: "Same fidelity limitation as direct_screw_drive; deferred."
+      - family: cable_and_drum
+        why_not_selected_here: >
+          A cable is not a rigid B-rep body. Representing it would require a
+          flexible-body model this pilot does not have. Deferred, not rejected.
+      - family: scissor_linkage
+        why_not_selected_here: >
+          Admissible and buildable, but it multiplies revolute joints without
+          testing anything crank-and-link does not already test. Deferred.
+    absent_capability_rule: >
+      Where a family is not built because the toolchain cannot represent it, the
+      correct outcome is UNSUPPORTED with the capability named, never INFEASIBLE
+      (NEG-BM-002-009, FRE-BM-002-002).
+
+# ------------------------------------------------- what the reference must show
+expected_to_establish:
+  - "Seven valid single-solid B-rep product bodies and no others."
+  - "An uninterrupted physical chain from the exterior handle to the platform."
+  - "A realized housing-boundary crossing with no housing interference at any sampled angle."
+  - "Two axially separated journal lands supporting the crank shaft radially."
+  - "Two realized revolute joints, each with a pin, a matching bore or clevis, a declared radial clearance and realized bilateral axial retention."
+  - "Two realized vertical guide channels with followers engaged through the whole stroke."
+  - "A complete 0-360 degree crank cycle with no undeclared volumetric overlap at any sample."
+  - "Measured platform travel of 90 mm, with the bottom and top extremes measured independently from the built solids."
+  - "A payload access path terminating at the platform support surface, not at the housing rim."
+  - "An acyclic assembly sequence in which no body passes through undeclared rigid material."
+  - "STEP and BREP export with independent re-import, and a deterministic rebuild."
+
+expected_not_to_establish:
+  - "That the platform carries 1 kg. No strength evidence exists at any fidelity (DOS-BM-002 S5)."
+  - "That the mechanism does not jam. Jamming is contact-level; REQ-007 stays NOT_VERIFIED (NRM-BM-002-014, EV-BM-002-001)."
+  - "That the product is safe (UNR-BM-002-005)."
+  - "That it is practical to manufacture or easy to assemble (REQ-006 evidence gap)."
+  - "Crank effort or mechanical advantage (UNR-BM-002-003)."
+  - "Whether the mechanism holds position when the crank is released (UNR-BM-002-004, FRE-BM-002-008). This design declares no holding feature and claims none."
+  - "Whether the boundary-crossing element counts as enclosed (UNR-BM-002-001)."
+  - "Whether 90 mm complies with 'approximately 80-100 mm' at the band edge (UNR-BM-002-002). 90 mm is mid-band, so the structural predicate is evaluable; the qualifier stays unresolved."
+
+# ------------------------------------- invariant expectations, frozen in advance
+expected_invariant_outcomes:
+  - invariant: NRM-BM-002-001
+    expected: PASS
+    why: "external rotary input, internal platform and a continuous realized chain between them"
+  - invariant: NRM-BM-002-002
+    expected: PASS
+    why: "crossing realized at the -X wall bore; support realized at two journal lands; no interference"
+    bounded_by: UNR-BM-002-001
+  - invariant: NRM-BM-002-003
+    expected: PASS
+    why: "conversion is localized at the crank pin / rod bore pair and the rod / platform pin pair, with geometry on both bodies"
+  - invariant: NRM-BM-002-004
+    expected: PASS as a structural predicate
+    why: "declared and measured travel 90 mm, in millimetres, mid-band"
+    bounded_by: UNR-BM-002-002
+  - invariant: NRM-BM-002-005
+    expected: PASS on declaration only; capacity NOT_VERIFIED
+    why: "SCENARIO-PAYLOAD-1KG is declared with its unit and the load path exists; no strength evidence exists"
+    bounded_by: [UNR-BM-002-002, UNR-BM-002-007]
+  - invariant: NRM-BM-002-006
+    expected: PASS for existence of reactions actually owed
+    why: >
+      radial loads on the shaft and on both joint pins are reacted at realized
+      journals and bores. No axial load is produced in the declared scenario, so
+      per SF-5.3 and NEG-BM-002-019 no axial reaction is owed; an axial location is
+      nevertheless realized and is reported as a design choice, not as a discharge.
+  - invariant: NRM-BM-002-007
+    expected: PASS
+    why: >
+      the scenario requires the platform to stay square to accept a payload, so
+      orientation IS scenario-relevant here; two guide channels constrain it.
+      This is INA-BM-002-B's failure mode avoided, not anti-rotation asserted
+      universally (NEG-BM-002-020).
+  - invariant: NRM-BM-002-008
+    expected: PASS
+    why: "dense sampling of the full cycle with zero undeclared common volume"
+  - invariant: NRM-BM-002-009
+    expected: PASS by its otherwise-branch
+    why: >
+      the design declares NO physical end of travel. The crank rotates
+      continuously; the extremes are kinematic reversals, each evaluated at its own
+      configuration. Inferring two stops from a stated displacement is exactly
+      NEG-BM-002-021.
+  - invariant: NRM-BM-002-010
+    expected: PASS
+    why: "access path terminates on the platform support surface, not the rim (NEG-BM-002-007)"
+  - invariant: NRM-BM-002-011
+    expected: PASS for existence only
+    bounded_by: UNR-BM-002-007
+  - invariant: NRM-BM-002-012
+    expected: PASS
+    why: "each discretely installed body has a swept, unobstructed installation path"
+  - invariant: NRM-BM-002-013
+    expected: PASS
+    why: "no powered or stored-energy element anywhere in the chain"
+  - invariant: NRM-BM-002-014
+    expected: PASS
+    why: >
+      every measurement declares its contact resolution; no declared-pair result is
+      cited for engagement or for REQ-007
+
+# ------------------------------------------------------------ frozen concept
+frozen_starting_concept:
+  mechanism: in-line slider-crank platform lift
+  crank_radius_mm: 45.0
+  connecting_rod_centre_distance_mm: 85.0
+  crank_shaft_axis: horizontal, parallel to X
+  crank_axis_height_mm: 55.0
+  platform_pin_bottom_mm: 95.0
+  platform_pin_top_mm: 185.0
+  nominal_platform_pin_travel_mm: 90.0
+  crank_pin_minimum_height_mm: 10.0
+  housing_floor_top_mm: 4.0
+  initial_min_crank_pin_floor_clearance_mm: 6.0
+  max_connecting_rod_angle_deg: 31.97
+  note: >
+    These are starting parameters, not truths. Any change made because actual 3D
+    geometry contradicts them is recorded in
+    ../executable_references/EXE-BM002-01/DESIGN_AND_OPERATION_RATIONALE.md under
+    "changes to the frozen starting concept", with the contradiction, the minimum
+    change, the old and new values and the resulting measured travel.
+
+provisional_layout_decisions_to_verify:
+  decisions:
+    - "rear panel is the +X side panel"
+    - "crank-shaft axis parallel to X"
+    - "external crank outside the housing"
+    - "internal crank arm and connecting rod remain inside during normal use"
+    - "rear panel carries the second crank-shaft journal"
+    - "rear panel carries integral retention geometry for both joint pins"
+    - "vertical platform guides integrated into the front and back inner walls"
+    - "platform engages its guides before the rear panel is installed"
+    - "housing top open enough for payload access at the TOP state"
+  note: >
+    Carried into CAD as hypotheses. Where the built geometry refutes one, the
+    refutation and the replacement are recorded in the rationale document.
+
+no_bm001_architecture_reuse: >
+  BM-002 is a distinct mechanism. No BM-001 enclosure, closure, latch, keeper or
+  snap-pin architecture is copied. The only shared items are the tool library
+  (ver3/cad_validation/tools) and the report conventions.

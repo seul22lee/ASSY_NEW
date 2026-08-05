@@ -1,0 +1,271 @@
+reference_id: EXE-BM002-01
+case_id: BM-002
+schema_version: 0.1.0
+units: mm
+kind: EXECUTABLE_POSITIVE_REFERENCE
+phase: PHASE_A_CAD_AND_CORE_VALIDATION
+
+what_this_is: >
+  One design that satisfies the rank-1 BM-002 source, built as B-rep solids and
+  measured. It is a positive reference, not a demonstration and not a product. Its
+  maximum claim is GEOMETRICALLY AND KINEMATICALLY ADMISSIBLE AT THE EVALUATED CAD
+  FIDELITY.
+
+what_this_is_not:
+  - "not evidence that the rank-1 source is satisfiable only this way (FRE-BM-002-002)"
+  - "not evidence of strength, stiffness, effort, jamming, safety or manufacturability"
+  - "not a lock, not production authority, not a demonstration corpus"
+
+mechanism_family: crank_and_link
+conversion: >
+  A crank of radius 45 mm drives a fixed-length 85 mm link whose far end is
+  constrained to a vertical line by the platform's guide channels. Slider-crank
+  kinematics give the platform exactly 2 x 45 = 90 mm of travel between the two
+  crank dead centres.
+
+frame:
+  origin: housing minimum outer corner
+  x: width; +X is the side the rear panel closes; x < 0 is outside the housing
+  y: depth, front to back
+  z: up; z = 0 is the surface the product stands on
+
+# --------------------------------------------------------------- product bodies
+product_bodies:
+  - id: BODY-HOUSING
+    name: housing
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    export: housing.step / housing.brep
+    mechanical_roles:
+      - base and main enclosure walls
+      - mechanism cavity
+      - top payload access opening
+      - first crank-shaft journal land, which is also the housing boundary crossing
+      - second crank-shaft journal land on an internal boss
+      - vertical platform guide channels, front and back
+      - support-surface reaction at z = 0
+    features:
+      - id: FEATURE-HOUSING-FLOOR
+        what: floor slab, z 0.000 to 4.000
+      - id: FEATURE-HOUSING-CAVITY
+        what: mechanism cavity, x 8.000 to 71.000, y 5.000 to 135.000, z 4.000 upward
+      - id: FEATURE-HOUSING-TOP-OPENING
+        what: open top at the rim, z = 224.000; the payload access aperture
+      - id: FEATURE-HOUSING-JOURNAL-1
+        what: >
+          journal land through the -X wall, bore diameter 70.400, x 0.000 to 8.000,
+          axis (y 70.000, z 60.000). This bore IS the boundary crossing.
+      - id: FEATURE-HOUSING-JOURNAL-RELIEF
+        what: >
+          relief bore, diameter 76.400, x 8.000 to 14.000. Its only purpose is to
+          make the two journal lands physically distinct rather than one long bore.
+      - id: FEATURE-HOUSING-JOURNAL-2
+        what: journal land in the internal boss, bore diameter 70.400, x 14.000 to 26.000
+      - id: FEATURE-HOUSING-JOURNAL-BOSS
+        what: internal boss carrying journal 2, outer diameter 84.000, x 8.000 to 26.000
+      - id: FEATURE-HOUSING-JOURNAL-2-END-FACE
+        what: >
+          inboard end face of the journal boss at x = 26.000; the crank shaft's
+          thrust collar bears on it and that is what stops the shaft being pulled out
+      - id: FEATURE-HOUSING-GUIDE-FRONT
+        what: >
+          front guide channel, x 21.800 to 48.200, channel floor y = 8.000, mouth
+          y = 14.000, z 94.000 to 224.000
+      - id: FEATURE-HOUSING-GUIDE-BACK
+        what: >
+          back guide channel, x 21.800 to 48.200, mouth y = 126.000, channel floor
+          y = 132.000, z 94.000 to 224.000
+      - id: FEATURE-HOUSING-PANEL-SEAT
+        what: +X end faces of the walls and floor at x = 71.000; the rear panel seats here
+      - id: FEATURE-HOUSING-SUPPORT-FACE
+        what: underside at z = 0.000; the reaction site for the whole load path
+
+  - id: BODY-REAR-PANEL
+    name: rear panel
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    export: rear_panel.step / rear_panel.brep
+    mechanical_roles:
+      - closes the +X side of the mechanism cavity after internal assembly
+      - integral axial retention of the crank joint pin
+      - integral axial retention of the platform joint pin
+    features:
+      - id: FEATURE-PANEL-PLATE
+        what: closure plate, x 71.000 to 79.000, full footprint
+      - id: FEATURE-PANEL-SEAT-FACE
+        what: inner face at x = 71.000, seating on FEATURE-HOUSING-PANEL-SEAT
+      - id: FEATURE-PANEL-CRANK-PIN-LAND
+        what: >
+          annular land, inner radius 36.000, outer radius 54.000 about the crank
+          axis, standing proud to x = 67.000. The crank joint pin head orbits at
+          radius 45.000, so the land faces the pin head at every crank angle and
+          stops it leaving in +X.
+      - id: FEATURE-PANEL-PLATFORM-PIN-LAND
+        what: >
+          vertical land, y 61.000 to 79.000, z 94.000 to 200.000, standing proud to
+          x = 67.000. It spans the platform joint pin's whole travel and stops it
+          leaving in +X.
+
+  - id: BODY-PLATFORM
+    name: platform
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    export: platform.step / platform.brep
+    as_built_state: CRANK_0_BOTTOM
+    mechanical_roles:
+      - payload support plate
+      - two guide followers
+      - clevis carrying the platform joint pin
+    features:
+      - id: FEATURE-PLATFORM-SUPPORT-SURFACE
+        what: >
+          plate top face. z = 126.000 at BOTTOM, z = 216.000 at TOP. This face, not
+          the housing rim, is where the payload access path terminates.
+      - id: FEATURE-PLATFORM-PLATE
+        what: plate, x 11.000 to 63.000, y 14.400 to 125.600, thickness 8.000
+      - id: FEATURE-PLATFORM-FOLLOWER-FRONT
+        what: front guide follower, x 22.000 to 48.000, y 8.400 to 14.400, height 16.000
+      - id: FEATURE-PLATFORM-FOLLOWER-BACK
+        what: back guide follower, x 22.000 to 48.000, y 125.600 to 131.600, height 16.000
+      - id: FEATURE-PLATFORM-CLEVIS-LUG-A
+        what: -X clevis lug, x 35.000 to 41.000, bore diameter 10.200
+      - id: FEATURE-PLATFORM-CLEVIS-LUG-B
+        what: +X clevis lug, x 55.000 to 61.000, bore diameter 10.200
+      - id: FEATURE-PLATFORM-CLEVIS-LUG-B-FACE
+        what: +X face of lug B at x = 61.000; the platform joint pin head bears on it
+
+  - id: BODY-CRANK-SHAFT
+    name: crank shaft
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    export: crank_shaft.step / crank_shaft.brep
+    as_built_state: CRANK_0_BOTTOM
+    mechanical_roles:
+      - exterior user handle, outside the housing
+      - boundary-crossing element
+      - journalled element, running in both housing journal lands
+      - internal crank arm carrying the crank joint pin bore
+    features:
+      - id: FEATURE-SHAFT-GRIP
+        what: >
+          handle grip, diameter 12.000, offset 26.000 from the crank axis,
+          x -46.000 to -18.000. Entirely outside the housing.
+      - id: FEATURE-SHAFT-HUB
+        what: >
+          hub, diameter 70.000, x -18.000 to 27.000. It is simultaneously the
+          exterior crank body, the boundary-crossing element and the journal
+          surface for both lands.
+      - id: FEATURE-SHAFT-THRUST-COLLAR
+        what: collar, diameter 80.000, x 27.000 to 30.000; bears on FEATURE-HOUSING-JOURNAL-2-END-FACE
+      - id: FEATURE-SHAFT-CRANK-ARM
+        what: >
+          crank arm, x 30.000 to 40.000, from radius 14.000 at the axis to a
+          9.000-radius boss centred 45.000 from the axis
+      - id: FEATURE-SHAFT-CRANK-PIN-BORE
+        what: crank pin bore, diameter 10.200, centred 45.000 from the axis
+
+  - id: BODY-CONNECTING-ROD
+    name: connecting rod
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    export: connecting_rod.step / connecting_rod.brep
+    as_built_state: CRANK_0_BOTTOM
+    mechanical_roles:
+      - fixed-length link between the crank joint and the platform joint
+    features:
+      - id: FEATURE-ROD-CRANK-BORE
+        what: crank-end bore, diameter 10.200
+      - id: FEATURE-ROD-PLATFORM-BORE
+        what: platform-end bore, diameter 10.200
+      - id: FEATURE-ROD-CENTRE-DISTANCE
+        what: 85.000 between bore centres; measured from the built solid, not asserted
+      - id: FEATURE-ROD-CRANK-END-FACE
+        what: +X face at x = 54.000; the crank joint pin head bears on it
+
+  - id: BODY-CRANK-JOINT-PIN
+    name: crank joint pin
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    export: crank_joint_pin.step / crank_joint_pin.brep
+    as_built_state: CRANK_0_BOTTOM
+    mechanical_roles:
+      - realizes the revolute joint between the crank arm and the connecting rod
+      - its head is the -X axial stop of that joint
+    features:
+      - id: FEATURE-CRANK-PIN-SHANK
+        what: shank, diameter 10.000, x 30.000 to 54.000
+      - id: FEATURE-CRANK-PIN-HEAD
+        what: head, diameter 17.000, x 54.000 to 65.000
+
+  - id: BODY-PLATFORM-JOINT-PIN
+    name: platform joint pin
+    material_class: GENERIC_RIGID_POLYMER
+    installed_as: DISCRETE
+    export: platform_joint_pin.step / platform_joint_pin.brep
+    as_built_state: CRANK_0_BOTTOM
+    mechanical_roles:
+      - realizes the revolute joint between the connecting rod and the platform clevis
+      - its head is the -X axial stop of that joint
+    features:
+      - id: FEATURE-PLATFORM-PIN-SHANK
+        what: shank, diameter 10.000, x 35.000 to 61.000
+      - id: FEATURE-PLATFORM-PIN-HEAD
+        what: head, diameter 17.000, x 61.000 to 65.000
+
+# --------------------------------------------------- scenario, not a body
+scenario_objects:
+  - id: SCENARIO-PAYLOAD-1KG
+    is_product_body: false
+    declared_mass: 1.0
+    declared_mass_unit: kg
+    envelope_mm: {x: 36.0, y: 60.0, z: 40.0}
+    seats_on: FEATURE-PLATFORM-SUPPORT-SURFACE
+    why_not_a_body: >
+      It is the user's payload, not part of the product. It is never exported, never
+      counted in the body topology check, and never given a material. Counting it as
+      a product body is negative control NC-19.
+    what_declaring_it_discharges: >
+      The structural half of NRM-BM-002-005 - a supported payload is declared, with
+      its unit, consistent with the source's approximately 1 kg - and the existence
+      end of NRM-BM-002-011. It discharges nothing about capacity.
+    what_it_does_not_discharge: >
+      Whether the structure carries 1 kg. No strength evidence exists at any
+      fidelity (DOS-BM-002 S5); the capacity claim is NOT_VERIFIED and REQ-003
+      resolves to UNSUPPORTED (stage_expectations s11).
+
+# ------------------------------------------------------------- declarations
+no_powered_element: >
+  No body, feature or scenario object in this reference is a motor, battery, spring
+  drive, counterweight drive or any other stored- or supplied-energy source. The
+  only energy input is the user's hand on FEATURE-SHAFT-GRIP (NRM-BM-002-013).
+
+declared_terminal_states:
+  declares_physical_end_of_travel: false
+  reading: >
+    This design declares NO physical end of travel. The crank turns continuously
+    through 360 degrees; BOTTOM and TOP are kinematic reversals of the slider-crank,
+    not stops, and nothing in the product arrests the platform there. NRM-BM-002-009
+    therefore applies through its otherwise-branch: the required displacement is
+    verified within the mechanically available range. Inferring two physical stops
+    from a stated displacement is NEG-BM-002-021, and is not done here. Each extreme
+    is nonetheless measured at its own configuration, independently, so the defect
+    in NEG-BM-002-006 cannot occur either.
+
+compliant_regions: []
+compliant_regions_note: >
+  There are none. Every joint here is a clearance fit retained by a pin head on one
+  side and a rear-panel land on the other. No press fit, no snap fit, no
+  interference fit and no represented deformation, so this reference makes no claim
+  about insertion force, strain or recovery (UNR-BM-002-008 is untouched by it).
+
+evaluation_tolerances:
+  contact_tol_mm: 0.05
+  overlap_tol_mm3: 1.0e-6
+  note: >
+    Properties of the EVALUATION, not of the design. A measured distance at or below
+    contact_tol is reported as contact; a boolean-common volume at or below
+    overlap_tol_mm3 is treated as numerical noise. Neither is a material allowance.
+
+oracle_scope:
+  pack: ver3/oracles/product_cases/BM-002
+  oracle_files_are_read_only: true

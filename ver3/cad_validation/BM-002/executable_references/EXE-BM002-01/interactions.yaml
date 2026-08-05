@@ -1,0 +1,211 @@
+reference_id: EXE-BM002-01
+schema_version: 0.1.0
+units: mm
+
+method: >
+  Each interaction is measured inside a declared region of interest, so a clearance
+  on one part of a body pair cannot be masked by a contact elsewhere on the same
+  pair. Every region names the state it is evaluated in. Overlap is the volume of
+  the boolean common; clearance is BRepExtrema_DistShapeShape. Neither is inferred
+  from the other.
+
+interaction_kinds_used:
+  DECLARED_CONTACT: "the two faces are intended to touch; measured min distance <= contact_tol and no common volume"
+  DECLARED_CLEARANCE: "a running or assembly gap of a declared nominal; |measured - nominal| <= contact_tol"
+  NOT_INTENDED_TO_INTERACT: "the two bodies are not meant to meet here; measured distance > contact_tol, and where a nominal gap is declared it is matched"
+
+not_used:
+  DECLARED_INTERFERENCE_FIT: "this design has none"
+  DECLARED_COMPLIANT_INTERACTION: "this design has none; nothing here deforms"
+
+interactions:
+  # ------------------------------------------------ crank shaft in the housing
+  - id: INT-01
+    bodies: [BODY-CRANK-SHAFT, BODY-HOUSING]
+    features: [FEATURE-SHAFT-HUB, FEATURE-HOUSING-JOURNAL-1]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.2
+    what: >
+      First journal land, through the -X wall. This is also the housing boundary
+      crossing: the same bore both supports the shaft radially and is the aperture
+      the drive passes through.
+    reacts: radial load on the crank shaft
+    discharges: [NRM-BM-002-002, NRM-BM-002-006]
+
+  - id: INT-02
+    bodies: [BODY-CRANK-SHAFT, BODY-HOUSING]
+    features: [FEATURE-SHAFT-HUB, FEATURE-HOUSING-JOURNAL-2]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.2
+    what: >
+      Second journal land, on the internal boss. Axially separated from the first
+      by a relief, so the shaft is located by two lands rather than by one long
+      bore.
+    reacts: radial load on the crank shaft
+    discharges: [NRM-BM-002-006]
+
+  - id: INT-03
+    bodies: [BODY-CRANK-SHAFT, BODY-HOUSING]
+    features: [FEATURE-SHAFT-HUB, FEATURE-HOUSING-JOURNAL-RELIEF]
+    type: NOT_INTENDED_TO_INTERACT
+    nominal_clearance_mm: 3.2
+    what: >
+      The relief between the two lands. It carries no load and must not touch; its
+      only job is to make the two lands physically distinct. Measuring it is what
+      shows the two lands are two.
+
+  - id: INT-04
+    bodies: [BODY-CRANK-SHAFT, BODY-HOUSING]
+    features: [FEATURE-SHAFT-THRUST-COLLAR, FEATURE-HOUSING-JOURNAL-2-END-FACE]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 1.0
+    what: >
+      Axial location of the crank shaft in -X. Pulling the handle draws the collar
+      against the journal boss end face after 1.0 mm and it goes no further.
+    note: >
+      No axial load is produced in the declared scenario, so no axial reaction is
+      OWED (SF-5.3, NEG-BM-002-019). This is a design choice against handling, not
+      a discharge of NRM-BM-002-006.
+
+  - id: INT-17
+    bodies: [BODY-CONNECTING-ROD, BODY-CRANK-SHAFT]
+    features: [FEATURE-SHAFT-CRANK-ARM, FEATURE-ROD-CRANK-BORE]
+    type: NOT_INTENDED_TO_INTERACT
+    nominal_clearance_mm: 2.0
+    what: >
+      Axial gap between the crank arm's +X face and the connecting rod's -X face.
+      It is what limits the crank shaft's travel in +X, through the rod and the
+      crank pin head to the rear-panel land.
+
+  # ------------------------------------------------------------- crank joint
+  - id: INT-05
+    bodies: [BODY-CRANK-JOINT-PIN, BODY-CRANK-SHAFT]
+    features: [FEATURE-CRANK-PIN-SHANK, FEATURE-SHAFT-CRANK-PIN-BORE]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.1
+    what: the crank joint pin running in the crank arm bore
+    reacts: radial load between the crank arm and the pin
+    discharges: [NRM-BM-002-003, NRM-BM-002-006]
+
+  - id: INT-06
+    bodies: [BODY-CONNECTING-ROD, BODY-CRANK-JOINT-PIN]
+    features: [FEATURE-ROD-CRANK-BORE, FEATURE-CRANK-PIN-SHANK]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.1
+    what: >
+      the connecting rod's crank bore running on the same pin. This pair and INT-05
+      together are the rotary-to-translation conversion engagement, with
+      participating geometry identified on both bodies.
+    discharges: [NRM-BM-002-003, NRM-BM-002-006]
+
+  - id: INT-07
+    bodies: [BODY-CONNECTING-ROD, BODY-CRANK-JOINT-PIN]
+    features: [FEATURE-ROD-CRANK-END-FACE, FEATURE-CRANK-PIN-HEAD]
+    type: DECLARED_CONTACT
+    what: >
+      the crank joint pin head seated on the rod's +X face. This is the pin's
+      axial stop in -X.
+    discharges: [NRM-BM-002-003]
+
+  - id: INT-08
+    bodies: [BODY-CRANK-JOINT-PIN, BODY-REAR-PANEL]
+    features: [FEATURE-CRANK-PIN-HEAD, FEATURE-PANEL-CRANK-PIN-LAND]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 2.0
+    what: >
+      the crank joint pin's axial stop in +X. The land is an annulus about the crank
+      axis, so it faces the orbiting pin head at every crank angle.
+    discharges: [NRM-BM-002-003, NRM-BM-002-012]
+
+  # ---------------------------------------------------------- platform joint
+  - id: INT-09
+    bodies: [BODY-PLATFORM, BODY-PLATFORM-JOINT-PIN]
+    features: [FEATURE-PLATFORM-CLEVIS-LUG-A, FEATURE-PLATFORM-PIN-SHANK]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.1
+    what: the platform joint pin running in clevis lug A
+    discharges: [NRM-BM-002-003, NRM-BM-002-006, NRM-BM-002-011]
+
+  - id: INT-10
+    bodies: [BODY-PLATFORM, BODY-PLATFORM-JOINT-PIN]
+    features: [FEATURE-PLATFORM-CLEVIS-LUG-B, FEATURE-PLATFORM-PIN-SHANK]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.1
+    what: >
+      the same pin in clevis lug B. Two lugs straddling the rod is what stops the
+      joint being a cantilever.
+    discharges: [NRM-BM-002-003, NRM-BM-002-006, NRM-BM-002-011]
+
+  - id: INT-11
+    bodies: [BODY-CONNECTING-ROD, BODY-PLATFORM-JOINT-PIN]
+    features: [FEATURE-ROD-PLATFORM-BORE, FEATURE-PLATFORM-PIN-SHANK]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.1
+    what: the rod's platform bore running on the platform joint pin
+    discharges: [NRM-BM-002-003, NRM-BM-002-011]
+
+  - id: INT-12
+    bodies: [BODY-PLATFORM, BODY-PLATFORM-JOINT-PIN]
+    features: [FEATURE-PLATFORM-CLEVIS-LUG-B-FACE, FEATURE-PLATFORM-PIN-HEAD]
+    type: DECLARED_CONTACT
+    what: the platform joint pin head seated on lug B's +X face; its axial stop in -X
+    discharges: [NRM-BM-002-003]
+
+  - id: INT-13
+    bodies: [BODY-PLATFORM-JOINT-PIN, BODY-REAR-PANEL]
+    features: [FEATURE-PLATFORM-PIN-HEAD, FEATURE-PANEL-PLATFORM-PIN-LAND]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 2.0
+    what: >
+      the platform joint pin's axial stop in +X. The land runs the whole length of
+      the pin's travel, so the stop is present at every platform height.
+    discharges: [NRM-BM-002-003, NRM-BM-002-012]
+
+  # ---------------------------------------------------------------- guidance
+  - id: INT-14
+    bodies: [BODY-HOUSING, BODY-PLATFORM]
+    features: [FEATURE-HOUSING-GUIDE-FRONT, FEATURE-PLATFORM-FOLLOWER-FRONT]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.2
+    what: >
+      front guide follower in the front channel. The 0.2 mm is the side clearance,
+      which is the smallest gap in the pair; the follower tip stands 0.4 mm off the
+      channel floor and the plate edge 0.4 mm off the boss face.
+    reacts: lateral connecting-rod reaction, and platform pitch and roll
+    discharges: [NRM-BM-002-006, NRM-BM-002-007]
+
+  - id: INT-15
+    bodies: [BODY-HOUSING, BODY-PLATFORM]
+    features: [FEATURE-HOUSING-GUIDE-BACK, FEATURE-PLATFORM-FOLLOWER-BACK]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.2
+    what: back guide follower in the back channel
+    reacts: lateral connecting-rod reaction, and platform pitch and roll
+    discharges: [NRM-BM-002-006, NRM-BM-002-007]
+
+  # ----------------------------------------------------------------- closure
+  - id: INT-16
+    bodies: [BODY-HOUSING, BODY-REAR-PANEL]
+    features: [FEATURE-HOUSING-PANEL-SEAT, FEATURE-PANEL-SEAT-FACE]
+    type: DECLARED_CONTACT
+    what: the rear panel seated on the housing's +X end faces
+    discharges: [NRM-BM-002-012]
+
+# ------------------------------------- interaction with the scenario payload
+external_interactions:
+  - id: INT-P1
+    bodies: [SCENARIO-PAYLOAD-1KG, BODY-PLATFORM]
+    features: [SCENARIO-PAYLOAD-1KG, FEATURE-PLATFORM-SUPPORT-SURFACE]
+    type: DECLARED_CONTACT
+    evaluated_by: validation/payload_access_report.json
+    why_external: >
+      One participant is not a product body, so it is outside the product-body pair
+      scan by construction. It is measured separately and the result is cited here
+      rather than being asserted.
+    discharges: [NRM-BM-002-010, NRM-BM-002-011]
+
+coverage_note: >
+  Every pair of product bodies that comes within reach of another is covered either
+  by an interaction above or by the per-state whole-body pair scan in
+  validation/interaction_report.json, which measures all 21 pairs in all 9 states
+  and reports any approach closer than contact_tol that is not declared here.

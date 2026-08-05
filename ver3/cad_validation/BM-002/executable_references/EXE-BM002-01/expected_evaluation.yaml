@@ -1,0 +1,250 @@
+reference_id: EXE-BM002-01
+case_id: BM-002
+schema_version: 0.1.0
+phase: PHASE_A_CAD_AND_CORE_VALIDATION
+oracle_tree_sha256: 80d47f65edf964e6cc1c0b3251919aa3a45eb1be
+base_commit: 014de6e2833b65afc1c12a9e0c907e55f7d618a1
+
+status: >
+  What this reference EXPECTED the Oracle to conclude, taken from
+  ../../reviews/REFERENCE_SELECTION.yaml, which was frozen before any geometry
+  existed, and what was actually observed. It exists so that a surprising result is
+  visible as a surprise rather than being absorbed into a rewritten expectation.
+  Where an expectation was right it is left alone; where it was wrong the
+  divergence is recorded rather than the expectation edited.
+
+expectation_source: BM-002/reviews/REFERENCE_SELECTION.yaml, frozen before geometry
+
+geometry_signature: 6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee
+
+# ------------------------------------------------------------- headline result
+observed_summary:
+  invariants_evaluated: 14
+  PASS: 14
+  FAIL: 0
+  motion_samples_over_the_full_cycle: 228
+  max_undeclared_overlap_mm3: 0.0
+  measured_support_surface_travel_mm: 90.000000
+  measured_platform_pin_travel_mm: 90.000000
+  negative_controls_run: 20
+  negative_controls_detected: 20
+  maximum_claim: GEOMETRICALLY AND KINEMATICALLY ADMISSIBLE AT THE EVALUATED CAD FIDELITY
+
+expected_and_observed:
+  - invariant: NRM-BM-002-001
+    expected: PASS
+    observed: PASS
+    how: >
+      Handle grip measured 26.000 off the axis and orbiting - centre at
+      (70.000, 34.000) at 0 degrees and (96.000, 60.000) at 90 - on the same single
+      solid as the hub; seven-link chain, every link a measured material relation;
+      full cycle traversable.
+  - invariant: NRM-BM-002-002
+    expected: PASS
+    observed: PASS
+    how: >
+      72438.8 mm3 of shaft outside the housing, 30787.6 in the wall band, 100579.2
+      inside; two journal lands measuring 0.2000 each with a 3.2000 relief between
+      them; zero common volume with the housing at every one of 228 samples.
+    bounded_by: UNR-BM-002-001
+    note: >
+      Whether the crossing element itself counts as enclosed is not decided.
+      AMB-002-01 is carried, so REQ-004 is INDETERMINATE.
+  - invariant: NRM-BM-002-003
+    expected: PASS
+    observed: PASS
+    how: >
+      Five joint engagements measured at all nine states with regions of interest
+      that follow the joint axis: 0.100000 mm clearance and zero common volume in
+      every one. Both pins bilaterally retained, each stopped by its DECLARED
+      retention body.
+  - invariant: NRM-BM-002-004
+    expected: PASS as a structural predicate
+    observed: PASS
+    how: >
+      Support surface 126.000000 at BOTTOM and 216.000000 at TOP, measured from the
+      built platform solid clipped to the payload footprint in two separate
+      configurations; platform pin 100.000000 to 190.000000 from the pin solid's own
+      axis. Travel 90.000000 mm by both measures, 10 mm inside each edge of the
+      80-100 mm band.
+    bounded_by: UNR-BM-002-002
+  - invariant: NRM-BM-002-005
+    expected: PASS on declaration only; capacity NOT_VERIFIED
+    observed: PASS with the capacity clause NOT_VERIFIED
+    how: >
+      SCENARIO-PAYLOAD-1KG declared at 1.0 kg with its unit and its envelope; load
+      path complete. Capacity clause carries status NOT_VERIFIED, and REQ-003
+      resolves to UNSUPPORTED.
+    bounded_by: [UNR-BM-002-002, UNR-BM-002-007]
+  - invariant: NRM-BM-002-006
+    expected: PASS for existence of reactions actually owed
+    observed: PASS
+    how: >
+      Six load-carrying elements, each with a realized reaction for the component it
+      actually carries. No axial reaction is owed anywhere: the mechanism is planar
+      and every joint axis is parallel to X. The shaft's axial location is reported
+      as a handling choice, not as a discharge, which is what SF-5.3 and
+      NEG-BM-002-019 require.
+    bounded_by: UNR-BM-002-007
+  - invariant: NRM-BM-002-007
+    expected: PASS
+    observed: PASS
+    how: >
+      Both followers carry 2329.600 mm3 inside their channels at all 37 cycle
+      samples with zero material past either channel floor; all 18 pitch, roll and
+      yaw probes at BOTTOM, MID-STROKE and TOP are obstructed, the smallest by
+      55.660 mm3.
+    note: >
+      Anti-rotation is required here because THIS scenario needs a square plate to
+      accept a payload, not because anti-rotation is universal. ADM-BM-002-E stays
+      admissible and NEG-BM-002-020 is not triggered.
+  - invariant: NRM-BM-002-008
+    expected: PASS
+    observed: PASS
+    how: >
+      21 body pairs measured in 9 states and at 228 motion samples; maximum common
+      volume 0.000000e+00 mm3; the only approaches within 0.05 mm are the three
+      declared contacts.
+  - invariant: NRM-BM-002-009
+    expected: PASS by its otherwise-branch
+    observed: PASS
+    how: >
+      The design declares no physical end of travel, so the applies_when condition
+      is not met and the otherwise-branch governs: the required displacement is
+      verified within the mechanically available range. Three separate
+      configurations measured - 0, 180 and 360 degrees - and nothing copied between
+      them.
+    note: >
+      Inferring two physical stops from a stated displacement is NEG-BM-002-021 and
+      was not done. FRE-BM-002-010 is exercised.
+  - invariant: NRM-BM-002-010
+    expected: PASS
+    observed: PASS
+    how: >
+      The declared envelope descends from z = 284 to the support surface at both TOP
+      and BOTTOM with 0.000000 mm3 of overlap, and seats at 0.000000 mm from the
+      platform. Endpoint z = 216.000 at TOP and 126.000 at BOTTOM; the rim is
+      224.000 and is never the endpoint.
+  - invariant: NRM-BM-002-011
+    expected: PASS for existence only
+    observed: PASS with the adequacy clause NOT_VERIFIED
+    bounded_by: UNR-BM-002-007
+  - invariant: NRM-BM-002-012
+    expected: PASS
+    observed: PASS
+    how: >
+      Six swept insertions plus a base and two operations; maximum common volume
+      with already-placed material 0.000000 mm3; dependency graph acyclic. No press,
+      snap or interference region exists anywhere, so no insertion depends on a
+      deformation.
+  - invariant: NRM-BM-002-013
+    expected: PASS
+    observed: PASS
+    how: >
+      Exactly the seven declared bodies, one material class, zero matches for motor,
+      battery, actuator, solenoid, powered, spring drive or stored energy. The
+      scenario payload is not among them.
+  - invariant: NRM-BM-002-014
+    expected: PASS
+    observed: PASS
+    how: >
+      18 interactions recorded with their model fidelity and claim scope; zero
+      declared-pair evidence items cited anywhere; the unsupported-claim scan found
+      no PASS on a strength or jamming clause without contact-resolving evidence.
+
+divergences_from_the_frozen_expectation: []
+divergence_note: >
+  None. Every invariant landed where REFERENCE_SELECTION.yaml said it would. That
+  is a weaker result than it looks: the selection was frozen at the level of
+  "which invariants should pass", not at the level of the geometry, and the
+  geometry needed three changes before it could deliver them. Those are recorded in
+  DESIGN_AND_OPERATION_RATIONALE.md as CHG-01, CHG-02 and CHG-03.
+
+# --------------------------------------- what the geometry cost to get right
+errors_found_during_this_phase:
+  - id: CHG-01
+    kind: CAD_DEFECT
+    what: the crank arm sat 3.000 mm inside the housing floor at bottom dead centre
+    measured: crank shaft / housing common volume 278.7734 mm3 at BDC with crank_axis_z = 55.0
+    fixed_by: crank_axis_z 55.0 -> 60.0, the least height that clears the floor by 2.0 mm
+    travel_after: 90.000000 mm, unchanged
+  - id: CHG-02
+    kind: LAYOUT_CONTRADICTION
+    what: >
+      the provisional decision that the rear panel carries the second crank-shaft
+      journal is unrealizable
+    measured: >
+      64.0000 mm3 of connecting-rod material inside a 4 x 4 x 4 probe centred on the
+      crank axis at BDC, and a rod-to-axis-line distance of 0.0000 mm; a shaft
+      extending past the rod is struck by it, and a two-web crankshaft cannot be a
+      single connected solid for the same reason
+    fixed_by: >
+      a second journal land inside the housing, separated from the first by a relief
+      bore so the two are physically distinct; the rear panel keeps its closure and
+      pin-retention roles
+    travel_after: 90.000000 mm, unchanged
+  - id: CHG-03
+    kind: DERIVED_DIMENSION
+    what: proposed plate at 197-207 and rim at 215 are unreachable once the clevis must clear the rod eye
+    fixed_by: clevis_offset 18.0; plate at TOP 208-216, rim 224, top clearance 8.000 unchanged
+    travel_after: 90.000000 mm, unchanged
+  - id: DEF-01
+    kind: VALIDATOR_DEFECT
+    what: the boundary-crossing negative control left the handle grip outside the housing, so it was a no-op
+    fixed_by: the mutation now pulls the whole shaft inboard, which is what INA-BM-002-H describes
+  - id: DEF-02
+    kind: VALIDATOR_DEFECT
+    what: >
+      the pitch/roll negative control removed the followers but left the plate edges
+      0.400 mm from the guide bosses, so a 4 degree rotation still fouled them by
+      13.7431 mm3 and no escape was achieved
+    fixed_by: the mutation now also pulls the plate edges 6 mm clear of the bosses
+  - id: DEF-03
+    kind: VALIDATOR_DEFECT
+    what: >
+      guide engagement compared the PLATFORM's z-extent against the channel's, but
+      the platform's box reaches to z = 89 because of the clevis, 5 mm below the
+      channel's lower end, so the check reported the followers leaving the channel
+      at every sample when they never do
+    fixed_by: >
+      clip the platform to the channel footprint first and measure the FOLLOWER's
+      extent; measured 114.0 to 130.0 at BOTTOM inside a channel spanning 94.0 to 224.0
+
+no_oracle_file_was_modified: true
+no_bm001_file_was_modified: true
+
+weakening_check: >
+  No check was relaxed to obtain a PASS, and no CAD was weakened. contact_tol stayed
+  at 0.05 mm and overlap_tol_mm3 at 1.0e-6 throughout; the alternative to CHG-01 was
+  to raise the overlap tolerance above 278.77 mm3, which would have blinded the
+  check that found the defect, and it was not done. Three checks were made STRICTER
+  during the phase: the two-journal check now measures the relief between the lands
+  as well as the lands themselves; axial retention now requires the blocking body to
+  be the DECLARED retention body and not merely some obstruction; and guide
+  engagement now measures the follower rather than the whole platform. Two negative
+  controls were strengthened after they were found to be no-ops.
+
+what_is_not_claimed:
+  - payload capacity, strength, stress, deflection or margin
+  - crank torque, effort or mechanical advantage
+  - jamming, stability or smooth operation
+  - safety, pinch hazards or stability under disturbance
+  - position holding after the crank is released, and self-locking
+  - manufacturability, assembly force, tooling, tolerance capability or cost
+  - wear, fatigue or life
+  - that any of the other four admissible conversion families is inferior; four
+    remain admissible and unbuilt (FRE-BM-002-002)
+
+deferred_by_instruction:
+  items:
+    - MuJoCo models and runs
+    - plots
+    - operation and assembly videos
+    - the final review PNG set and VLM review
+    - the BM-002 human-review packet and comprehensive report
+    - demonstration CAD, failure-CAD corpus and mutation-product CAD
+    - LOCK.json and production pipeline code
+    - FEA
+  note: >
+    None of these was run and no result from any of them is implied anywhere in
+    this reference. Human review status is HUMAN_REVIEW_PENDING.

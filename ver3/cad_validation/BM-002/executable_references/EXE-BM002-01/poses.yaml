@@ -1,0 +1,142 @@
+reference_id: EXE-BM002-01
+schema_version: 0.1.0
+units: mm, degrees
+
+frame: >
+  World frame of parameters.yaml. The housing and the rear panel are fixed. Every
+  other body's pose is a rigid transform of its as-built solid; nothing here
+  deforms and nothing is rebuilt per state.
+
+pose_law:
+  crank_angle_symbol: theta
+  zero: >
+    theta = 0 is bottom dead centre: the crank pin is directly below the shaft
+    axis and the handle grip points straight down. theta increases so that the
+    crank pin moves toward +Y first.
+  crank_shaft: rotation about the shaft axis line (y 70.000, z 60.000, along +X) by theta
+  crank_joint_pin: >
+    the same rotation. The pin is a body of revolution about its own axis, so
+    orbiting it with the crank is exact rather than an approximation.
+  connecting_rod: >
+    rotation about the line through the as-built crank-pin centre by
+    alpha = asin(R sin theta / L), then translation to bring the crank eye onto the
+    crank pin.
+  platform: pure vertical translation
+  platform_joint_pin: the same vertical translation
+  status_of_the_formula: >
+    This relation POSES the bodies. It is not evidence that the physical chain
+    exists (NRM-BM-002-014). What establishes the chain is the geometry itself -
+    a pin in two bores at every joint, a hub in two journal lands, followers in two
+    channels - and validate.py measures each of those with the kernel. If the
+    formula were the evidence, negative control NC-20 would pass, and it does not.
+
+kinematic_relations:
+  crank_radius_mm: 45.0
+  rod_centre_distance_mm: 85.0
+  crank_axis: {y: 70.0, z: 60.0}
+  crank_pin_centre: "y = 70 + 45 sin(theta), z = 60 - 45 cos(theta)"
+  platform_pin_centre: "y = 70, z = z_crankpin + sqrt(85^2 - (45 sin theta)^2)"
+  support_surface: "platform pin z + 26.000"
+  max_rod_angle_deg: 31.9657
+  note: >
+    The support-surface offset above is recorded for reading only. Every reported
+    height in validation/ is measured from the built solid, never computed from
+    this line.
+
+states:
+  - id: CRANK_0_BOTTOM
+    theta_deg: 0.0
+    role: bottom kinematic reversal; the as-built configuration; the assembly configuration
+    crank_pin_centre: {y: 70.000, z: 15.000}
+    platform_pin_centre: {y: 70.000, z: 100.000}
+    support_surface_z: 126.000
+    rod_angle_deg: 0.000
+  - id: CRANK_45_RISING
+    theta_deg: 45.0
+    role: rising
+    crank_pin_centre: {y: 101.820, z: 28.180}
+    platform_pin_centre: {y: 70.000, z: 108.663}
+    support_surface_z: 134.663
+    rod_angle_deg: 21.955
+  - id: CRANK_90_RISING
+    theta_deg: 90.0
+    role: rising; maximum connecting-rod angle
+    crank_pin_centre: {y: 115.000, z: 60.000}
+    platform_pin_centre: {y: 70.000, z: 132.111}
+    support_surface_z: 158.111
+    rod_angle_deg: 31.966
+  - id: CRANK_135_RISING
+    theta_deg: 135.0
+    role: rising
+    crank_pin_centre: {y: 101.820, z: 91.820}
+    platform_pin_centre: {y: 70.000, z: 172.483}
+    support_surface_z: 198.483
+    rod_angle_deg: 21.955
+  - id: CRANK_180_TOP
+    theta_deg: 180.0
+    role: top kinematic reversal
+    crank_pin_centre: {y: 70.000, z: 105.000}
+    platform_pin_centre: {y: 70.000, z: 190.000}
+    support_surface_z: 216.000
+    rod_angle_deg: 0.000
+  - id: CRANK_225_LOWERING
+    theta_deg: 225.0
+    role: lowering
+    crank_pin_centre: {y: 38.180, z: 91.820}
+    platform_pin_centre: {y: 70.000, z: 172.483}
+    support_surface_z: 198.483
+    rod_angle_deg: -21.955
+  - id: CRANK_270_LOWERING
+    theta_deg: 270.0
+    role: lowering; maximum connecting-rod angle, opposite sense
+    crank_pin_centre: {y: 25.000, z: 60.000}
+    platform_pin_centre: {y: 70.000, z: 132.111}
+    support_surface_z: 158.111
+    rod_angle_deg: -31.966
+  - id: CRANK_315_LOWERING
+    theta_deg: 315.0
+    role: lowering
+    crank_pin_centre: {y: 38.180, z: 28.180}
+    platform_pin_centre: {y: 70.000, z: 108.663}
+    support_surface_z: 134.663
+    rod_angle_deg: -21.955
+  - id: CRANK_360_BOTTOM
+    theta_deg: 360.0
+    role: >
+      bottom kinematic reversal, reached by completing the turn. Geometrically the
+      same configuration as CRANK_0_BOTTOM, and evaluated separately so that a full
+      cycle is closed rather than assumed to close.
+    crank_pin_centre: {y: 70.000, z: 15.000}
+    platform_pin_centre: {y: 70.000, z: 100.000}
+    support_surface_z: 126.000
+    rod_angle_deg: 0.000
+
+segments:
+  - id: M1_000_090
+    from: CRANK_0_BOTTOM
+    to: CRANK_90_RISING
+    theta_range_deg: [0.0, 90.0]
+  - id: M2_090_180
+    from: CRANK_90_RISING
+    to: CRANK_180_TOP
+    theta_range_deg: [90.0, 180.0]
+  - id: M3_180_270
+    from: CRANK_180_TOP
+    to: CRANK_270_LOWERING
+    theta_range_deg: [180.0, 270.0]
+  - id: M4_270_360
+    from: CRANK_270_LOWERING
+    to: CRANK_360_BOTTOM
+    theta_range_deg: [270.0, 360.0]
+
+sampling_note: >
+  Segment sampling is DECLARED in validate.py, not discovered adaptively, so the
+  sample set is reproducible and a reader can see exactly where the motion was
+  examined closely. Refinement windows sit at both ends of every segment, which is
+  where the dead centres are.
+
+what_the_states_do_not_establish:
+  - "that the crank can be turned by a human hand (UNR-BM-002-003)"
+  - "that the mechanism does not jam at or near the dead centres (REQ-007, NOT_VERIFIED)"
+  - "that the platform holds position when the crank is released (UNR-BM-002-004)"
+  - "anything about velocity, acceleration, inertia or dynamics; these are static poses"

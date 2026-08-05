@@ -1,0 +1,703 @@
+{
+  "count": 18,
+  "coverage": {
+    "both_platform_guides": [
+      "INT-14",
+      "INT-15"
+    ],
+    "both_shaft_journals": [
+      "INT-01",
+      "INT-02"
+    ],
+    "crank_pin_and_bore": [
+      "INT-05",
+      "INT-06"
+    ],
+    "platform_pin_and_bore": [
+      "INT-09",
+      "INT-10",
+      "INT-11"
+    ],
+    "support_surface_and_payload": [
+      "INT-P1"
+    ]
+  },
+  "interactions": [
+    {
+      "bodies": [
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "evaluated_states": [
+        "CRANK_0_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-SHAFT-HUB",
+        "FEATURE-HOUSING-JOURNAL-1"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-01",
+      "load_direction": "radial, reacting the crank shaft",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.2,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 0.2,
+      "status": "PASS"
+    },
+    {
+      "bodies": [
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "evaluated_states": [
+        "CRANK_0_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-SHAFT-HUB",
+        "FEATURE-HOUSING-JOURNAL-2"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-02",
+      "load_direction": "radial, reacting the crank shaft",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.2,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 0.2,
+      "status": "PASS"
+    },
+    {
+      "bodies": [
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "evaluated_states": [
+        "CRANK_0_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-SHAFT-HUB",
+        "FEATURE-HOUSING-JOURNAL-RELIEF"
+      ],
+      "intended": "NOT_INTENDED_TO_INTERACT",
+      "interaction_id": "INT-03",
+      "load_direction": "none; this is a relief and carries nothing",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 3.2,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 3.2,
+      "status": "PASS"
+    },
+    {
+      "bodies": [
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "evaluated_states": [
+        "CRANK_0_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-SHAFT-THRUST-COLLAR",
+        "FEATURE-HOUSING-JOURNAL-2-END-FACE"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-04",
+      "load_direction": "axial; no axial load is produced in the declared scenario",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 1.0,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 1.0,
+      "status": "PASS"
+    },
+    {
+      "bodies": [
+        "BODY-CRANK-JOINT-PIN",
+        "BODY-CRANK-SHAFT"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "engaged_at_every_state": true,
+      "evaluated_states": [
+        "CRANK_0_BOTTOM",
+        "CRANK_45_RISING",
+        "CRANK_90_RISING",
+        "CRANK_135_RISING",
+        "CRANK_180_TOP",
+        "CRANK_225_LOWERING",
+        "CRANK_270_LOWERING",
+        "CRANK_315_LOWERING",
+        "CRANK_360_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-CRANK-PIN-SHANK",
+        "FEATURE-SHAFT-CRANK-PIN-BORE"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-05",
+      "load_direction": "radial, from the crank torque and the rod force",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.1,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 0.1,
+      "status": "PASS",
+      "swept_max_common_volume_mm3": 0.0,
+      "swept_min_distance_mm": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ]
+    },
+    {
+      "bodies": [
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "engaged_at_every_state": true,
+      "evaluated_states": [
+        "CRANK_0_BOTTOM",
+        "CRANK_45_RISING",
+        "CRANK_90_RISING",
+        "CRANK_135_RISING",
+        "CRANK_180_TOP",
+        "CRANK_225_LOWERING",
+        "CRANK_270_LOWERING",
+        "CRANK_315_LOWERING",
+        "CRANK_360_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-ROD-CRANK-BORE",
+        "FEATURE-CRANK-PIN-SHANK"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-06",
+      "load_direction": "radial, along the rod",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.1,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 0.1,
+      "status": "PASS",
+      "swept_max_common_volume_mm3": 0.0,
+      "swept_min_distance_mm": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ]
+    },
+    {
+      "bodies": [
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "evaluated_states": [
+        "CRANK_0_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-ROD-CRANK-END-FACE",
+        "FEATURE-CRANK-PIN-HEAD"
+      ],
+      "intended": "DECLARED_CONTACT",
+      "interaction_id": "INT-07",
+      "load_direction": "axial, retention only",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": null,
+      "status": "PASS"
+    },
+    {
+      "bodies": [
+        "BODY-CRANK-JOINT-PIN",
+        "BODY-REAR-PANEL"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "evaluated_states": [
+        "CRANK_0_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-CRANK-PIN-HEAD",
+        "FEATURE-PANEL-CRANK-PIN-LAND"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-08",
+      "load_direction": "axial, retention only",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 2.0,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 2.0,
+      "status": "PASS"
+    },
+    {
+      "bodies": [
+        "BODY-PLATFORM",
+        "BODY-PLATFORM-JOINT-PIN"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "engaged_at_every_state": true,
+      "evaluated_states": [
+        "CRANK_0_BOTTOM",
+        "CRANK_45_RISING",
+        "CRANK_90_RISING",
+        "CRANK_135_RISING",
+        "CRANK_180_TOP",
+        "CRANK_225_LOWERING",
+        "CRANK_270_LOWERING",
+        "CRANK_315_LOWERING",
+        "CRANK_360_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-PLATFORM-CLEVIS-LUG-A",
+        "FEATURE-PLATFORM-PIN-SHANK"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-09",
+      "load_direction": "vertical and lateral",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.1,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 0.1,
+      "status": "PASS",
+      "swept_max_common_volume_mm3": 0.0,
+      "swept_min_distance_mm": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ]
+    },
+    {
+      "bodies": [
+        "BODY-PLATFORM",
+        "BODY-PLATFORM-JOINT-PIN"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "engaged_at_every_state": true,
+      "evaluated_states": [
+        "CRANK_0_BOTTOM",
+        "CRANK_45_RISING",
+        "CRANK_90_RISING",
+        "CRANK_135_RISING",
+        "CRANK_180_TOP",
+        "CRANK_225_LOWERING",
+        "CRANK_270_LOWERING",
+        "CRANK_315_LOWERING",
+        "CRANK_360_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-PLATFORM-CLEVIS-LUG-B",
+        "FEATURE-PLATFORM-PIN-SHANK"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-10",
+      "load_direction": "vertical and lateral",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.1,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 0.1,
+      "status": "PASS",
+      "swept_max_common_volume_mm3": 0.0,
+      "swept_min_distance_mm": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ]
+    },
+    {
+      "bodies": [
+        "BODY-CONNECTING-ROD",
+        "BODY-PLATFORM-JOINT-PIN"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "engaged_at_every_state": true,
+      "evaluated_states": [
+        "CRANK_0_BOTTOM",
+        "CRANK_45_RISING",
+        "CRANK_90_RISING",
+        "CRANK_135_RISING",
+        "CRANK_180_TOP",
+        "CRANK_225_LOWERING",
+        "CRANK_270_LOWERING",
+        "CRANK_315_LOWERING",
+        "CRANK_360_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-ROD-PLATFORM-BORE",
+        "FEATURE-PLATFORM-PIN-SHANK"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-11",
+      "load_direction": "along the rod",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.1,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 0.1,
+      "status": "PASS",
+      "swept_max_common_volume_mm3": 0.0,
+      "swept_min_distance_mm": [
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1
+      ]
+    },
+    {
+      "bodies": [
+        "BODY-PLATFORM",
+        "BODY-PLATFORM-JOINT-PIN"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "evaluated_states": [
+        "CRANK_0_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-PLATFORM-CLEVIS-LUG-B-FACE",
+        "FEATURE-PLATFORM-PIN-HEAD"
+      ],
+      "intended": "DECLARED_CONTACT",
+      "interaction_id": "INT-12",
+      "load_direction": "axial, retention only",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": null,
+      "status": "PASS"
+    },
+    {
+      "bodies": [
+        "BODY-PLATFORM-JOINT-PIN",
+        "BODY-REAR-PANEL"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "evaluated_states": [
+        "CRANK_0_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-PLATFORM-PIN-HEAD",
+        "FEATURE-PANEL-PLATFORM-PIN-LAND"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-13",
+      "load_direction": "axial, retention only",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 2.0,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 2.0,
+      "status": "PASS"
+    },
+    {
+      "bodies": [
+        "BODY-HOUSING",
+        "BODY-PLATFORM"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "engaged_at_every_sample": true,
+      "evaluated_states": [
+        "0.0 deg",
+        "10.0 deg",
+        "20.0 deg",
+        "30.0 deg",
+        "40.0 deg",
+        "50.0 deg",
+        "60.0 deg",
+        "70.0 deg",
+        "80.0 deg",
+        "90.0 deg",
+        "100.0 deg",
+        "110.0 deg",
+        "120.0 deg",
+        "130.0 deg",
+        "140.0 deg",
+        "150.0 deg",
+        "160.0 deg",
+        "170.0 deg",
+        "180.0 deg",
+        "190.0 deg",
+        "200.0 deg",
+        "210.0 deg",
+        "220.0 deg",
+        "230.0 deg",
+        "240.0 deg",
+        "250.0 deg",
+        "260.0 deg",
+        "270.0 deg",
+        "280.0 deg",
+        "290.0 deg",
+        "300.0 deg",
+        "310.0 deg",
+        "320.0 deg",
+        "330.0 deg",
+        "340.0 deg",
+        "350.0 deg",
+        "360.0 deg"
+      ],
+      "features": [
+        "FEATURE-HOUSING-GUIDE-FRONT",
+        "FEATURE-PLATFORM-FOLLOWER-FRONT"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-14",
+      "load_direction": "lateral, plus platform pitch and roll",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.2,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 0.2,
+      "status": "PASS",
+      "swept_follower_volume_in_channel_mm3": [
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6
+      ]
+    },
+    {
+      "bodies": [
+        "BODY-HOUSING",
+        "BODY-PLATFORM"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "engaged_at_every_sample": true,
+      "evaluated_states": [
+        "0.0 deg",
+        "10.0 deg",
+        "20.0 deg",
+        "30.0 deg",
+        "40.0 deg",
+        "50.0 deg",
+        "60.0 deg",
+        "70.0 deg",
+        "80.0 deg",
+        "90.0 deg",
+        "100.0 deg",
+        "110.0 deg",
+        "120.0 deg",
+        "130.0 deg",
+        "140.0 deg",
+        "150.0 deg",
+        "160.0 deg",
+        "170.0 deg",
+        "180.0 deg",
+        "190.0 deg",
+        "200.0 deg",
+        "210.0 deg",
+        "220.0 deg",
+        "230.0 deg",
+        "240.0 deg",
+        "250.0 deg",
+        "260.0 deg",
+        "270.0 deg",
+        "280.0 deg",
+        "290.0 deg",
+        "300.0 deg",
+        "310.0 deg",
+        "320.0 deg",
+        "330.0 deg",
+        "340.0 deg",
+        "350.0 deg",
+        "360.0 deg"
+      ],
+      "features": [
+        "FEATURE-HOUSING-GUIDE-BACK",
+        "FEATURE-PLATFORM-FOLLOWER-BACK"
+      ],
+      "intended": "DECLARED_CLEARANCE",
+      "interaction_id": "INT-15",
+      "load_direction": "lateral, plus platform pitch and roll",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.2,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 0.2,
+      "status": "PASS",
+      "swept_follower_volume_in_channel_mm3": [
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6,
+        2329.6
+      ]
+    },
+    {
+      "bodies": [
+        "BODY-HOUSING",
+        "BODY-REAR-PANEL"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "evaluated_states": [
+        "CRANK_0_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-HOUSING-PANEL-SEAT",
+        "FEATURE-PANEL-SEAT-FACE"
+      ],
+      "intended": "DECLARED_CONTACT",
+      "interaction_id": "INT-16",
+      "load_direction": "structural closure; carries housing stiffness, not the payload",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": null,
+      "status": "PASS"
+    },
+    {
+      "bodies": [
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-SHAFT"
+      ],
+      "claim_scope": "that these two faces are separated by the declared amount in the evaluated configuration, and nothing more",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY - the separation of two real faces is measured. NOT contact mechanics: no force, no pressure, no deformation, no friction is computed.",
+      "evaluated_states": [
+        "CRANK_0_BOTTOM"
+      ],
+      "features": [
+        "FEATURE-SHAFT-CRANK-ARM",
+        "FEATURE-ROD-CRANK-BORE"
+      ],
+      "intended": "NOT_INTENDED_TO_INTERACT",
+      "interaction_id": "INT-17",
+      "load_direction": "none; it is a gap that limits axial travel",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 2.0,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY",
+      "nominal_clearance_mm": 2.0,
+      "status": "PASS"
+    },
+    {
+      "bodies": [
+        "SCENARIO-PAYLOAD-1KG",
+        "BODY-PLATFORM"
+      ],
+      "claim_scope": "that a 36 x 60 x 40 mm envelope reaches and rests on the platform's support surface through the top aperture. Nothing about whether the platform carries 1 kg.",
+      "contact_resolution": "RESOLVED_SURFACE_GEOMETRY for the seating of the envelope on the support surface. The payload is a bounded envelope, not a modelled object: it has no mass distribution, no stiffness and no friction here.",
+      "evaluated_states": [
+        "TOP",
+        "BOTTOM"
+      ],
+      "features": [
+        "SCENARIO-PAYLOAD-1KG",
+        "FEATURE-PLATFORM-SUPPORT-SURFACE"
+      ],
+      "intended": "DECLARED_CONTACT",
+      "interaction_id": "INT-P1",
+      "load_direction": "vertical, payload weight onto the support surface",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "model_fidelity": "EXACT_BREP_RIGID_BODY, one participant is a scenario envelope",
+      "nominal_clearance_mm": 0.0,
+      "status": "PASS"
+    }
+  ],
+  "name": "contact resolution",
+  "no_ideal_pair_recorded_as_contact": true,
+  "purpose": "For every interaction: what was measured, in which configurations, at what fidelity, and what may therefore be claimed. An ideal kinematic pair is never recorded here as resolved surface contact.",
+  "status": "PASS"
+}

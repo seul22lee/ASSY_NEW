@@ -1,0 +1,1342 @@
+{
+  "evaluation_tolerance": {
+    "contact_tol_mm": 0.05,
+    "note": "evaluation tolerance, never a material allowance",
+    "overlap_tol_mm3": 1e-06
+  },
+  "interactions": [
+    {
+      "bodies": [
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.2,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-01",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.2,
+      "roi_box_mm": [
+        0.0,
+        8.0,
+        30.0,
+        110.0,
+        20.0,
+        100.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.2,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-02",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.2,
+      "roi_box_mm": [
+        14.0,
+        26.0,
+        30.0,
+        110.0,
+        20.0,
+        100.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING"
+      ],
+      "criterion": "min distance > contact_tol, and where a nominal gap is declared, |min distance - nominal| <= contact_tol",
+      "declared_nominal_mm": 3.2,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-03",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 3.2,
+      "roi_box_mm": [
+        8.0,
+        14.0,
+        30.0,
+        110.0,
+        20.0,
+        100.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "NOT_INTENDED_TO_INTERACT"
+    },
+    {
+      "bodies": [
+        "BODY-CRANK-SHAFT",
+        "BODY-HOUSING"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 1.0,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-04",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 1.0,
+      "roi_box_mm": [
+        24.0,
+        31.0,
+        106.0,
+        112.0,
+        57.0,
+        63.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-SHAFT"
+      ],
+      "criterion": "min distance > contact_tol, and where a nominal gap is declared, |min distance - nominal| <= contact_tol",
+      "declared_nominal_mm": 2.0,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-17",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 2.0,
+      "roi_box_mm": [
+        38.0,
+        44.0,
+        55.0,
+        85.0,
+        0.0,
+        30.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "NOT_INTENDED_TO_INTERACT"
+    },
+    {
+      "bodies": [
+        "BODY-CRANK-JOINT-PIN",
+        "BODY-CRANK-SHAFT"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.1,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-05",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.1,
+      "roi_box_mm": [
+        30.0,
+        40.0,
+        55.0,
+        85.0,
+        0.0,
+        30.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.1,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-06",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.1,
+      "roi_box_mm": [
+        42.0,
+        53.5,
+        55.0,
+        85.0,
+        0.0,
+        30.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN"
+      ],
+      "criterion": "min distance <= contact_tol (0.050) and no overlap",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-07",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "roi_box_mm": [
+        53.0,
+        58.0,
+        55.0,
+        85.0,
+        0.0,
+        30.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CONTACT"
+    },
+    {
+      "bodies": [
+        "BODY-CRANK-JOINT-PIN",
+        "BODY-REAR-PANEL"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 2.0,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-08",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 2.0,
+      "roi_box_mm": [
+        60.0,
+        70.0,
+        20.0,
+        120.0,
+        0.0,
+        120.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-PLATFORM",
+        "BODY-PLATFORM-JOINT-PIN"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.1,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-09",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.1,
+      "roi_box_mm": [
+        35.0,
+        41.0,
+        55.0,
+        85.0,
+        85.0,
+        115.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-PLATFORM",
+        "BODY-PLATFORM-JOINT-PIN"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.1,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-10",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.1,
+      "roi_box_mm": [
+        55.0,
+        60.5,
+        55.0,
+        85.0,
+        85.0,
+        115.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-CONNECTING-ROD",
+        "BODY-PLATFORM-JOINT-PIN"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.1,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-11",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.1,
+      "roi_box_mm": [
+        42.0,
+        54.0,
+        55.0,
+        85.0,
+        85.0,
+        115.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-PLATFORM",
+        "BODY-PLATFORM-JOINT-PIN"
+      ],
+      "criterion": "min distance <= contact_tol (0.050) and no overlap",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-12",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "roi_box_mm": [
+        60.5,
+        66.0,
+        55.0,
+        85.0,
+        85.0,
+        115.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CONTACT"
+    },
+    {
+      "bodies": [
+        "BODY-PLATFORM-JOINT-PIN",
+        "BODY-REAR-PANEL"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 2.0,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-13",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 2.0,
+      "roi_box_mm": [
+        60.0,
+        70.0,
+        55.0,
+        85.0,
+        85.0,
+        115.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-HOUSING",
+        "BODY-PLATFORM"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.2,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-14",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.2,
+      "roi_box_mm": [
+        18.0,
+        52.0,
+        5.0,
+        16.0,
+        108.0,
+        136.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-HOUSING",
+        "BODY-PLATFORM"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.2,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-15",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.2,
+      "roi_box_mm": [
+        18.0,
+        52.0,
+        124.0,
+        135.0,
+        108.0,
+        136.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-HOUSING",
+        "BODY-REAR-PANEL"
+      ],
+      "criterion": "min distance <= contact_tol (0.050) and no overlap",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "CRANK_0_BOTTOM",
+      "interaction_id": "INT-16",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "roi_box_mm": [
+        66.0,
+        74.0,
+        0.0,
+        140.0,
+        0.0,
+        224.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CONTACT"
+    }
+  ],
+  "method": "Each declared interaction is measured inside a declared region of interest, so a clearance is not masked by a contact elsewhere on the same body pair. Whole-body pairs are then scanned per state.",
+  "name": "interaction classification and tolerance check",
+  "per_state_pair_scan": [
+    {
+      "declared_contacts": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": [
+          "FEATURE-ROD-CRANK-END-FACE",
+          "FEATURE-CRANK-PIN-HEAD"
+        ],
+        "BODY-HOUSING|BODY-REAR-PANEL": [
+          "FEATURE-HOUSING-PANEL-SEAT",
+          "FEATURE-PANEL-SEAT-FACE"
+        ],
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-B-FACE",
+          "FEATURE-PLATFORM-PIN-HEAD"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-CONNECTING-ROD|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CONNECTING-ROD|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.5
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CONNECTING-ROD|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 13.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 68.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CRANK-SHAFT|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 5.0
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 5.0
+        },
+        "BODY-CRANK-SHAFT|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-HOUSING|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 9.0
+        },
+        "BODY-HOUSING|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        }
+      },
+      "state": "CRANK_0_BOTTOM"
+    },
+    {
+      "declared_contacts": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": [
+          "FEATURE-ROD-CRANK-END-FACE",
+          "FEATURE-CRANK-PIN-HEAD"
+        ],
+        "BODY-HOUSING|BODY-REAR-PANEL": [
+          "FEATURE-HOUSING-PANEL-SEAT",
+          "FEATURE-PANEL-SEAT-FACE"
+        ],
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-B-FACE",
+          "FEATURE-PLATFORM-PIN-HEAD"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-CONNECTING-ROD|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CONNECTING-ROD|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 14.680194847
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CONNECTING-ROD|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 13.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 68.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CRANK-SHAFT|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 5.0
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 5.385019494
+        },
+        "BODY-CRANK-SHAFT|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-HOUSING|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 9.0
+        },
+        "BODY-HOUSING|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        }
+      },
+      "state": "CRANK_45_RISING"
+    },
+    {
+      "declared_contacts": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": [
+          "FEATURE-ROD-CRANK-END-FACE",
+          "FEATURE-CRANK-PIN-HEAD"
+        ],
+        "BODY-HOUSING|BODY-REAR-PANEL": [
+          "FEATURE-HOUSING-PANEL-SEAT",
+          "FEATURE-PANEL-SEAT-FACE"
+        ],
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-B-FACE",
+          "FEATURE-PLATFORM-PIN-HEAD"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-CONNECTING-ROD|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CONNECTING-ROD|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 10.5
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CONNECTING-ROD|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 13.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 68.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CRANK-SHAFT|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 21.695054691
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.568237234
+        },
+        "BODY-CRANK-SHAFT|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-HOUSING|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 26.675149524
+        },
+        "BODY-HOUSING|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        }
+      },
+      "state": "CRANK_90_RISING"
+    },
+    {
+      "declared_contacts": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": [
+          "FEATURE-ROD-CRANK-END-FACE",
+          "FEATURE-CRANK-PIN-HEAD"
+        ],
+        "BODY-HOUSING|BODY-REAR-PANEL": [
+          "FEATURE-HOUSING-PANEL-SEAT",
+          "FEATURE-PANEL-SEAT-FACE"
+        ],
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-B-FACE",
+          "FEATURE-PLATFORM-PIN-HEAD"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-CONNECTING-ROD|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CONNECTING-ROD|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 14.778283967
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CONNECTING-ROD|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 13.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 68.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CRANK-SHAFT|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 59.848445624
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.829378485
+        },
+        "BODY-CRANK-SHAFT|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-HOUSING|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        }
+      },
+      "state": "CRANK_135_RISING"
+    },
+    {
+      "declared_contacts": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": [
+          "FEATURE-ROD-CRANK-END-FACE",
+          "FEATURE-CRANK-PIN-HEAD"
+        ],
+        "BODY-HOUSING|BODY-REAR-PANEL": [
+          "FEATURE-HOUSING-PANEL-SEAT",
+          "FEATURE-PANEL-SEAT-FACE"
+        ],
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-B-FACE",
+          "FEATURE-PLATFORM-PIN-HEAD"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-CONNECTING-ROD|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CONNECTING-ROD|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 16.0
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CONNECTING-ROD|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 13.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 68.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CRANK-SHAFT|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.0
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 70.691230008
+        },
+        "BODY-CRANK-SHAFT|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-HOUSING|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 6.0
+        }
+      },
+      "state": "CRANK_180_TOP"
+    },
+    {
+      "declared_contacts": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": [
+          "FEATURE-ROD-CRANK-END-FACE",
+          "FEATURE-CRANK-PIN-HEAD"
+        ],
+        "BODY-HOUSING|BODY-REAR-PANEL": [
+          "FEATURE-HOUSING-PANEL-SEAT",
+          "FEATURE-PANEL-SEAT-FACE"
+        ],
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-B-FACE",
+          "FEATURE-PLATFORM-PIN-HEAD"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-CONNECTING-ROD|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CONNECTING-ROD|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 14.778283967
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CONNECTING-ROD|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 13.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 68.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CRANK-SHAFT|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 59.848445624
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.829378485
+        },
+        "BODY-CRANK-SHAFT|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-HOUSING|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        }
+      },
+      "state": "CRANK_225_LOWERING"
+    },
+    {
+      "declared_contacts": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": [
+          "FEATURE-ROD-CRANK-END-FACE",
+          "FEATURE-CRANK-PIN-HEAD"
+        ],
+        "BODY-HOUSING|BODY-REAR-PANEL": [
+          "FEATURE-HOUSING-PANEL-SEAT",
+          "FEATURE-PANEL-SEAT-FACE"
+        ],
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-B-FACE",
+          "FEATURE-PLATFORM-PIN-HEAD"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-CONNECTING-ROD|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CONNECTING-ROD|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 10.5
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CONNECTING-ROD|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 13.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 68.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CRANK-SHAFT|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 21.695054691
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.568237234
+        },
+        "BODY-CRANK-SHAFT|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-HOUSING|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 26.675149524
+        },
+        "BODY-HOUSING|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        }
+      },
+      "state": "CRANK_270_LOWERING"
+    },
+    {
+      "declared_contacts": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": [
+          "FEATURE-ROD-CRANK-END-FACE",
+          "FEATURE-CRANK-PIN-HEAD"
+        ],
+        "BODY-HOUSING|BODY-REAR-PANEL": [
+          "FEATURE-HOUSING-PANEL-SEAT",
+          "FEATURE-PANEL-SEAT-FACE"
+        ],
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-B-FACE",
+          "FEATURE-PLATFORM-PIN-HEAD"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-CONNECTING-ROD|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CONNECTING-ROD|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 14.680194847
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CONNECTING-ROD|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 13.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 68.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CRANK-SHAFT|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 5.0
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 5.385019494
+        },
+        "BODY-CRANK-SHAFT|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-HOUSING|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 9.0
+        },
+        "BODY-HOUSING|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        }
+      },
+      "state": "CRANK_315_LOWERING"
+    },
+    {
+      "declared_contacts": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": [
+          "FEATURE-ROD-CRANK-END-FACE",
+          "FEATURE-CRANK-PIN-HEAD"
+        ],
+        "BODY-HOUSING|BODY-REAR-PANEL": [
+          "FEATURE-HOUSING-PANEL-SEAT",
+          "FEATURE-PANEL-SEAT-FACE"
+        ],
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": [
+          "FEATURE-PLATFORM-CLEVIS-LUG-B-FACE",
+          "FEATURE-PLATFORM-PIN-HEAD"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-CONNECTING-ROD|BODY-CRANK-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-CONNECTING-ROD|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CONNECTING-ROD|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.5
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-CONNECTING-ROD|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CONNECTING-ROD|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 13.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-CRANK-SHAFT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.1
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 65.5
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 68.0
+        },
+        "BODY-CRANK-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-CRANK-SHAFT|BODY-HOUSING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 5.0
+        },
+        "BODY-CRANK-SHAFT|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 5.0
+        },
+        "BODY-CRANK-SHAFT|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 27.0
+        },
+        "BODY-HOUSING|BODY-PLATFORM": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.2
+        },
+        "BODY-HOUSING|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 9.0
+        },
+        "BODY-HOUSING|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM-JOINT-PIN|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.0
+        },
+        "BODY-PLATFORM|BODY-PLATFORM-JOINT-PIN": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-PLATFORM|BODY-REAR-PANEL": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.0
+        }
+      },
+      "state": "CRANK_360_BOTTOM"
+    }
+  ],
+  "status": "PASS",
+  "step": 6
+}
