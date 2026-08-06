@@ -17,10 +17,11 @@ ver3/
     phase0/                            FROZEN. The standing authority.
         ARCHITECTURE_INVARIANTS.yaml       INV-001..INV-018
         VER2_RETIREMENT_MATRIX.md          R-01..R-32, U-01..U-05
+        ARCHITECTURE_CHANGE_PROPOSALS.yaml the only way a phase0 authority changes
         PHASE0_EVIDENCE_REPORT.md
         ARCHITECTURE_COMPREHENSION_CHECK.md
 
-    contracts/                         nine contracts, all draft
+    contracts/                         ten contracts, all draft
         DESIGN_STATE_CONTRACT.yaml
         STAGE_PATCH_CONTRACT.yaml
         STAGE_OWNERSHIP_MATRIX.yaml
@@ -30,6 +31,7 @@ ver3/
         BENCHMARK_RESULT_CONTRACT.yaml
         GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
         STAGE_PROGRESSION_CONTRACT.yaml
+        ENTITY_FAMILY_AUDIT.yaml           consumer justification for all 32 families
 
     assy_v3/                           THE PIPELINE. Empty of stage logic.
         __init__.py
@@ -40,11 +42,15 @@ ver3/
 
     benchmarks/                        source requests and run output
         README.md
-        BM-001/  BM-002/  BM-003/
+        BM-001/  BM-002/
             descriptor.yaml
-            source/request.txt
-            runs/
-            evaluations/
+            source_manifest.yaml           provenance, hashes, human-review status
+            source/request.txt             verbatim; the only raw text a run reads
+            runs/  evaluations/
+        BM-003/
+            descriptor.yaml                PLACEHOLDER; blocks every freeze
+            BM-003_SELECTION_CRITERIA.md   criteria + 3 briefs, subject unchosen
+            source/  runs/  evaluations/
 
     tests/meta/                        boundary and contract enforcement
         _paths.py
@@ -54,6 +60,8 @@ ver3/
         test_status_semantics.py
         test_no_stage_implementation.py
         test_benchmark_skeleton.py
+        test_package_path.py
+        test_entity_family_audit.py
 
     oracles/                           FROZEN. Hidden answer keys.
     oracle_tools/                      FROZEN. Oracle tooling.
@@ -106,8 +114,14 @@ ARCHITECTURE_INVARIANTS.yaml  (frozen authority)
                     └── STAGE_PROGRESSION_CONTRACT ........ how stages get built and frozen
 ```
 
-All nine are `draft`. None may become `frozen` while BM-003 is a placeholder —
-checked by `test_benchmark_skeleton.py`.
+All ten are `draft`. None may become `frozen` while BM-003 is a placeholder —
+checked by `test_benchmark_skeleton.py` and again by `test_entity_family_audit.py`.
+
+`ENTITY_FAMILY_AUDIT.yaml` sits beside `DESIGN_STATE_CONTRACT.yaml` rather than
+under it: it is a review of that contract, and its findings are recorded rather
+than applied. Two families are `MERGE_CANDIDATE`, three are `PROVISIONAL`, and
+two expressiveness gaps (retention capture, assembly ordering) need typed
+relations before `s03` — none of which adds a family.
 
 ---
 
@@ -163,3 +177,4 @@ python3 -m unittest discover -s ver3/tests/meta -t .
 ```
 
 Requires PyYAML and nothing else. CI: `.github/workflows/ver3-boundaries.yml`.
+108 tests.

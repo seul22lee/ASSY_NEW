@@ -53,7 +53,7 @@ them returns.
 | R-11 | `V2` Stage 03 | Role → face / region-type → location | Same defect as R-10 at product scale: yields "automatic side drive", "fixed assembly opening". | **RETIRE** | Face/opening chosen only from access, load-path and assembly-dependency evidence, or left `UNRESOLVED` with alternatives | `INV-003`, `INV-008` |
 | R-12 | `V2` downstream stages | Element/declaration order as an engineering decision (e.g. first element = support end) | Order is a serialization artifact. Reordering the input changes the design. | **RETIRE** | Explicit typed relations; determinism from canonical serialization, never from list order | `INV-014` order-independence: permute input entity order, output must be identical |
 | R-13 | `V2 tools/run_benchmarks.py:42-49` — `spec=spec` passed to Stage 02 **and** Stage 03 | Re-reading the raw request downstream of Stage 01 | Each re-parse is an independent interpretation; two stages can disagree about the same sentence with no way to detect it. | **RETIRE** | Stage 01 is the sole consumer of raw text. Stages ≥02 receive typed projections only. | `INV-002`: raw-request field absent from every projection ≥ Stage 02 |
-| R-14 | `V2` any stage | Benchmark-ID / product-name branches | Encodes the suite into the system; generalization becomes unmeasurable. | **RETIRE** | Behaviour depends only on typed content | `INV-015`: grep for case IDs in `assy3/`; plus renamed-case run must be identical |
+| R-14 | `V2` any stage | Benchmark-ID / product-name branches | Encodes the suite into the system; generalization becomes unmeasurable. | **RETIRE** | Behaviour depends only on typed content | `INV-015`: grep for case IDs in `assy_v3/`; plus renamed-case run must be identical |
 
 ---
 

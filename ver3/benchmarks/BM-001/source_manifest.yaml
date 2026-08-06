@@ -1,0 +1,141 @@
+# SOURCE MANIFEST — provenance of the source-only benchmark input
+#
+# request.txt is the ONLY raw text a run may consume, and only Stage 01 consumes
+# it (INV-002, rebuild policy rule 5). This manifest records where those bytes
+# came from, how they were obtained, and what was deliberately excluded.
+#
+# The extraction rule followed: VERBATIM COPY ONLY. Nothing was interpreted,
+# normalized, summarized, clarified, reordered or enriched. Where two witnesses
+# to the source disagreed, the disagreement is recorded below rather than
+# resolved, and the extraction is marked HUMAN_REVIEW_REQUIRED.
+
+schema_version: "0.1.0"
+benchmark_id: BM-001
+artifact: ver3/benchmarks/BM-001/source/request.txt
+
+# ---------------------------------------------------------------- provenance
+provenance:
+  primary_witness:
+    path: /home/ftk3187/github/ASSY_Ver2.0/tests/fixtures/BM-001_requirementspec.json
+    field: source_text
+    field_role: >
+      The raw request string as received. The surrounding object is Ver2's Stage
+      01 OUTPUT, but this field is its INPUT, carried through unaltered.
+    file_sha256: dee480217055a18d5935ed4cc5c71e055fbb0472d71f767b29d8df5660b4f57e
+  corroborating_witness:
+    path: /home/ftk3187/github/ASSY_Ver2.0/BM-001_LATCHING_STORAGE_BOX.md
+    section: "2. User Requirement"
+    delimiter_statement: "The system receives only the following requirement."
+    why_it_matters: >
+      This sentence is what makes the source boundary objective rather than a
+      judgement. The benchmark specification itself declares where the request
+      starts and stops, so the extraction did not have to infer an edge.
+
+# ---------------------------------------------------------- extraction method
+extraction:
+  method: VERBATIM_FIELD_COPY
+  steps:
+    - "Read the primary witness's source_text field as an exact string."
+    - "Wrote those bytes to request.txt, followed by one trailing newline."
+    - "Compared against the corroborating witness word for word (see below)."
+  transformations_applied:
+    - "A single trailing newline was appended, so the file is a well-formed POSIX text file."
+  transformations_NOT_applied:
+    - interpretation
+    - normalization
+    - summarization
+    - clarification
+    - enrichment
+    - reordering
+    - spelling or punctuation correction
+    - re-wrapping or unwrapping of lines
+  hashes:
+    content_sha256: 3fe0ff024784958c2ad0e7514f102ea9fde319c47caad4912c7f3d820ec6be5b      # source_text exactly as it appears in the witness
+    file_sha256: a37a822a1f759dece5d1966c431be44281a68071628248fa69f76547141578d4         # request.txt as written, including the trailing newline
+    bytes: 405
+  note_on_the_two_hashes: >
+    Both are recorded so the one added byte is visible. A single hash would make
+    the appended newline indistinguishable from source content.
+
+# --------------------------------------------------- witness reconciliation
+witness_comparison:
+  method: "Whitespace-collapsed word-for-word comparison of both witnesses."
+  identical_after_whitespace_collapse: true
+  differences:
+    - none. The two witnesses agree word for word; only line wrapping differs.
+
+  line_structure:
+    primary_witness_newlines: 0
+    corroborating_witness_newlines: 8
+    explanation: >
+      The corroborating witness is hard-wrapped for reading. Unwrapping it, or
+      wrapping the primary to match, would both be normalization, so neither was
+      done. The primary witness was taken as written.
+
+# ------------------------------------------------------------- human review
+human_review:
+  status: HUMAN_REVIEW_REQUIRED
+  why: >
+    Two witnesses to the source exist and they are not byte-identical. Choosing
+    which rendering is canonical is a judgement, not a mechanical step, so it is
+    referred rather than made silently. The extraction itself is an exact copy of
+    the declared primary witness; what needs confirming is the choice of witness.
+  questions:
+    - id: Q1
+      question: >
+        Is the single-paragraph primary witness the canonical rendering, or is
+        the hard-wrapped specification document?
+      impact: >
+        Affects source-clause locators only. No word, number or unit differs
+        between the two.
+      severity: LOW
+
+  what_review_does_not_need_to_settle:
+    - "Whether the copy is faithful to the primary witness. That is hash-verifiable above."
+    - "Where the request begins and ends. Both witnesses delimit it identically."
+
+# ------------------------------------------------- contamination declarations
+declared_absent:
+  oracle_semantics:
+    present: false
+    statement: >
+      NO Oracle content is present. No invariant, no unresolved decision, no
+      negative case, no evidence-fidelity judgement and no requirement position
+      was read from or copied into this artifact.
+    how_assured: >
+      The extraction never opened ver3/oracles/. It read the original Ver2
+      fixture named by the dossier's locator, not the dossier. The Oracle
+      dossier's analytical sections (S2-S7) were therefore never a source for
+      this file, which is what keeps the answer key out of the one tree
+      production code may read.
+  positive_reference_information:
+    present: false
+    statement: >
+      NO positive executable reference information is present. Nothing from
+      ver3/cad_validation/ was read. request.txt contains no mechanism, no
+      geometry, no dimension not stated by the user, no body count and no
+      architecture.
+  ver2_derived_interpretation:
+    present: false
+    statement: >
+      NO Ver2 interpretation is present. The primary witness object also contains
+      product_intent, user_intent_summary, clauses, requirements,
+      operating_scenarios, assumptions, unknowns, freedoms, relations and
+      discovery_outcomes. ALL of these were deliberately excluded.
+    why_excluded: >
+      They are Ver2's Stage 01 OUTPUT - an already-performed interpretation of
+      this same text. Including any of them would hand the new pipeline a
+      pre-solved S01 and make the stage untestable, which is precisely what
+      rebuild policy rule 2 forbids.
+    excluded_fields: [product_intent, user_intent_summary, clauses, requirements,
+                      operating_scenarios, assumptions, unknowns, freedoms,
+                      relations, discovery_outcomes, meta]
+
+# --------------------------------------------------------------- consumption
+consumption:
+  readable_by: [s01]
+  not_readable_by: [s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12]
+  rule: >
+    Every stage after s01 reads DesignState. Two stages reading this file would
+    produce two interpretations of one sentence with nothing to say which an
+    entity depends on.

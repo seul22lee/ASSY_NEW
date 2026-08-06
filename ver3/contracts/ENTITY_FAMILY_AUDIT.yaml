@@ -1,0 +1,653 @@
+# ENTITY_FAMILY_AUDIT — consumer-based justification for all 32 families
+#
+# A family earns its place by having a CONSUMER, not by being conceptually tidy.
+# The question asked of each is: which stage reads it, and what would that stage
+# be unable to do if the family did not exist? A family nothing consumes is
+# either dead or a field on something else.
+#
+# NO FAMILY WAS ADDED OR DELETED BY THIS AUDIT. The count is 32 before and after.
+# Overlap findings are RECORDED as MERGE_CANDIDATE with a recommendation; acting
+# on one is a contract change that goes through STAGE_PROGRESSION_CONTRACT, not
+# an edit made while auditing.
+#
+# status vocabulary:
+#   CORE            unique responsibility, has a consumer, no unresolved overlap
+#   PROVISIONAL     justified, but an open question must be settled before its
+#                   owning stage is implemented
+#   MERGE_CANDIDATE substantially overlaps another family; a boundary rule or a
+#                   merge is required, and the recommendation is recorded
+#   UNSUPPORTED     cannot currently be produced or consumed by any stage
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+references:
+  - ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+  - ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
+  - ver3/contracts/GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
+
+audit_scope:
+  families_audited: 32
+  families_added: 0
+  families_deleted: 0
+  no_stage_contract_frozen_by_this_audit: true
+
+summary:
+  CORE: 27
+  PROVISIONAL: 3
+  MERGE_CANDIDATE: 2
+  UNSUPPORTED: 0
+  note_on_zero_unsupported: >
+    No family is unproducible or unconsumable, so none is UNSUPPORTED. Two
+    EXPRESSIVENESS GAPS were found (retention and assembly ordering, section 3),
+    but those are missing relations between existing families, not families that
+    cannot be supported. Recording a family as UNSUPPORTED to populate the
+    category would be false.
+
+# =====================================================================
+# 1. Per-family audit
+# =====================================================================
+families:
+
+  # ---------------------------------------------------------- source (s01)
+  SourceClause:
+    owning_stage: s01
+    first_downstream_consumer: s01
+    consumer_note: "Requirement creation cites clauses; s11 cites them again when stating scope."
+    unique_responsibility: "The only family holding verbatim source text with a locator."
+    duplicates: none
+    overlap_note: >
+      Overlaps Requirement, which also carries statement_verbatim and
+      source_locator. They are distinguished by cardinality: a Requirement may
+      derive from several clauses, and a clause may yield no requirement at all.
+    required_for_assurance_package: true
+    package_items: [PKG-01]
+    status: CORE
+    obligation: >
+      Requirement.source_locator should become a typed reference to SourceClause
+      IDs rather than an independent locator string, so the two cannot disagree
+      about where a sentence is. Recorded, not applied.
+
+  Requirement:
+    owning_stage: s01
+    first_downstream_consumer: s02
+    consumer_note: "s02 derives Obligations; s08 plans against it; s11 evaluates it."
+    unique_responsibility: "A rank-1 source statement with its verification kind and observable."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-01, PKG-02, PKG-24]
+    status: CORE
+
+  Freedom:
+    owning_stage: s01
+    first_downstream_consumer: s06
+    consumer_note: >
+      s06 is the first stage that can consume one: an underdetermined solve must
+      record which Freedom it is resolving rather than silently picking.
+    unique_responsibility: "A decision the SOURCE deliberately leaves open."
+    duplicates: none
+    overlap_note: >
+      Overlaps UnresolvedDecision. The boundary is provenance, not shape: a
+      Freedom is a property OF THE SOURCE and is permanent; an UnresolvedDecision
+      is a state OF THE RUN and is expected to close. A freedom the run has not
+      yet consumed is legitimately both.
+    required_for_assurance_package: true
+    package_items: [PKG-03]
+    status: CORE
+    why_not_merged: >
+      Merging would lose INV-014, which forbids a freedom becoming an assertion
+      target. That prohibition is meaningless for an UnresolvedDecision, which is
+      supposed to be resolved.
+
+  Ambiguity:
+    owning_stage: s01
+    first_downstream_consumer: s12
+    consumer_note: >
+      No stage between s01 and s12 consumes it. s12 carries it out as a human
+      question. This thin consumption is what makes it a merge candidate.
+    unique_responsibility: "A source CONFLICT recorded rather than resolved."
+    duplicates: UnresolvedDecision
+    overlap_note: >
+      PKG-04 projects Ambiguity and UnresolvedDecision into the SAME package
+      section, which is the clearest evidence of the overlap. Every field of
+      Ambiguity has a counterpart: statement/decision,
+      conflicting_clauses/alternatives, resolvable_when/why_open.
+    required_for_assurance_package: true
+    package_items: [PKG-04]
+    status: MERGE_CANDIDATE
+    recommendation: >
+      Make Ambiguity a subtype of UnresolvedDecision distinguished by
+      why_open = SOURCE_CONFLICT, with conflicting_clauses as a subtype field.
+      This keeps the reporting distinction that matters - a source conflict
+      cannot be resolved by the pipeline, only by new source or a human - while
+      removing a near-identical family.
+    decision_required_before: "s01 implementation (STAGE_PROGRESSION_CONTRACT step 1)."
+
+  Scenario:
+    owning_stage: s01
+    first_downstream_consumer: s08
+    consumer_note: "A VerificationPlanItem names the scenario it plans in; s11 needs it for scope."
+    unique_responsibility: "A declared operating scenario with its system boundary."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-05]
+    status: CORE
+    why_it_earns_its_place: >
+      INV-009's PASS scope has a scenario field. Without this family that field
+      would be a free string, which is the R-20 defect.
+
+  # ------------------------------------------------------ obligations (s02)
+  Obligation:
+    owning_stage: s02
+    first_downstream_consumer: s03
+    consumer_note: "s03 shapes topology to satisfy it; s05 discharges it; s11 closes it."
+    unique_responsibility: "What must be physically true for a requirement to hold."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-06, PKG-15, PKG-28]
+    status: CORE
+
+  Candidate:
+    owning_stage: s02
+    first_downstream_consumer: s03
+    unique_responsibility: "A persisting branch in the solution space."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-07]
+    status: CORE
+    why_it_earns_its_place: >
+      INV-007 forbids a selected-candidate field. Candidates must persist as
+      entities or there is nowhere for the unpursued branches to live.
+
+  AcceptanceContract:
+    owning_stage: s02
+    first_downstream_consumer: s08
+    consumer_note: "s08 plans verification consistent with it; s11 judges against it."
+    unique_responsibility: "What a specific CANDIDATE must satisfy to count as realized."
+    duplicates: none
+    overlap_note: >
+      Overlaps VerificationPlanItem: both are criteria fixed before results
+      exist. They differ in subject and in time - this one is per-candidate and
+      pre-geometry, the plan item is per-requirement and operational.
+    required_for_assurance_package: true
+    package_items: [PKG-08]
+    status: PROVISIONAL
+    open_question: >
+      What happens when a VerificationPlanItem contradicts the AcceptanceContract
+      of the candidate it tests? Nothing currently detects that, and it is
+      exactly how a criterion gets quietly relaxed after the geometry exists.
+    decision_required_before: "s08 implementation."
+
+  # ---------------------------------------------------------- topology (s03)
+  Body:
+    owning_stage: s03
+    first_downstream_consumer: s04
+    unique_responsibility: "A rigid part, with metric pose and extent."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-10]
+    status: CORE
+
+  Joint:
+    owning_stage: s03
+    first_downstream_consumer: s04
+    consumer_note: "s04 builds States and Transitions from joint coordinates."
+    unique_responsibility: "The KINEMATIC relation between two bodies: what motion is permitted."
+    duplicates: none
+    overlap_note: >
+      The sharpest overlap in the topology group, examined in section 2.1. A
+      journal bearing is a Joint AND an Interface. They remain distinct because
+      each exists without the other: an idealised joint may have no modelled
+      contact region, and two bolted faces are an Interface with no Joint.
+    required_for_assurance_package: true
+    package_items: [PKG-10]
+    status: CORE
+    obligation: >
+      Joint needs an optional typed reference to the Interface(s) that realize
+      it, so the same journal cannot be represented twice without the duplication
+      being visible. Recorded, not applied.
+
+  Interface:
+    owning_stage: s03
+    first_downstream_consumer: s05
+    consumer_note: "s05 attaches the Features that make the interaction real."
+    unique_responsibility: >
+      The REGION where two bodies meet, classified by interaction kind. This is
+      the interaction-site family; no separate one exists.
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-11]
+    status: CORE
+    obligation: >
+      No direct Interface -> Feature link exists today; the association runs
+      indirectly through Realization.participating_features. An unrealized
+      Interface is therefore hard to detect. Recorded, not applied.
+
+  Configuration:
+    owning_stage: s03
+    first_downstream_consumer: s04
+    unique_responsibility: "Which bodies are PRESENT - an assembly configuration."
+    duplicates: none
+    overlap_note: >
+      Name collision with State, which is also 'a configuration'. They are
+      orthogonal: Configuration says which bodies EXIST, State says where they
+      ARE. A partially assembled product is a Configuration; mid-travel is a
+      State. Both are needed and both are needed together to say 'at this stage
+      of assembly, in this pose'.
+    required_for_assurance_package: true
+    package_items: [PKG-12]
+    status: CORE
+    obligation: "Document the Configuration/State distinction where both are defined."
+
+  MobilityExpectation:
+    owning_stage: s03
+    first_downstream_consumer: s04
+    consumer_note: "s04's DOF_ABSENCE witnesses test exactly the forbidden set declared here."
+    unique_responsibility: "INTENDED and FORBIDDEN degrees of freedom, per configuration."
+    duplicates: none
+    overlap_note: >
+      Distinct from Constraint, which is algebraic and solved numerically by s06.
+      This is topological and is tested kinematically.
+    required_for_assurance_package: true
+    package_items: [PKG-12]
+    status: CORE
+    why_it_earns_its_place: >
+      An unintended DOF can only be checked against a DECLARED forbidden set.
+      Without this family, unintended-DOF checking degenerates into "nothing
+      obviously moved", which cannot fail.
+
+  # ------------------------------------------------------------ motion (s04)
+  State:
+    owning_stage: s04
+    first_downstream_consumer: s08
+    unique_responsibility: "A named pose of the mechanism, in unit-bearing joint coordinates."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-13]
+    status: CORE
+
+  Transition:
+    owning_stage: s04
+    first_downstream_consumer: s08
+    unique_responsibility: "A path between two States, with DECLARED sampling."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-13]
+    status: CORE
+    why_it_earns_its_place: >
+      R-07: a constant offset between endpoints is not a motion model. The path
+      and its sampling must be an entity or the claim rests on two poses.
+
+  Witness:
+    owning_stage: [s04, s09]
+    first_downstream_consumer: s11
+    consumer_note: "s11 cites witnesses when evaluating; s10 reconciles them with evidence."
+    unique_responsibility: "An executable demonstration that something holds."
+    duplicates: EvidenceItem
+    overlap_note: >
+      Examined in section 2.2. Both carry an outcome, a fidelity and artifacts.
+      The defensible distinction is planned-ness: a Witness is produced during
+      DESIGN, before any verification plan exists; an EvidenceItem answers a
+      VerificationPlanItem. That distinction holds for s04's witnesses and
+      collapses entirely for s09's.
+    required_for_assurance_package: true
+    package_items: [PKG-14]
+    status: MERGE_CANDIDATE
+    recommendation: >
+      Restrict Witness ownership to s04 - design-time demonstrations that precede
+      any plan - and let s09 produce EvidenceItem only, with EvidenceItem gaining
+      a typed reference to any Witness it re-executes. This removes the duplicate
+      without losing s04's ability to demonstrate mobility before s08 exists.
+    also_fixes: "The dual-ownership defect in section 2.4."
+    decision_required_before: "s04 implementation."
+
+  # ------------------------------------------------------ realization (s05)
+  Feature:
+    owning_stage: s05
+    first_downstream_consumer: s07
+    unique_responsibility: "Named geometry ON A BODY that participates in an interaction."
+    duplicates: none
+    overlap_note: >
+      Body-level, where Interface is pair-level. The same physical chamfer is one
+      Feature on one body; the fit it forms with another body is one Interface.
+    required_for_assurance_package: true
+    package_items: [PKG-15]
+    status: CORE
+
+  Realization:
+    owning_stage: s05
+    first_downstream_consumer: s08
+    consumer_note: "s08 plans against its verification_predicate; s11 closes the obligation."
+    unique_responsibility: "The embodiment that DISCHARGES an obligation, with its predicate."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-15]
+    status: CORE
+    why_it_earns_its_place: >
+      INV-008: an obligation is never discharged by a label. This family is the
+      link that makes discharge checkable, and it is where retention is currently
+      expressed (section 3.1).
+
+  Parameter:
+    owning_stage: s05
+    first_downstream_consumer: s06
+    unique_responsibility: "A named quantity with a MANDATORY unit."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-16, PKG-18]
+    status: CORE
+
+  Constraint:
+    owning_stage: s05
+    first_downstream_consumer: s06
+    unique_responsibility: "An algebraic relation the parameters must satisfy."
+    duplicates: none
+    overlap_note: >
+      Distinct from MobilityExpectation (topological) and from Interface
+      (spatial). This one is numeric and is what s06 actually solves.
+    required_for_assurance_package: true
+    package_items: [PKG-16, PKG-18]
+    status: CORE
+
+  ConstructionStatement:
+    owning_stage: s05
+    first_downstream_consumer: s07
+    consumer_note: "s07 receives ONLY these plus resolved parameters (INV-006)."
+    unique_responsibility: "One step of the program that builds geometry."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-17]
+    status: CORE
+    why_it_earns_its_place: >
+      INV-006 requires a compilation failure to cite the ORIGINATING statement.
+      That is impossible unless statements are addressable entities.
+
+  # -------------------------------------------------------- geometry (s07)
+  GeometrySignature:
+    owning_stage: s07
+    first_downstream_consumer: s09
+    consumer_note: "Evidence is only interpretable against the geometry it was measured on."
+    unique_responsibility: "A deterministic semantic description of the built geometry."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-19]
+    status: PROVISIONAL
+    open_question: >
+      This is the one family that does not denote a real-world THING. It
+      describes the whole model, which sits awkwardly with INV-001's
+      one-entity-per-thing framing, and it may belong in the run record beside
+      ToolRunRecord rather than in DesignState.
+    argument_for_keeping_it_here: >
+      It must be referenced by EvidenceItem and by RequirementEvaluation scope,
+      and cross-referencing DesignState to the run record for something that
+      central would be worse than the awkwardness.
+    decision_required_before: "s07 implementation."
+
+  # ---------------------------------------------------- verification (s08+)
+  VerificationPlanItem:
+    owning_stage: s08
+    first_downstream_consumer: s09
+    unique_responsibility: >
+      The plan: requirement x criterion x scenario x observable x fidelity, fixed
+      BEFORE execution.
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-20, PKG-23]
+    status: CORE
+    why_it_earns_its_place: >
+      AL-04: a criterion created after the result is known is not a criterion.
+      Ownership by s08, strictly before s09 executes, is what makes the plan a
+      prediction.
+
+  NegativeControl:
+    owning_stage: [s08, s09]
+    first_downstream_consumer: s10
+    consumer_note: "s10 judges control adequacy; s11 may not PASS without one."
+    unique_responsibility: "A deliberate mutation and whether its validator DETECTED it."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-21]
+    status: PROVISIONAL
+    open_question: >
+      Dual ownership (section 2.4). s08 designs the mutation and s09 measures
+      detection, which is one entity created once and extended once - not two
+      creations. The matrix currently lets both CREATE it.
+    recommendation: "owns: [s08]; extends: [s09]."
+    decision_required_before: "s08 implementation."
+
+  EvidenceItem:
+    owning_stage: s09
+    first_downstream_consumer: s10
+    unique_responsibility: "The measured outcome of a plan item, with fidelity and contact resolution."
+    duplicates: Witness
+    overlap_note: "See Witness. The recommendation resolves it in this family's favour."
+    required_for_assurance_package: true
+    package_items: [PKG-22, PKG-23, PKG-24, PKG-25]
+    status: CORE
+
+  RequirementEvaluation:
+    owning_stage: s11
+    first_downstream_consumer: s12
+    unique_responsibility: "The per-requirement verdict, with its six-field scope block."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-26, PKG-28]
+    status: CORE
+
+  ExcludedClaim:
+    owning_stage: s11
+    first_downstream_consumer: s12
+    consumer_note: "Consumed by the package projection and carried to human review."
+    unique_responsibility: "A property the evidence does NOT establish, named explicitly."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-27]
+    status: CORE
+    why_it_earns_its_place: >
+      Silence is not exclusion. Without this family, "we did not check strength"
+      and "strength is fine" look identical in the output - which is the failure
+      BM-002's REQ-003 UNSUPPORTED position exists to prevent.
+
+  # ------------------------------------------------------------- meta (any)
+  Assumption:
+    owning_stage: any
+    first_downstream_consumer: s11
+    consumer_note: "s11 must scope a PASS by the assumptions it rests on; s12 attributes failures to them."
+    unique_responsibility: "An inferred fact the source did not state."
+    duplicates: none
+    overlap_note: >
+      Distinct from Freedom: a Freedom is openness the source INTENDED; an
+      Assumption is a gap the pipeline FILLED. Conflating them would let a filled
+      gap inherit the source's authority.
+    required_for_assurance_package: true
+    package_items: [PKG-02]
+    status: CORE
+
+  UnresolvedDecision:
+    owning_stage: any
+    first_downstream_consumer: s12
+    unique_responsibility: "A recorded openness in the RUN."
+    duplicates: none
+    overlap_note: "See Freedom and Ambiguity."
+    required_for_assurance_package: true
+    package_items: [PKG-04, PKG-18]
+    status: CORE
+
+  RejectedAlternative:
+    owning_stage: any
+    first_downstream_consumer: s12
+    consumer_note: "Consumed by the package projection; s12 shows it in revision history."
+    unique_responsibility: "A branch that was considered and dropped, with a reason KIND."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-09, PKG-30]
+    status: CORE
+    why_it_earns_its_place: >
+      INV-011: rejection for absence-from-library is not infeasibility. The
+      reason_kind enumeration only has somewhere to live if rejections are
+      entities.
+
+  FailureProvenance:
+    owning_stage: s12
+    first_downstream_consumer: s12
+    consumer_note: >
+      Terminal. Its consumer is the assurance package projection, which is the
+      declared sufficiency consumer for s12.
+    unique_responsibility: "A failure routed to the decision and stage that own it."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-29, PKG-30]
+    status: CORE
+
+  HumanReviewQuestion:
+    owning_stage: s12
+    first_downstream_consumer: s12
+    consumer_note: "Terminal; consumed by the projection and by the human."
+    unique_responsibility: "A question only a human can settle."
+    duplicates: none
+    required_for_assurance_package: true
+    package_items: [PKG-31]
+    status: CORE
+    why_it_earns_its_place: >
+      The pipeline never self-approves. Questions must survive to the end as
+      entities, or approval becomes the absence of recorded doubt.
+
+# =====================================================================
+# 2. Overlap groups examined
+# =====================================================================
+overlap_analysis:
+
+  - id: OV-01
+    group: [Joint, Interface, Feature, Constraint, MobilityExpectation]
+    question: "Do the topology families denote the same thing more than once?"
+    finding: >
+      No. They are separated by WHAT THEY CONSTRAIN, and each exists without the
+      others:
+        Joint               permitted MOTION between two bodies (kinematic)
+        Interface           the REGION where two bodies meet (spatial, pair-level)
+        Feature             the GEOMETRY on one body (spatial, body-level)
+        Constraint          a numeric RELATION among parameters (algebraic)
+        MobilityExpectation intended and forbidden DOF per configuration (topological)
+      An idealised joint may have no modelled region; two bolted faces are an
+      Interface with no Joint; a datum Feature may participate in no interaction.
+    residual_risk: >
+      A journal bearing is legitimately a Joint and an Interface. Nothing today
+      links them, so the same physical bearing could be represented twice without
+      the duplication being detectable.
+    action: "Recorded as an obligation on Joint and on Interface. No merge."
+
+  - id: OV-02
+    group: [Witness, EvidenceItem]
+    question: "Are demonstrations and evidence records the same family?"
+    finding: >
+      Partly. The distinction is planned-ness, and it holds only for s04. An s04
+      witness precedes any verification plan, so it cannot be an EvidenceItem -
+      there is no VerificationPlanItem for it to answer. An s09 witness is
+      produced during plan execution and is an EvidenceItem in all but name.
+    action: >
+      MERGE_CANDIDATE. Recommendation: Witness owned by s04 only; s09 produces
+      EvidenceItem, which may cite a Witness it re-executed.
+
+  - id: OV-03
+    group: [Freedom, Ambiguity, Assumption, UnresolvedDecision]
+    question: "Four families for openness. Are all four needed?"
+    finding: >
+      Three are. They differ in ORIGIN, which determines who can close them:
+        Freedom            the source left it open        -> may never be closed by assertion (INV-014)
+        Assumption         the pipeline filled a gap      -> closed by evidence or by the source
+        UnresolvedDecision the run has not decided yet    -> closed by a later stage
+        Ambiguity          the source CONTRADICTS itself  -> closable only by new source or a human
+      Ambiguity's closure rule is a special case of UnresolvedDecision's, and
+      PKG-04 already projects the two into one section.
+    action: "Ambiguity -> MERGE_CANDIDATE as a subtype. The other three stay."
+
+  - id: OV-04
+    group: [NegativeControl, Witness]
+    question: "Should a family have two owning stages?"
+    finding: >
+      No. Both dual-ownership cases are one entity CREATED once and EXTENDED
+      once, mis-recorded as two owners. Dual ownership weakens INV-001's
+      ownership check: with two legitimate creators, a duplicate created by the
+      second is indistinguishable from a legitimate creation.
+    action: >
+      NegativeControl owns: [s08], extends: [s09]. Witness owns: [s04] under the
+      OV-02 recommendation. Both recorded, neither applied.
+
+  - id: OV-05
+    group: [State, Configuration]
+    question: "Two families both meaning 'configuration'?"
+    finding: >
+      A name collision, not a duplication. Configuration = which bodies are
+      PRESENT. State = where they ARE. Both are needed simultaneously to say
+      'at this stage of assembly, in this pose', which is exactly what an
+      assembly witness asserts.
+    action: "Documentation obligation only. No merge."
+
+  - id: OV-06
+    group: [AcceptanceContract, VerificationPlanItem]
+    question: "Two families of pre-committed criteria?"
+    finding: >
+      Distinct in subject and time - per-candidate and pre-geometry, versus
+      per-requirement and operational - but nothing detects a plan item that
+      contradicts the acceptance contract of the candidate it tests.
+    action: "AcceptanceContract -> PROVISIONAL pending a consistency rule."
+
+# =====================================================================
+# 3. Expressiveness gaps
+#    Missing RELATIONS between existing families. No family is added here.
+# =====================================================================
+expressiveness_gaps:
+
+  - id: GAP-01
+    concern: "Retention and capture relationships"
+    currently_expressed_as: >
+      A pattern across three families: Interface (interaction_kind), Realization
+      (discharges the retention obligation, with a verification predicate) and
+      MobilityExpectation (the forbidden DOF, per configuration).
+    what_cannot_be_said: >
+      That a body is captured by two others JOINTLY - that neither retainer alone
+      suffices. The pattern expresses "this DOF is forbidden in this
+      configuration", not "these two bodies together are what forbid it".
+    why_it_matters: >
+      BM-002's pin retention is single-retainer and is expressible. Every BM-003
+      brief in BM-003_SELECTION_CRITERIA.md turns on joint capture, so this gap
+      becomes load-bearing as soon as the third benchmark exists.
+    proposed_resolution: >
+      A typed relation - retained_by(Body, [Body], Configuration) - via the
+      RELATE patch operation, which already exists. NO NEW FAMILY REQUIRED.
+    status: OPEN
+    decision_required_before: "s03 implementation."
+
+  - id: GAP-02
+    concern: "Assembly sequence ordering"
+    currently_expressed_as: >
+      A series of Configurations plus ASSEMBLY_INSERTION Witnesses.
+    what_cannot_be_said: >
+      That step A must precede step B, and that the reverse order is
+      geometrically impossible. The ordering is implicit in the sequence of
+      Configurations and is never asserted, so nothing can check it.
+    why_it_matters: >
+      BM-002's 9-step assembly has a genuinely forced order - the shaft must
+      enter through the journal bore before the panel closes. A pipeline that
+      emitted the steps in an impossible order would currently produce a
+      structurally valid result.
+    proposed_resolution: >
+      A typed precedes(Configuration, Configuration) relation with a required
+      reason, again via RELATE. NO NEW FAMILY REQUIRED.
+    status: OPEN
+    decision_required_before: "s03 implementation."
+
+# =====================================================================
+# 4. Findings, by when they must be settled
+# =====================================================================
+findings_by_stage:
+  before_s01: [Ambiguity merge decision]
+  before_s03: [GAP-01 retention relation, GAP-02 assembly ordering, Joint/Interface link, Interface/Feature link]
+  before_s04: [Witness ownership and merge decision]
+  before_s07: [GeometrySignature placement]
+  before_s08: [NegativeControl dual ownership, AcceptanceContract consistency rule]
+
+closing_note: >
+  Every finding above is recorded rather than applied. Applying any of them is a
+  contract change, and a contract change runs through STAGE_PROGRESSION_CONTRACT
+  step 1 for the affected stage. This audit freezes nothing.

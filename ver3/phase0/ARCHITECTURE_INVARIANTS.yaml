@@ -67,7 +67,7 @@ invariants:
           subjects are a schema error, not a warning.
     stage_scope: all
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/identity.py::check_single_denotation
+    planned_validator: ver3/assy_v3/validation/identity.py::check_single_denotation
     closes: [R-19, R-20, "Ver2 B.1"]
 
   - invariant_id: INV-002
@@ -84,7 +84,7 @@ invariants:
           Enforced by the projection type itself, then asserted in a test.
       - name: static_scan
         method: >
-          AST scan of ver3/assy3/stages/s02..s12 for `re.` / `.search(` / `.match(`
+          AST scan of ver3/assy_v3/stages/s02..s12 for `re.` / `.search(` / `.match(`
           applied to any value reachable from a request-text field.
       - name: paraphrase_invariance
         method: >
@@ -92,7 +92,7 @@ invariants:
           held byte-identical. All downstream artifacts must be unchanged.
     stage_scope: ["s02","s03","s04","s05","s06","s07","s08","s09","s10","s11","s12"]
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/projection.py::check_no_raw_request
+    planned_validator: ver3/assy_v3/validation/projection.py::check_no_raw_request
     closes: [R-13]
 
   # ------------------------------------------------------------------
@@ -161,7 +161,7 @@ invariants:
           geometric predicate must still evaluate to the same verdict.
     stage_scope: ["s03","s04","s05"]
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/spatial.py::check_geometric_authority
+    planned_validator: ver3/assy_v3/validation/spatial.py::check_geometric_authority
     closes: [R-02, R-03, R-04, R-05, R-10, R-11, R-12]
 
   # ------------------------------------------------------------------
@@ -193,7 +193,7 @@ invariants:
           surface as a typed unknown in the ValidationReport, never as a value.
     stage_scope: all
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/defaults.py::check_no_silent_default
+    planned_validator: ver3/assy_v3/validation/defaults.py::check_no_silent_default
     closes: [R-21, "Ver2 B.5"]
 
   # ------------------------------------------------------------------
@@ -225,7 +225,7 @@ invariants:
           from every stage patch.
     stage_scope: ["s04"]
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/render_boundary.py::check_render_is_projection
+    planned_validator: ver3/assy_v3/validation/render_boundary.py::check_render_is_projection
     closes: [R-01, R-29]
 
   - invariant_id: INV-006
@@ -252,7 +252,7 @@ invariants:
           and must NOT produce a part file.
     stage_scope: ["s07"]
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/cad_boundary.py::check_cad_compiles_only
+    planned_validator: ver3/assy_v3/validation/cad_boundary.py::check_cad_compiles_only
     closes: [R-24]
 
   # ------------------------------------------------------------------
@@ -288,7 +288,7 @@ invariants:
           bearing and stop. B must never rank above A; selection must not occur.
     stage_scope: ["s02","s03","s04"]
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/selection.py::check_selection_gate
+    planned_validator: ver3/assy_v3/validation/selection.py::check_selection_gate
     closes: [R-15, R-16, R-17]
 
   - invariant_id: INV-008
@@ -333,7 +333,7 @@ invariants:
           credited to both extremes.
     stage_scope: ["s02","s03","s04","s05","s11"]
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/obligations.py::check_obligation_closure
+    planned_validator: ver3/assy_v3/validation/obligations.py::check_obligation_closure
     closes: [R-09, R-18, R-28, "Ver2 B.6"]
 
   # ------------------------------------------------------------------
@@ -363,7 +363,7 @@ invariants:
           there cannot be the sole support for a PASS.
     stage_scope: ["s08","s09","s10","s11"]
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/verification.py::check_pass_scope
+    planned_validator: ver3/assy_v3/validation/verification.py::check_pass_scope
     closes: ["Ver1 A.3 partial", R-08]
 
   - invariant_id: INV-010
@@ -392,7 +392,7 @@ invariants:
           Objectives reported as optimized require an optimization trace.
     stage_scope: ["s06"]
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/solver.py::check_solver_status
+    planned_validator: ver3/assy_v3/validation/solver.py::check_solver_status
     closes: [R-22, R-23]
 
   - invariant_id: INV-011
@@ -422,7 +422,7 @@ invariants:
           it" must fail with reason UNSUPPORTED_MISREPORTED.
     stage_scope: all
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/status.py::check_unsupported_vs_infeasible
+    planned_validator: ver3/assy_v3/validation/status.py::check_unsupported_vs_infeasible
     closes: [R-27, "Ver1 A.3"]
 
   - invariant_id: INV-012
@@ -445,7 +445,7 @@ invariants:
           not PASS.
     stage_scope: ["s11"]
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/evidence_match.py::check_semantic_identity
+    planned_validator: ver3/assy_v3/validation/evidence_match.py::check_semantic_identity
     closes: [R-25]
 
   - invariant_id: INV-013
@@ -467,7 +467,7 @@ invariants:
           must appear as EXECUTION_FAILED.
     stage_scope: ["s08","s09","s10"]
     severity: BLOCKING
-    planned_validator: ver3/assy3/validation/evidence_completeness.py::check_observable_bijection
+    planned_validator: ver3/assy_v3/validation/evidence_completeness.py::check_observable_bijection
     closes: [R-26]
 
   # ------------------------------------------------------------------
@@ -511,7 +511,7 @@ invariants:
     detection_strategy:
       - name: identifier_scan
         method: >
-          Scan ver3/assy3 for case-ID literals (BM-*, C4-*, latched_drawer,
+          Scan ver3/assy_v3 for case-ID literals (BM-*, C4-*, latched_drawer,
           rack_pinion_fixture) and for product-name string comparisons. Any hit
           in production code is a failure; Oracle packs and fixtures are exempt.
       - name: case_rename_run
@@ -534,7 +534,7 @@ invariants:
     detection_strategy:
       - name: import_scan
         method: >
-          AST import scan of ver3/assy3 for legacy package names and for any path
+          AST import scan of ver3/assy_v3 for legacy package names and for any path
           outside ver3/.
       - name: absence_run
         method: >

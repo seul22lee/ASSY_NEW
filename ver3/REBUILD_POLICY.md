@@ -222,17 +222,34 @@ first is a boundary check that gets skipped when the environment breaks.
 
 ---
 
-## 7. What this policy does not settle
+## 7. Settled by recorded proposal
+
+- **`ver3/assy_v3/` is the single authoritative package path.** The invariants
+  file previously named a different path in 16 places, all of them forward
+  references to a package that did not exist when they were written (the literal
+  is quoted in the proposal record, which is the one place it belongs). Changed
+  under **ACP-001** in `ver3/phase0/ARCHITECTURE_CHANGE_PROPOSALS.yaml`, which
+  records the previous value, the new value, the rationale, the 15 affected
+  invariants, all 13 planned validators, three detection methods, retirement row
+  R-14, and `semantic_change: false` with its justification — no invariant's
+  meaning changes, only where a planned validator will live.
+
+  **No alias, symlink or compatibility package exists.** Two names for one
+  package is the aliasing rule 2 retires, and it would leave "which is
+  authoritative" permanently open. Enforced by `test_package_path.py`.
+
+  Two occurrences remain in `ver3/oracles/`, deliberately. They are historical
+  observations of whether a package was present at a past moment, and Oracle
+  files are immutable to implementation work under INV-017; rewriting them would
+  falsify the record of what was observed.
+
+---
+
+## 8. What this policy does not settle
 
 Recorded rather than resolved, because resolving them quietly is the failure mode
 this whole document is about.
 
-- **`assy_v3` vs `assy3`.** `ver3/phase0/ARCHITECTURE_INVARIANTS.yaml` names the
-  package `ver3/assy3/` in its `planned_validator` paths. The rebuild task
-  specified `assy_v3`, and `ver3/assy_v3/` is what exists. It satisfies INV-016
-  either way. The invariants file is frozen and wins on conflict, so the divergence
-  must be reconciled through that file's own change process rather than by editing
-  it here.
 - **U-02, Ver1 host templates.** Undecided in the retirement matrix. Not
   admissible to `assy_v3` until decided; `HostTemplate` is a forbidden symbol in
   the meantime.

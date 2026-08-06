@@ -1,0 +1,134 @@
+# ARCHITECTURE_CHANGE_PROPOSALS — the record required to change a phase0 authority
+#
+# ARCHITECTURE_INVARIANTS.yaml carries `status: draft  # frozen with the Oracle
+# lock; changes need a proposal`. INV-017 defines that mechanism for Oracle files
+# (ORACLE_CHANGE_PROPOSAL); this file is its counterpart for the phase0
+# architecture authorities, and it exists so that a change to an invariant is a
+# recorded decision rather than an edit.
+#
+# The rule it enforces: a phase0 authority is never edited to make something else
+# convenient. It is edited by an accepted proposal that states what changed, why,
+# what it affects, and whether it changes meaning.
+#
+# Required fields per proposal:
+#   proposal_id, date, status, targets, previous_value, new_value, rationale,
+#   semantic_change, affected_validators, affected_invariants, not_changed,
+#   verification, accepted_by
+
+schema_version: "0.1.0"
+enforced_by: ver3/tests/meta/test_package_path.py
+
+proposals:
+
+  - proposal_id: ACP-001
+    date: "2026-08-05"
+    status: ACCEPTED_AND_APPLIED
+    title: "Planned Ver3 package path: ver3/assy3/ -> ver3/assy_v3/"
+
+    targets:
+      - ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+      - ver3/phase0/VER2_RETIREMENT_MATRIX.md
+
+    previous_value: "ver3/assy3/"
+    new_value: "ver3/assy_v3/"
+
+    rationale: >
+      The rebuild task that created the package specified `assy_v3`, and
+      ver3/assy_v3/ is what exists on disk and what every contract, test and CI
+      job references. The invariants file predates it and named `ver3/assy3/` in
+      its planned_validator paths and in two detection methods.
+
+      One of the two had to move, and the alternatives were weighed:
+
+        (a) rename the package to assy3 — rejected. It contradicts the explicit
+            instruction that created it, and would require rewriting the
+            contracts, the test suite, the CI job and the layout document to
+            match a path that exists nowhere.
+        (b) add an alias, symlink or compatibility package so both resolve —
+            rejected, and explicitly forbidden by the instruction authorising
+            this change. Two names for one package is exactly the aliasing that
+            rebuild policy rule 2 retires, and it would leave the question of
+            which is authoritative permanently open.
+        (c) change the invariants file through this procedure — chosen.
+
+      The deciding argument is that `ver3/assy3/` was never a constraint on
+      behaviour. It is a forward reference to a package that did not exist when
+      it was written. Nothing was ever validated at that path, so no evidence,
+      no result and no invariant meaning depends on the string.
+
+    semantic_change: false
+    semantic_change_justification: >
+      NO INVARIANT'S MEANING CHANGES. Every edit is to a path literal naming
+      where a planned validator will live, or where a scan will be rooted. What
+      INV-001..INV-016 require, what they prohibit, their severity, their stage
+      scope and their retirement coverage are all untouched.
+
+      Concretely: INV-002 still requires that only Stage 01 reads raw source
+      text; only the directory the AST scan walks is renamed. INV-016 still
+      forbids a runtime dependency on the KG project; only the tree the import
+      scan roots at is renamed.
+
+      Had this changed what an invariant requires, `semantic_change: true` would
+      be recorded here and the change would need re-derivation against the
+      failures the invariant closes, not merely a path substitution.
+
+    affected_invariants:
+      count: 16
+      invariants: [INV-001, INV-002, INV-003, INV-004, INV-005, INV-006, INV-007,
+                   INV-008, INV-009, INV-010, INV-011, INV-012, INV-013, INV-015,
+                   INV-016]
+      note: >
+        15 distinct invariants, 16 occurrences: INV-002 carries the path twice,
+        once in a detection method and once in its planned_validator.
+
+    affected_validators:
+      # Every one is PLANNED. None exists yet, so nothing was renamed on disk and
+      # no test changed behaviour as a result of this proposal.
+      - {invariant: INV-001, previous: "ver3/assy3/validation/identity.py::check_single_denotation",              new: "ver3/assy_v3/validation/identity.py::check_single_denotation"}
+      - {invariant: INV-002, previous: "ver3/assy3/validation/projection.py::check_no_raw_request",               new: "ver3/assy_v3/validation/projection.py::check_no_raw_request"}
+      - {invariant: INV-003, previous: "ver3/assy3/validation/spatial.py::check_geometric_authority",             new: "ver3/assy_v3/validation/spatial.py::check_geometric_authority"}
+      - {invariant: INV-004, previous: "ver3/assy3/validation/defaults.py::check_no_silent_default",              new: "ver3/assy_v3/validation/defaults.py::check_no_silent_default"}
+      - {invariant: INV-005, previous: "ver3/assy3/validation/render_boundary.py::check_render_is_projection",    new: "ver3/assy_v3/validation/render_boundary.py::check_render_is_projection"}
+      - {invariant: INV-006, previous: "ver3/assy3/validation/cad_boundary.py::check_cad_compiles_only",          new: "ver3/assy_v3/validation/cad_boundary.py::check_cad_compiles_only"}
+      - {invariant: INV-007, previous: "ver3/assy3/validation/selection.py::check_selection_gate",                new: "ver3/assy_v3/validation/selection.py::check_selection_gate"}
+      - {invariant: INV-008, previous: "ver3/assy3/validation/obligations.py::check_obligation_closure",          new: "ver3/assy_v3/validation/obligations.py::check_obligation_closure"}
+      - {invariant: INV-009, previous: "ver3/assy3/validation/verification.py::check_pass_scope",                 new: "ver3/assy_v3/validation/verification.py::check_pass_scope"}
+      - {invariant: INV-010, previous: "ver3/assy3/validation/solver.py::check_solver_status",                    new: "ver3/assy_v3/validation/solver.py::check_solver_status"}
+      - {invariant: INV-011, previous: "ver3/assy3/validation/status.py::check_unsupported_vs_infeasible",        new: "ver3/assy_v3/validation/status.py::check_unsupported_vs_infeasible"}
+      - {invariant: INV-012, previous: "ver3/assy3/validation/evidence_match.py::check_semantic_identity",        new: "ver3/assy_v3/validation/evidence_match.py::check_semantic_identity"}
+      - {invariant: INV-013, previous: "ver3/assy3/validation/evidence_completeness.py::check_observable_bijection", new: "ver3/assy_v3/validation/evidence_completeness.py::check_observable_bijection"}
+
+    affected_detection_methods:
+      - {invariant: INV-002, previous: "AST scan of ver3/assy3/stages/s02..s12", new: "AST scan of ver3/assy_v3/stages/s02..s12"}
+      - {invariant: INV-015, previous: "Scan ver3/assy3 for case-ID literals",   new: "Scan ver3/assy_v3 for case-ID literals"}
+      - {invariant: INV-016, previous: "AST import scan of ver3/assy3",          new: "AST import scan of ver3/assy_v3"}
+
+    affected_retirement_rows:
+      - {row: R-14, file: ver3/phase0/VER2_RETIREMENT_MATRIX.md, previous: "grep for case IDs in `assy3/`", new: "grep for case IDs in `assy_v3/`"}
+
+    not_changed:
+      - path: ver3/oracles/FINAL_PRE_CAD_CORRECTION_STATE.yaml
+        key: ver3_assy3
+        why: >
+          An Oracle file, immutable to implementation work under INV-017. The key
+          records a HISTORICAL OBSERVATION - whether a package was present at the
+          time that state was captured - and rewriting it would falsify the
+          record of what was observed. A historical note is not a forward
+          reference and does not need to track the current path.
+      - path: ver3/oracles/PRE_CAD_CORRECTION_STATE.yaml
+        key: ver3_assy3_present
+        why: "Same. Oracle file, historical observation, INV-017."
+
+    verification:
+      - "No occurrence of the token assy3 remains in ver3/phase0/."
+      - "The only remaining occurrences repository-wide are the two Oracle historical keys above."
+      - "ver3/assy_v3/ exists and is the only package path referenced by contracts, tests and CI."
+      - "No alias, symlink, compatibility package or forbidden-dependency exception was created."
+      - "The full meta suite passes."
+      - "Enforced continuously by ver3/tests/meta/test_package_path.py."
+
+    accepted_by: >
+      The instruction authorising this task, which directed that the formal
+      invariant-change procedure be used to change the planned package path to
+      ver3/assy_v3/, and that no alias, symlink, compatibility package or
+      exception be added.

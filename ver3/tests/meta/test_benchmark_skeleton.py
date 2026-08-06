@@ -74,6 +74,93 @@ class TestBenchmarkSkeleton(unittest.TestCase):
                 for who in ("production_stages", "generation_models", "prompts", "retrieval"):
                     self.assertIn(who, never)
 
+    def test_extracted_sources_have_a_manifest(self):
+        for bm in ("BM-001", "BM-002"):
+            with self.subTest(benchmark=bm):
+                d = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "descriptor.yaml"))
+                if not d["source"].get("present"):
+                    self.skipTest("%s source not extracted yet" % bm)
+                self.assertTrue(os.path.isfile(os.path.join(_paths.BENCHMARKS, bm, "source", "request.txt")))
+                self.assertTrue(os.path.isfile(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml")))
+
+    def test_request_matches_its_recorded_hash(self):
+        """The copy must be verifiable, not merely asserted."""
+        import hashlib
+        for bm in ("BM-001", "BM-002"):
+            with self.subTest(benchmark=bm):
+                man = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml"))
+                path = os.path.join(_paths.REPO_ROOT, man["artifact"])
+                with open(path, "rb") as fh:
+                    raw = fh.read()
+                self.assertEqual(man["extraction"]["hashes"]["file_sha256"],
+                                 hashlib.sha256(raw).hexdigest())
+                self.assertEqual(man["extraction"]["hashes"]["bytes"], len(raw))
+                # content hash excludes the one appended newline
+                self.assertEqual(man["extraction"]["hashes"]["content_sha256"],
+                                 hashlib.sha256(raw[:-1]).hexdigest())
+
+    def test_manifest_declares_no_oracle_and_no_reference_content(self):
+        for bm in ("BM-001", "BM-002"):
+            with self.subTest(benchmark=bm):
+                man = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml"))
+                absent = man["declared_absent"]
+                for key in ("oracle_semantics", "positive_reference_information",
+                            "ver2_derived_interpretation"):
+                    self.assertFalse(absent[key]["present"], "%s declares %s present" % (bm, key))
+                    self.assertTrue(absent[key]["statement"].strip())
+
+    def test_manifest_records_a_human_review_status(self):
+        allowed = {"HUMAN_REVIEW_REQUIRED", "HUMAN_REVIEW_COMPLETE"}
+        for bm in ("BM-001", "BM-002"):
+            with self.subTest(benchmark=bm):
+                man = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml"))
+                hr = man["human_review"]
+                self.assertIn(hr["status"], allowed)
+                if hr["status"] == "HUMAN_REVIEW_REQUIRED":
+                    self.assertTrue(hr["questions"], "review required but no question stated")
+
+    def test_extraction_applied_no_interpretation(self):
+        """The forbidden transformations must be named, not merely avoided."""
+        forbidden = {"interpretation", "normalization", "summarization",
+                     "clarification", "enrichment", "reordering"}
+        for bm in ("BM-001", "BM-002"):
+            with self.subTest(benchmark=bm):
+                man = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml"))
+                declared = set(man["extraction"]["transformations_NOT_applied"])
+                self.assertEqual(set(), forbidden - declared)
+                self.assertEqual("VERBATIM_FIELD_COPY", man["extraction"]["method"])
+
+    def test_source_provenance_is_not_an_oracle_path(self):
+        """The extraction must not have come from ver3/oracles/.
+
+        Reading the dossier would mean the answer key's analytical sections were
+        a source for the one tree production code is allowed to read.
+        """
+        for bm in ("BM-001", "BM-002"):
+            with self.subTest(benchmark=bm):
+                man = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml"))
+                for witness in ("primary_witness", "corroborating_witness"):
+                    path = man["provenance"][witness]["path"]
+                    self.assertNotIn("ver3/oracles", path)
+                    self.assertNotIn("cad_validation", path)
+
+    def test_request_contains_no_mechanism_or_geometry_leakage(self):
+        """A source request states a problem. It must not name a solution.
+
+        A leaked mechanism noun here would mean the pipeline was handed its
+        answer in its only legitimate input.
+        """
+        leaks = ("slider-crank", "crank shaft", "connecting rod", "clevis",
+                 "snap latch", "cantilever", "b-rep", "step file", "cadquery",
+                 "mujoco", "body count", "overhung")
+        for bm in ("BM-001", "BM-002"):
+            with self.subTest(benchmark=bm):
+                with open(os.path.join(_paths.BENCHMARKS, bm, "source", "request.txt"),
+                          encoding="utf-8") as fh:
+                    text = fh.read().lower()
+                found = [w for w in leaks if w in text]
+                self.assertEqual([], found, "solution language in the source request: %s" % found)
+
     def test_bm003_is_declared_a_placeholder(self):
         data = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
         self.assertEqual("PLACEHOLDER", data["status"])
