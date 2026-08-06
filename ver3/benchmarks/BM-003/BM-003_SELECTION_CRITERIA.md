@@ -1,10 +1,28 @@
 # BM-003 — selection criteria and candidate briefs
 
-**The subject of BM-003 is `HUMAN_DECISION_REQUIRED`.** This document narrows the
-space and offers three briefs. It does not choose, and choosing is not a step
-that can be delegated: BM-003 is the third witness in the freeze gate, and a
-benchmark selected by the same process it is meant to test would not be
-independent evidence.
+> **SUPERSEDED IN PART — the subject is now fixed.**
+>
+> BM-003 is **Compact folding three-leg desktop stand**, fixed by instruction.
+> None of the three briefs below was selected; the decision was made outside this
+> analysis, which is what the document asked for. Sections 1–3 remain live: they
+> are the coverage gaps and criteria the fixed subject must still be checked
+> against, and section 5's post-selection sequence is now the active path.
+>
+> The source request exists at [`source/request.txt`](source/request.txt) and is
+> **HUMAN_REVIEW_REQUIRED and unfrozen**. No Oracle has been authored.
+>
+> **How the fixed subject scores against section 3:** it exercises C1 (assembly
+> order), C2 (leg joints retained), C3 (mobility differs between stored and
+> deployed), C4 (legs must not fold, twist or work loose once open), C5
+> (retention through the full cycle), C6 (the release admits many realizations),
+> and C7 (decidable by mobility counting and interference sweeps, with load
+> capacity explicitly out of scope). It is closest in spirit to Brief A, without
+> being it.
+
+This document narrowed the space and offered three briefs. It did not choose, and
+choosing was not a step that could be delegated: BM-003 is the third witness in
+the freeze gate, and a benchmark selected by the same process it is meant to test
+would not be independent evidence.
 
 Nothing here is an Oracle, a design, a positive reference or a Stage output. No
 mechanism is specified, no geometry is proposed, and no expected outcome is
@@ -205,14 +223,16 @@ result outright when `oracle_frozen_before_run` is false.
 ## 6. Status
 
 ```yaml
-benchmark_subject: HUMAN_DECISION_REQUIRED
-candidate_briefs: [A, B, C]
-recommendation: NONE
+benchmark_subject: "BM-003 - COMPACT FOLDING THREE-LEG DESKTOP STAND"
+subject_status: FIXED_BY_INSTRUCTION
+candidate_briefs: [A, B, C]        # none selected; superseded by the fixed subject
+source_request: AUTHORED           # HUMAN_REVIEW_REQUIRED, unfrozen
 oracle: NOT_AUTHORED
-source_request: NOT_WRITTEN
 positive_reference: NOT_BUILT
 blocks: freezing any stage contract
 ```
 
-Until a human chooses, BM-003 remains a declared placeholder and no stage
-contract may freeze — enforced by `test_benchmark_skeleton.py`.
+BM-003 remains a declared placeholder and no stage contract may freeze — enforced
+by `test_benchmark_skeleton.py`. The source being written does not change that:
+the gate needs a **frozen** source and an Oracle frozen **before** the first run,
+and neither exists.

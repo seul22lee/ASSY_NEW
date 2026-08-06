@@ -7,14 +7,17 @@
 
 schema_version: "0.1.0"
 benchmark_id: BM-003
-title: "NOT YET DEFINED"
+title: "Compact folding three-leg desktop stand"
 status: PLACEHOLDER
 
 source:
   request_path: ver3/benchmarks/BM-003/source/request.txt
-  present: false
+  present: true
   frozen: false
   read_by: s01
+  manifest: ver3/benchmarks/BM-003/source/source_manifest.yaml
+  human_review: HUMAN_REVIEW_REQUIRED
+  origin: AUTHORED
   note: >
     The only raw text input to a run. Every later stage reads DesignState.
 
@@ -46,18 +49,23 @@ output:
 
 placeholder_notice:
   state: >
-    BM-003 has no source request, no Oracle and no positive executable
-    reference. The directory exists because STAGE_PROGRESSION_CONTRACT step 8
-    requires three benchmarks, and a skeleton that is missing the third would
-    make the freeze gate look satisfiable when it is not.
+    BM-003 has a source request, but it is AUTHORED, UNFROZEN and
+    HUMAN_REVIEW_REQUIRED, and there is still no Oracle and no positive
+    executable reference. It therefore remains a placeholder: the freeze gate
+    needs a frozen source and an Oracle frozen before the first run, and it has
+    neither.
   blocks:
     - "Freezing ANY stage contract (STAGE_PROGRESSION_CONTRACT freeze_rule)."
   selection_criteria: ver3/benchmarks/BM-003/BM-003_SELECTION_CRITERIA.md
-  benchmark_subject: HUMAN_DECISION_REQUIRED
-  candidate_briefs: [A, B, C]
-  recommendation: NONE
+  benchmark_subject: "BM-003 - COMPACT FOLDING THREE-LEG DESKTOP STAND"
+  subject_status: FIXED_BY_INSTRUCTION
+  subject_chosen_by_pipeline_or_author: false
+  candidate_briefs_superseded: >
+    The three briefs in BM-003_SELECTION_CRITERIA.md were not chosen among.
+    The subject was fixed by decision, which settles that document's
+    HUMAN_DECISION_REQUIRED without selecting a brief.
   required_before_use:
-    - "A source request, frozen."
+    - "Human review of the authored source (BM003_SOURCE_HUMAN_REVIEW_CHECKLIST.md), then freezing it."
     - "An independently authored Oracle, frozen BEFORE the first source-only run."
     - "Optionally a positive executable reference, for evaluator validation."
   ordering_rule: >
@@ -65,6 +73,7 @@ placeholder_notice:
     evaluation. An Oracle written after seeing a run is a description of that
     run (BENCHMARK_RESULT_CONTRACT oracle_frozen_before_run, which invalidates
     the result outright when false).
-  deliberately_undefined: >
-    The subject is not chosen here. Picking it inside this rebuild task would
-    make it a benchmark shaped by the architecture it is meant to test.
+  subject_provenance: >
+    The subject was FIXED BY INSTRUCTION, not selected by analysis and not
+    chosen by the pipeline or by the source's author. That is what keeps BM-003
+    usable as the third independent witness in the freeze gate.

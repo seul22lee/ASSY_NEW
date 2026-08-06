@@ -161,6 +161,63 @@ class TestBenchmarkSkeleton(unittest.TestCase):
                 found = [w for w in leaks if w in text]
                 self.assertEqual([], found, "solution language in the source request: %s" % found)
 
+    def test_bm003_authored_source_is_unfrozen_and_under_review(self):
+        """An authored source is not verifiable by comparison, so it stays unfrozen.
+
+        BM-001 and BM-002 were extracted and can be checked against a witness.
+        BM-003 was written, so whether it is faithful and answer-free is a human
+        judgement, and freezing it before that judgement would skip the only
+        check there is.
+        """
+        path = os.path.join(_paths.BENCHMARKS, "BM-003", "source", "source_manifest.yaml")
+        if not os.path.isfile(path):
+            self.skipTest("BM-003 source not authored yet")
+        man = _paths.load_yaml(path)
+        self.assertEqual("AUTHORED", man["provenance"]["origin"])
+        self.assertEqual("HUMAN_REVIEW_REQUIRED", man["human_review"]["status"])
+        self.assertFalse(man["human_review"]["frozen"])
+        self.assertFalse(man["subject"]["chosen_by_this_session"])
+
+    def test_bm003_request_matches_its_recorded_hash(self):
+        import hashlib
+        path = os.path.join(_paths.BENCHMARKS, "BM-003", "source", "source_manifest.yaml")
+        if not os.path.isfile(path):
+            self.skipTest("BM-003 source not authored yet")
+        man = _paths.load_yaml(path)
+        with open(os.path.join(_paths.REPO_ROOT, man["artifact"]), "rb") as fh:
+            raw = fh.read()
+        self.assertEqual(man["authoring"]["hashes"]["file_sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(man["authoring"]["hashes"]["bytes"], len(raw))
+
+    def test_bm003_request_is_within_the_length_target(self):
+        path = os.path.join(_paths.BENCHMARKS, "BM-003", "source", "request.txt")
+        if not os.path.isfile(path):
+            self.skipTest("BM-003 source not authored yet")
+        with open(path, encoding="utf-8") as fh:
+            words = len(fh.read().split())
+        self.assertTrue(150 <= words <= 300, "request is %d words; target 150-300" % words)
+
+    def test_bm003_source_declares_no_oracle_exists(self):
+        path = os.path.join(_paths.BENCHMARKS, "BM-003", "source", "source_manifest.yaml")
+        if not os.path.isfile(path):
+            self.skipTest("BM-003 source not authored yet")
+        man = _paths.load_yaml(path)
+        self.assertFalse(man["declared_absent"]["oracle_semantics"]["present"])
+        self.assertFalse(man["declared_absent"]["solution_content"]["present"])
+        for item in ("an Oracle", "a mechanism selection", "CAD", "an evaluation"):
+            self.assertIn(item, man["this_task_did_not_produce"])
+
+    def test_bm003_still_blocks_the_freeze_gate_despite_having_a_source(self):
+        """A written source is not a frozen source.
+
+        The gate needs a frozen source AND an Oracle frozen before the first run.
+        Having authored one of the three must not make the gate look passable.
+        """
+        d = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
+        self.assertEqual("PLACEHOLDER", d["status"])
+        self.assertFalse(d["source"]["frozen"])
+        self.assertFalse(d["oracle"]["frozen_before_source_only_runs"])
+
     def test_bm003_is_declared_a_placeholder(self):
         data = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
         self.assertEqual("PLACEHOLDER", data["status"])

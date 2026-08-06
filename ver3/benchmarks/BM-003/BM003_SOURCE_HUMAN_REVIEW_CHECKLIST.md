@@ -1,0 +1,154 @@
+# BM-003 — source human review checklist
+
+For a human reviewing [`source/request.txt`](source/request.txt) before it is
+frozen.
+
+**What this review is for.** BM-001 and BM-002 have sources that were *extracted*,
+so their faithfulness is checkable by comparing bytes to a witness. BM-003's
+source was *authored*. There is no witness to compare against, so whether it
+states the intent faithfully and contains no answer is a judgement — and the
+author of a request is the worst-placed party to make it.
+
+**Reviewer independence.** Ideally not the author of the request. Necessarily not
+the same person who later authors the BM-003 Oracle, since an Oracle author who
+has already shaped the request has partly answered it.
+
+Status while unreviewed: **HUMAN_REVIEW_REQUIRED**, source **unfrozen**.
+
+---
+
+## A. Intent coverage
+
+Does the request carry the fixed product intent? Section 2 of the authoring
+record maps each area to its sentence; confirm each against the request itself
+rather than against the table.
+
+| | Check | ✅ / ❌ / note |
+|---|---|---|
+| A1 | Legs fold close to the body; compact stored form | |
+| A2 | Everything stays attached when folded | |
+| A3 | No loose removable parts needed to fold or unfold | |
+| A4 | Unfolds by hand, in a sequence a user can follow | |
+| A5 | Three legs end up spread in different directions, usable footprint | |
+| A6 | Nothing comes apart during unfolding | |
+| A7 | No tools, motor or external fixture | |
+| A8 | Stays open without the user holding it | |
+| A9 | Legs cannot fold back, twist aside, or work loose on their own | |
+| A10 | A deliberate action is required before folding | |
+| A11 | Folds back to the same compact form | |
+| A12 | Open-and-fold cycle repeatable | |
+| A13 | Joints and retention stay intact through the cycle | |
+| A14 | Can be built and assembled in a sensible order | |
+| A15 | Stays together in ordinary opening and folding | |
+| A16 | Intended to hold a small desktop object | |
+
+---
+
+## B. No solution content
+
+The request must not answer its own question.
+
+| | Check | ✅ / ❌ / note |
+|---|---|---|
+| B1 | No mechanism or linkage named or implied | |
+| B2 | No locking realization — no latch, collar, toggle, pin, spring, magnet, screw, detent, or any substitute for one | |
+| B3 | No joint type named or implied | |
+| B4 | No body or component count (three **legs** is behaviour, not a body count) | |
+| B5 | No hub design, assembly direction or retention feature | |
+| B6 | No dimension, angle, mass, force or other number | |
+| B7 | No geometric threshold, including soft ones ("fits in a drawer", "no taller than…") | |
+
+> **The question behind B1–B3:** could at least three genuinely different
+> mechanisms satisfy this request? If only one obvious answer exists, something in
+> the wording has narrowed it, and the benchmark can no longer detect premature
+> convergence to a single candidate.
+
+---
+
+## C. Judgement calls the author flagged
+
+These are the places the author was least certain. Each is argued in the
+authoring record; the reviewer decides.
+
+| | Call | Reviewer decision |
+|---|---|---|
+| C1 | *"do something deliberate"* expresses the release without naming a lock. Is it clear enough to be answerable, and open enough not to prescribe? | |
+| C2 | *"stay open on its own"* is used instead of "lock". Does it read as persistence, or does it still imply a locking device? | |
+| C3 | *"It is meant to hold a small object on my desk"* gives purpose with no number. Does it stay clear of a structural-capacity requirement? | |
+| C4 | "fold", "open", "spread apart" — do any read as a **prescribed motion or joint type**? ("swing" was rejected in drafting for implying rotation about a fixed axis.) | |
+| C5 | The instruction's *"or another obvious unintended rigid-body motion"* was **not** translated into the request — only the three named failures appear, in a user's words. Is that omission acceptable, or should the general case be expressed? | |
+
+---
+
+## D. Register and answerability
+
+| | Check | ✅ / ❌ / note |
+|---|---|---|
+| D1 | Reads as something a real person would write, not as a specification | |
+| D2 | 150–300 words (authored at 289) | |
+| D3 | No stage names, DesignState or Oracle vocabulary | |
+| D4 | No requirement identifiers | |
+| D5 | No predicates, acceptance criteria or evaluation instructions | |
+| D6 | A competent designer could attempt this without further questions | |
+| D7 | Ambiguities that remain are ones a *real* request would have — not accidents of drafting | |
+
+> **D7 is not asking for the ambiguities to be removed.** A source that has been
+> polished until nothing is open is no longer a realistic request, and the
+> pipeline's ability to *record* an ambiguity rather than silently resolve it is
+> part of what the benchmark measures. The question is whether each remaining
+> ambiguity is one a user would plausibly have left.
+
+---
+
+## E. Scope boundaries
+
+| | Check | ✅ / ❌ / note |
+|---|---|---|
+| E1 | No numeric load-capacity requirement | |
+| E2 | No claim or requirement of material strength, stress or buckling | |
+| E3 | No fatigue, wear or friction-performance requirement | |
+| E4 | No manufacturing-process feasibility requirement | |
+| E5 | Nothing that would require FEM, CFD or elastic snap-fit analysis to answer | |
+| E6 | The in-scope behaviour — assembly, configuration-dependent mobility, deployment, locking, release, folding, retention — is all present | |
+
+> **Why E1–E5 matter as much as the coverage checks.** A requirement this
+> benchmark cannot verify does not make it harder; it makes it *emptier*. The
+> honest result would be UNSUPPORTED, which is a correct answer that measures
+> nothing.
+
+---
+
+## F. Independence
+
+| | Check | ✅ / ❌ / note |
+|---|---|---|
+| F1 | No Oracle content — and no BM-003 Oracle exists yet | |
+| F2 | No positive executable reference content; no geometry from any source | |
+| F3 | No Ver1 or Ver2 material | |
+| F4 | Does not substantially re-run a frozen dossier (nearest: `C4-drawer`, `guided-slider`, `latch-retention`, `rotary-to-linear-engagement`) | |
+| F5 | Nothing in the request is keyed to this being a benchmark rather than a product request | |
+
+---
+
+## G. Outcome
+
+```yaml
+reviewer:            # name
+review_date:         # YYYY-MM-DD
+outcome:             # ACCEPTED | ACCEPTED_WITH_EDITS | REJECTED
+c1_c5_decisions:     # one line each
+required_edits:      # empty if ACCEPTED
+source_frozen:       # true only if ACCEPTED and no edits pending
+```
+
+**On ACCEPTED:** set `frozen: true` and `human_review.status:
+HUMAN_REVIEW_COMPLETE` in `source/source_manifest.yaml`, record the reviewer and
+date, and re-hash `request.txt` if it changed.
+
+**Then, and only then**, the BM-003 Oracle may be authored — independently, and
+frozen **before** the first source-only run. `BENCHMARK_RESULT_CONTRACT`
+invalidates a result outright when `oracle_frozen_before_run` is false: an Oracle
+written after a run is not a weaker Oracle, it is no Oracle at all.
+
+Until this review passes, BM-003 stays a placeholder and **no stage contract may
+freeze**.

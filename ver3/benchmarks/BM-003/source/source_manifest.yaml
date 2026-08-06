@@ -1,0 +1,215 @@
+# SOURCE MANIFEST — BM-003
+#
+# This source is AUTHORED, not extracted. BM-001 and BM-002 have a pre-existing
+# user request that was copied verbatim from an original fixture; BM-003 has no
+# prior source, so the request was written for it.
+#
+# That difference matters, and it is why this manifest is shaped differently from
+# the other two. An extraction can be verified by comparing bytes against a
+# witness. An authored request cannot: its faithfulness is a judgement about
+# whether it says what was intended and nothing more. The verification burden
+# therefore falls on human review, and the source stays UNFROZEN until that
+# review happens.
+#
+# request.txt is the ONLY raw text a run may consume, and only Stage 01 consumes
+# it (INV-002, rebuild policy rule 5).
+
+schema_version: "0.1.0"
+benchmark_id: BM-003
+artifact: ver3/benchmarks/BM-003/source/request.txt
+
+subject:
+  title: "BM-003 — COMPACT FOLDING THREE-LEG DESKTOP STAND"
+  fixed_by: authoring_instruction
+  chosen_by_this_session: false
+  note: >
+    The subject was FIXED by the instruction that commissioned this source. It
+    was not selected here, and the three candidate briefs in
+    BM-003_SELECTION_CRITERIA.md were not chosen among — that document's
+    HUMAN_DECISION_REQUIRED is now settled by decision, not by analysis.
+
+# ---------------------------------------------------------------- provenance
+provenance:
+  origin: AUTHORED
+  authored_from:
+    what: "A fixed product intent supplied in the authoring instruction."
+    content: >
+      Six areas of user-observable behaviour — stored configuration, deployment,
+      deployed configuration, folding, product assembly, and scope — each stated
+      as behaviour to be exhibited rather than as a mechanism to be built.
+    recorded_in: ver3/benchmarks/BM-003/BM003_SOURCE_AUTHORING_RECORD.md
+  NOT_derived_from:
+    - an Oracle, for BM-003 or for any other benchmark
+    - a positive executable reference
+    - any existing benchmark's source request
+    - any Ver1 or Ver2 fixture, dossier or golden output
+    - any mechanism catalogue or prior design
+  prior_art_check:
+    performed: true
+    what_was_checked: >
+      That the subject does not re-run a frozen dossier. The nearest existing
+      cases are C4-drawer (knob-driven drawer), guided-slider, latch-retention
+      and rotary-to-linear-engagement. None involves a folding multi-leg support,
+      configuration-dependent mobility of the kind described, or a deliberate
+      release before folding.
+    conclusion: DISTINCT
+
+# ---------------------------------------------------------- authoring method
+authoring:
+  method: AUTHORED_FROM_FIXED_PRODUCT_INTENT
+  register: "Ordinary first-person product request, as a user would write it."
+  length_words: 289
+  length_target: "150-300 words"
+  what_was_written: >
+    The need and the user-observable behaviour: what the product must do, and
+    what must not happen while it does it.
+  what_was_deliberately_NOT_written:
+    - a mechanism, linkage or kinematic arrangement
+    - a locking realization of any kind
+    - a joint type
+    - a body or component count
+    - an assembly direction or hub arrangement
+    - a retention feature
+    - any numeric dimension, angle, mass or load
+    - any acceptance criterion, predicate or evaluation instruction
+    - any requirement identifier
+  hashes:
+    file_sha256: 1098f2caf1527996466f898966478989f61f511869c9db1ea6a52971d88d92c7
+    bytes: 1458
+  note_on_a_single_hash: >
+    BM-001 and BM-002 record two hashes because a trailing newline was appended
+    to extracted content. Nothing was appended here — the file IS the authored
+    text — so a second hash would describe nothing.
+
+# --------------------------------------------------- prohibited content scan
+prohibited_content_scan:
+  performed: true
+  method: "Regex scan of the request over each prohibited category."
+  categories:
+    stage_names: clean
+    designstate_or_oracle_terminology: clean
+    requirement_ids: clean
+    predicates_or_evaluation_instructions: clean
+    selected_linkage: clean
+    selected_locking_feature: clean
+    selected_joint_type: clean
+    preferred_body_count: clean
+    numeric_or_geometric_thresholds: clean
+    structural_capacity_language: clean
+    manufacturing_process_language: clean
+  one_real_hit_acted_on:
+    match: "clamp"
+    where: "'anything to clamp it to', rendering the instruction's 'external fixture'"
+    resolution: >
+      Rewritten to "any other equipment to do it". The word appeared only in the
+      NEGATIVE and referred to something outside the product, so it prescribed
+      no locking realization - but it is a mechanism noun a few lines from the
+      release requirement, and a reviewer should not have to reason out that it
+      is not a hint. Rescanned after the edit: clean.
+  one_false_positive_investigated:
+    match: "rack"
+    where: "inside the word 'track', in 'loose pieces to keep track of'"
+    resolution: >
+      A substring artifact of a scan without word boundaries. Re-run with word
+      boundaries: clean. Recorded because a scan result nobody checked is not
+      evidence.
+
+# --------------------------------------------------------- scope boundaries
+scope:
+  in_scope_for_this_benchmark:
+    - rigid-body assembly
+    - configuration-dependent mobility
+    - deployment
+    - locking
+    - release
+    - folding
+    - retention
+  deliberately_out_of_scope:
+    - numeric load capacity
+    - material strength, stress, buckling
+    - fatigue, wear, friction performance
+    - manufacturing-process feasibility
+    - FEM, CFD, elastic snap-fit analysis
+  the_one_load_bearing_sentence:
+    text: "It is meant to hold a small object on my desk while I am working."
+    why_it_is_phrased_that_way: >
+      The instruction permits stating the intended use but forbids turning it
+      into a structural-capacity benchmark. The sentence therefore gives the
+      product a purpose and no number. Adding a mass, a force or the word
+      "support" with a quantity would convert it into a capacity requirement
+      that this benchmark cannot verify, which would produce UNSUPPORTED and
+      measure nothing.
+
+# ------------------------------------------------------------- human review
+human_review:
+  status: HUMAN_REVIEW_REQUIRED
+  frozen: false
+  checklist: ver3/benchmarks/BM-003/BM003_SOURCE_HUMAN_REVIEW_CHECKLIST.md
+  why: >
+    An authored request cannot be verified by comparison the way an extracted one
+    can. Whether it states the intent faithfully, whether it leaks a solution,
+    and whether it is answerable at all are judgements, and the author of a
+    request is the worst-placed party to make them.
+  must_be_settled_before:
+    - "Freezing this source."
+    - "Authoring the BM-003 Oracle."
+    - "The first source-only run of BM-003."
+  ordering_rule: >
+    The Oracle must be authored independently and frozen BEFORE the first
+    source-only run. BENCHMARK_RESULT_CONTRACT invalidates a result outright when
+    oracle_frozen_before_run is false, so an Oracle written after a run is not a
+    weaker Oracle — it is no Oracle at all.
+
+# ------------------------------------------------- contamination declarations
+declared_absent:
+  oracle_semantics:
+    present: false
+    statement: >
+      NO Oracle content is present, and no BM-003 Oracle exists. No invariant, no
+      unresolved decision, no negative case and no evaluation criterion was
+      authored, consulted or implied.
+    how_assured: >
+      ver3/oracles/ was not read during authoring. Nothing there concerns BM-003,
+      because BM-003 has no Oracle to read.
+  positive_reference_information:
+    present: false
+    statement: >
+      NO positive executable reference information is present. ver3/cad_validation/
+      was not read. The request contains no mechanism, no geometry, no dimension,
+      no body count and no architecture.
+  ver2_derived_interpretation:
+    present: false
+    statement: >
+      NO Ver1 or Ver2 material is present. BM-003 has no legacy fixture, dossier
+      or golden output, and none was sought.
+  solution_content:
+    present: false
+    statement: >
+      The request describes a NEED and OBSERVABLE BEHAVIOUR only. Every locking
+      realization named as forbidden by the instruction — latch, collar, toggle,
+      pin, spring, magnet, screw — is absent, as is any linkage or joint type.
+    residual_judgement: >
+      "fold", "open" and "spread apart" describe what a user sees happen. They
+      are the ordinary words for the behaviour and cannot be avoided without
+      making the request unintelligible, but a reviewer should confirm they do
+      not read as a prescribed motion type. This is checklist item C4.
+
+# --------------------------------------------------------------- consumption
+consumption:
+  readable_by: [s01]
+  not_readable_by: [s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12]
+  rule: >
+    Every stage after s01 reads DesignState. Two stages reading this file would
+    produce two interpretations of one sentence, with nothing to say which one a
+    downstream entity depends on.
+
+# ------------------------------------------------------------ what this is not
+this_task_did_not_produce:
+  - an Oracle
+  - any Stage output
+  - a mechanism selection
+  - a topology
+  - CAD
+  - a simulation
+  - a positive executable reference
+  - an evaluation
