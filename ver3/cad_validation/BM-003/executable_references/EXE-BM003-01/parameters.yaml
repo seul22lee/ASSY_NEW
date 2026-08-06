@@ -1,0 +1,103 @@
+# EXE-BM003-01 — parameters
+#
+# Every dimension the fixture depends on, with its unit, provenance and bounds.
+#
+# PROVENANCE IS THE POINT. The BM-003 source contains no digit, so NO value here
+# is derived from it. Every number is FIXTURE_CHOICE: a decision this reference
+# made in order to exist at all, and one a different valid design would make
+# differently. Recording that distinction is what stops a fixture dimension being
+# read later as a requirement.
+#
+# provenance values:
+#   FIXTURE_CHOICE   chosen by this reference; the source says nothing
+#   DERIVED          computed from other parameters; formula given
+#   FIXTURE_PRINCIPLE fixed by the commissioned realization principle
+
+reference_id: EXE-BM003-01
+benchmark_id: BM-003
+schema_version: "0.1.0"
+units: mm
+angle_units: degrees
+
+realization_principle:
+  summary: >
+    Three hinged legs on a central hub, held deployed by a captive annular ring
+    whose three arms geometrically block the leg heels from rising. Release is a
+    deliberate lift-and-rotate of the ring.
+  declared_state_maintenance_class: KINEMATIC_BLOCK
+  provenance: FIXTURE_PRINCIPLE
+
+parameters:
+
+  # ---- hub column -------------------------------------------------------
+  col_r:            {value: 11.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [6, 20],   note: "column radius; ring rides on it"}
+  col_top_z:        {value: 118.0, unit: mm, provenance: FIXTURE_CHOICE, bounds: [60, 200], note: "top of the full-diameter column"}
+  spigot_r:         {value: 8.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [4, 10],   note: "reduced top spigot; top plate seats on the step"}
+  spigot_top_z:     {value: 126.0, unit: mm, provenance: FIXTURE_CHOICE, bounds: [60, 220]}
+  shoulder_r:       {value: 15.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [12, 22],  note: "ring lower travel stop; must exceed ring bore"}
+  shoulder_top_z:   {value: 10.5,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [4, 20],   note: "ring rests here when locked"}
+  shoulder_bot_z:   {value: 3.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [0, 10]}
+
+  # ---- leg root stations ------------------------------------------------
+  station_count:    {value: 3,     unit: count, provenance: FIXTURE_PRINCIPLE, bounds: [3, 3], note: "three legs; the source says three"}
+  station_angles:   {value: [90.0, 210.0, 330.0], unit: deg, provenance: DERIVED, formula: "90 + 120*i", note: "threefold spacing"}
+  boss_r_outer:     {value: 20.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [14, 30], note: "clevis boss outer radius"}
+  boss_half_h:      {value: 7.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [4, 12]}
+  hinge_r:          {value: 24.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [16, 34], note: "hinge axis radius from column axis"}
+  hinge_z:          {value: 0.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [-20, 20], note: "hinge axis plane; datum"}
+  hinge_pin_r:      {value: 3.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [2, 6]}
+  hinge_pin_len:    {value: 30.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [16, 44]}
+  clip_r:           {value: 4.6,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [3, 8],  note: "retaining clip outer radius; exceeds pin radius"}
+  clip_t:           {value: 1.8,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [1, 4]}
+
+  # ---- legs -------------------------------------------------------------
+  leg_len:          {value: 126.0, unit: mm, provenance: FIXTURE_CHOICE, bounds: [70, 200]}
+  leg_r:            {value: 6.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [3, 12]}
+  theta_stored:     {value: 0.0,   unit: deg, provenance: FIXTURE_CHOICE, bounds: [0, 10],  note: "leg angle from -Z; 0 = straight down, tucked"}
+  theta_deployed:   {value: 30.0,  unit: deg, provenance: FIXTURE_CHOICE, bounds: [15, 45], note: "splay angle giving the footprint"}
+
+  # ---- blocker heel -----------------------------------------------------
+  heel_len:         {value: 20.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [10, 34], note: "arm above the hinge that the ring blocks"}
+  heel_r:           {value: 3.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [2, 6]}
+  heel_beta:        {value: 40.0,  unit: deg, provenance: FIXTURE_CHOICE, bounds: [20, 60],
+                     note: "heel angular offset from +Z at theta=0; leans the heel outward so it rises on fold-back"}
+
+  # ---- captive locking ring --------------------------------------------
+  ring_bore_r:      {value: 11.4,  unit: mm, provenance: DERIVED, formula: "col_r + ring_slip", note: "slip fit on the column"}
+  ring_slip:        {value: 0.4,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [0.2, 1.0], note: "NOMINAL clearance, not a tolerance"}
+  ring_hub_or:      {value: 16.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [13, 22]}
+  ring_h:           {value: 9.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [5, 16]}
+  ring_arm_r_in:    {value: 16.0,  unit: mm, provenance: DERIVED, formula: "ring_hub_or"}
+  ring_arm_r_out:   {value: 48.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [34, 62], note: "must cover the heel-tip sweep"}
+  ring_arm_half_w:  {value: 13.0,  unit: deg, provenance: FIXTURE_CHOICE, bounds: [8, 22], note: "arm angular half-width"}
+  ring_z_locked:    {value: 10.5,  unit: mm, provenance: DERIVED, formula: "shoulder_top_z", note: "ring bottom, locked"}
+  ring_z_released:  {value: 20.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [14, 26], note: "ring bottom, lifted"}
+  ring_release_rot: {value: 60.0,  unit: deg, provenance: DERIVED, formula: "360/(2*station_count)", note: "half a station pitch puts arms in the gaps"}
+
+  # ---- ring captor (the final retainer) ---------------------------------
+  captor_z_bot:     {value: 29.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [22, 40], note: "bounds ring upper travel"}
+  captor_h:         {value: 6.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [3, 12]}
+  captor_r:         {value: 15.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [12, 22], note: "exceeds ring bore, so the ring cannot pass"}
+  captor_pin_r:     {value: 2.2,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [1.5, 4]}
+  captor_pin_len:   {value: 26.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [16, 36]}
+
+  # ---- top support plate ------------------------------------------------
+  plate_r:          {value: 23.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [14, 40], note: "support region for the desktop object"}
+  plate_t:          {value: 8.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [4, 14]}
+  plate_bore_r:     {value: 8.2,   unit: mm, provenance: DERIVED, formula: "spigot_r + 0.2"}
+  top_pin_r:        {value: 2.0,   unit: mm, provenance: FIXTURE_CHOICE, bounds: [1.5, 4]}
+  top_pin_len:      {value: 20.0,  unit: mm, provenance: FIXTURE_CHOICE, bounds: [12, 30]}
+
+  # ---- sampling ---------------------------------------------------------
+  samples_coarse:   {value: 48,  unit: count, provenance: FIXTURE_CHOICE, bounds: [24, 200], note: "base samples per transition"}
+  samples_refine:   {value: 24,  unit: count, provenance: FIXTURE_CHOICE, bounds: [8, 96],   note: "extra samples near critical events"}
+  min_clearance_target: {value: 0.3, unit: mm, provenance: FIXTURE_CHOICE, bounds: [0.05, 2.0],
+                         note: "NOMINAL proxy clearance floor. NOT a tolerance and NOT a contact claim."}
+
+not_established_by_any_parameter_here:
+  - "load capacity, stress, stiffness, buckling"
+  - "fatigue, wear, lifetime"
+  - "tolerance-induced looseness or achievable manufacturing precision"
+  - "contact pressure, friction behaviour"
+  - "impact resistance"
+  - "manufacturing-process feasibility or cost"
