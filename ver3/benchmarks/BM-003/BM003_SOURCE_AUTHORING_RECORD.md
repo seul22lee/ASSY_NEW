@@ -10,9 +10,9 @@ reference, no evaluation.
 
 - Subject: **BM-003 — Compact folding three-leg desktop stand**, fixed by the
   authoring instruction and not chosen here.
-- Artifact: [`source/request.txt`](source/request.txt) — 300 words, target 150–300
+- Artifact: [`source/request.txt`](source/request.txt) — 299 words, target 150–300
 - Status: **HUMAN_APPROVED and FROZEN** (human decision, 2026-08-05)
-- `sha256` `0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c`
+- `sha256` `ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d` (revision **R3**)
 
 ---
 
@@ -51,7 +51,8 @@ not the source.
 | Parts stay connected through the deployment path | *"Nothing should come apart or fall off while I am opening it"* |
 | No tools, motor, or external fixture | *"I should not need tools, a motor, or any other equipment to do it"* |
 | Stays deployed without the user holding it | *"it needs to stay open on its own. I should not have to hold the legs while I use it"* |
-| No free folding, twisting, detaching, or other unintended motion | *"they should not be able to fold back, twist aside, or work themselves loose"* — and, for the general case, *"Nothing should turn on its own, shift out of place, or move in some other direction I was not expecting"* |
+| No free folding, twisting, detaching, or other unintended motion | *"they should not be able to fold back, twist aside, or **come off**"* — and, for the general case, *"Nothing should turn on its own, shift out of place, or move in some other direction I was not expecting"* |
+| Retention through the whole cycle | *"come off"*, *"come apart"*, *"fall off"*, *"all normal parts remaining attached"* — four separate places, none of them the deleted R1/R2 wording |
 | Deliberate release required before folding | *"Before it can be folded again I want to have to do something deliberate, so it does not collapse just because I knocked it"* |
 | Returns to the compact stored configuration | *"it should fold back down to the same compact shape it started in"* |
 | Cycle is repeatable | *"The opening and folding sequence should be repeatable"* |
@@ -95,7 +96,7 @@ The instruction requires that the legs *"must not freely fold, twist away,
 detach, or acquire another obvious unintended rigid-body motion."*
 
 The named failures are carried as *"they should not be able to fold back, twist
-aside, or work themselves loose."* "Rigid-body motion" is analysis vocabulary and
+aside, or **come off**"* — the third term as amended by R3. "Rigid-body motion" is analysis vocabulary and
 does not belong in a user's request, so each is given in the words a user would
 use.
 
@@ -200,6 +201,57 @@ Re-audited after the edits: overprescription **clean** on thirteen categories �
 including a contact-noise-and-lifetime category added specifically to confirm
 these edits did what they were for — and underdefinition **complete** on all
 twenty-four intent elements. 300 words.
+
+---
+
+## 4b. Amendment R3 — the pre-Oracle scope correction
+
+Formal amendment `BM003-SOURCE-AMENDMENT-R3`, class
+`PRE_ORACLE_SCOPE_CORRECTION`, status `HUMAN_APPROVED`. Recorded in full under
+`amendment_history` in [`source/source_manifest.yaml`](source/source_manifest.yaml).
+
+The source was **already frozen**, so this was not an author edit. A frozen
+artifact changes only through a recorded approval, with the superseded hash
+retained rather than overwritten — a frozen state whose predecessor cannot be
+reconstructed was never really frozen.
+
+| | |
+|---|---|
+| Previous | *"they should not be able to fold back, twist aside, or **work themselves loose**."* |
+| Revised | *"they should not be able to fold back, twist aside, or **come off**."* |
+
+**Why.** *"Work themselves loose"* reads as clearance growth over a load history
+— contact degradation, needing tolerances and surface behaviour to verify.
+Neither is inside this benchmark's scope, so the phrase would have produced
+UNSUPPORTED: a correct answer that measures nothing, quietly hollowing out a
+retention requirement. *"Come off"* states the same failure as a **retention
+fact**, decidable by whether the connection still holds — which is exactly the
+fidelity available.
+
+It narrows one phrase. It selects no mechanism and adds no requirement.
+
+| | Previous (R2) | Revised (R3) |
+|---|---|---|
+| SHA-256 | `0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c` | `ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d` |
+| Bytes | 1556 | 1543 |
+| Words | 300 | 299 |
+
+Both recomputed from the actual `request.txt` bytes after the edit.
+
+**Timing.** Made **before any Oracle authoring began** and **before any positive
+realization existed** — `oracle_authored_at_time_of_change: false`,
+`positive_reference_authored_at_time_of_change: false`. Nothing had been written
+that this could invalidate, and no evaluation could have been shaped by it.
+
+**Decisions.** D-003-1 through D-003-6 remain **APPROVED**. R3 narrows a phrase
+inside the scope those decisions already accepted; it reopens none of them.
+
+Re-audited by [`ver3/tests/meta/source_audit.py`](../../tests/meta/source_audit.py):
+overprescription **CLEAN**, underdefinition **COMPLETE**, contact degradation
+**CLEAN**.
+
+**R1 and R2 are historical.** Their quoted wording, hashes and word counts
+describe states this source no longer has.
 
 ---
 

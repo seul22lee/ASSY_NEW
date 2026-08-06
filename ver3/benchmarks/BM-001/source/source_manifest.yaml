@@ -207,3 +207,35 @@ human_decision:
     The hard-wrapped specification document remains a CORROBORATING witness and
     the line-wrapping difference remains a recorded discrepancy. It was not
     normalized and was not modified.
+
+# ---------------------------------------------------------------------
+# IMMUTABLE ORIGIN
+#
+# A local absolute path is extraction history, not provenance: it is valid only
+# on one machine and says nothing about WHICH version of the file was read. The
+# fields below pin the content itself, so a third party can fetch exactly the
+# bytes this request came from.
+#
+# origin_commit is the commit that last modified the file, not a branch name. A
+# branch moves; the whole point of provenance is that it cannot.
+# ---------------------------------------------------------------------
+immutable_origin:
+  status: ESTABLISHED
+  origin_repository: git@github.com:seul22lee/ASSY.git
+  origin_commit: e784482a4c4e8c38ab2d84b61bf233067cb6d972
+  origin_commit_kind: "commit that last modified the file (immutable, not a branch)"
+  repo_relative_path: tests/fixtures/BM-001_requirementspec.json
+  origin_file_sha256: dee480217055a18d5935ed4cc5c71e055fbb0472d71f767b29d8df5660b4f57e
+  extracted_field: source_text
+  extracted_value_sha256: 3fe0ff024784958c2ad0e7514f102ea9fde319c47caad4912c7f3d820ec6be5b
+  verification: >
+    The committed blob at that commit was compared byte-for-byte against the
+    working-tree file and is identical, and the working tree was clean for this
+    path. The hash therefore describes the committed content, not an uncommitted
+    local edit.
+  local_path_at_extraction: /home/ftk3187/github/ASSY_Ver2.0/tests/fixtures/BM-001_requirementspec.json
+  local_path_authority: NON_AUTHORITATIVE_EXTRACTION_HISTORY
+  local_path_note: >
+    Retained because it records how the extraction was actually performed. It is
+    NOT provenance: it is machine-specific and version-blind, and no test may
+    depend on it.

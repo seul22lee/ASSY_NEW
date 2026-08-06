@@ -1534,30 +1534,39 @@ def write_contracts(mp: Dict, xml_empty: str, xml_payload: str):
 
 
 def artifact_hashes() -> Dict:
+    """Build and verify the artifact-hash manifest. MUST BE CALLED LAST.
+
+    Everything it records has to be written and closed first: all numerical
+    outputs, all plots and videos, all per-artifact metadata. No tracked artifact
+    may be written after this returns.
+
+    This previously walked the tree and wrote hashes without checking them. A run
+    then left four stale entries, because a second partial run rewrote reports and
+    one video while a manifest from the first run was already on disk. Nothing
+    re-read the files, so nothing noticed.
+
+    manifest_util.build_manifest re-hashes every entry before returning and
+    raises if any disagrees, so a manifest that is wrong at birth can no longer be
+    written. Post-manifest mutation is caught by manifest_util.verify, which the
+    regression test in ver3/tests/meta/ calls.
+    """
+    import manifest_util as mu
+    doc = mu.build_manifest(
+        roots=[OUT, SIMDIR], here=HERE,
+        extra={"reference_id": "EXE-BM002-01",
+               "scope": "MuJoCo simulation inputs and outputs",
+               "geometry_signature_sha256": ACCEPTED_SIGNATURE})
+    mu.write_manifest(doc, os.path.join(OUT, mu.MANIFEST_FILENAME))
+
+    # Re-verify from what was actually written, not from the in-memory document.
+    # The write itself is the last thing that can go wrong.
     import yaml
-    rows = []
-    for root, dirs, files in os.walk(OUT):
-        dirs[:] = [d for d in dirs if d != "__pycache__"]
-        for fn in sorted(files):
-            if fn == "artifact_hashes.yaml":
-                continue
-            p = os.path.join(root, fn)
-            rows.append({"path": os.path.relpath(p, HERE),
-                         "bytes": os.path.getsize(p),
-                         "sha256": cv.sha256_file(p)})
-    for fn in sorted(os.listdir(SIMDIR)):
-        p = os.path.join(SIMDIR, fn)
-        if os.path.isfile(p):
-            rows.append({"path": os.path.relpath(p, HERE),
-                         "bytes": os.path.getsize(p),
-                         "sha256": cv.sha256_file(p)})
-    rows.sort(key=lambda r: r["path"])
-    doc = {"reference_id": "EXE-BM002-01",
-           "scope": "MuJoCo simulation inputs and outputs",
-           "geometry_signature_sha256": ACCEPTED_SIGNATURE,
-           "file_count": len(rows), "files": rows}
-    with open(os.path.join(OUT, "artifact_hashes.yaml"), "w") as fh:
-        yaml.safe_dump(doc, fh, sort_keys=False, default_flow_style=False, width=120)
+    with open(os.path.join(OUT, mu.MANIFEST_FILENAME)) as fh:
+        written = yaml.safe_load(fh)
+    problems = mu.verify(written, HERE)
+    if problems:
+        raise mu.ManifestVerificationError(
+            "manifest does not match the files on disk after writing: %s" % problems)
     return doc
 
 

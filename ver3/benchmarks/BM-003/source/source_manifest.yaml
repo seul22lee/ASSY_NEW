@@ -31,8 +31,8 @@ benchmark_id: BM-003
 source_class: NEWLY_AUTHORED
 authority_status: FROZEN
 production_readable: true
-request_sha256: 0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c
-source_word_count: 300
+request_sha256: ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d
+source_word_count: 299
 human_review_required: true
 human_review_complete: true
 frozen: true
@@ -102,7 +102,7 @@ provenance:
 authoring:
   method: AUTHORED_FROM_FIXED_PRODUCT_INTENT
   register: "Ordinary first-person product request, as a user would write it."
-  length_words: 300
+  length_words: 299
   length_target: "150-300 words"
   what_was_written: >
     The need and the user-observable behaviour: what the product must do, and
@@ -118,8 +118,8 @@ authoring:
     - any acceptance criterion, predicate or evaluation instruction
     - any requirement identifier
   hashes:
-    file_sha256: 0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c
-    bytes: 1556
+    file_sha256: ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d
+    bytes: 1543
   note_on_a_single_hash: >
     BM-001 and BM-002 record two hashes because a trailing newline was appended
     to extracted content. Nothing was appended here — the file IS the authored
@@ -331,3 +331,109 @@ human_decision:
       to check these edits achieved their purpose. It matches rattle, loosen,
       backlash, play, slop, wobble, vibration, lifetime, durability and cycle
       counts. Clean.
+
+# ---------------------------------------------------------------------
+# AMENDMENT HISTORY
+#
+# This source was FROZEN before this amendment. It was therefore not edited
+# silently: R3 is a formal amendment with its own approval, and the superseded
+# hash is retained rather than overwritten. A frozen artifact whose previous
+# state cannot be reconstructed was not really frozen.
+#
+# R1 and R2 are HISTORICAL. Their word counts, hashes and quoted text describe
+# states this source no longer has.
+# ---------------------------------------------------------------------
+amendment_history:
+  current_revision: R3
+
+  amendments:
+    - amendment_id: BM003-SOURCE-AMENDMENT-R3
+      status: HUMAN_APPROVED
+      amendment_class: PRE_ORACLE_SCOPE_CORRECTION
+      state: CURRENT
+      timestamp: "2026-08-05"
+      approval_provenance: >
+        Explicit human instruction, given as a formal amendment to an
+        already-frozen source. Not an author edit and not an automated fix.
+      previous_text: >
+        they should not be able to fold back, twist aside, or work themselves loose.
+      revised_text: >
+        they should not be able to fold back, twist aside, or come off.
+      rationale: >
+        Preserve gross rigid-body retention and unintended-motion meaning without
+        introducing contact degradation, tolerance, vibration, wear, fatigue, or
+        lifetime requirements.
+      semantic_effect: >
+        Narrows the requirement to assembly retention and gross rigid-body
+        behaviour. It does not select a mechanism or add a new product
+        requirement.
+      why_the_old_phrase_was_a_problem: >
+        "work themselves loose" reads as clearance growth over a load history -
+        a contact-level property needing tolerances and surface behaviour to
+        verify, neither of which this benchmark's scope covers. It would have
+        produced UNSUPPORTED: a correct answer that measures nothing. "come off"
+        states the same failure as a retention fact, decidable by whether the
+        connection still holds.
+      oracle_authored_at_time_of_change: false
+      positive_reference_authored_at_time_of_change: false
+      timing_note: >
+        The amendment was made BEFORE any Oracle authoring began and before any
+        positive realization existed. Nothing had yet been written that could be
+        invalidated by it, and no evaluation could have been influenced by it.
+      measurements:
+        previous_request_sha256: 0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c
+        previous_bytes: 1556
+        previous_word_count: 300
+        revised_request_sha256: ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d
+        revised_bytes: 1543
+        revised_word_count: 299
+        recomputed_from: "the actual request.txt bytes after the edit"
+      files_affected:
+        - ver3/benchmarks/BM-003/source/request.txt
+        - ver3/benchmarks/BM-003/source/source_manifest.yaml
+        - ver3/benchmarks/BM-003/BM003_SOURCE_AUTHORING_RECORD.md
+        - ver3/benchmarks/BM-003/BM003_SOURCE_HUMAN_REVIEW_CHECKLIST.md
+        - ver3/benchmarks/BM-003/descriptor.yaml
+        - ver3/benchmarks/SOURCE_FREEZE_REVIEW.md
+      post_amendment_audits:
+        overprescription: CLEAN
+        underdefinition: COMPLETE
+        contact_degradation: CLEAN
+        audited_by: ver3/tests/meta/source_audit.py
+      decisions_still_approved: >
+        D-003-1 through D-003-6 remain APPROVED after R3. The amendment narrows
+        one phrase within the scope those decisions already accepted; it does not
+        reopen any of them.
+
+    - amendment_id: BM003-SOURCE-REVISION-R2
+      state: HISTORICAL
+      superseded_by: BM003-SOURCE-AMENDMENT-R3
+      timestamp: "2026-08-05"
+      what: >
+        Two wording corrections required at acceptance: "rattle" -> "shift out of
+        place", and the repeatability sentence rewritten to "all normal parts
+        remaining attached".
+      resulting_sha256: 0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c
+      resulting_word_count: 300
+      note: "HISTORICAL. This hash and word count are no longer the source state."
+
+    - amendment_id: BM003-SOURCE-REVISION-R1
+      state: HISTORICAL
+      superseded_by: BM003-SOURCE-REVISION-R2
+      timestamp: "2026-08-05"
+      what: >
+        The general unintended-motion sentence added at the C5 gap, plus removal
+        of "keep track of" and two length trims.
+      note: >
+        HISTORICAL. R1's wording quoted the phrase "rattle", which R2 removed.
+        Nothing from R1 describes the current source.
+
+frozen_state_after_amendment:
+  authority_status: FROZEN
+  human_review_required: true
+  human_review_complete: true
+  frozen: true
+  note: >
+    The amendment did not unfreeze the source. It replaced one frozen state with
+    another under a recorded human approval, which is the only way a frozen
+    artifact may change.

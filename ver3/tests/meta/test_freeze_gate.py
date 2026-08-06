@@ -19,7 +19,7 @@ class TestGateOnRealSources(unittest.TestCase):
     """The source precondition is satisfied — and satisfied for the right reason."""
 
     def test_source_precondition_is_now_satisfied(self):
-        self.assertTrue(fg.stage_freeze_permitted(),
+        self.assertTrue(fg.source_precondition_satisfied(),
                         "blockers: %s" % fg.all_source_blockers())
 
     def test_no_benchmark_blocks(self):
@@ -54,7 +54,7 @@ class TestGateOnRealSources(unittest.TestCase):
                     manifests = {b: dict(_paths.source_manifest(b)) for b in _paths.BENCHMARK_IDS}
                     manifests[bm][field] = broken
                     blockers = fg.all_source_blockers(_paths.BENCHMARK_IDS, manifests)
-                    self.assertFalse(fg.stage_freeze_permitted(_paths.BENCHMARK_IDS, manifests))
+                    self.assertFalse(fg.source_precondition_satisfied(_paths.BENCHMARK_IDS, manifests))
                     self.assertEqual([(bm, field)],
                                      [(b["benchmark_id"], b["field"]) for b in blockers])
 
@@ -69,6 +69,42 @@ class TestGateOnRealSources(unittest.TestCase):
         self.assertEqual([], frozen,
                          "contracts frozen without progression steps 3-7: %s" % frozen)
 
+    def test_no_function_claims_to_decide_a_stage_freeze(self):
+        """A fake full gate is worse than a missing one.
+
+        The missing function fails loudly at the call site; a stub returning the
+        source precondition under the full gate's name passes, and a caller has
+        no way to notice.
+        """
+        self.assertFalse(hasattr(fg, "stage_freeze_permitted"))
+        self.assertTrue(hasattr(fg, "source_precondition_satisfied"))
+
+    def test_the_contract_records_what_a_full_stage_freeze_needs(self):
+        progression = _paths.contract("STAGE_PROGRESSION_CONTRACT.yaml")
+        inputs = progression["freeze_rule"]["full_stage_freeze_inputs"]["required_inputs"]
+        names = {i["input"] for i in inputs}
+        for required in ("source_precondition", "hidden_oracle_readiness",
+                         "stage_contract_and_validator_readiness",
+                         "benchmark_execution_results",
+                         "downstream_consumer_sufficiency",
+                         "false_acceptance_checks",
+                         "remaining_progression_steps"):
+            with self.subTest(input=required):
+                self.assertIn(required, names)
+
+    def test_only_the_source_precondition_is_currently_satisfied(self):
+        """Satisfying one input is not partial permission."""
+        progression = _paths.contract("STAGE_PROGRESSION_CONTRACT.yaml")
+        inputs = progression["freeze_rule"]["full_stage_freeze_inputs"]["required_inputs"]
+        satisfied = [i["input"] for i in inputs if i["state"] == "SATISFIED"]
+        self.assertEqual(["source_precondition"], satisfied)
+
+    def test_the_contract_names_the_renamed_helper(self):
+        progression = _paths.contract("STAGE_PROGRESSION_CONTRACT.yaml")
+        helper = progression["freeze_rule"]["source_preconditions"]["helper"]
+        self.assertIn("source_precondition_satisfied", helper)
+        self.assertNotIn("stage_freeze_permitted", helper)
+
 
 class TestEachFieldBlocksIndependently(unittest.TestCase):
     """One broken field at a time, against an otherwise settled envelope."""
@@ -78,24 +114,24 @@ class TestEachFieldBlocksIndependently(unittest.TestCase):
 
     def test_a_fully_settled_envelope_opens_the_gate(self):
         """The control. Without it, a gate that never opens would pass every test below."""
-        self.assertTrue(fg.stage_freeze_permitted(["BM-001"], self._one()))
+        self.assertTrue(fg.source_precondition_satisfied(["BM-001"], self._one()))
 
     def test_human_review_complete_false_blocks_alone(self):
         m = self._one(human_review_complete=False)
         blockers = fg.all_source_blockers(["BM-001"], m)
-        self.assertFalse(fg.stage_freeze_permitted(["BM-001"], m))
+        self.assertFalse(fg.source_precondition_satisfied(["BM-001"], m))
         self.assertEqual(["human_review_complete"], [b["field"] for b in blockers])
 
     def test_frozen_false_blocks_alone(self):
         m = self._one(frozen=False)
         blockers = fg.all_source_blockers(["BM-001"], m)
-        self.assertFalse(fg.stage_freeze_permitted(["BM-001"], m))
+        self.assertFalse(fg.source_precondition_satisfied(["BM-001"], m))
         self.assertEqual(["frozen"], [b["field"] for b in blockers])
 
     def test_authority_status_not_frozen_blocks_alone(self):
         m = self._one(authority_status="PROPOSED")
         blockers = fg.all_source_blockers(["BM-001"], m)
-        self.assertFalse(fg.stage_freeze_permitted(["BM-001"], m))
+        self.assertFalse(fg.source_precondition_satisfied(["BM-001"], m))
         self.assertEqual(["authority_status"], [b["field"] for b in blockers])
 
     def test_superseded_authority_status_blocks_even_when_reviewed_and_frozen(self):
@@ -105,19 +141,19 @@ class TestEachFieldBlocksIndependently(unittest.TestCase):
         authority_status is a separate field rather than a derived one.
         """
         m = self._one(authority_status="SUPERSEDED")
-        self.assertFalse(fg.stage_freeze_permitted(["BM-001"], m))
+        self.assertFalse(fg.source_precondition_satisfied(["BM-001"], m))
         self.assertEqual(["authority_status"],
                          [b["field"] for b in fg.all_source_blockers(["BM-001"], m)])
 
     def test_frozen_without_review_blocks(self):
         """Marked frozen but never reviewed. `frozen` alone would let this through."""
         m = self._one(human_review_complete=False)
-        self.assertFalse(fg.stage_freeze_permitted(["BM-001"], m))
+        self.assertFalse(fg.source_precondition_satisfied(["BM-001"], m))
 
     def test_reviewed_but_not_frozen_blocks(self):
         """Reviewed, bytes still open. `human_review_complete` alone would let this through."""
         m = self._one(frozen=False)
-        self.assertFalse(fg.stage_freeze_permitted(["BM-001"], m))
+        self.assertFalse(fg.source_precondition_satisfied(["BM-001"], m))
 
     def test_a_missing_field_blocks_rather_than_defaulting_open(self):
         """An absent field must never read as satisfied.
@@ -129,7 +165,7 @@ class TestEachFieldBlocksIndependently(unittest.TestCase):
             with self.subTest(missing=field):
                 env = fg.settled_envelope()
                 del env[field]
-                self.assertFalse(fg.stage_freeze_permitted(["BM-001"], {"BM-001": env}))
+                self.assertFalse(fg.source_precondition_satisfied(["BM-001"], {"BM-001": env}))
 
     def test_one_unsettled_benchmark_blocks_all_three(self):
         """Two settled sources do not make up for a third that is not.
@@ -141,13 +177,13 @@ class TestEachFieldBlocksIndependently(unittest.TestCase):
             "BM-002": fg.settled_envelope(),
             "BM-003": fg.settled_envelope(frozen=False),
         }
-        self.assertFalse(fg.stage_freeze_permitted(_paths.BENCHMARK_IDS, manifests))
+        self.assertFalse(fg.source_precondition_satisfied(_paths.BENCHMARK_IDS, manifests))
         blockers = fg.all_source_blockers(_paths.BENCHMARK_IDS, manifests)
         self.assertEqual(["BM-003"], [b["benchmark_id"] for b in blockers])
 
     def test_all_three_settled_opens_the_gate(self):
         manifests = {bm: fg.settled_envelope() for bm in _paths.BENCHMARK_IDS}
-        self.assertTrue(fg.stage_freeze_permitted(_paths.BENCHMARK_IDS, manifests))
+        self.assertTrue(fg.source_precondition_satisfied(_paths.BENCHMARK_IDS, manifests))
 
 
 class TestGateMatchesTheContract(unittest.TestCase):

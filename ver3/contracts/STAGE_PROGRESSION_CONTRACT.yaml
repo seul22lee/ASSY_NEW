@@ -134,11 +134,67 @@ freeze_rule:
       All three benchmarks, not a majority. Two settled sources do not make up
       for a third that is not.
     enforced_by: ver3/tests/meta/test_freeze_gate.py
+    helper: ver3/tests/meta/freeze_gate.py::source_precondition_satisfied
+    naming_note: >
+      The helper is named for what it proves. It was previously called
+      stage_freeze_permitted, which overstated it: three settled YAML fields are
+      one prerequisite, not a decision to freeze a stage. There is no alias,
+      wrapper, compatibility function or deprecated forwarder for the old name -
+      a gate that is easy to misread is a gate that will be misread.
     rationale: >
       Step 4 requires source-only runs, and a source-only run is only meaningful
       against a settled source. Running against a source that is still being
       edited measures the pipeline against a moving target, and freezing a stage
       on that evidence would bake the moving target in.
+  full_stage_freeze_inputs:
+    statement: >
+      What a real stage-freeze decision requires. The source precondition above
+      is ONE of these. No function evaluating the whole set exists yet, and none
+      should be written until every input below can actually be supplied.
+    why_recorded_here: >
+      A function named for the full gate that in fact checks only the source
+      precondition would be a fake gate wearing the real gate's name - it would
+      pass, where a missing function fails loudly at the call site. Recording the
+      inputs is how the list survives without a stub pretending to evaluate it.
+    required_inputs:
+      - id: FSF-01
+        input: source_precondition
+        state: SATISFIED
+        detail: "All three source envelopes reviewed, frozen and FROZEN."
+      - id: FSF-02
+        input: hidden_oracle_readiness
+        state: NOT_SATISFIED
+        detail: >
+          Every benchmark needs an independently authored Oracle, frozen BEFORE
+          its first source-only run. BM-003 has none. A benchmark with no Oracle
+          is unscorable, so its runs cannot count as evidence for anything.
+      - id: FSF-03
+        input: stage_contract_and_validator_readiness
+        state: NOT_SATISFIED
+        detail: "The stage's contract (step 1), negative conditions (step 2) and validator must exist."
+      - id: FSF-04
+        input: benchmark_execution_results
+        state: NOT_SATISFIED
+        detail: "Source-only runs on BM-001, BM-002 and BM-003 (step 4), each with a recorded execution status."
+      - id: FSF-05
+        input: downstream_consumer_sufficiency
+        state: NOT_SATISFIED
+        detail: >
+          The probe of step 6 reports no missing input on all three benchmarks.
+          This is the real gate; schema validity is cheap.
+      - id: FSF-06
+        input: false_acceptance_checks
+        state: NOT_SATISFIED
+        detail: >
+          No FALSE_ACCEPTANCE finding outstanding. A stage frozen over an
+          unearned claim propagates it to every stage built on top.
+      - id: FSF-07
+        input: remaining_progression_steps
+        state: NOT_SATISFIED
+        detail: "Steps 5 and 7 complete: contract completeness, leakage audit, determinism."
+    current_conclusion: >
+      NO stage contract may freeze. FSF-01 is satisfied and FSF-02 through FSF-07
+      are not. Satisfying one input is not partial permission.
   statement: >
     A stage contract is frozen only after all three benchmarks demonstrate
     downstream sufficiency from source-only runs.

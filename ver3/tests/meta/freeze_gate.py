@@ -81,12 +81,29 @@ def all_source_blockers(benchmark_ids=None, manifests=None):
     return out
 
 
-def stage_freeze_permitted(benchmark_ids=None, manifests=None):
+def source_precondition_satisfied(benchmark_ids=None, manifests=None):
     """True only when NO source blocks.
 
-    Deliberately the last thing defined here, and deliberately derived from the
-    blocker list rather than computed separately: a boolean that can disagree
-    with the reasons behind it is worse than no boolean.
+    NAMED FOR WHAT IT PROVES. It answers one question - are the benchmark source
+    envelopes settled? - and nothing else. It is NOT a stage-freeze decision.
+
+    The previous name, stage_freeze_permitted, overstated it. Freezing a stage
+    contract additionally requires hidden-Oracle readiness, a stage contract and
+    validator, execution results on all three benchmarks, downstream-consumer
+    sufficiency and false-acceptance checks. A caller reading the old name could
+    reasonably have concluded a stage was clear to freeze on the strength of
+    three settled YAML fields, and a gate that is easy to misread is a gate that
+    will be misread.
+
+    No `stage_freeze_permitted` exists, here or anywhere. Writing one that
+    returned this value would be a fake gate wearing the real gate's name, which
+    is worse than the missing function: the missing function fails loudly at the
+    call site, and the fake one passes. The full set of required inputs is
+    recorded in STAGE_PROGRESSION_CONTRACT freeze_rule.full_stage_freeze_inputs
+    so that whoever implements it has the list rather than this docstring.
+
+    Derived from the blocker list rather than computed separately: a boolean that
+    can disagree with the reasons behind it is worse than no boolean.
     """
     return not all_source_blockers(benchmark_ids, manifests)
 

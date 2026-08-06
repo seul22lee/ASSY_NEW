@@ -134,9 +134,9 @@ witness and a recorded discrepancy.** It was not normalized and not modified.
 
 **Source class:** `NEWLY_AUTHORED`
 **Authoritative witness:** none — **no independent verbatim source witness exists**
-**SHA-256:** `0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c`
-**Word count:** 300 (target 150–300)
-**Status:** `FROZEN` — human-approved with edits
+**SHA-256:** `ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d`  *(revision R3)*
+**Word count:** 299 (target 150–300)
+**Status:** `FROZEN` — human-approved, amended at R3
 
 ### Exact request text
 
@@ -156,10 +156,10 @@ motor, or any other equipment to do it.
 
 Once it is open, it needs to stay open on its own. I should not have to hold the
 legs while I use it, and they should not be able to fold back, twist aside, or
-work themselves loose. Nothing should turn on its own, shift out of place, or
-move in some other direction I was not expecting. Before it can be folded again
-I want to have to do something deliberate, so it does not collapse just because
-I knocked it.
+come off. Nothing should turn on its own, shift out of place, or move in some
+other direction I was not expecting. Before it can be folded again I want to
+have to do something deliberate, so it does not collapse just because I knocked
+it.
 
 After that deliberate release, it should fold back down to the same compact shape
 it started in. The opening and folding sequence should be repeatable, with all
@@ -187,6 +187,7 @@ against the intent — which is what the acceptance below is.
 - **R1a** — *"keep track of"* → *"look after"* (`track` is a guide synonym).
 - **R1b** — two phrases trimmed to hold the word target.
 - **R2** — the two human-required wording corrections, below.
+- **R3** — the pre-Oracle scope correction, below. **Current revision.**
 
 ### R2 — the corrections required at acceptance
 
@@ -221,9 +222,45 @@ The contact-noise category was added specifically to check these edits achieved
 their purpose. It matches `rattle`, `loosen*`, `backlash`, `play`, `slop`,
 `wobble`, `vibrat*`, `lifetime`, `durab*` and cycle counts.
 
-### Decisions — RESOLVED
+### R3 — pre-Oracle scope correction (current)
 
-All approved, subject to R2-a and R2-b, both applied.
+`BM003-SOURCE-AMENDMENT-R3`, class `PRE_ORACLE_SCOPE_CORRECTION`, status
+`HUMAN_APPROVED`. Recorded under `amendment_history` in
+[`BM-003/source/source_manifest.yaml`](BM-003/source/source_manifest.yaml).
+
+| | |
+|---|---|
+| Previous | *"they should not be able to fold back, twist aside, or **work themselves loose**."* |
+| Revised | *"they should not be able to fold back, twist aside, or **come off**."* |
+
+*"Work themselves loose"* reads as clearance growth over a load history —
+contact degradation, verifiable only with tolerances and surface behaviour, both
+outside this benchmark's scope. It would have produced UNSUPPORTED and quietly
+hollowed out a retention requirement. *"Come off"* states the same failure as a
+retention fact, decidable by whether the connection still holds.
+
+| | R2 (historical) | R3 (current) |
+|---|---|---|
+| SHA-256 | `0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c` | `ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d` |
+| Bytes | 1556 | 1543 |
+| Words | 300 | 299 |
+
+The source was **already frozen**, so this was a formal amendment rather than an
+edit: approval recorded, superseded hash retained, and the source re-frozen
+rather than reverted to unfrozen.
+
+**Timing:** before any Oracle authoring and before any positive realization
+existed — `oracle_authored_at_time_of_change: false`,
+`positive_reference_authored_at_time_of_change: false`.
+
+Re-audited after R3: overprescription **CLEAN**, underdefinition **COMPLETE**,
+contact degradation **CLEAN**.
+
+### Decisions — RESOLVED, and still approved after R3
+
+All approved, subject to R2-a and R2-b, both applied. **D-003-1 through D-003-6
+remain APPROVED after amendment R3**, which narrows one phrase inside the scope
+those decisions already accepted and reopens none of them.
 
 - **D-003-1** — release expressed clearly and openly enough → **APPROVED**
 - **D-003-2** — *"stay open on its own"* avoids implying a lock → **APPROVED**

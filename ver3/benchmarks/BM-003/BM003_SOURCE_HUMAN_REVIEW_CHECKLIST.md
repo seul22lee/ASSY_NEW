@@ -1,7 +1,9 @@
 # BM-003 — source human review checklist
 
-For a human reviewing [`source/request.txt`](source/request.txt) before it is
-frozen.
+For a human reviewing [`source/request.txt`](source/request.txt).
+
+**Current state: FROZEN at revision R3.** This checklist records the review that
+led to the freeze, plus the C5 re-check required by amendment R3.
 
 **What this review is for.** BM-001 and BM-002 have sources that were *extracted*,
 so their faithfulness is checkable by comparing bytes to a witness. BM-003's
@@ -30,9 +32,10 @@ has already shaped the request has partly answered it.
 > and assembly persistence without importing tolerance, wear, fatigue, fastener
 > loosening or lifetime.
 >
-> Final source: **300 words**,
-> `sha256 0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c`,
-> `authority_status: FROZEN`.
+> Source at the time of that review: 300 words, `sha256 0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c`.
+>
+> **Superseded by amendment R3** — see the R3 box below. The current source is
+> **299 words**, `sha256 ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d`, `authority_status: FROZEN`.
 >
 > The blank checklist below is retained as the record of what was examined.
 
@@ -54,7 +57,7 @@ rather than against the table.
 | A6 | Nothing comes apart during unfolding | |
 | A7 | No tools, motor or external fixture | |
 | A8 | Stays open without the user holding it | |
-| A9 | Legs cannot fold back, twist aside, or work loose on their own | |
+| A9 | Legs cannot fold back, twist aside, or **come off** (as amended by R3) | |
 | A9b | No leg turns on its own, shifts out of place, or moves in another unexpected direction | |
 | A10 | A deliberate action is required before folding | |
 | A11 | Folds back to the same compact form | |
@@ -98,7 +101,8 @@ authoring record; the reviewer decides.
 | C2 | *"stay open on its own"* is used instead of "lock". Does it read as persistence, or does it still imply a locking device? | |
 | C3 | *"It is meant to hold a small object on my desk"* gives purpose with no number. Does it stay clear of a structural-capacity requirement? | |
 | C4 | "fold", "open", "spread apart" — do any read as a **prescribed motion or joint type**? ("swing" was rejected in drafting for implying rotation about a fixed axis.) | |
-| C5 | **CLOSED by revision R1.** The general unintended-motion case is now expressed: *"Nothing should rattle, turn on its own, or move in some other direction I was not expecting."* Confirm it reads as a user's sentence, states only what must not happen, and prescribes nothing. | |
+| C5 | **CLOSED. Re-checked at R3.** The general unintended-motion case reads, in the CURRENT source: *"Nothing should turn on its own, shift out of place, or move in some other direction I was not expecting."* Confirm it reads as a user's sentence, states only what must not happen, and prescribes nothing. *(The R1 wording quoted "rattle"; R2 removed it. Do not evaluate the R1 text.)* | |
+| C6 | **Added at R3.** The named unintended motions now end *"or come off"* rather than *"or work themselves loose"*. Confirm the retention meaning survives and that no contact-degradation, tolerance, wear or lifetime property has been introduced. | |
 
 ---
 
@@ -107,7 +111,7 @@ authoring record; the reviewer decides.
 | | Check | ✅ / ❌ / note |
 |---|---|---|
 | D1 | Reads as something a real person would write, not as a specification | |
-| D2 | 150–300 words (final: 300) | |
+| D2 | 150–300 words (current, R3: 299) | |
 | D3 | No stage names, DesignState or Oracle vocabulary | |
 | D4 | No requirement identifiers | |
 | D5 | No predicates, acceptance criteria or evaluation instructions | |
@@ -158,14 +162,19 @@ authoring record; the reviewer decides.
 reviewer:            # name
 review_date:         # YYYY-MM-DD
 outcome:             # ACCEPTED | ACCEPTED_WITH_EDITS | REJECTED
-c1_c5_decisions:     # one line each
+c1_c6_decisions:     # one line each, C1 through C6
 required_edits:      # empty if ACCEPTED
 source_frozen:       # true only if ACCEPTED and no edits pending
 ```
 
-**On ACCEPTED — done 2026-08-05:** `source/source_manifest.yaml` now carries
+**On ACCEPTED — done 2026-08-05:** `source/source_manifest.yaml` carries
 `authority_status: FROZEN`, `human_review_complete: true`, `frozen: true`, the
 decision record, and the re-hashed request.
+
+**Amendment R3 — approved, applied, source re-frozen.** `work themselves loose`
+→ `come off`. The source did not revert to unfrozen: a frozen artifact changes
+only through a recorded approval, and one frozen state was replaced by another.
+Current: 299 words, `sha256 ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d`.
 
 **Then, and only then**, the BM-003 Oracle may be authored — independently, and
 frozen **before** the first source-only run. `BENCHMARK_RESULT_CONTRACT`
