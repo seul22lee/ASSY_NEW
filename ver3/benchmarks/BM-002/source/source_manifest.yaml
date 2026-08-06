@@ -10,7 +10,51 @@
 # resolved, and the extraction is marked HUMAN_REVIEW_REQUIRED.
 
 schema_version: "0.1.0"
+
+# ---------------------------------------------------------------------
+# COMMON ENVELOPE
+#
+# Identical in shape across all three benchmarks, whatever their source class.
+# Everything below the envelope is source-class-specific; everything inside it
+# can be read without knowing which class this is.
+#
+# The envelope is what the Stage freeze gate reads. Three fields block the gate
+# independently — human_review_complete, frozen, and authority_status — so no
+# single edit can make an unreviewed source look ready.
+# ---------------------------------------------------------------------
 benchmark_id: BM-002
+source_class: EXTRACTED_VERBATIM
+authority_status: PROPOSED
+production_readable: true
+request_sha256: 4b25163b95adf59428131da783ee2fe292e099937e196ce1e3a59cc7befb061f
+source_word_count: 73
+human_review_required: true
+human_review_complete: false
+frozen: false
+oracle_visible_to_production: false
+positive_reference_visible_to_production: false
+
+envelope_notes:
+  production_readable: >
+    request.txt is the ONE artifact production code may read, and only Stage 01
+    may read it (INV-002, rebuild policy rule 5).
+  authority_status_values: [PROPOSED, FROZEN, SUPERSEDED]
+  authority_status_meaning: >
+    PROPOSED - a candidate source awaiting human review. FROZEN - reviewed,
+    accepted and immutable; the only value the freeze gate accepts. SUPERSEDED -
+    replaced by a later revision, retained for the record.
+  why_three_blocking_fields: >
+    They fail differently. human_review_complete records whether a human looked;
+    frozen records whether the bytes are settled; authority_status records what
+    the artifact IS. A source can be reviewed but not yet frozen, or frozen by
+    mistake without review, and the gate must catch either.
+  oracle_visible_to_production: >
+    Permanently false. ver3/oracles/ is a BLOCKING forbidden path root; a stage
+    reading it would be reading its own answer key.
+  positive_reference_visible_to_production: >
+    Permanently false. ver3/cad_validation/ holds human-built designs that are
+    known to work. Reproducing one is not designing.
+
 artifact: ver3/benchmarks/BM-002/source/request.txt
 
 # ---------------------------------------------------------------- provenance
@@ -85,7 +129,7 @@ witness_comparison:
 
 # ------------------------------------------------------------- human review
 human_review:
-  status: HUMAN_REVIEW_REQUIRED
+  # status and completion live in the COMMON ENVELOPE above.
   why: >
     Two witnesses to the source exist and they are not byte-identical. Choosing
     which rendering is canonical is a judgement, not a mechanical step, so it is

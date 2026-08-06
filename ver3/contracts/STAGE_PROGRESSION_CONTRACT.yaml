@@ -108,6 +108,37 @@ progression_steps:
 # 2. The freeze rule
 # =====================================================================
 freeze_rule:
+  source_preconditions:
+    statement: >
+      Before any stage contract may freeze, EVERY benchmark source must satisfy
+      all three of these envelope fields in
+      ver3/benchmarks/<id>/source/source_manifest.yaml. Each blocks
+      INDEPENDENTLY; none is derived from the others.
+    required:
+      human_review_complete: true
+      frozen: true
+      authority_status: FROZEN
+    why_three_and_not_one: >
+      They fail differently, and each catches a case the others miss.
+      human_review_complete records whether a human actually looked; a source can
+      be marked frozen by mistake without ever having been reviewed. frozen
+      records whether the bytes are settled; a source can be reviewed while edits
+      are still pending. authority_status records what the artifact IS; a
+      SUPERSEDED revision can be both reviewed and frozen and still be the wrong
+      source. Collapsing them into one "ready" flag would put an unreviewed
+      source one edit away from looking ready.
+    fail_closed: >
+      A missing field blocks. Absence must never read as satisfied, because a
+      gate that fails open is not a gate.
+    quorum: >
+      All three benchmarks, not a majority. Two settled sources do not make up
+      for a third that is not.
+    enforced_by: ver3/tests/meta/test_freeze_gate.py
+    rationale: >
+      Step 4 requires source-only runs, and a source-only run is only meaningful
+      against a settled source. Running against a source that is still being
+      edited measures the pipeline against a moving target, and freezing a stage
+      on that evidence would bake the moving target in.
   statement: >
     A stage contract is frozen only after all three benchmarks demonstrate
     downstream sufficiency from source-only runs.

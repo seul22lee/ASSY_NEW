@@ -34,6 +34,7 @@ rather than against the table.
 | A7 | No tools, motor or external fixture | |
 | A8 | Stays open without the user holding it | |
 | A9 | Legs cannot fold back, twist aside, or work loose on their own | |
+| A9b | No leg rattles, turns on its own, or moves in another unexpected direction | |
 | A10 | A deliberate action is required before folding | |
 | A11 | Folds back to the same compact form | |
 | A12 | Open-and-fold cycle repeatable | |
@@ -76,7 +77,7 @@ authoring record; the reviewer decides.
 | C2 | *"stay open on its own"* is used instead of "lock". Does it read as persistence, or does it still imply a locking device? | |
 | C3 | *"It is meant to hold a small object on my desk"* gives purpose with no number. Does it stay clear of a structural-capacity requirement? | |
 | C4 | "fold", "open", "spread apart" — do any read as a **prescribed motion or joint type**? ("swing" was rejected in drafting for implying rotation about a fixed axis.) | |
-| C5 | The instruction's *"or another obvious unintended rigid-body motion"* was **not** translated into the request — only the three named failures appear, in a user's words. Is that omission acceptable, or should the general case be expressed? | |
+| C5 | **CLOSED by revision R1.** The general unintended-motion case is now expressed: *"Nothing should rattle, turn on its own, or move in some other direction I was not expecting."* Confirm it reads as a user's sentence, states only what must not happen, and prescribes nothing. | |
 
 ---
 
@@ -85,7 +86,7 @@ authoring record; the reviewer decides.
 | | Check | ✅ / ❌ / note |
 |---|---|---|
 | D1 | Reads as something a real person would write, not as a specification | |
-| D2 | 150–300 words (authored at 289) | |
+| D2 | 150–300 words (authored at 299) | |
 | D3 | No stage names, DesignState or Oracle vocabulary | |
 | D4 | No requirement identifiers | |
 | D5 | No predicates, acceptance criteria or evaluation instructions | |

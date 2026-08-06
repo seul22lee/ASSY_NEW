@@ -10,9 +10,9 @@ reference, no evaluation.
 
 - Subject: **BM-003 — Compact folding three-leg desktop stand**, fixed by the
   authoring instruction and not chosen here.
-- Artifact: [`source/request.txt`](source/request.txt) — 289 words, target 150–300
+- Artifact: [`source/request.txt`](source/request.txt) — 299 words, target 150–300
 - Status: **HUMAN_REVIEW_REQUIRED**, unfrozen
-- `sha256` `1098f2caf1527996466f898966478989f61f511869c9db1ea6a52971d88d92c7`
+- `sha256` `80619fb12625c8a1e958af726227f380590d0d9da4505814af5a208866fd29c5`
 
 ---
 
@@ -45,13 +45,13 @@ not the source.
 |---|---|
 | Legs fold close to the body; narrow compact form | *"three legs that fold in close to the body, so the whole thing becomes narrow and compact when I put it away"* |
 | Components remain attached and captive | *"Everything should stay attached while it is folded"* |
-| No loose removable parts to fold or unfold | *"I do not want to take anything off to fold it, and I do not want loose pieces to keep track of"* |
+| No loose removable parts to fold or unfold | *"I do not want to take anything off to fold it, or loose pieces to look after"* |
 | Unfolds manually through a comprehensible sequence | *"I should be able to open it by hand, following a sequence that makes sense as I go"* |
 | Three legs spread in different directions, usable footprint | *"spread apart in different directions so they give the stand a usable footprint on the desk"* |
 | Parts stay connected through the deployment path | *"Nothing should come apart or fall off while I am opening it"* |
 | No tools, motor, or external fixture | *"I should not need tools, a motor, or any other equipment to do it"* |
 | Stays deployed without the user holding it | *"it needs to stay open on its own. I should not have to hold the legs while I use it"* |
-| No free folding, twisting, detaching, or other unintended motion | *"they should not be able to fold back, twist aside, or work themselves loose"* |
+| No free folding, twisting, detaching, or other unintended motion | *"they should not be able to fold back, twist aside, or work themselves loose"* — and, for the general case, *"Nothing should rattle, turn on its own, or move in some other direction I was not expecting"* |
 | Deliberate release required before folding | *"Before it can be folded again I want to have to do something deliberate, so it does not collapse just because I knocked it"* |
 | Returns to the compact stored configuration | *"it should fold back down to the same compact shape it started in"* |
 | Cycle is repeatable | *"open it and fold it away again and again"* |
@@ -89,20 +89,31 @@ must stay open, or the benchmark cannot detect premature convergence.
 observation. The word "lock" was avoided throughout, including as a verb, because
 it carries a mechanism family with it in ordinary usage.
 
-### 3.3 The unintended-motion list
+### 3.3 The unintended-motion list — C5, now closed
 
 The instruction requires that the legs *"must not freely fold, twist away,
 detach, or acquire another obvious unintended rigid-body motion."*
 
-Written as: *"they should not be able to fold back, twist aside, or work
-themselves loose."*
+The named failures are carried as *"they should not be able to fold back, twist
+aside, or work themselves loose."* "Rigid-body motion" is analysis vocabulary and
+does not belong in a user's request, so each is given in the words a user would
+use.
 
-"Rigid-body motion" is analysis vocabulary and does not belong in a user's
-request, so the three named failures are given in the words a user would use.
-The general clause was not translated — a user would not say "or any other
-unintended rigid-body motion", and inventing a phrase for it would have added a
-completeness claim the user never made. **A reviewer should decide whether that
-omission is acceptable**; it is checklist item C5.
+**Revision R1 closes the gap.** The first draft omitted the general clause and
+flagged the omission as checklist item C5; on review it was judged a real gap,
+because the named three are examples and the requirement is the general case.
+Added:
+
+> *"Nothing should rattle, turn on its own, or move in some other direction I was
+> not expecting."*
+
+It states what must **not** happen and never what prevents it, so it constrains
+the outcome without narrowing the solution space. No "degree of freedom", no
+joint, latch, guide, bearing, linkage or locking mechanism, no number.
+
+"I was not expecting" is deliberate: the user is the one who decides what counts
+as unexpected, which is how a real request would put it and keeps the judgement
+where it belongs rather than smuggling in a threshold.
 
 ### 3.4 The desktop object, kept out of structural scope
 
@@ -122,7 +133,7 @@ against a prescribed joint type: "swing" was rejected in an earlier draft as
 implying rotation about a fixed axis, and replaced with "spread apart", which
 constrains only the outcome. **Reviewer confirmation is item C4.**
 
-### 3.6 Three things removed in drafting
+### 3.6 Four things removed in drafting
 
 - *"narrow enough to slip into a drawer or a bag"* — removed. A soft size
   threshold not present in the fixed intent, and the instruction forbids hidden
@@ -130,6 +141,11 @@ constrains only the outcome. **Reviewer confirmation is item C4.**
 - *"stable footprint"* — replaced with *"usable footprint"*, matching the
   instruction's own word. "Stable" reads as a stability criterion, which is not
   in scope and would have been a quiet acceptance threshold.
+- *"keep track of"* — replaced with *"look after"*. It is an idiom, not a
+  mechanical track, but "track" is a guide synonym and the instruction forbids
+  naming a guide. This phrase tripped the audit twice — first as the substring
+  "rack", then as the whole word "track" once the guide category was added — so
+  removing it settles both rather than annotating it twice.
 - *"anything to clamp it to"* — replaced with *"any other equipment to do it"*.
   It rendered the instruction's "external fixture" and appeared only in the
   negative, so it prescribed nothing; but "clamp" is a mechanism noun sitting a

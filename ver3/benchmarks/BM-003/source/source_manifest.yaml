@@ -15,7 +15,51 @@
 # it (INV-002, rebuild policy rule 5).
 
 schema_version: "0.1.0"
+
+# ---------------------------------------------------------------------
+# COMMON ENVELOPE
+#
+# Identical in shape across all three benchmarks, whatever their source class.
+# Everything below the envelope is source-class-specific; everything inside it
+# can be read without knowing which class this is.
+#
+# The envelope is what the Stage freeze gate reads. Three fields block the gate
+# independently — human_review_complete, frozen, and authority_status — so no
+# single edit can make an unreviewed source look ready.
+# ---------------------------------------------------------------------
 benchmark_id: BM-003
+source_class: NEWLY_AUTHORED
+authority_status: PROPOSED
+production_readable: true
+request_sha256: 80619fb12625c8a1e958af726227f380590d0d9da4505814af5a208866fd29c5
+source_word_count: 299
+human_review_required: true
+human_review_complete: false
+frozen: false
+oracle_visible_to_production: false
+positive_reference_visible_to_production: false
+
+envelope_notes:
+  production_readable: >
+    request.txt is the ONE artifact production code may read, and only Stage 01
+    may read it (INV-002, rebuild policy rule 5).
+  authority_status_values: [PROPOSED, FROZEN, SUPERSEDED]
+  authority_status_meaning: >
+    PROPOSED - a candidate source awaiting human review. FROZEN - reviewed,
+    accepted and immutable; the only value the freeze gate accepts. SUPERSEDED -
+    replaced by a later revision, retained for the record.
+  why_three_blocking_fields: >
+    They fail differently. human_review_complete records whether a human looked;
+    frozen records whether the bytes are settled; authority_status records what
+    the artifact IS. A source can be reviewed but not yet frozen, or frozen by
+    mistake without review, and the gate must catch either.
+  oracle_visible_to_production: >
+    Permanently false. ver3/oracles/ is a BLOCKING forbidden path root; a stage
+    reading it would be reading its own answer key.
+  positive_reference_visible_to_production: >
+    Permanently false. ver3/cad_validation/ holds human-built designs that are
+    known to work. Reproducing one is not designing.
+
 artifact: ver3/benchmarks/BM-003/source/request.txt
 
 subject:
@@ -58,7 +102,7 @@ provenance:
 authoring:
   method: AUTHORED_FROM_FIXED_PRODUCT_INTENT
   register: "Ordinary first-person product request, as a user would write it."
-  length_words: 289
+  length_words: 299
   length_target: "150-300 words"
   what_was_written: >
     The need and the user-observable behaviour: what the product must do, and
@@ -74,8 +118,8 @@ authoring:
     - any acceptance criterion, predicate or evaluation instruction
     - any requirement identifier
   hashes:
-    file_sha256: 1098f2caf1527996466f898966478989f61f511869c9db1ea6a52971d88d92c7
-    bytes: 1458
+    file_sha256: 80619fb12625c8a1e958af726227f380590d0d9da4505814af5a208866fd29c5
+    bytes: 1523
   note_on_a_single_hash: >
     BM-001 and BM-002 record two hashes because a trailing newline was appended
     to extracted content. Nothing was appended here — the file IS the authored
@@ -97,6 +141,33 @@ prohibited_content_scan:
     numeric_or_geometric_thresholds: clean
     structural_capacity_language: clean
     manufacturing_process_language: clean
+  revision_r1_c5_correction:
+    what: >
+      One sentence was added at the reviewer's flagged C5 gap, expressing the
+      general unintended-motion case that the first draft left untranslated:
+      "Nothing should rattle, turn on its own, or move in some other direction I
+      was not expecting."
+    constraints_met:
+      - "no 'degree of freedom'"
+      - "no joint, latch, guide, bearing, linkage or locking mechanism named"
+      - "no numeric threshold"
+      - "no implied realization - it states what must NOT happen, not what prevents it"
+    length_effect: >
+      289 -> 306 words, over the 150-300 target. Two wordy phrases were trimmed
+      rather than shortening the new sentence, since the sentence is the point of
+      the revision. Final: 299.
+  second_real_hit_acted_on:
+    match: "track"
+    where: "'loose pieces to keep track of'"
+    resolution: >
+      Rewritten to "loose pieces to look after". "Keep track of" is an idiom, not
+      a mechanical track - but "track" is a guide synonym, the instruction
+      forbids naming a guide, and a reviewer scanning for guide language would
+      stop on it exactly as the audit did. Rescanned: clean.
+    note: >
+      This phrase caused a scan hit twice: first as the substring "rack", then as
+      the whole word "track" once the guide category was added. Removing it
+      settles both.
   one_real_hit_acted_on:
     match: "clamp"
     where: "'anything to clamp it to', rendering the instruction's 'external fixture'"
@@ -142,8 +213,8 @@ scope:
 
 # ------------------------------------------------------------- human review
 human_review:
-  status: HUMAN_REVIEW_REQUIRED
-  frozen: false
+  # status, completion and frozen live in the COMMON ENVELOPE above.
+  # A second copy here could disagree with the fields the freeze gate reads.
   checklist: ver3/benchmarks/BM-003/BM003_SOURCE_HUMAN_REVIEW_CHECKLIST.md
   why: >
     An authored request cannot be verified by comparison the way an extracted one

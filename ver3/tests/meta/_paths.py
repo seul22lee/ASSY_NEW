@@ -34,6 +34,45 @@ CONTRACT_FILES = [
 
 STAGE_IDS = ["s%02d" % n for n in range(1, 13)]
 
+BENCHMARK_IDS = ["BM-001", "BM-002", "BM-003"]
+
+#: Envelope fields every source manifest carries, whatever its source class.
+SOURCE_ENVELOPE_FIELDS = [
+    "benchmark_id",
+    "source_class",
+    "authority_status",
+    "production_readable",
+    "request_sha256",
+    "source_word_count",
+    "human_review_required",
+    "human_review_complete",
+    "frozen",
+    "oracle_visible_to_production",
+    "positive_reference_visible_to_production",
+]
+
+#: The three envelope fields that block the Stage freeze gate, each on its own.
+FREEZE_BLOCKING_FIELDS = ["human_review_complete", "frozen", "authority_status"]
+
+
+def request_path(benchmark_id: str) -> str:
+    """THE canonical request path. There is no alternative and no fallback."""
+    return os.path.join(BENCHMARKS, benchmark_id, "source", "request.txt")
+
+
+def source_manifest_path(benchmark_id: str) -> str:
+    """THE canonical source-manifest path.
+
+    Deliberately a single expression with no existence check and no second
+    location to try. A resolver that falls back to another path makes two layouts
+    permanently valid, which is the thing normalization was meant to end.
+    """
+    return os.path.join(BENCHMARKS, benchmark_id, "source", "source_manifest.yaml")
+
+
+def source_manifest(benchmark_id: str) -> dict:
+    return load_yaml(source_manifest_path(benchmark_id))
+
 
 def load_yaml(path: str) -> dict:
     with open(path, "r", encoding="utf-8") as fh:

@@ -211,7 +211,7 @@ result outright when `oracle_frozen_before_run` is false.
 
 1. Write the source request. It states a **problem**, never a mechanism. The
    leakage test in `test_benchmark_skeleton.py` scans for solution language.
-2. Freeze it, with a `source_manifest.yaml` carrying provenance and hashes.
+2. Freeze it, with a `source/source_manifest.yaml` carrying provenance and hashes.
 3. Author the Oracle **independently**, in `ver3/oracles/`, and freeze it
    **before** the first source-only run.
 4. Optionally build a positive executable reference in `ver3/cad_validation/`,

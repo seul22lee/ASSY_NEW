@@ -80,20 +80,21 @@ class TestBenchmarkSkeleton(unittest.TestCase):
                 d = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "descriptor.yaml"))
                 if not d["source"].get("present"):
                     self.skipTest("%s source not extracted yet" % bm)
-                self.assertTrue(os.path.isfile(os.path.join(_paths.BENCHMARKS, bm, "source", "request.txt")))
-                self.assertTrue(os.path.isfile(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml")))
+                self.assertTrue(os.path.isfile(_paths.request_path(bm)))
+                self.assertTrue(os.path.isfile(_paths.source_manifest_path(bm)))
 
     def test_request_matches_its_recorded_hash(self):
         """The copy must be verifiable, not merely asserted."""
         import hashlib
         for bm in ("BM-001", "BM-002"):
             with self.subTest(benchmark=bm):
-                man = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml"))
+                man = _paths.source_manifest(bm)
                 path = os.path.join(_paths.REPO_ROOT, man["artifact"])
                 with open(path, "rb") as fh:
                     raw = fh.read()
                 self.assertEqual(man["extraction"]["hashes"]["file_sha256"],
                                  hashlib.sha256(raw).hexdigest())
+                self.assertEqual(man["request_sha256"], hashlib.sha256(raw).hexdigest())
                 self.assertEqual(man["extraction"]["hashes"]["bytes"], len(raw))
                 # content hash excludes the one appended newline
                 self.assertEqual(man["extraction"]["hashes"]["content_sha256"],
@@ -102,7 +103,7 @@ class TestBenchmarkSkeleton(unittest.TestCase):
     def test_manifest_declares_no_oracle_and_no_reference_content(self):
         for bm in ("BM-001", "BM-002"):
             with self.subTest(benchmark=bm):
-                man = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml"))
+                man = _paths.source_manifest(bm)
                 absent = man["declared_absent"]
                 for key in ("oracle_semantics", "positive_reference_information",
                             "ver2_derived_interpretation"):
@@ -110,14 +111,13 @@ class TestBenchmarkSkeleton(unittest.TestCase):
                     self.assertTrue(absent[key]["statement"].strip())
 
     def test_manifest_records_a_human_review_status(self):
-        allowed = {"HUMAN_REVIEW_REQUIRED", "HUMAN_REVIEW_COMPLETE"}
         for bm in ("BM-001", "BM-002"):
             with self.subTest(benchmark=bm):
-                man = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml"))
-                hr = man["human_review"]
-                self.assertIn(hr["status"], allowed)
-                if hr["status"] == "HUMAN_REVIEW_REQUIRED":
-                    self.assertTrue(hr["questions"], "review required but no question stated")
+                man = _paths.source_manifest(bm)
+                self.assertTrue(man["human_review_required"])
+                if not man["human_review_complete"]:
+                    self.assertTrue(man["human_review"]["questions"],
+                                    "review outstanding but no question stated")
 
     def test_extraction_applied_no_interpretation(self):
         """The forbidden transformations must be named, not merely avoided."""
@@ -125,7 +125,7 @@ class TestBenchmarkSkeleton(unittest.TestCase):
                      "clarification", "enrichment", "reordering"}
         for bm in ("BM-001", "BM-002"):
             with self.subTest(benchmark=bm):
-                man = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml"))
+                man = _paths.source_manifest(bm)
                 declared = set(man["extraction"]["transformations_NOT_applied"])
                 self.assertEqual(set(), forbidden - declared)
                 self.assertEqual("VERBATIM_FIELD_COPY", man["extraction"]["method"])
@@ -138,7 +138,7 @@ class TestBenchmarkSkeleton(unittest.TestCase):
         """
         for bm in ("BM-001", "BM-002"):
             with self.subTest(benchmark=bm):
-                man = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, bm, "source_manifest.yaml"))
+                man = _paths.source_manifest(bm)
                 for witness in ("primary_witness", "corroborating_witness"):
                     path = man["provenance"][witness]["path"]
                     self.assertNotIn("ver3/oracles", path)
@@ -155,7 +155,7 @@ class TestBenchmarkSkeleton(unittest.TestCase):
                  "mujoco", "body count", "overhung")
         for bm in ("BM-001", "BM-002"):
             with self.subTest(benchmark=bm):
-                with open(os.path.join(_paths.BENCHMARKS, bm, "source", "request.txt"),
+                with open(_paths.request_path(bm),
                           encoding="utf-8") as fh:
                     text = fh.read().lower()
                 found = [w for w in leaks if w in text]
@@ -169,28 +169,31 @@ class TestBenchmarkSkeleton(unittest.TestCase):
         judgement, and freezing it before that judgement would skip the only
         check there is.
         """
-        path = os.path.join(_paths.BENCHMARKS, "BM-003", "source", "source_manifest.yaml")
+        path = _paths.source_manifest_path("BM-003")
         if not os.path.isfile(path):
             self.skipTest("BM-003 source not authored yet")
         man = _paths.load_yaml(path)
         self.assertEqual("AUTHORED", man["provenance"]["origin"])
-        self.assertEqual("HUMAN_REVIEW_REQUIRED", man["human_review"]["status"])
-        self.assertFalse(man["human_review"]["frozen"])
+        self.assertEqual("NEWLY_AUTHORED", man["source_class"])
+        self.assertTrue(man["human_review_required"])
+        self.assertFalse(man["human_review_complete"])
+        self.assertFalse(man["frozen"])
         self.assertFalse(man["subject"]["chosen_by_this_session"])
 
     def test_bm003_request_matches_its_recorded_hash(self):
         import hashlib
-        path = os.path.join(_paths.BENCHMARKS, "BM-003", "source", "source_manifest.yaml")
+        path = _paths.source_manifest_path("BM-003")
         if not os.path.isfile(path):
             self.skipTest("BM-003 source not authored yet")
         man = _paths.load_yaml(path)
         with open(os.path.join(_paths.REPO_ROOT, man["artifact"]), "rb") as fh:
             raw = fh.read()
         self.assertEqual(man["authoring"]["hashes"]["file_sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(man["request_sha256"], hashlib.sha256(raw).hexdigest())
         self.assertEqual(man["authoring"]["hashes"]["bytes"], len(raw))
 
     def test_bm003_request_is_within_the_length_target(self):
-        path = os.path.join(_paths.BENCHMARKS, "BM-003", "source", "request.txt")
+        path = _paths.request_path("BM-003")
         if not os.path.isfile(path):
             self.skipTest("BM-003 source not authored yet")
         with open(path, encoding="utf-8") as fh:
@@ -198,7 +201,7 @@ class TestBenchmarkSkeleton(unittest.TestCase):
         self.assertTrue(150 <= words <= 300, "request is %d words; target 150-300" % words)
 
     def test_bm003_source_declares_no_oracle_exists(self):
-        path = os.path.join(_paths.BENCHMARKS, "BM-003", "source", "source_manifest.yaml")
+        path = _paths.source_manifest_path("BM-003")
         if not os.path.isfile(path):
             self.skipTest("BM-003 source not authored yet")
         man = _paths.load_yaml(path)
@@ -215,7 +218,7 @@ class TestBenchmarkSkeleton(unittest.TestCase):
         """
         d = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
         self.assertEqual("PLACEHOLDER", d["status"])
-        self.assertFalse(d["source"]["frozen"])
+        self.assertFalse(_paths.source_manifest("BM-003")["frozen"])
         self.assertFalse(d["oracle"]["frozen_before_source_only_runs"])
 
     def test_bm003_is_declared_a_placeholder(self):

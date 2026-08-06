@@ -42,15 +42,16 @@ ver3/
 
     benchmarks/                        source requests and run output
         README.md
-        BM-001/  BM-002/
+        SOURCE_FREEZE_REVIEW.md            consolidated review, all decisions PENDING
+        BM-001/  BM-002/  BM-003/          ONE canonical layout, no exceptions
             descriptor.yaml
-            source_manifest.yaml           provenance, hashes, human-review status
-            source/request.txt             verbatim; the only raw text a run reads
+            source/request.txt             the only raw text a run reads
+            source/source_manifest.yaml    common envelope + class-specific detail
             runs/  evaluations/
-        BM-003/
-            descriptor.yaml                PLACEHOLDER; blocks every freeze
-            BM-003_SELECTION_CRITERIA.md   criteria + 3 briefs, subject unchosen
-            source/  runs/  evaluations/
+        BM-003/                            additionally:
+            BM-003_SELECTION_CRITERIA.md   criteria + 3 briefs (subject now fixed)
+            BM003_SOURCE_AUTHORING_RECORD.md
+            BM003_SOURCE_HUMAN_REVIEW_CHECKLIST.md
 
     tests/meta/                        boundary and contract enforcement
         _paths.py
@@ -80,7 +81,8 @@ away in the moment.
 |---|---|---|---|
 | `phase0/` | no | yes | Governing prose; not a runtime input |
 | `contracts/` | as schema definitions | yes | The contracts the code implements |
-| `benchmarks/*/source/` | **s01 only, at run time** | yes | The request is the legitimate input |
+| `benchmarks/*/source/request.txt` | **s01 only, at run time** | yes | The request is the legitimate input |
+| `benchmarks/*/source/source_manifest.yaml` | no | yes | Provenance and review state, not a runtime input |
 | `benchmarks/*/descriptor.yaml` | no | yes | Branching on it is FP-02 / INV-015 / R-14 |
 | `oracles/` | **never (BLOCKING)** | yes | An Oracle states what must be true of a run. Reading it is reading the answer key. |
 | `cad_validation/` | **never (BLOCKING)** | yes | Positive references. Reproducing one is not designing. |
