@@ -1,0 +1,356 @@
+{
+  "all_inertias_positive_definite": true,
+  "all_masses_positive": true,
+  "all_triangle_inequalities_hold": true,
+  "assumptions": {
+    "affects": "empty-cycle torque, linearly in each body's mass. The INCREMENTAL payload torque (payload run minus empty run) is independent of these choices.",
+    "metal_like": {
+      "bodies": [
+        "BODY-CRANK-SHAFT",
+        "BODY-CONNECTING-ROD",
+        "BODY-CRANK-JOINT-PIN",
+        "BODY-PLATFORM-JOINT-PIN"
+      ],
+      "value": 7850.0,
+      "why": "a generic steel-like metal for the mechanism bodies. Same status: DECLARED SIMULATION ASSUMPTION, NOT A SOURCE REQUIREMENT, NOT A VERIFIED MATERIAL SELECTION."
+    },
+    "polymer_like": {
+      "bodies": [
+        "BODY-HOUSING",
+        "BODY-REAR-PANEL",
+        "BODY-PLATFORM"
+      ],
+      "value": 1200.0,
+      "why": "a generic rigid polymer. The source states no material (DOS-BM-002 S3), so this is a DECLARED SIMULATION ASSUMPTION, NOT A SOURCE REQUIREMENT and NOT A VERIFIED MATERIAL SELECTION."
+    }
+  },
+  "bodies": {
+    "BODY-CONNECTING-ROD": {
+      "cad_volume_mm3": 20821.237046,
+      "com_m": [
+        0.048,
+        0.07,
+        0.0575
+      ],
+      "com_mm": [
+        48.0,
+        70.0,
+        57.5
+      ],
+      "declared_density_kg_m3": 7850.0,
+      "inertia_about_com_kg_m2": [
+        [
+          0.000126767146,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.000123649334,
+          -0.0
+        ],
+        [
+          0.0,
+          -0.0,
+          7.040533e-06
+        ]
+      ],
+      "mass_kg": 0.163446711,
+      "material_class": "metal_like",
+      "positive_definite": true,
+      "positive_mass": true,
+      "principal_values_kg_m2": [
+        7.040533e-06,
+        0.000123649334,
+        0.000126767146
+      ],
+      "triangle_inequality": true
+    },
+    "BODY-CRANK-JOINT-PIN": {
+      "cad_volume_mm3": 4381.736354,
+      "com_m": [
+        0.051971769,
+        0.07,
+        0.015
+      ],
+      "com_mm": [
+        51.971769,
+        70.0,
+        15.0
+      ],
+      "declared_density_kg_m3": 7850.0,
+      "inertia_about_com_kg_m2": [
+        [
+          8.93001e-07,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          3.93653e-06,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          3.93653e-06
+        ]
+      ],
+      "mass_kg": 0.03439663,
+      "material_class": "metal_like",
+      "positive_definite": true,
+      "positive_mass": true,
+      "principal_values_kg_m2": [
+        8.93001e-07,
+        3.93653e-06,
+        3.93653e-06
+      ],
+      "triangle_inequality": true
+    },
+    "BODY-CRANK-SHAFT": {
+      "cad_volume_mm3": 203805.61849,
+      "com_m": [
+        0.007561176,
+        0.07,
+        0.058652076
+      ],
+      "com_mm": [
+        7.561176,
+        70.0,
+        58.652076
+      ],
+      "declared_density_kg_m3": 7850.0,
+      "inertia_about_com_kg_m2": [
+        [
+          0.001000575996,
+          -0.0,
+          1.5868279e-05
+        ],
+        [
+          -0.0,
+          0.000941521862,
+          0.0
+        ],
+        [
+          1.5868279e-05,
+          0.0,
+          0.000876333659
+        ]
+      ],
+      "mass_kg": 1.599874105,
+      "material_class": "metal_like",
+      "positive_definite": true,
+      "positive_mass": true,
+      "principal_values_kg_m2": [
+        0.000874338981,
+        0.000941521862,
+        0.001002570675
+      ],
+      "triangle_inequality": true
+    },
+    "BODY-HOUSING": {
+      "cad_volume_mm3": 448170.644724,
+      "com_m": [
+        0.020576491,
+        0.07,
+        0.107652617
+      ],
+      "com_mm": [
+        20.576491,
+        70.0,
+        107.652617
+      ],
+      "declared_density_kg_m3": 1200.0,
+      "inertia_about_com_kg_m2": [
+        [
+          0.004019586641,
+          0.0,
+          8.6293328e-05
+        ],
+        [
+          0.0,
+          0.00278126793,
+          -0.0
+        ],
+        [
+          8.6293328e-05,
+          -0.0,
+          0.001696782702
+        ]
+      ],
+      "mass_kg": 0.537804774,
+      "material_class": "polymer_like",
+      "positive_definite": true,
+      "positive_mass": true,
+      "principal_values_kg_m2": [
+        0.001693581274,
+        0.00278126793,
+        0.004022788069
+      ],
+      "triangle_inequality": true
+    },
+    "BODY-PLATFORM": {
+      "cad_volume_mm3": 57303.442367,
+      "com_m": [
+        0.037987561,
+        0.07,
+        0.120236941
+      ],
+      "com_mm": [
+        37.987561,
+        70.0,
+        120.236941
+      ],
+      "declared_density_kg_m3": 1200.0,
+      "inertia_about_com_kg_m2": [
+        [
+          8.0815756e-05,
+          0.0,
+          1.21386e-06
+        ],
+        [
+          0.0,
+          1.7150004e-05,
+          0.0
+        ],
+        [
+          1.21386e-06,
+          0.0,
+          9.2525127e-05
+        ]
+      ],
+      "mass_kg": 0.068764131,
+      "material_class": "polymer_like",
+      "positive_definite": true,
+      "positive_mass": true,
+      "principal_values_kg_m2": [
+        1.7150004e-05,
+        8.0691245e-05,
+        9.2649639e-05
+      ],
+      "triangle_inequality": true
+    },
+    "BODY-PLATFORM-JOINT-PIN": {
+      "cad_volume_mm3": 2949.955502,
+      "com_m": [
+        0.052616613,
+        0.07,
+        0.1
+      ],
+      "com_mm": [
+        52.616613,
+        70.0,
+        100.0
+      ],
+      "declared_density_kg_m3": 7850.0,
+      "inertia_about_com_kg_m2": [
+        [
+          4.57844e-07,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          2.25151e-06,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          2.25151e-06
+        ]
+      ],
+      "mass_kg": 0.023157151,
+      "material_class": "metal_like",
+      "positive_definite": true,
+      "positive_mass": true,
+      "principal_values_kg_m2": [
+        4.57844e-07,
+        2.25151e-06,
+        2.25151e-06
+      ],
+      "triangle_inequality": true
+    },
+    "BODY-REAR-PANEL": {
+      "cad_volume_mm3": 277564.337196,
+      "com_m": [
+        0.074423175,
+        0.07,
+        0.109182918
+      ],
+      "com_mm": [
+        74.423175,
+        70.0,
+        109.182918
+      ],
+      "declared_density_kg_m3": 1200.0,
+      "inertia_about_com_kg_m2": [
+        [
+          0.001885272851,
+          0.0,
+          -5.088597e-06
+        ],
+        [
+          0.0,
+          0.001370309806,
+          -0.0
+        ],
+        [
+          -5.088597e-06,
+          -0.0,
+          0.000520343578
+        ]
+      ],
+      "mass_kg": 0.333077205,
+      "material_class": "polymer_like",
+      "positive_definite": true,
+      "positive_mass": true,
+      "principal_values_kg_m2": [
+        0.000520324608,
+        0.001370309806,
+        0.001885291821
+      ],
+      "triangle_inequality": true
+    }
+  },
+  "declared_assumption_note": "DECLARED SIMULATION ASSUMPTION. NOT A SOURCE REQUIREMENT. NOT A VERIFIED MATERIAL SELECTION.",
+  "geometry_signature_sha256": "6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee",
+  "inertia_frame": "about each body's own centre of mass, in world-aligned axes at the as-built (crank 0 deg) pose, which is the pose every MuJoCo body frame is defined in.",
+  "moving_mass_kg": 1.889638728,
+  "payload": {
+    "com_mm": [
+      37.0,
+      70.0,
+      146.0
+    ],
+    "envelope_mm": [
+      36.0,
+      60.0,
+      40.0
+    ],
+    "inertia_about_com_kg_m2": [
+      [
+        0.000433333333,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.000241333333,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.000408
+      ]
+    ],
+    "is_product_body": false,
+    "mass_kg": 1.0,
+    "note": "SCENARIO-PAYLOAD-1KG. A scenario object, not a product body. It is a uniform box over the declared envelope, rigidly attached to the platform, and it is absent from the empty model."
+  },
+  "reference_id": "EXE-BM002-01",
+  "static_mass_kg": 0.870881979,
+  "total_product_mass_kg": 2.760520707,
+  "unit_conversion": "CAD is in mm and mm^3. mass = volume_mm3 * 1e-9 * rho; inertia = I_mm5 * 1e-15 * rho. Both checked by the dimensional test in the report."
+}

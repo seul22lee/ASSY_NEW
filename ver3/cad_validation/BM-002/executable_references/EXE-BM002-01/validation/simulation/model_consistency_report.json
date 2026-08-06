@@ -1,0 +1,112 @@
+{
+  "cad_unchanged": true,
+  "checks": {
+    "crank_axis_matches_cad": {
+      "cad_mm": [
+        70.0,
+        60.0
+      ],
+      "model_m": [
+        0.07,
+        0.06
+      ],
+      "ok": true
+    },
+    "crank_radius_mm": {
+      "cad": 45.0,
+      "model_derived": 45.0,
+      "ok": true
+    },
+    "moving_mass_empty_kg": 2.760521,
+    "moving_mass_payload_kg": 3.760521,
+    "payload_delta_kg": 1.0,
+    "rod_centre_distance_mm": {
+      "cad": 85.0,
+      "model_anchor": 85.0,
+      "ok": true
+    },
+    "rod_length_constant": {
+      "how": "the rod is one rigid body with a fixed anchor offset, so its length cannot change; what is measured instead is the closed-loop residual at the platform joint",
+      "max_loop_closure_error_mm": 9.018e-06
+    },
+    "support_surface_bottom_mm": 125.999997,
+    "support_surface_top_mm": 216.000002,
+    "travel_agreement_mm": 5e-06,
+    "travel_from_cad_mm": 90.0,
+    "travel_from_simulation_mm": 90.000005
+  },
+  "geometry_signature_sha256": "6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee",
+  "mapping": {
+    "bodies": {
+      "BODY-CONNECTING-ROD": {
+        "dof": 1,
+        "far_end": "equality connect at the CAD platform-pin axis",
+        "joint": "hinge crank_joint, axis +X, at the CAD crank-pin axis",
+        "mujoco": "rod"
+      },
+      "BODY-CRANK-JOINT-PIN": {
+        "dof": 0,
+        "mujoco": "welded into crank",
+        "why": "each pin is a body of revolution about a joint axis parallel to X, and each pin's centre is rigidly fixed to that parent in the CAD, so welding is EXACT for position and for inertia about the joint axis - the pin's own spin carries no dynamics here. Their full CAD mass and inertia are retained. This makes NO claim about pin contact, bending or bearing stress."
+      },
+      "BODY-CRANK-SHAFT": {
+        "dof": 1,
+        "joint": "hinge crank_hinge, axis +X, at the CAD crank axis y=70 z=60 mm",
+        "mujoco": "crank"
+      },
+      "BODY-HOUSING": {
+        "dof": 0,
+        "mujoco": "housing_and_panel (welded to world)",
+        "role": "fixed world body, the datum"
+      },
+      "BODY-PLATFORM": {
+        "dof": 1,
+        "joint": "slide platform_slide, axis +Z - the IDEAL GUIDE CONSTRAINT",
+        "mujoco": "platform"
+      },
+      "BODY-PLATFORM-JOINT-PIN": {
+        "dof": 0,
+        "mujoco": "welded into platform",
+        "why": "each pin is a body of revolution about a joint axis parallel to X, and each pin's centre is rigidly fixed to that parent in the CAD, so welding is EXACT for position and for inertia about the joint axis - the pin's own spin carries no dynamics here. Their full CAD mass and inertia are retained. This makes NO claim about pin contact, bending or bearing stress."
+      },
+      "BODY-REAR-PANEL": {
+        "dof": 0,
+        "mujoco": "housing_and_panel (welded to world)",
+        "role": "rigidly fixed to the housing in the completed-product model"
+      }
+    },
+    "closed_loop": {
+      "degrees_of_freedom": "3 joint DOF minus 2 independent constraint rows in the plane = 1 net DOF, the crank angle",
+      "how": "equality connect between rod and platform at the platform pin",
+      "why": "a slider-crank is a closed loop and MuJoCo integrates a tree"
+    },
+    "geometry_signature_sha256": "6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee",
+    "purpose": "how each accepted CAD product body appears in the MuJoCo model. Nothing in the CAD was changed to build this.",
+    "scenario_objects": {
+      "SCENARIO-PAYLOAD-1KG": {
+        "absent_from": "model_empty.xml",
+        "is_product_body": false,
+        "mujoco": "extra inertial merged into the platform body in model_payload_1kg.xml only"
+      }
+    },
+    "what_this_topology_cannot_support": [
+      "contact-level jamming - REQ-007 stays NOT_VERIFIED",
+      "guide wear, tolerance binding, local guide pressure",
+      "manufacturing variation or frictional wedging",
+      "any stress, strain or strength result"
+    ],
+    "what_this_topology_supports": [
+      "rigid-body dynamics of the assembled mechanism",
+      "actuator torque under declared assumptions",
+      "back-driving tendency when the actuator is released",
+      "IDEAL joint and guide reactions",
+      "numerical constraint stability"
+    ]
+  },
+  "model_hashes": {
+    "model_empty_sha256": "d5fb6239e2a138fdefd15c62e74908778f4d270f67c3e002c20bcde48a6559cc",
+    "model_payload_1kg_sha256": "dcbdac122df5b971d51e6d459806a5e2304ff6886e5d60f6ea44fdd1f121a471"
+  },
+  "reference_id": "EXE-BM002-01",
+  "status": "PASS"
+}

@@ -1,0 +1,121 @@
+{
+  "assumptions": {
+    "damping": 0.0,
+    "engine": "mujoco 2.3.7",
+    "kind": "MUJOCO RIGID-BODY SIMULATION, ACTUATOR RELEASE",
+    "not_a_contact_model": true,
+    "release_angles_deg": [
+      90.0,
+      135.0,
+      225.0,
+      270.0
+    ],
+    "seconds_per_release": 2.5
+  },
+  "camera": {
+    "eye_mm": [
+      -380.0,
+      -320.0,
+      250.0
+    ],
+    "fixed_for_whole_clip": true,
+    "half_height_mm": 150.0,
+    "projection": "orthographic",
+    "target_mm": [
+      14.0,
+      74.0,
+      124.0
+    ],
+    "up": [
+      0.0,
+      0.0,
+      1.0
+    ]
+  },
+  "claims_established": [
+    "what the mechanism does when the actuator stops supplying torque, at four crank angles, with the 1 kg scenario payload",
+    "the actuator torque is identically zero after release in every frame"
+  ],
+  "claims_not_established": [
+    "payload structural capacity, stress, deflection, pin bending, shaft strength",
+    "bearing pressure or local guide pressure",
+    "fatigue, wear or life",
+    "manufacturing feasibility or physical assembly force",
+    "user ergonomic suitability or acceptable crank effort (no ceiling is stated)",
+    "pinch safety or any safety property",
+    "contact-level jamming or tolerance-induced binding",
+    "self-locking outside the exact tested model",
+    "that any holding requirement exists - the source states none (UNR-BM-002-004)",
+    "friction, which is zero here and would change the result"
+  ],
+  "codec": "H.264 (libx264), yuv420p, MP4 container",
+  "container_readback": {
+    "codec_reported": "h264",
+    "container_duration_s": 10.0,
+    "container_fps": 30.0,
+    "container_size_px": [
+      1280,
+      720
+    ],
+    "ffmpeg_version": "4.2.2-static",
+    "frames_read_back": 300
+  },
+  "duration_s": 10.0,
+  "engine": "cadquery-ocp tessellation + matplotlib painter + ffmpeg (libx264)",
+  "engine_versions": {
+    "cadquery": "2.4.0",
+    "ffmpeg": "4.2.2-static",
+    "imageio_ffmpeg": "0.5.1",
+    "matplotlib": "3.7.5",
+    "numpy": "1.24.4"
+  },
+  "file": "validation/simulation/review/lift_mujoco_backdrive.mp4",
+  "fps": 30,
+  "frame_count": 300,
+  "geometry_source": "the reference's own B-rep solids, posed by the same functions the validator uses. No proxy geometry.",
+  "human_review": "HUMAN_REVIEW_PENDING",
+  "kind": "REVIEW_EVIDENCE",
+  "output_bytes": 2329745,
+  "output_sha256": "fbe8194c52318c2cd82194b26ea81b254ac23c3b406507d5cbd9f06aeafa2166",
+  "reference_id": "EXE-BM002-01",
+  "resolution_px": [
+    1280,
+    720
+  ],
+  "sample_columns": [
+    "t_s",
+    "release_deg",
+    "crank_deg",
+    "support_surface_z_mm",
+    "actuator_torque_Nm"
+  ],
+  "source_geometry_signature_sha256": "6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee",
+  "state_timeline": [
+    {
+      "crank_angle_deg": 90.0,
+      "frame": 0,
+      "state": "RELEASED AT 90 DEG",
+      "t_s": 0.0
+    },
+    {
+      "crank_angle_deg": 135.0,
+      "frame": 75,
+      "state": "RELEASED AT 135 DEG",
+      "t_s": 2.5
+    },
+    {
+      "crank_angle_deg": 225.0,
+      "frame": 150,
+      "state": "RELEASED AT 225 DEG",
+      "t_s": 5.0
+    },
+    {
+      "crank_angle_deg": 270.0,
+      "frame": 225,
+      "state": "RELEASED AT 270 DEG",
+      "t_s": 7.5
+    }
+  ],
+  "trajectory_sha256": "cb793cc97b5dc6a46b2360962e6f4d61a51bfffeed72013c33be0db79f712162",
+  "video_id": "VID-BM002-MJ-BACKDRIVE"
+}

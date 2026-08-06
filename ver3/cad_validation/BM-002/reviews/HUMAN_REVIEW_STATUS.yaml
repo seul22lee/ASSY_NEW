@@ -6,6 +6,25 @@ status: HUMAN_REVIEW_PENDING
 author_self_review_complete: true
 independent_human_review_complete: false
 
+phases_present:
+  phases:
+  - id: PHASE_A_CAD
+    what: geometry and kinematics measured on B-rep solids; no force anywhere
+    result: 14 Oracle predicates PASS, 20/20 negative controls, travel 90.000000 mm
+  - id: PHASE_A_MEDIA
+    what: 42 CAD-derived review images and two PRESCRIBED CAD animations
+    result: PNG audit YES; video audit conclusive
+  - id: PHASE_B_MUJOCO
+    what: >
+      MuJoCo rigid-body dynamics at a DECLARED IDEAL-JOINT fidelity; forces, but
+      no contact and no stress
+    result: >
+      complete cycle, torque, back-driving, ideal reactions; 20/20 simulation
+      negative controls; analytic cross-check within 0.0000703 N m
+  note: >
+    The three are different kinds of evidence and are never merged. MuJoCo did not
+    exist during Phase A and nothing in Phase A depends on it.
+
 what_author_self_review_covered: >
   Legibility and correctness of the CAD-derived review media only: that every
   image and video frame was rendered from the accepted B-rep geometry, that the
@@ -33,16 +52,28 @@ media:
   operation_storyboard_frames: 9
   assembly_storyboard_frames: 9
   videos: 2
+  mujoco_videos: 3
+  mujoco_plots: 7
   all_media_from_actual_brep: true
   generative_imagery_used: false
   proxy_or_redrawn_geometry_used: false
-  mujoco_used: false
+  mujoco_used_in_phase_a_media: false
   png_audit: ../executable_references/EXE-BM002-01/validation/PNG_REVIEW_AUDIT.md
   png_audit_conclusion: YES - READY FOR INDEPENDENT HUMAN CAD REVIEW
   video_audit: ../executable_references/EXE-BM002-01/validation/VIDEO_REVIEW_AUDIT.md
   video_audit_conclusion: >
-    both clips decode as written, match their manifests exactly, and show what
-    they claim to show; review evidence for geometry and prescribed kinematics only
+    PART 1 (2 CAD clips): both decode as written, match their manifests exactly,
+    and show what they claim to show; review evidence for geometry and PRESCRIBED
+    kinematics only. PART 2 (3 MuJoCo clips): all three decode cleanly, match
+    their manifests byte for byte, resolve their recorded inputs, and carry poses
+    READ BACK FROM THE SOLVER rather than imposed by a formula; review evidence
+    for rigid-body dynamics under declared assumptions only. No requirement
+    position changes on account of any of the five.
+  video_audit_reader_warning: >
+    In the back-driving clip the on-frame "crank moved" value is INSTANTANEOUS
+    and the motion is a fast undamped oscillation of roughly 2 Hz. The figures in
+    backdrive_report.json are MAXIMA over the release window. Reading any single
+    frame as the outcome of a release gives the wrong answer.
   packet: INDEPENDENT_HUMAN_REVIEW_PACKET.md
 
 # ------------------------------------------------- reviewer decisions, all PENDING
@@ -187,3 +218,113 @@ deferred_in_this_phase:
 self_approval: >
   NONE. The author does not approve this design. Recording the decisions above is
   the reviewer's act, not the author's.
+
+# ------------------------------------------------- PHASE B: MuJoCo dynamics
+phase_b_mujoco:
+  engine: {name: mujoco, version: "2.3.7", python: "3.8.10"}
+  cad_changed: false
+  geometry_signature_sha256: 6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee
+  fidelity: >
+    rigid bodies, IDEAL joints, IDEAL prismatic guide. No contact is resolved and
+    no stress is computed anywhere.
+  declared_assumptions:
+    density_polymer_like_kg_m3: 1200.0
+    density_metal_like_kg_m3: 7850.0
+    status: DECLARED SIMULATION ASSUMPTION - NOT A SOURCE REQUIREMENT - NOT A VERIFIED MATERIAL SELECTION
+    joint_damping: 0.0
+    joint_friction: 0.0
+    gravity_m_s2: [0.0, 0.0, -9.81]
+  results:
+    total_product_mass_kg: 2.76052
+    moving_mass_kg: 1.88964
+    measured_travel_mm: 90.0000
+    empty_peak_torque_Nm: [-0.15580, 0.15580]
+    empty_rms_torque_Nm: 0.10649
+    payload_1kg_peak_torque_Nm: [-0.65691, 0.65691]
+    payload_1kg_rms_torque_Nm: 0.43031
+    incremental_payload_peak_torque_Nm: [-0.50263, 0.50263]
+    incremental_payload_rms_torque_Nm: 0.32453
+    analytic_cross_check_max_difference_Nm: 0.0000703
+    analytic_cross_check_tolerance_Nm: 0.010052
+    speed_sensitivity_rms_change_percent: 0.2
+    back_driving_cases: "12 of 16"
+    max_platform_drop_on_release_mm: {at_45_or_315_deg: 7.00, at_90_or_270_deg: 32.11, at_135_or_225_deg: 70.66}
+    dead_centres_no_motion_deg: [0, 180]
+    solver_warnings: 0
+    simulation_negative_controls: "20 of 20 detected"
+  requirement_positions_unchanged_by_mujoco:
+    REQ-003_payload_capacity: UNSUPPORTED
+    REQ-007_jamming: NOT_VERIFIED
+    REQ-005_safety: INDETERMINATE
+    REQ-006_manufacture: NOT_VERIFIED
+  holding_after_release: >
+    the mechanism DOES NOT HOLD when the actuator is released, except at the two
+    kinematic dead centres. The source states no holding requirement
+    (UNR-BM-002-004, FRE-BM-002-008), so this is a behaviour for a reviewer to
+    weigh, not a requirement failure.
+
+phase_b_reviewer_decisions:
+  - id: D1
+    question: >
+      Is a peak crank torque of about 0.66 N m with 1 kg acceptable for a hand
+      crank at a 26 mm grip radius - about 25 N at the grip?
+    decision: PENDING
+  - id: D2
+    question: >
+      The mechanism back-drives at every angle except the two dead centres. Is
+      that acceptable, or should a holding feature be added - noting the source
+      requires none?
+    decision: PENDING
+  - id: D3
+    question: Are the declared densities and the resulting 2.76 kg product mass plausible?
+    decision: PENDING
+  - id: D4
+    question: >
+      The crank shaft alone is 1.60 kg of the 2.76 kg total, because the O70 hub
+      is modelled as steel. Should that body be lighter?
+    decision: PENDING
+  - id: D5
+    question: >
+      Is an ideal-joint rigid-body model the right next fidelity step, or is a
+      contact-resolving model needed before anything further is claimed?
+    decision: PENDING
+  - id: D6
+    question: >
+      What evidence would a reviewer want before REQ-007 jamming could move off
+      NOT_VERIFIED?
+    decision: PENDING
+
+phase_b_author_concerns:
+  - id: SC-08
+    concern: >
+      The crank shaft is 1.60 kg of the 2.76 kg product, from a O70 x 45 mm steel
+      hub whose size is forced by the assembly route (SC-01).
+    relates_to: [D3, D4]
+  - id: SC-09
+    concern: >
+      No holding feature, and it back-drives. Released at 135 degrees the platform
+      falls 70.66 mm, the full height back to the bottom of its travel.
+    relates_to: [D2]
+  - id: SC-10
+    concern: >
+      The absolute torque figures scale with the declared densities. Only the
+      incremental 1 kg result is robust.
+    relates_to: [D1, D3]
+  - id: SC-11
+    concern: >
+      Zero friction is optimistic. Real friction would add to the crank torque and
+      would damp the back-driving, so both reported behaviours are bounds.
+    relates_to: [D1, D2]
+
+phase_b_not_established:
+  items:
+  - payload structural capacity, stress, deflection, pin bending, shaft strength
+  - bearing pressure or local guide pressure
+  - contact-level jamming, tolerance binding, frictional wedging, guide wear
+  - fatigue, wear, life
+  - manufacturing feasibility, physical assembly force
+  - user ergonomic suitability, pinch safety
+  - self-locking outside the exact tested model
+  note: >
+    No FEA was run. No contact model exists. No strength PASS and no jamming PASS
+    was claimed anywhere.

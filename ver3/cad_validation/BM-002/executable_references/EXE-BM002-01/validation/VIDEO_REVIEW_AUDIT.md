@@ -237,3 +237,159 @@ claim to show. Both are review evidence for **geometry and prescribed kinematics
 only**.
 
 **Human review status: HUMAN_REVIEW_PENDING.**
+
+---
+---
+
+# PART 2 — MuJoCo dynamics videos
+
+Three further clips were produced in Phase B. They are **a different kind of
+evidence** from the two above and are audited separately for that reason: Part 1
+covers CAD animations where every pose was *prescribed* by the kinematic law,
+whereas these three show poses *read back from the solver*. Nothing in Part 1
+depends on anything here.
+
+## Engine and provenance — all three clips
+
+| | |
+|---|---|
+| Physics | MuJoCo 2.3.7, rigid bodies, IDEAL joints, IDEAL prismatic guide |
+| Poses | `data.xpos` / `data.xmat` read back from the solver each frame |
+| Geometry | the reference's own B-rep solids, posed by those solver readbacks |
+| Source signature | `6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee` |
+| Encoder | libx264, yuv420p, MP4, 1280×720, 30 fps |
+| Contact | **none resolved** |
+| Stress | **none computed** |
+
+The distinction that matters for reading these clips: **no pose in them was
+imposed by a formula.** In Part 1 the platform is where the slider-crank equation
+says it is. Here it is where the constrained solver put it, so a frame showing the
+rod still attached at both ends is a result rather than a restatement of the
+input.
+
+## Decoded from disk
+
+Every frame of every clip was decoded to a null sink; the encoder emitted no
+errors on any of them. Frame counts were obtained by decoding to raw video and
+dividing by the frame size, not by trusting a container header.
+
+| Clip | Bytes | sha256 | Frames declared | Frames decoded | Decode |
+|---|---|---|---|---|---|
+| `lift_mujoco_empty.mp4` | 1 692 697 | matches manifest | 360 | **360** | clean |
+| `lift_mujoco_payload_1kg.mp4` | 1 775 914 | matches manifest | 360 | **360** | clean |
+| `lift_mujoco_backdrive.mp4` | 2 329 745 | matches manifest | 300 | **300** | clean |
+
+Each manifest's pointers to its inputs were re-hashed and all resolve:
+`lift_mujoco_empty_video.json` → `empty_cycle_report.json` and
+`simulation/model_empty.xml`; `lift_mujoco_payload_1kg_video.json` →
+`simulation/model_payload_1kg.xml`. All nine artifacts carrying a geometry
+signature carry the **same** one, and it is the accepted Phase A signature.
+
+## 1. `validation/simulation/review/lift_mujoco_empty.mp4`
+
+Fixed orthographic camera for the whole clip, housing and rear panel cut at
+y = 74 **for display only**. 12.0 s, one full revolution.
+
+### Verified by looking at the decoded frames
+
+- **Frame 0** — badge `BOTTOM`. Crank 0.0°, platform height **126.0 mm**,
+  actuator torque **+0.0000 N m MEASURED**, payload *none — empty platform*. The
+  crank pin is at its lowest and the rod is near-vertical.
+- **Frame 180** — badge `TOP`. Crank 179.9°, platform height **216.0 mm**,
+  torque +0.0002 N m. 216.0 − 126.0 = **90.0 mm**, which is the measured travel
+  in `SUMMARY.json` (90.000005 mm) to the displayed precision.
+- **Frame 359** — the clip closes the cycle; the platform has returned.
+- The rod remains attached at the crank pin and at the platform clevis in every
+  frame examined. In a model where the loop is closed by an equality constraint
+  rather than by a rigid body, a separated rod is a visible failure mode, and it
+  does not occur.
+
+The torque readout is labelled **MEASURED** on every frame, and it is the
+actuator force the solver reported at that sample — not a value computed for the
+caption.
+
+## 2. `validation/simulation/review/lift_mujoco_payload_1kg.mp4`
+
+Same camera, same duration, with the 1 kg scenario payload present.
+
+- **Frame 180** — badge `TOP`, crank 179.9°, platform height **216.0 mm**,
+  payload `SCENARIO-PAYLOAD-1KG, 1.000 kg`. The payload block is drawn resting on
+  the platform's support surface and stands proud of the housing rim, which is
+  the expected consequence of the 8 mm top recess.
+- Platform heights track the empty clip frame for frame, as they must: the
+  payload changes the **forces**, not the kinematics. That the two clips agree
+  geometrically while differing in the torque readout is the point of showing
+  both.
+
+## 3. `validation/simulation/review/lift_mujoco_backdrive.mp4`
+
+Four release angles — 90°, 135°, 225°, 270° — 2.5 s of free integration each, 1 kg
+payload, zero damping and zero friction.
+
+- **Frame 0** — badge `RELEASED AT 90 DEG`, `actuator RELEASED at t = 0`,
+  torque **+0.0000 N m MEASURED**.
+- **Frame 74** — 2.47 s after release, torque still **+0.0000 N m**. The actuator
+  is genuinely producing nothing; the gain and both bias terms were zeroed, and
+  the readout confirms it every frame rather than being asserted once.
+- Every frame carries, on the image itself: *"the source states NO holding
+  requirement (UNR-BM-002-004): back-driving is a behaviour, not a failure."*
+
+### One thing a reviewer must not misread
+
+The overlay number `crank moved` is **instantaneous**, and the motion is a fast
+undamped oscillation — roughly 2 Hz, swinging the crank about ±180° each way.
+Frame 74 reads `−3.69 deg`, which is *not* in tension with the 179.86° in
+`backdrive_report.json`: that figure is the **maximum over the release window**,
+and the frame catches the crank passing back through its starting angle.
+
+This was checked rather than assumed. The 90° payload release was re-integrated
+in isolation along both code paths — the report's (hold 1.5 s, free 2.0 s) and
+the video's (hold 1.2 s, free 2.5 s) — and they agree to the digit:
+
+```
+t=0.25 s   -179.758 deg        t=1.25 s   -175.637 deg
+t=0.50 s     -0.716 deg        t=1.50 s     -6.252 deg
+t=0.75 s   -178.388 deg        t=1.75 s   -171.366 deg
+t=1.00 s     -2.762 deg        t=2.00 s    -11.359 deg
+```
+
+Undamped and frictionless, the mechanism does not fall and settle; it falls and
+swings back. The platform excursion figures (7.00 / 32.11 / 70.66 mm) are
+likewise maxima, each equal to the height back to the bottom of travel, which is
+the energy-conservation check on the model. **Reading any single frame as the
+outcome of a release will give the wrong answer**, and at 30 fps against a 2 Hz
+oscillation there are only about 15 frames per half swing, so the motion is fast
+on screen.
+
+## Claims
+
+Established by these three clips, at this fidelity:
+
+- the assembled rigid-body mechanism completes a 0–360° crank cycle;
+- the platform rises and returns through the measured travel;
+- the connecting rod stays connected at both joints throughout;
+- the actuator torque displayed is the measured actuator force, sample by sample;
+- the actuator produces identically zero torque after release, in every frame.
+
+**Not** established by them, and not claimed anywhere on any frame: payload
+structural capacity, stress, deflection, pin bending, shaft strength, bearing or
+guide pressure, fatigue, wear, life, manufacturing feasibility, assembly force,
+ergonomic suitability, pinch safety, contact-level jamming or tolerance binding,
+self-locking outside this exact model, and friction — which is zero here and
+would change both the torque and the back-driving result.
+
+Every frame carries the fidelity banner *"DECLARED FIDELITY: rigid bodies, IDEAL
+joints, IDEAL prismatic guide. No contact is resolved. Densities are DECLARED
+ASSUMPTIONS. STRENGTH / SAFETY / JAMMING NOT VERIFIED."* and the footer *"MuJoCo
+rigid-body result under declared assumptions. Nothing here establishes stress,
+strength, jamming or safety."*
+
+## Conclusion — Part 2
+
+All three clips decode cleanly, match their manifests byte for byte, resolve
+their recorded inputs, and show what they claim to show. They are review evidence
+for **rigid-body dynamics under declared assumptions only**. No requirement
+position changes on account of them: REQ-003 remains UNSUPPORTED and REQ-007
+remains NOT_VERIFIED.
+
+**Human review status: HUMAN_REVIEW_PENDING.**

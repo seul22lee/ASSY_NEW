@@ -1304,7 +1304,8 @@ def step8_predicates(bodies, ev, r2, r3, r4, r5, r6, r7, ccr) -> Dict:
                         "blocked_on": i.get("blocked_on")} for i in inv],
         "requirement_readings": rec["requirement_readings"],
         "maximum_claim": rec["maximum_claim"],
-        "scope_warning": rec["scope_warning"]})
+        "scope_warning": rec["scope_warning"],
+        "phase_b_dynamics_cross_reference": phase_b_pointer()})
     return rec
 
 
@@ -1601,6 +1602,39 @@ def selftest_cases(bodies: List[cv.Body], ev: Dict, r6: Dict) -> List[Dict]:
 
 
 # ================================================================ artifacts
+def phase_b_pointer() -> Dict:
+    """A pointer to the Phase B dynamics evidence, if it exists yet.
+
+    Phase A's records are NOT rewritten to look as though MuJoCo existed while
+    they were made. This is a cross-reference and nothing more: the Phase A
+    result stands on its own geometry evidence, and every dynamics number lives
+    in validation/simulation/.
+    """
+    p = os.path.join(OUT, "simulation", "SUMMARY.json")
+    if not os.path.exists(p):
+        return {"present": False,
+                "note": "no MuJoCo dynamics evidence has been generated yet"}
+    d = json.load(open(p))
+    return {
+        "present": True,
+        "phase": "PHASE_B_MUJOCO_RIGID_BODY_DYNAMICS",
+        "generated_after_phase_a": True,
+        "summary": "validation/simulation/SUMMARY.json",
+        "engine": d["engine"],
+        "geometry_signature_sha256": d["geometry_signature_sha256"],
+        "cad_changed_by_phase_b": d["cad_changed"],
+        "overall": d["overall"],
+        "headline": d["headline"],
+        "what_it_added": d["established_at_this_fidelity"],
+        "what_it_did_not_change": d["oracle_position"],
+        "relationship_to_phase_a": (
+            "Phase A is geometry and kinematics measured on B-rep solids, with no "
+            "force anywhere. Phase B is rigid-body dynamics at an IDEAL-JOINT "
+            "fidelity, with no contact anywhere. Neither supersedes the other and "
+            "neither is a contact model."),
+    }
+
+
 def artifact_hashes() -> Dict:
     skip = {"__pycache__", "artifact_hashes.yaml"}
     rows = []
@@ -1721,6 +1755,8 @@ def main() -> int:
                  "nothing about strength, crank effort, jamming, position holding, "
                  "safety, manufacturability or life; those are NOT_VERIFIED or "
                  "UNSUPPORTED and are named as such."))
+    summary["phase_b_dynamics_cross_reference"] = phase_b_pointer()
+    cv.write_json(os.path.join(OUT, "SUMMARY.json"), summary)
     ah = artifact_hashes()
     print("  artifact hashes: %d files" % ah["file_count"])
     print("OVERALL: %s   (%.1f s)" % (summary["overall"], time.time() - t0))

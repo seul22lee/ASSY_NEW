@@ -1,0 +1,32 @@
+{
+  "empty": {
+    "peak_crank_bearing_reaction_N": 18.568049,
+    "peak_crank_joint_reaction_N": 2.721654,
+    "peak_guide_moment_Nm": 0.112757,
+    "peak_guide_reaction_N": 1.063089,
+    "peak_platform_joint_reaction_N": 1.394099
+  },
+  "explicitly_not": [
+    "local contact pressure",
+    "bearing stress",
+    "pin stress",
+    "guide contact stress"
+  ],
+  "fidelity_limitation": "these are reactions of IDEAL constraints in a rigid-body model. They are resultants, not distributions. No area, no pressure, no stress and no deflection is computed anywhere, so none of these numbers can support a strength, bearing or wear statement.",
+  "how_measured": {
+    "crank_bearing": "MuJoCo force/torque sensor at a site on the crank axis",
+    "crank_joint": "MuJoCo force/torque sensor at a site on the crank pin",
+    "guide": "MuJoCo force/torque sensor at a site on the platform body",
+    "platform_joint": "the equality-constraint force rows for the connect"
+  },
+  "label": "IDEAL JOINT / CONSTRAINT REACTION",
+  "payload_1kg": {
+    "peak_crank_bearing_reaction_N": 29.245396,
+    "peak_crank_joint_reaction_N": 14.259558,
+    "peak_guide_moment_Nm": 0.822689,
+    "peak_guide_reaction_N": 7.185671,
+    "peak_platform_joint_reaction_N": 12.899776
+  },
+  "reference_id": "EXE-BM002-01",
+  "status": "PASS"
+}

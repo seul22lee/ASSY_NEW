@@ -1,0 +1,104 @@
+reference_id: EXE-BM002-01
+geometry_signature_sha256: 6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee
+environment:
+  mujoco_version: 2.3.7
+  python_version: 3.8.10
+  numpy_version: 1.24.4
+  platform: Linux-5.4.0-176-generic-x86_64-with-glibc2.29
+  timestep_s: 0.0003333333333333333
+  integrator: implicitfast
+  solver: Newton
+  solver_iterations: 200
+  solver_tolerance: 1.0e-12
+  gravity_m_s2: &id001
+  - 0.0
+  - 0.0
+  - -9.81
+  equality_solref:
+  - 0.002
+  - 1.0
+  equality_solimp:
+  - 0.9999
+  - 0.99999
+  - 1.0e-06
+  - 0.5
+  - 2
+  joint_damping: 0.0
+  joint_friction: 0.0
+  actuator:
+    type: general, position servo (gaintype fixed, biastype affine)
+    kp_N_m_per_rad: 1500.0
+    kv_N_m_s_per_rad: 3.0
+    law: tau = kp*(ctrl - q) - kv*qdot
+    reported_quantity: data.actuator_force, the MEASURED actuator force. The command is reported separately
+      as commanded_control_rad; control NC-S14 exists because confusing the two is easy.
+    gain_tuning_note: kp and kv are sized against the crank's own inertia of about 1e-3 kg m^2. The first
+      attempt used kp=4000, kv=200, for which kv*dt/I = 77 and the integrator diverged on the first step.
+  output_sampling:
+    report_every_n_steps: 100
+    report_rate_Hz: 30.0
+    video_every_n_steps: 100
+    video_fps: 30
+  warm_up: 1.0 s settle at the start angle with the servo active
+assumptions:
+  densities_kg_m3:
+    polymer_like:
+      value: 1200.0
+      bodies:
+      - BODY-HOUSING
+      - BODY-REAR-PANEL
+      - BODY-PLATFORM
+      why: a generic rigid polymer. The source states no material (DOS-BM-002 S3), so this is a DECLARED
+        SIMULATION ASSUMPTION, NOT A SOURCE REQUIREMENT and NOT A VERIFIED MATERIAL SELECTION.
+    metal_like:
+      value: 7850.0
+      bodies:
+      - BODY-CRANK-SHAFT
+      - BODY-CONNECTING-ROD
+      - BODY-CRANK-JOINT-PIN
+      - BODY-PLATFORM-JOINT-PIN
+      why: 'a generic steel-like metal for the mechanism bodies. Same status: DECLARED SIMULATION ASSUMPTION,
+        NOT A SOURCE REQUIREMENT, NOT A VERIFIED MATERIAL SELECTION.'
+    affects: empty-cycle torque, linearly in each body's mass. The INCREMENTAL payload torque (payload
+      run minus empty run) is independent of these choices.
+  gravity_m_s2:
+    value: *id001
+    why: standard, product standing upright on a desk
+  joint_damping_N_m_s_per_rad:
+    value: 0.0
+    why: zero in the primary model. Damping would ADD to the actuator torque and would DISSIPATE back-driving
+      motion, so both primary results are the undamped case and a damped variant is run as a declared
+      sensitivity.
+  joint_friction:
+    value: 0.0
+    why: no Coulomb friction anywhere. Friction is a contact-level property this model does not resolve;
+      adding a number would invent one.
+  payload_kg:
+    value: 1.0
+    why: SCENARIO-PAYLOAD-1KG, the source's approximately 1 kg
+  pin_simplification:
+    value: BODY-CRANK-JOINT-PIN is welded to BODY-CRANK-SHAFT and BODY-PLATFORM-JOINT-PIN is welded to
+      BODY-PLATFORM.
+    why: each pin is a body of revolution about a joint axis parallel to X, and each pin's centre is rigidly
+      fixed to that parent in the CAD, so welding is EXACT for position and for inertia about the joint
+      axis - the pin's own spin carries no dynamics here. Their full CAD mass and inertia are retained.
+      This makes NO claim about pin contact, bending or bearing stress.
+  guide_representation:
+    value: one prismatic joint along +Z, an IDEAL GUIDE CONSTRAINT
+    why: the CAD guide is two channels with 0.2 and 0.4 mm clearances. This model replaces them with a
+      single ideal slide. It can carry the guide REACTION; it cannot carry jamming, binding, wear, local
+      pressure or tolerance behaviour.
+  platform_joint_representation:
+    value: MuJoCo equality connect between the rod and the platform
+    why: the slider-crank is a closed loop and MuJoCo integrates a tree. The connect constrains the two
+      bodies to share the platform-pin point, leaving relative rotation free - which is a pin joint in
+      this planar mechanism.
+not_established:
+- payload structural capacity, stress, deflection, pin bending, shaft strength
+- bearing pressure or local guide pressure
+- fatigue, wear or life
+- manufacturing feasibility or physical assembly force
+- user ergonomic suitability or acceptable crank effort (no ceiling is stated)
+- pinch safety or any safety property
+- contact-level jamming or tolerance-induced binding
+- self-locking outside the exact tested model

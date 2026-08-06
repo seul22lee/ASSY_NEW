@@ -289,3 +289,34 @@ CAD, and the geometry signature is unchanged at
 What these images do **not** establish: strength, stiffness, crank effort,
 jamming, safety, manufacturability, assembly force, wear or life. Every image
 says so on its face.
+
+---
+
+## Addendum — Phase B plots are not in this audit
+
+This audit covers the **42 CAD-derived review images in `screenshots/`** and
+nothing else.
+
+Phase B added **seven MuJoCo plots** under
+`validation/simulation/plots/`. They are a different kind of artifact and are
+audited where they belong, in the simulation reports:
+
+| plot | what it shows |
+|---|---|
+| `platform_height_vs_crank_angle.png` | simulated height against crank angle, with the independent analytic curve over it |
+| `actuator_torque_empty_vs_payload.png` | measured actuator torque, empty and with 1 kg |
+| `payload_incremental_torque.png` | the density-independent incremental result against the analytic prediction |
+| `rod_angle_vs_crank_angle.png` | simulated rod angle against the analytic arcsine |
+| `joint_reactions_vs_crank_angle.png` | **IDEAL** joint and constraint reactions |
+| `constraint_error_vs_time.png` | loop-closure residual through the cycle |
+| `backdrive_response.png` | crank and platform motion after the actuator is released |
+
+Each carries a title, axis labels, units, the scenario, the model fidelity, the
+source result-file name, the geometry signature, and — where relevant — the
+statement that the material densities are declared assumptions. Every plotted
+series is read from a saved report; nothing is plotted that the underlying report
+does not contain.
+
+**None of the 42 CAD images was regenerated, altered or invalidated by Phase B.**
+The geometry signature is unchanged, so every statement in this audit still holds
+exactly as written.

@@ -1,0 +1,171 @@
+{
+  "controls": [
+    {
+      "checked_by": "gravity-dependent torque check",
+      "control_id": "NC-S01",
+      "detected": true,
+      "measured": "RMS actuator torque falls from 0.10649 to 0.00020 N m",
+      "mutation": "set model.opt.gravity to zero",
+      "what": "remove gravity"
+    },
+    {
+      "checked_by": "model-consistency check on total moving mass",
+      "control_id": "NC-S02",
+      "detected": true,
+      "measured": "payload model moving mass 3.7605 kg vs empty 2.7605 kg; a payload run whose mass equals the empty run's is not a payload run",
+      "mutation": "report the empty model's mass under the payload label",
+      "what": "remove the 1 kg payload while claiming it is present"
+    },
+    {
+      "checked_by": "topology check against the accepted 7-body set",
+      "control_id": "NC-S03",
+      "detected": true,
+      "measured": "body set becomes 8 entries including a payload, against the accepted 7",
+      "mutation": "append SCENARIO-PAYLOAD-1KG to the product body set",
+      "what": "count the scenario payload as a product body"
+    },
+    {
+      "checked_by": "gravity-sign check on the torque phase",
+      "control_id": "NC-S04",
+      "detected": true,
+      "measured": "peak positive torque moves from 105.9 deg to 253.9 deg",
+      "mutation": "gravity z set to +9.81",
+      "what": "reverse the gravity vector"
+    },
+    {
+      "checked_by": "analytic cross-check of the incremental torque",
+      "control_id": "NC-S05",
+      "detected": true,
+      "measured": "incremental torque at 113 deg would be 0.05026 N m, not the 0.50262 N m a 1 kg payload gives; the cross-check tolerance is 0.00503",
+      "mutation": "scale the payload inertial by 0.1 and keep the 1 kg label",
+      "what": "change the payload mass to 0.1 kg while labelling it 1 kg"
+    },
+    {
+      "checked_by": "travel and loop-closure check",
+      "control_id": "NC-S06",
+      "detected": true,
+      "measured": "with the loop broken the platform no longer follows the crank: it moves 4906.63 mm on its own while the crank is driven",
+      "mutation": "disable the joint in the model",
+      "what": "break the crank-to-rod joint"
+    },
+    {
+      "checked_by": "travel and loop-closure check",
+      "control_id": "NC-S07",
+      "detected": true,
+      "measured": "with the platform joint disabled the platform travel becomes 78486.5398 mm and the loop closure error reaches 78474.2730 mm",
+      "mutation": "disable the joint in the model",
+      "what": "break the rod-to-platform joint"
+    },
+    {
+      "checked_by": "loop-closure and platform-height check",
+      "control_id": "NC-S08",
+      "detected": true,
+      "measured": "platform pin height at 90 deg moves from 132.1110 mm to 137.9423 mm",
+      "mutation": "lengthen the rod by 5 mm in the kinematic relation",
+      "what": "change the connecting-rod length"
+    },
+    {
+      "checked_by": "travel check: travel must equal twice the declared crank radius",
+      "control_id": "NC-S09",
+      "detected": true,
+      "measured": "measured travel would be 80.0 mm, not the 90.0 mm a 45 mm crank gives",
+      "mutation": "use a 40 mm crank and keep the 45 mm label",
+      "what": "change the crank radius while claiming 45 mm"
+    },
+    {
+      "checked_by": "platform free-fall check",
+      "control_id": "NC-S10",
+      "detected": true,
+      "measured": "with the linkage constraint removed the platform falls 4906.63 mm in 1 s instead of following the crank",
+      "mutation": "disable the platform joint equality so the platform is unconstrained by the linkage",
+      "what": "remove the platform slide constraint"
+    },
+    {
+      "checked_by": "measured-travel check",
+      "control_id": "NC-S11",
+      "detected": true,
+      "measured": "measured travel collapses to 0.0000 mm against the claimed 90 mm",
+      "mutation": "build the model with the platform slide joint removed, so the platform is welded to the world",
+      "what": "lock the platform while claiming 90 mm travel"
+    },
+    {
+      "checked_by": "incremental-torque check: the difference must be non-zero and must match the analytic payload torque",
+      "control_id": "NC-S12",
+      "detected": true,
+      "measured": "the incremental RMS would be 0.00000 N m instead of the measured 0.32382 N m",
+      "mutation": "report the empty run's torque as the payload run's",
+      "what": "copy the empty torque into the payload report"
+    },
+    {
+      "checked_by": "release-independence check",
+      "control_id": "NC-S13",
+      "detected": true,
+      "measured": "the 16 tested releases give 13 distinct crank displacements; copying one into all would erase that",
+      "mutation": "replace every release outcome with the 0 deg one",
+      "what": "copy the bottom release result into all release angles"
+    },
+    {
+      "checked_by": "unit and magnitude check on the torque channel",
+      "control_id": "NC-S14",
+      "detected": true,
+      "measured": "at one sample the command is 1.57080 rad and the measured torque is 0.14906 N m; they are different quantities in different units",
+      "mutation": "substitute ctrl for actuator_force in the report",
+      "what": "report the actuator command instead of the measured torque"
+    },
+    {
+      "checked_by": "mass plausibility check",
+      "control_id": "NC-S15",
+      "detected": true,
+      "measured": "the platform would weigh 6.876e+07 kg instead of 0.06876 kg",
+      "mutation": "compute mass as volume_mm3 * density without the 1e-9 factor",
+      "what": "omit the unit conversion from mm to m"
+    },
+    {
+      "checked_by": "positive-definite and triangle-inequality check on every body",
+      "control_id": "NC-S16",
+      "detected": true,
+      "measured": "eigenvalues [-1.0, 1.0, 1.0] contain a non-positive value; MuJoCo also rejects such a model at load time, which is how the real defect in this session's first inertia derivation was caught",
+      "mutation": "set one principal inertia negative",
+      "what": "use invalid or non-positive inertia"
+    },
+    {
+      "checked_by": "in-run divergence watch (Divergence.look), reported per run as divergence_watch",
+      "control_id": "NC-S17",
+      "detected": true,
+      "measured": "the watch sees {'nonfinite_samples': 0, 'max_abs_qpos': 109148.725996, 'max_warning_total_seen': 1, 'state_jump_detected': True}. An END-OF-RUN warning delta reports ZERO here, because mj_checkPos resets MjData and clears the counters - which is precisely the failure this control exists to catch, and which it did catch.",
+      "mutation": "run with a 0.02 s timestep, far beyond the servo's stability limit",
+      "what": "hide solver divergence"
+    },
+    {
+      "checked_by": "claim-fidelity scan: a jamming claim requires contact-resolving evidence",
+      "control_id": "NC-S18",
+      "detected": true,
+      "measured": "the ideal guide resolves no contact, so it cannot carry a jamming verdict (NRM-BM-002-014, NEG-BM-002-011); the scan flags it",
+      "mutation": "assert REQ-007 PASS citing the prismatic guide",
+      "what": "claim jamming PASS from the ideal prismatic guide model"
+    },
+    {
+      "checked_by": "claim-fidelity scan: a strength claim requires stress evidence",
+      "control_id": "NC-S19",
+      "detected": true,
+      "measured": "a reaction force is not a stress and this model computes no stress; the scan flags it",
+      "mutation": "assert REQ-003 payload capacity PASS citing joint reaction forces",
+      "what": "claim strength PASS from rigid-body dynamics"
+    },
+    {
+      "checked_by": "trajectory SHA-256 recorded in each video manifest",
+      "control_id": "NC-S20",
+      "detected": true,
+      "measured": "trajectory hash changes from 61c64403b72d8ef6 to 095ae27905760365",
+      "mutation": "shift every crank angle by 1 degree before hashing the frame trajectory",
+      "what": "generate a video from a trajectory different from the reported one"
+    }
+  ],
+  "controls_detected": 20,
+  "controls_run": 20,
+  "name": "simulation negative controls",
+  "purpose": "Establishes that the simulation checks can fail. Each control perturbs the model, the data or the claim in memory and passes only if the corresponding check reports it. No perturbed model is exported.",
+  "reference_id": "EXE-BM002-01",
+  "status": "PASS",
+  "undetected": []
+}

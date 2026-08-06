@@ -1,0 +1,67 @@
+{
+  "bodies": {
+    "BODY-CONNECTING-ROD": {
+      "dof": 1,
+      "far_end": "equality connect at the CAD platform-pin axis",
+      "joint": "hinge crank_joint, axis +X, at the CAD crank-pin axis",
+      "mujoco": "rod"
+    },
+    "BODY-CRANK-JOINT-PIN": {
+      "dof": 0,
+      "mujoco": "welded into crank",
+      "why": "each pin is a body of revolution about a joint axis parallel to X, and each pin's centre is rigidly fixed to that parent in the CAD, so welding is EXACT for position and for inertia about the joint axis - the pin's own spin carries no dynamics here. Their full CAD mass and inertia are retained. This makes NO claim about pin contact, bending or bearing stress."
+    },
+    "BODY-CRANK-SHAFT": {
+      "dof": 1,
+      "joint": "hinge crank_hinge, axis +X, at the CAD crank axis y=70 z=60 mm",
+      "mujoco": "crank"
+    },
+    "BODY-HOUSING": {
+      "dof": 0,
+      "mujoco": "housing_and_panel (welded to world)",
+      "role": "fixed world body, the datum"
+    },
+    "BODY-PLATFORM": {
+      "dof": 1,
+      "joint": "slide platform_slide, axis +Z - the IDEAL GUIDE CONSTRAINT",
+      "mujoco": "platform"
+    },
+    "BODY-PLATFORM-JOINT-PIN": {
+      "dof": 0,
+      "mujoco": "welded into platform",
+      "why": "each pin is a body of revolution about a joint axis parallel to X, and each pin's centre is rigidly fixed to that parent in the CAD, so welding is EXACT for position and for inertia about the joint axis - the pin's own spin carries no dynamics here. Their full CAD mass and inertia are retained. This makes NO claim about pin contact, bending or bearing stress."
+    },
+    "BODY-REAR-PANEL": {
+      "dof": 0,
+      "mujoco": "housing_and_panel (welded to world)",
+      "role": "rigidly fixed to the housing in the completed-product model"
+    }
+  },
+  "closed_loop": {
+    "degrees_of_freedom": "3 joint DOF minus 2 independent constraint rows in the plane = 1 net DOF, the crank angle",
+    "how": "equality connect between rod and platform at the platform pin",
+    "why": "a slider-crank is a closed loop and MuJoCo integrates a tree"
+  },
+  "geometry_signature_sha256": "6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee",
+  "purpose": "how each accepted CAD product body appears in the MuJoCo model. Nothing in the CAD was changed to build this.",
+  "scenario_objects": {
+    "SCENARIO-PAYLOAD-1KG": {
+      "absent_from": "model_empty.xml",
+      "is_product_body": false,
+      "mujoco": "extra inertial merged into the platform body in model_payload_1kg.xml only"
+    }
+  },
+  "what_this_topology_cannot_support": [
+    "contact-level jamming - REQ-007 stays NOT_VERIFIED",
+    "guide wear, tolerance binding, local guide pressure",
+    "manufacturing variation or frictional wedging",
+    "any stress, strain or strength result"
+  ],
+  "what_this_topology_supports": [
+    "rigid-body dynamics of the assembled mechanism",
+    "actuator torque under declared assumptions",
+    "back-driving tendency when the actuator is released",
+    "IDEAL joint and guide reactions",
+    "numerical constraint stability"
+  ]
+}

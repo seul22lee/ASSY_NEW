@@ -471,3 +471,120 @@ set; VLM review; the human-review packet; the comprehensive report; demonstratio
 CAD; the failure-CAD corpus; mutation-product CAD; LOCK.json; production pipeline
 code; FEA. **None of these was run, and no result from any of them is implied
 anywhere in this reference.** Human review status: **HUMAN_REVIEW_PENDING**.
+
+---
+
+## 12. Phase B — MuJoCo rigid-body dynamics
+
+Added **after** Phase A was complete and committed. Nothing in §1–§11 depends on
+it, the accepted CAD was not changed to obtain it, and the geometry signature is
+identical before and after: `6824e510…6bc2ee`.
+
+Three kinds of evidence now exist for this reference and they are not
+interchangeable:
+
+| | what it is | what it computes |
+|---|---|---|
+| §1–§11 above | **CAD geometry and kinematics** | exact solid measurement. No force. |
+| `validation/review/lift_cad_*.mp4` | **prescribed CAD animation** | a pose law. No force. |
+| `validation/simulation/` | **MuJoCo rigid-body dynamics** | forces, at an **ideal-joint** fidelity. No contact. |
+
+### 12.1 What the model is
+
+The actual joint topology, not a ratio: a revolute crank on the CAD crank axis, a
+revolute crank joint, the fixed-length rod, the platform joint closed as an
+equality constraint at the CAD platform-pin axis, and the platform on one
+translational degree of freedom. Three joint DOF minus two in-plane constraint
+rows leaves one net DOF — the crank angle. **There is no
+crank-angle-to-platform-height equation anywhere in the model;** the platform's
+height is whatever the solver produces.
+
+Mass and inertia come from the accepted B-rep solids. Densities are **DECLARED
+SIMULATION ASSUMPTIONS — NOT SOURCE REQUIREMENTS, NOT VERIFIED MATERIAL
+SELECTIONS**: 1200 kg/m³ for the housing, rear panel and platform, 7850 kg/m³ for
+the shaft, rod and both pins. Total product mass **2.76052 kg**, of which
+**1.88964 kg** moves.
+
+Both joint pins are welded into their CAD parents. Each is a body of revolution
+about a joint axis parallel to X and each pin's centre is rigidly fixed to that
+parent, so the weld is exact for position and for inertia about the joint axis.
+Their full CAD mass and inertia are retained. **This makes no claim about pin
+contact, bending or bearing stress.**
+
+### 12.2 What it found
+
+* The assembled mechanism completes a full 0–360° crank cycle with **zero solver
+  warnings** and a loop-closure residual of **9–14 nanometres**, against the
+  0.1 mm running clearances the CAD declares.
+* Measured travel **90.0000 mm** in both scenarios — the dynamics reproduce the
+  geometric result rather than being told it.
+* Empty actuator torque **±0.15580 N·m** (RMS 0.10649), peaks at 105.2° and 254.8°.
+* With the 1 kg scenario payload **±0.65691 N·m** (RMS 0.43031), peaks at 111.6°
+  and 248.4°.
+* **Incremental payload torque ±0.50263 N·m** (RMS 0.32453), peaks at 113.2° and
+  246.8°. This is the density-independent result: the only difference between the
+  two runs is the payload.
+* An **independently implemented** analytic quasi-static torque `τ = m g dz/dθ`
+  agrees with the incremental result to **0.0000703 N·m** — 0.7 % of the declared
+  2 % tolerance. The analytic functions are re-derived inside `simulate_lift.py`
+  from R, L and the axis height; they do not call this file's pose law, so the two
+  sides of the comparison are not the same function.
+* Torque changes by **0.2 % across a 5× speed range**, so the result is
+  essentially quasi-static and the inertial term is small.
+* **The mechanism back-drives.** 12 of 16 release cases move under gravity when
+  the actuator is released. The four that do not are the 0° and 180° **kinematic
+  dead centres**, where `dz/dθ = 0` and gravity exerts no crank torque. Those are
+  reversals, not stops — nothing in the product arrests the platform there.
+  Released at 135° the platform falls **70.66 mm**, at 90° **32.11 mm**, at 45°
+  **7.00 mm** — in every case exactly the height from the release position down
+  to the bottom of travel, which is the energy check an undamped model must pass.
+  The model has no damping, so the mechanism then swings back like a pendulum;
+  the reported figures are maximum excursions, not end states.
+
+### 12.3 What it did NOT change
+
+**Nothing in the Oracle position moved, and nothing could have.**
+
+* **REQ-003 payload capacity stays UNSUPPORTED.** The peak ideal joint reactions
+  under the 1 kg payload are 29.2 N at the crank bearing, 14.3 N at the crank
+  joint, 12.9 N at the platform joint and 7.2 N at the guide. **A constraint
+  reaction is a resultant, not a stress.** No area, no pressure, no deflection and
+  no stress is computed anywhere in this model (UNR-BM-002-007).
+* **REQ-007 jamming stays NOT_VERIFIED.** The guide here is a **single ideal
+  prismatic constraint**; the real CAD guide is two channels with 0.2 mm side and
+  0.4 mm tip clearances. No contact is resolved, so jamming, binding, wear, local
+  pressure and tolerance behaviour are all outside this model
+  (NRM-BM-002-014, NEG-BM-002-011).
+* **Back-driving creates no requirement.** The source states no holding,
+  self-locking or back-drive requirement (UNR-BM-002-004, FRE-BM-002-008), so the
+  result is a behaviour a reviewer should weigh, not a failure. Imposing a holding
+  requirement because a legacy realization used a pawl is NEG-BM-002-014.
+* Safety, manufacturability, effort and life are untouched.
+
+### 12.4 Errors found and fixed during Phase B
+
+Recorded for the same reason as §10: a simulation that never caught anything is
+not evidence.
+
+* **SIM-01 — the inertia tensors were wrong, and MuJoCo refused the model.**
+  `GProp_GProps.MatrixOfInertia()` is already referred to the **centre of mass**,
+  not the frame origin. The first derivation applied a parallel-axis shift anyway,
+  subtracting a term that was not there and producing tensors with negative
+  eigenvalues. MuJoCo rejected them at load time with *"inertia must have positive
+  eigenvalues"*. Verified against a 100 mm cube, which returns 1.666667e9 mm⁵
+  about its own centre rather than the 6.666667e9 it has about the origin.
+* **SIM-02 — the servo gains were unstable for this mechanism.** The first attempt
+  used kp = 4000, kv = 200. The crank's inertia about its axis is ≈1e-3 kg·m², so
+  `kv·dt/I = 77` — far beyond the explicit stability limit of 2 — and the
+  integrator diverged on the first step. Gains are now sized against that inertia:
+  kp = 1500, kv = 3.0, giving 0.4 and 8e-3.
+* **SIM-03 — the rod's initial angle had a sign error**, which left the loop
+  unclosed at every settle. `q_rod = asin(R sin θ / L) − θ`, not `−asin(…) − θ`.
+* **SIM-04 — divergence could hide.** `mj_step` calls `mj_checkPos`, which resets
+  the whole `MjData` — warning counters included — when the state goes bad.
+  Comparing warning counts before and after a run therefore reports **zero** for a
+  run that blew up. Negative control NC-S17 caught exactly this, and every run now
+  carries an in-run `Divergence` watch reported as `divergence_watch`.
+
+None of these was a CAD defect. All four were defects in the simulation code, and
+two of them were surfaced by the checks that exist to surface them.

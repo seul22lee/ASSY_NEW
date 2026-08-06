@@ -1,0 +1,125 @@
+{
+  "assumptions": {
+    "densities": "declared assumptions, see mass_properties.json",
+    "engine": "mujoco 2.3.7",
+    "every_pose_read_back_from_the_solver": true,
+    "guide": "ideal prismatic constraint",
+    "kind": "MUJOCO RIGID-BODY SIMULATION",
+    "not_a_contact_model": true,
+    "period_s": 12.0
+  },
+  "camera": {
+    "eye_mm": [
+      -380.0,
+      -320.0,
+      250.0
+    ],
+    "fixed_for_whole_clip": true,
+    "half_height_mm": 150.0,
+    "projection": "orthographic",
+    "target_mm": [
+      14.0,
+      74.0,
+      124.0
+    ],
+    "up": [
+      0.0,
+      0.0,
+      1.0
+    ]
+  },
+  "claims_established": [
+    "the assembled rigid-body mechanism completes a 0-360 degree crank cycle",
+    "the platform rises and returns through the measured travel",
+    "the connecting rod stays connected at both joints throughout",
+    "the actuator torque shown is the MEASURED actuator force, sample by sample"
+  ],
+  "claims_not_established": [
+    "payload structural capacity, stress, deflection, pin bending, shaft strength",
+    "bearing pressure or local guide pressure",
+    "fatigue, wear or life",
+    "manufacturing feasibility or physical assembly force",
+    "user ergonomic suitability or acceptable crank effort (no ceiling is stated)",
+    "pinch safety or any safety property",
+    "contact-level jamming or tolerance-induced binding",
+    "self-locking outside the exact tested model"
+  ],
+  "codec": "H.264 (libx264), yuv420p, MP4 container",
+  "container_readback": {
+    "codec_reported": "h264",
+    "container_duration_s": 12.0,
+    "container_fps": 30.0,
+    "container_size_px": [
+      1280,
+      720
+    ],
+    "ffmpeg_version": "4.2.2-static",
+    "frames_read_back": 360
+  },
+  "duration_s": 12.0,
+  "engine": "cadquery-ocp tessellation + matplotlib painter + ffmpeg (libx264)",
+  "engine_versions": {
+    "cadquery": "2.4.0",
+    "ffmpeg": "4.2.2-static",
+    "imageio_ffmpeg": "0.5.1",
+    "matplotlib": "3.7.5",
+    "numpy": "1.24.4"
+  },
+  "file": "validation/simulation/review/lift_mujoco_empty.mp4",
+  "fps": 30,
+  "frame_count": 360,
+  "geometry_source": "the reference's own B-rep solids, posed by the same functions the validator uses. No proxy geometry.",
+  "human_review": "HUMAN_REVIEW_PENDING",
+  "kind": "REVIEW_EVIDENCE",
+  "mujoco_model_sha256": "d5fb6239e2a138fdefd15c62e74908778f4d270f67c3e002c20bcde48a6559cc",
+  "output_bytes": 1692697,
+  "output_sha256": "aa625dfd6cd189259caaf1f9b0ac9dce7cd106d8a587cc0b0304a4b27d052d40",
+  "poses_from": "data.xpos / data.xmat read back from the solver at each frame, then applied to the CAD solids. No prescribed pose law is used anywhere in this clip.",
+  "reference_id": "EXE-BM002-01",
+  "resolution_px": [
+    1280,
+    720
+  ],
+  "sample_columns": [
+    "t_s",
+    "crank_deg",
+    "support_surface_z_mm",
+    "actuator_torque_Nm",
+    "rod_angle_deg"
+  ],
+  "simulation_result_file": "validation/simulation/empty_cycle_report.json",
+  "simulation_result_sha256": "fd1596c414f1b4d92eb2e8a7ab42eb84583dd3bfe4f2e9ea63112e6fb94bbbb0",
+  "source_geometry_signature_sha256": "6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee",
+  "state_timeline": [
+    {
+      "crank_angle_deg": 0.0,
+      "frame": 0,
+      "state": "BOTTOM",
+      "support_surface_z_mm": 126.0,
+      "t_s": 0.0
+    },
+    {
+      "crank_angle_deg": 0.94,
+      "frame": 1,
+      "state": "RISING",
+      "support_surface_z_mm": 126.0028,
+      "t_s": 0.0333
+    },
+    {
+      "crank_angle_deg": 179.94,
+      "frame": 180,
+      "state": "TOP",
+      "support_surface_z_mm": 216.0,
+      "t_s": 6.0
+    },
+    {
+      "crank_angle_deg": 180.94,
+      "frame": 181,
+      "state": "LOWERING",
+      "support_surface_z_mm": 215.9908,
+      "t_s": 6.0333
+    }
+  ],
+  "trajectory_sha256": "d1a4601774020ad84f762b55f8360034b99cd373ff85cb3fd84aa8b11df3f2d4",
+  "video_id": "VID-BM002-MJ-EMPTY"
+}

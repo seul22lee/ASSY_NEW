@@ -244,3 +244,145 @@ No demonstration CAD, failure corpus, LOCK file or production code exists.**
 
 The author does not approve this design. Recording the decisions in §4 is the
 reviewer's act, not the author's.
+
+---
+
+# PART 2 — Phase B: MuJoCo rigid-body dynamics
+
+**Added after Phase A. The CAD did not change: the geometry signature is
+identical, `6824e510…6bc2ee`, and the Phase A validator still passes unchanged.**
+
+Three kinds of evidence now exist and they are **not interchangeable**:
+
+| | what it is | computes |
+|---|---|---|
+| Part 1 above | CAD geometry and kinematics | exact solid measurement, **no force** |
+| `lift_cad_operation.mp4` | **prescribed** CAD animation | a pose law, **no force** |
+| Part 2 here | **MuJoCo** rigid-body dynamics | forces, at an **ideal-joint** fidelity, **no contact** |
+
+## 8. What the dynamics model is
+
+The actual joint topology — revolute crank on the CAD crank axis, revolute crank
+joint, fixed-length rod, platform joint closed as an equality constraint at the
+CAD platform-pin axis, platform on one translational DOF. One net degree of
+freedom. **No crank-angle-to-height equation exists in the model**; the platform's
+height is whatever the solver produces.
+
+MuJoCo 2.3.7, timestep 1/3000 s, `implicitfast`, Newton solver, gravity
+[0, 0, −9.81] m/s², **zero damping and zero friction** in the primary model.
+
+**Densities are DECLARED ASSUMPTIONS — not source requirements, not verified
+material selections:** 1200 kg/m³ (housing, panel, platform) and 7850 kg/m³
+(shaft, rod, pins). Total product mass **2.76052 kg**, moving mass **1.88964 kg**.
+
+## 9. Results a reviewer may rely on
+
+| quantity | empty | 1 kg payload |
+|---|---|---|
+| measured travel | **90.0000 mm** | **90.0000 mm** |
+| peak actuator torque | **±0.15580 N·m** | **±0.65691 N·m** |
+| at crank angle | 105.2° / 254.8° | 111.6° / 248.4° |
+| RMS torque | 0.10649 N·m | 0.43031 N·m |
+| loop-closure error | 0.000009 mm | 0.000014 mm |
+| solver warnings | **0** | **0** |
+
+**Incremental 1 kg payload torque: ±0.50263 N·m, RMS 0.32453, peaks at 113.2° and
+246.8°.** This is the **density-independent** result — the only difference between
+the two runs is the payload — and it agrees with an **independently implemented**
+analytic `τ = m g dz/dθ` to **0.0000703 N·m**, against a declared 2 % tolerance of
+0.010052 N·m.
+
+**Speed sensitivity:** RMS torque changes **0.2 %** across a 5× speed range, so the
+figures are essentially quasi-static.
+
+**Back-driving:** **12 of 16** release cases move under gravity when the actuator
+is released. The four that do not are the 0° and 180° **kinematic dead centres**,
+where `dz/dθ = 0`. Maximum platform drop: **70.66 mm** released at 135° or 225°,
+**32.11 mm** at 90° or 270°, **7.00 mm** at 45° or 315° — in every case exactly
+the height from the release position down to the bottom of travel. The model is
+undamped, so the mechanism then swings back like a pendulum. **This mechanism
+does not hold position when released.** The source states **no** holding
+requirement (UNR-BM-002-004), so this is a **behaviour for a reviewer to weigh,
+not a failure**.
+
+**Ideal joint and constraint reactions** — labelled as such, never as contact
+pressure or stress:
+
+| reaction | empty | 1 kg payload |
+|---|---|---|
+| crank bearing | 18.568 N | 29.245 N |
+| crank joint | 2.722 N | 14.260 N |
+| platform joint | 1.394 N | 12.900 N |
+| ideal guide | 1.063 N | 7.186 N |
+| ideal guide moment | 0.1128 N·m | 0.8227 N·m |
+
+## 10. Phase B media
+
+* [platform height vs crank angle](../executable_references/EXE-BM002-01/validation/simulation/plots/platform_height_vs_crank_angle.png)
+* [actuator torque, empty vs 1 kg](../executable_references/EXE-BM002-01/validation/simulation/plots/actuator_torque_empty_vs_payload.png)
+* [incremental payload torque vs analytic](../executable_references/EXE-BM002-01/validation/simulation/plots/payload_incremental_torque.png)
+* [rod angle vs crank angle](../executable_references/EXE-BM002-01/validation/simulation/plots/rod_angle_vs_crank_angle.png)
+* [ideal joint reactions](../executable_references/EXE-BM002-01/validation/simulation/plots/joint_reactions_vs_crank_angle.png)
+* [constraint error vs time](../executable_references/EXE-BM002-01/validation/simulation/plots/constraint_error_vs_time.png)
+* [back-drive response](../executable_references/EXE-BM002-01/validation/simulation/plots/backdrive_response.png)
+
+**MuJoCo videos** — simulated, not prescribed:
+
+* [empty cycle, 12.0 s](../executable_references/EXE-BM002-01/validation/simulation/review/lift_mujoco_empty.mp4) · [manifest](../executable_references/EXE-BM002-01/validation/simulation/review/lift_mujoco_empty_video.json)
+* [1 kg payload cycle, 12.0 s](../executable_references/EXE-BM002-01/validation/simulation/review/lift_mujoco_payload_1kg.mp4) · [manifest](../executable_references/EXE-BM002-01/validation/simulation/review/lift_mujoco_payload_1kg_video.json)
+* [back-drive, four release angles, 10.0 s](../executable_references/EXE-BM002-01/validation/simulation/review/lift_mujoco_backdrive.mp4) · [manifest](../executable_references/EXE-BM002-01/validation/simulation/review/lift_mujoco_backdrive_video.json)
+
+**Reports:** [SUMMARY](../executable_references/EXE-BM002-01/validation/simulation/SUMMARY.json) ·
+[environment](../executable_references/EXE-BM002-01/validation/simulation/environment.json) ·
+[mass properties](../executable_references/EXE-BM002-01/validation/simulation/mass_properties_report.json) ·
+[model consistency](../executable_references/EXE-BM002-01/validation/simulation/model_consistency_report.json) ·
+[empty cycle](../executable_references/EXE-BM002-01/validation/simulation/empty_cycle_report.json) ·
+[1 kg cycle](../executable_references/EXE-BM002-01/validation/simulation/payload_1kg_cycle_report.json) ·
+[torque comparison](../executable_references/EXE-BM002-01/validation/simulation/torque_comparison_report.json) ·
+[speed sensitivity](../executable_references/EXE-BM002-01/validation/simulation/speed_sensitivity_report.json) ·
+[back-drive](../executable_references/EXE-BM002-01/validation/simulation/backdrive_report.json) ·
+[joint reactions](../executable_references/EXE-BM002-01/validation/simulation/joint_reaction_report.json) ·
+[constraint stability](../executable_references/EXE-BM002-01/validation/simulation/constraint_stability_report.json) ·
+[negative controls](../executable_references/EXE-BM002-01/validation/simulation/negative_control_report.json) ·
+[model inputs](../executable_references/EXE-BM002-01/simulation/README.md)
+
+## 11. What Phase B did NOT change
+
+* **REQ-003 payload capacity: UNSUPPORTED — unchanged.** A constraint reaction is
+  a resultant, not a stress. No area, no pressure, no deflection, no stress is
+  computed anywhere (UNR-BM-002-007).
+* **REQ-007 jamming: NOT_VERIFIED — unchanged.** The guide here is a **single
+  ideal prismatic constraint**; the real guide is two channels with 0.2 and 0.4 mm
+  clearances. No contact is resolved (NRM-BM-002-014, NEG-BM-002-011).
+* Safety, manufacturability, effort, wear and life are untouched.
+
+**MuJoCo upgraded nothing, and was never capable of doing so.**
+
+## 12. Additional reviewer questions — all PENDING
+
+| # | question | decision |
+|---|---|---|
+| D1 | Is a peak crank torque of ~0.66 N·m with 1 kg acceptable for a hand crank at a 26 mm grip radius? That is about **25 N at the grip**. | **PENDING** |
+| D2 | The mechanism **back-drives** at every angle except the two dead centres. Is that acceptable for this product, or should a holding feature be added — noting the source requires none? | **PENDING** |
+| D3 | Are the declared densities (1200 / 7850 kg/m³) reasonable placeholders, and is the resulting 2.76 kg product mass plausible? | **PENDING** |
+| D4 | The crank shaft alone is **1.60 kg** of the 2.76 kg total, because the Ø70 hub is modelled as steel. Should that body be a lighter material or a lighter section? | **PENDING** |
+| D5 | Is an ideal-joint rigid-body model the right next fidelity step, or is a contact-resolving model needed before anything further is claimed? | **PENDING** |
+| D6 | Given the ideal guide, what evidence would a reviewer want before REQ-007 could move off NOT_VERIFIED? | **PENDING** |
+
+## 13. Author self-review — additional Phase B concerns
+
+* **SC-08 — the crank shaft dominates the mass.** 1.60 kg of a 2.76 kg product,
+  from a Ø70 × 45 mm steel hub. The hub is that large because the assembly route
+  forces it (SC-01). A reviewer may reasonably ask for a hollow or polymer hub.
+* **SC-09 — no holding feature, and it back-drives.** Released at 135° the
+  platform falls **70.66 mm**, the full height back to the bottom of its travel.
+  Nothing in the source requires holding, but a desktop lift that will not stay
+  put may still be judged unacceptable.
+* **SC-10 — the torque figures are assumption-dependent.** Only the incremental
+  1 kg result is robust. A reviewer should treat the empty and absolute payload
+  torques as scaling with the declared densities.
+* **SC-11 — zero friction is optimistic.** Real friction would add to the crank
+  torque and would damp the back-driving. Both reported behaviours are therefore
+  bounds, not predictions.
+
+**Human review remains PENDING. The author does not approve this design.**

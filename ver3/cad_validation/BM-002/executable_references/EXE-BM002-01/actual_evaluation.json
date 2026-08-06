@@ -85,6 +85,57 @@
   "maximum_claim": "GEOMETRICALLY AND KINEMATICALLY ADMISSIBLE AT THE EVALUATED CAD FIDELITY",
   "oracle_tree_sha256": "80d47f65edf964e6cc1c0b3251919aa3a45eb1be",
   "phase": "PHASE_A_CAD_AND_CORE_VALIDATION",
+  "phase_b_dynamics_cross_reference": {
+    "cad_changed_by_phase_b": false,
+    "engine": {
+      "name": "mujoco",
+      "version": "2.3.7"
+    },
+    "generated_after_phase_a": true,
+    "geometry_signature_sha256": "6824e5102424e3db883f16b684ab54f02c14eed19bead0116c704092156bc2ee",
+    "headline": {
+      "analytic_max_difference_Nm": 7.0331e-05,
+      "back_driving_cases": 12,
+      "back_driving_cases_tested": 16,
+      "empty_peak_torque_Nm": [
+        -0.155805,
+        0.155805
+      ],
+      "empty_rms_torque_Nm": 0.106488,
+      "incremental_peak_Nm": [
+        -0.502626,
+        0.502627
+      ],
+      "incremental_rms_Nm": 0.324526,
+      "measured_travel_mm": 90.000005,
+      "payload_peak_torque_Nm": [
+        -0.656912,
+        0.656913
+      ],
+      "payload_rms_torque_Nm": 0.430307
+    },
+    "overall": "PASS",
+    "phase": "PHASE_B_MUJOCO_RIGID_BODY_DYNAMICS",
+    "present": true,
+    "relationship_to_phase_a": "Phase A is geometry and kinematics measured on B-rep solids, with no force anywhere. Phase B is rigid-body dynamics at an IDEAL-JOINT fidelity, with no contact anywhere. Neither supersedes the other and neither is a contact model.",
+    "summary": "validation/simulation/SUMMARY.json",
+    "what_it_added": [
+      "the assembled rigid-body mechanism completes a 0-360 degree crank cycle",
+      "platform displacement under the constrained model",
+      "actuator torque under declared mass, density, damping and speed assumptions",
+      "incremental 1 kg payload torque, which is independent of the density assumptions",
+      "unactuated back-driving tendency at eight release angles",
+      "IDEAL joint and guide reactions",
+      "numerical constraint stability"
+    ],
+    "what_it_did_not_change": {
+      "REQ-003_payload_capacity": "UNSUPPORTED, unchanged. A rigid-body reaction force is not a stress and this model computes none (UNR-BM-002-007).",
+      "REQ-005_safety": "INDETERMINATE, unchanged. No criterion is stated.",
+      "REQ-006_manufacture": "NOT_VERIFIED, unchanged.",
+      "REQ-007_jamming": "NOT_VERIFIED, unchanged. The guide is an IDEAL prismatic constraint; no contact is resolved (NRM-BM-002-014, NEG-BM-002-011).",
+      "holding_after_release": "informed, not required. The source states no holding requirement (UNR-BM-002-004)."
+    }
+  },
   "reference_id": "EXE-BM002-01",
   "requirement_readings": [
     {

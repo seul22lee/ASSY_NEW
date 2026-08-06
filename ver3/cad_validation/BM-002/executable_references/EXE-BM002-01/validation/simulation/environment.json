@@ -1,0 +1,49 @@
+{
+  "actuator": {
+    "gain_tuning_note": "kp and kv are sized against the crank's own inertia of about 1e-3 kg m^2. The first attempt used kp=4000, kv=200, for which kv*dt/I = 77 and the integrator diverged on the first step.",
+    "kp_N_m_per_rad": 1500.0,
+    "kv_N_m_s_per_rad": 3.0,
+    "law": "tau = kp*(ctrl - q) - kv*qdot",
+    "reported_quantity": "data.actuator_force, the MEASURED actuator force. The command is reported separately as commanded_control_rad; control NC-S14 exists because confusing the two is easy.",
+    "type": "general, position servo (gaintype fixed, biastype affine)"
+  },
+  "equality_solimp": [
+    0.9999,
+    0.99999,
+    1e-06,
+    0.5,
+    2
+  ],
+  "equality_solref": [
+    0.002,
+    1.0
+  ],
+  "gravity_m_s2": [
+    0.0,
+    0.0,
+    -9.81
+  ],
+  "integrator": "implicitfast",
+  "joint_damping": 0.0,
+  "joint_friction": 0.0,
+  "model_hashes": {
+    "model_empty_sha256": "d5fb6239e2a138fdefd15c62e74908778f4d270f67c3e002c20bcde48a6559cc",
+    "model_payload_1kg_sha256": "dcbdac122df5b971d51e6d459806a5e2304ff6886e5d60f6ea44fdd1f121a471"
+  },
+  "mujoco_version": "2.3.7",
+  "numpy_version": "1.24.4",
+  "output_sampling": {
+    "report_every_n_steps": 100,
+    "report_rate_Hz": 30.0,
+    "video_every_n_steps": 100,
+    "video_fps": 30
+  },
+  "platform": "Linux-5.4.0-176-generic-x86_64-with-glibc2.29",
+  "python_version": "3.8.10",
+  "reference_id": "EXE-BM002-01",
+  "solver": "Newton",
+  "solver_iterations": 200,
+  "solver_tolerance": 1e-12,
+  "timestep_s": 0.0003333333333333333,
+  "warm_up": "1.0 s settle at the start angle with the servo active"
+}

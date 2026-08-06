@@ -1,0 +1,80 @@
+<mujoco model="EXE-BM002-01-lift-empty">
+  <compiler autolimits="true" angle="radian"/>
+  <option gravity="0 0 -9.81" integrator="implicitfast"
+          timestep="0.000333333333" solver="Newton"
+          iterations="200" tolerance="1e-12"/>
+  <default>
+    <geom contype="0" conaffinity="0" density="0" type="sphere" size="0.001"/>
+  </default>
+  <worldbody>
+    <!-- BODY-HOUSING and BODY-REAR-PANEL: fixed world bodies. Their CAD mass is
+         recorded here for the mass report; being welded to the world it takes no
+         part in the dynamics, which is correct - the housing is the datum. -->
+    <body name="housing_and_panel" pos="0 0 0">
+      <inertial pos="0.0411706742 0.07 0.108237895" mass="0.870881979" fullinertia="0.00590534118 0.00474844645 0.00281351331 0 6.42556527e-05 0"/>
+      <geom name="g_static" pos="0 0 0"/>
+    </body>
+
+    <!-- BODY-CRANK-SHAFT: revolute about the actual CAD crank axis, parallel to X.
+         BODY-CRANK-JOINT-PIN is welded into it; see ASSUMPTIONS. -->
+    <body name="crank" pos="0 0.07 0.06">
+      <joint name="crank_hinge" type="hinge" axis="1 0 0" pos="0 0 0"
+             damping="0" frictionloss="0" limited="false"/>
+      <inertial pos="0.00849588939 0 -0.00226667282" mass="1.63427074" fullinertia="0.00106563242 0.00107603447 0.000946682844 0 8.114663e-05 0"/>
+      <geom name="g_crank" pos="0 0 0"/>
+      <site name="s_crank_bearing" pos="0 0 0" size="0.002"/>
+
+      <!-- BODY-CONNECTING-ROD: revolute at the actual crank-joint axis -->
+      <body name="rod" pos="0 0 -0.045">
+        <joint name="crank_joint" type="hinge" axis="1 0 0" pos="0 0 0"
+               damping="0" frictionloss="0" limited="false"/>
+        <inertial pos="0.048 0 0.0425" mass="0.163446711" fullinertia="0.000126767146 0.000123649334 7.040533e-06 -0 0 -0"/>
+        <geom name="g_rod" pos="0 0 0"/>
+        <site name="s_crank_joint" pos="0 0 0" size="0.002"/>
+        <site name="s_rod_far_end" pos="0 0 0.085" size="0.002"/>
+      </body>
+    </body>
+
+    <!-- BODY-PLATFORM: one translational DOF along the actual vertical Z.
+         The slide joint IS the ideal guide constraint; it removes all three
+         rotations and both lateral translations. BODY-PLATFORM-JOINT-PIN is
+         welded into it; the scenario payload is added here in the payload model. -->
+    <body name="platform" pos="0 0 0">
+      <joint name="platform_slide" type="slide" axis="0 0 1" pos="0 0 0" damping="0" frictionloss="0" limited="false"/>
+      <inertial pos="0.0416729662 0.07 0.115138776" mass="0.091921282" fullinertia="8.83680829e-05 3.02033451e-05 9.84839852e-05 0 6.34238011e-06 0"/>
+      <geom name="g_platform" pos="0 0 0"/>
+      <site name="s_guide" pos="0 0 0" size="0.002"/>
+      <site name="s_platform_pin" pos="0 0.07 0.1"
+            size="0.002"/>
+    </body>
+  </worldbody>
+
+  <!-- the platform joint: the closed loop the slider-crank needs -->
+  <equality>
+    <connect name="platform_joint" body1="rod" body2="platform"
+             anchor="0 0 0.085"
+             solref="0.002 1"
+             solimp="0.9999 0.99999 1e-06 0.5 2"/>
+  </equality>
+
+  <actuator>
+    <general name="crank_drive" joint="crank_hinge" gaintype="fixed"
+             biastype="affine" gainprm="1500 0 0"
+             biasprm="0 -1500 -3"
+             ctrlrange="-1000 1000"/>
+  </actuator>
+
+  <sensor>
+    <force name="f_crank_bearing" site="s_crank_bearing"/>
+    <torque name="t_crank_bearing" site="s_crank_bearing"/>
+    <force name="f_crank_joint" site="s_crank_joint"/>
+    <torque name="t_crank_joint" site="s_crank_joint"/>
+    <force name="f_guide" site="s_guide"/>
+    <torque name="t_guide" site="s_guide"/>
+    <jointpos name="q_crank" joint="crank_hinge"/>
+    <jointvel name="v_crank" joint="crank_hinge"/>
+    <jointpos name="q_slide" joint="platform_slide"/><jointvel name="v_slide" joint="platform_slide"/>
+    <jointpos name="q_rod" joint="crank_joint"/>
+    <actuatorfrc name="tau_crank" actuator="crank_drive"/>
+  </sensor>
+</mujoco>
