@@ -1,0 +1,55 @@
+# Benchmark descriptor — identity and locations only.
+#
+# This file is read by the harness and the evaluator. It is NOT read by any
+# stage: production code may not branch on benchmark identity (FP-02, INV-015,
+# retirement row R-14). The only thing a run consumes from this tree is
+# source/request.txt, and only Stage 01 consumes it (INV-002).
+
+schema_version: "0.1.0"
+benchmark_id: BM-002
+title: "Enclosed hand-cranked platform lift"
+status: ORACLE_AUTHORED
+
+source:
+  request_path: ver3/benchmarks/BM-002/source/request.txt
+  present: false
+  frozen: false
+  read_by: s01
+  note: >
+    The only raw text input to a run. Every later stage reads DesignState.
+  extraction_pending: >
+    The frozen rank-1 source for this benchmark currently exists only inside
+    ver3/oracles/_dossiers/, which is a BLOCKING forbidden path root. It must be
+    extracted into source/request.txt before the first source-only run.
+
+    The extraction is deliberately NOT done here. A dossier holds rank-1 user
+    source AND Oracle-authored semantic material in one document, and separating
+    them carelessly would carry answer-key content into the one tree production
+    code is allowed to read - which is the exact leak this architecture exists
+    to prevent. It is a scoped task with a human check, not a copy.
+
+oracle:
+  # Deliberately OUTSIDE this tree. ver3/oracles/ is a BLOCKING forbidden path
+  # root for assy_v3, and keeping the Oracle there is what lets the request text
+  # stay readable without the answer key becoming readable with it.
+  location: ver3/oracles/product_cases/BM-002/
+  authored_independently: true
+  frozen_before_source_only_runs: true
+  visible_to: [evaluator, human_reviewers]
+  never_visible_to: [production_stages, generation_models, prompts, retrieval]
+
+positive_executable_reference:
+  location: ver3/cad_validation/BM-002/
+  role: >
+    Development and evaluator-validation fixture. Proves the problem is solvable
+    and that the evaluator can recognise a solution. NEVER a production input,
+    retrieval source, template or golden geometry (rebuild policy rule 4).
+  scoring: >
+    Similarity to it is never a scoring input (BENCHMARK_RESULT_CONTRACT SC-01).
+    It is one valid design; scoring against it would penalise every other correct
+    answer.
+
+output:
+  runs: ver3/benchmarks/BM-002/runs/
+  evaluations: ver3/benchmarks/BM-002/evaluations/
+  layout: "see BENCHMARK_RESULT_CONTRACT run_output_layout"

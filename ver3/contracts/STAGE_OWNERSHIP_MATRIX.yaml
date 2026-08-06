@@ -1,0 +1,331 @@
+# STAGE_OWNERSHIP_MATRIX — who may create what, and what each stage owes
+#
+# Two questions this file answers, and nothing else:
+#   1. For each entity family, which stage may CREATE it and which may EXTEND it.
+#   2. What each stage must contribute to the runtime assurance package.
+#
+# NO STAGE LOGIC IS DEFINED HERE (rebuild policy rule 6). "Stage 05 owns
+# Realization" is an ownership fact. HOW Stage 05 decides on a realization is not
+# in this repository yet and must not be inferred from this file.
+#
+# Why ownership is a contract rather than a convention: Ver2's Stage 05 created
+# entities that denoted things Stage 03 had already created (R-19), and nothing
+# could tell the duplicate from a legitimate second instance. Single ownership
+# plus typed extension is the structural fix, and INV-001 is its invariant.
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+references:
+  - ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+  - ver3/contracts/STAGE_PATCH_CONTRACT.yaml
+  - ver3/contracts/GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
+
+# =====================================================================
+# 1. The stages
+#    Names are roles, not implementations. Each `owns` list is exhaustive:
+#    a stage that emits a CREATE for a family it does not own is a SCHEMA_FAILURE
+#    at patch validation, not a warning.
+# =====================================================================
+stages:
+
+  s01:
+    name: requirement_capture
+    role: >
+      Read the raw source request and turn it into typed Requirements, plus the
+      source-side context: clauses, freedoms, ambiguities, scenarios.
+    source_text_access: EXCLUSIVE
+    source_text_note: >
+      Rebuild policy rule 5 and INV-002. s01 is the only stage that may read raw
+      source text. Every later stage reads DesignState. A later stage that
+      re-reads the request is re-interpreting it, and two interpretations of one
+      sentence is exactly the failure this forbids.
+    owns: [Requirement, SourceClause, Freedom, Ambiguity, Scenario]
+    extends: []
+    may_not:
+      - "Invent a requirement the source does not state. That is an Assumption."
+      - "Sharpen a source qualifier. 'approximately 300 mm' stays approximate."
+      - "Resolve an Ambiguity. Recording it is the deliverable."
+
+  s02:
+    name: obligation_and_candidate_formation
+    role: >
+      Derive what must physically be true (Obligations) and form the candidate
+      mechanism families that could make it true. Candidates persist as branches.
+    owns: [Obligation, Candidate, AcceptanceContract]
+    extends: [Requirement]
+    may_not:
+      - "Select a winner. There is no selected-candidate field (INV-007, R-15)."
+      - "Penalise a candidate for element count or for needing realization."
+      - "Reject a candidate because no library entry exists. That is UNSUPPORTED (INV-011)."
+
+  s03:
+    name: embodiment_topology
+    role: >
+      Establish the bodies, the joints between them, the interfaces where they
+      meet, and the configurations the assembly can be in.
+    owns: [Body, Joint, Interface, Configuration, MobilityExpectation]
+    extends: [Candidate, Obligation]
+    may_not:
+      - "Use a qualitative region as a position (R-02, R-03, R-04)."
+      - "Leave a body-pair meeting region unclassified (interaction_kind is mandatory)."
+      - "Emit a generic block as an embodiment (R-09)."
+
+  s04:
+    name: motion_and_state
+    role: >
+      Define named states, the transitions between them, and produce executable
+      witnesses that the intended motion exists and the forbidden motion does not.
+    owns: [State, Transition, Witness]
+    extends: [Joint, Body, Configuration]
+    may_not:
+      - "Treat a rendered sheet as the authoritative artifact (R-01, INV-005)."
+      - "Substitute a constant offset for a motion model (R-07)."
+      - "Use adaptive sampling without declaring it."
+
+  s05:
+    name: feature_and_realization
+    role: >
+      Attach the features that make interactions real, bind them into
+      Realizations that discharge Obligations, and emit the construction program.
+    owns: [Feature, Realization, Parameter, Constraint, ConstructionStatement]
+    extends: [Body, Joint, Interface, Obligation]
+    may_not:
+      - "Create a Body or Joint. It extends s03's (INV-001, R-19)."
+      - "Discharge an obligation with a label, a field or a relationship (INV-008)."
+      - "Emit a Parameter with a null unit (INV-004)."
+
+  s06:
+    name: parameter_resolution
+    role: "Solve the constraint system for the parameters, or report why it cannot."
+    owns: []
+    extends: [Parameter, Constraint]
+    may_not:
+      - "Default a missing unit. FP-01 exists for this line (R-21, INV-004)."
+      - "Report `feasible` for an underdetermined system."
+      - "Silently pick one solution from a family without recording the freedom."
+
+  s07:
+    name: geometry_compilation
+    role: >
+      Compile the ConstructionProgram into actual geometry and sign it. Receives
+      ONLY the program and the resolved parameters (INV-006).
+    owns: [GeometrySignature]
+    extends: [Body, Feature]
+    may_not:
+      - "Consult the source request, the Requirements or the Candidates."
+      - "Repair an uncompilable statement. It fails, citing the statement (INV-006)."
+      - "Use an OCCT face index as a persistent identity."
+
+  s08:
+    name: verification_planning
+    role: >
+      Plan how each requirement will be checked, at what fidelity, in which
+      scenario, on which observable — and design the negative controls.
+    owns: [VerificationPlanItem, NegativeControl]
+    extends: [Requirement, Obligation]
+    may_not:
+      - "Plan a check whose fidelity cannot support the requirement's claim."
+      - "Emit a control that cannot fail (INV-013)."
+      - "Match a plan item to a requirement by unit (INV-012)."
+
+  s09:
+    name: evidence_execution
+    role: "Execute the plan, record what was measured, and run the controls."
+    owns: [EvidenceItem, Witness, NegativeControl]
+    extends: [VerificationPlanItem]
+    may_not:
+      - "Report an outcome without declaring fidelity and contact resolution."
+      - "Assert that a control was detected. Detection is MEASURED."
+      - "Convert an execution failure into a negative result (see STATUS_SEMANTICS)."
+
+  s10:
+    name: evidence_consolidation
+    role: >
+      Reconcile evidence across plan items: fidelity coverage, scope gaps,
+      control adequacy, and contradictions between two pieces of evidence.
+    owns: []
+    extends: [EvidenceItem, NegativeControl, VerificationPlanItem]
+    may_not:
+      - "Average, outvote or otherwise merge contradictory evidence into agreement."
+      - "Upgrade a proxy-fidelity result to the fidelity the requirement needs."
+
+  s11:
+    name: requirement_evaluation
+    role: "Judge each requirement against the consolidated evidence, with scope."
+    owns: [RequirementEvaluation, ExcludedClaim]
+    extends: [Requirement]
+    may_not:
+      - "Emit PASS without a complete six-field scope block (INV-009)."
+      - "Leave a mandatory obligation without a terminal status (INV-008)."
+      - "Leave a property outside the evidence unnamed. Silence is not exclusion."
+
+  s12:
+    name: failure_attribution_and_revision
+    role: >
+      Route each failure to the decision and stage that own it, compute the
+      invalidation cone, and propose the revision patch. Carry human questions out.
+    owns: [FailureProvenance, HumanReviewQuestion]
+    extends: [RequirementEvaluation, UnresolvedDecision]
+    may_not:
+      - "Attribute a failure to the last stage that touched the artifact by default."
+      - "Approve the design. Human questions leave the pipeline PENDING."
+      - "Discard a failed alternative. It is retained as a RejectedAlternative."
+
+# =====================================================================
+# 2. Families any stage may create
+# =====================================================================
+universally_ownable:
+  - family: UnresolvedDecision
+    why: >
+      Any stage may discover that something is open. Restricting who may record
+      openness creates pressure to resolve it silently, which is the defect.
+  - family: Assumption
+    why: "Any stage may need to assume. Every stage must SAY so."
+  - family: RejectedAlternative
+    why: "Any stage may drop a branch. No stage may drop it without a record."
+  - constraint: >
+      The creating stage is recorded in the entity's provenance either way
+      (PROVENANCE_CONTRACT). "Any stage may create it" never means "no stage owns
+      this instance".
+
+# =====================================================================
+# 3. The extension rule
+# =====================================================================
+extension_rule:
+  principle: >
+    A downstream stage adds fields to an existing entity by its ID. It does not
+    create a second entity denoting the same thing (INV-001).
+  permitted:
+    - "Filling a field the owning stage left null."
+    - "Appending to an explicitly append-only collection."
+    - "Adding a new provenance record."
+  forbidden:
+    - action: "Overwriting a value the owning stage set"
+      instead: "Emit an UnresolvedDecision, or a REVISE patch that names the conflict."
+    - action: "Creating a near-duplicate entity with a different ID"
+      instead: "Extend by ID. If it is genuinely a second instance, set instance_identity."
+    - action: "Deleting an entity"
+      instead: >
+        Entities are not deleted. A superseded entity is marked superseded, with
+        its successor and reason. The assurance package must be able to show it.
+
+# =====================================================================
+# 4. Per-stage contribution to the runtime assurance package
+#
+#    The package is a PROJECTION of DesignState (see
+#    GENERATED_ASSURANCE_PACKAGE_CONTRACT). It is therefore built by stages
+#    putting the right things INTO the state — never by a reporting step that
+#    assembles prose at the end.
+#
+#    Each entry answers: after this stage, what can the package show that it
+#    could not show before?
+# =====================================================================
+assurance_contributions:
+
+  s01:
+    adds:
+      - "The source scope: what was asked, verbatim, with locators."
+      - "Declared operating scenarios and system boundary."
+      - "The freedoms the source leaves open."
+      - "The ambiguities found and NOT resolved."
+      - "Quantity kinds and their qualifiers as stated."
+    package_sections: [scope_and_source, freedoms, open_questions]
+
+  s02:
+    adds:
+      - "The obligations the requirements imply, and their derivation."
+      - "The candidate branches under consideration, all of them."
+      - "Per-candidate acceptance contracts: what would count as realized."
+      - "Any candidate rejected, with a reason kind that is not 'not in library'."
+    package_sections: [obligations, candidate_space, rejected_alternatives]
+
+  s03:
+    adds:
+      - "The body/joint/interface topology, with instance identity."
+      - "Every meeting region classified by interaction kind."
+      - "Intended and forbidden DOF per configuration."
+      - "Assembly configurations, including partial ones."
+    package_sections: [architecture, interaction_inventory, mobility]
+
+  s04:
+    adds:
+      - "Named states and the transitions between them, with declared sampling."
+      - "Executable witnesses: mobility, DOF absence, full operation."
+      - "Swept volumes as authoritative geometry, not as a picture."
+    package_sections: [operation, witnesses]
+
+  s05:
+    adds:
+      - "Feature-level realization of each interaction."
+      - "The obligation -> realization -> verification-predicate chain."
+      - "Parameters with units and constraints relating them."
+      - "The construction program, statement by statement."
+    package_sections: [realization_map, parameters, construction_program]
+
+  s06:
+    adds:
+      - "Solved parameter values, or the reason the system is not solvable."
+      - "Solution freedoms: where a family of solutions exists and one was taken."
+      - "The solver formulation actually used."
+    package_sections: [parameters, freedoms, unsupported_formulations]
+
+  s07:
+    adds:
+      - "The geometry signature and critical dimensions, per body."
+      - "Compilation failures attributed to the originating statement."
+    package_sections: [as_built_geometry, construction_program]
+
+  s08:
+    adds:
+      - "The verification plan: requirement x criterion x scenario x observable."
+      - "Planned fidelity per item, and what that fidelity cannot support."
+      - "The negative-control design, before any result is known."
+    package_sections: [verification_plan, negative_controls, evidence_scope]
+
+  s09:
+    adds:
+      - "Measured outcomes with fidelity and contact resolution declared."
+      - "Negative-control detection, measured."
+      - "Execution failures recorded AS execution failures."
+    package_sections: [evidence, negative_controls, execution_record]
+
+  s10:
+    adds:
+      - "Coverage: which requirements have evidence at sufficient fidelity."
+      - "Contradictions between evidence items, unmerged."
+      - "Control adequacy: which checks are demonstrably able to fail."
+    package_sections: [evidence_scope, coverage, contradictions]
+
+  s11:
+    adds:
+      - "Per-requirement outcome with the six-field scope block."
+      - "Explicitly excluded claims: what this evidence does NOT establish."
+      - "Terminal status for every mandatory obligation."
+    package_sections: [evaluation, excluded_claims, obligation_closure]
+
+  s12:
+    adds:
+      - "Failure attribution to the owning decision and stage."
+      - "The invalidation cone: what a revision would invalidate."
+      - "Revision history: what changed, why, and what it superseded."
+      - "Human review questions, all PENDING."
+    package_sections: [failure_attribution, revision_history, human_review_queue]
+
+# =====================================================================
+# 5. Cumulativeness
+# =====================================================================
+cumulativeness:
+  rule: >
+    A section a stage contributed is never dropped by a later stage. Later stages
+    extend and qualify it. The package at S12 is a superset of the package at S05
+    in content, though a claim inside it may have been superseded — in which case
+    both the claim and its supersession are visible.
+  anti_rule: >
+    "The final report only shows the final answer" is the failure mode. A package
+    that shows only what survived cannot be audited, because the reader cannot
+    see what was tried, what was dropped, or what was never checked.
+  enforcement: >
+    The package is generated by projection from DesignState, and DesignState does
+    not delete. This is why cumulativeness is a structural property here rather
+    than a discipline the report writer must remember.

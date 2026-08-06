@@ -1,0 +1,340 @@
+# STATUS_SEMANTICS — every status value, its meaning, and what it must never mean
+#
+# The recurring Ver2 failure was not a wrong status; it was a status that could
+# absorb a situation it did not describe. Missing knowledge became INFEASIBLE
+# (R-27). An execution crash became a negative result. A proxy check became a
+# PASS. Each of those is a collapse of one status into another, and each of them
+# makes a run look better than it was.
+#
+# Rule shape: every status carries an explicit `never_means` list, and the
+# collapses section names the specific illegal merges.
+#
+# NO STAGE LOGIC IS DEFINED HERE (rebuild policy rule 6). Which status applies to
+# a given situation is a stage decision; what each status MEANS is this contract.
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+
+# =====================================================================
+# 1. Execution statuses — did the machinery run?
+#
+#    These describe the RUN, never the DESIGN. A design is not worse because a
+#    provider was rate-limited, and this separation is the whole point of having
+#    a distinct vocabulary for it.
+# =====================================================================
+execution_statuses:
+
+  SUCCESS:
+    meaning: "The step executed and produced a schema-valid, contract-complete result."
+    design_implication: NONE
+    never_means:
+      - "The result is correct."
+      - "The design is good."
+    note: "SUCCESS is about the machinery. Correctness is EVALUATION_OUTCOMES."
+
+  PROVIDER_RATE_LIMIT:
+    meaning: "The provider refused the request for rate reasons; it may succeed later."
+    retryable: true
+    retry_policy: "Bounded exponential backoff. Every attempt is recorded separately."
+    design_implication: NONE
+    never_means:
+      - "The model could not do the task."
+      - "The requirement is unverifiable."
+    must_not_be_collapsed_into: [PROVIDER_UNAVAILABLE, MODEL_CAPABILITY_FAILURE]
+
+  PROVIDER_QUOTA_EXHAUSTED:
+    meaning: "The account's quota is spent. Retrying the same way cannot succeed."
+    retryable: false
+    design_implication: NONE
+    required_behaviour:
+      - "The run halts at this stage with the status recorded."
+      - "The partial DesignState and the partial assurance package are retained."
+    never_means:
+      - "The design failed."
+      - "The stage is complete."
+    note: >
+      Distinguished from RATE_LIMIT because the operational response differs:
+      one waits, the other cannot be waited out.
+
+  PROVIDER_UNAVAILABLE:
+    meaning: "The provider could not be reached, or returned a server-side error."
+    retryable: true
+    design_implication: NONE
+    never_means: ["The task is impossible."]
+
+  PROVIDER_TIMEOUT:
+    meaning: "The request exceeded the declared deadline with no complete response."
+    retryable: true
+    design_implication: NONE
+    never_means:
+      - "The model was thinking too hard, therefore the task is too hard."
+      - "A partial response may be used as if complete."
+    required_behaviour: "Any partial text received is recorded as partial, never parsed as complete."
+
+  RESPONSE_TRUNCATED:
+    meaning: "A response was returned but hit a length limit before completing."
+    retryable: true
+    design_implication: NONE
+    required_behaviour:
+      - "The truncated text is retained in the ModelRunRecord."
+      - "It is NOT parsed into a patch."
+    never_means:
+      - "The part received is the stage's output."
+    why_explicit: >
+      A truncated structured response often parses. Parsing it yields a patch
+      that is silently missing its tail, which is the most dangerous possible
+      failure because nothing downstream can see it.
+
+  RESPONSE_PARSE_FAILURE:
+    meaning: "A complete response was returned but could not be parsed into the expected form."
+    retryable: true
+    design_implication: NONE
+    required_behaviour: "The raw response is retained verbatim for inspection."
+    never_means: ["The content was wrong."]
+
+  SCHEMA_FAILURE:
+    meaning: "The response parsed but violates the contract: wrong types, missing required fields, unowned entity type, dangling reference."
+    retryable: true
+    design_implication: NONE
+    required_behaviour:
+      - "The rejected patch is retained with the specific violations listed."
+      - "The DesignState is unchanged (STAGE_PATCH_CONTRACT atomicity)."
+    never_means:
+      - "The field can be filled with a default."
+    note: "This is where FP-01 (`or \"mm\"`) would have hidden. A missing unit is a SCHEMA_FAILURE, not a defaulting opportunity (INV-004, R-21)."
+
+  CONTRACT_INCOMPLETE:
+    meaning: >
+      The step produced valid output but did not cover everything the contract
+      requires — e.g. a required assurance-package section has no content and no
+      declared reason, or a mandatory obligation was left without a status.
+    retryable: true
+    design_implication: NONE
+    required_behaviour: "The specific unmet contract items are enumerated."
+    never_means:
+      - "Close enough."
+      - "The missing part was not applicable."
+    why: >
+      Distinguished from SCHEMA_FAILURE because the output is well-formed. This
+      status catches under-coverage, which a schema check cannot see.
+
+  MODEL_CAPABILITY_FAILURE:
+    meaning: >
+      The model executed correctly, was not truncated, produced parseable and
+      schema-valid output, and the output is nonetheless not adequate to the task
+      — e.g. it cannot produce a coherent construction program for the topology.
+    retryable: "bounded"
+    design_implication: RECORDED
+    never_means:
+      - "The problem is infeasible."
+      - "The requirement is unsatisfiable."
+    required_behaviour:
+      - "Recorded as a capability limit of the run, not a property of the design."
+      - "Distinguished in the benchmark result from a design-level failure."
+    why_this_status_exists: >
+      Without it, every model limitation is charged to the design. That is R-27's
+      shape (missing knowledge reported as infeasible) at a different layer, and
+      it makes a benchmark measure the model rather than the pipeline.
+
+  SAFE_REJECTION:
+    meaning: >
+      The step declined to produce a claim it could not support, and said so.
+      Example: refusing to emit a strength verdict from a kinematic model.
+    retryable: false
+    design_implication: CORRECT_BEHAVIOUR
+    never_means:
+      - "The stage failed."
+      - "The pipeline is underperforming."
+    required_behaviour:
+      - "The refused claim and the reason are recorded."
+      - "The corresponding requirement receives UNSUPPORTED or NOT_VERIFIED, never FAIL."
+    scoring: >
+      A benchmark MUST NOT penalise SAFE_REJECTION as an error. A pipeline that
+      is punished for declining unsupported claims will learn to assert them.
+
+  FALSE_ACCEPTANCE:
+    meaning: >
+      The pipeline accepted, passed or emitted something that should have been
+      rejected: a PASS with insufficient evidence, an undetected negative
+      control, an unclassified interaction treated as benign.
+    retryable: false
+    design_implication: SEVERE
+    detected_by: "The evaluator and the negative-control machinery, never by the accepting stage."
+    never_means:
+      - "The design is wrong. The design may be fine; the CLAIM was unearned."
+      - "A stage erred in judgement. It is a structural failure of the check that let it through."
+    required_behaviour:
+      - "Recorded as the most serious class of run defect."
+      - "Never merged with any other status in a summary."
+    why: >
+      This is the failure the whole architecture exists to prevent. Every other
+      status describes a run that stopped short; this one describes a run that
+      went too far and claimed something it had not earned.
+
+execution_status_rules:
+  - "Exactly one execution status per step attempt. A retry is a new attempt with its own status."
+  - "The run-level status is the WORST status among its attempts, by the severity order below."
+  - "No status may be inferred. It is set at the point where the condition is detected."
+  - "A retry never erases the prior attempt's status."
+
+severity_order:
+  note: "Used only for run-level roll-up. Not a quality score."
+  order:
+    - FALSE_ACCEPTANCE
+    - MODEL_CAPABILITY_FAILURE
+    - CONTRACT_INCOMPLETE
+    - SCHEMA_FAILURE
+    - RESPONSE_PARSE_FAILURE
+    - RESPONSE_TRUNCATED
+    - PROVIDER_QUOTA_EXHAUSTED
+    - PROVIDER_TIMEOUT
+    - PROVIDER_UNAVAILABLE
+    - PROVIDER_RATE_LIMIT
+    - SAFE_REJECTION
+    - SUCCESS
+
+# =====================================================================
+# 2. Requirement evaluation outcomes — what the evidence establishes
+# =====================================================================
+evaluation_outcomes:
+
+  PASS:
+    meaning: "The evidence establishes the requirement, within a stated scope."
+    requires:
+      - "A complete six-field scope block: requirement, criterion, scenario, observable, fidelity, contact_resolution (INV-009)."
+      - "Evidence at a fidelity that can support the claim."
+      - "At least one negative control, measured as able to fail (INV-013)."
+    never_means: ["The property holds in all scenarios."]
+
+  FAIL:
+    meaning: "The evidence establishes that the requirement is NOT met."
+    requires: ["Evidence at a fidelity that can support a negative claim."]
+    never_means:
+      - "The check crashed."
+      - "No evidence was gathered."
+    note: "Absence of evidence is NOT_VERIFIED. This collapse is C-02 below."
+
+  NOT_VERIFIED:
+    meaning: "No sufficient evidence was gathered. The requirement's truth is unknown."
+    never_means: ["The requirement is unimportant or was waived."]
+
+  NOT_EVALUABLE:
+    meaning: "The requirement as stated cannot be evaluated — it is ambiguous, or names no observable."
+    requires: ["The specific defect in the requirement, and what would make it evaluable."]
+    never_means: ["The requirement is invalid and may be dropped."]
+
+  UNSUPPORTED:
+    meaning: >
+      The pipeline cannot address this class of claim at all — no available
+      method has the fidelity required. Material strength from a rigid-body
+      kinematic model is the canonical case.
+    never_means:
+      - "The design is inadequate."
+      - "The requirement failed."
+    note: "R-27's fix. Missing capability is UNSUPPORTED, never INFEASIBLE (INV-011)."
+
+  INDETERMINATE:
+    meaning: "Evidence exists on both sides and was not reconciled."
+    requires: ["Both evidence items cited, unmerged (see s10, PKG-25)."]
+    never_means: ["Pick the more numerous side."]
+
+# =====================================================================
+# 3. Solver statuses
+# =====================================================================
+solver_statuses:
+  feasible: "A solution satisfying all constraints was found."
+  infeasible: "The constraints are provably mutually unsatisfiable. Requires the conflicting set."
+  underdetermined:
+    meaning: "A family of solutions exists; the constraints do not select one."
+    required_behaviour: "Record a Freedom. Taking one member silently is the defect."
+    never_means: "feasible"
+  unsupported_formulation: "The system is outside what the solver can express. A capability limit, not infeasibility."
+  solver_failure: "The solver errored or did not converge. An execution fact, not a result."
+
+# =====================================================================
+# 4. Observable statuses
+# =====================================================================
+observable_statuses:
+  MEASURED: "A value was obtained by execution."
+  NOT_MEASURED: "No attempt was made, or the attempt was not completed."
+  INVALID: "A value was obtained but fails a validity precondition."
+  NOT_APPLICABLE: "The observable does not apply in this scenario. Requires a reason."
+  EXECUTION_FAILED: "The measurement attempt errored."
+  rule: "EXECUTION_FAILED never becomes a value, a zero, or a negative result."
+
+# =====================================================================
+# 5. Forbidden collapses
+#    Each is a merge that must be impossible. These are the failures the
+#    vocabulary above is shaped to prevent.
+# =====================================================================
+forbidden_collapses:
+  - id: C-01
+    collapse: "missing capability -> infeasible"
+    correct: UNSUPPORTED
+    origin: "R-27, KG_NO_PERMITTED_REALIZER"
+    invariant: INV-011
+
+  - id: C-02
+    collapse: "no evidence -> FAIL"
+    correct: NOT_VERIFIED
+    why: "Charges the design for the pipeline's inaction."
+
+  - id: C-03
+    collapse: "execution failure -> negative result"
+    correct: EXECUTION_FAILED
+    why: "A crashed check has measured nothing."
+
+  - id: C-04
+    collapse: "provider failure -> design failure"
+    correct: "PROVIDER_RATE_LIMIT | PROVIDER_QUOTA_EXHAUSTED | PROVIDER_UNAVAILABLE | PROVIDER_TIMEOUT"
+    why: "The design did not change because a server was busy."
+
+  - id: C-05
+    collapse: "truncated response -> partial output used as complete"
+    correct: RESPONSE_TRUNCATED
+    why: "Silently missing content is invisible to every downstream check."
+
+  - id: C-06
+    collapse: "proxy-fidelity evidence -> PASS at physical fidelity"
+    correct: "PASS with fidelity in scope, or UNSUPPORTED"
+    invariant: INV-009
+
+  - id: C-07
+    collapse: "underdetermined -> feasible"
+    correct: "underdetermined plus a recorded Freedom"
+    why: "Silently choosing one solution hides a design decision as a computation."
+
+  - id: C-08
+    collapse: "safe rejection -> stage error"
+    correct: SAFE_REJECTION
+    why: "Penalising correct restraint teaches overclaiming."
+
+  - id: C-09
+    collapse: "contradictory evidence -> majority result"
+    correct: INDETERMINATE
+    why: "Evidence is not a vote."
+
+  - id: C-10
+    collapse: "model inadequacy -> requirement unsatisfiable"
+    correct: MODEL_CAPABILITY_FAILURE
+    why: "Makes the benchmark measure the model instead of the pipeline."
+
+  - id: C-11
+    collapse: "missing unit -> default unit"
+    correct: SCHEMA_FAILURE
+    origin: "R-21, assy/stages/s06_solver.py:51"
+    invariant: INV-004
+
+  - id: C-12
+    collapse: "unclassified interaction -> assumed benign"
+    correct: "REPRESENTATION_INCOMPLETE, and FALSE_ACCEPTANCE if it reached a PASS"
+    why: "The unexamined contact is the one that jams."
+
+collapse_enforcement:
+  enforced_by: ver3/tests/meta/test_status_semantics.py
+  checks:
+    - "Every status name is unique across all vocabularies in this file."
+    - "Every status has a non-empty meaning."
+    - "Every forbidden collapse names a correct alternative that exists in a vocabulary here."
+    - "Every execution status referenced by MODEL_RUN_RECORD_CONTRACT exists here."

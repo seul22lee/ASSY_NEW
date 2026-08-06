@@ -1,0 +1,171 @@
+# PROVENANCE_CONTRACT — every claim traces to its origin
+#
+# A design claim with no origin cannot be audited, revised or attributed. Ver2
+# could not answer "which decision made this dimension what it is", so Stage 12
+# attributed failures to whichever stage touched the artifact last. Provenance is
+# what makes attribution possible, which is why it is mandatory rather than
+# diagnostic.
+#
+# NO STAGE LOGIC IS DEFINED HERE (rebuild policy rule 6).
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+references:
+  - ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+  - ver3/contracts/STAGE_PATCH_CONTRACT.yaml
+  - ver3/contracts/MODEL_RUN_RECORD_CONTRACT.yaml
+
+# =====================================================================
+# 1. Scope
+# =====================================================================
+scope:
+  applies_to: "Every entity, every field value, and every relationship in DesignState."
+  rule: >
+    No value enters DesignState without a provenance record. There is no
+    "obvious", "default" or "inherited" value that is exempt. A value whose
+    origin is not worth recording is a value nobody can later question.
+
+# =====================================================================
+# 2. The provenance record
+# =====================================================================
+provenance_record:
+  required_fields:
+    - provenance_id
+    - run_id
+    - stage_id
+    - stage_attempt
+    - patch_id
+    - method
+    - inputs
+    - basis
+  optional_fields:
+    - model_run_ref
+    - tool_run_ref
+    - human_ref
+    - notes
+
+  field_semantics:
+    method: "How the value was produced. One of `methods` below."
+    inputs: >
+      The entity IDs, parameter values and artifacts the stage actually consulted.
+      Not what it was permitted to consult — what it read.
+    basis: >
+      The justification in one sentence, in the stage's own terms. Not a restatement
+      of the value.
+    model_run_ref: "Required when method is MODEL_GENERATION or MODEL_ASSISTED."
+    tool_run_ref: "Required when method is TOOL_COMPUTATION or SOLVER."
+
+# =====================================================================
+# 3. Methods
+# =====================================================================
+methods:
+
+  SOURCE_VERBATIM:
+    what: "Copied from the source request without alteration."
+    requires: [source_locator]
+    only_available_to: s01
+    why_restricted: "Only s01 may read raw source text (INV-002, rebuild rule 5)."
+
+  SOURCE_DERIVED:
+    what: "Derived from a source clause by a stated interpretation."
+    requires: [source_clause_ids, interpretation]
+    only_available_to: s01
+
+  ASSUMPTION:
+    what: "Asserted without a source basis."
+    requires: [why, would_be_invalidated_by]
+    note: >
+      Always creates an Assumption entity as well. An assumption recorded only in
+      provenance is invisible to the assurance package's interpretation section.
+
+  MODEL_GENERATION:
+    what: "Produced by a language model."
+    requires: [model_run_ref]
+    note: "The ModelRunRecord holds the prompt, response and execution status."
+
+  MODEL_ASSISTED:
+    what: "A model proposed it and a deterministic check constrained or corrected it."
+    requires: [model_run_ref, check_description]
+
+  TOOL_COMPUTATION:
+    what: "Computed by a deterministic tool: geometry kernel, mesh query, integrator."
+    requires: [tool_run_ref]
+
+  SOLVER:
+    what: "Produced by the constraint solver."
+    requires: [tool_run_ref, formulation, solver_status]
+
+  ENGINEERING_KNOWLEDGE:
+    what: "From declared, versioned engineering knowledge held by the system."
+    requires: [knowledge_ref, knowledge_version]
+    constraint: >
+      The knowledge base must be DECLARED — inspectable, versioned and citable. A
+      fact the model simply knows is MODEL_GENERATION, not this.
+    prohibited_sources:
+      - "Ver1 mechanism cards or host templates (U-02, U-05, FORBIDDEN_LEGACY_DEPENDENCIES)."
+      - "The hidden benchmark Oracles."
+      - "The positive executable CAD references."
+
+  PROPAGATION:
+    what: "Recomputed from other entities by a stated rule."
+    requires: [rule, source_entity_ids]
+
+  HUMAN:
+    what: "Supplied by a human during the run."
+    requires: [human_ref, question_id]
+    note: "Never used to record an approval. See no_self_approval below."
+
+# =====================================================================
+# 4. Chains
+# =====================================================================
+chains:
+  rule: >
+    Provenance composes. A value produced by PROPAGATION from three entities has a
+    chain reaching back through each of theirs, terminating at SOURCE_VERBATIM,
+    ASSUMPTION, ENGINEERING_KNOWLEDGE, MODEL_GENERATION or HUMAN.
+  terminal_methods: [SOURCE_VERBATIM, ASSUMPTION, ENGINEERING_KNOWLEDGE, MODEL_GENERATION, HUMAN]
+  required_query: >
+    "What does this value ultimately rest on?" must be answerable by walking the
+    chain, with no manual reconstruction. Stage 12's failure attribution is
+    exactly this query, which is why the chain is a contract and not a convenience.
+  cycle_rule: "Provenance chains are acyclic. A cycle is a SCHEMA_FAILURE."
+
+# =====================================================================
+# 5. Immutability
+# =====================================================================
+immutability:
+  rules:
+    - "A provenance record is never edited after its patch is applied."
+    - "A revised value gets a NEW provenance record; the old one is retained."
+    - "A superseded entity keeps its full provenance."
+  why: >
+    Editable provenance would let a run be made to look cleaner than it was, and
+    a record that can be tidied afterwards is not evidence.
+
+# =====================================================================
+# 6. Attribution
+# =====================================================================
+attribution:
+  used_by: s12
+  rule: >
+    A failure is attributed to the DECISION its provenance chain identifies, and
+    to the stage that made that decision — never to the stage that last touched
+    the artifact.
+  invalidation_cone:
+    definition: "The set of entities whose provenance chains pass through a revised entity."
+    required: "Computed and recorded on every SUPERSEDE (STAGE_PATCH_CONTRACT)."
+    why: "Revising a decision without knowing what depended on it produces a state that is internally inconsistent but passes every local check."
+
+# =====================================================================
+# 7. Self-approval
+# =====================================================================
+no_self_approval:
+  rule: >
+    No provenance method records an approval of the design. HUMAN records an
+    answer to a question, not a sign-off.
+  why: >
+    Approval is a human act performed outside the pipeline on the assurance
+    package. A pipeline that can record its own approval will produce runs that
+    are approved, which is not the same as runs that are right.
+  related: "GENERATED_ASSURANCE_PACKAGE_CONTRACT PKG-31: human review questions remain PENDING."

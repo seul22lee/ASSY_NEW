@@ -1,0 +1,163 @@
+# STAGE_PROGRESSION_CONTRACT — how the pipeline is built, stage by stage
+#
+# Ver2 was built forward: each stage was written, and its output was whatever the
+# next stage could be made to accept. The result was stages that produced
+# structurally valid output which the downstream stage could not actually use, so
+# the downstream stage compensated — with defaults, with aliases, with fallbacks.
+# Every one of those compensations is a row in the retirement matrix.
+#
+# The fix is a gate: a stage is not frozen until its output is DEMONSTRABLY
+# SUFFICIENT for the stage after it, on all three benchmarks, from source only.
+#
+# NO STAGE LOGIC IS DEFINED HERE (rebuild policy rule 6). This is the process a
+# future task follows; it implements nothing.
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+references:
+  - ver3/contracts/GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
+  - ver3/contracts/BENCHMARK_RESULT_CONTRACT.yaml
+  - ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
+
+# =====================================================================
+# 1. The eight steps
+#    Applied to ONE stage at a time, in order s01 -> s12.
+# =====================================================================
+progression_steps:
+
+  - step: 1
+    name: define_stage_contract
+    what: >
+      Write the stage's input contract, output contract and the entity families
+      it owns, consistent with STAGE_OWNERSHIP_MATRIX and DESIGN_STATE_CONTRACT.
+    exit: "The contract parses, cross-references resolve, and it names the assurance sections the stage contributes."
+    forbidden: "Writing the contract to match an implementation that already exists."
+
+  - step: 2
+    name: define_negative_conditions
+    what: >
+      Enumerate what this stage must REFUSE to do: the collapses it must not
+      make, the defaults it must not apply, the entities it must not create.
+    exit: "Each negative condition names a STATUS_SEMANTICS collapse, an invariant or a retirement row."
+    why: >
+      Written before the implementation, because a prohibition invented afterwards
+      is usually a description of what the code already happens to do.
+
+  - step: 3
+    name: implement_stage
+    what: "Implement the stage against its contract."
+    exit: "The stage produces a schema-valid StagePatch."
+    note: "Not part of this task. Deliverable D is an empty package boundary."
+
+  - step: 4
+    name: run_source_only_on_all_benchmarks
+    what: >
+      Execute the pipeline up to and including this stage on BM-001, BM-002 and
+      BM-003, from the source request only.
+    exit: "Three runs complete or terminate with a recorded execution status."
+    hard_constraints:
+      - "No Oracle is read by any production code path."
+      - "No positive executable reference is read by any production code path."
+      - "No benchmark-ID branching (FP-02, INV-015)."
+
+  - step: 5
+    name: check_contract_completeness
+    what: >
+      Verify each run's output covers everything the stage's contract requires,
+      including its assurance-package contributions.
+    exit: "No CONTRACT_INCOMPLETE, or every instance is explained and accepted as a recorded limitation."
+
+  - step: 6
+    name: demonstrate_downstream_sufficiency
+    what: >
+      Show that the NEXT stage can consume this stage's output without inventing
+      anything: no default, no alias, no fallback, no re-reading of the source.
+    method: >
+      A downstream-sufficiency probe: a minimal consumer that attempts to
+      construct the next stage's required inputs from this stage's output alone,
+      and reports exactly what is missing.
+    exit: "The probe reports no missing input on all three benchmarks."
+    failure_response: >
+      Return to step 1 for THIS stage. Do not proceed and compensate downstream.
+      Compensating downstream is the mechanism that produced R-01 through R-32.
+    why_this_is_the_real_gate: >
+      Schema validity is cheap; a stage can emit a well-formed structure that is
+      substantively empty. Sufficiency is what the downstream stage actually needs.
+
+  - step: 7
+    name: verify_no_leakage_and_determinism
+    what: "Confirm independence and reproducibility."
+    checks:
+      - "Oracle and reference paths untouched: audited from the run's file-access record."
+      - "No benchmark-ID branching in production code."
+      - "Re-running from recorded model responses (offline replay, PR-10) reproduces the same state hash."
+      - "The stage's assurance-package contribution is present in all three runs."
+    exit: "All checks pass."
+
+  - step: 8
+    name: freeze_stage_contract
+    what: "Mark the stage's contract frozen. Later changes go through a recorded amendment."
+    precondition: >
+      Steps 4-7 passed on ALL THREE benchmarks. Not two. Not one plus a plausible
+      argument about the third.
+    exit: "The contract's status becomes `frozen`, with the three run IDs cited as evidence."
+    then: "Begin step 1 for the next stage."
+
+# =====================================================================
+# 2. The freeze rule
+# =====================================================================
+freeze_rule:
+  statement: >
+    A stage contract is frozen only after all three benchmarks demonstrate
+    downstream sufficiency from source-only runs.
+  rationale:
+    - "One benchmark proves the stage works on one problem. Three make accidental fit visible."
+    - "Freezing early is how a downstream stage inherits an inadequate input and starts compensating."
+    - "Freezing late is cheap. Unfreezing after four stages depend on the contract is not."
+  not_required_for_freeze:
+    - "That the benchmark's requirements PASS. A stage may be sufficient while the design is still wrong."
+    - "That the run reaches S12. Progression is incremental by construction."
+  explicitly_permitted: >
+    A frozen contract may be amended. The amendment is recorded, and every stage
+    that depended on the frozen version is re-checked at step 6.
+
+# =====================================================================
+# 3. Downstream sufficiency, defined
+# =====================================================================
+downstream_sufficiency:
+  definition: >
+    Stage N's output is sufficient for stage N+1 when N+1 can construct every
+    input its contract requires, using only N's output and the accumulated
+    DesignState — with no default value, no alias resolution, no fallback path,
+    no re-reading of the source request, and no benchmark-specific special case.
+  insufficiency_signals:
+    - "The downstream stage needs a value the upstream stage never produced."
+    - "The downstream stage must guess a unit, a frame or a reference."
+    - "The downstream stage must re-read the source request (violates INV-002)."
+    - "The downstream stage must branch on which benchmark is running."
+    - "The downstream stage works on two benchmarks and needs a special case for the third."
+  for_s12:
+    note: >
+      S12 has no successor stage. Its sufficiency consumer is the assurance
+      package itself: every required content item in
+      GENERATED_ASSURANCE_PACKAGE_CONTRACT must be projectable from the final
+      DesignState.
+
+# =====================================================================
+# 4. Implementation order
+# =====================================================================
+implementation_order:
+  order: [s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12]
+  rationale: >
+    Strictly forward. Each stage's gate is its successor's needs, so building out
+    of order means gating against a consumer that does not exist yet.
+  before_s01:
+    - "DesignState and StagePatch types, from the contracts in this directory."
+    - "The provider layer, from the interfaces in ver3/assy_v3/providers/."
+    - "The assurance-package projection, so every stage has somewhere to contribute."
+    - "The benchmark harness and result writer."
+  note_on_the_projection: >
+    The projection is built BEFORE s01 deliberately. If it is built last it
+    becomes a report generator, and a report generator invents structure the
+    stages never produced — which is the exact artifact this architecture forbids.

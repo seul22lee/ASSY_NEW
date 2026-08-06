@@ -1,0 +1,644 @@
+# RETIREMENT_MATRIX — machine-readable classification of every legacy component
+#
+# Produced by auditing the repositories, not by reading a plan. Scope:
+#   * /home/ftk3187/github/ASSY_Ver2.0        the Ver2 pipeline (frozen, read-only)
+#   * /home/ftk3187/github/ASSY_Ver1.0        the Ver1 milestones (frozen, read-only)
+#   * this repository's root tree             the KG / ontology project
+#   * ver3/                                   existing Ver3 evaluation work
+#
+# RELATIONSHIP TO ver3/phase0/VER2_RETIREMENT_MATRIX.md
+#   That file is the AUTHORITY for rows R-01..R-32 and for the "explicitly not
+#   retired" and "uncertain" tables. It is prose and it is frozen. This file is
+#   its machine-readable projection PLUS the repository-level audit that it does
+#   not cover. Where the two could disagree, the prose file wins and this file is
+#   wrong and must be corrected. No row here weakens a disposition there.
+#
+# DEFAULT DISPOSITION IS RETIRE. A component is preserved only on evidence, never
+# because replacing it would produce a larger diff.
+
+schema_version: "0.1.0"
+status: draft
+audited_at_commit: bff7ed07cabe19edaed2866a00b0061c660ad8e3
+authority: ver3/phase0/VER2_RETIREMENT_MATRIX.md
+
+legacy_roots:
+  ver1: /home/ftk3187/github/ASSY_Ver1.0
+  ver2: /home/ftk3187/github/ASSY_Ver2.0
+  this_repo_root: /home/ftk3187/github/ASSY_Ver3.0
+
+disposition_vocabulary:
+  RETIRE: >
+    The component does not return in any form. Its failure was the abstraction
+    itself, not its implementation quality.
+  REIMPLEMENT: >
+    The underlying mathematics or mechanism may be written again FROM SCRATCH,
+    with new tests, in assy_v3. No legacy code is imported, adapted, translated
+    or copied. Naming similarity is not reuse and is not permission.
+  REFERENCE_ONLY: >
+    May be READ by a human as evidence. Never executed, never imported, never a
+    runtime input, never an assertion target.
+  EVALUATION_ARTIFACT: >
+    Part of how Ver3 is judged, not part of what Ver3 runs. Read by evaluation
+    tooling only. Never a production input to any stage. (Rebuild policy rule 4.)
+  KEEP_NON_PIPELINE: >
+    Belongs to a different project that happens to share this repository. Not
+    retired, not reused, and not reachable from assy_v3 at runtime.
+  UNDECIDED: >
+    Recorded rather than forced. Blocks nothing today; must be resolved before
+    the stage that would depend on it is implemented.
+
+# =====================================================================
+# 1. Ver2 pipeline — module surface
+#    Every .py under ASSY_Ver2.0/assy. The default is RETIRE; a module is
+#    listed as REIMPLEMENT only where the phase0 matrix already licences the
+#    underlying idea.
+# =====================================================================
+ver2_modules:
+
+  - path: assy/stages/s01_requirement.py
+    role: Stage 01 requirement interpreter
+    disposition: REIMPLEMENT
+    reason: >
+      Requirement interpretation is a necessary capability and Stage 01 is the
+      only stage permitted to read raw source text (INV-002). The Ver2
+      implementation is not the starting point; the contract is.
+    ver3_replacement: "assy_v3 stage s01 (not implemented in this task)"
+    guarded_by: [INV-002]
+
+  - path: assy/stages/s01_llm.py
+    role: LLM call plumbing for Stage 01
+    disposition: REIMPLEMENT
+    reason: >
+      A model boundary is needed, but it must be an interface with a recorded
+      ModelRunRecord, not embedded call code. See MODEL_RUN_RECORD_CONTRACT.
+    ver3_replacement: assy_v3/providers/interfaces.py::LanguageModelProvider
+    guarded_by: [INV-018]
+
+  - path: assy/stages/s01_prompt.py
+    role: prompt templates
+    disposition: REFERENCE_ONLY
+    reason: >
+      Prompts encode an interpretation policy. Reading Ver2's prompts to see
+      what it asked for is legitimate; importing them imports its policy.
+
+  - path: assy/stages/s01_validation.py
+    role: Stage 01 validation
+    disposition: RETIRE
+    reason: "Field-presence acceptance (R-28)."
+    retirement_rows: [R-28]
+
+  - path: assy/stages/s02_mechanical.py
+    role: Stage 02 mechanical architecture, candidate selection
+    disposition: RETIRE
+    reason: >
+      Contains the selection defect directly: `selected_id=best.id` at line 408,
+      ranked partly on element count, ties resolved by an arbitrary stable pick.
+      Stage 02 in Ver3 has no selected-candidate field at all.
+    retirement_rows: [R-15, R-16, R-17]
+    guarded_by: [INV-007]
+
+  - path: assy/stages/s03_product.py
+    role: Stage 03 product architecture planner
+    disposition: RETIRE
+    reason: "Placeholder architecture generated from role names (R-18)."
+    retirement_rows: [R-11, R-18]
+    guarded_by: [INV-003, INV-008]
+
+  - path: assy/stages/s04_concept.py
+    role: Stage 04 concept visualization
+    disposition: RETIRE
+    reason: >
+      The rendered sheet was Stage 04's authoritative artifact, and `_zone_of`
+      (line 308) manufactured position from role. Both are load-bearing failures.
+    retirement_rows: [R-01, R-10]
+    guarded_by: [INV-003, INV-005]
+
+  - path: assy/stages/s04_kinematic.py
+    role: Stage 04 kinematics
+    disposition: REIMPLEMENT
+    reason: >
+      Kinematics is necessary. Ver2's motion model (interval swapping, fixed
+      offsets) is not; the replacement carries axes, frames, paths and swept
+      volumes.
+    retirement_rows: [R-06, R-07]
+    guarded_by: [INV-003]
+
+  - path: assy/stages/s04_layout.py
+    role: Stage 04 layout
+    disposition: RETIRE
+    reason: "Layout expressed in zones, stations and ordinal spans."
+    retirement_rows: [R-02, R-03, R-05]
+
+  - path: assy/stages/s04_states.py
+    role: Stage 04 state sets
+    disposition: REIMPLEMENT
+    reason: "States and transitions are sound; they must carry poses and swept regions."
+    retirement_rows: [R-06]
+
+  - path: assy/stages/s05_engineering.py
+    role: Stage 05 engineering integration
+    disposition: RETIRE
+    reason: >
+      A second design world with its own entities and free-string subjects.
+      Stage 05 in Ver3 emits a patch that EXTENDS entities by ID.
+    retirement_rows: [R-19, R-20]
+    guarded_by: [INV-001]
+
+  - path: assy/stages/s06_solver.py
+    role: Stage 06 solver
+    disposition: RETIRE
+    reason: >
+      `unit = c.unit or "mm"` at line 51 is the canonical silent default, and
+      values were copied and reported as solved.
+    retirement_rows: [R-21, R-22, R-23]
+    guarded_by: [INV-004, INV-010]
+
+  - path: assy/stages/s07_cad.py
+    role: Stage 07 CAD compilation
+    disposition: RETIRE
+    reason: "CAD fallback geometry gave the compiler design authority (R-24)."
+    retirement_rows: [R-24]
+    guarded_by: [INV-006]
+
+  - path: assy/stages/s08_simplan.py
+    role: Stage 08 simulation planning
+    disposition: REIMPLEMENT
+    reason: "Verification planning is necessary; it must bind observables semantically."
+    guarded_by: [INV-012, INV-013]
+
+  - path: assy/stages/s09_simrun.py
+    role: Stage 09 simulation execution
+    disposition: REIMPLEMENT
+    reason: >
+      Execution is necessary. Every planned observable must receive exactly one
+      outcome, including EXECUTION_FAILED.
+    guarded_by: [INV-013]
+
+  - path: assy/stages/s10_metrics.py
+    role: Stage 10 metrics
+    disposition: RETIRE
+    reason: "A missing metric was omitted from the report rather than reported missing."
+    retirement_rows: [R-26]
+    guarded_by: [INV-013]
+
+  - path: assy/stages/s11_evaluate.py
+    role: Stage 11 requirement evaluation
+    disposition: RETIRE
+    reason: "Unit-based evidence matching: any millimetre satisfied any millimetre."
+    retirement_rows: [R-25]
+    guarded_by: [INV-012]
+
+  - path: assy/stages/s12_revision.py
+    role: Stage 12 revision
+    disposition: REIMPLEMENT
+    reason: "Revision is necessary and must be driven by a dependency cone."
+    guarded_by: [INV-001]
+
+  - path: assy/stages/base.py
+    role: stage base class
+    disposition: RETIRE
+    reason: >
+      Ver3's stage boundary is defined by STAGE_PATCH_CONTRACT and
+      STAGE_OWNERSHIP_MATRIX, not by inheritance from a legacy base.
+
+  - path: assy/domain/upstream.py
+    role: upstream domain types
+    disposition: RETIRE
+    reason: >
+      Holds SpatialZone (1547), AxisStation (1522), RadialPosition (859),
+      BodyPlacement.span and ConceptVisualization (1724) — the qualitative-
+      spatial family that made clearance undecidable.
+    retirement_rows: [R-01, R-02, R-03, R-04, R-05]
+    guarded_by: [INV-003]
+
+  - path: assy/domain/downstream.py
+    role: downstream domain types
+    disposition: RETIRE
+    reason: "Types of the retired stages; superseded by DESIGN_STATE_CONTRACT."
+
+  - path: assy/domain/engineering.py
+    role: engineering domain types
+    disposition: RETIRE
+    reason: "Stage 05's independent truth store (R-19)."
+    retirement_rows: [R-19]
+
+  - path: assy/domain/session.py
+    role: session/run state
+    disposition: REIMPLEMENT
+    reason: "A run record is needed; MODEL_RUN_RECORD_CONTRACT defines it afresh."
+
+  - path: assy/domain/common.py
+    role: shared value types, quantities
+    disposition: REIMPLEMENT
+    reason: >
+      Unit-bearing values and stable typed IDs are explicitly not retired, on
+      condition of a new ID grammar and mandatory units.
+    conditions: ["unit mandatory", "dimensionless explicit", "no `or \"mm\"`"]
+    guarded_by: [INV-004]
+
+  - path: assy/geometry.py
+    role: transforms, frames, intersection maths
+    disposition: REIMPLEMENT
+    reason: >
+      Homogeneous transforms, frame composition, quaternion conversion, AABB/OBB
+      intersection and swept-volume sampling are ordinary geometry. Rewritten
+      from scratch with new tests; no policy layered on top.
+    conditions: ["no legacy import", "new tests", "no zone/station policy above it"]
+
+  - path: assy/assembly.py
+    role: assembly composition
+    disposition: REIMPLEMENT
+    reason: "Assembly dependency is necessary; it must be obligation-traced."
+
+  - path: assy/construction.py
+    role: construction program
+    disposition: REIMPLEMENT
+    reason: "A ConstructionProgram is the correct Stage 07 input; the Ver2 form is not reused."
+
+  - path: assy/engagement.py
+    role: engagement sites
+    disposition: REIMPLEMENT
+    reason: "Localized engagement is required by INV-008; the representation is new."
+
+  - path: assy/converge.py
+    role: convergence loop
+    disposition: RETIRE
+    reason: "Convergence over a state that permitted silent defaults cannot be salvaged."
+
+  - path: assy/pipeline.py
+    role: pipeline orchestration
+    disposition: RETIRE
+    reason: >
+      Orchestration is where Ver2 passed `spec` to Stage 02 and Stage 03
+      (tools/run_benchmarks.py:42-49). Ver3's orchestrator passes typed
+      projections only.
+    retirement_rows: [R-13]
+    guarded_by: [INV-002]
+
+  - path: assy/cli.py
+    role: command line
+    disposition: RETIRE
+    reason: "Entry point of the retired pipeline."
+
+  - path: assy/cadrender.py
+    role: CAD rendering
+    disposition: RETIRE
+    reason: "Renderer-as-designer family."
+    retirement_rows: [R-01, R-29]
+    guarded_by: [INV-005]
+
+  - path: assy/conceptrender.py
+    role: concept sheet rendering
+    disposition: RETIRE
+    retirement_rows: [R-01, R-29]
+    reason: "The rendered sheet was the authoritative artifact."
+    guarded_by: [INV-005]
+
+  - path: assy/mechanismrender.py
+    role: mechanism rendering
+    disposition: RETIRE
+    reason: "Same family as conceptrender."
+    guarded_by: [INV-005]
+
+  - path: assy/sectionrender.py
+    role: section rendering
+    disposition: REIMPLEMENT
+    reason: >
+      Sectioning is a legitimate NON-AUTHORITATIVE projection. Ver3 already has
+      an independent section renderer in the CAD evaluation tooling; production
+      rendering is rebuilt behind a write-blocked DesignState handle.
+    guarded_by: [INV-005]
+
+  - path: assy/conceptcoverage.py
+    role: render coverage acceptance
+    disposition: RETIRE
+    reason: "Glyph-per-schema-field acceptance (R-29)."
+    retirement_rows: [R-29]
+
+  - path: assy/viz.py
+    role: visualization helpers
+    disposition: RETIRE
+    reason: "Belongs to the retired render-authority family."
+
+  - path: assy/formlib.py
+    role: form library
+    disposition: RETIRE
+    reason: >
+      Generic forms are placeholders that satisfy no obligation; a block is not
+      an embodiment.
+    retirement_rows: [R-09]
+
+  - path: assy/runartifacts.py
+    role: run artifact writing
+    disposition: REIMPLEMENT
+    reason: "Artifact recording is necessary; the schema is new."
+
+  - path: assy/version.py
+    role: version constant
+    disposition: RETIRE
+    reason: "Ver3 versions its own contracts."
+
+  - path: assy/knowledge/cards.py
+    role: mechanism cards
+    disposition: REFERENCE_ONLY
+    reason: >
+      Reading a card imports a pre-solved sub-design. This is the single highest
+      risk of Ver3 silently becoming Ver1. See UNDECIDED U-05.
+    retirement_rows: [R-09]
+    hard_prohibition: true
+
+  - path: assy/knowledge/mechanisms.py
+    role: mechanism library
+    disposition: REFERENCE_ONLY
+    hard_prohibition: true
+    reason: "Same as cards.py: a library of pre-solved answers."
+
+  - path: assy/knowledge/elements.py
+    role: element catalogue
+    disposition: REFERENCE_ONLY
+    hard_prohibition: true
+    reason: "Catalogue reseeding was a Stage 05 defect (R-20)."
+
+  - path: assy/knowledge/resolvers.py
+    role: knowledge resolvers
+    disposition: RETIRE
+    reason: >
+      A resolver that answers "not found" as INFEASIBLE is the R-27 defect. The
+      Ver3 boundary returns Optional and only UNSUPPORTED is reachable from None.
+    retirement_rows: [R-27]
+    guarded_by: [INV-011]
+
+  - path: assy/knowledge/spawning.py
+    role: element spawning
+    disposition: RETIRE
+    reason: "Spawns entities outside the owning stage (R-19, INV-001)."
+
+  - path: assy/knowledge/sizing.py
+    role: sizing heuristics
+    disposition: REIMPLEMENT
+    reason: "First-order sizing is legitimate if it reports residuals and status."
+    guarded_by: [INV-010]
+
+  - path: assy/knowledge/coupling.py
+    role: coupling knowledge
+    disposition: REIMPLEMENT
+    reason: "Joints/couplings are explicitly not retired, subject to axis+frames+realization."
+
+  - path: assy/knowledge/duty.py
+    role: duty knowledge
+    disposition: UNDECIDED
+    reason: "Duty and life have no stated requirement in any current benchmark."
+
+  - path: assy/knowledge/materials.py
+    role: material data
+    disposition: UNDECIDED
+    reason: >
+      Material selection is unresolved across all three benchmarks. A material
+      library that supplies a default is a silent-default vector (INV-004).
+
+  - path: assy/knowledge/manufacturing.py
+    role: manufacturing knowledge
+    disposition: UNDECIDED
+    reason: "REQ-006-class manufacturability has no evidence at any fidelity."
+
+  - path: assy/knowledge/partfeatures.py
+    role: part features
+    disposition: REIMPLEMENT
+    reason: "Feature identity is needed for obligation discharge; representation is new."
+
+  - path: assy/knowledge/checks.py
+    role: knowledge checks
+    disposition: RETIRE
+    reason: "Field-presence acceptance family."
+    retirement_rows: [R-28]
+
+  - path: assy/knowledge/compliance.py
+    role: compliance checks
+    disposition: RETIRE
+    reason: "Same family."
+    retirement_rows: [R-28]
+
+  - path: assy/knowledge/testplan.py
+    role: test planning
+    disposition: REIMPLEMENT
+    reason: "Superseded by the Stage 08 contract."
+
+  - path: assy/validation/analytical.py
+    role: analytical validation
+    disposition: REIMPLEMENT
+    reason: "Analytic cross-checks are valuable; they must be independent of the model they check."
+
+  - path: assy/validation/mjcf.py
+    role: MJCF emission
+    disposition: REIMPLEMENT
+    reason: >
+      The V-A/V-B fidelity distinction is sound and directly informs
+      evidence_scope.fidelity. The harness is not ported.
+    retirement_rows: []
+    conditions: ["fidelity declared", "structural_artifacts declared"]
+    guarded_by: [INV-009]
+
+# =====================================================================
+# 2. Ver2 non-module components
+# =====================================================================
+ver2_other:
+  - path: tools/run_benchmarks.py
+    disposition: RETIRE
+    reason: "Passed the raw spec to Stage 02 and Stage 03 (R-13)."
+    retirement_rows: [R-13]
+  - path: BM-001_GOLDEN_STAGE_OUTPUTS.md
+    disposition: REFERENCE_ONLY
+    reason: "Golden outputs are one sample from an allowed set, produced by the system under audit."
+    retirement_rows: [R-31]
+    hard_prohibition: true
+    note: "Never an assertion target. Rank-5 historical example only."
+  - path: BM-002_GOLDEN_STAGE_OUTPUTS.md
+    disposition: REFERENCE_ONLY
+    retirement_rows: [R-31]
+    hard_prohibition: true
+    reason: "Same as BM-001 goldens."
+  - path: benchmarks/
+    disposition: REFERENCE_ONLY
+    reason: "Ver2's benchmark definitions are rank-1 source material for the dossiers, read by humans."
+  - path: mujoco_core/
+    disposition: REIMPLEMENT
+    reason: "A physics boundary is needed; the Ver2 harness is not imported."
+  - path: tests/
+    disposition: RETIRE
+    reason: "Field-presence and render-coverage acceptance."
+    retirement_rows: [R-28, R-29, R-30]
+  - path: out/
+    disposition: REFERENCE_ONLY
+    reason: "Historical run output."
+  - path: "*.md (STAGE_0x_*.md, SYSTEM_ARCHITECTURE.md, DOMAIN_SPECIFICATION.md)"
+    disposition: REFERENCE_ONLY
+    reason: >
+      Ver2's own documentation, including its RL-#### retrospective entries,
+      is the best available evidence of why Ver2 failed. Read, never executed.
+
+# =====================================================================
+# 3. Ver1
+# =====================================================================
+ver1:
+  - path: knowledge/cards/, knowledge/templates/
+    disposition: REFERENCE_ONLY
+    hard_prohibition: true
+    reason: "A card is a pre-solved sub-design. Never imported, never a knowledge source."
+    retirement_rows: [R-09]
+  - path: tasks/benchmark/benchmark.py
+    disposition: RETIRE
+    reason: >
+      KG_NO_PERMITTED_REALIZER reported missing knowledge as INFEASIBLE
+      (lines 145-150), including for a mechanism whose card existed.
+    retirement_rows: [R-27]
+    guarded_by: [INV-011]
+  - path: tasks/benchmark/goldens/
+    disposition: REFERENCE_ONLY
+    hard_prohibition: true
+    retirement_rows: [R-31]
+    reason: "Legacy golden equality."
+  - path: "m0..m27 milestone directories"
+    disposition: REFERENCE_ONLY
+    reason: >
+      Evidence of what was attempted and what the results actually were,
+      including the V-A structural artifacts. Cited by the dossiers at rank 5.
+  - path: "V-01..V-17 deterministic validators"
+    disposition: REFERENCE_ONLY
+    reason: "Read for WHAT they checked. Ver3 validators are contract-derived, not ported."
+
+# =====================================================================
+# 4. This repository's root tree — the KG / ontology project
+#    INV-016 forbids any Ver3 runtime dependency on these.
+# =====================================================================
+this_repo_root:
+  - path: ontology/
+    disposition: KEEP_NON_PIPELINE
+    reason: >
+      A machine-design knowledge graph built from textbooks. It is a different
+      project sharing this repository. INV-016 makes a Ver3 runtime read of it a
+      BLOCKING violation, and the absence_run test renames it to prove Ver3 does
+      not need it.
+    guarded_by: [INV-016]
+  - path: data/
+    disposition: KEEP_NON_PIPELINE
+    reason: "Claims, evidence spans and alignments for the KG project."
+    guarded_by: [INV-016]
+  - path: rules/
+    disposition: KEEP_NON_PIPELINE
+    reason: >
+      selection_rules.yaml / substitution_rules.yaml are KG-project rules. A
+      Ver3 stage reading them would be importing an outside decision policy.
+    guarded_by: [INV-016]
+  - path: shapes/
+    disposition: KEEP_NON_PIPELINE
+    reason: "SHACL shapes for the KG."
+  - path: scripts/
+    disposition: KEEP_NON_PIPELINE
+    reason: "KG build scripts. Not a Ver3 dependency."
+  - path: build/, outputs/
+    disposition: KEEP_NON_PIPELINE
+    reason: "KG extraction artifacts and visualizations."
+  - path: tests/ (root)
+    disposition: KEEP_NON_PIPELINE
+    reason: "Tests for the KG project. Ver3 tests live under ver3/tests."
+  - path: vendor/
+    disposition: KEEP_NON_PIPELINE
+    reason: "Vendored cytoscape for the KG visualization."
+  - path: config/config.yaml
+    disposition: KEEP_NON_PIPELINE
+    reason: "KG project configuration."
+  - path: docs/
+    disposition: KEEP_NON_PIPELINE
+    reason: "KG project documentation."
+  - path: "*.pdf (root)"
+    disposition: KEEP_NON_PIPELINE
+    reason: "Source textbooks for the KG project."
+
+# =====================================================================
+# 5. Existing ver3/ work
+# =====================================================================
+ver3_existing:
+  - path: ver3/oracles/
+    disposition: EVALUATION_ARTIFACT
+    reason: >
+      Oracle packs state what must be true and what must remain unresolved. They
+      judge a run; they are never an input to one. A stage that reads an Oracle
+      is reading its own answer key.
+    hard_prohibition: true
+    prohibition: "assy_v3 must not import or read ver3/oracles at runtime."
+  - path: ver3/oracle_tools/
+    disposition: EVALUATION_ARTIFACT
+    reason: "Auditing tooling for the Oracle packs."
+  - path: ver3/cad_validation/
+    disposition: EVALUATION_ARTIFACT
+    reason: >
+      Positive executable CAD references (EXE-BM001-*, EXE-BM002-01) demonstrate
+      that a design satisfying the source is buildable and measurable. They are
+      evidence ABOUT the problem, not a production input, and not a target for a
+      stage to reproduce. Reproducing one would be R-30/R-31 with new packaging.
+    hard_prohibition: true
+    prohibition: "assy_v3 must not import or read ver3/cad_validation at runtime."
+    retirement_rows: [R-30, R-31]
+  - path: ver3/cad_validation/tools/
+    disposition: EVALUATION_ARTIFACT
+    reason: >
+      cadval.py / valcore.py / cadvideo.py are the evaluation CAD toolchain.
+      Some of their primitives (exact B-rep measurement, z-buffered review
+      rendering) may later be REIMPLEMENTED for production, but the modules
+      themselves stay on the evaluation side of the boundary.
+  - path: ver3/phase0/
+    disposition: EVALUATION_ARTIFACT
+    reason: >
+      ARCHITECTURE_INVARIANTS.yaml and VER2_RETIREMENT_MATRIX.md are the
+      governing contracts for this rebuild. Frozen; changes need a proposal.
+    frozen: true
+
+# =====================================================================
+# 6. Uncertain dispositions, carried forward from phase0 §8
+# =====================================================================
+undecided:
+  - id: U-01
+    concept: MuJoCo as Ver3's kinematic evidence engine
+    provisional: "one capability with mandatory fidelity + structural_artifacts"
+    blocks: "Stage 08/09 contract"
+  - id: U-02
+    concept: HostTemplate / named attachment site
+    provisional: "REIMPLEMENT as a pure topological anchor with no geometry or parameter bounds"
+    blocks: "Stage 05 contract"
+  - id: U-03
+    concept: UnresolvedLayoutChoice / LayoutConflict
+    provisional: "lean subsume into the general UNRESOLVED type"
+    resolved_by: >
+      DESIGN_STATE_CONTRACT in this task subsumes them: openness is recorded as
+      an UnresolvedDecision with alternatives, not as a layout-specific type.
+    status: RESOLVED_BY_THIS_TASK
+  - id: U-04
+    concept: Ver1 carve composition semantics
+    provisional: "defer to Stage 05 contract; do not import"
+    blocks: "Stage 05 contract"
+  - id: U-05
+    concept: where mechanism knowledge comes from at all
+    provisional: >
+      KnowledgeProvider is a boundary, deliberately unimplemented. It must not be
+      closed by importing Ver1 cards or the root ontology.
+    blocks: "Stage 02 implementation"
+    note: >
+      LOAD-BEARING. This is exactly where Ver3 could silently become Ver1. This
+      task defines the interface and implements no provider, which is the whole
+      point of deliverable M.
+
+# =====================================================================
+# 7. Audit completeness
+# =====================================================================
+completeness:
+  ver2_python_modules_found: 57
+  ver2_python_modules_classified: 57
+  repo_root_top_level_dirs_found: 11
+  repo_root_top_level_dirs_classified: 11
+  ver3_existing_trees_classified: 5
+  phase0_rows_covered: "R-01..R-32 (authority: ver3/phase0/VER2_RETIREMENT_MATRIX.md)"
+  method: >
+    Every .py under ASSY_Ver2.0/assy was enumerated by find and assigned a
+    disposition. Directories are classified as units where their contents share
+    one disposition. No component was left unclassified, and no component was
+    preserved on diff-size grounds.

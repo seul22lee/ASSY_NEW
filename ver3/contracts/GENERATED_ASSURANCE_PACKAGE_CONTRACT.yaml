@@ -1,0 +1,475 @@
+# GENERATED_ASSURANCE_PACKAGE_CONTRACT
+#
+# The pipeline must progressively construct an executable, auditable assurance
+# package across S01-S12 whose depth is comparable to a manually authored
+# benchmark Oracle — WITHOUT ever reading one.
+#
+# The artifact's name in production code is GENERATED_DESIGN_ASSURANCE_PACKAGE
+# (equivalently RUNTIME_ASSURANCE_RECORD). It is NEVER called an Oracle inside
+# production code. The word "Oracle" in assy_v3 would mean the hidden answer key
+# had leaked into the system that is supposed to be judged by it, and the naming
+# rule exists so that leak is visible at grep depth.
+#
+# NO STAGE LOGIC IS DEFINED HERE (rebuild policy rule 6). This file says what the
+# package must be able to contain and where each part comes from. It does not say
+# how any stage produces its content.
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+references:
+  - ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+  - ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
+  - ver3/contracts/PROVENANCE_CONTRACT.yaml
+  - ver3/contracts/BENCHMARK_RESULT_CONTRACT.yaml
+
+artifact_name: GENERATED_DESIGN_ASSURANCE_PACKAGE
+artifact_alias: RUNTIME_ASSURANCE_RECORD
+forbidden_names_in_production_code:
+  - Oracle
+  - oracle
+  - ORACLE
+  - answer_key
+  - ground_truth
+  - expected_design
+  - reference_design
+naming_enforcement: >
+  ver3/tests/meta/test_no_stage_implementation.py fails if any forbidden name
+  appears as an identifier, module name, path literal or field name under
+  ver3/assy_v3. Prose in a comment that explains WHY the word is forbidden is
+  permitted and is the only permitted occurrence.
+
+# =====================================================================
+# 1. The three artifacts that must never be conflated
+#
+#    These look similar on the page. They differ in WHO authored them, WHEN they
+#    were fixed relative to the run, and WHO is allowed to see them. Conflating
+#    any two of them destroys the evaluation's meaning, and every rule below is
+#    downstream of this table.
+# =====================================================================
+three_way_distinction:
+
+  hidden_benchmark_oracle:
+    what: "The independently authored statement of what must be true of a run."
+    authored_by: "A human, independently of the pipeline."
+    frozen: "BEFORE any source-only run of that benchmark."
+    visible_to:
+      - benchmark evaluator
+      - human reviewers
+    NOT_visible_to:
+      - production stages
+      - generation models
+      - prompts
+      - retrieval
+      - any code under ver3/assy_v3
+    lives_at: ver3/oracles/
+    enforcement: >
+      FORBIDDEN_LEGACY_DEPENDENCIES forbidden_path_roots lists ver3/oracles/ at
+      BLOCKING severity. A stage reading it is reading its own answer key.
+    defines_success: "YES"
+    why_hidden: >
+      An Oracle that a stage can see stops measuring whether the pipeline can
+      design, and starts measuring whether the pipeline can copy.
+
+  runtime_generated_assurance_package:
+    what: "This artifact. What the run itself claims, established and unestablished."
+    authored_by: "The pipeline, from its own accumulated state."
+    generated_from:
+      - the source request
+      - the accumulated typed DesignState
+      - declared engineering knowledge
+      - deterministic tool results
+      - the run's own revision history
+    NOT_generated_from:
+      - the hidden benchmark Oracle
+      - positive executable references
+      - a benchmark's expected outcome
+      - any artifact that postdates knowing the result
+    visible_to: [everyone]
+    lives_at: "run output directory (see BENCHMARK_RESULT_CONTRACT)"
+    defines_success: "NO"
+    why_not: >
+      It may legitimately resemble the Oracle in structure and depth — that
+      resemblance is the goal. What it must never do is DEFINE success, because
+      it was written by the same process whose success is in question, and a
+      criterion authored after seeing the result is not a criterion.
+
+  positive_executable_reference:
+    what: "A human-built, executable CAD design that is known to work."
+    authored_by: "A human, as a development and evaluator-validation fixture."
+    purpose:
+      - "Prove the evaluator can recognise a good design (no false negatives)."
+      - "Prove a validator's negative controls can fail."
+      - "Give benchmark authors a concrete feasibility existence proof."
+    NOT_permitted_as:
+      - production input
+      - retrieval source
+      - template
+      - golden geometry
+      - a target the pipeline is scored against for similarity
+    lives_at: ver3/cad_validation/
+    enforcement: >
+      Listed at BLOCKING severity in forbidden_path_roots. Rebuild policy rule 4.
+    defines_success: "NO"
+    why_not: >
+      It is ONE valid design. Scoring against it would convert "did the pipeline
+      solve the problem" into "did the pipeline reproduce this solution", which
+      penalises every correct answer that differs.
+
+  summary_rule: >
+    The Oracle defines success and is hidden. The reference proves the evaluator
+    works and is hidden from production. The package states what the run claims
+    and is public. A run is judged by comparing the package (and the artifacts it
+    projects) against the Oracle — a comparison only the evaluator performs.
+
+# =====================================================================
+# 2. What the package IS, structurally
+# =====================================================================
+nature:
+  is: "A projection of the cumulative typed DesignState."
+  is_not:
+    - what: "A second, independent design world"
+      why: >
+        If the package can hold a fact the DesignState does not, the two can
+        disagree, and the artifact stops being evidence about the run.
+    - what: "A manually assembled report disconnected from Stage outputs"
+      why: >
+        A hand-written narrative can describe a design the pipeline never
+        produced. Every sentence must trace to an entity.
+    - what: "A rendering step that runs once at the end"
+      why: >
+        A terminal report can only show what survived. The requirement is
+        PROGRESSIVE construction, so that what was tried and dropped is visible.
+  projection_rule:
+    statement: >
+      Every element of the package is derived from DesignState entities by a
+      deterministic, total projection function. The package has no authoring
+      channel of its own.
+    consequences:
+      - "The package cannot contain a claim with no entity behind it."
+      - "The package cannot omit an entity that its section selects for."
+      - "Re-projecting an unchanged DesignState yields a byte-identical package."
+      - "Fixing the package means fixing the state — never editing the output."
+  materialization:
+    when: "After every stage, not only at S12."
+    why: >
+      The package must be inspectable mid-run. A package that only exists at the
+      end cannot show that S05 recorded a freedom that S06 later consumed.
+    retention: "Every per-stage materialization is retained, not overwritten."
+
+# =====================================================================
+# 3. Required contents by S12
+#
+#    Each item names the section, the DesignState families it projects, the
+#    stage that first contributes, and — most importantly — the failure it
+#    prevents. An item present but empty must SAY it is empty and why; a silent
+#    omission is a CONTRACT_INCOMPLETE result, not a shorter package.
+# =====================================================================
+required_contents:
+
+  - id: PKG-01
+    section: scope_and_source
+    projects: [SourceClause, Requirement]
+    first_stage: s01
+    prevents: "A design judged against a problem nobody can reconstruct."
+
+  - id: PKG-02
+    section: interpretation
+    projects: [Requirement, Assumption]
+    first_stage: s01
+    must_distinguish: "stated vs inferred, per item"
+    prevents: "An assumption presented with the authority of a requirement."
+
+  - id: PKG-03
+    section: freedoms
+    projects: [Freedom]
+    first_stage: s01
+    prevents: "A free choice silently hardened into a fixed requirement (INV-014)."
+
+  - id: PKG-04
+    section: open_questions
+    projects: [Ambiguity, UnresolvedDecision]
+    first_stage: s01
+    prevents: "Silent resolution of a source conflict."
+
+  - id: PKG-05
+    section: operating_scenarios
+    projects: [Scenario]
+    first_stage: s01
+    prevents: "Evidence gathered in an undeclared scenario and read as general."
+
+  - id: PKG-06
+    section: obligations
+    projects: [Obligation]
+    first_stage: s02
+    must_include: "derivation from requirement, and mandatory flag"
+    prevents: "A requirement with no physical consequence attached."
+
+  - id: PKG-07
+    section: candidate_space
+    projects: [Candidate]
+    first_stage: s02
+    must_include: "ALL candidates, including unpursued branches"
+    prevents: "A premature winner presented as the only option (INV-007)."
+
+  - id: PKG-08
+    section: acceptance_contracts
+    projects: [AcceptanceContract]
+    first_stage: s02
+    prevents: "Success criteria invented after the geometry exists."
+
+  - id: PKG-09
+    section: rejected_alternatives
+    projects: [RejectedAlternative]
+    first_stage: any
+    must_include: "reason kind, evidence, rejecting stage"
+    prevents: >
+      A design that looks inevitable. Also catches rejection-for-absence, which
+      is UNSUPPORTED, not infeasible (INV-011).
+
+  - id: PKG-10
+    section: architecture
+    projects: [Body, Joint]
+    first_stage: s03
+    must_include: "instance identity, metric pose and extent"
+    prevents: "A parts list mistaken for an embodiment (R-09)."
+
+  - id: PKG-11
+    section: interaction_inventory
+    projects: [Interface]
+    first_stage: s03
+    must_include: "EVERY meeting region, each with an interaction kind"
+    prevents: "An unclassified contact silently assumed benign."
+
+  - id: PKG-12
+    section: mobility
+    projects: [MobilityExpectation, Configuration]
+    first_stage: s03
+    must_include: "intended AND forbidden DOF, per configuration"
+    prevents: "An unintended DOF that no check was ever looking for."
+
+  - id: PKG-13
+    section: operation
+    projects: [State, Transition]
+    first_stage: s04
+    must_include: "declared sampling"
+    prevents: "A motion claim backed by two endpoints (R-07)."
+
+  - id: PKG-14
+    section: witnesses
+    projects: [Witness]
+    first_stage: s04
+    must_include: "witness kind, method, fidelity, artifacts"
+    prevents: "An assertion that assembly is possible with nothing that shows it."
+
+  - id: PKG-15
+    section: realization_map
+    projects: [Realization, Feature, Obligation]
+    first_stage: s05
+    must_include: "obligation -> realization -> verification predicate, per obligation"
+    prevents: "An obligation discharged by a label (INV-008)."
+
+  - id: PKG-16
+    section: parameters
+    projects: [Parameter, Constraint]
+    first_stage: s05
+    must_include: "unit on every parameter, provenance of every value"
+    prevents: "A silent unit default (R-21, INV-004)."
+
+  - id: PKG-17
+    section: construction_program
+    projects: [ConstructionStatement]
+    first_stage: s05
+    prevents: "Geometry whose origin cannot be traced to a decision (INV-006)."
+
+  - id: PKG-18
+    section: solver_record
+    projects: [Parameter, Constraint, UnresolvedDecision]
+    first_stage: s06
+    must_include: "formulation used, solution status, solution freedoms"
+    prevents: "An underdetermined system reported as solved."
+
+  - id: PKG-19
+    section: as_built_geometry
+    projects: [GeometrySignature]
+    first_stage: s07
+    must_include: "signature hash, critical dimensions, per body"
+    prevents: "An evaluation of geometry nobody can identify or reproduce."
+
+  - id: PKG-20
+    section: verification_plan
+    projects: [VerificationPlanItem]
+    first_stage: s08
+    must_include: "requirement x criterion x scenario x observable x fidelity"
+    prevents: "Evidence chosen after the result is known."
+
+  - id: PKG-21
+    section: negative_controls
+    projects: [NegativeControl]
+    first_stage: s08
+    must_include: "mutation, checking validator, MEASURED detection"
+    prevents: "A check that passes because it cannot fail (INV-013)."
+
+  - id: PKG-22
+    section: evidence
+    projects: [EvidenceItem]
+    first_stage: s09
+    must_include: "outcome, fidelity, contact resolution, artifacts"
+    prevents: "A proxy result read as a physical one."
+
+  - id: PKG-23
+    section: evidence_scope
+    projects: [EvidenceItem, VerificationPlanItem]
+    first_stage: s08
+    must_include: "what each fidelity level CANNOT support"
+    prevents: >
+      Overreach — the kinematic-model-used-as-strength-evidence failure. What the
+      evidence cannot say must be stated where the evidence is presented.
+
+  - id: PKG-24
+    section: coverage
+    projects: [Requirement, EvidenceItem]
+    first_stage: s10
+    must_include: "requirements with NO sufficient-fidelity evidence, named"
+    prevents: "An unchecked requirement invisible among the checked ones."
+
+  - id: PKG-25
+    section: contradictions
+    projects: [EvidenceItem]
+    first_stage: s10
+    must_include: "unmerged, both sides shown"
+    prevents: "Disagreement averaged into false agreement."
+
+  - id: PKG-26
+    section: evaluation
+    projects: [RequirementEvaluation]
+    first_stage: s11
+    must_include: "outcome plus six-field scope block on every PASS (INV-009)"
+    prevents: "An unqualified PASS."
+
+  - id: PKG-27
+    section: excluded_claims
+    projects: [ExcludedClaim]
+    first_stage: s11
+    must_include: "what is NOT established, and what would be required"
+    prevents: "A reader inferring strength, safety or durability from silence."
+
+  - id: PKG-28
+    section: obligation_closure
+    projects: [Obligation, RequirementEvaluation]
+    first_stage: s11
+    must_include: "terminal status for EVERY mandatory obligation"
+    prevents: "An obligation that quietly never reached a verdict (INV-008)."
+
+  - id: PKG-29
+    section: failure_attribution
+    projects: [FailureProvenance]
+    first_stage: s12
+    must_include: "owning decision, owning stage, invalidation cone"
+    prevents: "Blame assigned to the last stage that touched the artifact."
+
+  - id: PKG-30
+    section: revision_history
+    projects: [FailureProvenance, RejectedAlternative]
+    first_stage: s12
+    must_include: "what changed, why, what it superseded, what was invalidated"
+    prevents: "A final answer with no visible path to it."
+
+  - id: PKG-31
+    section: human_review_queue
+    projects: [HumanReviewQuestion]
+    first_stage: s12
+    must_include: "every question PENDING; the pipeline never self-approves"
+    prevents: "Machine self-approval of a design needing human judgement."
+
+  - id: PKG-32
+    section: provenance_index
+    projects: [all]
+    first_stage: s01
+    must_include: "for every entity: creating stage, method, inputs, run record"
+    prevents: "A claim whose origin cannot be established (PROVENANCE_CONTRACT)."
+
+  - id: PKG-33
+    section: execution_record
+    projects: [ModelRunRecord, ToolRunRecord]
+    first_stage: s01
+    must_include: "every model and tool invocation, with its execution status"
+    prevents: >
+      A degraded run reported as a normal one. A rate-limited or truncated
+      generation is a recorded fact, never an invisible retry
+      (MODEL_RUN_RECORD_CONTRACT).
+
+  - id: PKG-34
+    section: determinism_record
+    projects: [all]
+    first_stage: s01
+    must_include: "seeds, tool versions, solver settings, projection hash"
+    prevents: "An unreproducible result presented as a measurement."
+
+content_completeness_rule: >
+  A required item with nothing to report is emitted with an explicit empty
+  marker and the reason it is empty. Omitting the section instead is
+  CONTRACT_INCOMPLETE. The distinction matters because "we found no ambiguities"
+  and "we never looked for ambiguities" are different claims, and only the second
+  one is a defect.
+
+# =====================================================================
+# 4. Anti-leakage
+#
+#    The package must be able to resemble an Oracle in depth. That resemblance is
+#    only meaningful if it was reached independently, so the rules below are
+#    about DERIVATION, not similarity.
+# =====================================================================
+anti_leakage:
+  rules:
+    - id: AL-01
+      rule: "No production code path may read ver3/oracles/."
+      enforced_by: ver3/tests/meta/test_no_legacy_imports.py
+
+    - id: AL-02
+      rule: "No production code path may read ver3/cad_validation/."
+      enforced_by: ver3/tests/meta/test_no_legacy_imports.py
+
+    - id: AL-03
+      rule: "No prompt, template, fixture or retrieval corpus may embed Oracle content."
+      note: >
+        Enforcement is a review obligation plus the naming test. It cannot be
+        fully automated, and pretending otherwise would be worse than saying so.
+
+    - id: AL-04
+      rule: >
+        No acceptance criterion may be created after the result it judges is
+        known. AcceptanceContract is owned by s02 and VerificationPlanItem by
+        s08, both strictly before s09 executes.
+      why: "This ordering is what makes the plan a prediction rather than a description."
+
+    - id: AL-05
+      rule: >
+        Benchmark identity must not steer content. FP-02 forbids BM-\d{3} in
+        production code (INV-015, R-14).
+
+    - id: AL-06
+      rule: >
+        The package must be producible for a source request that has no Oracle at
+        all.
+      why: >
+        This is the operational test of independence. If the package can only be
+        built for benchmarked inputs, something in the pipeline is keyed to the
+        benchmark.
+
+# =====================================================================
+# 5. Depth target
+# =====================================================================
+depth_target:
+  statement: >
+    Comparable in depth to a manually authored benchmark Oracle: invariants with
+    their justification, unresolved decisions with what they block, negative
+    cases with measured detection, and evidence fidelity stated where the
+    evidence is used.
+  measured_by: >
+    The evaluator, by comparing the package against the hidden Oracle. Depth is
+    never self-assessed by the pipeline, and the package contains no
+    self-grading field.
+  explicitly_not:
+    - "A page count, a section count, or a word count."
+    - "Similarity to any specific Oracle's wording or ordering."

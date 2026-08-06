@@ -1,0 +1,159 @@
+# STAGE_PATCH_CONTRACT — the only way DesignState changes
+#
+# A stage does not mutate DesignState. It PROPOSES a StagePatch, the patch is
+# validated against this contract and against STAGE_OWNERSHIP_MATRIX, and only
+# then is it applied. A stage that could write directly to the state would make
+# ownership advisory, and ownership is the mechanism INV-001 depends on.
+#
+# NO STAGE LOGIC IS DEFINED HERE (rebuild policy rule 6). This is the envelope
+# and its validation rules. What a stage puts in the envelope is out of scope.
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+references:
+  - ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+  - ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
+  - ver3/contracts/PROVENANCE_CONTRACT.yaml
+  - ver3/contracts/STATUS_SEMANTICS.yaml
+
+# =====================================================================
+# 1. Envelope
+# =====================================================================
+patch_envelope:
+  required_fields:
+    - patch_id
+    - run_id
+    - stage_id
+    - stage_attempt
+    - parent_state_hash
+    - operations
+    - execution_status
+    - provenance
+    - declared_incompleteness
+  field_rules:
+    patch_id: "Unique within a run. Stable across retries of the same attempt."
+    stage_attempt: >
+      Increments when a stage is re-entered after a revision. Attempt 2 does not
+      overwrite attempt 1's patch; both are retained (see revision below).
+    parent_state_hash: >
+      The hash of the DesignState the stage actually read. If the current state
+      hash differs at apply time, the patch is REJECTED as stale rather than
+      merged. A patch computed against one world and applied to another is how
+      inconsistent states are created.
+    execution_status: >
+      One of the twelve values in STATUS_SEMANTICS.execution_statuses. A patch
+      carries the status of the work that produced it, including a degraded one.
+    declared_incompleteness: >
+      What the stage knows it did not finish. A stage may emit a patch with
+      execution_status CONTRACT_INCOMPLETE and a populated list here. It may NOT
+      emit a complete-looking patch that quietly omits required content.
+
+# =====================================================================
+# 2. Operations
+# =====================================================================
+operations:
+  kinds: [CREATE, EXTEND, RELATE, SUPERSEDE, RECORD_UNRESOLVED, RECORD_REJECTED]
+
+  CREATE:
+    what: "Bring a new entity into existence."
+    required: [entity_type, entity_id, fields, provenance_ref]
+    validation:
+      - "stage_id must own entity_type in STAGE_OWNERSHIP_MATRIX, or the type must be universally ownable."
+      - "entity_id must not already exist."
+      - "All required_fields for the family must be present and non-null."
+      - "Every field marked authoritative_geometry must carry a unit (INV-003, INV-004)."
+      - "Every reference field must name an existing entity ID (R-20)."
+
+  EXTEND:
+    what: "Add to an existing entity, by ID."
+    required: [entity_id, fields, provenance_ref]
+    validation:
+      - "The entity must exist."
+      - "stage_id must appear in the family's `extends`, or own the family."
+      - "A field already set by the owning stage may not be overwritten."
+      - "Append-only collections may only be appended to."
+    on_conflict: >
+      A stage that needs a different value than the owner set does NOT overwrite.
+      It emits SUPERSEDE with a reason, or RECORD_UNRESOLVED. Overwriting hides
+      the disagreement, and the disagreement is usually the interesting part.
+
+  RELATE:
+    what: "Create a typed relationship between two existing entities."
+    required: [relation_type, subject, object, provenance_ref]
+    validation:
+      - "Both endpoints must exist and be of the types the relation permits."
+      - "A free-string subject or object is a SCHEMA_FAILURE (R-20)."
+
+  SUPERSEDE:
+    what: "Mark an entity as replaced, keeping both."
+    required: [superseded_entity_id, successor_entity_id, reason, provenance_ref]
+    validation:
+      - "Neither entity is deleted."
+      - "The invalidation cone (what depended on the superseded entity) must be listed."
+    why: >
+      Revision must be visible. A design world where the wrong answer simply
+      disappears cannot show why the right one is right.
+
+  RECORD_UNRESOLVED:
+    what: "Record an openness."
+    required: [decision, why_open, alternatives, blocks, provenance_ref]
+    validation:
+      - "Permitted from any stage at any time (STAGE_OWNERSHIP_MATRIX universally_ownable)."
+    note: "Never rejected for being inconvenient. The alternative is silent resolution."
+
+  RECORD_REJECTED:
+    what: "Record a dropped alternative."
+    required: [what, reason_kind, reason, evidence, provenance_ref]
+    validation:
+      - "reason_kind must be one of the permitted kinds in DESIGN_STATE_CONTRACT."
+      - "Absence from a library is NOT a permitted reason kind (INV-011)."
+
+# =====================================================================
+# 3. Atomicity
+# =====================================================================
+atomicity:
+  rule: "A patch applies entirely or not at all."
+  why: >
+    A partially applied patch leaves entities referring to entities that were
+    never created. Half a topology is worse than none, because it looks complete.
+  on_rejection:
+    - "The DesignState is unchanged."
+    - "The rejected patch is RETAINED with its rejection reason."
+    - "The run records execution_status SCHEMA_FAILURE for that attempt."
+  retention_rule: >
+    Rejected patches are part of the run record, not debris. The assurance
+    package's execution_record section projects them (PKG-33).
+
+# =====================================================================
+# 4. Determinism
+# =====================================================================
+determinism:
+  rule: >
+    Applying the same patch to the same parent state yields a byte-identical
+    child state and an identical state hash.
+  requirements:
+    - "Operations are applied in the order given."
+    - "Serialization follows DESIGN_STATE_CONTRACT canonical rules."
+    - "No wall-clock time, PID, memory address or iteration order of an unordered set may enter the state."
+  enforced_by: ver3/tests/meta/test_stage_determinism.py
+  note_on_nondeterministic_generation: >
+    A model call may be nondeterministic. Its OUTPUT, once recorded in a
+    ModelRunRecord, is a fixed input to patch construction. Determinism is
+    required of the state transition, not of the generator.
+
+# =====================================================================
+# 5. Revision
+# =====================================================================
+revision:
+  trigger: "Stage 12 attributes a failure to a decision owned by an earlier stage."
+  mechanism:
+    - "The owning stage is re-entered with an incremented stage_attempt."
+    - "Its new patch SUPERSEDEs the entities the revision replaces."
+    - "The invalidation cone identifies downstream entities to re-derive."
+    - "Prior attempts remain in the run record."
+  forbidden:
+    - what: "Rolling the state back to before the failed attempt"
+      why: "That erases the evidence that the alternative was tried and failed."
+    - what: "Re-entering a stage without recording why"
+      why: "An unexplained re-run is indistinguishable from resampling until success."

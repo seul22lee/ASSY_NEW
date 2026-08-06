@@ -1,0 +1,195 @@
+# FORBIDDEN_LEGACY_DEPENDENCIES — what assy_v3 may never reach
+#
+# This file is CONSUMED BY A TEST. ver3/tests/meta/test_no_legacy_imports.py
+# reads it and fails the suite on any violation. It is not documentation that
+# happens to describe a rule; it is the rule's data.
+#
+# The prohibition is on REACHING legacy, in any of these ways:
+#   import        - a Python import of a legacy package or module
+#   filesystem    - opening a path under a legacy root or a non-pipeline tree
+#   subprocess    - shelling out to legacy code
+#   copy          - pasting legacy source into assy_v3 (detected by review, and
+#                   by the identifier scan for legacy-only symbol names)
+#   adapter       - a shim that translates legacy structures into Ver3 ones
+#
+# Rebuild policy rule 3: compatibility adapters require EXPLICIT APPROVAL,
+# recorded as an entry in `approved_exceptions`. That list is empty and an empty
+# list is the expected steady state.
+
+schema_version: "0.1.0"
+status: enforced
+enforced_by: ver3/tests/meta/test_no_legacy_imports.py
+
+# The package under protection. Everything below is forbidden *inside* this tree.
+protected_package:
+  path: ver3/assy_v3
+  import_root: ver3
+  rationale: >
+    assy_v3 is the only tree that becomes the Ver3 pipeline. Evaluation trees
+    (ver3/oracles, ver3/oracle_tools, ver3/cad_validation) are deliberately NOT
+    protected by this file: they are allowed to read whatever they must in order
+    to judge a run, because they are not part of the product.
+
+# ---------------------------------------------------------------------
+# 1. Forbidden Python imports
+#    Matched against the top-level module name of every import statement, by AST.
+#    A dotted prefix match counts: `assy.stages.s04_concept` matches `assy`.
+# ---------------------------------------------------------------------
+forbidden_import_roots:
+  - name: assy
+    source: ASSY_Ver2.0
+    why: "The entire Ver2 pipeline package. Frozen, read-only legacy."
+  - name: mujoco_core
+    source: ASSY_Ver2.0
+    why: "Ver2's physics harness. A physics boundary is REIMPLEMENTed, not imported."
+  - name: knowledge
+    source: ASSY_Ver1.0
+    why: >
+      Ver1 mechanism cards and host templates. Importing a card imports a
+      pre-solved sub-design. This is the U-05 failure mode.
+  - name: tasks
+    source: ASSY_Ver1.0
+    why: "Ver1 benchmark harness, including the KG_NO_PERMITTED_REALIZER defect."
+  - name: ontology
+    source: this repository root
+    why: "KG project. INV-016 forbids a Ver3 runtime dependency on it."
+  - name: scripts
+    source: this repository root
+    why: "KG build scripts."
+  - name: shapes
+    source: this repository root
+    why: "KG SHACL shapes."
+  - name: cadval
+    source: ver3/cad_validation/tools
+    why: >
+      Evaluation CAD toolchain. Positive CAD references are evaluation
+      artifacts, not production inputs (rebuild policy rule 4).
+  - name: valcore
+    source: ver3/cad_validation/tools
+    why: "Evaluation validation engine."
+  - name: cadvideo
+    source: ver3/cad_validation/tools
+    why: "Evaluation review-media toolchain."
+  - name: build
+    source: ver3/cad_validation/**/build.py
+    why: >
+      The CAD reference builders are named `build`. A stage importing one would
+      be reproducing a known answer.
+
+# ---------------------------------------------------------------------
+# 2. Forbidden filesystem roots
+#    No path literal in assy_v3 may point into these, and at runtime no file
+#    under them may be opened.
+# ---------------------------------------------------------------------
+forbidden_path_roots:
+  - path: /home/ftk3187/github/ASSY_Ver1.0
+    why: "Ver1 legacy root."
+  - path: /home/ftk3187/github/ASSY_Ver2.0
+    why: "Ver2 legacy root."
+  - path: ontology/
+    why: "KG project (INV-016)."
+  - path: data/
+    why: "KG project (INV-016)."
+  - path: rules/
+    why: "KG project (INV-016). Contains selection and substitution POLICY."
+  - path: build/
+    why: "KG extraction artifacts."
+  - path: outputs/
+    why: "KG outputs."
+  - path: vendor/
+    why: "Vendored third-party JS for the KG visualization."
+  - path: ver3/oracles/
+    why: >
+      An Oracle states what must be true of a run. A stage reading it is reading
+      its own answer key. Evaluation tooling may read it; assy_v3 may not.
+    severity: BLOCKING
+  - path: ver3/cad_validation/
+    why: >
+      Positive executable CAD references. Reproducing one is R-30/R-31 with new
+      packaging.
+    severity: BLOCKING
+
+# ---------------------------------------------------------------------
+# 3. Forbidden concepts, by name
+#    These are legacy-only symbols. Their appearance inside assy_v3 is evidence
+#    of a copied abstraction even when no import statement exists.
+# ---------------------------------------------------------------------
+forbidden_symbols:
+  - symbol: SpatialZone
+    why: "Coarse qualitative region used as position (R-02)."
+    retirement_row: R-02
+  - symbol: AxisStation
+    why: "Ordinal station used as an authoritative limit location (R-03)."
+    retirement_row: R-03
+  - symbol: RadialPosition
+    why: "Two-valued radial placement (R-04)."
+    retirement_row: R-04
+  - symbol: ConceptVisualization
+    why: "The rendered sheet as Stage 04's authoritative artifact (R-01)."
+    retirement_row: R-01
+  - symbol: KG_NO_PERMITTED_REALIZER
+    why: "Missing knowledge reported as INFEASIBLE (R-27)."
+    retirement_row: R-27
+  - symbol: HostTemplate
+    why: "Ver1 card model. UNDECIDED U-02; not admissible until resolved."
+  - symbol: selected_id
+    why: >
+      Stage 02's premature winner. Ver3's Stage 02 output has no
+      selected-candidate field at all (INV-007).
+    retirement_row: R-15
+
+# ---------------------------------------------------------------------
+# 4. Forbidden code patterns
+#    Regexes applied to assy_v3 source. Each closes a specific defect.
+# ---------------------------------------------------------------------
+forbidden_patterns:
+  - id: FP-01
+    pattern: 'or\s+"mm"'
+    why: "The canonical silent default (R-21, assy/stages/s06_solver.py:51)."
+    invariant: INV-004
+  - id: FP-02
+    pattern: "BM-\\d{3}"
+    why: >
+      Benchmark-ID branching encodes the suite into the system (R-14). Oracle
+      packs, fixtures and benchmark descriptors are exempt; production code is not.
+    invariant: INV-015
+    exempt_paths: ["ver3/benchmarks/", "ver3/oracles/", "ver3/tests/fixtures/"]
+  - id: FP-03
+    pattern: "sys\\.path\\.(insert|append)"
+    why: >
+      Path surgery is how a legacy import sneaks in without appearing as a
+      dependency. assy_v3 is imported as a package, not by path injection.
+  - id: FP-04
+    pattern: "ASSY_Ver[12]\\.0"
+    why: "A literal legacy path."
+
+# ---------------------------------------------------------------------
+# 5. Approved exceptions
+#    Rebuild policy rule 3: adapters require explicit approval. Each entry needs
+#    an approver, a date, a scope and an expiry. An empty list is correct.
+# ---------------------------------------------------------------------
+approved_exceptions: []
+
+exception_requirements:
+  required_fields: [id, what, why_no_alternative, approved_by, approved_on, scope, expires_on, removal_plan]
+  note: >
+    An exception is a debt with a due date, not a permission. An entry without an
+    expiry is not an exception; it is a decision to keep legacy, and it belongs in
+    RETIREMENT_MATRIX.yaml instead.
+
+# ---------------------------------------------------------------------
+# 6. What this file deliberately does NOT forbid
+# ---------------------------------------------------------------------
+not_forbidden:
+  - what: "Reading Ver1/Ver2 source as a human"
+    why: "REFERENCE_ONLY dispositions exist precisely so the evidence stays available."
+  - what: "Rewriting transform mathematics from scratch"
+    why: >
+      Homogeneous transforms and swept-volume sampling are ordinary geometry.
+      REIMPLEMENT means new code and new tests, not a ban on the subject.
+  - what: "Evaluation tooling reading Oracles and CAD references"
+    why: "That is what evaluation tooling is for. Only assy_v3 is protected."
+  - what: "Using the same word as a legacy type"
+    why: >
+      'Joint', 'Body' and 'Frame' are the vocabulary of the domain. What is
+      forbidden is the legacy ABSTRACTION, not the noun.

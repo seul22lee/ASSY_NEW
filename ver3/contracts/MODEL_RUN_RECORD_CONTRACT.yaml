@@ -1,0 +1,220 @@
+# MODEL_RUN_RECORD_CONTRACT — every model and tool invocation is a recorded fact
+#
+# The pipeline will run against real providers, including free-tier APIs with
+# hard rate limits, small quotas, aggressive timeouts and low output caps. Those
+# conditions are NORMAL OPERATING CONDITIONS, not exceptions, and the system must
+# report a degraded run as degraded rather than as a worse design.
+#
+# The rule that shapes this whole file: a provider condition must never be
+# convertible into a statement about the design.
+#
+# NO STAGE LOGIC IS DEFINED HERE (rebuild policy rule 6). This is what must be
+# recorded, not when to call a model.
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+references:
+  - ver3/contracts/STATUS_SEMANTICS.yaml
+  - ver3/contracts/PROVENANCE_CONTRACT.yaml
+  - ver3/contracts/STAGE_PATCH_CONTRACT.yaml
+
+# =====================================================================
+# 1. ModelRunRecord
+# =====================================================================
+model_run_record:
+  required_fields:
+    - model_run_id
+    - run_id
+    - stage_id
+    - stage_attempt
+    - attempt_index
+    - purpose
+    - provider_id
+    - model_id
+    - model_version_string
+    - request
+    - response
+    - execution_status
+    - usage
+    - timing
+    - determinism
+
+  field_semantics:
+
+    attempt_index:
+      what: "1-based index of this attempt for the same purpose within the stage attempt."
+      rule: "Every retry gets its own record. A retry never overwrites its predecessor."
+
+    purpose:
+      what: "What the call was for, in pipeline terms."
+      rule: "Recorded before the call, not inferred from the response."
+
+    provider_id:
+      rule: "The concrete provider actually used. Never a generic label."
+
+    model_id:
+      rule: >
+        The exact model identifier requested AND, if different, the one served.
+        A provider that silently substitutes a model must be recorded as having
+        done so; a run whose model is unknown is not reproducible.
+
+    request:
+      required_subfields: [prompt_sha256, prompt_text, parameters, max_output_tokens, deadline_s]
+      rules:
+        - "prompt_text is retained verbatim, including system content."
+        - "Retention is mandatory. An unretained prompt makes the response uninterpretable."
+        - "The prompt must contain no Oracle content and no positive-reference content (GENERATED_ASSURANCE_PACKAGE_CONTRACT AL-03)."
+
+    response:
+      required_subfields: [raw_text, finish_reason, truncated, response_sha256]
+      rules:
+        - "raw_text is retained EXACTLY as received, before any parsing or repair."
+        - "truncated is set from the provider's finish reason, never guessed from content."
+        - "A truncated response is retained and NOT parsed (STATUS_SEMANTICS RESPONSE_TRUNCATED)."
+
+    execution_status:
+      rule: "Exactly one of the twelve values in STATUS_SEMANTICS.execution_statuses."
+
+    usage:
+      required_subfields: [input_tokens, output_tokens]
+      optional_subfields: [cached_input_tokens, cost_estimate]
+      rule: "Recorded when the provider reports it; marked NOT_REPORTED when it does not. Never estimated silently."
+
+    timing:
+      required_subfields: [started_at, ended_at, duration_s, retry_wait_s]
+      note: "Timestamps live in the run record, never in DesignState (STAGE_PATCH_CONTRACT determinism)."
+
+    determinism:
+      required_subfields: [temperature, top_p, seed, seed_honoured]
+      rule: >
+        seed_honoured is recorded as UNKNOWN when the provider gives no
+        guarantee. Claiming determinism a provider does not offer is worse than
+        recording its absence.
+
+# =====================================================================
+# 2. Free-tier and constrained-provider requirements
+#
+#    These are requirements on the PROVIDER LAYER's observable behaviour. The
+#    interfaces are declared in ver3/assy_v3/providers/ with no implementation.
+# =====================================================================
+provider_requirements:
+
+  - id: PR-01
+    requirement: "Every provider failure maps to a specific PROVIDER_* execution status."
+    forbidden: "A generic 'provider error' that a stage interprets as a design outcome."
+    rationale: "Forbidden collapse C-04."
+
+  - id: PR-02
+    requirement: "Rate limits are handled by bounded backoff, and every attempt is recorded."
+    forbidden:
+      - "Unbounded retry."
+      - "Retrying until the answer is acceptable."
+    rationale: >
+      Retry-until-satisfied is resampling for a desired result. The bound and the
+      per-attempt record are what distinguish a retry from a search.
+
+  - id: PR-03
+    requirement: "Quota exhaustion halts the run with the partial state and partial assurance package retained."
+    forbidden: "Continuing with a reduced-quality path that is not recorded as such."
+
+  - id: PR-04
+    requirement: >
+      Model fallback, if it happens at all, is EXPLICIT: recorded as a separate
+      ModelRunRecord with its own model_id and a fallback_reason.
+    forbidden: "Silent fallback to a different model."
+    rationale: >
+      Rebuild policy rule 2 retires Ver2's fallback machinery. A silent fallback
+      makes the run's own record wrong about what produced it.
+
+  - id: PR-05
+    requirement: "Output-length limits are declared per call and truncation is detected from the provider's finish reason."
+    forbidden: "Parsing a truncated response."
+    rationale: "Forbidden collapse C-05."
+
+  - id: PR-06
+    requirement: >
+      Response caching is keyed on (provider_id, model_id, prompt_sha256,
+      parameters) and a cache hit is recorded as a cache hit.
+    forbidden: "A cache hit recorded as a fresh call."
+    why: "Two runs that look independent but shared a cached response are not two runs."
+
+  - id: PR-07
+    requirement: "The provider layer never sees Oracle or positive-reference content."
+    enforced_by: ver3/tests/meta/test_no_legacy_imports.py
+    rationale: "AL-01, AL-02, AL-03."
+
+  - id: PR-08
+    requirement: >
+      A capability shortfall is recorded as MODEL_CAPABILITY_FAILURE, distinct
+      from every provider condition and from every design outcome.
+    rationale: "Forbidden collapse C-10."
+
+  - id: PR-09
+    requirement: >
+      The provider layer exposes its limits (context window, max output tokens,
+      rate limit, structured-output support) as declared capability metadata.
+    why: >
+      A stage that cannot see the output cap cannot plan around it, and will
+      generate work that is guaranteed to truncate.
+
+  - id: PR-10
+    requirement: "Offline/replay mode: a run may be re-executed from recorded ModelRunRecords without contacting any provider."
+    why: >
+      This is how a degraded run is analysed, and how the deterministic parts of
+      the pipeline are tested without spending quota.
+
+  - id: PR-11
+    requirement: "Secrets are never written to a run record."
+    rule: "API keys are read from the environment. prompt_text is retained; credentials are not part of it."
+
+# =====================================================================
+# 3. ToolRunRecord
+#    Deterministic tools: geometry kernel, mesh queries, solvers, integrators.
+# =====================================================================
+tool_run_record:
+  required_fields:
+    - tool_run_id
+    - run_id
+    - stage_id
+    - tool_id
+    - tool_version
+    - inputs_sha256
+    - outputs
+    - execution_status
+    - timing
+  rules:
+    - "tool_version is the concrete library version, e.g. the CAD kernel build. A result is only reproducible against a named version."
+    - "A tool crash is EXECUTION_FAILED, never a measured value (forbidden collapse C-03)."
+    - "Numerical settings (tolerance, sampling, integrator, seed) are part of inputs, not incidental configuration."
+    - "A tool that reports a value with no unit is a SCHEMA_FAILURE at the boundary (INV-004)."
+
+# =====================================================================
+# 4. Retention
+# =====================================================================
+retention:
+  rules:
+    - "Every record is retained for the life of the run's artifacts, including failed attempts."
+    - "Records are append-only and are never edited."
+    - "Records live in the run output, never in DesignState."
+  why_not_in_designstate: >
+    They contain timestamps and durations. DesignState must hash deterministically
+    (STAGE_PATCH_CONTRACT determinism), so wall-clock data is kept beside it and
+    referenced by ID.
+  projected_into: "GENERATED_ASSURANCE_PACKAGE_CONTRACT PKG-33 (execution_record)."
+
+# =====================================================================
+# 5. What a run record must make answerable
+# =====================================================================
+answerable_questions:
+  questions:
+    - "Which model produced this claim, at which version, from which prompt?"
+    - "Was this run degraded, and in what specific way?"
+    - "How many attempts did this step take, and why did each fail?"
+    - "Was any response truncated, and was it used anyway?"
+    - "Did the run ever silently switch models?"
+    - "Could this run be replayed offline?"
+    - "Did any prompt contain Oracle or positive-reference content?"
+  closing_note: >
+    If any of these cannot be answered from the records alone, the contract is
+    not met — regardless of how good the resulting design looks.

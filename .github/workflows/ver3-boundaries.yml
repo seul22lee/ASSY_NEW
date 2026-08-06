@@ -1,0 +1,47 @@
+# Ver3 boundary enforcement.
+#
+# These tests are the reason the rebuild rules are rules rather than intentions.
+# They run on every push and pull request that touches the ver3 tree.
+#
+# Deliberately stdlib-only: the suite uses unittest and PyYAML, with no pytest
+# and no project install step. A boundary check that needs an environment to be
+# built first is a boundary check that gets skipped when the environment breaks.
+
+name: ver3 boundaries
+
+on:
+  push:
+    paths: ['ver3/**', '.github/workflows/ver3-boundaries.yml']
+  pull_request:
+    paths: ['ver3/**', '.github/workflows/ver3-boundaries.yml']
+  workflow_dispatch:
+
+jobs:
+  boundaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyYAML
+        run: python -m pip install --upgrade pyyaml
+
+      - name: Meta tests (boundaries and contracts)
+        run: python -m unittest discover -s ver3/tests/meta -t . -v
+
+      - name: assy_v3 imports cleanly with nothing else on the path
+        # An empty boundary that imports nothing cannot violate anything. This
+        # catches an accidental dependency that the AST scan would miss because
+        # it only appears at import time.
+        run: python -c "import ver3.assy_v3, ver3.assy_v3.providers; print('assy_v3 boundary ok')"
+
+      - name: No stages package exists
+        run: |
+          if [ -d ver3/assy_v3/stages ]; then
+            echo "ver3/assy_v3/stages exists; stage implementation has begun without the progression gate." >&2
+            exit 1
+          fi
+          echo "no stages package"

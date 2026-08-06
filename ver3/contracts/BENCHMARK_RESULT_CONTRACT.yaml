@@ -1,0 +1,184 @@
+# BENCHMARK_RESULT_CONTRACT — what a benchmark run produces and who judges it
+#
+# The benchmark result is written by the EVALUATOR, not by the pipeline. The
+# pipeline produces a run: a DesignState, an assurance package, geometry, and
+# execution records. The evaluator compares that run against the hidden Oracle
+# and writes the result.
+#
+# The separation is the point. A pipeline that writes its own benchmark result is
+# grading itself, and would only need to change its report to improve its score.
+#
+# NO STAGE LOGIC IS DEFINED HERE (rebuild policy rule 6).
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+references:
+  - ver3/contracts/GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
+  - ver3/contracts/STATUS_SEMANTICS.yaml
+  - ver3/contracts/MODEL_RUN_RECORD_CONTRACT.yaml
+
+# =====================================================================
+# 1. Separation of duties
+# =====================================================================
+duties:
+  pipeline_produces:
+    - DesignState (final and per-stage)
+    - GENERATED_DESIGN_ASSURANCE_PACKAGE (per-stage materializations, retained)
+    - geometry artifacts and their signatures
+    - ModelRunRecords and ToolRunRecords
+    - per-stage execution statuses
+  pipeline_must_not_produce:
+    - a benchmark score
+    - a pass/fail verdict on the benchmark
+    - any comparison against an Oracle
+    - a self-assessment of the assurance package's depth
+  evaluator_produces:
+    - the BenchmarkResult defined below
+  evaluator_may_read:
+    - the hidden Oracle
+    - the entire run output
+    - positive executable references (to validate itself, not to score the run)
+
+# =====================================================================
+# 2. BenchmarkResult
+# =====================================================================
+benchmark_result:
+  required_fields:
+    - result_id
+    - benchmark_id
+    - run_id
+    - oracle_id
+    - oracle_frozen_before_run
+    - pipeline_commit
+    - oracle_commit
+    - run_execution_summary
+    - invariant_findings
+    - unresolved_findings
+    - negative_case_findings
+    - assurance_package_findings
+    - false_acceptance_findings
+    - safe_rejection_findings
+    - evaluator_notes
+
+  field_semantics:
+
+    oracle_frozen_before_run:
+      type: boolean
+      rule: >
+        Established from version control: the Oracle's commit must precede the
+        run's. FALSE invalidates the result entirely — the run cannot be scored,
+        and no partial credit is available.
+
+    run_execution_summary:
+      contains: [per_stage_execution_status, worst_status, degraded, degradation_reasons]
+      rule: >
+        A degraded run is reported as degraded. Its design findings remain valid
+        for what was reached, and the stages never reached are reported as not
+        reached — never as failed.
+
+    invariant_findings:
+      what: "Per Oracle invariant: HELD | VIOLATED | NOT_ESTABLISHED, with the run evidence cited."
+      rule: "NOT_ESTABLISHED is distinct from VIOLATED. The run not showing something is not the run contradicting it."
+
+    unresolved_findings:
+      what: >
+        Per Oracle unresolved decision: did the run recognise it as open, resolve
+        it silently, or never encounter it?
+      values: [RECOGNISED_OPEN, SILENTLY_RESOLVED, NOT_ENCOUNTERED, RESOLVED_WITH_JUSTIFICATION]
+      rule: "SILENTLY_RESOLVED is a defect even when the resolution chosen is the right one."
+
+    negative_case_findings:
+      what: "Per Oracle negative case: did the run's own checks detect it?"
+      values: [DETECTED, NOT_DETECTED, NOT_APPLICABLE]
+      rule: "NOT_DETECTED on a case the run claimed to cover is a FALSE_ACCEPTANCE finding."
+
+    assurance_package_findings:
+      what: >
+        Per required content item (PKG-01..PKG-34): PRESENT_WITH_CONTENT |
+        PRESENT_EMPTY_WITH_REASON | MISSING, plus a depth judgement against the
+        Oracle's corresponding material.
+      rule: >
+        MISSING is CONTRACT_INCOMPLETE. PRESENT_EMPTY_WITH_REASON is acceptable
+        and is not penalised — an honest empty section is a correct output.
+
+    false_acceptance_findings:
+      what: "Anything the run accepted that the Oracle says it should not have."
+      rule: "Reported individually and never aggregated into a score line. This is the most serious class."
+
+    safe_rejection_findings:
+      what: "Claims the run correctly declined to make."
+      rule: >
+        Reported as CORRECT BEHAVIOUR. A benchmark that penalises these produces
+        a pipeline that overclaims, which defeats the exercise.
+
+# =====================================================================
+# 3. Scoring constraints
+# =====================================================================
+scoring_constraints:
+  - id: SC-01
+    rule: "Similarity to a positive executable reference is NEVER a scoring input."
+    why: "It is one valid design. Scoring against it penalises every other correct answer."
+
+  - id: SC-02
+    rule: "A provider condition is never scored as a design defect."
+    why: "Forbidden collapse C-04."
+
+  - id: SC-03
+    rule: "MODEL_CAPABILITY_FAILURE is reported separately from design findings."
+    why: "Otherwise the benchmark measures the model rather than the pipeline."
+
+  - id: SC-04
+    rule: "SAFE_REJECTION is never penalised."
+
+  - id: SC-05
+    rule: "UNSUPPORTED is not a failure. It is a correctly reported capability boundary."
+    invariant: INV-011
+
+  - id: SC-06
+    rule: "A run that did not reach a stage is not scored on that stage's findings."
+
+  - id: SC-07
+    rule: >
+      No aggregate single number may be reported without the finding lists that
+      produced it.
+    why: >
+      A single score hides which findings moved it, and a benchmark whose failures
+      cannot be located cannot drive a fix.
+
+# =====================================================================
+# 4. Run output layout
+# =====================================================================
+run_output_layout:
+  root: "runs/<run_id>/"
+  contents:
+    - path: "manifest.yaml"
+      what: "run_id, benchmark_id, pipeline commit, provider config (no secrets), start/end."
+    - path: "source/request.txt"
+      what: "The source request, verbatim. The only raw-text input, read only by s01."
+    - path: "state/s<NN>_designstate.json"
+      what: "DesignState after each stage, with its hash."
+    - path: "patches/s<NN>_attempt<M>.json"
+      what: "Every StagePatch, including rejected ones."
+    - path: "assurance/s<NN>_GENERATED_DESIGN_ASSURANCE_PACKAGE.json"
+      what: "Per-stage materialization. Retained, never overwritten."
+    - path: "assurance/GENERATED_DESIGN_ASSURANCE_PACKAGE.json"
+      what: "Final materialization. A projection, not an authored document."
+    - path: "geometry/"
+      what: "Built geometry and signatures."
+    - path: "execution/model_runs.jsonl"
+      what: "Every ModelRunRecord, append-only."
+    - path: "execution/tool_runs.jsonl"
+      what: "Every ToolRunRecord, append-only."
+    - path: "execution/file_access.jsonl"
+      what: >
+        Every file path production code opened. Audited for Oracle and reference
+        access (AL-01, AL-02). A leak claim needs evidence, and this is it.
+  rule: "The evaluator writes NOTHING into runs/<run_id>/. Results live separately."
+
+evaluation_output_layout:
+  root: "evaluations/<result_id>/"
+  contents:
+    - "result.yaml — the BenchmarkResult."
+    - "findings/ — per-finding detail with run evidence citations."
+  rule: "Written after the run completes. The pipeline never reads this tree."

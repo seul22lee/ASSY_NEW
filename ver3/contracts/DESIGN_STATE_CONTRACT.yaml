@@ -1,0 +1,340 @@
+# DESIGN_STATE_CONTRACT — what the single design world contains
+#
+# There is exactly ONE DesignState per run. Stages do not own private truth
+# stores; a stage proposes a StagePatch and the patch is applied to this state.
+# Ver2's Stage 05 kept its own entities and that is R-19.
+#
+# NO STAGE LOGIC IS DEFINED HERE. This file says what may exist and what shape it
+# has. It does not say how any stage decides anything.
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+
+# =====================================================================
+# 1. Identity
+# =====================================================================
+identity:
+  principle: >
+    Exactly one entity per real-world thing (INV-001). A downstream stage extends
+    an entity by its stable ID; it never creates a second entity denoting the
+    same thing.
+  entity_id:
+    format: "<type_prefix>-<zero_padded_ordinal>"
+    example: "BODY-0007"
+    rules:
+      - "Assigned by the owning stage at CREATE time; immutable thereafter."
+      - "Never reused, never recycled, never renumbered."
+      - "No legacy ID format is accepted (see RETIREMENT_MATRIX ver2_modules assy/domain/common.py)."
+      - "IDs are opaque. No behaviour may branch on an ID's numeric part."
+  instance_identity:
+    what: >
+      A token distinguishing legitimately multiple instances of the same kind:
+      two rails, four fasteners, N identical guides.
+    why: >
+      INV-001's duplicate check requires POSITIVE evidence of re-denotation.
+      Instance count is never evidence of duplication, and this token is how the
+      validator tells multiplicity from duplication.
+    required_on: [Body, Joint, Interface, Feature, Realization]
+  references:
+    rule: >
+      Every reference is a typed reference to an existing entity ID. A
+      free-string subject is a SCHEMA ERROR, not a warning (R-20).
+    forbidden: ["free-string subject", "name-based lookup", "positional reference"]
+
+# =====================================================================
+# 2. Entity families
+#    Fields marked authoritative_geometry MUST have metric types (INV-003).
+# =====================================================================
+entity_families:
+
+  Requirement:
+    owned_by: s01
+    purpose: "A rank-1 source statement, carried verbatim with its qualifier."
+    required_fields: [entity_id, statement_verbatim, kind, verification_kind, observable_verbatim, source_locator]
+    rules:
+      - "The source's own qualifier ('approximately') is preserved, never sharpened."
+      - "This is the ONLY family whose creation may consult raw source text (INV-002)."
+
+  Obligation:
+    owned_by: s02
+    purpose: "A physical or functional thing that must be true for a requirement to hold."
+    required_fields: [entity_id, statement, derived_from_requirements, mandatory]
+    rules:
+      - "Every mandatory obligation must reach a terminal status (INV-008)."
+      - "An obligation is never discharged by a label, a field or a relationship."
+
+  Candidate:
+    owned_by: s02
+    purpose: "A mechanism family or arrangement under consideration."
+    required_fields: [entity_id, summary, family, obligations_addressed]
+    rules:
+      - "Candidates PERSIST as branches. Stage 02 has NO selected-candidate field (INV-007)."
+      - "Element count is never a ranking input; mandatory realization is not a penalty."
+
+  Body:
+    owned_by: s03
+    extendable_by: [s05, s06, s07]
+    purpose: "A rigid part of the product."
+    required_fields: [entity_id, instance_identity, role, created_by_stage]
+    authoritative_geometry_fields: [pose, extent, swept_volume]
+    annotation_fields: [region_label, canonical_role]
+    rules:
+      - "pose is a frame/transform with units. An enum may annotate it, never be it (INV-003)."
+      - "A generic block is not an embodiment (R-09)."
+
+  Joint:
+    owned_by: s03
+    extendable_by: [s04, s05]
+    purpose: "A kinematic relation between two bodies."
+    required_fields: [entity_id, joint_type, parent_body, child_body, axis, parent_frame, child_frame]
+    rules:
+      - "A joint_type label alone is inert. A realization on each side is required (INV-008)."
+      - "axis is a unit-bearing vector in a named frame."
+
+  Interface:
+    owned_by: s03
+    extendable_by: [s05]
+    purpose: "A region where two bodies meet, with its declared kind."
+    required_fields: [entity_id, bodies, interaction_kind, nominal]
+    interaction_kinds: [DECLARED_CONTACT, DECLARED_CLEARANCE, DECLARED_INTERFERENCE_FIT, DECLARED_COMPLIANT_INTERACTION, NOT_INTENDED_TO_INTERACT]
+    rules:
+      - "Every region where two bodies meet is classified. An unclassified region is REPRESENTATION_INCOMPLETE."
+
+  Feature:
+    owned_by: s05
+    purpose: "A named geometric feature on a body that participates in an interaction."
+    required_fields: [entity_id, body, feature_kind, geometry]
+    rules:
+      - "OCCT/CAD face indices are never a persistent identity."
+
+  Realization:
+    owned_by: s05
+    purpose: "The embodiment that discharges one or more obligations."
+    required_fields: [entity_id, discharges_obligations, participating_features, verification_predicate]
+    rules:
+      - "Must cite the obligation IDs it discharges (INV-008)."
+      - "A realization with no verification predicate discharges nothing."
+
+  State:
+    owned_by: s04
+    purpose: "A named configuration of the mechanism."
+    required_fields: [entity_id, name, joint_coordinates]
+    authoritative_geometry_fields: [body_poses, swept_volumes]
+    rules:
+      - "Joint coordinates are unit-bearing values, not ordinal intervals (R-03, R-05)."
+
+  Transition:
+    owned_by: s04
+    purpose: "A path between two states."
+    required_fields: [entity_id, from_state, to_state, path, sampling_declaration]
+    authoritative_geometry_fields: [path, swept_volume]
+    rules:
+      - "A constant offset between endpoints is not a motion model (R-07)."
+      - "Sampling is DECLARED, never adaptive-and-unrecorded."
+
+  Parameter:
+    owned_by: s05
+    extendable_by: [s06]
+    purpose: "A named quantity the design depends on."
+    required_fields: [entity_id, symbol, unit, status]
+    rules:
+      - "unit is MANDATORY. 'dimensionless' is explicit. A null unit is a schema error (INV-004)."
+
+  Constraint:
+    owned_by: s05
+    extendable_by: [s06]
+    purpose: "A relation the parameters must satisfy."
+    required_fields: [entity_id, expression, parameters, kind]
+
+  UnresolvedDecision:
+    owned_by: any
+    purpose: >
+      A recorded openness. Subsumes Ver2's UnresolvedLayoutChoice and
+      LayoutConflict (RETIREMENT_MATRIX undecided U-03, resolved here).
+    required_fields: [entity_id, decision, why_open, alternatives, blocks]
+    rules:
+      - "Recording openness is always permitted. Resolving it silently is never permitted."
+
+  VerificationPlanItem:
+    owned_by: s08
+    required_fields: [entity_id, requirement_id, criterion_id, scenario_id, observable_id, planned_fidelity]
+
+  EvidenceItem:
+    owned_by: s09
+    required_fields: [entity_id, plan_item, outcome, fidelity, structural_artifacts, contact_resolution]
+    rules:
+      - "Evidence declares its contact resolution. A declared-pair result is marked as such."
+
+  RequirementEvaluation:
+    owned_by: s11
+    required_fields: [entity_id, requirement_id, outcome, scope]
+    rules:
+      - "A PASS requires a non-empty scope block with all six fields (INV-009)."
+      - "Matching is on (requirement_id, criterion_id, scenario_id, observable_id). NEVER on unit (INV-012)."
+
+# =====================================================================
+# 3. Geometric authority
+# =====================================================================
+geometric_authority:
+  rule: >
+    Pose, orientation, extent, offset, motion path, contact, clearance and
+    geometric feasibility are represented and proven by metric geometry.
+  field_roles:
+    authoritative: "metric type; may be an input to a geometric predicate"
+    annotation: "enum/ordinal/label; MAY exist; may NEVER be a predicate input"
+  predicate_rule: >
+    Every geometric predicate declares its input fields. If any input resolves to
+    an annotation-role field, the predicate is INVALID.
+  ablation_rule: >
+    Dropping every annotation-role field must not change any geometric verdict.
+
+# =====================================================================
+# 4. What DesignState may never contain
+# =====================================================================
+prohibited_content:
+  - what: "raw request text at or after Stage 02"
+    invariant: INV-002
+    retirement_row: R-13
+  - what: "an entity whose provenance names a render step"
+    invariant: INV-005
+    retirement_row: R-01
+  - what: "a geometric property whose authoritative value is an enum or ordinal"
+    invariant: INV-003
+    retirement_rows: [R-02, R-03, R-04, R-05]
+  - what: "a defaulted unit, dimension, face, axis, span, placement or form"
+    invariant: INV-004
+    retirement_row: R-21
+  - what: "a selected-candidate field before the Stage 03/04 feasibility gate"
+    invariant: INV-007
+    retirement_row: R-15
+  - what: "a free-string subject"
+    invariant: INV-001
+    retirement_row: R-20
+  - what: "an entity created by a stage that does not own its type"
+    invariant: INV-001
+    reference: STAGE_OWNERSHIP_MATRIX.yaml
+
+# =====================================================================
+# 5. Serialization
+# =====================================================================
+serialization:
+  canonical_form:
+    rule: "Sorted keys, explicit units, no timestamps, no absolute paths, no RNG."
+    why: "Determinism is a build property (INV-018); byte-identical on re-run."
+  forbidden_in_output: [wall_clock_time, absolute_filesystem_path, unseeded_random, set_iteration_order]
+
+# =====================================================================
+# 6. Families required by the runtime assurance package
+#    GENERATED_ASSURANCE_PACKAGE_CONTRACT defines a PROJECTION of this state.
+#    A projection can only show what the state holds, so every element the
+#    package must be capable of containing needs a typed home here. Adding these
+#    families is what stops the package becoming a second design world or a
+#    hand-assembled report disconnected from stage output.
+# =====================================================================
+assurance_families:
+
+  SourceClause:
+    owned_by: s01
+    purpose: "A verbatim span of the source request, with its locator."
+    required_fields: [entity_id, verbatim, locator, quantity_kinds, directionality]
+    rules:
+      - "The only family that may hold source text. Nothing downstream re-reads it (INV-002)."
+
+  Assumption:
+    owned_by: any
+    purpose: "An inferred fact that the source did not state."
+    required_fields: [entity_id, statement, inferred_by_stage, why, would_be_invalidated_by]
+    rules:
+      - "A user-stated fact is a SourceClause. An inferred one is an Assumption. Conflating them is a defect."
+
+  Freedom:
+    owned_by: s01
+    purpose: "A decision the source deliberately leaves open."
+    required_fields: [entity_id, decision, why_free]
+    rules:
+      - "A freedom may never become an assertion target (INV-014)."
+
+  Ambiguity:
+    owned_by: s01
+    purpose: "A source conflict recorded rather than resolved."
+    required_fields: [entity_id, statement, conflicting_clauses, resolvable_when]
+
+  Scenario:
+    owned_by: s01
+    purpose: "A declared operating scenario with its boundary."
+    required_fields: [entity_id, name, system_boundary, actors, environment]
+
+  RejectedAlternative:
+    owned_by: any
+    purpose: "A candidate, principle or arrangement that was considered and dropped."
+    required_fields: [entity_id, what, rejected_by_stage, reason_kind, reason, evidence]
+    reason_kinds: [SOURCE_CONTRADICTION, PHYSICAL_INFEASIBILITY, FEASIBILITY_EVIDENCE, SUPERSEDED]
+    rules:
+      - "Rejection for absence-from-library is NOT a reason kind; that is UNSUPPORTED (INV-011)."
+      - "Failed alternatives are retained, never deleted. The package must be able to show them."
+
+  AcceptanceContract:
+    owned_by: s02
+    purpose: "What a specific candidate must satisfy to be judged realized."
+    required_fields: [entity_id, candidate, obligations, predicates]
+
+  Configuration:
+    owned_by: s03
+    purpose: "A named assembly configuration, e.g. partially assembled, closed."
+    required_fields: [entity_id, name, bodies_present, expected_mobility]
+
+  MobilityExpectation:
+    owned_by: s03
+    purpose: "Intended and forbidden degrees of freedom for a configuration."
+    required_fields: [entity_id, configuration, intended_dof, forbidden_dof]
+    rules:
+      - "Unintended-DOF checking requires the forbidden set to be declared, not inferred at check time."
+
+  Witness:
+    owned_by: [s04, s09]
+    purpose: >
+      An executable demonstration that something holds: an assembly insertion,
+      a mobility count, a full-operation cycle.
+    required_fields: [entity_id, witness_kind, subject, method, fidelity, result, artifacts]
+    witness_kinds: [ASSEMBLY_INSERTION, MOBILITY, DOF_ABSENCE, FULL_OPERATION, ENGAGEMENT_PERSISTENCE, RETENTION_PERSISTENCE]
+    rules:
+      - "A witness declares its fidelity. A proxy-geometry witness is not a CAD witness."
+
+  ConstructionStatement:
+    owned_by: s05
+    purpose: "One step of the ConstructionProgram that Stage 07 compiles."
+    required_fields: [entity_id, operation, operands, parameters]
+    rules:
+      - "Stage 07 compiles these or fails, preserving the originating statement (INV-006)."
+
+  GeometrySignature:
+    owned_by: s07
+    purpose: "A deterministic semantic description of built geometry."
+    required_fields: [entity_id, signature_sha256, per_body, critical_dimensions]
+
+  NegativeControl:
+    owned_by: [s08, s09]
+    purpose: "A deliberate mutation and whether its validator detected it."
+    required_fields: [entity_id, control_id, mutation, checked_by, detected, measured]
+    rules:
+      - "A control that cannot fail is not a control. `detected` is measured, never asserted."
+
+  ExcludedClaim:
+    owned_by: s11
+    purpose: "A property the evidence does NOT establish, named explicitly."
+    required_fields: [entity_id, claim, why_not_established, would_require]
+    rules:
+      - "Silence is not exclusion. A property outside the evidence must be named."
+
+  FailureProvenance:
+    owned_by: s12
+    purpose: "A failure routed to the decision and stage that own it."
+    required_fields: [entity_id, failure, owning_decision, owning_stage, invalidation_cone, revision_patch]
+
+  HumanReviewQuestion:
+    owned_by: s12
+    purpose: "A question only a human can settle, carried to the end."
+    required_fields: [entity_id, question, why_human, relates_to]
+    rules:
+      - "Every question is PENDING until a human answers it. The pipeline never self-approves."

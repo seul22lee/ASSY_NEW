@@ -1,0 +1,66 @@
+# Benchmark descriptor — identity and locations only.
+#
+# This file is read by the harness and the evaluator. It is NOT read by any
+# stage: production code may not branch on benchmark identity (FP-02, INV-015,
+# retirement row R-14). The only thing a run consumes from this tree is
+# source/request.txt, and only Stage 01 consumes it (INV-002).
+
+schema_version: "0.1.0"
+benchmark_id: BM-003
+title: "NOT YET DEFINED"
+status: PLACEHOLDER
+
+source:
+  request_path: ver3/benchmarks/BM-003/source/request.txt
+  present: false
+  frozen: false
+  read_by: s01
+  note: >
+    The only raw text input to a run. Every later stage reads DesignState.
+
+oracle:
+  # Deliberately OUTSIDE this tree. ver3/oracles/ is a BLOCKING forbidden path
+  # root for assy_v3, and keeping the Oracle there is what lets the request text
+  # stay readable without the answer key becoming readable with it.
+  location: NOT_AUTHORED
+  authored_independently: false
+  frozen_before_source_only_runs: false
+  visible_to: [evaluator, human_reviewers]
+  never_visible_to: [production_stages, generation_models, prompts, retrieval]
+
+positive_executable_reference:
+  location: NOT_BUILT
+  role: >
+    Development and evaluator-validation fixture. Proves the problem is solvable
+    and that the evaluator can recognise a solution. NEVER a production input,
+    retrieval source, template or golden geometry (rebuild policy rule 4).
+  scoring: >
+    Similarity to it is never a scoring input (BENCHMARK_RESULT_CONTRACT SC-01).
+    It is one valid design; scoring against it would penalise every other correct
+    answer.
+
+output:
+  runs: ver3/benchmarks/BM-003/runs/
+  evaluations: ver3/benchmarks/BM-003/evaluations/
+  layout: "see BENCHMARK_RESULT_CONTRACT run_output_layout"
+
+placeholder_notice:
+  state: >
+    BM-003 has no source request, no Oracle and no positive executable
+    reference. The directory exists because STAGE_PROGRESSION_CONTRACT step 8
+    requires three benchmarks, and a skeleton that is missing the third would
+    make the freeze gate look satisfiable when it is not.
+  blocks:
+    - "Freezing ANY stage contract (STAGE_PROGRESSION_CONTRACT freeze_rule)."
+  required_before_use:
+    - "A source request, frozen."
+    - "An independently authored Oracle, frozen BEFORE the first source-only run."
+    - "Optionally a positive executable reference, for evaluator validation."
+  ordering_rule: >
+    The Oracle must be frozen before the first run, not merely before the
+    evaluation. An Oracle written after seeing a run is a description of that
+    run (BENCHMARK_RESULT_CONTRACT oracle_frozen_before_run, which invalidates
+    the result outright when false).
+  deliberately_undefined: >
+    The subject is not chosen here. Picking it inside this rebuild task would
+    make it a benchmark shaped by the architecture it is meant to test.
