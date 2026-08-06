@@ -1,0 +1,196 @@
+# EVIDENCE SCOPE — BM-003
+#
+# What each class of evidence can establish, and what it cannot. The second half
+# is the part that matters: an evidence class used beyond its scope produces a
+# confident answer to a question it never examined.
+#
+# The canonical overreach for this benchmark is a rigid-body simulation being
+# read as structural evidence. The stand holds an object; a rigid-body model
+# reports reaction forces; a reaction force looks like a load. It is not a
+# stress, the model computes none, and no arrangement of that evidence can
+# establish capacity.
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+
+evidence_classes:
+
+  - id: EVC-BM-003-TOPOLOGY
+    name: topology_and_graph
+    what_it_is: "Connectivity, ownership, precedence and acyclicity over declared entities."
+    in_scope:
+      - "Connectedness of the component graph in a named configuration."
+      - "Existence of an ordered assembly sequence and absence of dependency cycles."
+      - "That each declared relationship names both participants."
+      - "That every operational relationship is activated by some assembly step."
+    out_of_scope:
+      - "Whether any of it is geometrically realizable."
+      - "Whether a declared joint has any physical interface."
+      - "Any motion, clearance or force."
+    structural_artifacts:
+      - "A graph is connected because the author drew the edges. Connectivity of a DECLARED graph is not evidence that the parts touch."
+    supports: [NRM-BM-003-002, NRM-BM-003-014, NRM-BM-003-015]
+
+  - id: EVC-BM-003-CAD
+    name: metric_cad_geometry
+    what_it_is: "Measurements on actual solid geometry: extents, positions, interference, overlap."
+    in_scope:
+      - "That a declared interface exists as geometry on both bodies."
+      - "Interference or its absence between bodies in a given configuration."
+      - "Non-degeneracy of the deployed contact triangle."
+      - "The escape direction a retention feature blocks."
+    out_of_scope:
+      - "Anything about motion between configurations."
+      - "Any stress, deflection or capacity."
+      - "Tolerance, fit or achievable manufacturing precision."
+    structural_artifacts:
+      - "Nominal geometry has exactly the clearances the author modelled. A measured clearance is a restatement of the model, not a physical finding."
+    supports: [NRM-BM-003-001, NRM-BM-003-006, NRM-BM-003-016, NRM-BM-003-017]
+
+  - id: EVC-BM-003-ASSEMBLY_PATH
+    name: assembly_path_analysis
+    what_it_is: "Existence of a collision-free insertion or mating path per assembly step."
+    in_scope:
+      - "That a part can reach its installed position in the partially built product."
+      - "That an insertion path is blocked once a later part is installed."
+    out_of_scope:
+      - "Assembly force, time, ergonomics or tooling."
+      - "Whether a human hand can reach or grip."
+    structural_artifacts:
+      - "A path found by search exists in the nominal model only; it says nothing about tolerance stack-up."
+    supports: [NRM-BM-003-014]
+
+  - id: EVC-BM-003-MOBILITY
+    name: mobility_analysis
+    what_it_is: "Degree-of-freedom analysis of a configuration against a declared intended and forbidden set."
+    in_scope:
+      - "That an intended gross freedom exists in a configuration."
+      - "That a forbidden gross freedom is unavailable."
+      - "That DEPLOYED and RELEASED differ in available folding mobility."
+    out_of_scope:
+      - "Any compliance, play or clearance-driven motion."
+      - "How much force would defeat the blocking arrangement."
+      - "Behaviour under impact or vibration."
+    structural_artifacts:
+      - "A DOF count derived from declared joints reproduces the declared joints. It is only evidence when the joints are geometrically realized (NRM-BM-003-016)."
+    supports: [NRM-BM-003-009, NRM-BM-003-010, NRM-BM-003-011]
+
+  - id: EVC-BM-003-KINEMATIC_SIM
+    name: continuous_kinematic_simulation
+    what_it_is: "Continuous or finely sampled motion over a declared path; rigid bodies, ideal joints."
+    fidelity: "V-A: declared kinematic pairs. No contact is resolved."
+    in_scope:
+      - "That a continuous path exists between two configurations."
+      - "That connectedness and retention persist at every sampled interior point."
+      - "That no interpenetration occurs along the path."
+    out_of_scope:
+      - "Structural capacity, stress, buckling."
+      - "Contact pressure, friction behaviour, wear."
+      - "Tolerance-induced looseness."
+      - "Impact resistance."
+      - "Lifetime or fatigue."
+      - "Manufacturing feasibility."
+    structural_artifacts:
+      - "Under declared ideal joints, a leg follows its joint axis EXACTLY. Zero off-axis deviation is a property of the model, never a demonstration of guidance."
+      - "A constraint that closes a loop holds the loop closed by construction. Loop closure is not evidence that the physical arrangement would."
+    supports: [NRM-BM-003-005, NRM-BM-003-012, NRM-BM-003-013, NRM-BM-003-017]
+
+  - id: EVC-BM-003-CONTACT
+    name: contact_resolving_analysis
+    what_it_is: "Analysis in which contact between surfaces is resolved rather than declared."
+    availability: NOT_AVAILABLE_IN_THIS_BENCHMARK
+    in_scope_if_available:
+      - "Whether a declared interference actually engages."
+      - "Jamming, binding and wedging behaviour."
+    out_of_scope: ["Stress and capacity, which need structural analysis even with contact resolved."]
+    consequence_of_absence: >
+      Every contact-dependent property is NOT_VERIFIED or UNSUPPORTED for BM-003.
+      No invariant in this Oracle depends on one, which is deliberate: an Oracle
+      whose acceptance rests on evidence the benchmark cannot produce is not an
+      acceptance specification, it is a wish.
+
+  - id: EVC-BM-003-STRUCTURAL
+    name: structural_analysis
+    what_it_is: "Stress, deflection, buckling, fatigue."
+    availability: NOT_AVAILABLE_IN_THIS_BENCHMARK
+    consequence_of_absence: >
+      Capacity, strength, stiffness and lifetime are UNSUPPORTED. Combined with
+      AMB-BM-003-002 - no stated load - they are also unevaluable in principle
+      here: there is no requirement to test against and no method to test with.
+    supports: []
+
+  - id: EVC-BM-003-HUMAN
+    name: human_review
+    what_it_is: "A human judging what no deterministic check can decide."
+    in_scope:
+      - "Whether a deployment sequence is comprehensible to a user."
+      - "Whether a footprint is 'usable' beyond geometric non-degeneracy."
+      - "Whether the product reads as compact desktop scale."
+      - "Whether an effort is acceptable."
+    out_of_scope:
+      - "Anything a deterministic check settles. Human review is not a substitute for a check that exists."
+    structural_artifacts:
+      - >
+        None of the model kind - human judgement computes nothing, so it produces
+        no value that is true by construction. Its characteristic failure is the
+        opposite one: a reviewer shown a plausible design agrees with it, so the
+        artifact to watch for is ANCHORING on what was presented rather than a
+        number that was inevitable.
+    status_rule: "A property awaiting human review is NOT_VERIFIED. It is never PASS on the strength of plausibility."
+    supports: [NRM-BM-003-004, NRM-BM-003-007]
+
+prohibited_inferences:
+  statement: >
+    Rigid-body or ideal-joint simulation MUST NOT establish any of the following,
+    at any sampling density, for any duration, however clean the result.
+  items:
+    - structural capacity
+    - stress
+    - buckling
+    - contact pressure
+    - wear
+    - lifetime
+    - tolerance-induced looseness
+    - impact resistance
+    - manufacturing feasibility
+  why: >
+    None is computed by such a model. A reaction force is not a stress; an
+    unresolved contact is not a pressure; an undamped ideal joint has no wear.
+    Reporting any of these from this evidence is FALSE_ACCEPTANCE, and it is the
+    most likely single failure for this benchmark because the stand's purpose -
+    holding an object - invites exactly that inference.
+
+required_statuses:
+  principle: "A property the available evidence cannot decide keeps an honest status."
+  mapping:
+    - property: "Structural capacity, strength, stiffness"
+      status: UNSUPPORTED
+      because: "No structural method is available, and no load is stated."
+    - property: "Fatigue, wear, lifetime"
+      status: UNSUPPORTED
+      because: "No method available; no duty cycle stated."
+    - property: "Contact-level jamming, binding, looseness"
+      status: NOT_VERIFIED
+      because: "The method exists in principle but is not available here."
+    - property: "Manufacturing feasibility, tolerance"
+      status: NOT_VERIFIED
+      because: "No process is stated and none is analysed."
+    - property: "Impact resistance implied by 'knocked it'"
+      status: NOT_EVALUABLE
+      because: "The source states no disturbance. There is no criterion to evaluate against."
+    - property: "'Usable' footprint beyond geometric non-degeneracy"
+      status: INDETERMINATE
+      because: "AMB-BM-003-009: the term admits several readings and the source distinguishes none."
+    - property: "Compact desktop scale, absolutely"
+      status: NOT_EVALUABLE
+      because: "AMB-BM-003-001: no envelope is stated."
+    - property: "Acceptable user effort"
+      status: NOT_EVALUABLE
+      because: "AMB-BM-003-004: no criterion is stated."
+
+overclaim_rule:
+  statement: >
+    No claim may cite an evidence class whose `out_of_scope` list contains that
+    claim's property.
+  enforced_by: ver3/oracle_tools/audit_bm003_oracle.py

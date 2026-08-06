@@ -1,0 +1,319 @@
+# NORMATIVE INVARIANTS — BM-003 HELD_OUT_BENCHMARK_ORACLE
+#
+# What every acceptable design must satisfy, stated so that materially different
+# mechanisms can all satisfy it.
+#
+# Each invariant passed four tests before entering this file:
+#   T1 solution-neutrality  could two mechanically different designs satisfy it?
+#   T2 obligation form      is there a verification predicate at all?
+#   T3 source backing       does a frozen source clause support it?
+#   T4 non-inversion        is it more than the negation of one imagined design?
+#
+# T1 is the one that does the work here. The temptation throughout was to write
+# the mechanism instead of the requirement - "a detent holds the leg" rather than
+# "folding mobility is unavailable until a deliberate action". The first rejects
+# every correct answer that is not a detent; the second is what the user asked
+# for.
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+source_sha256: ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d
+
+basis_types:
+  DIRECT_USER_REQUIREMENT: "Restates a frozen source clause without exceeding it."
+  NECESSARY_PHYSICAL_CONSEQUENCE: "Physically unavoidable given a source clause; requires derivation premises."
+  VERIFICATION_MINIMUM: "The least condition that makes a claimed verification meaningful."
+
+invariants:
+
+  - id: NRM-BM-003-001
+    statement: >
+      Three distinguishable support legs exist, and each has a stored position in
+      which it lies close to the product body.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-002]
+    verification_predicate: >
+      Three leg entities are identifiable in the design, each with a distinct
+      stored pose, and each stored pose lies against or adjacent to a body.
+    requires_tags: [three_legs_present, stored_pose_defined]
+    admits: "any leg geometry, any folding axis or path, any body arrangement"
+
+  - id: NRM-BM-003-002
+    statement: >
+      In the stored configuration every normal product component is connected to
+      the product; none is detached.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-003]
+    verification_predicate: >
+      In the stored configuration, the connectivity graph over normal components
+      has exactly one connected component.
+    requires_tags: [stored_connected]
+
+  - id: NRM-BM-003-003
+    statement: >
+      Ordinary folding and unfolding require no removal of any product component,
+      and depend on no separate loose item the user must retain.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-004]
+    verification_predicate: >
+      No transition on the stored-deployed-stored path has a step whose
+      precondition is the detachment or separate storage of a normal component.
+    requires_tags: [no_removal_to_operate]
+    note: >
+      Scoped to ORDINARY OPERATION. Service, repair or first assembly may involve
+      removal; that is a different activity and the source constrains only this one.
+
+  - id: NRM-BM-003-004
+    statement: >
+      A manual deployment sequence exists from the stored configuration to the
+      deployed configuration, comprehensible to a user performing it.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-005]
+    verification_predicate: >
+      An ordered sequence of user-performable steps is declared, each naming the
+      component acted on and the motion applied, ending in the deployed
+      configuration.
+    requires_tags: [deployment_sequence_declared]
+    admits: "any step count, any order, and more than one valid order"
+
+  - id: NRM-BM-003-005
+    statement: >
+      Connectedness is preserved at every point along the deployment path, not
+      only at its endpoints.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-007]
+    verification_predicate: >
+      At every sampled configuration along the declared path, the connectivity
+      graph remains singly connected. Sampling is declared, and endpoints alone
+      do not satisfy this.
+    requires_tags: [path_sampled, path_connected]
+    why_intermediate_sampling: >
+      Two valid endpoints prove nothing about the path between them. A design
+      whose leg passes through disconnection mid-travel satisfies both endpoints
+      and fails the requirement, which is negative case NEG-BM-003-006.
+
+  - id: NRM-BM-003-006
+    statement: >
+      In the deployed configuration the three legs extend in materially different
+      directions and their ground-contact regions are neither coincident nor
+      collinear.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_clauses: [SRC-BM003-006]
+    derivation_premises:
+      - "The source requires the legs to be spread apart in different directions."
+      - "The source requires the result to be a footprint on the desk."
+      - "Three coincident or collinear contacts bound no area, so no footprint exists."
+    verification_predicate: >
+      The convex hull of the three ground-contact regions, projected onto the
+      support plane, has non-zero area.
+    requires_tags: [deployed_footprint_non_degenerate]
+    does_not_require:
+      - "any footprint dimension"
+      - "symmetry or equal angular spacing"
+      - "any stability margin"
+
+  - id: NRM-BM-003-007
+    statement: >
+      The deployed configuration presents a supporting region intended to carry a
+      desktop object.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-006, SRC-BM003-014]
+    verification_predicate: >
+      A support region is identifiable in the deployed configuration and is
+      geometrically available - not enclosed, obstructed or facing away from use.
+    requires_tags: [support_region_identifiable]
+    explicitly_not_a_capacity_requirement: >
+      The source states no mass, force or load. This invariant is satisfied by
+      the region EXISTING and being reachable. Any capacity claim is UNSUPPORTED
+      by construction of this benchmark's evidence scope.
+
+  - id: NRM-BM-003-008
+    statement: >
+      Deployment requires no tool, no motor and no external fixture.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-007]
+    verification_predicate: >
+      No declared deployment step names a tool, a powered actuator or an external
+      body outside the product as a participant.
+    requires_tags: [unpowered_manual_operation]
+
+  - id: NRM-BM-003-009
+    statement: >
+      The deployed configuration persists without continuous user support: the
+      folding motion is unavailable while the product is in the deployed state.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-008, SRC-BM003-009]
+    verification_predicate: >
+      In the deployed configuration, the folding degree of freedom of each leg is
+      shown blocked by a declared, physically realized state-maintaining
+      relationship - and not by an external hand, gravity alone assumed, or an
+      unmodelled assertion.
+    requires_tags: [deployed_state_maintained, state_maintenance_realized]
+    admits: >
+      ANY state-maintenance principle: geometric interference, over-centre
+      configuration, a captive sliding member, a compliant element, friction
+      declared as such, a separate retaining body, or any other coherent
+      arrangement. The Oracle constrains that the behaviour exists and is
+      realized, never how.
+
+  - id: NRM-BM-003-010
+    statement: >
+      In the deployed configuration no unintended gross rigid-body freedom
+      remains: a leg cannot fold back, twist aside, translate out of place, or
+      detach.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-009, SRC-BM003-010]
+    verification_predicate: >
+      The design declares, per leg, its intended deployed mobility and its
+      forbidden mobility; a mobility analysis of the deployed configuration shows
+      the forbidden set is empty of available gross freedoms.
+    requires_tags: [deployed_mobility_declared, unintended_dof_absent]
+    scope_boundary: >
+      GROSS rigid-body freedom only. This says nothing about clearance, play,
+      compliance, vibration or looseness developing over time - none of which is
+      in the source and none of which this benchmark's evidence can decide.
+
+  - id: NRM-BM-003-011
+    statement: >
+      A deliberate user action is required before folding becomes possible, and
+      folding mobility is unavailable until it is performed.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-011]
+    verification_predicate: >
+      A distinct RELEASED configuration exists, reachable from DEPLOYED only by a
+      declared user action, and the folding transition is available from RELEASED
+      and unavailable from DEPLOYED.
+    requires_tags: [release_action_declared, folding_blocked_before_release]
+    does_not_require:
+      - "any disturbance magnitude the deployed state must survive"
+      - "that the release be a separate physical feature rather than a motion"
+    admits: "any release principle - a motion, a displacement, a squeeze, a lift, a rotation"
+
+  - id: NRM-BM-003-012
+    statement: >
+      After the deliberate release, a continuous path exists from the deployed
+      configuration back to the same stored configuration, and the deploy-fold
+      cycle can be performed repeatedly.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-012, SRC-BM003-013]
+    verification_predicate: >
+      A continuous, sampled path exists from DEPLOYED through RELEASED and
+      FOLDING to STORED, the resulting stored configuration matches the initial
+      one, and the cycle is shown to repeat without a one-way step.
+    requires_tags: [return_path_exists, cycle_repeatable]
+    note: "Repeatable means no step is irreversible. It is not a cycle count and implies no durability claim."
+
+  - id: NRM-BM-003-013
+    statement: >
+      Every normal product component remains attached throughout the complete
+      operational cycle, and no component must be removed and refitted.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-003, SRC-BM003-004, SRC-BM003-009, SRC-BM003-013]
+    verification_predicate: >
+      At every sampled configuration of the full cycle, every normal component is
+      connected, and each declared retention relationship remains active.
+    requires_tags: [retention_persistent, cycle_sampled]
+
+  - id: NRM-BM-003-014
+    statement: >
+      A physically coherent assembly sequence exists that produces the completed
+      product from its components.
+    basis_type: DIRECT_USER_REQUIREMENT
+    support_type: direct
+    source_clauses: [SRC-BM003-015]
+    verification_predicate: >
+      An ordered assembly sequence is declared; each step has a collision-free
+      insertion or mating path in the configuration produced by the preceding
+      steps; and the dependency relation over steps is acyclic.
+    requires_tags: [assembly_sequence_declared, insertion_paths_clear, assembly_acyclic]
+
+  - id: NRM-BM-003-015
+    statement: >
+      Assembly is complete before operational use: every joint and retention
+      relationship the operation depends on is established by the assembly
+      sequence.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_clauses: [SRC-BM003-015]
+    derivation_premises:
+      - "The source requires the product to be put together and then to stay together through operation."
+      - "A relationship the operation depends on must therefore exist before operation begins."
+    verification_predicate: >
+      Every joint and retention relationship referenced by any operational
+      transition is activated at some step of the assembly sequence.
+    requires_tags: [operational_relations_activated]
+
+  - id: NRM-BM-003-016
+    statement: >
+      Every declared joint and every declared retention relationship is realized
+      by identifiable geometry on each participating body.
+    basis_type: VERIFICATION_MINIMUM
+    support_type: derived
+    source_clauses: [SRC-BM003-015]
+    enables_claim: >
+      That the product "stays together" and that the deployed state is
+      maintained. Without this, both claims rest on a label rather than on a
+      physical arrangement.
+    requires_evidence_tags: [interface_ownership_shown, retention_direction_shown]
+    verification_predicate: >
+      For each declared relationship, both participating bodies expose the
+      feature that realizes it, and for a retention relationship the blocked
+      escape direction is identified.
+    why_this_is_a_minimum: >
+      A joint named in prose with no interface on either body is the Ver1/Ver2
+      failure family: the relationship exists as a field and not as geometry.
+      Nothing downstream can detect it once it is accepted.
+
+  - id: NRM-BM-003-017
+    statement: >
+      Moving bodies do not pass through one another or through forbidden solid
+      regions at any point on any declared operational path.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_clauses: [SRC-BM003-005, SRC-BM003-007, SRC-BM003-012]
+    derivation_premises:
+      - "The source requires the product to open and fold as a physical object."
+      - "A motion that passes solid through solid is not physically realizable."
+    verification_predicate: >
+      Swept-volume or sampled interference checking over each declared path
+      reports no interpenetration between distinct bodies, at declared sampling.
+    requires_tags: [path_interference_checked]
+    does_not_require:
+      - "any minimum clearance"
+      - "zero clearance, or any tolerance condition"
+
+required_unresolved:
+  principle: >
+    These must remain open. An Oracle that resolves them has invented a
+    requirement, and a run that resolves them silently has done the same.
+  items:
+    - "Compact desktop scale, in any dimension (AMB-BM-003-001)."
+    - "The supported object and any load it imposes (AMB-BM-003-002)."
+    - "Acceptable deployed footprint dimensions (AMB-BM-003-003)."
+    - "Acceptable user effort to deploy, release or fold (AMB-BM-003-004)."
+    - "Any quantitative disturbance implied by 'knocked it' (AMB-BM-003-005)."
+    - "Material, strength, stiffness, fatigue, wear and lifetime (AMB-BM-003-006)."
+    - "Acceptable clearance and play (AMB-BM-003-007)."
+    - "Manufacturing process and tolerance (AMB-BM-003-008)."
+    - "Any meaning of 'usable footprint' beyond geometric deployment (AMB-BM-003-009)."
+
+prohibited_normative_content:
+  - "Any numeric threshold. The source contains no digits; the Oracle introduces none."
+  - "Any named mechanism, locking feature, joint type or body count."
+  - "Any material, process or tolerance."
+  - "Any requirement whose only honest evaluation is UNSUPPORTED."
+  - "Any statement that would reject a mechanically sound design differing only in principle."

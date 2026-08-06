@@ -1,0 +1,159 @@
+# FREEDOMS — BM-003
+#
+# Not a leftovers list. Every entry is an explicit assertion that THIS ORACLE
+# REFUSES TO CONSTRAIN this decision, with the reason.
+#
+# A freedom is binding on the Oracle itself: no invariant, evidence expectation,
+# negative case or stage expectation may assert a value the list below declares
+# free. The auditor checks this mechanically, because the failure it prevents is
+# silent - an invariant that names a mechanism looks like rigour and is actually
+# an Oracle grading designs on resemblance to the one its author imagined.
+#
+# Nothing named as an EXAMPLE below is preferred, recommended or mandatory. The
+# examples exist to demonstrate the breadth of what must be admitted.
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+
+freedoms:
+
+  - id: FRE-BM-003-001
+    decision: "The locking or state-maintenance principle."
+    free_because: >
+      The source says the stand must "stay open on its own" and that "something
+      deliberate" must precede folding. It names no device and no principle.
+    admits_examples:
+      - geometric interference between bodies
+      - an over-centre or toggle configuration
+      - a captive sliding or rotating member
+      - a compliant element that must be deflected
+      - a friction interface declared as such
+      - a separate retaining body that must be displaced
+      - a gravity-assisted seated arrangement
+    none_is_preferred: true
+    oracle_constrains_only: >
+      That folding is unavailable in DEPLOYED, that a deliberate action makes it
+      available, and that whatever does this is realized in geometry rather than
+      asserted.
+    blocked_from: "Every invariant, negative case and stage expectation in this pack."
+
+  - id: FRE-BM-003-002
+    decision: "Joint type at every connection."
+    free_because: "The source describes motions, never joints."
+    admits_examples: [revolute, prismatic, planar, spherical, compliant flexure, multi-DOF arrangements]
+    none_is_preferred: true
+    oracle_constrains_only: "That each joint is realized by geometry on both bodies, and that its mobility matches the configuration model."
+
+  - id: FRE-BM-003-003
+    decision: "Body count."
+    free_because: >
+      The source says "three legs" - a functional count of supports, not a count
+      of bodies. A leg may be one body or several; the body may be one or many.
+    admits_examples:
+      - "four bodies: a body and three legs"
+      - "many more, if legs are compound or a separate retainer exists"
+      - "fewer, if a compliant single piece provides several functions"
+    none_is_preferred: true
+    oracle_constrains_only: "That three distinguishable legs are identifiable and that each is retained."
+
+  - id: FRE-BM-003-004
+    decision: "Central versus distributed coordination."
+    free_because: >
+      The source does not say whether the legs move together or independently. It
+      requires only that all three end up spread apart.
+    admits_examples:
+      - "a shared hub or collar coupling all three legs"
+      - "three fully independent legs, each folded separately"
+      - "two coupled and one independent"
+    none_is_preferred: true
+    oracle_constrains_only: "That the deployed footprint is non-degenerate and that the sequence is comprehensible."
+
+  - id: FRE-BM-003-005
+    decision: "Deployment sequence and step count."
+    free_because: >
+      "A sequence that makes sense as I go" constrains comprehensibility, not
+      order or length.
+    admits_examples:
+      - "one motion deploying all three legs"
+      - "three separate leg motions in any order"
+      - "a motion followed by a separate securing action"
+    none_is_preferred: true
+    oracle_constrains_only: "That a sequence exists, is user-performable, and reaches DEPLOYED."
+
+  - id: FRE-BM-003-006
+    decision: "Retention realization."
+    free_because: "The source requires things to stay attached and says nothing about how."
+    admits_examples:
+      - "a captured pin or shaft"
+      - "an undercut or interlocking profile"
+      - "capture between two or more bodies jointly"
+      - "an enclosing housing feature"
+      - "a compliant snap engagement"
+    none_is_preferred: true
+    oracle_constrains_only: "That each retention blocks an identified escape direction and remains active through the cycle."
+
+  - id: FRE-BM-003-007
+    decision: "Hub arrangement, or its absence."
+    free_because: "The source never mentions a hub, a body centre or any joining arrangement."
+    admits_examples: ["a central hub", "a spine", "distributed mounts on a shell", "no distinct hub at all"]
+    none_is_preferred: true
+
+  - id: FRE-BM-003-008
+    decision: "Use or absence of springs, detents, braces, collars, rings, captive sliders and over-centre geometry."
+    free_because: >
+      Every one of these is a means to an end the source states without naming
+      any means.
+    admits_examples: ["any of them", "several in combination", "none of them"]
+    none_is_preferred: true
+    explicitly: >
+      The presence of a spring is not evidence of quality and its absence is not
+      a defect. Treating any of these as mandatory is negative case
+      NEG-BM-003-013.
+
+  - id: FRE-BM-003-009
+    decision: "Whether state maintenance and release are one feature or two."
+    free_because: >
+      The source requires a deliberate action before folding. Whether the thing
+      that holds and the thing that releases are the same element is unstated.
+    admits_examples:
+      - "one element that both holds and releases when displaced"
+      - "a holding arrangement and a separate release control"
+    none_is_preferred: true
+
+  - id: FRE-BM-003-010
+    decision: "Materials."
+    free_because: "The source names no material and no material property."
+    none_is_preferred: true
+
+  - id: FRE-BM-003-011
+    decision: "All dimensions, angles, proportions and clearances."
+    free_because: >
+      The source contains no digit. Every dimension is therefore free, including
+      the folded envelope, the deployed footprint, and every clearance.
+    none_is_preferred: true
+    consequence: >
+      No predicate in this Oracle may compare any dimension against a threshold.
+      Predicates may only test geometric RELATIONS - non-degenerate, connected,
+      non-interfering, reachable.
+
+  - id: FRE-BM-003-012
+    decision: "Aesthetic form, styling and finish."
+    free_because: "Unmentioned by the source."
+    none_is_preferred: true
+
+  - id: FRE-BM-003-013
+    decision: "Which configuration a newly assembled product arrives in."
+    free_because: "The source does not say whether assembly ends stored or deployed."
+    admits_examples: ["assembly ends STORED", "assembly ends DEPLOYED"]
+    none_is_preferred: true
+
+binding_rule:
+  statement: >
+    No invariant, evidence expectation, negative case or stage expectation may
+    assert a value for any decision above.
+  enforced_by: ver3/oracle_tools/audit_bm003_oracle.py
+  rationale: >
+    A freedom contradicted by an invariant is worse than an absent freedom: the
+    Oracle claims to admit a family of designs and rejects them, and the claim is
+    what stops anyone checking.

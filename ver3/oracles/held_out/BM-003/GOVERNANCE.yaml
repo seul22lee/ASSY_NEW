@@ -1,0 +1,140 @@
+# GOVERNANCE — BM-003 HELD_OUT_BENCHMARK_ORACLE
+#
+# Who authored this, from what, under what isolation, and what may change it.
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+title: "BM-003 - Compact folding three-leg desktop stand"
+
+authoring:
+  authored_by_model: "Claude Opus 5 (claude-opus-5)"
+  authored_on: "2026-08-05"
+  authoring_task: "Independent held-out Oracle authoring, commissioned separately from source authoring."
+  source_authority: ver3/benchmarks/BM-003/source/request.txt
+  source_sha256: ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d
+  source_revision: R3
+  source_hash_verified_before_authoring: true
+
+files_read_during_authoring:
+  frozen_source_and_its_governance:
+    - ver3/benchmarks/BM-003/source/request.txt
+    - ver3/benchmarks/BM-003/source/source_manifest.yaml
+    - ver3/benchmarks/BM-003/descriptor.yaml
+  oracle_authoring_rules_and_schemas:
+    - ver3/oracles/ORACLE_AUTHORING_POLICY.md
+    - ver3/oracles/ORACLE_METHOD.md
+  generic_oracle_validation_utilities:
+    - ver3/oracle_tools/audit_oracles.py    # header and pack-discovery only, to confirm this pack is out of its scope
+  repository_layout:
+    - "directory listing of ver3/oracles/product_cases/ (names only, to establish where this pack must NOT go)"
+
+files_explicitly_not_read:
+  - path: ver3/assy_v3/
+    why: "Production package. Reading it would let implementation shape the acceptance specification."
+  - path: "any S01-S12 implementation"
+    why: "None exists; none was sought. Stage expectations were written against the source and this Oracle's own invariants."
+  - path: "production prompts, provider adapters"
+    why: "None exists; none was sought."
+  - path: "Ver1 and Ver2 interpretations, mechanism cards, templates, stage outputs"
+    why: "A card or template would seed a preferred mechanism, which is what this Oracle must not have."
+  - path: ver3/cad_validation/
+    why: "Positive executable references and realization geometry for BM-001 and BM-002."
+  - path: "any BM-003 candidate design"
+    why: "None exists. No design was authored, sketched or implied by this task."
+  - path: "generated DesignState or runtime assurance packages"
+    why: "None exists."
+  - path: ver3/oracles/product_cases/**
+    why: >
+      The normative content of the BM-001 and BM-002 packs was not read. Their
+      DIRECTORY NAMES were listed to determine where this pack must not be
+      placed, and the shared authoring policy and method documents were read
+      because they are repository-level rules rather than benchmark content.
+
+prior_context_disclosure:
+  statement: >
+    Stating this because an isolation claim that omits it would be false.
+  detail: >
+    This authoring session is a continuation of a longer working session that
+    earlier produced CAD and simulation work for BM-002, and authored the BM-003
+    SOURCE. The BM-002 realization was therefore known to the author before this
+    task began. It was not consulted, and nothing in this Oracle derives from it:
+    BM-002 is an enclosed crank-driven platform lift, sharing no mechanism,
+    topology or state-maintenance principle with a folding three-leg stand.
+  mitigation:
+    - "No BM-002 or BM-001 file was opened during this task."
+    - "No mechanism family in realizations.yaml resembles the BM-002 architecture."
+    - "Every invariant traces to a BM-003 source clause; the auditor enforces it."
+    - "Five state-maintenance principles are admitted, none preferred, so no single remembered design could be the target."
+  residual_risk: >
+    Having authored the BM-003 source, the author knew what the source says
+    before reading it here. That is unavoidable in a single-agent session and is
+    the reason ORACLE_METHOD prefers a different author for the Oracle than for
+    the request. Recorded as a known limitation rather than claimed away, and it
+    is the item a human reviewer should weigh first.
+  recommended_human_action: >
+    An independent reviewer should confirm that no invariant narrows the solution
+    space beyond the source, and that the five admissible families are genuinely
+    all admitted.
+
+authority:
+  authority_status: FROZEN
+  frozen_on: "2026-08-05"
+  frozen_by: "the authoring task, on the frozen source"
+  human_review_status: HUMAN_REVIEW_RECOMMENDED
+  human_review_note: >
+    The Oracle is frozen against the source. Human review is recommended for the
+    prior-context disclosure above and for the permissiveness claim, and is not a
+    precondition for the Oracle being usable as a held-out reference.
+
+production_visibility:
+  visible_to_production: false
+  oracle_visible_to_production: false
+  enforcement:
+    - "ver3/oracles/ is a BLOCKING forbidden path root in ver3/FORBIDDEN_LEGACY_DEPENDENCIES.yaml."
+    - "ver3/tests/meta/test_no_legacy_imports.py fails on any path literal reaching it from assy_v3."
+  rule: >
+    This Oracle is NEVER a production input. It is read by the benchmark
+    evaluator and by human reviewers, and by nothing else. A stage that read it
+    would be reading its own answer key.
+
+usage:
+  used_by: [benchmark_evaluator, human_reviewers]
+  never_used_by: [production_stages, generation_models, prompts, retrieval]
+  defines_success: true
+  frozen_before_any_source_only_run: true
+  note: >
+    No source-only run of BM-003 has occurred - no stage is implemented - so this
+    Oracle necessarily predates every run of the benchmark it judges. That
+    ordering is what BENCHMARK_RESULT_CONTRACT requires, and it is satisfied here
+    by construction rather than by discipline.
+
+change_procedure:
+  statement: "A frozen Oracle changes only through a recorded proposal, never as part of an implementation commit."
+  required_of_a_proposal:
+    - "The old statement and the proposed statement, verbatim."
+    - "The new evidence, with its source rank."
+    - "Why the old statement is DEFECTIVE, not merely inconvenient."
+    - "Impact on every other statement in this pack."
+    - "An explicit benchmark-overfitting risk assessment."
+  never_permitted:
+    - "Editing an Oracle statement to make a failing run pass."
+    - "Adding a requirement after seeing what a run produced."
+  amendment_history: []
+
+integrity:
+  hash_manifest: ver3/oracles/held_out/BM-003/ORACLE_HASHES.yaml
+  auditor: ver3/oracle_tools/audit_bm003_oracle.py
+  mutation_tests: ver3/tests/meta/test_bm003_oracle.py
+  rule: "Any drift in a hashed file fails the suite."
+
+placement_rationale:
+  where: ver3/oracles/held_out/BM-003/
+  why_not_product_cases: >
+    The existing product_cases packs derive from frozen DOSSIERS with rank-1
+    locators, and ver3/oracle_tools/audit_oracles.py enumerates and validates
+    them on that basis. BM-003's authority is a frozen BENCHMARK SOURCE instead,
+    so its provenance model differs and it carries its own auditor. Placing it
+    under product_cases would either break that auditor's clean baseline or
+    require editing frozen tooling to accommodate a different provenance model -
+    both worse than a separate tree.

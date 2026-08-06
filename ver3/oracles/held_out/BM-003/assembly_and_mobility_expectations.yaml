@@ -1,0 +1,200 @@
+# ASSEMBLY AND MOBILITY EXPECTATIONS — BM-003
+#
+# What evidence a design must produce about how it goes together, and about what
+# can and cannot move once it has.
+#
+# These are EVIDENCE requirements, not design requirements. They say what must be
+# shown, never what must be built. The distinction matters because an evidence
+# requirement phrased as a design requirement quietly narrows the solution space:
+# "show that each leg's folding freedom is blocked" admits any blocking
+# principle, while "show that the detent engages" admits one.
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+
+# =====================================================================
+# D. Assembly expectations
+# =====================================================================
+assembly_expectations:
+
+  - id: ASM-BM-003-001
+    requires_evidence_of: "A product-body installation sequence."
+    detail: >
+      An ordered list of steps, each naming the body installed and the
+      relationships it establishes. Order must be explicit: a set of parts is not
+      a sequence.
+    satisfied_by: [topology_and_graph, assembly_path_analysis]
+    supports_invariant: NRM-BM-003-014
+
+  - id: ASM-BM-003-002
+    requires_evidence_of: "A physically possible insertion or mating path for every step."
+    detail: >
+      For each step, a collision-free path exists from a free position to the
+      installed position, IN THE CONFIGURATION PRODUCED BY THE PRECEDING STEPS -
+      not in isolation and not in the finished product.
+    satisfied_by: [assembly_path_analysis, metric_cad_geometry]
+    supports_invariant: NRM-BM-003-014
+    why_the_preceding_configuration_matters: >
+      A part can have a clear path into an empty frame and none into the
+      partially built product. Checking each insertion against the empty frame is
+      how an impossible assembly passes (NEG-BM-003-002).
+
+  - id: ASM-BM-003-003
+    requires_evidence_of: "Absence of cyclic assembly dependencies."
+    detail: >
+      The precedence relation over steps is a directed acyclic graph. If A must
+      precede B and B must precede A, no build order exists however plausible
+      each pairwise constraint looks.
+    satisfied_by: [topology_and_graph]
+    supports_invariant: NRM-BM-003-014
+
+  - id: ASM-BM-003-004
+    requires_evidence_of: "Activation of every joint and retention relationship."
+    detail: >
+      Each relationship the operation depends on is established at an identified
+      assembly step, and is realized by geometry on both participating bodies.
+    satisfied_by: [topology_and_graph, metric_cad_geometry]
+    supports_invariant: NRM-BM-003-015
+
+  - id: ASM-BM-003-005
+    requires_evidence_of: "Assembly completed before operational use."
+    detail: >
+      No operational transition depends on a relationship the assembly sequence
+      never establishes.
+    satisfied_by: [topology_and_graph]
+    supports_invariant: NRM-BM-003-015
+
+  - id: ASM-BM-003-006
+    requires_evidence_of: "No product part becomes an ordinary loose component during operation."
+    detail: >
+      Across the full operational cycle, no component is detached, and no step
+      requires the user to hold or set aside a separated part.
+    satisfied_by: [topology_and_graph, continuous_kinematic_simulation]
+    supports_invariant: NRM-BM-003-003
+    scope_note: "Ordinary operation only. Service and repair are outside the source's scope."
+
+  - id: ASM-BM-003-007
+    requires_evidence_of: "Retention remains effective throughout deployment and folding."
+    detail: >
+      Each retention relationship is shown active at every sampled configuration
+      of both paths, and the direction it blocks is identified.
+    satisfied_by: [metric_cad_geometry, mobility_analysis, continuous_kinematic_simulation]
+    supports_invariant: NRM-BM-003-013
+
+# =====================================================================
+# E. Mobility and operation expectations
+# =====================================================================
+mobility_expectations:
+
+  - id: MOB-BM-003-001
+    requires_evidence_of: "Intended fold and deploy mobility exists where it should."
+    detail: >
+      In STORED, each leg's unfolding motion is available. In RELEASED, each
+      leg's folding motion is available.
+    satisfied_by: [mobility_analysis, continuous_kinematic_simulation]
+    supports_invariant: NRM-BM-003-004
+
+  - id: MOB-BM-003-002
+    requires_evidence_of: "Folding mobility is BLOCKED in DEPLOYED, before release."
+    detail: >
+      A mobility analysis of the deployed configuration shows the folding freedom
+      unavailable, and identifies the realized relationship that blocks it.
+    satisfied_by: [mobility_analysis, metric_cad_geometry]
+    supports_invariant: NRM-BM-003-009
+    not_satisfied_by: >
+      An assertion that the state is maintained; a label naming a lock; or a
+      simulation in which the leg is held by a constraint that has no counterpart
+      in the geometry.
+
+  - id: MOB-BM-003-003
+    requires_evidence_of: "The release reopens folding mobility."
+    detail: >
+      After the declared release action, the same analysis shows the folding
+      freedom available. The difference between DEPLOYED and RELEASED must be
+      demonstrated, not asserted.
+    satisfied_by: [mobility_analysis, continuous_kinematic_simulation]
+    supports_invariant: NRM-BM-003-011
+
+  - id: MOB-BM-003-004
+    requires_evidence_of: "No unintended gross rigid-body freedom remains in DEPLOYED."
+    detail: >
+      The design declares the forbidden set per leg - fold, twist, translate,
+      detach, and any other it identifies - and the analysis shows each is
+      unavailable.
+    satisfied_by: [mobility_analysis]
+    supports_invariant: NRM-BM-003-010
+    requires_declared_forbidden_set: >
+      Unintended-DOF checking is only meaningful against a DECLARED forbidden
+      set. Without one it degenerates into "nothing obviously moved", which
+      cannot fail and therefore establishes nothing.
+
+  - id: MOB-BM-003-005
+    requires_evidence_of: "Complete stored-to-deployed and deployed-to-stored paths exist."
+    detail: >
+      Continuous paths, not endpoint pairs, with declared sampling.
+    satisfied_by: [continuous_kinematic_simulation, assembly_path_analysis]
+    supports_invariant: NRM-BM-003-012
+
+  - id: MOB-BM-003-006
+    requires_evidence_of: "Intermediate configurations are evaluated, not only endpoints."
+    detail: >
+      Sampling is declared and covers the interior of each path. Connectedness,
+      retention and interference are each evaluated at the sampled interior
+      points.
+    satisfied_by: [continuous_kinematic_simulation]
+    supports_invariant: NRM-BM-003-005
+    why: >
+      Endpoint-only evidence is the single most effective way to make an
+      unbuildable mechanism look correct: both ends check out and the motion
+      between them was never examined (NEG-BM-003-006).
+
+  - id: MOB-BM-003-007
+    requires_evidence_of: "Joints, interfaces and retention persist through the full path."
+    detail: >
+      Each declared relationship is active at every sampled configuration of the
+      complete cycle, including the interior.
+    satisfied_by: [mobility_analysis, continuous_kinematic_simulation]
+    supports_invariant: NRM-BM-003-013
+
+  - id: MOB-BM-003-008
+    requires_evidence_of: "Moving bodies do not pass through one another."
+    detail: >
+      Sampled or swept-volume interference checking over every declared path,
+      covering leg-body and leg-leg pairs.
+    satisfied_by: [metric_cad_geometry, continuous_kinematic_simulation]
+    supports_invariant: NRM-BM-003-017
+
+joint_capture_rule:
+  statement: >
+    A part may be retained by SEVERAL parts acting together. A retention
+    relationship whose blocked direction is closed only by the combination of
+    two or more bodies is admissible and complete.
+  why_stated_explicitly: >
+    A checker that expects one retainer per retained part would reject a
+    correct joint capture, which is a common and sound arrangement. This rule
+    exists so that permissiveness here is deliberate rather than accidental.
+
+explicitly_not_required:
+  statement: >
+    None of the following is required, and requiring any of them would exceed
+    the source and demand evidence this benchmark cannot produce.
+  items:
+    - "Zero clearance, or any clearance value."
+    - "Zero vibration, or any dynamic response."
+    - "Zero wear, or any lifetime property."
+    - "Contact-level tightness, preload or interference fit."
+    - "Any friction coefficient."
+  why: >
+    Each would convert a gross-mobility requirement into a contact-mechanics
+    one. The honest outcome would be UNSUPPORTED - a correct answer that
+    measures nothing - and the requirement it replaced would go unchecked.
+
+three_leg_completeness_rule:
+  statement: >
+    Deployment evidence must cover ALL THREE legs. Evidence that one leg
+    deploys does not establish that the stand deploys.
+  why: >
+    A design in which one leg deploys and two foul each other produces
+    perfectly good evidence for the leg that works. Negative case
+    NEG-BM-003-010 targets exactly this.

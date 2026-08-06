@@ -1,0 +1,222 @@
+# STAGE EXPECTATIONS — BM-003
+#
+# Held-out expectations for S01-S12. These EVALUATE OUTPUTS AFTER GENERATION.
+# They are not production instructions, they were not written against any stage
+# implementation, and no stage code was read to produce them.
+#
+# Each stage gets four lists:
+#   must_make_available   what must exist in its output for the next stage to work
+#   must_not_decide       what it is forbidden to settle
+#   must_leave_unresolved which openness must survive it
+#   downstream_needs      what the next consumer requires from it
+#
+# The `must_not_decide` list is the one that carries the weight. A stage that
+# decides early is how a freedom becomes a constraint without anyone choosing to
+# impose one, and by the time it shows up downstream it looks like a given.
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+
+solution_neutrality_rule: >
+  No expectation below names a mechanism, a joint type, a body count or a
+  dimension. An expectation that did would leak a preferred solution into the
+  evaluation of every run, which is the failure a held-out Oracle exists to
+  avoid. The auditor checks this file against the freedoms list.
+
+stages:
+
+  s01:
+    role_as_evaluated: "Turns the frozen source into typed requirements and records what it leaves open."
+    must_make_available:
+      - "Every source clause represented, verbatim, with a locator."
+      - "The three legs, the fold/deploy behaviour, the deliberate release, and the attachment requirements as separate requirements."
+      - "Every ambiguity in ambiguities.yaml recorded as open."
+      - "Every freedom in freedoms.yaml recorded as a freedom."
+    must_not_decide:
+      - "Any mechanism, joint type, body count or dimension."
+      - "What 'compact', 'usable footprint' or 'small object' quantitatively mean."
+      - "What disturbance 'knocked it' represents."
+    must_leave_unresolved: [AMB-BM-003-001, AMB-BM-003-002, AMB-BM-003-003, AMB-BM-003-004,
+                            AMB-BM-003-005, AMB-BM-003-006, AMB-BM-003-007, AMB-BM-003-008,
+                            AMB-BM-003-009, AMB-BM-003-010]
+    downstream_needs: "s02 needs requirements with their qualifiers intact, and the open set explicit."
+    evidence_before_progression: "Every clause mapped; no numeric threshold introduced."
+
+  s02:
+    role_as_evaluated: "Derives physical obligations and forms candidate approaches."
+    must_make_available:
+      - "An obligation for each of: three legs retained, stored connectedness, deployment path, footprint non-degeneracy, deployed state maintenance, deliberate release, return path, assembly coherence."
+      - "Candidates spanning materially different state-maintenance principles."
+    must_not_decide:
+      - "Which candidate wins."
+      - "That any mechanism family is required or excluded."
+    must_leave_unresolved: [AMB-BM-003-002, AMB-BM-003-006]
+    downstream_needs: "s03 needs obligations that constrain topology without naming it."
+    evidence_before_progression: "At least two materially different candidates persist."
+    negative_case_guarded: NEG-BM-003-013
+
+  s03:
+    role_as_evaluated: "Establishes bodies, joints, interfaces and configurations."
+    must_make_available:
+      - "Three identifiable legs and their connections."
+      - "The configurations of configurations.yaml, or an equivalent representation."
+      - "Per configuration: intended and forbidden gross mobility."
+      - "An ordered assembly sequence with acyclic dependencies."
+      - "Every retention relationship, with the direction it blocks."
+    must_not_decide:
+      - "The state-maintenance principle, if a candidate has not required one."
+      - "Any dimension not forced by a declared relationship."
+    must_leave_unresolved: [AMB-BM-003-003, AMB-BM-003-007]
+    downstream_needs: "s04 needs a declared forbidden mobility set; without it unintended-DOF checking cannot fail."
+    evidence_before_progression: "Assembly acyclic; every meeting region classified."
+    negative_cases_guarded: [NEG-BM-003-002, NEG-BM-003-003, NEG-BM-003-012]
+
+  s04:
+    role_as_evaluated: "Establishes states, transitions and motion witnesses."
+    must_make_available:
+      - "Continuous sampled paths for deploy and fold, with declared sampling."
+      - "A mobility result for DEPLOYED showing folding unavailable."
+      - "A mobility result for RELEASED showing folding available."
+      - "Interference results over the path interior, leg-leg included."
+      - "Retention active at every sampled configuration."
+    must_not_decide:
+      - "That a property holds because the endpoints hold."
+      - "That an unmodelled constraint stands in for absent geometry."
+    must_leave_unresolved: [AMB-BM-003-004, AMB-BM-003-005]
+    downstream_needs: "s05 needs to know which interfaces the motion actually depends on."
+    evidence_before_progression: "Interior sampling present; endpoint-only evidence is insufficient."
+    negative_cases_guarded: [NEG-BM-003-001, NEG-BM-003-004, NEG-BM-003-005, NEG-BM-003-006, NEG-BM-003-007, NEG-BM-003-011]
+
+  s05:
+    role_as_evaluated: "Attaches features and binds them into realizations discharging obligations."
+    must_make_available:
+      - "For every declared joint and retention, the realizing feature on BOTH bodies."
+      - "For every retention, the blocked escape direction."
+      - "The obligation to realization to verification-predicate chain."
+    must_not_decide:
+      - "Which mechanism family is correct."
+      - "Any dimension the source or a constraint does not force."
+    must_leave_unresolved: [AMB-BM-003-006, AMB-BM-003-008]
+    downstream_needs: "s06 needs parameters with units; s07 needs a construction program."
+    evidence_before_progression: "No relationship exists only as a label."
+    negative_cases_guarded: [NEG-BM-003-008, NEG-BM-003-009]
+
+  s06:
+    role_as_evaluated: "Resolves parameters against declared constraints."
+    must_make_available:
+      - "Solved values with units, or a recorded reason the system is not solvable."
+      - "Any solution freedom where a family of solutions exists."
+    must_not_decide:
+      - "A value for a quantity the source leaves open, presented as required."
+      - "Any threshold for compactness, footprint, effort or capacity."
+    must_leave_unresolved: [AMB-BM-003-001, AMB-BM-003-003]
+    downstream_needs: "s07 needs resolved parameters and nothing else."
+    evidence_before_progression: "No unit defaulted; no invented threshold."
+    negative_case_guarded: NEG-BM-003-017
+
+  s07:
+    role_as_evaluated: "Compiles geometry from the construction program."
+    must_make_available:
+      - "Built geometry with a signature, per body."
+      - "Stored and deployed envelopes, so relational compactness is checkable."
+    must_not_decide:
+      - "Anything about requirements; it receives the program and the parameters only."
+    must_leave_unresolved: []
+    downstream_needs: "s08 needs geometry it can plan measurements against."
+    evidence_before_progression: "Compilation succeeds or fails citing the originating statement."
+    negative_case_guarded: NEG-BM-003-016
+
+  s08:
+    role_as_evaluated: "Plans verification and designs the negative controls."
+    must_make_available:
+      - "A plan item per requirement, naming criterion, scenario, observable and planned fidelity."
+      - "For each fidelity, what it cannot support."
+      - "Negative controls able to fail."
+    must_not_decide:
+      - "That a property is verified."
+      - "That rigid-body evidence can support a structural claim."
+    must_leave_unresolved: [AMB-BM-003-002, AMB-BM-003-006]
+    downstream_needs: "s09 needs a plan fixed before execution, so the plan is a prediction."
+    evidence_before_progression: "Every mandatory obligation has a plan item; no plan claims structural evidence."
+
+  s09:
+    role_as_evaluated: "Executes the plan and records what was measured."
+    must_make_available:
+      - "Outcomes with fidelity and contact resolution declared."
+      - "Coverage of ALL THREE legs, not one generalized."
+      - "Measured negative-control detection."
+    must_not_decide:
+      - "That an unmeasured property is satisfied."
+      - "That an execution failure is a negative result."
+    must_leave_unresolved: [AMB-BM-003-007]
+    downstream_needs: "s10 needs fidelity declared per item to reconcile anything."
+    evidence_before_progression: "Structural artifacts recorded, not reported as findings."
+    negative_case_guarded: NEG-BM-003-010
+
+  s10:
+    role_as_evaluated: "Reconciles evidence across plan items."
+    must_make_available:
+      - "Which requirements lack sufficient-fidelity evidence, named."
+      - "Contradictions, unmerged."
+      - "Which controls are demonstrably able to fail."
+    must_not_decide:
+      - "That a proxy-fidelity result suffices for a claim needing more."
+    must_leave_unresolved: [AMB-BM-003-009]
+    downstream_needs: "s11 needs the coverage gaps explicit to scope any PASS."
+    evidence_before_progression: "No fidelity upgrade; no averaging of contradictions."
+
+  s11:
+    role_as_evaluated: "Judges each requirement with scope."
+    must_make_available:
+      - "Per requirement: outcome with a complete scope block."
+      - "Explicitly excluded claims - what this evidence does NOT establish."
+      - "A terminal status for every mandatory obligation."
+    must_not_decide:
+      - "PASS for capacity, strength, stiffness, wear or lifetime."
+      - "PASS for anything awaiting human review."
+    must_leave_unresolved: [AMB-BM-003-002, AMB-BM-003-005, AMB-BM-003-006, AMB-BM-003-009]
+    downstream_needs: "s12 needs outcomes attributable to decisions."
+    evidence_before_progression: "Required statuses match evidence_scope.required_statuses."
+    outcome_rules:
+      geometric_and_mobility_requirements:
+        pass_requires: "Sampled path evidence with realized interfaces and a declared forbidden mobility set."
+        fail_when: "A path, a blocking relationship or a retention is shown absent."
+        if_capability_absent: NOT_VERIFIED
+        otherwise: NOT_VERIFIED
+      structural_capacity:
+        pass_requires: "Structural analysis against a stated load. Neither exists for BM-003."
+        fail_when: "never - there is no criterion to fail against"
+        if_capability_absent: UNSUPPORTED
+        otherwise: UNSUPPORTED
+      impact_resistance:
+        pass_requires: "A stated disturbance. The source states none."
+        if_capability_absent: NOT_EVALUABLE
+        otherwise: NOT_EVALUABLE
+      usable_footprint_beyond_geometry:
+        pass_requires: "A resolved meaning for 'usable'. AMB-BM-003-009 keeps it open."
+        if_capability_absent: INDETERMINATE
+        otherwise: INDETERMINATE
+    negative_case_guarded: NEG-BM-003-014
+
+  s12:
+    role_as_evaluated: "Attributes failures and carries human questions out."
+    must_make_available:
+      - "Each failure routed to the owning decision and stage."
+      - "The invalidation cone of any revision."
+      - "Every unresolved ambiguity, still unresolved."
+      - "Human review questions, PENDING."
+    must_not_decide:
+      - "That the design is approved."
+      - "That an ambiguity is closed because the run ended."
+    must_leave_unresolved: [AMB-BM-003-001, AMB-BM-003-002, AMB-BM-003-003, AMB-BM-003-004,
+                            AMB-BM-003-005, AMB-BM-003-006, AMB-BM-003-007, AMB-BM-003-008,
+                            AMB-BM-003-009, AMB-BM-003-010]
+    downstream_needs: "The assurance package projection needs every required content item projectable."
+    evidence_before_progression: "No self-approval; every ambiguity survives."
+
+not_production_instructions: >
+  Nothing here tells a stage HOW to do anything. Each entry describes what an
+  evaluator should find in a completed output, and each was derived from the
+  frozen source and this Oracle's own invariants - never from a stage
+  implementation, which was not read.

@@ -1,0 +1,264 @@
+# SOURCE CLAUSE LEDGER — BM-003
+#
+# Every statement of the frozen source, verbatim, with its provenance. This is
+# the ledger against which the whole Oracle is checked: an invariant with no
+# clause behind it is Oracle invention, and a clause with no invariant is
+# coverage the Oracle silently dropped.
+#
+# The distinction that matters throughout: what the SOURCE SAYS versus what the
+# ORACLE READS INTO IT. Every clause carries both, separately. Where the Oracle
+# interprets, the interpretation is labelled and its limits are stated - because
+# an interpretation presented as source text is how an unstated requirement
+# enters an acceptance specification and never leaves.
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+source_authority: ver3/benchmarks/BM-003/source/request.txt
+source_sha256: ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d
+source_revision: R3
+source_authority_status: FROZEN
+
+interpretation_rules:
+  - "A clause's `verbatim` field is the source. Nothing may be added to it."
+  - "`oracle_reading` is this Oracle's interpretation and is always separable from the source."
+  - "`does_not_establish` bounds the reading. It is what stops an interpretation growing."
+  - "No quantity appears in any reading that does not appear in the source. The source contains no digits at all."
+
+clauses:
+
+  - id: SRC-BM003-001
+    verbatim: "I need a compact folding stand for my desk."
+    locator: "paragraph 1, sentence 1"
+    oracle_reading: >
+      Establishes the product kind (a stand), that it folds, and that its
+      intended setting is a desk. "Compact" is a qualitative property of the
+      folded state.
+    does_not_establish:
+      - "any dimension, envelope or volume"
+      - "what counts as compact"
+    supports_invariants: [NRM-BM-003-001]
+    supports_ambiguities: [AMB-BM-003-001]
+
+  - id: SRC-BM003-002
+    verbatim: >-
+      It should have three legs that fold in close to the body, so the whole
+      thing becomes narrow and compact when I put it away.
+    locator: "paragraph 2, sentence 1"
+    oracle_reading: >
+      Three legs exist and are distinguishable. Each folds to a stored position
+      close to a body. The stored configuration is narrow and compact relative to
+      the deployed one.
+    does_not_establish:
+      - "how a leg folds, or about what"
+      - "what the body is, or how many bodies exist"
+      - "any folded dimension or clearance"
+    supports_invariants: [NRM-BM-003-001, NRM-BM-003-002, NRM-BM-003-003]
+    supports_freedoms: [FRE-BM-003-002, FRE-BM-003-003, FRE-BM-003-007]
+
+  - id: SRC-BM003-003
+    verbatim: "Everything should stay attached while it is folded."
+    locator: "paragraph 2, sentence 2"
+    oracle_reading: >
+      In the stored configuration every normal product component remains
+      connected to the product. Nothing is detached in order to be stored.
+    does_not_establish:
+      - "what holds anything attached"
+      - "any retention force, preload or tightness"
+    supports_invariants: [NRM-BM-003-002, NRM-BM-003-013]
+
+  - id: SRC-BM003-004
+    verbatim: "I do not want to take anything off to fold it, or loose pieces to look after."
+    locator: "paragraph 2, sentence 3"
+    oracle_reading: >
+      Ordinary folding requires no removal of any component, and the product does
+      not rely on a separate loose item the user must keep. Both directions
+      matter: nothing is removed, and nothing needs storing separately.
+    does_not_establish:
+      - "that a component may never be removed for service or repair"
+      - "any statement about tools for maintenance, as distinct from operation"
+    supports_invariants: [NRM-BM-003-003, NRM-BM-003-013]
+
+  - id: SRC-BM003-005
+    verbatim: >-
+      When I want to use it, I should be able to open it by hand, following a
+      sequence that makes sense as I go.
+    locator: "paragraph 3, sentence 1"
+    oracle_reading: >
+      Deployment is manual and proceeds through a sequence a user can follow
+      while performing it. "Makes sense as I go" is comprehensibility during the
+      action, not documentation.
+    does_not_establish:
+      - "the number of steps, or their order"
+      - "any force, torque or effort"
+      - "that the sequence is unique"
+    supports_invariants: [NRM-BM-003-004, NRM-BM-003-005]
+    supports_freedoms: [FRE-BM-003-005]
+    supports_ambiguities: [AMB-BM-003-004]
+
+  - id: SRC-BM003-006
+    verbatim: >-
+      The three legs should end up spread apart in different directions so they
+      give the stand a usable footprint on the desk.
+    locator: "paragraph 3, sentence 2"
+    oracle_reading: >
+      In the deployed configuration the three legs occupy materially different
+      directions and together bound a supporting region. "Different directions"
+      is the geometric content; a footprint requires the three not to be
+      coincident or collinear in their ground contact.
+    does_not_establish:
+      - "any footprint dimension, angle or spacing"
+      - "any symmetry, or equal angular spacing"
+      - "what load the footprint carries"
+      - "stability under any specific disturbance"
+    supports_invariants: [NRM-BM-003-006, NRM-BM-003-007]
+    supports_ambiguities: [AMB-BM-003-003, AMB-BM-003-009]
+
+  - id: SRC-BM003-007
+    verbatim: >-
+      Nothing should come apart or fall off while I am opening it, and I should
+      not need tools, a motor, or any other equipment to do it.
+    locator: "paragraph 3, sentence 3"
+    oracle_reading: >
+      Connectedness is preserved along the entire deployment path, not merely at
+      its endpoints. Deployment is unpowered, tool-free and needs no external
+      fixture.
+    does_not_establish:
+      - "any clearance, tolerance or fit"
+      - "that a hand cannot apply significant force"
+    supports_invariants: [NRM-BM-003-005, NRM-BM-003-008, NRM-BM-003-014]
+
+  - id: SRC-BM003-008
+    verbatim: "Once it is open, it needs to stay open on its own."
+    locator: "paragraph 4, sentence 1"
+    oracle_reading: >
+      The deployed configuration persists without continuous user support. Some
+      state-maintenance behaviour exists; the source names none.
+    does_not_establish:
+      - "any locking principle, feature or mechanism"
+      - "any holding force or resistance"
+      - "that the state is maintained by geometry rather than friction, or the reverse"
+    supports_invariants: [NRM-BM-003-009]
+    supports_freedoms: [FRE-BM-003-001, FRE-BM-003-006, FRE-BM-003-009]
+
+  - id: SRC-BM003-009
+    verbatim: >-
+      I should not have to hold the legs while I use it, and they should not be
+      able to fold back, twist aside, or come off.
+    locator: "paragraph 4, sentence 2"
+    oracle_reading: >
+      In the deployed configuration three specific gross motions are absent:
+      folding back, twisting aside, and detaching. "Come off" is a RETENTION
+      statement - the leg stays connected - and is deliberately not a statement
+      about looseness developing over time (see amendment R3).
+    does_not_establish:
+      - "any tolerance, clearance, play or tightness"
+      - "any wear, fatigue or lifetime property"
+      - "how the motions are prevented"
+    supports_invariants: [NRM-BM-003-009, NRM-BM-003-010, NRM-BM-003-013]
+    supports_ambiguities: [AMB-BM-003-007]
+
+  - id: SRC-BM003-010
+    verbatim: >-
+      Nothing should turn on its own, shift out of place, or move in some other
+      direction I was not expecting.
+    locator: "paragraph 4, sentence 3"
+    oracle_reading: >
+      The general case behind the three named motions: no unintended GROSS
+      rigid-body freedom remains in the deployed configuration. The user is the
+      judge of what is unexpected, so the Oracle reads this as "not among the
+      intended motions of the deployed state".
+    does_not_establish:
+      - "a numeric displacement, angle or rate"
+      - "any contact-level condition - this is a gross-mobility statement"
+    supports_invariants: [NRM-BM-003-010]
+
+  - id: SRC-BM003-011
+    verbatim: >-
+      Before it can be folded again I want to have to do something deliberate,
+      so it does not collapse just because I knocked it.
+    locator: "paragraph 4, sentence 4"
+    oracle_reading: >
+      A deliberate user action is required before folding becomes possible.
+      Folding mobility is unavailable in the deployed configuration and becomes
+      available only after that action.
+    does_not_establish:
+      - "what the action is, or what performs it"
+      - "ANY numeric disturbance, impact energy, force or acceleration"
+      - "any robustness or impact-resistance requirement"
+    interpretation_boundary: >
+      "Knocked it" is the user's REASON for wanting a deliberate release. It is
+      not a load case. Converting it into a numeric impact threshold would invent
+      a requirement the source does not state and cannot support, and is a
+      negative case (NEG-BM-003-015).
+    supports_invariants: [NRM-BM-003-011]
+    supports_freedoms: [FRE-BM-003-001]
+    supports_ambiguities: [AMB-BM-003-005]
+
+  - id: SRC-BM003-012
+    verbatim: >-
+      After that deliberate release, it should fold back down to the same compact
+      shape it started in.
+    locator: "paragraph 5, sentence 1"
+    oracle_reading: >
+      The release restores folding mobility, and the stored configuration reached
+      afterwards is the same one the product started in.
+    does_not_establish:
+      - "exact repeatability of pose to any tolerance"
+    supports_invariants: [NRM-BM-003-012]
+
+  - id: SRC-BM003-013
+    verbatim: >-
+      The opening and folding sequence should be repeatable, with all normal
+      parts remaining attached and without anything needing to be removed and put
+      back on.
+    locator: "paragraph 5, sentence 2"
+    oracle_reading: >
+      The deploy-fold cycle can be performed more than once, and across the whole
+      cycle every normal component stays attached and none is removed and
+      refitted.
+    does_not_establish:
+      - "a cycle count"
+      - "any durability, wear or fatigue property"
+    supports_invariants: [NRM-BM-003-012, NRM-BM-003-013]
+    supports_ambiguities: [AMB-BM-003-006]
+
+  - id: SRC-BM003-014
+    verbatim: "It is meant to hold a small object on my desk while I am working."
+    locator: "paragraph 6, sentence 1"
+    oracle_reading: >
+      States the product's PURPOSE. It gives the stand something to support and
+      no quantity whatsoever.
+    does_not_establish:
+      - "ANY mass, force, load or capacity"
+      - "any strength, stiffness or deflection requirement"
+      - "what the object is, or its size"
+    interpretation_boundary: >
+      This clause must not become a structural-capacity requirement. The source
+      states no quantity, so no capacity claim could be evaluated; asserting one
+      would produce a requirement whose only honest outcome is UNSUPPORTED.
+      Marking capacity PASS from any evidence this benchmark can produce is a
+      negative case (NEG-BM-003-014).
+    supports_invariants: [NRM-BM-003-007]
+    supports_ambiguities: [AMB-BM-003-002]
+
+  - id: SRC-BM003-015
+    verbatim: >-
+      It should also be something that can genuinely be built as a product and
+      put together in a sensible order, and stay together through normal opening
+      and folding.
+    locator: "paragraph 7, sentence 1"
+    oracle_reading: >
+      A physically coherent assembly sequence exists, and the completed assembly
+      retains its joints and retention relationships through ordinary operation.
+    does_not_establish:
+      - "any manufacturing process, tolerance or cost"
+      - "assembly force, time or ergonomics"
+    supports_invariants: [NRM-BM-003-014, NRM-BM-003-015, NRM-BM-003-016]
+    supports_ambiguities: [AMB-BM-003-008]
+
+coverage_rule: >
+  Every clause above must be referenced by at least one invariant, freedom or
+  ambiguity, and every normative statement must cite at least one clause. The
+  auditor checks both directions: an unreferenced clause is coverage the Oracle
+  dropped, and an uncited invariant is Oracle invention.

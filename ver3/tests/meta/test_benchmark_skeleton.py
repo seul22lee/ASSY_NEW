@@ -6,8 +6,8 @@ Two things are checked here that are easy to get wrong quietly:
   directory. Both must stay in their own trees so that `ver3/oracles/` and
   `ver3/cad_validation/` can remain BLOCKING forbidden path roots without also
   blocking the source request the pipeline legitimately reads.
-* BM-003 must announce that it is a placeholder. A skeleton missing its third
-  benchmark makes STAGE_PROGRESSION_CONTRACT's freeze gate look satisfiable when
+* BM-003 must be internally consistent about its readiness. A benchmark whose
+  descriptor overstates its state makes the freeze gate look satisfiable when
   it is not, and a gate that appears passable is worse than a missing one.
 """
 
@@ -210,31 +210,50 @@ class TestBenchmarkSkeleton(unittest.TestCase):
         for item in ("an Oracle", "a mechanism selection", "CAD", "an evaluation"):
             self.assertIn(item, man["this_task_did_not_produce"])
 
-    def test_bm003_remains_a_placeholder_for_want_of_an_oracle(self):
-        """A frozen source does not make a benchmark ready.
+    def test_bm003_is_now_scorable(self):
+        """Source frozen AND Oracle frozen: the benchmark can finally be judged.
 
-        The source precondition is satisfied, which is a different thing from
-        BM-003 being usable: with no Oracle it cannot be scored at all. The
-        placeholder must survive its source being frozen, or completing the easy
-        half would look like finishing.
+        Both halves were required. A frozen source with no Oracle is unscorable,
+        and an Oracle written after a run is no Oracle at all - so the ordering
+        matters as much as the existence.
         """
         d = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
         self.assertTrue(_paths.source_manifest("BM-003")["frozen"])
-        self.assertEqual("PLACEHOLDER", d["status"])
-        self.assertFalse(d["oracle"]["frozen_before_source_only_runs"])
-        self.assertEqual("NOT_AUTHORED", d["oracle"]["location"])
+        self.assertEqual("ORACLE_READY", d["status"])
+        self.assertTrue(d["oracle"]["authored_independently"])
+        self.assertTrue(d["oracle"]["frozen_before_source_only_runs"])
+        self.assertEqual("FROZEN", d["oracle"]["authority_status"])
+        self.assertTrue(os.path.isdir(os.path.join(
+            _paths.VER3, "oracles", "held_out", "BM-003")))
 
-    def test_bm003_is_declared_a_placeholder(self):
-        data = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
-        self.assertEqual("PLACEHOLDER", data["status"])
-        self.assertIn("placeholder_notice", data)
-        self.assertFalse(data["oracle"]["frozen_before_source_only_runs"])
+    def test_bm003_still_has_no_positive_executable_reference(self):
+        """An Oracle defines success; a positive reference only validates the evaluator.
 
-    def test_bm003_blocks_the_freeze_gate(self):
-        """An incomplete benchmark set must block freezing, and must say so."""
+        BM-003 is scorable without one, and adding one must never become a
+        precondition - it would turn "did the pipeline solve the problem" into
+        "did it reproduce our example".
+        """
         data = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
-        blocks = " ".join(data["placeholder_notice"]["blocks"]).lower()
-        self.assertIn("freez", blocks)
+        self.assertEqual("NOT_BUILT", data["positive_executable_reference"]["location"])
+        self.assertFalse(os.path.exists(os.path.join(_paths.VER3, "cad_validation", "BM-003")))
+
+    def test_stage_freeze_is_still_blocked_by_everything_except_bm003(self):
+        """BM-003 is ready; stage freezing is not.
+
+        FSF-02 hidden-Oracle readiness is now satisfied for this benchmark. The
+        remaining inputs are not, because no stage exists to run - and satisfying
+        one input is not partial permission.
+        """
+        data = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
+        notice = data["oracle_ready_notice"]
+        self.assertIn("no stage is implemented", notice["still_outstanding_elsewhere"])
+        progression = _paths.contract("STAGE_PROGRESSION_CONTRACT.yaml")
+        inputs = progression["freeze_rule"]["full_stage_freeze_inputs"]["required_inputs"]
+        unsatisfied = [i["input"] for i in inputs if i["state"] != "SATISFIED"]
+        self.assertTrue(unsatisfied, "no stage may freeze while inputs remain unsatisfied")
+        frozen = [n for n in _paths.CONTRACT_FILES
+                  if _paths.contract(n).get("status") == "frozen"]
+        self.assertEqual([], frozen)
 
     def test_no_stage_contract_is_frozen_while_bm003_is_a_placeholder(self):
         """Consistency between the descriptor's claim and the contracts on disk.

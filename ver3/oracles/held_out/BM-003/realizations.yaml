@@ -1,0 +1,205 @@
+# ADMISSIBLE REALIZATION FAMILIES — BM-003
+#
+# Materially different designs that must ALL be accepted. Their purpose is to
+# demonstrate that this Oracle is permissive where the source is silent - an
+# Oracle that admits only one of these is grading resemblance, not requirements.
+#
+# NONE IS PREFERRED, RECOMMENDED OR A TARGET. They are described only deeply
+# enough to show they differ in PRINCIPLE rather than in shape: each maintains
+# the deployed state and releases it by a different physical mechanism. No
+# dimension, no CAD, no construction program, and no completion of any of them
+# appears here, and none may be authored from this file.
+#
+# The inadmissible families exist for the opposite reason: each must be rejected
+# by at least one invariant, so that permissiveness has a floor.
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+
+physical_tag_vocabulary:
+  three_legs_present: "Three distinguishable support legs are identifiable."
+  stored_pose_defined: "Each leg has a stored pose close to the body."
+  stored_connected: "All normal components connected in STORED."
+  no_removal_to_operate: "No component is removed to fold or unfold."
+  deployment_sequence_declared: "An ordered, user-performable deployment sequence exists."
+  path_sampled: "Operational paths are sampled in their interior, not only at endpoints."
+  path_connected: "Connectedness holds at every sampled point."
+  deployed_footprint_non_degenerate: "The three deployed contacts bound a non-zero area."
+  support_region_identifiable: "A support region exists and is reachable in DEPLOYED."
+  unpowered_manual_operation: "No tool, motor or external fixture participates."
+  deployed_state_maintained: "Folding is unavailable in DEPLOYED."
+  state_maintenance_realized: "The blocking arrangement exists as geometry, not as an assertion."
+  deployed_mobility_declared: "Intended and forbidden gross mobility are declared per leg."
+  unintended_dof_absent: "No forbidden gross freedom is available in DEPLOYED."
+  release_action_declared: "A deliberate user action is declared."
+  folding_blocked_before_release: "Folding is unavailable until that action is performed."
+  return_path_exists: "A continuous path returns to the original STORED configuration."
+  cycle_repeatable: "No step of the cycle is irreversible."
+  retention_persistent: "Every retention relationship is active throughout the cycle."
+  cycle_sampled: "The full cycle is sampled, interior included."
+  assembly_sequence_declared: "An ordered assembly sequence exists."
+  insertion_paths_clear: "Each step has a collision-free path in the preceding configuration."
+  assembly_acyclic: "Step dependencies form a DAG."
+  operational_relations_activated: "Every operational relationship is established during assembly."
+  path_interference_checked: "Interference is checked over each declared path."
+
+admissible_realizations:
+
+  - id: ADM-BM-003-001
+    family: OVER_CENTRE_GEOMETRY
+    state_maintenance_principle: >
+      The deployed position lies just past a geometric singularity of the leg
+      linkage. Folding would require the leg to travel back through the
+      over-centre point, which the arrangement's own geometry opposes.
+    release_principle: "The user displaces the linkage back through the over-centre point."
+    materially_different_because: >
+      State maintenance is a property of the CONFIGURATION, not of any added
+      element. Remove every extra part and the behaviour persists.
+    satisfies_tags: [three_legs_present, stored_pose_defined, stored_connected, no_removal_to_operate,
+                     deployment_sequence_declared, path_sampled, path_connected,
+                     deployed_footprint_non_degenerate, support_region_identifiable,
+                     unpowered_manual_operation, deployed_state_maintained, state_maintenance_realized,
+                     deployed_mobility_declared, unintended_dof_absent, release_action_declared,
+                     folding_blocked_before_release, return_path_exists, cycle_repeatable,
+                     retention_persistent, cycle_sampled, assembly_sequence_declared,
+                     insertion_paths_clear, assembly_acyclic, operational_relations_activated,
+                     path_interference_checked]
+    not_preferred: true
+
+  - id: ADM-BM-003-002
+    family: CAPTIVE_SLIDING_COLLAR
+    state_maintenance_principle: >
+      A captive collar, retained on the body and never removable, slides to a
+      position where it geometrically obstructs the folding motion of all three
+      legs at once.
+    release_principle: "The user slides the collar clear of the obstructing position."
+    materially_different_because: >
+      Maintenance is by a SEPARATE MOVING BODY that translates, and it couples
+      all three legs through one element rather than treating them independently.
+    satisfies_tags: [three_legs_present, stored_pose_defined, stored_connected, no_removal_to_operate,
+                     deployment_sequence_declared, path_sampled, path_connected,
+                     deployed_footprint_non_degenerate, support_region_identifiable,
+                     unpowered_manual_operation, deployed_state_maintained, state_maintenance_realized,
+                     deployed_mobility_declared, unintended_dof_absent, release_action_declared,
+                     folding_blocked_before_release, return_path_exists, cycle_repeatable,
+                     retention_persistent, cycle_sampled, assembly_sequence_declared,
+                     insertion_paths_clear, assembly_acyclic, operational_relations_activated,
+                     path_interference_checked]
+    not_preferred: true
+    note: "The collar is a normal component and is never removed, so NRM-BM-003-003 is satisfied."
+
+  - id: ADM-BM-003-003
+    family: COMPLIANT_ENGAGEMENT
+    state_maintenance_principle: >
+      A compliant feature deflects as the leg reaches its deployed position and
+      springs back to obstruct the return path.
+    release_principle: "The user deflects the compliant feature clear, then folds."
+    materially_different_because: >
+      Maintenance depends on ELASTIC DEFLECTION of a member rather than on rigid
+      geometry or a translating body. Its state is a strain state.
+    satisfies_tags: [three_legs_present, stored_pose_defined, stored_connected, no_removal_to_operate,
+                     deployment_sequence_declared, path_sampled, path_connected,
+                     deployed_footprint_non_degenerate, support_region_identifiable,
+                     unpowered_manual_operation, deployed_state_maintained, state_maintenance_realized,
+                     deployed_mobility_declared, unintended_dof_absent, release_action_declared,
+                     folding_blocked_before_release, return_path_exists, cycle_repeatable,
+                     retention_persistent, cycle_sampled, assembly_sequence_declared,
+                     insertion_paths_clear, assembly_acyclic, operational_relations_activated,
+                     path_interference_checked]
+    not_preferred: true
+    evidence_consequence: >
+      Whether the compliant feature RETURNS reliably is contact- and
+      material-dependent, so it is NOT_VERIFIED here. Admissibility is not
+      affected: a physical realization must never become inadmissible because the
+      benchmark cannot yet test it.
+
+  - id: ADM-BM-003-004
+    family: SEATED_STRUT_UNDER_GRAVITY
+    state_maintenance_principle: >
+      Each deployed leg is held by a separate strut or brace that seats into a
+      pocket, with the seating maintained by the geometry of the pocket and the
+      weight of the assembly. Folding requires lifting the strut out of its seat.
+    release_principle: "The user lifts or swings each strut clear of its seat."
+    materially_different_because: >
+      Maintenance uses a SEPARATE LOAD-PATH MEMBER and a seating pocket, and it
+      is per-leg rather than shared. It is the only family here in which the
+      maintaining element is also part of the support path.
+    satisfies_tags: [three_legs_present, stored_pose_defined, stored_connected, no_removal_to_operate,
+                     deployment_sequence_declared, path_sampled, path_connected,
+                     deployed_footprint_non_degenerate, support_region_identifiable,
+                     unpowered_manual_operation, deployed_state_maintained, state_maintenance_realized,
+                     deployed_mobility_declared, unintended_dof_absent, release_action_declared,
+                     folding_blocked_before_release, return_path_exists, cycle_repeatable,
+                     retention_persistent, cycle_sampled, assembly_sequence_declared,
+                     insertion_paths_clear, assembly_acyclic, operational_relations_activated,
+                     path_interference_checked]
+    not_preferred: true
+    note: "The struts are normal components, captive to the product, never separately stored."
+
+  - id: ADM-BM-003-005
+    family: ROTATING_CAM_SLEEVE
+    state_maintenance_principle: >
+      A sleeve rotates about the body axis; in one angular position its profile
+      obstructs the leg folding path, in another it clears it.
+    release_principle: "The user rotates the sleeve to the clear position."
+    materially_different_because: >
+      Maintenance is by ROTATION of a shared body rather than translation, over-
+      centre geometry, compliance or a seated strut. It is a fifth distinct
+      principle.
+    satisfies_tags: [three_legs_present, stored_pose_defined, stored_connected, no_removal_to_operate,
+                     deployment_sequence_declared, path_sampled, path_connected,
+                     deployed_footprint_non_degenerate, support_region_identifiable,
+                     unpowered_manual_operation, deployed_state_maintained, state_maintenance_realized,
+                     deployed_mobility_declared, unintended_dof_absent, release_action_declared,
+                     folding_blocked_before_release, return_path_exists, cycle_repeatable,
+                     retention_persistent, cycle_sampled, assembly_sequence_declared,
+                     insertion_paths_clear, assembly_acyclic, operational_relations_activated,
+                     path_interference_checked]
+    not_preferred: true
+
+permissiveness_requirement:
+  statement: "EVERY physical invariant must admit ALL admissible realizations."
+  rationale: >
+    This is the mechanical test of solution-neutrality. The five families differ
+    in the physical principle that maintains and releases the deployed state -
+    configuration, translation, elastic deflection, seated load path, rotation.
+    An invariant that rejects any of them has encoded a mechanism.
+  count: 5
+  minimum_required: 4
+
+inadmissible_realizations:
+
+  - id: INADM-BM-003-001
+    description: "A stand whose deployed legs can be folded by hand without any prior action."
+    rejected_by: [NRM-BM-003-009, NRM-BM-003-011]
+    why: "Nothing distinguishes DEPLOYED from RELEASED; the deliberate action does not exist."
+
+  - id: INADM-BM-003-002
+    description: "A stand requiring a separate pin to be inserted when deployed and stored in a pocket when folded."
+    rejected_by: [NRM-BM-003-003]
+    why: "A loose component the user must retain, which the source explicitly excludes."
+
+  - id: INADM-BM-003-003
+    description: "A stand whose three deployed legs lie in a single plane through the body axis, all contacts collinear."
+    rejected_by: [NRM-BM-003-006]
+    why: "Three collinear contacts bound no area, so no footprint exists."
+
+  - id: INADM-BM-003-004
+    description: "A stand whose legs must be unclipped and reattached each time it is folded."
+    rejected_by: [NRM-BM-003-003, NRM-BM-003-013]
+    why: "Components are removed and refitted during ordinary operation."
+
+  - id: INADM-BM-003-005
+    description: >
+      A stand whose deployed state is held only by a constraint asserted in a
+      simulation, with no corresponding geometry on either body.
+    rejected_by: [NRM-BM-003-016, NRM-BM-003-009]
+    why: >
+      The relationship exists as a label, not as an interface. This is the
+      failure family the verification minimum exists to catch.
+
+  - id: INADM-BM-003-006
+    description: "A stand with valid stored and deployed poses but no continuous motion between them."
+    rejected_by: [NRM-BM-003-005, NRM-BM-003-012]
+    why: "Endpoints are not a path. The product cannot open."

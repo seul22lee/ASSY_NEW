@@ -1,0 +1,289 @@
+# NEGATIVE CASES — BM-003
+#
+# Designs, evidence uses and pipeline behaviours that must be REJECTED.
+#
+# The anti-inversion rule governs every entry: a negative case must not be the
+# bare negation of an invariant. "The footprint is degenerate" restates
+# NRM-BM-003-006 and adds nothing. A useful negative case describes something
+# that LOOKS ACCEPTABLE TO A NAIVE CHECKER and is still wrong - typically because
+# a label, a field, a relationship or a simulation artefact is present while the
+# physical realization is absent.
+#
+# Each entry therefore carries `why_a_model_might_do_this`: the plausible reason a
+# competent generator produces this specific error. A negative case nobody would
+# ever commit tests nothing.
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+
+negative_cases:
+
+  - id: NEG-BM-003-001
+    failure_class: RETENTION_LAPSES_MID_OPERATION
+    mutation: >
+      A leg is retained in STORED and in DEPLOYED, but at an intermediate
+      deployment angle its retaining feature passes clear of the capture and the
+      leg is momentarily free to separate.
+    why_wrong: >
+      Retention must hold throughout the path. A leg that is captive only at the
+      endpoints can be lost during ordinary use.
+    expected_detection_predicate: "Retention active at every sampled interior configuration (MOB-BM-003-007)."
+    expected_owning_stage: s04
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Endpoints are what a designer checks and what a report shows. The interior
+      of the path is where the geometry is least intuitive and least examined.
+
+  - id: NEG-BM-003-002
+    failure_class: INSERTION_PATH_CLOSED_BY_LATER_PART
+    mutation: >
+      Every part has a clear insertion path into the empty frame, but one part's
+      path is blocked once a part installed earlier is in place.
+    why_wrong: "The sequence is unbuildable, though each step passes when checked in isolation."
+    expected_detection_predicate: "Insertion path checked in the configuration produced by the preceding steps (ASM-BM-003-002)."
+    expected_owning_stage: s03
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Checking each part against the finished or empty product is the natural
+      simplification, and it is wrong in exactly this case.
+
+  - id: NEG-BM-003-003
+    failure_class: ASSEMBLY_DEPENDENCY_CYCLE
+    mutation: >
+      Part A must be installed before B, B before C, and C before A. Every
+      pairwise constraint is individually sensible.
+    why_wrong: "No build order exists. The product cannot be assembled at all."
+    expected_detection_predicate: "Acyclicity of the precedence relation (ASM-BM-003-003)."
+    expected_owning_stage: s03
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Pairwise constraints are generated locally and are each correct. The cycle
+      is a global property nothing local reveals.
+
+  - id: NEG-BM-003-004
+    failure_class: DEPLOYED_FOLDING_NOT_BLOCKED
+    mutation: >
+      A locking element is declared, named and positioned, but its geometry does
+      not intersect the leg's folding path, so the leg folds freely in DEPLOYED.
+    why_wrong: >
+      The deployed state does not persist. The requirement is met by a name
+      rather than by an obstruction.
+    expected_detection_predicate: "Folding freedom shown unavailable in DEPLOYED, with the blocking geometry identified (MOB-BM-003-002)."
+    expected_owning_stage: s04
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Naming a locking element is the easy half; placing it where it actually
+      obstructs requires the folding path to have been computed first.
+
+  - id: NEG-BM-003-005
+    failure_class: RELEASE_DOES_NOT_RESTORE_MOBILITY
+    mutation: >
+      A release action is declared and performed, and folding remains blocked
+      afterwards because the released element still obstructs the path.
+    why_wrong: "The product cannot be folded. The release is ceremonial."
+    expected_detection_predicate: "Folding freedom available in RELEASED and unavailable in DEPLOYED (MOB-BM-003-003)."
+    expected_owning_stage: s04
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Effort concentrates on making the lock hold. That the release must also
+      CLEAR the path is a second, easily missed condition.
+
+  - id: NEG-BM-003-006
+    failure_class: ENDPOINTS_WITHOUT_A_PATH
+    mutation: >
+      Valid STORED and DEPLOYED configurations are both declared, and no
+      continuous motion connects them.
+    why_wrong: "Two static poses are not an operation. The stand cannot open."
+    expected_detection_predicate: "A continuous sampled path between the configurations (MOB-BM-003-005, MOB-BM-003-006)."
+    expected_owning_stage: s04
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Endpoints are what a requirement describes and what a picture shows. The
+      path is the part that must be computed.
+
+  - id: NEG-BM-003-007
+    failure_class: INTERMEDIATE_COLLISION
+    mutation: >
+      Legs clear one another in STORED and in DEPLOYED, and two of them
+      interpenetrate at an intermediate angle.
+    why_wrong: "The motion is not physically realizable, though both endpoints are clean."
+    expected_detection_predicate: "Interference checked over the path interior, leg-leg included (MOB-BM-003-008)."
+    expected_owning_stage: s04
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Three legs sweeping toward a shared body is precisely where the swept
+      volumes are hardest to reason about without computing them.
+
+  - id: NEG-BM-003-008
+    failure_class: JOINT_WITHOUT_INTERFACE_OWNERSHIP
+    mutation: >
+      A joint is declared between leg and body, with a type and an axis, and
+      neither body carries any feature realizing it.
+    why_wrong: >
+      The joint exists as a field. Nothing physical connects the bodies, so
+      neither the motion nor the retention it is credited with exists.
+    expected_detection_predicate: "Both participating bodies expose the realizing feature (NRM-BM-003-016)."
+    expected_owning_stage: s05
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      A joint is trivially expressible as a record and expensive to realize as
+      geometry. This is the single most common form of the label-versus-thing
+      failure.
+
+  - id: NEG-BM-003-009
+    failure_class: RETENTION_BLOCKS_NO_DIRECTION
+    mutation: >
+      A retention relationship is declared, and its geometry leaves the leg's
+      escape direction open - the feature obstructs a direction the leg cannot
+      travel anyway.
+    why_wrong: "Retention that blocks nothing retains nothing, though the relationship is present and named."
+    expected_detection_predicate: "The blocked escape direction is identified and coincides with an available escape direction (NRM-BM-003-016)."
+    expected_owning_stage: s05
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Adding a retaining feature satisfies the obligation textually. Checking
+      WHICH direction it closes requires knowing which direction the part could
+      otherwise leave by.
+
+  - id: NEG-BM-003-010
+    failure_class: PARTIAL_DEPLOYMENT_CLAIMED_AS_COMPLETE
+    mutation: >
+      One or two legs deploy correctly, a third is blocked or omitted, and the
+      result is reported as a working three-leg stand.
+    why_wrong: "The footprint requires all three. Two contacts bound no area."
+    expected_detection_predicate: "Deployment evidence covers all three legs (three_leg_completeness_rule); footprint non-degeneracy (NRM-BM-003-006)."
+    expected_owning_stage: s09
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Symmetry invites generalizing from one leg. If the legs are truly identical
+      the generalization is sound, and the case where it is not is exactly the
+      case where it matters.
+
+  - id: NEG-BM-003-011
+    failure_class: UNINTENDED_TWIST_REMAINS
+    mutation: >
+      Folding is correctly blocked in DEPLOYED, and each leg retains a gross
+      rotational freedom about its own axis, or can translate along its mount.
+    why_wrong: >
+      The source forbids twisting aside and shifting out of place, not only
+      folding. Blocking one freedom is not blocking the forbidden set.
+    expected_detection_predicate: "Declared forbidden set is empty of available gross freedoms (MOB-BM-003-004)."
+    expected_owning_stage: s04
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Folding is the freedom the requirement names first and the one a designer
+      thinks about. Twist and translation are the ones a single-axis check never
+      looks for.
+
+  - id: NEG-BM-003-012
+    failure_class: COMPONENT_MUST_BE_REMOVED_TO_FOLD
+    mutation: >
+      Folding requires a brace to be detached and set aside, and the design
+      reports the fold as successful.
+    why_wrong: "The source excludes both removal and loose pieces to look after."
+    expected_detection_predicate: "No transition precondition detaches a normal component (NRM-BM-003-003, ASM-BM-003-006)."
+    expected_owning_stage: s03
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      A removable brace is the simplest way to make a rigid deployed state, and
+      the constraint it violates is a sentence about user experience rather than
+      about geometry.
+
+  - id: NEG-BM-003-013
+    failure_class: MECHANISM_FAMILY_TREATED_AS_MANDATORY
+    mutation: >
+      A candidate is rejected, or scored down, because it does not use a spring
+      detent - or any other specific family - although it satisfies every
+      invariant.
+    why_wrong: >
+      The source names no mechanism. Requiring one converts an acceptance
+      specification into a resemblance test and rejects correct answers.
+    expected_detection_predicate: "No invariant or evaluation asserts a value for FRE-BM-003-001 or FRE-BM-003-008."
+    expected_owning_stage: s02
+    must_not_be_reported_as: [FAIL, INFEASIBLE]
+    why_a_model_might_do_this: >
+      Familiar mechanisms are easier to reason about and to justify. Preferring
+      one feels like engineering judgement and is indistinguishable, from the
+      outside, from overfitting.
+
+  - id: NEG-BM-003-014
+    failure_class: CAPACITY_PASS_FROM_RIGID_BODY_EVIDENCE
+    mutation: >
+      A rigid-body simulation reports reaction forces at the leg joints, and the
+      run marks a strength or capacity property PASS on that basis.
+    why_wrong: >
+      A reaction force is not a stress and the model computes none. There is also
+      no stated load to evaluate against (AMB-BM-003-002).
+    expected_detection_predicate: >
+      Capacity claims may cite only structural_analysis, which is unavailable;
+      the required status is UNSUPPORTED (evidence_scope prohibited_inferences).
+    expected_owning_stage: s11
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      The product's purpose is to hold an object, a simulation produces
+      force-shaped numbers, and the inference from one to the other is short and
+      wrong. This is the most likely single failure for this benchmark.
+
+  - id: NEG-BM-003-015
+    failure_class: INVENTED_NUMERIC_IMPACT_THRESHOLD
+    mutation: >
+      "So it does not collapse just because I knocked it" is converted into an
+      impact-resistance requirement with an invented energy, force or
+      acceleration, and the design is then evaluated against it.
+    why_wrong: >
+      The source states no disturbance magnitude. The threshold is the
+      pipeline's, so the evaluation measures the pipeline's own invention.
+    expected_detection_predicate: >
+      No numeric threshold may be introduced that the source does not state
+      (AMB-BM-003-005; auditor check no_unstated_numeric_threshold).
+    expected_owning_stage: s01
+    must_not_be_reported_as: [PASS, FAIL]
+    correct_behaviour: "NOT_EVALUABLE, with the ambiguity recorded."
+    why_a_model_might_do_this: >
+      A requirement with a number is testable and a requirement without one is
+      uncomfortable. Supplying the number feels like diligence.
+
+  - id: NEG-BM-003-016
+    failure_class: STORED_COMPACTNESS_ASSERTED_NOT_SHOWN
+    mutation: >
+      The stored configuration is described as compact, and its envelope is no
+      smaller than the deployed one.
+    why_wrong: >
+      Compactness is relational and checkable even without an absolute target:
+      folded must be smaller than deployed. Asserting it skips the one part that
+      is decidable.
+    expected_detection_predicate: "Stored envelope compared against deployed envelope (NRM-BM-003-001)."
+    expected_owning_stage: s07
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      With no stated size target, compactness looks entirely unevaluable, so the
+      relational part that IS evaluable gets skipped with it.
+
+  - id: NEG-BM-003-017
+    failure_class: SILENT_RESOLUTION_OF_AN_AMBIGUITY
+    mutation: >
+      A footprint dimension, a supported mass or a folded envelope is chosen and
+      then presented as a source requirement rather than as a design decision.
+    why_wrong: >
+      Choosing is legitimate; attributing the choice to the user is not. It
+      launders a decision into a given and removes it from review.
+    expected_detection_predicate: "Every value not in the source carries provenance identifying it as a decision (ambiguities resolution_rule)."
+    expected_owning_stage: s01
+    must_not_be_reported_as: [PASS]
+    why_a_model_might_do_this: >
+      Downstream stages need concrete values, and the shortest path to one is to
+      write it into the requirement.
+
+anti_inversion_statement: >
+  No case above is the bare negation of an invariant. Each names a distinct
+  FAILURE MECHANISM: a label without geometry (008, 009), an artefact of checking
+  endpoints only (001, 006, 007), a locally valid but globally impossible
+  sequence (002, 003), an incomplete blocking set (011), an evidence class used
+  beyond its scope (014), an invented requirement (015, 017), or a preference
+  presented as a requirement (013). Each is a way for a design to LOOK right to a
+  checker that is not looking at the right thing.
+
+counts:
+  total: 17
+  minimum_required: 15

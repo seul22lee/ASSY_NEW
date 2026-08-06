@@ -8,7 +8,7 @@
 schema_version: "0.1.0"
 benchmark_id: BM-003
 title: "Compact folding three-leg desktop stand"
-status: PLACEHOLDER
+status: ORACLE_READY
 
 source:
   request_path: ver3/benchmarks/BM-003/source/request.txt
@@ -29,9 +29,13 @@ oracle:
   # Deliberately OUTSIDE this tree. ver3/oracles/ is a BLOCKING forbidden path
   # root for assy_v3, and keeping the Oracle there is what lets the request text
   # stay readable without the answer key becoming readable with it.
-  location: NOT_AUTHORED
-  authored_independently: false
-  frozen_before_source_only_runs: false
+  location: ver3/oracles/held_out/BM-003/
+  oracle_name: HELD_OUT_BENCHMARK_ORACLE
+  authored_independently: true
+  frozen_before_source_only_runs: true
+  authority_status: FROZEN
+  auditor: ver3/oracle_tools/audit_bm003_oracle.py
+  hash_manifest: ver3/oracles/held_out/BM-003/ORACLE_HASHES.yaml
   visible_to: [evaluator, human_reviewers]
   never_visible_to: [production_stages, generation_models, prompts, retrieval]
 
@@ -51,15 +55,19 @@ output:
   evaluations: ver3/benchmarks/BM-003/evaluations/
   layout: "see BENCHMARK_RESULT_CONTRACT run_output_layout"
 
-placeholder_notice:
+oracle_ready_notice:
   state: >
-    BM-003's source is now HUMAN-APPROVED and FROZEN, so it no longer blocks the
-    source precondition of the Stage freeze gate. It remains a PLACEHOLDER for a
-    different reason: there is still no Oracle and no positive executable
-    reference. An Oracle must be authored independently and frozen BEFORE the
-    first source-only run, and none was authored in this session.
+    BM-003's source is HUMAN-APPROVED and FROZEN, and its held-out Oracle is
+    authored and FROZEN. The benchmark is now SCORABLE: an evaluator has both the
+    source a run consumes and the acceptance specification to judge it against.
+    No positive executable reference exists, and none is required - a positive
+    reference validates the evaluator, it does not define success.
   blocks:
-    - "Freezing ANY stage contract (STAGE_PROGRESSION_CONTRACT freeze_rule)."
+    - "Nothing further from BM-003's side. FSF-02 hidden-Oracle readiness is now satisfied for this benchmark."
+  still_outstanding_elsewhere: >
+    No stage contract may freeze, because FSF-03 through FSF-07 remain
+    unsatisfied: no stage is implemented, so no source-only run has occurred and
+    no downstream sufficiency has been demonstrated.
   selection_criteria: ver3/benchmarks/BM-003/BM-003_SELECTION_CRITERIA.md
   benchmark_subject: "BM-003 - COMPACT FOLDING THREE-LEG DESKTOP STAND"
   subject_status: FIXED_BY_INSTRUCTION
@@ -70,8 +78,8 @@ placeholder_notice:
     HUMAN_DECISION_REQUIRED without selecting a brief.
   required_before_use:
     - "DONE - human review of the authored source, then freezing it (2026-08-05)."
-    - "An independently authored Oracle, frozen BEFORE the first source-only run."
-    - "Optionally a positive executable reference, for evaluator validation."
+    - "DONE - an independently authored Oracle, frozen before any source-only run (2026-08-05)."
+    - "OPTIONAL, not present - a positive executable reference, for evaluator validation."
   ordering_rule: >
     The Oracle must be frozen before the first run, not merely before the
     evaluation. An Oracle written after seeing a run is a description of that

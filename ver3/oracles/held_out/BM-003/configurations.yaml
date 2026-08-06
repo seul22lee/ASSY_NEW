@@ -1,0 +1,221 @@
+# CONFIGURATION AND TRANSITION MODEL — BM-003
+#
+# The source-supported configurations, what must be true in each, and how they
+# connect. This is the frame the mobility and assembly expectations are written
+# against.
+#
+# NAMING IS NOT NORMATIVE. A design that represents the same distinctions under
+# other names, or that merges two of these into one where the source does not
+# distinguish them, satisfies this model. What is normative is the DISTINCTIONS:
+# in particular that DEPLOYED and RELEASED differ in available mobility, because
+# that difference is the entire content of "something deliberate before folding".
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+
+equivalence_rule: >
+  A design satisfies this model if there exists a mapping from its own
+  configuration representation onto these configurations that preserves: required
+  connectedness, the allowed and prohibited gross mobility of each, the active
+  retention relationships, and the permitted transitions. The names need not
+  match and the count need not match, provided no distinction below is lost.
+
+configurations:
+
+  - id: CFG-BM-003-UNASSEMBLED
+    name: UNASSEMBLED_OR_PARTIALLY_ASSEMBLED
+    source_basis: [SRC-BM003-015]
+    what_it_is: "Before assembly is complete. Components exist; some relationships are not yet established."
+    required_connectedness: "Not required. Components may be separate; this is the only configuration in which that is true."
+    allowed_gross_mobility: "Unconstrained. Free bodies may be positioned along their insertion paths."
+    prohibited_gross_mobility: "None."
+    active_retention: "Only those established by the assembly steps performed so far."
+    permitted_transitions: [TRN-BM-003-ASSEMBLE]
+    note: >
+      This configuration exists so that assembly is evaluable at all. Without it,
+      an assembly sequence has no starting state and every insertion path is
+      being checked against a product that is already built.
+
+  - id: CFG-BM-003-STORED
+    name: STORED
+    source_basis: [SRC-BM003-002, SRC-BM003-003, SRC-BM003-004]
+    what_it_is: "Assembly complete, legs folded close to the body, product compact for storage."
+    required_connectedness: "Fully connected. Every normal component attached (NRM-BM-003-002)."
+    allowed_gross_mobility:
+      - "The unfolding motion of each leg, available to a manual action."
+    prohibited_gross_mobility:
+      - "Detachment of any normal component."
+    active_retention:
+      - "Every relationship that keeps components attached."
+    permitted_transitions: [TRN-BM-003-DEPLOY]
+    not_required: "No constraint that the legs be held in the stored position. The source does not require a stored-state latch."
+
+  - id: CFG-BM-003-DEPLOYING
+    name: DEPLOYING
+    source_basis: [SRC-BM003-005, SRC-BM003-007]
+    what_it_is: "The continuum of intermediate configurations between STORED and DEPLOYED."
+    required_connectedness: "Fully connected AT EVERY SAMPLED POINT, not only at the endpoints (NRM-BM-003-005)."
+    allowed_gross_mobility:
+      - "Continued motion along the deployment path."
+      - "Reversal back toward STORED - the source forbids no mid-deployment reversal."
+    prohibited_gross_mobility:
+      - "Detachment of any component."
+      - "Interpenetration of bodies (NRM-BM-003-017)."
+    active_retention:
+      - "Every relationship active in STORED remains active throughout."
+    permitted_transitions: [TRN-BM-003-DEPLOY, TRN-BM-003-DEPLOY_REVERSE]
+    why_it_is_a_configuration_and_not_a_gap: >
+      Most of what can go wrong happens here, and endpoint checking cannot see any
+      of it: a leg that disconnects mid-travel, two legs that collide at some
+      intermediate angle, a retention that lapses while the leg swings. Treating
+      the path as a gap between two valid states is the failure this entry exists
+      to prevent.
+
+  - id: CFG-BM-003-DEPLOYED
+    name: DEPLOYED
+    source_basis: [SRC-BM003-006, SRC-BM003-008, SRC-BM003-009, SRC-BM003-010]
+    what_it_is: "Legs spread, footprint formed, state maintained without user support."
+    required_connectedness: "Fully connected, with the state-maintaining relationship additionally active."
+    allowed_gross_mobility:
+      - "The deliberate release action, and nothing else."
+    prohibited_gross_mobility:
+      - "Folding of any leg (NRM-BM-003-011)."
+      - "Twisting of any leg out of its deployed orientation."
+      - "Gross translation of any leg out of position."
+      - "Detachment of any leg or component."
+      - "Any other gross rigid-body freedom not declared intended (NRM-BM-003-010)."
+    active_retention:
+      - "Every attachment relationship."
+      - "The state-maintaining relationship that blocks folding."
+    permitted_transitions: [TRN-BM-003-RELEASE]
+    the_distinguishing_property: >
+      DEPLOYED is defined by what it CANNOT do. If folding is available here, the
+      configuration is not DEPLOYED in this model's sense, however the design
+      names it.
+
+  - id: CFG-BM-003-RELEASED
+    name: RELEASED
+    source_basis: [SRC-BM003-011, SRC-BM003-012]
+    what_it_is: "After the deliberate action, before folding begins. Geometrically close to DEPLOYED; different in mobility."
+    required_connectedness: "Fully connected. Release must not detach anything (NRM-BM-003-003)."
+    allowed_gross_mobility:
+      - "Folding of the legs toward STORED."
+      - "Return to DEPLOYED, if the design permits re-engagement without a further action."
+    prohibited_gross_mobility:
+      - "Detachment of any normal component."
+    active_retention:
+      - "Every attachment relationship remains active."
+      - "The state-maintaining relationship is disengaged - and ONLY that one."
+    permitted_transitions: [TRN-BM-003-FOLD, TRN-BM-003-REENGAGE]
+    the_distinguishing_property: >
+      RELEASED must differ from DEPLOYED in exactly one respect: folding is now
+      available. A release that changes nothing about mobility is not a release
+      (NEG-BM-003-005), and a release that detaches a component violates the
+      no-loose-parts requirement.
+
+  - id: CFG-BM-003-FOLDING
+    name: FOLDING
+    source_basis: [SRC-BM003-012, SRC-BM003-013]
+    what_it_is: "The continuum of intermediate configurations between RELEASED and STORED."
+    required_connectedness: "Fully connected at every sampled point."
+    allowed_gross_mobility:
+      - "Continued motion toward STORED."
+      - "Reversal toward DEPLOYED."
+    prohibited_gross_mobility:
+      - "Detachment."
+      - "Interpenetration of bodies."
+    active_retention:
+      - "Every attachment relationship remains active throughout."
+    permitted_transitions: [TRN-BM-003-FOLD, TRN-BM-003-FOLD_REVERSE]
+
+transitions:
+
+  - id: TRN-BM-003-ASSEMBLE
+    from: CFG-BM-003-UNASSEMBLED
+    to: CFG-BM-003-STORED
+    trigger: "Assembly, performed once before operational use."
+    source_basis: [SRC-BM003-015]
+    requires:
+      - "An ordered sequence with a collision-free path for each step (NRM-BM-003-014)."
+      - "Acyclic step dependencies."
+      - "Activation of every relationship the operation depends on (NRM-BM-003-015)."
+    note: "The terminal configuration may equally be DEPLOYED; the source does not say which state a new product arrives in."
+
+  - id: TRN-BM-003-DEPLOY
+    from: CFG-BM-003-STORED
+    to: CFG-BM-003-DEPLOYED
+    through: CFG-BM-003-DEPLOYING
+    trigger: "A manual user action. Unpowered, tool-free, no external fixture."
+    source_basis: [SRC-BM003-005, SRC-BM003-007]
+    requires:
+      - "A declared, comprehensible step sequence (NRM-BM-003-004)."
+      - "Connectedness at every sampled point (NRM-BM-003-005)."
+      - "No interference along the path (NRM-BM-003-017)."
+      - "Arrival at a state where folding is blocked (NRM-BM-003-009)."
+    freedom: "The three legs may deploy together, in sequence, or in any grouping. The source constrains only the outcome."
+
+  - id: TRN-BM-003-DEPLOY_REVERSE
+    from: CFG-BM-003-DEPLOYING
+    to: CFG-BM-003-STORED
+    trigger: "Reversal of the manual action before the deployed state is reached."
+    source_basis: [SRC-BM003-005]
+    requires: ["Connectedness throughout."]
+    note: >
+      Admissible, not mandatory. The source neither requires mid-deployment
+      reversal nor forbids it, so the Oracle requires neither.
+
+  - id: TRN-BM-003-RELEASE
+    from: CFG-BM-003-DEPLOYED
+    to: CFG-BM-003-RELEASED
+    trigger: "A DELIBERATE user action, declared by the design."
+    source_basis: [SRC-BM003-011]
+    requires:
+      - "The action is distinct from the folding motion itself (NRM-BM-003-011)."
+      - "It is performable by hand, without tools."
+      - "It detaches nothing."
+    deliberateness_criterion: >
+      The action must not be a mere continuation of the folding motion. If pushing
+      a leg toward stored is itself the release, then folding was never blocked
+      and the deployed state did not persist against anything.
+    explicitly_not_required: >
+      No disturbance magnitude, force threshold or impact energy. "So it does not
+      collapse just because I knocked it" is the user's REASON, not a load case.
+
+  - id: TRN-BM-003-REENGAGE
+    from: CFG-BM-003-RELEASED
+    to: CFG-BM-003-DEPLOYED
+    trigger: "Return to the maintained state."
+    source_basis: [SRC-BM003-013]
+    requires: ["Available at least via the full deploy path, so that the cycle repeats."]
+    note: "Direct re-engagement without a full cycle is admissible and not required."
+
+  - id: TRN-BM-003-FOLD
+    from: CFG-BM-003-RELEASED
+    to: CFG-BM-003-STORED
+    through: CFG-BM-003-FOLDING
+    trigger: "Manual folding after release."
+    source_basis: [SRC-BM003-012, SRC-BM003-013]
+    requires:
+      - "A continuous sampled path (NRM-BM-003-012)."
+      - "Arrival at the SAME stored configuration."
+      - "Connectedness and retention throughout (NRM-BM-003-013)."
+      - "No removal of any component (NRM-BM-003-003)."
+
+  - id: TRN-BM-003-FOLD_REVERSE
+    from: CFG-BM-003-FOLDING
+    to: CFG-BM-003-DEPLOYED
+    trigger: "Reversal during folding."
+    source_basis: [SRC-BM003-013]
+    requires: ["Connectedness throughout."]
+    note: "Admissible, not mandatory."
+
+reachability_requirement:
+  statement: >
+    STORED and DEPLOYED are mutually reachable, and the cycle closes: the STORED
+    configuration reached after folding is the one deployment started from.
+  why_endpoints_are_insufficient: >
+    A design can declare a valid stored pose and a valid deployed pose with no
+    continuous motion joining them. Both poses check out; the product cannot
+    open. This is negative case NEG-BM-003-006 and it is the reason every path
+    requirement in this Oracle demands sampling.

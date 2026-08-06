@@ -1,0 +1,160 @@
+# AMBIGUITIES AND UNRESOLVED ITEMS — BM-003
+#
+# Preserved, never reconciled. Each is something the source leaves open that a
+# reader might be tempted to close by assuming a reasonable value.
+#
+# The temptation is the point. Every entry below has an obvious plausible answer,
+# and supplying it would create a requirement the user never stated and the
+# benchmark cannot evaluate. Recording the openness is what keeps a run's silent
+# resolution detectable: if a design fixes one of these, that is a design
+# decision requiring provenance, not a fact about the problem.
+
+schema_version: "0.1.0"
+oracle_name: HELD_OUT_BENCHMARK_ORACLE
+benchmark_id: BM-003
+
+resolution_rule: >
+  A run may CHOOSE a value for any of these. It may not present the choice as a
+  source requirement. Recording the choice with its rationale is correct
+  behaviour; asserting the value as given is silent resolution and is a defect.
+
+ambiguities:
+
+  - id: AMB-BM-003-001
+    question: "What size qualifies as compact desktop scale?"
+    source_says: "'compact', 'narrow and compact', 'for my desk'"
+    kind: quantitative
+    why_unresolved: "No dimension, envelope or comparison object appears in the source."
+    tempting_wrong_move: "Assuming an envelope that 'obviously' suits a desk, then testing against it."
+    block_scopes: [blocks_quantitative_acceptance]
+    does_not_block: >
+      Structural predicates. A folded configuration can be shown more compact
+      than the deployed one without any absolute size, so compactness as a
+      RELATION remains checkable.
+    source_clauses: [SRC-BM003-001, SRC-BM003-002]
+
+  - id: AMB-BM-003-002
+    question: "What object is supported, and what load does it impose?"
+    source_says: "'a small object on my desk'"
+    kind: quantitative
+    why_unresolved: "No mass, no force, no dimension, no object class."
+    tempting_wrong_move: >
+      Inventing a representative mass to make a capacity check possible. The
+      check would then measure the invented number.
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    blocks_pass_for: "any structural-capacity claim"
+    source_clauses: [SRC-BM003-014]
+
+  - id: AMB-BM-003-003
+    question: "What deployed footprint dimensions are acceptable?"
+    source_says: "'spread apart in different directions', 'a usable footprint'"
+    kind: quantitative
+    why_unresolved: "No spacing, angle, area or stability criterion is stated."
+    block_scopes: [blocks_quantitative_acceptance]
+    does_not_block: >
+      The non-degeneracy predicate (NRM-BM-003-006). Whether three contacts bound
+      a non-zero area is decidable without any target dimension.
+    source_clauses: [SRC-BM003-006]
+
+  - id: AMB-BM-003-004
+    question: "What user effort is acceptable to deploy, release or fold?"
+    source_says: "'open it by hand', 'something deliberate'"
+    kind: quantitative
+    why_unresolved: "No force, torque, travel or ergonomic criterion is stated."
+    block_scopes: [blocks_quantitative_acceptance]
+    does_not_block: "That the operation is manual, unpowered and tool-free, which is a structural property."
+    source_clauses: [SRC-BM003-005, SRC-BM003-011]
+
+  - id: AMB-BM-003-005
+    question: "What quantitative disturbance does 'knocked it' represent?"
+    source_says: "'so it does not collapse just because I knocked it'"
+    kind: interpretive
+    why_unresolved: >
+      The clause states the user's REASON for wanting a deliberate release. It
+      is not a load case and carries no magnitude.
+    tempting_wrong_move: >
+      Reading it as an impact-resistance requirement and inventing an energy,
+      force or acceleration to test against.
+    block_scopes: [blocks_quantitative_acceptance]
+    does_not_block: >
+      NRM-BM-003-011. That folding is unavailable before a deliberate action is
+      a mobility property, decidable without any disturbance magnitude.
+    negative_case: NEG-BM-003-015
+    source_clauses: [SRC-BM003-011]
+
+  - id: AMB-BM-003-006
+    question: "What material, strength, stiffness, fatigue, wear and lifetime are required?"
+    source_says: "nothing"
+    kind: quantitative
+    why_unresolved: "Entirely absent from the source."
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    blocks_pass_for: "every structural, durability and lifetime claim"
+    source_clauses: []
+    note: >
+      Listed with no supporting clause deliberately. It is unresolved BECAUSE the
+      source is silent, and an ambiguity that required a clause could not record
+      silence.
+
+  - id: AMB-BM-003-007
+    question: "What clearance and play are acceptable?"
+    source_says: "'they should not be able to fold back, twist aside, or come off'"
+    kind: quantitative
+    why_unresolved: >
+      The clause constrains GROSS motion. Amendment R3 removed the earlier
+      wording 'work themselves loose' precisely because it read as a
+      contact-level condition the source does not state.
+    block_scopes: [blocks_quantitative_acceptance]
+    does_not_block: "Gross-mobility predicates, which are decidable without any clearance value."
+    source_clauses: [SRC-BM003-009]
+
+  - id: AMB-BM-003-008
+    question: "What manufacturing process and tolerances apply?"
+    source_says: "'can genuinely be built as a product'"
+    kind: interpretive
+    why_unresolved: >
+      'Built as a product' asserts coherence, not a process. No process,
+      tolerance or cost target appears.
+    block_scopes: [blocks_quantitative_acceptance, blocks_PASS]
+    blocks_pass_for: "manufacturing-feasibility claims"
+    does_not_block: "That an assembly sequence exists with clear insertion paths, which is geometric."
+    source_clauses: [SRC-BM003-015]
+
+  - id: AMB-BM-003-009
+    question: "What does 'usable footprint' mean beyond geometric deployment?"
+    source_says: "'so they give the stand a usable footprint on the desk'"
+    kind: interpretive
+    why_unresolved: >
+      'Usable' could mean stable under load, large enough for the object, or
+      simply that three separated contacts exist. The source distinguishes none
+      of these and supplies no quantity for the first two.
+    block_scopes: [blocks_quantitative_acceptance, blocks_evidence_interpretation]
+    oracle_position: >
+      This Oracle reads the GEOMETRIC content only - three non-degenerate
+      contacts - and records the rest as open. Reading more would require a load
+      or a size the source does not give.
+    source_clauses: [SRC-BM003-006]
+
+  - id: AMB-BM-003-010
+    question: "Is a stored-state retention required, or may the legs hang free when folded?"
+    source_says: "'Everything should stay attached while it is folded'"
+    kind: interpretive
+    why_unresolved: >
+      'Stay attached' is a connection requirement. Whether the folded legs must
+      additionally be HELD in the folded position is not stated.
+    oracle_position: >
+      Attachment is required; stored-state holding is not. A design that adds it
+      is admissible and one that omits it is not thereby defective.
+    block_scopes: [blocks_evidence_interpretation]
+    source_clauses: [SRC-BM003-003]
+
+unresolved_summary:
+  total: 10
+  quantitative: 7
+  interpretive: 4
+  note: >
+    The kinds overlap: AMB-BM-003-005, -008 and -009 are interpretive with a
+    quantitative consequence, and are counted in both.
+  none_blocks_the_pack: >
+    No ambiguity prevents a fair acceptance predicate for BM-003. Every structural
+    and mobility predicate in this Oracle is decidable without resolving any of
+    them, which is why the pack is authorable while all ten stay open.
