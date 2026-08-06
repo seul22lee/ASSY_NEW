@@ -37,7 +37,7 @@ clauses:
     does_not_establish:
       - "any dimension, envelope or volume"
       - "what counts as compact"
-    supports_invariants: [NRM-BM-003-001]
+    supports_invariants: [NRM-BM-003-018]
     supports_ambiguities: [AMB-BM-003-001]
 
   - id: SRC-BM003-002
@@ -53,7 +53,7 @@ clauses:
       - "how a leg folds, or about what"
       - "what the body is, or how many bodies exist"
       - "any folded dimension or clearance"
-    supports_invariants: [NRM-BM-003-001, NRM-BM-003-002, NRM-BM-003-003]
+    supports_invariants: [NRM-BM-003-001, NRM-BM-003-002, NRM-BM-003-003, NRM-BM-003-018]
     supports_freedoms: [FRE-BM-003-002, FRE-BM-003-003, FRE-BM-003-007]
 
   - id: SRC-BM003-003
@@ -92,7 +92,7 @@ clauses:
       - "the number of steps, or their order"
       - "any force, torque or effort"
       - "that the sequence is unique"
-    supports_invariants: [NRM-BM-003-004, NRM-BM-003-005]
+    supports_invariants: [NRM-BM-003-004, NRM-BM-003-017]
     supports_freedoms: [FRE-BM-003-005]
     supports_ambiguities: [AMB-BM-003-004]
 
@@ -126,7 +126,7 @@ clauses:
     does_not_establish:
       - "any clearance, tolerance or fit"
       - "that a hand cannot apply significant force"
-    supports_invariants: [NRM-BM-003-005, NRM-BM-003-008, NRM-BM-003-014]
+    supports_invariants: [NRM-BM-003-005, NRM-BM-003-008, NRM-BM-003-017]
 
   - id: SRC-BM003-008
     verbatim: "Once it is open, it needs to stay open on its own."
@@ -205,7 +205,7 @@ clauses:
       afterwards is the same one the product started in.
     does_not_establish:
       - "exact repeatability of pose to any tolerance"
-    supports_invariants: [NRM-BM-003-012]
+    supports_invariants: [NRM-BM-003-012, NRM-BM-003-017]
 
   - id: SRC-BM003-013
     verbatim: >-
@@ -256,6 +256,29 @@ clauses:
       - "assembly force, time or ergonomics"
     supports_invariants: [NRM-BM-003-014, NRM-BM-003-015, NRM-BM-003-016]
     supports_ambiguities: [AMB-BM-003-008]
+
+reciprocity_rule:
+  statement: >
+    For every clause C:  C.supports_invariants  ==  {I | C in I.source_clauses}.
+    Exact set equality, both directions, enforced mechanically.
+  how_the_mismatches_were_repaired: >
+    Five of fifteen clauses disagreed at semantic review (F-07). Each was decided
+    on its merits rather than by deleting whichever side was inconvenient:
+
+      SRC-001  claimed NRM-001 and was cited by nothing. The real gap was that
+               the source's first sentence - a COMPACT FOLDING stand - had no
+               normative consequence at all. Repaired by adding NRM-018 rather
+               than by dropping the claim.
+      SRC-002  claimed NRM-002 and NRM-003, which did not cite it. They should:
+               legs folding to a stored position is part of why everything stays
+               attached there and why nothing is removed. Invariants corrected.
+      SRC-005  claimed NRM-005; NRM-017 cited it. Deployment being manual does
+               not by itself establish path connectedness (that is SRC-007), but
+               it does establish that a physical motion occurs, which NRM-017
+               needs. Clause corrected to match.
+      SRC-007  claimed NRM-014; NRM-017 cited it. Nothing coming apart WHILE
+               OPENING is not an assembly-sequence statement. Clause corrected.
+      SRC-012  under-claimed. NRM-017 cites it and it did not say so. Corrected.
 
 coverage_rule: >
   Every clause above must be referenced by at least one invariant, freedom or

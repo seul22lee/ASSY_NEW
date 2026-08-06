@@ -69,7 +69,7 @@ negative_cases:
     why_wrong: >
       The deployed state does not persist. The requirement is met by a name
       rather than by an obstruction.
-    expected_detection_predicate: "Folding freedom shown unavailable in DEPLOYED, with the blocking geometry identified (MOB-BM-003-002)."
+    expected_detection_predicate: "Persistence shown by the declared state-maintenance class's own predicate, via a compatible evidence route (MOB-BM-003-002)."
     expected_owning_stage: s04
     must_not_be_reported_as: [PASS]
     why_a_model_might_do_this: >
@@ -82,7 +82,7 @@ negative_cases:
       A release action is declared and performed, and folding remains blocked
       afterwards because the released element still obstructs the path.
     why_wrong: "The product cannot be folded. The release is ceremonial."
-    expected_detection_predicate: "Folding freedom available in RELEASED and unavailable in DEPLOYED (MOB-BM-003-003)."
+    expected_detection_predicate: "After the deliberate action, folding can proceed and the full path to STORED exists (MOB-BM-003-003, NRM-BM-003-011)."
     expected_owning_stage: s04
     must_not_be_reported_as: [PASS]
     why_a_model_might_do_this: >
@@ -123,7 +123,7 @@ negative_cases:
     why_wrong: >
       The joint exists as a field. Nothing physical connects the bodies, so
       neither the motion nor the retention it is credited with exists.
-    expected_detection_predicate: "Both participating bodies expose the realizing feature (NRM-BM-003-016)."
+    expected_detection_predicate: "Realization identified on all participating bodies OR functional regions per the declared realization class (NRM-BM-003-016)."
     expected_owning_stage: s05
     must_not_be_reported_as: [PASS]
     why_a_model_might_do_this: >
@@ -253,7 +253,7 @@ negative_cases:
       Compactness is relational and checkable even without an absolute target:
       folded must be smaller than deployed. Asserting it skips the one part that
       is decidable.
-    expected_detection_predicate: "Stored envelope compared against deployed envelope (NRM-BM-003-001)."
+    expected_detection_predicate: "At least one storage-relevant extent smaller in STORED than DEPLOYED (NRM-BM-003-018, MOB-BM-003-009)."
     expected_owning_stage: s07
     must_not_be_reported_as: [PASS]
     why_a_model_might_do_this: >
@@ -274,6 +274,44 @@ negative_cases:
     why_a_model_might_do_this: >
       Downstream stages need concrete values, and the shortest path to one is to
       write it into the requirement.
+
+  - id: NEG-BM-003-018
+    failure_class: PERSISTENCE_CLAIMED_FROM_AN_INCOMPATIBLE_ROUTE
+    mutation: >
+      A friction-dependent or compliant retention is reported PASS on the
+      strength of a zero-friction, ideal-joint, rigid-body model - or a
+      deformation-resolved assembly path is passed on rigid geometry alone.
+    why_wrong: >
+      The model contains no friction and resolves no contact, so it cannot
+      observe the mechanism the claim rests on. A clean result from it is not
+      weak evidence for the claim; it is no evidence at all.
+    expected_detection_predicate: "Persistence cites only an evidence class whose establishes_class matches the declared class (evidence_scope class_evidence_compatibility_rule)."
+    expected_owning_stage: s11
+    must_not_be_reported_as: [PASS]
+    correct_behaviour: "NOT_VERIFIED."
+    why_a_model_might_do_this: >
+      The kinematic model is the one that exists and runs cleanly. Accepting its
+      silence as confirmation is easier than recording that the required route is
+      unavailable.
+    added_at: "semantic review F-01, F-12"
+
+  - id: NEG-BM-003-019
+    failure_class: FOLDING_PATH_EXISTENCE_TREATED_AS_A_DEFECT
+    mutation: >
+      An over-centre or gravity-seated design is rejected because a mobility
+      analysis finds a folding kinematic path in DEPLOYED.
+    why_wrong: >
+      For those classes the path existing is the PREMISE, not the defect. The
+      state is maintained by an energy barrier, not by absence of the path.
+      Rejecting them here rejects a correct answer.
+    expected_detection_predicate: "Only SMC-KINEMATIC_BLOCK claims path absence; other classes declare folding_path_may_exist: true (state_maintenance_classes)."
+    expected_owning_stage: s04
+    must_not_be_reported_as: [FAIL, INFEASIBLE]
+    why_a_model_might_do_this: >
+      "Stays open" reads naturally as "cannot fold", and a DOF check is the
+      cheapest thing to run. This Oracle made exactly that error in its first
+      version.
+    added_at: "semantic review F-01"
 
 anti_inversion_statement: >
   No case above is the bare negation of an invariant. Each names a distinct

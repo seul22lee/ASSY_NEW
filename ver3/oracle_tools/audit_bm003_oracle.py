@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Deterministic, read-only auditor for the BM-003 HELD_OUT_BENCHMARK_ORACLE.
+"""BM-003 held-out Oracle: structural and declared-semantic consistency auditor.
+
+NAMED FOR WHAT IT DOES. It checks structure, and it checks that the pack's own
+DECLARED semantics agree with each other - that a family's declared
+state-maintenance class has a compatible evidence route, that an invariant does
+not require what a freedom frees, that a negative case anchors to a predicate
+that exists. It does NOT establish physical buildability, and no arrangement of
+these checks could.
 
 A separate tool from audit_oracles.py because BM-003's authority differs. The
 product_cases packs derive from frozen dossiers with rank-1 locators; BM-003
@@ -20,6 +27,9 @@ WHAT THIS TOOL CAN ESTABLISH
 
 WHAT IT CANNOT
   * that any invariant is physically true;
+  * that a declared state-maintenance class is the one the design actually uses -
+    the class is declared, and the auditor checks consequences of the
+    declaration, not its truth;
   * that the admissible families are actually buildable - their tags are authored
     by the same hand that authored the invariants, so a clean fixture result
     means the author was self-consistent, not that the world agrees;
@@ -46,6 +56,28 @@ REPO = os.path.dirname(ROOT)
 PACK = os.path.join(ROOT, "oracles", "held_out", "BM-003")
 SOURCE = os.path.join(ROOT, "benchmarks", "BM-003", "source", "request.txt")
 
+#: Semantic conditions that CANNOT be checked mechanically. Each becomes a
+#: required human review item rather than being quietly treated as validated.
+#: Listing them is the honest alternative to a check that only appears to run.
+UNCHECKABLE_REQUIRING_HUMAN_REVIEW = [
+    "Whether any invariant is physically true.",
+    "Whether a declared state-maintenance class is the principle the design really uses.",
+    "Whether the admissible families are buildable - they are conceptual witnesses.",
+    "Whether the Oracle is overfitted in a way nobody thought to encode as a check.",
+    "Whether a deployment sequence is comprehensible to a human user.",
+]
+
+#: Semantic conditions that CANNOT be checked mechanically. Each becomes a
+#: required human review item rather than being quietly treated as validated.
+#: Listing them is the honest alternative to a check that only appears to run.
+UNCHECKABLE_REQUIRING_HUMAN_REVIEW = [
+    "Whether any invariant is physically true.",
+    "Whether a declared state-maintenance class is the principle the design really uses.",
+    "Whether the admissible families are buildable - they are conceptual witnesses.",
+    "Whether the Oracle is overfitted in a way nobody thought to encode as a check.",
+    "Whether a deployment sequence is comprehensible to a human user.",
+]
+
 FILES = {
     "ledger": "source_clause_ledger.yaml",
     "normative": "normative.yaml",
@@ -71,6 +103,25 @@ MECHANISM_WORDS = [
 
 #: Files where mechanism vocabulary is legitimate.
 MECHANISM_PERMITTED_FILES = {"freedoms", "realizations", "negatives", "ledger", "governance"}
+
+#: Field names whose CONTENT is a list of what is admitted, excluded or historical.
+#: Naming a mechanism there is the opposite of requiring it, and a check that
+#: cannot tell the two apart forces the Oracle to stop explaining itself.
+ADMITTING_FIELDS = {
+    "admits", "admits_examples", "does_not_require", "explicitly_does_not_require",
+    "admissible_representations", "not_satisfied_by", "must_not", "why_wrong",
+    "what_was_removed_and_why", "what_changed", "defect_this_corrects",
+    "why_it_was_generalized", "why_it_was_added", "what_each_field_means",
+    "realization_classes", "admissible_path_kinds", "not_a_snap_force_benchmark",
+    "two_ways_to_satisfy_it", "the_distinction_that_matters", "how_the_mismatches_were_repaired",
+    "state_maintenance_principle", "barrier_or_blocking_mechanism", "release_principle",
+    "materially_different_because", "why_this_class_exists", "what_must_be_true",
+    "availability_note", "in_scope_if_available", "summary", "note",
+}
+
+
+def _in_admitting_context(path):
+    return any(part.split("[")[0] in ADMITTING_FIELDS for part in path.split("."))
 
 VALID_STATUSES = {"PASS", "FAIL", "NOT_VERIFIED", "UNSUPPORTED", "INDETERMINATE",
                   "NOT_EVALUABLE"}
@@ -187,6 +238,7 @@ METADATA_KEYS = {
     "schema_version", "source_sha256", "source_revision", "benchmark_id",
     "oracle_name", "authored_on", "frozen_on", "decision_date", "timestamp",
     "count", "total", "minimum_required", "quantitative", "interpretive",
+    "corrected_at", "added_at", "amendment_id", "record",
 }
 
 
@@ -195,10 +247,13 @@ def _semantic_text(text):
     text = re.sub(r"\b[0-9a-f]{16,}\b", "", text)                       # hashes
     text = re.sub(r"\b(?:NRM|SRC|AMB|FRE|NEG|ADM|INADM|CFG|TRN|ASM|MOB|EVC)-[A-Z0-9-]+", "", text)
     text = re.sub(r"\bBM-?00\d\b", "", text)                            # benchmark ids
-    text = re.sub(r"\bs\d\d\b", "", text)                               # stage ids
+    text = re.sub(r"\b[sS]\d\d\b", "", text)                            # stage ids, either case
     text = re.sub(r"\bV-[AB]\b", "", text)                               # fidelity labels
     text = re.sub(r"\b\d+\.\d+\.\d+\b", "", text)                      # semantic versions
     text = re.sub(r"\bVer[12]\b", "", text)                              # legacy version names
+    text = re.sub(r"\bF-\d+\b", "", text)                                # review finding ids
+    text = re.sub(r"\bSMC-[A-Z_]+\b", "", text)                          # class ids
+    text = re.sub(r"^\s*\(\d+\)|\s\(\d+\)", " ", text)                   # enumeration markers
     return text
 
 
@@ -250,6 +305,8 @@ def check_freedoms_not_contradicted(docs, findings):
         if key in MECHANISM_PERMITTED_FILES:
             continue
         for path, s in _walk_strings(docs[key]):
+            if _in_admitting_context(path) or path.startswith("$.state_maintenance_classes"):
+                continue
             low = s.lower()
             for word in MECHANISM_WORDS:
                 if not re.search(r"\b%s\b" % re.escape(word), low):
@@ -347,6 +404,11 @@ def check_evidence_scope(docs, findings):
                     findings.append(Finding("A-9", "BLOCKING", "UNKNOWN_EVIDENCE_CLASS",
                                             "%s -> %s" % (e["id"], name)))
 
+    if "class_evidence_compatibility_rule" not in docs["evidence"]:
+        findings.append(Finding(
+            "A-9", "BLOCKING", "NO_CLASS_EVIDENCE_COMPATIBILITY_RULE",
+            "without it, any family can be 'verified' by whichever route happens to exist"))
+
     for entry in docs["evidence"]["required_statuses"]["mapping"]:
         if entry["status"] not in VALID_STATUSES:
             findings.append(Finding("A-9", "BLOCKING", "UNKNOWN_REQUIRED_STATUS",
@@ -372,8 +434,13 @@ def check_no_structural_pass(docs, findings):
 
 def check_release_requirement_present(docs, findings):
     """A-11. The deliberate release is the benchmark's distinguishing requirement."""
-    texts = " ".join(s for _p, s in _walk_strings(docs["normative"]))
-    if "deliberate" not in texts.lower():
+    # Must be required by an INVARIANT. Searching the whole file would find the
+    # word inside the state-maintenance class definitions and report success
+    # while no invariant required anything.
+    requiring = [i["id"] for i in docs["normative"]["invariants"]
+                 if "deliberate" in (str(i.get("statement", "")) +
+                                     str(i.get("verification_predicate", ""))).lower()]
+    if not requiring:
         findings.append(Finding("A-11", "BLOCKING", "DELIBERATE_RELEASE_MISSING",
                                 "no invariant requires a deliberate action before folding"))
     cfg_ids = {c["id"] for c in docs["configurations"]["configurations"]}
@@ -499,6 +566,271 @@ def check_governance(docs, findings):
         findings.append(Finding("A-16", "BLOCKING", "SOURCE_HASH_NOT_VERIFIED", ""))
 
 
+
+# ---------------------------------------------------------------------------
+# Semantic checks added at the semantic review
+# ---------------------------------------------------------------------------
+
+def check_clause_reciprocity(docs, findings):
+    """B-1. C.supports_invariants == {I | C in I.source_clauses}, exactly.
+
+    The previous coverage check scanned free text for SRC- tokens, so a clause
+    could cite itself into apparent coverage. Set equality both ways closes it.
+    """
+    fwd = {c["id"]: set(c.get("supports_invariants", []))
+           for c in docs["ledger"]["clauses"]}
+    rev = {}
+    for inv in docs["normative"]["invariants"]:
+        for c in inv.get("source_clauses", []):
+            rev.setdefault(c, set()).add(inv["id"])
+    for cid in sorted(set(fwd) | set(rev)):
+        f, r = fwd.get(cid, set()), rev.get(cid, set())
+        if f != r:
+            findings.append(Finding("B-1", "BLOCKING", "CLAUSE_MAPPING_NOT_RECIPROCAL",
+                                    "%s claims %s but is cited by %s" % (cid, sorted(f), sorted(r))))
+
+
+def check_family_class_and_route(docs, findings):
+    """B-2/B-4/B-14. Each family declares a class, and a route compatible with it."""
+    classes = {c["id"]: c for c in docs["normative"]["state_maintenance_classes"]}
+    routes = {}
+    for c in docs["evidence"]["evidence_classes"]:
+        if "establishes_class" in c:
+            routes.setdefault(c["establishes_class"], []).append(c["name"])
+    for fam in docs["realizations"]["admissible_realizations"]:
+        fid = fam["id"]
+        cls = fam.get("state_maintenance_class")
+        if not cls:
+            findings.append(Finding("B-2", "BLOCKING", "FAMILY_WITHOUT_CLASS", fid))
+            continue
+        if cls not in classes:
+            findings.append(Finding("B-2", "BLOCKING", "FAMILY_UNKNOWN_CLASS", "%s -> %s" % (fid, cls)))
+            continue
+        route = fam.get("required_evidence_route")
+        if not route:
+            findings.append(Finding("B-2", "BLOCKING", "FAMILY_WITHOUT_EVIDENCE_ROUTE", fid))
+            continue
+        if cls != "SMC-OTHER_DECLARED_PHYSICAL_PRINCIPLE" and route not in routes.get(cls, []):
+            findings.append(Finding(
+                "B-4", "BLOCKING", "EVIDENCE_ROUTE_INCOMPATIBLE_WITH_CLASS",
+                "%s declares %s but its route %r establishes %s" % (
+                    fid, cls, route, [k for k, v in routes.items() if route in v] or "nothing")))
+        # A family whose route is unavailable must not claim its persistence established.
+        avail = fam.get("evidence_route_available_now")
+        status = fam.get("persistence_claim_status")
+        if avail is False and status != "NOT_VERIFIED":
+            findings.append(Finding(
+                "B-14", "BLOCKING", "PERSISTENCE_CLAIMED_WITHOUT_AN_AVAILABLE_ROUTE",
+                "%s route unavailable but status is %r" % (fid, status)))
+        if avail is True and status not in ("ESTABLISHABLE", "NOT_VERIFIED"):
+            findings.append(Finding("B-14", "BLOCKING", "UNKNOWN_PERSISTENCE_STATUS",
+                                    "%s -> %r" % (fid, status)))
+
+
+def check_folding_path_not_universally_forbidden(docs, findings):
+    """B-3. Only SMC-KINEMATIC_BLOCK may claim the folding path is absent.
+
+    The defect this exists for: an invariant demanding DOF absence silently
+    rejects over-centre, gravity-seated and compliant designs, all of which have
+    a folding path by construction.
+    """
+    classes = {c["id"]: c for c in docs["normative"]["state_maintenance_classes"]}
+    for cid, c in classes.items():
+        if cid == "SMC-KINEMATIC_BLOCK":
+            if c.get("folding_path_may_exist") is not False:
+                findings.append(Finding("B-3", "BLOCKING", "KINEMATIC_BLOCK_MISDECLARED", cid))
+        elif cid != "SMC-OTHER_DECLARED_PHYSICAL_PRINCIPLE":
+            if c.get("folding_path_may_exist") is not True:
+                findings.append(Finding(
+                    "B-3", "BLOCKING", "NON_BLOCK_CLASS_FORBIDS_FOLDING_PATH",
+                    "%s must permit a folding path to exist" % cid))
+
+    persist = next(i for i in docs["normative"]["invariants"] if i["id"] == "NRM-BM-003-009")
+    blob = " ".join(str(v) for k, v in persist.items() if k != "explicitly_does_not_require").lower()
+    for phrase in ("degree of freedom of each leg is shown blocked",
+                   "folding motion is unavailable while"):
+        if phrase in blob:
+            findings.append(Finding("B-3", "BLOCKING", "PERSISTENCE_REQUIRES_DOF_ABSENCE",
+                                    "NRM-BM-003-009 demands kinematic absence: %r" % phrase))
+    for fam in docs["realizations"]["admissible_realizations"]:
+        if fam.get("folding_path_exists_in_deployed") and \
+                fam.get("state_maintenance_class") == "SMC-KINEMATIC_BLOCK":
+            findings.append(Finding("B-3", "BLOCKING", "CLASS_CONTRADICTS_DECLARED_PATH",
+                                    "%s declares a folding path under SMC-KINEMATIC_BLOCK" % fam["id"]))
+
+
+def check_compliant_realization_not_excluded(docs, findings):
+    """B-5. A monolithic compliant realization must not be barred by a two-body rule."""
+    vm = next(i for i in docs["normative"]["invariants"] if i["id"] == "NRM-BM-003-016")
+    pred = str(vm.get("verification_predicate", "")).lower()
+    for phrase in ("both participating bodies", "each participating body"):
+        if phrase in pred:
+            findings.append(Finding("B-5", "BLOCKING", "BILATERAL_INTERFACE_RULE",
+                                    "NRM-BM-003-016 requires %r, excluding a monolithic flexure" % phrase))
+    if "MONOLITHIC_COMPLIANT" not in str(vm.get("realization_classes", {})):
+        findings.append(Finding("B-5", "BLOCKING", "NO_MONOLITHIC_REALIZATION_CLASS",
+                                "NRM-BM-003-016 declares no monolithic compliant class"))
+
+
+def check_assembly_endpoint_freedom(docs, findings):
+    """B-6. The declared assembly-endpoint freedom must be in the graph, not a note."""
+    t = next(x for x in docs["configurations"]["transitions"] if x["id"] == "TRN-BM-003-ASSEMBLE")
+    targets = t.get("to_any_of") or ([t["to"]] if "to" in t else [])
+    if "CFG-BM-003-STORED" not in targets or "CFG-BM-003-DEPLOYED" not in targets:
+        findings.append(Finding("B-6", "BLOCKING", "ASSEMBLY_ENDPOINT_FREEDOM_NOT_IN_GRAPH",
+                                "TRN-BM-003-ASSEMBLE targets %s" % targets))
+
+
+#: Named rules in the pack that a negative case may legitimately anchor to when
+#: the condition is a pack-wide rule rather than a single invariant.
+NAMED_PACK_RULES = [
+    "class_evidence_compatibility_rule", "prohibited_inferences", "overclaim_rule",
+    "state_maintenance_classes", "resolution_rule", "required_statuses",
+    "no_unstated_numeric_threshold", "binding_rule", "three_leg_completeness_rule",
+    "structural_analysis",
+]
+
+
+def check_negative_cases_anchor_to_predicates(docs, findings):
+    """B-7/B-8. Every negative case anchors to a normative or evidential predicate."""
+    known = {i["id"] for i in docs["normative"]["invariants"]}
+    for g in ("assembly_expectations", "mobility_expectations"):
+        known |= {e["id"] for e in docs["expectations"][g]}
+    for neg in docs["negatives"]["negative_cases"]:
+        pred = neg.get("expected_detection_predicate", "")
+        refs = re.findall(r"(?:NRM|ASM|MOB)-BM-003-\d+", pred)
+        other = re.findall(r"(?:FRE|AMB|SMC)-[A-Z0-9_-]+", pred)
+        named = [r for r in NAMED_PACK_RULES if r in pred]
+        if not refs and not other and not named:
+            findings.append(Finding("B-7", "BLOCKING", "NEGATIVE_CASE_WITHOUT_NORMATIVE_ANCHOR",
+                                    "%s anchors to nothing that exists: %r" % (neg["id"], pred[:70])))
+        for r in refs:
+            if r not in known:
+                findings.append(Finding("B-7", "BLOCKING", "NEGATIVE_CASE_DANGLING_ANCHOR",
+                                        "%s -> %s" % (neg["id"], r)))
+    # B-8: compactness specifically must have a normative anchor.
+    compact = [n for n in docs["negatives"]["negative_cases"]
+               if "compact" in (n["id"] + str(n.get("failure_class", "")) + str(n.get("mutation", ""))).lower()]
+    inv_ids = {i["id"] for i in docs["normative"]["invariants"]}
+    for n in compact:
+        if not any(r in inv_ids for r in re.findall(r"NRM-BM-003-\d+", n.get("expected_detection_predicate", ""))):
+            findings.append(Finding("B-8", "BLOCKING", "COMPACTNESS_WITHOUT_NORMATIVE_ANCHOR", n["id"]))
+
+
+def check_release_representation_freedom(docs, findings):
+    """B-9/B-10. Deliberate release mandatory; a persistent RELEASED pose is not."""
+    rel = next(c for c in docs["configurations"]["configurations"] if c["id"] == "CFG-BM-003-RELEASED")
+    if rel.get("representation_status") != "OPTIONAL":
+        findings.append(Finding("B-9", "BLOCKING", "RELEASED_CONFIGURATION_MANDATORY",
+                                "CFG-BM-003-RELEASED representation_status=%r" % rel.get("representation_status")))
+    if not rel.get("admissible_representations"):
+        findings.append(Finding("B-9", "BLOCKING", "NO_ALTERNATIVE_RELEASE_REPRESENTATIONS", ""))
+
+    inv = next((i for i in docs["normative"]["invariants"]
+                if i["id"] == "NRM-BM-003-011"), None)
+    if inv is None:
+        # A-11 reports the substantive loss; this check must not crash on it.
+        return
+    if "distinct RELEASED configuration exists" in str(inv.get("verification_predicate", "")):
+        findings.append(Finding("B-9", "BLOCKING", "PERSISTENT_RELEASED_REQUIRED_BY_INVARIANT", inv["id"]))
+
+    operative = []
+    for cfg in docs["configurations"]["configurations"]:
+        for k, v in cfg.items():
+            if k in ADMITTING_FIELDS or k in ("what_was_removed_and_why", "corrected_at"):
+                continue
+            operative.append(json.dumps(v))
+    for inv in docs["normative"]["invariants"]:
+        for k, v in inv.items():
+            if k in ADMITTING_FIELDS or k == "corrected_at":
+                continue
+            operative.append(json.dumps(v))
+    blob = " ".join(operative)
+    for phrase in ("exactly one respect", "ONLY that one", "only that one",
+                   "and ONLY that", "exactly one state-maintaining"):
+        if phrase in blob:
+            findings.append(Finding("B-10", "BLOCKING", "EXACTLY_ONE_CHANGE_RESTRICTION",
+                                    "unsupported by the source: %r" % phrase))
+
+
+def check_unresolved_preservation_is_cumulative(docs, findings):
+    """B-11. Every ambiguity is preserved at every stage."""
+    all_amb = {a["id"] for a in docs["ambiguities"]["ambiguities"]}
+    for sid, spec in docs["stages"]["stages"].items():
+        if "must_preserve_unresolved" not in spec:
+            findings.append(Finding("B-11", "BLOCKING", "NO_CUMULATIVE_UNRESOLVED_LIST", sid))
+            continue
+        missing = all_amb - set(spec["must_preserve_unresolved"])
+        if missing:
+            findings.append(Finding("B-11", "BLOCKING", "UNRESOLVED_ITEM_DROPPED_AT_STAGE",
+                                    "%s drops %s" % (sid, sorted(missing))))
+        for a in spec.get("stage_relevant_unresolved", []):
+            if a not in all_amb:
+                findings.append(Finding("B-11", "BLOCKING", "DANGLING_AMBIGUITY_REF", "%s -> %s" % (sid, a)))
+
+
+def check_s05_may_embody_selected_candidate(docs, findings):
+    """B-12. S05 must embody the selected candidate; only substitution is barred."""
+    s05 = docs["stages"]["stages"]["s05"]
+    for entry in s05.get("must_not_decide", []):
+        low = entry.lower()
+        if "mechanism family is correct" in low or ("which mechanism family" in low and "substitut" not in low):
+            findings.append(Finding("B-12", "BLOCKING", "S05_FORBIDDEN_TO_EMBODY",
+                                    "s05 must_not_decide: %r" % entry))
+    if not s05.get("must_embody_selected_candidate"):
+        findings.append(Finding("B-12", "BLOCKING", "S05_EMBODIMENT_NOT_REQUIRED", ""))
+    if "candidate_selection_ownership" not in docs["stages"]:
+        findings.append(Finding("B-12", "BLOCKING", "NO_SELECTION_OWNERSHIP_RECORD", ""))
+
+
+def check_governance_independence_claims(docs, findings):
+    """B-13. No claim of independent authorship when the author is the same."""
+    ai = docs["governance"].get("author_independence")
+    if not ai:
+        findings.append(Finding("B-13", "BLOCKING", "NO_AUTHOR_INDEPENDENCE_RECORD", ""))
+        return
+    for field in ("authored_in_separate_task", "independent_author",
+                  "author_independence_status", "production_generation_isolated",
+                  "human_independence_review"):
+        if field not in ai:
+            findings.append(Finding("B-13", "BLOCKING", "INDEPENDENCE_FIELD_MISSING", field))
+    if ai.get("independent_author") and ai.get("author_independence_status") == "SAME_AGENT_SEPARATE_TASK":
+        findings.append(Finding("B-13", "BLOCKING", "INDEPENDENCE_CLAIM_CONTRADICTS_STATUS", ""))
+    if ai.get("production_generation_isolated") is not True:
+        findings.append(Finding("B-13", "BLOCKING", "PRODUCTION_ISOLATION_NOT_ASSERTED", ""))
+
+
+def check_descriptor_matches_governance(docs, findings, descriptor_path=None):
+    """B-13b. The descriptor must not claim more independence than governance supports."""
+    path = descriptor_path or os.path.join(ROOT, "benchmarks", "BM-003", "descriptor.yaml")
+    if not os.path.isfile(path):
+        return
+    with open(path, encoding="utf-8") as fh:
+        desc = yaml.safe_load(fh)
+    ai = docs["governance"].get("author_independence", {})
+    claimed = desc.get("oracle", {}).get("authored_independently")
+    if claimed is True and ai.get("independent_author") is False:
+        findings.append(Finding("B-13", "BLOCKING", "DESCRIPTOR_OVERCLAIMS_INDEPENDENCE",
+                                "descriptor authored_independently=true, governance independent_author=false"))
+
+
+def check_human_review_not_claimed_complete(docs, findings):
+    """B-15. Same-agent self-review is not independent approval."""
+    auth = docs["governance"]["authority"]
+    if auth.get("human_review_status") not in ("PENDING", "COMPLETE"):
+        findings.append(Finding("B-15", "BLOCKING", "UNKNOWN_HUMAN_REVIEW_STATUS",
+                                str(auth.get("human_review_status"))))
+    ai = docs["governance"].get("author_independence", {})
+    if auth.get("human_review_status") == "COMPLETE" and ai.get("independent_author") is False:
+        findings.append(Finding("B-15", "BLOCKING", "SELF_REVIEW_PRESENTED_AS_HUMAN_APPROVAL", ""))
+
+
+def check_unmechanisable_items_are_declared(docs, findings):
+    """B-16. What cannot be checked must be named, not silently assumed validated."""
+    if not UNCHECKABLE_REQUIRING_HUMAN_REVIEW:
+        findings.append(Finding("B-16", "BLOCKING", "NO_UNCHECKABLE_ITEMS_DECLARED", ""))
+
+
 CHECKS = [
     check_source_hash, check_clause_coverage, check_normative_provenance,
     check_no_unstated_numeric_threshold, check_no_preferred_realization,
@@ -507,6 +839,15 @@ CHECKS = [
     check_no_structural_pass, check_release_requirement_present,
     check_stage_expectations, check_ambiguities, check_ids_unique_and_resolve,
     check_fixture_permissiveness, check_governance,
+    # semantic checks
+    check_clause_reciprocity, check_family_class_and_route,
+    check_folding_path_not_universally_forbidden,
+    check_compliant_realization_not_excluded, check_assembly_endpoint_freedom,
+    check_negative_cases_anchor_to_predicates, check_release_representation_freedom,
+    check_unresolved_preservation_is_cumulative,
+    check_s05_may_embody_selected_candidate, check_governance_independence_claims,
+    check_descriptor_matches_governance, check_human_review_not_claimed_complete,
+    check_unmechanisable_items_are_declared,
 ]
 
 
@@ -541,6 +882,8 @@ def main():
         "oracle": "HELD_OUT_BENCHMARK_ORACLE",
         "benchmark_id": "BM-003",
         "checks_run": len(CHECKS),
+        "auditor_kind": "structural and declared-semantic consistency auditor",
+        "does_not_establish": UNCHECKABLE_REQUIRING_HUMAN_REVIEW,
         "findings": [f.as_dict() for f in findings],
         "counts": {"total": len(findings), "BLOCKING": len(blocking)},
         "result": "PASS" if not blocking else "FAIL",

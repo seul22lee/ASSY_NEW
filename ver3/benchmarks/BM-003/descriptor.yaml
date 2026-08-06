@@ -8,7 +8,7 @@
 schema_version: "0.1.0"
 benchmark_id: BM-003
 title: "Compact folding three-leg desktop stand"
-status: ORACLE_READY
+status: ORACLE_SEMANTIC_REVIEW_COMPLETE_HUMAN_APPROVAL_PENDING
 
 source:
   request_path: ver3/benchmarks/BM-003/source/request.txt
@@ -31,9 +31,20 @@ oracle:
   # stay readable without the answer key becoming readable with it.
   location: ver3/oracles/held_out/BM-003/
   oracle_name: HELD_OUT_BENCHMARK_ORACLE
-  authored_independently: true
+  authored_in_separate_task: true
+  independent_author: false
+  author_independence_status: SAME_AGENT_SEPARATE_TASK
+  production_generation_isolated: true
+  human_independence_review: PENDING
+  independence_note: >
+    The descriptor must not claim more independence than GOVERNANCE.yaml
+    supports. The same agent authored the BM-003 source and this Oracle in
+    separate tasks. What protects the benchmark is production isolation - no
+    stage can read the Oracle - not author independence, which is absent.
   frozen_before_source_only_runs: true
   authority_status: FROZEN
+  semantic_review_status: SELF_REVIEW_COMPLETE
+  human_semantic_approval: PENDING
   auditor: ver3/oracle_tools/audit_bm003_oracle.py
   hash_manifest: ver3/oracles/held_out/BM-003/ORACLE_HASHES.yaml
   visible_to: [evaluator, human_reviewers]
@@ -55,12 +66,18 @@ output:
   evaluations: ver3/benchmarks/BM-003/evaluations/
   layout: "see BENCHMARK_RESULT_CONTRACT run_output_layout"
 
-oracle_ready_notice:
+oracle_status_notice:
   state: >
-    BM-003's source is HUMAN-APPROVED and FROZEN, and its held-out Oracle is
-    authored and FROZEN. The benchmark is now SCORABLE: an evaluator has both the
-    source a run consumes and the acceptance specification to judge it against.
-    No positive executable reference exists, and none is required - a positive
+    BM-003's source is HUMAN-APPROVED and FROZEN. Its held-out Oracle is authored,
+    semantically self-reviewed and corrected, cryptographically frozen, and
+    STRUCTURALLY SCORABLE. Production visibility remains false.
+
+    What is NOT true: the Oracle has not been independently approved. The same
+    agent authored the source, the Oracle and the semantic review, so the review
+    is self-review however thorough it was. Independent human semantic approval
+    is PENDING, and the status name says so rather than rounding it up to READY.
+
+    No positive executable reference exists and none is required - a positive
     reference validates the evaluator, it does not define success.
   blocks:
     - "Nothing further from BM-003's side. FSF-02 hidden-Oracle readiness is now satisfied for this benchmark."

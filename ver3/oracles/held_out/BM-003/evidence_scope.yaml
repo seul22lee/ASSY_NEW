@@ -74,6 +74,13 @@ evidence_classes:
       - "Behaviour under impact or vibration."
     structural_artifacts:
       - "A DOF count derived from declared joints reproduces the declared joints. It is only evidence when the joints are geometrically realized (NRM-BM-003-016)."
+    establishes_class: SMC-KINEMATIC_BLOCK
+    establishes_only_that_class: >
+      Mobility analysis answers "is this motion available?". For
+      SMC-KINEMATIC_BLOCK that IS the question. For the other classes the motion
+      is available by premise, so a mobility result neither confirms nor refutes
+      them - and reporting a found folding path as a FAILURE of an over-centre
+      design is the specific error corrected at F-01.
     supports: [NRM-BM-003-009, NRM-BM-003-010, NRM-BM-003-011]
 
   - id: EVC-BM-003-KINEMATIC_SIM
@@ -96,6 +103,48 @@ evidence_classes:
       - "A constraint that closes a loop holds the loop closed by construction. Loop closure is not evidence that the physical arrangement would."
     supports: [NRM-BM-003-005, NRM-BM-003-012, NRM-BM-003-013, NRM-BM-003-017]
 
+  - id: EVC-BM-003-STABILITY
+    name: rigid_body_stability_analysis
+    what_it_is: >
+      Potential-energy or rigid-body stability analysis of a configuration under
+      declared operating assumptions.
+    availability: NOT_AVAILABLE_IN_THIS_BENCHMARK
+    in_scope_if_available:
+      - "That a deployed configuration is a stable equilibrium under the declared assumptions."
+      - "That an energy barrier separates the deployed configuration from the folding path."
+    out_of_scope:
+      - "Disturbance tolerance or margin - that needs a stated disturbance, which the source does not give."
+      - "Stress, capacity, contact pressure."
+    structural_artifacts:
+      - >
+        A model in which the leg is constrained to its joint axis will find that
+        axis stable by construction. Stability is only evidence when the
+        constraint set is the realized one.
+    establishes_class: SMC-STABLE_EQUILIBRIUM_OR_ENERGY_BARRIER
+    consequence_of_absence: >
+      Over-centre and gravity-seated persistence claims are NOT_VERIFIED. The
+      realizations remain ADMISSIBLE - the toolset's limits bound what may be
+      CLAIMED, never what may be BUILT.
+    added_at: "semantic review F-12"
+
+  - id: EVC-BM-003-COMPLIANCE
+    name: reduced_order_compliance_analysis
+    what_it_is: "A declared reduced-order model of an elastic member's deflection and return."
+    availability: NOT_AVAILABLE_IN_THIS_BENCHMARK
+    in_scope_if_available:
+      - "That a compliant region can deflect enough to permit the declared engagement."
+      - "That the declared deformation mode is the one the design relies on."
+    out_of_scope:
+      - "Stress, fatigue, lifetime, insertion force."
+      - "Whether the member returns reliably over many cycles."
+    structural_artifacts:
+      - "A prescribed deflection reproduces itself. A modelled deflection is evidence only if the model is not the claim."
+    establishes_class: SMC-CONTACT_OR_COMPLIANT_RETENTION
+    consequence_of_absence: >
+      Compliant engagement persistence is NOT_VERIFIED, and a
+      deformation-resolved assembly path is NOT_VERIFIED. Both remain ADMISSIBLE.
+    added_at: "semantic review F-12"
+
   - id: EVC-BM-003-CONTACT
     name: contact_resolving_analysis
     what_it_is: "Analysis in which contact between surfaces is resolved rather than declared."
@@ -103,7 +152,9 @@ evidence_classes:
     in_scope_if_available:
       - "Whether a declared interference actually engages."
       - "Jamming, binding and wedging behaviour."
+      - "Friction-dependent retention, under a declared friction assumption."
     out_of_scope: ["Stress and capacity, which need structural analysis even with contact resolved."]
+    establishes_class: SMC-CONTACT_OR_COMPLIANT_RETENTION
     consequence_of_absence: >
       Every contact-dependent property is NOT_VERIFIED or UNSUPPORTED for BM-003.
       No invariant in this Oracle depends on one, which is deliberate: an Oracle
@@ -170,6 +221,12 @@ required_statuses:
     - property: "Fatigue, wear, lifetime"
       status: UNSUPPORTED
       because: "No method available; no duty cycle stated."
+    - property: "Over-centre or gravity-seated persistence"
+      status: NOT_VERIFIED
+      because: "No stability or potential-energy route is available (EVC-BM-003-STABILITY)."
+    - property: "Compliant or friction-dependent retention persistence"
+      status: NOT_VERIFIED
+      because: "No contact or compliance route is available (EVC-BM-003-CONTACT, EVC-BM-003-COMPLIANCE)."
     - property: "Contact-level jamming, binding, looseness"
       status: NOT_VERIFIED
       because: "The method exists in principle but is not available here."
@@ -188,6 +245,19 @@ required_statuses:
     - property: "Acceptable user effort"
       status: NOT_EVALUABLE
       because: "AMB-BM-003-004: no criterion is stated."
+
+class_evidence_compatibility_rule:
+  statement: >
+    A persistence claim may cite only an evidence class whose `establishes_class`
+    matches the design's declared state-maintenance class.
+  why: >
+    Without it, any family can be "verified" by whichever route happens to be
+    available - which is exactly how a friction-dependent retention gets a PASS
+    from a zero-friction model that contains no friction at all.
+  required_outcome_when_no_compatible_route_exists: NOT_VERIFIED
+  applies_to: [SMC-KINEMATIC_BLOCK, SMC-STABLE_EQUILIBRIUM_OR_ENERGY_BARRIER,
+               SMC-CONTACT_OR_COMPLIANT_RETENTION, SMC-OTHER_DECLARED_PHYSICAL_PRINCIPLE]
+  added_at: "semantic review F-01, F-12"
 
 overclaim_rule:
   statement: >

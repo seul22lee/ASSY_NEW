@@ -4,11 +4,19 @@
 # connect. This is the frame the mobility and assembly expectations are written
 # against.
 #
-# NAMING IS NOT NORMATIVE. A design that represents the same distinctions under
-# other names, or that merges two of these into one where the source does not
-# distinguish them, satisfies this model. What is normative is the DISTINCTIONS:
-# in particular that DEPLOYED and RELEASED differ in available mobility, because
-# that difference is the entire content of "something deliberate before folding".
+# NAMING IS NOT NORMATIVE, AND NEITHER IS THE CONFIGURATION COUNT. A design that
+# represents the same distinctions under other names, or that merges two of these
+# where the source does not distinguish them, satisfies this model.
+#
+# What IS normative: folding does not begin without a deliberate action, and does
+# become possible after one. Whether the condition between those two facts is a
+# stable pose, a transient one, an event or a guard is free - the source asks for
+# a deliberate action, not for an observable intermediate state.
+#
+# "Prohibited mobility" throughout means the product does not ENTER that motion
+# under ordinary declared operation. It does not mean the motion is absent from
+# the configuration space; requiring that would admit only hard kinematic
+# blocking and reject over-centre, gravity-seated and compliant designs.
 
 schema_version: "0.1.0"
 oracle_name: HELD_OUT_BENCHMARK_ORACLE
@@ -80,24 +88,41 @@ configurations:
     allowed_gross_mobility:
       - "The deliberate release action, and nothing else."
     prohibited_gross_mobility:
-      - "Folding of any leg (NRM-BM-003-011)."
-      - "Twisting of any leg out of its deployed orientation."
-      - "Gross translation of any leg out of position."
-      - "Detachment of any leg or component."
-      - "Any other gross rigid-body freedom not declared intended (NRM-BM-003-010)."
+      note: >
+        "Prohibited" means the product DOES NOT ENTER these under ordinary
+        declared operation before the deliberate release. For SMC-KINEMATIC_BLOCK
+        that is because the motion is geometrically unavailable; for the other
+        classes it is because an energy barrier or a declared physical
+        interaction keeps it out. Both satisfy the requirement.
+      motions:
+        - "Folding of any leg (NRM-BM-003-011)."
+        - "Twisting of any leg out of its deployed orientation."
+        - "Gross translation of any leg out of position."
+        - "Detachment of any leg or component - normally kinematic, via retention."
+        - "Any other gross rigid-body freedom not declared intended (NRM-BM-003-010)."
     active_retention:
       - "Every attachment relationship."
-      - "The state-maintaining relationship that blocks folding."
+      - "The declared state-maintaining relationship, of whatever class."
     permitted_transitions: [TRN-BM-003-RELEASE]
     the_distinguishing_property: >
-      DEPLOYED is defined by what it CANNOT do. If folding is available here, the
-      configuration is not DEPLOYED in this model's sense, however the design
-      names it.
+      DEPLOYED is defined by what the product DOES NOT DO without a deliberate
+      action - not by what its configuration space contains. An over-centre or
+      gravity-seated design has a folding path and is still in DEPLOYED, because
+      it does not travel that path on its own.
+    what_changed: >
+      This entry previously read "DEPLOYED is defined by what it CANNOT do. If
+      folding is available here, the configuration is not DEPLOYED" - which
+      excluded every non-kinematic-block realization.
+    corrected_at: "semantic review F-01"
 
   - id: CFG-BM-003-RELEASED
     name: RELEASED
+    representation_status: OPTIONAL
     source_basis: [SRC-BM003-011, SRC-BM003-012]
-    what_it_is: "After the deliberate action, before folding begins. Geometrically close to DEPLOYED; different in mobility."
+    what_it_is: >
+      The condition after the deliberate action and before folding completes.
+      It MAY be a persistent configuration, a transient one, a transition event
+      or a guard - see admissible_representations below.
     required_connectedness: "Fully connected. Release must not detach anything (NRM-BM-003-003)."
     allowed_gross_mobility:
       - "Folding of the legs toward STORED."
@@ -106,13 +131,28 @@ configurations:
       - "Detachment of any normal component."
     active_retention:
       - "Every attachment relationship remains active."
-      - "The state-maintaining relationship is disengaged - and ONLY that one."
+      - "One or MORE state-maintaining relationships may disengage."
     permitted_transitions: [TRN-BM-003-FOLD, TRN-BM-003-REENGAGE]
+    admissible_representations:
+      - "a persistent RELEASED configuration"
+      - "a transient release configuration"
+      - "a transition event"
+      - "a transition guard on TRN-BM-003-FOLD"
+      - "a combined deliberate release-and-fold initiation"
+      - "coordinated release actions affecting several legs or retention relations"
     the_distinguishing_property: >
-      RELEASED must differ from DEPLOYED in exactly one respect: folding is now
-      available. A release that changes nothing about mobility is not a release
-      (NEG-BM-003-005), and a release that detaches a component violates the
-      no-loose-parts requirement.
+      What must be true is that folding does not begin without the deliberate
+      action, and does become possible after it. HOW MANY relationships change,
+      and whether the intermediate condition is a stable pose at all, are free.
+    what_was_removed_and_why: >
+      This entry previously required RELEASED to be a distinct persistent
+      configuration differing from DEPLOYED "in exactly one respect", with "ONLY
+      that one" relationship disengaged. Both rejected coherent designs: a
+      squeeze-and-fold grip has no stable released pose, and a three-leg
+      distributed release changes three relationships. The second also
+      contradicted FRE-BM-003-004, which frees central-versus-distributed
+      coordination.
+    corrected_at: "semantic review F-02, F-03"
 
   - id: CFG-BM-003-FOLDING
     name: FOLDING
@@ -133,14 +173,20 @@ transitions:
 
   - id: TRN-BM-003-ASSEMBLE
     from: CFG-BM-003-UNASSEMBLED
-    to: CFG-BM-003-STORED
+    to_any_of: [CFG-BM-003-STORED, CFG-BM-003-DEPLOYED]
     trigger: "Assembly, performed once before operational use."
     source_basis: [SRC-BM003-015]
     requires:
       - "An ordered sequence with a collision-free path for each step (NRM-BM-003-014)."
       - "Acyclic step dependencies."
       - "Activation of every relationship the operation depends on (NRM-BM-003-015)."
-    note: "The terminal configuration may equally be DEPLOYED; the source does not say which state a new product arrives in."
+      - "The completed product can subsequently traverse the full operational cycle, whichever endpoint assembly reaches."
+    freedom_realized: FRE-BM-003-013
+    what_changed: >
+      The edge was fixed to STORED with a prose note saying DEPLOYED was equally
+      acceptable. A checker walks the graph, not the note, so the declared
+      freedom was unreachable. Typed as to_any_of.
+    corrected_at: "semantic review F-05"
 
   - id: TRN-BM-003-DEPLOY
     from: CFG-BM-003-STORED
@@ -167,17 +213,24 @@ transitions:
 
   - id: TRN-BM-003-RELEASE
     from: CFG-BM-003-DEPLOYED
-    to: CFG-BM-003-RELEASED
+    to_any_of: [CFG-BM-003-RELEASED, CFG-BM-003-FOLDING]
     trigger: "A DELIBERATE user action, declared by the design."
     source_basis: [SRC-BM003-011]
     requires:
-      - "The action is distinct from the folding motion itself (NRM-BM-003-011)."
+      - "The action is deliberate: folding does not begin without it (NRM-BM-003-011)."
       - "It is performable by hand, without tools."
       - "It detaches nothing."
+    may_be_represented_as: [configuration, transient_configuration, event, guard, combined_with_folding]
     deliberateness_criterion: >
-      The action must not be a mere continuation of the folding motion. If pushing
-      a leg toward stored is itself the release, then folding was never blocked
-      and the deployed state did not persist against anything.
+      The action must not be something the product does under ordinary
+      unintentional handling. It MAY be concurrent with the start of folding - a
+      squeeze that both releases and begins the motion is deliberate, because
+      the squeeze is not ordinary handling.
+    what_changed: >
+      Previously required the action to be "distinct from the folding motion
+      itself" and the target to be a persistent RELEASED configuration. Both
+      rejected combined release-and-fold designs, which the source permits.
+    corrected_at: "semantic review F-02"
     explicitly_not_required: >
       No disturbance magnitude, force threshold or impact energy. "So it does not
       collapse just because I knocked it" is the user's REASON, not a load case.

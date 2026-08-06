@@ -210,21 +210,33 @@ class TestBenchmarkSkeleton(unittest.TestCase):
         for item in ("an Oracle", "a mechanism selection", "CAD", "an evaluation"):
             self.assertIn(item, man["this_task_did_not_produce"])
 
-    def test_bm003_is_now_scorable(self):
-        """Source frozen AND Oracle frozen: the benchmark can finally be judged.
+    def test_bm003_status_means_what_it_says(self):
+        """The status must not round self-review up to approval.
 
-        Both halves were required. A frozen source with no Oracle is unscorable,
-        and an Oracle written after a run is no Oracle at all - so the ordering
-        matters as much as the existence.
+        Four things are simultaneously true and the status name has to carry all
+        of them: the Oracle is frozen, it has been semantically reviewed, the
+        benchmark is structurally scorable, and NO human has independently
+        approved it. A status of ORACLE_READY would have asserted the fourth
+        away.
         """
         d = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
+        self.assertEqual("ORACLE_SEMANTIC_REVIEW_COMPLETE_HUMAN_APPROVAL_PENDING", d["status"])
         self.assertTrue(_paths.source_manifest("BM-003")["frozen"])
-        self.assertEqual("ORACLE_READY", d["status"])
-        self.assertTrue(d["oracle"]["authored_independently"])
-        self.assertTrue(d["oracle"]["frozen_before_source_only_runs"])
         self.assertEqual("FROZEN", d["oracle"]["authority_status"])
+        self.assertTrue(d["oracle"]["frozen_before_source_only_runs"])
+        self.assertEqual("SELF_REVIEW_COMPLETE", d["oracle"]["semantic_review_status"])
+        self.assertEqual("PENDING", d["oracle"]["human_semantic_approval"])
         self.assertTrue(os.path.isdir(os.path.join(
             _paths.VER3, "oracles", "held_out", "BM-003")))
+
+    def test_bm003_descriptor_does_not_claim_independent_authorship(self):
+        """It must not claim more independence than GOVERNANCE.yaml supports."""
+        d = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))["oracle"]
+        self.assertNotIn("authored_independently", d)
+        self.assertFalse(d["independent_author"])
+        self.assertEqual("SAME_AGENT_SEPARATE_TASK", d["author_independence_status"])
+        self.assertTrue(d["production_generation_isolated"])
+        self.assertEqual("PENDING", d["human_independence_review"])
 
     def test_bm003_still_has_no_positive_executable_reference(self):
         """An Oracle defines success; a positive reference only validates the evaluator.
@@ -245,7 +257,7 @@ class TestBenchmarkSkeleton(unittest.TestCase):
         one input is not partial permission.
         """
         data = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
-        notice = data["oracle_ready_notice"]
+        notice = data["oracle_status_notice"]
         self.assertIn("no stage is implemented", notice["still_outstanding_elsewhere"])
         progression = _paths.contract("STAGE_PROGRESSION_CONTRACT.yaml")
         inputs = progression["freeze_rule"]["full_stage_freeze_inputs"]["required_inputs"]

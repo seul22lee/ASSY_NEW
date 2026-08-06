@@ -77,15 +77,51 @@ prior_context_disclosure:
     space beyond the source, and that the five admissible families are genuinely
     all admitted.
 
+author_independence:
+  # Four different things that the single word "independent" was conflating.
+  # Separating them is the correction from semantic review F-08: the descriptor
+  # claimed authored_independently: true while this file disclosed that the same
+  # agent wrote the source and the Oracle.
+  authored_in_separate_task: true
+  independent_author: false
+  author_independence_status: SAME_AGENT_SEPARATE_TASK
+  production_generation_isolated: true
+  human_independence_review: PENDING
+  what_each_field_means:
+    authored_in_separate_task: >
+      The Oracle was commissioned as its own task, after the source was frozen.
+      Temporal and task separation is real and is worth something.
+    independent_author: >
+      FALSE. The same agent authored the BM-003 source and this Oracle.
+      ORACLE_METHOD prefers different authors, and this does not meet that bar.
+    production_generation_isolated: >
+      TRUE, and this is the property that actually protects the benchmark. No
+      production stage, prompt or provider can read this Oracle; ver3/oracles/
+      is a BLOCKING forbidden path root. A run cannot see its answer key
+      regardless of who wrote it.
+    human_independence_review: >
+      PENDING. No human has yet reviewed this Oracle for semantic independence
+      from the source author's assumptions. Same-agent self-review, however
+      thorough, is not independent approval.
+  why_the_distinction_matters: >
+    The risks differ. Isolation from production protects against the pipeline
+    copying its answers - that holds here. Author independence protects against
+    the Oracle sharing the source author's blind spots - that does NOT hold, and
+    only a human can close it.
+
 authority:
   authority_status: FROZEN
   frozen_on: "2026-08-05"
   frozen_by: "the authoring task, on the frozen source"
-  human_review_status: HUMAN_REVIEW_RECOMMENDED
+  human_review_status: PENDING
+  semantic_review_status: SELF_REVIEW_COMPLETE
+  semantic_review_record: ver3/oracles/held_out/BM-003/ORACLE_SEMANTIC_SELF_REVIEW.md
   human_review_note: >
-    The Oracle is frozen against the source. Human review is recommended for the
-    prior-context disclosure above and for the permissiveness claim, and is not a
-    precondition for the Oracle being usable as a held-out reference.
+    The Oracle is frozen against the source and a semantic self-review has been
+    completed and acted on. That is NOT independent approval: the review was
+    performed by the agent that authored the pack, which is the limitation
+    author_independence records. Independent human semantic approval remains
+    PENDING.
 
 production_visibility:
   visible_to_production: false
@@ -120,7 +156,31 @@ change_procedure:
   never_permitted:
     - "Editing an Oracle statement to make a failing run pass."
     - "Adding a requirement after seeing what a run produced."
-  amendment_history: []
+  amendment_history:
+    - amendment_id: BM003-ORACLE-SEMANTIC-CORRECTION-01
+      date: "2026-08-05"
+      kind: SEMANTIC_ACCEPTANCE_MODEL_CORRECTION
+      trigger: "Independent semantic review of the Oracle as a mechanical acceptance specification."
+      record: ver3/oracles/held_out/BM-003/ORACLE_SEMANTIC_SELF_REVIEW.md
+      summary: >
+        The Oracle equated "stays open on its own" with absence of a folding
+        kinematic degree of freedom, which falsely rejected three of the five
+        families it declared admissible. Corrected by introducing declared
+        state-maintenance classes. Also corrected: a forced persistent RELEASED
+        configuration, an "exactly one changed relationship" rule, a bilateral
+        interface rule that excluded monolithic compliant realizations, an
+        assembly graph that contradicted a declared freedom, a missing
+        compactness invariant, five non-reciprocal clause mappings, an
+        overstated independence claim, non-cumulative unresolved items, and an
+        S05 prohibition on embodying the selected candidate.
+      no_source_change: true
+      source_sha256_unchanged: ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d
+      why_this_was_not_an_ORACLE_CHANGE_PROPOSAL: >
+        The change procedure exists to stop an Oracle being edited to make a
+        failing run pass. No run exists - no stage is implemented - so no result
+        could have motivated any of these corrections. Each repairs an internal
+        contradiction between the Oracle and its own declared freedoms and
+        families, found before any design was ever evaluated against it.
 
 integrity:
   hash_manifest: ver3/oracles/held_out/BM-003/ORACLE_HASHES.yaml

@@ -20,6 +20,107 @@ oracle_name: HELD_OUT_BENCHMARK_ORACLE
 benchmark_id: BM-003
 source_sha256: ffb7f5f9feb8e38d6ee56dbce91529f817aebbd2f7180d7dedce65da0c94929d
 
+# =====================================================================
+# STATE-MAINTENANCE CLASSES
+#
+# "Stay open on its own" is a statement about what HAPPENS, not about what the
+# configuration space contains. The first version of this Oracle read it as
+# "the folding degree of freedom is absent", which silently required hard
+# kinematic blocking and falsely rejected over-centre, gravity-seated and
+# compliant realizations - three of the five families this pack declares
+# admissible. Corrected at semantic review finding F-01.
+#
+# A design declares its class. The class determines what must be shown and what
+# evidence can show it. It never determines whether the design is admissible.
+#
+# NO CLASS INTRODUCES A NUMBER. No disturbance magnitude, holding torque, impact
+# threshold, allowable displacement, friction coefficient, spring stiffness or
+# force threshold appears anywhere below, because the source states none and an
+# invented one would be the pipeline measuring its own invention.
+# =====================================================================
+state_maintenance_classes:
+
+  - id: SMC-KINEMATIC_BLOCK
+    what_must_be_true: >
+      The prohibited folding motion is geometrically unavailable in the deployed
+      configuration: no continuous rigid-body path exists from DEPLOYED toward
+      STORED without first performing the deliberate action.
+    folding_path_may_exist: false
+    minimum_verifier_fidelity: mobility_analysis_with_realized_geometry
+    must_declare: ["which body obstructs which motion", "the obstructing geometry on each participant"]
+    establishable_now: true
+    remains_unsupported: ["how much force would defeat the block", "wear, tolerance, lifetime"]
+    if_verifier_unavailable: NOT_VERIFIED
+
+  - id: SMC-STABLE_EQUILIBRIUM_OR_ENERGY_BARRIER
+    what_must_be_true: >
+      A folding path MAY exist kinematically, and the assembled system remains in
+      the deployed configuration without continuous user support under the
+      declared operating assumptions, because that configuration is a stable
+      equilibrium or is separated from the folding path by an energy barrier.
+    folding_path_may_exist: true
+    minimum_verifier_fidelity: rigid_body_stability_or_potential_energy_analysis
+    must_declare:
+      - "the operating assumptions: orientation, gravity, and what loads are assumed present"
+      - "which configuration is claimed stable, and with respect to which coordinate"
+      - "whether the barrier is gravitational, elastic, or configurational"
+    establishable_now: false
+    availability_note: >
+      No stability or potential-energy route is available in this benchmark's
+      toolset. The class is ADMISSIBLE and its persistence claim is NOT_VERIFIED.
+      Admissibility must not depend on what the toolset can currently do; only
+      CLAIMS may.
+    remains_unsupported: ["disturbance tolerance", "margin", "behaviour outside the declared assumptions"]
+    if_verifier_unavailable: NOT_VERIFIED
+    must_not: >
+      A mobility analysis showing a folding path EXISTS must not be reported as a
+      failure of this class. The path existing is the premise, not the defect.
+
+  - id: SMC-CONTACT_OR_COMPLIANT_RETENTION
+    what_must_be_true: >
+      Contact, elastic deformation, detent engagement, friction or another
+      declared physical interaction maintains the deployed configuration.
+    folding_path_may_exist: true
+    minimum_verifier_fidelity: contact_resolving_or_reduced_order_compliance_analysis
+    must_declare:
+      - "the interacting regions and the interaction kind"
+      - "for friction: that retention depends on friction, and under what contact assumption"
+      - "for compliance: the compliant region and its intended deformation mode"
+    establishable_now: false
+    availability_note: >
+      Neither contact resolution nor a compliance model is available here.
+      ADMISSIBLE; persistence NOT_VERIFIED.
+    remains_unsupported: ["engagement force", "return reliability", "wear", "fatigue", "lifetime"]
+    if_verifier_unavailable: NOT_VERIFIED
+    must_not: >
+      A friction-dependent or compliance-dependent retention claim MUST NOT be
+      reported PASS from a zero-friction, ideal-joint, rigid-body model. Such a
+      model contains no friction and resolves no contact, so it cannot observe
+      the mechanism the claim rests on.
+
+  - id: SMC-OTHER_DECLARED_PHYSICAL_PRINCIPLE
+    what_must_be_true: >
+      A coherent physical principle this Oracle's author did not anticipate,
+      declared explicitly, with the predicate that would establish it.
+    folding_path_may_exist: "as declared"
+    minimum_verifier_fidelity: "as declared, and argued"
+    must_declare: ["the principle", "the predicate", "the evidence route", "what remains unsupported"]
+    establishable_now: "depends on the declared route"
+    if_verifier_unavailable: NOT_VERIFIED
+    why_this_class_exists: >
+      An enumeration of principles is a prediction about the solution space, and
+      a wrong prediction here rejects a correct answer. This class is the
+      extension path that keeps the Oracle solution-neutral against arrangements
+      nobody listed. It is not a loophole: a design using it carries a heavier
+      declaration burden than any named class.
+
+state_maintenance_class_rules:
+  - "Every design declares exactly one primary class per state-maintaining relationship."
+  - "The class determines the required evidence, never the admissibility."
+  - "A class whose verifier is unavailable yields NOT_VERIFIED for persistence, not FAIL and not PASS."
+  - "No class permits a numeric threshold to be introduced."
+
+
 basis_types:
   DIRECT_USER_REQUIREMENT: "Restates a frozen source clause without exceeding it."
   NECESSARY_PHYSICAL_CONSEQUENCE: "Physically unavoidable given a source clause; requires derivation premises."
@@ -46,7 +147,7 @@ invariants:
       the product; none is detached.
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
-    source_clauses: [SRC-BM003-003]
+    source_clauses: [SRC-BM003-002, SRC-BM003-003]
     verification_predicate: >
       In the stored configuration, the connectivity graph over normal components
       has exactly one connected component.
@@ -58,7 +159,7 @@ invariants:
       and depend on no separate loose item the user must retain.
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
-    source_clauses: [SRC-BM003-004]
+    source_clauses: [SRC-BM003-002, SRC-BM003-004]
     verification_predicate: >
       No transition on the stored-deployed-stored path has a step whose
       precondition is the detachment or separate storage of a normal component.
@@ -148,23 +249,29 @@ invariants:
 
   - id: NRM-BM-003-009
     statement: >
-      The deployed configuration persists without continuous user support: the
-      folding motion is unavailable while the product is in the deployed state.
+      The deployed configuration persists without continuous user support and does
+      not enter folding under ordinary declared operation before the deliberate
+      release.
     basis_type: DIRECT_USER_REQUIREMENT
     support_type: direct
     source_clauses: [SRC-BM003-008, SRC-BM003-009]
     verification_predicate: >
-      In the deployed configuration, the folding degree of freedom of each leg is
-      shown blocked by a declared, physically realized state-maintaining
-      relationship - and not by an external hand, gravity alone assumed, or an
-      unmodelled assertion.
-    requires_tags: [deployed_state_maintained, state_maintenance_realized]
+      The design declares a state-maintenance class from state_maintenance_classes
+      and a physically realized state-maintaining relationship, and the predicate
+      that class requires is satisfied by evidence from a route compatible with
+      that class.
+    requires_tags: [deployed_state_maintained, state_maintenance_realized, state_maintenance_class_declared]
+    explicitly_does_not_require: >
+      That the folding kinematic path be ABSENT. Only SMC-KINEMATIC_BLOCK makes
+      that claim. An over-centre, gravity-seated or compliant realization has a
+      folding path and maintains its state by an energy barrier or a physical
+      interaction, and rejecting it for the path's existence would reject a
+      correct answer.
     admits: >
-      ANY state-maintenance principle: geometric interference, over-centre
-      configuration, a captive sliding member, a compliant element, friction
-      declared as such, a separate retaining body, or any other coherent
-      arrangement. The Oracle constrains that the behaviour exists and is
-      realized, never how.
+      ANY declared state-maintenance principle. The Oracle constrains that the
+      behaviour exists, that it is physically realized rather than asserted, and
+      that the evidence offered can actually observe it - never how it works.
+    corrected_at: "semantic review F-01"
 
   - id: NRM-BM-003-010
     statement: >
@@ -176,13 +283,21 @@ invariants:
     source_clauses: [SRC-BM003-009, SRC-BM003-010]
     verification_predicate: >
       The design declares, per leg, its intended deployed mobility and its
-      forbidden mobility; a mobility analysis of the deployed configuration shows
-      the forbidden set is empty of available gross freedoms.
-    requires_tags: [deployed_mobility_declared, unintended_dof_absent]
+      forbidden mobility. For each forbidden freedom, either it is kinematically
+      unavailable, OR the design declares the state-maintenance class that keeps
+      the product out of it and satisfies that class's predicate.
+    requires_tags: [deployed_mobility_declared, unintended_dof_addressed]
     scope_boundary: >
       GROSS rigid-body freedom only. This says nothing about clearance, play,
       compliance, vibration or looseness developing over time - none of which is
       in the source and none of which this benchmark's evidence can decide.
+    two_ways_to_satisfy_it: >
+      Detachment is normally blocked kinematically by retention geometry.
+      Folding, twisting and translation may be blocked kinematically OR
+      maintained by a declared class. Requiring kinematic absence for all four
+      was finding F-01; requiring nothing would let an assertion stand in for a
+      mechanism.
+    corrected_at: "semantic review F-01"
 
   - id: NRM-BM-003-011
     statement: >
@@ -192,14 +307,33 @@ invariants:
     support_type: direct
     source_clauses: [SRC-BM003-011]
     verification_predicate: >
-      A distinct RELEASED configuration exists, reachable from DEPLOYED only by a
-      declared user action, and the folding transition is available from RELEASED
-      and unavailable from DEPLOYED.
-    requires_tags: [release_action_declared, folding_blocked_before_release]
+      All four must hold, in any representation:
+        (1) folding does not begin through ordinary unintentional operation
+            before a deliberate user action;
+        (2) the deliberate action changes the system so that folding can proceed;
+        (3) the complete deployed-to-stored path then exists;
+        (4) operational retention remains coherent through the transition.
+    requires_tags: [release_action_declared, folding_gated_by_deliberate_action]
+    admissible_representations:
+      - "a persistent RELEASED configuration"
+      - "a transient release configuration"
+      - "a transition event"
+      - "a transition guard"
+      - "a combined deliberate release-and-fold initiation"
+      - "coordinated release actions affecting several legs or retention relations"
     does_not_require:
+      - "a stable, separately observable RELEASED pose"
+      - "that exactly one state-maintaining relation disengage"
+      - "that release finish before any folding motion begins"
+      - "one central release component"
+      - "a particular sequence shared by all realizations"
       - "any disturbance magnitude the deployed state must survive"
-      - "that the release be a separate physical feature rather than a motion"
-    admits: "any release principle - a motion, a displacement, a squeeze, a lift, a rotation"
+    the_distinction_that_matters: >
+      Three things are separable and only the first is mandatory: the DELIBERATE
+      ACTION, a separately stable RELEASED configuration, and the full FOLDING
+      operation. The source requires a deliberate action. Requiring a stable
+      released pose rejects a squeeze-and-fold grip, which is a coherent design.
+    corrected_at: "semantic review F-02, F-03"
 
   - id: NRM-BM-003-012
     statement: >
@@ -270,13 +404,32 @@ invariants:
       physical arrangement.
     requires_evidence_tags: [interface_ownership_shown, retention_direction_shown]
     verification_predicate: >
-      For each declared relationship, both participating bodies expose the
-      feature that realizes it, and for a retention relationship the blocked
-      escape direction is identified.
+      Every declared motion, constraint or retention relationship has an
+      identifiable physical realization on ALL PARTICIPATING BODIES OR FUNCTIONAL
+      REGIONS appropriate to its declared realization class, and for a retention
+      relationship the blocked escape direction is identified.
+    realization_classes:
+      RIGID_MULTI_BODY:
+        requires:
+          - "the relationship maps to identifiable participating bodies"
+          - "the implementing physical interfaces are identified on each"
+          - "retention and allowed relative motion are represented"
+      MONOLITHIC_COMPLIANT:
+        requires:
+          - "the relationship may be realized WITHIN ONE BODY"
+          - "an identifiable compliant region exists"
+          - "adjacent functional regions and the intended deformation mode are represented"
+          - "the evidence scope states what cannot be established without deformation or stress analysis"
     why_this_is_a_minimum: >
-      A joint named in prose with no interface on either body is the Ver1/Ver2
-      failure family: the relationship exists as a field and not as geometry.
-      Nothing downstream can detect it once it is accepted.
+      A joint named in prose with no realization anywhere is the label-versus-thing
+      failure: the relationship exists as a field and not as geometry, and nothing
+      downstream can detect it once accepted.
+    why_it_was_generalized: >
+      The first version required features on "both participating bodies", which a
+      living hinge cannot satisfy - there is one body. FRE-BM-003-002 explicitly
+      admits a compliant flexure, so the invariant contradicted a declared
+      freedom and would have rejected a monolithic realization outright.
+    corrected_at: "semantic review F-04"
 
   - id: NRM-BM-003-017
     statement: >
@@ -290,11 +443,55 @@ invariants:
       - "A motion that passes solid through solid is not physically realizable."
     verification_predicate: >
       Swept-volume or sampled interference checking over each declared path
-      reports no interpenetration between distinct bodies, at declared sampling.
+      reports no interpenetration between distinct bodies at declared sampling,
+      EXCEPT where the design declares a deformation-resolved path and identifies
+      the deforming region and its intended deformation mode.
     requires_tags: [path_interference_checked]
+    deformation_exception:
+      permitted_for: "a declared compliant engagement or snap-together assembly"
+      requires: ["the deforming region", "the intended deformation mode", "the declared realization class"]
+      must_not: >
+        A declared deformation-resolved path MUST NOT be reported PASS on rigid
+        geometry alone. Rigid geometry cannot observe deformation, so it can
+        neither confirm nor refute the claim - the honest outcome is NOT_VERIFIED.
     does_not_require:
       - "any minimum clearance"
       - "zero clearance, or any tolerance condition"
+      - "snap force, stress, fatigue or lifetime - BM-003 is not that benchmark"
+    corrected_at: "semantic review F-13"
+
+  - id: NRM-BM-003-018
+    statement: >
+      The stored configuration is meaningfully more compact than the deployed
+      configuration in at least one storage-relevant geometric extent.
+    basis_type: NECESSARY_PHYSICAL_CONSEQUENCE
+    support_type: derived
+    source_clauses: [SRC-BM003-001, SRC-BM003-002]
+    derivation_premises:
+      - "The source asks for a COMPACT FOLDING stand, and for the whole thing to become narrow and compact when put away."
+      - "Compactness with no stated size is not absolutely evaluable, but it IS relationally evaluable: folded against deployed."
+      - "A design whose folded envelope is no smaller than its deployed one has not folded in any sense the source would recognise."
+    verification_predicate: >
+      Under a declared frame and envelope definition, at least one declared
+      storage-relevant extent is SMALLER in STORED than in DEPLOYED.
+    requires_tags: [stored_more_compact_than_deployed]
+    does_not_require:
+      - "every dimension to decrease"
+      - "total volume to decrease"
+      - "any numeric compactness ratio"
+      - "fit within a drawer, bag or any container"
+      - "a specific bounding-box orientation"
+    evidence_plan_must_identify:
+      - "the frames and envelope definitions used"
+      - "the two configurations compared"
+      - "the measured relational result"
+      - "that the meaning of 'compact' beyond this relation remains unresolved (AMB-BM-003-001)"
+    why_it_was_added: >
+      The source's first sentence had no normative consequence at all - it was
+      cited by no invariant - while a negative case (NEG-BM-003-016) and a stage
+      expectation both referred to compactness. A design whose folded envelope
+      equalled its deployed one passed every invariant.
+    corrected_at: "semantic review F-06"
 
 required_unresolved:
   principle: >

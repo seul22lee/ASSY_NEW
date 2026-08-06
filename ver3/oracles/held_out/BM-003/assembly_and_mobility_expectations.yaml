@@ -35,6 +35,20 @@ assembly_expectations:
       not in isolation and not in the finished product.
     satisfied_by: [assembly_path_analysis, metric_cad_geometry]
     supports_invariant: NRM-BM-003-014
+    admissible_path_kinds:
+      RIGID: "a collision-free insertion path in rigid geometry"
+      DEFORMATION_RESOLVED: >
+        a declared path in which a compliant region deflects, identifying the
+        region and the intended deformation mode
+    must_not: >
+      A DEFORMATION_RESOLVED path MUST NOT be reported PASS from rigid geometry
+      alone: rigid geometry cannot observe the deflection the path depends on.
+      Required outcome without a compliance route: NOT_VERIFIED.
+    not_a_snap_force_benchmark: >
+      Declaring a deformation-resolved path requires the region and the mode. It
+      does NOT require insertion force, stress, fatigue or lifetime - BM-003 is
+      not that benchmark and states no such requirement.
+    corrected_at: "semantic review F-13"
     why_the_preceding_configuration_matters: >
       A part can have a clear path into an empty frame and none into the
       partially built product. Checking each insertion against the empty frame is
@@ -96,16 +110,48 @@ mobility_expectations:
     supports_invariant: NRM-BM-003-004
 
   - id: MOB-BM-003-002
-    requires_evidence_of: "Folding mobility is BLOCKED in DEPLOYED, before release."
+    requires_evidence_of: "The deployed state persists: folding does not begin before the deliberate release."
     detail: >
-      A mobility analysis of the deployed configuration shows the folding freedom
-      unavailable, and identifies the realized relationship that blocks it.
-    satisfied_by: [mobility_analysis, metric_cad_geometry]
+      What must be shown depends on the DECLARED state-maintenance class:
+        SMC-KINEMATIC_BLOCK    mobility analysis shows the folding freedom
+                               unavailable, with the obstructing geometry identified;
+        SMC-STABLE_EQUILIBRIUM_OR_ENERGY_BARRIER
+                               stability or potential-energy evidence under the
+                               declared assumptions - the folding path MAY exist;
+        SMC-CONTACT_OR_COMPLIANT_RETENTION
+                               contact-resolving or reduced-order compliance
+                               evidence - the folding path MAY exist;
+        SMC-OTHER_DECLARED_PHYSICAL_PRINCIPLE
+                               the declared predicate, by the declared route.
+    satisfied_by: [mobility_analysis, metric_cad_geometry, rigid_body_stability_analysis,
+                   contact_resolving_analysis, reduced_order_compliance_analysis]
+    satisfied_by_note: >
+      Per class, not in aggregate. A route valid for one class does not establish
+      another - which is the whole content of this expectation.
     supports_invariant: NRM-BM-003-009
     not_satisfied_by: >
-      An assertion that the state is maintained; a label naming a lock; or a
-      simulation in which the leg is held by a constraint that has no counterpart
-      in the geometry.
+      An assertion that the state is maintained; a label naming a lock; a
+      simulation in which the leg is held by a constraint with no counterpart in
+      the geometry; a zero-friction ideal-joint model offered for a
+      friction-dependent claim; or rigid geometry offered for a compliant one.
+    if_route_unavailable: >
+      NOT_VERIFIED. Only SMC-KINEMATIC_BLOCK has an available route in this
+      benchmark, so the other three classes are ADMISSIBLE with persistence
+      NOT_VERIFIED. That is an honest limitation of the toolset, not a defect in
+      the design.
+    corrected_at: "semantic review F-01, F-12"
+
+  - id: MOB-BM-003-009
+    requires_evidence_of: "STORED is more compact than DEPLOYED in a storage-relevant extent."
+    detail: >
+      Under a declared frame and envelope definition, compare the two
+      configurations and report the relational result. At least one declared
+      storage-relevant extent must be smaller in STORED.
+    satisfied_by: [metric_cad_geometry]
+    supports_invariant: NRM-BM-003-018
+    must_declare: ["the frame", "the envelope definition", "the extent compared"]
+    does_not_require: ["a ratio", "every dimension to shrink", "total volume to shrink"]
+    corrected_at: "semantic review F-06"
 
   - id: MOB-BM-003-003
     requires_evidence_of: "The release reopens folding mobility."

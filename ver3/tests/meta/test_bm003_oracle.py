@@ -78,7 +78,7 @@ class TestUnmutatedPackPasses(OracleMutationCase):
         self.assertEqual([], [f for f in self._audit() if f.severity == "BLOCKING"])
 
     def test_the_auditor_runs_every_declared_check(self):
-        self.assertEqual(16, len(auditor.CHECKS))
+        self.assertEqual(29, len(auditor.CHECKS))
 
 
 class TestRequiredMutationsDetected(OracleMutationCase):
@@ -351,3 +351,211 @@ class TestOracleContentRequirements(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ===========================================================================
+# Semantic mutations, added at the semantic review.
+#
+# The structural mutations above prove the auditor notices a broken FILE. These
+# prove it notices a broken ACCEPTANCE MODEL - an Oracle that parses perfectly,
+# resolves every reference, and rejects designs it claims to admit.
+#
+# Each asserts a SPECIFIC finding code. Asserting merely "something failed" would
+# let a mutation pass because it happened to break a reference, which is the
+# failure mode these tests are most exposed to.
+# ===========================================================================
+
+class TestSemanticMutations(OracleMutationCase):
+
+    def assertDetectedBy(self, code):
+        blocking = [f for f in self._audit() if f.severity == "BLOCKING"]
+        self.assertTrue(blocking, "semantic mutation went undetected")
+        codes = {f.code for f in blocking}
+        self.assertIn(code, codes,
+                      "detected, but not as %s - it may have tripped an unrelated "
+                      "structural check instead: %s" % (code, sorted(codes)))
+
+    def test_over_centre_family_with_hard_dof_lock_only_invariant(self):
+        """The original defect: persistence demanding kinematic absence."""
+        doc = self._load("normative")
+        inv = next(i for i in doc["invariants"] if i["id"] == "NRM-BM-003-009")
+        inv["statement"] = ("The deployed configuration persists: the folding motion is "
+                            "unavailable while the product is in the deployed state.")
+        inv["verification_predicate"] = ("In the deployed configuration, the folding "
+                                         "degree of freedom of each leg is shown blocked.")
+        inv.pop("explicitly_does_not_require", None)
+        self._save("normative", doc)
+        self.assertDetectedBy("PERSISTENCE_REQUIRES_DOF_ABSENCE")
+
+    def test_gravity_seated_family_with_all_folding_paths_forbidden(self):
+        doc = self._load("normative")
+        for c in doc["state_maintenance_classes"]:
+            c["folding_path_may_exist"] = False
+        self._save("normative", doc)
+        self.assertDetectedBy("NON_BLOCK_CLASS_FORBIDS_FOLDING_PATH")
+
+    def test_friction_family_accepted_on_zero_friction_evidence(self):
+        """A route that cannot observe the mechanism the claim rests on."""
+        doc = self._load("realizations")
+        fam = next(f for f in doc["admissible_realizations"]
+                   if f["state_maintenance_class"] == "SMC-CONTACT_OR_COMPLIANT_RETENTION")
+        fam["required_evidence_route"] = "continuous_kinematic_simulation"
+        fam["evidence_route_available_now"] = True
+        fam["persistence_claim_status"] = "ESTABLISHABLE"
+        self._save("realizations", doc)
+        self.assertDetectedBy("EVIDENCE_ROUTE_INCOMPATIBLE_WITH_CLASS")
+
+    def test_monolithic_compliant_blocked_by_two_body_interface_rule(self):
+        doc = self._load("normative")
+        vm = next(i for i in doc["invariants"] if i["id"] == "NRM-BM-003-016")
+        vm["verification_predicate"] = ("For each declared relationship, both participating "
+                                        "bodies expose the feature that realizes it.")
+        vm.pop("realization_classes", None)
+        self._save("normative", doc)
+        self.assertDetectedBy("BILATERAL_INTERFACE_RULE")
+
+    def test_assembly_endpoint_freedom_removed_from_the_graph(self):
+        doc = self._load("configurations")
+        t = next(x for x in doc["transitions"] if x["id"] == "TRN-BM-003-ASSEMBLE")
+        t.pop("to_any_of")
+        t["to"] = "CFG-BM-003-STORED"
+        self._save("configurations", doc)
+        self.assertDetectedBy("ASSEMBLY_ENDPOINT_FREEDOM_NOT_IN_GRAPH")
+
+    def test_persistent_released_configuration_made_mandatory(self):
+        doc = self._load("configurations")
+        rel = next(c for c in doc["configurations"] if c["id"] == "CFG-BM-003-RELEASED")
+        rel["representation_status"] = "MANDATORY"
+        self._save("configurations", doc)
+        self.assertDetectedBy("RELEASED_CONFIGURATION_MANDATORY")
+
+    def test_exactly_one_changed_relationship_restriction_reintroduced(self):
+        doc = self._load("configurations")
+        rel = next(c for c in doc["configurations"] if c["id"] == "CFG-BM-003-RELEASED")
+        rel["active_retention"] = ["The state-maintaining relationship is disengaged - and ONLY that one."]
+        self._save("configurations", doc)
+        self.assertDetectedBy("EXACTLY_ONE_CHANGE_RESTRICTION")
+
+    def test_compactness_invariant_removed_while_its_negative_case_remains(self):
+        doc = self._load("normative")
+        doc["invariants"] = [i for i in doc["invariants"] if i["id"] != "NRM-BM-003-018"]
+        self._save("normative", doc)
+        self.assertDetectedBy("COMPACTNESS_WITHOUT_NORMATIVE_ANCHOR")
+
+    def test_clause_ledger_reciprocity_broken(self):
+        doc = self._load("ledger")
+        doc["clauses"][0]["supports_invariants"] = ["NRM-BM-003-001"]
+        self._save("ledger", doc)
+        self.assertDetectedBy("CLAUSE_MAPPING_NOT_RECIPROCAL")
+
+    def test_unresolved_item_disappears_at_s07(self):
+        doc = self._load("stages")
+        doc["stages"]["s07"]["must_preserve_unresolved"] = [
+            a for a in doc["stages"]["s07"]["must_preserve_unresolved"]
+            if a != "AMB-BM-003-005"]
+        self._save("stages", doc)
+        self.assertDetectedBy("UNRESOLVED_ITEM_DROPPED_AT_STAGE")
+
+    def test_s05_forbidden_from_embodying_the_selected_candidate(self):
+        doc = self._load("stages")
+        doc["stages"]["s05"]["must_not_decide"].append("Which mechanism family is correct.")
+        self._save("stages", doc)
+        self.assertDetectedBy("S05_FORBIDDEN_TO_EMBODY")
+
+    def test_descriptor_claims_independence_governance_denies(self):
+        """Cross-file: the descriptor is outside the pack and still must agree."""
+        import shutil
+        desc_dir = os.path.join(self.tmp, "benchmarks", "BM-003")
+        os.makedirs(desc_dir)
+        real = os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml")
+        shutil.copy(real, os.path.join(desc_dir, "descriptor.yaml"))
+        d = _paths.load_yaml(os.path.join(desc_dir, "descriptor.yaml"))
+        d["oracle"]["authored_independently"] = True
+        with open(os.path.join(desc_dir, "descriptor.yaml"), "w") as fh:
+            yaml.safe_dump(d, fh, sort_keys=False)
+        findings = []
+        auditor.check_descriptor_matches_governance(
+            auditor.load(self.pack), findings,
+            descriptor_path=os.path.join(desc_dir, "descriptor.yaml"))
+        self.assertIn("DESCRIPTOR_OVERCLAIMS_INDEPENDENCE", {f.code for f in findings})
+
+    def test_family_admissible_on_tags_alone_with_no_evidence_route(self):
+        """Tags are self-assigned; without a route they prove only self-consistency."""
+        doc = self._load("realizations")
+        fam = doc["admissible_realizations"][0]
+        fam.pop("required_evidence_route")
+        self._save("realizations", doc)
+        self.assertDetectedBy("FAMILY_WITHOUT_EVIDENCE_ROUTE")
+
+    def test_unavailable_route_family_claims_established_persistence(self):
+        doc = self._load("realizations")
+        fam = next(f for f in doc["admissible_realizations"]
+                   if f["evidence_route_available_now"] is False)
+        fam["persistence_claim_status"] = "ESTABLISHABLE"
+        self._save("realizations", doc)
+        self.assertDetectedBy("PERSISTENCE_CLAIMED_WITHOUT_AN_AVAILABLE_ROUTE")
+
+    def test_compliant_retention_passed_from_rigid_geometry_alone(self):
+        """The compatibility rule is what stops rigid geometry standing in."""
+        doc = self._load("evidence")
+        doc.pop("class_evidence_compatibility_rule", None)
+        for c in doc["evidence_classes"]:
+            if c["id"] == "EVC-BM-003-CAD":
+                c["establishes_class"] = "SMC-CONTACT_OR_COMPLIANT_RETENTION"
+        self._save("evidence", doc)
+        doc2 = self._load("realizations")
+        fam = next(f for f in doc2["admissible_realizations"]
+                   if f["state_maintenance_class"] == "SMC-CONTACT_OR_COMPLIANT_RETENTION")
+        fam["required_evidence_route"] = "metric_cad_geometry"
+        fam["evidence_route_available_now"] = True
+        fam["persistence_claim_status"] = "ESTABLISHABLE"
+        self._save("realizations", doc2)
+        # CAD now claims to establish the compliant class, so the ROUTE check is
+        # satisfied. The defect must still surface, as the missing rule that
+        # would otherwise stop rigid geometry standing in for compliance.
+        self.assertDetectedBy("NO_CLASS_EVIDENCE_COMPATIBILITY_RULE")
+
+
+class TestSemanticChecksExistAndAreHonest(unittest.TestCase):
+
+    def test_the_auditor_declares_what_it_cannot_check(self):
+        """A condition that cannot be checked must be named, not assumed validated."""
+        self.assertTrue(auditor.UNCHECKABLE_REQUIRING_HUMAN_REVIEW)
+        for item in auditor.UNCHECKABLE_REQUIRING_HUMAN_REVIEW:
+            self.assertTrue(item.strip())
+
+    def test_the_auditor_is_named_for_what_it_does(self):
+        self.assertIn("structural and declared-semantic", auditor.__doc__)
+        self.assertNotIn("proves physical", auditor.__doc__)
+
+    def test_semantic_checks_were_added(self):
+        names = {fn.__name__ for fn in auditor.CHECKS}
+        for required in ("check_clause_reciprocity", "check_family_class_and_route",
+                         "check_folding_path_not_universally_forbidden",
+                         "check_compliant_realization_not_excluded",
+                         "check_assembly_endpoint_freedom",
+                         "check_release_representation_freedom",
+                         "check_unresolved_preservation_is_cumulative",
+                         "check_s05_may_embody_selected_candidate",
+                         "check_governance_independence_claims"):
+            with self.subTest(check=required):
+                self.assertIn(required, names)
+
+    def test_at_least_four_materially_distinct_principles_remain_admissible(self):
+        docs = auditor.load(PACK)
+        fams = docs["realizations"]["admissible_realizations"]
+        self.assertGreaterEqual(len(fams), 4)
+        principles = {f["state_maintenance_class"] for f in fams}
+        self.assertGreaterEqual(len(principles), 3,
+                                "families must differ in PRINCIPLE, not only in shape")
+
+    def test_families_whose_route_is_unavailable_remain_admissible(self):
+        """Admissibility must not depend on the current toolset. Claims may."""
+        docs = auditor.load(PACK)
+        unverifiable = [f for f in docs["realizations"]["admissible_realizations"]
+                        if f["evidence_route_available_now"] is False]
+        self.assertTrue(unverifiable, "expected some family to outrun the toolset")
+        for f in unverifiable:
+            with self.subTest(family=f["id"]):
+                self.assertEqual("NOT_VERIFIED", f["persistence_claim_status"])
+                self.assertIn("ADMISSIBLE", f["admissible_despite_unavailable_route"])
