@@ -36,7 +36,7 @@ evidence_classes:
     name: metric_cad_geometry
     what_it_is: "Measurements on actual solid geometry: extents, positions, interference, overlap."
     in_scope:
-      - "That a declared interface exists as geometry on both bodies."
+      - "That a declared interface exists as geometry on all participating bodies or functional regions."
       - "Interference or its absence between bodies in a given configuration."
       - "Non-degeneracy of the deployed contact triangle."
       - "The escape direction a retention feature blocks."
@@ -67,7 +67,7 @@ evidence_classes:
     in_scope:
       - "That an intended gross freedom exists in a configuration."
       - "That a forbidden gross freedom is unavailable."
-      - "That DEPLOYED and RELEASED differ in available folding mobility."
+      - "That the available folding mobility differs before and after the deliberate release condition, however that condition is represented."
     out_of_scope:
       - "Any compliance, play or clearance-driven motion."
       - "How much force would defeat the blocking arrangement."
@@ -156,10 +156,20 @@ evidence_classes:
     out_of_scope: ["Stress and capacity, which need structural analysis even with contact resolved."]
     establishes_class: SMC-CONTACT_OR_COMPLIANT_RETENTION
     consequence_of_absence: >
-      Every contact-dependent property is NOT_VERIFIED or UNSUPPORTED for BM-003.
-      No invariant in this Oracle depends on one, which is deliberate: an Oracle
-      whose acceptance rests on evidence the benchmark cannot produce is not an
-      acceptance specification, it is a wish.
+      NO INVARIANT UNIVERSALLY REQUIRES CONTACT ANALYSIS - a design using
+      SMC-KINEMATIC_BLOCK needs none. HOWEVER, a design relying on
+      SMC-CONTACT_OR_COMPLIANT_RETENTION requires a compatible contact,
+      compliance or declared reduced-order route to establish deployed-state
+      persistence. Without it that persistence claim is NOT_VERIFIED, and any
+      property needing resolved contact is NOT_VERIFIED or UNSUPPORTED.
+
+      The design remains ADMISSIBLE either way. The missing route bounds what may
+      be CLAIMED, not what may be BUILT.
+    corrected_at: >
+      propagation review P-06. This previously read "No invariant in this Oracle
+      depends on one, which is deliberate" - false since the state-maintenance
+      classes were introduced, and it told a reader the missing route cost
+      nothing.
 
   - id: EVC-BM-003-STRUCTURAL
     name: structural_analysis

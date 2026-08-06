@@ -67,7 +67,9 @@ assembly_expectations:
     requires_evidence_of: "Activation of every joint and retention relationship."
     detail: >
       Each relationship the operation depends on is established at an identified
-      assembly step, and is realized by geometry on both participating bodies.
+      assembly step, and has an identifiable physical realization on all
+      participating bodies OR functional regions appropriate to its declared
+      realization class.
     satisfied_by: [topology_and_graph, metric_cad_geometry]
     supports_invariant: NRM-BM-003-015
 
@@ -104,8 +106,9 @@ mobility_expectations:
   - id: MOB-BM-003-001
     requires_evidence_of: "Intended fold and deploy mobility exists where it should."
     detail: >
-      In STORED, each leg's unfolding motion is available. In RELEASED, each
-      leg's folding motion is available.
+      In STORED, each leg's unfolding motion is available. After the deliberate
+      release condition or action - however represented - each leg's folding
+      motion is available.
     satisfied_by: [mobility_analysis, continuous_kinematic_simulation]
     supports_invariant: NRM-BM-003-004
 
@@ -156,9 +159,10 @@ mobility_expectations:
   - id: MOB-BM-003-003
     requires_evidence_of: "The release reopens folding mobility."
     detail: >
-      After the declared release action, the same analysis shows the folding
-      freedom available. The difference between DEPLOYED and RELEASED must be
-      demonstrated, not asserted.
+      After the declared release action, folding can proceed. The CHANGE the
+      deliberate action makes must be demonstrated, not asserted - whether it is
+      represented as a new configuration, an event, a guard or a transient
+      condition.
     satisfied_by: [mobility_analysis, continuous_kinematic_simulation]
     supports_invariant: NRM-BM-003-011
 
@@ -166,8 +170,9 @@ mobility_expectations:
     requires_evidence_of: "No unintended gross rigid-body freedom remains in DEPLOYED."
     detail: >
       The design declares the forbidden set per leg - fold, twist, translate,
-      detach, and any other it identifies - and the analysis shows each is
-      unavailable.
+      detach, and any other it identifies - and shows, by the predicate its
+      declared state-maintenance class requires, that the product DOES NOT ENTER
+      any of them under the declared ordinary-operation scenario.
     satisfied_by: [mobility_analysis]
     supports_invariant: NRM-BM-003-010
     requires_declared_forbidden_set: >

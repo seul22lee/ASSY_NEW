@@ -524,3 +524,196 @@ independence, and the descriptor status says so rather than rounding up:
 five families really are all admitted — because that was wrong before this
 review, the auditor reported PASS throughout, and the same blind spot that
 produced it could have produced another.
+
+---
+---
+
+# Final propagation review before CAD validation
+
+Baseline `08de920084f67da40b5dbc41bf03e341246d1166`. Source hash verified
+unchanged. Auditor PASS 29/29, 58 Oracle tests green — and the pack still
+contains statements from the *pre-correction* model.
+
+**Why a passing auditor missed them.** The previous correction fixed each defect
+where the auditor looked. `check_compliant_realization_not_excluded` inspects
+`NRM-BM-003-016.verification_predicate`; the predicate was corrected and the
+**statement of the same invariant** was not. The check passed on a file that
+still says the old thing one line above where it looked. That is the shape of
+every finding below: a semantic model changed, and its consequences were
+propagated to the places under test rather than to every place they hold.
+
+## Independent findings
+
+### P-01 · MAJOR · NRM-BM-003-012 hard-codes the literal RELEASED sequence
+
+`normative.yaml` — predicate: *"A continuous, sampled path exists from DEPLOYED
+**through RELEASED and FOLDING** to STORED"*.
+
+Intended: after the deliberate release condition — however represented — a
+continuous path to STORED exists. **False rejection** of a squeeze-and-fold grip
+or any distributed release with no separately stable pose, i.e. of designs
+`CFG-BM-003-RELEASED.admissible_representations` explicitly admits. The pack
+contradicts itself in two files.
+
+*Correction:* realization-neutral wording. *Mutation:* reintroduce a mandatory
+persistent RELEASED configuration.
+
+### P-02 · MAJOR · RELEASED treated as a required node in six further places
+
+| File | Object | Stale text |
+|---|---|---|
+| `assembly_and_mobility_expectations.yaml` | MOB-BM-003-001 | *"In RELEASED, each leg's folding motion is available"* |
+| " | MOB-BM-003-003 | *"The difference between DEPLOYED and RELEASED must be demonstrated"* |
+| `configurations.yaml` | CFG-BM-003-FOLDING | *"between RELEASED and STORED"* |
+| " | TRN-BM-003-FOLD | `from: CFG-BM-003-RELEASED` |
+| " | TRN-BM-003-FOLD_REVERSE | `from: CFG-BM-003-RELEASED` |
+| `evidence_scope.yaml` | EVC-BM-003-MOBILITY | *"DEPLOYED and RELEASED differ in available folding mobility"* |
+| `realizations.yaml` | INADM-BM-003-001 | *"Nothing distinguishes DEPLOYED from RELEASED"* |
+
+Same risk as P-01. The transition edges are the worst of these: a graph walker
+finds folding reachable **only** from a node the Oracle says is optional.
+
+### P-03 · MAJOR · hard-DOF-lock language survives in four places
+
+| File | Object | Stale text |
+|---|---|---|
+| `configurations.yaml` | TRN-BM-003-DEPLOY | *"Arrival at a state where **folding is blocked**"* |
+| `assembly_and_mobility_expectations.yaml` | MOB-BM-003-004 | *"the analysis shows each is **unavailable**"* |
+| `freedoms.yaml` | FRE-BM-003-001 | *"That **folding is unavailable in DEPLOYED**"* |
+| `ambiguities.yaml` | AMB-BM-003-005 | *"That **folding is unavailable** before a deliberate action"* |
+
+**False rejection** of over-centre, gravity-seated and compliant families — the
+exact defect F-01 corrected, still asserted in the file that *frees* the locking
+principle. FRE-BM-003-001 is the sharpest: the freedom permitting any
+state-maintenance principle constrains the design to one.
+
+*Correction:* behavioural semantics — *does not enter* unintended folding under
+the declared ordinary-operation scenario — with evidence remaining class-dependent.
+
+### P-04 · MAJOR · monolithic-compliant propagation incomplete
+
+| File | Object | Stale text |
+|---|---|---|
+| `normative.yaml` | NRM-BM-003-016 **statement** | *"realized by identifiable geometry on **each participating body**"* |
+| `assembly_and_mobility_expectations.yaml` | ASM-BM-003-004 | *"realized by geometry on **both participating bodies**"* |
+| `freedoms.yaml` | FRE-BM-003-002 | *"realized by geometry on **both bodies**"* |
+| `evidence_scope.yaml` | EVC-BM-003-CAD | *"a declared interface exists as geometry on **both bodies**"* |
+
+**False rejection** of a living hinge, which has one body. The auditor check
+inspects one field of one invariant, so it verified the fix at the single point
+it was applied.
+
+*Correction:* the general rule everywhere, and an auditor check that scans every
+occurrence rather than one predicate.
+
+### P-05 · MAJOR · `satisfies_tags` still reads as physical evidence
+
+`realizations.yaml` / `check_fixture_permissiveness` / finding code
+`ADMISSIBLE_FAMILY_REJECTED`.
+
+A family "satisfies" an invariant when its author typed the tag. The name says
+*satisfies*, the finding says *rejected* — both assert a physical relation the
+data cannot support. F-11 diagnosed this and corrected the *consequence* (classes
+and routes) while leaving the *vocabulary* claiming what it always claimed.
+
+*Correction:* rename to `declared_coverage_tags`,
+`check_declared_family_coverage_consistency`, finding
+`DECLARED_COVERAGE_INCOMPLETE`, with an explicit statement that this establishes
+author-declared coverage only. *Mutation:* adding tags must not make a family
+physically accepted.
+
+### P-06 · MAJOR · contact-evidence self-contradiction
+
+`evidence_scope.yaml` EVC-BM-003-CONTACT: *"**No invariant in this Oracle depends
+on one**, which is deliberate."*
+
+False since the classes were introduced. A design declaring
+`SMC-CONTACT_OR_COMPLIANT_RETENTION` **requires** a contact or compliance route
+for its persistence claim. **Overclaim** — it tells a reader the missing route
+costs nothing.
+
+*Correction:* no invariant *universally* requires contact analysis; a design
+relying on that class does, and without it persistence is NOT_VERIFIED.
+
+### P-07 · MINOR · duplicate `UNCHECKABLE_REQUIRING_HUMAN_REVIEW`
+
+`audit_bm003_oracle.py` lines 62 and 73 — a botched splice during the previous
+task. Harmless today; two lists that can diverge is a defect waiting.
+
+### P-08 · MAJOR · direct execution of the test file is broken
+
+`python ver3/tests/meta/test_bm003_oracle.py` raises
+`ImportError: attempted relative import with no known parent package`. It never
+ran, so the `__main__` block was never exercised.
+
+**Worse than the reported placement issue.** The block sits at line 352 of 561 —
+even with imports fixed it would run only the classes defined above it, silently
+skipping every semantic mutation. A developer running the file directly would see
+a green result covering less than half the suite.
+
+*Correction:* package-aware import fallback **and** move the block to the end.
+Both, and verify both execution modes.
+
+### P-09 · MAJOR · descriptor overstates BM-003's readiness
+
+`descriptor.yaml` `oracle_status_notice.blocks`: *"**Nothing further from
+BM-003's side.**"*
+
+Independent human semantic approval is PENDING and positive-executable
+permissiveness validation has not happened. **Overclaim.**
+
+## Reported issue list, assessed
+
+| Reported | Verdict | Evidence |
+|---|---|---|
+| mandatory persistent RELEASED | **CONFIRMED** | P-01, P-02 — 7 sites incl. two transition edges |
+| hard kinematic blocking as the only persistence | **CONFIRMED** | P-03 — 4 sites, incl. the freedom that frees it |
+| bilateral two-rigid-body interfaces | **CONFIRMED** | P-04 — 4 sites, incl. NRM-016's own statement |
+| self-assigned tags as physical proof | **CONFIRMED** | P-05 — naming still asserts it |
+| contradictory contact-evidence description | **CONFIRMED** | P-06 |
+| overstated human/author independence | **PARTIALLY_CONFIRMED** | Governance and descriptor independence fields are correct after F-08. The residue is a *readiness* overclaim, not an *independence* one — P-09 |
+| direct-execution test gaps | **CONFIRMED, and worse than reported** | P-08: import failure, not just block placement |
+
+**Nothing rejected.** Two findings are independent of the report: P-07, and the
+import-failure half of P-08.
+
+## Conceptual challenge after propagation
+
+Reasoning witnesses, not CAD, and none is claimed physically proven.
+
+| | Witness | Expected | Evidence required | Unresolved | Actual | Auditor limitation |
+|---|---|---|---|---|---|---|
+| **A** | hard geometric blocking ring | ACCEPT, persistence establishable | mobility analysis + CAD | wear, tolerance, effort | ✅ SMC-KINEMATIC_BLOCK, route available | cannot confirm the ring really obstructs — the class is declared |
+| **B** | over-centre, folding path exists, deployed stable | ACCEPT, persistence NOT_VERIFIED | stability / potential-energy | margin, disturbance | ✅ path existence is the premise, not a defect | cannot evaluate stability at all |
+| **C** | gravity-seated support | ACCEPT, persistence NOT_VERIFIED | stability under declared gravity | disturbance, friction share | ✅ | same |
+| **D** | monolithic compliant engagement | ACCEPT, persistence NOT_VERIFIED | reduced-order compliance | force, return reliability, fatigue | ✅ — realizable in ONE body after P-04 | cannot evaluate deflection |
+| **E** | distributed multi-leg release, no stable released pose | ACCEPT | mobility before/after the deliberate action | effort | ✅ — `TRN-BM-003-FOLD` now reachable from DEPLOYED directly | cannot confirm the action is "deliberate" to a user |
+| **F** | endpoint-only animation, no continuous path | **REJECT** | — | — | ✅ NRM-005 / NRM-012 / MOB-006 | — |
+| **G** | contact-dependent detent, rigid geometry only | **persistence NOT_VERIFIED, never PASS** | contact or reduced-order compliance | engagement force, wear | ✅ route incompatible with the declared class | cannot tell a real detent from a declared one |
+
+**Seven of seven as expected.** D and E would have been rejected before this
+propagation pass: D by the bilateral wording in `NRM-BM-003-016`'s statement and
+in `ASM-BM-003-004`, E by `TRN-BM-003-FOLD`'s single `from: RELEASED` edge.
+
+**G is the case worth watching.** It is accepted as a *design* and its persistence
+claim is NOT_VERIFIED. That is correct — but it means a contact-dependent detent
+and a hard geometric block are, today, distinguishable only by what their authors
+declared. The auditor checks the consequences of the declaration, never its truth.
+
+## Residual limitations
+
+- The state-maintenance class is **declared**, never verified. Every acceptance
+  above is conditional on the declaration being honest.
+- Three of five families still have **no executable evidence route** in this
+  benchmark. Admissible, persistence NOT_VERIFIED — deliberately, since
+  admissibility is a property of the design and verifiability a property of the
+  toolset.
+- **Positive-executable permissiveness validation has not happened.** The five
+  families are reasoned witnesses; nothing has been built and run against the
+  Oracle. This is the largest remaining gap and it is recorded as
+  `PENDING_BEFORE_S03_S04_FREEZE`.
+- **Independent human semantic approval remains PENDING.** Two rounds of
+  self-review by the authoring agent found nineteen findings between them, five
+  of them BLOCKING, in a pack whose auditor reported PASS throughout. That is
+  evidence the method finds things — and equally evidence that a third round by
+  the same agent is not what is needed next.

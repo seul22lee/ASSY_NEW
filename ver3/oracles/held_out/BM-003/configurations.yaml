@@ -157,7 +157,10 @@ configurations:
   - id: CFG-BM-003-FOLDING
     name: FOLDING
     source_basis: [SRC-BM003-012, SRC-BM003-013]
-    what_it_is: "The continuum of intermediate configurations between RELEASED and STORED."
+    what_it_is: >
+      The continuum of intermediate configurations between the deliberate release
+      condition and STORED. Its entry point is whatever represents release in
+      this design - a pose, an event or a guard.
     required_connectedness: "Fully connected at every sampled point."
     allowed_gross_mobility:
       - "Continued motion toward STORED."
@@ -198,7 +201,7 @@ transitions:
       - "A declared, comprehensible step sequence (NRM-BM-003-004)."
       - "Connectedness at every sampled point (NRM-BM-003-005)."
       - "No interference along the path (NRM-BM-003-017)."
-      - "Arrival at a state where folding is blocked (NRM-BM-003-009)."
+      - "Arrival at a state that persists without continuous user support, by the declared state-maintenance class (NRM-BM-003-009)."
     freedom: "The three legs may deploy together, in sequence, or in any grouping. The source constrains only the outcome."
 
   - id: TRN-BM-003-DEPLOY_REVERSE
@@ -236,7 +239,7 @@ transitions:
       collapse just because I knocked it" is the user's REASON, not a load case.
 
   - id: TRN-BM-003-REENGAGE
-    from: CFG-BM-003-RELEASED
+    from_any_of: [CFG-BM-003-RELEASED, CFG-BM-003-FOLDING]
     to: CFG-BM-003-DEPLOYED
     trigger: "Return to the maintained state."
     source_basis: [SRC-BM003-013]
@@ -244,7 +247,14 @@ transitions:
     note: "Direct re-engagement without a full cycle is admissible and not required."
 
   - id: TRN-BM-003-FOLD
-    from: CFG-BM-003-RELEASED
+    from_any_of: [CFG-BM-003-RELEASED, CFG-BM-003-DEPLOYED]
+    from_note: >
+      Reachable from DEPLOYED DIRECTLY when release is an event, a guard or a
+      combined release-and-fold initiation. A single `from: RELEASED` edge would
+      make folding reachable only through a node the Oracle declares OPTIONAL,
+      so a graph walker would reject every design without a stable released pose.
+    guard: "the deliberate release condition or action has occurred"
+    corrected_at: "propagation review P-02"
     to: CFG-BM-003-STORED
     through: CFG-BM-003-FOLDING
     trigger: "Manual folding after release."

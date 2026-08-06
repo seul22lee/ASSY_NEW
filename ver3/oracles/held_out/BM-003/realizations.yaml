@@ -13,6 +13,21 @@
 # The inadmissible families exist for the opposite reason: each must be rejected
 # by at least one invariant, so that permissiveness has a floor.
 #
+# WHAT THE TAGS ARE, AND ARE NOT (propagation review P-05)
+#
+# `declared_coverage_tags` records what the AUTHOR DECLARES a family addresses.
+# It is NOT evidence that the family physically satisfies any invariant: the tag
+# list and the invariants' requirements were written by the same hand, so
+# agreement between them proves self-consistency and nothing else.
+#
+# The field was previously called `satisfies_tags` and its check reported
+# ADMISSIBLE_FAMILY_REJECTED - both asserting a physical relation the data cannot
+# support. Renamed so the vocabulary stops claiming it.
+#
+# PHYSICAL ACCEPTANCE IS CONDITIONAL ON A COMPATIBLE EXECUTABLE EVIDENCE ROUTE,
+# declared per family as required_evidence_route and checked against the
+# evidence classes. Coverage tags gate nothing on their own.
+#
 # CORRECTED AT SEMANTIC REVIEW (F-01, F-11, F-12). Each family now declares its
 # STATE-MAINTENANCE CLASS, whether a folding kinematic path exists in DEPLOYED,
 # and the EVIDENCE ROUTE that could establish its persistence.
@@ -31,7 +46,7 @@
 schema_version: 0.1.0
 oracle_name: HELD_OUT_BENCHMARK_ORACLE
 benchmark_id: BM-003
-physical_tag_vocabulary:
+declared_coverage_tag_vocabulary:
   three_legs_present: Three distinguishable support legs are identifiable.
   stored_pose_defined: Each leg has a stored pose close to the body.
   stored_connected: All normal components connected in STORED.
@@ -76,7 +91,7 @@ admissible_realizations:
     element. Remove every extra part and the behaviour persists.
 
     '
-  satisfies_tags:
+  declared_coverage_tags:
   - three_legs_present
   - stored_pose_defined
   - stored_connected
@@ -126,7 +141,7 @@ admissible_realizations:
     all three legs through one element rather than treating them independently.
 
     '
-  satisfies_tags:
+  declared_coverage_tags:
   - three_legs_present
   - stored_pose_defined
   - stored_connected
@@ -174,7 +189,7 @@ admissible_realizations:
     rigid geometry or a translating body. Its state is a strain state.
 
     '
-  satisfies_tags:
+  declared_coverage_tags:
   - three_legs_present
   - stored_pose_defined
   - stored_connected
@@ -231,7 +246,7 @@ admissible_realizations:
     part of the support path.
 
     '
-  satisfies_tags:
+  declared_coverage_tags:
   - three_legs_present
   - stored_pose_defined
   - stored_connected
@@ -282,7 +297,7 @@ admissible_realizations:
     over- centre geometry, compliance or a seated strut. It is a fifth distinct principle.
 
     '
-  satisfies_tags:
+  declared_coverage_tags:
   - three_legs_present
   - stored_pose_defined
   - stored_connected
@@ -318,7 +333,7 @@ admissible_realizations:
   required_evidence_route: mobility_analysis
   evidence_route_available_now: true
   persistence_claim_status: ESTABLISHABLE
-permissiveness_requirement:
+declared_coverage_requirement:
   statement: EVERY physical invariant must admit ALL admissible realizations.
   rationale: 'This is the mechanical test of solution-neutrality. The five families differ in the physical
     principle that maintains and releases the deployed state - configuration, translation, elastic deflection,
@@ -333,7 +348,8 @@ inadmissible_realizations:
   rejected_by:
   - NRM-BM-003-009
   - NRM-BM-003-011
-  why: Nothing distinguishes DEPLOYED from RELEASED; the deliberate action does not exist.
+  why: The deliberate action does not exist - folding is available under ordinary handling,
+    so nothing gates it however the release would have been represented.
 - id: INADM-BM-003-002
   description: A stand requiring a separate pin to be inserted when deployed and stored in a pocket when
     folded.

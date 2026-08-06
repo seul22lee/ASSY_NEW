@@ -18,7 +18,14 @@ import unittest
 
 import yaml
 
-from . import _paths
+try:                                    # package import: python -m unittest ...
+    from . import _paths
+except ImportError:                     # direct execution: python <path>/test_bm003_oracle.py
+    # Without this the file cannot be run directly at all, so its __main__ block
+    # was never exercised and the mutations below never ran that way.
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))))))
+    from ver3.tests.meta import _paths
 
 TOOLS = os.path.join(_paths.VER3, "oracle_tools")
 if TOOLS not in sys.path:
@@ -78,7 +85,7 @@ class TestUnmutatedPackPasses(OracleMutationCase):
         self.assertEqual([], [f for f in self._audit() if f.severity == "BLOCKING"])
 
     def test_the_auditor_runs_every_declared_check(self):
-        self.assertEqual(29, len(auditor.CHECKS))
+        self.assertEqual(35, len(auditor.CHECKS))
 
 
 class TestRequiredMutationsDetected(OracleMutationCase):
@@ -180,14 +187,18 @@ class TestFurtherMutationsDetected(OracleMutationCase):
         self._save("realizations", doc)
         self.assertDetected("TOO_FEW_ADMISSIBLE_FAMILIES")
 
-    def test_an_invariant_that_rejects_an_admissible_family(self):
-        """Overfitting, caught mechanically: permissiveness has a floor."""
+    def test_a_family_that_does_not_declare_full_coverage(self):
+        """A bookkeeping defect, and named as one.
+
+        This used to report ADMISSIBLE_FAMILY_REJECTED - a physical verdict the
+        data cannot support, since the tags and the requirements share an author.
+        """
         doc = self._load("realizations")
-        doc["admissible_realizations"][2]["satisfies_tags"] = [
-            t for t in doc["admissible_realizations"][2]["satisfies_tags"]
+        doc["admissible_realizations"][2]["declared_coverage_tags"] = [
+            t for t in doc["admissible_realizations"][2]["declared_coverage_tags"]
             if t != "deployed_state_maintained"]
         self._save("realizations", doc)
-        self.assertDetected("ADMISSIBLE_FAMILY_REJECTED")
+        self.assertDetected("DECLARED_COVERAGE_INCOMPLETE")
 
     def test_invariant_without_source_backing(self):
         doc = self._load("normative")
@@ -349,8 +360,6 @@ class TestOracleContentRequirements(unittest.TestCase):
         self.assertFalse(os.path.exists(cad))
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 # ===========================================================================
@@ -559,3 +568,206 @@ class TestSemanticChecksExistAndAreHonest(unittest.TestCase):
             with self.subTest(family=f["id"]):
                 self.assertEqual("NOT_VERIFIED", f["persistence_claim_status"])
                 self.assertIn("ADMISSIBLE", f["admissible_despite_unavailable_route"])
+
+
+class TestPropagationMutations(OracleMutationCase):
+    """Mutations for the propagation review (P-01..P-09).
+
+    Each reintroduces a stale statement from the pre-correction model in a place
+    the previous auditor did not look. They exist because the last correction
+    fixed each defect where a check happened to inspect, and a passing auditor
+    is only meaningful if it looks everywhere the claim holds.
+    """
+
+    def assertDetectedBy(self, code):
+        blocking = [f for f in self._audit() if f.severity == "BLOCKING"]
+        self.assertTrue(blocking, "propagation mutation went undetected")
+        codes = {f.code for f in blocking}
+        self.assertIn(code, codes,
+                      "detected, but not as %s - it may have tripped an unrelated "
+                      "parse or reference error: %s" % (code, sorted(codes)))
+
+    # -- Phase 2: mandatory persistent RELEASED ---------------------------
+    def test_mandatory_persistent_released_configuration(self):
+        doc = self._load("configurations")
+        rel = next(c for c in doc["configurations"] if c["id"] == "CFG-BM-003-RELEASED")
+        rel["representation_status"] = "MANDATORY"
+        self._save("configurations", doc)
+        self.assertDetectedBy("RELEASED_CONFIGURATION_MANDATORY")
+
+    def test_literal_released_sequence_reintroduced(self):
+        doc = self._load("normative")
+        inv = next(i for i in doc["invariants"] if i["id"] == "NRM-BM-003-012")
+        inv["verification_predicate"] = ("A continuous, sampled path exists from DEPLOYED "
+                                         "through RELEASED and FOLDING to STORED.")
+        inv.pop("no_literal_sequence_required", None)
+        self._save("normative", doc)
+        self.assertDetectedBy("MANDATORY_RELEASED_SEQUENCE")
+
+    def test_fold_reachable_only_through_a_released_pose(self):
+        """The graph-level form: folding routed through an optional node."""
+        doc = self._load("configurations")
+        fold = next(t for t in doc["transitions"] if t["id"] == "TRN-BM-003-FOLD")
+        fold.pop("from_any_of")
+        fold["from"] = "CFG-BM-003-RELEASED"
+        self._save("configurations", doc)
+        self.assertDetectedBy("FOLD_UNREACHABLE_WITHOUT_RELEASED_POSE")
+
+    def test_released_assumed_to_be_a_state_in_an_expectation(self):
+        doc = self._load("expectations")
+        mob = next(e for e in doc["mobility_expectations"] if e["id"] == "MOB-BM-003-001")
+        mob["detail"] = ("In STORED, each leg's unfolding motion is available. In RELEASED, "
+                         "each leg's folding motion is available.")
+        self._save("expectations", doc)
+        self.assertDetectedBy("RELEASED_ASSUMED_AS_A_STATE")
+
+    # -- Phase 3: hard-lock-only ------------------------------------------
+    def test_hard_lock_only_rule_in_a_transition(self):
+        doc = self._load("configurations")
+        t = next(x for x in doc["transitions"] if x["id"] == "TRN-BM-003-DEPLOY")
+        t["requires"] = ["Arrival at a state where folding is blocked (NRM-BM-003-009)."]
+        self._save("configurations", doc)
+        self.assertDetectedBy("HARD_LOCK_ONLY_RULE")
+
+    def test_hard_lock_only_rule_in_a_freedom(self):
+        """The sharpest form: the freedom that frees the principle constraining it."""
+        doc = self._load("freedoms")
+        fre = next(f for f in doc["freedoms"] if f["id"] == "FRE-BM-003-001")
+        fre["oracle_constrains_only"] = "That folding is unavailable in DEPLOYED."
+        self._save("freedoms", doc)
+        self.assertDetectedBy("HARD_LOCK_ONLY_RULE")
+
+    def test_over_centre_family_not_required_to_lack_a_folding_path(self):
+        """Declaring a folding path must not itself be a defect."""
+        doc = self._load("realizations")
+        fam = next(f for f in doc["admissible_realizations"]
+                   if f["state_maintenance_class"] == "SMC-STABLE_EQUILIBRIUM_OR_ENERGY_BARRIER")
+        self.assertTrue(fam["folding_path_exists_in_deployed"])
+        self.assertEqual([], [f for f in self._audit() if f.severity == "BLOCKING"],
+                         "an over-centre family with a folding path must pass unmutated")
+
+    def test_gravity_seated_family_forced_to_have_no_folding_path(self):
+        doc = self._load("normative")
+        for c in doc["state_maintenance_classes"]:
+            if c["id"] == "SMC-STABLE_EQUILIBRIUM_OR_ENERGY_BARRIER":
+                c["folding_path_may_exist"] = False
+        self._save("normative", doc)
+        self.assertDetectedBy("NON_BLOCK_CLASS_FORBIDS_FOLDING_PATH")
+
+    # -- Phase 4: monolithic compliant ------------------------------------
+    def test_stale_bilateral_wording_in_an_invariant_statement(self):
+        """The statement, not the predicate - where the last fix did not reach."""
+        doc = self._load("normative")
+        inv = next(i for i in doc["invariants"] if i["id"] == "NRM-BM-003-016")
+        inv["statement"] = ("Every declared joint and every declared retention relationship "
+                            "is realized by identifiable geometry on each participating body.")
+        self._save("normative", doc)
+        self.assertDetectedBy("STALE_BILATERAL_INTERFACE_WORDING")
+
+    def test_stale_bilateral_wording_in_an_assembly_expectation(self):
+        doc = self._load("expectations")
+        asm = next(e for e in doc["assembly_expectations"] if e["id"] == "ASM-BM-003-004")
+        asm["detail"] = ("Each relationship is established at an identified assembly step, "
+                         "and is realized by geometry on both participating bodies.")
+        self._save("expectations", doc)
+        self.assertDetectedBy("STALE_BILATERAL_INTERFACE_WORDING")
+
+    def test_stale_bilateral_wording_in_a_freedom(self):
+        doc = self._load("freedoms")
+        fre = next(f for f in doc["freedoms"] if f["id"] == "FRE-BM-003-002")
+        fre["oracle_constrains_only"] = "That each joint is realized by geometry on both bodies."
+        self._save("freedoms", doc)
+        self.assertDetectedBy("STALE_BILATERAL_INTERFACE_WORDING")
+
+    # -- Phase 5: coverage tags are not evidence --------------------------
+    def test_adding_coverage_tags_does_not_make_a_family_physically_accepted(self):
+        """Tags gate bookkeeping. The evidence route gates acceptance."""
+        doc = self._load("realizations")
+        fam = next(f for f in doc["admissible_realizations"]
+                   if f["evidence_route_available_now"] is False)
+        fam["declared_coverage_tags"] = list(doc["declared_coverage_tag_vocabulary"])
+        fam["persistence_claim_status"] = "ESTABLISHABLE"
+        self._save("realizations", doc)
+        self.assertDetectedBy("PERSISTENCE_CLAIMED_WITHOUT_AN_AVAILABLE_ROUTE")
+
+    def test_coverage_vocabulary_is_not_named_as_physical_proof(self):
+        doc = self._load("realizations")
+        self.assertIn("declared_coverage_tag_vocabulary", doc)
+        self.assertNotIn("physical_tag_vocabulary", doc)
+        for fam in doc["admissible_realizations"]:
+            self.assertIn("declared_coverage_tags", fam)
+            self.assertNotIn("satisfies_tags", fam)
+
+    # -- Phase 6: contact evidence ----------------------------------------
+    def test_contact_dependence_denied(self):
+        doc = self._load("evidence")
+        contact = next(c for c in doc["evidence_classes"] if c["id"] == "EVC-BM-003-CONTACT")
+        contact["consequence_of_absence"] = (
+            "Every contact-dependent property is NOT_VERIFIED for BM-003. "
+            "No invariant in this Oracle depends on one, which is deliberate.")
+        self._save("evidence", doc)
+        self.assertDetectedBy("CONTACT_DEPENDENCE_DENIED")
+
+    def test_compliant_retention_passing_on_rigid_geometry(self):
+        """A rigid route offered for a class that rigid geometry cannot observe."""
+        doc = self._load("realizations")
+        fam = next(f for f in doc["admissible_realizations"]
+                   if f["state_maintenance_class"] == "SMC-CONTACT_OR_COMPLIANT_RETENTION")
+        fam["required_evidence_route"] = "metric_cad_geometry"
+        fam["evidence_route_available_now"] = True
+        fam["persistence_claim_status"] = "ESTABLISHABLE"
+        self._save("realizations", doc)
+        self.assertDetectedBy("EVIDENCE_ROUTE_INCOMPATIBLE_WITH_CLASS")
+
+
+class TestDirectExecutionIsWired(unittest.TestCase):
+    """The file must run both ways, and cover everything either way."""
+
+    def test_main_block_is_the_last_thing_in_the_file(self):
+        """Placed mid-file it silently runs only the classes defined above it.
+
+        Matched at line start: this test's own body mentions the literal, so a
+        plain substring count would find its own text and never the block.
+        """
+        import re
+        with open(os.path.abspath(__file__), encoding="utf-8") as fh:
+            text = fh.read()
+        blocks = list(re.finditer(r"^if __name__ == .__main__.:", text, re.M))
+        self.assertEqual(1, len(blocks), "expected exactly one entry-point block")
+        after = text[blocks[0].start():]
+        self.assertNotIn("\nclass ", after, "a test class is defined after the main block")
+
+    def test_readiness_overclaim_is_detected(self):
+        """A descriptor claiming nothing is outstanding must fail."""
+        import shutil, tempfile
+        tmp = tempfile.mkdtemp(prefix="bm003_readiness_")
+        try:
+            dp = os.path.join(tmp, "descriptor.yaml")
+            shutil.copy(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"), dp)
+            d = _paths.load_yaml(dp)
+            d["oracle_status_notice"]["blocks"] = ["Nothing further from BM-003's side."]
+            with open(dp, "w") as fh:
+                yaml.safe_dump(d, fh, sort_keys=False)
+            findings = []
+            auditor.check_descriptor_readiness_matches(auditor.load(PACK), findings,
+                                                       descriptor_path=dp)
+            self.assertIn("READINESS_OVERCLAIMED", {f.code for f in findings})
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_the_five_readiness_dimensions_are_separate(self):
+        gov = auditor.load(PACK)["governance"]["readiness_dimensions"]
+        self.assertEqual("SATISFIED", gov["structural_held_out_oracle_readiness"])
+        self.assertEqual("COMPLETE", gov["semantic_self_review"])
+        self.assertEqual("PENDING", gov["independent_human_semantic_approval"])
+        self.assertEqual("PENDING_BEFORE_S03_S04_FREEZE",
+                         gov["positive_executable_permissiveness_validation"])
+        self.assertEqual("ENFORCED", gov["production_generation_isolation"])
+
+    def test_the_module_imports_under_both_names(self):
+        self.assertTrue(hasattr(_paths, "request_path"))
+        self.assertTrue(hasattr(auditor, "CHECKS"))
+
+
+if __name__ == "__main__":
+    unittest.main()

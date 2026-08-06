@@ -123,6 +123,41 @@ authority:
     author_independence records. Independent human semantic approval remains
     PENDING.
 
+readiness_dimensions:
+  statement: >
+    Five distinct properties. They are recorded separately because they fail
+    separately, and because "ready" asserted on the strength of one of them is
+    the overclaim this section exists to prevent.
+  structural_held_out_oracle_readiness: SATISFIED
+  semantic_self_review: COMPLETE
+  independent_human_semantic_approval: PENDING
+  positive_executable_permissiveness_validation: PENDING_BEFORE_S03_S04_FREEZE
+  production_generation_isolation: ENFORCED
+  what_each_means:
+    structural_held_out_oracle_readiness: >
+      The pack exists, is frozen, parses, and passes its structural and
+      declared-semantic auditor. FSF-02 is satisfied for BM-003.
+    semantic_self_review: >
+      COMPLETE and acted on - twice. Performed by the agent that authored the
+      pack, so it is self-review however thorough. Not independence.
+    independent_human_semantic_approval: >
+      PENDING. No human has judged whether the acceptance model is right. This is
+      the gap that matters most, because the semantic review found five BLOCKING
+      defects in a pack whose auditor was reporting PASS.
+    positive_executable_permissiveness_validation: >
+      PENDING. The five realization families are CONCEPTUAL WITNESSES, reasoned
+      about and never executed. Nothing has yet demonstrated that the Oracle
+      admits materially different designs when they are actually built and run
+      against it. Required before any S03/S04 freeze.
+    production_generation_isolation: >
+      ENFORCED. ver3/oracles/ is a BLOCKING forbidden path root; no stage, prompt
+      or provider can read this Oracle. This is what protects the benchmark, and
+      it holds regardless of who authored the pack.
+  do_not_collapse: >
+    Self-review is not approval, and structural readiness is not permissiveness
+    validation. A status claiming either would be false in a way a reader could
+    not detect from the pack alone.
+
 production_visibility:
   visible_to_production: false
   oracle_visible_to_production: false

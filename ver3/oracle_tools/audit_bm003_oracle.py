@@ -67,16 +67,6 @@ UNCHECKABLE_REQUIRING_HUMAN_REVIEW = [
     "Whether a deployment sequence is comprehensible to a human user.",
 ]
 
-#: Semantic conditions that CANNOT be checked mechanically. Each becomes a
-#: required human review item rather than being quietly treated as validated.
-#: Listing them is the honest alternative to a check that only appears to run.
-UNCHECKABLE_REQUIRING_HUMAN_REVIEW = [
-    "Whether any invariant is physically true.",
-    "Whether a declared state-maintenance class is the principle the design really uses.",
-    "Whether the admissible families are buildable - they are conceptual witnesses.",
-    "Whether the Oracle is overfitted in a way nobody thought to encode as a check.",
-    "Whether a deployment sequence is comprehensible to a human user.",
-]
 
 FILES = {
     "ledger": "source_clause_ledger.yaml",
@@ -516,9 +506,20 @@ def check_ids_unique_and_resolve(docs, findings):
                                             "%s in %s -> %s" % (path, FILES[key], ref)))
 
 
-def check_fixture_permissiveness(docs, findings):
-    """A-15. Every physical invariant must admit every admissible family."""
-    vocab = set(docs["realizations"]["physical_tag_vocabulary"])
+def check_declared_family_coverage_consistency(docs, findings):
+    """A-15. Every family DECLARES coverage of every invariant's requirements.
+
+    THIS ESTABLISHES INTERNAL AUTHOR-DECLARED COVERAGE ONLY. It does not
+    establish buildability, operational validity, or satisfaction of an
+    invariant: the coverage tags and the invariants' requirements were written by
+    the same hand, so agreement between them is self-consistency.
+
+    Physical acceptance is conditional on a compatible executable evidence route,
+    checked separately by check_family_class_and_route. The finding names here
+    say DECLARED_COVERAGE, not REJECTED, because a tag mismatch is a bookkeeping
+    defect and never a physical verdict.
+    """
+    vocab = set(docs["realizations"]["declared_coverage_tag_vocabulary"])
     required = {}
     for inv in docs["normative"]["invariants"]:
         if inv.get("basis_type") == "VERIFICATION_MINIMUM":
@@ -529,23 +530,23 @@ def check_fixture_permissiveness(docs, findings):
             continue
         for t in inv.get("requires_tags", []):
             if t not in vocab:
-                findings.append(Finding("A-15", "BLOCKING", "UNKNOWN_PHYSICAL_TAG",
+                findings.append(Finding("A-15", "BLOCKING", "UNKNOWN_COVERAGE_TAG",
                                         "%s -> %s" % (inv["id"], t)))
             required.setdefault(inv["id"], set()).add(t)
 
     for fam in docs["realizations"]["admissible_realizations"]:
-        tags = set(fam.get("satisfies_tags", []))
+        tags = set(fam.get("declared_coverage_tags", []))
         for inv_id, needed in required.items():
             missing = needed - tags
             if missing:
-                findings.append(Finding("A-15", "BLOCKING", "ADMISSIBLE_FAMILY_REJECTED",
-                                        "%s fails %s (missing %s)" % (fam["id"], inv_id, sorted(missing))))
+                findings.append(Finding("A-15", "BLOCKING", "DECLARED_COVERAGE_INCOMPLETE",
+                                        "%s does not declare coverage of %s (missing %s)" % (fam["id"], inv_id, sorted(missing))))
 
     inv_ids = {i["id"] for i in docs["normative"]["invariants"]}
     for bad in docs["realizations"]["inadmissible_realizations"]:
         rejectors = bad.get("rejected_by", [])
         if not rejectors:
-            findings.append(Finding("A-15", "BLOCKING", "INADMISSIBLE_NOT_REJECTED", bad["id"]))
+            findings.append(Finding("A-15", "BLOCKING", "INADMISSIBLE_WITHOUT_A_REJECTING_INVARIANT", bad["id"]))
         for r in rejectors:
             if r not in inv_ids:
                 findings.append(Finding("A-15", "BLOCKING", "DANGLING_REJECTOR",
@@ -831,6 +832,145 @@ def check_unmechanisable_items_are_declared(docs, findings):
         findings.append(Finding("B-16", "BLOCKING", "NO_UNCHECKABLE_ITEMS_DECLARED", ""))
 
 
+def check_no_stale_bilateral_wording(docs, findings):
+    """B-17. Two-rigid-body-only wording, anywhere in the pack.
+
+    The previous check inspected ONE field of ONE invariant. The statement of
+    that same invariant still said the old thing, and so did three other files.
+    A semantic model is only propagated when every place that asserts it is
+    updated, so this scans them all.
+    """
+    stale = ("both participating bodies", "each participating body",
+             "both bodies", "on BOTH bodies")
+    for key in ("normative", "expectations", "freedoms", "evidence",
+                "configurations", "stages"):
+        for path, text in _walk_strings(docs[key]):
+            if _in_admitting_context(path):
+                continue
+            low = text.lower()
+            for phrase in stale:
+                if phrase in low:
+                    findings.append(Finding(
+                        "B-17", "BLOCKING", "STALE_BILATERAL_INTERFACE_WORDING",
+                        "%s in %s: %r" % (path, FILES[key], text[:80])))
+
+
+def check_no_mandatory_released_sequence(docs, findings):
+    """B-18. No predicate may hard-code DEPLOYED -> RELEASED -> FOLDING -> STORED.
+
+    RELEASED is OPTIONAL. A predicate routing the fold path through it makes
+    folding reachable only via a node the Oracle declares optional, which rejects
+    every design whose release is an event, a guard or combined with folding.
+    """
+    for key in ("normative", "expectations", "evidence", "stages"):
+        for path, text in _walk_strings(docs[key]):
+            if _in_admitting_context(path) or "no_literal_sequence_required" in path:
+                continue
+            low = " ".join(text.lower().split())
+            if "through released" in low or "from deployed through released" in low:
+                findings.append(Finding("B-18", "BLOCKING", "MANDATORY_RELEASED_SEQUENCE",
+                                        "%s in %s: %r" % (path, FILES[key], text[:80])))
+            if "in released," in low and "each leg" in low:
+                findings.append(Finding("B-18", "BLOCKING", "RELEASED_ASSUMED_AS_A_STATE",
+                                        "%s in %s: %r" % (path, FILES[key], text[:80])))
+
+    # The fold transition must be reachable without passing through RELEASED.
+    fold = next((t for t in docs["configurations"]["transitions"]
+                 if t["id"] == "TRN-BM-003-FOLD"), None)
+    if fold is not None:
+        sources = fold.get("from_any_of") or ([fold["from"]] if "from" in fold else [])
+        if "CFG-BM-003-DEPLOYED" not in sources:
+            findings.append(Finding(
+                "B-18", "BLOCKING", "FOLD_UNREACHABLE_WITHOUT_RELEASED_POSE",
+                "TRN-BM-003-FOLD sources %s - folding must be reachable when release "
+                "is an event or a guard" % sources))
+
+
+def check_no_hard_lock_only_language(docs, findings):
+    """B-19. No unconditional 'folding is unavailable' rule for every design."""
+    stale = ("folding is unavailable in deployed",
+             "folding freedom is unavailable",
+             "arrival at a state where folding is blocked",
+             "the analysis shows each is unavailable")
+    for key in ("normative", "expectations", "configurations", "freedoms",
+                "ambiguities", "stages"):
+        for path, text in _walk_strings(docs[key]):
+            if _in_admitting_context(path):
+                continue
+            low = " ".join(text.lower().split())
+            for phrase in stale:
+                if phrase in low:
+                    findings.append(Finding(
+                        "B-19", "BLOCKING", "HARD_LOCK_ONLY_RULE",
+                        "%s in %s asserts unconditional path absence: %r"
+                        % (path, FILES[key], text[:80])))
+
+
+def check_readiness_not_overclaimed(docs, findings):
+    """B-21. The five readiness dimensions must be recorded separately."""
+    rd = docs["governance"].get("readiness_dimensions")
+    if not rd:
+        findings.append(Finding("B-21", "BLOCKING", "NO_READINESS_DIMENSIONS", ""))
+        return
+    for field in ("structural_held_out_oracle_readiness", "semantic_self_review",
+                  "independent_human_semantic_approval",
+                  "positive_executable_permissiveness_validation",
+                  "production_generation_isolation"):
+        if field not in rd:
+            findings.append(Finding("B-21", "BLOCKING", "READINESS_DIMENSION_MISSING", field))
+    ai = docs["governance"].get("author_independence", {})
+    if (rd.get("independent_human_semantic_approval") == "COMPLETE"
+            and ai.get("independent_author") is False):
+        findings.append(Finding("B-21", "BLOCKING", "SELF_REVIEW_CLAIMED_AS_APPROVAL",
+                                "same-agent review recorded as independent approval"))
+    if rd.get("production_generation_isolation") != "ENFORCED":
+        findings.append(Finding("B-21", "BLOCKING", "PRODUCTION_ISOLATION_NOT_ENFORCED",
+                                str(rd.get("production_generation_isolation"))))
+
+
+def check_descriptor_readiness_matches(docs, findings, descriptor_path=None):
+    """B-21b. The descriptor must not claim BM-003 has nothing outstanding."""
+    path = descriptor_path or os.path.join(ROOT, "benchmarks", "BM-003", "descriptor.yaml")
+    if not os.path.isfile(path):
+        return
+    with open(path, encoding="utf-8") as fh:
+        desc = yaml.safe_load(fh)
+    notice = desc.get("oracle_status_notice", {})
+    # Operative fields only. The notice also RECORDS the removed overclaim in
+    # prose, and a check that could not tell a quotation from an assertion would
+    # force the pack to stop explaining its own corrections.
+    blob = json.dumps(notice.get("blocks", [])) + json.dumps(notice.get("state", ""))
+    if "Nothing further from BM-003" in blob:
+        findings.append(Finding("B-21", "BLOCKING", "READINESS_OVERCLAIMED",
+                                "human approval and permissiveness validation are pending"))
+    rd = notice.get("readiness_dimensions", {})
+    gov = docs["governance"].get("readiness_dimensions", {})
+    for field, value in gov.items():
+        if field in ("statement", "what_each_means", "do_not_collapse"):
+            continue
+        if field in rd and rd[field] != value:
+            findings.append(Finding("B-21", "BLOCKING", "DESCRIPTOR_GOVERNANCE_READINESS_DISAGREE",
+                                    "%s: descriptor %r, governance %r" % (field, rd[field], value)))
+
+
+def check_contact_evidence_description(docs, findings):
+    """B-20. The contact class must not claim no invariant ever depends on it."""
+    contact = next((c for c in docs["evidence"]["evidence_classes"]
+                    if c["id"] == "EVC-BM-003-CONTACT"), None)
+    if contact is None:
+        findings.append(Finding("B-20", "BLOCKING", "NO_CONTACT_EVIDENCE_CLASS", ""))
+        return
+    text = " ".join(str(contact.get("consequence_of_absence", "")).split())
+    if "No invariant in this Oracle depends on one" in text:
+        findings.append(Finding(
+            "B-20", "BLOCKING", "CONTACT_DEPENDENCE_DENIED",
+            "a design declaring SMC-CONTACT_OR_COMPLIANT_RETENTION does depend on it"))
+    if "SMC-CONTACT_OR_COMPLIANT_RETENTION" not in text:
+        findings.append(Finding(
+            "B-20", "BLOCKING", "CONTACT_CLASS_DEPENDENCE_NOT_STATED",
+            "the class that needs this route is not named in consequence_of_absence"))
+
+
 CHECKS = [
     check_source_hash, check_clause_coverage, check_normative_provenance,
     check_no_unstated_numeric_threshold, check_no_preferred_realization,
@@ -838,7 +978,7 @@ CHECKS = [
     check_negative_cases_map_to_predicates, check_evidence_scope,
     check_no_structural_pass, check_release_requirement_present,
     check_stage_expectations, check_ambiguities, check_ids_unique_and_resolve,
-    check_fixture_permissiveness, check_governance,
+    check_declared_family_coverage_consistency, check_governance,
     # semantic checks
     check_clause_reciprocity, check_family_class_and_route,
     check_folding_path_not_universally_forbidden,
@@ -848,6 +988,10 @@ CHECKS = [
     check_s05_may_embody_selected_candidate, check_governance_independence_claims,
     check_descriptor_matches_governance, check_human_review_not_claimed_complete,
     check_unmechanisable_items_are_declared,
+    # propagation checks
+    check_no_stale_bilateral_wording, check_no_mandatory_released_sequence,
+    check_no_hard_lock_only_language, check_contact_evidence_description,
+    check_readiness_not_overclaimed, check_descriptor_readiness_matches,
 ]
 
 

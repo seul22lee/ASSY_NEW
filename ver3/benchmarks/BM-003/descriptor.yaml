@@ -79,8 +79,25 @@ oracle_status_notice:
 
     No positive executable reference exists and none is required - a positive
     reference validates the evaluator, it does not define success.
+  readiness_dimensions:
+    # Five separate things. Collapsing them is how "ready" gets claimed on the
+    # strength of the one that happens to be satisfied.
+    structural_held_out_oracle_readiness: SATISFIED
+    semantic_self_review: COMPLETE
+    independent_human_semantic_approval: PENDING
+    positive_executable_permissiveness_validation: PENDING_BEFORE_S03_S04_FREEZE
+    production_generation_isolation: ENFORCED
   blocks:
-    - "Nothing further from BM-003's side. FSF-02 hidden-Oracle readiness is now satisfied for this benchmark."
+    - "FSF-02 structural held-out-Oracle readiness is SATISFIED for BM-003."
+    - "Independent human semantic approval is PENDING - the Oracle has not been approved, only self-reviewed."
+    - "Positive-executable permissiveness validation is PENDING and is required before any S03/S04 freeze."
+  why_not_nothing_further: >
+    This previously read "Nothing further from BM-003's side", which was an
+    overclaim. Two things are still outstanding here and both bear on whether a
+    BM-003 result can be trusted: no human has independently reviewed the
+    acceptance model, and nothing has yet demonstrated that the Oracle really
+    admits materially different designs when executed against them rather than
+    reasoned about.
   still_outstanding_elsewhere: >
     No stage contract may freeze, because FSF-03 through FSF-07 remain
     unsatisfied: no stage is implemented, so no source-only run has occurred and

@@ -344,9 +344,17 @@ invariants:
     support_type: direct
     source_clauses: [SRC-BM003-012, SRC-BM003-013]
     verification_predicate: >
-      A continuous, sampled path exists from DEPLOYED through RELEASED and
-      FOLDING to STORED, the resulting stored configuration matches the initial
-      one, and the cycle is shown to repeat without a one-way step.
+      After the deliberate release condition or action - whether represented as a
+      configuration, an event, a guard, a transient condition or a combined
+      release-and-fold initiation - a continuous, sampled path to STORED exists,
+      the resulting stored configuration matches the initial one, and the cycle is
+      shown to repeat without a one-way step.
+    no_literal_sequence_required: >
+      DEPLOYED -> RELEASED -> FOLDING -> STORED is ONE admissible representation,
+      not the required shape. Requiring it rejects a squeeze-and-fold grip and any
+      distributed release with no separately stable pose - both of which
+      CFG-BM-003-RELEASED admissible_representations explicitly admits.
+    corrected_at: "propagation review P-01"
     requires_tags: [return_path_exists, cycle_repeatable]
     note: "Repeatable means no step is irreversible. It is not a cycle count and implies no durability claim."
 
@@ -393,8 +401,9 @@ invariants:
 
   - id: NRM-BM-003-016
     statement: >
-      Every declared joint and every declared retention relationship is realized
-      by identifiable geometry on each participating body.
+      Every declared motion, constraint or retention relationship has an
+      identifiable physical realization on all participating bodies OR functional
+      regions appropriate to its declared realization class.
     basis_type: VERIFICATION_MINIMUM
     support_type: derived
     source_clauses: [SRC-BM003-015]
