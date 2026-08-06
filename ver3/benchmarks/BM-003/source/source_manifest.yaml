@@ -29,13 +29,13 @@ schema_version: "0.1.0"
 # ---------------------------------------------------------------------
 benchmark_id: BM-003
 source_class: NEWLY_AUTHORED
-authority_status: PROPOSED
+authority_status: FROZEN
 production_readable: true
-request_sha256: 80619fb12625c8a1e958af726227f380590d0d9da4505814af5a208866fd29c5
-source_word_count: 299
+request_sha256: 0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c
+source_word_count: 300
 human_review_required: true
-human_review_complete: false
-frozen: false
+human_review_complete: true
+frozen: true
 oracle_visible_to_production: false
 positive_reference_visible_to_production: false
 
@@ -102,7 +102,7 @@ provenance:
 authoring:
   method: AUTHORED_FROM_FIXED_PRODUCT_INTENT
   register: "Ordinary first-person product request, as a user would write it."
-  length_words: 299
+  length_words: 300
   length_target: "150-300 words"
   what_was_written: >
     The need and the user-observable behaviour: what the product must do, and
@@ -118,8 +118,8 @@ authoring:
     - any acceptance criterion, predicate or evaluation instruction
     - any requirement identifier
   hashes:
-    file_sha256: 80619fb12625c8a1e958af726227f380590d0d9da4505814af5a208866fd29c5
-    bytes: 1523
+    file_sha256: 0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c
+    bytes: 1556
   note_on_a_single_hash: >
     BM-001 and BM-002 record two hashes because a trailing newline was appended
     to extracted content. Nothing was appended here — the file IS the authored
@@ -284,3 +284,50 @@ this_task_did_not_produce:
   - a simulation
   - a positive executable reference
   - an evaluation
+
+# ---------------------------------------------------------------------
+# HUMAN DECISION RECORD
+#
+# Recorded from an explicit human decision. This source is NEWLY AUTHORED and has
+# no independent verbatim witness, so acceptance rests entirely on this human
+# judgement rather than on any comparison.
+# ---------------------------------------------------------------------
+human_decision:
+  decided_by: human
+  decision_date: "2026-08-05"
+  outcome: ACCEPTED_WITH_EDITS
+  decisions:
+    - {id: D-003-1, question: "Is the release clear enough and open enough?", decision: APPROVED, resolved: true}
+    - {id: D-003-2, question: "Does 'stay open on its own' avoid implying a lock?", decision: APPROVED, resolved: true}
+    - {id: D-003-3, question: "Does the purpose sentence avoid a capacity requirement?", decision: APPROVED, resolved: true}
+    - {id: D-003-4, question: "Do the motion verbs prescribe a joint type?", decision: APPROVED, resolved: true}
+    - {id: D-003-5, question: "Does the general unintended-motion sentence prescribe anything?", decision: APPROVED, resolved: true}
+    - {id: D-003-6, question: "Are at least three genuinely different mechanisms admissible?", decision: APPROVED, resolved: true}
+  required_edits_applied:
+    - id: R2-a
+      replaced: "Nothing should rattle, turn on its own, or move in some other direction I was not expecting."
+      with: "Nothing should turn on its own, shift out of place, or move in some other direction I was not expecting."
+    - id: R2-b
+      replaced: "I want to be able to open it and fold it away again and again, without anything loosening, coming apart, or needing to be put back on."
+      with: "The opening and folding sequence should be repeatable, with all normal parts remaining attached and without anything needing to be removed and put back on."
+  edit_purpose: >
+    Preserve the gross rigid-body mobility and assembly-persistence requirements
+    while removing language that would have imported contact noise, tolerance,
+    wear, fatigue, fastener loosening or lifetime into the benchmark.
+
+    "rattle" and "loosening" both describe a CONTACT-LEVEL condition. Verifying
+    either needs tolerances, surface behaviour and a load history - none of which
+    this benchmark's declared scope covers - so both would have produced
+    UNSUPPORTED: a correct answer that measures nothing. "shift out of place" and
+    "remaining attached" describe the same failures at rigid-body fidelity, which
+    is the fidelity available.
+  post_edit_verification:
+    overprescription_audit: CLEAN
+    underdefinition_audit: COMPLETE
+    contact_noise_and_lifetime_scan: CLEAN
+    word_count: 300
+    scan_note: >
+      A contact-noise and lifetime category was added to the audit specifically
+      to check these edits achieved their purpose. It matches rattle, loosen,
+      backlash, play, slop, wobble, vibration, lifetime, durability and cycle
+      counts. Clean.

@@ -24,13 +24,13 @@ schema_version: "0.1.0"
 # ---------------------------------------------------------------------
 benchmark_id: BM-002
 source_class: EXTRACTED_VERBATIM
-authority_status: PROPOSED
+authority_status: FROZEN
 production_readable: true
 request_sha256: 4b25163b95adf59428131da783ee2fe292e099937e196ce1e3a59cc7befb061f
 source_word_count: 73
 human_review_required: true
-human_review_complete: false
-frozen: false
+human_review_complete: true
+frozen: true
 oracle_visible_to_production: false
 positive_reference_visible_to_production: false
 
@@ -200,3 +200,35 @@ consumption:
     Every stage after s01 reads DesignState. Two stages reading this file would
     produce two interpretations of one sentence with nothing to say which an
     entity depends on.
+
+# ---------------------------------------------------------------------
+# HUMAN DECISION RECORD
+#
+# Recorded from an explicit human decision. Nothing here was decided by the
+# author of the source or by any automated check; the freeze is a human act and
+# this section is where that act is written down.
+# ---------------------------------------------------------------------
+human_decision:
+  decided_by: human
+  decision_date: "2026-08-05"
+  outcome: ACCEPTED
+  decisions:
+    - id: D-002-1
+      question: "Is the travel quantity '80-100 mm' or '80--100 mm'?"
+      decision: "80-100 mm"
+      basis: "the exact fixture text, preserved"
+      resolved: true
+      effect: >
+        The authoritative quantity spelling is the fixture's. Stage 01 will carry
+        "approximately 80-100 mm" verbatim, qualifier included.
+    - id: D-002-2
+      question: "Which witness rendering is canonical?"
+      decision: ORIGINAL_BENCHMARK_FIXTURE
+      resolved: true
+  corroborating_witness_disposition: >
+    The specification document containing "80--100 mm" remains a CORROBORATING
+    witness and a RECORDED DISCREPANCY. It was explicitly NOT normalized and NOT
+    modified. The discrepancy stays visible in SOURCE_FREEZE_REVIEW.md, because a
+    resolved decision is not the same as a difference that never existed - a
+    later reader comparing the two witnesses must find the divergence already
+    accounted for rather than discover it fresh.

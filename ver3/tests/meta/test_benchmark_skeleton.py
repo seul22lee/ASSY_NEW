@@ -161,13 +161,13 @@ class TestBenchmarkSkeleton(unittest.TestCase):
                 found = [w for w in leaks if w in text]
                 self.assertEqual([], found, "solution language in the source request: %s" % found)
 
-    def test_bm003_authored_source_is_unfrozen_and_under_review(self):
-        """An authored source is not verifiable by comparison, so it stays unfrozen.
+    def test_bm003_authored_source_was_frozen_by_human_decision(self):
+        """An authored source has no witness, so only a human could accept it.
 
-        BM-001 and BM-002 were extracted and can be checked against a witness.
-        BM-003 was written, so whether it is faithful and answer-free is a human
-        judgement, and freezing it before that judgement would skip the only
-        check there is.
+        BM-001 and BM-002 were extracted and are checkable against a fixture.
+        BM-003 was written, so its acceptance rests entirely on human judgement -
+        which is why the decision record, not the envelope alone, is the evidence
+        that the freeze was legitimate.
         """
         path = _paths.source_manifest_path("BM-003")
         if not os.path.isfile(path):
@@ -176,8 +176,8 @@ class TestBenchmarkSkeleton(unittest.TestCase):
         self.assertEqual("AUTHORED", man["provenance"]["origin"])
         self.assertEqual("NEWLY_AUTHORED", man["source_class"])
         self.assertTrue(man["human_review_required"])
-        self.assertFalse(man["human_review_complete"])
-        self.assertFalse(man["frozen"])
+        self.assertTrue(man["human_review_complete"])
+        self.assertTrue(man["frozen"])
         self.assertFalse(man["subject"]["chosen_by_this_session"])
 
     def test_bm003_request_matches_its_recorded_hash(self):
@@ -210,16 +210,19 @@ class TestBenchmarkSkeleton(unittest.TestCase):
         for item in ("an Oracle", "a mechanism selection", "CAD", "an evaluation"):
             self.assertIn(item, man["this_task_did_not_produce"])
 
-    def test_bm003_still_blocks_the_freeze_gate_despite_having_a_source(self):
-        """A written source is not a frozen source.
+    def test_bm003_remains_a_placeholder_for_want_of_an_oracle(self):
+        """A frozen source does not make a benchmark ready.
 
-        The gate needs a frozen source AND an Oracle frozen before the first run.
-        Having authored one of the three must not make the gate look passable.
+        The source precondition is satisfied, which is a different thing from
+        BM-003 being usable: with no Oracle it cannot be scored at all. The
+        placeholder must survive its source being frozen, or completing the easy
+        half would look like finishing.
         """
         d = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
+        self.assertTrue(_paths.source_manifest("BM-003")["frozen"])
         self.assertEqual("PLACEHOLDER", d["status"])
-        self.assertFalse(_paths.source_manifest("BM-003")["frozen"])
         self.assertFalse(d["oracle"]["frozen_before_source_only_runs"])
+        self.assertEqual("NOT_AUTHORED", d["oracle"]["location"])
 
     def test_bm003_is_declared_a_placeholder(self):
         data = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))

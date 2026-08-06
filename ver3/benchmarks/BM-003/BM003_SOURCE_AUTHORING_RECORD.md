@@ -10,9 +10,9 @@ reference, no evaluation.
 
 - Subject: **BM-003 — Compact folding three-leg desktop stand**, fixed by the
   authoring instruction and not chosen here.
-- Artifact: [`source/request.txt`](source/request.txt) — 299 words, target 150–300
-- Status: **HUMAN_REVIEW_REQUIRED**, unfrozen
-- `sha256` `80619fb12625c8a1e958af726227f380590d0d9da4505814af5a208866fd29c5`
+- Artifact: [`source/request.txt`](source/request.txt) — 300 words, target 150–300
+- Status: **HUMAN_APPROVED and FROZEN** (human decision, 2026-08-05)
+- `sha256` `0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c`
 
 ---
 
@@ -51,11 +51,11 @@ not the source.
 | Parts stay connected through the deployment path | *"Nothing should come apart or fall off while I am opening it"* |
 | No tools, motor, or external fixture | *"I should not need tools, a motor, or any other equipment to do it"* |
 | Stays deployed without the user holding it | *"it needs to stay open on its own. I should not have to hold the legs while I use it"* |
-| No free folding, twisting, detaching, or other unintended motion | *"they should not be able to fold back, twist aside, or work themselves loose"* — and, for the general case, *"Nothing should rattle, turn on its own, or move in some other direction I was not expecting"* |
+| No free folding, twisting, detaching, or other unintended motion | *"they should not be able to fold back, twist aside, or work themselves loose"* — and, for the general case, *"Nothing should turn on its own, shift out of place, or move in some other direction I was not expecting"* |
 | Deliberate release required before folding | *"Before it can be folded again I want to have to do something deliberate, so it does not collapse just because I knocked it"* |
 | Returns to the compact stored configuration | *"it should fold back down to the same compact shape it started in"* |
-| Cycle is repeatable | *"open it and fold it away again and again"* |
-| Joint and retention relationships stay intact through the cycle | *"without anything loosening, coming apart, or needing to be put back on"* |
+| Cycle is repeatable | *"The opening and folding sequence should be repeatable"* |
+| Joint and retention relationships stay intact through the cycle | *"with all normal parts remaining attached and without anything needing to be removed and put back on"* |
 | Assemblable through a comprehensible sequence | *"something that can genuinely be built as a product and put together in a sensible order"* |
 | Assembly retains joints and locking components in ordinary use | *"it should stay together through normal opening and folding"* |
 | Intended to hold a small desktop object | *"It is meant to hold a small object on my desk while I am working"* |
@@ -104,8 +104,8 @@ flagged the omission as checklist item C5; on review it was judged a real gap,
 because the named three are examples and the requirement is the general case.
 Added:
 
-> *"Nothing should rattle, turn on its own, or move in some other direction I was
-> not expecting."*
+> *"Nothing should turn on its own, shift out of place, or move in some other
+> direction I was not expecting."*
 
 It states what must **not** happen and never what prevents it, so it constrains
 the outcome without narrowing the solution space. No "degree of freedom", no
@@ -172,11 +172,42 @@ Not omissions — decisions.
 
 ---
 
+## 4a. Revision R2 — the human-approved wording corrections
+
+Approved at freeze, 2026-08-05. D-003-1 through D-003-6 were approved **subject
+to** these two edits.
+
+| | Before | After |
+|---|---|---|
+| R2-a | *"Nothing should **rattle**, turn on its own, or move in some other direction I was not expecting."* | *"Nothing should turn on its own, **shift out of place**, or move in some other direction I was not expecting."* |
+| R2-b | *"...open it and fold it away again and again, without anything **loosening, coming apart**, or needing to be put back on."* | *"The opening and folding sequence should be **repeatable, with all normal parts remaining attached** and without anything needing to be removed and put back on."* |
+
+**Why they matter.** Both removed words describe a **contact-level** condition.
+"Rattle" is free play between surfaces; "loosening" is a fastener or interference
+losing its grip over time. Verifying either needs tolerances, surface behaviour
+and a load history — none of which this benchmark's declared scope covers. Each
+would therefore have produced UNSUPPORTED: a correct answer that measures
+nothing, quietly hollowing out two of the requirements the benchmark exists for.
+
+The replacements say the same thing at the fidelity that is actually available.
+"Shift out of place" is a rigid-body displacement, checkable by a pose
+comparison. "All normal parts remaining attached" is a retention relationship,
+checkable by whether the connection still holds. Gross mobility and assembly
+persistence survive intact; contact noise, tolerance, wear, fatigue, fastener
+loosening and lifetime are all out.
+
+Re-audited after the edits: overprescription **clean** on thirteen categories —
+including a contact-noise-and-lifetime category added specifically to confirm
+these edits did what they were for — and underdefinition **complete** on all
+twenty-four intent elements. 300 words.
+
+---
+
 ## 5. What must happen next
 
-1. **Human review** of this source against
-   [`BM003_SOURCE_HUMAN_REVIEW_CHECKLIST.md`](BM003_SOURCE_HUMAN_REVIEW_CHECKLIST.md).
-2. **Freeze** the source once review passes, recording who reviewed it and when.
+1. ~~**Human review** of this source.~~ **DONE** — 2026-08-05, ACCEPTED_WITH_EDITS.
+2. ~~**Freeze** the source.~~ **DONE** — `authority_status: FROZEN`,
+   `human_review_complete: true`, `frozen: true`.
 3. **Author the Oracle independently**, in `ver3/oracles/`, and freeze it
    **before** the first source-only run. Not in this session, and ideally not by
    whoever wrote this request.
@@ -184,5 +215,6 @@ Not omissions — decisions.
    never as a scoring target.
 5. Update `descriptor.yaml` from `PLACEHOLDER`, which un-blocks the freeze gate.
 
-Until steps 1–3 are complete, BM-003 remains a placeholder and **no stage
-contract may freeze**, enforced by `test_benchmark_skeleton.py`.
+The source is frozen, so the source precondition of the Stage freeze gate is now
+satisfied. BM-003 nonetheless remains a **placeholder**: it has no Oracle, and no
+Oracle was authored in this session. Steps 3–5 above are still outstanding.

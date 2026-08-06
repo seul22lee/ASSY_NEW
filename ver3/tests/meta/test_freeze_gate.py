@@ -16,32 +16,58 @@ from . import freeze_gate as fg
 
 
 class TestGateOnRealSources(unittest.TestCase):
-    """The gate must be closed right now — no source has been reviewed."""
+    """The source precondition is satisfied — and satisfied for the right reason."""
 
-    def test_gate_is_currently_closed(self):
-        self.assertFalse(fg.stage_freeze_permitted())
+    def test_source_precondition_is_now_satisfied(self):
+        self.assertTrue(fg.stage_freeze_permitted(),
+                        "blockers: %s" % fg.all_source_blockers())
 
-    def test_every_benchmark_currently_blocks(self):
-        blocked = {b["benchmark_id"] for b in fg.all_source_blockers()}
-        self.assertEqual(set(_paths.BENCHMARK_IDS), blocked)
+    def test_no_benchmark_blocks(self):
+        self.assertEqual([], fg.all_source_blockers())
 
-    def test_each_benchmark_blocks_on_all_three_fields(self):
+    def test_it_opened_because_all_three_conditions_hold_on_every_benchmark(self):
+        """The gate must be open on the merits, not because a check went missing.
+
+        An empty blocker list is also what a gate that stopped looking would
+        return, so the three fields are asserted directly rather than inferred
+        from the absence of complaints.
+        """
         for bm in _paths.BENCHMARK_IDS:
+            man = _paths.source_manifest(bm)
             with self.subTest(benchmark=bm):
-                fields = {b["field"] for b in fg.source_blockers(bm)}
-                self.assertEqual(set(_paths.FREEZE_BLOCKING_FIELDS), fields)
+                self.assertTrue(man["human_review_complete"])
+                self.assertTrue(man["frozen"])
+                self.assertEqual(fg.REQUIRED_AUTHORITY_STATUS, man["authority_status"])
+                self.assertEqual([], fg.source_blockers(bm))
 
-    def test_every_blocker_states_a_reason(self):
-        for b in fg.all_source_blockers():
-            with self.subTest(benchmark=b["benchmark_id"], field=b["field"]):
-                self.assertTrue(b["reason"].strip())
+    def test_breaking_any_single_real_source_recloses_the_gate(self):
+        """Each real source still depends on all three of its own fields.
 
-    def test_no_stage_contract_is_frozen_while_the_gate_is_closed(self):
-        if fg.stage_freeze_permitted():
-            self.skipTest("gate is open; this test guards the closed case")
+        Run against the manifests actually on disk, one field flipped at a time,
+        so this cannot pass on a synthetic envelope while the real ones drift.
+        """
+        for bm in _paths.BENCHMARK_IDS:
+            for field, broken in (("human_review_complete", False),
+                                  ("frozen", False),
+                                  ("authority_status", "PROPOSED")):
+                with self.subTest(benchmark=bm, field=field):
+                    manifests = {b: dict(_paths.source_manifest(b)) for b in _paths.BENCHMARK_IDS}
+                    manifests[bm][field] = broken
+                    blockers = fg.all_source_blockers(_paths.BENCHMARK_IDS, manifests)
+                    self.assertFalse(fg.stage_freeze_permitted(_paths.BENCHMARK_IDS, manifests))
+                    self.assertEqual([(bm, field)],
+                                     [(b["benchmark_id"], b["field"]) for b in blockers])
+
+    def test_an_open_source_gate_is_not_permission_to_freeze_a_stage(self):
+        """The source precondition is one prerequisite, not the whole gate.
+
+        Steps 3-7 have not run for any stage - none is implemented - so nothing
+        may be frozen regardless of how settled the sources are.
+        """
         frozen = [n for n in _paths.CONTRACT_FILES
                   if _paths.contract(n).get("status") == "frozen"]
-        self.assertEqual([], frozen, "contracts frozen behind a closed gate: %s" % frozen)
+        self.assertEqual([], frozen,
+                         "contracts frozen without progression steps 3-7: %s" % frozen)
 
 
 class TestEachFieldBlocksIndependently(unittest.TestCase):

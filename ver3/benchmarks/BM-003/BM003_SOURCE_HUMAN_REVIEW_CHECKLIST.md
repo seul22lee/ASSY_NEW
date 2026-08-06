@@ -13,7 +13,28 @@ author of a request is the worst-placed party to make it.
 the same person who later authors the BM-003 Oracle, since an Oracle author who
 has already shaped the request has partly answered it.
 
-Status while unreviewed: **HUMAN_REVIEW_REQUIRED**, source **unfrozen**.
+> **REVIEW COMPLETE — 2026-08-05. Outcome: ACCEPTED_WITH_EDITS.**
+>
+> All of A, B, D, E and F were accepted. C1–C6 were approved **subject to** two
+> wording corrections, applied as revision R2 and recorded in section 4a of the
+> authoring record:
+>
+> - *"rattle"* → *"shift out of place"*
+> - *"without anything loosening, coming apart, or needing to be put back on"* →
+>   *"with all normal parts remaining attached and without anything needing to be
+>   removed and put back on"*
+>
+> Both removed words describe a **contact-level** condition that this benchmark's
+> scope cannot verify; each would have produced UNSUPPORTED. The replacements
+> state the same requirements at rigid-body fidelity, preserving gross mobility
+> and assembly persistence without importing tolerance, wear, fatigue, fastener
+> loosening or lifetime.
+>
+> Final source: **300 words**,
+> `sha256 0c3c68b2ac9be8cfaffff0814722577d89386e386f0a0828ba4b1e7fb16da23c`,
+> `authority_status: FROZEN`.
+>
+> The blank checklist below is retained as the record of what was examined.
 
 ---
 
@@ -34,7 +55,7 @@ rather than against the table.
 | A7 | No tools, motor or external fixture | |
 | A8 | Stays open without the user holding it | |
 | A9 | Legs cannot fold back, twist aside, or work loose on their own | |
-| A9b | No leg rattles, turns on its own, or moves in another unexpected direction | |
+| A9b | No leg turns on its own, shifts out of place, or moves in another unexpected direction | |
 | A10 | A deliberate action is required before folding | |
 | A11 | Folds back to the same compact form | |
 | A12 | Open-and-fold cycle repeatable | |
@@ -86,7 +107,7 @@ authoring record; the reviewer decides.
 | | Check | ✅ / ❌ / note |
 |---|---|---|
 | D1 | Reads as something a real person would write, not as a specification | |
-| D2 | 150–300 words (authored at 299) | |
+| D2 | 150–300 words (final: 300) | |
 | D3 | No stage names, DesignState or Oracle vocabulary | |
 | D4 | No requirement identifiers | |
 | D5 | No predicates, acceptance criteria or evaluation instructions | |
@@ -142,14 +163,14 @@ required_edits:      # empty if ACCEPTED
 source_frozen:       # true only if ACCEPTED and no edits pending
 ```
 
-**On ACCEPTED:** set `frozen: true` and `human_review.status:
-HUMAN_REVIEW_COMPLETE` in `source/source_manifest.yaml`, record the reviewer and
-date, and re-hash `request.txt` if it changed.
+**On ACCEPTED — done 2026-08-05:** `source/source_manifest.yaml` now carries
+`authority_status: FROZEN`, `human_review_complete: true`, `frozen: true`, the
+decision record, and the re-hashed request.
 
 **Then, and only then**, the BM-003 Oracle may be authored — independently, and
 frozen **before** the first source-only run. `BENCHMARK_RESULT_CONTRACT`
 invalidates a result outright when `oracle_frozen_before_run` is false: an Oracle
 written after a run is not a weaker Oracle, it is no Oracle at all.
 
-Until this review passes, BM-003 stays a placeholder and **no stage contract may
-freeze**.
+The source is frozen. BM-003 nonetheless stays a **placeholder** until its Oracle
+exists — and no Oracle was authored in this session.

@@ -166,14 +166,35 @@ class TestCommonEnvelope(unittest.TestCase):
                 with self.subTest(benchmark=bm, field=field):
                     self.assertIsInstance(man[field], bool)
 
-    def test_nothing_is_marked_approved_or_frozen_yet(self):
-        """No source may be self-approved. Freezing is a human act."""
+    def test_every_freeze_carries_a_human_decision_record(self):
+        """Freezing is a human act, so a frozen source must say who decided.
+
+        This is what stops a source being frozen by an edit. A frozen envelope
+        with no decision record behind it is indistinguishable from a typo.
+        """
         for bm in _paths.BENCHMARK_IDS:
+            man = _paths.source_manifest(bm)
+            if not man["frozen"]:
+                continue
             with self.subTest(benchmark=bm):
-                man = _paths.source_manifest(bm)
-                self.assertFalse(man["human_review_complete"])
-                self.assertFalse(man["frozen"])
-                self.assertEqual("PROPOSED", man["authority_status"])
+                dec = man["human_decision"]
+                self.assertEqual("human", dec["decided_by"])
+                self.assertTrue(dec["decision_date"])
+                self.assertIn(dec["outcome"], ("ACCEPTED", "ACCEPTED_WITH_EDITS"))
+                self.assertTrue(dec["decisions"], "no decisions recorded")
+                for d in dec["decisions"]:
+                    self.assertTrue(d["resolved"], "unresolved decision on a frozen source")
+
+    def test_frozen_sources_are_internally_consistent(self):
+        """frozen, reviewed and FROZEN must move together."""
+        for bm in _paths.BENCHMARK_IDS:
+            man = _paths.source_manifest(bm)
+            with self.subTest(benchmark=bm):
+                if man["authority_status"] == "FROZEN":
+                    self.assertTrue(man["frozen"])
+                    self.assertTrue(man["human_review_complete"])
+                self.assertTrue(man["human_review_required"],
+                                "review was required; that fact does not change on freezing")
 
     def test_frozen_implies_reviewed(self):
         """A frozen source that was never reviewed is a contradiction.
@@ -235,11 +256,12 @@ class TestSourceFreezeReview(unittest.TestCase):
                     body = fh.read().rstrip("\n")
                 self.assertIn(body, self.text)
 
-    def test_every_human_decision_is_pending(self):
-        """Nothing may be approved or frozen autonomously."""
-        self.assertIn("PENDING", self.text)
-        for forbidden in ("HUMAN_APPROVED", "authority_status: FROZEN\nfrozen: true"):
-            self.assertNotIn(forbidden, self.text)
+    def test_every_decision_is_resolved(self):
+        """After the freeze, no decision may still read PENDING."""
+        self.assertNotIn("PENDING", self.text)
+        for bm in _paths.BENCHMARK_IDS:
+            with self.subTest(benchmark=bm):
+                self.assertIn("RESOLVED", self.text)
 
     def test_it_records_the_bm002_quantity_discrepancy_without_normalizing_it(self):
         """Both renderings must appear; recording it is the point."""
@@ -249,18 +271,18 @@ class TestSourceFreezeReview(unittest.TestCase):
     def test_it_records_that_bm003_has_no_independent_witness(self):
         self.assertIn("no independent verbatim witness", self.text)
 
-    def test_no_source_is_marked_approved_anywhere_in_the_tree(self):
-        strays = []
-        for dirpath, dirnames, filenames in os.walk(_paths.BENCHMARKS):
-            dirnames[:] = [d for d in dirnames if d != "__pycache__"]
-            for fn in filenames:
-                if not fn.endswith((".md", ".yaml", ".yml")):
-                    continue
-                full = os.path.join(dirpath, fn)
-                with open(full, encoding="utf-8", errors="replace") as fh:
-                    if "HUMAN_APPROVED" in fh.read():
-                        strays.append(os.path.relpath(full, _paths.REPO_ROOT))
-        self.assertEqual([], strays, "self-approved sources: %s" % strays)
+    def test_it_records_the_nine_decisions(self):
+        for did in ("D-001-1", "D-002-1", "D-002-2",
+                    "D-003-1", "D-003-2", "D-003-3", "D-003-4", "D-003-5", "D-003-6"):
+            with self.subTest(decision=did):
+                self.assertIn(did, self.text)
+
+    def test_it_names_the_authoritative_witness_for_each_extracted_source(self):
+        for bm in ("BM-001", "BM-002"):
+            man = _paths.source_manifest(bm)
+            with self.subTest(benchmark=bm):
+                self.assertEqual("ORIGINAL_BENCHMARK_FIXTURE",
+                                 man["human_decision"]["decisions"][-1]["decision"])
 
 
 if __name__ == "__main__":

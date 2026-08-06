@@ -13,10 +13,11 @@ status: PLACEHOLDER
 source:
   request_path: ver3/benchmarks/BM-003/source/request.txt
   present: true
-  frozen: false
+  frozen: true
   read_by: s01
   manifest: ver3/benchmarks/BM-003/source/source_manifest.yaml
-  human_review: HUMAN_REVIEW_REQUIRED
+  human_review: HUMAN_REVIEW_COMPLETE
+  authority_status: FROZEN
   origin: AUTHORED
   note: >
     The only raw text input to a run. Every later stage reads DesignState.
@@ -49,11 +50,11 @@ output:
 
 placeholder_notice:
   state: >
-    BM-003 has a source request, but it is AUTHORED, UNFROZEN and
-    HUMAN_REVIEW_REQUIRED, and there is still no Oracle and no positive
-    executable reference. It therefore remains a placeholder: the freeze gate
-    needs a frozen source and an Oracle frozen before the first run, and it has
-    neither.
+    BM-003's source is now HUMAN-APPROVED and FROZEN, so it no longer blocks the
+    source precondition of the Stage freeze gate. It remains a PLACEHOLDER for a
+    different reason: there is still no Oracle and no positive executable
+    reference. An Oracle must be authored independently and frozen BEFORE the
+    first source-only run, and none was authored in this session.
   blocks:
     - "Freezing ANY stage contract (STAGE_PROGRESSION_CONTRACT freeze_rule)."
   selection_criteria: ver3/benchmarks/BM-003/BM-003_SELECTION_CRITERIA.md
@@ -65,7 +66,7 @@ placeholder_notice:
     The subject was fixed by decision, which settles that document's
     HUMAN_DECISION_REQUIRED without selecting a brief.
   required_before_use:
-    - "Human review of the authored source (BM003_SOURCE_HUMAN_REVIEW_CHECKLIST.md), then freezing it."
+    - "DONE - human review of the authored source, then freezing it (2026-08-05)."
     - "An independently authored Oracle, frozen BEFORE the first source-only run."
     - "Optionally a positive executable reference, for evaluator validation."
   ordering_rule: >
