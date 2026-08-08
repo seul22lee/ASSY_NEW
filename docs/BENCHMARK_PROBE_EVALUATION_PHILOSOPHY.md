@@ -12,7 +12,7 @@ cites a repository artifact.
 | question | answer |
 |---|---|
 | data | `ver3/benchmarks/BM-00N/source/request.txt`, frozen, `read_by: s01` per the descriptor |
-| upstream S01/S02 | **replayed** from `ver3/assy_v3/fixtures/responses/BM-00N/s0N.json` — human/agent-authored recordings |
+| upstream S01/S02 | **replayed** from `ver3/assy_v3/fixtures/responses/BM-00N/s0N.json` — **repository fixtures whose authorship/provenance is UNKNOWN from available metadata** (no `authored_by` key in any of the six; see the provenance note below) |
 | S03/S04 | **live**, from an independent provider |
 | who produced the badge | `ver3/tools/run_window.py` (fixture replay) or `run_window2.py` (live) |
 | what is validated | that the *machinery* completed: the response parsed, the patch validated against `DESIGN_STATE_CONTRACT`, and the fourteen/thirteen checks reported nothing |
@@ -25,16 +25,41 @@ cites a repository artifact.
 | question | answer |
 |---|---|
 | data | `ver3/assy_v3/probes/PRB-0N/request.txt` |
-| upstream S01/S02 | **also hand-authored recordings** — `probes/PRB-01/` contains `s01.json`, `s02.json`, `s02.pre_revision.json` |
+| upstream S01/S02 | **also replayed, and here the provenance is explicit** — all seven PRB fixtures carry `_meta.authored_by: "agent-in-repository"`; `probes/PRB-01/` contains `s01.json`, `s02.json`, `s02.pre_revision.json` |
 | S03/S04 | live, identically to BM |
 | what is validated | *the same fourteen/thirteen checks*, nothing else |
 | PASS means | exactly what it means for BM |
 | engineering claim supported | the same one: the machinery completed |
 
-**So today BM and PRB are structurally identical.** Same replayed upstream, same
-live downstream, same checks, same badge semantics. The only difference is which
-directory the request lives in. A probe is currently *"a fourth, fifth and sixth
-case with hand-authored S01/S02"* — not a generalization test.
+**So today the Window-2 execution topology of BM and PRB is structurally
+analogous** — replayed upstream, live downstream, the same checks, the same badge
+semantics — **and their provenance is not.** A probe is currently *"a fourth,
+fifth and sixth case whose S01/S02 are replayed from repository-authored
+fixtures"* — not a generalization test.
+
+### Provenance note — what the fixture metadata does and does not establish
+
+| | BM-001/002/003 | PRB-01/02/03 |
+|---|---|---|
+| `_meta.authored_by` | **absent in all six fixtures** | `"agent-in-repository"` in **all seven** |
+| provenance label | **UNKNOWN from available metadata** | **repository-authored**, directly supported |
+| `pairing_history` | present in five of six | present |
+
+**The shared `pairing_history` sentence does not establish common authorship.**
+It is written verbatim by a repository tool, `tools/repair_prompt_pairing.py:165-175`,
+and is present in all eleven fixture `pairing_history` arrays. It records that a
+tool re-stamped the pairing; it says nothing about who produced the content.
+
+Anchors: `P4A_COMPLETE.md:76-77` (per-case provenance labels), `P4A_COMPLETE.md:654-672`
+(the complete eleven-fixture `authored_by` / `pairing_history` census),
+`P4A_COMPLETE.md:952` (the correction of BM provenance to UNKNOWN),
+`P5_COMPLETE.md:274-277` and `P5_COMPLETE.md:475-476` (the sentence traced to the tool,
+and the narrowing of the common-authorship inference).
+
+**Consequently, nothing below should be read as a claim that the BM upstream
+fixtures were authored by a human, by an agent, or by hand.** What is established
+is that they are replayed rather than generated live, which is what the
+evaluation argument actually depends on.
 
 ### The decisive omission
 
@@ -128,11 +153,12 @@ when judging the pipeline. *Steering risk:* **high** — it makes the validators
 de facto definition of quality, and a validator is a proxy written by the same
 hand as the thing it checks.
 
-### M-3 — Probes have hand-authored upstream, which contradicts their purpose
+### M-3 — Probes have replayed, repository-authored upstream, which contradicts their purpose
 
 *Implementation communicates:* a probe is another case. *Philosophy intends:* a
-probe is an unseen input. *Why it matters:* `probes/PRB-01/s01.json` is authored,
-so the probe's S01/S02 are not generalization evidence at all; only S03/S04 are.
+probe is an unseen input. *Why it matters:* `probes/PRB-01/s01.json` carries
+`_meta.authored_by: "agent-in-repository"`, so the probe's S01/S02 are not
+generalization evidence at all; only S03/S04 are.
 *Steering risk:* **medium** — it inflates apparent probe maturity, and it is how
 this project reached "comparable benchmark/probe maturity" while comparing two
 replays.
@@ -166,8 +192,8 @@ the pipeline establish them?"*
 **PRB should represent** a frozen unseen input paired with a **function-indexed
 micro-oracle**. Its role is *"on a problem we never fitted anything to, does the
 pipeline establish the invariants that any mechanism performing this function must
-satisfy?"* Probes must be run end-to-end live — a probe with authored upstream is
-not a probe.
+satisfy?"* Probes must be run end-to-end live — a probe whose upstream is
+replayed rather than generated is not a probe.
 
 **Should BM ever receive PASS/FAIL?** BM is an input; inputs have no verdict.
 **A RUN on BM receives a verdict**, and the distinction is not pedantic: it is
@@ -250,7 +276,8 @@ never something that itself passes or fails.
 **What should PRB mean?**
 A frozen unseen input plus a **function-indexed micro-oracle**, run end-to-end
 live. The primary generalization evidence, and currently the weakest part of the
-setup, because probes have authored upstream and no oracle at all.
+setup, because probes have replayed repository-authored upstream (explicit
+`authored_by: agent-in-repository`) and no oracle at all.
 
 **What should the dashboard communicate?**
 Three separate axes — machinery, contract discipline, engineering correctness —

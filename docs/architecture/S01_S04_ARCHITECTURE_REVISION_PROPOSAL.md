@@ -66,7 +66,9 @@ can be referred to, it must be resolvable. *(R-10)*
 **P-4 — One semantic type per concept, agreed by producer, contract and consumer.** *(R-14)*
 
 **P-5 — A commitment is a claim about the design, and claims bind.** A later stage may
-refine or supersede with a stated reason; it may not silently contradict. *(R-5)*
+refine or supersede with a stated reason; it may not silently contradict.
+*(R-5 — **the capability need is evidence-supported; the mechanism proposed to meet it is a
+preferred candidate, not frozen.** See §13.0 and §26.1.)*
 
 **P-6 — Assurance must not test the property its producer guarantees.** *(R-7)*
 
@@ -309,7 +311,113 @@ not the families it wants. Each declared need names:
 - whether it is **required** or **contributory**;
 - the **reasoning step** that consumes it.
 
-### 7.2 Three consequences
+### 7.2 Who establishes that the declaration itself is complete
+
+**This is the load-bearing question, and §7.1 alone does not answer it.** A stage that
+declares too little can be proved "sufficient" against its own understatement. That would
+reproduce the whitelist omission at a higher level of abstraction, and it must be closed
+before anything else in this proposal is worth implementing.
+
+**The closure: the required set is derived, not declared.**
+
+**(1) Responsibility is not owned by the stage.** The authoritative source of a stage's
+engineering responsibility is its **stage responsibility contract** — the normative
+statement of which engineering question the stage answers and which entity families and
+fields it may create. It is not the prompt, not the implementation, and not the stage's own
+sufficiency declaration.
+
+**(2) Required fact classes are derived from the stage's declared *outputs*.** Every output
+field a stage may create declares its **semantic dependencies** in the entity-family
+contract: what the value is expressed relative to, what it must be consistent with, and what
+it references. The **derived minimum input set** of a stage is the union of the semantic
+dependencies of every output field it may create.
+
+> A field whose contract says it is *expressed in the frame of the arrangement* thereby
+> makes the arrangement a required input. No one has to remember to ask for it.
+
+**(3) The declaration is bounded below and may only be widened.** A stage may add
+**contributory** needs — facts that improve its reasoning. It **may not declare fewer than
+the derived minimum**. A declaration narrower than the derivation is a contract violation,
+not a preference.
+
+**(4) A stage may not self-validate its own sufficiency.** It may propose contributory
+needs. It may not author the required set, and the check that the *declaration* is adequate
+is a different check, with different inputs, from the check that the *view* satisfies the
+declaration.
+
+### 7.2.1 Four-way independence
+
+| Artifact | Authored by | Read by the sufficiency check? |
+|---|---|---|
+| **stage responsibility** | normative contract | **yes — this is the essential one** |
+| **derived required needs** | deterministic derivation over output-field dependencies | yes |
+| **declared contributory needs** | the stage | yes, but they can never reduce the required set |
+| **generated view** | the substrate | yes |
+| **sufficiency assurance** | the assurance layer, never the stage | — |
+
+> **An assurance check that reads only the declaration and the view is structurally
+> incapable of detecting an omitted need.** It must read the output contract from which the
+> requirement derives. This is stated as a prohibition because it is exactly the shape of
+> the failure the audit found.
+
+### 7.2.2 Distinguishing an omitted need from an unnecessary fact
+
+Three signals, none of them benchmark-specific:
+
+1. **Derivation** — a fact class is necessary iff some output field the stage may create
+   declares a semantic dependency on it. A class nothing depends on is not needed, and its
+   absence is not a finding. This is the primary test and it is mechanical.
+2. **Contradiction against accumulated state** — a stage produces a value that contradicts an
+   authoritative value present in accumulated state and absent from its view. The
+   contradiction is detectable *because* the accumulated state has the value, and it is
+   positive evidence that the class was needed. This converts an omission into an
+   observable event rather than a silent one.
+3. **The producer's own unresolved layer as a sufficiency sensor** — a stage that records an
+   unresolved item naming a fact class which *exists in accumulated state* is reporting an
+   omitted need in its own words. The audit established that this recognition capability is
+   real and precise, and that nothing consumed it; here it is given a consumer.
+
+Signals 2 and 3 are **detectors, not the guarantee.** The guarantee is signal 1. The
+detectors exist because a derivation is only as complete as the dependency declarations it
+reads.
+
+### 7.2.3 Why the recursion terminates
+
+The obvious objection is regress: if a need list can be incomplete, so can a dependency
+declaration. The regress terminates for a structural reason, and the difference is not
+cosmetic.
+
+| | consumer need list *(rejected as the primitive)* | output-field semantic dependency *(the primitive)* |
+|---|---|---|
+| scope | global — "everything this stage's reasoning requires" | local — "what this one field's value means" |
+| completeness test | **none exists**; a missing entry looks exactly like a fact that was not needed | **mechanical** — every field of a given kind must declare its referent, e.g. every spatial value declares its frame, every reference declares its target family |
+| who can check it | nobody, without redoing the engineering | a structural check over the contract |
+| failure signature | silent | the field has no defined meaning, which is itself a finding |
+
+So the residual risk is not eliminated; it is **moved to a place where it has a completeness
+test.** That is the whole claim, and it is the reason this design is proposed rather than a
+longer whitelist.
+
+### 7.2.4 What would make consumer sufficiency self-fulfilling
+
+Design prohibitions, stated so that a later reviewer can test for them:
+
+- deriving the declaration from the view that was sent, or from what the stage happened to use;
+- letting the consuming stage author its own required set;
+- an assurance check whose only inputs are the declaration and the view;
+- defining "sufficient" as *"every declared class was present"* with no term referring to
+  responsibility;
+- silently demoting an unmet required class to contributory to make a call proceed;
+- treating a stage's successful execution as evidence that its view was sufficient.
+
+**The operative definition, therefore:**
+
+> **Consumer-view completeness ≠ "all facts listed in the declaration happened to be
+> present."** It is: *every fact class on which the stage's permitted outputs semantically
+> depend is present in the view, at sufficient maturity, and any that is not is recorded as
+> an attributable insufficiency.*
+
+### 7.3 Three consequences
 
 **(a) The view is built from the declaration**, not from a hand-maintained family list. A
 family list cannot express "the arrangement of the *selected* candidate" and cannot notice
@@ -516,6 +624,31 @@ without any geometry knowledge downstream. **This is the mechanism-independent r
 
 ## §13 S04·A → S04·B REFINEMENT SEMANTICS
 
+### 13.0 Status of this section — SELECTED PROVISIONAL ARCHITECTURE
+
+**R-5 is the one requirement the frozen audit marks PROVISIONAL** (`P4B_FINAL_SYNTHESIS.md`
+§21). Everything in this section, in §5.3's `SUPERSEDE` mode, in §16's invalidation
+semantics and in migration unit **M-4** rests on it, and must not be presented as frozen
+alongside the fourteen FINAL requirements.
+
+**Two things are separated and carry different weight:**
+
+| | Statement | Standing |
+|---|---|---|
+| **capability need** | *Later-stage reasoning must not silently invalidate the premises on which an authoritative commitment depends.* | **evidence-supported**; a spatial refinement that contradicts an earlier arrangement, and a selection whose premises change beneath it, are both observed shapes |
+| **architectural mechanism** | commitment classes + supersede-with-reason + invalidation cone + STALE selection | **PREFERRED CANDIDATE PENDING R-5 CLOSURE** — coherent and self-consistent, but not the only design that meets the need |
+
+**What must be closed before this mechanism is frozen** — this is P4B unresolved question 4:
+*why does an unguarded direct write into stored entities exist alongside a defined,
+validated `EXTEND` operation that is never exercised?* The answer determines whether
+declaring commitment classes is sufficient, or whether the substrate must also make
+out-of-band writes structurally impossible. Those are different architectures with different
+costs, and the evidence does not currently choose between them.
+
+**Not resolved by assumption here.** The mechanism below is written out in full because a
+candidate must be specific enough to be criticised — not because the question is settled.
+Alternatives that remain open are recorded in §26.1.
+
 Every S04·A spatial value carries a commitment class:
 
 | Class | Meaning | S04·B may |
@@ -617,6 +750,11 @@ The selection gate fires only if: every retained candidate has evidence at equal
 coverage and equal maturity; no unresolved item blocks selection; and every candidate's
 evidence-route verdict is recorded. A tie is an `UnresolvedDecision`, never a pick.
 
+**The gate does not author the verdict on its own preconditions** (§27.2). All three
+conditions are computable from committed state by a reader that is not the gate; the gate
+consumes that verdict. A gate that fires without an externally computed precondition verdict
+is itself a `FALSE_ACCEPTANCE`.
+
 **The two poles become reachable.** A stage that declines a claim it cannot support emits
 `SAFE_REJECTION` — a success of restraint. A commitment made over a blocking unresolved item,
 or over a check whose inputs were below its declared minimum maturity, is `FALSE_ACCEPTANCE`.
@@ -625,6 +763,48 @@ The audit found both defined and unemittable; here they are the natural outputs 
 ---
 
 ## §17 ASSURANCE ARCHITECTURE
+
+### 17.0 Two rules, deliberately separated
+
+R-9 is easy to inflate into "everything must be independently validated", which is neither
+what the evidence supports nor achievable. Two distinct rules are intended, and merging
+them would make the architecture incoherent.
+
+**Rule A — maturity minimum (a claim about a stage).**
+
+> **At least one meaningful engineering property per stage must be independently
+> established before that stage may be described as having demonstrated engineering
+> assurance.**
+
+This is R-9 as the audit states it. It is a floor on development maturity, and it exists
+because the audit found *zero* such properties across all stages — every Layer-B check was
+co-located with its producer and invoked by the same tool.
+
+**Rule B — claim semantics (a claim about a value).**
+
+> **Any individual property asserted as `ENGINEERING_ESTABLISHED` must carry assurance
+> appropriate to that assertion — including sufficient independence and inputs at or above
+> the check's declared minimum maturity.**
+
+**Rule B does not require every stored property to be validated.** A property may
+legitimately and permanently remain:
+
+| status | meaning |
+|---|---|
+| `NOT_ESTABLISHED` | no check of sufficient independence has evaluated it |
+| `NOT_VERIFIED` | a check ran and its result is honestly inconclusive |
+| `PROVISIONAL` | asserted to enable downstream reasoning, revisable |
+| `EVIDENCE_INCOMPLETE` | a check exists but its inputs are below its declared minimum maturity |
+
+**What is prohibited is inheritance.** An unassured property must never acquire
+`ENGINEERING_ESTABLISHED` by proximity — not from a sibling that was checked, not from its
+stage completing, not from its patch validating, not from an aggregate badge. Establishment
+attaches to a property and to nothing else.
+
+**Consequence for reporting.** A stage may correctly be described as *executed*,
+*contract-complete*, and *carrying values at high evidence maturity*, while most of its
+properties are `NOT_ESTABLISHED`. That is an honest and expected state, not a defect, and it
+is the state the audit found the pipeline actually to be in.
 
 ### 17.1 The independence rule
 
@@ -675,7 +855,11 @@ Four constructs, never merged, never collapsed into one badge:
 | **ENGINEERING ESTABLISHMENT** | *per property*: an independent check with sufficient-maturity inputs found it to hold | that the design is good |
 
 **Rules.** A stage is never "mature" because it executed and filled a schema. A property with
-no check of sufficient independence is `NOT ESTABLISHED` — distinct from failing. A metric may
+no check of sufficient independence is `NOT_ESTABLISHED` — **distinct from failing, and a
+legitimate permanent state** (§17.0 Rule B). The four constructs never substitute for one
+another: execution does not imply contract completeness, contract completeness does not
+imply evidence maturity, and evidence maturity — which is a property of a *value's
+provenance* — never implies engineering establishment, which requires an independent check. A metric may
 not reward specificity the input cannot support: a fabricated numeric predicate must not score
 above an honest declaration that no quantity is available, because that inverts
 `SAFE_REJECTION`. **No numeric weighting is proposed here**; the constructs come first.
@@ -798,11 +982,11 @@ change was preferred, per the brief. The changes are to *what crosses* the bound
 | R-2 | C-12, C-13 | arrangement is a required class in S04·B's contract (§7, §12) | S04·B | S04·A | S04·B | deterministic | spatial closure, PREMISE | S04·B cannot run without it | placements checked against the arrangement they extend |
 | R-3 | C-14, C-15 | required-distinctness declaration on topology (§12) | S03 | S03·A | S04·B, assurance | LLM declares, det. checks | spatial closure, PREMISE | violation is a finding, not a silent pass | two joints declared distinct sharing a location |
 | R-4 | C-17 | Configuration distinguishing basis (§14) | S03 | S03·A | S04·B, assurance | LLM authors, det. compares | state realization, PREMISE | contradiction recorded | two configurations equal on their basis |
-| R-5 *(prov.)* | C-19 | commitment classes + supersede-with-reason + invalidation cone (§13, §5.3) | shared substrate | any stage | assurance, gate | deterministic | progression validity | superseding a gate premise marks selection STALE | a changed COMPARABLE value with no supersede record |
+| R-5 **PROVISIONAL** *(need supported; mechanism is a preferred candidate — §13.0)* | C-19 | commitment classes + supersede-with-reason + invalidation cone (§13, §5.3) | shared substrate | any stage | assurance, gate | deterministic | progression validity | superseding a gate premise marks selection STALE | a changed COMPARABLE value with no supersede record |
 | R-6 | C-11, C-18 | domain/disposition split; `UNDISPOSITIONED`; premise rule (§11) | S03 + substrate | det. enumerates, LLM authors | assurance | both, separated | deterministic consistency, PREMISE | disposition completeness is a reported quantity | a disposition with no resolvable premise |
 | R-7 | C-11, C-18 | independence degrees; self-fulfilling disclosure (§17) | assurance layer | assurance | reviewer | deterministic | meta | — | a check whose property its input's producer guarantees |
 | R-8 | C-20 | blocking defined by the consumer's required classes (§16.2) | substrate | any stage | gate, stages | deterministic | progression validity | a blocking item stops the call or the gate | commitment with a blocking item open |
-| R-9 | C-21 | assurance over committed state, not stage-invoked (§17.3) | assurance layer | assurance | reviewer | deterministic | meta | — | every property has a check of declared independence |
+| R-9 | C-21 | assurance over committed state, not stage-invoked (§17.3); **Rule A** floor + **Rule B** claim semantics (§17.0) | assurance layer | assurance | reviewer | deterministic | meta | — | **Rule A:** at least one engineering property per stage established by a check of declared independence. **Rule B:** no property carries `ENGINEERING_ESTABLISHED` without assurance appropriate to that claim. Unassured properties remain `NOT_ESTABLISHED`, which is not a failure |
 | R-10 | C-10 | `ConstraintRelation` and `PhysicalInteraction` as addressable entities (§9, §10) | S03·B | S03·B | mobility, assurance | LLM authors, det. expands | reference integrity, STRUCTURAL | unresolvable reference refuses the patch | a nested reference resolving to nothing |
 | R-11 | C-07 | `PhysicalEffectObligation` → `PhysicalInteraction` discharge (§9) | S02 → S03·B | S02, S03·B | S03, assurance | LLM both ends | topology consistency, PREMISE | undischarged effect blocks or is open | an effect obligation with no interaction and no open item |
 | R-12 | C-08 | `ReactionSiteRequirement` typed external/internal from the scenario boundary (§9.3) | S01/S02 | S01, S02 | S03·B, assurance | LLM authors, det. checks closure | quantitative + topology | an open path is recorded, not hidden | a terminal hop that is not an external site |
@@ -854,7 +1038,7 @@ Coherent units, not a patch sequence. **No file is edited by this document.**
 | **M-1 Representation closure** | contract-first | entity-family definitions; the typed-relation model; ownership matrix; the concepts in §8–§10 |
 | **M-2 Sufficiency substrate** | new shared capability | per-stage sufficiency declarations; view construction; the recorded `ConsumerView`; budget policy |
 | **M-3 Authorship boundary** | replaces two derivations | the mobility derivation; the motion-evidence representation; the defaulting sites §11.3 names |
-| **M-4 Commitment substrate** | extends the patch layer | commitment classes; supersede-with-reason; invalidation cone made operative; removal of out-of-band writes |
+| **M-4 Commitment substrate** *(**PROVISIONAL** — pending R-5 closure, §13.0)* | extends the patch layer | commitment classes; supersede-with-reason; invalidation cone made operative; treatment of out-of-band writes. **The capability need is established; this mechanism is the preferred candidate and must not be implemented ahead of P4B question 4** |
 | **M-5 Gate** | makes an existing concept real | selection preconditions; the two poles' emission points |
 | **M-6 Assurance layer** | new layer | checks relocated to read committed state; independence declarations; self-fulfilling disclosure |
 | **M-7 Status constructs** | reporting and metrics | the four constructs; maturity coverage over S03/S04; metric construct validity |
@@ -872,24 +1056,84 @@ established, a stage's failure cannot be attributed.
 
 | Rejected | Why |
 |---|---|
-| add a check comparing joint origins | treats one symptom; the arrangement is still absent and the next distinctness case is unprotected |
+| a check comparing the origins of one specific named joint pair | treats one symptom; the arrangement is still absent and the next distinctness case is unprotected. **This rejects the case-specific check, not the general invariant — see the note below** |
 | add `Envelope` to the S04 family whitelist | fixes one class silently; the whitelist remains unable to notice the next missing class |
 | pass the whole DesignState to every stage | destroys token economy, grows cognitive load with state, and still cannot attribute a miss |
 | raise the render limit | moves the cliff; silent slicing remains the failure mode |
 | ban the string `"NONE"` | the concept needs a type, not a banned token |
 | require a defeat specification field to be non-empty | non-emptiness is what the audited system already tested; it is why `"None"` passed |
-| add a validator for zero-length links | mechanism-specific reasoning smuggled into assurance |
+| a check asserting that *all* joint pairs have nonzero separation | not a mechanical truth — coincident axes are legitimate in many mechanisms; the invariant must be conditioned on a declared premise, not applied universally |
 | use a stronger model | the audited failures are dominated by information the model never received |
 | add mechanism knowledge to prompts | product-noun → mechanism mapping is the retirement row the architecture exists to avoid |
 | tune sampling density | the defect is that a constant was recorded as evidence, not that the constant was wrong |
+
+### 25.1 What is *not* rejected: conditional non-degeneracy
+
+The rows above are easy to over-read, so the boundary is drawn explicitly.
+
+**Rejected — a benchmark-shaped patch:**
+
+> *"A particular case produced a zero-length crank, therefore add a zero-length-crank
+> check."*
+
+Rejected because it encodes one mechanism, fires on one geometry, and leaves every other
+degeneracy unprotected.
+
+**Also rejected — an over-general invariant:**
+
+> *"All joint pairs must have nonzero separation."*
+
+Rejected because it is false as a mechanical statement.
+
+**Retained, and required — a conditional general invariant:**
+
+> **Where upstream topology establishes that two kinematic sites must be distinct for a
+> mechanical relationship to exist, spatial realization must establish that the required
+> distinctness is preserved.**
+
+This is mechanism-independent. It fires **only** where the engineering premises require
+distinctness, and the premise is authored upstream by the stage that owns topology — not
+inferred downstream from geometry, and not written into a validator as product knowledge.
+A degenerate realization is then a *contradiction of a declared topological premise*, which
+is exactly the kind of thing assurance is for.
+
+**It is already load-bearing elsewhere in this proposal**, and the four statements must be
+read as one mechanism:
+
+| Location | Statement |
+|---|---|
+| §12 | topology may declare *mechanically required distinctness* — a topological statement containing no dimension |
+| §17.2 | the spatial/topology-closure category, at **PREMISE** independence — the placer did not author the premise |
+| §22 R-3 | the requirement, its owner, and its failure signature |
+| §23 item 2 | S04→S05 readiness requires every declared required-distinctness to be satisfied |
+
+**No implementation algorithm is prescribed.** Whether distinctness is expressed as a
+minimum separation, a non-coincidence predicate on axes, or a rank condition on the
+realized topology is an implementation question; the architecture requires only that the
+premise be declarable upstream and checkable downstream against a producer that did not
+author it.
 | make every unresolved item blocking | would halt on openness that is legitimately deferred; the condition must be defined, not maximised |
 
 ---
 
 ## §26 REMAINING ARCHITECTURE DECISIONS
 
-1. **R-5 is PROVISIONAL.** Whether commitment classes are enough, or whether the substrate
-   must also prevent out-of-band writes structurally, depends on P4B question 4.
+### 26.1 The R-5 substrate — open alternatives
+
+Recorded so that the choice is made on evidence rather than inherited from this document:
+
+| Candidate | What it assumes | What would select it |
+|---|---|---|
+| **(a) declarative commitment classes** *(written out in §13, preferred)* | that recording a commitment's class and requiring a reason to supersede it is enough, because writers are cooperative | P4B Q4 resolves to *"the out-of-band write was an expedient, not a needed capability"* |
+| **(b) structurally enforced patch-only mutation** | that no path may write stored state outside a validated patch, at the cost of every convenience path | P4B Q4 resolves to *"the direct write exists because the patch layer could not express the update"* — which would also indict `EXTEND`'s expressiveness |
+| **(c) append-only state with commitments as derived views** | that no value is ever mutated at all; supersession is a new record and current-value is computed | if invalidation proves too costly to maintain incrementally |
+
+**No option is chosen here.** (a) is written out because it is the least disruptive of the
+three and because a candidate must be concrete to be attacked; that is not an argument that
+it is correct.
+
+1. **R-5 is PROVISIONAL, and so is migration unit M-4.** See §13.0 for the full statement of
+   what is supported and what is a candidate. The open alternatives are recorded in §26.1.
 2. **Repeated-member correspondence** rests on one case (C-16). The typed model in §12 is
    proposed as provisional; a second multi-instance case would settle whether it needs a
    dedicated relation or is a property of body identity.
@@ -907,6 +1151,123 @@ established, a stage's failure cannot be attributed.
 7. **Whether `UNDISPOSITIONED` cells should block the gate**, or only be reported. §16.2's
    rule implies they block only if a consumer declares the disposition required; whether S04
    or S05 does is open.
+
+---
+
+## §27 SELF-FULFILLING-ASSURANCE AUDIT OF THIS PROPOSAL
+
+The P6 failure shape — *producer creates X → evaluator confirms X has the exact shape the
+producer always creates → "engineering validity"* — is applied to this architecture's own
+assurance categories.
+
+**The headline result, stated before the table because it changes how §18 must be read:**
+
+> **Most checks this architecture introduces establish *fidelity* or *provenance
+> integrity*, not engineering correctness.** A view can be sufficient and the reasoning
+> still wrong. A disposition can have a resolvable premise and the premise still be
+> mechanically false. A placement can be faithful to a topology that is itself wrong.
+
+This is not a defect, but leaving it implicit **is** how the audited system reached
+"engineering validity" from structural conformance. Therefore:
+
+**New architectural rule — every check declares its claim class.**
+
+| Claim class | What passing establishes |
+|---|---|
+| **BOOKKEEPING** | a property the producer guarantees by construction. Reported, never counted as assurance |
+| **FIDELITY** | the artifact faithfully realizes a premise authored elsewhere. Says nothing about whether the premise is right |
+| **PROVENANCE INTEGRITY** | every claim is traceable to a resolvable premise. Says nothing about whether the premise is true |
+| **ENGINEERING CONSEQUENCE** | two independently authored premises are checked against each other, and a mechanically wrong design can fail. **Only this class may contribute to `ENGINEERING_ESTABLISHED`** |
+
+### 27.1 Category-by-category
+
+| Category | Producer creates | Assurance consumes | Guaranteed by producer? | Claim class | Could a wrong engineering claim still pass? |
+|---|---|---|---|---|---|
+| **Consumer sufficiency** | the view; contributory needs | the **output contract's dependency derivation** + the view | **No** — the required set derives from a contract the stage does not own (§7.2) | FIDELITY | **Yes.** A sufficient view does not make the reasoning right. Its value is *attributive*: it makes a later failure chargeable to the model rather than the boundary |
+| **Mobility — domain totality** | deterministic enumeration | the same enumeration | **Yes, by construction** | **BOOKKEEPING** | n/a — must never be reported as assurance. This is the exact defect the audit found |
+| **Mobility — disposition completeness** | authored relations; derived dispositions | dispositions + the relations they cite | **No** — completeness varies with what was authored | PROVENANCE INTEGRITY | **Yes.** A resolvable premise may still be mechanically false |
+| **Mobility — cross-premise consistency** | S02 load cases / actuation; S03 dispositions | **both, from different producers** | **No** | **ENGINEERING CONSEQUENCE** | A DOF marked `IRRELEVANT` that a load case loads is a real contradiction. **This is where mobility assurance actually lives** |
+| **ConstraintRelation integrity** | S03·B relations | relations + the bodies (S03·A) and external sites (S02) they reference | **No** — referents come from other stages | PROVENANCE INTEGRITY | **Yes.** A well-formed relation naming real entities can be wrong |
+| **Constraint ↔ release consistency** | S03·B relations; S04·B transitions | **both** | **No** | **ENGINEERING CONSEQUENCE** | A transition that defeats a constraint without altering its maintaining interaction is a genuine contradiction |
+| **Topology → spatial closure** | S03 topology; S04·B placement | **both** | **No** — the placer authored neither incidence nor required distinctness | **ENGINEERING CONSEQUENCE** (bounded) | **Yes, in one direction:** a *wrong topology*, faithfully realized, passes. The check establishes fidelity of realization, not correctness of topology |
+| **Commitment / gating** | the gate | gate preconditions | **Yes, if the gate records its own verdict** | **would be BOOKKEEPING** | **Yes — and this is the live risk.** See 27.2 |
+| **Status / establishment claims** | the assurance layer itself | its own outputs | **Yes, internally** | — | **Yes.** No structural means answers "does this metric measure engineering quality"; see 27.3 |
+
+### 27.2 The gate is the one place this proposal was about to repeat the mistake
+
+As drafted, §16.3 lets the selection gate check its own preconditions and record that they
+were met. That is *producer creates X → evaluator confirms X* exactly.
+
+**Correction, adopted:**
+
+> **The gate may not author the verdict on its own preconditions.** Equal obligation
+> coverage, equal maturity, and the absence of blocking unresolved items are all computable
+> from committed state by a reader that is not the gate. The gate consumes that verdict; it
+> does not produce it. A gate that fires without an externally computed precondition verdict
+> is itself a `FALSE_ACCEPTANCE`.
+
+### 27.3 The residual that cannot be closed structurally
+
+Construct validity — *does an establishment claim measure engineering quality?* — is not
+answerable from inside the system. R-15 makes a weaker, checkable claim: a maturity
+construct must have a term for every stage it purports to cover. The stronger claim needs
+**EXTERNAL** independence: an artifact authored without seeing any system output. The
+repository contains such artifacts and does not evaluate against them; whether they become
+the external evaluator is recorded as open in §26 item 3. **Until then, no aggregate in this
+architecture should be described as measuring design quality.**
+
+---
+
+## §28 WITHDRAWN-CLAIM CHECK
+
+Every claim the frozen audit withdrew or narrowed, checked against this document.
+
+| Withdrawn claim | Present? | Where this document stands |
+|---|---|---|
+| TYPE-B persistence failure is architecturally impossible | **No** | §1 and §3 say the additive mechanism *worked in the audited corpus*; §5.3 constrains mutation prospectively without claiming the old design made loss impossible |
+| All continuity failures are consumer-boundary failures | **No** | §1 item 2 says the *dominant recurrent* continuity failure is sufficiency; §1 items 3–6 and §6 carry capture, representation, reasoning, authorship, gating and assurance failures separately |
+| DOF-grid size alone caused prompt truncation | **No** | §19 attributes the loss to the silent positional slice and to large derived content *competing* for a fixed budget; no single content class is named as the cause |
+| BM fixtures are known human- or agent-authored | **No** | fixtures appear only in migration unit M-9, with no provenance claim. The corrected provenance is in `BENCHMARK_PROBE_EVALUATION_PHILOSOPHY.md` |
+| The model always recognises the defect it commits | **No** | §1 item 4 is conditional — *"Where it names the defect the same artifact commits…"*. §7.2.2 signal 3 uses the recognition layer as a detector, explicitly not as a guarantee |
+| Every spatial miss is a pure model failure | **No** | §1 item 2 and §7.2 hold that a stage's failure is not attributable until sufficiency is established; §24's ordering constraint states this as a migration precondition |
+| State lacks the coordinates needed to detect collocated joints | **No** | §12 and §22 R-3 treat detection as available once the premise is declared and the arrangement is projected; the deficit is the premise and the projection, not the coordinates |
+| Zero-length geometry can only be checked with mechanism-specific logic | **Corrected in this pass** | §25 previously rejected "a validator for zero-length links" without qualification, which contradicted §12, §17.2, §22 R-3 and §23. §25.1 now separates the case-specific patch and the over-general invariant (both rejected) from the conditional general invariant (retained and required) |
+
+**One withdrawn claim had survived into the proposal.** It is corrected above.
+
+---
+
+## §29 ARCHITECTURE READINESS
+
+**Verdict: (B) READY EXCEPT FOR THE EXPLICITLY PROVISIONAL R-5 SUBSTRATE.**
+
+**Why not (C).** The load-bearing question was consumer-sufficiency declaration
+completeness: if a stage can under-declare and then be proved sufficient against its own
+understatement, the whitelist failure returns in a new form and nothing else matters. §7.2
+closes it structurally rather than by convention — the required set is **derived** from the
+semantic dependencies of the outputs the stage is permitted to create, the stage may widen
+but never narrow it, and the sufficiency check must read the output contract rather than the
+declaration alone. The regress terminates for a stated reason (§7.2.3): a per-field
+dependency has a mechanical completeness test and a consumer need list has none. The
+residual risk is real and is named — it is now located where it can be tested.
+
+**Why not (A).** R-5 is PROVISIONAL in the frozen audit, and §13.0, §5.3, §16 and migration
+unit M-4 all rest on it. The capability need is evidence-supported; the mechanism is a
+preferred candidate among three (§26.1), and P4B question 4 selects between them. Building
+M-4 before that question is answered would freeze a choice the evidence has not made.
+
+**What this verdict does and does not license.**
+
+| | |
+|---|---|
+| **Ready for implementation planning** | M-1 representation closure · M-2 sufficiency substrate · M-3 authorship boundary · M-6 assurance layer · M-7 status constructs · M-8 prompts and schemas *(after M-1)* · M-9 evidence substrate |
+| **Not ready — hold for R-5 closure** | M-4 commitment substrate · M-5 gate, insofar as it depends on invalidation semantics |
+| **Carried as provisional, not blocking** | repeated-member correspondence (§26 item 2, one-case evidence) |
+
+**Three things must be true before an implementation plan is written**, and none is a code
+task: P4B question 4 is answered (selects M-4); the claim-class rule of §27 is adopted, so
+no structural check is counted as engineering assurance; and §27.2's correction holds — the
+gate does not author the verdict on its own preconditions.
 
 ---
 

@@ -1,5 +1,27 @@
 # S01–S04 audit — read inventory
 
+> # ⚠ SUPERSEDED HISTORICAL AUDIT RECORD
+>
+> **DO NOT USE THIS FILE AS CURRENT AUDIT COVERAGE OR CURRENT CONCLUSIONS.**
+>
+> This is a working record kept *during* the audit and frozen where it stood. Its
+> coverage counts, `NOT READ` markers, open questions and provisional findings
+> reflect a moment in the reading, **not the final state**. This inventory was built during scope construction and still carries 225 `NOT READ` rows against a file list that the frozen scope later superseded; it is not a record of what went unread.
+>
+> **Current authorities:**
+> - scope, corpus and coverage definitions → `AUDIT_SCOPE.md`
+> - per-package findings and final coverage → `P1_COMPLETE.md` … `P6_COMPLETE.md`
+> - final conclusions and requirement traceability → `P4B_FINAL_SYNTHESIS.md` (frozen, §21)
+>
+> Where this file and a `*_COMPLETE.md` report disagree, **the COMPLETE report
+> governs**. Several findings recorded here were later withdrawn or narrowed on
+> fuller evidence; those reversals are documented in `P5_COMPLETE.md` §14 and
+> `P4A_COMPLETE.md` §H.
+>
+> Retained unedited for chronology. Nothing below has been rewritten to look current.
+
+---
+
 The audit is valid only when every file below is COMPLETE. This file is the
 persistent record that makes a faithful read possible across context boundaries:
 it is updated as ranges are read, never retroactively assumed.

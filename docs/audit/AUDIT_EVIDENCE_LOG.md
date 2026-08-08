@@ -1,5 +1,27 @@
 # Audit evidence log
 
+> # ⚠ SUPERSEDED HISTORICAL AUDIT RECORD
+>
+> **DO NOT USE THIS FILE AS CURRENT AUDIT COVERAGE OR CURRENT CONCLUSIONS.**
+>
+> This is a working record kept *during* the audit and frozen where it stood. Its
+> coverage counts, `NOT READ` markers, open questions and provisional findings
+> reflect a moment in the reading, **not the final state**. It stops inside Package 1 — its closing line reads "Package 1 continues" — and its PC-/OBS- entries are explicitly unresolved by design.
+>
+> **Current authorities:**
+> - scope, corpus and coverage definitions → `AUDIT_SCOPE.md`
+> - per-package findings and final coverage → `P1_COMPLETE.md` … `P6_COMPLETE.md`
+> - final conclusions and requirement traceability → `P4B_FINAL_SYNTHESIS.md` (frozen, §21)
+>
+> Where this file and a `*_COMPLETE.md` report disagree, **the COMPLETE report
+> governs**. Several findings recorded here were later withdrawn or narrowed on
+> fuller evidence; those reversals are documented in `P5_COMPLETE.md` §14 and
+> `P4A_COMPLETE.md` §H.
+>
+> Retained unedited for chronology. Nothing below has been rewritten to look current.
+
+---
+
 Session-scoped. Appended as reading proceeds. Findings during a package are
 recorded as **Observation**, **Potential contradiction** or **Needs
 verification** only; resolution waits until that package is complete.

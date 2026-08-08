@@ -239,8 +239,23 @@ throughout.
 
 ### 3E. PNG evidence — inspected directly, not via review documents
 
-**170 images are inspected in this audit.** Prior PNG review documents are read
-*after* my own inspection, and any disagreement is recorded (§3F).
+**Terminology, fixed here and used identically in every count below.**
+
+| term | meaning | number |
+|---|---|---|
+| **candidate image universe** | every PNG under the four reference packs (49 + 54 + 42 + 25) | **170** |
+| **assigned direct-inspection set — PLANNED ESTIMATE** | the mandatory sets plus representatives of the redundant groups, as estimated in this scope document *before* the images were opened | **≈ 97** |
+| **assigned direct-inspection set — FINAL ACTUAL** | the same set after the per-pack enumeration was made exact during P3 | **99** |
+| **inspected** | opened and viewed directly | **99 / 99** |
+
+**`P3_COMPLETE.md` is the file-level authority for the final count**
+(`P3_COMPLETE.md:19` per-pack table, `:22` the reconciliation, `:1041` the close).
+The planned estimate below is preserved as written; it was low by two because
+EXE-BM001-01 has ten pose-state isos where this scope estimated nine.
+
+**The 170-image universe is enumerated in the table below; 99 of it are inspected
+directly.** Prior PNG review documents are read *after* my own inspection, and any
+disagreement is recorded (§3F).
 
 | reference | total | mandatory visual evidence set | redundant group | engineering claim the group supports |
 |---|---|---|---|---|
@@ -249,9 +264,18 @@ throughout.
 | **EXE-BM002-01** crank-link lift | 42 | `review_body_identification`, `review_kinematic_chain_annotated`, `review_internal_mechanism_cutaway_iso`, `review_internal_mechanism_rear_panel_removed`, `review_external_crank_user_interface`, `review_overview_operation_and_sections`, `review_assembly_01..09` (9), `review_operation_01..09` (9), `review_section_{AA_shaft_and_dual_journals, BB_crank_link_platform ×3, CC_platform_guides ×3, DD_crank_joint_retention, EE_platform_joint_retention, FF_payload_access ×2}` (11) = **35** | `review_overall_{front,front_iso,left,rear,rear_iso,right,top}` = 7 — inspect **1**, plus 1 confirming view | four-body kinematic chain · distinct crank and platform pivots · dual journals supporting the revolute axis · prismatic platform guides · joint retention at both pins · assembly order · full rise/lower cycle · payload access at both extrema |
 | **EXE-BM003-01** three-leg deployable stand | 25 | `exploded`, `assembly_steps`, `compare_stored_deployed`, `hub_locked`, `blocker_engaged`, `blocker_released`, `state_stored`, `state_deployed_locked`, `state_deployed_released`, `deployed_locked_section_iso`, `stored_section_iso` = **11** | `stored_[4]`, `deployed_locked_[4]`, `deployed_released_[4]`, `deployed_locked_section_[4]`, `stored_section_[4]` = 20 — the 2 section isos are already mandatory; inspect **3 remaining isos** | hub + 3 legs + 3 pins + ring architecture · repeated-member placement at 120° · bayonet/ring blocking geometry · stored vs deployed states · lock and release · support region and footprint |
 
-**Inspection budget: ~73 mandatory + ~24 representative from redundant groups ≈ 97
-images.** The remaining ~73 are strict orthographic duplicates of an inspected
-iso and are recorded as covered by their group. Every group's engineering claim
+**Inspection budget — PLANNED ESTIMATE: ~73 mandatory + ~24 representative from
+redundant groups ≈ 97 images.** The remaining ~73 are strict orthographic
+duplicates of an inspected iso and are recorded as covered by their group.
+
+**FINAL ACTUAL COVERAGE: 99 assigned, 99 inspected — 73/73 mandatory and 25/25
+representative, plus one image the estimate above missed.** The planned figure is
+retained above as the historical estimate; it is not the coverage authority.
+See `P3_COMPLETE.md:19,22,1041`.
+
+**No image was dropped from the assigned set on the ground of presumed
+redundancy after inspection began.** A conflicting reference image found during
+P3 is the reason: filename-level inference about redundancy is not safe. Every group's engineering claim
 is written down before the images are opened, so an image cannot retroactively
 become "what I was looking for".
 
@@ -546,13 +570,13 @@ Each difference classified: `SUPPORTED` · `VALID ALTERNATIVE` ·
 |---|---|---|---|
 | P1 intended architecture | 22 | 9,697 | all FULL |
 | P2 contracts | 17 | 4,593 | all FULL |
-| P3 minimal reference | ~60 + 97 images | ~9,900 | FULL / SKIM / INSPECT |
+| P3 minimal reference | ~60 + **99 images inspected** (170-image universe; 97 was the planned estimate) | ~9,900 | FULL / SKIM / INSPECT |
 | P4A actual outputs (primary) | 75 | ~24,000 | all FULL |
 | P4A historical runs | ~250 | — | STRUCTURAL; 36 records FULL |
 | P5 implementation | 26 | 4,700 | all FULL |
 | P5G git history | 3 diffs, 14 log traces | — | FULL |
 | P6 evaluation | 26 | 7,200 | all FULL |
-| **corpus** | **~476 files + 97 images** | **~60,100 lines** | |
+| **corpus** | **~476 files + 99 inspected images** (of a 170-image universe) | **~60,100 lines** | |
 | **to be read FULL** | **~226 files** | **~50,200 lines** | |
 
 Revision 1: ~666 files, ~165,000 lines corpus, ~93,000 FULL. The reduction is
@@ -681,7 +705,8 @@ directories (50 files) — excluded on the repository's own written instruction
 that they exist for diagnosis and are not authoritative.
 
 **11.5 — binary artifacts other than the inspected PNGs.** 26 `.step`,
-26 `.brep`, 10 `.mp4`, 2 `.gif`, 2 `.xml`, and ~73 orthographic PNG duplicates
+26 `.brep`, 10 `.mp4`, 2 `.gif`, 2 `.xml`, and the 71 orthographic PNG duplicates
+remaining from the 170-image universe after the 99 assigned images
 covered by their inspected group (§3E). Videos and solids become escalation
 evidence only when a FULL file or an inspected image raises a question only they
 can settle.
