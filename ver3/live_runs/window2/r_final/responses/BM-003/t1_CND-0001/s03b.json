@@ -1,0 +1,219 @@
+{
+  "blocking_relations": [
+    {
+      "id": "BLK-0001",
+      "retained_group": "RGP-0002",
+      "blocked_direction": "+Y",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TY"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "Apply an upward force to the leg support and observe it detach from the main body.",
+      "promised_features": ["support prevents upward separation"]
+    },
+    {
+      "id": "BLK-0002",
+      "retained_group": "RGP-0003",
+      "blocked_direction": "+Y",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TY"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "Apply an upward force to the leg support and observe it detach from the main body.",
+      "promised_features": ["support prevents upward separation"]
+    },
+    {
+      "id": "BLK-0003",
+      "retained_group": "RGP-0004",
+      "blocked_direction": "+Y",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TY"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "Apply an upward force to the leg support and observe it detach from the main body.",
+      "promised_features": ["support prevents upward separation"]
+    },
+    {
+      "id": "BLK-0004",
+      "retained_group": "RGP-0002",
+      "blocked_direction": "-Y",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TY"],
+      "driver": "LOAD",
+      "defeat_specification": "Place the product on a surface and observe the leg support sink into the ground.",
+      "promised_features": ["load path to ground"]
+    },
+    {
+      "id": "BLK-0005",
+      "retained_group": "RGP-0003",
+      "blocked_direction": "-Y",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TY"],
+      "driver": "LOAD",
+      "defeat_specification": "Place the product on a surface and observe the leg support sink into the ground.",
+      "promised_features": ["load path to ground"]
+    },
+    {
+      "id": "BLK-0006",
+      "retained_group": "RGP-0004",
+      "blocked_direction": "-Y",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TY"],
+      "driver": "LOAD",
+      "defeat_specification": "Place the product on a surface and observe the leg support sink into the ground.",
+      "promised_features": ["load path to ground"]
+    },
+    {
+      "id": "BLK-0007",
+      "retained_group": "RGP-0005",
+      "blocked_direction": "+Z",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TZ"],
+      "driver": "DECLARED_SCENARIO",
+      "defeat_specification": "Press down on the blocking member and observe it translate downward.",
+      "promised_features": ["blocking member held in deployed position"]
+    },
+    {
+      "id": "BLK-0008",
+      "retained_group": "RGP-0006",
+      "blocked_direction": "+Z",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TZ"],
+      "driver": "DECLARED_SCENARIO",
+      "defeat_specification": "Press down on the blocking member and observe it translate downward.",
+      "promised_features": ["blocking member held in deployed position"]
+    },
+    {
+      "id": "BLK-0009",
+      "retained_group": "RGP-0007",
+      "blocked_direction": "+Z",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TZ"],
+      "driver": "DECLARED_SCENARIO",
+      "defeat_specification": "Press down on the blocking member and observe it translate downward.",
+      "promised_features": ["blocking member held in deployed position"]
+    }
+  ],
+  "irrelevance": [],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": ["FRG-0001", "BOD-0002", "IFC-0001", "BOD-0001", "IFC-0004", "BOD-0005", "IFC-0007", "BOD-0002", "IFC-0001", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "IFC-0001", "BOD-0002", "IFC-0007", "BOD-0005", "IFC-0004", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": ["FRG-0001", "BOD-0002", "IFC-0001", "BOD-0001", "IFC-0004", "BOD-0005", "IFC-0007", "BOD-0002", "IFC-0001", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "candidate": "CND-0001",
+      "ordered_hops": ["FRG-0002", "BOD-0005", "IFC-0004", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "candidate": "CND-0001",
+      "ordered_hops": ["FRG-0001", "BOD-0002", "IFC-0001", "BOD-0001", "IFC-0004", "BOD-0005", "IFC-0007", "BOD-0002", "IFC-0001", "BOD-0001"]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0001",
+      "access_side": "-Y",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0002",
+      "access_side": "+Y",
+      "activates": ["JNT-0001", "IFC-0001", "IFC-0007"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0003",
+      "access_side": "+Y",
+      "activates": ["JNT-0002", "IFC-0002", "IFC-0008"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001"]
+    },
+    {
+      "id": "ASY-0004",
+      "order_index": 4,
+      "body": "BOD-0004",
+      "access_side": "+Y",
+      "activates": ["JNT-0003", "IFC-0003", "IFC-0009"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001"]
+    },
+    {
+      "id": "ASY-0005",
+      "order_index": 5,
+      "body": "BOD-0005",
+      "access_side": "+Z",
+      "activates": ["JNT-0004", "IFC-0004"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001", "BOD-0002"]
+    },
+    {
+      "id": "ASY-0006",
+      "order_index": 6,
+      "body": "BOD-0006",
+      "access_side": "+Z",
+      "activates": ["JNT-0005", "IFC-0005"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001", "BOD-0003"]
+    },
+    {
+      "id": "ASY-0007",
+      "order_index": 7,
+      "body": "BOD-0007",
+      "access_side": "+Z",
+      "activates": ["JNT-0006", "IFC-0006"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001", "BOD-0004"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-1001",
+      "decision": "Ground reaction for load paths",
+      "why_open": "The load paths reference the ground but no ground body is modeled; the reaction site is external.",
+      "alternatives": ["Add a ground body", "Model the desk surface as a body"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["LC-0001", "LC-0002", "LC-0003", "LC-0005"],
+      "blocks": ["LDP-0001", "LDP-0002", "LDP-0003", "LDP-0005"]
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "housing: contains all other bodies, forms the outer boundary, supports the mechanism and provides the mounting to the wall",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0006", "OBL-0007"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "input gate: first closure that separates an item from the supply; moves to admit an item into the metering volume",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "output gate: second closure that releases the item from the metering volume to the outside",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    },
+    {
+      "id": "BOD-0004",
+      "role": "linkage: connects input and output gates so they are never open together and that one actuation drives them in sequence",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "BOD-0005",
+      "role": "actuator: the manual surface pressed by the user; transmits the actuation to the linkage",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0003"]
+    },
+    {
+      "id": "BOD-0006",
+      "role": "return spring: restores the mechanism to its rest state after each actuation",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "BOD-0007",
+      "role": "hard stop: bounds the travel of the gates, defining the open and closed positions",
+      "instance_identity": "integral with housing",
+      "addresses_obligations": ["OBL-0002"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": [],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": [],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": [],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": [],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0005",
+      "members": [],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0006",
+      "body": "BOD-0006",
+      "members": [],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0007",
+      "body": "BOD-0007",
+      "members": [],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0003",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0004",
+      "child_group": "RGP-0005",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0007",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0005",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0004",
+      "child_group": "RGP-0006",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "COMPRESSION",
+        "direction": "TY",
+        "required_travel": "UNSPECIFIED",
+        "allowable_travel_status": "FREE",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "COIL_SPRING",
+        "root_interface": "IFC-0005",
+        "activation_window": "AFTER_ACTUATION_RELEASE"
+      }
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "ASSEMBLED",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "ASSEMBLED",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0002", "BOD-0004"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "ENGAGED",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0003", "BOD-0004"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "ENGAGED",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0004", "BOD-0006"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "COMPRESSED",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0006",
+      "bodies": ["BOD-0001", "BOD-0006"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "COMPRESSED",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0007",
+      "bodies": ["BOD-0001", "BOD-0005"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "ASSEMBLED",
+      "addresses_obligations": ["OBL-0003"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "rest",
+      "kind": "REST",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006", "BOD-0007"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "input_open",
+      "kind": "INTERMEDIATE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006", "BOD-0007"]
+    },
+    {
+      "id": "CFG-0003",
+      "name": "output_open",
+      "kind": "INTERMEDIATE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006", "BOD-0007"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the surface that is pressed to release an item", "the released item", "the opening through which items are put in"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0003",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the released item"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-0001",
+      "decision": "linkage geometry and travel ranges",
+      "why_open": "The linkage must ensure the two gates never open simultaneously, but the required stroke, lever ratios and gate travel distances depend on item dimensions and clearances that are not yet specified.",
+      "alternatives": ["gate on cams", "gate on slots", "gate on springs"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0005"],
+      "blocks": ["OBL-0002"]
+    }
+  ]
+}

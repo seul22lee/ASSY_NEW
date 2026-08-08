@@ -1,0 +1,125 @@
+{
+  "scale": {
+    "basis": "RELATIVE",
+    "absolute": null,
+    "note": "No absolute dimensions provided; using relative scale."
+  },
+  "envelopes": [
+    {
+      "id": "ENV-0001",
+      "body": "BOD-0001",
+      "half_extent": [2.0, 1.5, 0.5],
+      "centre": [0.0, 0.0, 0.0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0002",
+      "body": "BOD-0002",
+      "half_extent": [0.5, 1.0, 0.5],
+      "centre": [0.0, 1.0, 0.0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0003",
+      "body": "BOD-0003",
+      "half_extent": [0.5, 1.0, 0.5],
+      "centre": [1.732, -1.0, 0.0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0004",
+      "body": "BOD-0004",
+      "half_extent": [0.5, 1.0, 0.5],
+      "centre": [-1.732, -1.0, 0.0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0005",
+      "body": "BOD-0005",
+      "half_extent": [0.5, 0.5, 0.5],
+      "centre": [0.0, 1.0, 1.0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0006",
+      "body": "BOD-0006",
+      "half_extent": [0.5, 0.5, 0.5],
+      "centre": [1.732, -1.0, 1.0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0007",
+      "body": "BOD-0007",
+      "half_extent": [0.5, 0.5, 0.5],
+      "centre": [-1.732, -1.0, 1.0],
+      "maturity": "PROVISIONAL"
+    }
+  ],
+  "region_volumes": [
+    {
+      "functional_region": "FRG-0001",
+      "half_extent": [0.5, 0.5, 0.5],
+      "centre": [0.0, 1.5, 0.0]
+    },
+    {
+      "functional_region": "FRG-0002",
+      "half_extent": [0.5, 0.5, 0.5],
+      "centre": [0.0, 1.0, 1.5]
+    },
+    {
+      "functional_region": "FRG-0003",
+      "half_extent": [0.5, 0.5, 0.5],
+      "centre": [0.0, 0.0, -0.5]
+    }
+  ],
+  "reach_results": [
+    {
+      "actor": "ACT-0001",
+      "target": "release action",
+      "reachable": true,
+      "approach_side": "+Z",
+      "why": "Access region FRG-0002 is located above blocking members (z=1.5) and actor can approach from +Z."
+    },
+    {
+      "actor": "ACT-0001",
+      "target": "pivot action",
+      "reachable": true,
+      "approach_side": "+Z",
+      "why": "Access region FRG-0002 is accessible from above for pivot action on blocking members."
+    }
+  ],
+  "assembly_directions": [
+    {
+      "assembly_step": "ASY-0001",
+      "direction": [0, -1, 0]
+    },
+    {
+      "assembly_step": "ASY-0002",
+      "direction": [0, 1, 0]
+    },
+    {
+      "assembly_step": "ASY-0003",
+      "direction": [0, 1, 0]
+    },
+    {
+      "assembly_step": "ASY-0004",
+      "direction": [0, 1, 0]
+    },
+    {
+      "assembly_step": "ASY-0005",
+      "direction": [0, 0, 1]
+    },
+    {
+      "assembly_step": "ASY-0006",
+      "direction": [0, 0, 1]
+    },
+    {
+      "assembly_step": "ASY-0007",
+      "direction": [0, 0, 1]
+    }
+  ],
+  "elimination": {
+    "eliminated": false,
+    "reason": null
+  }
+}

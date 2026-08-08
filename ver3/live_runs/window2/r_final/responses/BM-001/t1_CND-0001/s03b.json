@@ -1,0 +1,168 @@
+{
+  "blocking_relations": [
+    {
+      "id": "BLK-0001",
+      "retained_group": "RGP-0001",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TX","TY","TZ","RX","RY","RZ"],
+      "driver": "DECLARED_SCENARIO",
+      "defeat_specification": "Apply a force/moment to BOD-0001 in any direction; it must not accelerate. If it moves, the constraint is defeated."
+    },
+    {
+      "id": "BLK-0002",
+      "retained_group": "RGP-0002",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001","CFG-0002"],
+      "dofs": ["TX","TY","TZ","RX","RY"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "Attempt to translate or rotate the closing panel in any direction except its allowed rotation about the hinge axis. If it moves in a disallowed direction, constraint is defeated."
+    },
+    {
+      "id": "BLK-0003",
+      "retained_group": "RGP-0003",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001","CFG-0002"],
+      "dofs": ["TX","TY","TZ","RX","RY","RZ"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "Apply any force to the catch base; it must not move. If it moves, constraint is defeated."
+    },
+    {
+      "id": "BLK-0004",
+      "retained_group": "RGP-0004",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001","CFG-0002"],
+      "dofs": ["TX","TZ","RX","RY","RZ"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "Attempt to move the catch tip in any direction except its compliant deflection along +Y. If it moves in a disallowed direction, constraint is defeated."
+    },
+    {
+      "id": "BLK-0005",
+      "retained_group": "RGP-0002",
+      "blocked_direction": "+Z",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TZ"],
+      "driver": "LOAD",
+      "defeat_specification": "Push the closing panel downward (into the opening) beyond its nominal closed position. If it moves downward appreciably, the constraint is defeated."
+    },
+    {
+      "id": "BLK-0006",
+      "retained_group": "RGP-0002",
+      "blocked_direction": "-Z",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TZ"],
+      "driver": "LOAD",
+      "defeat_specification": "Pull the closing panel upward (out of the opening) while in closed configuration. If it lifts off, constraint is defeated."
+    },
+    {
+      "id": "BLK-0007",
+      "retained_group": "RGP-0002",
+      "blocked_direction": "+Y",
+      "blocker_body": "BOD-0003",
+      "configurations": ["CFG-0001"],
+      "dofs": ["TY"],
+      "driver": "LOAD",
+      "defeat_specification": "Attempt to open the panel by pushing in the +Y direction (outward) while closed. If it opens, constraint is defeated."
+    }
+  ],
+  "irrelevance": [],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "JNT-0001", "BOD-0001", "NONE"]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "IFC-0003", "BOD-0003", "JNT-0002", "BOD-0003", "IFC-0002", "BOD-0001", "NONE"]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "IFC-0003", "BOD-0003", "JNT-0002", "BOD-0003", "IFC-0002", "BOD-0001", "NONE"]
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "IFC-0003", "BOD-0003", "JNT-0002", "BOD-0003", "IFC-0002", "BOD-0001", "NONE"]
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "NONE"]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0001",
+      "access_side": "+Z",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0003",
+      "access_side": "+X",
+      "activates": ["IFC-0002"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0001"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0002",
+      "access_side": "+Y",
+      "activates": ["JNT-0001", "IFC-0001", "IFC-0003"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0001", "ASY-0002"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-1001",
+      "decision": "Grounded base",
+      "why_open": "No explicit ground body is defined in the mechanism. The base BOD-0001 must be fixed to the world to provide reaction for all load paths.",
+      "alternatives": ["Add a Ground body", "Define a fixed joint to inertial frame"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["BLK-0001"],
+      "blocks": ["load_paths"]
+    },
+    {
+      "id": "S3U-1002",
+      "decision": "Hinge pivot details",
+      "why_open": "The revolute joint JNT-0001 needs a physical pivot (pin, axle, or bearing) that is not modeled as a separate body or interface feature.",
+      "alternatives": ["Add a hinge pin body", "Model axis as a feature on BOD-0001 and BOD-0002"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["BLK-0002"],
+      "blocks": ["assembly"]
+    },
+    {
+      "id": "S3U-1003",
+      "decision": "Retention features",
+      "why_open": "The blocking relations for closed configuration assume a latch or catch geometry that is not explicitly detailed in the bodies or interfaces.",
+      "alternatives": ["Add latch geometry to BOD-0002", "Add latch geometry to BOD-0001"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["BLK-0005", "BLK-0006", "BLK-0007"],
+      "blocks": ["load_paths"]
+    }
+  ]
+}

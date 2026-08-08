@@ -1,0 +1,147 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "pressed surface that turns about a fixed axis",
+      "instance_identity": "unique",
+      "addresses_obligations": ["OBL-0001", "OBL-0005", "OBL-0007"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "fixed support that carries the pivot and reacts the foot load",
+      "instance_identity": "unique",
+      "addresses_obligations": ["OBL-0006"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "stored-energy element that returns the surface",
+      "instance_identity": "unique",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "BOD-0004",
+      "role": "separate retaining member that locates the surface axially",
+      "instance_identity": "unique",
+      "addresses_obligations": []
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["BOD-0001"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["BOD-0002"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["BOD-0003"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": ["BOD-0004"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0001",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0003",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0004",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "CONTACT",
+      "addresses_obligations": ["OBL-0006"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0004"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "CONTACT",
+      "addresses_obligations": []
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "COMPRESSED",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "FIXED",
+      "nominal_status": "FIXED",
+      "addresses_obligations": ["OBL-0003"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "resting",
+      "kind": "DISCRETE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "pressed",
+      "kind": "DISCRETE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the surface that is pressed, by foot"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-0001",
+      "decision": "how the stored-energy element is attached to the support",
+      "why_open": "The candidate specifies a stored-energy element but not its anchorage details.",
+      "alternatives": ["integrated with the support", "separate part attached to the support", "inserted into a pocket"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0005", "FRE-0007"],
+      "blocks": ["OBL-0003", "OBL-0004"]
+    }
+  ]
+}

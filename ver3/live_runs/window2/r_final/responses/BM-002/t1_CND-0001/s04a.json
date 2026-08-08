@@ -1,0 +1,88 @@
+{
+  "scale": {
+    "basis": "RELATIVE",
+    "absolute": null,
+    "note": "No absolute dimensions given; using relative units."
+  },
+  "envelopes": [
+    {
+      "id": "ENV-0001",
+      "body": "BOD-0001",
+      "half_extent": [2.0, 2.0, 1.0],
+      "centre": [0.0, 0.0, 0.0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0002",
+      "body": "BOD-0002",
+      "half_extent": [0.5, 0.5, 3.0],
+      "centre": [0.0, 0.0, 1.0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0003",
+      "body": "BOD-0003",
+      "half_extent": [0.5, 2.5, 0.5],
+      "centre": [0.0, 2.0, 1.0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0004",
+      "body": "BOD-0004",
+      "half_extent": [3.0, 1.0, 2.0],
+      "centre": [1.0, 3.0, 1.0],
+      "maturity": "PROVISIONAL"
+    }
+  ],
+  "region_volumes": [
+    {
+      "functional_region": "FRG-0001",
+      "half_extent": [1.0, 1.0, 0.5],
+      "centre": [0.0, 0.0, 2.5]
+    },
+    {
+      "functional_region": "FRG-0002",
+      "half_extent": [1.5, 0.5, 1.0],
+      "centre": [1.0, 4.0, 1.0]
+    },
+    {
+      "functional_region": "FRG-0003",
+      "half_extent": [3.0, 1.0, 1.0],
+      "centre": [0.0, -1.5, 0.0]
+    }
+  ],
+  "reach_results": [
+    {
+      "actor": "ACT-0001",
+      "target": "rotary input",
+      "reachable": true,
+      "approach_side": "+Z",
+      "why": "FRG-0001 on BOD-0002 is accessible from above."
+    },
+    {
+      "actor": "ACT-0001",
+      "target": "platform surface",
+      "reachable": true,
+      "approach_side": "+Z",
+      "why": "FRG-0002 on BOD-0004 is accessible from above."
+    }
+  ],
+  "assembly_directions": [
+    {
+      "assembly_step": "STEP-0001",
+      "direction": [0.0, 1.0, 0.0]
+    },
+    {
+      "assembly_step": "STEP-0002",
+      "direction": [0.0, 0.0, 1.0]
+    },
+    {
+      "assembly_step": "STEP-0003",
+      "direction": [1.0, 0.0, 0.0]
+    }
+  ],
+  "elimination": {
+    "eliminated": false,
+    "reason": null
+  }
+}

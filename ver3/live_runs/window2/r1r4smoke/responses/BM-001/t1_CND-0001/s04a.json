@@ -1,0 +1,101 @@
+{
+  "scale": {
+    "basis": "RELATIVE",
+    "absolute": null,
+    "note": "No absolute sizes provided; using arbitrary consistent units."
+  },
+  "envelopes": [
+    {
+      "id": "ENV-0001",
+      "body": "BOD-0001",
+      "half_extent": [5, 5, 5],
+      "centre": [0, 0, 0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0002",
+      "body": "BOD-0002",
+      "half_extent": [4, 4, 1],
+      "centre": [0, 0, 5],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0003",
+      "body": "BOD-0003",
+      "half_extent": [1, 1, 2],
+      "centre": [4, 0, 0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0004",
+      "body": "BOD-0004",
+      "half_extent": [0.2, 4, 0.2],
+      "centre": [0, 0, 4],
+      "maturity": "PROVISIONAL"
+    }
+  ],
+  "region_volumes": [
+    {
+      "functional_region": "FRG-0001",
+      "half_extent": [5, 1, 1],
+      "centre": [0, 0, -5],
+      "role": "SUPPORT"
+    },
+    {
+      "functional_region": "FRG-0002",
+      "half_extent": [3, 3, 3],
+      "centre": [0, 0, 0],
+      "role": "ACCESS"
+    },
+    {
+      "functional_region": "FRG-0003",
+      "half_extent": [1, 1, 1],
+      "centre": [4, 0, 2],
+      "role": "APERTURE"
+    },
+    {
+      "functional_region": "FRG-0004",
+      "half_extent": [1, 1, 1],
+      "centre": [0, 0, 5],
+      "role": "SUPPORT"
+    }
+  ],
+  "reach_results": [
+    {
+      "actor": "ACT-0001",
+      "target": "the enclosing volume interior",
+      "reachable": true,
+      "approach_side": "+Z",
+      "why": "Access region FRG-0002 is open from +Z, reaching inside the volume."
+    },
+    {
+      "actor": "ACT-0001",
+      "target": "the release surface of the catch",
+      "reachable": true,
+      "approach_side": "+X",
+      "why": "Aperture FRG-0003 is accessible from +X to reach the catch release surface."
+    }
+  ],
+  "assembly_directions": [
+    {
+      "assembly_step": "ASY-0001",
+      "direction": [0, 0, 1]
+    },
+    {
+      "assembly_step": "ASY-0002",
+      "direction": [0, 0, 1]
+    },
+    {
+      "assembly_step": "ASY-0003",
+      "direction": [0, 0, 1]
+    },
+    {
+      "assembly_step": "ASY-0004",
+      "direction": [0, 0, 1]
+    }
+  ],
+  "elimination": {
+    "eliminated": false,
+    "reason": null
+  }
+}

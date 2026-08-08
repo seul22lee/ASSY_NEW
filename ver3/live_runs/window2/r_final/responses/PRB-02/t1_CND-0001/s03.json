@@ -1,0 +1,219 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "fixed jaw",
+      "instance_identity": "one",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "traveling jaw",
+      "instance_identity": "one",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "lead screw",
+      "instance_identity": "one",
+      "addresses_obligations": ["OBL-0002", "OBL-0006"]
+    },
+    {
+      "id": "BOD-0004",
+      "role": "anchor nut",
+      "instance_identity": "one",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "BOD-0005",
+      "role": "handle",
+      "instance_identity": "one",
+      "addresses_obligations": ["OBL-0006"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["fixed jaw body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["traveling jaw body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["lead screw shaft", "thread"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": ["nut body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0005",
+      "members": ["handle body"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "HELICAL",
+      "parent_group": "RGP-0004",
+      "child_group": "RGP-0003",
+      "dof": ["TY", "RY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0004",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0005",
+      "dof": ["RY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "desk edge"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0002", "desk edge"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "sliding",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0003", "BOD-0005"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0006"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "open",
+      "kind": "assembly",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "tightening",
+      "kind": "operation",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    },
+    {
+      "id": "CFG-0003",
+      "name": "holding",
+      "kind": "operation",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    },
+    {
+      "id": "CFG-0004",
+      "name": "releasing",
+      "kind": "operation",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0005"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["handle"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001", "BOD-0002"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-0001",
+      "decision": "geometry of the lead screw thread",
+      "why_open": "the pitch and diameter affect the helix angle and thus the self-locking condition",
+      "alternatives": ["multi-start thread", "single-start thread"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0005"],
+      "blocks": ["OBL-0002"]
+    },
+    {
+      "id": "S3U-0002",
+      "decision": "method of preventing rotation of the traveling jaw about the guide axis",
+      "why_open": "the traveling jaw must not rotate relative to the fixed jaw, but this is achieved by the prismatic joint if it is non-circular",
+      "alternatives": ["rectangular guide", "round guide with key"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": ["OBL-0004"]
+    },
+    {
+      "id": "S3U-0003",
+      "decision": "how the handle is attached to the lead screw",
+      "why_open": "the handle must transmit torque, but can be fixed or integrally formed",
+      "alternatives": ["fixed handle", "integrally formed handle"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0004"],
+      "blocks": ["OBL-0006"]
+    }
+  ]
+}

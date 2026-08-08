@@ -1,0 +1,160 @@
+{
+  "blocking_relations": [
+    {
+      "id": "BLK-0001",
+      "retained_group": "RGP-0001",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0004",
+      "configurations": ["CFG-0002", "CFG-0003"],
+      "dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "driver": "DECLARED_SCENARIO",
+      "defeat_specification": "None"
+    },
+    {
+      "id": "BLK-0002",
+      "retained_group": "RGP-0002",
+      "blocked_direction": "-Y",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0002", "CFG-0003"],
+      "dofs": ["TY"],
+      "driver": "LOAD",
+      "defeat_specification": "A force applied in the -Y direction to the traveling jaw assembly causes it to move relative to the fixed jaw assembly."
+    },
+    {
+      "id": "BLK-0003",
+      "retained_group": "RGP-0003",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0002",
+      "configurations": ["CFG-0002", "CFG-0003"],
+      "dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "driver": "DECLARED_SCENARIO",
+      "defeat_specification": "None"
+    },
+    {
+      "id": "BLK-0004",
+      "retained_group": "RGP-0004",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003", "CFG-0004"],
+      "dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "driver": "DECLARED_SCENARIO",
+      "defeat_specification": "None"
+    },
+    {
+      "id": "BLK-0005",
+      "retained_group": "RGP-0001",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0004",
+      "configurations": ["CFG-0001", "CFG-0004"],
+      "dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "driver": "DECLARED_SCENARIO",
+      "defeat_specification": "None"
+    }
+  ],
+  "irrelevance": [
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": ["RY"],
+      "scenario": "No load or actuation applied to the lead screw assembly in the open configuration."
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": ["RY"],
+      "scenario": "No load or actuation applied to the handle assembly in the open configuration."
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": ["arm", "BOD-0002", "BOD-0001", "desk edge"]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": ["arm", "BOD-0002", "BOD-0001", "desk edge"]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": ["arm", "BOD-0002", "BOD-0001", "desk edge"]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0004",
+      "access_side": "+Y",
+      "activates": ["JNT-0003"],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0001",
+      "access_side": "+Y",
+      "activates": ["JNT-0001"],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0004"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0002",
+      "access_side": "+Y",
+      "activates": ["JNT-0001", "JNT-0002"],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001"]
+    },
+    {
+      "id": "ASY-0004",
+      "order_index": 4,
+      "body": "BOD-0003",
+      "access_side": "+Y",
+      "activates": ["JNT-0002", "JNT-0004"],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0002"]
+    },
+    {
+      "id": "ASY-0005",
+      "order_index": 5,
+      "body": "BOD-0005",
+      "access_side": "+Y",
+      "activates": ["JNT-0004"],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0003"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-1001",
+      "decision": "Fixed jaw (BOD-0001) is not fixed to anything.",
+      "why_open": "There is no joint or interface connecting BOD-0001 to a ground or external reference. It is only attached to the anchor nut via JNT-0003, which is a fixed joint. But the anchor nut is not fixed to anything. Thus, the assembly is not grounded.",
+      "alternatives": ["RGP-0001", "RGP-0002"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["JNT-0003"],
+      "blocks": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "S3U-1002",
+      "decision": "Lead screw (BOD-0003) is not axially constrained.",
+      "why_open": "The lead screw is connected to the traveling jaw via a helical joint (JNT-0002) and to the handle via a revolute joint (JNT-0004). There is no constraint preventing axial translation (TY) and rotation (RY) relative to the fixed jaw. The helical joint allows both, but the nut is not fixed, so the lead screw can move.",
+      "alternatives": ["RGP-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["JNT-0002"],
+      "blocks": ["OBL-0002"]
+    }
+  ]
+}

@@ -653,3 +653,74 @@ and until this cycle it was reported as success.
 
 **Do not begin S05 without addressing the blocked-DOF depth debt**, which is now
 the largest declared gap and the one S05 would inherit.
+
+---
+
+# Cycle 5 — structural ambiguity removed (R-1..R-4)
+
+One integrated revision, four coordinated changes, no benchmark- or
+model-specific behaviour.
+
+**R-1 consistency.** `S03_CONTRACT.blocking_relation_rule` was made authoritative
+in code: `BLOCKING_REQUIRED` is its field list, and the prompt now shows those
+names **as keys**. The contract had always modelled a blocking relation as a
+first-class thing carrying `retained_group` and `configurations` — relation-level
+facts. The implementation had buried them in per-DOF detail, which caused both the
+name drift and the bookkeeping explosion.
+
+**R-2 false negatives.** `canonicalise_blocking()` binds one explicit, documented
+alias set and **records every rename**, so a supplied fact is never reported
+missing and a rename is never mistaken for a native field. `relations_of()` also
+accepts relations still expressed in the older per-DOF shape. The validator was
+not weakened: the same seven fields are still required.
+
+**R-3 deterministic derivation.** `derive_mobility()` computes the total DOF
+disposition from joint classes, blocking relations and irrelevance claims:
+free-by-class → INTENDED, covered by a relation → BLOCKED_BY, declared → 
+IRRELEVANT_BECAUSE, otherwise MAINTAINED_BY_CLASS. `free_dof()` is ordinary
+axis-relative kinematics, product-independent. This finally implements the
+contract's own statement that the LLM role for totality is NONE.
+
+**R-4 prompt simplification.** s03b: 3294 → **2684 chars**, while gaining the
+explicit key list it previously lacked. Shorter *and* more precise.
+
+## Quantified result
+
+| | before | after |
+|---|---|---|
+| full chain SUCCESS | 0/6 | **4/6** (BM-001, BM-003, PRB-01, PRB-02·s04b) |
+| findings | 313 | **240** |
+| grid cells authored by LLM | 48–126/case | **0** |
+| relations recognised | 0 of 262 | **31 of 31** |
+| entries derived | 0 | **420 (13.5×)** |
+| renames required | — | **0** |
+| tests | 316 pass | **316 pass** |
+
+**False-negative reduction:** the entire 262-relation class disappeared, and it
+disappeared because the information was there all along. 73 findings resolved net.
+
+## Acceptance criteria
+
+1. false negatives substantially reduced — **yes**, the dominant class is gone.
+2. contract/prompt/parser/validator agree — **yes**, one vocabulary from the contract.
+3. LLM bookkeeping reduced — **yes**, 13.5× moved to deterministic derivation.
+4. prompt complexity reduced — **yes**, shorter and more precise.
+5. benchmark and probe maturity improve together — **yes**: 2 of 3 benchmarks and
+   2 of 3 probes now complete the chain; both groups improved from zero.
+6. no benchmark-specific behaviour — **yes**, grep-verified.
+7. no model-specific behaviour — **yes**; the alias map is declared, recorded, and
+   was unused this run.
+
+## Remaining, with earliest cause
+
+| finding | earliest cause |
+|---|---|
+| `UnresolvedDecision.blocks → BLK-0001` dangling (BM-002, PRB-03 s03b) | **representation** — a blocking relation has no entity to be referenced. First Window 2 evidence meeting rule 8's bar |
+| `configuration_interference` 47, `assembly_path` 39, `swept_clearance` 24 | **validator** — AABB conservatism; near-vacuous, all NOT_VERIFIED |
+| `dof_totality` 26 | **derivation** — groups with no joint get no free DOF; needs review |
+| `region_occupancy` 10 | **validator** — ACCESS/APERTURE overlapping its owner is expected (R-4 of the analysis, not yet applied) |
+| `obligation_ownership` 19 | **prompt** — `addresses_obligations` still unpopulated |
+| S02 closure ~91% | **model capability**, already recorded |
+
+Nothing here is architectural except the first, which is a schema question with
+evidence behind it for the first time.

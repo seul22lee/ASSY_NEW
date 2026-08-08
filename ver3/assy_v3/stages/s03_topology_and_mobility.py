@@ -51,6 +51,72 @@ PATH_KINDS = ("RIGID", "DEFORMATION_RESOLVED")
 
 BLOCKING_DRIVERS = ("LOAD", "KINEMATIC_NECESSITY", "DECLARED_SCENARIO")
 
+#: The blocking relation's fields, taken from S03_CONTRACT.blocking_relation_rule.
+#: The CONTRACT IS AUTHORITATIVE: it models a blocking relation as a first-class
+#: thing carrying retained_group and configurations - relation-level facts, not
+#: per-DOF ones. An earlier implementation buried these inside per-DOF detail,
+#: which is what produced both the bookkeeping explosion and the name drift.
+BLOCKING_REQUIRED = ("retained_group", "blocked_direction", "blocker_body",
+                     "configurations", "defeat_specification", "driver")
+BLOCKING_OPTIONAL = ("promised_features", "depends_on_compliant_recovery")
+
+#: The ONE intentional alias set, declared here and nowhere else. These are the
+#: names a live model used for the same engineering concepts; binding them is not
+#: weakening the validator, it is refusing to call a supplied fact missing. Every
+#: bind is RECORDED so a rename can never be mistaken for a native field.
+BLOCKING_ALIASES = {"blocked_by": "blocker_body", "blocker": "blocker_body",
+                    "direction": "blocked_direction",
+                    "test": "defeat_specification",
+                    "defeat_test": "defeat_specification",
+                    "reason": "driver", "why": "driver",
+                    "group": "retained_group", "rigid_group": "retained_group"}
+
+
+def canonicalise_blocking(raw: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
+    """Bind a blocking relation onto the contract's vocabulary.
+
+    Returns the canonical relation and the list of renames applied. A field that
+    is absent stays absent: this resolves NAMING, never completeness.
+    """
+    out: Dict[str, Any] = {}
+    renamed: List[str] = []
+    for key, value in (raw or {}).items():
+        canon = BLOCKING_ALIASES.get(key, key)
+        if canon != key:
+            renamed.append("%s->%s" % (key, canon))
+        if canon not in out or not str(out.get(canon) or "").strip():
+            out[canon] = value
+    # A blocker given as a one-element list is the same engineering fact as a
+    # blocker given as a string.
+    b = out.get("blocker_body")
+    if isinstance(b, list) and len(b) == 1 and isinstance(b[0], str):
+        out["blocker_body"] = b[0]
+        renamed.append("blocker_body[list]->str")
+    return out, renamed
+
+
+#: Which DOF each joint class leaves FREE, relative to its own axis. Ordinary
+#: kinematics, product-independent, and the basis for deriving the disposition
+#: grid instead of asking a model to author it cell by cell.
+def free_dof(joint_type: str, axis: str) -> Set[str]:
+    a = (axis or "+Z").upper().lstrip("+-")
+    a = a if a in ("X", "Y", "Z") else "Z"
+    others = [x for x in ("X", "Y", "Z") if x != a]
+    jt = (joint_type or "").upper()
+    if jt == "REVOLUTE":
+        return {"R" + a}
+    if jt == "PRISMATIC":
+        return {"T" + a}
+    if jt in ("HELICAL", "CYLINDRICAL"):
+        return {"R" + a, "T" + a}
+    if jt == "SPHERICAL":
+        return {"RX", "RY", "RZ"}
+    if jt == "PLANAR":
+        return {"T" + others[0], "T" + others[1], "R" + a}
+    if jt == "COMPLIANT":
+        return {"T" + a}
+    return set()                                    # FIXED, and anything unknown
+
 REGION_ROLES = ("ACCESS", "SUPPORT", "KEEP_OUT", "APERTURE")
 
 #: Directions are symbolic axis directions, never placements.
@@ -196,6 +262,81 @@ TYPED INPUT
 -----------
 {projection}
 """
+
+
+def derive_mobility(groups: List[str], configurations: List[str],
+                   joints: List[Dict[str, Any]],
+                   relations: List[Dict[str, Any]],
+                   irrelevance: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Compute the TOTAL DOF disposition from authored engineering facts.
+
+    The model authors joints, a handful of blocking relations, and any DOF it
+    claims irrelevant. Everything else follows mechanically:
+
+      free by the joint class            -> INTENDED
+      covered by a blocking relation     -> BLOCKED_BY   (overrides INTENDED:
+                                            a retention that removes an intended
+                                            freedom in one configuration is the
+                                            normal case)
+      declared irrelevant                -> IRRELEVANT_BECAUSE
+      otherwise                          -> MAINTAINED_BY_CLASS
+
+    This is the contract's own division of labour - "LLM role NONE for DOF
+    totality... the LLM only dispositions each entry" - finally implemented.
+    Nothing is compressed away: every entry still exists, carries its reason,
+    and cites the relation or joint that produced it.
+    """
+    by_child: Dict[str, List[Dict[str, Any]]] = {}
+    for j in joints:
+        by_child.setdefault(j.get("child_group"), []).append(j)
+
+    blocked: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+    for r in relations:
+        group = r.get("retained_group")
+        dofs = r.get("_dofs") or []
+        configs = [c for c in (r.get("configurations") or []) if isinstance(c, str)]
+        for cfg in (configs or configurations):
+            for dof in dofs:
+                blocked[(group, cfg, dof)] = r
+
+    irrelevant: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+    for i in irrelevance:
+        for dof in (i.get("dof") or []):
+            irrelevant[(i.get("rigid_group"), i.get("configuration"), dof)] = i
+
+    out: List[Dict[str, Any]] = []
+    for group in groups:
+        free: Set[str] = set()
+        source: Dict[str, str] = {}
+        for j in by_child.get(group, []):
+            for dof in free_dof(j.get("joint_type"), j.get("axis_direction")):
+                free.add(dof)
+                source[dof] = j.get("entity_id") or j.get("id")
+        for cfg in configurations:
+            for dof in DOF_NAMES:
+                key = (group, cfg, dof)
+                entry: Dict[str, Any] = {"rigid_group": group, "configuration": cfg,
+                                         "dof": dof, "derived_by": "s03:derivation"}
+                if key in blocked:
+                    r = blocked[key]
+                    entry.update({"disposition": "BLOCKED_BY",
+                                  "blocking_relation": r.get("id"),
+                                  "blocked_direction": r.get("blocked_direction"),
+                                  "blocker_body": r.get("blocker_body"),
+                                  "defeat_specification": r.get("defeat_specification"),
+                                  "driver": r.get("driver")})
+                elif dof in free:
+                    entry.update({"disposition": "INTENDED", "by_joint": source.get(dof)})
+                elif key in irrelevant:
+                    entry.update({"disposition": "IRRELEVANT_BECAUSE",
+                                  "scenario": irrelevant[key].get("scenario")})
+                else:
+                    entry.update({"disposition": "MAINTAINED_BY_CLASS",
+                                  "holding_class": "joint class of %s"
+                                  % (by_child.get(group, [{}])[0].get("joint_type", "none")
+                                     if by_child.get(group) else "no joint")})
+                out.append(entry)
+    return out
 
 
 def dof_domain(groups: Iterable[str], configurations: Iterable[str]) -> List[Tuple[str, str, str]]:
@@ -680,62 +821,55 @@ def no_selection_check_s03(state) -> List[str]:
 # =========================================================================
 # s03 pass B
 # =========================================================================
-S03B_PROMPT = """You are completing a mechanism that already exists as a topology.
-The bodies, rigid groups, joints, interfaces and configurations are fixed and are
-given below. You are adding what moves, what stops it, how loads reach the world,
-and in what order it goes together.
+
+S03B_PROMPT = """The mechanism below is fixed. Add what holds it together, how
+loads reach the world, and in what order it goes together.
 
 Do not add or rename bodies, groups, joints, interfaces or configurations. If
-something is missing, say so in `unresolved` rather than inventing it.
+something is missing, say so in unresolved.
 
-RULES
-1. DISPOSITION EVERY DEGREE OF FREEDOM, for every rigid group in every
-   configuration. Each of the six gets exactly one code:
-     I  INTENDED             this motion is the point
-     B  BLOCKED_BY           something stops it
-     M  MAINTAINED_BY_CLASS  the joint class holds it by construction
-     R  IRRELEVANT_BECAUSE   name a scenario in which it is BOTH unloaded AND
-                             unactuated; if you cannot name one, it is not
-                             irrelevant, and a scenario that carries a load case
-                             is not such a scenario
-   Expand into `detail` ONLY the ones you coded B or R.
-   A B needs the BODY ID that stops it, the direction, how a test would defeat
-   it, and why it must be blocked (LOAD, KINEMATIC_NECESSITY, DECLARED_SCENARIO).
-   Every body meant to stay where it is put has at least one blocked DOF: a
-   mechanism in which nothing is blocked is a pile of loose parts.
-   Leaving a line out is the failure this stage exists to prevent.
-2. For every LOAD CASE, trace the ordered PATH from where the load is applied,
-   through THIS mechanism, to the reaction site. Hops are body, joint or
-   interface ids. A path that does not reach the reaction site is a load that is
-   not reacted. Never state how much load anything carries.
-3. Give the ASSEMBLY ORDER: which body, from which access side, what it depends
-   on, and which retention termination holds it once placed -
-   LATER_BODY_COVER, ROTATION, ELASTICITY, or NONE if nothing retains it. A
-   rigid part pushed straight in leaves the reverse direction open, so a body
-   that must stay put needs one of the first three. Mark a step
-   DEFORMATION_RESOLVED if it only goes together because something flexes,
-   otherwise RIGID.
+1. BLOCKING RELATIONS. For each body that must stay where it is put, state what
+   stops it. ONE relation per (retained group, blocked direction) - not one per
+   degree of freedom: the pipeline expands your relations over every DOF and
+   every configuration itself. A mechanism in which nothing is blocked is a pile
+   of loose parts.
+2. IRRELEVANCE. Only for a DOF that is BOTH unloaded AND unactuated, naming the
+   scenario in which that holds. A scenario carrying a load case is not one.
+   Most mechanisms need none.
+3. LOAD PATHS. Per load case, the ordered hops from where the load is applied,
+   through this mechanism, to the reaction site. Hops are body, joint or
+   interface ids. Never say how much load anything carries.
+4. ASSEMBLY ORDER. Which body, from which access side, what it depends on, and
+   what retains it once placed. A rigid part pushed straight in leaves the
+   reverse direction open, so a body that must stay put needs LATER_BODY_COVER,
+   ROTATION or ELASTICITY.
 
 RESPONSE SCHEMA
-Return a single JSON object with exactly these keys.
+Return one JSON object. Emit every key. Use exactly these key names.
 
-  mobility[]           one row per (rigid_group, configuration) pair:
-                       rigid_group, configuration,
-                       dof {{TX,TY,TZ,RX,RY,RZ}} each holding one code I/B/M/R,
-                       detail {{<DOF>: {{...}}}} for the B and R codes only
-  load_paths[]         id "LDP-0001", load_case, candidate, ordered_hops[]
-  assembly_steps[]     id "ASY-0001", order_index (integer), body, access_side,
-                       activates[], termination_strategy, path_kind, depends_on[]
-  unresolved[]         id "S3U-1001", decision, why_open, alternatives[],
-                       alternatives_kind, kept_open_by[], blocks[]
+  blocking_relations[]  id "BLK-0001", retained_group, blocked_direction,
+                        blocker_body, configurations[], dofs[], driver,
+                        defeat_specification, promised_features[] (optional)
+  irrelevance[]         rigid_group, configuration, dof[], scenario
+  load_paths[]          id "LDP-0001", load_case, candidate, ordered_hops[]
+  assembly_steps[]      id "ASY-0001", order_index, body, access_side,
+                        activates[], termination_strategy, path_kind, depends_on[]
+  unresolved[]          id "S3U-1001", decision, why_open, alternatives[],
+                        alternatives_kind, kept_open_by[], blocks[]
 
-PERMITTED VALUES
-  driver               {drivers}
-  termination_strategy {terminations} - NONE only for a body nothing retains
-  path_kind            {path_kinds}
-  alternatives_kind    ENTITY_REFS | PRINCIPLE_FAMILIES | FREE_TEXT
+  blocked_direction     {axis_directions}
+  blocker_body          a body id, not a description
+  configurations        configuration ids where the relation holds
+  dofs                  which of {dofs} the relation removes
+  driver                {drivers}
+  defeat_specification  how a test would defeat this constraint
+  termination_strategy  {terminations}
+  path_kind             {path_kinds}
+  alternatives_kind     ENTITY_REFS | PRINCIPLE_FAMILIES | FREE_TEXT
 
-THE MECHANISM YOU ARE COMPLETING
+Ids you emit are new. Never reuse an id from the input.
+
+THE MECHANISM
 {mechanism}
 
 THE LOAD CASES AND OBLIGATIONS
@@ -743,46 +877,62 @@ THE LOAD CASES AND OBLIGATIONS
 """
 
 
+def relations_of(parsed):
+    """Canonical blocking relations, plus every rename applied to obtain them.
+
+    Accepts the relation list this stage asks for, and ALSO relations still
+    expressed as per-DOF detail: an engineering fact supplied in an older shape
+    is supplied, and calling it missing was the false negative this cycle exists
+    to remove.
+    """
+    relations, renames = [], []
+    for raw in (parsed.get("blocking_relations") or []):
+        if not isinstance(raw, dict):
+            continue
+        rel, renamed = canonicalise_blocking(raw)
+        rel["_dofs"] = [d for d in (rel.get("dofs") or rel.get("dof") or [])
+                        if isinstance(d, str) and d in DOF_NAMES]
+        relations.append(rel)
+        renames += renamed
+    for row in (parsed.get("mobility") or []):
+        if not isinstance(row, dict):
+            continue
+        detail = row.get("detail") if isinstance(row.get("detail"), dict) else {}
+        for dof, code in (row.get("dof") or {}).items():
+            if _DISPOSITION_CODE.get(code, code) != "BLOCKED_BY":
+                continue
+            rel, renamed = canonicalise_blocking(detail.get(dof) or {})
+            rel.setdefault("retained_group", row.get("rigid_group"))
+            rel.setdefault("configurations", [row.get("configuration")])
+            rel["id"] = rel.get("id") or "BLK-%s-%s" % (row.get("rigid_group"), dof)
+            rel["_dofs"] = [dof]
+            relations.append(rel)
+            renames += renamed
+    return relations, renames
+
+
 class S03BMobilityAndAssembly(Stage):
-    """The second half of s03. Split from the first because one response could
-    not carry the whole mechanism AND its complete mobility grid: the largest
-    topologies truncated, and a truncated total function is not a total
-    function. The split preserves every field; it only stops asking for them at
-    once."""
+    """The second half of s03: what holds the mechanism, how loads leave it, and
+    how it is built. It authors ENGINEERING RELATIONS; the exhaustive DOF grid is
+    derived from them by `derive_mobility`, which is the contract's own division
+    of labour (LLM role NONE for totality)."""
 
     stage_id = "s03"
     pass_id = "s03b"
-    purpose = "disposition every degree of freedom and give the load paths and assembly order"
+    purpose = "author the blocking relations, load paths and assembly order"
 
-    def prompt(self, inputs: Dict[str, Any]) -> str:
+    def prompt(self, inputs):
         return S03B_PROMPT.format(
-            drivers=" | ".join(BLOCKING_DRIVERS),
+            axis_directions=" | ".join(AXIS_DIRECTIONS),
+            drivers=" | ".join(BLOCKING_DRIVERS), dofs=" ".join(DOF_NAMES),
             terminations=" | ".join(TERMINATION_STRATEGIES),
             path_kinds=" | ".join(PATH_KINDS),
             mechanism=_render(inputs["mechanism"]),
             demands=_render(inputs.get("demands") or {}))
 
-    def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:
+    def to_operations(self, parsed):
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
-        ops: List[Op] = []
-        prov = "s03b:mobility"
-        by_config: Dict[str, List[Dict[str, Any]]] = {}
-        for row in parsed.get("mobility", []):
-            for dof, code in (row.get("dof") or {}).items():
-                entry = {"rigid_group": row["rigid_group"],
-                         "configuration": row["configuration"],
-                         "dof": dof, "disposition": _DISPOSITION_CODE.get(code, code)}
-                d = (row.get("detail") or {}).get(dof)
-                if isinstance(d, dict):
-                    entry.update(d)
-                elif d:
-                    # A detail that is not a mapping still says something; keep
-                    # it verbatim rather than dropping it or crashing on it.
-                    entry["detail_note"] = d
-                by_config.setdefault(row["configuration"], []).append(entry)
-        for idx, (config, entries) in enumerate(sorted(by_config.items()), start=1):
-            ops.append(Op("CREATE", "MobilityExpectation", "MEX-%04d" % idx, {
-                "configuration": config, "dispositions": entries}, prov))
+        ops, prov = [], "s03b:relations"
         for p in parsed.get("load_paths", []):
             ops.append(Op("CREATE", "LoadPath", p["id"], {
                 "load_case": p["load_case"], "candidate": p["candidate"],
@@ -803,45 +953,27 @@ class S03BMobilityAndAssembly(Stage):
                 "blocks": u.get("blocks", [])}, prov))
         return ops
 
-    def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
-        out: List[str] = []
-        if not parsed.get("mobility"):
-            out.append("no DOF dispositions")
-        for row in parsed.get("mobility", []):
-            for dof, code in (row.get("dof") or {}).items():
-                if _DISPOSITION_CODE.get(code, code) not in DISPOSITIONS:
-                    out.append("disposition %r is not one of the four" % code)
-                    break
-        # A BLOCKED_BY without its defeat specification is a CLAIM WITHOUT ITS
-        # EVIDENCE. It was previously reported by a check that ran after the
-        # stage had already returned SUCCESS, so the stage passed while the
-        # support for its central claim was missing. Mandatory evidence belongs
-        # here, where its absence makes the stage CONTRACT_INCOMPLETE.
-        blocked_missing, irrelevant_missing = [], []
-        for row in parsed.get("mobility", []):
-            detail = row.get("detail") or {}
-            for dof, code in (row.get("dof") or {}).items():
-                disposition = _DISPOSITION_CODE.get(code, code)
-                d = detail.get(dof) if isinstance(detail, dict) else None
-                d = d if isinstance(d, dict) else {}
-                tag = "%s/%s/%s" % (row.get("rigid_group"), row.get("configuration"), dof)
-                if disposition == "BLOCKED_BY":
-                    absent = [f for f in ("blocked_direction", "blocker_body",
-                                          "defeat_specification", "driver")
-                              if not str(d.get(f) or "").strip()]
-                    if absent:
-                        blocked_missing.append("%s missing %s" % (tag, ", ".join(absent)))
-                elif disposition == "IRRELEVANT_BECAUSE":
-                    if not str(d.get("scenario") or "").strip():
-                        irrelevant_missing.append("%s names no scenario" % tag)
-        if blocked_missing:
-            out.append("%d blocked DOF carry no defeat specification: %s"
-                       % (len(blocked_missing), "; ".join(blocked_missing[:6])
-                          + ("; ..." if len(blocked_missing) > 6 else "")))
-        if irrelevant_missing:
-            out.append("%d DOF called irrelevant name no scenario: %s"
-                       % (len(irrelevant_missing), "; ".join(irrelevant_missing[:6])
-                          + ("; ..." if len(irrelevant_missing) > 6 else "")))
+    def completeness(self, parsed, inputs):
+        out = []
+        relations, _renames = relations_of(parsed)
+        if not relations:
+            out.append("no blocking relation: nothing in this mechanism is held")
+        incomplete = []
+        for r in relations:
+            absent = [f for f in BLOCKING_REQUIRED
+                      if f != "configurations" and not str(r.get(f) or "").strip()]
+            if not r.get("_dofs"):
+                absent.append("dofs")
+            if absent:
+                incomplete.append("%s missing %s" % (r.get("id"), ", ".join(absent)))
+        if incomplete:
+            out.append("%d blocking relation(s) incomplete: %s"
+                       % (len(incomplete), "; ".join(incomplete[:5])
+                          + ("; ..." if len(incomplete) > 5 else "")))
+        for i in parsed.get("irrelevance", []):
+            if isinstance(i, dict) and not str(i.get("scenario") or "").strip():
+                out.append("an irrelevance claim names no scenario")
+                break
         if not parsed.get("assembly_steps"):
             out.append("no assembly order")
         return out

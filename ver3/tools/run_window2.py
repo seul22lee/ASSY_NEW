@@ -34,7 +34,8 @@ from ver3.assy_v3.stages.s01_requirement_capture import S01RequirementCapture  #
 from ver3.assy_v3.stages.s02_obligation_and_candidates import (             # noqa: E402
     S02ObligationAndCandidates)
 from ver3.assy_v3.stages.s03_topology_and_mobility import (                 # noqa: E402
-    S03BMobilityAndAssembly, S03TopologyAndMobility, assembly_acyclic_check, blocking_relation_check,
+    S03BMobilityAndAssembly, S03TopologyAndMobility, assembly_acyclic_check,
+    blocking_relation_check, derive_mobility, relations_of,
     compliance_check, dof_totality_check, functional_region_check,
     interface_classification_check, irrelevance_check, load_path_check,
     no_magnitude_check, no_selection_check_s03, obligation_ownership_check,
@@ -239,6 +240,43 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
             fail("CONTRACT_CONDITION", "s03b declared incomplete",
                  outb.declared_incompleteness)
         state.apply(outb.patch)
+        # DETERMINISTIC DERIVATION. The model authored relations; the pipeline
+        # expands them into the total DOF disposition. Bookkeeping the LLM used
+        # to do by hand, done here where it cannot be forgotten.
+        try:
+            parsed = json.loads(outb.raw_response or "{}")
+        except Exception:                                           # noqa: BLE001
+            parsed = {}
+        relations, renames = relations_of(parsed)
+        rec["blocking_relations_authored"] = len(relations)
+        rec["field_renames_bound"] = len(renames)
+        rec["rename_examples"] = sorted(set(renames))[:6]
+        groups = [g["entity_id"] for g in state.family("RigidGroup")]
+        configs = [c["entity_id"] for c in state.family("Configuration")]
+        joints = [dict(j) for j in state.family("Joint")]
+        entries = derive_mobility(groups, configs, joints, relations,
+                                  parsed.get("irrelevance") or [])
+        rec["dof_entries_derived"] = len(entries)
+        by_config = {}
+        for e in entries:
+            by_config.setdefault(e["configuration"], []).append(e)
+        from ver3.assy_v3.state.patch import Op as _Op, StagePatch as _Patch
+        ops = [_Op("CREATE", "MobilityExpectation", "MEX-%04d" % (i + 1),
+                   {"configuration": cfg, "dispositions": rows}, "s03:derivation")
+               for i, (cfg, rows) in enumerate(sorted(by_config.items()))]
+        if ops:
+            dpatch = _Patch(patch_id="%s-s03-derived" % state.run_id,
+                            run_id=state.run_id, stage_id="s03", stage_attempt=3,
+                            parent_state_hash=state.state_hash(), operations=ops,
+                            execution_status="SUCCESS",
+                            provenance={"purpose": "derive the total DOF disposition",
+                                        "provider": "deterministic"},
+                            declared_incompleteness=[])
+            dproblems = state.validate(dpatch)
+            if dproblems:
+                fail("CONTRACT_CONDITION", "derived mobility rejected", dproblems)
+            else:
+                state.apply(dpatch)
 
     for name, fn in S03_CHECKS:
         try:

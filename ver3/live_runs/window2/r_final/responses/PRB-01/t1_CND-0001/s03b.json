@@ -1,0 +1,263 @@
+{
+  "blocking_relations": [
+    {
+      "id": "BLK-0001",
+      "retained_group": "RGP-0002",
+      "blocked_direction": "+Y",
+      "blocker_body": "BOD-0007",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "dofs": ["TY"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "If input gate can move beyond hard stop in +Y direction, then blocking relation fails."
+    },
+    {
+      "id": "BLK-0002",
+      "retained_group": "RGP-0002",
+      "blocked_direction": "-Y",
+      "blocker_body": "BOD-0007",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "dofs": ["TY"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "If input gate can move beyond hard stop in -Y direction, then blocking relation fails."
+    },
+    {
+      "id": "BLK-0003",
+      "retained_group": "RGP-0003",
+      "blocked_direction": "+Y",
+      "blocker_body": "BOD-0007",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "dofs": ["TY"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "If output gate can move beyond hard stop in +Y direction, then blocking relation fails."
+    },
+    {
+      "id": "BLK-0004",
+      "retained_group": "RGP-0003",
+      "blocked_direction": "-Y",
+      "blocker_body": "BOD-0007",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "dofs": ["TY"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "If output gate can move beyond hard stop in -Y direction, then blocking relation fails."
+    },
+    {
+      "id": "BLK-0005",
+      "retained_group": "RGP-0005",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0004",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "dofs": ["RZ"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "If actuator can rotate freely without constraint, then blocking relation fails."
+    },
+    {
+      "id": "BLK-0006",
+      "retained_group": "RGP-0006",
+      "blocked_direction": "-Y",
+      "blocker_body": "BOD-0004",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "dofs": ["TY"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "If spring can extend beyond its rest length without constraint, then blocking relation fails."
+    },
+    {
+      "id": "BLK-0007",
+      "retained_group": "RGP-0006",
+      "blocked_direction": "+Y",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "dofs": ["TY"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "If spring can compress beyond its solid height without constraint, then blocking relation fails."
+    },
+    {
+      "id": "BLK-0008",
+      "retained_group": "RGP-0001",
+      "blocked_direction": "NONE",
+      "blocker_body": "NONE",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "driver": "DECLARED_SCENARIO",
+      "defeat_specification": "If housing can move relative to wall, then blocking relation fails."
+    },
+    {
+      "id": "BLK-0009",
+      "retained_group": "RGP-0004",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "If linkage can move without constraint relative to housing, then blocking relation fails."
+    },
+    {
+      "id": "BLK-0010",
+      "retained_group": "RGP-0007",
+      "blocked_direction": "NONE",
+      "blocker_body": "BOD-0001",
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "driver": "KINEMATIC_NECESSITY",
+      "defeat_specification": "If hard stop can move relative to housing, then blocking relation fails."
+    }
+  ],
+  "irrelevance": [],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "BOD-0007", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0005", "BOD-0004", "BOD-0006", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "BOD-0001"]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0001",
+      "access_side": "NONE",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0007",
+      "access_side": "INTERNAL",
+      "activates": [],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0004",
+      "access_side": "TOP",
+      "activates": ["JNT-0003", "JNT-0005"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001"]
+    },
+    {
+      "id": "ASY-0004",
+      "order_index": 4,
+      "body": "BOD-0006",
+      "access_side": "TOP",
+      "activates": ["JNT-0005"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0004"]
+    },
+    {
+      "id": "ASY-0005",
+      "order_index": 5,
+      "body": "BOD-0005",
+      "access_side": "FRONT",
+      "activates": ["JNT-0003"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0004"]
+    },
+    {
+      "id": "ASY-0006",
+      "order_index": 6,
+      "body": "BOD-0002",
+      "access_side": "TOP",
+      "activates": ["JNT-0001"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001", "BOD-0004"]
+    },
+    {
+      "id": "ASY-0007",
+      "order_index": 7,
+      "body": "BOD-0003",
+      "access_side": "TOP",
+      "activates": ["JNT-0002"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001", "BOD-0004"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-1001",
+      "decision": "How loads from contained items are transmitted to the housing and how the housing is fixed to the wall.",
+      "why_open": "The mechanism description does not specify any mounting features, fasteners, or interfaces for the load path from the housing to the wall.",
+      "alternatives": [
+        "Use screws through housing flanges into wall anchors.",
+        "Use adhesive bonding.",
+        "Use a snap-fit bracket that engages a wall plate."
+      ],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["OBL-0006"],
+      "blocks": ["LDP-0001", "LDP-0002", "LDP-0003"]
+    },
+    {
+      "id": "S3U-1002",
+      "decision": "How the actuator (BOD-0005) is constrained in the housing and how its motion is limited.",
+      "why_open": "The joint JNT-0003 only allows rotation about Z, but there are no explicit hard stops or guide surfaces for the actuator. It is unclear how the actuator's range of motion is bounded and how it returns to rest.",
+      "alternatives": [
+        "Provide a slot in the housing that the actuator slides in and out of.",
+        "Use a torsion spring on the revolute joint to bias the actuator to a rest position.",
+        "Use a cam follower that rides on a profile in the housing."
+      ],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["OBL-0003"],
+      "blocks": ["LDP-0002"]
+    },
+    {
+      "id": "S3U-1003",
+      "decision": "How the gates (BOD-0002, BOD-0003) are guided in the housing and how the linkage (BOD-0004) connects to them.",
+      "why_open": "The interfaces IFC-0003 and IFC-0004 are listed as CONTACT, but the exact kinematic pairing (e.g., pin-slot, cam) is not specified. Also, the housing must provide guiding surfaces for the gates, which are not detailed.",
+      "alternatives": [
+        "Use pins on the gates that slide in slots in the linkage.",
+        "Use a four-bar linkage with revolute joints.",
+        "Use a rack-and-pinion arrangement."
+      ],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["OBL-0002"],
+      "blocks": ["LDP-0002"]
+    },
+    {
+      "id": "S3U-1004",
+      "decision": "How the return spring (BOD-0006) is anchored and how it interacts with the linkage and housing.",
+      "why_open": "The spring is modeled as a compliant joint between RGP-0004 and RGP-0006, but the attachment points and required preload are not specified.",
+      "alternatives": [
+        "The spring could be a coil spring that sits between the linkage and a boss on the housing.",
+        "A leaf spring could be integrated with the linkage.",
+        "A compression spring could act between the actuator and the housing."
+      ],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["OBL-0002"],
+      "blocks": ["LDP-0002"]
+    }
+  ]
+}

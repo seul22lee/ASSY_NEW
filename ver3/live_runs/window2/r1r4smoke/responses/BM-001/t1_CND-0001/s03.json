@@ -1,0 +1,196 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "base structure forming the enclosed volume and supporting the rotating element and catch",
+      "instance_identity": "main body",
+      "addresses_obligations": ["OBL-0001", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0013"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "rotating structure that opens and closes the volume",
+      "instance_identity": "lid",
+      "addresses_obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0008", "OBL-0009"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "compliant structure that holds the lid closed and releases when pressed",
+      "instance_identity": "catch",
+      "addresses_obligations": ["OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0011"]
+    },
+    {
+      "id": "BOD-0004",
+      "role": "rigid pin about which the lid rotates",
+      "instance_identity": "hinge pin",
+      "addresses_obligations": ["OBL-0004", "OBL-0009"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["entire body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["entire body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["catch body (rigid part)"],
+      "is_default": false
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0003",
+      "members": ["flexible connection region"],
+      "is_default": false
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0004",
+      "members": ["entire body"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0004",
+      "dof": ["RY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "BENDING",
+        "direction": "outward about Y-axis",
+        "required_travel": "sufficient to clear the lid during closing and releasing",
+        "allowable_travel_status": "UNSPECIFIED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "RGP-0004",
+        "root_interface": "IFC-0001",
+        "activation_window": "during closing and releasing"
+      }
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0005", "OBL-0006", "OBL-0007"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "closed",
+      "addresses_obligations": ["OBL-0001", "OBL-0009", "OBL-0011"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0001", "BOD-0004"],
+      "interaction_kind": "INTERFERENCE_FIT",
+      "nominal_status": "assembled",
+      "addresses_obligations": ["OBL-0004", "OBL-0009"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0002", "BOD-0004"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0004", "OBL-0009"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0001", "BOD-0004"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0004", "OBL-0009"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "closed",
+      "kind": "nominal",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "open",
+      "kind": "nominal",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004"]
+    },
+    {
+      "id": "CFG-0003",
+      "name": "releasing",
+      "kind": "transient",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0002",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001", "BOD-0002"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the enclosing volume interior"]
+    },
+    {
+      "id": "FRG-0003",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the release surface of the catch"]
+    },
+    {
+      "id": "FRG-0004",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-0001",
+      "decision": "the magnitude of the deflection required for the catch to clear the lid",
+      "why_open": "the dimensions and material properties are not yet defined",
+      "alternatives": ["free text: choose a value that permits easy release and withstands repeated cycles"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0004", "FRE-0005"],
+      "blocks": ["OBL-0005", "OBL-0006", "OBL-0007", "OBL-0011"]
+    },
+    {
+      "id": "S3U-0002",
+      "decision": "the force required to deflect the catch",
+      "why_open": "the stiffness and geometry of the compliant element are not defined",
+      "alternatives": ["free text: choose a range that is easy for a user and resistant to disturbance"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0004", "FRE-0005"],
+      "blocks": ["OBL-0005", "OBL-0006", "OBL-0007", "OBL-0011"]
+    }
+  ]
+}

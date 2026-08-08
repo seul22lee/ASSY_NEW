@@ -255,3 +255,39 @@ at all.
 **R-3 is the highest-value structural change**, but it should be measured only
 after R-1/R-2/R-4, because the current evidence about grid-authoring cost is
 confounded by a defect that made all of that reasoning appear absent.
+
+---
+
+# Appendix — outcome of the R-1..R-4 revision
+
+The diagnosis above was acted on as one integrated revision. Measured result:
+
+| measure | before | after |
+|---|---|---|
+| full chain SUCCESS (s03→s03b→s04a→s04b) | **0 / 6** | **4 / 6** |
+| total findings | 313 | 240 |
+| DOF grid cells authored by the LLM | 48–126 per case | **0** |
+| blocking relations authored by the LLM | 0 recognised of 262 emitted | **31 recognised of 31** |
+| DOF entries derived by the pipeline | 0 | **420** |
+| bookkeeping ratio (derived ÷ authored) | — | **13.5×** |
+| s03b prompt | 3294 chars | **2684 chars** |
+| field renames needed | n/a | **0** |
+
+**H5 confirmed in the strongest way available.** Once the contract's key names were
+shown as keys, the alias map bound **nothing** — the model used the canonical
+names immediately. The 262 "missing" relations were never a reasoning problem and
+never a compliance problem; they were an unbound schema. R-2's alias map remains
+as a safety net that records any rename rather than silently normalising it, and
+in this run it had no work to do.
+
+**R-3 confirmed.** 31 engineering facts now generate 420 exhaustive entries, each
+citing the relation or joint that produced it. Nothing was compressed: the total
+function is still total, still checked by `dof_totality_check` against a domain
+computed independently, and every entry carries its reason.
+
+**New finding, not fixed** (one revision per cycle): `UnresolvedDecision.blocks`
+references `BLK-` relation ids, and a blocking relation has no entity to be — it
+lives inside `MobilityExpectation.dispositions`. This is the first evidence in
+Window 2 that the current representation **cannot express a fact the reasoning
+needs**: a relation the design must be able to point at. That is the bar rule 8
+sets for reopening the schema, and it should be the next cycle's single change.

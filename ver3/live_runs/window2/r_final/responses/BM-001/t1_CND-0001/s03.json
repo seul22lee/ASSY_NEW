@@ -1,0 +1,171 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "base structure: contains the enclosed volume and supports the rotating closing element",
+      "instance_identity": "single piece",
+      "addresses_obligations": ["OBL-0001", "OBL-0004", "OBL-0006", "OBL-0009", "OBL-0010"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "closing element: rotates about a fixed axis to open and close the volume",
+      "instance_identity": "single piece",
+      "addresses_obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0006", "OBL-0009"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "compliant catch: flexes to engage and release the closing element",
+      "instance_identity": "single piece",
+      "addresses_obligations": ["OBL-0005", "OBL-0007"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["base_volume", "axis_support"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["closing_panel", "release_surface"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["catch_base"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0003",
+      "members": ["catch_tip"],
+      "is_default": false
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0004",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "BENDING",
+        "direction": "+Y",
+        "required_travel": "sufficient to deflect for latch engagement and release",
+        "allowable_travel_status": "UNSUPPORTED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "catch_flexure",
+        "root_interface": "IFC-0003",
+        "activation_window": "during latch engagement and release"
+      }
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "OPEN",
+      "addresses_obligations": ["OBL-0004", "OBL-0006"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "ASSEMBLED",
+      "addresses_obligations": ["OBL-0005", "OBL-0009", "OBL-0010"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "ENGAGED",
+      "addresses_obligations": ["OBL-0005", "OBL-0006"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "OPEN",
+      "addresses_obligations": ["OBL-0003"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "Closed",
+      "kind": "STABLE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "Open",
+      "kind": "TRANSIENT",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0002"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["interior of enclosed volume"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0002"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0004",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the retaining function's release"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-0001",
+      "decision": "axis placement of the revolute joint relative to the base and closing element",
+      "why_open": "depends on feature sizes (wall thickness, geometry of hinge mounts) that are not yet defined",
+      "alternatives": ["position along the top edge of the base", "position inset from the edge"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0004"],
+      "blocks": ["geometry generation"]
+    },
+    {
+      "id": "S3U-0002",
+      "decision": "method of retaining the compliant catch to the base",
+      "why_open": "could be a snap-fit, adhesive, or fastener; not determined by obligations",
+      "alternatives": ["snap-fit", "adhesive", "mechanical fastener"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0003"],
+      "blocks": ["assembly sequence"]
+    }
+  ]
+}

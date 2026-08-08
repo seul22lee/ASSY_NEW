@@ -1,0 +1,1831 @@
+[
+ {
+  "blocking_relations_authored": 7,
+  "candidate": "CND-0001",
+  "case": "BM-001",
+  "counts": {
+   "AcceptanceContract": 3,
+   "Actor": 1,
+   "Ambiguity": 6,
+   "AssemblyStep": 3,
+   "Assumption": 2,
+   "Body": 3,
+   "Candidate": 5,
+   "Configuration": 2,
+   "Freedom": 6,
+   "FunctionalRegion": 4,
+   "Interface": 4,
+   "Joint": 2,
+   "LoadCase": 5,
+   "LoadPath": 5,
+   "MobilityExpectation": 2,
+   "Obligation": 13,
+   "Requirement": 10,
+   "RigidGroup": 4,
+   "Scenario": 4,
+   "SourceClause": 5,
+   "UnresolvedDecision": 8
+  },
+  "dof_entries_derived": 48,
+  "failures": [
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0001 -> NONE",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0002 -> NONE",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0003 -> NONE",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0004 -> NONE",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0005 -> NONE",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0008 (Every component remains attached through the whole open-close cycle.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0011 (The load on the retaining function reaches a reaction site.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0012 (The product is manufacturable at low cost by some process.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0013 (The product occupies a space on a desk that a user finds practical.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "JOINT_GRAPH_DISCONNECTED: RGP-0003, RGP-0004 not reachable",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "simulation_completeness"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0002 overlap as boxes in CFG-0001; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0002 overlap as boxes in CFG-0002; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0001 (ACCESS) overlaps BOD-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "region_occupancy"
+   },
+   {
+    "detail": "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0003 (KEEP_OUT) overlaps BOD-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "region_occupancy"
+   },
+   {
+    "detail": "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0004 (APERTURE) overlaps BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "region_occupancy"
+   },
+   {
+    "detail": "SWEEP_ENTERS_KEEP_OUT: BOD-0002 sweeps into FRG-0003 during TRN-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_ENTERS_KEEP_OUT: BOD-0003 sweeps into FRG-0003 during TRN-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_ENTERS_KEEP_OUT: BOD-0002 sweeps into FRG-0003 during TRN-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_ENTERS_KEEP_OUT: BOD-0003 sweeps into FRG-0003 during TRN-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [1, 0, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0002 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0002 entering along [0, 1, 0] meets BOD-0003, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   }
+  ],
+  "field_renames_bound": 0,
+  "rename_examples": [],
+  "s03_declared_incomplete": [],
+  "s03_seconds": 9.46,
+  "s03_status": "SUCCESS",
+  "s03b_status": "SUCCESS",
+  "s04_counts": {
+   "AcceptanceContract": 3,
+   "Actor": 1,
+   "Ambiguity": 6,
+   "AssemblyStep": 3,
+   "Assumption": 2,
+   "Body": 3,
+   "Candidate": 5,
+   "Configuration": 2,
+   "Envelope": 3,
+   "Freedom": 6,
+   "FunctionalRegion": 4,
+   "Interface": 4,
+   "Joint": 2,
+   "LoadCase": 5,
+   "LoadPath": 5,
+   "MobilityExpectation": 2,
+   "Obligation": 13,
+   "Requirement": 10,
+   "RigidGroup": 4,
+   "Scenario": 4,
+   "SourceClause": 5,
+   "State": 2,
+   "Transition": 2,
+   "UnresolvedDecision": 8
+  },
+  "s04a_status": "SUCCESS",
+  "s04b_status": "SUCCESS",
+  "trial": 1
+ },
+ {
+  "candidate": "CND-0001",
+  "case": "BM-002",
+  "counts": {
+   "AcceptanceContract": 4,
+   "Actor": 1,
+   "Ambiguity": 7,
+   "Assumption": 1,
+   "Body": 4,
+   "Candidate": 6,
+   "Configuration": 2,
+   "Freedom": 7,
+   "FunctionalRegion": 3,
+   "Interface": 4,
+   "Joint": 4,
+   "LoadCase": 4,
+   "Obligation": 14,
+   "Requirement": 11,
+   "RigidGroup": 4,
+   "Scenario": 3,
+   "SourceClause": 6,
+   "UnresolvedDecision": 5
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: S3U-1001.blocks -> BLK-0001",
+     "DANGLING_REF: S3U-1001.blocks -> BLK-0002",
+     "DANGLING_REF: S3U-1001.blocks -> BLK-0003",
+     "DANGLING_REF: S3U-1001.blocks -> BLK-0004"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s03",
+    "what": "s03b contract validation"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: TX",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: TY",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: TZ",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: RX",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: RY",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: RZ",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: TX",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: TY",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: TZ",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: RX",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: RY",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: RZ",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: and 36 more",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "LOADCASE_WITHOUT_PATH: LC-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADCASE_WITHOUT_PATH: LC-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADCASE_WITHOUT_PATH: LC-0003",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADCASE_WITHOUT_PATH: LC-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0011 (The converting relation continues to produce output motion throughout )",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0014 (The product is manufacturable by some process at a practical cost.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0002 overlap as boxes in CFG-0001; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0003 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0002 overlap as boxes in CFG-0002; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0003 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0001 (ACCESS) overlaps BOD-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "region_occupancy"
+   },
+   {
+    "detail": "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0002 (ACCESS) overlaps BOD-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "region_occupancy"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0003 sweeps into BOD-0001 during TRN-0001; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   }
+  ],
+  "s03_declared_incomplete": [],
+  "s03_seconds": 8.75,
+  "s03_status": "SUCCESS",
+  "s03b_status": "SCHEMA_FAILURE",
+  "s04_counts": {
+   "AcceptanceContract": 4,
+   "Actor": 1,
+   "Ambiguity": 7,
+   "Assumption": 1,
+   "Body": 4,
+   "Candidate": 6,
+   "Configuration": 2,
+   "Envelope": 4,
+   "Freedom": 7,
+   "FunctionalRegion": 3,
+   "Interface": 4,
+   "Joint": 4,
+   "LoadCase": 4,
+   "Obligation": 14,
+   "Requirement": 11,
+   "RigidGroup": 4,
+   "Scenario": 3,
+   "SourceClause": 6,
+   "State": 2,
+   "Transition": 1,
+   "UnresolvedDecision": 5
+  },
+  "s04a_status": "SUCCESS",
+  "s04b_status": "SUCCESS",
+  "trial": 1
+ },
+ {
+  "blocking_relations_authored": 9,
+  "candidate": "CND-0001",
+  "case": "BM-003",
+  "counts": {
+   "AcceptanceContract": 4,
+   "Actor": 1,
+   "Ambiguity": 10,
+   "AssemblyStep": 7,
+   "Assumption": 2,
+   "Body": 7,
+   "Candidate": 6,
+   "Configuration": 3,
+   "Freedom": 9,
+   "FunctionalRegion": 3,
+   "Interface": 9,
+   "Joint": 6,
+   "LoadCase": 5,
+   "LoadPath": 5,
+   "MobilityExpectation": 3,
+   "Obligation": 17,
+   "Requirement": 19,
+   "RigidGroup": 7,
+   "Scenario": 6,
+   "SourceClause": 15,
+   "UnresolvedDecision": 6
+  },
+  "dof_entries_derived": 126,
+  "failures": [
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0002 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0003 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0004 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0005 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0005 -> BOD-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0006 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0006 -> BOD-0003",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0007 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0007 -> BOD-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0001 -> FRG-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0003 -> FRG-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0004 -> FRG-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0005 -> FRG-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0003 (A continuous path connects the folded and deployed positions in both d)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0004 (In the deployed configuration the three ground contacts bound a non-ze)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0008 (Every normal component remains attached through the whole cycle, and n)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0009 (The folded configuration is smaller than the deployed one in at least )",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0011 (The object's load reaches a reaction site through a connected path.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0012 (No participant outside the product appears in any operational step.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0013 (An ordered installation sequence exists in which every part has a clea)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0014 (No step of the cycle is irreversible.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0002 (ACCESS) overlaps BOD-0005",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "region_occupancy"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0002 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0004 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0005 entering along [0, 0, 1] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0005 entering along [0, 0, 1] meets BOD-0002, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0006 entering along [0, 0, 1] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0006 entering along [0, 0, 1] meets BOD-0003, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0007 entering along [0, 0, 1] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0007 entering along [0, 0, 1] meets BOD-0004, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   }
+  ],
+  "field_renames_bound": 0,
+  "rename_examples": [],
+  "s03_declared_incomplete": [],
+  "s03_seconds": 13.88,
+  "s03_status": "SUCCESS",
+  "s03b_status": "SUCCESS",
+  "s04_counts": {
+   "AcceptanceContract": 4,
+   "Actor": 1,
+   "Ambiguity": 10,
+   "AssemblyStep": 7,
+   "Assumption": 2,
+   "Body": 7,
+   "Candidate": 6,
+   "Configuration": 3,
+   "Envelope": 7,
+   "Freedom": 9,
+   "FunctionalRegion": 3,
+   "Interface": 9,
+   "Joint": 6,
+   "LoadCase": 5,
+   "LoadPath": 5,
+   "MobilityExpectation": 3,
+   "Obligation": 17,
+   "Requirement": 19,
+   "RigidGroup": 7,
+   "Scenario": 6,
+   "SourceClause": 15,
+   "State": 3,
+   "Transition": 2,
+   "UnresolvedDecision": 6
+  },
+  "s04a_status": "SUCCESS",
+  "s04b_status": "SUCCESS",
+  "trial": 1
+ },
+ {
+  "blocking_relations_authored": 10,
+  "candidate": "CND-0001",
+  "case": "PRB-01",
+  "counts": {
+   "AcceptanceContract": 2,
+   "Actor": 1,
+   "Ambiguity": 6,
+   "AssemblyStep": 7,
+   "Assumption": 2,
+   "Body": 7,
+   "Candidate": 5,
+   "Configuration": 3,
+   "Freedom": 7,
+   "FunctionalRegion": 3,
+   "Interface": 7,
+   "Joint": 5,
+   "LoadCase": 5,
+   "LoadPath": 5,
+   "MobilityExpectation": 3,
+   "Obligation": 8,
+   "Requirement": 7,
+   "RigidGroup": 7,
+   "Scenario": 4,
+   "SourceClause": 5,
+   "UnresolvedDecision": 9
+  },
+  "dof_entries_derived": 126,
+  "failures": [
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0001/TX -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0001/TY -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0001/TZ -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0001/RX -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0001/RY -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0001/RZ -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0002/TX -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0002/TY -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0002/TZ -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0002/RX -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0002/RY -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0002/RZ -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0003/TX -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0003/TY -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0003/TZ -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0003/RX -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0003/RY -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "BLOCKER_NOT_A_BODY: RGP-0001/CFG-0003/RZ -> 'NONE'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "blocking_relation"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0002 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0003 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0004 -> BOD-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0005 -> BOD-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0006 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0006 -> BOD-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0007 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0007 -> BOD-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "JOINED_BODIES_WITHOUT_INTERFACE: JNT-0003 connects BOD-0004 and BOD-0005",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "interface_classification"
+   },
+   {
+    "detail": "JOINED_BODIES_WITHOUT_INTERFACE: JNT-0004 connects BOD-0001 and BOD-0007",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "interface_classification"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0001 (A volume holds the items before release and admits more from above.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0005 (Release continues to occur when few items remain.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "JOINT_GRAPH_DISCONNECTED: RGP-0004, RGP-0005, RGP-0006 not reachable",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "simulation_completeness"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0002 overlap as boxes in CFG-0001; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0003 overlap as boxes in CFG-0001; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0004 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0005 overlap as boxes in CFG-0001; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0007 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0004 and BOD-0005 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0004 and BOD-0007 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0002 overlap as boxes in CFG-0002; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0003 overlap as boxes in CFG-0002; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0004 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0005 overlap as boxes in CFG-0002; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0007 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0004 and BOD-0005 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0004 and BOD-0007 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0002 overlap as boxes in CFG-0003; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0003 overlap as boxes in CFG-0003; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0004 overlap as boxes in CFG-0003 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "CLEARANCE_NOT_VERIFIED: BOD-0001 and BOD-0005 overlap as boxes in CFG-0003; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0007 overlap as boxes in CFG-0003 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0004 and BOD-0005 overlap as boxes in CFG-0003 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0004 and BOD-0007 overlap as boxes in CFG-0003 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0001 (ACCESS) overlaps BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "region_occupancy"
+   },
+   {
+    "detail": "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0003 (APERTURE) overlaps BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "region_occupancy"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0002 sweeps into BOD-0005 during TRN-0001; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0002 sweeps into BOD-0006 during TRN-0001; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0005 sweeps into BOD-0004 during TRN-0001; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0002 sweeps into BOD-0005 during TRN-0002; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0002 sweeps into BOD-0006 during TRN-0002; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0005 sweeps into BOD-0004 during TRN-0002; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0005 sweeps into BOD-0004 during TRN-0003; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0007 entering along [0, 0, -1] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0004 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0004 entering along [0, 1, 0] meets BOD-0007, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0006 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0006 entering along [0, 1, 0] meets BOD-0004, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0005 entering along [1, 0, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0005 entering along [1, 0, 0] meets BOD-0007, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0005 entering along [1, 0, 0] meets BOD-0004, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0005 entering along [1, 0, 0] meets BOD-0006, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0002 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0002 entering along [0, 1, 0] meets BOD-0004, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0007, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0004, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0006, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0005, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0002, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   }
+  ],
+  "field_renames_bound": 0,
+  "rename_examples": [],
+  "s03_declared_incomplete": [],
+  "s03_seconds": 12.57,
+  "s03_status": "SUCCESS",
+  "s03b_status": "SUCCESS",
+  "s04_counts": {
+   "AcceptanceContract": 2,
+   "Actor": 1,
+   "Ambiguity": 6,
+   "AssemblyStep": 7,
+   "Assumption": 2,
+   "Body": 7,
+   "Candidate": 5,
+   "Configuration": 3,
+   "Envelope": 7,
+   "Freedom": 7,
+   "FunctionalRegion": 3,
+   "Interface": 7,
+   "Joint": 5,
+   "LoadCase": 5,
+   "LoadPath": 5,
+   "MobilityExpectation": 3,
+   "Obligation": 8,
+   "Requirement": 7,
+   "RigidGroup": 7,
+   "Scenario": 4,
+   "SourceClause": 5,
+   "State": 3,
+   "Transition": 3,
+   "UnresolvedDecision": 9
+  },
+  "s04a_status": "SUCCESS",
+  "s04b_status": "SUCCESS",
+  "trial": 1
+ },
+ {
+  "blocking_relations_authored": 5,
+  "candidate": "CND-0001",
+  "case": "PRB-02",
+  "counts": {
+   "AcceptanceContract": 2,
+   "Actor": 1,
+   "Ambiguity": 6,
+   "AssemblyStep": 5,
+   "Assumption": 1,
+   "Body": 5,
+   "Candidate": 5,
+   "Configuration": 4,
+   "Freedom": 6,
+   "FunctionalRegion": 3,
+   "Interface": 5,
+   "Joint": 4,
+   "LoadCase": 3,
+   "LoadPath": 3,
+   "MobilityExpectation": 4,
+   "Obligation": 8,
+   "Requirement": 6,
+   "RigidGroup": 5,
+   "Scenario": 3,
+   "SourceClause": 4,
+   "UnresolvedDecision": 8
+  },
+  "dof_entries_derived": 120,
+  "failures": [
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0002 -> BOD-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0003 -> BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0004 -> BOD-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "ASSEMBLY_DEP_UNKNOWN: ASY-0005 -> BOD-0003",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "assembly_acyclic"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0001 -> arm",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0001 -> desk edge",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0002 -> arm",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0002 -> desk edge",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0003 -> arm",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADPATH_HOP_UNKNOWN: LDP-0003 -> desk edge",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "JOINED_BODIES_WITHOUT_INTERFACE: JNT-0002 connects BOD-0004 and BOD-0003",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "interface_classification"
+   },
+   {
+    "detail": "JOINED_BODIES_WITHOUT_INTERFACE: JNT-0003 connects BOD-0001 and BOD-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "interface_classification"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0001 (A connection exists between the product and an external edge, and betw)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0005 (The arm's load reaches the desk edge through a connected path.)",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": [
+     "1 body pair(s) the topology connects are placed apart: BOD-0002 and desk edge placed 0.9 apart"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s04a",
+    "what": "declared incomplete"
+   },
+   {
+    "detail": "ENVELOPE_FOR_UNKNOWN_BODY: desk edge",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "envelope_coverage"
+   },
+   {
+    "detail": "JOINED_BODIES_DO_NOT_MEET: the topology connects BOD-0002 and desk edge, but they are placed 0.9 apart",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "joint_geometry"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0003 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0004 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0002 and BOD-0005 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0003 and BOD-0004 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0003 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0004 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0002 and BOD-0005 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0003 and BOD-0004 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0003 overlap as boxes in CFG-0003 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0004 overlap as boxes in CFG-0003 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0002 and BOD-0005 overlap as boxes in CFG-0003 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0003 and BOD-0004 overlap as boxes in CFG-0003 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0003 overlap as boxes in CFG-0004 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0001 and BOD-0004 overlap as boxes in CFG-0004 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0002 and BOD-0005 overlap as boxes in CFG-0004 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0003 and BOD-0004 overlap as boxes in CFG-0004 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0001 (ACCESS) overlaps BOD-0005",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "region_occupancy"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0002 sweeps into BOD-0005 during TRN-0001; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_ENTERS_KEEP_OUT: BOD-0003 sweeps into FRG-0003 during TRN-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0003 sweeps into BOD-0001 during TRN-0001; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0003 sweeps into BOD-0004 during TRN-0001; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0003 sweeps into desk edge during TRN-0001; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0005 sweeps into BOD-0002 during TRN-0001; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0002 sweeps into BOD-0005 during TRN-0003; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_ENTERS_KEEP_OUT: BOD-0003 sweeps into FRG-0003 during TRN-0003",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0003 sweeps into BOD-0001 during TRN-0003; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0003 sweeps into BOD-0004 during TRN-0003; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0003 sweeps into desk edge during TRN-0003; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "SWEEP_MEETS_UNDECLARED_BODY: BOD-0005 sweeps into BOD-0002 during TRN-0003; s03 declared no interface between them (NOT_VERIFIED: box overlap is not proof of collision)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "swept_clearance"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0001 entering along [0, 1, 0] meets BOD-0004, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0002 entering along [0, 1, 0] meets BOD-0004, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0002 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0004, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0002, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0005 entering along [0, 1, 0] meets BOD-0004, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0005 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0005 entering along [0, 1, 0] meets BOD-0002, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   },
+   {
+    "detail": "ASSEMBLY_PATH_OBSTRUCTED: BOD-0005 entering along [0, 1, 0] meets BOD-0003, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "assembly_path"
+   }
+  ],
+  "field_renames_bound": 0,
+  "rename_examples": [],
+  "s03_declared_incomplete": [],
+  "s03_seconds": 10.46,
+  "s03_status": "SUCCESS",
+  "s03b_status": "SUCCESS",
+  "s04_counts": {
+   "AcceptanceContract": 2,
+   "Actor": 1,
+   "Ambiguity": 6,
+   "AssemblyStep": 5,
+   "Assumption": 1,
+   "Body": 5,
+   "Candidate": 5,
+   "Configuration": 4,
+   "Envelope": 6,
+   "Freedom": 6,
+   "FunctionalRegion": 3,
+   "Interface": 5,
+   "Joint": 4,
+   "LoadCase": 3,
+   "LoadPath": 3,
+   "MobilityExpectation": 4,
+   "Obligation": 8,
+   "Requirement": 6,
+   "RigidGroup": 5,
+   "Scenario": 3,
+   "SourceClause": 4,
+   "State": 4,
+   "Transition": 3,
+   "UnresolvedDecision": 8
+  },
+  "s04a_status": "CONTRACT_INCOMPLETE",
+  "s04b_status": "SUCCESS",
+  "trial": 1
+ },
+ {
+  "candidate": "CND-0001",
+  "case": "PRB-03",
+  "counts": {
+   "AcceptanceContract": 2,
+   "Actor": 2,
+   "Ambiguity": 5,
+   "Assumption": 1,
+   "Body": 4,
+   "Candidate": 5,
+   "Configuration": 2,
+   "Freedom": 7,
+   "FunctionalRegion": 1,
+   "Interface": 4,
+   "Joint": 3,
+   "LoadCase": 3,
+   "Obligation": 8,
+   "Requirement": 5,
+   "RigidGroup": 4,
+   "Scenario": 3,
+   "SourceClause": 4,
+   "UnresolvedDecision": 5
+  },
+  "failures": [
+   {
+    "detail": [
+     "interface IFC-0004 is unclassified"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s03",
+    "what": "declared incomplete"
+   },
+   {
+    "detail": [
+     "DANGLING_REF: S3U-1001.blocks -> BLK-0004"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s03",
+    "what": "s03b contract validation"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: TX",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: TY",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: TZ",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: RX",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: RY",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0001: RZ",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: TX",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: TY",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: TZ",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: RX",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: RY",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: RGP-0001 in CFG-0002: RZ",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "DOF_NOT_DISPOSITIONED: and 36 more",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "dof_totality"
+   },
+   {
+    "detail": "LOADCASE_WITHOUT_PATH: LC-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADCASE_WITHOUT_PATH: LC-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "LOADCASE_WITHOUT_PATH: LC-0003",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "load_path"
+   },
+   {
+    "detail": "INTERFACE_UNCLASSIFIED: IFC-0004 -> 'FIXED'",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "interface_classification"
+   },
+   {
+    "detail": "JOINED_BODIES_WITHOUT_INTERFACE: JNT-0003 connects BOD-0002 and BOD-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "interface_classification"
+   },
+   {
+    "detail": "OBLIGATION_UNCLAIMED_AT_S03: OBL-0002 (The displacement of that surface is available at the product boundary )",
+    "kind": "CHECK_FINDING",
+    "stage": "s03",
+    "what": "obligation_ownership"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0002 and BOD-0004 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0003 and BOD-0004 overlap as boxes in CFG-0001 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0002 and BOD-0004 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "UNDECLARED_PAIR_OVERLAPS: BOD-0003 and BOD-0004 overlap as boxes in CFG-0002 and s03 declared no interface between them",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "configuration_interference"
+   },
+   {
+    "detail": "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0001 (ACCESS) overlaps BOD-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s04",
+    "what": "region_occupancy"
+   }
+  ],
+  "s03_declared_incomplete": [
+   "interface IFC-0004 is unclassified"
+  ],
+  "s03_seconds": 7.14,
+  "s03_status": "CONTRACT_INCOMPLETE",
+  "s03b_status": "SCHEMA_FAILURE",
+  "s04_counts": {
+   "AcceptanceContract": 2,
+   "Actor": 2,
+   "Ambiguity": 5,
+   "Assumption": 1,
+   "Body": 4,
+   "Candidate": 5,
+   "Configuration": 2,
+   "Envelope": 4,
+   "Freedom": 7,
+   "FunctionalRegion": 1,
+   "Interface": 4,
+   "Joint": 3,
+   "LoadCase": 3,
+   "Obligation": 8,
+   "Requirement": 5,
+   "RigidGroup": 4,
+   "Scenario": 3,
+   "SourceClause": 4,
+   "State": 2,
+   "Transition": 1,
+   "UnresolvedDecision": 5
+  },
+  "s04a_status": "SUCCESS",
+  "s04b_status": "SUCCESS",
+  "trial": 1
+ }
+]
