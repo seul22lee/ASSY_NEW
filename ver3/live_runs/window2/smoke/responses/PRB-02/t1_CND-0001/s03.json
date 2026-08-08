@@ -1,0 +1,822 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "Fixed jaw, reacts load to the desk edge",
+      "instance_identity": "single body"
+    },
+    {
+      "id": "BOD-0002",
+      "role": "Driven jaw, moves linearly to clamp and provides clamping force",
+      "instance_identity": "single body"
+    },
+    {
+      "id": "BOD-0003",
+      "role": "Screw, transmits torque to linear motion and provides axial force",
+      "instance_identity": "single body"
+    },
+    {
+      "id": "BOD-0004",
+      "role": "Handle, manually actuated to rotate the screw",
+      "instance_identity": "single body"
+    },
+    {
+      "id": "BOD-0005",
+      "role": "Guide rail, constrains the driven jaw to translation",
+      "instance_identity": "single body"
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["BOD-0001"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["BOD-0002"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["BOD-0003"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": ["BOD-0004"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0005",
+      "members": ["BOD-0005"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0005",
+      "dof": [],
+      "axis_direction": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "HELICAL",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0002",
+      "dof": ["TZ", "RZ"],
+      "axis_direction": "+Z"
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0004",
+      "child_group": "RGP-0003",
+      "dof": ["RZ"],
+      "axis_direction": "+Z"
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0005",
+      "dof": ["TZ"],
+      "axis_direction": "+Z"
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "CLOSED"
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0003", "BOD-0002"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "CLOSED"
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0001", "BOD-0005"],
+      "interaction_kind": "FIXED",
+      "nominal_status": "CLOSED"
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "OPEN"
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0003", "BOD-0005"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "OPEN"
+    },
+    {
+      "id": "IFC-0006",
+      "bodies": ["BOD-0004", "BOD-0003"],
+      "interaction_kind": "FIXED",
+      "nominal_status": "CLOSED"
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "Open",
+      "kind": "RELEASED",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "Clamped",
+      "kind": "ACTIVE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    }
+  ],
+  "dof_dispositions": [
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "-X",
+      "blocker_body": "BOD-0002",
+      "defeat_specification": "Push the jaw assembly away from the fixed jaw until contact is lost",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "+X",
+      "blocker_body": "BOD-0002",
+      "defeat_specification": "Forcibly separate the jaws",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Lift the assembly off the guide rail",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Lift the assembly off the guide rail",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Twist the assembly about the X axis",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Twist the assembly about the X axis",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Twist the assembly about the Y axis",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Twist the assembly about the Y axis",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Z",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Twist the assembly about the Z axis",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Z",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Twist the assembly about the Z axis",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Translate the jaw laterally",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Translate the jaw laterally",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Translate the jaw vertically",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Translate the jaw vertically",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "-Z",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Withdraw the jaw in the positive direction",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Rotate the jaw about X",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Rotate the jaw about X",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Rotate the jaw about Y",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Rotate the jaw about Y",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Z",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Rotate the jaw about Z",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Z",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "Rotate the jaw about Z",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Move the screw laterally",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Move the screw laterally",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Move the screw vertically",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Move the screw vertically",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "-Z",
+      "blocker_body": "RGP-0002",
+      "defeat_specification": "Force the screw in the positive direction",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Tilt the screw about X",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Tilt the screw about X",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Tilt the screw about Y",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Tilt the screw about Y",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "+Z",
+      "blocker_body": "BOD-0002",
+      "defeat_specification": "Rotate the screw in the positive direction",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0003",
+      "defeat_specification": "Move the handle laterally",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0003",
+      "defeat_specification": "Move the handle laterally",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0003",
+      "defeat_specification": "Move the handle vertically",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0003",
+      "defeat_specification": "Move the handle vertically",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Z",
+      "blocker_body": "BOD-0003",
+      "defeat_specification": "Move the handle axially",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Z",
+      "blocker_body": "BOD-0003",
+      "defeat_specification": "Move the handle axially",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0003",
+      "defeat_specification": "Tilt the handle about X",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0003",
+      "defeat_specification": "Tilt the handle about X",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0003",
+      "defeat_specification": "Tilt the handle about Y",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0003",
+      "defeat_specification": "Tilt the handle about Y",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Move the rail laterally",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Move the rail laterally",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Move the rail vertically",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "±Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "Move the rail vertically",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED"
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001 (arm attachment)", "BOD-0001", "IFC-0001", "BOD-0002", "JNT-0002", "BOD-0003", "JNT-0003", "BOD-0004 (handle)", "BOD-0005 (guide rail)", "IFC-0003", "BOD-0001", "desk edge"]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001 (arm attachment)", "BOD-0001", "IFC-0001", "BOD-0002", "JNT-0002", "BOD-0003", "JNT-0003", "BOD-0004 (handle)", "BOD-0005 (guide rail)", "IFC-0003", "BOD-0001", "desk edge"]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": ["desk edge", "IFC-0001", "BOD-0002", "JNT-0002", "BOD-0003", "JNT-0003", "BOD-0004 (handle)", "BOD-0005 (guide rail)", "IFC-0003", "BOD-0001", "arm attachment"]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASM-0001",
+      "order_index": 1,
+      "body": "BOD-0005",
+      "access_side": "+Z",
+      "activates": [],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASM-0002",
+      "order_index": 2,
+      "body": "BOD-0001",
+      "access_side": "+Z",
+      "activates": ["JNT-0001", "JNT-0004"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASM-0001"]
+    },
+    {
+      "id": "ASM-0003",
+      "order_index": 3,
+      "body": "BOD-0003",
+      "access_side": "+Z",
+      "activates": ["JNT-0002"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASM-0002"]
+    },
+    {
+      "id": "ASM-0004",
+      "order_index": 4,
+      "body": "BOD-0002",
+      "access_side": "+Z",
+      "activates": ["JNT-0002", "JNT-0004"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASM-0003"]
+    },
+    {
+      "id": "ASM-0005",
+      "order_index": 5,
+      "body": "BOD-0004",
+      "access_side": "+Z",
+      "activates": ["JNT-0003"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASM-0003"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0004"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001", "BOD-0002"]
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001", "BOD-0002"]
+    },
+    {
+      "id": "FRG-0004",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001", "BOD-0002"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "How the screw is retained axially relative to the fixed jaw",
+      "why_open": "The screw must translate along Z to drive the jaw, but its axial position relative to the fixed structure must be controlled. The mechanism does not specify a bearing or thrust surface.",
+      "alternatives": ["A thrust bearing in the fixed jaw", "A captive screw with a shoulder", "A separate bearing housing"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0005"],
+      "blocks": ["OBL-0002"]
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "How the handle is attached to the screw",
+      "why_open": "The handle must transfer torque to the screw but the attachment means is unspecified.",
+      "alternatives": ["Press fit", "Splines", "Set screw", "Integral molding"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0004"],
+      "blocks": ["OBL-0006"]
+    },
+    {
+      "id": "UNR-1003",
+      "decision": "How the arm attaches to the product",
+      "why_open": "The interface to the monitor arm is unstated.",
+      "alternatives": ["A standard VESA mount", "A custom bracket", "Through holes"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0003"],
+      "blocks": ["OBL-0005"]
+    }
+  ]
+}

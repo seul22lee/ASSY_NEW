@@ -1,0 +1,207 @@
+{
+  "mobility": [
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "blocked_by": "BOD-0001",
+          "direction": "global X",
+          "defeated_by": "applying a force to BOD-0001 that exceeds friction and the rigidity of the base",
+          "why_required": "DECLARED_SCENARIO"
+        },
+        "TY": {
+          "blocked_by": "BOD-0001",
+          "direction": "global Y",
+          "defeated_by": "applying a force to BOD-0001 that exceeds friction and the rigidity of the base",
+          "why_required": "DECLARED_SCENARIO"
+        },
+        "TZ": {
+          "blocked_by": "BOD-0001",
+          "direction": "global Z",
+          "defeated_by": "applying a force to BOD-0001 that exceeds friction and the rigidity of the base",
+          "why_required": "DECLARED_SCENARIO"
+        },
+        "RX": {
+          "blocked_by": "BOD-0001",
+          "direction": "global X",
+          "defeated_by": "applying a moment to BOD-0001 that exceeds friction and the rigidity of the base",
+          "why_required": "DECLARED_SCENARIO"
+        },
+        "RY": {
+          "blocked_by": "BOD-0001",
+          "direction": "global Y",
+          "defeated_by": "applying a moment to BOD-0001 that exceeds friction and the rigidity of the base",
+          "why_required": "DECLARED_SCENARIO"
+        },
+        "RZ": {
+          "blocked_by": "BOD-0001",
+          "direction": "global Z",
+          "defeated_by": "applying a moment to BOD-0001 that exceeds friction and the rigidity of the base",
+          "why_required": "DECLARED_SCENARIO"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "M",
+        "TY": "M",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "I"
+      },
+      "detail": {}
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "M",
+        "TY": "M",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "I"
+      },
+      "detail": {}
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "M",
+        "TY": "M",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "M"
+      },
+      "detail": {}
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "M",
+        "TY": "M",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "M"
+      },
+      "detail": {}
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "I",
+        "TY": "M",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "M"
+      },
+      "detail": {}
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "I",
+        "TY": "M",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "M"
+      },
+      "detail": {}
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "JNT-0002", "BOD-0001", "IFC-0001", "BOD-0003", "BOD-0001", "world"]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "IFC-0004", "BOD-0003", "IFC-0001", "BOD-0001", "world"]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "IFC-0004", "BOD-0003", "IFC-0001", "BOD-0001", "world"]
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "JNT-0002", "BOD-0001", "world"]
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "JNT-0002", "BOD-0001", "world"]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0001",
+      "access_side": "N/A",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0002",
+      "access_side": "TOP",
+      "activates": ["JNT-0002"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0003",
+      "access_side": "TOP",
+      "activates": ["JNT-0001"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-2001",
+      "decision": "The compliant element (JNT-0003) is not accounted for in the load paths and mobility details.",
+      "why_open": "The topology defines a compliant joint (JNT-0003) between RGP-0003 and RGP-0004, but the load paths and mobility entries do not include its effects, likely because the body BOD-0003 is split into two rigid groups (RGP-0003 and RGP-0004) with a compliant joint between them. The load paths should include this internal compliance when tracing loads from BOD-0002 to the base.",
+      "alternatives": ["Add load paths that include JNT-0003 explicitly.", "Add mobility entries for RGP-0004 relative to RGP-0003."],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["JNT-0003"],
+      "blocks": ["Complete load path tracing for LC-0002, LC-0003, and LC-0005."]
+    }
+  ]
+}

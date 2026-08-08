@@ -1,0 +1,245 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The dispenser must be mounted on a wall.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["wall-mounted is stated in the requirement"]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The dispenser must be able to hold approximately twenty items.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s05",
+      "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["quantity class BAND, ambiguity about 'about twenty'"]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The dispenser must release exactly one item per lever press.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["kinematic requirement, exact release"]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The dispenser must allow refilling from the top without removing from wall.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["top refill, no removal"]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The dispenser must not jam when nearly empty.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s05",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["kinematic, jam prevention"]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The user must be able to operate the lever.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["lever operation manual"]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The wall-mounting method must be decided.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["freedom FRE-0002 not resolved"]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The refill opening design must be decided.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["freedom FRE-0003 not resolved"]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The mechanism for releasing exactly one item must be decided.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["freedom FRE-0001 not resolved"]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "wall-mounted dispenser",
+      "reacted_at_role": "wall",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "lever",
+      "reacted_at_role": "dispenser",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "refill opening",
+      "reacted_at_role": "dispenser",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0003",
+      "applied_to_role": "dispenser contents",
+      "reacted_at_role": "dispenser",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Gravity-fed chute with single-item pocket release operated by lever",
+      "family": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "RETAIN_BODY", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY", "ACTUATE", "METER_DISCRETE_QUANTITY"],
+      "principle": ["REVOLUTE_PAIR", "CRANK_SLIDER", "DETENT_OR_SNAP", "HARD_STOP", "GEOMETRIC_UNDERCUT", "JOURNAL_SUPPORT", "DIRECT_BEARING", "STRAIGHT_INSERTION", "DIRECT_MANUAL", "SINGLE_ITEM_POCKET"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": ["OBL-0007", "OBL-0008", "OBL-0009"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Exact release can be verified kinematically; jam prevention via geometry."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Rotating carousel with indexing rotor and lever",
+      "family": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "RETAIN_BODY", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY", "ACTUATE", "METER_DISCRETE_QUANTITY"],
+      "principle": ["REVOLUTE_PAIR", "CRANK_SLIDER", "DETENT_OR_SNAP", "HARD_STOP", "ROTATION_LOCK", "JOURNAL_SUPPORT", "DIRECT_BEARING", "STRAIGHT_INSERTION", "DIRECT_MANUAL", "INDEXING_ROTOR"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": ["OBL-0007", "OBL-0008", "OBL-0009"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Indexing can be verified kinematically."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Auger or screw feeder with lever",
+      "family": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "RETAIN_BODY", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY", "ACTUATE", "METER_DISCRETE_QUANTITY"],
+      "principle": ["REVOLUTE_PAIR", "SCREW_AND_NUT", "DETENT_OR_SNAP", "HARD_STOP", "ELASTIC_CAPTURE", "JOURNAL_SUPPORT", "DIRECT_BEARING", "STRAIGHT_INSERTION", "DIRECT_MANUAL", "METERED_APERTURE"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": ["OBL-0007", "OBL-0008", "OBL-0009"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Feeding behavior may require dynamics analysis."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": ["Dispenser is wall-mounted.", "Holds approximately twenty items.", "Releases exactly one item per lever press.", "Refills from top without removal.", "Does not jam when nearly empty.", "User can operate lever."]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": ["Dispenser is wall-mounted.", "Holds approximately twenty items.", "Releases exactly one item per lever press.", "Refills from top without removal.", "Does not jam when nearly empty.", "User can operate lever."]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": ["Dispenser is wall-mounted.", "Holds approximately twenty items.", "Releases exactly one item per lever press.", "Refills from top without removal.", "Does not jam when nearly empty.", "User can operate lever."]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Exact meaning of 'about twenty' and 'nearly empty' thresholds",
+      "why_open": "The requirements do not define acceptable tolerances for capacity and low-level behavior.",
+      "alternatives": ["free text: define numeric thresholds for capacity and near-empty level"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0002", "OBL-0005"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "Selection among candidate mechanisms for exact release",
+      "why_open": "Multiple principle families can satisfy the kinematic requirement; the input does not provide evidence to distinguish.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": ["OBL-0009"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The user manually operates the lever; no automated control is implied.",
+      "why": "The request says 'each time I press a lever'.",
+      "would_be_invalidated_by": "If the request mentioned automatic operation."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The dispenser is intended for indoor use.",
+      "why": "Not stated; assumption for typical wall-mounted dispensers.",
+      "would_be_invalidated_by": "If the user specified outdoor use."
+    }
+  ]
+}

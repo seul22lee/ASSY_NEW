@@ -1,0 +1,229 @@
+{
+ "_meta": {
+  "answers_prompt_sha256": "6b38053b55247c33",
+  "authored_by": "agent-in-repository",
+  "pairing_history": [
+   "re-paired after the response-schema section was added to the prompt; content unchanged and re-verified against the parser, contract validation and completeness check"
+  ]
+ },
+ "actors": [
+  {
+   "id": "ACT-0001",
+   "must_reach": [
+    "the surface that is pressed, by foot"
+   ],
+   "name": "operator"
+  },
+  {
+   "id": "ACT-0002",
+   "must_reach": [
+    "the signal the product produces"
+   ],
+   "name": "the machine"
+  }
+ ],
+ "ambiguities": [
+  {
+   "block_scopes": [
+    "blocks_evidence_interpretation",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [
+    "SRC-0002"
+   ],
+   "id": "AMB-0001",
+   "resolvable_when": "the signal type and the boundary with the machine are stated",
+   "statement": "What is the signal - electrical, pneumatic or mechanical - and is producing it within this product's scope?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0002"
+   ],
+   "id": "AMB-0002",
+   "resolvable_when": "a force and travel are supplied",
+   "statement": "What force should pressing require, and what travel?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [
+    "SRC-0004"
+   ],
+   "id": "AMB-0003",
+   "resolvable_when": "a force or energy is supplied",
+   "statement": "What sideways disturbance must it resist?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [
+    "SRC-0003"
+   ],
+   "id": "AMB-0004",
+   "resolvable_when": "a cycle count or reliability criterion is supplied",
+   "statement": "Does every time imply a cycle count or a reliability target?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0001"
+   ],
+   "id": "AMB-0005",
+   "resolvable_when": "the mounting is described",
+   "statement": "Is the product free-standing on the floor or fixed to the workbench?"
+  }
+ ],
+ "assumptions": [],
+ "freedoms": [
+  {
+   "decision": "how the pressed surface returns to rest",
+   "id": "FRE-0001",
+   "why_free": "the text requires return on its own and names no means"
+  },
+  {
+   "decision": "how the pressed surface moves",
+   "id": "FRE-0002",
+   "why_free": "pressing is stated; no path, axis or travel is"
+  },
+  {
+   "decision": "how the signal is produced and carried",
+   "id": "FRE-0003",
+   "why_free": "the text says a signal reaches the machine and says nothing further"
+  },
+  {
+   "decision": "how the product is located at the workbench",
+   "id": "FRE-0004",
+   "why_free": "unstated"
+  },
+  {
+   "decision": "the number of parts",
+   "id": "FRE-0005",
+   "why_free": "unstated"
+  },
+  {
+   "decision": "every dimension",
+   "id": "FRE-0006",
+   "why_free": "the text contains no quantity"
+  },
+  {
+   "decision": "material and manufacturing process",
+   "id": "FRE-0007",
+   "why_free": "unstated"
+  }
+ ],
+ "requirements": [
+  {
+   "id": "REQ-0001",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "a surface a foot presses, located at a workbench",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-1",
+   "statement_verbatim": "a foot pedal for a workbench",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0002",
+   "kind": "INTERFACE",
+   "observable_verbatim": "a signal produced when the pressed surface is displaced",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-2a",
+   "statement_verbatim": "Pressing it should send a signal to the machine",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0003",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "the pressed surface returning to its resting position with no user action",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-2b",
+   "statement_verbatim": "when I take my foot off it must return to its resting position on its own",
+   "verification_kind": "KINEMATIC"
+  },
+  {
+   "id": "REQ-0004",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "the proportion of presses after which the resting position is regained",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-2b",
+   "statement_verbatim": "every time",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0005",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "displacement of the pressed surface under a sideways disturbance",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-3",
+   "statement_verbatim": "It should not move if something brushes against it sideways",
+   "verification_kind": "KINEMATIC"
+  }
+ ],
+ "scenarios": [
+  {
+   "actors": [
+    "ACT-0001",
+    "ACT-0002"
+   ],
+   "environment": "at a workbench, gravity acting downward",
+   "id": "SCN-0001",
+   "kind": "OPERATION",
+   "name": "pressing and releasing",
+   "system_boundary": "the product and the floor or bench it sits on; the operator's foot and the machine are outside it"
+  },
+  {
+   "actors": [],
+   "environment": "an unintended sideways contact of unstated magnitude",
+   "id": "SCN-0002",
+   "kind": "OPERATION",
+   "name": "brushed sideways",
+   "system_boundary": "the product and whatever brushes it"
+  },
+  {
+   "actors": [],
+   "environment": "no mounting method stated",
+   "id": "SCN-0003",
+   "kind": "ASSEMBLY",
+   "name": "installation at the workbench",
+   "system_boundary": "the product, the workbench and whoever installs it"
+  }
+ ],
+ "source_clauses": [
+  {
+   "directionality": "none",
+   "id": "SRC-0001",
+   "locator": "sentence-1",
+   "quantity_kinds": [],
+   "verbatim": "Design a foot pedal for a workbench."
+  },
+  {
+   "directionality": "none",
+   "id": "SRC-0002",
+   "locator": "sentence-2a",
+   "quantity_kinds": [],
+   "verbatim": "Pressing it should send a signal to the machine,"
+  },
+  {
+   "directionality": "bidirectional",
+   "id": "SRC-0003",
+   "locator": "sentence-2b",
+   "quantity_kinds": [],
+   "verbatim": "and when I take my foot off it must return to its resting position on its own every time."
+  },
+  {
+   "directionality": "lateral",
+   "id": "SRC-0004",
+   "locator": "sentence-3",
+   "quantity_kinds": [],
+   "verbatim": "It should not move if something brushes against it sideways."
+  }
+ ]
+}

@@ -238,16 +238,24 @@ class TestBenchmarkSkeleton(unittest.TestCase):
         self.assertTrue(d["production_generation_isolated"])
         self.assertEqual("PENDING", d["human_independence_review"])
 
-    def test_bm003_still_has_no_positive_executable_reference(self):
+    def test_bm003_positive_reference_is_never_a_precondition(self):
         """An Oracle defines success; a positive reference only validates the evaluator.
 
-        BM-003 is scorable without one, and adding one must never become a
-        precondition - it would turn "did the pipeline solve the problem" into
-        "did it reproduce our example".
+        This assertion used to be "no reference exists", which was the correct
+        way to enforce the invariant while none did. One now does, so the
+        invariant is enforced directly instead: whatever the reference's state,
+        it must never become a precondition for scoring, and its descriptor must
+        say so. Requiring one would turn "did the pipeline solve the problem"
+        into "did it reproduce our example".
         """
         data = _paths.load_yaml(os.path.join(_paths.BENCHMARKS, "BM-003", "descriptor.yaml"))
-        self.assertEqual("NOT_BUILT", data["positive_executable_reference"]["location"])
-        self.assertFalse(os.path.exists(os.path.join(_paths.VER3, "cad_validation", "BM-003")))
+        ref = data["positive_executable_reference"]
+        self.assertTrue(ref["never_a_precondition"].strip())
+        self.assertIn("never", ref["scoring"].lower())
+        if ref["location"] != "NOT_BUILT":
+            built = os.path.join(_paths.REPO_ROOT, ref["location"])
+            self.assertTrue(os.path.isdir(built), "declared location must exist")
+            self.assertIn("status", ref, "a built reference must declare its validation status")
 
     def test_stage_freeze_is_still_blocked_by_everything_except_bm003(self):
         """BM-003 is ready; stage freezing is not.

@@ -1,0 +1,230 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "locator": "requirement-1",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "locator": "requirement-2",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "locator": "requirement-3",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "locator": "requirement-4",
+      "quantity_kinds": [],
+      "directionality": "none"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "source_locator": "requirement-1",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "kind": "USABILITY",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "source_locator": "requirement-2",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "kind": "PROCESS",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "source_locator": "requirement-3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "kind": "PROCESS",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "source_locator": "requirement-4",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Normal handling",
+      "kind": "OPERATION",
+      "system_boundary": "The box with its latch",
+      "actors": [],
+      "environment": "desktop use, normal handling, transport"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "User operating latch",
+      "kind": "OPERATION",
+      "system_boundary": "The latch",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": "desktop use"
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Transport",
+      "kind": "TRANSPORT",
+      "system_boundary": "The box",
+      "actors": [],
+      "environment": "during transport"
+    },
+    {
+      "id": "SCN-0004",
+      "name": "Assembly",
+      "kind": "ASSEMBLY",
+      "system_boundary": "The product",
+      "actors": [
+        "ACT-0002"
+      ],
+      "environment": "manufacturing"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": [
+        "latch"
+      ]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "assembler",
+      "must_reach": [
+        "product"
+      ]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "The mechanism of the latch is not specified.",
+      "why_free": "The request only requires the latch to be easy to operate and secure, not how it achieves that."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "The materials of the box are not specified.",
+      "why_free": "The request only says low-cost manufacturing, not the material."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "The dimensions of the box are not specified.",
+      "why_free": "The request only says compact and desktop use, not specific dimensions."
+    },
+    {
+      "id": "FRE-0004",
+      "decision": "The manufacturing process is not specified.",
+      "why_free": "The request only says low-cost, not the process."
+    },
+    {
+      "id": "FRE-0005",
+      "decision": "The assembly method is not specified.",
+      "why_free": "The request only says easy to assemble, not how."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The meaning of 'accidental opening during normal handling' is ambiguous: it does not specify what constitutes 'normal handling' or what level of force would be considered accidental.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When the specific handling conditions and force thresholds are defined.",
+      "block_scopes": [
+        "REQ-0001"
+      ]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The meaning of 'easy to operate' is ambiguous: it does not specify the required ease, such as the force or dexterity required.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When usability criteria such as force limits or user demographics are defined.",
+      "block_scopes": [
+        "REQ-0002"
+      ]
+    },
+    {
+      "id": "AMB-0003",
+      "statement": "The meaning of 'secure during transport' is ambiguous: it does not specify the expected vibration, shock, or orientation during transport.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When transportation conditions and security criteria are defined.",
+      "block_scopes": [
+        "REQ-0002"
+      ]
+    },
+    {
+      "id": "AMB-0004",
+      "statement": "The meaning of 'low-cost manufacturing' is ambiguous: it does not specify cost targets or volume.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When cost constraints and production volume are defined.",
+      "block_scopes": [
+        "REQ-0003"
+      ]
+    },
+    {
+      "id": "AMB-0005",
+      "statement": "The meaning of 'practical for desktop use' is ambiguous: it does not specify the specific desktop environment or usage scenarios.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When target user and desktop context are defined.",
+      "block_scopes": [
+        "REQ-0003"
+      ]
+    },
+    {
+      "id": "AMB-0006",
+      "statement": "The meaning of 'mechanically plausible' is ambiguous: it does not specify the criteria for plausibility.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When engineering standards or simulation criteria are defined.",
+      "block_scopes": [
+        "REQ-0004"
+      ]
+    },
+    {
+      "id": "AMB-0007",
+      "statement": "The meaning of 'easy to assemble' is ambiguous: it does not specify the target assembly time, tools, or skill level.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When assembly process and constraints are defined.",
+      "block_scopes": [
+        "REQ-0004"
+      ]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The box is intended for single-user desktop use.",
+      "why": "The request mentions desktop use and user operation, implying a single user context.",
+      "would_be_invalidated_by": "Evidence that the box is intended for multiple users or different environments."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "Low-cost manufacturing implies high-volume production.",
+      "why": "Low-cost manufacturing often benefits from economies of scale, but this is not explicitly stated.",
+      "would_be_invalidated_by": "Evidence that the product is intended for low-volume, high-cost manufacturing."
+    }
+  ]
+}

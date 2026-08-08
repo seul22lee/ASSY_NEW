@@ -1,0 +1,125 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a foot pedal for a workbench.",
+      "locator": "req-1",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "Pressing it should send a signal to the machine.",
+      "locator": "req-2",
+      "quantity_kinds": [],
+      "directionality": "output"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "when I take my foot off it must return to its resting position on its own every time.",
+      "locator": "req-3",
+      "quantity_kinds": ["frequency"],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "It should not move if something brushes against it sideways.",
+      "locator": "req-4",
+      "quantity_kinds": [],
+      "directionality": "sideways"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Pressing it should send a signal to the machine.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "signal to the machine",
+      "source_locator": "req-2",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "when I take my foot off it must return to its resting position on its own every time.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "return to its resting position on its own every time",
+      "source_locator": "req-3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "It should not move if something brushes against it sideways.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "not move if something brushes against it sideways",
+      "source_locator": "req-4",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Pressing pedal",
+      "kind": "OPERATION",
+      "system_boundary": "foot pedal and machine",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": "workbench"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Releasing pedal",
+      "kind": "OPERATION",
+      "system_boundary": "foot pedal",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": "workbench"
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Sideways brushing",
+      "kind": "OPERATION",
+      "system_boundary": "foot pedal",
+      "actors": [],
+      "environment": "workbench"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": [
+        "pedal"
+      ]
+    }
+  ],
+  "freedoms": [],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "What type of signal is sent to the machine?",
+      "resolvable_when": "During design",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "What is meant by 'move' in the context of sideways brushing? (e.g., displacement, tilting, activation)",
+      "resolvable_when": "During design",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0003",
+      "statement": "What is the 'resting position'?",
+      "resolvable_when": "During design",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    }
+  ],
+  "assumptions": []
+}

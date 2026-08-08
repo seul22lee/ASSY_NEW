@@ -1,0 +1,91 @@
+# STAGE 01 CONTRACT — requirement capture
+#
+# Written under STAGE_PROGRESSION_CONTRACT step 1, from
+# docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md (revision 2). NO STAGE LOGIC HERE.
+
+schema_version: "0.1.0"
+stage_id: s01
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+derived_from: docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md
+
+engineering_question: >
+  What did the user actually say, and what did they leave open?
+
+engineering_responsibility: >
+  Convert prose into typed statements without sharpening, and make silence
+  explicit.
+
+required_inputs:
+  - raw source request text
+input_exclusivity: >
+  s01 is the ONLY stage that may read raw source text (INV-002, R-13). Every
+  later stage reads DesignState.
+
+required_discoveries:
+  - "per requirement: whether the source supplies a magnitude, a band, a comparative, or nothing"
+  - "the kind of every scenario: OPERATION | SERVICE | ASSEMBLY | TRANSPORT"
+  - "which actors exist and what each must reach or operate"
+  - "the observable behind each requirement"
+
+owned_decisions:
+  creates: [Requirement, SourceClause, Freedom, Ambiguity, Scenario, Actor, SystemBoundary]
+  also_owns:
+    - "the quantity inventory"
+    - "the classification of a source statement as verbatim clause versus derived requirement"
+
+prohibited_decisions:
+  - what: "invent a requirement the source does not state"
+    instead: "that is an Assumption, and it is not s01's to make"
+  - what: "sharpen a source qualifier"
+    example: "'approximately 300 mm' stays approximate"
+  - what: "resolve an Ambiguity"
+    instead: "recording it is the deliverable"
+  - what: "name a mechanism, material, part or dimension"
+
+structured_outputs:
+  Requirement: [entity_id, statement_verbatim, kind, verification_kind, observable_verbatim, source_locator, quantity_class]
+  SourceClause: [entity_id, verbatim, locator, quantity_kinds, directionality]
+  Scenario: [entity_id, name, kind, system_boundary, actors, environment]
+  Actor: [entity_id, name, must_reach]
+  Freedom: [entity_id, decision, why_free]
+  Ambiguity: [entity_id, statement, conflicting_clauses, resolvable_when, block_scopes]
+  quantity_inventory:
+    per_requirement: "MAGNITUDE | BAND | COMPARATIVE | NONE"
+    why: >
+      Downstream stages must know that the source gave no number as a FACT, not
+      discover it by finding nothing. BM-002 supplies two magnitudes; BM-001 and
+      BM-003 supply none.
+
+allowed_unresolved:
+  - "every Ambiguity"
+  - "every Freedom"
+  - "every quantity the source does not give"
+
+maturity_expectations:
+  geometry: NONE
+  note: "No frames, no bodies, no positions exist at this stage."
+
+deterministic_exit_checks:
+  - id: S01-C1
+    check: "every Requirement resolves to an existing SourceClause locator"
+  - id: S01-C2
+    check: "no numeral appears in a Requirement that is absent from its cited clause"
+    rationale: "the sharpening check"
+  - id: S01-C3
+    check: "every Scenario has a kind"
+  - id: S01-C4
+    check: "every Requirement has a quantity_class"
+  - id: S01-C5
+    check: "re-running on identical text produces byte-identical output"
+
+next_stage_consumer_requirement:
+  consumer: s02
+  needs: [requirements, observables, scenarios_by_kind, actors, quantity_inventory, ambiguities_with_block_scopes]
+  must_not_need: [raw source text]
+
+llm_role: >
+  High. Extraction and classification. The failure mode is sharpening, which
+  S01-C2 checks mechanically.
+knowledge_base_role: >
+  None. A knowledge base at s01 would import assumptions the source did not make.

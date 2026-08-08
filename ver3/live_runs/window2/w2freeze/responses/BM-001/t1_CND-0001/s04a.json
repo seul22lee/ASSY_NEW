@@ -1,0 +1,86 @@
+{
+  "scale": {
+    "basis": "RELATIVE",
+    "absolute": null,
+    "note": "All dimensions are relative; origin at center of BOD-0001."
+  },
+  "envelopes": [
+    {
+      "id": "ENV-0001",
+      "body": "BOD-0001",
+      "half_extent": [5, 3, 2],
+      "centre": [0, 0, 0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0002",
+      "body": "BOD-0002",
+      "half_extent": [5, 3, 2],
+      "centre": [0, 0, 4],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0003",
+      "body": "BOD-0003",
+      "half_extent": [1.5, 1, 1],
+      "centre": [0, -4, 0],
+      "maturity": "PROVISIONAL"
+    }
+  ],
+  "region_volumes": [
+    {
+      "functional_region": "FRG-0001",
+      "half_extent": [2.5, 2, 1],
+      "centre": [0, 0, 2]
+    },
+    {
+      "functional_region": "FRG-0002",
+      "half_extent": [1.5, 1, 1],
+      "centre": [0, -3, 0]
+    },
+    {
+      "functional_region": "FRG-0003",
+      "half_extent": [5, 3, 0.5],
+      "centre": [0, 0, -2]
+    },
+    {
+      "functional_region": "FRG-0004",
+      "half_extent": [5, 3, 1.5],
+      "centre": [0, 0, 4]
+    }
+  ],
+  "reach_results": [
+    {
+      "actor": "ACT-0001",
+      "target": "the interior of the enclosed volume",
+      "reachable": true,
+      "approach_side": "front (positive Y)",
+      "why": "Access region FRG-0001 is on the front face, and after opening (lid rotated), opening provides clearance."
+    },
+    {
+      "actor": "ACT-0001",
+      "target": "the retaining function's release",
+      "reachable": true,
+      "approach_side": "front (positive Y)",
+      "why": "Access region FRG-0002 is on the front, allowing engagement with catch tip."
+    }
+  ],
+  "assembly_directions": [
+    {
+      "assembly_step": "ASY-0001",
+      "direction": [0, 0, -1]
+    },
+    {
+      "assembly_step": "ASY-0002",
+      "direction": [0, 0, 1]
+    },
+    {
+      "assembly_step": "ASY-0003",
+      "direction": [0, -1, 0]
+    }
+  ],
+  "elimination": {
+    "eliminated": false,
+    "reason": null
+  }
+}

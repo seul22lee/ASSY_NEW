@@ -1,0 +1,302 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "base: contains the enclosed volume and provides the fixed axis and the catch reaction surface",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0001", "OBL-0005", "OBL-0007"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "closing element: rotates about the fixed axis to open and close the volume",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002", "OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "catch: compliant member that retains the closing element in the closed configuration",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0005", "OBL-0006", "OBL-0008"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["BOD-0001"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["BOD-0002"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["BOD-0003"],
+      "is_default": false
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0003",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "bending",
+        "direction": "translation in Y",
+        "required_travel": "sufficient to disengage from the closing element",
+        "allowable_travel_status": "bounded by material limits",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "catch itself",
+        "root_interface": "IFC-0002",
+        "activation_window": "release action only"
+      }
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged in closed configuration",
+      "addresses_obligations": ["OBL-0005"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "compliant connection",
+      "addresses_obligations": []
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "open",
+      "kind": "OPEN",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "closed",
+      "kind": "CLOSED",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    }
+  ],
+  "mobility": [
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "M",
+        "TY": "M",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "M"
+      },
+      "detail": {}
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "M",
+        "TY": "M",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "M"
+      },
+      "detail": {}
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "M",
+        "TY": "M",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "I"
+      },
+      "detail": {}
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "M",
+        "TY": "M",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "B"
+      },
+      "detail": {
+        "RZ": {
+          "blocked_direction": "clockwise",
+          "blocker_body": "BOD-0003",
+          "defeat_specification": "apply a torque about Z that exceeds the catch's release resistance",
+          "driver": "DECLARED_SCENARIO"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "M",
+        "TY": "R",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "M"
+      },
+      "detail": {
+        "TY": {
+          "scenario": "when the box is open and no release force is applied"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "M",
+        "TY": "R",
+        "TZ": "M",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "M"
+      },
+      "detail": {
+        "TY": {
+          "scenario": "when the latch is engaged and no release force is applied"
+        }
+      }
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "JNT-0001", "BOD-0001", "BOD-0001 (base to desk surface)"]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "IFC-0001", "BOD-0003", "JNT-0002", "BOD-0001", "BOD-0001 (base to desk surface)"]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "IFC-0001", "BOD-0003", "JNT-0002", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "IFC-0001", "BOD-0003", "JNT-0002", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "BOD-0001 (base to desk surface)"]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0001",
+      "access_side": "from outside the assembly",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0003",
+      "access_side": "from outside the assembly",
+      "activates": ["JNT-0002"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0001"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0002",
+      "access_side": "from outside the assembly",
+      "activates": ["JNT-0001"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0001", "ASY-0002"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"]
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001"]
+    },
+    {
+      "id": "FRG-0004",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "dimensions and proportions",
+      "why_open": "no dimensions are stated",
+      "alternatives": ["scaling", "proportion families"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0004"],
+      "blocks": ["OBL-0013"]
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "material and manufacturing process",
+      "why_open": "low-cost is a preference; no material or process is named",
+      "alternatives": ["plastic injection", "sheet metal"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0005"],
+      "blocks": ["OBL-0012"]
+    }
+  ]
+}

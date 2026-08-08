@@ -1,0 +1,404 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The stand must have a configuration that is narrow and compact when folded.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0012"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The user observes that 'the whole thing becomes narrow and compact when I put it away' and 'fold back down to the same compact shape it started in'."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "All components must remain attached to the stand during folding and unfolding.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0003", "REQ-0006", "REQ-0013"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The user says 'Everything should stay attached while it is folded', 'I do not want to take anything off to fold it, or loose pieces to look after', 'Nothing should come apart or fall off while I am opening it', and 'with all normal parts remaining attached'."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The stand must be openable by hand without tools, motor, or other equipment.",
+      "derived_from_requirements": ["REQ-0004", "REQ-0006", "REQ-0007"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The user says 'I should be able to open it by hand', 'I should not need tools, a motor, or any other equipment' and 'I should not need tools, a motor, or any other equipment to do it'."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The opening sequence must be guided and clear, with each step making sense to the user.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The user says 'following a sequence that makes sense as I go'."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "When open, the legs must spread in different directions to provide a stable footprint on the desk.",
+      "derived_from_requirements": ["REQ-0005", "REQ-0014"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001", "ACT-0002"],
+      "derivation_premises": ["The user says 'The three legs should end up spread apart in different directions so they give the stand a usable footprint on the desk.' and 'hold a small object'."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The stand must remain stable and maintain its open configuration without user support.",
+      "derived_from_requirements": ["REQ-0008", "REQ-0009", "REQ-0010"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001", "ACT-0002"],
+      "derivation_premises": ["The user says 'Once it is open, it needs to stay open on its own', 'I should not have to hold the legs while I use it', 'they should not be able to fold back, twist aside, or come off', and 'Nothing should turn on its own, shift out of place, or move in some other direction I was not expecting.'"]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The stand must require a deliberate action to fold it from the open configuration.",
+      "derived_from_requirements": ["REQ-0011"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The user says 'Before it can be folded again I want to have to do something deliberate.'"]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The stand must fold back to the same compact shape as originally, repeatably.",
+      "derived_from_requirements": ["REQ-0012", "REQ-0013"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The user says 'After that deliberate release, it should fold back down to the same compact shape it started in.' and 'The opening and folding sequence should be repeatable.'"]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The stand must be capable of holding a small object on the desk.",
+      "derived_from_requirements": ["REQ-0014"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["The user says 'It is meant to hold a small object on my desk while I am working.'"]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The stand must be assemblable in a sensible order without requiring removal of parts.",
+      "derived_from_requirements": ["REQ-0015", "REQ-0013"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["The user says 'It should also be something that can genuinely be built as a product and put together in a sensible order' and 'with all normal parts remaining attached'."]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The stand must have no unintended motion, such as turning, shifting, or moving in unexpected directions.",
+      "derived_from_requirements": ["REQ-0010"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The user says 'Nothing should turn on its own, shift out of place, or move in some other direction I was not expecting.'"]
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The stand must equally support the intended small object without excessive deflection or instability, though the load is unspecified.",
+      "derived_from_requirements": ["REQ-0014"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["The user's requirement to 'hold a small object' implies the stand must carry its weight; ambiguity AMB-0001 leaves the load magnitude undefined."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "legs",
+      "reacted_at_role": "base",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "legs",
+      "reacted_at_role": "base",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "legs",
+      "reacted_at_role": "base",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "legs",
+      "reacted_at_role": "base",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0005",
+      "scenario": "SCN-0003",
+      "applied_to_role": "top",
+      "reacted_at_role": "base",
+      "direction_class": "AXIAL",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0006",
+      "scenario": "SCN-0003",
+      "applied_to_role": "top",
+      "reacted_at_role": "base",
+      "direction_class": "TRANSVERSE",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0007",
+      "scenario": "SCN-0001",
+      "applied_to_role": "all",
+      "reacted_at_role": "base",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0008",
+      "scenario": "SCN-0002",
+      "applied_to_role": "all",
+      "reacted_at_role": "base",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0009",
+      "scenario": "SCN-0001",
+      "applied_to_role": "legs",
+      "reacted_at_role": "base",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0010",
+      "scenario": "SCN-0002",
+      "applied_to_role": "legs",
+      "reacted_at_role": "base",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A tripod stand using revolute joints at the hub, with a latch or detent to hold open, and a manual release to fold.",
+      "family": ["PERMIT_RELATIVE_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "PERMIT_ASSEMBLY"],
+      "principle": ["REVOLUTE_PAIR", "DETENT_OR_SNAP", "HARD_STOP", "STRAIGHT_INSERTION"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0013"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "A revolute pair provides the required rotational mobility for folding and unfolding."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A tripod stand using slider joints for legs that extend and retract, with a cam-lock to hold position.",
+      "family": ["PERMIT_RELATIVE_MOTION", "MAINTAIN_CONFIGURATION", "GUIDE_MOTION", "PERMIT_ASSEMBLY"],
+      "principle": ["PRISMATIC_PAIR", "FRICTION_HOLD", "PRISMATIC_GUIDE", "STRAIGHT_INSERTION"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0014"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Prismatic pairs provide linear motion for folding, but the stand shape may not be as compact as a pure rotatable leg design."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A tripod stand using a compliant flexure hub that allows folding and provides a detent-like hold, molded as one piece.",
+      "family": ["PERMIT_RELATIVE_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "PERMIT_ASSEMBLY"],
+      "principle": ["COMPLIANT_FLEXURE", "DETENT_OR_SNAP", "JOINT_LIMIT_BY_GEOMETRY", "ELASTIC_INSERTION"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0015"],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "Requires deflection and snap force analysis, which is not available."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0004",
+      "summary": "A tripod stand with legs on revolute joints and a sliding collar that locks and unlocks the legs, similar to an umbrella mechanism.",
+      "family": ["PERMIT_RELATIVE_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "GUIDE_MOTION", "PERMIT_ASSEMBLY"],
+      "principle": ["REVOLUTE_PAIR", "OVER_CENTRE", "HARD_STOP", "PRISMATIC_GUIDE", "STRAIGHT_INSERTION"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0016"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Revolute joints and a guide collar provide the necessary motion."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "predicates": [
+        "All components remain attached during folding and unfolding.",
+        "The stand can be opened by hand without tools.",
+        "The legs spread to provide a stable footprint.",
+        "The stand remains open without user support.",
+        "A deliberate action is required to fold.",
+        "The stand folds to a compact shape repeatably."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "predicates": [
+        "All components remain attached during folding and unfolding.",
+        "The stand can be opened by hand without tools.",
+        "The legs extend to provide a stable footprint.",
+        "The stand remains open without user support.",
+        "A deliberate action is required to fold.",
+        "The stand retracts to a compact shape repeatably."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "predicates": [
+        "The flexure allows folding without separation.",
+        "The stand can be opened by hand without tools.",
+        "The legs spread to provide a stable footprint.",
+        "The stand remains open due to detent.",
+        "A deliberate action is required to fold.",
+        "The stand returns to compact shape."
+      ]
+    },
+    {
+      "id": "ACC-0004",
+      "candidate": "CND-0004",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "predicates": [
+        "All components remain attached during folding and unfolding.",
+        "The stand can be opened by hand without tools.",
+        "The legs spread to provide a stable footprint.",
+        "The stand remains open due to over-center lock.",
+        "A deliberate action (sliding collar) is required to fold.",
+        "The stand folds to compact shape repeatably."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "The exact size and weight of the 'small object' is unresolved.",
+      "why_open": "No specification for the object's dimensions or mass.",
+      "alternatives": ["small object", "large object", "unspecified"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001", "FRE-0005"],
+      "blocks": ["OBL-0009", "OBL-0012"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "The exact compact shape is unresolved.",
+      "why_open": "No dimensions or geometry defined for the folded configuration.",
+      "alternatives": ["narrow and tall", "flat and wide", "unspecified"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002", "FRE-0001"],
+      "blocks": ["OBL-0001", "OBL-0008"]
+    },
+    {
+      "id": "UNR-0003",
+      "decision": "The sequence of opening/folding steps that 'makes sense' is unresolved.",
+      "why_open": "No specific sequence defined.",
+      "alternatives": ["sequential", "parallel", "random"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0003", "FRE-0002"],
+      "blocks": ["OBL-0004"]
+    },
+    {
+      "id": "UNR-0004",
+      "decision": "The definition of 'normal parts' is unresolved.",
+      "why_open": "No list of normal parts given.",
+      "alternatives": ["all parts", "excluding fasteners", "unspecified"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0004"],
+      "blocks": ["OBL-0010"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The stand is used on a desk.",
+      "why": "The request explicitly says 'for my desk' and 'on my desk'.",
+      "would_be_invalidated_by": "If the user later says it will also be used on other surfaces."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The user can operate the stand with one or two hands without tools.",
+      "why": "The request says 'open it by hand' and 'not need tools'.",
+      "would_be_invalidated_by": "If the user requires a tool or assistance."
+    }
+  ]
+}

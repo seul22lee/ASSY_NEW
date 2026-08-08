@@ -1,0 +1,742 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "carries the arm and forms the base of the grip",
+      "instance_identity": "the clamp body, a rigid part"
+    },
+    {
+      "id": "BOD-0002",
+      "role": "moves to grip the desk edge",
+      "instance_identity": "a movable jaw, a rigid part"
+    },
+    {
+      "id": "BOD-0003",
+      "role": "transmits force from the user to the jaw",
+      "instance_identity": "a screw, rigid, helical thread"
+    },
+    {
+      "id": "BOD-0004",
+      "role": "transmits rotation from the user to the screw",
+      "instance_identity": "a handle, rigid, rotatable"
+    },
+    {
+      "id": "BOD-0005",
+      "role": "reacts the arm load to the desk edge",
+      "instance_identity": "a fixed jaw, rigid part of the clamp body or separate"
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["BOD-0001"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["BOD-0002"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["BOD-0003"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": ["BOD-0004"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0005",
+      "members": ["BOD-0005"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0005",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "HELICAL",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0003",
+      "dof": ["TY", "RY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0004",
+      "dof": ["RY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0005",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0002",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "compliant_member",
+        "direction": "+Y",
+        "required_travel": "thickness range",
+        "allowable_travel_status": "unknown",
+        "actuation": "none",
+        "compliant_element": "flexible jaw",
+        "root_interface": "IFC-0003",
+        "activation_window": "when gripping"
+      }
+    },
+    {
+      "id": "JNT-0006",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0005",
+      "dof": [],
+      "axis_direction": null,
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "sliding contact"
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "INTERFERENCE_FIT",
+      "nominal_status": "thread engagement"
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0002", "BOD-0005"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "gripping the desk edge"
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0003", "BOD-0004"],
+      "interaction_kind": "INTERFERENCE_FIT",
+      "nominal_status": "fixed connection"
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "loose",
+      "kind": "assembly",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "gripping",
+      "kind": "operational",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    }
+  ],
+  "dof_dispositions": [
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "TX",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "apply a transverse force exceeding friction at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "TY",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "apply a vertical force exceeding friction at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "no load in Z"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "RX",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "apply a moment about X exceeding frictional holding at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "RZ",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "apply a moment about Z exceeding frictional holding at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "PRISMATIC_GUIDE"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "PRISMATIC_GUIDE"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "PRISMATIC_GUIDE"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "TX",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "apply a transverse force exceeding friction at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "TY",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "apply a vertical force exceeding friction at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "no load in Z"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "RX",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "apply a moment about X exceeding friction at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "RZ",
+      "blocker_body": "BOD-0005",
+      "defeat_specification": "apply a moment about Z exceeding friction at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "HELICAL_PAIR"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "REVOLUTE_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "REVOLUTE_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "REVOLUTE_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "REVOLUTE_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "REVOLUTE_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "REVOLUTE_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "REVOLUTE_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "REVOLUTE_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "REVOLUTE_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "REVOLUTE_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "loose, no load"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "TX",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a transverse force exceeding friction at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "TY",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a vertical force exceeding friction at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "IRRELEVANT_BECAUSE",
+      "scenario": "no load in Z"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "RX",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a moment about X exceeding friction at IFC-0003",
+      "driver": "LOAD"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED_JOINT"
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "RZ",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a moment about Z exceeding friction at IFC-0003",
+      "driver": "LOAD"
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "JNT-0001", "BOD-0005", "IFC-0003", "desk edge"]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "JNT-0001", "BOD-0005", "IFC-0003", "desk edge"]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0002", "IFC-0003", "BOD-0005", "JNT-0001", "BOD-0001"]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASM-0001",
+      "order_index": 1,
+      "body": "BOD-0005",
+      "access_side": "top",
+      "activates": [],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASM-0002",
+      "order_index": 2,
+      "body": "BOD-0001",
+      "access_side": "top",
+      "activates": ["JNT-0001"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASM-0001"]
+    },
+    {
+      "id": "ASM-0003",
+      "order_index": 3,
+      "body": "BOD-0002",
+      "access_side": "side",
+      "activates": ["JNT-0002"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASM-0002"]
+    },
+    {
+      "id": "ASM-0004",
+      "order_index": 4,
+      "body": "BOD-0003",
+      "access_side": "top",
+      "activates": ["JNT-0003"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["ASM-0002"]
+    },
+    {
+      "id": "ASM-0005",
+      "order_index": 5,
+      "body": "BOD-0004",
+      "access_side": "top",
+      "activates": ["JNT-0004"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "RIGID",
+      "depends_on": ["ASM-0004"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0004"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"]
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001", "BOD-0002"]
+    },
+    {
+      "id": "FRG-0004",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001", "BOD-0005"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "how the arm attaches to the clamp body",
+      "why_open": "unstated",
+      "alternatives": ["BOD-0001", "BOD-0005"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["FRE-0003"],
+      "blocks": ["OBL-0001", "OBL-0005"]
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "what load the arm imposes",
+      "why_open": "magnitude, reach and moment are unstated",
+      "alternatives": ["stated arm load", "no quantitative acceptance"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001", "AMB-0003"],
+      "blocks": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "UNR-1003",
+      "decision": "how the thickness range is spanned",
+      "why_open": "nothing specifies continuous, discrete, or compliant",
+      "alternatives": ["continuous adjustment", "discrete positions", "compliant member"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0002"],
+      "blocks": ["OBL-0002"]
+    }
+  ]
+}

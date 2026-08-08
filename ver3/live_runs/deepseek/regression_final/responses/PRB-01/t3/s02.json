@@ -1,0 +1,216 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must be mountable on a wall.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must have a storage volume capable of holding about twenty small items.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "A single actuation of the lever must release exactly one item.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001", "ACT-0002"]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "A single actuation must never release more than one item.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must allow refilling from the top while remaining mounted on the wall.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The product must release an item without jamming when nearly empty.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0001", "ACT-0002"]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "dispenser body",
+      "reacted_at_role": "wall mount",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "stored items",
+      "reacted_at_role": "dispenser body",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "lever",
+      "reacted_at_role": "dispenser body",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A gravity-fed dispenser with a lever-operated cam and single-item pocket.",
+      "family": ["CONVERT_MOTION", "METER_DISCRETE_QUANTITY", "PERMIT_RELATIVE_MOTION", "BOUND_MOTION"],
+      "principle": ["CAM_AND_FOLLOWER", "SINGLE_ITEM_POCKET", "REVOLUTE_PAIR", "HARD_STOP"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "The basic single-item release can be verified by mobility analysis."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A gravity-fed dispenser with a lever-operated sliding gate that meters one item.",
+      "family": ["CONVERT_MOTION", "METER_DISCRETE_QUANTITY", "PERMIT_RELATIVE_MOTION", "BOUND_MOTION"],
+      "principle": ["CRANK_SLIDER", "GATED_PAIR", "PRISMATIC_PAIR", "HARD_STOP"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "The gate motion and release cycle can be checked with mobility analysis."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A spring-loaded dispenser with an indexing rotor that presents one item per actuation.",
+      "family": ["ACTUATE", "METER_DISCRETE_QUANTITY", "PERMIT_RELATIVE_MOTION", "BOUND_MOTION"],
+      "principle": ["STORED_ENERGY", "INDEXING_ROTOR", "REVOLUTE_PAIR", "JOINT_LIMIT_BY_GEOMETRY"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Indexing rotor release can be analyzed for motion constraints."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": [
+        "The dispenser is mountable on a wall.",
+        "The dispenser holds approximately twenty small items.",
+        "Each lever press releases exactly one item.",
+        "No lever press releases more than one item.",
+        "The dispenser can be refilled from the top without removing it from the wall.",
+        "The dispenser does not jam when nearly empty."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": [
+        "The dispenser is mountable on a wall.",
+        "The dispenser holds approximately twenty small items.",
+        "Each lever press releases exactly one item.",
+        "No lever press releases more than one item.",
+        "The dispenser can be refilled from the top without removing it from the wall.",
+        "The dispenser does not jam when nearly empty."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": [
+        "The dispenser is mountable on a wall.",
+        "The dispenser holds approximately twenty small items.",
+        "Each lever press releases exactly one item.",
+        "No lever press releases more than one item.",
+        "The dispenser can be refilled from the top without removing it from the wall.",
+        "The dispenser does not jam when nearly empty."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "The release mechanism must ensure exactly one item per press, but the behavior when empty or nearly empty is undefined.",
+      "why_open": "The requirement 'exactly one' is ambiguous when the dispenser is empty or nearly empty; it might require a release or permit none, and the threshold for 'nearly empty' is unspecified.",
+      "alternatives": [
+        "CND-0001",
+        "CND-0002",
+        "CND-0003"
+      ],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "AMB-0002", "AMB-0003", "FRE-0004"],
+      "blocks": ["OBL-0003", "OBL-0004", "OBL-0006"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The dispenser is operated manually by a single user.",
+      "why": "The requirement mentions 'I press a lever' implying manual operation.",
+      "would_be_invalidated_by": "A specification that the dispenser is automated or operated by multiple users."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The small items are uniform in size.",
+      "why": "The requirement refers to 'small items' without variation, and dispensers typically handle uniform items.",
+      "would_be_invalidated_by": "A specification that the dispenser must handle varied sizes or shapes."
+    },
+    {
+      "id": "ASM-1003",
+      "statement": "The dispenser is intended for indoor use.",
+      "why": "Wall-mounted dispensers for small items are commonly indoor; no outdoor requirements are mentioned.",
+      "would_be_invalidated_by": "A requirement for weather resistance or outdoor use."
+    }
+  ]
+}

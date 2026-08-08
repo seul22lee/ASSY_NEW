@@ -1,0 +1,203 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a compact desktop platform-lifting device enclosed within a housing.",
+      "locator": "LOC-0001",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "The user should rotate an external hand crank to raise and lower an internal platform.",
+      "locator": "LOC-0002",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "The platform should move approximately 80-100 mm",
+      "locator": "LOC-0003",
+      "quantity_kinds": ["BAND"],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "and support a payload of approximately 1 kg.",
+      "locator": "LOC-0004",
+      "quantity_kinds": ["BAND"],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0005",
+      "verbatim": "The mechanism should remain enclosed within the housing during normal operation.",
+      "locator": "LOC-0005",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0006",
+      "verbatim": "The product should be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+      "locator": "LOC-0006",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0007",
+      "verbatim": "Avoid obvious jamming or unstable operation.",
+      "locator": "LOC-0007",
+      "quantity_kinds": [],
+      "directionality": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a compact desktop platform-lifting device enclosed within a housing.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "device enclosed within a housing",
+      "source_locator": "LOC-0001",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "The user should rotate an external hand crank to raise and lower an internal platform.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "rotate an external hand crank to raise and lower an internal platform",
+      "source_locator": "LOC-0002",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "The platform should move approximately 80-100 mm",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "move approximately 80-100 mm",
+      "source_locator": "LOC-0003",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "and support a payload of approximately 1 kg.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "support a payload of approximately 1 kg",
+      "source_locator": "LOC-0004",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0005",
+      "statement_verbatim": "The mechanism should remain enclosed within the housing during normal operation.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "mechanism should remain enclosed within the housing during normal operation",
+      "source_locator": "LOC-0005",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0006",
+      "statement_verbatim": "The product should be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "safe to use, mechanically plausible, easy to assemble, and practical to manufacture",
+      "source_locator": "LOC-0006",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0007",
+      "statement_verbatim": "Avoid obvious jamming or unstable operation.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "obvious jamming or unstable operation",
+      "source_locator": "LOC-0007",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Normal Operation",
+      "kind": "OPERATION",
+      "system_boundary": "The device and its housing",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": "Desktop"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "User",
+      "must_reach": [
+        "external hand crank"
+      ]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "The specific mechanism type, materials, and dimensions other than the approximate platform travel and payload are free to be chosen by the designer.",
+      "why_free": "The request does not specify them."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "The interior layout and the exact means of enclosing the mechanism are free.",
+      "why_free": "The request does not specify the enclosure design."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The meaning of 'easy to assemble' and 'practical to manufacture' is not precisely defined.",
+      "resolvable_when": "When specific manufacturing and assembly criteria are provided.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The phrase 'approximately 80-100 mm' is ambiguous regarding the exact acceptable range.",
+      "resolvable_when": "When precise tolerances are provided.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0003",
+      "statement": "The phrase 'approximately 1 kg' is ambiguous regarding the exact acceptable payload range.",
+      "resolvable_when": "When precise payload specifications are provided.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0004",
+      "statement": "'Safe to use' is not defined in terms of specific safety requirements or standards.",
+      "resolvable_when": "When relevant safety standards or specific safety requirements are provided.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0005",
+      "statement": "'Mechanically plausible' is subjective and not quantified.",
+      "resolvable_when": "When specific design constraints or performance expectations are defined.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0006",
+      "statement": "'Avoid obvious jamming or unstable operation' does not specify the criteria for jamming or instability.",
+      "resolvable_when": "When specific acceptance criteria are provided.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The user is a human operator.",
+      "why": "The text refers to 'the user' and an external hand crank, implying manual operation.",
+      "would_be_invalidated_by": "If the product were intended to be automated or operated by a machine."
+    }
+  ]
+}

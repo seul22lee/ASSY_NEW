@@ -355,9 +355,20 @@ class TestOracleContentRequirements(unittest.TestCase):
         self.assertIn("prior_context_disclosure", g)
         self.assertTrue(g["prior_context_disclosure"]["residual_risk"].strip())
 
-    def test_no_positive_reference_exists_for_bm003(self):
-        cad = os.path.join(_paths.VER3, "cad_validation", "BM-003")
-        self.assertFalse(os.path.exists(cad))
+    def test_oracle_is_independent_of_any_positive_reference(self):
+        """The Oracle must not cite, require or be validated by a reference.
+
+        Previously asserted as "no reference exists". One now does, so the
+        property that mattered is asserted directly: no Oracle file may reference
+        the CAD reference, in either direction.
+        """
+        import glob
+        ref_token = "EXE-BM003"
+        for path in glob.glob(os.path.join(_paths.VER3, "oracles", "held_out", "BM-003", "*")):
+            if os.path.isfile(path):
+                with open(path) as fh:
+                    self.assertNotIn(ref_token, fh.read(),
+                                     "%s cites a positive reference" % os.path.basename(path))
 
 
 

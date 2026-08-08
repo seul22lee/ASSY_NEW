@@ -1,0 +1,132 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "Main body that supports the held object and provides mounting for supports and latch",
+      "instance_identity": "single instance",
+      "addresses_obligations": ["OBL-0010", "OBL-0017"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "Support leg, one of three, pivots about a fixed axis to deploy and fold, carries load to ground",
+      "instance_identity": "three instances, identical part",
+      "addresses_obligations": ["OBL-0001", "OBL-0002", "OBL-0005", "OBL-0006"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "Latch, translates along a fixed axis to block or release the folding motion of the supports",
+      "instance_identity": "single instance",
+      "addresses_obligations": ["OBL-0005", "OBL-0006", "OBL-0007"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["BOD-0001"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["BOD-0002"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["BOD-0003"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0003",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "deployed",
+      "addresses_obligations": ["OBL-0006"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "released",
+      "addresses_obligations": ["OBL-0007"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "latching",
+      "addresses_obligations": ["OBL-0005", "OBL-0006"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "deployed",
+      "kind": "OPERATIONAL",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "folded",
+      "kind": "STORAGE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    },
+    {
+      "id": "CFG-0003",
+      "name": "released",
+      "kind": "TRANSIENT",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0002",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0002"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["BOD-0003"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "radial support and axial retention at each turning relation",
+      "why_open": "The joint type REVOLUTE implies a pin or axle, but the specific means to prevent axial dislodgement is not yet determined.",
+      "alternatives": ["retaining rings", "shoulder and cover", "peened end"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0006"],
+      "blocks": ["OBL-0002"]
+    }
+  ]
+}

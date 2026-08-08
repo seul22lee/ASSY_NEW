@@ -1,0 +1,42 @@
+{
+ "_meta": {"answers_prompt_sha256": "4665836dfd4eaafd", "authored_by": "agent-in-repository"},
+ "source_clauses": [
+  {"id": "SRC-0001", "verbatim": "Design a foot pedal for a workbench.", "locator": "sentence-1", "quantity_kinds": [], "directionality": "none"},
+  {"id": "SRC-0002", "verbatim": "Pressing it should send a signal to the machine,", "locator": "sentence-2a", "quantity_kinds": [], "directionality": "none"},
+  {"id": "SRC-0003", "verbatim": "and when I take my foot off it must return to its resting position on its own every time.", "locator": "sentence-2b", "quantity_kinds": [], "directionality": "bidirectional"},
+  {"id": "SRC-0004", "verbatim": "It should not move if something brushes against it sideways.", "locator": "sentence-3", "quantity_kinds": [], "directionality": "lateral"}
+ ],
+ "requirements": [
+  {"id": "REQ-0001", "statement_verbatim": "a foot pedal for a workbench", "kind": "FUNCTIONAL", "verification_kind": "STRUCTURAL", "observable_verbatim": "a surface a foot presses, located at a workbench", "source_locator": "sentence-1", "quantity_class": "NONE"},
+  {"id": "REQ-0002", "statement_verbatim": "Pressing it should send a signal to the machine", "kind": "INTERFACE", "verification_kind": "STRUCTURAL", "observable_verbatim": "a signal produced when the pressed surface is displaced", "source_locator": "sentence-2a", "quantity_class": "NONE"},
+  {"id": "REQ-0003", "statement_verbatim": "when I take my foot off it must return to its resting position on its own", "kind": "FUNCTIONAL", "verification_kind": "KINEMATIC", "observable_verbatim": "the pressed surface returning to its resting position with no user action", "source_locator": "sentence-2b", "quantity_class": "NONE"},
+  {"id": "REQ-0004", "statement_verbatim": "every time", "kind": "FUNCTIONAL", "verification_kind": "QUANTITATIVE", "observable_verbatim": "the proportion of presses after which the resting position is regained", "source_locator": "sentence-2b", "quantity_class": "NONE"},
+  {"id": "REQ-0005", "statement_verbatim": "It should not move if something brushes against it sideways", "kind": "FUNCTIONAL", "verification_kind": "KINEMATIC", "observable_verbatim": "displacement of the pressed surface under a sideways disturbance", "source_locator": "sentence-3", "quantity_class": "NONE"}
+ ],
+ "actors": [
+  {"id": "ACT-0001", "name": "operator", "must_reach": ["the surface that is pressed, by foot"]},
+  {"id": "ACT-0002", "name": "the machine", "must_reach": ["the signal the product produces"]}
+ ],
+ "scenarios": [
+  {"id": "SCN-0001", "name": "pressing and releasing", "kind": "OPERATION", "system_boundary": "the product and the floor or bench it sits on; the operator's foot and the machine are outside it", "actors": ["ACT-0001", "ACT-0002"], "environment": "at a workbench, gravity acting downward"},
+  {"id": "SCN-0002", "name": "brushed sideways", "kind": "OPERATION", "system_boundary": "the product and whatever brushes it", "actors": [], "environment": "an unintended sideways contact of unstated magnitude"},
+  {"id": "SCN-0003", "name": "installation at the workbench", "kind": "ASSEMBLY", "system_boundary": "the product, the workbench and whoever installs it", "actors": [], "environment": "no mounting method stated"}
+ ],
+ "freedoms": [
+  {"id": "FRE-0001", "decision": "how the pressed surface returns to rest", "why_free": "the text requires return on its own and names no means"},
+  {"id": "FRE-0002", "decision": "how the pressed surface moves", "why_free": "pressing is stated; no path, axis or travel is"},
+  {"id": "FRE-0003", "decision": "how the signal is produced and carried", "why_free": "the text says a signal reaches the machine and says nothing further"},
+  {"id": "FRE-0004", "decision": "how the product is located at the workbench", "why_free": "unstated"},
+  {"id": "FRE-0005", "decision": "the number of parts", "why_free": "unstated"},
+  {"id": "FRE-0006", "decision": "every dimension", "why_free": "the text contains no quantity"},
+  {"id": "FRE-0007", "decision": "material and manufacturing process", "why_free": "unstated"}
+ ],
+ "ambiguities": [
+  {"id": "AMB-0001", "statement": "What is the signal - electrical, pneumatic or mechanical - and is producing it within this product's scope?", "conflicting_clauses": ["SRC-0002"], "resolvable_when": "the signal type and the boundary with the machine are stated", "block_scopes": ["blocks_evidence_interpretation", "blocks_PASS"]},
+  {"id": "AMB-0002", "statement": "What force should pressing require, and what travel?", "conflicting_clauses": ["SRC-0002"], "resolvable_when": "a force and travel are supplied", "block_scopes": ["blocks_quantitative_acceptance"]},
+  {"id": "AMB-0003", "statement": "What sideways disturbance must it resist?", "conflicting_clauses": ["SRC-0004"], "resolvable_when": "a force or energy is supplied", "block_scopes": ["blocks_quantitative_acceptance", "blocks_PASS"]},
+  {"id": "AMB-0004", "statement": "Does every time imply a cycle count or a reliability target?", "conflicting_clauses": ["SRC-0003"], "resolvable_when": "a cycle count or reliability criterion is supplied", "block_scopes": ["blocks_quantitative_acceptance", "blocks_PASS"]},
+  {"id": "AMB-0005", "statement": "Is the product free-standing on the floor or fixed to the workbench?", "conflicting_clauses": ["SRC-0001"], "resolvable_when": "the mounting is described", "block_scopes": ["blocks_quantitative_acceptance"]}
+ ],
+ "assumptions": []
+}

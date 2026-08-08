@@ -1,0 +1,143 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "It should hold about twenty of them",
+      "locator": "REQ-1",
+      "quantity_kinds": ["BAND"],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "release exactly one each time I press a lever, so I never get two at once",
+      "locator": "REQ-2",
+      "quantity_kinds": ["MAGNITUDE"],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "I refill it from the top without taking it off the wall",
+      "locator": "REQ-3",
+      "quantity_kinds": ["NONE"],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "It must not jam when it is nearly empty.",
+      "locator": "REQ-4",
+      "quantity_kinds": ["COMPARATIVE"],
+      "directionality": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "It should hold about twenty of them",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "hold about twenty of them",
+      "source_locator": "REQ-1",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "release exactly one each time I press a lever, so I never get two at once",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "release exactly one each time I press a lever",
+      "source_locator": "REQ-2",
+      "quantity_class": "MAGNITUDE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "I refill it from the top without taking it off the wall",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "refill it from the top without taking it off the wall",
+      "source_locator": "REQ-3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "It must not jam when it is nearly empty.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "must not jam when it is nearly empty",
+      "source_locator": "REQ-4",
+      "quantity_class": "COMPARATIVE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Dispensing",
+      "kind": "OPERATION",
+      "system_boundary": "wall-mounted dispenser for small items",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": "wall-mounted"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Refilling",
+      "kind": "SERVICE",
+      "system_boundary": "wall-mounted dispenser for small items",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": "wall-mounted"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": [
+        "lever",
+        "top opening"
+      ]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Mechanism for releasing items",
+      "why_free": "The request specifies only the outcome and not the mechanism."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "Material of the dispenser",
+      "why_free": "The request does not specify material."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "Exact dimensions and shape",
+      "why_free": "The request does not specify dimensions or shape other than 'wall-mounted'."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "What does 'nearly empty' mean?",
+      "resolvable_when": "Design decision or further clarification",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "What is a 'small item'?",
+      "resolvable_when": "Design decision or further clarification",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The 'small items' are uniform in size and shape",
+      "why": "The request implies consistent behavior and capacity, suggesting uniform items.",
+      "would_be_invalidated_by": "Specification of varied item sizes"
+    }
+  ]
+}

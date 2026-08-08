@@ -1,0 +1,241 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The stand must be compact, i.e., folded size minimized.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "derivation_premises": ["A compact product requires smaller outer dimensions when folded."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The stand must have exactly three legs that fold close to the body.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "derivation_premises": ["The number of legs is fixed by the requirement."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "Folding must be possible without detaching any part.",
+      "derived_from_requirements": ["REQ-0003", "REQ-0006", "REQ-0011"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "derivation_premises": ["Permanent attachment allows folding without detachment."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "A user must be able to open the stand by hand without tools.",
+      "derived_from_requirements": ["REQ-0004", "REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Hand manipulation implies the user can apply forces to the stand."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "When open, the three legs must be spread apart in different directions.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "derivation_premises": ["Different directions are needed for a usable footprint."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The stand must remain open without user support.",
+      "derived_from_requirements": ["REQ-0007", "REQ-0008"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "derivation_premises": ["An open configuration must be stable under its own weight and any disturbance."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "No unintended movement of any component when the stand is in use.",
+      "derived_from_requirements": ["REQ-0008"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "derivation_premises": ["Unintended movement would violate the requirement."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "Folding must require a deliberate user action.",
+      "derived_from_requirements": ["REQ-0009", "REQ-0010"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "derivation_premises": ["A deliberate action implies the open configuration is stable and requires an explicit input to change."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The stand must support a small object.",
+      "derived_from_requirements": ["REQ-0012"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "derivation_premises": ["Supporting a load requires the structure to withstand the load without excessive deflection."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The stand must be repeatedly openable and foldable without part detachment.",
+      "derived_from_requirements": ["REQ-0011"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "derivation_premises": ["Repeatability implies no irreversible changes or part loss."]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The stand must be manufactured and assembled in a sensible order.",
+      "derived_from_requirements": ["REQ-0013"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "derivation_premises": ["A product must be assemblable with a logical sequence."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the moving leg elements",
+      "reacted_at_role": "the support surface on the desk",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the moving leg elements",
+      "reacted_at_role": "the support surface on the desk",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0003",
+      "applied_to_role": "the object support surface",
+      "reacted_at_role": "the desk surface",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A stand using revolute joints for the three legs, with a detent or snap to hold open and a release mechanism.",
+      "family": ["PERMIT_RELATIVE_MOTION", "MAINTAIN_CONFIGURATION", "ACTUATE"],
+      "principle": ["REVOLUTE_PAIR", "DETENT_OR_SNAP", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "obligations_created": ["OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Primary function of leg motion can be analyzed for degrees of freedom."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A stand using compliant flexures for leg motion, with an over-center toggle to hold open.",
+      "family": ["PERMIT_RELATIVE_MOTION", "MAINTAIN_CONFIGURATION", "ACTUATE"],
+      "principle": ["COMPLIANT_FLEXURE", "OVER_CENTRE", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "obligations_created": ["OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Compliant mechanisms allow motion; load capacity may require stress analysis."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A stand using a prismatic pair for a sliding leg and revolute pairs for others, with a friction hold.",
+      "family": ["PERMIT_RELATIVE_MOTION", "MAINTAIN_CONFIGURATION", "ACTUATE"],
+      "principle": ["PRISMATIC_PAIR", "FRICTION_HOLD", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "obligations_created": ["OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Friction hold may require analysis of forces."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0012"],
+      "predicates": ["The stand has exactly three legs that fold close to the body.", "The stand remains open without user support.", "Folding requires a deliberate user action."]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0012"],
+      "predicates": ["The stand has exactly three legs that fold close to the body.", "The stand remains open without user support.", "Folding requires a deliberate user action."]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0012"],
+      "predicates": ["The stand has exactly three legs that fold close to the body.", "The stand remains open without user support.", "Folding requires a deliberate user action."]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which principle family to use for leg folding and locking",
+      "why_open": "Multiple principle families can satisfy the requirements; no evidence currently distinguishes them.",
+      "alternatives": ["REVOLUTE_PAIR", "PRISMATIC_PAIR", "COMPLIANT_FLEXURE"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0003", "AMB-0001"],
+      "blocks": ["OBL-0001", "OBL-0006"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The stand is used on a flat, horizontal desk surface.",
+      "why": "Assumption provided in typed input.",
+      "would_be_invalidated_by": "Usage on non-flat or inclined surfaces."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The user has normal hand function and can perform manual manipulation.",
+      "why": "Assumption provided in typed input.",
+      "would_be_invalidated_by": "Requirement for assisted use."
+    }
+  ]
+}

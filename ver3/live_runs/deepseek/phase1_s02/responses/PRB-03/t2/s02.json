@@ -1,0 +1,253 @@
+{
+  "obligations": [
+    {
+      "obligation_id": "OBL-0001",
+      "requirement_ids": ["REQ-0001"],
+      "statement": "The product must include a surface that can be pressed by a foot, and must be located at a workbench.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0002",
+      "requirement_ids": ["REQ-0002"],
+      "statement": "The product must produce a signal when the surface is displaced, and the signal must reach the machine.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"]
+    },
+    {
+      "obligation_id": "OBL-0003",
+      "requirement_ids": ["REQ-0003"],
+      "statement": "The pressed surface must return to its resting position on its own when the foot is removed.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0004",
+      "requirement_ids": ["REQ-0004"],
+      "statement": "The resting position must be regained on every press-release cycle.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0005",
+      "requirement_ids": ["REQ-0005"],
+      "statement": "The pressed surface must not displace when subjected to a sideways disturbance.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": []
+    }
+  ],
+  "load_cases": [
+    {
+      "load_case_id": "LC-0001",
+      "scenario_id": "SCN-0001",
+      "description": "Operator presses the pedal with a foot; gravity acts downward; the product reacts against the workbench/floor.",
+      "on_role": "BODY",
+      "reacted_at_role": "MOUNTING",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0002",
+      "scenario_id": "SCN-0001",
+      "description": "The product self-weight acts downward due to gravity.",
+      "on_role": "BODY",
+      "reacted_at_role": "MOUNTING",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0003",
+      "scenario_id": "SCN-0002",
+      "description": "A sideways disturbance acts on the product.",
+      "on_role": "BODY",
+      "reacted_at_role": "MOUNTING",
+      "direction_class": "TRANSVERSE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "CAND-0001",
+      "function_classes": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "RETAIN_BODY", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY", "ACTUATE", "METER_DISCRETE_QUANTITY"],
+      "principle_families": {
+        "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+        "CONVERT_MOTION": "LEVER_LINKAGE",
+        "MAINTAIN_CONFIGURATION": "GRAVITY_SEATED",
+        "BOUND_MOTION": "HARD_STOP",
+        "RETAIN_BODY": "ROTATION_LOCK",
+        "GUIDE_MOTION": "JOURNAL_SUPPORT",
+        "TRANSMIT_LOAD": "DIRECT_BEARING",
+        "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+        "ACTUATE": "DIRECT_MANUAL",
+        "METER_DISCRETE_QUANTITY": "ESCAPEMENT"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "obligations_created": ["OBL-0006"],
+      "evidence_route_verdict": {
+        "needed_route": "RIGID_BODY_DYNAMICS",
+        "route_exists": true
+      }
+    },
+    {
+      "candidate_id": "CAND-0002",
+      "function_classes": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "RETAIN_BODY", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY", "ACTUATE", "METER_DISCRETE_QUANTITY"],
+      "principle_families": {
+        "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+        "CONVERT_MOTION": "CRANK_SLIDER",
+        "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+        "BOUND_MOTION": "HARD_STOP",
+        "RETAIN_BODY": "ELASTIC_CAPTURE",
+        "GUIDE_MOTION": "PRISMATIC_GUIDE",
+        "TRANSMIT_LOAD": "SHEAR_MEMBER",
+        "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+        "ACTUATE": "DIRECT_MANUAL",
+        "METER_DISCRETE_QUANTITY": "SINGLE_ITEM_POCKET"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "obligations_created": ["OBL-0006"],
+      "evidence_route_verdict": {
+        "needed_route": "RIGID_BODY_DYNAMICS",
+        "route_exists": true
+      }
+    },
+    {
+      "candidate_id": "CAND-0003",
+      "function_classes": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "RETAIN_BODY", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY", "ACTUATE", "METER_DISCRETE_QUANTITY"],
+      "principle_families": {
+        "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+        "CONVERT_MOTION": "CAM_AND_FOLLOWER",
+        "MAINTAIN_CONFIGURATION": "OVER_CENTRE",
+        "BOUND_MOTION": "JOINT_LIMIT_BY_GEOMETRY",
+        "RETAIN_BODY": "GEOMETRIC_UNDERCUT",
+        "GUIDE_MOTION": "MULTI_POINT_CONSTRAINT",
+        "TRANSMIT_LOAD": "TENSION_MEMBER",
+        "PERMIT_ASSEMBLY": "INSERT_AND_TURN",
+        "ACTUATE": "STORED_ENERGY",
+        "METER_DISCRETE_QUANTITY": "INDEXING_ROTOR"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "obligations_created": ["OBL-0006", "OBL-0007"],
+      "evidence_route_verdict": {
+        "needed_route": "RIGID_KINEMATIC_GEOMETRY",
+        "route_exists": true
+      }
+    },
+    {
+      "candidate_id": "CAND-0004",
+      "function_classes": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "RETAIN_BODY", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY", "ACTUATE", "METER_DISCRETE_QUANTITY"],
+      "principle_families": {
+        "PERMIT_RELATIVE_MOTION": "COMPLIANT_FLEXURE",
+        "CONVERT_MOTION": "FLEXIBLE_ELEMENT_DRIVE",
+        "MAINTAIN_CONFIGURATION": "FRICTION_HOLD",
+        "BOUND_MOTION": "HARD_STOP",
+        "RETAIN_BODY": "ELASTIC_CAPTURE",
+        "GUIDE_MOTION": "MULTI_POINT_CONSTRAINT",
+        "TRANSMIT_LOAD": "SHEAR_MEMBER",
+        "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+        "ACTUATE": "STORED_ENERGY",
+        "METER_DISCRETE_QUANTITY": "METERED_APERTURE"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "obligations_created": ["OBL-0006", "OBL-0008"],
+      "evidence_route_verdict": {
+        "needed_route": "COMPLIANCE_REDUCED_ORDER",
+        "route_exists": false
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "acceptance_contract_id": "AC-0001",
+      "obligation_id": "OBL-0001",
+      "pass_fail_criteria": "The product includes a surface that can be pressed by a foot and is located at a workbench.",
+      "evidence_required": "RIGID_KINEMATIC_GEOMETRY",
+      "status": "SATISFIABLE"
+    },
+    {
+      "acceptance_contract_id": "AC-0002",
+      "obligation_id": "OBL-0002",
+      "pass_fail_criteria": "The product produces a signal when the surface is displaced, and the signal reaches the machine.",
+      "evidence_required": "RIGID_KINEMATIC_GEOMETRY",
+      "status": "SATISFIABLE"
+    },
+    {
+      "acceptance_contract_id": "AC-0003",
+      "obligation_id": "OBL-0003",
+      "pass_fail_criteria": "The pressed surface returns to its resting position on its own when the foot is removed.",
+      "evidence_required": "RIGID_BODY_DYNAMICS",
+      "status": "SATISFIABLE"
+    },
+    {
+      "acceptance_contract_id": "AC-0004",
+      "obligation_id": "OBL-0004",
+      "pass_fail_criteria": "The resting position is regained on every press-release cycle.",
+      "evidence_required": "RIGID_BODY_DYNAMICS",
+      "status": "UNSATISFIABLE"
+    },
+    {
+      "acceptance_contract_id": "AC-0005",
+      "obligation_id": "OBL-0005",
+      "pass_fail_criteria": "The pressed surface does not displace when subjected to a sideways disturbance.",
+      "evidence_required": "RIGID_BODY_DYNAMICS",
+      "status": "SATISFIABLE"
+    }
+  ],
+  "unresolved": [
+    {
+      "unresolved_id": "UNRES-0001",
+      "decision": "Which principle family for signal production and transmission should be used?",
+      "kept_open_by": ["AMB-0001", "FRE-0003"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "alternatives": []
+    },
+    {
+      "unresolved_id": "UNRES-0002",
+      "decision": "What force and travel should pressing require?",
+      "kept_open_by": ["AMB-0002"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": []
+    },
+    {
+      "unresolved_id": "UNRES-0003",
+      "decision": "What sideways disturbance must it resist?",
+      "kept_open_by": ["AMB-0003"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": []
+    },
+    {
+      "unresolved_id": "UNRES-0004",
+      "decision": "What cycle count or reliability target applies?",
+      "kept_open_by": ["AMB-0004"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": []
+    },
+    {
+      "unresolved_id": "UNRES-0005",
+      "decision": "Is the product free-standing on the floor or fixed to the workbench?",
+      "kept_open_by": ["AMB-0005"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": []
+    }
+  ],
+  "assumptions": [
+    "The product is considered a single body for load cases; specific parts are not identified.",
+    "The signal type and boundary with the machine are not specified; this affects evidence for REQ-0002.",
+    "The magnitude of the sideways disturbance is unknown.",
+    "The cycle count and reliability target are unknown.",
+    "The mounting situation is unspecified.",
+    "The mechanism must be able to react loads to the workbench/floor."
+  ]
+}

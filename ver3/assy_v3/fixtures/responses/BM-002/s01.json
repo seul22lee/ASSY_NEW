@@ -1,0 +1,316 @@
+{
+ "_meta": {
+  "answers_prompt_sha256": "2f4defd9b40a49e5",
+  "pairing_history": [
+   "re-paired after the response-schema section was added to the prompt; content unchanged and re-verified against the parser, contract validation and completeness check"
+  ]
+ },
+ "actors": [
+  {
+   "id": "ACT-0001",
+   "must_reach": [
+    "the rotary input, from outside the enclosing body",
+    "the platform, to place and remove a payload"
+   ],
+   "name": "user"
+  }
+ ],
+ "ambiguities": [
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0001"
+   ],
+   "id": "AMB-0001",
+   "resolvable_when": "an envelope or comparison object is supplied",
+   "statement": "What size qualifies as compact and desktop-practical?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0003"
+   ],
+   "id": "AMB-0002",
+   "resolvable_when": "the tolerance on the band is stated",
+   "statement": "Does approximately 80-100 mm bound the travel, or describe it?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [
+    "SRC-0003"
+   ],
+   "id": "AMB-0003",
+   "resolvable_when": "the load condition is stated",
+   "statement": "What does supporting approximately 1 kg require - static holding, holding while moving, or both?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [
+    "SRC-0005"
+   ],
+   "id": "AMB-0004",
+   "resolvable_when": "a hazard list or a standard is named",
+   "statement": "What does safe to use exclude?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [
+    "SRC-0006"
+   ],
+   "id": "AMB-0005",
+   "resolvable_when": "a binding or stability criterion is supplied",
+   "statement": "What counts as obvious jamming, and against what condition is stability judged?"
+  },
+  {
+   "block_scopes": [
+    "blocks_evidence_interpretation"
+   ],
+   "conflicting_clauses": [
+    "SRC-0001",
+    "SRC-0004"
+   ],
+   "id": "AMB-0006",
+   "resolvable_when": "the meaning of enclosed is stated with respect to access",
+   "statement": "Does enclosed during normal operation permit an opening for payload access?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [],
+   "id": "AMB-0007",
+   "resolvable_when": "material or durability criteria are supplied",
+   "statement": "What material, strength, wear and lifetime are required?"
+  }
+ ],
+ "assumptions": [],
+ "freedoms": [
+  {
+   "decision": "how rotary input becomes platform translation",
+   "id": "FRE-0001",
+   "why_free": "the text requires the relation and names no means of producing it"
+  },
+  {
+   "decision": "how the platform is guided, and whether its orientation is constrained",
+   "id": "FRE-0002",
+   "why_free": "unstated beyond raise and lower"
+  },
+  {
+   "decision": "where the rotary input crosses the enclosing body, and on which face",
+   "id": "FRE-0003",
+   "why_free": "the text says external and internal but names no location"
+  },
+  {
+   "decision": "the number of parts and the division into them",
+   "id": "FRE-0004",
+   "why_free": "unstated"
+  },
+  {
+   "decision": "every dimension except the stated travel band",
+   "id": "FRE-0005",
+   "why_free": "the text gives one band and one mass and no other quantity"
+  },
+  {
+   "decision": "material and manufacturing process",
+   "id": "FRE-0006",
+   "why_free": "unstated"
+  },
+  {
+   "decision": "whether the mechanism holds position when the input is released",
+   "id": "FRE-0007",
+   "why_free": "the text requires raising and lowering and says nothing about holding"
+  }
+ ],
+ "requirements": [
+  {
+   "id": "REQ-0001",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "a platform that is raised and lowered, contained by an enclosing body",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-1",
+   "statement_verbatim": "a compact desktop platform-lifting device enclosed within a housing",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0002",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "a rotary input operated by a user from outside the enclosing body",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-2",
+   "statement_verbatim": "The user should rotate an external hand crank",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0003",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "the platform rises and falls as the rotary input turns, in both directions",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-2",
+   "statement_verbatim": "to raise and lower an internal platform",
+   "verification_kind": "KINEMATIC"
+  },
+  {
+   "id": "REQ-0004",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "platform vertical displacement",
+   "quantity_class": "BAND",
+   "source_locator": "sentence-3",
+   "statement_verbatim": "The platform should move approximately 80-100 mm",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0005",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "maximum supported payload",
+   "quantity_class": "BAND",
+   "source_locator": "sentence-3",
+   "statement_verbatim": "support a payload of approximately 1 kg",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0006",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "no moving element leaves the enclosing body at any point of operation",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-4",
+   "statement_verbatim": "The mechanism should remain enclosed within the housing during normal operation",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0007",
+   "kind": "SAFETY",
+   "observable_verbatim": "user exposure to moving elements and to stored energy",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-5",
+   "statement_verbatim": "safe to use",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0008",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "every declared relationship has a physical realization",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-5",
+   "statement_verbatim": "mechanically plausible",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0009",
+   "kind": "PROCESS",
+   "observable_verbatim": "an ordered installation sequence with a clear path for every part",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-5",
+   "statement_verbatim": "easy to assemble",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0010",
+   "kind": "PROCESS",
+   "observable_verbatim": "process suitability and unit cost",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-5",
+   "statement_verbatim": "practical to manufacture",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0011",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "the input continues to produce output motion throughout travel, without binding",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-6",
+   "statement_verbatim": "Avoid obvious jamming or unstable operation",
+   "verification_kind": "QUANTITATIVE"
+  }
+ ],
+ "scenarios": [
+  {
+   "actors": [
+    "ACT-0001"
+   ],
+   "environment": "a desk, upright, indoors, gravity acting downward",
+   "id": "SCN-0001",
+   "kind": "OPERATION",
+   "name": "raising and lowering under payload",
+   "system_boundary": "the product and the surface it stands on; the user and the payload are outside it"
+  },
+  {
+   "actors": [
+    "ACT-0001"
+   ],
+   "environment": "payload approached from outside the enclosing body",
+   "id": "SCN-0002",
+   "kind": "OPERATION",
+   "name": "placing and removing the payload",
+   "system_boundary": "the product, the payload and the surface it stands on"
+  },
+  {
+   "actors": [],
+   "environment": "no process stated",
+   "id": "SCN-0003",
+   "kind": "ASSEMBLY",
+   "name": "assembly",
+   "system_boundary": "the parts and whoever puts them together"
+  }
+ ],
+ "source_clauses": [
+  {
+   "directionality": "none",
+   "id": "SRC-0001",
+   "locator": "sentence-1",
+   "quantity_kinds": [],
+   "verbatim": "Design a compact desktop platform-lifting device enclosed within a housing."
+  },
+  {
+   "directionality": "bidirectional",
+   "id": "SRC-0002",
+   "locator": "sentence-2",
+   "quantity_kinds": [],
+   "verbatim": "The user should rotate an external hand crank to raise and lower an internal platform."
+  },
+  {
+   "directionality": "vertical",
+   "id": "SRC-0003",
+   "locator": "sentence-3",
+   "quantity_kinds": [
+    "length",
+    "mass"
+   ],
+   "verbatim": "The platform should move approximately 80-100 mm and support a payload of approximately 1 kg."
+  },
+  {
+   "directionality": "none",
+   "id": "SRC-0004",
+   "locator": "sentence-4",
+   "quantity_kinds": [],
+   "verbatim": "The mechanism should remain enclosed within the housing during normal operation."
+  },
+  {
+   "directionality": "none",
+   "id": "SRC-0005",
+   "locator": "sentence-5",
+   "quantity_kinds": [],
+   "verbatim": "The product should be safe to use, mechanically plausible, easy to assemble, and practical to manufacture."
+  },
+  {
+   "directionality": "none",
+   "id": "SRC-0006",
+   "locator": "sentence-6",
+   "quantity_kinds": [],
+   "verbatim": "Avoid obvious jamming or unstable operation."
+  }
+ ]
+}

@@ -1,0 +1,178 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The clamp must structurally fix the monitor arm to the desk edge.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The clamp must accommodate desk edge thicknesses between 18 mm and 40 mm.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "Once tightened, the clamp must not slip or rotate on the desk edge under the weight of the monitor arm.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The user must be able to remove the clamp from the desk edge without using any tools.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "clamp",
+      "reacted_at_role": "desk",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "clamp",
+      "reacted_at_role": "desk",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0003",
+      "applied_to_role": "clamp",
+      "reacted_at_role": "desk",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A clamp using a screw mechanism to press a jaw against the desk edge, with a friction pad for grip.",
+      "family": "TRANSMIT_LOAD",
+      "principle": "DIRECT_BEARING",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0005", "OBL-0006"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Requires torque and friction coefficients to confirm slip resistance."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A clamp using a cam lever to clamp onto the desk edge, with an over-center mechanism for locking.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "OVER_CENTRE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0007", "OBL-0008"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Over-center geometry must be proven to hold under load."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A clamp using a flexible strap or band to wrap around the desk edge and a ratchet to tighten.",
+      "family": "TRANSMIT_LOAD",
+      "principle": "TENSION_MEMBER",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0009", "OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Requires friction and tension analysis to prevent slip."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "predicates": [
+        "clamp can accommodate 18-40mm edge thickness",
+        "clamp does not slip under specified arm weight",
+        "clamp can be removed without tools"
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "predicates": [
+        "clamp can accommodate 18-40mm edge thickness",
+        "clamp does not slip under specified arm weight",
+        "clamp can be removed without tools"
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "predicates": [
+        "clamp can accommodate 18-40mm edge thickness",
+        "clamp does not slip under specified arm weight",
+        "clamp can be removed without tools"
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "The required clamping force to prevent slip under the monitor arm's weight is not specified.",
+      "why_open": "No torque or weight magnitude given in requirements.",
+      "alternatives": ["AMB-0001", "AMB-0002"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "AMB-0002"],
+      "blocks": ["CND-0001", "CND-0002", "CND-0003"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The clamp will be used in a typical indoor office environment.",
+      "why": "Not explicitly stated but reasonable.",
+      "would_be_invalidated_by": "If the request specifies outdoor or extreme environments."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The monitor arm is a standard commercial product.",
+      "why": "Not specified, but inferable.",
+      "would_be_invalidated_by": "If the user specifies a custom or unusual arm."
+    }
+  ]
+}

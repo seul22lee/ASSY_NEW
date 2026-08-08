@@ -1,0 +1,276 @@
+{
+ "_meta": {
+  "answers_prompt_sha256": "9a14b16df78aebc1",
+  "authored_by": "agent-in-repository",
+  "pairing_history": [
+   "re-paired after the response-schema section was added to the prompt; content unchanged and re-verified against the parser, contract validation and completeness check"
+  ]
+ },
+ "actors": [
+  {
+   "id": "ACT-0001",
+   "must_reach": [
+    "the surface that is pressed to release an item",
+    "the released item",
+    "the opening through which items are put in"
+   ],
+   "name": "user"
+  }
+ ],
+ "ambiguities": [
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [
+    "SRC-0001"
+   ],
+   "id": "AMB-0001",
+   "resolvable_when": "the items are described",
+   "statement": "What are the small items - their size, shape, weight and whether they are all alike?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0002"
+   ],
+   "id": "AMB-0002",
+   "resolvable_when": "a tolerance on the count is stated",
+   "statement": "Does about twenty bound the capacity or describe it?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0005"
+   ],
+   "id": "AMB-0003",
+   "resolvable_when": "a remaining count or fill level is stated",
+   "statement": "What counts as nearly empty?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [
+    "SRC-0003",
+    "SRC-0005"
+   ],
+   "id": "AMB-0004",
+   "resolvable_when": "the failure conditions are distinguished",
+   "statement": "What counts as jamming, and is a release that produces nothing the same failure as one that produces two?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0001",
+    "SRC-0004"
+   ],
+   "id": "AMB-0005",
+   "resolvable_when": "the wall construction and permitted fixings are stated",
+   "statement": "What wall is it mounted to, and what fixings are acceptable?"
+  },
+  {
+   "block_scopes": [
+    "blocks_evidence_interpretation"
+   ],
+   "conflicting_clauses": [
+    "SRC-0004"
+   ],
+   "id": "AMB-0006",
+   "resolvable_when": "the frequency or role of refilling is stated",
+   "statement": "Is refilling ordinary use or a maintenance activity?"
+  }
+ ],
+ "assumptions": [],
+ "freedoms": [
+  {
+   "decision": "how one item is separated from the rest",
+   "id": "FRE-0001",
+   "why_free": "the text requires one at a time and names no means of achieving it"
+  },
+  {
+   "decision": "how the items are held before release",
+   "id": "FRE-0002",
+   "why_free": "unstated"
+  },
+  {
+   "decision": "how the product is fixed to the wall",
+   "id": "FRE-0003",
+   "why_free": "wall-mounted is stated; no fixing, wall type or orientation is"
+  },
+  {
+   "decision": "the number of parts",
+   "id": "FRE-0004",
+   "why_free": "unstated"
+  },
+  {
+   "decision": "every dimension",
+   "id": "FRE-0005",
+   "why_free": "the text gives two counts and no length, area or mass"
+  },
+  {
+   "decision": "material and manufacturing process",
+   "id": "FRE-0006",
+   "why_free": "unstated"
+  },
+  {
+   "decision": "whether the pressed surface returns on its own",
+   "id": "FRE-0007",
+   "why_free": "the text says press and does not say what happens after"
+  }
+ ],
+ "requirements": [
+  {
+   "id": "REQ-0001",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "a product fixed to a wall that gives out the items it holds",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-1",
+   "statement_verbatim": "a wall-mounted dispenser for small items",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0002",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "the number of items held at once",
+   "quantity_class": "BAND",
+   "source_locator": "sentence-2a",
+   "statement_verbatim": "It should hold about twenty of them",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0003",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "the number of items released per press",
+   "quantity_class": "MAGNITUDE",
+   "source_locator": "sentence-2b",
+   "statement_verbatim": "release exactly one each time I press a lever",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0004",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "the number of items released per press, at its maximum",
+   "quantity_class": "MAGNITUDE",
+   "source_locator": "sentence-2b",
+   "statement_verbatim": "so I never get two at once",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0005",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "a path by which items are put in, entering from above",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-3",
+   "statement_verbatim": "I refill it from the top",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0006",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "refilling performed with the product still fixed in place",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-3",
+   "statement_verbatim": "without taking it off the wall",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0007",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "release continues to occur when few items remain",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-4",
+   "statement_verbatim": "It must not jam when it is nearly empty",
+   "verification_kind": "QUANTITATIVE"
+  }
+ ],
+ "scenarios": [
+  {
+   "actors": [
+    "ACT-0001"
+   ],
+   "environment": "fixed to a wall, gravity acting downward",
+   "id": "SCN-0001",
+   "kind": "OPERATION",
+   "name": "releasing one item",
+   "system_boundary": "the product, the items it holds and the wall it is fixed to; the user's hand and the released item once free are outside it"
+  },
+  {
+   "actors": [
+    "ACT-0001"
+   ],
+   "environment": "fixed to a wall; how few is not stated",
+   "id": "SCN-0002",
+   "kind": "OPERATION",
+   "name": "releasing when nearly empty",
+   "system_boundary": "as SCN-0001, with few items remaining"
+  },
+  {
+   "actors": [
+    "ACT-0001"
+   ],
+   "environment": "product remains fixed to the wall throughout",
+   "id": "SCN-0003",
+   "kind": "OPERATION",
+   "name": "refilling in place",
+   "system_boundary": "the product, the items being added and the wall"
+  },
+  {
+   "actors": [],
+   "environment": "no wall type or fixing method stated",
+   "id": "SCN-0004",
+   "kind": "ASSEMBLY",
+   "name": "fixing to the wall",
+   "system_boundary": "the product, the wall and whoever fixes it"
+  }
+ ],
+ "source_clauses": [
+  {
+   "directionality": "none",
+   "id": "SRC-0001",
+   "locator": "sentence-1",
+   "quantity_kinds": [],
+   "verbatim": "I want a wall-mounted dispenser for small items."
+  },
+  {
+   "directionality": "none",
+   "id": "SRC-0002",
+   "locator": "sentence-2a",
+   "quantity_kinds": [
+    "count"
+   ],
+   "verbatim": "It should hold about twenty of them"
+  },
+  {
+   "directionality": "none",
+   "id": "SRC-0003",
+   "locator": "sentence-2b",
+   "quantity_kinds": [
+    "count"
+   ],
+   "verbatim": "and release exactly one each time I press a lever, so I never get two at once."
+  },
+  {
+   "directionality": "downward",
+   "id": "SRC-0004",
+   "locator": "sentence-3",
+   "quantity_kinds": [],
+   "verbatim": "I refill it from the top without taking it off the wall."
+  },
+  {
+   "directionality": "none",
+   "id": "SRC-0005",
+   "locator": "sentence-4",
+   "quantity_kinds": [],
+   "verbatim": "It must not jam when it is nearly empty."
+  }
+ ]
+}

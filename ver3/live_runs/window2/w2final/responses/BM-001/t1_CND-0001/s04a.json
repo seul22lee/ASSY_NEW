@@ -1,0 +1,81 @@
+{
+  "scale": {
+    "basis": "RELATIVE",
+    "absolute": null,
+    "note": "No absolute quantities specified; using relative units."
+  },
+  "envelopes": [
+    {
+      "id": "ENV-0001",
+      "body": "BOD-0001",
+      "half_extent": [3, 2, 1],
+      "centre": [0, 0, 0],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0002",
+      "body": "BOD-0002",
+      "half_extent": [2, 1, 0.5],
+      "centre": [0, 0, 0.5],
+      "maturity": "PROVISIONAL"
+    },
+    {
+      "id": "ENV-0003",
+      "body": "BOD-0003",
+      "half_extent": [0.5, 0.5, 1.5],
+      "centre": [2, 0, 0.5],
+      "maturity": "PROVISIONAL"
+    }
+  ],
+  "region_volumes": [
+    {
+      "functional_region": "FRG-0001",
+      "half_extent": [0.5, 0.5, 0.5],
+      "centre": [2, 0, 1.5]
+    },
+    {
+      "functional_region": "FRG-0002",
+      "half_extent": [1.5, 1.5, 0.5],
+      "centre": [0, 0, 0]
+    },
+    {
+      "functional_region": "FRG-0003",
+      "half_extent": [3, 2, 0.5],
+      "centre": [0, 0, -0.5]
+    }
+  ],
+  "reach_results": [
+    {
+      "actor": "ACT-0001",
+      "target": "catch_tip_to_release",
+      "reachable": true,
+      "approach_side": "TOP",
+      "why": "The RELEASE_SURFACE is on the top side of the catch tip, accessible from above."
+    },
+    {
+      "actor": "ACT-0001",
+      "target": "interior_of_enclosed_volume",
+      "reachable": true,
+      "approach_side": "TOP",
+      "why": "The ACCESS region is open from the top to the interior volume."
+    }
+  ],
+  "assembly_directions": [
+    {
+      "assembly_step": "ASY-0001",
+      "direction": [0, 0, 0]
+    },
+    {
+      "assembly_step": "ASY-0002",
+      "direction": [0, 0, 1]
+    },
+    {
+      "assembly_step": "ASY-0003",
+      "direction": [0, 0, 1]
+    }
+  ],
+  "elimination": {
+    "eliminated": false,
+    "reason": null
+  }
+}

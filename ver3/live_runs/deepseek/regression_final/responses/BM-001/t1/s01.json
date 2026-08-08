@@ -1,0 +1,184 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "locator": "req-sentence-1",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "locator": "req-sentence-2",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "locator": "req-sentence-3",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "locator": "req-sentence-4",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0005",
+      "verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "locator": "req-sentence-5",
+      "quantity_kinds": [],
+      "directionality": "none"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "box is compact for desktop use and has a reusable latch",
+      "source_locator": "req-sentence-1",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "box opens and closes repeatedly without accidental opening during normal handling",
+      "source_locator": "req-sentence-2",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "kind": "USABILITY",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "latch is easy for a user to operate while remaining secure during transport",
+      "source_locator": "req-sentence-3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "kind": "PROCESS",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "product is suitable for low-cost manufacturing and practical for desktop use",
+      "source_locator": "req-sentence-4",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0005",
+      "statement_verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "kind": "PROCESS",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "design is mechanically plausible and easy to assemble",
+      "source_locator": "req-sentence-5",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "normal_handling",
+      "kind": "OPERATION",
+      "system_boundary": "storage box with latch",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": "normal handling conditions"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "transport",
+      "kind": "TRANSPORT",
+      "system_boundary": "storage box with latch",
+      "actors": [],
+      "environment": "during transport"
+    },
+    {
+      "id": "SCN-0003",
+      "name": "assembly",
+      "kind": "ASSEMBLY",
+      "system_boundary": "product",
+      "actors": [
+        "ACT-0002"
+      ],
+      "environment": "assembly context"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": [
+        "latch"
+      ]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "assembler",
+      "must_reach": []
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Materials, manufacturing process, and specific latch mechanism are not specified.",
+      "why_free": "The text only states that the product should be suitable for low-cost manufacturing, leaving the implementation details open."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "Dimensions and exact shape of the box and latch are not specified.",
+      "why_free": "The text only requests a compact design for desktop use, without providing specific measurements or geometry."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "Method for ensuring 'low-cost' is not specified.",
+      "why_free": "The text does not define how low-cost is achieved, leaving the means open."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The meaning of 'compact' is ambiguous; no specific size or volume is given.",
+      "conflicting_clauses": [],
+      "resolvable_when": "when the product requirements are refined with specific constraints",
+      "block_scopes": [
+        "dimensioning"
+      ]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The meaning of 'easy to assemble' is ambiguous; it does not specify the number of parts, tools, or time.",
+      "conflicting_clauses": [],
+      "resolvable_when": "when assembly process is designed",
+      "block_scopes": [
+        "assembly"
+      ]
+    },
+    {
+      "id": "AMB-0003",
+      "statement": "The meaning of 'normal handling' is ambiguous; it is not defined what actions or conditions count as normal handling.",
+      "conflicting_clauses": [],
+      "resolvable_when": "when the use cases are defined",
+      "block_scopes": [
+        "operation"
+      ]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The latch is a separate component from the box.",
+      "why": "The text refers to 'the latch' as a distinct entity.",
+      "would_be_invalidated_by": "A design where the latch is integral to the box material."
+    }
+  ]
+}

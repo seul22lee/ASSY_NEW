@@ -1,0 +1,82 @@
+{
+  "source_clauses": [
+    "I need a clamp that fixes a monitor arm to the edge of my desk.",
+    "Desk edges here are between 18 and 40 mm thick.",
+    "Once it is tight it must not slip or rotate under the weight of the arm.",
+    "I want to be able to take it off and move it to another desk without any tools."
+  ],
+  "requirements": [
+    {
+      "id": 1,
+      "statement": "The clamp must fix a monitor arm to the edge of a desk.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 2,
+      "statement": "The clamp must fit desk edges with thickness between 18 and 40 mm.",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": 3,
+      "statement": "Once tight, the clamp must not slip or rotate under the weight of the arm.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 4,
+      "statement": "The clamp must be removable and movable to another desk without tools.",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "kind": "OPERATION",
+      "description": "Using the clamp to fix a monitor arm to a desk edge."
+    },
+    {
+      "id": 2,
+      "kind": "OPERATION",
+      "description": "Tightening the clamp so it holds the arm."
+    },
+    {
+      "id": 3,
+      "kind": "OPERATION",
+      "description": "Removing the clamp from the desk."
+    },
+    {
+      "id": 4,
+      "kind": "OPERATION",
+      "description": "Moving the clamp to another desk and reattaching it."
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "monitor arm",
+      "role": "to be fixed by the clamp"
+    },
+    {
+      "id": 2,
+      "name": "desk edge",
+      "role": "surface to which the clamp is fixed"
+    },
+    {
+      "id": 3,
+      "name": "user",
+      "role": "operates the clamp (tightening, removing, moving) without tools"
+    }
+  ],
+  "freedoms": [
+    "The specific mechanism for clamping is not specified.",
+    "The material of the clamp is not specified.",
+    "The dimensions of the clamp beyond fitting the desk edge thickness are not specified.",
+    "The weight of the monitor arm is not specified."
+  ],
+  "ambiguities": [
+    "The phrase 'under the weight of the arm' is ambiguous: it does not specify whether the arm is in a particular position or moving.",
+    "The phrase 'without any tools' is ambiguous: it does not specify whether this applies only to removal and moving, or also to installation and tightening."
+  ],
+  "assumptions": [
+    "The clamp is intended for a typical monitor arm, but the weight is not known."
+  ]
+}

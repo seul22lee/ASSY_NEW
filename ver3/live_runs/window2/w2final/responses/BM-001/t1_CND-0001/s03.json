@@ -1,0 +1,178 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "fixed base and enclosure body",
+      "instance_identity": "one monolithic part",
+      "addresses_obligations": ["OBL-0001", "OBL-0002", "OBL-0008", "OBL-0009", "OBL-0010"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "closing element that rotates about a fixed axis",
+      "instance_identity": "one rigid part",
+      "addresses_obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0008", "OBL-0009", "OBL-0010"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "compliant catch that retains the closing element",
+      "instance_identity": "one monolithic compliant part",
+      "addresses_obligations": ["OBL-0005", "OBL-0006", "OBL-0007"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["base_body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["closing_element"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["catch_anchor"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0003",
+      "members": ["catch_tip"],
+      "is_default": false
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0003",
+      "dof": [],
+      "axis_direction": "NONE"
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["RZ"],
+      "axis_direction": "+Z"
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0004",
+      "dof": ["TX"],
+      "axis_direction": "+X",
+      "compliance": {
+        "mode": "BENDING",
+        "direction": "TX",
+        "required_travel": "d",
+        "allowable_travel_status": "UNSPECIFIED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "catch_arm",
+        "root_interface": "IFC-0001",
+        "activation_window": "CLOSING_ENGAGEMENT"
+      }
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0003", "BOD-0001"],
+      "interaction_kind": "FIXED",
+      "nominal_status": "ATTACHED",
+      "addresses_obligations": ["OBL-0009"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0002", "BOD-0001"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "ENGAGED_IN_CLOSED",
+      "addresses_obligations": ["OBL-0005"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0002", "BOD-0001"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "SEPARATED_IN_OPEN",
+      "addresses_obligations": ["OBL-0003"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0003", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "ENGAGED_IN_CLOSED",
+      "addresses_obligations": ["OBL-0005"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "ALIGNED_FOR_INSERTION",
+      "addresses_obligations": ["OBL-0010"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "CLOSED",
+      "kind": "CLOSED",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "OPEN",
+      "kind": "OPEN",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "RELEASE_SURFACE",
+      "owning_bodies": ["BOD-0003"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["catch_tip_to_release"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001", "BOD-0002"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["interior_of_enclosed_volume"]
+    },
+    {
+      "id": "FRG-0003",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "geometry and dimensions of the catch",
+      "why_open": "the catch must allow sufficient deflection for engagement while resisting accidental release, but dimensions are not yet decided",
+      "alternatives": ["width and thickness of the catch", "geometry of the engagement surface"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["AMB-0002", "AMB-0003"],
+      "blocks": ["OBL-0006"]
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "axis of rotation placement",
+      "why_open": "the axis location depends on the size of the box and the clearance required for opening, which are not yet defined",
+      "alternatives": ["axis on the rear edge", "axis on the side"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0001", "FRE-0006"],
+      "blocks": ["OBL-0003"]
+    }
+  ]
+}

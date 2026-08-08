@@ -1,0 +1,263 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "frame and reservoir",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0001", "OBL-0004", "OBL-0006", "OBL-0007", "OBL-0008"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "upper gate",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "lower gate",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    },
+    {
+      "id": "BOD-0004",
+      "role": "linkage connecting upper and lower gates",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "BOD-0005",
+      "role": "return spring for upper gate",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    },
+    {
+      "id": "BOD-0006",
+      "role": "return spring for lower gate",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    },
+    {
+      "id": "BOD-0007",
+      "role": "wall mounting interface",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0006", "OBL-0007"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["frame", "reservoir", "wall_mount"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["gate_plate", "gate_face"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["gate_plate", "gate_face"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": ["link_arm"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0005",
+      "members": ["spring_coil"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0006",
+      "body": "BOD-0006",
+      "members": ["spring_coil"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0007",
+      "body": "BOD-0007",
+      "members": ["mounting_plate"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0003",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0004",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0004",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0005",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0005",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0006",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0006",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0007",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0007",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "SEPARATED",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "SEPARATED",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0001", "BOD-0002", "BOD-0003"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "CLEAR",
+      "addresses_obligations": ["OBL-0002", "OBL-0004"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0002", "BOD-0004"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "CLEAR",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0003", "BOD-0004"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "CLEAR",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0006",
+      "bodies": ["BOD-0001", "BOD-0007"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "ATTACHED",
+      "addresses_obligations": ["OBL-0006", "OBL-0007"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "rest",
+      "kind": "REST",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006", "BOD-0007"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "actuated",
+      "kind": "ACTUATED",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006", "BOD-0007"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the surface that is pressed to release an item", "the released item", "the opening through which items are put in"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006", "BOD-0007"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001", "BOD-0002", "BOD-0003"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0004",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001", "BOD-0002", "BOD-0003"],
+      "required_by_actors": [],
+      "reach_targets": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-0001",
+      "decision": "how the gates are linked and kept out of phase",
+      "why_open": "The exact linkage geometry and the hard stops are not yet specified; the linkage is declared but its travel bounds are not.",
+      "alternatives": ["a four-bar linkage with fixed pivot geometry", "a rack and pinion", "a cam and follower"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": ["OBL-0002"]
+    },
+    {
+      "id": "S3U-0002",
+      "decision": "how the return to rest state is achieved",
+      "why_open": "Whether a spring or gravity achieves the return is not decided; the candidate says 'return' but not the means.",
+      "alternatives": ["spring return", "gravity return", "user returns"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0007"],
+      "blocks": ["OBL-0003"]
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+reference_id: EXE-BM003-01
+schema_version: 0.1.0
+units: mm, degrees
+
+frame: >
+  The world frame of parameters.yaml. BODY-HUB, the three hinge pins, the ring
+  captor and the top support are fixed in it. Only the three legs and the ring
+  move, and both move as rigid transforms of their as-built solids: nothing here
+  deforms and no body is rebuilt per configuration.
+
+as_built_configuration: DEPLOYED_LOCKED
+why: >
+  build() returns the configuration the assembly sequence ends in, because step 7
+  sweeps the as-built solids and the as-built pose therefore has to be the
+  assembled pose. This design must end assembly DEPLOYED: the ring cannot be
+  lowered onto the heels unless the legs are already swung out. FRE-BM-003-013
+  leaves the arrival configuration free and AMB-BM-003-010 leaves stored-state
+  holding open, so neither choice is read back as a requirement.
+
+degrees_of_freedom:
+  theta:
+    symbol: theta
+    body: each of BODY-LEG-A, BODY-LEG-B, BODY-LEG-C
+    kind: revolute
+    axis: >
+      the station's hinge axis - the line through
+      (hinge_r cos az, hinge_r sin az, hinge_z) along (-sin az, cos az, 0)
+    zero: >
+      theta = 0 is the stored pose: the leg shaft hangs parallel to the hub axis.
+      theta increases as the leg swings radially outward, so the foot moves away
+      from the axis and the heel drops.
+    realised_by: BODY-PIN-A / -B / -C in the hub's clevis bores
+    coupled: >
+      not coupled. The three legs are independent revolutes. FRE-BM-003-004
+      leaves coordination free; this design does not couple them and claims no
+      simultaneity.
+  ring_z:
+    symbol: ring_z
+    body: BODY-RING
+    kind: prismatic along the hub axis
+    lower_stop: the pedestal top face, at seat_z
+    upper_stop: the ring captor's underside, at ring_z_released + ring_h
+  ring_phi:
+    symbol: ring_phi
+    body: BODY-RING
+    kind: revolute about the hub axis
+    gated_by: >
+      the three anti-rotation ribs. While ring_z is at the lower stop the ribs
+      occupy the ring's keyways and ring_phi is confined to the keyway-minus-rib
+      angular slack. The ring must first be lifted past rib_z1.
+
+configurations:
+
+  - id: STORED
+    theta: 0.0
+    ring_z: DERIVED ring_z_released
+    ring_phi: 60.0
+    description: >
+      All three legs alongside the body; the ring lifted and turned so its arms
+      sit over the rib tops rather than over the heels. This is the compact
+      configuration.
+    note: >
+      The legs are not held in this configuration by anything. AMB-BM-003-010
+      records that the source requires attachment when folded but not stored-state
+      holding, and no such holding is claimed here.
+
+  - id: DEPLOYED_LOCKED
+    theta: 30.0
+    ring_z: DERIVED ring_z_locked
+    ring_phi: 0.0
+    description: >
+      Legs out; ring down, seated on the pedestal, arms directly over the heels
+      with the declared blocking gap. This is the configuration the product is
+      used in and the one the state-maintenance claim is about.
+
+  - id: DEPLOYED_RELEASED
+    theta: 30.0
+    ring_z: DERIVED ring_z_released
+    ring_phi: 60.0
+    description: >
+      Legs still out; the ring lifted clear of the ribs and turned so the arms
+      have moved off the heels. Folding is now geometrically available.
+
+  - id: LIFTED_ALIGNED
+    theta: 30.0
+    ring_z: DERIVED ring_z_released
+    ring_phi: 0.0
+    declared_state: false
+    description: >
+      The configuration between the lift and the turn. It is a waypoint of the
+      declared paths, not one of the three states this reference reports on, and
+      no claim is made about it beyond the interference measurements on the
+      segments that pass through it.
+
+segments:
+  method: >
+    Each segment is a straight-line interpolation of (theta, ring_z, ring_phi)
+    between two waypoints. Each sample is a rigid transform of the as-built
+    solids and every body pair is measured at every sample with the kernel.
+
+  - id: M1_UNFOLD
+    from: STORED
+    to: DEPLOYED_RELEASED
+    moves: the three legs, theta 0 -> 30
+    user_action: swing each leg out by hand
+  - id: M2_RING_TURN_TO_LOCK
+    from: DEPLOYED_RELEASED
+    to: LIFTED_ALIGNED
+    moves: BODY-RING, ring_phi 60 -> 0
+    user_action: turn the ring back until its keyways line up with the ribs
+  - id: M3_RING_LOWER_TO_LOCK
+    from: LIFTED_ALIGNED
+    to: DEPLOYED_LOCKED
+    moves: BODY-RING, ring_z released -> locked
+    user_action: let the ring down onto the pedestal
+  - id: M4_RING_LIFT_TO_RELEASE
+    from: DEPLOYED_LOCKED
+    to: LIFTED_ALIGNED
+    moves: BODY-RING, ring_z locked -> released
+    user_action: lift the ring - first half of the deliberate release
+  - id: M5_RING_TURN_TO_RELEASE
+    from: LIFTED_ALIGNED
+    to: DEPLOYED_RELEASED
+    moves: BODY-RING, ring_phi 0 -> 60
+    user_action: turn the ring - second half of the deliberate release
+  - id: M6_FOLD
+    from: DEPLOYED_RELEASED
+    to: STORED
+    moves: the three legs, theta 30 -> 0
+    user_action: fold each leg back
+
+operational_cycle:
+  deploy: [M1_UNFOLD, M2_RING_TURN_TO_LOCK, M3_RING_LOWER_TO_LOCK]
+  release: [M4_RING_LIFT_TO_RELEASE, M5_RING_TURN_TO_RELEASE]
+  fold: [M6_FOLD]
+  repeatable_because: >
+    M4 is M3 reversed, M5 is M2 reversed and M6 is M1 reversed. No segment
+    contains a step that cannot be undone, and the stored configuration reached
+    at the end of M6 is the same transform set the cycle started from. That is
+    what "repeatable" means here; it is not a cycle count and implies nothing
+    about durability (AMB-BM-003-006).
+
+deliberate_release:
+  what_it_is: the two-motion sequence M4 then M5
+  why_two_motions: >
+    The ring cannot be turned while it is down, because the ribs are in its
+    keyways; and lifting alone does not free the legs, because the lifted arms
+    are still over the heels and stop the fold part way. Both facts are measured,
+    not asserted - see validation/state_maintenance.json.
+  representation: >
+    a persistent RELEASED configuration, one of the representations
+    NRM-BM-003-011 admits. The Oracle does not require this shape and admits
+    several others; nothing here should be read as preferring it.
+
+not_claimed:
+  - "any force or torque needed to lift, turn, swing or fold anything (AMB-BM-003-004)"
+  - "any behaviour under gravity or under a disturbance (AMB-BM-003-005)"
+  - "any velocity, timing or dynamic effect; every path here is quasi-static"
+  - "any tolerance, play or wear beyond the exact nominal geometry (AMB-BM-003-007)"

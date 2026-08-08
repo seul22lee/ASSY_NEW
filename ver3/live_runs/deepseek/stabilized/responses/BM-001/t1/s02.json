@@ -1,0 +1,246 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must be a storage container that can contain items.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "derivation_premises": ["A container must have an interior volume to store items."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must be compact and suitable for a desktop.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "derivation_premises": ["Desktop suitability imposes size constraints that depend on the mechanism."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The product must have a latch that can be engaged and disengaged.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002", "REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A latch must be operable to open and close."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The latch must be reusable, meaning it must withstand repeated open-close cycles.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s05",
+      "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+      "route_available": false,
+      "derivation_premises": ["Repeated operation induces wear that depends on material and mechanism."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The box must not open accidentally during normal handling.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "derivation_premises": ["Accidental opening occurs under loads that must be reacted to keep the latch closed."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The latch must be easy for a user to operate.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Effort and reachability depend on mechanism and geometry."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The lid or closing element must remain secure during transport.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "derivation_premises": ["Transport loads must be reacted to prevent opening."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The product must be suitable for low-cost manufacturing.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "derivation_premises": ["Cost depends on manufacturing process and material."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The design must be mechanically plausible.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "derivation_premises": ["A mechanism must have the necessary degrees of freedom to function."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The product must be easy to assemble.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "derivation_premises": ["Assembly requires that parts can be placed without interference."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the moving closing role",
+      "reacted_at_role": "the body the product grips",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the product body",
+      "reacted_at_role": "the surface the product stands on",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the moving closing role",
+      "reacted_at_role": "the body the product grips",
+      "direction_class": "TRANSVERSE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the moving closing role",
+      "reacted_at_role": "the body the product grips",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Box with a latch using a friction hold and a compliant flexure for reuse.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "FRICTION_HOLD",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0009"],
+      "obligations_created": ["OBL-0011", "OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction retention requires contact analysis; route not available."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Box with a latch using an over-centre mechanism for secure closure.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "OVER_CENTRE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0009"],
+      "obligations_created": ["OBL-0013", "OBL-0014"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Ideal joint analysis can verify over-centre behaviour."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Box with a latch using a detent or snap fit for simplicity.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "DETENT_OR_SNAP",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0009"],
+      "obligations_created": ["OBL-0015", "OBL-0016"],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "Snap action requires compliance analysis; route not available."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0009", "OBL-0011", "OBL-0012"],
+      "predicates": [
+        "The box has a friction-based latch that holds closed under normal handling.",
+        "The latch is operable by a user.",
+        "The latch withstands repeated operation without failure."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0009", "OBL-0013", "OBL-0014"],
+      "predicates": [
+        "The box has an over-centre latch that remains closed under normal handling.",
+        "The latch is operable by a user.",
+        "The latch withstands repeated operation without failure."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0009", "OBL-0015", "OBL-0016"],
+      "predicates": [
+        "The box has a snap-fit latch that stays closed under normal handling.",
+        "The latch is operable by a user.",
+        "The latch withstands repeated operation without failure."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which latch mechanism to select",
+      "why_open": "The requirements do not specify the mechanism, and all three candidates satisfy the primary obligations with available evidence routes (or note lack of route).",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["FRE-0003", "AMB-0001"],
+      "blocks": ["OBL-0004", "OBL-0008", "OBL-0010"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The latch is part of the product and is not a separate component.",
+      "why": "It is described as a feature of the box.",
+      "would_be_invalidated_by": "If the latch is specified as separate."
+    }
+  ]
+}

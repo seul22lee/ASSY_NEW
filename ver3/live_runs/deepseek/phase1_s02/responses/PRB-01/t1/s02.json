@@ -1,0 +1,247 @@
+{
+  "obligations": [
+    {
+      "obligation_id": "OBL-0001",
+      "derived_from": ["REQ-0001"],
+      "statement": "The product must be a wall-mounted dispenser for small items.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0002",
+      "derived_from": ["REQ-0001"],
+      "statement": "The product must be fixed to a wall during operation.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0003",
+      "derived_from": ["REQ-0001"],
+      "statement": "The product must give out the items it holds.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0004",
+      "derived_from": ["REQ-0002"],
+      "statement": "The product must be able to hold about twenty items at once.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "TOLERANCE_ANALYSIS",
+      "route_available": false,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0005",
+      "derived_from": ["REQ-0003"],
+      "statement": "The product must release exactly one item per press of a lever.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0006",
+      "derived_from": ["REQ-0004"],
+      "statement": "The product must never release two items at once.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0007",
+      "derived_from": ["REQ-0005"],
+      "statement": "The product must provide a path for items to be put in from the top.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0008",
+      "derived_from": ["REQ-0006"],
+      "statement": "The product must allow refilling while it remains fixed to the wall.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0009",
+      "derived_from": ["REQ-0007"],
+      "statement": "The product must not jam when it is nearly empty.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    }
+  ],
+  "load_cases": [
+    {
+      "load_case_id": "LC-0001",
+      "scenario": "SCN-0001",
+      "description": "Product fixed to wall, gravity acting downward; user presses lever to release one item.",
+      "applied_on_role": "PRODUCT_BODY",
+      "reacted_at_role": "WALL_INTERFACE",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0002",
+      "scenario": "SCN-0001",
+      "description": "User presses lever to release an item.",
+      "applied_on_role": "ACTUATOR",
+      "reacted_at_role": "PRODUCT_BODY",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0003",
+      "scenario": "SCN-0001",
+      "description": "Weight of items held (about twenty small items) acting downward.",
+      "applied_on_role": "ITEM_HOLDING_REGION",
+      "reacted_at_role": "WALL_INTERFACE",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0004",
+      "scenario": "SCN-0002",
+      "description": "Product fixed to wall with few items remaining; gravity acting downward.",
+      "applied_on_role": "PRODUCT_BODY",
+      "reacted_at_role": "WALL_INTERFACE",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0005",
+      "scenario": "SCN-0003",
+      "description": "Refilling from top while product fixed to wall; items added from above.",
+      "applied_on_role": "ITEM_ENTRY_PATH",
+      "reacted_at_role": "PRODUCT_BODY",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0006",
+      "scenario": "SCN-0004",
+      "description": "Product fixed to wall; no wall type or fixing method stated.",
+      "applied_on_role": "WALL_INTERFACE",
+      "reacted_at_role": "WALL",
+      "direction_class": "TRANSVERSE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "CAND-0001",
+      "principle_families": {
+        "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+        "CONVERT_MOTION": "CRANK_SLIDER",
+        "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+        "BOUND_MOTION": "HARD_STOP",
+        "RETAIN_BODY": "GEOMETRIC_UNDERCUT",
+        "GUIDE_MOTION": "PRISMATIC_GUIDE",
+        "TRANSMIT_LOAD": "DIRECT_BEARING",
+        "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+        "ACTUATE": "DIRECT_MANUAL",
+        "METER_DISCRETE_QUANTITY": "SINGLE_ITEM_POCKET"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009"],
+      "obligations_created": ["OBL-0010", "OBL-0011"],
+      "evidence_route_verdict": {
+        "route_needed": "MOBILITY_ANALYSIS",
+        "route_available": true
+      }
+    },
+    {
+      "candidate_id": "CAND-0002",
+      "principle_families": {
+        "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+        "CONVERT_MOTION": "LEVER_LINKAGE",
+        "MAINTAIN_CONFIGURATION": "OVER_CENTRE",
+        "BOUND_MOTION": "JOINT_LIMIT_BY_GEOMETRY",
+        "RETAIN_BODY": "ELASTIC_CAPTURE",
+        "GUIDE_MOTION": "JOURNAL_SUPPORT",
+        "TRANSMIT_LOAD": "SHEAR_MEMBER",
+        "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+        "ACTUATE": "STORED_ENERGY",
+        "METER_DISCRETE_QUANTITY": "INDEXING_ROTOR"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009"],
+      "obligations_created": ["OBL-0010", "OBL-0012"],
+      "evidence_route_verdict": {
+        "route_needed": "MOBILITY_ANALYSIS",
+        "route_available": true
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "contract_id": "AC-0001",
+      "obligation_id": "OBL-0004",
+      "ambiguity_id": "AMB-0001",
+      "acceptance_test": "The product must hold at least twenty items of the specified size and shape without overflow, and the exact capacity may be verified once items are described.",
+      "status": "BLOCKED"
+    },
+    {
+      "contract_id": "AC-0002",
+      "obligation_id": "OBL-0005",
+      "ambiguity_id": "AMB-0002",
+      "acceptance_test": "The product must release exactly one item per press, and the tolerance on 'exactly' is to be defined.",
+      "status": "BLOCKED"
+    },
+    {
+      "contract_id": "AC-0003",
+      "obligation_id": "OBL-0009",
+      "ambiguity_id": "AMB-0003",
+      "acceptance_test": "The product must not jam when nearly empty, where 'nearly empty' must be defined.",
+      "status": "BLOCKED"
+    },
+    {
+      "contract_id": "AC-0004",
+      "obligation_id": "OBL-0005",
+      "ambiguity_id": "AMB-0004",
+      "acceptance_test": "The product must not jam, and a release that produces nothing or two items must be defined in terms of failure.",
+      "status": "BLOCKED"
+    },
+    {
+      "contract_id": "AC-0005",
+      "obligation_id": "OBL-0002",
+      "ambiguity_id": "AMB-0005",
+      "acceptance_test": "The product must be fixable to a wall, with the wall type and fixings to be specified.",
+      "status": "BLOCKED"
+    }
+  ],
+  "unresolved": [
+    {
+      "decision_id": "UNR-0001",
+      "description": "The choice between CAND-0001 and CAND-0002 is unresolved because both address all obligations and rely on the same evidence route (MOBILITY_ANALYSIS, which is available). The distinguishing evidence would be the specific behavior of the metering mechanism under the defined item characteristics and jamming conditions.",
+      "kept_open_by": ["AMB-0001", "AMB-0004"],
+      "alternatives_kind": "ENTITY_REFS",
+      "alternatives": ["CAND-0001", "CAND-0002"]
+    }
+  ],
+  "assumptions": [
+    "The product has a body, a wall interface, an item-holding region, and an actuator.",
+    "The product is rigid for the purpose of load cases and candidate evaluation.",
+    "Gravity acts downward, and the wall is vertical.",
+    "The items are small and discrete, but their exact properties are not specified.",
+    "The lever is operated by the user's hand, and the press direction is not defined; it is assumed to be a push or pull that creates a transverse load on the actuator.",
+    "Refilling involves placing items from above into an entry path; the load case for refilling is considered moderate.",
+    "The product must be robust to the wall fixing method, but no specific loads from fixing are given.",
+    "The load cases are defined at the role level and may be allocated to specific parts during design."
+  ]
+}

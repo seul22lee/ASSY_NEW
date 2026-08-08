@@ -1,0 +1,268 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must provide a reusable latch that can be engaged and disengaged repeatedly.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A reusable latch must be able to change state more than once."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The box must have an openable and closable configuration that can be maintained without accidental opening during normal handling.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "derivation_premises": ["Accidental opening is prevented only if the latched configuration is maintained under expected forces."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The latch must be operable by a single user with reasonable effort.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A user applies forces to operate the latch; if the required force exceeds human capability, the latch is inoperable."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The latch must remain secure during transport, meaning it must resist accidental release under transport-induced loads.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Transport induces loads on the latch; if the latch disengages under these loads, security is not maintained."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must be suitable for low-cost manufacturing.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "derivation_premises": ["Low-cost manufacturing imposes limits on materials and processes."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The product must be practical for desktop use.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "derivation_premises": ["Desktop use requires the product to be sized and shaped to fit on a desktop and not interfere with normal desk tasks."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The product must be mechanically plausible, meaning its moving parts can be arranged and supported in a realizable configuration.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "derivation_premises": ["A mechanically plausible design must be kinematically feasible."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The product must be easy to assemble.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "derivation_premises": ["Assembly requires parts to be inserted into their positions without interference."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The product must constrain relative motion between the box and the lid (or equivalent) to allow opening and closing while preventing separation under normal use.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "derivation_premises": ["Opening and closing require a defined relative motion between box and closure."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The product must allow the user to reach the latch and the box interior.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The user must be able to physically access the latch and the interior to operate and use the box."]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The latch must have a stable closed configuration that resists accidental opening due to external disturbances.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "derivation_premises": ["If the closed configuration is unstable, small disturbances will cause opening."]
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The latch must be easily released by the user but not by accidental forces.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Human-applied forces differ from typical disturbance forces in magnitude and direction."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the latch",
+      "reacted_at_role": "the box frame",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the product (box and latch)",
+      "reacted_at_role": "the external surface (during transport)",
+      "direction_class": "TRANSVERSE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the product (box and latch)",
+      "reacted_at_role": "the external surface (during transport)",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0004",
+      "applied_to_role": "the product (box)",
+      "reacted_at_role": "the desktop surface",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Latch using a simple hook and catch with a spring-loaded lever, molded as part of the box and lid.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "DETENT_OR_SNAP",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0009", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction and engagement forces require contact analysis."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Latch using a rotating hook that engages a pin on the lid, with a torsion spring to hold it closed.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "FRICTION_HOLD",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0009", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction retention requires contact analysis."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Latch using a sliding bolt that engages a keeper, with a spring bias to the locked position.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "FRICTION_HOLD",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0009", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction and sliding forces require contact analysis."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0009", "OBL-0011", "OBL-0012"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0009", "OBL-0011", "OBL-0012"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0009", "OBL-0011", "OBL-0012"],
+      "predicates": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which latch mechanism to choose",
+      "why_open": "All three candidates satisfy the same obligations and have the same evidence route availability.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "AMB-0002", "AMB-0003", "FRE-0001"],
+      "blocks": ["OBL-0003", "OBL-0004", "OBL-0012"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The box has a lid that can be latched closed.",
+      "why": "A 'latch' implies a moveable closure for an opening.",
+      "would_be_invalidated_by": "If the design were a drawer or slide, latch would mean something else."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "External forces during transport are predominantly inertial and gravitational.",
+      "why": "Transport scenarios typically involve these loads.",
+      "would_be_invalidated_by": "If specific impact or vibration loads were specified."
+    }
+  ]
+}

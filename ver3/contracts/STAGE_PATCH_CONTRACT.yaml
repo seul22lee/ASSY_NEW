@@ -28,6 +28,7 @@ patch_envelope:
     - stage_attempt
     - parent_state_hash
     - operations
+    - invalidation_cone
     - execution_status
     - provenance
     - declared_incompleteness
@@ -44,6 +45,21 @@ patch_envelope:
     execution_status: >
       One of the twelve values in STATUS_SEMANTICS.execution_statuses. A patch
       carries the status of the work that produced it, including a degraded one.
+    invalidation_cone: >
+      For each entity or value this patch changes, the set of entities, derived
+      values and EvidenceItems whose validity depends on it, marked STALE. It is
+      computed here, when the change is made - NOT when a consequence surfaces.
+      The cone lives on the patch and no longer only on FailureProvenance at s12:
+      invalidation that fires only after a failure is attributed at the end of
+      the pipeline is too late. BM-003 R5 is the case: shortening an arm radius
+      silently destroyed the lift-only property, and nothing was marked stale
+      because nothing had failed YET.
+      Computation: every check declares its input value set; a change marks STALE
+      exactly those checks whose input set intersects the transitive closure of
+      the changed values. BM-002 demonstrates the discrimination - three changes
+      each recorded an explicit UNCHANGED result, because the travel check's
+      inputs did not include the moved axis height.
+      Checks outside the cone are PRESERVED, not recomputed.
     declared_incompleteness: >
       What the stage knows it did not finish. A stage may emit a patch with
       execution_status CONTRACT_INCOMPLETE and a populated list here. It may NOT

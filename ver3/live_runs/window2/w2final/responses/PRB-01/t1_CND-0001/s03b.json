@@ -1,0 +1,323 @@
+{
+  "mobility": [
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": {"TX": "B", "TY": "B", "TZ": "B", "RX": "B", "RY": "B", "RZ": "B"},
+      "detail": {
+        "TX": {"blocked_by_body": "BOD-0006", "direction": "TX", "defeat_test": "Apply lateral force at BOD-0001; if it moves, fix is insufficient.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TY": {"blocked_by_body": "BOD-0006", "direction": "TY", "defeat_test": "Lift BOD-0001; if it separates, fix is insufficient.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TZ": {"blocked_by_body": "BOD-0006", "direction": "TZ", "defeat_test": "Push BOD-0001 in Z; if moves, fix is insufficient.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RX": {"blocked_by_body": "BOD-0006", "direction": "RX", "defeat_test": "Torque about X; if rotates, fix is insufficient.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RY": {"blocked_by_body": "BOD-0006", "direction": "RY", "defeat_test": "Torque about Y; if rotates, fix is insufficient.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RZ": {"blocked_by_body": "BOD-0006", "direction": "RZ", "defeat_test": "Torque about Z; if rotates, fix is insufficient.", "why_blocked": "BASE_FIXED_TO_WALL"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": {"TX": "B", "TY": "B", "TZ": "B", "RX": "B", "RY": "B", "RZ": "B"},
+      "detail": {
+        "TX": {"blocked_by_body": "BOD-0006", "direction": "TX", "defeat_test": "Apply lateral force; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TY": {"blocked_by_body": "BOD-0006", "direction": "TY", "defeat_test": "Lift; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TZ": {"blocked_by_body": "BOD-0006", "direction": "TZ", "defeat_test": "Push; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RX": {"blocked_by_body": "BOD-0006", "direction": "RX", "defeat_test": "Torque; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RY": {"blocked_by_body": "BOD-0006", "direction": "RY", "defeat_test": "Torque; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RZ": {"blocked_by_body": "BOD-0006", "direction": "RZ", "defeat_test": "Torque; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0003",
+      "dof": {"TX": "B", "TY": "B", "TZ": "B", "RX": "B", "RY": "B", "RZ": "B"},
+      "detail": {
+        "TX": {"blocked_by_body": "BOD-0006", "direction": "TX", "defeat_test": "Apply lateral force; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TY": {"blocked_by_body": "BOD-0006", "direction": "TY", "defeat_test": "Lift; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TZ": {"blocked_by_body": "BOD-0006", "direction": "TZ", "defeat_test": "Push; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RX": {"blocked_by_body": "BOD-0006", "direction": "RX", "defeat_test": "Torque; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RY": {"blocked_by_body": "BOD-0006", "direction": "RY", "defeat_test": "Torque; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RZ": {"blocked_by_body": "BOD-0006", "direction": "RZ", "defeat_test": "Torque; if moves, attach fails.", "why_blocked": "BASE_FIXED_TO_WALL"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": {"TX": "M", "TY": "B", "TZ": "M", "RX": "M", "RY": "M", "RZ": "B"},
+      "detail": {
+        "TY": {"blocked_by_body": "BOD-0004", "direction": "-Y", "defeat_test": "Pull gate +Y; if moves, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RZ": {"blocked_by_body": "BOD-0004", "direction": "RZ", "defeat_test": "Rotate gate about Z; if rotates, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": {"TX": "M", "TY": "B", "TZ": "M", "RX": "M", "RY": "M", "RZ": "B"},
+      "detail": {
+        "TY": {"blocked_by_body": "BOD-0004", "direction": "-Y", "defeat_test": "Pull gate +Y; if moves, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RZ": {"blocked_by_body": "BOD-0004", "direction": "RZ", "defeat_test": "Rotate gate about Z; if rotates, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0003",
+      "dof": {"TX": "M", "TY": "B", "TZ": "M", "RX": "M", "RY": "M", "RZ": "B"},
+      "detail": {
+        "TY": {"blocked_by_body": "BOD-0004", "direction": "-Y", "defeat_test": "Pull gate +Y; if moves, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RZ": {"blocked_by_body": "BOD-0004", "direction": "RZ", "defeat_test": "Rotate gate about Z; if rotates, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": {"TX": "M", "TY": "B", "TZ": "M", "RX": "M", "RY": "M", "RZ": "B"},
+      "detail": {
+        "TY": {"blocked_by_body": "BOD-0004", "direction": "-Y", "defeat_test": "Pull gate +Y; if moves, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RZ": {"blocked_by_body": "BOD-0004", "direction": "RZ", "defeat_test": "Rotate gate about Z; if rotates, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": {"TX": "M", "TY": "B", "TZ": "M", "RX": "M", "RY": "M", "RZ": "B"},
+      "detail": {
+        "TY": {"blocked_by_body": "BOD-0004", "direction": "-Y", "defeat_test": "Pull gate +Y; if moves, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RZ": {"blocked_by_body": "BOD-0004", "direction": "RZ", "defeat_test": "Rotate gate about Z; if rotates, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0003",
+      "dof": {"TX": "M", "TY": "B", "TZ": "M", "RX": "M", "RY": "M", "RZ": "B"},
+      "detail": {
+        "TY": {"blocked_by_body": "BOD-0004", "direction": "-Y", "defeat_test": "Pull gate +Y; if moves, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RZ": {"blocked_by_body": "BOD-0004", "direction": "RZ", "defeat_test": "Rotate gate about Z; if rotates, link stops it.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": {"TX": "M", "TY": "M", "TZ": "M", "RX": "M", "RY": "M", "RZ": "B"},
+      "detail": {
+        "RZ": {"blocked_by_body": "BOD-0001", "direction": "RZ", "defeat_test": "Free rotate about Z; if not, stop works.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": {"TX": "M", "TY": "M", "TZ": "M", "RX": "M", "RY": "M", "RZ": "I"}
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0003",
+      "dof": {"TX": "M", "TY": "M", "TZ": "M", "RX": "M", "RY": "M", "RZ": "I"}
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": {"TX": "B", "TY": "I", "TZ": "B", "RX": "B", "RY": "B", "RZ": "B"},
+      "detail": {
+        "TX": {"blocked_by_body": "BOD-0001", "direction": "TX", "defeat_test": "Push spring laterally; if moves, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "TZ": {"blocked_by_body": "BOD-0001", "direction": "TZ", "defeat_test": "Push spring laterally; if moves, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RX": {"blocked_by_body": "BOD-0001", "direction": "RX", "defeat_test": "Torque about X; if rotates, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RY": {"blocked_by_body": "BOD-0001", "direction": "RY", "defeat_test": "Torque about Y; if rotates, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RZ": {"blocked_by_body": "BOD-0001", "direction": "RZ", "defeat_test": "Torque about Z; if rotates, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": {"TX": "B", "TY": "I", "TZ": "B", "RX": "B", "RY": "B", "RZ": "B"},
+      "detail": {
+        "TX": {"blocked_by_body": "BOD-0001", "direction": "TX", "defeat_test": "Push spring laterally; if moves, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "TZ": {"blocked_by_body": "BOD-0001", "direction": "TZ", "defeat_test": "Push spring laterally; if moves, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RX": {"blocked_by_body": "BOD-0001", "direction": "RX", "defeat_test": "Torque about X; if rotates, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RY": {"blocked_by_body": "BOD-0001", "direction": "RY", "defeat_test": "Torque about Y; if rotates, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RZ": {"blocked_by_body": "BOD-0001", "direction": "RZ", "defeat_test": "Torque about Z; if rotates, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0003",
+      "dof": {"TX": "B", "TY": "I", "TZ": "B", "RX": "B", "RY": "B", "RZ": "B"},
+      "detail": {
+        "TX": {"blocked_by_body": "BOD-0001", "direction": "TX", "defeat_test": "Push spring laterally; if moves, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "TZ": {"blocked_by_body": "BOD-0001", "direction": "TZ", "defeat_test": "Push spring laterally; if moves, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RX": {"blocked_by_body": "BOD-0001", "direction": "RX", "defeat_test": "Torque about X; if rotates, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RY": {"blocked_by_body": "BOD-0001", "direction": "RY", "defeat_test": "Torque about Y; if rotates, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"},
+        "RZ": {"blocked_by_body": "BOD-0001", "direction": "RZ", "defeat_test": "Torque about Z; if rotates, guide prevents.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0006",
+      "configuration": "CFG-0001",
+      "dof": {"TX": "B", "TY": "B", "TZ": "B", "RX": "B", "RY": "B", "RZ": "B"},
+      "detail": {
+        "TX": {"blocked_by_body": "WALL", "direction": "TX", "defeat_test": "Apply force; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TY": {"blocked_by_body": "WALL", "direction": "TY", "defeat_test": "Lift; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TZ": {"blocked_by_body": "WALL", "direction": "TZ", "defeat_test": "Push; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RX": {"blocked_by_body": "WALL", "direction": "RX", "defeat_test": "Torque; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RY": {"blocked_by_body": "WALL", "direction": "RY", "defeat_test": "Torque; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RZ": {"blocked_by_body": "WALL", "direction": "RZ", "defeat_test": "Torque; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0006",
+      "configuration": "CFG-0002",
+      "dof": {"TX": "B", "TY": "B", "TZ": "B", "RX": "B", "RY": "B", "RZ": "B"},
+      "detail": {
+        "TX": {"blocked_by_body": "WALL", "direction": "TX", "defeat_test": "Apply force; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TY": {"blocked_by_body": "WALL", "direction": "TY", "defeat_test": "Lift; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TZ": {"blocked_by_body": "WALL", "direction": "TZ", "defeat_test": "Push; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RX": {"blocked_by_body": "WALL", "direction": "RX", "defeat_test": "Torque; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RY": {"blocked_by_body": "WALL", "direction": "RY", "defeat_test": "Torque; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RZ": {"blocked_by_body": "WALL", "direction": "RZ", "defeat_test": "Torque; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0006",
+      "configuration": "CFG-0003",
+      "dof": {"TX": "B", "TY": "B", "TZ": "B", "RX": "B", "RY": "B", "RZ": "B"},
+      "detail": {
+        "TX": {"blocked_by_body": "WALL", "direction": "TX", "defeat_test": "Apply force; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TY": {"blocked_by_body": "WALL", "direction": "TY", "defeat_test": "Lift; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "TZ": {"blocked_by_body": "WALL", "direction": "TZ", "defeat_test": "Push; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RX": {"blocked_by_body": "WALL", "direction": "RX", "defeat_test": "Torque; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RY": {"blocked_by_body": "WALL", "direction": "RY", "defeat_test": "Torque; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"},
+        "RZ": {"blocked_by_body": "WALL", "direction": "RZ", "defeat_test": "Torque; if moves, mount fails.", "why_blocked": "BASE_FIXED_TO_WALL"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0007",
+      "configuration": "CFG-0001",
+      "dof": {"TX": "M", "TY": "B", "TZ": "M", "RX": "M", "RY": "M", "RZ": "M"},
+      "detail": {
+        "TY": {"blocked_by_body": "BOD-0006", "direction": "-Y", "defeat_test": "Pull lever +Y; if moves, bracket stops it.", "why_blocked": "KINEMATIC_NECESSITY"}
+      }
+    },
+    {
+      "rigid_group": "RGP-0007",
+      "configuration": "CFG-0002",
+      "dof": {"TX": "M", "TY": "I", "TZ": "M", "RX": "M", "RY": "M", "RZ": "M"}
+    },
+    {
+      "rigid_group": "RGP-0007",
+      "configuration": "CFG-0003",
+      "dof": {"TX": "M", "TY": "I", "TZ": "M", "RX": "M", "RY": "M", "RZ": "M"}
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "IFC-0005", "BOD-0006"]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0007", "IFC-0006", "BOD-0006"]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "IFC-0005", "BOD-0006"]
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "IFC-0005", "BOD-0006"]
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "IFC-0005", "BOD-0006"]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0006",
+      "access_side": "BACK",
+      "activates": ["IFC-0005"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0001",
+      "access_side": "BACK",
+      "activates": ["IFC-0005"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0001"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0005",
+      "access_side": "FRONT",
+      "activates": ["IFC-0004"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0002"]
+    },
+    {
+      "id": "ASY-0004",
+      "order_index": 4,
+      "body": "BOD-0002",
+      "access_side": "FRONT",
+      "activates": ["JNT-0001"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0002"]
+    },
+    {
+      "id": "ASY-0005",
+      "order_index": 5,
+      "body": "BOD-0003",
+      "access_side": "FRONT",
+      "activates": ["JNT-0002"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0002"]
+    },
+    {
+      "id": "ASY-0006",
+      "order_index": 6,
+      "body": "BOD-0004",
+      "access_side": "FRONT",
+      "activates": ["JNT-0003", "JNT-0004", "JNT-0005", "JNT-0007"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0004", "ASY-0005"]
+    },
+    {
+      "id": "ASY-0007",
+      "order_index": 7,
+      "body": "BOD-0007",
+      "access_side": "FRONT",
+      "activates": ["IFC-0006"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0001"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-2001",
+      "decision": "Load paths omit the wall as a body because it is outside the topology.",
+      "why_open": "The wall is the reaction site but is not a listed body.",
+      "alternatives": ["Treat the wall as an interface target.", "Explicitly add the wall to the topology."],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": [],
+      "blocks": []
+    }
+  ]
+}

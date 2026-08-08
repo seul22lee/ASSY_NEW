@@ -1,0 +1,66 @@
+{
+  "source_clauses": [
+    "Design a foot pedal for a workbench.",
+    "Pressing it should send a signal to the machine, and when I take my foot off it must return to its resting position on its own every time.",
+    "It should not move if something brushes against it sideways."
+  ],
+  "requirements": [
+    {
+      "id": 1,
+      "statement": "The foot pedal must transmit a signal to the machine when pressed.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 2,
+      "statement": "The foot pedal must return to its resting position on its own every time the user takes their foot off.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 3,
+      "statement": "The foot pedal must not move when something brushes against it sideways.",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "kind": "OPERATION",
+      "description": "Pressing the foot pedal to send a signal to the machine."
+    },
+    {
+      "id": 2,
+      "kind": "OPERATION",
+      "description": "Releasing the foot pedal, expecting it to return to resting position."
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "user",
+      "actions": ["presses foot pedal", "takes foot off pedal"]
+    },
+    {
+      "id": 2,
+      "name": "machine",
+      "actions": ["receives signal"]
+    },
+    {
+      "id": 3,
+      "name": "something",
+      "actions": ["brushes against pedal sideways"]
+    }
+  ],
+  "freedoms": [
+    "The request does not specify the type of signal (e.g., electrical, mechanical, pneumatic).",
+    "The request does not specify the mechanism for automatic return.",
+    "The request does not specify the material or dimensions of the pedal.",
+    "The request does not specify the method to prevent sideways movement."
+  ],
+  "ambiguities": [
+    "What is meant by 'signal' - could be electrical, pneumatic, or other.",
+    "What is meant by 'move' in the sideways context - could mean displacement, tilting, or activation.",
+    "What is meant by 'resting position' - is it fully released or a specific position?",
+    "The phrase 'when I take my foot off' implies a specific user action, but the condition for returning is clear."
+  ],
+  "assumptions": []
+}

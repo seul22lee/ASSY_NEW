@@ -1,0 +1,74 @@
+{
+  "source_clauses": [
+    "wall-mounted dispenser for small items",
+    "hold about twenty of them",
+    "release exactly one each time I press a lever, so I never get two at once",
+    "refill it from the top without taking it off the wall",
+    "must not jam when it is nearly empty"
+  ],
+  "requirements": [
+    {
+      "id": 1,
+      "statement": "The dispenser must be wall-mounted.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 2,
+      "statement": "The dispenser must hold approximately twenty small items.",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": 3,
+      "statement": "The dispenser must release exactly one item each time a lever is pressed, ensuring that two items are never released at once.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 4,
+      "statement": "The dispenser must be refillable from the top without being removed from the wall.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 5,
+      "statement": "The dispenser must not jam when it is nearly empty.",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "kind": "OPERATION",
+      "description": "User presses a lever to release exactly one item."
+    },
+    {
+      "id": 2,
+      "kind": "SERVICE",
+      "description": "User refills the dispenser from the top without removing it from the wall."
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "user",
+      "actions": ["press lever", "refill from top"]
+    }
+  ],
+  "freedoms": [
+    "The mechanism for releasing items is not specified.",
+    "The material of the dispenser is not specified.",
+    "The dimensions of the dispenser are not specified.",
+    "The method of wall mounting is not specified.",
+    "The type of small items is not specified."
+  ],
+  "ambiguities": [
+    "What constitutes 'about twenty'?",
+    "What is the tolerance for 'exactly one'?",
+    "What is the meaning of 'nearly empty'?",
+    "How should the dispenser behave when the user presses the lever multiple times quickly?",
+    "Is the release mechanism required to be a lever, or is it just an example?"
+  ],
+  "assumptions": [
+    "The dispenser is for small items that are uniform in size and shape.",
+    "The lever is manually operated by the user.",
+    "The dispenser is intended for indoor use."
+  ]
+}

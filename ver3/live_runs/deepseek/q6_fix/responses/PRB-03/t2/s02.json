@@ -1,0 +1,197 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must have a foot-operated actuator that a user can press to send a signal to the machine.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001", "ACT-0002"],
+      "derivation_premises": [
+        "A device that cannot be operated by a user's foot cannot meet the functional requirement.",
+        "A device that does not produce a signal upon activation cannot meet the functional requirement."
+      ]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must include a return mechanism that restores the pedal to its resting position when the user releases it.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": [
+        "If a mechanism is not capable of returning to its initial state after actuation, it cannot satisfy the return requirement."
+      ]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The product must resist lateral forces sufficient to prevent unwanted movement when brushed sideways.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0003"],
+      "derivation_premises": [
+        "If a body is not held against external lateral forces, it may move."
+      ]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The product must be a physical pedal that interacts with the environment.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": [
+        "The assumption that a foot pedal is physical is required for the requirement to be meaningful."
+      ]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the surface the user's foot presses",
+      "reacted_at_role": "the floor the workbench stands on",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the surface the user's foot presses",
+      "reacted_at_role": "the floor the workbench stands on",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0003",
+      "applied_to_role": "the side of the pedal that an external object brushes",
+      "reacted_at_role": "the floor the workbench stands on",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the body of the pedal",
+      "reacted_at_role": "the floor the workbench stands on",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A foot pedal that uses a revolute hinge for pivoting, a spring for return, and a hard stop to limit motion.",
+      "family": "REVOLUTE_PAIR",
+      "principle": "REVOLUTE_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0004"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Can verify the existence of a pivoting motion."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A foot pedal that uses a compliant flexure for return and lateral stability.",
+      "family": "COMPLIANT_FLEXURE",
+      "principle": "COMPLIANT_FLEXURE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "Compliance analysis route is not available at this stage."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A foot pedal that uses a prismatic guide for vertical motion and a spring for return.",
+      "family": "PRISMATIC_PAIR",
+      "principle": "PRISMATIC_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0004"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Can verify the linear motion path exists."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0004"],
+      "predicates": [
+        "Pressing the pedal with a downward force produces a signal.",
+        "Releasing the pedal allows it to return to its resting position.",
+        "The pedal is physical and operable by foot."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "predicates": [
+        "Pressing the pedal with a downward force produces a signal.",
+        "Releasing the pedal allows it to return to its resting position.",
+        "The pedal resists lateral forces sufficiently."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0004"],
+      "predicates": [
+        "Pressing the pedal with a downward force produces a signal.",
+        "Releasing the pedal allows it to return to its resting position.",
+        "The pedal is physical and operable by foot."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "The required lateral resistance force magnitude",
+      "why_open": "The lateral force requirement is ambiguous; the exact force is unspecified.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "FRE-0004"],
+      "blocks": ["OBL-0003"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "A foot pedal is a physical device that can be pressed by a user.",
+      "why": "The term 'foot pedal' implies a physical interface.",
+      "would_be_invalidated_by": "A non-physical or virtual pedal design."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The machine accepts a signal from the pedal.",
+      "why": "The request states 'sends a signal to the machine'.",
+      "would_be_invalidated_by": "The machine not being able to receive signals."
+    }
+  ]
+}

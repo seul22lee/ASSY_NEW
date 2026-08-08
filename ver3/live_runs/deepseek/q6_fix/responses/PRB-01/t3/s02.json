@@ -1,0 +1,293 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must be capable of being mounted on a wall.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["A product that is wall-mounted requires some interface to a wall."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must have a storage volume capable of holding approximately twenty items.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["To hold items there must be a physical volume."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The product must release exactly one item per lever press.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The lever press triggers a mechanism that dispenses a single item."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The product must allow refilling from the top without detaching from the wall.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Refilling requires an accessible opening that does not require moving the whole product."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must not jam when nearly empty.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Item dispensing relies on unobstructed movement of items within the storage."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The product must provide a lever that the user can reach and press.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The user must be able to interact with the lever physically."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The product must have a top opening that the user can reach for refilling.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["User access requires a reachable opening."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The product must react the weight of the stored items and its own weight to the wall.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["An unsupported load will accelerate; the wall provides support."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The product must react the force applied by the user on the lever to the wall or other structure.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The lever must be actuated by a user-applied force."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The product must provide a mechanism that can count or separate one item from a bulk quantity.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Dispensing relies on isolating a single item from many."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the dispenser structure",
+      "reacted_at_role": "the wall",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the dispenser structure",
+      "reacted_at_role": "the wall",
+      "direction_class": "AXIAL",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the lever",
+      "reacted_at_role": "the wall",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the top opening and structure",
+      "reacted_at_role": "the wall",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0005",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the top opening",
+      "reacted_at_role": "the wall",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0006",
+      "scenario": "SCN-0003",
+      "applied_to_role": "the dispenser structure",
+      "reacted_at_role": "the wall",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Rotary indexing dispenser",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "INDEXING_ROTOR",
+      "obligations_addressed": ["OBL-0003", "OBL-0010", "OBL-0005"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can verify the indexing action."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Gate and chute dispenser",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "GATED_PAIR",
+      "obligations_addressed": ["OBL-0003", "OBL-0010", "OBL-0005"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Static analysis can verify the gating logic."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Escapement-based dispenser",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "ESCAPEMENT",
+      "obligations_addressed": ["OBL-0003", "OBL-0010", "OBL-0005"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can check the escapement cycle."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "predicates": [
+        "The product must be wall-mounted and dispense small items.",
+        "It must hold about twenty items.",
+        "Pressing the lever releases exactly one item.",
+        "Refill from the top without detaching from wall.",
+        "Must not jam when nearly empty."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "predicates": [
+        "The product must be wall-mounted and dispense small items.",
+        "It must hold about twenty items.",
+        "Pressing the lever releases exactly one item.",
+        "Refill from the top without detaching from wall.",
+        "Must not jam when nearly empty."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "predicates": [
+        "The product must be wall-mounted and dispense small items.",
+        "It must hold about twenty items.",
+        "Pressing the lever releases exactly one item.",
+        "Refill from the top without detaching from wall.",
+        "Must not jam when nearly empty."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Choose exact release mechanism to ensure exactly one item dispensed without jamming.",
+      "why_open": "The exact meaning of 'exactly one' is ambiguous and depends on the mechanism's precision.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0002", "FRE-0003"],
+      "blocks": ["OBL-0003", "OBL-0005"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "Define acceptable capacity range for 'about twenty' items.",
+      "why_open": "The acceptable range for 'about twenty' is not specified.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0002"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The dispenser is used by a single user.",
+      "why": "The text uses 'I' and 'me'.",
+      "would_be_invalidated_by": "If multiple users are stated."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The small items are similar in size and shape.",
+      "why": "The text says 'small items' without specifying variety.",
+      "would_be_invalidated_by": "If items vary greatly in size."
+    }
+  ]
+}

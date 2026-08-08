@@ -1,0 +1,161 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must send a signal to the machine when the pedal is pressed.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["REQ-0001 states a functional requirement to send a signal."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The pedal must return to its resting position on its own when the foot is removed.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["REQ-0002 requires automatic return."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The pedal must not move when something brushes against it sideways.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["REQ-0003 requires resistance to sideways force."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "pedal",
+      "reacted_at_role": "base",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "pedal",
+      "reacted_at_role": "base",
+      "direction_class": "AXIAL",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0003",
+      "applied_to_role": "pedal",
+      "reacted_at_role": "base",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A pedal that rotates about a pivot and uses a spring to return and a detent to resist sideways motion.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "REVOLUTE_PAIR",
+      "obligations_addressed": ["OBL-0002", "OBL-0003"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Rotation and return path can be checked."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A pedal that translates linearly and uses a spring to return and a guide to prevent sideways motion.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "PRISMATIC_PAIR",
+      "obligations_addressed": ["OBL-0002", "OBL-0003"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Translation path can be checked."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A pedal that uses a compliant flexure to deform and return, with geometry resisting sideways motion.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "COMPLIANT_FLEXURE",
+      "obligations_addressed": ["OBL-0002", "OBL-0003"],
+      "obligations_created": ["OBL-0004"],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "Requires compliance analysis, not available."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "predicates": ["The pedal rotates around a fixed axis.", "The pedal returns to its resting position when released.", "The pedal remains stationary when a sideways force is applied."]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "predicates": ["The pedal translates along a straight line.", "The pedal returns to its resting position when released.", "The pedal does not move sideways."]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "predicates": ["The pedal deforms elastically when pressed.", "The pedal returns to its resting position when released.", "The pedal resists sideways deflection."]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Choice of mechanism for sending signal",
+      "why_open": "The requirement REQ-0001 does not specify the type of signal, and the mechanism for sending it is not defined.",
+      "alternatives": ["electrical switch", "mechanical linkage", "optical sensor"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001", "FRE-0001"],
+      "blocks": ["OBL-0001"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "Definition of 'something' for sideways brushing",
+      "why_open": "The requirement REQ-0003 is ambiguous about what 'something' refers to, affecting the design of resistance.",
+      "alternatives": ["any object", "heavy object", "light object"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002", "FRE-0003"],
+      "blocks": ["OBL-0003"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The foot pedal is intended for a workbench machine that accepts an input signal.",
+      "why": "It is implied by the request.",
+      "would_be_invalidated_by": "if the machine does not accept signals"
+    }
+  ]
+}

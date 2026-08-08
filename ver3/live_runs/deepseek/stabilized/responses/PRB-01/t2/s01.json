@@ -1,0 +1,180 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "I want a wall-mounted dispenser for small items.",
+      "locator": "REQ-001",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "It should hold about twenty of them",
+      "locator": "REQ-002",
+      "quantity_kinds": ["count"],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "release exactly one each time I press a lever",
+      "locator": "REQ-003",
+      "quantity_kinds": ["count"],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "so I never get two at once.",
+      "locator": "REQ-004",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0005",
+      "verbatim": "I refill it from the top without taking it off the wall.",
+      "locator": "REQ-005",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0006",
+      "verbatim": "It must not jam when it is nearly empty.",
+      "locator": "REQ-006",
+      "quantity_kinds": [],
+      "directionality": "none"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "I want a wall-mounted dispenser for small items.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "the dispenser is mounted on a wall",
+      "source_locator": "REQ-001",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "It should hold about twenty of them",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "the dispenser holds about twenty items",
+      "source_locator": "REQ-002",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "release exactly one each time I press a lever",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "each lever press releases exactly one item",
+      "source_locator": "REQ-003",
+      "quantity_class": "COMPARATIVE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "so I never get two at once.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "the dispenser never releases two items at once",
+      "source_locator": "REQ-004",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0005",
+      "statement_verbatim": "I refill it from the top without taking it off the wall.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "the dispenser can be refilled from the top while it remains attached to the wall",
+      "source_locator": "REQ-005",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0006",
+      "statement_verbatim": "It must not jam when it is nearly empty.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "the dispenser does not jam when nearly empty",
+      "source_locator": "REQ-006",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Dispensing",
+      "kind": "OPERATION",
+      "system_boundary": "The dispenser and its contents are inside; the wall, the user, and the items being dispensed are outside.",
+      "actors": ["ACT-0001"],
+      "environment": "wall-mounted"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Refilling",
+      "kind": "SERVICE",
+      "system_boundary": "The dispenser (including its internal storage) is inside; the wall, the user, and the items being loaded are outside.",
+      "actors": ["ACT-0001"],
+      "environment": "wall-mounted"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": ["lever", "top opening"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "The mechanism for releasing one item at a time is unspecified.",
+      "why_free": "The text does not mention the mechanism."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "The internal arrangement and materials are unspecified.",
+      "why_free": "The text does not mention them."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "The exact capacity is left as an approximate band.",
+      "why_free": "The text says 'about twenty'."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "What constitutes 'nearly empty' is not defined.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When the threshold for 'nearly empty' is specified.",
+      "block_scopes": ["REQ-0006"]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The meaning of 'exactly one each time' is ambiguous under failure conditions (e.g., if no items are present).",
+      "conflicting_clauses": [],
+      "resolvable_when": "When the behavior when empty is specified.",
+      "block_scopes": ["REQ-0003"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The dispenser is intended to be operated by a single user.",
+      "why": "The text refers to 'I' and 'my'.",
+      "would_be_invalidated_by": "If usage is meant for multiple users simultaneously."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The items are small and similar enough to be treated uniformly.",
+      "why": "The text says 'small items' and 'about twenty of them'.",
+      "would_be_invalidated_by": "If items vary greatly in size or shape."
+    },
+    {
+      "id": "ASM-0003",
+      "statement": "The dispenser is meant to be refilled only by the user, not by automated means.",
+      "why": "The text says 'I refill it'.",
+      "would_be_invalidated_by": "If automated refilling is required."
+    }
+  ]
+}

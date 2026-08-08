@@ -1,0 +1,177 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The device must be compact, desktop-sized, and enclosed within a housing.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["housing present", "desktop-sized implies dimensional constraints"]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The platform must raise and lower when the hand crank is rotated.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["hand crank rotation must be converted to linear motion"]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The platform must have a travel range of approximately 80-100 mm and support a payload of approximately 1 kg.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["quantitative range ambiguous", "payload magnitude given"]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The mechanism must remain enclosed within the housing during normal operation.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["housing is a boundary", "mechanism must not protrude"]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s05",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["safety implies no exposed hazards", "assembly complexity impacts ease"]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The device must avoid obvious jamming or unstable operation.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["jamming relates to mobility constraints", "stability relates to load paths"]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "PLATFORM",
+      "reacted_at_role": "HOUSING",
+      "direction_class": "AXIAL",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "1 kg"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "PLATFORM",
+      "reacted_at_role": "HOUSING",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Scissor lift mechanism using linkage principle",
+      "family": "CONVERT_MOTION",
+      "principle": "LEVER_LINKAGE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0006"],
+      "obligations_created": ["OBL-0007"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Kinematic geometry sufficient for motion verification"
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Screw jack mechanism using screw and nut principle",
+      "family": "CONVERT_MOTION",
+      "principle": "SCREW_AND_NUT",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0006"],
+      "obligations_created": ["OBL-0008"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Motion path provided by screw thread"
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0006"],
+      "predicates": [
+        "The device fits within a desktop-sized enclosure.",
+        "Rotating the crank produces vertical platform motion.",
+        "Vertical travel is between 80 and 100 mm.",
+        "The mechanism remains inside the housing during operation.",
+        "No jamming or unstable motion occurs during operation."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0006"],
+      "predicates": [
+        "The device fits within a desktop-sized enclosure.",
+        "Rotating the crank produces vertical platform motion.",
+        "Vertical travel is between 80 and 100 mm.",
+        "The mechanism remains inside the housing during operation.",
+        "No jamming or unstable motion occurs during operation."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which principle family (SCREW_AND_NUT vs LEVER_LINKAGE) best meets the travel and load requirements while remaining compact and safe.",
+      "why_open": "Both families can satisfy the functional requirements; the discriminating factor is quantitative performance, which requires engineering design.",
+      "alternatives": ["SCREW_AND_NUT", "LEVER_LINKAGE"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["AMB-0001", "FRE-0001"],
+      "blocks": ["OBL-0003"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The device is intended for typical desktop use, implying it is small and lightweight.",
+      "why": "The word 'desktop' suggests a tabletop application.",
+      "would_be_invalidated_by": "Evidence that the device is intended for a different environment."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The payload of 1 kg is the maximum load the platform is expected to support.",
+      "why": "The phrase 'support a payload' implies a load-bearing capacity.",
+      "would_be_invalidated_by": "A specification that the payload is not a maximum but a typical load."
+    }
+  ]
+}

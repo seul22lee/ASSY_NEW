@@ -40,7 +40,7 @@ stages:
       source text. Every later stage reads DesignState. A later stage that
       re-reads the request is re-interpreting it, and two interpretations of one
       sentence is exactly the failure this forbids.
-    owns: [Requirement, SourceClause, Freedom, Ambiguity, Scenario]
+    owns: [Requirement, SourceClause, Freedom, Ambiguity, Scenario, Actor]
     extends: []
     may_not:
       - "Invent a requirement the source does not state. That is an Assumption."
@@ -52,7 +52,7 @@ stages:
     role: >
       Derive what must physically be true (Obligations) and form the candidate
       mechanism families that could make it true. Candidates persist as branches.
-    owns: [Obligation, Candidate, AcceptanceContract]
+    owns: [Obligation, Candidate, AcceptanceContract, LoadCase]
     extends: [Requirement]
     may_not:
       - "Select a winner. There is no selected-candidate field (INV-007, R-15)."
@@ -64,19 +64,29 @@ stages:
     role: >
       Establish the bodies, the joints between them, the interfaces where they
       meet, and the configurations the assembly can be in.
-    owns: [Body, Joint, Interface, Configuration, MobilityExpectation]
+    owns: [Body, RigidGroup, Joint, Interface, Configuration, MobilityExpectation, LoadPath, FunctionalRegion, AssemblyStep]
     extends: [Candidate, Obligation]
     may_not:
       - "Use a qualitative region as a position (R-02, R-03, R-04)."
       - "Leave a body-pair meeting region unclassified (interaction_kind is mandatory)."
       - "Emit a generic block as an embodiment (R-09)."
+      - "Fix an axis PLACEMENT. Direction only; placement is s04b (BM-002 CHG-01)."
+      - "Store a per-element load component. It is derived from the LoadPath (SF-5.3)."
+      - "Declare a forbidden-DOF set that is not TOTAL over the DOF domain."
 
   s04:
     name: motion_and_state
+    passes: [s04a, s04b]
+    pass_note: >
+      One numbered stage, two declared fidelities. s04a is envelope and reach
+      feasibility over EVERY retained candidate; s04b is swept occupancy and path
+      proof over the survivors. The selection gate sits between them. Numbering
+      is preserved because the frozen Oracle stage_expectations reference s04 by
+      name. See ver3/contracts/stages/S04_CONTRACT.yaml.
     role: >
       Define named states, the transitions between them, and produce executable
       witnesses that the intended motion exists and the forbidden motion does not.
-    owns: [State, Transition, Witness]
+    owns: [State, Transition, Witness, Envelope, SweptVolume, SelectionDecision]
     extends: [Joint, Body, Configuration]
     may_not:
       - "Treat a rendered sheet as the authoritative artifact (R-01, INV-005)."
@@ -97,6 +107,10 @@ stages:
 
   s06:
     name: parameter_resolution
+    execution_mode: >
+      A deterministic SOLVER SERVICE, invocable by s05 within one stage attempt,
+      not a sequential barrier. s05 and s06 form one bounded convergence block
+      with s04b. See ver3/contracts/stages/S06_CONTRACT.yaml convergence_block.
     role: "Solve the constraint system for the parameters, or report why it cannot."
     owns: []
     extends: [Parameter, Constraint]

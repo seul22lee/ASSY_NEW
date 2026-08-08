@@ -1,0 +1,290 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The pedal must transmit a signal to the machine upon pressing.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Pressing by foot must result in a signal.\""]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The pedal must return to its resting position automatically upon release of foot force.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Self-return is required; likely requires stored energy or spring.\""]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The pedal must not move when a lateral (sideways) force is applied.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["Sideways brush must not cause displacement or activation.\""]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The pedal must allow foot operation and be reachable by the foot.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Foot must be able to press and release the pedal.\""]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The pedal must be stable against lateral forces without unintended motion.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["Lateral force should not initiate motion.\""]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The pedal must return to its resting position after each use without manual assistance.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Automatic return required; likely uses a spring or gravity.\""]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The mechanism must ensure that the pedal does not move under lateral forces (i.e., it must have lateral stability).",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s05",
+      "evidence_route": "COMPLIANCE_REDUCED_ORDER",
+      "route_available": false,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["Lateral forces should not cause displacement; implies a constraint on the mechanism.\""]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The pedal must be operable by foot pressure (i.e., it must be able to be pressed).",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Assumption ASM-0001: operated by foot pressure.\""]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The signal must be sent to the machine upon pressing (interface requirement).",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["The signal is sent to the machine.\""]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "pedal top surface",
+      "reacted_at_role": "pedal pivot or base",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "pedal lateral side",
+      "reacted_at_role": "pedal pivot or base",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "pedal pivot or base",
+      "reacted_at_role": "pedal top surface",
+      "direction_class": "REACTION",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A pedal that uses a revolute pair for rotation and a spring for return.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "REVOLUTE_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0008"],
+      "obligations_created": ["OBL-0002", "OBL-0003"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Basic mechanism, but lateral stability may require extra constraints."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A pedal that uses a prismatic pair for linear motion and a spring for return.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "PRISMATIC_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0004", "OBL-0008"],
+      "obligations_created": ["OBL-0003", "OBL-0007"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Linear motion may be less stable laterally unless guided."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A pedal that uses a compliant flexure for motion and a spring for return.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "COMPLIANT_FLEXURE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0004", "OBL-0008"],
+      "obligations_created": ["OBL-0003", "OBL-0007"],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "Lateral stiffness may be inherent, but analysis requires finite element."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0004",
+      "summary": "A pedal that uses a helical pair (screw) and a spring for return.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "HELICAL_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0004", "OBL-0008"],
+      "obligations_created": ["OBL-0003", "OBL-0007"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Rotary to linear, may have self-locking feature, but lateral stability needs analysis."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0008"],
+      "predicates": [
+        "The pedal must be able to send a signal when pressed.",
+        "The pedal must return to its resting position automatically upon release.",
+        "The pedal must not move when brushed sideways."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0004", "OBL-0008", "OBL-0003"],
+      "predicates": [
+        "The pedal must be able to send a signal when pressed.",
+        "The pedal must return to its resting position automatically upon release.",
+        "The pedal must not move when brushed sideways."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0004", "OBL-0008", "OBL-0003"],
+      "predicates": [
+        "The pedal must be able to send a signal when pressed.",
+        "The pedal must return to its resting position automatically upon release.",
+        "The pedal must not move when brushed sideways."
+      ]
+    },
+    {
+      "id": "ACC-0004",
+      "candidate": "CND-0004",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0004", "OBL-0008", "OBL-0003"],
+      "predicates": [
+        "The pedal must be able to send a signal when pressed.",
+        "The pedal must return to its resting position automatically upon release.",
+        "The pedal must not move when brushed sideways."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "What constitutes 'move' in 'should not move'? Does it mean no displacement, no activation, or something else?",
+      "why_open": "The requirement REQ-0003 is ambiguous regarding the definition of 'move'.",
+      "alternatives": ["No displacement", "No activation", "No both"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0003"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "How to achieve automatic return?",
+      "why_open": "Multiple principles could satisfy REQ-0002.",
+      "alternatives": ["Spring", "Gravity", "Elastic element", "Active actuation"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": ["OBL-0002"]
+    },
+    {
+      "id": "UNR-0003",
+      "decision": "What type of signal should be sent?",
+      "why_open": "Signal type is not specified.",
+      "alternatives": ["Electrical", "Mechanical", "Optical", "Pneumatic"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0002"],
+      "blocks": ["OBL-0001"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The pedal is operated by foot pressure.",
+      "why": "The request says 'pressing it' and 'take my foot off'.",
+      "would_be_invalidated_by": "If the pedal is operated by something else."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The resting position is the position when not pressed.",
+      "why": "Implied by 'return to its resting position'.",
+      "would_be_invalidated_by": "If a different reference is specified."
+    },
+    {
+      "id": "ASM-1003",
+      "statement": "The signal is sent to the machine.",
+      "why": "The request states 'send a signal to the machine'.",
+      "would_be_invalidated_by": "If the machine is not the intended recipient."
+    }
+  ]
+}

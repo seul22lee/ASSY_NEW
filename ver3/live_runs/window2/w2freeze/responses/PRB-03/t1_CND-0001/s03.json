@@ -1,0 +1,229 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "pressed surface returning by stored energy",
+      "instance_identity": "single pressed surface body that rotates about a fixed axis",
+      "addresses_obligations": ["OBL-0001", "OBL-0003", "OBL-0004", "OBL-0007"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "supporting base that carries the axis and reacts load to the world",
+      "instance_identity": "fixed base body that mounts to the workbench or floor",
+      "addresses_obligations": ["OBL-0006", "OBL-0005"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "stored-energy element that returns the surface",
+      "instance_identity": "single stored-energy element (e.g., spring) anchored between base and surface",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "BOD-0004",
+      "role": "retaining member that keeps the turning connection axially captured and radially supported",
+      "instance_identity": "single retaining member (e.g., clip or cap) that secures the surface to the axis on the base",
+      "addresses_obligations": ["OBL-0005", "OBL-0008"]
+    },
+    {
+      "id": "BOD-0005",
+      "role": "hard stop defining the resting position and the pressed position",
+      "instance_identity": "catch or stop feature on the base that the surface contacts at both travel ends",
+      "addresses_obligations": ["OBL-0007", "OBL-0003"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": [],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": [],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": [],
+      "is_default": false
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": [],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0005",
+      "members": [],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0001",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0003",
+      "dof": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "axis_direction": "NONE",
+      "compliance": {
+        "mode": "elastic",
+        "direction": "between base and stored-energy element",
+        "required_travel": "unstated",
+        "allowable_travel_status": "UNSPECIFIED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "BOD-0003",
+        "root_interface": "IFC-0003",
+        "activation_window": "when the foot is released"
+      }
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0004",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0005",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "assembled",
+      "addresses_obligations": ["OBL-0005", "OBL-0007"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0005"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "resting",
+      "addresses_obligations": ["OBL-0003", "OBL-0007"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0003", "BOD-0002"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "compressed",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0003", "BOD-0001"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "compressed",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0004", "BOD-0002"],
+      "interaction_kind": "INTERFERENCE_FIT",
+      "nominal_status": "assembled",
+      "addresses_obligations": ["OBL-0005", "OBL-0008"]
+    },
+    {
+      "id": "IFC-0006",
+      "bodies": ["BOD-0004", "BOD-0001"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "assembled",
+      "addresses_obligations": ["OBL-0005"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "resting",
+      "kind": "OPERATION",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "pressed",
+      "kind": "OPERATION",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    },
+    {
+      "id": "CFG-0003",
+      "name": "brushed",
+      "kind": "OPERATION",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the surface that is pressed, by foot"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0002"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001", "BOD-0002"],
+      "required_by_actors": [],
+      "reach_targets": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "stored-energy element type, size, and anchoring",
+      "why_open": "the return may be any stored-energy mechanism and no magnitudes are given",
+      "alternatives": ["coil spring", "torsion spring", "elastic band"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0001", "FRE-0006"],
+      "blocks": []
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "geometry and location of the catch/stop",
+      "why_open": "travel bounds require dimensions not yet specified",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0006"],
+      "blocks": []
+    },
+    {
+      "id": "UNR-1003",
+      "decision": "retaining member type and interference fit parameters",
+      "why_open": "axial retention needs dimensions and interferences",
+      "alternatives": ["snap ring", "circlip", "nut"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0006"],
+      "blocks": []
+    }
+  ]
+}

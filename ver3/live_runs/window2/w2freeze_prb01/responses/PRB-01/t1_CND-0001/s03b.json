@@ -1,0 +1,879 @@
+{
+  "mobility": [
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "BOD-0007",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the frame in X; it is fixed to the wall via BOD-0007.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "BOD-0007",
+          "direction": "+Y/-Y",
+          "test": "Attempt to translate the frame in Y; it is fixed to the wall via BOD-0007.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "BOD-0007",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the frame in Z; it is fixed to the wall via BOD-0007.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "BOD-0007",
+          "direction": "about X",
+          "test": "Attempt to rotate the frame about X; it is fixed to the wall via BOD-0007.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "BOD-0007",
+          "direction": "about Y",
+          "test": "Attempt to rotate the frame about Y; it is fixed to the wall via BOD-0007.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "BOD-0007",
+          "direction": "about Z",
+          "test": "Attempt to rotate the frame about Z; it is fixed to the wall via BOD-0007.",
+          "driver": "DECLARED_SCENARIO"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the gate sideways; it is blocked by the frame geometry.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0005",
+          "direction": "+Y (downward gravity)",
+          "test": "Release the gate; it stays due to spring force from RGP-0005.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the gate out of plane; it is guided by the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about X",
+          "test": "Attempt to tilt the gate; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Y",
+          "test": "Attempt to tilt the gate; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Z",
+          "test": "Attempt to rotate the gate about Z; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "B",
+        "TY": "I",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the gate sideways; it is blocked by the frame geometry.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the gate out of plane; it is guided by the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about X",
+          "test": "Attempt to tilt the gate; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Y",
+          "test": "Attempt to tilt the gate; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Z",
+          "test": "Attempt to rotate the gate about Z; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the gate sideways; it is blocked by the frame geometry.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0006",
+          "direction": "+Y (downward gravity)",
+          "test": "Release the gate; it stays due to spring force from RGP-0006.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the gate out of plane; it is guided by the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about X",
+          "test": "Attempt to tilt the gate; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Y",
+          "test": "Attempt to tilt the gate; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Z",
+          "test": "Attempt to rotate the gate about Z; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "B",
+        "TY": "I",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the gate sideways; it is blocked by the frame geometry.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the gate out of plane; it is guided by the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about X",
+          "test": "Attempt to tilt the gate; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Y",
+          "test": "Attempt to tilt the gate; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Z",
+          "test": "Attempt to rotate the gate about Z; it is constrained by the prismatic joint with RGP-0001.",
+          "driver": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "+Y/-Y",
+          "test": "Attempt to translate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "about X",
+          "test": "Attempt to rotate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "about Y",
+          "test": "Attempt to rotate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "about Z",
+          "test": "Attempt to rotate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "I"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "+Y/-Y",
+          "test": "Attempt to translate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "about X",
+          "test": "Attempt to rotate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0002",
+          "direction": "about Y",
+          "test": "Attempt to rotate the link; it is pinned to the gates.",
+          "driver": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Y/-Y",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about X",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Y",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Z",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0005",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Y/-Y",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about X",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Y",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Z",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0006",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Y/-Y",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about X",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Y",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Z",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0006",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Y/-Y",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about X",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Y",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "RGP-0001",
+          "direction": "about Z",
+          "test": "Attempt to rotate the spring; it is fixed to the frame.",
+          "driver": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0007",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "+Y/-Y",
+          "test": "Attempt to translate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "about X",
+          "test": "Attempt to rotate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "about Y",
+          "test": "Attempt to rotate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "about Z",
+          "test": "Attempt to rotate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0007",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "+X/-X",
+          "test": "Attempt to translate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "TY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "+Y/-Y",
+          "test": "Attempt to translate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "TZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "+Z/-Z",
+          "test": "Attempt to translate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "RX": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "about X",
+          "test": "Attempt to rotate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "RY": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "about Y",
+          "test": "Attempt to rotate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        },
+        "RZ": {
+          "role": "BLOCKED_BY",
+          "blocked_by": "world",
+          "direction": "about Z",
+          "test": "Attempt to rotate the wall mount; it is fixed to the wall.",
+          "driver": "DECLARED_SCENARIO"
+        }
+      }
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0001",
+        "IFC-0006",
+        "BOD-0007",
+        "world"
+      ]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0002",
+        "JNT-0001",
+        "BOD-0001",
+        "IFC-0006",
+        "BOD-0007",
+        "world"
+      ]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0002",
+        "JNT-0001",
+        "BOD-0001",
+        "IFC-0006",
+        "BOD-0007",
+        "world"
+      ]
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0001",
+        "IFC-0006",
+        "BOD-0007",
+        "world"
+      ]
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0001",
+        "IFC-0006",
+        "BOD-0007",
+        "world"
+      ]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0007",
+      "access_side": "wall side",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0001",
+      "access_side": "front",
+      "activates": [
+        "IFC-0006"
+      ],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": [
+        "ASY-0001"
+      ]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0005",
+      "access_side": "top",
+      "activates": [
+        "JNT-0005"
+      ],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": [
+        "ASY-0002"
+      ]
+    },
+    {
+      "id": "ASY-0004",
+      "order_index": 4,
+      "body": "BOD-0006",
+      "access_side": "top",
+      "activates": [
+        "JNT-0006"
+      ],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": [
+        "ASY-0002"
+      ]
+    },
+    {
+      "id": "ASY-0005",
+      "order_index": 5,
+      "body": "BOD-0002",
+      "access_side": "front",
+      "activates": [
+        "JNT-0001",
+        "IFC-0001",
+        "IFC-0003"
+      ],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": [
+        "ASY-0002",
+        "ASY-0003"
+      ]
+    },
+    {
+      "id": "ASY-0006",
+      "order_index": 6,
+      "body": "BOD-0003",
+      "access_side": "front",
+      "activates": [
+        "JNT-0002",
+        "IFC-0002",
+        "IFC-0003"
+      ],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": [
+        "ASY-0002",
+        "ASY-0004"
+      ]
+    },
+    {
+      "id": "ASY-0007",
+      "order_index": 7,
+      "body": "BOD-0004",
+      "access_side": "front",
+      "activates": [
+        "JNT-0003",
+        "JNT-0004",
+        "IFC-0004",
+        "IFC-0005"
+      ],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": [
+        "ASY-0005",
+        "ASY-0006"
+      ]
+    }
+  ],
+  "unresolved": []
+}

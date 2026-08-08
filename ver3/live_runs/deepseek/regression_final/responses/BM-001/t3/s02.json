@@ -1,0 +1,231 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must be a compact desktop storage box.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must include a reusable latch.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The box must open and close repeatedly without accidental opening during normal handling.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The latch must be easy for a user to operate while remaining secure during transport.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must be suitable for low-cost manufacturing and practical for desktop use.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The design must be mechanically plausible and easy to assemble.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0002"]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "LID",
+      "reacted_at_role": "BASE",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "LID",
+      "reacted_at_role": "BASE",
+      "direction_class": "TRANSVERSE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "BOX",
+      "reacted_at_role": "GROUND",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0001",
+      "applied_to_role": "LATCH",
+      "reacted_at_role": "BASE",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Latch using compliant flexure for relative motion and friction hold, with direct manual actuation.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "COMPLIANT_FLEXURE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": [
+        "OBL-0007"
+      ],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Ideal-joint torque and back-drive under ideal joints"
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Latch using revolute pair for relative motion and detent or snap for hold, with direct manual actuation.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "REVOLUTE_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": [
+        "OBL-0007"
+      ],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Ideal-joint torque and back-drive under ideal joints"
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Latch using prismatic pair for relative motion and friction hold, with direct manual actuation.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "PRISMATIC_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": [
+        "OBL-0007"
+      ],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Ideal-joint torque and back-drive under ideal joints"
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0004",
+      "summary": "Latch using compliant flexure for relative motion and detent or snap for hold, with direct manual actuation.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "COMPLIANT_FLEXURE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": [
+        "OBL-0007"
+      ],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Ideal-joint torque and back-drive under ideal joints"
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0007"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0007"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0007"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0004",
+      "candidate": "CND-0004",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0007"],
+      "predicates": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which latch mechanism (compliant flexure vs. revolute pair vs. prismatic pair) best balances ease of operation and security during transport.",
+      "why_open": "The requirements do not specify a quantitative balance between ease and security; this is a design trade-off.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003", "CND-0004"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "FRE-0003"],
+      "blocks": ["OBL-0004"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The box will be operated by a single user.",
+      "why": "The request mentions 'a user' in relation to latch operation.",
+      "would_be_invalidated_by": "Evidence that multiple users operate the latch simultaneously."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The box will be transported manually, not by any automated system.",
+      "why": "The request mentions 'during transport' without specifying means, implying manual handling.",
+      "would_be_invalidated_by": "Specification of automated handling or specific transport standards."
+    },
+    {
+      "id": "ASM-1003",
+      "statement": "The latch is intended to be operated by hand.",
+      "why": "The request mentions 'easy for a user to operate' and 'normal handling', which implies manual operation.",
+      "would_be_invalidated_by": "Specification of tool-operated or automatic latch."
+    }
+  ]
+}

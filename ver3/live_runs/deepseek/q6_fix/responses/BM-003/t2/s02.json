@@ -1,0 +1,410 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The three legs must fold in close to the body and the whole thing becomes narrow and compact when put away.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Folding requires relative motion between legs and body without interference."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "All parts must remain attached to the stand during folding and storage.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0003", "REQ-0006", "REQ-0012", "REQ-0014"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Any part that separates from the assembly is no longer attached."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "No loose pieces or separate components may be required for folding or opening.",
+      "derived_from_requirements": ["REQ-0003", "REQ-0012"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A loose piece would have to be removed to fold it."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The user must be able to open the stand by hand, following a logical sequence.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A hand-operated mechanism requires accessible parts and sufficient manual force."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "When open, the three legs must spread out in different directions to provide a stable footprint on the desk.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A spread footprint requires legs at distinct angular positions."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The stand must be openable without tools, motor, or other equipment.",
+      "derived_from_requirements": ["REQ-0006", "REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Manual operation requires that all motions are achievable by hand force."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "When open, the stand must stay open on its own without external support.",
+      "derived_from_requirements": ["REQ-0007", "REQ-0008"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A stable configuration requires that gravity and applied forces do not cause collapse."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The legs must be prevented from folding back, twisting aside, or coming off during use.",
+      "derived_from_requirements": ["REQ-0008", "REQ-0009"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["If a leg can move under load, it will not stay in place."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The stand must not spontaneously turn, shift, or move in unexpected directions during use.",
+      "derived_from_requirements": ["REQ-0009"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Unintended motion would indicate instability or insufficient constraint."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "A deliberate release action must be required before folding, preventing collapse from a knock.",
+      "derived_from_requirements": ["REQ-0010"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A mechanism that only unlocks with deliberate input will not unlock from incidental forces."]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "After the deliberate release, the stand must fold back to the same compact shape as originally.",
+      "derived_from_requirements": ["REQ-0011"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Repeatable folding requires that the final configuration is reachable by the same motion path."]
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The opening and folding sequence must be repeatable, with all normal parts remaining attached throughout.",
+      "derived_from_requirements": ["REQ-0012"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Repeatable cycles require that the kinematic chain is consistent and not damaged."]
+    },
+    {
+      "id": "OBL-0013",
+      "statement": "The stand must hold a small object securely on a desk while working.",
+      "derived_from_requirements": ["REQ-0013"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "COMPLIANCE_REDUCED_ORDER",
+      "route_available": false,
+      "involves_actors": ["ACT-0001", "ACT-0002"],
+      "derivation_premises": ["A small object must be supported and retained without tipping or sliding."]
+    },
+    {
+      "id": "OBL-0014",
+      "statement": "The stand must be assemblable in a sensible order and stay together during normal opening and folding.",
+      "derived_from_requirements": ["REQ-0014"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0003"],
+      "derivation_premises": ["Assembly requires that parts can be joined in some sequence and remain engaged."]
+    },
+    {
+      "id": "OBL-0015",
+      "statement": "The stand must have a stable configuration when open on a flat, horizontal desk surface.",
+      "derived_from_requirements": ["REQ-0005", "REQ-0007", "REQ-0008"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A stable stand requires that the center of gravity is over the support polygon."]
+    },
+    {
+      "id": "OBL-0016",
+      "statement": "The stand must support a small object without tipping over under its weight.",
+      "derived_from_requirements": ["REQ-0013"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["The object's weight applies a load that must be reacted by the desk through the stand."]
+    },
+    {
+      "id": "OBL-0017",
+      "statement": "The stand must allow a user to reach and operate any release mechanism and the folding legs.",
+      "derived_from_requirements": ["REQ-0004", "REQ-0010"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["User access to moving parts is necessary for manual operation."]
+    },
+    {
+      "id": "OBL-0018",
+      "statement": "The folding mechanism must provide a stable open configuration that resists accidental collapse or movement.",
+      "derived_from_requirements": ["REQ-0007", "REQ-0008", "REQ-0009"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Some principle families can inherently lock in position, others rely on friction or geometry."]
+    },
+    {
+      "id": "OBL-0019",
+      "statement": "The stand must have a deliberate release action that is distinct from incidental loading.",
+      "derived_from_requirements": ["REQ-0010"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A release mechanism must discriminate between intentional and unintentional forces."]
+    },
+    {
+      "id": "OBL-0020",
+      "statement": "The stand must be assemblable without special tools or complex sequence, and all parts must remain attached during assembly.",
+      "derived_from_requirements": ["REQ-0014"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0003"],
+      "derivation_premises": ["Assembly requires that parts can be joined without interference and stay connected."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the folding legs",
+      "reacted_at_role": "the user's hands",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the folding legs",
+      "reacted_at_role": "the user's hands",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0003",
+      "applied_to_role": "the supporting surface of the stand",
+      "reacted_at_role": "the desk surface",
+      "direction_class": "AXIAL",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0003",
+      "applied_to_role": "the entire stand",
+      "reacted_at_role": "the desk surface",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0005",
+      "scenario": "SCN-0004",
+      "applied_to_role": "the components of the stand",
+      "reacted_at_role": "the assembler's workbench or fixture",
+      "direction_class": "NONE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0006",
+      "scenario": "SCN-0005",
+      "applied_to_role": "the folded stand",
+      "reacted_at_role": "the user's hands or storage location",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Candidate using revolute joints with a detent lock for open configuration and a separate release button.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "REVOLUTE_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015", "OBL-0016", "OBL-0017", "OBL-0018", "OBL-0019", "OBL-0020"],
+      "obligations_created": ["OBL-0021", "OBL-0022"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Revolute joints are simple and can be designed to meet folding and opening requirements."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Candidate using planar joints with a friction hold to maintain open configuration.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "PLANAR_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015", "OBL-0016", "OBL-0017", "OBL-0018", "OBL-0019", "OBL-0020"],
+      "obligations_created": ["OBL-0023", "OBL-0024"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Friction holds can be analyzed for stability, but may require precise control."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Candidate using compliant flexures to allow folding without separate joints, relying on elastic deformation.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "COMPLIANT_FLEXURE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015", "OBL-0016", "OBL-0017", "OBL-0018", "OBL-0019", "OBL-0020"],
+      "obligations_created": ["OBL-0025", "OBL-0026"],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "Compliant mechanisms require deflection analysis, which is not available at this stage."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015", "OBL-0016", "OBL-0017", "OBL-0018", "OBL-0019", "OBL-0020", "OBL-0021", "OBL-0022"],
+      "predicates": ["All obligations are satisfied by the candidate design."]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015", "OBL-0016", "OBL-0017", "OBL-0018", "OBL-0019", "OBL-0020", "OBL-0023", "OBL-0024"],
+      "predicates": ["All obligations are satisfied by the candidate design."]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015", "OBL-0016", "OBL-0017", "OBL-0018", "OBL-0019", "OBL-0020", "OBL-0025", "OBL-0026"],
+      "predicates": ["All obligations are satisfied by the candidate design."]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "The choice of mechanism family depends on the relative importance of stiffness, compactness, and cost, which cannot be determined from requirements alone.",
+      "why_open": "The requirements do not provide quantitative targets for compactness (AMB-0001) or specify the nature of the deliberate release action (AMB-0002). Material and manufacturing choices (FRE-0001) and exact dimensions (FRE-0002) are also open, which affect feasibility of each family.",
+      "alternatives": ["REVOLUTE_PAIR", "PLANAR_PAIR", "COMPLIANT_FLEXURE"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["AMB-0001", "AMB-0002", "FRE-0001", "FRE-0002", "FRE-0003"],
+      "blocks": ["OBL-0010", "OBL-0018", "OBL-0019"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "The method for achieving a deliberate release (e.g., a button, a latch, a twist) is not determined, and this affects which principle families are viable.",
+      "why_open": "The requirement REQ-0010 does not specify the kind of deliberate action, and Ambiguity AMB-0002 blocks progress. This ambiguity affects all candidates.",
+      "alternatives": ["DETENT_OR_SNAP", "OVER_CENTRE", "FRICTION_HOLD", "COMPLIANT_FLEXURE"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": ["OBL-0010", "OBL-0019"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The stand is used on a flat, horizontal surface (a desk).",
+      "why": "The text mentions 'on my desk' repeatedly, implying a desk surface.",
+      "would_be_invalidated_by": "If the stand is intended for use on other surfaces."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The user has two functioning hands and can perform manual operations without tools.",
+      "why": "The text says 'by hand' and 'no tools', implying manual operation.",
+      "would_be_invalidated_by": "If the user requires assistive devices or the stand needs tools for operation."
+    },
+    {
+      "id": "ASM-1003",
+      "statement": "The small object is small and light enough to be supported by a stand on a desk without causing tipping.",
+      "why": "The requirement says 'small object' and 'on my desk'.",
+      "would_be_invalidated_by": "If the object is heavy or large, the stand may need additional support."
+    },
+    {
+      "id": "ASM-1004",
+      "statement": "The stand is intended for repeated use, and the materials and mechanisms must withstand normal wear without failing.",
+      "why": "The requirements imply storage and reuse, and durability is implicit.",
+      "would_be_invalidated_by": "If the stand is intended for single use."
+    }
+  ]
+}

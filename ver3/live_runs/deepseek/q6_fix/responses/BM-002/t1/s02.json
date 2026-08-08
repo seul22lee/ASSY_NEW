@@ -1,0 +1,302 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The platform must be reachable by the payload within the device.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["For a payload to be supported, it must be able to be placed on the platform."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The platform must move between configurations whose relative displacement is approximately 80-100 mm.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A specified range of movement requires the mechanism to achieve at least two distinct configurations."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The device must be self-contained within a housing such that all mechanism parts remain inside during normal operation.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["For a mechanism to remain enclosed, its moving parts must not protrude outside the housing boundary."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The device must be manually operable by a user rotating a hand crank.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["To be manually operated, the mechanism must transmit torque from a user input."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The platform must support a payload of approximately 1 kg without failure.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["A payload exerts a force due to gravity that must be reacted by the structure."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The device must be stable and not jam or operate unstably under normal use.",
+      "derived_from_requirements": ["REQ-0007"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A mechanism that jams or moves unstably fails to perform its function reliably."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The design must be compatible with practical manufacturing and assembly processes.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["A product's manufacturability depends on the chosen manufacturing process."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The device must be safe for the user to operate, presenting no foreseeable hazards.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0001", "ACT-0002"],
+      "derivation_premises": ["Safety requires avoiding sharp edges, pinch points, or unexpected movements."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The mechanism must be able to be assembled within the housing.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Assembly requires that parts can be inserted and positioned without interference."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The mechanism must provide a reaction to the payload weight through a load path to the external support.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["For a body to be in equilibrium, the sum of forces and moments acting on it must be zero."]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The platform must be supported and guided so that it moves in a controlled manner without unintended degrees of freedom.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0007"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A mechanism that guides motion must constrain the platform's movement to a desired path."]
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The hand crank must be accessible and operable by the user.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["For a user to rotate the crank, it must be reachable and have sufficient clearance to rotate."]
+    },
+    {
+      "id": "OBL-0013",
+      "statement": "The mechanism must transmit load from the platform to the housing and then to the desktop.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A load must be transferred through a continuous structural path to the ground."]
+    },
+    {
+      "id": "OBL-0014",
+      "statement": "The device must be compact and fit on a desktop.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A compact device requires that the mechanism fit within a relatively small volume."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the surface that supports the payload",
+      "reacted_at_role": "the surface the device stands on",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "approximately 1 kg"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the hand crank",
+      "reacted_at_role": "the surface the device stands on",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the housing",
+      "reacted_at_role": "the surface the device stands on",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A lead screw mechanism where the hand crank rotates a screw and a nut translates to raise/lower the platform.",
+      "family": "CONVERT_MOTION",
+      "principle": "SCREW_AND_NUT",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": ["OBL-0007", "OBL-0008"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "A screw and nut can be analyzed with ideal joints for torque and load capacity."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A rack and pinion mechanism where the hand crank rotates a pinion that engages a rack attached to the platform.",
+      "family": "CONVERT_MOTION",
+      "principle": "RACK_AND_PINION",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": ["OBL-0007", "OBL-0008"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Rack and pinion involves gear teeth which need detailed geometry analysis."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A crank-slider mechanism using a rotating crank and a slider to convert rotary motion to linear motion.",
+      "family": "CONVERT_MOTION",
+      "principle": "CRANK_SLIDER",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": ["OBL-0007", "OBL-0008"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Crank-slider can be analyzed as a four-bar linkage with ideal joints."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "predicates": [
+        "platform movement range is within 80-100 mm",
+        "platform supports at least 1 kg",
+        "device remains enclosed during operation"
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "predicates": [
+        "platform movement range is within 80-100 mm",
+        "platform supports at least 1 kg",
+        "device remains enclosed during operation"
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "predicates": [
+        "platform movement range is within 80-100 mm",
+        "platform supports at least 1 kg",
+        "device remains enclosed during operation"
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Whether the design must self-lock to hold position without continuous input, or whether an external brake is acceptable.",
+      "why_open": "The requirement for 'safe to use' and 'stable operation' does not specify whether the device must hold its position if the user releases the crank.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "AMB-0002", "AMB-0003", "AMB-0004"],
+      "blocks": ["OBL-0004", "OBL-0006"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The device will be placed on a horizontal, stable surface during use.",
+      "why": "The device is described as a compact desktop device; the scenario environment is 'desktop'.",
+      "would_be_invalidated_by": "If the device is intended for use on non-horizontal or unstable surfaces."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The user applies force to the hand crank within typical human capabilities.",
+      "why": "The device is hand-cranked; the assumption of normal user strength is consistent with its intended use.",
+      "would_be_invalidated_by": "If the crank requires excessive torque that cannot be easily applied by an average user."
+    }
+  ]
+}

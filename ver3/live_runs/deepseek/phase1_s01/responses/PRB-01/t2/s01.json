@@ -1,0 +1,89 @@
+{
+  "source_clauses": [
+    "I want a wall-mounted dispenser for small items.",
+    "It should hold about twenty of them",
+    "release exactly one each time I press a lever",
+    "so I never get two at once.",
+    "I refill it from the top without taking it off the wall.",
+    "It must not jam when it is nearly empty."
+  ],
+  "requirements": [
+    {
+      "id": 1,
+      "statement": "Dispenser must be wall-mounted.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 2,
+      "statement": "Dispenser must hold about twenty small items.",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": 3,
+      "statement": "Dispenser must release exactly one small item each time a lever is pressed.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 4,
+      "statement": "Dispenser must never release two items at once.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 5,
+      "statement": "Dispenser must be refillable from the top without removing it from the wall.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 6,
+      "statement": "Dispenser must not jam when nearly empty.",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "kind": "OPERATION",
+      "description": "User presses lever to release an item."
+    },
+    {
+      "id": 2,
+      "kind": "SERVICE",
+      "description": "User refills dispenser from top while it is mounted."
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "user",
+      "actions": ["press lever", "refill dispenser"]
+    },
+    {
+      "id": 2,
+      "name": "dispenser",
+      "actions": ["release item", "hold items", "avoid jamming"]
+    },
+    {
+      "id": 3,
+      "name": "wall",
+      "actions": ["support dispenser"]
+    }
+  ],
+  "freedoms": [
+    "Mechanism for release is not specified.",
+    "Size and shape of dispenser are not specified.",
+    "Material of dispenser is not specified.",
+    "Detailed dimensions of dispenser are not specified.",
+    "Method of wall mounting is not specified.",
+    "Type of small items is not specified."
+  ],
+  "ambiguities": [
+    "The exact number of items in 'about twenty' is not defined.",
+    "The meaning of 'nearly empty' is not quantified.",
+    "Whether the lever is part of the dispenser or separate is not specified."
+  ],
+  "assumptions": [
+    "The 'small items' are uniform in size and shape.",
+    "The dispenser is manually operated by pressing a lever.",
+    "The dispenser is intended for indoor use."
+  ]
+}

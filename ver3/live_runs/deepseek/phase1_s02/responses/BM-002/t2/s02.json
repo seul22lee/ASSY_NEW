@@ -1,0 +1,299 @@
+{
+  "obligations": [
+    {
+      "obligation_id": "OBL-0001",
+      "requirement_id": "REQ-0001",
+      "obligation": "The product must include an enclosing body and a platform that is raised and lowered within it.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0002",
+      "requirement_id": "REQ-0002",
+      "obligation": "The product must provide a rotary input that is operable by the user from outside the enclosing body.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0003",
+      "requirement_id": "REQ-0003",
+      "obligation": "Rotation of the input in one direction must raise the platform, and rotation in the opposite direction must lower it.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0004",
+      "requirement_id": "REQ-0004",
+      "obligation": "The platform must achieve a vertical travel within a band of approximately 80-100 mm.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0005",
+      "requirement_id": "REQ-0005",
+      "obligation": "The product must be capable of supporting a payload of approximately 1 kg under the stated operation scenarios.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0006",
+      "requirement_id": "REQ-0006",
+      "obligation": "No moving element of the mechanism may leave the enclosing body during normal operation.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0007",
+      "requirement_id": "REQ-0007",
+      "obligation": "The design must be safe to use, considering user exposure to moving elements and stored energy.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0008",
+      "requirement_id": "REQ-0008",
+      "obligation": "Every declared relationship (input to platform motion, platform to travel, etc.) must have a physical realization.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0009",
+      "requirement_id": "REQ-0009",
+      "obligation": "The product must be easy to assemble, with a clear path for every part.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0010",
+      "requirement_id": "REQ-0010",
+      "obligation": "The product must be practical to manufacture, considering process suitability and unit cost.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0011",
+      "requirement_id": "REQ-0011",
+      "obligation": "The mechanism must avoid obvious jamming or unstable operation during travel.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0012",
+      "requirement_id": "REQ-0001",
+      "obligation": "The platform must be accessible to the user for placing and removing a payload.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    }
+  ],
+  "load_cases": [
+    {
+      "load_case_id": "LC-0001",
+      "scenario_id": "SCN-0001",
+      "load_description": "The weight of the payload acts downward on the platform during raising and lowering.",
+      "load_role": "PAYLOAD",
+      "reacted_role": "GROUND",
+      "direction_class": "AXIAL",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED",
+      "involves_actors": []
+    },
+    {
+      "load_case_id": "LC-0002",
+      "scenario_id": "SCN-0001",
+      "load_description": "The weight of the product itself acts downward through its body.",
+      "load_role": "PRODUCT_BODY",
+      "reacted_role": "GROUND",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED",
+      "involves_actors": []
+    },
+    {
+      "load_case_id": "LC-0003",
+      "scenario_id": "SCN-0001",
+      "load_description": "The user applies torque to the rotary input during operation.",
+      "load_role": "INPUT",
+      "reacted_role": "GROUND",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED",
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "load_case_id": "LC-0004",
+      "scenario_id": "SCN-0002",
+      "load_description": "The user applies forces to place or remove the payload on the platform.",
+      "load_role": "PLATFORM",
+      "reacted_role": "GROUND",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED",
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "load_case_id": "LC-0005",
+      "scenario_id": "SCN-0001",
+      "load_description": "The weight of the payload acts downward on the platform at rest.",
+      "load_role": "PLATFORM",
+      "reacted_role": "GROUND",
+      "direction_class": "AXIAL",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED",
+      "involves_actors": []
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "CAND-0001",
+      "principle_families": {
+        "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+        "CONVERT_MOTION": "SCREW_AND_NUT",
+        "MAINTAIN_CONFIGURATION": "FRICTION_HOLD",
+        "BOUND_MOTION": "HARD_STOP",
+        "RETAIN_BODY": "LATER_BODY_COVER",
+        "GUIDE_MOTION": "PRISMATIC_GUIDE",
+        "TRANSMIT_LOAD": "DIRECT_BEARING",
+        "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+        "ACTUATE": "DIRECT_MANUAL",
+        "METER_DISCRETE_QUANTITY": "NONE"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "sufficient": true
+      }
+    },
+    {
+      "candidate_id": "CAND-0002",
+      "principle_families": {
+        "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+        "CONVERT_MOTION": "RACK_AND_PINION",
+        "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+        "BOUND_MOTION": "HARD_STOP",
+        "RETAIN_BODY": "LATER_BODY_COVER",
+        "GUIDE_MOTION": "PRISMATIC_GUIDE",
+        "TRANSMIT_LOAD": "DIRECT_BEARING",
+        "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+        "ACTUATE": "DIRECT_MANUAL",
+        "METER_DISCRETE_QUANTITY": "NONE"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "sufficient": true
+      }
+    },
+    {
+      "candidate_id": "CAND-0003",
+      "principle_families": {
+        "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+        "CONVERT_MOTION": "CRANK_SLIDER",
+        "MAINTAIN_CONFIGURATION": "GRAVITY_SEATED",
+        "BOUND_MOTION": "HARD_STOP",
+        "RETAIN_BODY": "LATER_BODY_COVER",
+        "GUIDE_MOTION": "MULTI_POINT_CONSTRAINT",
+        "TRANSMIT_LOAD": "SHEAR_MEMBER",
+        "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+        "ACTUATE": "DIRECT_MANUAL",
+        "METER_DISCRETE_QUANTITY": "NONE"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "sufficient": true
+      }
+    }
+  ],
+  "acceptance_contracts": [],
+  "unresolved": [
+    {
+      "unresolved_id": "UNR-0001",
+      "description": "The travel band 'approximately 80-100 mm' is ambiguous: does it define a strict range or a nominal value with tolerance? The acceptance criteria depend on this.",
+      "kept_open_by": ["AMB-0002"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": [
+        "strict range: 80-100 mm",
+        "nominal 90 mm ± 10 mm"
+      ]
+    },
+    {
+      "unresolved_id": "UNR-0002",
+      "description": "The load condition for supporting 1 kg is ambiguous: static, dynamic, or both? The verification would require this.",
+      "kept_open_by": ["AMB-0003"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": [
+        "static holding only",
+        "holding while moving",
+        "both"
+      ]
+    },
+    {
+      "unresolved_id": "UNR-0003",
+      "description": "The definition of 'safe to use' is ambiguous; without a hazard list or standard, the safety obligations cannot be verified.",
+      "kept_open_by": ["AMB-0004"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": [
+        "no sharp edges",
+        "no pinch points",
+        "compliance with a standard (e.g., ISO 12100)"
+      ]
+    },
+    {
+      "unresolved_id": "UNR-0004",
+      "description": "The interpretation of 'enclosed' is ambiguous: does it permit an opening for payload access? This affects the design of the housing.",
+      "kept_open_by": ["AMB-0006"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": [
+        "fully enclosed with no openings",
+        "permit an opening for payload access"
+      ]
+    },
+    {
+      "unresolved_id": "UNR-0005",
+      "description": "The required material, strength, wear, and lifetime are unspecified, making it impossible to verify durability.",
+      "kept_open_by": ["AMB-0007"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": [
+        "no durability requirements",
+        "specific criteria to be supplied"
+      ]
+    }
+  ],
+  "assumptions": [
+    "The platform's vertical travel direction is assumed to be along the direction of gravity.",
+    "The environment is a desk, upright, indoors, with gravity acting downward as per Scenario SCN-0001.",
+    "The user is the actor reaching the rotary input and the platform.",
+    "The payload is outside the system boundary during operation.",
+    "The assembly scenario does not provide details; it is assumed that assembly occurs without special tools."
+  ]
+}

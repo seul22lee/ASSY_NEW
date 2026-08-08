@@ -1,0 +1,202 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a compact desktop platform-lifting device enclosed within a housing.",
+      "locator": "REQ-001",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "The user should rotate an external hand crank to raise and lower an internal platform.",
+      "locator": "REQ-002",
+      "quantity_kinds": ["rotation"],
+      "directionality": "rotational"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "The platform should move approximately 80-100 mm and support a payload of approximately 1 kg.",
+      "locator": "REQ-003",
+      "quantity_kinds": ["length", "mass"],
+      "directionality": "vertical"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "The mechanism should remain enclosed within the housing during normal operation.",
+      "locator": "REQ-004",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0005",
+      "verbatim": "The product should be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+      "locator": "REQ-005",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0006",
+      "verbatim": "Avoid obvious jamming or unstable operation.",
+      "locator": "REQ-006",
+      "quantity_kinds": [],
+      "directionality": "none"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a compact desktop platform-lifting device enclosed within a housing.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "The device is compact and enclosed within a housing.",
+      "source_locator": "REQ-001",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "The user should rotate an external hand crank to raise and lower an internal platform.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "Rotating the external hand crank causes the platform to raise and lower.",
+      "source_locator": "REQ-002",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "The platform should move approximately 80-100 mm and support a payload of approximately 1 kg.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "The platform moves approximately 80-100 mm and supports approximately 1 kg.",
+      "source_locator": "REQ-003",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "The mechanism should remain enclosed within the housing during normal operation.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "The mechanism is not accessible during normal operation.",
+      "source_locator": "REQ-004",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0005",
+      "statement_verbatim": "The product should be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+      "kind": "USABILITY",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "The product is safe, plausible, easy to assemble, and practical to manufacture.",
+      "source_locator": "REQ-005",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0006",
+      "statement_verbatim": "Avoid obvious jamming or unstable operation.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "The device operates without obvious jamming or instability.",
+      "source_locator": "REQ-006",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Normal Operation",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the device including housing, hand crank, platform, and mechanism. Outside: the user and the environment (including the surface the device sits on).",
+      "actors": ["ACT-0001"],
+      "environment": "Desktop environment; user operates hand crank."
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Assembly",
+      "kind": "ASSEMBLY",
+      "system_boundary": "Inside: the device components to be assembled. Outside: the assembler and their tools.",
+      "actors": ["ACT-0002"],
+      "environment": "Manufacturing or assembly setting."
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Service",
+      "kind": "SERVICE",
+      "system_boundary": "Inside: the device. Outside: service personnel and tools.",
+      "actors": ["ACT-0003"],
+      "environment": "Maintenance setting."
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "User",
+      "must_reach": ["external hand crank"]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "Assembler",
+      "must_reach": ["device components"]
+    },
+    {
+      "id": "ACT-0003",
+      "name": "Service personnel",
+      "must_reach": ["device (for service)"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Choice of mechanism (e.g., scissor, screw, etc.)",
+      "why_free": "The request does not specify a particular mechanism."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "Choice of housing material and shape",
+      "why_free": "Not specified in the request."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "Exact dimensions (beyond the platform movement range)",
+      "why_free": "Only the platform travel range is given; device size is not specified."
+    },
+    {
+      "id": "FRE-0004",
+      "decision": "Manufacturing method",
+      "why_free": "The request asks for practical manufacturability but does not specify a method."
+    },
+    {
+      "id": "FRE-0005",
+      "decision": "Assembly process details",
+      "why_free": "The request asks for ease of assembly but does not define the process."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The platform movement is given as 'approximately 80-100 mm' – whether this is a range or an approximate single value.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When design requirements are finalized.",
+      "block_scopes": ["dimensioning"]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The payload is 'approximately 1 kg' – whether this is a minimum, maximum, or typical load.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When performance specifications are defined.",
+      "block_scopes": ["performance"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The device is intended for indoor desktop use on a stable, level surface.",
+      "why": "The term 'desktop' suggests a tabletop environment.",
+      "would_be_invalidated_by": "A statement that the device is for portable or outdoor use."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "A single hand crank is sufficient; no motorization is implied.",
+      "why": "The request says 'user should rotate an external hand crank'.",
+      "would_be_invalidated_by": "A statement that motor assistance is required."
+    }
+  ]
+}

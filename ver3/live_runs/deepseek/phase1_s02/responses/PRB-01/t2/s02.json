@@ -1,0 +1,376 @@
+{
+  "obligations": [
+    {
+      "obligation_id": "OBL-0001",
+      "description": "Product must be fixable to a wall",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0002",
+      "description": "Product must hold approximately twenty items",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0003",
+      "description": "Product must release exactly one item per press",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0004",
+      "description": "Product must never release more than one item per press",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0005",
+      "description": "Product must allow refilling from the top",
+      "scope": "UNIVERSAL",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0006",
+      "description": "Product must allow refilling without removal from wall",
+      "scope": "UNIVERSAL",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0007",
+      "description": "Product must release items correctly when nearly empty",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0008",
+      "description": "User must be able to reach the press surface, the released item, and the loading opening",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0009",
+      "description": "Product must remain fixed to wall during operation",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0010",
+      "description": "Product must be refillable while still attached to wall",
+      "scope": "UNIVERSAL",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0011",
+      "description": "Product must prevent items from falling out during loading or storage",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0012",
+      "description": "Product must tolerate the forces from wall mounting and gravity",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0013",
+      "description": "Product must keep items separate from each other",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "obligation_id": "OBL-0014",
+      "description": "Product must allow user to press a surface",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    }
+  ],
+  "load_cases": [
+    {
+      "load_case_id": "LC-0001",
+      "scenario": "SCN-0001",
+      "description": "Gravity load on the dispenser when mounted",
+      "on_role": "PRODUCT",
+      "reacted_at": "WALL",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0002",
+      "scenario": "SCN-0001",
+      "description": "Force applied by user pressing the lever",
+      "on_role": "PRODUCT",
+      "reacted_at": "WALL",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0003",
+      "scenario": "SCN-0002",
+      "description": "Force applied when nearly empty (same as normal press)",
+      "on_role": "PRODUCT",
+      "reacted_at": "WALL",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0004",
+      "scenario": "SCN-0003",
+      "description": "Gravity load of items during refill",
+      "on_role": "PRODUCT",
+      "reacted_at": "WALL",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0005",
+      "scenario": "SCN-0004",
+      "description": "Installation forces when fixing to wall",
+      "on_role": "PRODUCT",
+      "reacted_at": "WALL",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0006",
+      "scenario": "SCN-0004",
+      "description": "Weight of product during mounting",
+      "on_role": "PRODUCT",
+      "reacted_at": "WALL",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "CAND-0001",
+      "functions": [
+        {
+          "function_class": "RETAIN_BODY",
+          "principle_family": "GEOMETRIC_UNDERCUT"
+        },
+        {
+          "function_class": "METER_DISCRETE_QUANTITY",
+          "principle_family": "SINGLE_ITEM_POCKET"
+        },
+        {
+          "function_class": "ACTUATE",
+          "principle_family": "DIRECT_MANUAL"
+        }
+      ],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": [
+        {
+          "obligation_id": "OBL-C1-001",
+          "description": "A support structure is required to hold the dispenser against the wall",
+          "scope": "UNIVERSAL",
+          "evidence_route": "RIGID_BODY_DYNAMICS",
+          "route_available": true,
+          "involves_actors": []
+        }
+      ],
+      "evidence_route_verdict": {
+        "primary_function": "METER_DISCRETE_QUANTITY",
+        "route_needed": "MOBILITY_ANALYSIS",
+        "route_available": true
+      }
+    },
+    {
+      "candidate_id": "CAND-0002",
+      "functions": [
+        {
+          "function_class": "RETAIN_BODY",
+          "principle_family": "ROTATION_LOCK"
+        },
+        {
+          "function_class": "METER_DISCRETE_QUANTITY",
+          "principle_family": "GATED_PAIR"
+        },
+        {
+          "function_class": "ACTUATE",
+          "principle_family": "DIRECT_MANUAL"
+        }
+      ],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": [
+        {
+          "obligation_id": "OBL-C2-001",
+          "description": "A support structure is required to hold the dispenser against the wall",
+          "scope": "UNIVERSAL",
+          "evidence_route": "RIGID_BODY_DYNAMICS",
+          "route_available": true,
+          "involves_actors": []
+        }
+      ],
+      "evidence_route_verdict": {
+        "primary_function": "METER_DISCRETE_QUANTITY",
+        "route_needed": "MOBILITY_ANALYSIS",
+        "route_available": true
+      }
+    },
+    {
+      "candidate_id": "CAND-0003",
+      "functions": [
+        {
+          "function_class": "RETAIN_BODY",
+          "principle_family": "ELASTIC_CAPTURE"
+        },
+        {
+          "function_class": "METER_DISCRETE_QUANTITY",
+          "principle_family": "INDEXING_ROTOR"
+        },
+        {
+          "function_class": "ACTUATE",
+          "principle_family": "STORED_ENERGY"
+        }
+      ],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": [
+        {
+          "obligation_id": "OBL-C3-001",
+          "description": "A support structure is required to hold the dispenser against the wall",
+          "scope": "UNIVERSAL",
+          "evidence_route": "RIGID_BODY_DYNAMICS",
+          "route_available": true,
+          "involves_actors": []
+        }
+      ],
+      "evidence_route_verdict": {
+        "primary_function": "METER_DISCRETE_QUANTITY",
+        "route_needed": "MOBILITY_ANALYSIS",
+        "route_available": true
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "acceptance_contract_id": "AC-0001",
+      "requirement_id": "REQ-0001",
+      "verification_kind": "STRUCTURAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "interpretation": "The product has a means of attachment to a wall and is configured to dispense items."
+    },
+    {
+      "acceptance_contract_id": "AC-0002",
+      "requirement_id": "REQ-0002",
+      "verification_kind": "QUANTITATIVE",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "interpretation": "The product can hold approximately twenty items, subject to AMB-0001 and AMB-0002.",
+      "blocked_by": ["AMB-0001", "AMB-0002"]
+    },
+    {
+      "acceptance_contract_id": "AC-0003",
+      "requirement_id": "REQ-0003",
+      "verification_kind": "QUANTITATIVE",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "interpretation": "Each actuation results in exactly one item being released, subject to AMB-0004.",
+      "blocked_by": ["AMB-0004"]
+    },
+    {
+      "acceptance_contract_id": "AC-0004",
+      "requirement_id": "REQ-0004",
+      "verification_kind": "QUANTITATIVE",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "interpretation": "The mechanism prevents release of more than one item per actuation, subject to AMB-0004.",
+      "blocked_by": ["AMB-0004"]
+    },
+    {
+      "acceptance_contract_id": "AC-0005",
+      "requirement_id": "REQ-0005",
+      "verification_kind": "STRUCTURAL",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "interpretation": "There is an opening at the top through which items can be placed into the storage area."
+    },
+    {
+      "acceptance_contract_id": "AC-0006",
+      "requirement_id": "REQ-0006",
+      "verification_kind": "STRUCTURAL",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "interpretation": "Refilling can be performed while the product remains attached to the wall."
+    },
+    {
+      "acceptance_contract_id": "AC-0007",
+      "requirement_id": "REQ-0007",
+      "verification_kind": "QUANTITATIVE",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "interpretation": "The mechanism continues to operate without jamming when the number of stored items is low, subject to AMB-0003 and AMB-0004.",
+      "blocked_by": ["AMB-0003", "AMB-0004"]
+    }
+  ],
+  "unresolved": [
+    {
+      "decision_id": "UNR-0001",
+      "description": "Which metering principle (SINGLE_ITEM_POCKET, GATED_PAIR, INDEXING_ROTOR) best satisfies the requirement to release exactly one item at a time?",
+      "kept_open_by": ["FREE-0001"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "alternatives": ["SINGLE_ITEM_POCKET", "GATED_PAIR", "INDEXING_ROTOR"],
+      "evidence_to_resolve": "A mobility analysis and swept-volume simulation could determine which principle guarantees single-item dispensing without jamming."
+    },
+    {
+      "decision_id": "UNR-0002",
+      "description": "How should the product be retained to the wall?",
+      "kept_open_by": ["FRE-0003"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": ["Screw fixings", "Adhesive backing", "Magnetic mount", "Clamp"],
+      "evidence_to_resolve": "Unknown wall type and fixings; needs clarification of wall material and permitted fixing methods."
+    }
+  ],
+  "assumptions": [
+    {
+      "assumption_id": "ASM-0001",
+      "description": "The dispenser is mounted in an orientation that allows gravity to assist in dispensing, i.e., items are stored above the release mechanism.",
+      "rationale": "Requirement states wall-mounted and refill from top, implying a vertical orientation."
+    },
+    {
+      "assumption_id": "ASM-0002",
+      "description": "The items are small and can be dispensed one at a time through a mechanical gate or pocket.",
+      "rationale": "Requirement describes small items, but size/shape not specified."
+    },
+    {
+      "assumption_id": "ASM-0003",
+      "description": "The wall is vertical and strong enough to support the dispenser and its contents.",
+      "rationale": "Wall-mounted implies typical vertical wall capable of supporting the dispenser."
+    }
+  ]
+}

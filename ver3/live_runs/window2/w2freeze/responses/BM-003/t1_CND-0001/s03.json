@@ -1,0 +1,211 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "Main body: holds the object and supports loads",
+      "instance_identity": "one per product",
+      "addresses_obligations": [
+        "OBL-0002",
+        "OBL-0006",
+        "OBL-0010",
+        "OBL-0017"
+      ]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "Support leg: translates between folded and deployed",
+      "instance_identity": "three per product, one per support",
+      "addresses_obligations": [
+        "OBL-0001",
+        "OBL-0002",
+        "OBL-0005",
+        "OBL-0006",
+        "OBL-0007"
+      ]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "Blocking member: prevents folding until displaced",
+      "instance_identity": "one per product",
+      "addresses_obligations": [
+        "OBL-0005",
+        "OBL-0006",
+        "OBL-0007",
+        "OBL-0017"
+      ]
+    },
+    {
+      "id": "BOD-0004",
+      "role": "Retaining member: retains the blocking member",
+      "instance_identity": "one per product",
+      "addresses_obligations": [
+        "OBL-0007",
+        "OBL-0017"
+      ]
+    },
+    {
+      "id": "BOD-0005",
+      "role": "Anchor: retains supports to the main body",
+      "instance_identity": "three per product, one per support",
+      "addresses_obligations": [
+        "OBL-0002",
+        "OBL-0006"
+      ]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["main body structure"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["leg shaft"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["blocking member body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": ["retaining member body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0005",
+      "members": ["anchor body"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0003",
+      "dof": ["TX"],
+      "axis_direction": "+X",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0004",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0005",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "INTENDED",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "INTENDED",
+      "addresses_obligations": ["OBL-0006", "OBL-0007"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0001", "BOD-0004"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "INTENDED",
+      "addresses_obligations": []
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0001", "BOD-0005"],
+      "interaction_kind": "INTERFERENCE_FIT",
+      "nominal_status": "INTENDED",
+      "addresses_obligations": ["OBL-0002", "OBL-0006"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0002", "BOD-0005"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "INTENDED",
+      "addresses_obligations": ["OBL-0002"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "deployed",
+      "kind": "NOMINAL",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "folded",
+      "kind": "ALTERNATIVE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the holding region", "the release member"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001", "BOD-0002"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0002"],
+      "required_by_actors": [],
+      "reach_targets": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "exact geometry and dimensions of the blocking member and its travel",
+      "why_open": "dimensions not specified in requirements",
+      "alternatives": ["FRE-0007"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "AMB-0002", "AMB-0007"],
+      "blocks": ["s03"]
+    }
+  ]
+}

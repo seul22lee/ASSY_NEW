@@ -1,0 +1,327 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must be capable of repeated open and close cycles without accidental opening during normal handling.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The latch must be easy for the user to operate.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The latch must remain secure during transport.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The product must be suitable for low-cost manufacturing.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s05",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must be practical for desktop use.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The design must be mechanically plausible.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The product must be easy to assemble.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The latch must prevent accidental opening under normal handling loads.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The latch must be operable by the user with reasonable force.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The latch must remain engaged during transport vibrations and shocks.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The product must be manufacturable with low-cost processes.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s05",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The latch mechanism must be easy to assemble manually.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"]
+    },
+    {
+      "id": "OBL-0013",
+      "statement": "The product must maintain its configuration during normal handling.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "box body",
+      "reacted_at_role": "not specified",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "latch",
+      "reacted_at_role": "not specified",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0003",
+      "applied_to_role": "box",
+      "reacted_at_role": "not specified",
+      "direction_class": "TRANSVERSE",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0004",
+      "applied_to_role": "product",
+      "reacted_at_role": "not specified",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Use a detent/snap latch mechanism that relies on elastic deformation for engagement and release.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "DETENT_OR_SNAP",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0013"],
+      "obligations_created": ["OBL-0014"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction and snap forces need contact analysis to verify retention and release forces."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Use a friction hold latch with a wedge or inclined surface that jams to prevent opening.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "FRICTION_HOLD",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0013"],
+      "obligations_created": ["OBL-0015"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction retention requires contact analysis to verify hold and release forces."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Use a spring-loaded ball detent that engages with a recess for retention.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "DETENT_OR_SNAP",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0013"],
+      "obligations_created": ["OBL-0016"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Snap and retention forces need contact analysis."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0004",
+      "summary": "Use a quarter-turn latch with a stud and ramp that secures by rotation.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "DETENT_OR_SNAP",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0013"],
+      "obligations_created": ["OBL-0017"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Engagement and release forces need contact analysis."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0013"],
+      "predicates": ["Latch remains closed under normal handling loads", "User can open with force within ergonomic limits", "Latch remains closed during transport vibrations"]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0013"],
+      "predicates": ["Latch remains closed under normal handling loads", "User can open with force within ergonomic limits", "Latch remains closed during transport vibrations"]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0013"],
+      "predicates": ["Latch remains closed under normal handling loads", "User can open with force within ergonomic limits", "Latch remains closed during transport vibrations"]
+    },
+    {
+      "id": "ACC-0004",
+      "candidate": "CND-0004",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0013"],
+      "predicates": ["Latch remains closed under normal handling loads", "User can open with force within ergonomic limits", "Latch remains closed during transport vibrations"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Could not determine which latch mechanism best balances ease-of-operation and security without defined force thresholds and handling conditions.",
+      "why_open": "The requirements do not define the force thresholds or the specific handling conditions that would distinguish between accidental opening and normal operation.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003", "CND-0004"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "AMB-0002", "AMB-0003"],
+      "blocks": ["OBL-0008", "OBL-0009", "OBL-0010"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "Could not determine which manufacturing process is lowest cost without defined cost targets and volume.",
+      "why_open": "The requirement does not specify cost targets or production volume, making it ambiguous which process would be most suitable.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0004", "ASM-0002"],
+      "blocks": ["OBL-0004", "OBL-0011"]
+    },
+    {
+      "id": "UNR-0003",
+      "decision": "Could not determine the maximum size or weight for desktop practicality without defining the desktop environment.",
+      "why_open": "The requirement does not specify the desktop environment or usage scenario, making it ambiguous what practical means.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0005", "FRE-0003"],
+      "blocks": ["OBL-0005"]
+    },
+    {
+      "id": "UNR-0004",
+      "decision": "Could not determine the specific assembly steps or required tooling for easy assembly without defining assembly constraints.",
+      "why_open": "The requirement does not specify target assembly time, tools, or skill level, making it ambiguous what easy means.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0007", "FRE-0005"],
+      "blocks": ["OBL-0007", "OBL-0012"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The box is intended for single-user desktop use.",
+      "why": "The request mentions desktop use and user operation, implying a single user context.",
+      "would_be_invalidated_by": "Evidence that the box is intended for multiple users or different environments."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "Low-cost manufacturing implies high-volume production.",
+      "why": "Low-cost manufacturing often benefits from economies of scale, but this is not explicitly stated.",
+      "would_be_invalidated_by": "Evidence that the product is intended for low-volume, high-cost manufacturing."
+    },
+    {
+      "id": "ASM-1003",
+      "statement": "The latch is the only closure mechanism; the box may be a container with a lid and latch.",
+      "why": "The requirements focus on the latch and the box, suggesting a single closure point.",
+      "would_be_invalidated_by": "Evidence of multiple latches or a different closure system."
+    }
+  ]
+}

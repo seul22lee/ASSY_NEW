@@ -1,0 +1,236 @@
+reference_id: EXE-BM003-01
+schema_version: 0.1.0
+units: mm
+
+method: >
+  Every interaction is measured inside a declared region of interest, so a
+  clearance on one part of a body pair cannot be masked by a contact elsewhere on
+  the same pair. Each region names the configuration it is evaluated in. Overlap
+  is the volume of the boolean common; clearance is BRepExtrema_DistShapeShape.
+  Neither is inferred from the other. The regions themselves are declared in
+  validate.py, where they are built from the station azimuths rather than typed
+  out three times.
+
+interaction_kinds_used:
+  DECLARED_CONTACT: "the two faces are meant to touch; measured min distance <= contact_tol and no common volume"
+  DECLARED_CLEARANCE: "a running or retention gap of a declared nominal; |measured - nominal| <= contact_tol"
+  NOT_INTENDED_TO_INTERACT: "the two bodies are not meant to meet here; measured distance > contact_tol, and where a nominal is declared it is matched"
+
+not_used:
+  DECLARED_INTERFERENCE_FIT: "this design has none"
+  DECLARED_COMPLIANT_INTERACTION: "this design has none; nothing here deforms, and NRM-BM-003-017's deformation exception is therefore not invoked"
+
+note_on_nominals: >
+  Every nominal below is a consequence of parameters.yaml, not an independent
+  requirement. AMB-BM-003-007 leaves acceptable clearance and play unresolved, so
+  none of these numbers is offered as a threshold the source implies. They are
+  here so that a wrong build is caught: if a nominal and a measurement disagree,
+  the model has changed and the report says so.
+
+interactions:
+
+  # ------------------------------------------------------------- hinge A
+  - id: INT-HINGE-A-HEAD
+    bodies: [BODY-PIN-A, BODY-HUB]
+    type: DECLARED_CONTACT
+    realises: RET-PIN-A-INWARD
+    blocks_escape_direction: "-y of station A, i.e. the pin cannot travel toward the far plate"
+  - id: INT-HINGE-A-BAR
+    bodies: [BODY-PIN-A, BODY-HUB]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.5
+    realises: RET-PIN-A-OUTWARD
+    blocks_escape_direction: "+y of station A; the turned end bar cannot re-enter the relief"
+  - id: INT-HINGE-A-BORE
+    bodies: [BODY-PIN-A, BODY-LEG-A]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.3
+    realises: JNT-HINGE-A
+  - id: INT-BLADE-A-GAP
+    bodies: [BODY-LEG-A, BODY-HUB]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 1.0
+    realises: RET-LEG-A-AXIAL
+    blocks_escape_direction: "both directions along the hinge axis; the clevis pair encloses the blade"
+  - id: INT-BLOCK-A
+    bodies: [BODY-LEG-A, BODY-RING]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.4
+    realises: BLK-FOLD-A
+    note: >
+      the running gap between heel A and its blocking arm in DEPLOYED_LOCKED. It is
+      what folding back has to close before it is stopped; the stopping itself is
+      measured as an overlap, in validation/state_maintenance.json.
+  - id: INT-CLEAR-A
+    bodies: [BODY-LEG-A, BODY-RING]
+    type: NOT_INTENDED_TO_INTERACT
+    note: the same pair in DEPLOYED_RELEASED, where the arm has moved off the heel
+  - id: INT-STOP-A
+    bodies: [BODY-LEG-A, BODY-HUB]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.15
+    realises: STP-OUTWARD-A
+    note: >
+      heel underside over the outward stop pad in DEPLOYED_LOCKED. This is the
+      stop on the far side of the deployed angle; the fold-back side is INT-BLOCK-A.
+
+  # ------------------------------------------------------------- hinge B
+  - id: INT-HINGE-B-HEAD
+    bodies: [BODY-PIN-B, BODY-HUB]
+    type: DECLARED_CONTACT
+    realises: RET-PIN-B-INWARD
+    blocks_escape_direction: "-y of station B"
+  - id: INT-HINGE-B-BAR
+    bodies: [BODY-PIN-B, BODY-HUB]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.5
+    realises: RET-PIN-B-OUTWARD
+    blocks_escape_direction: "+y of station B"
+  - id: INT-HINGE-B-BORE
+    bodies: [BODY-PIN-B, BODY-LEG-B]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.3
+    realises: JNT-HINGE-B
+  - id: INT-BLADE-B-GAP
+    bodies: [BODY-LEG-B, BODY-HUB]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 1.0
+    realises: RET-LEG-B-AXIAL
+  - id: INT-BLOCK-B
+    bodies: [BODY-LEG-B, BODY-RING]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.4
+    realises: BLK-FOLD-B
+  - id: INT-CLEAR-B
+    bodies: [BODY-LEG-B, BODY-RING]
+    type: NOT_INTENDED_TO_INTERACT
+  - id: INT-STOP-B
+    bodies: [BODY-LEG-B, BODY-HUB]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.15
+    realises: STP-OUTWARD-B
+
+  # ------------------------------------------------------------- hinge C
+  - id: INT-HINGE-C-HEAD
+    bodies: [BODY-PIN-C, BODY-HUB]
+    type: DECLARED_CONTACT
+    realises: RET-PIN-C-INWARD
+    blocks_escape_direction: "-y of station C"
+  - id: INT-HINGE-C-BAR
+    bodies: [BODY-PIN-C, BODY-HUB]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.5
+    realises: RET-PIN-C-OUTWARD
+    blocks_escape_direction: "+y of station C"
+  - id: INT-HINGE-C-BORE
+    bodies: [BODY-PIN-C, BODY-LEG-C]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.3
+    realises: JNT-HINGE-C
+  - id: INT-BLADE-C-GAP
+    bodies: [BODY-LEG-C, BODY-HUB]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 1.0
+    realises: RET-LEG-C-AXIAL
+  - id: INT-BLOCK-C
+    bodies: [BODY-LEG-C, BODY-RING]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.4
+    realises: BLK-FOLD-C
+  - id: INT-CLEAR-C
+    bodies: [BODY-LEG-C, BODY-RING]
+    type: NOT_INTENDED_TO_INTERACT
+  - id: INT-STOP-C
+    bodies: [BODY-LEG-C, BODY-HUB]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.15
+    realises: STP-OUTWARD-C
+
+  # --------------------------------------------------------- the ring stack
+  - id: INT-RING-SEAT
+    bodies: [BODY-HUB, BODY-RING]
+    type: DECLARED_CONTACT
+    realises: RET-RING-DOWN
+    blocks_escape_direction: "-z; the pedestal top face is the ring's lower stop"
+  - id: INT-RING-KEY
+    bodies: [BODY-HUB, BODY-RING]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.4
+    realises: JNT-RING-TURN
+    note: >
+      rib inside keyway in DEPLOYED_LOCKED. This is the feature that makes turning
+      unavailable until the ring is lifted; the residual angular slack it leaves is
+      measured in validation/state_maintenance.json.
+  - id: INT-RING-RIBTOP
+    bodies: [BODY-HUB, BODY-RING]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.4
+    note: >
+      the lifted and turned ring standing over the rib tops in DEPLOYED_RELEASED.
+      The ribs are what stops it dropping back to the locked height while turned.
+  - id: INT-RING-CAPTOR-STOP
+    bodies: [BODY-RING, BODY-RING-CAPTOR]
+    type: DECLARED_CONTACT
+    realises: RET-RING-UP
+    blocks_escape_direction: "+z; this is the final captor that keeps the ring on the column"
+  - id: INT-RING-CAPTOR-GAP
+    bodies: [BODY-RING, BODY-RING-CAPTOR]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 2.4
+    note: the same pair in DEPLOYED_LOCKED; this gap is the ring's total lift travel
+  - id: INT-CAPTOR-SEAT
+    bodies: [BODY-HUB, BODY-RING-CAPTOR]
+    type: DECLARED_CONTACT
+    realises: RET-CAPTOR-DOWN
+    blocks_escape_direction: "-z; the column step is the captor's lower stop"
+  - id: INT-CAPTOR-LUG
+    bodies: [BODY-HUB, BODY-RING-CAPTOR]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.2
+    realises: RET-CAPTOR-UP
+    blocks_escape_direction: "+z; the turned captor sits under the column's lower bayonet lugs"
+
+  # --------------------------------------------------------- the top support
+  - id: INT-SUPPORT-SEAT
+    bodies: [BODY-HUB, BODY-TOP-SUPPORT]
+    type: DECLARED_CONTACT
+    realises: RET-SUPPORT-DOWN
+    blocks_escape_direction: "-z; the sleeve stands on the lower bayonet lugs"
+  - id: INT-SUPPORT-LUG
+    bodies: [BODY-HUB, BODY-TOP-SUPPORT]
+    type: DECLARED_CLEARANCE
+    nominal_clearance_mm: 0.3
+    realises: RET-SUPPORT-UP
+    blocks_escape_direction: "+z; the platform's groove ledge sits under the column's upper lugs"
+  - id: INT-SUPPORT-CAPTOR
+    bodies: [BODY-RING-CAPTOR, BODY-TOP-SUPPORT]
+    type: NOT_INTENDED_TO_INTERACT
+    nominal_clearance_mm: 4.2
+    note: the support is carried by the hub's lugs, not by the captor's own body
+
+  # ----------------------------------------------------------- leg to leg
+  - id: INT-LEG-LEG-AB
+    bodies: [BODY-LEG-A, BODY-LEG-B]
+    type: NOT_INTENDED_TO_INTERACT
+    note: measured in STORED, where the three legs are closest together
+  - id: INT-LEG-LEG-BC
+    bodies: [BODY-LEG-B, BODY-LEG-C]
+    type: NOT_INTENDED_TO_INTERACT
+  - id: INT-LEG-LEG-AC
+    bodies: [BODY-LEG-A, BODY-LEG-C]
+    type: NOT_INTENDED_TO_INTERACT
+
+retention_summary:
+  principle: >
+    Every body that could leave has a named blocked direction and a named blocker,
+    and both are measured above. Nothing in this design is retained by friction, by
+    a press fit or by an assertion.
+  chain: >
+    ring -> ring captor -> the hub's lower bayonet lugs. top support -> the hub's
+    upper bayonet lugs. each leg -> its pin -> the pin's head one side and its
+    turned end bar the other. Each chain terminates on BODY-HUB, which is the
+    fixed reference body, so no retention depends on a part that is itself loose.
+  what_is_not_established:
+    - "retention force, or what load would defeat any of these (AMB-BM-003-002, AMB-BM-003-006)"
+    - "whether a bayonet could be turned back by vibration; rigid geometry cannot decide it"
+    - "wear, fatigue or lifetime of any interface (AMB-BM-003-006)"

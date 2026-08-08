@@ -1,0 +1,176 @@
+# VALIDATION STATUS — EXE-BM003-01
+#
+# Machine-readable. This file, not any SUMMARY.json, is the authoritative
+# statement of what has and has not been validated for this reference.
+#
+# Read this before reading any other result in this directory. Three partial
+# artifact sets exist on disk and none of them is a complete single-run set.
+
+schema_version: "0.1.0"
+reference_id: EXE-BM003-01
+benchmark_id: BM-003
+recorded: "2026-08-06"
+
+# =====================================================================
+# STATUS
+# =====================================================================
+development_fast_validation: PASS
+full_sampling_reference_validation: NOT_COMPLETED
+reason: EXECUTION_ENVIRONMENT_WALL_TIME_LIMIT
+engineering_failure_observed_before_interruption: false
+final_positive_reference_certification: DEFERRED
+
+completion_claim: DEFERRED
+completion_claim_intended: ONE_POSITIVE_EXECUTABLE_REFERENCE_VALIDATED
+completion_claim_not_yet_supported_because: >
+  The intended claim requires one complete full-sampling run whose artifacts all
+  belong to that run. No such run exists. The claim is therefore NOT made, and
+  GOVERNANCE.yaml carries the same deferral.
+
+# =====================================================================
+# WHAT WAS ACTUALLY OBSERVED
+# =====================================================================
+observed:
+  fast_mode_run:
+    completed: true
+    finished: "2026-08-06T14:47"
+    overall: PASS
+    run_seconds: 1144.8
+    steps_all_pass: true
+    negative_controls: "17/17 detected"
+    oracle_invariants: "18/18 PASS"
+    findings: 0
+    caveat: >
+      BM003_FAST=1 reduces sampling density only - no computation is skipped, no
+      predicate is disabled and no output file is absent. But the two declared
+      refinement windows (t in [0,0.08] and [0.92,1.0] of every segment, at 0.01
+      spacing) are NOT examined in fast mode, and those are exactly where the
+      seating and blocking contacts occur. A fast PASS is therefore weaker than a
+      full PASS. It is adequate for iteration and inadequate as the recorded
+      evidence for a positive reference.
+
+  full_sampling_run:
+    completed: false
+    reached: "end of step 7 (assembly)"
+    interrupted_during: "finalisation, after assembly_report.json was written"
+    stages_completed:
+      - "step 1 build"
+      - "step 2 native validity"
+      - "step 3 re-import"
+      - "step 4 geometry signature"
+      - "core mechanism predicates"
+      - "step 5 motion (47 samples per segment, both refinement windows)"
+      - "step 6 interactions (34 declared interactions)"
+      - "step 7 assembly (151 samples per insertion)"
+    stages_not_reached:
+      - "negative controls"
+      - "step 8 Oracle evaluation"
+      - "step 9 render"
+      - "final summary"
+    results_seen_before_interruption: ALL_PASS
+    no_failing_measurement_observed: true
+
+  instrumented_run:
+    completed: false
+    purpose: "stage-level timing, to locate the hotspot"
+    measured_stage_seconds:
+      build: 1.0
+      native_validity: 0.1
+      re_import: 0.7
+      geometry_signature: 1.1
+      core_predicates: 361.9
+      motion_report: ">233 (interrupted)"
+    interrupted_by: "shell wall-time cap at 600 s"
+
+# =====================================================================
+# WHY IT DID NOT COMPLETE
+# =====================================================================
+blocking_condition:
+  what: >
+    Every foreground shell available to the agent is capped at 600 s of wall
+    time. The full-sampling run needs approximately 2350-2550 s.
+  it_is_not: >
+    a defect in the reference, in build.py, in validate.py, in the Oracle or in
+    any measurement. Every measurement taken before each interruption passed.
+  measured_cost_profile:
+    step_5_motion: "~1480 s - the single hotspot; 12690 body-pair measurements"
+    core_predicates: "361.9 s"
+    negative_controls: "~600 s - dominated by 17 model builds, does not scale with sampling"
+    constant_floor: "~440 s - re-import, interactions, rendering"
+  what_would_resolve_it:
+    - "a single uninterrupted execution window of at least 45 minutes"
+    - "or an explicit decision to reduce declared full-run sampling, which changes evidence and was not taken"
+
+# =====================================================================
+# ARTIFACT SETS ON DISK - NONE IS A CLEAN SINGLE-RUN SET
+# =====================================================================
+artifact_sets:
+  - path: validation/
+    kind: PARTIAL
+    from: "instrumented foreground run, 16:02-16:08"
+    contents: "steps 1-4 and the core predicates only; no summary, no controls"
+    authoritative: false
+
+  - path: validation_interrupted_20260806_155638/
+    kind: MIXED_PARTIAL
+    from: "fast run (14:47) leftovers OVERWRITTEN IN PLACE by the full run (15:16-15:49)"
+    contains_from_fast_run:
+      - SUMMARY.json
+      - checker_selftest.json
+      - oracle_evaluation.json
+      - render_report.json
+      - review_media.json
+      - videos.json
+      - review/bm003_cad_cycle.mp4
+      - review/bm003_cad_assembly.mp4
+    contains_from_full_run:
+      - build_report.json
+      - solid_validity.json
+      - reimport_report.json
+      - geometry_signature.json
+      - motion_report.json
+      - interaction_report.json
+      - assembly_report.json
+      - "the core predicate files"
+    authoritative: false
+    why_not: >
+      Its SUMMARY.json reports fast_mode true and 1144.8 s while its
+      motion_report.json reports 47 samples per segment - a full-mode figure. The
+      two do not describe the same run. This is precisely the failure mode
+      manifest_util was written after, and it is why no manifest may be built
+      from this directory.
+
+  - path: validation_interrupted_20260806T160153/
+    kind: PARTIAL
+    from: "a detached relaunch, 15:57-16:00, stopped deliberately"
+    authoritative: false
+
+manifest:
+  generated: false
+  refused_because: >
+    manifest_util.build_manifest hashes whatever is on disk. Building a manifest
+    now would stamp a mixture of three runs as one verified artifact set. No
+    manifest is written until one complete run exists.
+
+# =====================================================================
+# WHAT IS AND IS NOT CLAIMED RIGHT NOW
+# =====================================================================
+claimed_now:
+  - "the ten bodies build as valid single solids and round-trip through BREP and STEP"
+  - "under FAST sampling every predicate, every interaction and every assembly step passed"
+  - "under FAST sampling all 17 negative controls were detected"
+  - "under FULL sampling, steps 1-7 passed before the run was interrupted"
+
+not_claimed_now:
+  - "that the reference is fully validated at declared sampling"
+  - "that the negative controls hold at full-mode sampling"
+  - "that the Oracle evaluation holds at full-mode sampling"
+  - "anything that would require a manifest, since none exists"
+  - "every unsupported item already listed in actual_evaluation.json remains unsupported"
+
+next_action_required: >
+  One uninterrupted full-sampling run in a window of at least 45 minutes, its
+  exit code observed, RUN_STATUS.txt written by its own finally block, all
+  artifacts confirmed to share that run, and only then make_manifest.py.
+
+human_review: HUMAN_REVIEW_PENDING

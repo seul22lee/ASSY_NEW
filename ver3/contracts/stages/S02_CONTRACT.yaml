@@ -1,0 +1,104 @@
+# STAGE 02 CONTRACT — obligation, load and candidate formation
+schema_version: "0.1.0"
+stage_id: s02
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+derived_from: docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md
+
+engineering_question: >
+  What must physically be true, what loads exist, what families of mechanism
+  could satisfy both - and which of those can we actually evidence?
+
+engineering_responsibility: >
+  Derive physical necessity from stated intent; enumerate the loads the scenarios
+  imply; generate genuinely different candidate families; and classify, before
+  any geometry, what each candidate would need in order to be proven.
+
+required_inputs:
+  from_s01: [Requirement, Scenario, Actor, Observable, Freedom, Ambiguity, quantity_inventory]
+  from_registry: [evidence_route_capabilities]
+prohibited_inputs: [raw source text]
+
+required_discoveries:
+  - "obligations that follow physically but are not stated"
+  - "the obligations each candidate CREATES, not only those it addresses"
+  - "load cases: what is applied, to which body role, in which direction class"
+  - "whether the transmission family is self-locking - a family property, knowable here"
+  - "the evidence route each candidate's primary function would require, and whether it exists"
+
+owned_decisions:
+  creates: [Obligation, Candidate, AcceptanceContract, LoadCase, BodyHypothesis, PhysicalInteractionHypothesis]
+  also_owns:
+    - "the declaration that a claim class is unevaluable by this toolchain"
+
+load_case_ownership:
+  principle: >
+    A LoadCase is CANDIDATE-INDEPENDENT. It says what the world does to the
+    product, never what any mechanism carries.
+  required_fields: [entity_id, scenario, applied_to_role, direction_class, kind, magnitude_or_status]
+  kind: [GRAVITY, PAYLOAD, ACTOR_APPLIED, REACTION]
+  why_kind_matters: >
+    Without ACTOR_APPLIED, "the user turns the handle" and "a load is applied to
+    the handle" are indistinguishable.
+  magnitude_rule: >
+    A magnitude appears only if s01's quantity inventory supplies one. Otherwise
+    the status is UNSUPPORTED. Inventing a representative load is prohibited.
+  what_it_must_not_contain:
+    - "which element carries which component - that is candidate-dependent and belongs to the LoadPath at s03 (SF-5.3)"
+
+prohibited_decisions:
+  - what: "select a winning candidate"
+    invariant: INV-007
+    retirement_row: R-15
+  - what: "score candidates, or penalise element count"
+    retirement_row: R-16
+    rationale: "a candidate that has not realized its supports has fewer elements, so incompleteness wins"
+  - what: "reject a candidate because no library entry exists"
+    instead: "UNSUPPORTED"
+    invariant: INV-011
+  - what: "state any position or dimension"
+  - what: "assign a load component to a specific element"
+
+structured_outputs:
+  Obligation: [entity_id, statement, derived_from_requirements, mandatory, derivation_premises]
+  Candidate: [entity_id, summary, family, principle, obligations_addressed, obligations_created, evidence_route_verdict, self_locking]
+  LoadCase: [entity_id, scenario, applied_to_role, direction_class, kind, magnitude_or_status]
+  AcceptanceContract: [entity_id, candidate, obligations, predicates]
+
+allowed_unresolved:
+  - "candidate ranking - MANDATORY, there is no selected-candidate field"
+  - "every magnitude the source does not give"
+  - "which of several admissible principles is used"
+
+maturity_expectations:
+  geometry: BODY_CLASS_ONLY
+  note: "Body hypotheses have roles. They have no extent, no position and no count commitment."
+
+deterministic_exit_checks:
+  - id: S02-C1
+    check: "every Obligation traces to a Requirement or to a named derivation premise"
+  - id: S02-C2
+    check: "no Candidate carries a score or rank"
+  - id: S02-C3
+    check: "every Candidate has an evidence_route_verdict"
+  - id: S02-C4
+    check: "every LoadCase names a scenario, an applied_to_role, a direction_class and a kind"
+  - id: S02-C5
+    check: "every Scenario of kind OPERATION has at least one LoadCase, or an explicit declaration that it is unloaded"
+  - id: S02-C6
+    check: "no LoadCase names a specific element"
+  - id: S02-C7
+    check: "every claim class with no available evidence route is declared UNSUPPORTED here, not later"
+
+next_stage_consumer_requirement:
+  consumer: s03
+  needs: [body_hypotheses_with_roles, interaction_hypotheses, obligations_addressed_and_created, load_cases_with_direction_classes, evidence_route_verdicts]
+  must_not_need: [raw source text, benchmark documentation]
+
+llm_role: >
+  Highest of any stage. Candidate generation is genuinely open-ended: two
+  materially different topologies satisfied one Oracle on BM-001.
+knowledge_base_role: >
+  The micro-oracle capability packs. Per capability the KB supplies: the
+  obligations it creates, whether it is self-locking, which
+  retention-termination options it permits, and its evidence route.

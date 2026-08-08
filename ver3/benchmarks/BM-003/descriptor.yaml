@@ -51,7 +51,18 @@ oracle:
   never_visible_to: [production_stages, generation_models, prompts, retrieval]
 
 positive_executable_reference:
-  location: NOT_BUILT
+  location: ver3/cad_validation/BM-003/executable_references/EXE-BM003-01
+  status: BUILT_VALIDATION_DEFERRED
+  status_note: >
+    Built as an Oracle-aware executable evaluator fixture. Its full-sampling
+    validation did not complete (execution wall-time limit) and its completion
+    claim is DEFERRED, not made. See the reference's VALIDATION_STATUS.yaml.
+  never_a_precondition: >
+    Its EXISTENCE must never become a precondition for scoring BM-003. An Oracle
+    defines success; a positive reference only validates the evaluator. Requiring
+    one would turn "did the pipeline solve the problem" into "did it reproduce
+    our example". This field records that the invariant survives the reference
+    now existing.
   role: >
     Development and evaluator-validation fixture. Proves the problem is solvable
     and that the evaluator can recognise a solution. NEVER a production input,

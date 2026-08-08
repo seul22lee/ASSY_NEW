@@ -1,0 +1,245 @@
+{
+  "source_clauses": [
+    "I need a compact folding stand for my desk.",
+    "It should have three legs that fold in close to the body, so the whole thing becomes narrow and compact when I put it away.",
+    "Everything should stay attached while it is folded.",
+    "I do not want to take anything off to fold it, or loose pieces to look after.",
+    "When I want to use it, I should be able to open it by hand, following a sequence that makes sense as I go.",
+    "The three legs should end up spread apart in different directions so they give the stand a usable footprint on the desk.",
+    "Nothing should come apart or fall off while I am opening it, and I should not need tools, a motor, or any other equipment to do it.",
+    "Once it is open, it needs to stay open on its own.",
+    "I should not have to hold the legs while I use it, and they should not be able to fold back, twist aside, or come off.",
+    "Nothing should turn on its own, shift out of place, or move in some other direction I was not expecting.",
+    "Before it can be folded again I want to have to do something deliberate, so it does not collapse just because I knocked it.",
+    "After that deliberate release, it should fold back down to the same compact shape it started in.",
+    "The opening and folding sequence should be repeatable, with all normal parts remaining attached and without anything needing to be removed and put back on.",
+    "It is meant to hold a small object on my desk while I am working.",
+    "It should also be something that can genuinely be built as a product and put together in a sensible order, and stay together through normal opening and folding."
+  ],
+  "requirements": [
+    {
+      "id": 1,
+      "statement": "The stand must be compact when folded.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 2,
+      "statement": "The stand must be for use on a desk.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 3,
+      "statement": "The stand must have three legs.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 4,
+      "statement": "The legs must fold in close to the body.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 5,
+      "statement": "The whole thing must become narrow and compact when put away.",
+      "quantity_class": "NONE",
+      "notes": "The compactness is not quantified; 'narrow' is qualitative."
+    },
+    {
+      "id": 6,
+      "statement": "Everything must stay attached while folded.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 7,
+      "statement": "No parts must be removed to fold it.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 8,
+      "statement": "There must be no loose pieces to look after.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 9,
+      "statement": "The stand must be openable by hand.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 10,
+      "statement": "The opening sequence must make sense as the user goes.",
+      "quantity_class": "NONE",
+      "notes": "Subjective; no specific sequence stated."
+    },
+    {
+      "id": 11,
+      "statement": "The three legs must end up spread apart in different directions.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 12,
+      "statement": "The legs must provide a usable footprint on the desk.",
+      "quantity_class": "NONE",
+      "notes": "'Usable footprint' not quantified."
+    },
+    {
+      "id": 13,
+      "statement": "Nothing must come apart or fall off while opening.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 14,
+      "statement": "No tools, motor, or other equipment must be required to open it.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 15,
+      "statement": "The stand must stay open on its own.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 16,
+      "statement": "The user must not have to hold the legs while using it.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 17,
+      "statement": "The legs must not be able to fold back, twist aside, or come off.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 18,
+      "statement": "Nothing must turn on its own, shift out of place, or move unexpectedly.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 19,
+      "statement": "A deliberate release action must be required before folding.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 20,
+      "statement": "The stand must not collapse due to a knock.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 21,
+      "statement": "After the deliberate release, the stand must fold back to the same compact shape it started in.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 22,
+      "statement": "The opening and folding sequence must be repeatable.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 23,
+      "statement": "All normal parts must remain attached during repeated opening and folding.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 24,
+      "statement": "No parts must be removed and put back on during normal use.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 25,
+      "statement": "The stand must hold a small object on the desk while the user is working.",
+      "quantity_class": "NONE",
+      "notes": "'Small object' not further specified."
+    },
+    {
+      "id": 26,
+      "statement": "The stand must be genuinely buildable as a product.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 27,
+      "statement": "The stand must be put together in a sensible order.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 28,
+      "statement": "The stand must stay together through normal opening and folding.",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "kind": "OPERATION",
+      "description": "The user opens the stand by hand from folded to open state.",
+      "actors": ["user"],
+      "requirements": [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+    },
+    {
+      "id": 2,
+      "kind": "OPERATION",
+      "description": "The user uses the stand to hold a small object while working.",
+      "actors": ["user", "stand", "object"],
+      "requirements": [15,16,17,18,25]
+    },
+    {
+      "id": 3,
+      "kind": "OPERATION",
+      "description": "The user deliberately releases a lock and folds the stand from open to folded state.",
+      "actors": ["user"],
+      "requirements": [19,20,21,22,23,24]
+    },
+    {
+      "id": 4,
+      "kind": "ASSEMBLY",
+      "description": "The stand is manufactured and assembled in a sensible order.",
+      "actors": ["manufacturer"],
+      "requirements": [26,27,28]
+    }
+  ],
+  "actors": [
+    {
+      "id": "user",
+      "description": "The person who opens, uses, and folds the stand.",
+      "must_reach": ["open the stand", "use the stand", "fold the stand"]
+    },
+    {
+      "id": "stand",
+      "description": "The folding stand itself.",
+      "must_reach": ["be compact", "open by hand", "stay open", "fold", "hold object"]
+    },
+    {
+      "id": "object",
+      "description": "The small object to be held.",
+      "must_reach": ["be held on desk"]
+    },
+    {
+      "id": "manufacturer",
+      "description": "The entity that builds and assembles the product.",
+      "must_reach": ["assemble the stand"]
+    }
+  ],
+  "freedoms": [
+    "The specific mechanism for folding is not specified.",
+    "The specific materials are not specified.",
+    "The dimensions are not specified.",
+    "The weight of the stand is not specified.",
+    "The type of small object it holds is not specified.",
+    "The specific shape of the footprint is not specified.",
+    "The specific opening sequence is not specified; it only needs to make sense.",
+    "The specific deliberate release action is not specified.",
+    "The manufacturing process is not specified."
+  ],
+  "ambiguities": [
+    "The term 'compact' is not quantified.",
+    "The term 'narrow' is not quantified.",
+    "The term 'usable footprint' is not quantified.",
+    "The term 'small object' is not defined.",
+    "The phrase 'sequence that makes sense as I go' is subjective.",
+    "The phrase 'stay open on its own' could imply a locking mechanism, but the specific means is not specified.",
+    "The phrase 'deliberate release' could be a button, lever, or other action, but is not specified.",
+    "The phrase 'same compact shape' implies a consistent folded shape, but exact geometry is not defined."
+  ],
+  "assumptions": [
+    "The stand is for a single small object.",
+    "The user is an adult with normal hand dexterity.",
+    "The stand will be used on a flat, stable desk surface.",
+    "The stand is a separate product, not integrated into the desk.",
+    "The opening and folding is done manually by the user."
+  ]
+}

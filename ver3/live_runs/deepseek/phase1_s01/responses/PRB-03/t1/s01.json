@@ -1,0 +1,68 @@
+{
+  "source_clauses": [
+    "Design a foot pedal for a workbench.",
+    "Pressing it should send a signal to the machine, and when I take my foot off it must return to its resting position on its own every time.",
+    "It should not move if something brushes against it sideways."
+  ],
+  "requirements": [
+    {
+      "id": 1,
+      "statement": "shall send a signal to the machine when pressed",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 2,
+      "statement": "shall return to its resting position on its own every time the foot is removed",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 3,
+      "statement": "shall not move when brushed sideways",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "kind": "OPERATION",
+      "description": "The user presses the pedal to send a signal."
+    },
+    {
+      "id": 2,
+      "kind": "OPERATION",
+      "description": "The user removes their foot and the pedal returns to resting position."
+    },
+    {
+      "id": 3,
+      "kind": "OPERATION",
+      "description": "Something brushes against the pedal sideways and the pedal does not move."
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "user",
+      "description": "presses the pedal and removes foot",
+      "operates": "foot pedal"
+    },
+    {
+      "id": 2,
+      "name": "something",
+      "description": "an unspecified object that brushes sideways against the pedal",
+      "operates": "foot pedal"
+    }
+  ],
+  "freedoms": [
+    "The design of the foot pedal is not specified in terms of mechanism, material, or dimensions.",
+    "The location of the pedal relative to the workbench is not specified.",
+    "The signal type (e.g., electrical, mechanical) is not specified."
+  ],
+  "ambiguities": [
+    "It is unclear what 'move' means in the context of sideways brushing - whether it refers to any displacement or only activation.",
+    "It is unclear what constitutes 'sideways' relative to the pedal orientation."
+  ],
+  "assumptions": [
+    "The machine is the recipient of the signal.",
+    "The foot pedal is initially at a resting position."
+  ]
+}

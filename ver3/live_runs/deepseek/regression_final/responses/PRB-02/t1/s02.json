@@ -1,0 +1,223 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The clamp must be able to fix a monitor arm to the edge of a desk.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["REQ-0001 states the clamp fixes a monitor arm to the desk edge."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The clamp must accommodate desk edge thicknesses between 18 and 40 mm.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["REQ-0002 specifies the range of desk thicknesses."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The clamp must not slip or rotate under the weight of the arm.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s05",
+      "evidence_route": "COMPLIANCE_REDUCED_ORDER",
+      "route_available": false,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["REQ-0003 requires the clamp to resist the weight without slipping or rotating."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The clamp must be removable and relocatable without tools.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["REQ-0004 requires tool-free removal and relocation."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The clamp must not require tools for installation or removal.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["REQ-0004 specifies no tools."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The clamp must be able to be tightened and released manually.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["REQ-0004 implies manual operation for tool-free removal."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The clamp must be able to withstand the weight of the monitor arm.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s05",
+      "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["REQ-0003 implies the clamp must carry the weight."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The clamp must be capable of being attached to a desk edge without requiring an additional support structure.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["REQ-0001 implies the clamp is the sole fixing means."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0002",
+      "applied_to_role": "clamp",
+      "reacted_at_role": "desk_edge",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "clamp",
+      "reacted_at_role": "desk_edge",
+      "direction_class": "MOMENT",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Clamp with a screw mechanism",
+      "family": "RETAIN_BODY",
+      "principle": "FRICTION_HOLD",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008"],
+      "obligations_created": ["OBL-0009"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Kinematic geometry can verify the screw engagement and range."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Clamp with a cam lever mechanism",
+      "family": "RETAIN_BODY",
+      "principle": "FRICTION_HOLD",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008"],
+      "obligations_created": ["OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Rigid body dynamics can assess the cam's holding torque."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Clamp with a spring-loaded toggle mechanism",
+      "family": "RETAIN_BODY",
+      "principle": "FRICTION_HOLD",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008"],
+      "obligations_created": ["OBL-0011"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Rigid body dynamics can assess the toggle's locking force."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0004",
+      "summary": "Clamp with a rack and pinion mechanism",
+      "family": "RETAIN_BODY",
+      "principle": "FRICTION_HOLD",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008"],
+      "obligations_created": ["OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Rigid body dynamics can assess the rack and pinion's torque."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0004",
+      "candidate": "CND-0004",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008"],
+      "predicates": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Selection among screw, cam lever, spring toggle, and rack & pinion mechanisms",
+      "why_open": "All candidate mechanisms can in principle satisfy the functional requirements, but the feasibility of achieving the required holding force without slipping or rotating depends on load magnitudes, friction coefficients, and clamping surface characteristics that are unspecified.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003", "CND-0004"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "AMB-0003", "FRE-0001"],
+      "blocks": ["OBL-0003", "OBL-0007"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The clamp will be used on a standard desk edge as typically encountered, and the monitor arm weight is within the normal range for such equipment.",
+      "why": "The requirements do not specify the desk edge geometry or arm weight, so we assume typical values to proceed.",
+      "would_be_invalidated_by": "If the desk edge has an unusual profile (e.g., very tapered or with a lip) or if the monitor arm is unusually heavy, the design may need adjustment."
+    }
+  ]
+}

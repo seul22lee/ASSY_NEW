@@ -1,0 +1,280 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must be attached to a wall.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A product that is not attached to a wall cannot be wall-mounted."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must dispense small items.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["If items are not dispensed, the product does not function as a dispenser."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The product must hold approximately twenty items.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["The storage capacity is a property of the geometry and arrangement of the storage volume."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "Depressing the lever must dispense exactly one item per press.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A mechanism that does not meter items will not consistently dispense exactly one."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must allow refilling through a top opening while remaining attached to the wall.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["If the top opening is blocked or inaccessible, the user cannot refill without detaching the product."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The product must dispense correctly even when nearly empty.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A mechanism that relies on a minimum quantity of items may fail when the supply is low."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The lever must be reachable and operable by the user.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A lever that cannot be reached or operated cannot be pressed."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The product must be mounted such that it can be refilled from the top without detachment.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["If the mounting interferes with the top opening, refill cannot occur while attached."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The product must not jam when nearly empty.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A mechanism that relies on gravity feed may jam if the remaining items do not align properly."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The product must be able to contain and release items one at a time.",
+      "derived_from_requirements": ["REQ-0003", "REQ-0005"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A single item release requires a mechanism that can isolate one item from the bulk."]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The product must be able to be mounted to a wall and remain mounted during use.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A dispenser that detaches during use cannot be wall-mounted."]
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The product must be designed to dispense items without requiring the user to reach inside the storage volume.",
+      "derived_from_requirements": ["REQ-0003", "REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["If the user must reach inside to retrieve an item, the mechanism does not dispense it."]
+    },
+    {
+      "id": "OBL-0013",
+      "statement": "The product must be capable of being refilled without spilling or losing items.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A top opening that is not clear may cause items to spill during refill."]
+    },
+    {
+      "id": "OBL-0014",
+      "statement": "The product must be able to dispense items when the storage is nearly empty.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A mechanism that cannot operate with a low fill level cannot meet the near-empty requirement."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the surface the product is mounted on",
+      "reacted_at_role": "the wall surface",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the lever",
+      "reacted_at_role": "the product's structure",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the contents",
+      "reacted_at_role": "the product's storage volume",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the product's storage volume",
+      "reacted_at_role": "the wall surface",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0005",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the user's hand",
+      "reacted_at_role": "the product's outer surface",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A gravity-fed dispenser with a rotating metering wheel and a lever actuation.",
+      "family": "TRANSMIT_LOAD",
+      "principle": "DIRECT_BEARING",
+      "obligations_addressed": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0006", "OBL-0009", "OBL-0010", "OBL-0014"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": ""
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "predicates": [
+        "Rigid body dynamics confirms the product remains attached under gravity and lever forces.",
+        "Swept interference confirms the top opening is clear during refill.",
+        "Mobility analysis confirms exactly one item is released per lever press even when nearly empty."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "The exact capacity value within the range 'about twenty' is undefined.",
+      "why_open": "The capacity appears as a band and the requirement does not specify a target.",
+      "alternatives": ["15 to 25 items", "18 to 22 items", "20 items"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": ["OBL-0003"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "The lever placement, shape, and method of operation are unspecified.",
+      "why_open": "The lever is mentioned but its ergonomic design is not.",
+      "alternatives": ["Side-mounted lever", "Front-mounted lever", "Top-mounted lever"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001", "FRE-0001"],
+      "blocks": ["OBL-0007"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The wall is capable of supporting the dispenser and its contents.",
+      "why": "The product is wall-mounted, so the wall must resist the weight.",
+      "would_be_invalidated_by": "If the wall is not strong enough or not vertical."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The small items are uniform and can be dispensed one at a time by a simple mechanism.",
+      "why": "The requirement assumes a single lever press releases one item.",
+      "would_be_invalidated_by": "If the items are irregularly shaped or difficult to separate mechanically."
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "I need a clamp that fixes a monitor arm to the edge of my desk.",
+      "locator": "S1",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "Desk edges here are between 18 and 40 mm thick.",
+      "locator": "S2",
+      "quantity_kinds": ["length"],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "Once it is tight it must not slip or rotate under the weight of the arm.",
+      "locator": "S3",
+      "quantity_kinds": ["force", "mass"],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "I want to be able to take it off and move it to another desk without any tools.",
+      "locator": "S4",
+      "quantity_kinds": [],
+      "directionality": "none"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "I need a clamp that fixes a monitor arm to the edge of my desk.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "The clamp is attached to the desk edge and holds the monitor arm.",
+      "source_locator": "S1",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "Desk edges here are between 18 and 40 mm thick.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "The clamp fits desk edges with thickness between 18 and 40 mm.",
+      "source_locator": "S2",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "Once it is tight it must not slip or rotate under the weight of the arm.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "When loaded, the clamp does not slip or rotate relative to the desk edge.",
+      "source_locator": "S3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "I want to be able to take it off and move it to another desk without any tools.",
+      "kind": "USABILITY",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "The clamp can be removed and reattached without using tools.",
+      "source_locator": "S4",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "desk edge clamping",
+      "kind": "ASSEMBLY",
+      "system_boundary": "The clamp is inside; the desk edge and the monitor arm are outside.",
+      "actors": ["ACT-0001"],
+      "environment": "desk edge"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "clamp removal and relocation",
+      "kind": "SERVICE",
+      "system_boundary": "The clamp is inside; the desk and the monitor arm are outside.",
+      "actors": ["ACT-0001"],
+      "environment": "tool-free operation"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": ["desk edge", "clamp"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "mechanism and materials for the clamp",
+      "why_free": "The text does not specify how the clamp achieves its function."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "weight or mass of the monitor arm",
+      "why_free": "The text does not state a specific weight."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The phrase 'without any tools' does not specify whether the clamp must be adjustable or whether it can be tightened by hand.",
+      "conflicting_clauses": [],
+      "resolvable_when": "later design or clarification",
+      "block_scopes": ["requirement REQ-0004"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The monitor arm is a separate item that attaches to the clamp.",
+      "why": "The request says 'fixes a monitor arm' but does not define the arm.",
+      "would_be_invalidated_by": "If the monitor arm is integrated into the clamp."
+    }
+  ]
+}

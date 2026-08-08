@@ -1,0 +1,138 @@
+# STAGE 05 CONTRACT — feature and realization
+# s05 and s06 form ONE bounded convergence block. See S06_CONTRACT convergence.
+
+schema_version: "0.1.0"
+stage_id: s05
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+derived_from: docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md
+
+engineering_question: >
+  What actual geometry on which rigid group makes each declared relation real,
+  and what does that geometry demand of the layout?
+
+engineering_responsibility: >
+  Realize every declared relation as named geometry, and surface the constraints
+  that geometry imposes back onto the layout.
+
+required_inputs:
+  from_s03: [Interface, blocking_relations, compliant Joints, AssemblyStep, MobilityExpectation]
+  from_s04b: [located Joint frames, State, Transition, SweptVolume, FunctionalRegion volumes, confirmed LoadPath]
+
+required_discoveries:
+  - "the feature that realizes EACH SIDE of each interaction"
+  - "the feature pair that produces each declared limit"
+  - "the geometry of each compliant joint, and its required_travel"
+  - "the region of interest in which each interaction is to be measured"
+  - "the ENVELOPE CONSTRAINTS features impose on layout parameters"
+
+envelope_constraint_rule:
+  principle: >
+    A feature that implies a minimum envelope must emit it as a Constraint
+    binding a layout parameter.
+  worked_example: >
+    A pin of radius r needing a wall w gives a boss radius r+w, which gives an
+    arm outer radius R+r+w, which constrains the axis height. BM-002 CHG-01 and
+    CHG-03 and BM-003 R3 and R6 are all the absence of this.
+
+clearance_constraint_rule:
+  principle: >
+    EVERY declared clearance and EVERY declared interference-free pair emits a
+    corresponding Constraint - not only envelope constraints.
+  why: >
+    The convergence block can only converge on constraints it has been given. In
+    BM-003 the arm-to-clevis clearance was never declared, so shortening the
+    clevis produced a BUILD FAILURE patched by hand rather than an INFEASIBILITY
+    that triggered a re-solve, and the lift-only regression rode along undetected
+    for three revisions.
+  cost: "thirty-four interactions become thirty-four constraints; trivial"
+
+owned_decisions:
+  creates: [Feature, Realization, Constraint, Parameter declarations, ConstructionStatement, ROI definitions]
+  extends: [Body, RigidGroup, Joint, Interface, compliant Joint geometry]
+  also_owns: ["feature-level defeat specifications", "embodiment alternatives"]
+
+prohibited_decisions:
+  - what: "create a Body, RigidGroup or Joint"
+    instead: "extend s03's, by ID"
+    invariant: INV-001
+    retirement_row: R-19
+  - what: "discharge an obligation with a label, a field or a relationship"
+    invariant: INV-008
+  - what: "emit a Parameter with a null unit"
+    invariant: INV-004
+  - what: "set a Parameter VALUE except by citing a solver artifact"
+    rationale: >
+      This is what guards R-23 without needing a sequential barrier, and it is
+      what makes the s05/s06 loop safe.
+  - what: "change topology, DOF disposition, interaction kinds, load paths or assembly order"
+    instead: "escalate to s03"
+
+construction_frame_rule:
+  principle: >
+    Every ConstructionStatement is expressed in the OWNING BODY'S OWN FRAME.
+    World placement never appears in the construction program.
+  why: >
+    s07 receives only the program and the parameters. If placement were in the
+    program, s07 would be compiling a world layout and would need State - which
+    contradicts s04's ownership of State and reopens the input contradiction the
+    derived pose law closed. Bodies compile in body frames; poses are applied
+    downstream from located joint frames and joint coordinates.
+
+structured_outputs:
+  Feature: [entity_id, rigid_group, feature_kind, geometry, maturity]
+  Realization: [entity_id, discharges_obligations, participating_features, verification_predicate]
+  Constraint: [entity_id, expression, parameters, kind, provenance]
+  Parameter: [entity_id, symbol, unit, status, maturity]
+  ConstructionStatement: [entity_id, operation, operands, parameters]
+  ROI: [entity_id, interaction, region, follows_frame]
+
+roi_rule: >
+  Each interaction declares the region in which it is measured, so a clearance
+  cannot be masked by a contact elsewhere on the same body pair. Where the
+  interaction moves, the ROI FOLLOWS ITS FRAME rather than being a fixed box the
+  joint orbits out of.
+
+allowed_unresolved:
+  - "embodiment alternatives"
+  - "every dimension, until s06 solves it"
+  - "underdetermined parameter directions, recorded as UnresolvedDecision"
+  - "allowable_travel on every compliant joint"
+
+maturity_expectations:
+  geometry: [FEATURE_LEVEL_EMBODIMENT, PARAMETERIZED_CONSTRUCTION_INTENT]
+  authority: "shape AUTHORITATIVE, size UNSOLVED"
+
+deterministic_exit_checks:
+  - id: S05-C1
+    check: "every Interface has a Feature on EACH participant, or a declared compliant Joint"
+  - id: S05-C2
+    check: "every blocking relation has a feature pair"
+  - id: S05-C3
+    check: "every declared limit has a PRODUCING feature pair"
+  - id: S05-C4
+    check: "every Obligation is cited by some Realization carrying a verification predicate"
+  - id: S05-C5
+    check: "construction program totality: every referenced symbol is declared"
+  - id: S05-C6
+    check: "no Parameter has a null unit"
+  - id: S05-C7
+    check: "no parameter dependency cycle"
+  - id: S05-C8
+    check: "no Feature intrudes into a FunctionalRegion (re-run of s04b occupancy against the new geometry)"
+  - id: S05-C9
+    check: "every declared clearance and interference-free pair has a Constraint"
+  - id: S05-C10
+    check: "no Parameter value is set without a cited solver artifact"
+
+next_stage_consumer_requirement:
+  consumer: s06
+  needs: [closed constraint system, every symbol declared and united, envelope constraints, clearance constraints]
+
+llm_role: >
+  High for feature proposal and program shape. NONE for completeness, which is
+  enumeration over s03's relation set.
+knowledge_base_role: >
+  Highest of any stage. Feature patterns per capability - clevis+pin+head+captor,
+  rail+lip+tab, heel+arm - each carrying its envelope constraints and assembly
+  implications.

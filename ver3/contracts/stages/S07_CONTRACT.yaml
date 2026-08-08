@@ -1,0 +1,111 @@
+# STAGE 07 CONTRACT — geometry compilation
+# A pure compiler, plus a validity reporter. No repair, ever.
+
+schema_version: "0.1.0"
+stage_id: s07
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+derived_from: docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md
+
+engineering_question: >
+  Does the declared program, with the solved values, produce valid solids?
+
+engineering_responsibility: >
+  Compile faithfully, report validity, export, and fail loudly rather than
+  repair.
+
+required_inputs:
+  - ConstructionProgram
+  - resolved Parameter values
+input_exclusivity:
+  invariant: INV-006
+  rule: >
+    s07 receives ONLY the program and the parameters. It does NOT receive the
+    pose law, because the pose law is DERIVABLE from located joint frames and
+    joint coordinates and is therefore not an input to compilation. This
+    resolves the contradiction where all three references carried both the
+    construction and the pose law inside one build module.
+prohibited_inputs:
+  - raw source text
+  - Requirement, Obligation, Candidate
+  - any Witness of fidelity SCOUT
+
+compiles_in_body_frame: >
+  Bodies are compiled in their own frames. s07 never places a body in the world;
+  world poses are derived downstream from located joint frames and joint
+  coordinates. This is what keeps INV-006's input restriction consistent.
+
+required_discoveries:
+  - "whether each body compiles to a valid solid"
+  - "whether each body is a SINGLE CONNECTED SOLID"
+    # BM-003 R1: a hub built as seven disconnected solids, discoverable nowhere earlier
+  - "whether the exported and re-imported geometry agrees with the native geometry"
+  - "whether an independent rebuild is byte-equivalent on the kernel's own mass properties"
+
+owned_decisions:
+  creates: [GeometrySignature]
+  extends: [Body, Feature]
+  note: "s07 owns NO engineering decision. It owns only facts about what compiled."
+
+prohibited_decisions:
+  - what: "repair an uncompilable statement"
+    instead: "FAIL, citing the construction statement and its dependency cone"
+    invariant: INV-006
+    retirement_row: R-24
+  - what: "choose a form, a placement, an axis or a missing dimension"
+    retirement_row: R-24
+  - what: "use an OCCT face index as a persistent identity"
+  - what: "consult the source, the requirements or the candidates"
+  - what: "read a SCOUT witness"
+
+structured_outputs:
+  compiled_bodies: [body_id, solid, volume, is_valid, solid_count, single_connected_solid]
+  GeometrySignature: [entity_id, signature_sha256, per_body, critical_dimensions]
+  exports:
+    order: [native_brep_per_body, native_brep_assembly, step_per_body, step_assembly, reimport_all, compare]
+    rule: >
+      The signature is taken from the NATIVE shapes BEFORE any export. STEP is an
+      exchange artifact, round-trip checked, never the authoritative source. The
+      authoritative source is parameters + construction program + native B-rep.
+  determinism_report: [independent_rebuild, signature_comparison]
+
+allowed_unresolved: []
+unresolved_rationale: >
+  Nothing may remain unresolved at s07. If a symbol has no value, s06 did not
+  converge and s07 must not have been entered.
+
+maturity_expectations:
+  geometry: CAD_SOLIDS
+  authority: "AUTHORITATIVE and FROZEN. This is where CadQuery becomes authoritative and nowhere earlier."
+
+deterministic_exit_checks:
+  - id: S07-C1
+    check: "every body is a valid solid with positive volume"
+  - id: S07-C2
+    check: "every body is a SINGLE CONNECTED SOLID"
+  - id: S07-C3
+    check: "BREP round-trip volume delta within 1e-6 mm3"
+  - id: S07-C4
+    check: "STEP round-trip volume delta within the declared relative tolerance, and re-import is valid"
+  - id: S07-C5
+    check: "an independent rebuild produces an identical geometry signature"
+  - id: S07-C6
+    check: "on failure, the originating ConstructionStatement and its dependency cone are cited; no geometry is emitted"
+
+next_stage_consumer_requirement:
+  consumer: s08
+  needs:
+    - compiled solids
+    - GeometrySignature
+    - feature identities
+    - "declared predicates WITH their defeat specifications from s03 and s05"
+  must_not_need:
+    - "to invent a negative control from the geometry"
+  rationale: >
+    A control authored from geometry defeats what the geometry suggests rather
+    than what the design claims. DEF-01, DEF-02 and NC-17 are three instances
+    across two benchmarks.
+
+llm_role: NONE
+knowledge_base_role: >
+  None. A knowledge base at s07 would be a repair mechanism, which is R-24.

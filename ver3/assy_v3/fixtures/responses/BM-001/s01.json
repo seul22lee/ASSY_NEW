@@ -1,0 +1,290 @@
+{
+ "_meta": {
+  "answers_prompt_sha256": "8b0db4445daac1de",
+  "pairing_history": [
+   "re-paired after the response-schema section was added to the prompt; content unchanged and re-verified against the parser, contract validation and completeness check"
+  ]
+ },
+ "actors": [
+  {
+   "id": "ACT-0001",
+   "must_reach": [
+    "the retaining function's release",
+    "the interior of the enclosed volume"
+   ],
+   "name": "user"
+  }
+ ],
+ "ambiguities": [
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0001",
+    "SRC-0004"
+   ],
+   "id": "AMB-0001",
+   "resolvable_when": "a size, an envelope or a comparison object is supplied",
+   "statement": "What size qualifies as compact and desktop-practical?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [
+    "SRC-0002",
+    "SRC-0003"
+   ],
+   "id": "AMB-0002",
+   "resolvable_when": "a disturbance magnitude or a test condition is supplied",
+   "statement": "What disturbance does normal handling represent, and what does transport represent?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0003"
+   ],
+   "id": "AMB-0003",
+   "resolvable_when": "a force, torque or ergonomic criterion is supplied",
+   "statement": "What effort counts as easy for a user to operate?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance",
+    "blocks_PASS"
+   ],
+   "conflicting_clauses": [
+    "SRC-0004"
+   ],
+   "id": "AMB-0004",
+   "resolvable_when": "a cost target and a process are supplied",
+   "statement": "What cost target does low-cost mean, and against what process?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0001"
+   ],
+   "id": "AMB-0005",
+   "resolvable_when": "the stored contents are described",
+   "statement": "What is stored, and does it constrain the interior?"
+  },
+  {
+   "block_scopes": [
+    "blocks_quantitative_acceptance"
+   ],
+   "conflicting_clauses": [
+    "SRC-0001"
+   ],
+   "id": "AMB-0006",
+   "resolvable_when": "a cycle count or a durability criterion is supplied",
+   "statement": "Does reusable constrain a cycle count or only that release is non-destructive?"
+  }
+ ],
+ "assumptions": [],
+ "freedoms": [
+  {
+   "decision": "how the enclosed volume is opened and closed",
+   "id": "FRE-0001",
+   "why_free": "the text requires opening and closing and names no motion, axis or arrangement"
+  },
+  {
+   "decision": "how the retaining function is realized",
+   "id": "FRE-0002",
+   "why_free": "the text calls it a latch and says nothing about how it holds or releases"
+  },
+  {
+   "decision": "the number of parts and how the product is divided into them",
+   "id": "FRE-0003",
+   "why_free": "the text states no part count and no division"
+  },
+  {
+   "decision": "every dimension and proportion",
+   "id": "FRE-0004",
+   "why_free": "the text contains no dimension"
+  },
+  {
+   "decision": "material and manufacturing process",
+   "id": "FRE-0005",
+   "why_free": "low-cost is a preference; no material or process is named"
+  },
+  {
+   "decision": "whether the product opens fully or partially, and where the opening faces",
+   "id": "FRE-0006",
+   "why_free": "unstated"
+  }
+ ],
+ "requirements": [
+  {
+   "id": "REQ-0001",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "an enclosed volume that stores contents",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-1",
+   "statement_verbatim": "a compact desktop storage box",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0002",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "a retaining function that can be engaged and released more than once",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-1",
+   "statement_verbatim": "with a reusable latch",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0003",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "a traversable path between an open and a closed configuration, in both directions",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-2",
+   "statement_verbatim": "The box should open and close repeatedly",
+   "verification_kind": "KINEMATIC"
+  },
+  {
+   "id": "REQ-0004",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "the closed configuration is not left without a deliberate action",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-2",
+   "statement_verbatim": "without accidental opening during normal handling",
+   "verification_kind": "KINEMATIC"
+  },
+  {
+   "id": "REQ-0005",
+   "kind": "USABILITY",
+   "observable_verbatim": "the effort a user applies to release the retaining function",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-3",
+   "statement_verbatim": "The latch should be easy for a user to operate",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0006",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "the retaining function still engaged after a transport disturbance",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-3",
+   "statement_verbatim": "while remaining secure during transport",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0007",
+   "kind": "PROCESS",
+   "observable_verbatim": "unit manufacturing cost",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-4",
+   "statement_verbatim": "suitable for low-cost manufacturing",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0008",
+   "kind": "USABILITY",
+   "observable_verbatim": "the space the product occupies on a desk",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-4",
+   "statement_verbatim": "practical for desktop use",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "id": "REQ-0009",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "every declared relationship has a physical realization",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-5",
+   "statement_verbatim": "mechanically plausible",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "id": "REQ-0010",
+   "kind": "PROCESS",
+   "observable_verbatim": "an ordered installation sequence with a clear path for every part",
+   "quantity_class": "NONE",
+   "source_locator": "sentence-5",
+   "statement_verbatim": "easy to assemble",
+   "verification_kind": "STRUCTURAL"
+  }
+ ],
+ "scenarios": [
+  {
+   "actors": [
+    "ACT-0001"
+   ],
+   "environment": "a desk, upright, indoors",
+   "id": "SCN-0001",
+   "kind": "OPERATION",
+   "name": "opening and closing on a desk",
+   "system_boundary": "the product and the desk surface it rests on; the user's hand is outside it"
+  },
+  {
+   "actors": [
+    "ACT-0001"
+   ],
+   "environment": "handled by a user; no magnitude stated",
+   "id": "SCN-0002",
+   "kind": "OPERATION",
+   "name": "normal handling",
+   "system_boundary": "the product and whatever holds or moves it"
+  },
+  {
+   "actors": [],
+   "environment": "moved while closed; no disturbance magnitude stated",
+   "id": "SCN-0003",
+   "kind": "TRANSPORT",
+   "name": "transport",
+   "system_boundary": "the product and its carrier"
+  },
+  {
+   "actors": [],
+   "environment": "no process stated",
+   "id": "SCN-0004",
+   "kind": "ASSEMBLY",
+   "name": "assembly",
+   "system_boundary": "the parts and whoever puts them together"
+  }
+ ],
+ "source_clauses": [
+  {
+   "directionality": "none",
+   "id": "SRC-0001",
+   "locator": "sentence-1",
+   "quantity_kinds": [],
+   "verbatim": "Design a compact desktop storage box with a reusable latch."
+  },
+  {
+   "directionality": "bidirectional",
+   "id": "SRC-0002",
+   "locator": "sentence-2",
+   "quantity_kinds": [],
+   "verbatim": "The box should open and close repeatedly without accidental opening during normal handling."
+  },
+  {
+   "directionality": "none",
+   "id": "SRC-0003",
+   "locator": "sentence-3",
+   "quantity_kinds": [],
+   "verbatim": "The latch should be easy for a user to operate while remaining secure during transport."
+  },
+  {
+   "directionality": "none",
+   "id": "SRC-0004",
+   "locator": "sentence-4",
+   "quantity_kinds": [],
+   "verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use."
+  },
+  {
+   "directionality": "none",
+   "id": "SRC-0005",
+   "locator": "sentence-5",
+   "quantity_kinds": [],
+   "verbatim": "The design should be mechanically plausible and easy to assemble."
+  }
+ ]
+}

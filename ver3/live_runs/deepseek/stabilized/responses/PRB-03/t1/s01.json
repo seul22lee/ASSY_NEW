@@ -1,0 +1,147 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a foot pedal for a workbench.",
+      "locator": "REQ-0001",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "Pressing it should send a signal to the machine",
+      "locator": "REQ-0002",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "when I take my foot off it must return to its resting position on its own every time.",
+      "locator": "REQ-0003",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "It should not move if something brushes against it sideways.",
+      "locator": "REQ-0004",
+      "quantity_kinds": [],
+      "directionality": "sideways"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a foot pedal for a workbench.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "none",
+      "source_locator": "REQ-0001",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "Pressing it should send a signal to the machine",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "none",
+      "source_locator": "REQ-0002",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "when I take my foot off it must return to its resting position on its own every time.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "none",
+      "source_locator": "REQ-0003",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "It should not move if something brushes against it sideways.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "none",
+      "source_locator": "REQ-0004",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Foot pedal actuation",
+      "kind": "OPERATION",
+      "system_boundary": "The foot pedal is inside; the workbench, the machine, and the user's foot are outside.",
+      "actors": ["ACT-0001"],
+      "environment": "workbench"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Side brush",
+      "kind": "OPERATION",
+      "system_boundary": "The foot pedal is inside; the workbench and the brushing object are outside.",
+      "actors": ["ACT-0002"],
+      "environment": "workbench"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user's foot",
+      "must_reach": ["press the pedal", "take off from the pedal"]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "brushing object",
+      "must_reach": ["make contact with the pedal sideways"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Mechanism and materials for signal transmission and return to resting position",
+      "why_free": "Not specified in the request"
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "Physical dimensions and geometric details",
+      "why_free": "Not specified in the request"
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "Mounting method to the workbench",
+      "why_free": "Not specified in the request"
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "What constitutes 'sideways' direction for the side brush scenario is ambiguous - the text does not specify a specific angle or plane.",
+      "conflicting_clauses": [],
+      "resolvable_when": "During design or with additional user input",
+      "block_scopes": ["side-load resistance"]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The nature of the signal to the machine is unspecified - electrical, mechanical, or other.",
+      "conflicting_clauses": [],
+      "resolvable_when": "During design or integration",
+      "block_scopes": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The foot pedal is intended to be operated by a human foot.",
+      "why": "The request says 'I take my foot off'.",
+      "would_be_invalidated_by": "If the pedal is operated by other means"
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The machine is external to the foot pedal.",
+      "why": "The request says 'send a signal to the machine'.",
+      "would_be_invalidated_by": "If the machine is internal"
+    }
+  ]
+}

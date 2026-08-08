@@ -1,0 +1,239 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The dispenser must be attached to the wall.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The dispenser must be able to hold approximately twenty small items.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "Pressing the lever must release exactly one item.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The user must be able to refill the dispenser from the top without removing it from the wall.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The dispenser must not jam when it is nearly empty.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The concept of 'nearly empty' is ambiguous (AMB-0001)."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "A mechanism is required that releases exactly one item per lever press.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": false,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "A top opening is required for refilling while the dispenser is wall-mounted.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": false,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "item",
+      "reacted_at_role": "dispenser body",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "lever",
+      "reacted_at_role": "dispenser body",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "top opening",
+      "reacted_at_role": "dispenser body",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Gravity-fed dispenser with a metering mechanism.",
+      "family": ["TRANSMIT_LOAD", "METER_DISCRETE_QUANTITY"],
+      "principle": ["GRAVITY_SEATED", "SINGLE_ITEM_POCKET"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "obligations_created": ["OBL-0006"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Requires a mechanism to ensure one item per press."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Screw-driven dispenser with a rotating auger.",
+      "family": ["CONVERT_MOTION", "METER_DISCRETE_QUANTITY"],
+      "principle": ["SCREW_AND_NUT", "INDEXING_ROTOR"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "obligations_created": ["OBL-0006"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Requires a mechanism to ensure one item per press."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Sliding gate dispenser with a lever-operated gate.",
+      "family": ["CONVERT_MOTION", "METER_DISCRETE_QUANTITY"],
+      "principle": ["LEVER_LINKAGE", "GATED_PAIR"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "obligations_created": ["OBL-0006"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Requires a mechanism to ensure one item per press."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "predicates": [
+        "The dispenser is attached to the wall.",
+        "The dispenser holds approximately twenty small items.",
+        "Pressing the lever releases exactly one item.",
+        "The dispenser is refillable from the top without removal.",
+        "The dispenser does not jam when nearly empty."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "predicates": [
+        "The dispenser is attached to the wall.",
+        "The dispenser holds approximately twenty small items.",
+        "Pressing the lever releases exactly one item.",
+        "The dispenser is refillable from the top without removal.",
+        "The dispenser does not jam when nearly empty."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "predicates": [
+        "The dispenser is attached to the wall.",
+        "The dispenser holds approximately twenty small items.",
+        "Pressing the lever releases exactly one item.",
+        "The dispenser is refillable from the top without removal.",
+        "The dispenser does not jam when nearly empty."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "The specific mechanism for releasing exactly one item.",
+      "why_open": "Multiple mechanism families could satisfy the requirement.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": ["OBL-0006"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "The definition of 'nearly empty'.",
+      "why_open": "The requirement is ambiguous.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0005"]
+    },
+    {
+      "id": "UNR-0003",
+      "decision": "The method of wall attachment.",
+      "why_open": "Not specified.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0004"],
+      "blocks": ["OBL-0001"]
+    },
+    {
+      "id": "UNR-0004",
+      "decision": "The method of top refilling.",
+      "why_open": "Not specified.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0005"],
+      "blocks": ["OBL-0004"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "'about twenty' means approximately twenty but the exact tolerance is not specified.",
+      "why": "the text uses an approximate quantity",
+      "would_be_invalidated_by": "a later specification of an exact capacity"
+    }
+  ]
+}

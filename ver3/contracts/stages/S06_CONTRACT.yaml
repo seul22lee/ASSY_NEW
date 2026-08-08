@@ -1,0 +1,141 @@
+# STAGE 06 CONTRACT — parameter resolution, and the convergence block
+#
+# s06 is a DETERMINISTIC SOLVER SERVICE, not a sequential barrier. It may be
+# invoked by s05 repeatedly within one stage attempt. Numbering and both
+# must_exist lists are preserved: the frozen Oracle stage_expectations for s05
+# and s06 are satisfied at CONVERGENCE, because they state what must EXIST, not
+# what order it is produced in.
+
+schema_version: "0.1.0"
+stage_id: s06
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+derived_from: docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md
+
+engineering_question: >
+  Do values exist that satisfy every constraint, and if not, exactly which
+  constraints conflict?
+
+engineering_responsibility: >
+  Solve, or report precisely why not. Never approximate a report of success.
+
+required_inputs:
+  from_s05: [Constraint, Parameter declarations]
+prohibited_inputs: [Requirement, Candidate, raw source text]
+
+owned_decisions:
+  creates: []
+  extends: [Parameter values, Constraint status]
+  also_owns: ["the promotion of PROVISIONAL placements to AUTHORITATIVE on convergence"]
+
+prohibited_decisions:
+  - what: "default a missing unit"
+    retirement_row: R-21
+    invariant: INV-004
+  - what: "report feasible for an underdetermined system"
+  - what: "silently pick one member of a solution family"
+  - what: "defer a symbolic expression to CAD"
+    retirement_row: R-22
+  - what: "copy existing values and call them solved"
+    retirement_row: R-23
+  - what: "any LLM involvement"
+    rationale: "an LLM here re-introduces R-23"
+
+structured_outputs:
+  per_parameter: [value_or_status, maturity]
+  solver_report: [residuals, active_set, margins, solver_status]
+  solver_status: [feasible, infeasible, underdetermined, unsupported_formulation, solver_failure]
+
+# =====================================================================
+convergence_block:
+  members: [s04b, s05, s06]
+  name: geometric settlement loop
+
+  termination:
+    rule: >
+      Terminate on a ROUND BUDGET N, or on a REPEATED STATE, where a state is
+      the pair (unsatisfied-constraint set, changed-parameter set). A repeated
+      state is a genuine cycle and is reported as one.
+    explicitly_not: >
+      NOT monotone reduction of the unsatisfied set. That rule was proposed and
+      is WRONG: replay BM-003 R1 to R4 and round 1 fixes the arm-to-clevis
+      clearance while round 2 breaks the lift-only property, leaving the set the
+      same size. A monotone rule terminates a problem that has a solution and
+      that was actually solved by changing two parameters. Real constraint
+      systems are not monotone.
+
+  scope:
+    may_change: [placements, dimensions, feature alternatives]
+    may_not_change: [Body, RigidGroup, Joint, interaction_kind, MobilityExpectation, LoadPath, AssemblyStep]
+    on_may_not_change: >
+      ESCALATE to s03, recorded as a FailureProvenance naming the owning
+      decision. This is the line that stops the loop meaning "redo the whole
+      design".
+    validation_against_the_record: >
+      Applied to the manual history it reproduces the severity judgements without
+      judgement: BM-002 CHG-01 and CHG-03 are iterations; CHG-02 is an escalation
+      (it required an overhung crank); BM-003 R1 and R4 are iterations; R2 is an
+      escalation (a stop pad realizes a previously undispositioned DOF).
+
+  budgets:
+    inner: "at most K feature alternatives per unsatisfied constraint"
+    outer: "at most N solver rounds"
+    exhaustion_ladder: [feature_alternative, placement, dimension, escalate_to_s03]
+    every_exhausted_alternative: "retained as a RejectedAlternative with its reason"
+
+  invalidation:
+    cone_computation: >
+      Every check declares its input value set (S04B-C8). A change marks STALE
+      exactly those checks whose input set intersects the transitive closure of
+      the changed values.
+    demonstrated_discrimination: >
+      BM-002 records three changes each with an explicit UNCHANGED result:
+      "Resulting measured travel: 90.000000 mm, unchanged. Travel is 2R and R was
+      not touched." Moving the crank axis invalidates the bottom-dead-centre
+      clearance check and provably not the travel check.
+    on_promotion: >
+      When a PROVISIONAL placement is promoted to AUTHORITATIVE, the cone marks
+      every s04b check whose inputs moved as STALE, and those checks are re-run.
+      Unchanged checks are PRESERVED, not recomputed.
+
+  non_convergence:
+    outcome: >
+      Terminate with the solver's own vocabulary - infeasible with a named
+      conflicting set, or underdetermined with the free directions - plus a
+      FailureProvenance routing to the s03 decision that owns the conflict.
+    never: >
+      Never terminate by silently accepting the last state. Never produce a
+      design from a non-converged block.
+
+  not_in_scope: >
+    This contract defines a bounded dependency-driven settlement process. It is
+    NOT a scheduler and NOT an agent-control architecture.
+
+allowed_unresolved:
+  - "free directions in an underdetermined system, recorded as UnresolvedDecision"
+
+maturity_expectations:
+  geometry: SOLVED
+  authority: "AUTHORITATIVE on convergence; placements promoted from PROVISIONAL"
+
+deterministic_exit_checks:
+  - id: S06-C1
+    check: "every Parameter has a value or an explicit non-value status"
+  - id: S06-C2
+    check: "residuals are within the declared bound for a feasible report"
+  - id: S06-C3
+    check: "the active set is consistent with the reported solver_status"
+  - id: S06-C4
+    check: "no unit was defaulted"
+  - id: S06-C5
+    check: "on convergence, every promoted placement has its dependent checks re-run or explicitly preserved"
+  - id: S06-C6
+    check: "determinism: identical input produces identical output"
+
+next_stage_consumer_requirement:
+  consumer: s07
+  needs: [construction program, a value for every symbol it references]
+  must_not_need: [requirements, candidates, source text, pose law]
+
+llm_role: NONE
+knowledge_base_role: "constraint idioms and their solvability class"

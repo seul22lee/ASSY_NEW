@@ -1,0 +1,107 @@
+{
+  "source_clauses": [
+    "Design a compact desktop platform-lifting device enclosed within a housing.",
+    "The user should rotate an external hand crank to raise and lower an internal platform.",
+    "The platform should move approximately 80-100 mm and support a payload of approximately 1 kg.",
+    "The mechanism should remain enclosed within the housing during normal operation.",
+    "The product should be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+    "Avoid obvious jamming or unstable operation."
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "The device shall be a compact desktop platform-lifting device enclosed within a housing.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "R2",
+      "text": "The user shall rotate an external hand crank to raise and lower an internal platform.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "R3",
+      "text": "The platform shall move approximately 80-100 mm.",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "R4",
+      "text": "The platform shall support a payload of approximately 1 kg.",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "R5",
+      "text": "The mechanism shall remain enclosed within the housing during normal operation.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "R6",
+      "text": "The product shall be safe to use.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "R7",
+      "text": "The product shall be mechanically plausible.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "R8",
+      "text": "The product shall be easy to assemble.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "R9",
+      "text": "The product shall be practical to manufacture.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "R10",
+      "text": "The product shall avoid obvious jamming or unstable operation.",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "S1",
+      "kind": "OPERATION",
+      "text": "The user operates the device by rotating the external hand crank to raise and lower the internal platform."
+    }
+  ],
+  "actors": [
+    {
+      "id": "A1",
+      "name": "user",
+      "actions": ["rotate external hand crank"]
+    },
+    {
+      "id": "A2",
+      "name": "external hand crank",
+      "actions": ["rotate", "raise and lower internal platform"]
+    },
+    {
+      "id": "A3",
+      "name": "internal platform",
+      "actions": ["move approximately 80-100 mm", "support payload of approximately 1 kg"]
+    }
+  ],
+  "freedoms": [
+    "The specific mechanism to achieve the lifting is not specified.",
+    "The specific materials are not specified.",
+    "The specific dimensions of the housing are not specified.",
+    "The specific design for safety is not specified.",
+    "The specific assembly method is not specified.",
+    "The manufacturing process is not specified."
+  ],
+  "ambiguities": [
+    "The phrase 'approximately 80-100 mm' is ambiguous: it could mean the total travel range or the travel per revolution, but the text does not clarify.",
+    "The phrase 'supported payload of approximately 1 kg' is ambiguous: it could be a maximum or nominal payload.",
+    "The meaning of 'safe to use' is vague and not further defined.",
+    "The meaning of 'mechanically plausible' is subjective and not precisely defined.",
+    "The phrase 'easy to assemble' is subjective and could vary by the intended assembler.",
+    "The phrase 'practical to manufacture' is subjective and depends on scale and context."
+  ],
+  "assumptions": [
+    "The platform is intended to lift and lower in a vertical direction.",
+    "The normal operation refers to the mechanism being fully inside the housing, with only the hand crank external.",
+    "The user is a human operator."
+  ]
+}

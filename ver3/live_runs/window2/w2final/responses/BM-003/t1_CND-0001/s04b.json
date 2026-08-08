@@ -1,0 +1,56 @@
+{
+  "joint_placements": [
+    {
+      "joint": "JNT-0001",
+      "origin": [0.0, 0.0, -1.0]
+    },
+    {
+      "joint": "JNT-0002",
+      "origin": [0.0, 0.0, -1.0]
+    }
+  ],
+  "state_coordinates": [
+    {
+      "configuration": "CFG-0001",
+      "coordinates": {
+        "JNT-0001": 0.0,
+        "JNT-0002": 0.0
+      }
+    },
+    {
+      "configuration": "CFG-0002",
+      "coordinates": {
+        "JNT-0001": 90.0,
+        "JNT-0002": 2.0
+      }
+    },
+    {
+      "configuration": "CFG-0003",
+      "coordinates": {
+        "JNT-0001": 45.0,
+        "JNT-0002": 1.0
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "id": "TRN-0001",
+      "from_configuration": "CFG-0001",
+      "to_configuration": "CFG-0002",
+      "moving_groups": ["RGP-0002", "RGP-0003"]
+    },
+    {
+      "id": "TRN-0002",
+      "from_configuration": "CFG-0002",
+      "to_configuration": "CFG-0003",
+      "moving_groups": ["RGP-0003"]
+    },
+    {
+      "id": "TRN-0003",
+      "from_configuration": "CFG-0003",
+      "to_configuration": "CFG-0001",
+      "moving_groups": ["RGP-0002", "RGP-0003"]
+    }
+  ],
+  "notes": ""
+}

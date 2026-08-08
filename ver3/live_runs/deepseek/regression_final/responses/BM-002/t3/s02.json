@@ -1,0 +1,248 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "Provide an external hand crank that the user can reach and rotate.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["User must reach and rotate the crank to raise and lower platform."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "Convert user's rotation of the crank into vertical movement of the platform.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Rotation must result in platform raising and lowering."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "Support a payload of approximately 1 kg on the platform without failure.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["Payload is approximately 1 kg."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "Provide a travel range of approximately 80-100 mm for the platform.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Travel range is approximately 80-100 mm."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "An assembly must permit full travel within an enclosed housing given compact desktop footprint.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0003", "ASM-0001", "ASM-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Platform moves vertically 80-100 mm.", "Mechanism within housing.", "Compact desktop footprint."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "Keep the mechanism fully enclosed within the housing during normal operation.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Mechanism remains inside housing."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "Be safe, mechanically plausible, easy to assemble, and practical to manufacture.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["Safety, plausibility, assembly ease, manufacturing practicality required."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "Avoid obvious jamming or unstable operation throughout the travel range under expected loads.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["No obvious jamming or unstable operation."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "Provide a support for the platform, reacting its weight and payload at the housing.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Platform supports payload and its own weight; reaction at housing."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "platform",
+      "reacted_at_role": "housing",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "platform",
+      "reacted_at_role": "housing",
+      "direction_class": "AXIAL",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "hand crank",
+      "reacted_at_role": "platform",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Scissor lift with screw drive and prismatic guide",
+      "family": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY"],
+      "principle": ["REVOLUTE_PAIR", "SCREW_AND_NUT", "FRICTION_HOLD", "PRISMATIC_GUIDE", "DIRECT_BEARING", "STRAIGHT_INSERTION"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0006", "OBL-0008", "OBL-0009"],
+      "obligations_created": ["OBL-0002"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can confirm required motion without jamming."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Lead screw with nut and linear guide",
+      "family": ["CONVERT_MOTION", "GUIDE_MOTION", "MAINTAIN_CONFIGURATION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY"],
+      "principle": ["SCREW_AND_NUT", "PRISMATIC_GUIDE", "FRICTION_HOLD", "DIRECT_BEARING", "STRAIGHT_INSERTION"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0006", "OBL-0008", "OBL-0009"],
+      "obligations_created": ["OBL-0002"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can confirm required motion without jamming."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Rack and pinion with linear guide",
+      "family": ["CONVERT_MOTION", "GUIDE_MOTION", "MAINTAIN_CONFIGURATION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY"],
+      "principle": ["RACK_AND_PINION", "PRISMATIC_GUIDE", "FRICTION_HOLD", "DIRECT_BEARING", "STRAIGHT_INSERTION"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0006", "OBL-0008", "OBL-0009"],
+      "obligations_created": ["OBL-0002"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can confirm required motion without jamming."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0006", "OBL-0008", "OBL-0009"],
+      "predicates": [
+        "User can rotate crank",
+        "Platform moves vertically 80-100 mm",
+        "Mechanism stays enclosed",
+        "No jamming observed",
+        "Supports 1 kg payload"
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0006", "OBL-0008", "OBL-0009"],
+      "predicates": [
+        "User can rotate crank",
+        "Platform moves vertically 80-100 mm",
+        "Mechanism stays enclosed",
+        "No jamming observed",
+        "Supports 1 kg payload"
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0006", "OBL-0008", "OBL-0009"],
+      "predicates": [
+        "User can rotate crank",
+        "Platform moves vertically 80-100 mm",
+        "Mechanism stays enclosed",
+        "No jamming observed",
+        "Supports 1 kg payload"
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Specific mechanism type (e.g., scissor lift, screw jack) not determined.",
+      "why_open": "Multiple principle families can satisfy the motion conversion obligation.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": ["OBL-0002"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The device is intended for use on a desktop, implying a small footprint.",
+      "why": "The request says 'compact desktop platform-lifting device'.",
+      "would_be_invalidated_by": "If the product were intended for a non-desktop setting."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The platform moves vertically.",
+      "why": "The request says 'raise and lower' and gives a travel distance, which suggests vertical motion.",
+      "would_be_invalidated_by": "If the platform movement were horizontal or in another direction."
+    }
+  ]
+}

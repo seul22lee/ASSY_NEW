@@ -1,0 +1,296 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "housing",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0001", "OBL-0004", "OBL-0006", "OBL-0007"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "inlet gate",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "outlet gate",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "BOD-0004",
+      "role": "linkage",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "BOD-0005",
+      "role": "actuator",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0003"]
+    },
+    {
+      "id": "BOD-0006",
+      "role": "return spring",
+      "instance_identity": "single",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["housing body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["inlet gate body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["outlet gate body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": ["linkage body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0005",
+      "members": ["actuator body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0006",
+      "body": "BOD-0006",
+      "members": ["spring body"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0003",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0004",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0005",
+      "child_group": "RGP-0001",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0005",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0005",
+      "child_group": "RGP-0006",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "LINEAR",
+        "direction": "+Y",
+        "required_travel": "UNKNOWN",
+        "allowable_travel_status": "UNBOUNDED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "spring body",
+        "root_interface": "IFC-0001",
+        "activation_window": "always active"
+      }
+    },
+    {
+      "id": "JNT-0006",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0004",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0007",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0004",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0005", "BOD-0006"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "CLEARANCE",
+      "addresses_obligations": ["OBL-0003"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "CLEARANCE",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "CLEARANCE",
+      "addresses_obligations": ["OBL-0001"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "CLEARANCE",
+      "addresses_obligations": ["OBL-0001"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0001", "BOD-0004"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "CLEARANCE",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0006",
+      "bodies": ["BOD-0001", "BOD-0005"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "CLEARANCE",
+      "addresses_obligations": ["OBL-0003"]
+    },
+    {
+      "id": "IFC-0007",
+      "bodies": ["BOD-0002", "BOD-0004"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "CLEARANCE",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0008",
+      "bodies": ["BOD-0003", "BOD-0004"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "CLEARANCE",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0009",
+      "bodies": ["BOD-0001", "BOD-0006"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "CLEARANCE",
+      "addresses_obligations": ["OBL-0002"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "rest",
+      "kind": "NOMINAL",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "actuated",
+      "kind": "ACTUATED",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006"]
+    },
+    {
+      "id": "CFG-0003",
+      "name": "releasing",
+      "kind": "OPERATIONAL",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the surface that is pressed to release an item", "the released item", "the opening through which items are put in"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0004",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the released item"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "how the two closures are kept out of phase",
+      "why_open": "The linkage topology is defined but not its exact geometry; the activation window and travel bounds remain unspecified.",
+      "alternatives": ["linkage ratios", "cam profiles", "spring preloads"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0001", "FRE-0005"],
+      "blocks": ["OBL-0002"]
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "how the actuator returns to rest",
+      "why_open": "The input does not state whether the return is automatic or manual; the choice affects the spring and linkage design.",
+      "alternatives": ["automatic spring return", "manual return", "gravity return"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0007"],
+      "blocks": ["OBL-0003"]
+    },
+    {
+      "id": "UNR-1003",
+      "decision": "how the product is fixed to the wall",
+      "why_open": "No wall type or fixing method is stated, which determines the mounting interface and load path.",
+      "alternatives": ["screws", "adhesive", "bracket"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0003", "AMB-0005"],
+      "blocks": ["OBL-0006"]
+    }
+  ]
+}

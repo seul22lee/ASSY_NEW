@@ -1,0 +1,114 @@
+{
+  "source_clauses": [
+    "Design a compact desktop platform-lifting device enclosed within a housing.",
+    "The user should rotate an external hand crank to raise and lower an internal platform.",
+    "The platform should move approximately 80-100 mm and support a payload of approximately 1 kg.",
+    "The mechanism should remain enclosed within the housing during normal operation.",
+    "The product should be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+    "Avoid obvious jamming or unstable operation."
+  ],
+  "requirements": [
+    {
+      "id": 1,
+      "text": "Device is a compact desktop platform-lifting device enclosed within a housing.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 2,
+      "text": "User rotates an external hand crank to raise and lower an internal platform.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 3,
+      "text": "Platform moves approximately 80-100 mm.",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": 4,
+      "text": "Platform supports a payload of approximately 1 kg.",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": 5,
+      "text": "Mechanism remains enclosed within the housing during normal operation.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 6,
+      "text": "Product is safe to use.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 7,
+      "text": "Product is mechanically plausible.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 8,
+      "text": "Product is easy to assemble.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 9,
+      "text": "Product is practical to manufacture.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 10,
+      "text": "Avoid obvious jamming or unstable operation.",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "kind": "OPERATION",
+      "description": "User rotates external hand crank to raise and lower internal platform.",
+      "actors": ["User", "Hand crank", "Platform"]
+    },
+    {
+      "id": 2,
+      "kind": "SERVICE",
+      "description": "Assembly of the device.",
+      "actors": ["Assembler", "Device"]
+    }
+  ],
+  "actors": [
+    {
+      "id": "User",
+      "description": "Operates the hand crank to raise and lower the platform."
+    },
+    {
+      "id": "Hand crank",
+      "description": "External component rotated by user."
+    },
+    {
+      "id": "Platform",
+      "description": "Internal component that moves up and down, supports payload."
+    },
+    {
+      "id": "Assembler",
+      "description": "Responsible for assembling the device."
+    }
+  ],
+  "freedoms": [
+    "The specific mechanism type is not specified.",
+    "Materials for housing and mechanism are not specified.",
+    "Exact dimensions other than platform travel are not specified.",
+    "The design of the hand crank is not specified.",
+    "The platform size and shape are not specified.",
+    "The method of enclosing the mechanism is not specified.",
+    "The manufacturing process is not specified."
+  ],
+  "ambiguities": [
+    "Approximate values for travel and payload are given; exact values are not specified.",
+    "The phrase 'approximately 80-100 mm' could be interpreted as a target range or a tolerance.",
+    "The phrase 'approximately 1 kg' could be interpreted as a nominal value or a range.",
+    "The requirement 'safe to use' is subjective and not quantified.",
+    "The requirement 'mechanically plausible' is subjective and not quantified.",
+    "The requirement 'easy to assemble' is subjective and not quantified.",
+    "The requirement 'practical to manufacture' is subjective and not quantified.",
+    "The phrase 'avoid obvious jamming or unstable operation' is not precisely defined."
+  ],
+  "assumptions": []
+}

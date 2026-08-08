@@ -1,0 +1,600 @@
+{
+  "controls": [
+    {
+      "control_id": "NC-01",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_BLOCK"
+      ],
+      "detected": true,
+      "mutates": "hinge pin A loses its bayonet end bar",
+      "status": "PASS",
+      "target_detail": {
+        "claim": "every body that could leave has a measured blocked escape direction and a named blocker",
+        "failed": [
+          "RET-PIN-A-OUTWARD"
+        ],
+        "status": "FAIL"
+      },
+      "target_predicate": "P_RETENTION",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_BLOCK": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-02",
+      "declared_dependent_predicates": [
+        "P_FOOTPRINT",
+        "P_BLOCK"
+      ],
+      "declared_unrelated_predicates": [
+        "P_SUPPORT"
+      ],
+      "detected": true,
+      "mutates": "leg C and its pin are absent",
+      "status": "PASS",
+      "target_detail": {
+        "leg_count": 2,
+        "status": "FAIL",
+        "stored_bbox_mm": {
+          "BODY-LEG-A": [
+            -5.0,
+            22.306547,
+            -137.428203,
+            5.0,
+            52.25833,
+            19.025709
+          ],
+          "BODY-LEG-B": [
+            -47.757042,
+            -30.459292,
+            -137.428203,
+            -16.818037,
+            -6.823147,
+            19.025709
+          ]
+        },
+        "stored_bboxes_distinct": true
+      },
+      "target_predicate": "P_THREE_LEGS",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_SUPPORT": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-03",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_RETENTION",
+        "P_COMPACT"
+      ],
+      "detected": true,
+      "mutates": "leg A loses its blocking heel",
+      "status": "PASS",
+      "target_detail": {
+        "analytic_block_angle_deg": 28.829354,
+        "claim": "with the ring locked, no continuous rigid-body path exists from DEPLOYED toward STORED for any leg",
+        "per_leg": {
+          "BODY-LEG-A": {
+            "clear_at_deployed": true,
+            "obstructed_at_stored": false,
+            "obstructed_from_theta_deg": null
+          },
+          "BODY-LEG-B": {
+            "clear_at_deployed": true,
+            "obstructed_at_stored": true,
+            "obstructed_from_theta_deg": 27.5
+          },
+          "BODY-LEG-C": {
+            "clear_at_deployed": true,
+            "obstructed_at_stored": true,
+            "obstructed_from_theta_deg": 27.5
+          }
+        },
+        "status": "FAIL"
+      },
+      "target_predicate": "P_BLOCK",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_COMPACT": "PASS",
+        "P_RETENTION": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-04",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_RETENTION",
+        "P_ANTIROT"
+      ],
+      "detected": true,
+      "mutates": "the ring is built with two arms instead of three",
+      "status": "PASS",
+      "target_detail": {
+        "analytic_block_angle_deg": 28.829354,
+        "claim": "with the ring locked, no continuous rigid-body path exists from DEPLOYED toward STORED for any leg",
+        "per_leg": {
+          "BODY-LEG-A": {
+            "clear_at_deployed": true,
+            "obstructed_at_stored": false,
+            "obstructed_from_theta_deg": null
+          },
+          "BODY-LEG-B": {
+            "clear_at_deployed": true,
+            "obstructed_at_stored": true,
+            "obstructed_from_theta_deg": 27.5
+          },
+          "BODY-LEG-C": {
+            "clear_at_deployed": true,
+            "obstructed_at_stored": true,
+            "obstructed_from_theta_deg": 27.5
+          }
+        },
+        "status": "FAIL"
+      },
+      "target_predicate": "P_BLOCK",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_ANTIROT": "PASS",
+        "P_RETENTION": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-05",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_BLOCK"
+      ],
+      "detected": true,
+      "mutates": "the ring captor is turned down inside the ring bore",
+      "status": "PASS",
+      "target_detail": {
+        "claim": "every body that could leave has a measured blocked escape direction and a named blocker",
+        "failed": [
+          "RET-RING-UP"
+        ],
+        "status": "FAIL"
+      },
+      "target_predicate": "P_RETENTION",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_BLOCK": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-06",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS"
+      ],
+      "detected": true,
+      "mutates": "AS-02 is made to depend on AS-11, which depends on AS-02",
+      "status": "PASS",
+      "target_detail": {
+        "acyclic": false,
+        "cycles_found": [
+          [
+            "AS-02",
+            "AS-11",
+            "AS-02",
+            "AS-02"
+          ]
+        ],
+        "dependencies": {
+          "AS-01": [],
+          "AS-02": [
+            "AS-11"
+          ],
+          "AS-03": [],
+          "AS-04": [
+            "AS-03"
+          ],
+          "AS-05": [],
+          "AS-06": [],
+          "AS-07": [
+            "AS-06"
+          ],
+          "AS-08": [],
+          "AS-09": [],
+          "AS-10": [
+            "AS-09"
+          ],
+          "AS-11": [
+            "AS-02",
+            "AS-05",
+            "AS-08"
+          ],
+          "AS-12": [
+            "AS-11"
+          ],
+          "AS-13": [
+            "AS-12"
+          ],
+          "AS-14": [
+            "AS-13"
+          ],
+          "AS-15": [
+            "AS-14"
+          ]
+        },
+        "status": "FAIL",
+        "unknown_references": []
+      },
+      "target_predicate": "P_ASM_ACYCLIC",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-07",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_ASM_ACYCLIC"
+      ],
+      "detected": true,
+      "mutates": "the ring captor is installed before the ring",
+      "status": "PASS",
+      "target_detail": {
+        "sampling_steps": 40,
+        "status": "FAIL"
+      },
+      "target_predicate": "P_ASM_PATHS",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_ASM_ACYCLIC": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-08",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_COMPACT"
+      ],
+      "detected": true,
+      "mutates": "the clevis bores are round, so the pin's end bar cannot pass",
+      "status": "PASS",
+      "target_detail": {
+        "sampling_steps": 40,
+        "status": "FAIL"
+      },
+      "target_predicate": "P_ASM_PATHS",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_COMPACT": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-09",
+      "corroboration": {
+        "declared_sampling_path_clear": "FAIL",
+        "endpoints_only_path_clear": "PASS",
+        "why_this_matters": "endpoint-only sampling reports PASS on a model that dense sampling reports FAIL on. That is exactly NEG-BM-003-006 and it is why the sampling policy is a checked predicate, not a convention."
+      },
+      "declared_unrelated_predicates": [
+        "P_PATH_SAMPLED at declared sampling"
+      ],
+      "detected": true,
+      "mutates": "sampling: the declared interior samples are removed and only the two endpoints are kept, on a model whose only defect is strictly between the endpoints",
+      "status": "PASS",
+      "target_detail": {
+        "declared_minimum_interior_samples": 8,
+        "interior_samples_per_segment": 0,
+        "samples_per_segment": 2,
+        "status": "FAIL",
+        "why": "two valid endpoints prove nothing about the path between them (NRM-BM-003-005, NEG-BM-003-006). The policy is declared, not discovered adaptively."
+      },
+      "target_predicate": "P_PATH_SAMPLED",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_PATH_SAMPLED_declared": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-10",
+      "declared_dependent_predicates": [
+        "P_BLOCK",
+        "P_RELEASE"
+      ],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS"
+      ],
+      "detected": true,
+      "mutates": "each heel is given a wide tangential lobe",
+      "note": "leg-to-leg separation in this mechanism is monotone in the leg angle - the legs are closest at DEPLOYED - so a leg-to-leg interference that exists at all also exists at an endpoint. It cannot be made interior-only here. The strictly interior-only interference control is NC-11. The lobe also reaches the clevis plates, which is why the leg-to-hub predicates are declared dependent rather than unrelated.",
+      "status": "PASS",
+      "target_detail": {
+        "sampling_steps": 8,
+        "status": "FAIL"
+      },
+      "target_predicate": "P_PATH_CLEAR",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-11",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_RETENTION",
+        "P_COMPACT"
+      ],
+      "detected": true,
+      "mutates": "a boss is added to the hub in the band the heel sweeps through only between the two endpoints",
+      "note": "both endpoint configurations are interference free; the defect exists only strictly between them",
+      "status": "PASS",
+      "target_detail": {
+        "sampling_steps": 8,
+        "status": "FAIL"
+      },
+      "target_predicate": "P_PATH_CLEAR",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_COMPACT": "PASS",
+        "P_RETENTION": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-12",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_BLOCK",
+        "P_RETENTION"
+      ],
+      "detected": true,
+      "mutates": "the release turn is removed, so the arms stay over the heels",
+      "status": "PASS",
+      "target_detail": {
+        "claim": "after the lift and the turn, the whole fold path is clear",
+        "max_common_volume_mm3": 2.349497858,
+        "status": "FAIL"
+      },
+      "target_predicate": "P_RELEASE",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_BLOCK": "PASS",
+        "P_RETENTION": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-13",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_COMPACT",
+        "P_FOOTPRINT"
+      ],
+      "detected": true,
+      "mutates": "the ring seat is raised above the heel's entire sweep, so the arms never meet a heel",
+      "status": "PASS",
+      "target_detail": {
+        "analytic_block_angle_deg": -5.277783,
+        "claim": "with the ring locked, no continuous rigid-body path exists from DEPLOYED toward STORED for any leg",
+        "per_leg": {
+          "BODY-LEG-A": {
+            "clear_at_deployed": true,
+            "obstructed_at_stored": false,
+            "obstructed_from_theta_deg": null
+          },
+          "BODY-LEG-B": {
+            "clear_at_deployed": true,
+            "obstructed_at_stored": false,
+            "obstructed_from_theta_deg": null
+          },
+          "BODY-LEG-C": {
+            "clear_at_deployed": true,
+            "obstructed_at_stored": false,
+            "obstructed_from_theta_deg": null
+          }
+        },
+        "status": "FAIL"
+      },
+      "target_predicate": "P_BLOCK",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_COMPACT": "PASS",
+        "P_FOOTPRINT": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-14",
+      "declared_dependent_predicates": [
+        "P_FOOTPRINT",
+        "P_BLOCK"
+      ],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_SUPPORT"
+      ],
+      "detected": true,
+      "mutates": "the deployed angle is set equal to the stored angle",
+      "status": "PASS",
+      "target_detail": {
+        "at_least_one_storage_relevant_extent_smaller": false,
+        "comparison": {
+          "bbox_dx": {
+            "deployed_mm": 96.87049,
+            "stored_mm": 96.87049,
+            "stored_smaller": false
+          },
+          "bbox_dy": {
+            "deployed_mm": 89.490381,
+            "stored_mm": 89.490381,
+            "stored_smaller": false
+          },
+          "bbox_dz": {
+            "deployed_mm": 254.0,
+            "stored_mm": 254.0,
+            "stored_smaller": false
+          },
+          "max_radial_extent": {
+            "deployed_mm": 68.89828,
+            "stored_mm": 68.89828,
+            "stored_smaller": false
+          }
+        },
+        "configurations": {
+          "DEPLOYED_LOCKED": {
+            "bbox_mm": {
+              "dx": 96.87049,
+              "dy": 89.490381,
+              "dz": 254.0,
+              "xmax": 48.435245,
+              "xmin": -48.435245,
+              "ymax": 53.0,
+              "ymin": -36.490381,
+              "zmax": 122.0,
+              "zmin": -132.0
+            },
+            "max_radial_extent_mm": 68.89828
+          },
+          "STORED": {
+            "bbox_mm": {
+              "dx": 96.87049,
+              "dy": 89.490381,
+              "dz": 254.0,
+              "xmax": 48.435245,
+              "xmin": -48.435245,
+              "ymax": 53.0,
+              "ymin": -36.490381,
+              "zmax": 122.0,
+              "zmin": -132.0
+            },
+            "max_radial_extent_mm": 68.89828
+          }
+        },
+        "frame": "the world frame of parameters.yaml; bounding box is axis-aligned in it",
+        "note": "bbox_dz is LARGER stored than deployed and is reported as such. NRM-BM-003-018 asks for at least one storage-relevant extent to shrink, not for every dimension to. What 'compact' means beyond this relation stays unresolved at AMB-BM-003-001.",
+        "status": "FAIL",
+        "storage_relevant_extents_declared": [
+          "bbox_dx",
+          "bbox_dy",
+          "max_radial_extent"
+        ]
+      },
+      "target_predicate": "P_COMPACT",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_SUPPORT": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-15",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_BLOCK"
+      ],
+      "detected": true,
+      "mutates": "M6's interpolation is replaced by a jump between endpoints",
+      "status": "PASS",
+      "target_detail": {
+        "status": "FAIL"
+      },
+      "target_predicate": "P_CONTINUITY",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_BLOCK": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-16",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_BLOCK",
+        "P_RETENTION"
+      ],
+      "detected": true,
+      "mutates": "the three anti-rotation ribs are removed",
+      "status": "PASS",
+      "target_detail": {
+        "claim": "at the locked height the ribs are inside the ring's keyways and the ring cannot be turned; lifted clear of them it turns freely through the whole release travel",
+        "locked_height_obstructed_from_deg": {
+          "negative": null,
+          "positive": null
+        },
+        "released_height_max_common_volume_mm3": 0.0,
+        "residual_angular_play_deg": null,
+        "status": "FAIL"
+      },
+      "target_predicate": "P_ANTIROT",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_BLOCK": "PASS",
+        "P_RETENTION": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    },
+    {
+      "control_id": "NC-17",
+      "declared_dependent_predicates": [],
+      "declared_unrelated_predicates": [
+        "P_THREE_LEGS",
+        "P_BLOCK",
+        "P_RETENTION"
+      ],
+      "detected": true,
+      "mutates": "the three outward stop pads are removed",
+      "status": "PASS",
+      "target_detail": {
+        "claim": "swinging a leg past its deployed angle is stopped by the hub's outward stop pad, so the deployed angle is bounded on both sides",
+        "clear_at_deployed": true,
+        "declared_outward_travel_bound_deg": 3.0,
+        "residual_outward_travel_deg": 8.5,
+        "status": "FAIL",
+        "stopped_at_theta_deg": 38.5,
+        "why_a_bound_is_needed_here": "'something eventually stops it' does not discriminate: with the stop pads removed the heel still reaches the base flange, about 8.5 degrees past deployed. NRM-BM-003-010 asks the DESIGN to declare its intended and forbidden mobility, so this reference declares its own bound and measures against it. The bound is a FIXTURE design declaration. It is not an Oracle threshold and must not be read back as one - the Oracle introduces no number anywhere (FRE-BM-003-011).",
+        "within_declared_bound": false
+      },
+      "target_predicate": "P_OUTWARD",
+      "target_result": "FAIL",
+      "unrelated_predicate_results": {
+        "P_BLOCK": "PASS",
+        "P_RETENTION": "PASS",
+        "P_THREE_LEGS": "PASS"
+      },
+      "unrelated_predicates_unchanged": true
+    }
+  ],
+  "controls_detected": 17,
+  "controls_run": 17,
+  "name": "checker self-test",
+  "purpose": "Establishes that the checks in this chain can fail. Each control injects a defect in memory and passes only if the check reports it. No perturbed model is exported.",
+  "status": "PASS",
+  "undetected": []
+}

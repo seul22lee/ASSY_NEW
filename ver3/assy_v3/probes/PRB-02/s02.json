@@ -1,0 +1,413 @@
+{
+ "_meta": {
+  "answers_prompt_sha256": "a103b6a7206e20ea",
+  "authored_by": "agent-in-repository",
+  "pairing_history": [
+   "re-paired after the response-schema section was added to the prompt; content unchanged and re-verified against the parser, contract validation and completeness check"
+  ],
+  "reasoning_note": "This product has no operational motion: it is fixed in use and moves only during fitting and removal. Its central obligation - not slipping or rotating - is a friction claim with no available route.",
+  "revision_note": "re-declared against the prompt after METER_DISCRETE_QUANTITY was added to the library. This product meters nothing, so the reasoning is unchanged."
+ },
+ "acceptance_contracts": [
+  {
+   "candidate": "CND-0001",
+   "id": "ACC-0001",
+   "obligations": [
+    "OBL-0002",
+    "OBL-0005"
+   ],
+   "predicates": [
+    "the span reaches both ends of the stated thickness range",
+    "a connected path exists from the arm to the desk edge"
+   ]
+  },
+  {
+   "candidate": "CND-0004",
+   "id": "ACC-0002",
+   "obligations": [
+    "OBL-0004",
+    "OBL-0005"
+   ],
+   "predicates": [
+    "the hooked profile removes the rotational freedom geometrically",
+    "a connected path exists from the arm to the desk edge"
+   ]
+  }
+ ],
+ "assumptions": [
+  {
+   "id": "ASM-0001",
+   "inferred_by_stage": "s02",
+   "statement": "The desk edge is rigid enough to react the arm's load without deforming.",
+   "why": "The load path terminates at the edge, and a path terminating at something that yields does not terminate.",
+   "would_be_invalidated_by": "a statement that the desk edge is compliant, hollow or fragile"
+  }
+ ],
+ "candidates": [
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "the hold is friction; the span and the travel are geometric and remain checkable",
+    "route": "CONTACT_RESOLVING_ANALYSIS"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0001",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0006"
+   ],
+   "obligations_created": [
+    "a normal load at each jaw",
+    "anti-rotation of the driven jaw",
+    "an engaged length spanning the thickness range"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "JOINT_LIMIT_BY_GEOMETRY",
+    "GUIDE_MOTION": "PRISMATIC_GUIDE",
+    "MAINTAIN_CONFIGURATION": "FRICTION_HOLD",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "HELICAL_PAIR",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": true,
+   "summary": "A helical pair draws two jaws together onto the edge and holds by the contact it makes."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "as CND-0001",
+    "route": "CONTACT_RESOLVING_ANALYSIS"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0002",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0006"
+   ],
+   "obligations_created": [
+    "a normal load at the jaw",
+    "guidance and travel bounds for the sliding jaw",
+    "a wedge travel spanning the thickness range"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "CONVERT_MOTION": "WEDGE_OR_INCLINE",
+    "GUIDE_MOTION": "PRISMATIC_GUIDE",
+    "MAINTAIN_CONFIGURATION": "FRICTION_HOLD",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": true,
+   "summary": "A sliding jaw is drawn against the edge by an inclined surface and holds by the contact it makes."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "the toggle condition is an energy argument the ideal-joint route can address; the grip it produces is still friction",
+    "route": "RIGID_BODY_DYNAMICS"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0003",
+   "obligations_addressed": [
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0006"
+   ],
+   "obligations_created": [
+    "a pivot support for each link",
+    "a bound past the toggle point",
+    "a means of adapting the closed span to the thickness"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "CONVERT_MOTION": "LEVER_LINKAGE",
+    "MAINTAIN_CONFIGURATION": "OVER_CENTRE",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "A lever pivoting over centre pulls a jaw onto the edge and stays there."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "a hooked profile removes a freedom geometrically, which is decidable without friction",
+    "route": "MOBILITY_ANALYSIS"
+   },
+   "family": "RETAIN_BODY",
+   "id": "CND-0004",
+   "obligations_addressed": [
+    "OBL-0004",
+    "OBL-0006",
+    "OBL-0007"
+   ],
+   "obligations_created": [
+    "an orientation assumption under which the load seats the product",
+    "a profile that fits every thickness in the range"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "MAINTAIN_CONFIGURATION": "GRAVITY_SEATED",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "RETAIN_BODY": "GEOMETRIC_UNDERCUT",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": false,
+   "summary": "A profile hooks under the edge so the arm's load presses the product against it."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "both the span and the hold depend on deflection",
+    "route": "COMPLIANCE_REDUCED_ORDER"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0005",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0006"
+   ],
+   "obligations_created": [
+    "a deflection bound covering the thickness range",
+    "a recovery",
+    "survival of repeated deflection"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+    "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "COMPLIANT_FLEXURE",
+    "RETAIN_BODY": "ELASTIC_CAPTURE",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": false,
+   "summary": "A compliant jaw is sprung over the edge and holds by its own recovery."
+  }
+ ],
+ "load_cases": [
+  {
+   "applied_to_role": "the arm-carrying role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0001",
+   "kind": "PAYLOAD",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk edge the product grips",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "the arm-carrying role",
+   "direction_class": "MOMENT",
+   "id": "LC-0002",
+   "kind": "PAYLOAD",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk edge the product grips",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "the gripping role",
+   "direction_class": "TRANSVERSE",
+   "id": "LC-0003",
+   "kind": "REACTION",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk edge the product grips",
+   "scenario": "SCN-0001"
+  }
+ ],
+ "obligations": [
+  {
+   "derivation_premises": [
+    "A body fixed to another has a connection to it; a body carrying a third has a connection to that too."
+   ],
+   "derived_from_requirements": [
+    "REQ-0001"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0001",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "A connection exists between the product and an external edge, and between the product and the arm it carries."
+  },
+  {
+   "derivation_premises": [
+    "A fixed span fits one thickness; a range requires the span to change."
+   ],
+   "derived_from_requirements": [
+    "REQ-0002"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0002",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The gripping span accommodates every edge thickness in the stated range."
+  },
+  {
+   "derivation_premises": [
+    "Resistance to sliding between two bodies pressed together is a friction property."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003"
+   ],
+   "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+   "id": "OBL-0003",
+   "mandatory": true,
+   "route_available": false,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "Once tightened, the product does not translate relative to the edge."
+  },
+  {
+   "derivation_premises": [
+    "A moment applied to a clamped joint is resisted by the contact it makes."
+   ],
+   "derived_from_requirements": [
+    "REQ-0004"
+   ],
+   "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+   "id": "OBL-0004",
+   "mandatory": true,
+   "route_available": false,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "Once tightened, the product does not rotate relative to the edge under the arm's load."
+  },
+  {
+   "derivation_premises": [
+    "An unreacted load accelerates the body carrying it.",
+    "The only external body the product touches in use is the desk edge."
+   ],
+   "derived_from_requirements": [
+    "REQ-0001",
+    "REQ-0004"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0005",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The arm's load reaches the desk edge through a connected path."
+  },
+  {
+   "derivation_premises": [
+    "Without tools means every actuation surface is operated by hand.",
+    "A surface the user cannot reach cannot be operated."
+   ],
+   "derived_from_requirements": [
+    "REQ-0005",
+    "REQ-0006"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0006",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "Tightening and releasing are performed by the user with no participant outside the product."
+  },
+  {
+   "derivation_premises": [
+    "Moving it to another desk requires that fitting be repeatable."
+   ],
+   "derived_from_requirements": [
+    "REQ-0005"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0007",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s04",
+   "scope": "UNIVERSAL",
+   "statement": "Removal is non-destructive and leaves the product able to be fitted again."
+  },
+  {
+   "derivation_premises": [
+    "A part with no path into the partly built product cannot be installed."
+   ],
+   "derived_from_requirements": [
+    "REQ-0001"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0008",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s04",
+   "scope": "UNIVERSAL",
+   "statement": "An ordered installation sequence exists in which every part has a clear path."
+  }
+ ],
+ "unresolved": [
+  {
+   "alternatives": [
+    "CND-0001",
+    "CND-0002",
+    "CND-0003",
+    "CND-0004",
+    "CND-0005"
+   ],
+   "alternatives_kind": "ENTITY_REFS",
+   "blocks": [
+    "OBL-0003",
+    "OBL-0004"
+   ],
+   "decision": "how the product is held to the edge",
+   "id": "UNR-0001",
+   "kept_open_by": [
+    "FRE-0001",
+    "AMB-0002"
+   ],
+   "why_open": "Five principle families hold a configuration and the requirements name none. Four of the five depend on friction or deflection, for which no evidence route exists here; the fifth removes the freedom geometrically. That difference is a fact about the available evidence, not a reason to prefer one."
+  },
+  {
+   "alternatives": [
+    "continuous adjustment",
+    "discrete positions",
+    "a compliant member covering the range"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0002"
+   ],
+   "decision": "how the thickness range is spanned",
+   "id": "UNR-0002",
+   "kept_open_by": [
+    "FRE-0002"
+   ],
+   "why_open": "The range is the one quantity the requirements supply, and nothing says whether it is spanned by a continuous adjustment, by discrete positions or by a compliant member."
+  },
+  {
+   "alternatives": [
+    "a stated arm load",
+    "no quantitative acceptance for retention"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0003",
+    "OBL-0004"
+   ],
+   "decision": "what load the arm imposes",
+   "id": "UNR-0003",
+   "kept_open_by": [
+    "AMB-0001",
+    "AMB-0003"
+   ],
+   "why_open": "Every retention obligation here is a resistance to a load whose magnitude, reach and moment are all unstated, so no holding arrangement can be shown adequate."
+  }
+ ]
+}

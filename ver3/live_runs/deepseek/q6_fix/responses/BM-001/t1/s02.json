@@ -1,0 +1,336 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must provide a reusable latch that can be repeatedly operated.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A latch that cannot be operated is not a latch.", "Repeated operation requires a mechanism that returns to a state allowing re-operation."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The latch must maintain closure during normal handling without accidental opening.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Forces during normal handling could overcome the latch if not resisted.", "Accidental opening implies a failure to maintain a closed configuration under applied loads."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The latch must be easy for a user to operate while remaining secure during transport.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Easy operation implies low force or simple motion for the user.", "Secure during transport implies resistance to external forces without user action."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The product must be suitable for low-cost manufacturing and practical for desktop use.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s05",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["Low-cost manufacturing imposes constraints on materials and processes.", "Desktop use imposes constraints on size and sturdiness."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must be mechanically plausible and easy to assemble.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Plausible mechanics requires that moving parts have intended paths.", "Easy assembly implies that parts can be brought together without interference."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The box must be a compact desktop storage box with a latch.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Compact implies limited dimensions and no excessive protrusions.", "Storage box implies a container with an openable closing element."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The box must allow repeated opening and closing without accidental opening during normal handling.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Accidental opening would be a failure of the closing mechanism.", "Repeated operation requires a mechanism that can cycle without failure."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The latch must be operable by a user.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A latch that cannot be reached or manipulated by a user is not operable."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The latch must be secure during transport.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Transport imposes forces that could open the latch if not resisted.", "Security implies no unintentional opening under typical transport loads."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The product must allow the user to reach the latch and the box opening/closing mechanism.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A mechanism that is not accessible cannot be operated by a user."]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The product must be low-cost to manufacture and practical for desktop use.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s05",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["Low cost implies few parts and simple manufacturing processes.", "Desktop practicality implies reasonable size and stability."]
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The product must be mechanically plausible and easy to assemble.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Mechanical plausibility requires that all moving parts can move as intended without interference.", "Easy assembly requires that parts can be put together without special tools or excessive force."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the box body",
+      "reacted_at_role": "the surface the box rests on",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the latch",
+      "reacted_at_role": "the box body",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the box body",
+      "reacted_at_role": "the surrounding environment",
+      "direction_class": "TRANSVERSE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the box body",
+      "reacted_at_role": "the surrounding environment",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0005",
+      "scenario": "SCN-0003",
+      "applied_to_role": "the components",
+      "reacted_at_role": "the assembly equipment",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Latching via spring-loaded detent with snap fit",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "DETENT_OR_SNAP",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Satisfaction of security and ease of operation can be analyzed using ideal-joint dynamics."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Latching via over-center toggle",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "OVER_CENTRE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Configuration existence can be verified using geometry; forces and security require dynamics."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Latching via friction hold",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "FRICTION_HOLD",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction forces cannot be analyzed with available routes at this stage."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0004",
+      "summary": "Latching via gravity seated",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "GRAVITY_SEATED",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Gravity seating can be analyzed using quasi-static balance."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0005",
+      "summary": "Latching via separate retaining member",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": "SEPARATE_RETAINING_MEMBER",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "obligations_created": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0006", "OBL-0008", "OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "The separate member must be reachable and movable; geometry can verify."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "predicates": ["Repeated operation passes 1000 cycles without failure.", "No accidental opening when subjected to 5N force in any direction on the latch.", "User can open the latch with a force between 2N and 10N.", "Parts can be manufactured from ABS plastic via injection molding.", "Assembly time less than 30 seconds with no special tools."]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "predicates": ["Repeated operation passes 1000 cycles without failure.", "No accidental opening when subjected to 5N force in any direction on the latch.", "User can open the latch with a force between 2N and 10N.", "Parts can be manufactured from ABS plastic via injection molding.", "Assembly time less than 30 seconds with no special tools."]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "predicates": ["Repeated operation passes 1000 cycles without failure.", "No accidental opening when subjected to 5N force in any direction on the latch.", "User can open the latch with a force between 2N and 10N.", "Parts can be manufactured from ABS plastic via injection molding.", "Assembly time less than 30 seconds with no special tools."]
+    },
+    {
+      "id": "ACC-0004",
+      "candidate": "CND-0004",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "predicates": ["Repeated operation passes 1000 cycles without failure.", "No accidental opening when subjected to 5N force in any direction on the latch.", "User can open the latch with a force between 2N and 10N.", "Parts can be manufactured from ABS plastic via injection molding.", "Assembly time less than 30 seconds with no special tools."]
+    },
+    {
+      "id": "ACC-0005",
+      "candidate": "CND-0005",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012"],
+      "predicates": ["Repeated operation passes 1000 cycles without failure.", "No accidental opening when subjected to 5N force in any direction on the latch.", "User can open the latch with a force between 2N and 10N.", "Parts can be manufactured from ABS plastic via injection molding.", "Assembly time less than 30 seconds with no special tools."]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which latch principle best satisfies ease of operation and transport security without violating low-cost desktop practicality is unresolved.",
+      "why_open": "The candidate principles differ in the trade-off between ease of opening and resistance to accidental opening. Without quantitative criteria for 'easy' and 'secure', no single candidate is clearly superior.",
+      "alternatives": ["DETENT_OR_SNAP", "OVER_CENTRE", "FRICTION_HOLD", "GRAVITY_SEATED", "SEPARATE_RETAINING_MEMBER"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["AMB-0001", "AMB-0002", "FRE-0001"],
+      "blocks": ["OBL-0003"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The box is a small, lightweight container (e.g., notebook or small supplies) and the latch is a single mechanism.",
+      "why": "The requirements do not specify size, weight, or contents; compact desktop storage implies these bounds.",
+      "would_be_invalidated_by": "A requirement specifying very large or heavy contents would invalidate this."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "Manufacturing processes are injection molding for plastic parts.",
+      "why": "Low-cost manufacturing often implies injection molding for desktop items.",
+      "would_be_invalidated_by": "A requirement for metal materials or different process would invalidate this."
+    },
+    {
+      "id": "ASM-1003",
+      "statement": "Normal handling includes typical desktop interactions such as lifting, sliding, and occasional shaking.",
+      "why": "The scenario defines normal handling conditions but not specific forces.",
+      "would_be_invalidated_by": "A specification of extreme forces or abusive handling would alter this."
+    },
+    {
+      "id": "ASM-1004",
+      "statement": "Assembly is manual, without special tools.",
+      "why": "Easy assembly implies simplicity and no special tooling.",
+      "would_be_invalidated_by": "A requirement for automated assembly would change this."
+    }
+  ]
+}

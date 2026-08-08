@@ -1,0 +1,651 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "base body providing the enclosure and the pivot support for the closing element",
+      "instance_identity": "the body that forms the enclosure and holds the axis"
+    },
+    {
+      "id": "BOD-0002",
+      "role": "closing element that rotates about the fixed axis on BOD-0001",
+      "instance_identity": "the moving closing panel"
+    },
+    {
+      "id": "BOD-0003",
+      "role": "compliant catch that engages with BOD-0002 to hold it shut and is pressed to release",
+      "instance_identity": "the catch"
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["BOD-0001"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["BOD-0002"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["base of the catch which is attached to BOD-0001"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0003",
+      "members": ["compliant tip of the catch that deflects"],
+      "is_default": false
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0004",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "TRANSVERSE_DEFLECTION",
+        "direction": "+Y",
+        "required_travel": "sufficient for the catch to clear the closing element during engagement and release",
+        "allowable_travel_status": "to be determined",
+        "actuation": "direct manual press on the release surface",
+        "compliant_element": "the thin cantilever section of the catch",
+        "root_interface": "BOD-0003 to BOD-0001 attachment",
+        "activation_window": "during opening and closing of the closing element"
+      }
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "clearances maintained as they rotate relative to each other"
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "catch body attached to base body"
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "catch tip contacts the closing element in the closed configuration and during engagement"
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "INTERFERENCE_FIT",
+      "nominal_status": "catch attachment is pressed into the base body"
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "closed",
+      "kind": "CLOSED",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "open",
+      "kind": "OPEN",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    }
+  ],
+  "dof_dispositions": [
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "FIXED joint to ground (implicit)"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +X or -X direction that would slide the closing element off its hinge axis; this would require breaking the revolute joint or deforming the base",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +Y or -Y direction that would lift the closing element off the axis; this would require breaking the revolute joint or deforming the base",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along Z",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +Z or -Z direction that would slide the closing element along the axis; this would require breaking the revolute joint or deforming the base",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "rotation about X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a torque about X that would tilt the closing element relative to the axis; would require breaking the revolute joint or deforming the base",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "rotation about Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a torque about Y that would tilt the closing element relative to the axis; would require breaking the revolute joint or deforming the base",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +X or -X direction that would slide the closing element off its hinge axis; would require breaking the revolute joint",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +Y or -Y direction that would lift the closing element off the axis; would require breaking the revolute joint",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along Z",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +Z or -Z direction that would slide the closing element along the axis; would require breaking the revolute joint",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "rotation about X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a torque about X that would tilt the closing element relative to the axis; would require breaking the revolute joint",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "rotation about Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a torque about Y that would tilt the closing element relative to the axis; would require breaking the revolute joint",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +X or -X that would shear the catch attachment off the base; would require breaking the interference fit or the material",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +Y or -Y that would pull the catch out of the base; would require breaking the interference fit",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along Z",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +Z or -Z that would slide the catch relative to the base; would require breaking the interference fit",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "rotation about X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a torque about X that would twist the catch relative to the base; would require breaking the interference fit",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "rotation about Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a torque about Y that would twist the catch relative to the base; would require breaking the interference fit",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "rotation about Z",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a torque about Z that would rotate the catch relative to the base; would require breaking the interference fit",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +X or -X that would shear the catch attachment off the base; would require breaking the interference fit or the material",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +Y or -Y that would pull the catch out of the base; would require breaking the interference fit",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "translation along Z",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a force in the +Z or -Z that would slide the catch relative to the base; would require breaking the interference fit",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "rotation about X",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a torque about X that would twist the catch relative to the base; would require breaking the interference fit",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "rotation about Y",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a torque about Y that would twist the catch relative to the base; would require breaking the interference fit",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "BLOCKED_BY",
+      "blocked_direction": "rotation about Z",
+      "blocker_body": "BOD-0001",
+      "defeat_specification": "apply a torque about Z that would rotate the catch relative to the base; would require breaking the interference fit",
+      "driver": "KINEMATIC_NECESSITY"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "TX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "COMPLIANT joint restricts transverse motion"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "TY",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "COMPLIANT joint restricts transverse motion"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "COMPLIANT joint restricts transverse motion"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "COMPLIANT joint restricts transverse motion"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "COMPLIANT joint restricts transverse motion"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "TX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "COMPLIANT joint restricts transverse motion"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "TY",
+      "disposition": "INTENDED"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "TZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "COMPLIANT joint restricts transverse motion"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "RX",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "COMPLIANT joint restricts transverse motion"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "RY",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "COMPLIANT joint restricts transverse motion"
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": "RZ",
+      "disposition": "MAINTAINED_BY_CLASS",
+      "holding_class": "COMPLIANT joint restricts transverse motion"
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0002",
+        "JNT-0001",
+        "BOD-0001",
+        "IFC-0001",
+        "BOD-0001",
+        "ground"
+      ]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0003",
+        "JNT-0002",
+        "BOD-0003",
+        "IFC-0002",
+        "BOD-0001",
+        "ground"
+      ]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0002",
+        "IFC-0003",
+        "BOD-0003",
+        "JNT-0002",
+        "BOD-0003",
+        "IFC-0002",
+        "BOD-0001",
+        "ground"
+      ]
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0002",
+        "JNT-0001",
+        "BOD-0001",
+        "ground"
+      ]
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0001",
+        "ground"
+      ]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASM-0001",
+      "order_index": 1,
+      "body": "BOD-0001",
+      "access_side": "top",
+      "activates": ["IFC-0001", "IFC-0002"],
+      "termination_strategy": "N/A (base body is installed first)",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASM-0002",
+      "order_index": 2,
+      "body": "BOD-0003",
+      "access_side": "top",
+      "activates": ["IFC-0002", "IFC-0003"],
+      "termination_strategy": "INTERFERENCE_FIT (integration into base)",
+      "path_kind": "RIGID",
+      "depends_on": ["ASM-0001"]
+    },
+    {
+      "id": "ASM-0003",
+      "order_index": 3,
+      "body": "BOD-0002",
+      "access_side": "top",
+      "activates": ["JNT-0001", "IFC-0003"],
+      "termination_strategy": "ELASTICITY (catch deflection during insertion)",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASM-0001", "ASM-0002"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"]
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001", "BOD-0002"]
+    },
+    {
+      "id": "FRG-0004",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001", "BOD-0002"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "how the catch is attached to the base",
+      "why_open": "the design requires a compliant catch but does not specify whether it is a separate part or an integral flexure of the base",
+      "alternatives": ["separate molded part", "integral living hinge"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0002", "FRE-0003"],
+      "blocks": ["OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"]
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "how the closing element is retained axially on the revolute joint",
+      "why_open": "the revolute joint has a DOF along its axis that must be blocked, but the design does not state the means",
+      "alternatives": ["retaining ring", "shoulder", "peening", "washer with snap"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0004"],
+      "blocks": ["OBL-0004", "OBL-0005"]
+    }
+  ]
+}

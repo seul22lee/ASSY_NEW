@@ -1,0 +1,159 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a foot pedal for a workbench.",
+      "locator": "Request-1",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "Pressing it should send a signal to the machine.",
+      "locator": "Request-2",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "when I take my foot off it must return to its resting position on its own every time.",
+      "locator": "Request-3",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "It should not move if something brushes against it sideways.",
+      "locator": "Request-4",
+      "quantity_kinds": [],
+      "directionality": "sideways"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Pressing it should send a signal to the machine.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "sends a signal to the machine when pressed",
+      "source_locator": "Request-2",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "when I take my foot off it must return to its resting position on its own every time.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "returns to its resting position on its own when foot is removed",
+      "source_locator": "Request-3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "It should not move if something brushes against it sideways.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "does not move when brushed sideways",
+      "source_locator": "Request-4",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "foot pedal operation",
+      "kind": "OPERATION",
+      "system_boundary": "inside: the foot pedal and its internal components; outside: the user's foot, the machine, and the workbench surface the pedal rests on.",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": "workbench"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "foot pedal service",
+      "kind": "SERVICE",
+      "system_boundary": "inside: the foot pedal and its internal components; outside: the user's hand or tool, the workbench surface, and any support structure.",
+      "actors": [
+        "ACT-0002"
+      ],
+      "environment": "workbench"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user's foot",
+      "must_reach": [
+        "the foot pedal"
+      ]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "user",
+      "must_reach": [
+        "the foot pedal for maintenance or adjustment"
+      ]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Mechanism for sending the signal to the machine",
+      "why_free": "The request says a signal must be sent, but does not specify how (electrical, mechanical, wireless, etc.)."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "Mechanism for returning to resting position",
+      "why_free": "The request says it must return on its own every time, but does not specify the mechanism (spring, gravity, etc.)."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "Mechanism to resist sideways movement",
+      "why_free": "The request says it should not move sideways, but does not specify how (guides, friction, etc.)."
+    },
+    {
+      "id": "FRE-0004",
+      "decision": "Physical dimensions and materials",
+      "why_free": "The request does not specify size, shape, or materials."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "It is not clear whether the pedal must remain fixed in position when brushed sideways or whether it may move slightly as long as it does not send a signal.",
+      "conflicting_clauses": [
+        "SRC-0004"
+      ],
+      "resolvable_when": "clarification with user or from test criteria",
+      "block_scopes": [
+        "REQ-0003"
+      ]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "It is not clear what 'resting position' means exactly - whether it is the initial at-rest position and how precise the return must be.",
+      "conflicting_clauses": [
+        "SRC-0003"
+      ],
+      "resolvable_when": "clarification with user or from engineering standards",
+      "block_scopes": [
+        "REQ-0002"
+      ]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The pedal operates in a workbench environment and is not exposed to harsh conditions.",
+      "why": "The request is for a workbench foot pedal.",
+      "would_be_invalidated_by": "A statement that the pedal must operate in harsh conditions."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The user's foot presses downward on the pedal.",
+      "why": "Typical foot pedal operation; not explicitly stated but implied.",
+      "would_be_invalidated_by": "A statement that the pedal is pressed in a different direction."
+    }
+  ]
+}

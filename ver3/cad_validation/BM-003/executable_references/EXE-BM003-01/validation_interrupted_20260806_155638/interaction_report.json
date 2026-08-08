@@ -1,0 +1,1455 @@
+{
+  "evaluation_tolerance": {
+    "contact_tol_mm": 0.05,
+    "note": "evaluation tolerance, never a material allowance",
+    "overlap_tol_mm3": 1e-06
+  },
+  "interactions": [
+    {
+      "bodies": [
+        "BODY-PIN-A",
+        "BODY-HUB"
+      ],
+      "criterion": "min distance <= contact_tol (0.050) and no overlap",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-HINGE-A-HEAD",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "roi_box_mm": [
+        -16.999999999999996,
+        -9.999999999999996,
+        30.0,
+        50.0,
+        -8,
+        8
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CONTACT"
+    },
+    {
+      "bodies": [
+        "BODY-PIN-A",
+        "BODY-HUB"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.5,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-HINGE-A-BAR",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.5,
+      "roi_box_mm": [
+        10.000000000000002,
+        16.000000000000004,
+        36.0,
+        44.0,
+        4.2,
+        5.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-PIN-A",
+        "BODY-LEG-A"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.3,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-HINGE-A-BORE",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.3,
+      "roi_box_mm": [
+        -3.999999999999998,
+        4.000000000000003,
+        34.0,
+        46.0,
+        2.5,
+        6.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-A",
+        "BODY-HUB"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 1.0,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-BLADE-A-GAP",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 1.0,
+      "roi_box_mm": [
+        -7.999999999999998,
+        -3.9999999999999973,
+        34.0,
+        46.0,
+        -8,
+        8
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-A",
+        "BODY-RING"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.4,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-BLOCK-A",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.4,
+      "roi_box_mm": [
+        -7.999999999999999,
+        8.000000000000002,
+        15.0,
+        27.0,
+        7.5,
+        14.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-A",
+        "BODY-RING"
+      ],
+      "criterion": "min distance > contact_tol, and where a nominal gap is declared, |min distance - nominal| <= contact_tol",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "DEPLOYED_RELEASED",
+      "interaction_id": "INT-CLEAR-A",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 3.631687998,
+      "roi_box_mm": [
+        -25.0,
+        25.000000000000004,
+        9.999999999999998,
+        45.0,
+        0.0,
+        26.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "NOT_INTENDED_TO_INTERACT"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-A",
+        "BODY-HUB"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.15,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-STOP-A",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.142658477,
+      "roi_box_mm": [
+        -5.999999999999998,
+        6.000000000000002,
+        28.0,
+        34.0,
+        -6.0,
+        1.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-PIN-B",
+        "BODY-HUB"
+      ],
+      "criterion": "min distance <= contact_tol (0.050) and no overlap",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-HINGE-B-HEAD",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "roi_box_mm": [
+        -38.30127018922193,
+        -17.480762113533153,
+        -39.72243186433546,
+        -23.66025403784439,
+        -8,
+        8
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CONTACT"
+    },
+    {
+      "bodies": [
+        "BODY-PIN-B",
+        "BODY-HUB"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.5,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-HINGE-B-BAR",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.5,
+      "roi_box_mm": [
+        -46.1051177665153,
+        -36.17691453623979,
+        -13.339745962155618,
+        -4.143593539448986,
+        4.2,
+        5.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-PIN-B",
+        "BODY-LEG-B"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.3,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-HINGE-B-BORE",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.3,
+      "roi_box_mm": [
+        -41.837168574084174,
+        -27.444863728670914,
+        -26.464101615137757,
+        -13.53589838486225,
+        2.5,
+        6.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-B",
+        "BODY-HUB"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 1.0,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-BLADE-B-GAP",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 1.0,
+      "roi_box_mm": [
+        -37.837168574084174,
+        -25.444863728670914,
+        -29.928203230275514,
+        -20.464101615137757,
+        -8,
+        8
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-B",
+        "BODY-RING"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.4,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-BLOCK-B",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.4,
+      "roi_box_mm": [
+        -27.38268590217984,
+        -8.990381056766577,
+        -20.428203230275514,
+        -0.571796769724493,
+        7.5,
+        14.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-B",
+        "BODY-RING"
+      ],
+      "criterion": "min distance > contact_tol, and where a nominal gap is declared, |min distance - nominal| <= contact_tol",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "DEPLOYED_RELEASED",
+      "interaction_id": "INT-CLEAR-B",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 3.631687998,
+      "roi_box_mm": [
+        -51.47114317029974,
+        3.839745962155618,
+        -44.15063509461097,
+        16.650635094610966,
+        0.0,
+        26.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "NOT_INTENDED_TO_INTERACT"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-B",
+        "BODY-HUB"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.15,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-STOP-B",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.142658477,
+      "roi_box_mm": [
+        -32.44486372867092,
+        -21.24871130596428,
+        -22.196152422706636,
+        -8.803847577293372,
+        -6.0,
+        1.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-PIN-C",
+        "BODY-HUB"
+      ],
+      "criterion": "min distance <= contact_tol (0.050) and no overlap",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-HINGE-C-HEAD",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "roi_box_mm": [
+        30.980762113533157,
+        51.801270189221924,
+        -16.33974596215564,
+        -0.27756813566456273,
+        -8,
+        8
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CONTACT"
+    },
+    {
+      "bodies": [
+        "BODY-PIN-C",
+        "BODY-HUB"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.5,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-HINGE-C-BAR",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.5,
+      "roi_box_mm": [
+        23.176914536239774,
+        33.105117766515285,
+        -35.856406460551035,
+        -26.660254037844396,
+        4.2,
+        5.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-PIN-C",
+        "BODY-LEG-C"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.3,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-HINGE-C-BORE",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.3,
+      "roi_box_mm": [
+        27.444863728670903,
+        41.83716857408417,
+        -26.464101615137775,
+        -13.53589838486226,
+        2.5,
+        6.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-C",
+        "BODY-HUB"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 1.0,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-BLADE-C-GAP",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 1.0,
+      "roi_box_mm": [
+        31.444863728670903,
+        43.837168574084174,
+        -19.535898384862268,
+        -10.071796769724507,
+        -8,
+        8
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-C",
+        "BODY-RING"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.4,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-BLOCK-C",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.4,
+      "roi_box_mm": [
+        8.990381056766573,
+        27.38268590217984,
+        -20.42820323027552,
+        -0.5717967697245001,
+        7.5,
+        14.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-C",
+        "BODY-RING"
+      ],
+      "criterion": "min distance > contact_tol, and where a nominal gap is declared, |min distance - nominal| <= contact_tol",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "DEPLOYED_RELEASED",
+      "interaction_id": "INT-CLEAR-C",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 3.631687998,
+      "roi_box_mm": [
+        -3.839745962155627,
+        51.47114317029974,
+        -44.150635094610976,
+        16.650635094610955,
+        0.0,
+        26.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "NOT_INTENDED_TO_INTERACT"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-C",
+        "BODY-HUB"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.15,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-STOP-C",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.142658477,
+      "roi_box_mm": [
+        21.24871130596427,
+        32.4448637286709,
+        -22.196152422706646,
+        -8.803847577293382,
+        -6.0,
+        1.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-HUB",
+        "BODY-RING"
+      ],
+      "criterion": "min distance <= contact_tol (0.050) and no overlap",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-RING-SEAT",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "roi_box_mm": [
+        -19.0,
+        19.0,
+        -19.0,
+        19.0,
+        9.0,
+        13.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CONTACT"
+    },
+    {
+      "bodies": [
+        "BODY-HUB",
+        "BODY-RING"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.4,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-RING-KEY",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.4,
+      "roi_box_mm": [
+        6.026279441628827,
+        19.088457268119896,
+        -0.5621778264910722,
+        15.06217782649107,
+        11.6,
+        14.5
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-HUB",
+        "BODY-RING"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.4,
+      "evaluated_in_state": "DEPLOYED_RELEASED",
+      "interaction_id": "INT-RING-RIBTOP",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.4,
+      "roi_box_mm": [
+        6.026279441628827,
+        19.088457268119896,
+        -0.5621778264910722,
+        15.06217782649107,
+        11.5,
+        15.5
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-RING",
+        "BODY-RING-CAPTOR"
+      ],
+      "criterion": "min distance <= contact_tol (0.050) and no overlap",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "DEPLOYED_RELEASED",
+      "interaction_id": "INT-RING-CAPTOR-STOP",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "roi_box_mm": [
+        -22.0,
+        22.0,
+        -22.0,
+        22.0,
+        22.0,
+        27.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CONTACT"
+    },
+    {
+      "bodies": [
+        "BODY-RING",
+        "BODY-RING-CAPTOR"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 2.4,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-RING-CAPTOR-GAP",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 2.4,
+      "roi_box_mm": [
+        -22.0,
+        22.0,
+        -22.0,
+        22.0,
+        17.0,
+        27.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-HUB",
+        "BODY-RING-CAPTOR"
+      ],
+      "criterion": "min distance <= contact_tol (0.050) and no overlap",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-CAPTOR-SEAT",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "roi_box_mm": [
+        -16.0,
+        16.0,
+        -16.0,
+        16.0,
+        22.0,
+        27.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CONTACT"
+    },
+    {
+      "bodies": [
+        "BODY-HUB",
+        "BODY-RING-CAPTOR"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.2,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-CAPTOR-LUG",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.2,
+      "roi_box_mm": [
+        -16.0,
+        16.0,
+        -16.0,
+        16.0,
+        30.0,
+        34.5
+      ],
+      "roi_excludes": [
+        "exclude the column bore, which is a radial gap not this axial one",
+        0.0,
+        0.0,
+        11.5
+      ],
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-HUB",
+        "BODY-TOP-SUPPORT"
+      ],
+      "criterion": "min distance <= contact_tol (0.050) and no overlap",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-SUPPORT-SEAT",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.0,
+      "roi_box_mm": [
+        -16.0,
+        16.0,
+        -16.0,
+        16.0,
+        34.5,
+        39.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "DECLARED_CONTACT"
+    },
+    {
+      "bodies": [
+        "BODY-HUB",
+        "BODY-TOP-SUPPORT"
+      ],
+      "criterion": "|min distance - nominal| <= contact_tol, and no overlap",
+      "declared_nominal_mm": 0.3,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-SUPPORT-LUG",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 0.3,
+      "roi_box_mm": [
+        -15.0,
+        15.0,
+        -15.0,
+        15.0,
+        112.0,
+        115.5
+      ],
+      "roi_excludes": [
+        "exclude the column bore",
+        0.0,
+        0.0,
+        11.6
+      ],
+      "status": "PASS",
+      "type": "DECLARED_CLEARANCE"
+    },
+    {
+      "bodies": [
+        "BODY-RING-CAPTOR",
+        "BODY-TOP-SUPPORT"
+      ],
+      "criterion": "min distance > contact_tol, and where a nominal gap is declared, |min distance - nominal| <= contact_tol",
+      "declared_nominal_mm": 4.2,
+      "evaluated_in_state": "DEPLOYED_LOCKED",
+      "interaction_id": "INT-SUPPORT-CAPTOR",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 4.2,
+      "roi_box_mm": [
+        -20.0,
+        20.0,
+        -20.0,
+        20.0,
+        30.0,
+        39.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "NOT_INTENDED_TO_INTERACT"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-A",
+        "BODY-LEG-B"
+      ],
+      "criterion": "min distance > contact_tol, and where a nominal gap is declared, |min distance - nominal| <= contact_tol",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "STORED",
+      "interaction_id": "INT-LEG-LEG-AB",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 36.244668654,
+      "roi_box_mm": [
+        -60.0,
+        60.0,
+        -60.0,
+        60.0,
+        -20.0,
+        12.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "NOT_INTENDED_TO_INTERACT"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-B",
+        "BODY-LEG-C"
+      ],
+      "criterion": "min distance > contact_tol, and where a nominal gap is declared, |min distance - nominal| <= contact_tol",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "STORED",
+      "interaction_id": "INT-LEG-LEG-BC",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 36.244668654,
+      "roi_box_mm": [
+        -60.0,
+        60.0,
+        -60.0,
+        60.0,
+        -20.0,
+        12.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "NOT_INTENDED_TO_INTERACT"
+    },
+    {
+      "bodies": [
+        "BODY-LEG-A",
+        "BODY-LEG-C"
+      ],
+      "criterion": "min distance > contact_tol, and where a nominal gap is declared, |min distance - nominal| <= contact_tol",
+      "declared_nominal_mm": null,
+      "evaluated_in_state": "STORED",
+      "interaction_id": "INT-LEG-LEG-AC",
+      "measured_common_volume_mm3": 0.0,
+      "measured_min_distance_mm": 36.244668654,
+      "roi_box_mm": [
+        -60.0,
+        60.0,
+        -60.0,
+        60.0,
+        -20.0,
+        12.0
+      ],
+      "roi_excludes": null,
+      "status": "PASS",
+      "type": "NOT_INTENDED_TO_INTERACT"
+    }
+  ],
+  "method": "Each declared interaction is measured inside a declared region of interest, so a clearance is not masked by a contact elsewhere on the same body pair. Whole-body pairs are then scanned per state.",
+  "name": "interaction classification and tolerance check",
+  "per_state_pair_scan": [
+    {
+      "declared_contacts": {
+        "BODY-HUB|BODY-PIN-A": [
+          "FEATURE-PIN-A-HEAD",
+          "FEATURE-CLEVIS-A-OUTER-FACE"
+        ],
+        "BODY-HUB|BODY-PIN-B": [
+          "FEATURE-PIN-B-HEAD",
+          "FEATURE-CLEVIS-B-OUTER-FACE"
+        ],
+        "BODY-HUB|BODY-PIN-C": [
+          "FEATURE-PIN-C-HEAD",
+          "FEATURE-CLEVIS-C-OUTER-FACE"
+        ],
+        "BODY-HUB|BODY-RING": [
+          "FEATURE-PEDESTAL-TOP",
+          "FEATURE-RING-UNDERSIDE"
+        ],
+        "BODY-HUB|BODY-RING-CAPTOR": [
+          "FEATURE-COLUMN-STEP",
+          "FEATURE-CAPTOR-UNDERSIDE"
+        ],
+        "BODY-HUB|BODY-TOP-SUPPORT": [
+          "FEATURE-LOWER-LUG-TOP",
+          "FEATURE-SLEEVE-UNDERSIDE"
+        ],
+        "BODY-RING|BODY-RING-CAPTOR": [
+          "FEATURE-RING-TOP",
+          "FEATURE-CAPTOR-UNDERSIDE"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-HUB|BODY-LEG-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-HUB|BODY-LEG-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-HUB|BODY-LEG-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 1.0
+        },
+        "BODY-HUB|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.4
+        },
+        "BODY-HUB|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-LEG-A|BODY-LEG-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 33.636073366
+        },
+        "BODY-LEG-A|BODY-LEG-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 33.636073366
+        },
+        "BODY-LEG-A|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.3
+        },
+        "BODY-LEG-A|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.227422826
+        },
+        "BODY-LEG-A|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 42.331246787
+        },
+        "BODY-LEG-A|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.306547358
+        },
+        "BODY-LEG-A|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 8.030988351
+        },
+        "BODY-LEG-A|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 18.647708155
+        },
+        "BODY-LEG-B|BODY-LEG-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 33.636073366
+        },
+        "BODY-LEG-B|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 42.331246787
+        },
+        "BODY-LEG-B|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.3
+        },
+        "BODY-LEG-B|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.227422826
+        },
+        "BODY-LEG-B|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.306547358
+        },
+        "BODY-LEG-B|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 8.030988351
+        },
+        "BODY-LEG-B|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 18.647708155
+        },
+        "BODY-LEG-C|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.227422826
+        },
+        "BODY-LEG-C|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 42.331246787
+        },
+        "BODY-LEG-C|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.3
+        },
+        "BODY-LEG-C|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.306547358
+        },
+        "BODY-LEG-C|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 8.030988351
+        },
+        "BODY-LEG-C|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 18.647708155
+        },
+        "BODY-PIN-A|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.440620417
+        },
+        "BODY-PIN-A|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.440620417
+        },
+        "BODY-PIN-A|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 19.544256833
+        },
+        "BODY-PIN-A|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.393026097
+        },
+        "BODY-PIN-A|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 35.078852524
+        },
+        "BODY-PIN-B|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.440620417
+        },
+        "BODY-PIN-B|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 19.544256833
+        },
+        "BODY-PIN-B|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.393026097
+        },
+        "BODY-PIN-B|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 35.078852524
+        },
+        "BODY-PIN-C|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 19.544256833
+        },
+        "BODY-PIN-C|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.393026097
+        },
+        "BODY-PIN-C|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 35.078852524
+        },
+        "BODY-RING-CAPTOR|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.2
+        },
+        "BODY-RING|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-RING|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 12.2
+        }
+      },
+      "state": "STORED"
+    },
+    {
+      "declared_contacts": {
+        "BODY-HUB|BODY-PIN-A": [
+          "FEATURE-PIN-A-HEAD",
+          "FEATURE-CLEVIS-A-OUTER-FACE"
+        ],
+        "BODY-HUB|BODY-PIN-B": [
+          "FEATURE-PIN-B-HEAD",
+          "FEATURE-CLEVIS-B-OUTER-FACE"
+        ],
+        "BODY-HUB|BODY-PIN-C": [
+          "FEATURE-PIN-C-HEAD",
+          "FEATURE-CLEVIS-C-OUTER-FACE"
+        ],
+        "BODY-HUB|BODY-RING": [
+          "FEATURE-PEDESTAL-TOP",
+          "FEATURE-RING-UNDERSIDE"
+        ],
+        "BODY-HUB|BODY-RING-CAPTOR": [
+          "FEATURE-COLUMN-STEP",
+          "FEATURE-CAPTOR-UNDERSIDE"
+        ],
+        "BODY-HUB|BODY-TOP-SUPPORT": [
+          "FEATURE-LOWER-LUG-TOP",
+          "FEATURE-SLEEVE-UNDERSIDE"
+        ],
+        "BODY-RING|BODY-RING-CAPTOR": [
+          "FEATURE-RING-TOP",
+          "FEATURE-CAPTOR-UNDERSIDE"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-HUB|BODY-LEG-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.142658477
+        },
+        "BODY-HUB|BODY-LEG-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.142658477
+        },
+        "BODY-HUB|BODY-LEG-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.142658477
+        },
+        "BODY-HUB|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-LEG-A|BODY-LEG-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 25.900979208
+        },
+        "BODY-LEG-A|BODY-LEG-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 25.900979208
+        },
+        "BODY-LEG-A|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.3
+        },
+        "BODY-LEG-A|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 41.549679045
+        },
+        "BODY-LEG-A|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 37.805938309
+        },
+        "BODY-LEG-A|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.4
+        },
+        "BODY-LEG-A|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 11.80414585
+        },
+        "BODY-LEG-A|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.11118325
+        },
+        "BODY-LEG-B|BODY-LEG-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 25.900979208
+        },
+        "BODY-LEG-B|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 37.805938309
+        },
+        "BODY-LEG-B|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.3
+        },
+        "BODY-LEG-B|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 41.549679045
+        },
+        "BODY-LEG-B|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.4
+        },
+        "BODY-LEG-B|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 11.80414585
+        },
+        "BODY-LEG-B|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.11118325
+        },
+        "BODY-LEG-C|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 41.549679045
+        },
+        "BODY-LEG-C|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 37.805938309
+        },
+        "BODY-LEG-C|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.3
+        },
+        "BODY-LEG-C|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.4
+        },
+        "BODY-LEG-C|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 11.80414585
+        },
+        "BODY-LEG-C|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.11118325
+        },
+        "BODY-PIN-A|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.440620417
+        },
+        "BODY-PIN-A|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.440620417
+        },
+        "BODY-PIN-A|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 15.022769381
+        },
+        "BODY-PIN-A|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.393026097
+        },
+        "BODY-PIN-A|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 35.078852524
+        },
+        "BODY-PIN-B|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.440620417
+        },
+        "BODY-PIN-B|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 15.022769381
+        },
+        "BODY-PIN-B|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.393026097
+        },
+        "BODY-PIN-B|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 35.078852524
+        },
+        "BODY-PIN-C|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 15.022769381
+        },
+        "BODY-PIN-C|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.393026097
+        },
+        "BODY-PIN-C|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 35.078852524
+        },
+        "BODY-RING-CAPTOR|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.2
+        },
+        "BODY-RING|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 2.4
+        },
+        "BODY-RING|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 14.6
+        }
+      },
+      "state": "DEPLOYED_LOCKED"
+    },
+    {
+      "declared_contacts": {
+        "BODY-HUB|BODY-PIN-A": [
+          "FEATURE-PIN-A-HEAD",
+          "FEATURE-CLEVIS-A-OUTER-FACE"
+        ],
+        "BODY-HUB|BODY-PIN-B": [
+          "FEATURE-PIN-B-HEAD",
+          "FEATURE-CLEVIS-B-OUTER-FACE"
+        ],
+        "BODY-HUB|BODY-PIN-C": [
+          "FEATURE-PIN-C-HEAD",
+          "FEATURE-CLEVIS-C-OUTER-FACE"
+        ],
+        "BODY-HUB|BODY-RING": [
+          "FEATURE-PEDESTAL-TOP",
+          "FEATURE-RING-UNDERSIDE"
+        ],
+        "BODY-HUB|BODY-RING-CAPTOR": [
+          "FEATURE-COLUMN-STEP",
+          "FEATURE-CAPTOR-UNDERSIDE"
+        ],
+        "BODY-HUB|BODY-TOP-SUPPORT": [
+          "FEATURE-LOWER-LUG-TOP",
+          "FEATURE-SLEEVE-UNDERSIDE"
+        ],
+        "BODY-RING|BODY-RING-CAPTOR": [
+          "FEATURE-RING-TOP",
+          "FEATURE-CAPTOR-UNDERSIDE"
+        ]
+      },
+      "issues": [],
+      "pairs": {
+        "BODY-HUB|BODY-LEG-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.142658477
+        },
+        "BODY-HUB|BODY-LEG-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.142658477
+        },
+        "BODY-HUB|BODY-LEG-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.142658477
+        },
+        "BODY-HUB|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.4
+        },
+        "BODY-HUB|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-HUB|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-LEG-A|BODY-LEG-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 25.900979208
+        },
+        "BODY-LEG-A|BODY-LEG-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 25.900979208
+        },
+        "BODY-LEG-A|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.3
+        },
+        "BODY-LEG-A|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 41.549679045
+        },
+        "BODY-LEG-A|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 37.805938309
+        },
+        "BODY-LEG-A|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 3.631687998
+        },
+        "BODY-LEG-A|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 11.80414585
+        },
+        "BODY-LEG-A|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.11118325
+        },
+        "BODY-LEG-B|BODY-LEG-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 25.900979208
+        },
+        "BODY-LEG-B|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 37.805938309
+        },
+        "BODY-LEG-B|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.3
+        },
+        "BODY-LEG-B|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 41.549679045
+        },
+        "BODY-LEG-B|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 3.631687998
+        },
+        "BODY-LEG-B|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 11.80414585
+        },
+        "BODY-LEG-B|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.11118325
+        },
+        "BODY-LEG-C|BODY-PIN-A": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 41.549679045
+        },
+        "BODY-LEG-C|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 37.805938309
+        },
+        "BODY-LEG-C|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.3
+        },
+        "BODY-LEG-C|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 3.631687998
+        },
+        "BODY-LEG-C|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 11.80414585
+        },
+        "BODY-LEG-C|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.11118325
+        },
+        "BODY-PIN-A|BODY-PIN-B": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.440620417
+        },
+        "BODY-PIN-A|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.440620417
+        },
+        "BODY-PIN-A|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 19.544256833
+        },
+        "BODY-PIN-A|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.393026097
+        },
+        "BODY-PIN-A|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 35.078852524
+        },
+        "BODY-PIN-B|BODY-PIN-C": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 46.440620417
+        },
+        "BODY-PIN-B|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 19.544256833
+        },
+        "BODY-PIN-B|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.393026097
+        },
+        "BODY-PIN-B|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 35.078852524
+        },
+        "BODY-PIN-C|BODY-RING": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 19.544256833
+        },
+        "BODY-PIN-C|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 24.393026097
+        },
+        "BODY-PIN-C|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 35.078852524
+        },
+        "BODY-RING-CAPTOR|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 4.2
+        },
+        "BODY-RING|BODY-RING-CAPTOR": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 0.0
+        },
+        "BODY-RING|BODY-TOP-SUPPORT": {
+          "common_volume_mm3": 0.0,
+          "min_distance_mm": 12.2
+        }
+      },
+      "state": "DEPLOYED_RELEASED"
+    }
+  ],
+  "status": "PASS",
+  "step": 6
+}

@@ -1,0 +1,153 @@
+schema_version: 0.1.0
+reference_id: EXE-BM003-01
+benchmark_id: BM-003
+
+# =====================================================================
+# WHAT THIS IS, STATED SO IT CANNOT BE QUIETLY PROMOTED
+# =====================================================================
+reference_class: ORACLE_AWARE_EXECUTABLE_EVALUATOR_FIXTURE
+
+production_visible: false
+production_training_input: false
+production_few_shot_input: false
+source_only_benchmark_result: false
+golden_design: false
+mandatory_mechanism: false
+validated_state_maintenance_class: KINEMATIC_BLOCK
+cross_principle_permissiveness_validated: false
+
+completion_claim: DEFERRED
+completion_claim_intended: ONE_POSITIVE_EXECUTABLE_REFERENCE_VALIDATED
+completion_claim_status: >
+  NOT MADE. The intended claim requires one complete full-sampling validation run
+  whose artifacts all belong to that run. The full run reached the end of step 7
+  with every measurement passing and was then interrupted by an execution
+  environment wall-time limit. No engineering failure was observed. See
+  VALIDATION_STATUS.yaml, which is the authoritative status record.
+full_sampling_reference_validation: NOT_COMPLETED
+final_positive_reference_certification: DEFERRED
+manifest_generated: false
+
+what_the_intended_claim_would_mean: >
+  One mechanism, built as exact OCCT B-rep solids from parameters plus Python
+  build code, satisfies the frozen BM-003 held-out Oracle's operative invariants
+  under the evidence this toolset can actually produce, and seventeen negative
+  controls confirm that the checks which say so are able to fail.
+
+what_that_claim_does_not_mean:
+  - "It is not a production ASSY result. No stage of assy_v3 produced it and no stage consumes it."
+  - "It is not a golden design. Nothing about this mechanism is preferred."
+  - "It is not a mandatory mechanism. FRE-BM-003-001, -002, -006, -007, -008 and -009 all remain open."
+  - "It is not a training example, a few-shot example, or any other production prompt input."
+  - >
+    It is NOT evidence that every realization family the Oracle admits is
+    executable. It is evidence about exactly one family - a rigid multi-body
+    design whose deployed state is held by geometric interference. The Oracle
+    admits four state-maintenance classes and five realization families; this
+    reference exercises one of each.
+  - >
+    It is not evidence that the Oracle is correctly permissive. Establishing that
+    would need at least one executable reference per admitted principle, built
+    independently. None of that was done here, which is why
+    cross_principle_permissiveness_validated is false.
+
+# =====================================================================
+# WHY THE CLASS WAS CHOSEN
+# =====================================================================
+state_maintenance_class_choice:
+  declared: SMC-KINEMATIC_BLOCK
+  reason: >
+    It is the only one of the Oracle's four classes whose predicate exact rigid
+    geometry can decide, because its claim is that a path is ABSENT. The Oracle
+    itself marks the other three establishable_now: false - they need stability,
+    potential-energy or contact-resolving routes this benchmark's toolset does
+    not have.
+  what_this_choice_is_not: >
+    Not a judgement that the other three classes are inferior, harder or less
+    admissible. A design in any of them would be equally admissible under
+    NRM-BM-003-009 and its persistence claim would honestly read NOT_VERIFIED.
+    Choosing the class this pipeline can establish is a property of the
+    EVIDENCE ROUTE, not of the design space.
+
+# =====================================================================
+# ORACLE RELATIONSHIP
+# =====================================================================
+oracle:
+  path: ver3/oracles/held_out/BM-003
+  frozen_before_this_reference: true
+  modified_by_this_work: false
+  reopening_conditions_checked:
+    - id: 1
+      condition: "a mechanically coherent exact B-rep reference is rejected by an operative Oracle predicate"
+      met: false
+    - id: 2
+      condition: "an exact negative control passes its intended Oracle predicate"
+      met: false
+    - id: 3
+      condition: "required exact assembly or mobility evidence cannot be represented by the Oracle schema"
+      met: false
+  consequence: >
+    None of the three conditions was met, so no Oracle change is proposed. Where
+    this reference and the Oracle appeared to disagree, the reference or the
+    evaluator was fixed - see DESIGN_AND_OPERATION_RATIONALE.md sections R1 to R8
+    and the connectivity limit-stop correction recorded in validate.py.
+
+oracle_awareness_declared: >
+  This reference was authored WITH the frozen Oracle in view. That is what makes
+  it an evaluator fixture rather than a benchmark run: it can show that the
+  checks are capable of passing and failing, and it cannot show anything about
+  what an uninformed run would produce. Any use of it as a benchmark result would
+  be circular.
+
+# =====================================================================
+# SEPARATION FROM PRODUCTION
+# =====================================================================
+separation:
+  files_touched_outside_this_directory: none
+  benchmark_source_modified: false
+  oracle_modified: false
+  assy_v3_modified: false
+  providers_modified: false
+  stage_contracts_S01_S12_modified: false
+  shared_tools_modified: false
+  note: >
+    validate.py imports ver3/cad_validation/tools/{cadval,valcore} read-only. No
+    shared tool was changed for this reference; everything BM-003 specific lives
+    in this directory.
+
+# =====================================================================
+# DYNAMICS
+# =====================================================================
+dynamics: DYNAMICS_NOT_REQUIRED_FOR_THIS_REFERENCE
+dynamics_reasoning: >
+  Every question this reference answers is a question about whether a rigid-body
+  configuration exists: is there a continuous path, is there a boolean overlap,
+  is an escape direction blocked, is one envelope smaller than another. None
+  needs gravity, inertia, a dynamic release, a stability result or a force. The
+  one class of question that would need a dynamic route - how much disturbance
+  the locked state survives - is blocked by AMB-BM-003-005, which carries no
+  magnitude, so the simulation would be measuring an invented number. No
+  rigid-body simulation was added.
+dynamics_would_be_required_if:
+  - "the declared class were SMC-STABLE_EQUILIBRIUM_OR_ENERGY_BARRIER"
+  - "the declared class were SMC-CONTACT_OR_COMPLIANT_RETENTION"
+  - "any claim were made about holding torque, disturbance tolerance or release force"
+  - "any part were compliant, in which case NRM-BM-003-017's deformation exception would apply"
+
+# =====================================================================
+# EVIDENCE BOUNDARIES
+# =====================================================================
+evidence_is:
+  - "exact OCCT B-rep solids, built from parameters.yaml plus build.py"
+  - "boolean common volume and BRepExtrema_DistShapeShape, computed by the kernel"
+  - "dense DECLARED sampling of every declared path, not adaptive discovery"
+evidence_is_not:
+  - "a proof of non-interference over the continuum; it is sampling, and is reported as such"
+  - "a statement about force, stiffness, material, wear, lifetime or manufacture"
+  - "a statement about anything an image shows; no geometric claim here rests on a render"
+
+authoritative_source:
+  is: "parameters.yaml + build.py + the native OCCT B-rep they produce"
+  is_not: "the STEP files, which are exchange artifacts and are round-trip checked, not trusted"
+
+human_review: HUMAN_REVIEW_PENDING

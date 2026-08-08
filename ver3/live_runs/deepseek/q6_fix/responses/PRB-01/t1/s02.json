@@ -1,0 +1,277 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The dispenser must be mounted to a wall such that it remains in place during operation and refilling.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A product that is not secured to the wall will fall or move when used."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The dispenser must contain a volume that holds approximately twenty items.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["Physical volume is required to store items."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The dispenser must release exactly one item per lever press when items are present.",
+      "derived_from_requirements": ["REQ-0003", "REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A mechanism that can release more than one item per actuation cannot satisfy the requirement."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The dispenser must be refillable from the top while mounted without disassembly.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["An opening must be accessible from the top while the dispenser is attached to the wall."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The dispenser must not jam or fail to release when nearly empty.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["A mechanism that relies on gravity or orientation may not function when the number of items is low."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The lever must be reachable and operable by the user when the dispenser is mounted at typical height.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A lever that cannot be reached cannot be operated."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The top opening must be accessible for refilling while the dispenser is mounted.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Refilling requires an opening that is positioned and oriented for access."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The mechanism must be configured such that one actuation of the lever results in exactly one item being dispensed.",
+      "derived_from_requirements": ["REQ-0003", "REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A mechanism with multiple release points per stroke would violate the requirement."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The dispenser must support the weight of its contents when mounted.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A container holding items experiences gravitational load."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The lever actuation must not require excessive force from the user.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["If the lever requires too much force, the user cannot operate it as intended."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the dispenser body",
+      "reacted_at_role": "the wall surface",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the lever",
+      "reacted_at_role": "the dispenser body",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the dispenser body",
+      "reacted_at_role": "the wall surface",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the top opening",
+      "reacted_at_role": "the dispenser body",
+      "direction_class": "AXIAL",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Gravity-fed dispenser with a rotating indexing wheel.",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "INDEXING_ROTOR",
+      "obligations_addressed": ["OBL-0003", "OBL-0004", "OBL-0005", "OBL-0008", "OBL-0002"],
+      "obligations_created": ["OBL-0001", "OBL-0006", "OBL-0009", "OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "SWEPT_INTERFERENCE",
+        "available": true,
+        "note": "Path clearance and release can be verified geometrically."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Gravity-fed dispenser with a reciprocating gate.",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "GATED_PAIR",
+      "obligations_addressed": ["OBL-0003", "OBL-0004", "OBL-0005", "OBL-0008", "OBL-0002"],
+      "obligations_created": ["OBL-0001", "OBL-0006", "OBL-0009", "OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "SWEPT_INTERFERENCE",
+        "available": true,
+        "note": "Gate motion and clearances can be verified."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Spring-loaded dispenser with a ratchet mechanism.",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "ESCAPEMENT",
+      "obligations_addressed": ["OBL-0003", "OBL-0004", "OBL-0005", "OBL-0008", "OBL-0002"],
+      "obligations_created": ["OBL-0001", "OBL-0006", "OBL-0009", "OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction and jamming cannot be analyzed."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0004",
+      "summary": "Gravity-fed dispenser with a hinged flap.",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "SINGLE_ITEM_POCKET",
+      "obligations_addressed": ["OBL-0003", "OBL-0004", "OBL-0005", "OBL-0008", "OBL-0002"],
+      "obligations_created": ["OBL-0001", "OBL-0006", "OBL-0009", "OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "SWEPT_INTERFERENCE",
+        "available": true,
+        "note": "Flap travel and pocket geometry can be verified."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "predicates": ["must be wall-mountable", "must hold about 20 items", "must release exactly one per press", "must be refillable from top", "must not jam when nearly empty", "lever must be reachable", "top opening accessible", "must not release more than one", "must support contents", "must not require excessive force"]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "predicates": ["must be wall-mountable", "must hold about 20 items", "must release exactly one per press", "must be refillable from top", "must not jam when nearly empty", "lever must be reachable", "top opening accessible", "must not release more than one", "must support contents", "must not require excessive force"]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "predicates": ["must be wall-mountable", "must hold about 20 items", "must release exactly one per press", "must be refillable from top", "must not jam when nearly empty", "lever must be reachable", "top opening accessible", "must not release more than one", "must support contents", "must not require excessive force"]
+    },
+    {
+      "id": "ACC-0004",
+      "candidate": "CND-0004",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "predicates": ["must be wall-mountable", "must hold about 20 items", "must release exactly one per press", "must be refillable from top", "must not jam when nearly empty", "lever must be reachable", "top opening accessible", "must not release more than one", "must support contents", "must not require excessive force"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "How to achieve exact one-release without risk of double release or jamming under low fill.",
+      "why_open": "Requires detailed mechanism design and analysis of motion and clearances.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003", "CND-0004"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0002", "AMB-0003", "FRE-0001"],
+      "blocks": ["OBL-0003", "OBL-0008", "OBL-0005"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The capacity requirement is interpreted as number of items, not volume or weight.",
+      "why": "Capacity is stated in 'items' and the assumption clarifies the unit.",
+      "would_be_invalidated_by": "If customer specifies volume or weight."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The wall mounting is at a typical height, allowing the user to reach the lever and top opening.",
+      "why": "The scenarios assume user access to the lever and top opening.",
+      "would_be_invalidated_by": "If mounting height is restricted or user reach is limited."
+    },
+    {
+      "id": "ASM-1003",
+      "statement": "The items are of a single uniform type and size.",
+      "why": "Capacity in items and one-at-a-time release are easier to interpret.",
+      "would_be_invalidated_by": "If multiple item sizes are to be dispensed."
+    }
+  ]
+}

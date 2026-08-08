@@ -1,0 +1,230 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The dispenser must be wall-mounted and contain small items.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The dispenser must hold approximately twenty small items.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+      "route_available": false
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The dispenser must release exactly one item per lever press.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The dispenser must never release two items at once.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The dispenser must allow refilling from the top without removal from the wall.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The dispenser must not jam when nearly empty.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "device",
+      "reacted_at_role": "wall",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "device",
+      "reacted_at_role": "wall",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Gravity-fed dispenser with rotary indexer, manual lever actuation",
+      "family": ["PERMIT_RELATIVE_MOTION", "TRANSMIT_LOAD", "ACTUATE"],
+      "principle": ["REVOLUTE_PAIR", "DIRECT_BEARING", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Primary function is kinematic; geometry can be validated."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Slide-gate dispenser with reciprocating motion, manual lever",
+      "family": ["PERMIT_RELATIVE_MOTION", "TRANSMIT_LOAD", "ACTUATE"],
+      "principle": ["PRISMATIC_PAIR", "DIRECT_BEARING", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Primary function is kinematic; geometry can be validated."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Rotating star wheel dispenser with cam and follower, manual lever",
+      "family": ["CONVERT_MOTION", "TRANSMIT_LOAD", "ACTUATE"],
+      "principle": ["CAM_AND_FOLLOWER", "DIRECT_BEARING", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Primary function is kinematic; geometry can be validated."
+      }
+    },
+    {
+      "id": "CND-0004",
+      "summary": "Friction-fed dispenser with flexible element drive (belt), manual lever",
+      "family": ["CONVERT_MOTION", "TRANSMIT_LOAD", "ACTUATE"],
+      "principle": ["FLEXIBLE_ELEMENT_DRIVE", "FRICTION_HOLD", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Primary function is friction-based; both kinematic and contact resolution needed."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": [
+        "The dispenser can be mounted to a wall and holds a volume of small items.",
+        "The dispenser contains at least twenty items when loaded.",
+        "Each lever press results in exactly one item exiting.",
+        "No lever press results in two items exiting simultaneously.",
+        "The top opening allows adding items without removing the dispenser from the wall.",
+        "When the item level is low, a lever press still yields a single item without jamming."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": [
+        "The dispenser can be mounted to a wall and holds a volume of small items.",
+        "The dispenser contains at least twenty items when loaded.",
+        "Each lever press results in exactly one item exiting.",
+        "No lever press results in two items exiting simultaneously.",
+        "The top opening allows adding items without removing the dispenser from the wall.",
+        "When the item level is low, a lever press still yields a single item without jamming."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": [
+        "The dispenser can be mounted to a wall and holds a volume of small items.",
+        "The dispenser contains at least twenty items when loaded.",
+        "Each lever press results in exactly one item exiting.",
+        "No lever press results in two items exiting simultaneously.",
+        "The top opening allows adding items without removing the dispenser from the wall.",
+        "When the item level is low, a lever press still yields a single item without jamming."
+      ]
+    },
+    {
+      "id": "ACC-0004",
+      "candidate": "CND-0004",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": [
+        "The dispenser can be mounted to a wall and holds a volume of small items.",
+        "The dispenser contains at least twenty items when loaded.",
+        "Each lever press results in exactly one item exiting.",
+        "No lever press results in two items exiting simultaneously.",
+        "The top opening allows adding items without removing the dispenser from the wall.",
+        "When the item level is low, a lever press still yields a single item without jamming."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Select a mechanism for dispensing exactly one item",
+      "why_open": "Multiple principles families could achieve single-item dispensing.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003", "CND-0004"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["FRE-0001", "AMB-0002"],
+      "blocks": ["REQ-0003", "REQ-0004"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "Determine the meaning of 'nearly empty' to assess jamming prevention",
+      "why_open": "The threshold for 'nearly empty' is ambiguous and needed for validation.",
+      "alternatives": ["FRE-0005"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["REQ-0006"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The user will press the lever to dispense items one at a time.",
+      "why": "The request describes pressing a lever to release items.",
+      "would_be_invalidated_by": "A change to the operation method."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The dispenser will be used for small items that can be stored and released individually.",
+      "why": "The request says 'small items' and 'release exactly one'.",
+      "would_be_invalidated_by": "A specification of items that cannot be individually dispensed."
+    }
+  ]
+}

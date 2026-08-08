@@ -1,0 +1,133 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Pressing it should send a signal to the machine",
+      "locator": "SRC-0001",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "when I take my foot off it must return to its resting position on its own every time",
+      "locator": "SRC-0002",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "It should not move if something brushes against it sideways.",
+      "locator": "SRC-0003",
+      "quantity_kinds": [],
+      "directionality": "sideways"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Pressing it should send a signal to the machine",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "send a signal to the machine",
+      "source_locator": "SRC-0001",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "when I take my foot off it must return to its resting position on its own every time",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "return to its resting position on its own every time",
+      "source_locator": "SRC-0002",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "It should not move if something brushes against it sideways.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "not move if something brushes against it sideways",
+      "source_locator": "SRC-0003",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Pressing the pedal",
+      "kind": "OPERATION",
+      "system_boundary": "foot pedal and machine",
+      "actors": ["ACT-0001"],
+      "environment": "workbench"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Releasing the pedal",
+      "kind": "OPERATION",
+      "system_boundary": "foot pedal",
+      "actors": ["ACT-0001"],
+      "environment": "workbench"
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Sideways brushing",
+      "kind": "OPERATION",
+      "system_boundary": "foot pedal",
+      "actors": ["ACT-0002"],
+      "environment": "workbench"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": ["press the pedal", "take foot off pedal"]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "something",
+      "must_reach": ["brush against pedal sideways"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "mechanism for sending signal",
+      "why_free": "not specified in request"
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "mechanism for returning to resting position",
+      "why_free": "not specified in request"
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "design details to prevent sideways movement",
+      "why_free": "not specified in request"
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "What does 'signal' mean? Electrical, mechanical, etc.",
+      "conflicting_clauses": [],
+      "resolvable_when": "when more context is provided",
+      "block_scopes": ["requirement REQ-0001"]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "What does 'something' refer to? Any object, or only objects of certain size/weight?",
+      "conflicting_clauses": [],
+      "resolvable_when": "when more context is provided",
+      "block_scopes": ["requirement REQ-0003"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The foot pedal is intended for a workbench machine that accepts an input signal.",
+      "why": "It is implied by the request.",
+      "would_be_invalidated_by": "if the machine does not accept signals"
+    }
+  ]
+}

@@ -1,0 +1,514 @@
+reference_id: EXE-BM003-01
+units: mm
+schema_version: 0.1.0
+
+frame:
+  description: >
+    Right-handed world frame. The hub axis is Z and z increases upward. The origin
+    is on the hub axis in the plane of the three hinge axes, so the hinge axes lie
+    at z = 0 and at radius hinge_r. Azimuth is measured from +X toward +Y. The hub
+    is the fixed reference body; every pose in poses.yaml is a rigid transform
+    expressed in this frame.
+  station_frames: >
+    Each leg station has a local frame obtained by rotating the world frame about
+    Z by the station azimuth. In a station frame +x is radially outward, +y is
+    tangential, and +z is world up. Every leg, heel and hinge dimension below is
+    given in a station frame and is identical for all three stations.
+
+note_on_absolute_size: >
+  BM-003's frozen source contains no digit (FRE-BM-003-011, AMB-BM-003-001,
+  AMB-BM-003-003). Every value in this file is therefore a FIXTURE DESIGN CHOICE
+  and none of them may be read back into the Oracle as a requirement, a preferred
+  size or a threshold. Nothing here is traceable to the source. The source
+  constrains RELATIONS only - spread apart, stays attached, blocked until
+  released, more compact folded - and those relations are what validate.py
+  measures. The numbers exist because an exact B-rep needs numbers, not because
+  the benchmark supplies any.
+
+provenance_vocabulary:
+  FIXTURE_DESIGN_CHOICE: >
+    Chosen by the author of this fixture. Free under a declared Oracle freedom.
+    Carries no normative weight.
+  FIXTURE_EVALUATION_TOLERANCE: >
+    A tolerance the CHECKER uses to decide a measurement, never a manufacturing
+    allowance and never a requirement on the design.
+  DERIVED: >
+    Computed in build.geom() from the values below. Not listed here; see
+    geometry_signature.json for the derived table actually used in the run.
+
+parameters:
+
+  # ------------------------------------------------- evaluation tolerances
+  - name: contact_tol
+    value: 0.05
+    purpose: distance at or below which two faces are treated as touching
+    range: [0.001, 0.5]
+    provenance: FIXTURE_EVALUATION_TOLERANCE
+  - name: overlap_tol_mm3
+    value: 1.0e-6
+    purpose: boolean common volume at or below which an intersection is numerical noise
+    range: [1.0e-9, 1.0e-3]
+    provenance: FIXTURE_EVALUATION_TOLERANCE
+  - name: connection_tol
+    value: 1.5
+    purpose: >
+      separation at or below which a DECLARED joint or retention pair counts as
+      still engaged, used only by the connectivity check. It is not a requirement
+      on any clearance: the check also reports each declared pair's largest
+      measured separation over the whole cycle, so the numbers stand on their own.
+    range: [0.1, 5.0]
+    provenance: FIXTURE_EVALUATION_TOLERANCE
+
+  # -------------------------------------------------------- station layout
+  - name: station_azimuth_a
+    value: 90.0
+    purpose: azimuth of leg station A, degrees
+    range: [0.0, 360.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: station_azimuth_b
+    value: 210.0
+    purpose: azimuth of leg station B, degrees
+    range: [0.0, 360.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: station_azimuth_c
+    value: 330.0
+    purpose: azimuth of leg station C, degrees
+    range: [0.0, 360.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: rib_azimuth_offset
+    value: -60.0
+    purpose: >
+      azimuth of each anti-rotation rib relative to its neighbouring leg station,
+      degrees; places the ribs midway between legs
+    range: [-90.0, 90.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: bayonet_azimuth
+    value: 0.0
+    purpose: azimuth of the first of the two diametrically opposed bayonet lugs, degrees
+    range: [0.0, 360.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+
+  # ------------------------------------------------------------------- hub
+  - name: hub_base_r
+    value: 28.0
+    purpose: outer radius of the hub base flange that carries the three clevis pairs
+    range: [18.0, 40.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: hub_base_z0
+    value: -14.0
+    purpose: underside of the hub base flange
+    range: [-30.0, -4.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: hub_base_z1
+    value: -2.0
+    purpose: top of the hub base flange; clears the heel sweep by design
+    range: [-8.0, 0.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: pedestal_r
+    value: 15.0
+    purpose: radius of the hub pedestal; its top face is the locking ring's lower seat
+    range: [10.0, 20.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: journal_r
+    value: 13.0
+    purpose: radius of the column section the locking ring slides and turns on
+    range: [8.0, 18.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: column_r
+    value: 11.0
+    purpose: radius of the upper column above the ring travel
+    range: [6.0, 16.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: rib_r
+    value: 16.0
+    purpose: outer radius of the three anti-rotation ribs on the journal
+    range: [13.5, 20.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: rib_half_deg
+    value: 8.0
+    purpose: half angular width of each anti-rotation rib, degrees
+    range: [3.0, 20.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: rib_h
+    value: 2.0
+    purpose: >
+      height of the anti-rotation ribs; the ring must be lifted past this before it
+      can be turned, which is what makes the release a lift-AND-turn action.
+      Revision R4: at 4.0 the ring rose 4.4 mm, and the heel - which moves outward
+      as it rises - cleared the arm's outer edge at r = 23.79 while the arm, cut
+      back to 23.0 in R1, no longer reached it. Lifting alone then freed the legs
+      completely and the turn became decorative. A shorter rib means a shorter
+      lift, and the heel is still under the arm when it gets there.
+    range: [1.0, 12.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: lug_r
+    value: 13.2
+    purpose: outer radius of the two bayonet lugs used at both column bayonets
+    range: [11.5, 16.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: lug_half_deg
+    value: 30.0
+    purpose: half angular width of each bayonet lug, degrees
+    range: [10.0, 44.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: lug_h
+    value: 4.0
+    purpose: axial height of each bayonet lug
+    range: [1.5, 10.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: clevis_x0
+    value: 24.0
+    purpose: >
+      inner radial end of each clevis plate, station frame. Revision R1: 28.0 left
+      the plates short of the base flange chord at their own y, so the hub built as
+      seven disconnected solids. 24.0 makes each plate overlap the flange.
+    range: [20.0, 34.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: clevis_x1
+    value: 49.0
+    purpose: outer radial end of each clevis plate, station frame
+    range: [42.0, 60.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: clevis_y0
+    value: 6.0
+    purpose: inner face of each clevis plate; the gap between the pair takes the leg blade
+    range: [5.2, 9.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: clevis_y1
+    value: 12.0
+    purpose: outer face of each clevis plate
+    range: [8.0, 18.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: clevis_z0
+    value: -14.0
+    purpose: bottom of each clevis plate
+    range: [-24.0, -6.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: clevis_z1
+    value: 19.0
+    purpose: top of each clevis plate
+    range: [12.0, 30.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: stop_pad_x0
+    value: 24.0
+    purpose: >
+      inner radial end of the outward stop pad, station frame. Revision R2: the
+      first exact model had no outward stop at all - nothing prevented a leg
+      swinging PAST its deployed angle, which the source's "move in some other
+      direction I was not expecting" does not allow. The pad is a tab on the base
+      flange that the heel's underside comes down on.
+    range: [18.0, 30.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: stop_pad_x1
+    value: 29.0
+    purpose: >
+      outer radial end of the outward stop pad. Revision R2a: 33.0 was chosen
+      against the leg SHAFT's inner edge at r = 34.8 and ignored the leg's hinge
+      EYE, whose inner extent is hinge_r - eye_r = 30.0. The pad therefore sat
+      inside the eye, and because the eye is a cylinder about the hinge axis the
+      resulting 86.82 mm3 overlap was identical at every leg angle - which is what
+      identified it. The eye, not the shaft, is the binding constraint.
+    range: [26.0, 29.5]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: stop_pad_half_y
+    value: 5.6
+    purpose: half thickness of the outward stop pad; fits the clevis gap
+    range: [3.0, 5.9]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: outward_travel_max_deg
+    value: 3.0
+    purpose: >
+      the largest swing past the deployed angle this design declares acceptable
+      before the leg must be stopped. A FIXTURE DESIGN DECLARATION of intended
+      versus forbidden mobility, which is what NRM-BM-003-010 asks the design to
+      supply. It is NOT an Oracle threshold: the Oracle introduces no number
+      anywhere and this one must not be read back into it. Without it the outward
+      stop check does not discriminate, because with the stop pads removed the
+      heel still reaches the base flange about 8.5 degrees past deployed - which
+      is what negative control NC-17 exposed.
+    range: [0.2, 15.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: outward_stop_clearance
+    value: 0.15
+    purpose: >
+      gap between the heel's underside and the outward stop pad in the deployed
+      configuration. It sets how far a leg can splay beyond deployed before it is
+      stopped; that residual angle is measured, not assumed.
+    range: [0.05, 1.5]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: hinge_r
+    value: 40.0
+    purpose: radius at which the three hinge axes lie
+    range: [28.0, 60.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: hinge_z
+    value: 0.0
+    purpose: height of the three hinge axes; defines the world origin plane
+    range: [-10.0, 10.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: pin_bore_r
+    value: 3.8
+    purpose: radius of the hinge bore in the clevis plates and in the leg eye
+    range: [3.0, 6.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: pin_slot_half_x
+    value: 5.3
+    purpose: >
+      half width, radially, of the bayonet relief that lets the pin's end bar pass
+      through the clevis plates and the leg eye during insertion
+    range: [4.0, 8.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: pin_slot_half_z
+    value: 2.3
+    purpose: half height of that bayonet relief
+    range: [1.5, 4.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+
+  # ------------------------------------------------------------------ legs
+  - name: blade_half_y
+    value: 5.0
+    purpose: half thickness of the leg blade, station frame
+    range: [3.0, 5.6]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: shaft_half_x
+    value: 6.0
+    purpose: half width of the leg shaft in the meridional plane
+    range: [4.0, 9.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: leg_len
+    value: 126.0
+    purpose: distance from the hinge axis to the far end of the leg shaft
+    range: [60.0, 200.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: eye_r
+    value: 10.0
+    purpose: radius of the hinge eye on the leg
+    range: [6.0, 14.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: heel_len
+    value: 22.0
+    purpose: length of the blocking heel measured from the hinge axis
+    range: [10.0, 34.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: heel_half_x
+    value: 4.0
+    purpose: half width of the blocking heel in the meridional plane
+    range: [2.0, 7.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: heel_beta
+    value: 42.0
+    purpose: >
+      angle of the blocking heel from the leg's own +z direction, leaning inward,
+      measured with the leg in its stored pose; the heel is rigidly part of the leg
+    range: [20.0, 60.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: pad_half_x
+    value: 13.0
+    purpose: half length of the ground pad along the leg
+    range: [6.0, 20.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: pad_z0
+    value: -8.0
+    purpose: lower face of the ground pad in its own pre-rotated frame
+    range: [-16.0, -3.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: pad_z1
+    value: 2.0
+    purpose: upper face of the ground pad in its own pre-rotated frame; overlaps the shaft
+    range: [0.5, 6.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: pad_centre_z
+    value: -124.0
+    purpose: height of the ground pad's origin along the leg, stored pose
+    range: [-190.0, -50.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: theta_stored
+    value: 0.0
+    purpose: leg swing angle in the stored configuration, degrees
+    range: [0.0, 10.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: theta_deployed
+    value: 30.0
+    purpose: leg swing angle in the deployed configuration, degrees
+    range: [10.0, 55.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+
+  # ------------------------------------------------------------ hinge pins
+  - name: pin_r
+    value: 3.5
+    purpose: radius of the hinge pin shaft
+    range: [2.5, 5.5]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: pin_head_r
+    value: 7.0
+    purpose: radius of the hinge pin head; blocks travel toward the hub centreline
+    range: [4.5, 10.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: pin_head_t
+    value: 3.0
+    purpose: thickness of the hinge pin head
+    range: [1.5, 6.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ear_half_x
+    value: 5.0
+    purpose: half length of the pin's bayonet end bar
+    range: [4.2, 7.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ear_half_z
+    value: 2.0
+    purpose: half width of the pin's bayonet end bar
+    range: [1.2, 3.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ear_t
+    value: 1.0
+    purpose: thickness of the pin's bayonet end bar along the pin axis
+    range: [0.6, 3.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ear_gap
+    value: 0.5
+    purpose: >
+      axial gap between the pin's bayonet end bar and the outer face of the clevis
+      plate it bears on; this gap is the pin's total axial play
+    range: [0.1, 1.5]
+    provenance: FIXTURE_DESIGN_CHOICE
+
+  # ---------------------------------------------------------- locking ring
+  - name: ring_bore_r
+    value: 13.4
+    purpose: bore of the locking ring; runs on the journal
+    range: [11.6, 18.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ring_collar_r
+    value: 18.0
+    purpose: outer radius of the locking ring's collar
+    range: [15.0, 24.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ring_arm_r
+    value: 23.0
+    purpose: >
+      outer radius of the three blocking arms. Revision R1: reaching the clevis
+      plates inward to fix the hub's connectivity brought their inner corners to
+      r = 24.74, so the arms were shortened to clear them. 23.0 still covers the
+      heel's blocking corner, which sits at r = 20.5 or less throughout.
+    range: [21.0, 27.5]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ring_arm_half_deg
+    value: 18.0
+    purpose: half angular width of each blocking arm, degrees
+    range: [8.0, 40.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ring_h
+    value: 9.0
+    purpose: axial height of the locking ring
+    range: [4.0, 16.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ring_key_r
+    value: 16.4
+    purpose: outer radius of the three keyways in the ring bore that take the ribs
+    range: [13.6, 20.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ring_key_half_deg
+    value: 10.0
+    purpose: >
+      half angular width of each ring keyway, degrees; the excess over rib_half_deg
+      is the ring's residual rotational play in the locked configuration
+    range: [8.5, 24.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ring_release_rot
+    value: 60.0
+    purpose: >
+      turn applied to the lifted ring to move its arms off the heels and onto the
+      rib tops, degrees
+    range: [20.0, 90.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: blocker_clearance
+    value: 0.4
+    purpose: >
+      running gap between the top of a heel and the underside of its blocking arm
+      in the deployed and locked configuration
+    range: [0.1, 2.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: ring_rib_clearance
+    value: 0.4
+    purpose: gap between the lifted ring's underside and the rib tops while it is turned
+    range: [0.1, 2.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+
+  # ------------------------------------------------------------ ring captor
+  - name: captor_bore_r
+    value: 11.2
+    purpose: bore of the ring captor; runs on the upper column
+    range: [11.05, 13.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: captor_r
+    value: 20.0
+    purpose: outer radius of the ring captor; must overhang the ring bore
+    range: [15.0, 28.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: captor_h
+    value: 8.0
+    purpose: axial height of the ring captor
+    range: [4.0, 14.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: captor_key_r
+    value: 13.6
+    purpose: outer radius of the two bayonet keyways in the captor and the sleeve
+    range: [13.3, 17.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: captor_key_half_deg
+    value: 35.0
+    purpose: half angular width of those bayonet keyways, degrees
+    range: [31.0, 44.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: captor_play
+    value: 0.2
+    purpose: axial play left for the ring captor between its seat and its bayonet lugs
+    range: [0.05, 1.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+
+  # ----------------------------------------------------------- top support
+  - name: sleeve_bore_r
+    value: 11.2
+    purpose: bore of the top support sleeve
+    range: [11.05, 13.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: sleeve_r
+    value: 18.0
+    purpose: outer radius of the top support sleeve
+    range: [13.8, 26.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: plate_r
+    value: 34.0
+    purpose: radius of the top support platform - the region offered to hold an object
+    range: [18.0, 60.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: plate_z0
+    value: 110.0
+    purpose: underside of the top support platform
+    range: [60.0, 200.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: plate_z1
+    value: 122.0
+    purpose: upper face of the top support platform - the support surface
+    range: [62.0, 210.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: plate_groove_r
+    value: 13.6
+    purpose: outer radius of the circumferential bayonet groove in the platform bore
+    range: [13.3, 17.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: top_lug_z0
+    value: 114.0
+    purpose: underside of the two bayonet lugs at the top of the column
+    range: [64.0, 204.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: top_lug_z1
+    value: 118.0
+    purpose: top of those lugs, and the top of the column
+    range: [66.0, 206.0]
+    provenance: FIXTURE_DESIGN_CHOICE
+  - name: top_lift_play
+    value: 0.3
+    purpose: axial play left for the top support between its seat and its bayonet lugs
+    range: [0.05, 1.0]
+    provenance: FIXTURE_DESIGN_CHOICE

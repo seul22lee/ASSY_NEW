@@ -1,0 +1,211 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The clamp must attach the monitor arm to the desk edge.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "derivation_premises": ["If the clamp does not fix the monitor arm to the desk edge, the monitor arm is not supported."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The clamp must accommodate desk edge thicknesses from 18 to 40 mm.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "TOLERANCE_ANALYSIS",
+      "route_available": false,
+      "derivation_premises": ["If the clamp cannot adapt to the full range of edge thicknesses, it will not fit on some desks."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The clamp must not slip or rotate on the desk edge when the weight of the monitor arm is applied after tightening.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["If the clamp slips or rotates under load, it fails to hold the monitor arm in place."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The clamp must be operable without tools for removal and relocation.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["If the user cannot attach/detach the clamp without tools, the tool-free requirement is not satisfied."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The clamp must be able to grip the desk edge with a force sufficient to prevent slipping and rotation under the weight of the arm.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "derivation_premises": ["If the gripping force is insufficient, the clamp will slip or rotate under load."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The clamp must provide a manual interface for the user to tighten and loosen it without tools.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["If there is no manual interface, the user cannot operate the clamp without tools."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The clamp must be able to be fixed to the desk edge without requiring access to the underside or hidden areas.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "derivation_premises": ["If the clamp requires access that the desk edge does not provide, installation is impossible."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the surface of the desk edge",
+      "reacted_at_role": "the clamp's gripping surfaces",
+      "direction_class": "TRANSVERSE",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the monitor arm",
+      "reacted_at_role": "the desk edge",
+      "direction_class": "GRAVITY",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the monitor arm",
+      "reacted_at_role": "the desk edge",
+      "direction_class": "MOMENT",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0003",
+      "applied_to_role": "the clamp",
+      "reacted_at_role": "the user's hand",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A clamp with a lever-operated cam mechanism that directly grips the desk edge.",
+      "family": "ACTUATE",
+      "principle": "DIRECT_MANUAL",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "The cam lever must generate sufficient clamping force; dynamics can estimate forces."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A clamp that uses a screw mechanism with a knurled knob to tighten against the desk edge.",
+      "family": "ACTUATE",
+      "principle": "DIRECT_MANUAL",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "The screw can be modeled as a helical joint to estimate required torque and resulting clamp force."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A clamp that uses a sliding wedge mechanism activated by a lever to wedge against the desk edge.",
+      "family": "ACTUATE",
+      "principle": "DIRECT_MANUAL",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "The wedge can be analyzed using quasi-static force balance."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "predicates": ["The clamp attaches to the desk edge.", "The clamp fits edge thickness 18-40 mm.", "The clamp does not slip or rotate under the weight of the arm.", "The clamp can be removed and moved without tools."]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "predicates": ["The clamp attaches to the desk edge.", "The clamp fits edge thickness 18-40 mm.", "The clamp does not slip or rotate under the weight of the arm.", "The clamp can be removed and moved without tools."]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "predicates": ["The clamp attaches to the desk edge.", "The clamp fits edge thickness 18-40 mm.", "The clamp does not slip or rotate under the weight of the arm.", "The clamp can be removed and moved without tools."]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which mechanism to use for the clamp.",
+      "why_open": "The requirements do not specify a preferred mechanism, and all candidate principles are viable at this stage.",
+      "alternatives": ["DIRECT_MANUAL", "DIRECT_MANUAL", "DIRECT_MANUAL"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0001", "FRE-0003"],
+      "blocks": ["OBL-0005", "OBL-0006"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The desk edge is horizontal and has a uniform thickness within the stated range.",
+      "why": "The requirements state a range of thicknesses, implying a typical desk edge with consistent geometry.",
+      "would_be_invalidated_by": "If the desk edge is not horizontal or has varying thickness."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The monitor arm has a standard mounting interface.",
+      "why": "The request refers to 'a monitor arm' without defining its attachment interface.",
+      "would_be_invalidated_by": "If the monitor arm uses a non-standard interface."
+    }
+  ]
+}

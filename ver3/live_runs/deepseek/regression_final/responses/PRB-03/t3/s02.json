@@ -1,0 +1,156 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "Pressing the pedal by the user's foot must cause a signal to be sent to the machine.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "Upon release of the pedal by the user's foot, the pedal must return to its resting position autonomously and consistently.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The pedal must not move when something brushes against it sideways.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "Return to resting position must be reliable 'every time' as specified in REQ-0002, requiring a defined reliability metric.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "Behavior under sideways brushing must satisfy the definition of 'not moving' as per REQ-0003, with displacement threshold defined.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "pedal",
+      "reacted_at_role": "machine",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "pedal",
+      "reacted_at_role": "machine",
+      "direction_class": "NONE",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0003",
+      "applied_to_role": "pedal",
+      "reacted_at_role": "machine",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Spring-loaded pedal with electrical contact",
+      "family": ["ACTUATE", "MAINTAIN_CONFIGURATION", "TRANSMIT_LOAD"],
+      "principle": ["STORED_ENERGY", "FRICTION_HOLD", "DIRECT_BEARING"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "obligations_created": ["OBL-0004", "OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Spring return and side stability can be analyzed with ideal dynamics."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Pedal with detent mechanism and electrical switch",
+      "family": ["ACTUATE", "MAINTAIN_CONFIGURATION", "BOUND_MOTION"],
+      "principle": ["DIRECT_MANUAL", "DETENT_OR_SNAP", "HARD_STOP"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "obligations_created": ["OBL-0004", "OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Detent return and side stability can be analyzed with ideal dynamics."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "predicates": ["Signal sent upon press", "Returns to rest on release", "No movement under side brush"]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "predicates": ["Signal sent upon press", "Returns to rest on release", "No movement under side brush"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Definition of 'moving' for side brush",
+      "why_open": "Ambiguity: what constitutes 'moving' - whether any displacement is forbidden or only significant movement",
+      "alternatives": ["no displacement", "no significant displacement"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0005"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "Reliability metric for 'every time'",
+      "why_open": "Ambiguity: whether 'every time' implies a specific reliability metric",
+      "alternatives": ["deterministic return", "probabilistic reliability level"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": ["OBL-0004"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The pedal is a separate component from the machine.",
+      "why": "the request refers to sending a signal to the machine, implying separation",
+      "would_be_invalidated_by": "evidence that the pedal is part of the machine"
+    }
+  ]
+}

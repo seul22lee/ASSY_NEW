@@ -1,0 +1,354 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must fold into a narrow and compact configuration.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "All parts must remain attached during and after folding.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0003", "REQ-0012"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "No loose parts are required for folding.",
+      "derived_from_requirements": ["REQ-0003", "REQ-0012"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The product must be openable by hand without tools, motor, or other equipment.",
+      "derived_from_requirements": ["REQ-0004", "REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must provide a usable footprint on a desk when open.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "No parts should come apart or fall off during opening.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The product must remain open without external support once opened.",
+      "derived_from_requirements": ["REQ-0007"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The legs must not fold back, twist aside, or come off during use.",
+      "derived_from_requirements": ["REQ-0008"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The product must not exhibit unintended motion or displacement.",
+      "derived_from_requirements": ["REQ-0009"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "Folding must require a deliberate action to prevent accidental collapse.",
+      "derived_from_requirements": ["REQ-0010"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "After deliberate release, the product must fold back to its original compact shape.",
+      "derived_from_requirements": ["REQ-0011"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The opening and folding sequence must be repeatable with all parts attached.",
+      "derived_from_requirements": ["REQ-0012"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0013",
+      "statement": "The product must hold a small object on a desk while in use.",
+      "derived_from_requirements": ["REQ-0013"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0014",
+      "statement": "The product must be buildable as a product with sensible assembly order and remain together through normal use.",
+      "derived_from_requirements": ["REQ-0014"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0015",
+      "statement": "The mechanism must allow opening and folding by a single person without assistance.",
+      "derived_from_requirements": ["REQ-0004", "REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0002",
+      "applied_to_role": "legs",
+      "reacted_at_role": "support surface",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "legs",
+      "reacted_at_role": "support surface",
+      "direction_class": "TRANSVERSE",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "legs",
+      "reacted_at_role": "body",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0003",
+      "applied_to_role": "legs",
+      "reacted_at_role": "body",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0005",
+      "scenario": "SCN-0002",
+      "applied_to_role": "stand",
+      "reacted_at_role": "support surface",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Three legs fold via revolute joints and lock with a detent mechanism.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "REVOLUTE_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Kinematic geometry can verify foldability and stance."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Three legs slide linearly via prismatic joints and lock with friction hold.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "PRISMATIC_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Kinematic geometry for sliding motion; friction hold may require contact analysis."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Three legs extend by scissor linkage driven by a central screw and nut.",
+      "family": "CONVERT_MOTION",
+      "principle": "SCREW_AND_NUT",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Kinematic geometry for linkage; load transmission via screw may need dynamics."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0004",
+      "summary": "Three legs deploy via cam and follower tracks that guide them.",
+      "family": "CONVERT_MOTION",
+      "principle": "CAM_AND_FOLLOWER",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Kinematic geometry for cam profiles; may require swept interference for clearance."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0005",
+      "summary": "Three legs fold via flexible hinges made of compliant material.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "COMPLIANT_FLEXURE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can verify folding motion, but compliance may need material analysis."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015"],
+      "predicates": ["The legs fold about revolute joints to a compact stowed configuration.", "A detent holds the legs open against unintended folding.", "All parts remain attached during folding."]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015"],
+      "predicates": ["The legs slide linearly to a deployed position.", "Friction holds them in place once deployed.", "All parts remain attached during folding."]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015"],
+      "predicates": ["A screw and nut drives scissor links to deploy the legs.", "The screw provides self-locking to hold the legs open.", "All parts remain attached during folding."]
+    },
+    {
+      "id": "ACC-0004",
+      "candidate": "CND-0004",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015"],
+      "predicates": ["Cam and follower tracks guide leg deployment.", "The legs lock at the end of travel.", "All parts remain attached during folding."]
+    },
+    {
+      "id": "ACC-0005",
+      "candidate": "CND-0005",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014", "OBL-0015"],
+      "predicates": ["Compliant flexures allow legs to fold and unfold.", "Material stiffness holds legs in place when open.", "All parts remain attached during folding."]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Whether the stand must support an object with a specific weight or size, affecting load cases.",
+      "why_open": "The kind of small object is not specified.",
+      "alternatives": ["OBL-0013"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0013"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "What constitutes a 'usable footprint' on the desk, affecting leg spread and stability.",
+      "why_open": "The definition of usable footprint is ambiguous.",
+      "alternatives": ["OBL-0005"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": ["OBL-0005"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The stand is intended to be used on a standard desk surface.",
+      "why": "The text repeatedly mentions 'my desk' and 'on the desk'.",
+      "would_be_invalidated_by": "A statement that it can be used on other surfaces."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The stand is operated by a single person without assistance.",
+      "why": "The text says 'I should be able to open it by hand' and 'I should not need tools'.",
+      "would_be_invalidated_by": "A statement that it requires two people or special equipment."
+    }
+  ]
+}

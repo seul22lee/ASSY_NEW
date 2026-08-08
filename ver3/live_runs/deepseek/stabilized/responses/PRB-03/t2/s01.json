@@ -1,0 +1,135 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a foot pedal for a workbench.",
+      "locator": "REQ-0001",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "Pressing it should send a signal to the machine,",
+      "locator": "REQ-0002",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "and when I take my foot off it must return to its resting position on its own every time.",
+      "locator": "REQ-0003",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "It should not move if something brushes against it sideways.",
+      "locator": "REQ-0004",
+      "quantity_kinds": [],
+      "directionality": "sideways"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a foot pedal for a workbench.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "A foot pedal for a workbench exists.",
+      "source_locator": "REQ-0001",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "Pressing it should send a signal to the machine,",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "Pressing the pedal results in a signal being sent to the machine.",
+      "source_locator": "REQ-0002",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "and when I take my foot off it must return to its resting position on its own every time.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "After foot removal, the pedal returns to its resting position on its own every time.",
+      "source_locator": "REQ-0003",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "It should not move if something brushes against it sideways.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "The pedal does not move when brushed sideways.",
+      "source_locator": "REQ-0004",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Foot Pressing",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the foot pedal. Outside: the workbench, the machine, and the user's foot.",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": "Workbench environment."
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Foot release",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the foot pedal. Outside: the workbench, the user's foot.",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": "Workbench environment."
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Sideways brushing",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the foot pedal. Outside: the environment and the brushing object.",
+      "actors": [],
+      "environment": "Workbench environment with potential accidental contact."
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": [
+        "pedal"
+      ]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Specific dimensions, materials, and mechanism of the pedal.",
+      "why_free": "The text does not specify any dimensions, materials, or mechanisms."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "Unclear what constitutes 'moving' in the sideways brushing scenario.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When acceptance criteria for movement are defined.",
+      "block_scopes": [
+        "verification"
+      ]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "A signal is an electrical or electronic signal.",
+      "why": "The text says 'send a signal to the machine'.",
+      "would_be_invalidated_by": "The machine uses a mechanical or non-electrical signal."
+    }
+  ]
+}

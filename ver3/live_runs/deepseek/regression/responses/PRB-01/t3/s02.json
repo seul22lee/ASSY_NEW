@@ -1,0 +1,229 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must be mounted on a wall.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must contain or be compatible with small items.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The product must hold a quantity of about twenty items.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "A lever must be operable by the user to release items.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "One item must be released per lever press, so the mechanism must count and release a single item.",
+      "derived_from_requirements": ["REQ-0003", "REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The product must be refillable from the top without detaching from the wall.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The product must not jam when nearly empty, ensuring reliable operation with a low fill level.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": []
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "lever",
+      "reacted_at_role": "wall",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "item storage",
+      "reacted_at_role": "wall",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "item storage",
+      "reacted_at_role": "wall",
+      "direction_class": "RADIAL",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "top opening",
+      "reacted_at_role": "wall",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Gravity-feed with lever-actuated escapement",
+      "family": ["ACTUATE", "METER_DISCRETE_QUANTITY"],
+      "principle": "DIRECT_MANUAL",
+      "obligations_addressed": ["OBL-0004", "OBL-0005"],
+      "obligations_created": ["OBL-0008"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Geometry of escapement can be checked."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Gravity-feed with indexing rotor",
+      "family": ["ACTUATE", "METER_DISCRETE_QUANTITY"],
+      "principle": "DIRECT_MANUAL",
+      "obligations_addressed": ["OBL-0004", "OBL-0005"],
+      "obligations_created": ["OBL-0008"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Geometry of rotor can be checked."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Gravity-feed with gated pair",
+      "family": ["ACTUATE", "METER_DISCRETE_QUANTITY"],
+      "principle": "DIRECT_MANUAL",
+      "obligations_addressed": ["OBL-0004", "OBL-0005"],
+      "obligations_created": ["OBL-0008"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Geometry of gates can be checked."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "predicates": ["Product is wall-mounted", "Product contains small items", "Holds about twenty items", "Lever operable", "Releases one item per press", "Refillable from top", "No jamming when nearly empty"]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "predicates": ["Product is wall-mounted", "Product contains small items", "Holds about twenty items", "Lever operable", "Releases one item per press", "Refillable from top", "No jamming when nearly empty"]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "predicates": ["Product is wall-mounted", "Product contains small items", "Holds about twenty items", "Lever operable", "Releases one item per press", "Refillable from top", "No jamming when nearly empty"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which principle family to use for the metering/release mechanism",
+      "why_open": "Multiple principle families can satisfy the obligation to release exactly one item per lever press; the evidence available (RIGID_KINEMATIC_GEOMETRY) does not distinguish between them without more specific item characteristics.",
+      "alternatives": ["ESCAPEMENT", "INDEXING_ROTOR", "GATED_PAIR"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["AMB-0001", "AMB-0004"],
+      "blocks": []
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "Exact definition of 'about twenty'",
+      "why_open": "The requirement holds 'about twenty' but the exact count or tolerance is unspecified; this affects the design of the storage and metering mechanism.",
+      "alternatives": ["Free text: user to specify exact capacity or tolerance"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": ["OBL-0003"]
+    },
+    {
+      "id": "UNR-0003",
+      "decision": "Definition of 'nearly empty'",
+      "why_open": "The requirement states no jamming when 'nearly empty' but the threshold is not defined; the design must ensure reliable operation for low fill levels.",
+      "alternatives": ["Free text: user to specify quantity threshold"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0003"],
+      "blocks": ["OBL-0007"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The user will interact with the dispenser manually by pressing a lever.",
+      "why": "The request says 'I press a lever'.",
+      "would_be_invalidated_by": "If the lever is automated or replaced by another control."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The dispenser is to be installed on a wall and remains there during refill.",
+      "why": "The request explicitly states 'wall-mounted' and 'without taking it off the wall'.",
+      "would_be_invalidated_by": "If the dispenser is portable or not wall-mounted."
+    },
+    {
+      "id": "ASM-1003",
+      "statement": "The dispenser will be used repeatedly for releasing items one at a time.",
+      "why": "The request implies repeated use and the requirement to not jam.",
+      "would_be_invalidated_by": "If the dispenser is meant for single-use."
+    }
+  ]
+}

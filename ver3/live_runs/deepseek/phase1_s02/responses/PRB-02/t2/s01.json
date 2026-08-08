@@ -1,0 +1,42 @@
+{
+ "_meta": {"answers_prompt_sha256": "20a7f531637bbf08", "authored_by": "agent-in-repository"},
+ "source_clauses": [
+  {"id": "SRC-0001", "verbatim": "I need a clamp that fixes a monitor arm to the edge of my desk.", "locator": "sentence-1", "quantity_kinds": [], "directionality": "none"},
+  {"id": "SRC-0002", "verbatim": "Desk edges here are between 18 and 40 mm thick.", "locator": "sentence-2", "quantity_kinds": ["length"], "directionality": "none"},
+  {"id": "SRC-0003", "verbatim": "Once it is tight it must not slip or rotate under the weight of the arm.", "locator": "sentence-3", "quantity_kinds": [], "directionality": "none"},
+  {"id": "SRC-0004", "verbatim": "I want to be able to take it off and move it to another desk without any tools.", "locator": "sentence-4", "quantity_kinds": [], "directionality": "none"}
+ ],
+ "requirements": [
+  {"id": "REQ-0001", "statement_verbatim": "a clamp that fixes a monitor arm to the edge of my desk", "kind": "FUNCTIONAL", "verification_kind": "STRUCTURAL", "observable_verbatim": "a connection between the arm and the desk edge that holds the arm in place", "source_locator": "sentence-1", "quantity_class": "NONE"},
+  {"id": "REQ-0002", "statement_verbatim": "Desk edges here are between 18 and 40 mm thick", "kind": "INTERFACE", "verification_kind": "QUANTITATIVE", "observable_verbatim": "the range of edge thickness the connection accommodates", "source_locator": "sentence-2", "quantity_class": "BAND"},
+  {"id": "REQ-0003", "statement_verbatim": "Once it is tight it must not slip", "kind": "FUNCTIONAL", "verification_kind": "QUANTITATIVE", "observable_verbatim": "relative movement between the product and the desk edge along the edge", "source_locator": "sentence-3", "quantity_class": "NONE"},
+  {"id": "REQ-0004", "statement_verbatim": "it must not ... rotate under the weight of the arm", "kind": "FUNCTIONAL", "verification_kind": "QUANTITATIVE", "observable_verbatim": "angular movement between the product and the desk edge under the arm's load", "source_locator": "sentence-3", "quantity_class": "NONE"},
+  {"id": "REQ-0005", "statement_verbatim": "I want to be able to take it off and move it to another desk", "kind": "FUNCTIONAL", "verification_kind": "STRUCTURAL", "observable_verbatim": "a reversal of the fixing that leaves the product usable elsewhere", "source_locator": "sentence-4", "quantity_class": "NONE"},
+  {"id": "REQ-0006", "statement_verbatim": "without any tools", "kind": "FUNCTIONAL", "verification_kind": "STRUCTURAL", "observable_verbatim": "no participant outside the product appears in fixing or removing it", "source_locator": "sentence-4", "quantity_class": "NONE"}
+ ],
+ "actors": [
+  {"id": "ACT-0001", "name": "user", "must_reach": ["whatever is moved to tighten the fixing", "whatever is moved to release it"]}
+ ],
+ "scenarios": [
+  {"id": "SCN-0001", "name": "holding the arm while in use", "kind": "OPERATION", "system_boundary": "the product and the desk edge; the monitor arm and its load are outside it and act on it", "actors": [], "environment": "gravity acting downward; the arm applies a load of unstated magnitude"},
+  {"id": "SCN-0002", "name": "fixing to a desk edge", "kind": "ASSEMBLY", "system_boundary": "the product, the desk edge and the user", "actors": ["ACT-0001"], "environment": "edge thickness anywhere in the stated range; no tools"},
+  {"id": "SCN-0003", "name": "removing and relocating", "kind": "SERVICE", "system_boundary": "the product, the desk edge and the user", "actors": ["ACT-0001"], "environment": "no tools; the product is reused afterwards"}
+ ],
+ "freedoms": [
+  {"id": "FRE-0001", "decision": "how the fixing grips the edge", "why_free": "the text requires it to hold and names no means"},
+  {"id": "FRE-0002", "decision": "how the range of edge thickness is accommodated", "why_free": "the range is stated; nothing about how it is spanned is"},
+  {"id": "FRE-0003", "decision": "how the arm attaches to the product", "why_free": "unstated"},
+  {"id": "FRE-0004", "decision": "the number of parts", "why_free": "unstated"},
+  {"id": "FRE-0005", "decision": "every dimension except the stated edge-thickness range", "why_free": "one range is given and no other quantity"},
+  {"id": "FRE-0006", "decision": "material and manufacturing process", "why_free": "unstated"}
+ ],
+ "ambiguities": [
+  {"id": "AMB-0001", "statement": "What load does the monitor arm impose - weight, reach and any moment?", "conflicting_clauses": ["SRC-0003"], "resolvable_when": "the arm's mass and geometry are supplied", "block_scopes": ["blocks_quantitative_acceptance", "blocks_PASS"]},
+  {"id": "AMB-0002", "statement": "What counts as tight, and who judges it?", "conflicting_clauses": ["SRC-0003"], "resolvable_when": "a tightening criterion is supplied", "block_scopes": ["blocks_quantitative_acceptance"]},
+  {"id": "AMB-0003", "statement": "How much movement counts as slipping or rotating?", "conflicting_clauses": ["SRC-0003"], "resolvable_when": "a displacement or angle limit is supplied", "block_scopes": ["blocks_quantitative_acceptance", "blocks_PASS"]},
+  {"id": "AMB-0004", "statement": "What is the desk edge made of, and what surface does it present?", "conflicting_clauses": ["SRC-0001", "SRC-0002"], "resolvable_when": "the edge material and finish are described", "block_scopes": ["blocks_quantitative_acceptance", "blocks_PASS"]},
+  {"id": "AMB-0005", "statement": "Does without any tools apply to fixing as well as removal?", "conflicting_clauses": ["SRC-0004"], "resolvable_when": "the text distinguishes the two activities", "block_scopes": ["blocks_evidence_interpretation"]},
+  {"id": "AMB-0006", "statement": "How much overhang is available behind the edge for the fixing to reach?", "conflicting_clauses": ["SRC-0001"], "resolvable_when": "the desk's underside clearance is described", "block_scopes": ["blocks_quantitative_acceptance"]}
+ ],
+ "assumptions": []
+}

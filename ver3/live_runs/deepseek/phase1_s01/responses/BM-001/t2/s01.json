@@ -1,0 +1,111 @@
+{
+  "source_clauses": [
+    "Design a compact desktop storage box with a reusable latch.",
+    "The box should open and close repeatedly without accidental opening during normal handling.",
+    "The latch should be easy for a user to operate while remaining secure during transport.",
+    "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+    "The design should be mechanically plausible and easy to assemble."
+  ],
+  "requirements": [
+    {
+      "id": 1,
+      "text": "The box should be compact for desktop use.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 2,
+      "text": "The box should have a reusable latch.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 3,
+      "text": "The box should open and close repeatedly.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 4,
+      "text": "The box should not accidentally open during normal handling.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 5,
+      "text": "The latch should be easy for a user to operate.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 6,
+      "text": "The latch should remain secure during transport.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 7,
+      "text": "The product should be suitable for low-cost manufacturing.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 8,
+      "text": "The product should be practical for desktop use.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 9,
+      "text": "The design should be mechanically plausible.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 10,
+      "text": "The product should be easy to assemble.",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "kind": "OPERATION",
+      "text": "Normal handling of the box",
+      "requirements": [4]
+    },
+    {
+      "id": 2,
+      "kind": "SERVICE",
+      "text": "User operating the latch",
+      "requirements": [5]
+    },
+    {
+      "id": 3,
+      "kind": "TRANSPORT",
+      "text": "Transporting the box",
+      "requirements": [6]
+    },
+    {
+      "id": 4,
+      "kind": "ASSEMBLY",
+      "text": "Assembling the product",
+      "requirements": [10]
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "user",
+      "actions": ["operate the latch"],
+      "scenario_ids": [2]
+    }
+  ],
+  "freedoms": [
+    "The text does not specify the box dimensions, materials, latch mechanism, or manufacturing process.",
+    "The text does not specify how low-cost is achieved.",
+    "The text does not specify how easy assembly is achieved."
+  ],
+  "ambiguities": [
+    "The text does not specify what 'compact' means in terms of dimensions.",
+    "The text does not specify what 'easy to operate' means.",
+    "The text does not specify what 'secure during transport' means.",
+    "The text does not specify what 'normal handling' includes."
+  ],
+  "assumptions": [
+    "The box is intended for desktop use and will be handled by a user.",
+    "The latch is a component of the box and is reusable.",
+    "The box is expected to be used repeatedly for opening and closing."
+  ]
+}

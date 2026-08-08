@@ -1,0 +1,234 @@
+reference_id: EXE-BM003-01
+schema_version: 0.1.0
+units: mm
+
+method: >
+  Each discretely installed body is swept along its declared straight-line
+  insertion direction, from its approach distance to its seated position, and the
+  boolean common with every already-placed body is measured at every sample. A
+  step passes only if that common volume stays at or below overlap_tol_mm3 the
+  whole way. Steps of kind "operation" turn a body that is already installed;
+  they are not swept by step 7 and each cites the sweep that did validate it.
+
+establishes: an unobstructed installation ordering exists, and the ordering is acyclic
+does_not_establish: >
+  insertion force, ease of assembly, tooling, fixturing or process suitability.
+  Those are quantitative and AMB-BM-003-008 leaves manufacturing entirely open,
+  so no manufacturability claim is made here.
+
+no_undeclared_rigid_passage: >
+  No body passes through undeclared rigid material at any point in this sequence.
+  There is no press fit, no snap fit and no interference fit anywhere in this
+  design, so no insertion depends on a deformation and none is claimed. Every
+  bayonet below engages by a rigid turn with clearance on both sides.
+
+why_this_order: >
+  Threaded parts first, then closed. The three hinges are built up station by
+  station while the column above them is still bare. The ring must go on before
+  the ring captor, because the captor is what stops the ring leaving; the captor
+  must go on before the top support, because the support seats on the captor's
+  own bayonet lugs. Everything that runs on the column is threaded down from the
+  column top, so each of those three bodies has one straight -Z path.
+
+why_assembly_ends_deployed: >
+  The ring's arms come down over the heels. If the legs were folded the heels
+  would be raised into the arms' path and the ring could not be seated at all.
+  Assembly therefore ends in DEPLOYED_LOCKED. FRE-BM-003-013 leaves the arrival
+  configuration free; this is a consequence of the mechanism, not a preference.
+
+bayonet_turns:
+  what_they_are: >
+    Four bodies are secured by a rigid quarter turn after insertion: each of the
+    three hinge pins, the ring captor, and the top support. In each case the body
+    is inserted with its relief aligned with the mating lug or slot, and then
+    turned so the relief no longer lines up and the escape direction is closed by
+    solid material.
+  how_they_are_validated: >
+    Not by step 7, which only sweeps straight lines. Each turn is swept
+    separately in validate.py over its full angular travel and every body pair is
+    measured with the kernel at every sample. The results are in
+    validation/bayonet_turns.json and each operation step below cites it.
+  what_remains_open: >
+    Whether a bayonet could be defeated by vibration or handling is not decidable
+    from rigid geometry and is not claimed. What is shown is that once turned, no
+    rigid-body translation along the insertion axis is available.
+
+steps:
+
+  - id: AS-01
+    place: BODY-HUB
+    kind: base
+    note: fixed reference body; nothing is inserted
+
+  # ------------------------------------------------------------ station A
+  - id: AS-02
+    place: BODY-LEG-A
+    kind: insertion
+    direction: [0.0, -1.0, 0.0]
+    approach_distance: 60.0
+    at_offset: [0.0, 0.0, 0.0]
+    description: >
+      the leg blade slides radially inward between the two clevis plates of
+      station A, in its deployed attitude
+    activates: [RET-LEG-A-AXIAL, STP-OUTWARD-A]
+  - id: AS-03
+    place: BODY-PIN-A
+    kind: insertion
+    direction: [1.0, 0.0, 0.0]
+    approach_distance: 30.0
+    at_offset: [0.0, 0.0, 0.0]
+    swept_configuration: >
+      the pin turned to its insertion attitude, so its end bar lies in the relief
+      cut through both clevis plates and the leg eye
+    description: the pin is pushed along the hinge axis until its head seats
+    activates: [JNT-HINGE-A, RET-PIN-A-INWARD]
+  - id: AS-04
+    place: BODY-PIN-A
+    kind: operation
+    validated_by: validation/bayonet_turns.json#TURN-PIN-A
+    description: quarter turn of the pin; the end bar no longer lines up with the relief
+    activates: RET-PIN-A-OUTWARD
+
+  # ------------------------------------------------------------ station B
+  - id: AS-05
+    place: BODY-LEG-B
+    kind: insertion
+    direction: [0.8660254037844387, 0.5, 0.0]
+    approach_distance: 60.0
+    at_offset: [0.0, 0.0, 0.0]
+    description: as AS-02, at station B
+    activates: [RET-LEG-B-AXIAL, STP-OUTWARD-B]
+  - id: AS-06
+    place: BODY-PIN-B
+    kind: insertion
+    direction: [-0.5, 0.8660254037844387, 0.0]
+    approach_distance: 30.0
+    at_offset: [0.0, 0.0, 0.0]
+    swept_configuration: the pin turned to its insertion attitude
+    description: as AS-03, at station B
+    activates: [JNT-HINGE-B, RET-PIN-B-INWARD]
+  - id: AS-07
+    place: BODY-PIN-B
+    kind: operation
+    validated_by: validation/bayonet_turns.json#TURN-PIN-B
+    description: quarter turn of the pin
+    activates: RET-PIN-B-OUTWARD
+
+  # ------------------------------------------------------------ station C
+  - id: AS-08
+    place: BODY-LEG-C
+    kind: insertion
+    direction: [-0.8660254037844387, 0.5, 0.0]
+    approach_distance: 60.0
+    at_offset: [0.0, 0.0, 0.0]
+    description: as AS-02, at station C
+    activates: [RET-LEG-C-AXIAL, STP-OUTWARD-C]
+  - id: AS-09
+    place: BODY-PIN-C
+    kind: insertion
+    direction: [-0.5, -0.8660254037844387, 0.0]
+    approach_distance: 30.0
+    at_offset: [0.0, 0.0, 0.0]
+    swept_configuration: the pin turned to its insertion attitude
+    description: as AS-03, at station C
+    activates: [JNT-HINGE-C, RET-PIN-C-INWARD]
+  - id: AS-10
+    place: BODY-PIN-C
+    kind: operation
+    validated_by: validation/bayonet_turns.json#TURN-PIN-C
+    description: quarter turn of the pin
+    activates: RET-PIN-C-OUTWARD
+
+  # ------------------------------------------------------- the column stack
+  - id: AS-11
+    place: BODY-RING
+    kind: insertion
+    direction: [0.0, 0.0, -1.0]
+    approach_distance: 112.0
+    at_offset: [0.0, 0.0, 0.0]
+    description: >
+      the ring is threaded down the whole column from the top, its three keyways
+      lined up with the three anti-rotation ribs, and comes to rest on the
+      pedestal with its arms over the heels
+    activates: [JNT-RING-SLIDE, JNT-RING-TURN, RET-RING-DOWN, BLK-FOLD-A, BLK-FOLD-B, BLK-FOLD-C]
+    depends_on: [AS-02, AS-05, AS-08]
+    why: the heels must already be down, which means the legs must already be in
+  - id: AS-12
+    place: BODY-RING-CAPTOR
+    kind: insertion
+    direction: [0.0, 0.0, -1.0]
+    approach_distance: 100.0
+    at_offset: [0.0, 0.0, 0.0]
+    swept_configuration: >
+      the captor turned to its insertion attitude, so its two bayonet keyways
+      line up with the two lugs it has to pass
+    description: threaded down the column onto the step above the ring's travel
+    activates: [RET-RING-UP, RET-CAPTOR-DOWN]
+    depends_on: [AS-11]
+  - id: AS-13
+    place: BODY-RING-CAPTOR
+    kind: operation
+    validated_by: validation/bayonet_turns.json#TURN-CAPTOR
+    description: quarter turn; the captor's own lugs now close its upward path
+    activates: RET-CAPTOR-UP
+  - id: AS-14
+    place: BODY-TOP-SUPPORT
+    kind: insertion
+    direction: [0.0, 0.0, -1.0]
+    approach_distance: 88.0
+    at_offset: [0.0, 0.0, 0.0]
+    swept_configuration: the top support turned to its insertion attitude
+    description: >
+      threaded down the column until its sleeve lands on the ring captor's
+      bayonet lugs; the column's upper lugs arrive inside the platform's groove
+    activates: RET-SUPPORT-DOWN
+    depends_on: [AS-13]
+  - id: AS-15
+    place: BODY-TOP-SUPPORT
+    kind: operation
+    validated_by: validation/bayonet_turns.json#TURN-TOP-SUPPORT
+    description: quarter turn; the groove ledge moves under the column's upper lugs
+    activates: RET-SUPPORT-UP
+
+dependency_relation:
+  form: >
+    A step depends on every step that must precede it. The relation declared by
+    the depends_on fields above, together with the implicit ordering of each
+    body's insertion before its own turn, is checked for acyclicity in
+    validation/assembly_graph.json.
+  acyclic: checked, not asserted
+
+operational_relations_activated_here:
+  - JNT-HINGE-A
+  - JNT-HINGE-B
+  - JNT-HINGE-C
+  - JNT-RING-SLIDE
+  - JNT-RING-TURN
+  - RET-PIN-A-INWARD
+  - RET-PIN-A-OUTWARD
+  - RET-PIN-B-INWARD
+  - RET-PIN-B-OUTWARD
+  - RET-PIN-C-INWARD
+  - RET-PIN-C-OUTWARD
+  - RET-LEG-A-AXIAL
+  - RET-LEG-B-AXIAL
+  - RET-LEG-C-AXIAL
+  - RET-RING-UP
+  - RET-RING-DOWN
+  - RET-CAPTOR-UP
+  - RET-CAPTOR-DOWN
+  - RET-SUPPORT-UP
+  - RET-SUPPORT-DOWN
+  - BLK-FOLD-A
+  - BLK-FOLD-B
+  - BLK-FOLD-C
+  - STP-OUTWARD-A
+  - STP-OUTWARD-B
+  - STP-OUTWARD-C
+note_on_that_list: >
+  RET-PIN-*-INWARD, RET-LEG-*-AXIAL, STP-OUTWARD-* and RET-CAPTOR-DOWN are activated by the
+  insertion steps themselves rather than by a separate operation: the pin head
+  seats as the pin is pushed home, the clevis plates enclose the blade as soon as
+  it is between them, and the captor lands on its step. They are listed so that
+  NRM-BM-003-015 can be checked against a complete set rather than against the
+  subset that happens to need a turn.

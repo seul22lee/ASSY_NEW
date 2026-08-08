@@ -1,0 +1,668 @@
+{
+ "_meta": {
+  "answers_prompt_sha256": "9241b8ca90b25be7",
+  "pairing_history": [
+   "re-paired after the response-schema section was added to the prompt; content unchanged and re-verified against the parser, contract validation and completeness check"
+  ]
+ },
+ "acceptance_contracts": [
+  {
+   "candidate": "CND-0001",
+   "id": "ACC-0001",
+   "obligations": [
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0007"
+   ],
+   "predicates": [
+    "with the member in place, no continuous path leads from deployed toward folded",
+    "displacing the member makes that path available",
+    "the member is itself retained"
+   ]
+  },
+  {
+   "candidate": "CND-0006",
+   "id": "ACC-0002",
+   "obligations": [
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0007"
+   ],
+   "predicates": [
+    "no continuous path leads from deployed toward folded before the action",
+    "the action makes it available",
+    "every rigid-body freedom of every support is intended or prevented"
+   ]
+  },
+  {
+   "candidate": "CND-0002",
+   "id": "ACC-0003",
+   "obligations": [
+    "OBL-0005",
+    "OBL-0007"
+   ],
+   "predicates": [
+    "the deployed configuration lies past the toggle point",
+    "an action carries the support back over it"
+   ]
+  },
+  {
+   "candidate": "CND-0003",
+   "id": "ACC-0004",
+   "obligations": [
+    "OBL-0005",
+    "OBL-0007"
+   ],
+   "predicates": [
+    "the compliant member is seated in the deployed configuration",
+    "an action unseats it"
+   ]
+  }
+ ],
+ "assumptions": [
+  {
+   "id": "ASM-0001",
+   "inferred_by_stage": "s02",
+   "statement": "The product stands on a surface that reacts its weight and the object it holds.",
+   "why": "Every load path must terminate somewhere, and the scenarios place the product on a desk.",
+   "would_be_invalidated_by": "a scenario in which the product is clamped, hung or held"
+  },
+  {
+   "id": "ASM-0002",
+   "inferred_by_stage": "s02",
+   "statement": "The object held imposes a downward load of unstated magnitude.",
+   "why": "The requirements say an object is held and give it no mass; a held object still has weight.",
+   "would_be_invalidated_by": "a statement that the object's weight is negligible"
+  }
+ ],
+ "candidates": [
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "the claim is that a motion is unavailable, which is decidable on geometry",
+    "route": "MOBILITY_ANALYSIS"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0001",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0007",
+    "OBL-0017"
+   ],
+   "obligations_created": [
+    "retention of the blocking member itself",
+    "a deliberate action that displaces it",
+    "radial support and axial retention at each turning relation",
+    "a bound on the deployed travel"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "MAINTAIN_CONFIGURATION": "SEPARATE_RETAINING_MEMBER",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "RETAIN_BODY": "LATER_BODY_COVER",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "Each support turns about a fixed axis; a displaced member blocks the folding motion until it is moved."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "an energy barrier is addressable by the ideal-joint route, but the disturbance that would defeat it is not stated and could not be tested",
+    "route": "RIGID_BODY_DYNAMICS"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0002",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0005",
+    "OBL-0007",
+    "OBL-0017"
+   ],
+   "obligations_created": [
+    "a travel bound past the toggle point",
+    "an action that carries each support back over centre"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "MAINTAIN_CONFIGURATION": "OVER_CENTRE",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "RETAIN_BODY": "LATER_BODY_COVER",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "Each support turns about a fixed axis and is held deployed past a toggle point."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "the hold is a deflection force and no available route establishes it",
+    "route": "COMPLIANCE_REDUCED_ORDER"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0003",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0005",
+    "OBL-0007",
+    "OBL-0017"
+   ],
+   "obligations_created": [
+    "a deflection bound and a recovery for the compliant member",
+    "a release action that unseats it",
+    "survival of repeated deflection"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+    "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "RETAIN_BODY": "ELASTIC_CAPTURE",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "Each support turns about a fixed axis; a compliant member seats in a recess to hold it deployed."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "retention by friction cannot be established by any route available here",
+    "route": "CONTACT_RESOLVING_ANALYSIS"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0004",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0005",
+    "OBL-0017"
+   ],
+   "obligations_created": [
+    "a normal load at the friction interface",
+    "lateral guidance and travel bounds for each sliding relation"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "JOINT_LIMIT_BY_GEOMETRY",
+    "MAINTAIN_CONFIGURATION": "FRICTION_HOLD",
+    "PERMIT_ASSEMBLY": "INSERT_AND_TURN",
+    "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+    "RETAIN_BODY": "GEOMETRIC_UNDERCUT",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": true,
+   "summary": "Each support slides rather than turns, and is held deployed by a friction interface."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "both the motion and the hold depend on deformation",
+    "route": "COMPLIANCE_REDUCED_ORDER"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0005",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0005",
+    "OBL-0008",
+    "OBL-0017"
+   ],
+   "obligations_created": [
+    "a deflection bound and a recovery",
+    "an orientation assumption for the seated configuration",
+    "survival of repeated deflection"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "JOINT_LIMIT_BY_GEOMETRY",
+    "MAINTAIN_CONFIGURATION": "GRAVITY_SEATED",
+    "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "COMPLIANT_FLEXURE",
+    "RETAIN_BODY": "ELASTIC_CAPTURE",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": false,
+   "summary": "Each support is a compliant continuous region of the body, deployed by deflecting it past a seated position."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "the claim is the absence of a path, which is what this route decides",
+    "route": "MOBILITY_ANALYSIS"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0006",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0007",
+    "OBL-0017"
+   ],
+   "obligations_created": [
+    "a body whose position determines whether folding is available",
+    "retention of that body",
+    "a deliberate action that moves it"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "MAINTAIN_CONFIGURATION": "KINEMATIC_BLOCK",
+    "PERMIT_ASSEMBLY": "INSERT_AND_TURN",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "RETAIN_BODY": "ROTATION_LOCK",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "Each support turns about a fixed axis; the geometry itself makes folding unavailable until a member is rotated clear."
+  }
+ ],
+ "load_cases": [
+  {
+   "applied_to_role": "the holding region role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0001",
+   "kind": "PAYLOAD",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk surface the product stands on",
+   "scenario": "SCN-0002"
+  },
+  {
+   "applied_to_role": "every support role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0002",
+   "kind": "GRAVITY",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk surface the product stands on",
+   "scenario": "SCN-0002"
+  },
+  {
+   "applied_to_role": "every support role",
+   "direction_class": "MOMENT",
+   "id": "LC-0003",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk surface the product stands on",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "the release role",
+   "direction_class": "NONE",
+   "id": "LC-0004",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk surface the product stands on",
+   "scenario": "SCN-0003"
+  },
+  {
+   "applied_to_role": "every support role",
+   "direction_class": "TRANSVERSE",
+   "id": "LC-0005",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk surface the product stands on",
+   "scenario": "SCN-0004"
+  }
+ ],
+ "obligations": [
+  {
+   "derivation_premises": [
+    "Folding in close and spreading apart are two positions of the same support."
+   ],
+   "derived_from_requirements": [
+    "REQ-0002"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0001",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "UNIVERSAL",
+   "statement": "Three distinguishable supports exist, each with a folded position adjacent to the body and a deployed position away from it."
+  },
+  {
+   "derivation_premises": [
+    "A support that stays attached while moving is connected by something that permits the motion and prevents separation."
+   ],
+   "derived_from_requirements": [
+    "REQ-0002",
+    "REQ-0004"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0002",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "UNIVERSAL",
+   "statement": "Each support is connected to the body by a relation permitting exactly the motion between those two positions."
+  },
+  {
+   "derivation_premises": [
+    "Two valid end positions say nothing about the path between them.",
+    "Coming apart while opening is a loss of connection at an interior point."
+   ],
+   "derived_from_requirements": [
+    "REQ-0008",
+    "REQ-0015",
+    "REQ-0019"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0003",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "A continuous path connects the folded and deployed positions in both directions, with every component connected at every point along it."
+  },
+  {
+   "derivation_premises": [
+    "Three coincident or collinear contacts bound no area, so no footprint exists."
+   ],
+   "derived_from_requirements": [
+    "REQ-0007"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0004",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "In the deployed configuration the three ground contacts bound a non-zero area."
+  },
+  {
+   "derivation_premises": [
+    "Staying open on its own is the absence of a required holding action."
+   ],
+   "derived_from_requirements": [
+    "REQ-0010"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0005",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The deployed configuration persists without continuous user support."
+  },
+  {
+   "derivation_premises": [
+    "Fold back, twist aside and come off name three freedoms; move in some other direction names the rest.",
+    "A freedom that is neither intended nor prevented is available."
+   ],
+   "derived_from_requirements": [
+    "REQ-0011",
+    "REQ-0012"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0006",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "In the deployed configuration, for every support, every rigid-body freedom is either intended or prevented."
+  },
+  {
+   "derivation_premises": [
+    "Something deliberate before folding means folding does not begin without it.",
+    "An action that changes nothing is not a release."
+   ],
+   "derived_from_requirements": [
+    "REQ-0013"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0007",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "Folding is unavailable until a deliberate user action is performed, and that action makes it available."
+  },
+  {
+   "derivation_premises": [
+    "A component that must be taken off is a loose piece the user has to keep."
+   ],
+   "derived_from_requirements": [
+    "REQ-0004",
+    "REQ-0005",
+    "REQ-0019"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0008",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "Every normal component remains attached through the whole cycle, and no ordinary step requires removing one."
+  },
+  {
+   "derivation_premises": [
+    "Compactness with no stated size is not absolutely evaluable but is relationally evaluable.",
+    "A folded envelope no smaller than the deployed one has not folded."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0009",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The folded configuration is smaller than the deployed one in at least one storage-relevant extent."
+  },
+  {
+   "derivation_premises": [
+    "A holding region that cannot be reached cannot receive an object."
+   ],
+   "derived_from_requirements": [
+    "REQ-0017"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0010",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "A region is offered to carry an object and is reachable in the deployed configuration."
+  },
+  {
+   "derivation_premises": [
+    "An unreacted load accelerates the body carrying it."
+   ],
+   "derived_from_requirements": [
+    "REQ-0017"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0011",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The object's load reaches a reaction site through a connected path."
+  },
+  {
+   "derivation_premises": [
+    "No tools, motor or equipment means every step is performed on the product alone."
+   ],
+   "derived_from_requirements": [
+    "REQ-0009"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0012",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "No participant outside the product appears in any operational step."
+  },
+  {
+   "derivation_premises": [
+    "A relation the operation needs must exist before operation begins."
+   ],
+   "derived_from_requirements": [
+    "REQ-0018"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0013",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "An ordered installation sequence exists in which every part has a clear path in the configuration produced by the preceding steps, and every relation the operation depends on is established by it."
+  },
+  {
+   "derivation_premises": [
+    "A repeatable cycle cannot contain a one-way step."
+   ],
+   "derived_from_requirements": [
+    "REQ-0016"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0014",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "No step of the cycle is irreversible."
+  },
+  {
+   "derivation_premises": [
+    "stated by the requirement it derives from"
+   ],
+   "derived_from_requirements": [
+    "REQ-0001"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0015",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "UNIVERSAL",
+   "statement": "A product exists with a folded and an unfolded configuration, used on a desk."
+  },
+  {
+   "derivation_premises": [
+    "stated by the requirement it derives from"
+   ],
+   "derived_from_requirements": [
+    "REQ-0006"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0016",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "UNIVERSAL",
+   "statement": "The unfolding steps are performable by a user in an order that can be followed."
+  },
+  {
+   "derivation_premises": [
+    "stated by the requirement it derives from"
+   ],
+   "derived_from_requirements": [
+    "REQ-0014"
+   ],
+   "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+   "id": "OBL-0017",
+   "mandatory": true,
+   "route_available": false,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The deployed configuration survives an unintended disturbance."
+  }
+ ],
+ "unresolved": [
+  {
+   "alternatives": [
+    "CND-0001",
+    "CND-0002",
+    "CND-0003",
+    "CND-0004",
+    "CND-0005",
+    "CND-0006"
+   ],
+   "alternatives_kind": "ENTITY_REFS",
+   "blocks": [
+    "OBL-0005",
+    "OBL-0006"
+   ],
+   "decision": "how the deployed configuration is maintained",
+   "id": "UNR-0001",
+   "kept_open_by": [
+    "FRE-0001",
+    "AMB-0005"
+   ],
+   "why_open": "Six principle families maintain a configuration and the requirements name none. They are not equivalent for this pipeline: three depend on claims no available evidence route can establish, which is a fact about the evidence and not a reason to prefer the others."
+  },
+  {
+   "alternatives": [
+    "one action moves all three",
+    "each support is moved separately",
+    "some coupled, some independent"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0007"
+   ],
+   "decision": "whether the supports move together or independently",
+   "id": "UNR-0002",
+   "kept_open_by": [
+    "FRE-0004"
+   ],
+   "why_open": "The requirements state only that all three end up spread apart. Coupled and independent motion both satisfy that, and the choice changes what the deliberate release must act on."
+  },
+  {
+   "alternatives": [
+    "a stated disturbance",
+    "no quantitative acceptance for the deployed hold"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0005"
+   ],
+   "decision": "what disturbance the deployed configuration must survive",
+   "id": "UNR-0003",
+   "kept_open_by": [
+    "AMB-0005"
+   ],
+   "why_open": "Being knocked is named as the reason for wanting a deliberate release and carries no magnitude, so no maintenance principle can be shown adequate against it."
+  },
+  {
+   "alternatives": [
+    "assembly ends folded",
+    "assembly ends deployed"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0013"
+   ],
+   "decision": "whether the product arrives folded or deployed",
+   "id": "UNR-0004",
+   "kept_open_by": [
+    "FRE-0009"
+   ],
+   "why_open": "The requirements do not say, and the answer constrains the assembly order because some maintenance principles cannot be assembled in one of the two configurations."
+  }
+ ]
+}

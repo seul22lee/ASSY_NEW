@@ -1,0 +1,305 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The device must provide a housing that fully encloses the internal components and platform during operation.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": [
+        "If the housing does not enclose the mechanism, the product would not satisfy the 'enclosed within a housing' requirement.",
+        "If any part of the mechanism is exposed during operation, it violates the enclosure requirement."
+      ]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The device must include an external hand crank that is operable by the user to raise and lower the internal platform.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": [
+        "A hand crank that is not reachable or operable cannot raise or lower the platform.",
+        "The user's action must produce platform motion as specified."
+      ]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The platform must have a travel range of approximately 80-100 mm.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": [
+        "The travel range is a functional requirement; if the mechanism cannot achieve this range, the requirement is unsatisfied."
+      ]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The platform must support a payload of approximately 1 kg.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": [
+        "A platform that cannot support the prescribed load will fail the payload requirement."
+      ]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The mechanism must operate without jamming or unstable motion under normal operation.",
+      "derived_from_requirements": ["REQ-0007"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": [
+        "Jamming or unstable operation prevents reliable raising and lowering."
+      ]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The product must be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0001", "ACT-0002"],
+      "derivation_premises": [
+        "A product that is unsafe, implausible, difficult to assemble, or impractical to manufacture violates the process requirement."
+      ]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The device must be assemblable: all components can be inserted and assembled by an assembler.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": [
+        "The assembler cannot reach all components if the design does not permit assembly operations."
+      ]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The device must include a mechanism that converts rotary motion of the hand crank into translational motion of the platform.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": [
+        "Rotating the crank must cause platform movement; therefore a motion conversion mechanism is required."
+      ]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The platform must be guided and supported during its motion to maintain alignment and stability.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0007"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": [
+        "Unsupported platform motion could lead to instability or jamming."
+      ]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The device must safely terminate the platform's motion at the limits of its travel.",
+      "derived_from_requirements": ["REQ-0007"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": [
+        "Without stops, the platform could move out of its intended range, leading to unsafe operation."
+      ]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The device must support its own weight and the payload while reacting against the desktop or supporting surface.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": [
+        "If the device cannot react the payload weight to the desk, it will tip or collapse."
+      ]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the platform",
+      "reacted_at_role": "the desktop surface",
+      "direction_class": "AXIAL",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "approximately 1 kg"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the hand crank",
+      "reacted_at_role": "the user's hand",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the housing",
+      "reacted_at_role": "the desktop surface",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the components being assembled",
+      "reacted_at_role": "the assembler's hands or fixtures",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Screw-driven linear actuator with scissor mechanism",
+      "family": "CONVERT_MOTION",
+      "principle": "SCREW_AND_NUT",
+      "obligations_addressed": ["OBL-0002", "OBL-0003", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "obligations_created": ["OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Screw and nut mechanism can convert rotation to translation; travel and load-carrying are analyzable."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Rack and pinion with guide rails",
+      "family": "CONVERT_MOTION",
+      "principle": "RACK_AND_PINION",
+      "obligations_addressed": ["OBL-0002", "OBL-0003", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "obligations_created": ["OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Rack and pinion directly converts rotation to translation; travel is determined by tooth engagement."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "predicates": [
+        "The travel distance of the platform is between 80 mm and 100 mm.",
+        "The platform can support a payload of 1 kg without failure.",
+        "The device operates without jamming or instability.",
+        "All components are enclosed in the housing.",
+        "The user can easily rotate the hand crank.",
+        "The device is safe, plausible, easy to assemble, and manufacturable."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"],
+      "predicates": [
+        "The travel distance of the platform is between 80 mm and 100 mm.",
+        "The platform can support a payload of 1 kg without failure.",
+        "The device operates without jamming or instability.",
+        "All components are enclosed in the housing.",
+        "The user can easily rotate the hand crank.",
+        "The device is safe, plausible, easy to assemble, and manufacturable."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Whether the platform travel is a nominal range with tolerance or a strict band",
+      "why_open": "The ambiguity AMB-0001 leaves the exact tolerance unspecified, which affects kinematic design and acceptance.",
+      "alternatives": ["Nominal with tolerance", "Strict range"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0003"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "Whether the 1 kg payload is a nominal value, upper limit, or range",
+      "why_open": "The ambiguity AMB-0002 and AMB-0004 leave the load specification unclear, affecting structural design and verification.",
+      "alternatives": ["Nominal", "Upper limit", "Range"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002", "AMB-0004"],
+      "blocks": ["OBL-0004"]
+    },
+    {
+      "id": "UNR-0003",
+      "decision": "Which mechanism principle family to use as the primary motion converter",
+      "why_open": "Both screw-and-nut and rack-and-pinion satisfy the obligations, but they differ in self-locking, friction, and cost, which are not yet specified.",
+      "alternatives": ["SCREW_AND_NUT", "RACK_AND_PINION"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0001", "FRE-0002"],
+      "blocks": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The device is intended for use on a desktop or similar flat, stable surface.",
+      "why": "The request says 'desktop platform-lifting device', implying a desktop environment.",
+      "would_be_invalidated_by": "Customer provides a different operating environment."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The hand crank is accessible to the user and the platform is used to lift objects.",
+      "why": "The request describes the user rotating the hand crank to raise/lower the platform.",
+      "would_be_invalidated_by": "If the user interface or intended use is different."
+    },
+    {
+      "id": "ASM-1003",
+      "statement": "The 'approximately 80-100 mm' travel and 'approximately 1 kg' payload are functional requirements with typical tolerances.",
+      "why": "'Approximately' suggests tolerance is acceptable, but exact tolerances are not specified.",
+      "would_be_invalidated_by": "Customer provides exact tolerance requirements."
+    }
+  ]
+}

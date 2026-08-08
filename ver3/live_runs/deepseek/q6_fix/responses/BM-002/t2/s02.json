@@ -1,0 +1,291 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must be a housing enclosing all mechanism components during normal operation.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Contents that are not enclosed cannot be said to be enclosed."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The housing must allow external access to a hand crank for rotation by the user.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["An external hand crank must be reachable by the user to be operable."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The mechanism must translate rotational input from the hand crank into translational motion of an internal platform.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Rotation cannot directly produce translation without a motion conversion element."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The platform must be able to move approximately 80-100 mm in at least one direction (with ambiguity on total versus one direction).",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A specified travel range requires a kinematic configuration that permits that displacement."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must support a payload of approximately 1 kg placed on the platform without failure.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["A payload exerts a load that must be structurally supported."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The mechanism must remain functional without jamming or unstable operation during normal use.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A mechanism that jams or becomes unstable cannot perform its function reliably."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The product must be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["Practical manufacturing and assembly require that parts and processes are feasible."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The platform must move in a controlled manner (raise and lower) without unintended degrees of freedom.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Unconstrained motion paths could lead to uncontrolled motion."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The platform must have a stable support when carrying the payload.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A payload causes forces that must be reacted to maintain stability."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The hand crank must be operable by the user (reachable and able to be turned).",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["If the crank is not accessible, the user cannot rotate it."]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The candidate mechanism must include a motion conversion principle for translating rotation to translation.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Different families (e.g., screw, rack, cam) have distinct motion characteristics."]
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The candidate mechanism must guide the platform along a defined path.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Without guidance, platform motion would be unconstrained."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the internal platform",
+      "reacted_at_role": "the table surface the product stands on",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the internal platform",
+      "reacted_at_role": "the table surface the product stands on",
+      "direction_class": "TRANSVERSE",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "approximately 1 kg"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the external hand crank",
+      "reacted_at_role": "the housing (via internal mechanism)",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Use a screw and nut mechanism to convert rotation to translation.",
+      "family": "CONVERT_MOTION",
+      "principle": "SCREW_AND_NUT",
+      "obligations_addressed": ["OBL-0003", "OBL-0008", "OBL-0011"],
+      "obligations_created": ["OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Screw mechanism provides constrained single-axis motion."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Use a rack and pinion mechanism to convert rotation to translation.",
+      "family": "CONVERT_MOTION",
+      "principle": "RACK_AND_PINION",
+      "obligations_addressed": ["OBL-0003", "OBL-0008", "OBL-0011"],
+      "obligations_created": ["OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Rack and pinion provides translation along a rack."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Use a cam and follower mechanism to convert rotation to translation.",
+      "family": "CONVERT_MOTION",
+      "principle": "CAM_AND_FOLLOWER",
+      "obligations_addressed": ["OBL-0003", "OBL-0008", "OBL-0011"],
+      "obligations_created": ["OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Cam can produce prescribed motion profile."
+      }
+    },
+    {
+      "id": "CND-0004",
+      "summary": "Use a lever linkage mechanism to convert rotation to translation.",
+      "family": "CONVERT_MOTION",
+      "principle": "LEVER_LINKAGE",
+      "obligations_addressed": ["OBL-0003", "OBL-0008", "OBL-0011"],
+      "obligations_created": ["OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Linkage can achieve translation with proper geometry."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0003", "OBL-0008", "OBL-0011", "OBL-0012"],
+      "predicates": ["The platform moves linearly over a range of 80-100 mm.", "The mechanism is enclosed within housing.", "The crank is accessible externally.", "The platform supports 1 kg payload without failure.", "No jamming or unstable operation occurs."]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0003", "OBL-0008", "OBL-0011", "OBL-0012"],
+      "predicates": ["The platform moves linearly over a range of 80-100 mm.", "The mechanism is enclosed within housing.", "The crank is accessible externally.", "The platform supports 1 kg payload without failure.", "No jamming or unstable operation occurs."]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0003", "OBL-0008", "OBL-0011", "OBL-0012"],
+      "predicates": ["The platform moves linearly over a range of 80-100 mm.", "The mechanism is enclosed within housing.", "The crank is accessible externally.", "The platform supports 1 kg payload without failure.", "No jamming or unstable operation occurs."]
+    },
+    {
+      "id": "ACC-0004",
+      "candidate": "CND-0004",
+      "obligations": ["OBL-0003", "OBL-0008", "OBL-0011", "OBL-0012"],
+      "predicates": ["The platform moves linearly over a range of 80-100 mm.", "The mechanism is enclosed within housing.", "The crank is accessible externally.", "The platform supports 1 kg payload without failure.", "No jamming or unstable operation occurs."]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "The travel distance ambiguity: does 'approximately 80-100 mm' refer to total travel or one direction?",
+      "why_open": "The requirement does not specify whether the 80-100 mm is total travel or one-directional travel.",
+      "alternatives": ["total travel", "one direction"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0004"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "The system boundary ambiguity: what loads must be reacted and where?",
+      "why_open": "The system boundary is not specified, making it unclear what loads are internal and external.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": ["OBL-0005", "OBL-0009"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The external hand crank is part of the product and is accessible from outside the housing.",
+      "why": "The text says 'external hand crank' and 'user should rotate', implying it is accessible.",
+      "would_be_invalidated_by": "If the crank is not part of the product or not accessible."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The device is placed on a stable horizontal surface.",
+      "why": "The term 'desktop' suggests it is placed on a tabletop.",
+      "would_be_invalidated_by": "If the device is held or mounted differently."
+    }
+  ]
+}

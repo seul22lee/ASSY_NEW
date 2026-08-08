@@ -1,0 +1,150 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "I need a clamp that fixes a monitor arm to the edge of my desk.",
+      "locator": "SRC-0001",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "Desk edges here are between 18 and 40 mm thick.",
+      "locator": "SRC-0002",
+      "quantity_kinds": ["length"],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "Once it is tight it must not slip or rotate under the weight of the arm.",
+      "locator": "SRC-0003",
+      "quantity_kinds": ["force"],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "I want to be able to take it off and move it to another desk without any tools.",
+      "locator": "SRC-0004",
+      "quantity_kinds": [],
+      "directionality": "none"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "I need a clamp that fixes a monitor arm to the edge of my desk.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "The clamp is able to fix a monitor arm to the edge of a desk.",
+      "source_locator": "SRC-0001",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "Desk edges here are between 18 and 40 mm thick.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "The clamp fits desk edges with thickness between 18 and 40 mm.",
+      "source_locator": "SRC-0002",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "Once it is tight it must not slip or rotate under the weight of the arm.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "The clamp does not slip or rotate when tightened and subjected to the weight of the arm.",
+      "source_locator": "SRC-0003",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "I want to be able to take it off and move it to another desk without any tools.",
+      "kind": "USABILITY",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "The clamp can be removed and moved to another desk without the use of tools.",
+      "source_locator": "SRC-0004",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Clamp installation and operation",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the clamp and the monitor arm. Outside: the desk edge and the environment.",
+      "actors": ["ACT-0001", "ACT-0002"],
+      "environment": "A desk with an edge thickness between 18 and 40 mm."
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Clamp removal and relocation",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the clamp and the monitor arm. Outside: the desk edge and the environment.",
+      "actors": ["ACT-0001", "ACT-0002"],
+      "environment": "A desk with an edge thickness between 18 and 40 mm."
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "User",
+      "must_reach": ["Clamp", "Desk edge"]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "Monitor arm",
+      "must_reach": ["Clamp"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "The mechanism by which the clamp fixes the monitor arm to the desk edge.",
+      "why_free": "The request does not specify how the clamp should achieve this."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "The mechanism by which the clamp is tightened.",
+      "why_free": "The request does not specify how the clamp is tightened."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "The mechanism by which the clamp is removed and moved to another desk.",
+      "why_free": "The request does not specify how the removal is accomplished."
+    },
+    {
+      "id": "FRE-0004",
+      "decision": "The materials used for the clamp.",
+      "why_free": "The request does not specify materials."
+    },
+    {
+      "id": "FRE-0005",
+      "decision": "The dimensions of the clamp (other than the range of desk edge thickness it must fit).",
+      "why_free": "The request does not specify dimensions."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The weight of the arm is not specified.",
+      "conflicting_clauses": [],
+      "resolvable_when": "Additional information about the monitor arm's weight is obtained.",
+      "block_scopes": ["REQ-0003"]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The clamp must fit desk edges between 18 and 40 mm thick, but the clamp's own size is not specified.",
+      "conflicting_clauses": [],
+      "resolvable_when": "Further design decisions are made."
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The monitor arm is attached to the clamp.",
+      "why": "The request implies a monitor arm is fixed to the desk via the clamp.",
+      "would_be_invalidated_by": "The request is reinterpreted to mean the clamp is used to fix the arm directly to the desk without a separate attachment."
+    }
+  ]
+}

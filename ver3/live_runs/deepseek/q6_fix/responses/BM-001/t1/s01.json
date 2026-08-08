@@ -1,0 +1,143 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "locator": "REQ-001",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "locator": "REQ-002",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "locator": "REQ-003",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "locator": "REQ-004",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0005",
+      "verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "locator": "REQ-005",
+      "quantity_kinds": [],
+      "directionality": "none"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "a compact desktop storage box with a reusable latch exists",
+      "source_locator": "REQ-001",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "the box opens and closes repeatedly without accidental opening during normal handling",
+      "source_locator": "REQ-002",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "kind": "USABILITY",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "the latch is easy for a user to operate while remaining secure during transport",
+      "source_locator": "REQ-003",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "kind": "PROCESS",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "the product is suitable for low-cost manufacturing and practical for desktop use",
+      "source_locator": "REQ-004",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0005",
+      "statement_verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "kind": "PROCESS",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "the design is mechanically plausible and easy to assemble",
+      "source_locator": "REQ-005",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Open and close operation",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the storage box and its latch. Outside: the user's hands and the surrounding environment, including the desktop or any surface the box rests on.",
+      "actors": ["ACT-0001"],
+      "environment": "normal handling conditions on a desktop"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Transport",
+      "kind": "TRANSPORT",
+      "system_boundary": "Inside: the storage box and its latch. Outside: the external environment and external forces (e.g., jostling, gravity) that may act on the box during transport.",
+      "actors": [],
+      "environment": "during transport, various handling conditions"
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Manufacturing and assembly",
+      "kind": "ASSEMBLY",
+      "system_boundary": "Inside: the product components and their assembly process. Outside: the manufacturing equipment and personnel performing the assembly.",
+      "actors": [],
+      "environment": "manufacturing facility, assembly process"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": ["the latch", "the box opening/closing mechanism"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Materials, dimensions, and manufacturing processes are not specified.",
+      "why_free": "The text only states performance and cost goals, not specific technical solutions."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The text does not define 'normal handling' or 'easy to operate'.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When detailed user scenarios or measurable criteria are provided.",
+      "block_scopes": ["REQ-0002", "REQ-0003"]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The text does not specify the environment for transport (e.g., vibration, impact, temperature).",
+      "conflicting_clauses": [],
+      "resolvable_when": "When transport conditions are defined for testing.",
+      "block_scopes": ["REQ-0003"]
+    }
+  ],
+  "assumptions": []
+}

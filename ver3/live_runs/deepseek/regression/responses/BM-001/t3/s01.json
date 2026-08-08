@@ -1,0 +1,163 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "locator": "REQ-0001",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "locator": "REQ-0002",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "locator": "REQ-0003",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "locator": "REQ-0004",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0005",
+      "verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "locator": "REQ-0005",
+      "quantity_kinds": [],
+      "directionality": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "compact desktop storage box with a reusable latch",
+      "source_locator": "SRC-0001",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "open and close repeatedly without accidental opening during normal handling",
+      "source_locator": "SRC-0002",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "kind": "USABILITY",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "easy for a user to operate while remaining secure during transport",
+      "source_locator": "SRC-0003",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "kind": "PROCESS",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "suitable for low-cost manufacturing and should be practical for desktop use",
+      "source_locator": "SRC-0004",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0005",
+      "statement_verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "kind": "PROCESS",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "mechanically plausible and easy to assemble",
+      "source_locator": "SRC-0005",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Normal handling",
+      "kind": "OPERATION",
+      "system_boundary": "storage box",
+      "actors": [
+        "ACT-0001"
+      ],
+      "environment": null
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Transport",
+      "kind": "TRANSPORT",
+      "system_boundary": "storage box",
+      "actors": [],
+      "environment": null
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": [
+        "latch"
+      ]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "The specific dimensions, materials, and mechanism for the latch are not specified.",
+      "why_free": "The request leaves these unspecified."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "The specific manufacturing process is not specified.",
+      "why_free": "The request only says 'low-cost manufacturing' without specifying a process."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "The specific assembly method is not specified.",
+      "why_free": "The request only says 'easy to assemble' without specifying a method."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The meaning of 'normal handling' is ambiguous.",
+      "resolvable_when": "When more context about typical usage is provided.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The meaning of 'secure during transport' is ambiguous.",
+      "resolvable_when": "When transport conditions are defined.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0003",
+      "statement": "The meaning of 'easy' for the user to operate is ambiguous.",
+      "resolvable_when": "When usability criteria are provided.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The box is intended for desktop use.",
+      "why": "The request states 'desktop storage box'.",
+      "would_be_invalidated_by": "If the environment of use is not a desktop."
+    }
+  ]
+}

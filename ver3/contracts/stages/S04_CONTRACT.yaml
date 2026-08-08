@@ -1,0 +1,169 @@
+# STAGE 04 CONTRACT — placement, motion and spatial feasibility
+#
+# ONE numbered stage, TWO declared passes at different fidelities. The selection
+# gate sits between them. Numbering is preserved because the frozen Oracle
+# stage_expectations reference s04 by name.
+
+schema_version: "0.1.0"
+stage_id: s04
+passes: [s04a, s04b]
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+derived_from: docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md
+
+why_two_passes: >
+  INV-007 forbids selection before feasibility evidence at equal obligation
+  coverage, and that principle is right. But full swept feasibility per candidate
+  is unaffordable: the Oracle packs list seven and five admissible fixtures, and
+  the manual process carried two, one and one. Splitting the fidelity keeps the
+  principle and pays for it.
+
+# =====================================================================
+s04a:
+  name: envelope and reach feasibility
+  engineering_question: >
+    Can any of these candidates fit, reach and be approached at all?
+  engineering_responsibility: >
+    Kill candidates cheaply, each for a stated geometric reason.
+  runs_on: "EVERY retained candidate"
+
+  required_inputs:
+    from_s03: [Body, RigidGroup, Joint, Configuration, FunctionalRegion, AssemblyStep, actor_reach_requirements]
+
+  required_discoveries:
+    - "a provisional extent for every body"
+    - "whether the declared functional regions can coexist"
+    - "whether every actor can reach what it must operate"
+    - "whether each assembly step's access side is geometrically available"
+
+  owned_decisions:
+    creates: [Envelope, endpoint State poses at PROVISIONAL maturity, FunctionalRegion volumes]
+    also_owns: ["the elimination of a candidate on geometric grounds"]
+
+  absolute_scale_rule: >
+    Where the source states no size - the common case - overall scale is a
+    DECLARED FREE PARAMETER with a representative value, recorded as BOUNDED
+    with the Freedom it derives from. Never a silent choice, and never
+    authoritative here.
+
+  prohibited_decisions:
+    - "any authoritative dimension"
+    - "any feature"
+    - "which surviving candidate wins, before the gate"
+
+  allowed_unresolved: ["every internal dimension", "all feature detail"]
+
+  maturity_expectations:
+    geometry: [ENVELOPES, ENDPOINT_POSES]
+    authority: PROVISIONAL
+    note: "AABB interference is CONSERVATIVE: no-overlap is a proof, overlap is not."
+
+  deterministic_exit_checks:
+    - id: S04A-C1
+      check: "every body has an extent with maturity PROVISIONAL"
+    - id: S04A-C2
+      check: "every FunctionalRegion has a volume"
+    - id: S04A-C3
+      check: "every Actor has a reach result"
+    - id: S04A-C4
+      check: "AABB interference computed per configuration"
+    - id: S04A-C5
+      check: "every eliminated candidate carries a geometric reason"
+    - id: S04A-C6
+      check: "absolute scale, where free, is recorded BOUNDED with its Freedom reference"
+
+selection_gate:
+  position: "between s04a and s04b"
+  precondition: >
+    Every retained candidate carries s03 completeness and s04a feasibility at
+    equal obligation coverage.
+  tie_rule: >
+    If more than one candidate survives with no discriminating evidence, that is
+    an UnresolvedDecision naming what would discriminate. Never an arbitrary
+    pick (R-17), never a score (R-16).
+
+# =====================================================================
+s04b:
+  name: placement, motion and spatial proof
+  engineering_question: >
+    Where is everything in each state, what path connects the states, and is that
+    path - and every assembly path - actually clear?
+  engineering_responsibility: >
+    Prove spatial feasibility over PATHS, not over endpoints.
+  runs_on: "the selected candidate only"
+
+  required_inputs:
+    from_s03: [Joint, MobilityExpectation, blocking_relations, AssemblyStep, LoadPath]
+    from_s04a: [Envelope, FunctionalRegion volumes, SelectionDecision]
+
+  required_discoveries:
+    - "the metric placement of every joint frame"
+    - "the pose of every rigid group in every state"
+    - "the path between states, with declared sampling"
+    - "the swept volume of every moving group"
+    - "whether each provisional load path's reaction region is unoccupied throughout the motion"
+    - "whether each assembly step has a clear insertion path IN THE CONFIGURATION PRODUCED BY THE PRECEDING STEPS"
+
+  owned_decisions:
+    creates: [located Joint frames, State, Transition, SweptVolume, Witness declarations]
+    extends: [LoadPath maturity to SPATIALLY_INSTANTIATED, Interface engagement_site]
+
+  pose_law_rule: >
+    The pose law is NOT authored. With located joint frames and joint
+    coordinates, every pose is DERIVABLE. Nothing downstream needs a hand-written
+    pose function - which is exactly what hid inside build.py in all three
+    references and produced the s07 input contradiction.
+
+  prohibited_decisions:
+    - "feature shape"
+    - "final dimensions"
+    - "a functionally-named state (waypoint states for a path are permitted)"
+    - "a render as an authoritative artifact"
+      # R-01, INV-005
+    - "a constant offset presented as a motion model"
+      # R-07
+    - "adaptive sampling that is not declared"
+
+  allowed_unresolved:
+    - "all feature detail and all dimensions"
+    - "any frame placement that depends on a feature envelope - these stay PROVISIONAL and settle in the convergence block"
+
+  maturity_expectations:
+    geometry: [POSES, MOTION_PATHS, SWEPT_OCCUPANCY]
+    authority: >
+      AUTHORITATIVE except for placements marked PROVISIONAL pending feature
+      envelopes. Per-value maturity is what makes this expressible.
+
+  deterministic_exit_checks:
+    - id: S04B-C1
+      check: "sampling is declared and non-adaptive"
+    - id: S04B-C2
+      check: "interior samples exist; endpoint-only sampling is REFUSED"
+      rationale: "NEG-BM-003-006; endpoint-only evidence is the most effective way to make an unbuildable mechanism look correct"
+    - id: S04B-C3
+      check: "every FunctionalRegion has an occupancy result in every state and along every path"
+    - id: S04B-C4
+      check: "every AssemblyStep has a swept-path result computed against the preceding configuration"
+    - id: S04B-C5
+      check: "every provisional LoadPath is confirmed or refuted"
+    - id: S04B-C6
+      check: "every declared blocking relation is shown to hold in every configuration where it is claimed"
+    - id: S04B-C7
+      check: "every compliant joint coordinate is ZERO in every state outside its activation set"
+      rationale: "without this, activation_window is an unchecked list of names"
+    - id: S04B-C8
+      check: "every check declares its input value set"
+    - id: S04B-C9
+      check: "every Interface has a metric engagement_site"
+      rationale: "the invalidation cone is computed from these declarations"
+
+  next_stage_consumer_requirement:
+    consumer: s05
+    needs: [located_joint_frames, states_with_joint_coordinates, paths_with_declared_sampling, swept_volumes, engagement_sites, metric_functional_regions, confirmed_load_paths]
+
+llm_role: >
+  Low. This is computation. The LLM proposes candidate placements for a solver
+  to check.
+knowledge_base_role: >
+  Sampling policies per motion class; standard probe sets - escape probes,
+  rotation probes, captivity probes.

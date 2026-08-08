@@ -1,0 +1,344 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "Housing: holds items, guides gates, transfers load to wall",
+      "instance_identity": "single molded or fabricated part",
+      "addresses_obligations": ["OBL-0001", "OBL-0006", "OBL-0007"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "Gate A: first closure, admits items into metering volume",
+      "instance_identity": "single part, slides vertically",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "Gate B: second closure, releases items from metering volume",
+      "instance_identity": "single part, slides vertically",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    },
+    {
+      "id": "BOD-0004",
+      "role": "Linkage: keeps gates out of phase, transmits actuation",
+      "instance_identity": "single compliant member connecting both gates",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    },
+    {
+      "id": "BOD-0005",
+      "role": "Return spring: returns gates to rest state",
+      "instance_identity": "single extension spring or elastic element",
+      "addresses_obligations": ["OBL-0002", "OBL-0003"]
+    },
+    {
+      "id": "BOD-0006",
+      "role": "Wall mount: interfaces with wall, reacts all loads",
+      "instance_identity": "single bracket or flange, part of housing?",
+      "addresses_obligations": ["OBL-0006", "OBL-0007"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["housing main body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0001",
+      "members": ["mounting flange"],
+      "is_default": false
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0002",
+      "members": ["gate A main"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0003",
+      "members": ["gate B main"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0004",
+      "members": ["linkage beam"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0006",
+      "body": "BOD-0004",
+      "members": ["linkage flexure ends"],
+      "is_default": false
+    },
+    {
+      "id": "RGP-0007",
+      "body": "BOD-0005",
+      "members": ["spring coils"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0008",
+      "body": "BOD-0006",
+      "members": ["wall mount rigid part"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0003",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0004",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0005",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "BENDING",
+        "direction": "TY",
+        "required_travel": "small displacement relative to gate travel",
+        "allowable_travel_status": "TO_BE_DETERMINED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "flexure connecting gate A to linkage",
+        "root_interface": "IFC-0004",
+        "activation_window": "always during relative motion"
+      }
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0004",
+      "child_group": "RGP-0005",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "BENDING",
+        "direction": "TY",
+        "required_travel": "small displacement relative to gate travel",
+        "allowable_travel_status": "TO_BE_DETERMINED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "flexure connecting gate B to linkage",
+        "root_interface": "IFC-0005",
+        "activation_window": "always during relative motion"
+      }
+    },
+    {
+      "id": "JNT-0005",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0006",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0008",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0007",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0007",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "EXTENSION",
+        "direction": "TY",
+        "required_travel": "enough to return gates",
+        "allowable_travel_status": "TO_BE_DETERMINED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "spring connecting housing to gate A",
+        "root_interface": "IFC-0006",
+        "activation_window": "always"
+      }
+    },
+    {
+      "id": "JNT-0008",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0007",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "EXTENSION",
+        "direction": "TY",
+        "required_travel": "enough to return gates",
+        "allowable_travel_status": "TO_BE_DETERMINED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "spring connecting housing to gate B",
+        "root_interface": "IFC-0007",
+        "activation_window": "always"
+      }
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "GATE A closed",
+      "addresses_obligations": ["OBL-0002", "OBL-0001"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "GATE B closed",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0001", "BOD-0002", "BOD-0003"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "gates move freely in slots",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0002", "BOD-0004"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "flexure connects gate A to linkage",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0003", "BOD-0004"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "flexure connects gate B to linkage",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0006",
+      "bodies": ["BOD-0001", "BOD-0005"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "spring attached to housing and gate A",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0007",
+      "bodies": ["BOD-0001", "BOD-0005"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "spring attached to housing and gate B",
+      "addresses_obligations": ["OBL-0002"]
+    },
+    {
+      "id": "IFC-0008",
+      "bodies": ["BOD-0001", "BOD-0006"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "wall mount rigidly attached to housing",
+      "addresses_obligations": ["OBL-0006", "OBL-0007"]
+    },
+    {
+      "id": "IFC-0009",
+      "bodies": ["BOD-0006"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "wall mount fixed to wall",
+      "addresses_obligations": ["OBL-0006"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "rest",
+      "kind": "REST",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "fill",
+      "kind": "ACTIVE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006"]
+    },
+    {
+      "id": "CFG-0003",
+      "name": "dispense",
+      "kind": "ACTIVE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the surface that is pressed to release an item", "the released item", "the opening through which items are put in"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001", "BOD-0006"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0004",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001", "BOD-0002", "BOD-0003"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the release boundary"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "how one item is separated from the group",
+      "why_open": "Five principle families meter a discrete quantity and the requirements name none. Two of the five depend on contact or deflection, for which no route exists here; three make the claim geometrically. That difference is a fact about the available evidence, not a reason to prefer one.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003", "CND-0004", "CND-0005"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["FRE-0001", "AMB-0001"],
+      "blocks": ["OBL-0002"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "whether the pressed surface returns on its own or is returned by the user",
+      "why_open": "The requirements say the surface is pressed and do not say what happens after. Every candidate creates a return obligation and none of them is required by the input.",
+      "alternatives": ["it returns on its own", "the user returns it", "it does not return between uses"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0007"],
+      "blocks": ["OBL-0003"]
+    },
+    {
+      "id": "UNR-0003",
+      "decision": "how the product is fixed to the wall",
+      "why_open": "The wall is the reaction site for every load in the product and nothing about it is stated: not its construction, not the permitted fixings, not the orientation of the mounting face.",
+      "alternatives": ["a fixing that penetrates the wall", "a fixing that bears on the wall surface", "a fixing that hangs from something already fixed"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0003", "AMB-0005"],
+      "blocks": ["OBL-0006"]
+    }
+  ]
+}

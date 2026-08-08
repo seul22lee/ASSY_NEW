@@ -1,0 +1,167 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The clamp must be attached to the desk edge and hold the monitor arm.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": [
+        "A clamp that is not attached to the desk edge cannot hold the monitor arm.",
+        "A clamp that does not hold the monitor arm does not satisfy the requirement."
+      ]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The clamp must accommodate desk edges with thickness between 18 and 40 mm.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "derivation_premises": [
+        "A clamp that cannot be fitted to a desk edge of a given thickness does not meet the requirement."
+      ]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The clamp must not slip or rotate relative to the desk edge when loaded.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "derivation_premises": [
+        "A clamp that slips or rotates under load does not hold the monitor arm in position."
+      ]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The clamp must be removable and reattachable without the use of tools.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": [
+        "A clamp that requires tools to remove or attach does not satisfy the requirement."
+      ]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the clamp's contact with the desk edge",
+      "reacted_at_role": "the desk edge",
+      "direction_class": "TRANSVERSE",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the clamp's contact with the desk edge",
+      "reacted_at_role": "the desk edge",
+      "direction_class": "MOMENT",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the clamp's contact with the desk edge",
+      "reacted_at_role": "the desk edge",
+      "direction_class": "AXIAL",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Clamp using a screw mechanism to apply clamping force.",
+      "family": "ACTUATE",
+      "principle": "DIRECT_MANUAL",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction and holding force cannot be analyzed at this stage."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Clamp using a cam lever to apply clamping force.",
+      "family": "ACTUATE",
+      "principle": "DIRECT_MANUAL",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0006"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction and holding force cannot be analyzed at this stage."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "predicates": [
+        "The clamp can be attached to a desk edge of thickness between 18 and 40 mm.",
+        "When loaded, the clamp does not slip or rotate relative to the desk edge.",
+        "The clamp can be removed and reattached without tools.",
+        "The clamp provides a reaction point for the monitor arm's weight."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0006"],
+      "predicates": [
+        "The clamp can be attached to a desk edge of thickness between 18 and 40 mm.",
+        "When loaded, the clamp does not slip or rotate relative to the desk edge.",
+        "The clamp can be removed and reattached without tools.",
+        "The clamp provides a reaction point for the monitor arm's weight."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Whether the clamp must be adjustable to accommodate different desk edge thicknesses or whether the requirement allows a fixed size that fits the stated range.",
+      "why_open": "The phrase 'without any tools' leaves it open whether the clamp must be tool-free adjustable or can be tightened by hand without tools.",
+      "alternatives": ["Tool-free adjustable", "Hand-tightened only"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0002"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The monitor arm is a separate item that attaches to the clamp.",
+      "why": "The requirements do not define the monitor arm.",
+      "would_be_invalidated_by": "If the monitor arm is integrated into the clamp."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "A suitable reaction point on the desk edge is available.",
+      "why": "The clamp must react forces to the desk edge.",
+      "would_be_invalidated_by": "If the desk edge is not able to support the loads."
+    }
+  ]
+}

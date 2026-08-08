@@ -1,0 +1,227 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must accept a force from the user's foot to move from resting to an actuated position.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The machine receives a signal only if a force is applied to the pedal."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must return to its resting position on its own when the user's foot is removed.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The pedal will not return to rest unless an internal mechanism provides a restoring force."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The product must resist transverse forces applied sideways without moving from its resting position.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["The pedal would move sideways if the transverse force exceeds the static friction or geometric restraint."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The product must communicate a signal to the machine.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "derivation_premises": ["The pedal must be coupled to the machine somehow to transmit a signal."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must be able to be mounted to a workbench.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "derivation_premises": ["The pedal must be attached to the workbench to be useful."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the surface the user's foot presses",
+      "reacted_at_role": "the mounting interface to the workbench",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the body the product grips",
+      "reacted_at_role": "the surface the product stands on",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the side surface that may be brushed",
+      "reacted_at_role": "the mounting interface to the workbench",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A hinged pedal with a spring return and an electrical signal.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "REVOLUTE_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "A revolute joint with a torsion spring is a simple mechanism to model."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A sliding pedal with a spring return and an electrical signal.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "PRISMATIC_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "A prismatic joint with a return spring can be modeled with ideal joints."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A compliant flexure pedal with spring return and electrical signal.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "COMPLIANT_FLEXURE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "Detailed compliance analysis is not available at this stage."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "predicates": [
+        "When the user presses the pedal, the signal is activated.",
+        "When the user removes the foot, the pedal returns to its resting position.",
+        "When a transverse force is applied, the pedal does not move.",
+        "The pedal can be mounted to the workbench."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "predicates": [
+        "When the user presses the pedal, the signal is activated.",
+        "When the user removes the foot, the pedal returns to its resting position.",
+        "When a transverse force is applied, the pedal does not move.",
+        "The pedal can be mounted to the workbench."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "predicates": [
+        "When the user presses the pedal, the signal is activated.",
+        "When the user removes the foot, the pedal returns to its resting position.",
+        "When a transverse force is applied, the pedal does not move.",
+        "The pedal can be mounted to the workbench."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which principle family to use for the relative motion of the pedal",
+      "why_open": "All three principle families (revolute, prismatic, compliant flexure) can in principle satisfy the kinematic obligations.",
+      "alternatives": [
+        "REVOLUTE_PAIR",
+        "PRISMATIC_PAIR",
+        "COMPLIANT_FLEXURE"
+      ],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": []
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "How the signal is transmitted to the machine",
+      "why_open": "The signal could be electrical, mechanical, or other; not specified.",
+      "alternatives": [
+        "Electrical",
+        "Mechanical",
+        "Other"
+      ],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": ["OBL-0004"]
+    },
+    {
+      "id": "UNR-0003",
+      "decision": "What constitutes a sideways brush",
+      "why_open": "The angle or plane of the brush is not specified.",
+      "alternatives": ["Sideways in the horizontal plane", "Sideways at an angle", "Sideways from any direction"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0003"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The foot pedal is intended to be operated by a human foot.",
+      "why": "The request says 'I take my foot off'.",
+      "would_be_invalidated_by": "If the pedal is operated by other means"
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The machine is external to the foot pedal.",
+      "why": "The request says 'send a signal to the machine'.",
+      "would_be_invalidated_by": "If the machine is internal"
+    },
+    {
+      "id": "ASM-1003",
+      "statement": "The pedal is mounted to the workbench.",
+      "why": "A foot pedal for a workbench must be attached to the workbench to be used.",
+      "would_be_invalidated_by": "If the pedal is portable or hand-held"
+    }
+  ]
+}

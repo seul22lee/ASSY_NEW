@@ -1,0 +1,221 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "main housing and enclosure base",
+      "instance_identity": "single part, fixed base",
+      "addresses_obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0007", "OBL-0009", "OBL-0010", "OBL-0011"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "closing element (lid)",
+      "instance_identity": "single part, rotates",
+      "addresses_obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "compliant catch",
+      "instance_identity": "single part with two rigid regions connected by a living hinge",
+      "addresses_obligations": ["OBL-0002", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0011"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["RGP-0001"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["RGP-0002"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["RGP-0003"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0003",
+      "members": ["RGP-0004"],
+      "is_default": false
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0004",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": {
+        "mode": "PRESCRIBED_KINEMATIC",
+        "direction": "+Y",
+        "required_travel": "UNSPECIFIED",
+        "allowable_travel_status": "UNSPECIFIED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "living hinge",
+        "root_interface": "IFC-0005",
+        "activation_window": "closing and opening motion"
+      }
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "ENGAGED",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CLEARANCE",
+      "nominal_status": "NOT",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "ENGAGED",
+      "addresses_obligations": ["OBL-0005", "OBL-0006", "OBL-0007"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "ENGAGED",
+      "addresses_obligations": ["OBL-0005"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0003", "BOD-0003"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "ENGAGED",
+      "addresses_obligations": ["OBL-0005", "OBL-0006", "OBL-0007"]
+    },
+    {
+      "id": "IFC-0006",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "ENGAGED",
+      "addresses_obligations": ["OBL-0005", "OBL-0007"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "closed",
+      "kind": "CLOSED",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "open",
+      "kind": "OPEN",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001", "BOD-0002"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the interior of the enclosed volume"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0002", "BOD-0003"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the retaining function's release"]
+    },
+    {
+      "id": "FRG-0003",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": [],
+      "reach_targets": []
+    },
+    {
+      "id": "FRG-0004",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001", "BOD-0002"],
+      "required_by_actors": [],
+      "reach_targets": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "size and dimensions of the product",
+      "why_open": "AMB-0001",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001", "FRE-0004"],
+      "blocks": ["OBL-0013"]
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "disturbance magnitudes for normal handling and transport",
+      "why_open": "AMB-0002",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": ["OBL-0006"]
+    },
+    {
+      "id": "UNR-1003",
+      "decision": "acceptable user effort for release",
+      "why_open": "AMB-0003",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0003"],
+      "blocks": ["OBL-0007"]
+    },
+    {
+      "id": "UNR-1004",
+      "decision": "cost target and manufacturing process",
+      "why_open": "AMB-0004",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0004", "FRE-0005"],
+      "blocks": ["OBL-0012"]
+    },
+    {
+      "id": "UNR-1005",
+      "decision": "what contents are stored and internal constraints",
+      "why_open": "AMB-0005",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0005", "FRE-0006"],
+      "blocks": ["OBL-0001"]
+    },
+    {
+      "id": "UNR-1006",
+      "decision": "cycle count for durability",
+      "why_open": "AMB-0006",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0006"],
+      "blocks": []
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The dispenser must be mountable on a wall.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["A wall-mounted product must have a mounting interface that can be attached to a vertical surface."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The dispenser must hold approximately twenty items.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A container must have internal volume sufficient to accommodate the stated number of items."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The dispenser must release exactly one item per lever press.",
+      "derived_from_requirements": ["REQ-0003", "REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["To release exactly one item, the mechanism must have a motion path that isolates a single item and prevents multiple from being dispensed."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The dispenser must allow refilling from the top without removal from the wall.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001", "ACT-0002"],
+      "derivation_premises": ["A top opening must be accessible from above while the dispenser is fixed to the wall."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The dispenser must operate without jamming when nearly empty.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Jamming occurs when a mechanism's moving parts are obstructed; thus the mechanism must maintain clear motion paths even with minimal load."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The dispenser must support the weight of approximately twenty items.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A container holding items must be able to support their gravitational load without failure."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The dispenser must withstand the force applied by the user when pressing the lever.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["An external force on the lever must be transmitted through the structure without failure."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the dispenser and its lever",
+      "reacted_at_role": "the wall it is mounted on",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the dispenser and its contents",
+      "reacted_at_role": "the wall it is mounted on",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the dispenser",
+      "reacted_at_role": "the wall it is mounted on",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Gravity-fed dispenser with a lever-actuated gate",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "GATED_PAIR",
+      "obligations_addressed": ["OBL-0002", "OBL-0003", "OBL-0005", "OBL-0006"],
+      "obligations_created": ["OBL-0008", "OBL-0009"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can assess the gating mechanism's motion to ensure single-item release."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Rotary indexer with lever-operated indexing rotor",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "INDEXING_ROTOR",
+      "obligations_addressed": ["OBL-0002", "OBL-0003", "OBL-0005", "OBL-0006"],
+      "obligations_created": ["OBL-00010"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can verify the indexing motion and item separation."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Auger/screw dispenser with lever-operated rotation",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "INDEXING_ROTOR",
+      "obligations_addressed": ["OBL-0002", "OBL-0003", "OBL-0005", "OBL-0006"],
+      "obligations_created": ["OBL-00010"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can verify the screw rotation and item metering."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007"],
+      "predicates": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which release mechanism principle to adopt",
+      "why_open": "Multiple principles can satisfy the single-item release obligation; no evidence yet distinguishes them.",
+      "alternatives": ["GATED_PAIR", "INDEXING_ROTOR", "INDEXING_ROTOR"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0003"],
+      "blocks": ["OBL-0003"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "The size of 'small items'",
+      "why_open": "Item dimensions are undefined, affecting volume and mechanism geometry.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0002"]
+    },
+    {
+      "id": "UNR-0003",
+      "decision": "Exact mounting method",
+      "why_open": "Wall-mounted requirement does not specify the mounting technique.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": ["OBL-0001"]
+    },
+    {
+      "id": "UNR-0004",
+      "decision": "Refill mechanism design",
+      "why_open": "Top refill requirement does not specify the opening or closure mechanism.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0004"],
+      "blocks": ["OBL-0004"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The dispenser is for a single type of small item.",
+      "why": "Not stated but implied by the need to hold a specific quantity.",
+      "would_be_invalidated_by": "Specification that it must handle multiple item types."
+    }
+  ]
+}

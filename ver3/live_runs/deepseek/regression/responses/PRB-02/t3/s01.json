@@ -1,0 +1,152 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "I need a clamp that fixes a monitor arm to the edge of my desk.",
+      "locator": "REQ-1",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "Desk edges here are between 18 and 40 mm thick.",
+      "locator": "REQ-1",
+      "quantity_kinds": ["BAND"],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "Once it is tight it must not slip or rotate under the weight of the arm.",
+      "locator": "REQ-1",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "I want to be able to take it off and move it to another desk without any tools.",
+      "locator": "REQ-1",
+      "quantity_kinds": [],
+      "directionality": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "I need a clamp that fixes a monitor arm to the edge of my desk.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "clamp fixes a monitor arm to the edge of my desk",
+      "source_locator": "SRC-0001",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "Desk edges here are between 18 and 40 mm thick.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "Desk edges here are between 18 and 40 mm thick",
+      "source_locator": "SRC-0002",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "Once it is tight it must not slip or rotate under the weight of the arm.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "must not slip or rotate under the weight of the arm",
+      "source_locator": "SRC-0003",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "I want to be able to take it off and move it to another desk without any tools.",
+      "kind": "PROCESS",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "take it off and move it to another desk without any tools",
+      "source_locator": "SRC-0004",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Fixation",
+      "kind": "ASSEMBLY",
+      "system_boundary": "clamp and desk edge",
+      "actors": ["ACT-0001"],
+      "environment": null
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Weight holding",
+      "kind": "OPERATION",
+      "system_boundary": "clamp and monitor arm",
+      "actors": [],
+      "environment": null
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Relocation",
+      "kind": "SERVICE",
+      "system_boundary": "clamp and user",
+      "actors": ["ACT-0001"],
+      "environment": null
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": ["clamp", "desk edge"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "How the clamp fixes the monitor arm to the desk edge",
+      "why_free": "The request does not specify a mechanism."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "How the clamp is tightened and released without tools",
+      "why_free": "The request does not specify a mechanism."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "It is unclear what 'tight' means precisely",
+      "resolvable_when": "When the clamping force is defined or measured.",
+      "conflicting_clauses": [],
+      "block_scopes": ["REQ-0003"]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "It is unclear what 'under the weight of the arm' includes",
+      "resolvable_when": "When the arm's weight and any dynamic loads are specified.",
+      "conflicting_clauses": [],
+      "block_scopes": ["REQ-0003"]
+    },
+    {
+      "id": "AMB-0003",
+      "statement": "It is unclear if 'without any tools' applies to both removal and installation",
+      "resolvable_when": "When the user clarifies the intended installation process.",
+      "conflicting_clauses": [],
+      "block_scopes": ["REQ-0004"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The desk edge thickness range is as stated: 18-40 mm.",
+      "why": "The request explicitly states 'between 18 and 40 mm thick'.",
+      "would_be_invalidated_by": "If the user provides a different thickness range."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The clamp is intended to be used on a desk edge, not any other surface.",
+      "why": "The request says 'fixes a monitor arm to the edge of my desk'.",
+      "would_be_invalidated_by": "If the user indicates other mounting surfaces."
+    }
+  ]
+}

@@ -1,0 +1,251 @@
+{
+  "obligations": [
+    {
+      "obligation_id": "OBL-0001",
+      "requirement_ids": ["REQ-0001"],
+      "description": "The product must provide an enclosed volume that can contain contents.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "notes": "The enclosed volume is required for storage. Its existence is a configuration property."
+    },
+    {
+      "obligation_id": "OBL-0002",
+      "requirement_ids": ["REQ-0002"],
+      "description": "A retaining function must be engageable and releasable multiple times without destruction.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "notes": "The latch must allow repeated engagement and release, implying motion reversibility."
+    },
+    {
+      "obligation_id": "OBL-0003",
+      "requirement_ids": ["REQ-0003"],
+      "description": "There must be a traversable path between open and closed configurations, in both directions.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "notes": "Requires a continuous motion path from closed to open and back."
+    },
+    {
+      "obligation_id": "OBL-0004",
+      "requirement_ids": ["REQ-0004"],
+      "description": "The closed configuration must not transition to open without a deliberate action.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "notes": "Need a latch/hold that prevents unintended opening under normal handling loads."
+    },
+    {
+      "obligation_id": "OBL-0005",
+      "requirement_ids": ["REQ-0005"],
+      "description": "The effort a user applies to release the retaining function must be 'easy'.",
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0001"],
+      "notes": "Difficulty depends on mechanism; requires quantitative criterion (AMB-0003). Route unavailable."
+    },
+    {
+      "obligation_id": "OBL-0006",
+      "requirement_ids": ["REQ-0006"],
+      "description": "The retaining function must remain engaged after a transport disturbance.",
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "notes": "Must withstand transport loads without disengaging. Magnitude unspecified (AMB-0002)."
+    },
+    {
+      "obligation_id": "OBL-0007",
+      "requirement_ids": ["REQ-0007"],
+      "description": "The product must have a unit manufacturing cost suitable for low-cost manufacturing.",
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "notes": "Material and process not specified (FRE-0005), cost target not given (AMB-0004)."
+    },
+    {
+      "obligation_id": "OBL-0008",
+      "requirement_ids": ["REQ-0008"],
+      "description": "The product must occupy a space practical for desktop use.",
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "notes": "Must fit on a desk; no dimension given (AMB-0001)."
+    },
+    {
+      "obligation_id": "OBL-0009",
+      "requirement_ids": ["REQ-0009"],
+      "description": "All declared relationships must have a physical realization.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "notes": "Mechanical plausibility requires that the intended functions are achievable."
+    },
+    {
+      "obligation_id": "OBL-0010",
+      "requirement_ids": ["REQ-0010"],
+      "description": "There must be an ordered installation sequence with clear path for every part.",
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "notes": "Depends on part division (FRE-0003) and assembly sequence."
+    }
+  ],
+  "load_cases": [
+    {
+      "load_case_id": "LC-0001",
+      "requirement_ids": ["REQ-0004"],
+      "scenario": "SCN-0002",
+      "description": "Normal handling may apply forces to the product that could cause accidental opening.",
+      "direction": "NONE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED",
+      "on_role": "BOX_BODY",
+      "reacted_at_role": "CONTACT_POINT",
+      "notes": "Disturbance magnitude unspecified (AMB-0002)."
+    },
+    {
+      "load_case_id": "LC-0002",
+      "requirement_ids": ["REQ-0006"],
+      "scenario": "SCN-0003",
+      "description": "Transport may apply dynamic loads that could cause unintended release.",
+      "direction": "NONE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED",
+      "on_role": "BOX_BODY",
+      "reacted_at_role": "CARRIER_CONTACT",
+      "notes": "Disturbance magnitude unspecified (AMB-0002)."
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "CAND-0001",
+      "name": "Hinged lid with latch",
+      "functions": [
+        {
+          "function_class": "PERMIT_RELATIVE_MOTION",
+          "principle_family": "REVOLUTE_PAIR"
+        },
+        {
+          "function_class": "MAINTAIN_CONFIGURATION",
+          "principle_family": "DETENT_OR_SNAP"
+        }
+      ],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "evidence_route": "MOBILITY_ANALYSIS",
+        "route_available": true,
+        "verdict": "PASS"
+      }
+    },
+    {
+      "candidate_id": "CAND-0002",
+      "name": "Sliding lid with friction latch",
+      "functions": [
+        {
+          "function_class": "PERMIT_RELATIVE_MOTION",
+          "principle_family": "PRISMATIC_PAIR"
+        },
+        {
+          "function_class": "MAINTAIN_CONFIGURATION",
+          "principle_family": "FRICTION_HOLD"
+        }
+      ],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "evidence_route": "MOBILITY_ANALYSIS",
+        "route_available": true,
+        "verdict": "PASS"
+      }
+    },
+    {
+      "candidate_id": "CAND-0003",
+      "name": "Snap-fit lid (compliant)",
+      "functions": [
+        {
+          "function_class": "PERMIT_RELATIVE_MOTION",
+          "principle_family": "COMPLIANT_FLEXURE"
+        },
+        {
+          "function_class": "MAINTAIN_CONFIGURATION",
+          "principle_family": "DETENT_OR_SNAP"
+        }
+      ],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "evidence_route": "COMPLIANCE_REDUCED_ORDER",
+        "route_available": false,
+        "verdict": "BLOCKED"
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "contract_id": "AC-0001",
+      "requirement_ids": ["REQ-0005"],
+      "criterion": "User release effort must be within an ergonomic range.",
+      "evidence_route_needed": "CONTACT_RESOLVING_ANALYSIS",
+      "evidence_route_available": false,
+      "kept_open_by": ["AMB-0003"]
+    },
+    {
+      "contract_id": "AC-0002",
+      "requirement_ids": ["REQ-0006"],
+      "criterion": "Retaining function must remain engaged under specified disturbance.",
+      "evidence_route_needed": "RIGID_BODY_DYNAMICS",
+      "evidence_route_available": true,
+      "kept_open_by": ["AMB-0002"]
+    },
+    {
+      "contract_id": "AC-0003",
+      "requirement_ids": ["REQ-0007"],
+      "criterion": "Unit manufacturing cost must be within target.",
+      "evidence_route_needed": "MANUFACTURING_PROCESS_ANALYSIS",
+      "evidence_route_available": false,
+      "kept_open_by": ["AMB-0004"]
+    },
+    {
+      "contract_id": "AC-0004",
+      "requirement_ids": ["REQ-0008"],
+      "criterion": "Product footprint must be within desktop-practical envelope.",
+      "evidence_route_needed": "RIGID_KINEMATIC_GEOMETRY",
+      "evidence_route_available": true,
+      "kept_open_by": ["AMB-0001"]
+    }
+  ],
+  "unresolved": [
+    {
+      "unresolved_id": "UNR-0001",
+      "description": "Choice of lid motion (hinged vs sliding vs other) is unresolved.",
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "alternatives": ["REVOLUTE_PAIR", "PRISMATIC_PAIR", "COMPLIANT_FLEXURE"],
+      "kept_open_by": ["FRE-0001", "FRE-0006"]
+    },
+    {
+      "unresolved_id": "UNR-0002",
+      "description": "Latch mechanism is unresolved.",
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "alternatives": ["DETENT_OR_SNAP", "FRICTION_HOLD", "OVER_CENTRE", "GRAVITY_SEATED", "SEPARATE_RETAINING_MEMBER"],
+      "kept_open_by": ["FRE-0002"]
+    }
+  ],
+  "assumptions": [
+    "No specific dimension or size is given; compactness is undefined.",
+    "The environment is assumed to be indoor, desk-like, and upright.",
+    "The user is assumed to be able to reach and operate the latch.",
+    "Transport load is assumed to be dynamic but magnitude unknown."
+  ]
+}

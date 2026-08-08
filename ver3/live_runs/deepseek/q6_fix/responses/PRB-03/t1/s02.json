@@ -1,0 +1,320 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must provide a pedal surface that the user's foot can press.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A signal is sent when the pedal is pressed; hence there must be a pedal surface that the foot can press."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must translate a press on the pedal surface into a signal sent to the machine.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Pressing the pedal must cause a signal; hence the press must be linked to a signaling mechanism."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The product must allow the pedal to move from rest to a pressed position when the foot presses.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Clear motion is required for the pedal to be pressed."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The product must return the pedal to its resting position using only internal means when the foot is removed.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["The pedal must return on its own; hence an internal restoring mechanism is necessary."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must maintain a defined resting position and return to that position each time.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["The requirement refers to 'its resting position', so a consistent rest configuration must exist."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The product must resist sideways motion of the pedal when a sideways force is applied, without preventing pressing.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["The pedal must not move sideways when brushed, but must still move when pressed; hence degrees of freedom must allow only the intended motion."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The product must have a supporting interface to the workbench surface to react applied loads.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002", "REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["The pedal must rest on the workbench; loads must be reacted to the environment."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The product must provide a restoring force or torque to return the pedal to rest.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Springs, gravity, or other means could supply the restoring action; the principle family differs."]
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The product must guide the pedal so that it moves in the intended direction (e.g., vertical) and not sideways.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["The pedal must press down and resist sideways motion, requiring a constraint that permits only a single degree of freedom."]
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The product must include a mechanism to transmit the pedal motion to a signal (e.g., electrical switch, mechanical valve).",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["A signal must be generated; the specific transduction mechanism is a free choice."]
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The product must allow service access to the foot pedal for maintenance or adjustment.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": ["The scenario includes service, so the pedal must be accessible for maintenance."]
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The pedal must have a stable resting position that is kinematically defined so that it returns to the same place each time.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Returning to 'resting position' implies a repeatable configuration; different mechanisms (spring, gravity, detent) achieve this differently."]
+    },
+    {
+      "id": "OBL-0013",
+      "statement": "The product must have a defined path for the pedal that avoids unintended motions (e.g., sideways brushing).",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["The pedal must not move sideways; hence its motion must be constrained to a single path."]
+    },
+    {
+      "id": "OBL-0014",
+      "statement": "The product must provide a ground or support to react the press force and any other loads to the workbench.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Loads must be reacted; the workbench is outside the product boundary."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the foot pedal surface",
+      "reacted_at_role": "the workbench surface the pedal rests on",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the foot pedal surface",
+      "reacted_at_role": "the workbench surface the pedal rests on",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the foot pedal assembly",
+      "reacted_at_role": "the workbench surface the pedal rests on",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the foot pedal",
+      "reacted_at_role": "the workbench surface",
+      "direction_class": "NONE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Pedal pivots on a revolute joint with a spring return and a hard stop.",
+      "family": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY", "ACTUATE"],
+      "principle": ["REVOLUTE_PAIR", "CRANK_SLIDER", "DETENT_OR_SNAP", "HARD_STOP", "JOURNAL_SUPPORT", "DIRECT_BEARING", "STRAIGHT_INSERTION", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": ["OBL-0007", "OBL-0014"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Spring force analysis and pivot reactions can be evaluated."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Pedal translates on a prismatic guide with a spring return and hard stop.",
+      "family": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY", "ACTUATE"],
+      "principle": ["PRISMATIC_PAIR", "CRANK_SLIDER", "DETENT_OR_SNAP", "HARD_STOP", "PRISMATIC_GUIDE", "DIRECT_BEARING", "STRAIGHT_INSERTION", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": ["OBL-0007", "OBL-0014"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Spring force and guide reaction can be analyzed."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Pedal uses a compliant flexure to allow deflection and return.",
+      "family": ["PERMIT_RELATIVE_MOTION", "CONVERT_MOTION", "MAINTAIN_CONFIGURATION", "BOUND_MOTION", "GUIDE_MOTION", "TRANSMIT_LOAD", "PERMIT_ASSEMBLY", "ACTUATE"],
+      "principle": ["COMPLIANT_FLEXURE", "FLEXIBLE_ELEMENT_DRIVE", "GRAVITY_SEATED", "HARD_STOP", "JOURNAL_SUPPORT", "DIRECT_BEARING", "ELASTIC_INSERTION", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": ["OBL-0007", "OBL-0014"],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "No reduced-order compliance tools are currently available; analysis would require detailed finite element work at a later stage."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "predicates": [
+        "A press on the pedal produces a signal.",
+        "Releasing the pedal returns it to its original rest position.",
+        "Sideways brushing does not move the pedal."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "predicates": [
+        "A press on the pedal produces a signal.",
+        "Releasing the pedal returns it to its original rest position.",
+        "Sideways brushing does not move the pedal."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0007", "OBL-0008", "OBL-0009", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "predicates": [
+        "A press on the pedal produces a signal.",
+        "Releasing the pedal returns it to its original rest position.",
+        "Sideways brushing does not move the pedal."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Whether the pedal must remain fixed under sideways brushing or may move slightly without sending a signal.",
+      "why_open": "The ambiguity is unresolved.",
+      "alternatives": ["The pedal does not move at all", "The pedal moves but does not trigger a signal"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0006", "OBL-0009", "OBL-0013"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "What exactly constitutes the resting position and how precise the return must be.",
+      "why_open": "The ambiguity is unresolved.",
+      "alternatives": ["Resting position is the initial at-rest position", "Resting position is a defined reference within tolerance"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": ["OBL-0005", "OBL-0012"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The pedal operates in a workbench environment and is not exposed to harsh conditions.",
+      "why": "The request is for a workbench foot pedal.",
+      "would_be_invalidated_by": "A statement that the pedal must operate in harsh conditions."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The user's foot presses downward on the pedal.",
+      "why": "Typical foot pedal operation; not explicitly stated but implied.",
+      "would_be_invalidated_by": "A statement that the pedal is pressed in a different direction."
+    }
+  ]
+}

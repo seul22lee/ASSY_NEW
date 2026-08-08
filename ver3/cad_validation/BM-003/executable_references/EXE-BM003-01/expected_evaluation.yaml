@@ -1,0 +1,125 @@
+reference_id: EXE-BM003-01
+benchmark_id: BM-003
+schema_version: 0.1.0
+
+purpose: >
+  What this reference expects the frozen BM-003 held-out Oracle to conclude,
+  written BEFORE the run and compared against actual_evaluation.json afterwards.
+  A disagreement between this file and the actual result is a finding, whichever
+  way it goes: an expectation that is met by accident is worth as little as one
+  that is missed.
+
+oracle: ver3/oracles/held_out/BM-003
+oracle_frozen_before_this_reference: true
+
+declared:
+  state_maintenance_class: SMC-KINEMATIC_BLOCK
+  realization_class: RIGID_MULTI_BODY
+  release_representation: "a persistent RELEASED configuration"
+  deformation_exception_invoked: false
+  arrival_configuration: DEPLOYED_LOCKED
+
+expected_invariants:
+  - id: NRM-BM-003-001
+    expect: PASS
+    because: "three leg bodies, each with its own stored pose lying alongside the column"
+  - id: NRM-BM-003-002
+    expect: PASS
+    because: "the declared running pairs form one connected component in the stored configuration"
+  - id: NRM-BM-003-003
+    expect: PASS
+    because: "no segment of the declared cycle removes a body, and every retention stays engaged"
+  - id: NRM-BM-003-004
+    expect: PASS
+    because: "M1 to M3 is an ordered, user-performable sequence ending deployed"
+  - id: NRM-BM-003-005
+    expect: PASS
+    because: "connectivity is measured at every sample of every segment, not at endpoints"
+  - id: NRM-BM-003-006
+    expect: PASS
+    because: "three ground contacts on a common plane whose convex hull has non-zero area"
+  - id: NRM-BM-003-007
+    expect: PASS
+    because: "the top support's upper face exists and nothing is above it"
+    not_a_capacity_claim: true
+  - id: NRM-BM-003-008
+    expect: PASS
+    because: "every operational segment moves a product body only; no tool or actuator participates"
+  - id: NRM-BM-003-009
+    expect: PASS
+    because: >
+      SMC-KINEMATIC_BLOCK is declared and its predicate is satisfied by a mobility
+      analysis on realized geometry: with the ring locked, the fold path from
+      DEPLOYED toward STORED is obstructed for every leg
+  - id: NRM-BM-003-010
+    expect: PASS
+    because: >
+      each leg's intended freedom is one revolute; fold-back, over-swing, axial
+      slide and detachment are each blocked by a named body and measured
+  - id: NRM-BM-003-011
+    expect: PASS
+    because: >
+      the ring cannot be turned while down, lifting alone does not free the legs,
+      and folding is available only after both motions
+  - id: NRM-BM-003-012
+    expect: PASS
+    because: "the cycle's segments are pairwise inverses and the returned transforms are exact"
+  - id: NRM-BM-003-013
+    expect: PASS
+    because: "every declared running pair stays engaged at every sample of the whole cycle"
+  - id: NRM-BM-003-014
+    expect: PASS
+    because: "fifteen ordered steps, each with a measured clear path, and an acyclic relation"
+  - id: NRM-BM-003-015
+    expect: PASS
+    because: "every relation an interaction realises is activated by some assembly step"
+  - id: NRM-BM-003-016
+    expect: PASS
+    because: >
+      RIGID_MULTI_BODY: every declared relation names its participating bodies and
+      the features on each, and every retention names its blocked direction
+  - id: NRM-BM-003-017
+    expect: PASS
+    because: "dense sampling of the six operational segments, fifteen insertions and five turns"
+    caveat: "sampling, not a continuum proof"
+  - id: NRM-BM-003-018
+    expect: PASS
+    because: >
+      the stored bounding box is smaller in x, in y and in maximum radial extent.
+      It is LARGER in z, which is expected and reported: the invariant asks for at
+      least one storage-relevant extent to shrink
+
+expected_unsupported:
+  - "load capacity of the support region - AMB-BM-003-002"
+  - "disturbance the locked state survives - AMB-BM-003-005"
+  - "material, strength, wear, fatigue, lifetime - AMB-BM-003-006"
+  - "manufacturability, process, tolerance - AMB-BM-003-008"
+  - "user effort - AMB-BM-003-004"
+  - "whether the footprint is large enough for anything - AMB-BM-003-003, AMB-BM-003-009"
+  - "whether the declared clearances and residual play are acceptable - AMB-BM-003-007"
+
+expected_not_verified:
+  - "whether a bayonet could be turned back by vibration or handling"
+  - "any behaviour under gravity, inertia or dynamic load"
+
+expected_negative_control_outcome:
+  controls: 17
+  every_control_detected: true
+  criterion: >
+    each control makes exactly its named target predicate go from PASS to FAIL
+    while its declared unrelated predicates keep the result they had on the
+    baseline. A control that is only detected because the checker raised an
+    exception counts as NOT detected.
+
+expected_oracle_reopening:
+  any_condition_met: false
+  because: >
+    the reference is expected to satisfy every operative predicate, no negative
+    control is expected to pass its intended predicate, and every piece of
+    evidence produced here is expected to be representable in the Oracle's
+    existing schema
+
+things_this_reference_deliberately_does_not_expect_to_show:
+  - "that any other admitted realization family is executable"
+  - "that the Oracle is correctly permissive across its four state-maintenance classes"
+  - "that this mechanism is a good design, only that it is a coherent one"

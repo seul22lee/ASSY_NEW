@@ -1,0 +1,185 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The clamp must fix a monitor arm to the edge of a desk.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The requirement demands that the clamp holds the arm in place on the desk edge."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The clamp must accommodate desk edges with thickness between 18 and 40 mm.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "TOLERANCE_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["The requirement specifies a range of desk thicknesses."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The clamp must not slip or rotate under the weight of the arm when tight.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["The requirement states that the clamp must stay fixed under load."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The clamp must be removable and movable to another desk without any tools.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The requirement demands tool-free removal."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "clamp",
+      "reacted_at_role": "desk edge",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "clamp",
+      "reacted_at_role": "desk edge",
+      "direction_class": "MOMENT",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "clamp",
+      "reacted_at_role": "user",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A clamp that uses a screw mechanism for tightening and a friction pad for grip.",
+      "family": ["PERMIT_RELATIVE_MOTION", "TRANSMIT_LOAD", "ACTUATE"],
+      "principle": ["SCREW_AND_NUT", "FRICTION_HOLD", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "The friction-based retention cannot be verified without contact analysis."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A clamp that uses a cam lever for quick release and a serrated jaw for grip.",
+      "family": ["PERMIT_RELATIVE_MOTION", "TRANSMIT_LOAD", "ACTUATE"],
+      "principle": ["CAM_AND_FOLLOWER", "FRICTION_HOLD", "DIRECT_MANUAL"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction and wear in the cam mechanism require contact analysis."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A clamp that uses a spring-loaded latch for quick attach and a rubber pad for grip.",
+      "family": ["PERMIT_RELATIVE_MOTION", "TRANSMIT_LOAD", "ACTUATE"],
+      "principle": ["DETENT_OR_SNAP", "FRICTION_HOLD", "STORED_ENERGY"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Spring force and friction need contact analysis."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "predicates": [
+        "The clamp can be fastened to a desk edge without tools.",
+        "The clamp fits desk edges between 18 and 40 mm.",
+        "The clamp does not slip when tightened.",
+        "The clamp can be removed without tools."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "predicates": [
+        "The clamp can be fastened to a desk edge without tools.",
+        "The clamp fits desk edges between 18 and 40 mm.",
+        "The clamp does not slip when tightened.",
+        "The clamp can be removed without tools."
+      ]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "predicates": [
+        "The clamp can be fastened to a desk edge without tools.",
+        "The clamp fits desk edges between 18 and 40 mm.",
+        "The clamp does not slip when tightened.",
+        "The clamp can be removed without tools."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which clamping principle to select.",
+      "why_open": "The requirements do not specify the method of tightening, leaving multiple mechanisms viable.",
+      "alternatives": ["SCREW_AND_NUT", "CAM_AND_FOLLOWER", "DETENT_OR_SNAP"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0002", "AMB-0001"],
+      "blocks": ["OBL-0005"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The clamp is used on a typical desk edge that is horizontal and flat.",
+      "why": "The request mentions desk edges without specifying any irregularity.",
+      "would_be_invalidated_by": "Information that desk edges vary significantly in shape or material."
+    },
+    {
+      "id": "ASM-1002",
+      "statement": "The user can manually operate the clamp without special strength.",
+      "why": "The request implies manual operation without tools, but does not specify strength requirements.",
+      "would_be_invalidated_by": "If the clamp requires excessive force that cannot be applied manually by an average user."
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a foot pedal for a workbench.",
+      "locator": "L1",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "Pressing it should send a signal to the machine",
+      "locator": "L2",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "and when I take my foot off it must return to its resting position on its own every time.",
+      "locator": "L3",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "It should not move if something brushes against it sideways.",
+      "locator": "L4",
+      "quantity_kinds": [],
+      "directionality": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a foot pedal for a workbench.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "A foot pedal is designed for a workbench.",
+      "source_locator": "L1",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "Pressing it should send a signal to the machine",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "When the pedal is pressed, a signal is sent to the machine.",
+      "source_locator": "L2",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "and when I take my foot off it must return to its resting position on its own every time.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "When the foot is removed, the pedal returns to its resting position on its own every time.",
+      "source_locator": "L3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "It should not move if something brushes against it sideways.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "When something brushes against the pedal sideways, it does not move.",
+      "source_locator": "L4",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Pedal operation",
+      "kind": "OPERATION",
+      "system_boundary": "The foot pedal and the machine it signals.",
+      "actors": [
+        "ACT-0001",
+        "ACT-0002"
+      ],
+      "environment": null
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Pedal service",
+      "kind": "SERVICE",
+      "system_boundary": "The foot pedal in its installed state.",
+      "actors": [],
+      "environment": null
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Pedal assembly",
+      "kind": "ASSEMBLY",
+      "system_boundary": "The foot pedal as a product to be assembled.",
+      "actors": [],
+      "environment": null
+    },
+    {
+      "id": "SCN-0004",
+      "name": "Transport of pedal",
+      "kind": "TRANSPORT",
+      "system_boundary": "The foot pedal in transit.",
+      "actors": [],
+      "environment": null
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user's foot",
+      "must_reach": [
+        "the pedal"
+      ]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "something",
+      "must_reach": [
+        "the pedal from the side"
+      ]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "The exact dimensions, materials, and mechanisms of the pedal are not specified.",
+      "why_free": "The text does not mention any specific dimensions, materials, or mechanisms."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "The type of signal and its transmission to the machine are not specified.",
+      "why_free": "The text only says 'send a signal' without specifying the signal type or transmission method."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "What constitutes 'moving' when something brushes against it sideways? Does any displacement count, or only significant movement?",
+      "resolvable_when": "During design review or testing, precise movement tolerances can be defined.",
+      "conflicting_clauses": [],
+      "block_scopes": [
+        "Design of the pedal's lateral stability"
+      ]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "What is the definition of 'every time'? Does it mean always without exception, or under normal conditions?",
+      "resolvable_when": "During acceptance testing, criteria for reliable return can be established.",
+      "conflicting_clauses": [],
+      "block_scopes": [
+        "Validation of the return mechanism"
+      ]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The foot pedal is intended for use by an operator at a workbench.",
+      "why": "The text says 'for a workbench' and refers to 'I' as the user.",
+      "would_be_invalidated_by": "A different context of use described in future requirements."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The machine is separate from the pedal and receives the signal.",
+      "why": "The text says 'send a signal to the machine'.",
+      "would_be_invalidated_by": "An explicit statement that the pedal is integrated into the machine."
+    }
+  ]
+}

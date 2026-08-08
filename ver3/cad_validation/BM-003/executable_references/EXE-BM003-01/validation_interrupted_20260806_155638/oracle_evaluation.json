@@ -1,0 +1,310 @@
+{
+  "declared_state_maintenance_class": "SMC-KINEMATIC_BLOCK",
+  "invariants": [
+    {
+      "evidence": [
+        "three_legs.json",
+        "envelope.json"
+      ],
+      "invariant": "NRM-BM-003-001",
+      "statement": "three distinguishable legs, each with a stored pose against the body",
+      "status": "PASS",
+      "tags": [
+        "three_legs_present",
+        "stored_pose_defined"
+      ]
+    },
+    {
+      "evidence": [
+        "connectivity.json"
+      ],
+      "invariant": "NRM-BM-003-002",
+      "statement": "stored configuration is one connected component",
+      "status": "PASS",
+      "tags": [
+        "stored_connected"
+      ]
+    },
+    {
+      "evidence": [
+        "connectivity.json",
+        "retention.json"
+      ],
+      "invariant": "NRM-BM-003-003",
+      "reasoning": "no segment of the declared cycle removes a body; every declared retention stays engaged at every sample",
+      "statement": "no removal of any component to fold or unfold",
+      "status": "PASS",
+      "tags": [
+        "no_removal_to_operate"
+      ]
+    },
+    {
+      "evidence": [
+        "poses.yaml",
+        "motion_report.json"
+      ],
+      "invariant": "NRM-BM-003-004",
+      "statement": "a manual deployment sequence exists, ending deployed",
+      "status": "PASS",
+      "tags": [
+        "deployment_sequence_declared"
+      ]
+    },
+    {
+      "evidence": [
+        "connectivity.json",
+        "motion_report.json"
+      ],
+      "invariant": "NRM-BM-003-005",
+      "statement": "connectedness holds along the path, not only at its endpoints",
+      "status": "PASS",
+      "tags": [
+        "path_sampled",
+        "path_connected"
+      ]
+    },
+    {
+      "evidence": [
+        "footprint.json"
+      ],
+      "invariant": "NRM-BM-003-006",
+      "statement": "three ground contacts bounding a non-zero area",
+      "status": "PASS",
+      "tags": [
+        "deployed_footprint_non_degenerate"
+      ]
+    },
+    {
+      "evidence": [
+        "support_region.json"
+      ],
+      "explicitly_not": "no capacity is claimed; AMB-BM-003-002 blocks any",
+      "invariant": "NRM-BM-003-007",
+      "statement": "an available support region exists in the deployed configuration",
+      "status": "PASS",
+      "tags": [
+        "support_region_identifiable"
+      ]
+    },
+    {
+      "evidence": [
+        "poses.yaml",
+        "assembly.yaml"
+      ],
+      "invariant": "NRM-BM-003-008",
+      "reasoning": "every declared operational segment moves a product body only; no participant outside the ten bodies appears in any of them",
+      "statement": "no tool, motor or external fixture in deployment",
+      "status": "PASS",
+      "tags": [
+        "unpowered_manual_operation"
+      ]
+    },
+    {
+      "declared_state_maintenance_class": "SMC-KINEMATIC_BLOCK",
+      "evidence": [
+        "state_maintenance.json"
+      ],
+      "invariant": "NRM-BM-003-009",
+      "statement": "the deployed configuration persists and does not enter folding first",
+      "status": "PASS",
+      "tags": [
+        "deployed_state_maintained",
+        "state_maintenance_realized",
+        "state_maintenance_class_declared"
+      ],
+      "verifier_fidelity": "mobility_analysis_with_realized_geometry",
+      "why_that_is_the_right_route": "SMC-KINEMATIC_BLOCK is the one class whose predicate exact rigid geometry can decide, because the claim is that a path is ABSENT. The other three classes need stability, energy or contact routes this toolset does not have; this design deliberately uses the class it can actually establish. That is a fixture choice, not a statement that the other classes are worse."
+    },
+    {
+      "evidence": [
+        "state_maintenance.json",
+        "retention.json",
+        "outward_stop.json"
+      ],
+      "invariant": "NRM-BM-003-010",
+      "per_leg_freedoms": {
+        "detach": "blocked by the pin, which is itself blocked both ways",
+        "fold back": "kinematically blocked by the ring arm",
+        "intended": "rotation about its own hinge axis, between the two stops",
+        "swing further out": "kinematically blocked by the hub's stop pad",
+        "twist aside / slide along the hinge axis": "blocked by the clevis pair"
+      },
+      "scope": "GROSS freedom only. The residual angular play between the two stops is measured and reported; whether that play is acceptable is unresolved at AMB-BM-003-007 and is not claimed either way.",
+      "statement": "no unintended gross rigid-body freedom in the deployed configuration",
+      "status": "PASS",
+      "tags": [
+        "deployed_mobility_declared",
+        "unintended_dof_addressed"
+      ]
+    },
+    {
+      "evidence": [
+        "state_maintenance.json"
+      ],
+      "invariant": "NRM-BM-003-011",
+      "note": "one of several representations NRM-BM-003-011 admits. The Oracle requires none of them in particular and this one is not preferred.",
+      "representation_used": "a persistent RELEASED configuration",
+      "statement": "a deliberate action is required before folding becomes possible",
+      "status": "PASS",
+      "tags": [
+        "release_action_declared",
+        "folding_gated_by_deliberate_action"
+      ]
+    },
+    {
+      "evidence": [
+        "cycle_return.json",
+        "motion_report.json"
+      ],
+      "invariant": "NRM-BM-003-012",
+      "statement": "after the release, a continuous path back to the same stored state, repeatably",
+      "status": "PASS",
+      "tags": [
+        "return_path_exists",
+        "cycle_repeatable"
+      ]
+    },
+    {
+      "evidence": [
+        "connectivity.json",
+        "retention.json"
+      ],
+      "invariant": "NRM-BM-003-013",
+      "statement": "every component stays attached through the whole cycle",
+      "status": "PASS",
+      "tags": [
+        "retention_persistent",
+        "cycle_sampled"
+      ]
+    },
+    {
+      "evidence": [
+        "assembly_report.json",
+        "assembly_graph.json",
+        "bayonet_turns.json"
+      ],
+      "invariant": "NRM-BM-003-014",
+      "statement": "a physically coherent assembly sequence exists",
+      "status": "PASS",
+      "tags": [
+        "assembly_sequence_declared",
+        "insertion_paths_clear",
+        "assembly_acyclic"
+      ]
+    },
+    {
+      "evidence": [
+        "relations_activated.json"
+      ],
+      "invariant": "NRM-BM-003-015",
+      "statement": "every relationship operation depends on is established by assembly",
+      "status": "PASS",
+      "tags": [
+        "operational_relations_activated"
+      ]
+    },
+    {
+      "evidence": [
+        "interaction_report.json",
+        "retention.json"
+      ],
+      "invariant": "NRM-BM-003-016",
+      "realization_class": "RIGID_MULTI_BODY",
+      "statement": "every declared relationship has an identifiable physical realization",
+      "status": "PASS",
+      "tags": [
+        "interface_ownership_shown",
+        "retention_direction_shown"
+      ]
+    },
+    {
+      "deformation_exception_invoked": false,
+      "evidence": [
+        "motion_report.json",
+        "assembly_report.json",
+        "bayonet_turns.json"
+      ],
+      "invariant": "NRM-BM-003-017",
+      "note": "this is dense sampling of the declared paths, not a proof over the continuum, and is reported as such",
+      "statement": "no body passes through another on any declared path",
+      "status": "PASS",
+      "tags": [
+        "path_interference_checked"
+      ]
+    },
+    {
+      "evidence": [
+        "envelope.json"
+      ],
+      "invariant": "NRM-BM-003-018",
+      "statement": "stored is more compact than deployed in a storage-relevant extent",
+      "status": "PASS",
+      "tags": [
+        "stored_more_compact_than_deployed"
+      ]
+    }
+  ],
+  "invariants_failed": [],
+  "invariants_pass": 18,
+  "invariants_total": 18,
+  "oracle": "ver3/oracles/held_out/BM-003",
+  "oracle_frozen_before_this_reference": true,
+  "oracle_reopening": {
+    "any_condition_met": false,
+    "conditions_that_would_require_it": [
+      "a mechanically coherent exact B-rep reference rejected by an operative predicate",
+      "an exact negative control passing its intended predicate",
+      "required exact assembly or mobility evidence that the Oracle schema cannot represent"
+    ],
+    "consequence": "no Oracle change is proposed by this reference"
+  },
+  "realization_class": "RIGID_MULTI_BODY",
+  "status": "PASS",
+  "unsupported_and_not_verified": [
+    {
+      "because": "AMB-BM-003-002; the source states no mass or force",
+      "claim": "load capacity of the support region",
+      "status": "UNSUPPORTED"
+    },
+    {
+      "because": "AMB-BM-003-005; 'knocked it' carries no magnitude",
+      "claim": "what disturbance the locked state survives",
+      "status": "UNSUPPORTED"
+    },
+    {
+      "because": "AMB-BM-003-006; the source is silent",
+      "claim": "material, strength, stiffness, wear, fatigue, lifetime",
+      "status": "UNSUPPORTED"
+    },
+    {
+      "because": "AMB-BM-003-008; only a geometric assembly path is shown",
+      "claim": "manufacturability, process, tolerance, cost",
+      "status": "UNSUPPORTED"
+    },
+    {
+      "because": "AMB-BM-003-004; no force, torque or travel criterion",
+      "claim": "user effort to deploy, release or fold",
+      "status": "UNSUPPORTED"
+    },
+    {
+      "because": "AMB-BM-003-003 and AMB-BM-003-009",
+      "claim": "whether the deployed footprint is large enough for any object",
+      "status": "UNSUPPORTED"
+    },
+    {
+      "because": "AMB-BM-003-007",
+      "claim": "whether the declared clearances and residual play are acceptable",
+      "status": "UNSUPPORTED"
+    },
+    {
+      "because": "rigid geometry cannot observe it; no dynamic route was run",
+      "claim": "whether a bayonet could be turned back by vibration or handling",
+      "status": "NOT_VERIFIED"
+    },
+    {
+      "because": "DYNAMICS_NOT_REQUIRED_FOR_THIS_REFERENCE; see the governance record",
+      "claim": "behaviour under gravity, inertia or any dynamic load",
+      "status": "NOT_VERIFIED"
+    }
+  ]
+}

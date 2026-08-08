@@ -1,0 +1,456 @@
+{
+ "_meta": {
+  "answers_prompt_sha256": "66cac2bc1d9d3d7c",
+  "authored_by": "agent-in-repository",
+  "pairing_history": [
+   "re-paired after the response-schema section was added to the prompt; content unchanged and re-verified against the parser, contract validation and completeness check"
+  ],
+  "revision_note": "Re-reasoned after METER_DISCRETE_QUANTITY was added. The previous answer, kept at s02.pre_revision.json, recorded that no offered family separated one item from a group. Five now do, so the central obligation is served by candidates instead of by an UnresolvedDecision."
+ },
+ "acceptance_contracts": [
+  {
+   "candidate": "CND-0001",
+   "id": "ACC-0001",
+   "obligations": [
+    "OBL-0002",
+    "OBL-0003"
+   ],
+   "predicates": [
+    "the two closures are never open at the same time",
+    "the volume between them admits one item and no more"
+   ]
+  },
+  {
+   "candidate": "CND-0002",
+   "id": "ACC-0002",
+   "obligations": [
+    "OBL-0002",
+    "OBL-0003"
+   ],
+   "predicates": [
+    "one actuation advances the rotor by exactly one index",
+    "one item passes the barrier per index"
+   ]
+  }
+ ],
+ "assumptions": [
+  {
+   "id": "ASM-0001",
+   "inferred_by_stage": "s02",
+   "statement": "The wall reacts the whole weight of the product and its contents.",
+   "why": "Every load path must terminate somewhere, and the only external body in the scenarios is the wall.",
+   "would_be_invalidated_by": "a scenario in which the product also rests on a shelf or the floor"
+  },
+  {
+   "id": "ASM-0002",
+   "inferred_by_stage": "s02",
+   "statement": "The items are discrete and separable from one another.",
+   "why": "Releasing exactly one presupposes that one can be distinguished from the rest; a continuous medium could not be counted.",
+   "would_be_invalidated_by": "a statement that the contents are granular, powdered or liquid"
+  }
+ ],
+ "candidates": [
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "that the two closures are never open together is a mobility claim",
+    "route": "MOBILITY_ANALYSIS"
+   },
+   "family": "METER_DISCRETE_QUANTITY",
+   "id": "CND-0001",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003"
+   ],
+   "obligations_created": [
+    "a linkage that keeps the two closures out of phase",
+    "a volume between them sized to one item",
+    "travel bounds for each closure",
+    "a return to the rest state"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "GUIDE_MOTION": "PRISMATIC_GUIDE",
+    "METER_DISCRETE_QUANTITY": "GATED_PAIR",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "Two gates never open together; one item occupies the volume between them per cycle."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "the advance per actuation is geometric",
+    "route": "MOBILITY_ANALYSIS"
+   },
+   "family": "METER_DISCRETE_QUANTITY",
+   "id": "CND-0002",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003"
+   ],
+   "obligations_created": [
+    "a stop at each index position",
+    "a return or one-way advance",
+    "radial support for the rotor"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "GUIDE_MOTION": "JOURNAL_SUPPORT",
+    "METER_DISCRETE_QUANTITY": "INDEXING_ROTOR",
+    "PERMIT_ASSEMBLY": "INSERT_AND_TURN",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": false,
+   "summary": "A rotor advanced a fixed angle per press carries one item past a barrier."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "whether an item seats in the pocket rather than bridging it is a contact question",
+    "route": "CONTACT_RESOLVING_ANALYSIS"
+   },
+   "family": "METER_DISCRETE_QUANTITY",
+   "id": "CND-0003",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003"
+   ],
+   "obligations_created": [
+    "a pocket sized to the item",
+    "a barrier the item cannot otherwise pass",
+    "a return of the carrier",
+    "a means of clearing a stalled item"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "GUIDE_MOTION": "PRISMATIC_GUIDE",
+    "METER_DISCRETE_QUANTITY": "SINGLE_ITEM_POCKET",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": false,
+   "summary": "A recess sized for one item is carried past a barrier by the pressed surface."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "that one stop is engaged at all times is a mobility claim",
+    "route": "MOBILITY_ANALYSIS"
+   },
+   "family": "METER_DISCRETE_QUANTITY",
+   "id": "CND-0004",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003"
+   ],
+   "obligations_created": [
+    "a rocking member carrying both stops",
+    "a return to the rest stop state",
+    "radial support for it"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "MAINTAIN_CONFIGURATION": "GRAVITY_SEATED",
+    "METER_DISCRETE_QUANTITY": "ESCAPEMENT",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "Two alternately released stops let exactly one item pass per cycle."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "the gating depends on deflection",
+    "route": "COMPLIANCE_REDUCED_ORDER"
+   },
+   "family": "METER_DISCRETE_QUANTITY",
+   "id": "CND-0005",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003"
+   ],
+   "obligations_created": [
+    "a deflection bound and a recovery",
+    "an aperture sized to the item",
+    "survival of repeated deflection"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+    "METER_DISCRETE_QUANTITY": "METERED_APERTURE",
+    "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "COMPLIANT_FLEXURE",
+    "RETAIN_BODY": "ELASTIC_CAPTURE",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": false,
+   "summary": "A compliant member deflects to release one item and recovers to block the next."
+  }
+ ],
+ "load_cases": [
+  {
+   "applied_to_role": "the containing role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0001",
+   "kind": "PAYLOAD",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the wall the product is fixed to",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "the actuation role",
+   "direction_class": "TRANSVERSE",
+   "id": "LC-0002",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the wall the product is fixed to",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "every product role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0003",
+   "kind": "GRAVITY",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the wall the product is fixed to",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "the containing role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0004",
+   "kind": "PAYLOAD",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the wall the product is fixed to",
+   "scenario": "SCN-0002"
+  },
+  {
+   "applied_to_role": "the containing role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0005",
+   "kind": "PAYLOAD",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the wall the product is fixed to",
+   "scenario": "SCN-0003"
+  }
+ ],
+ "obligations": [
+  {
+   "derivation_premises": [
+    "Items that are not contained cannot be dispensed one at a time."
+   ],
+   "derived_from_requirements": [
+    "REQ-0001",
+    "REQ-0002",
+    "REQ-0005"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0001",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "A volume holds the items before release and admits more from above."
+  },
+  {
+   "derivation_premises": [
+    "Releasing one requires separating one from the rest.",
+    "Two leaving at once is the same event failing, not a different requirement."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003",
+    "REQ-0004"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0002",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "Exactly one item passes the release boundary for each actuation, and never more than one."
+  },
+  {
+   "derivation_premises": [
+    "An actuation the user cannot reach cannot be performed."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0003",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "A user-operated surface causes the release and is reachable while the product is fixed in place."
+  },
+  {
+   "derivation_premises": [
+    "Refilling in place means the filling path does not pass through the fixing."
+   ],
+   "derived_from_requirements": [
+    "REQ-0005",
+    "REQ-0006"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0004",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s04",
+   "scope": "UNIVERSAL",
+   "statement": "A path exists by which items are added from above while the product remains fixed."
+  },
+  {
+   "derivation_premises": [
+    "Whether a group of loose items keeps feeding depends on how they bear on one another, which is a contact question."
+   ],
+   "derived_from_requirements": [
+    "REQ-0007"
+   ],
+   "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+   "id": "OBL-0005",
+   "mandatory": true,
+   "route_available": false,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "Release continues to occur when few items remain."
+  },
+  {
+   "derivation_premises": [
+    "An unreacted load accelerates the body carrying it.",
+    "The product is fixed to a wall, so the wall is where its load leaves it."
+   ],
+   "derived_from_requirements": [
+    "REQ-0001"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0006",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The weight of the product and its contents reaches the wall through a connected path."
+  },
+  {
+   "derivation_premises": [
+    "A part with no path into the partly built product cannot be installed."
+   ],
+   "derived_from_requirements": [
+    "REQ-0001"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0007",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s04",
+   "scope": "UNIVERSAL",
+   "statement": "An ordered installation sequence exists in which every part has a clear path, ending with the product fixed to the wall."
+  },
+  {
+   "derivation_premises": [
+    "Capacity is a consequence of the volume and the item size, neither of which is stated yet."
+   ],
+   "derived_from_requirements": [
+    "REQ-0002"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0008",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s05",
+   "scope": "UNIVERSAL",
+   "statement": "The number of items the volume holds is about twenty."
+  }
+ ],
+ "unresolved": [
+  {
+   "alternatives": [
+    "CND-0001",
+    "CND-0002",
+    "CND-0003",
+    "CND-0004",
+    "CND-0005"
+   ],
+   "alternatives_kind": "ENTITY_REFS",
+   "blocks": [
+    "OBL-0002"
+   ],
+   "decision": "how one item is separated from the group",
+   "id": "UNR-0001",
+   "kept_open_by": [
+    "FRE-0001",
+    "AMB-0001"
+   ],
+   "why_open": "Five principle families meter a discrete quantity and the requirements name none. Two of the five depend on contact or deflection, for which no route exists here; three make the claim geometrically. That difference is a fact about the available evidence, not a reason to prefer one."
+  },
+  {
+   "alternatives": [
+    "it returns on its own",
+    "the user returns it",
+    "it does not return between uses"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0003"
+   ],
+   "decision": "whether the pressed surface returns on its own or is returned by the user",
+   "id": "UNR-0002",
+   "kept_open_by": [
+    "FRE-0007"
+   ],
+   "why_open": "The requirements say the surface is pressed and do not say what happens after. Every candidate creates a return obligation and none of them is required by the input."
+  },
+  {
+   "alternatives": [
+    "a fixing that penetrates the wall",
+    "a fixing that bears on the wall surface",
+    "a fixing that hangs from something already fixed"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0006"
+   ],
+   "decision": "how the product is fixed to the wall",
+   "id": "UNR-0003",
+   "kept_open_by": [
+    "FRE-0003",
+    "AMB-0005"
+   ],
+   "why_open": "The wall is the reaction site for every load in the product and nothing about it is stated: not its construction, not the permitted fixings, not the orientation of the mounting face."
+  },
+  {
+   "alternatives": [
+    "shown by a contact-resolving route",
+    "left unverified"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0005"
+   ],
+   "decision": "whether continued release when nearly empty is achievable at all",
+   "id": "UNR-0004",
+   "kept_open_by": [
+    "AMB-0003",
+    "AMB-0004"
+   ],
+   "why_open": "Whether loose items keep feeding as the group thins is a contact question, and no available evidence route resolves contact. The obligation is recorded and its route is unavailable."
+  }
+ ]
+}

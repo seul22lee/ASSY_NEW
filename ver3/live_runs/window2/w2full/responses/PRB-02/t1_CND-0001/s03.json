@@ -1,0 +1,316 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "base clamping body",
+      "instance_identity": "fixed jaw",
+      "addresses_obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0006"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "driven clamping body",
+      "instance_identity": "moving jaw",
+      "addresses_obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0006"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "pulling actuation body",
+      "instance_identity": "lead screw",
+      "addresses_obligations": ["OBL-0006"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["fixed jaw body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["moving jaw body"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["lead screw body"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "HELICAL",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0003",
+      "dof": ["TZ", "RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0003",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0002", "OBL-0006"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0002", "OBL-0006"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "tightened",
+      "kind": "OPERATIONAL",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "loosened",
+      "kind": "SERVICE",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003"]
+    }
+  ],
+  "mobility": [
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": { "blocked_direction": "+X", "blocker_body": "BOD-0001", "defeat_specification": "apply force greater than static friction", "driver": "LOAD" },
+        "TY": { "blocked_direction": "+Y", "blocker_body": "BOD-0001", "defeat_specification": "apply force greater than static friction", "driver": "LOAD" },
+        "TZ": { "blocked_direction": "+Z", "blocker_body": "BOD-0001", "defeat_specification": "apply force greater than static friction", "driver": "LOAD" },
+        "RX": { "blocked_direction": "+X", "blocker_body": "BOD-0001", "defeat_specification": "apply moment greater than friction torque", "driver": "LOAD" },
+        "RY": { "blocked_direction": "+Y", "blocker_body": "BOD-0001", "defeat_specification": "apply moment greater than friction torque", "driver": "LOAD" },
+        "RZ": { "blocked_direction": "+Z", "blocker_body": "BOD-0001", "defeat_specification": "apply moment greater than friction torque", "driver": "LOAD" }
+      }
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": { "blocked_direction": "+X", "blocker_body": "BOD-0001", "defeat_specification": "apply force greater than friction", "driver": "LOAD" },
+        "TY": { "blocked_direction": "+Y", "blocker_body": "BOD-0001", "defeat_specification": "apply force greater than friction", "driver": "LOAD" },
+        "TZ": { "blocked_direction": "+Z", "blocker_body": "BOD-0001", "defeat_specification": "apply force greater than friction", "driver": "LOAD" },
+        "RX": { "blocked_direction": "+X", "blocker_body": "BOD-0001", "defeat_specification": "apply moment greater than friction", "driver": "LOAD" },
+        "RY": { "blocked_direction": "+Y", "blocker_body": "BOD-0001", "defeat_specification": "apply moment greater than friction", "driver": "LOAD" },
+        "RZ": { "blocked_direction": "+Z", "blocker_body": "BOD-0001", "defeat_specification": "apply moment greater than friction", "driver": "LOAD" }
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "M",
+        "TY": "M",
+        "TZ": "B",
+        "RX": "M",
+        "RY": "M",
+        "RZ": "B"
+      },
+      "detail": {
+        "TZ": { "blocked_direction": "+Z", "blocker_body": "BOD-0001", "defeat_specification": "apply axial force greater than thread friction", "driver": "LOAD" },
+        "RZ": { "blocked_direction": "+Z", "blocker_body": "BOD-0003", "defeat_specification": "apply torque greater than thread friction", "driver": "LOAD" }
+      }
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "R",
+        "TY": "R",
+        "TZ": "R",
+        "RX": "R",
+        "RY": "R",
+        "RZ": "R"
+      },
+      "detail": {
+        "TX": { "scenario": "loosened, not in contact with desk, no load applied" },
+        "TY": { "scenario": "loosened, not in contact with desk, no load applied" },
+        "TZ": { "scenario": "loosened, not in contact with desk, no load applied" },
+        "RX": { "scenario": "loosened, not in contact with desk, no load applied" },
+        "RY": { "scenario": "loosened, not in contact with desk, no load applied" },
+        "RZ": { "scenario": "loosened, not in contact with desk, no load applied" }
+      }
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "R",
+        "TY": "R",
+        "TZ": "R",
+        "RX": "R",
+        "RY": "R",
+        "RZ": "R"
+      },
+      "detail": {
+        "TX": { "scenario": "loosened, not in contact with desk, no load applied" },
+        "TY": { "scenario": "loosened, not in contact with desk, no load applied" },
+        "TZ": { "scenario": "loosened, not in contact with desk, no load applied" },
+        "RX": { "scenario": "loosened, not in contact with desk, no load applied" },
+        "RY": { "scenario": "loosened, not in contact with desk, no load applied" },
+        "RZ": { "scenario": "loosened, not in contact with desk, no load applied" }
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "R",
+        "TY": "R",
+        "TZ": "B",
+        "RX": "R",
+        "RY": "R",
+        "RZ": "B"
+      },
+      "detail": {
+        "TZ": { "blocked_direction": "+Z", "blocker_body": "BOD-0001", "defeat_specification": "apply axial force to disengage thread", "driver": "KINEMATIC_NECESSITY" },
+        "RZ": { "blocked_direction": "+Z", "blocker_body": "BOD-0003", "defeat_specification": "apply torque to rotate screw", "driver": "KINEMATIC_NECESSITY" }
+      }
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "JNT-0001", "BOD-0003", "JNT-0002", "BOD-0002", "IFC-0001", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "JNT-0001", "BOD-0003", "JNT-0002", "BOD-0002", "IFC-0001", "BOD-0001"]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": ["BOD-0001", "JNT-0001", "BOD-0003", "JNT-0002", "BOD-0002", "IFC-0001", "BOD-0001"]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0001",
+      "access_side": "+Z",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0003",
+      "access_side": "+Z",
+      "activates": ["JNT-0001"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0001"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0002",
+      "access_side": "+Z",
+      "activates": ["JNT-0002"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0002"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0003"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0001", "BOD-0002"]
+    },
+    {
+      "id": "FRG-0003",
+      "role": "KEEP_OUT",
+      "owning_bodies": ["BOD-0001", "BOD-0002"]
+    },
+    {
+      "id": "FRG-0004",
+      "role": "APERTURE",
+      "owning_bodies": ["BOD-0001"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "How the product is held to the edge",
+      "why_open": "Five principle families hold a configuration and the requirements name none. Four of the five depend on friction or deflection, for which no evidence route exists here; the fifth removes the freedom geometrically. That difference is a fact about the available evidence, not a reason to prefer one.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003", "CND-0004", "CND-0005"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["FRE-0001", "AMB-0002"],
+      "blocks": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "How the thickness range is spanned",
+      "why_open": "The range is the one quantity the requirements supply, and nothing says whether it is spanned by a continuous adjustment, by discrete positions or by a compliant member.",
+      "alternatives": ["continuous adjustment", "discrete positions", "a compliant member covering the range"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0002"],
+      "blocks": ["OBL-0002"]
+    },
+    {
+      "id": "UNR-1003",
+      "decision": "What load the arm imposes",
+      "why_open": "Every retention obligation here is a resistance to a load whose magnitude, reach and moment are all unstated, so no holding arrangement can be shown adequate.",
+      "alternatives": ["a stated arm load", "no quantitative acceptance for retention"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001", "AMB-0003"],
+      "blocks": ["OBL-0003", "OBL-0004"]
+    }
+  ]
+}

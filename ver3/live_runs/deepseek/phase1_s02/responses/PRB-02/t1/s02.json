@@ -1,0 +1,232 @@
+{
+  "obligations": [
+    {
+      "obligation_id": "OBL-0001",
+      "requirement_id": "REQ-0001",
+      "statement": "The product must hold the arm in place relative to the desk edge.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": null
+    },
+    {
+      "obligation_id": "OBL-0002",
+      "requirement_id": "REQ-0002",
+      "statement": "The product must accommodate desk edge thicknesses between 18 and 40 mm.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "TOLERANCE_ANALYSIS",
+      "route_available": false,
+      "involves_actors": null
+    },
+    {
+      "obligation_id": "OBL-0003",
+      "requirement_id": "REQ-0003",
+      "statement": "The product must prevent relative movement along the edge once tightened.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": null
+    },
+    {
+      "obligation_id": "OBL-0004",
+      "requirement_id": "REQ-0004",
+      "statement": "The product must prevent angular movement under the arm's load.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": null
+    },
+    {
+      "obligation_id": "OBL-0005",
+      "requirement_id": "REQ-0005",
+      "statement": "The product must be removable and reusable elsewhere.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0006",
+      "requirement_id": "REQ-0006",
+      "statement": "The product must be operable without tools.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0001"]
+    }
+  ],
+  "load_cases": [
+    {
+      "load_case_id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "product",
+      "reacted_at_role": "desk edge",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "product",
+      "reacted_at_role": "desk edge",
+      "direction_class": "MOMENT",
+      "kind": "PAYLOAD",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "product",
+      "reacted_at_role": "desk edge",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "load_case_id": "LC-0004",
+      "scenario": "SCN-0003",
+      "applied_to_role": "product",
+      "reacted_at_role": "desk edge",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "CAND-0001",
+      "function_classes": {
+        "RETAIN_BODY": "FRICTION_HOLD",
+        "ACCOMMODATE_RANGE": "COMPLIANT_FLEXURE"
+      },
+      "principle_families": {},
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "primary_route": "CONTACT_RESOLVING_ANALYSIS",
+        "route_available": false
+      }
+    },
+    {
+      "candidate_id": "CAND-0002",
+      "function_classes": {
+        "RETAIN_BODY": "ROTATION_LOCK",
+        "ACCOMMODATE_RANGE": "MULTI_POINT_CONSTRAINT"
+      },
+      "principle_families": {},
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "primary_route": "CONTACT_RESOLVING_ANALYSIS",
+        "route_available": false
+      }
+    },
+    {
+      "candidate_id": "CAND-0003",
+      "function_classes": {
+        "RETAIN_BODY": "GEOMETRIC_UNDERCUT",
+        "ACCOMMODATE_RANGE": "PRISMATIC_GUIDE"
+      },
+      "principle_families": {},
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "primary_route": "CONTACT_RESOLVING_ANALYSIS",
+        "route_available": false
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "requirement_id": "REQ-0001",
+      "verification_kind": "STRUCTURAL",
+      "criterion": "The product must be able to hold the arm in place under stated conditions.",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "ambiguous": false
+    },
+    {
+      "requirement_id": "REQ-0002",
+      "verification_kind": "QUANTITATIVE",
+      "criterion": "The product must fit edge thicknesses from 18 to 40 mm inclusive.",
+      "evidence_route": "TOLERANCE_ANALYSIS",
+      "route_available": false,
+      "ambiguous": false
+    },
+    {
+      "requirement_id": "REQ-0003",
+      "verification_kind": "QUANTITATIVE",
+      "criterion": "There must be no relative movement along the edge once tightened.",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "ambiguous": true,
+      "ambiguity_ids": ["AMB-0003"]
+    },
+    {
+      "requirement_id": "REQ-0004",
+      "verification_kind": "QUANTITATIVE",
+      "criterion": "There must be no rotation under the arm's load.",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "ambiguous": true,
+      "ambiguity_ids": ["AMB-0001", "AMB-0003"]
+    },
+    {
+      "requirement_id": "REQ-0005",
+      "verification_kind": "STRUCTURAL",
+      "criterion": "The product must be removable and reusable.",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "ambiguous": false
+    },
+    {
+      "requirement_id": "REQ-0006",
+      "verification_kind": "STRUCTURAL",
+      "criterion": "The product must be operable without tools.",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "ambiguous": true,
+      "ambiguity_ids": ["AMB-0005"]
+    }
+  ],
+  "unresolved": [
+    {
+      "decision": "Which candidate is acceptable cannot be determined because the primary evidence route (contact analysis) is not available.",
+      "alternatives": [
+        "CAND-0001",
+        "CAND-0002",
+        "CAND-0003"
+      ],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "AMB-0002", "AMB-0003", "AMB-0004", "AMB-0006"],
+      "needed_evidence": "Contact analysis to evaluate friction retention and slip/rotation resistance."
+    }
+  ],
+  "assumptions": [
+    {
+      "assumption_id": "ASM-0001",
+      "statement": "The arm's weight and geometry are unknown but will be supplied to resolve AMB-0001."
+    },
+    {
+      "assumption_id": "ASM-0002",
+      "statement": "The tightening criterion is not defined; it will be supplied to resolve AMB-0002."
+    },
+    {
+      "assumption_id": "ASM-0003",
+      "statement": "The allowable movement limits are not specified; they will be supplied to resolve AMB-0003."
+    },
+    {
+      "assumption_id": "ASM-0004",
+      "statement": "The desk edge material and finish are unknown; they will be described to resolve AMB-0004."
+    },
+    {
+      "assumption_id": "ASM-0005",
+      "statement": "The text 'without any tools' is ambiguous regarding fixing and removal; clarification needed for AMB-0005."
+    },
+    {
+      "assumption_id": "ASM-0006",
+      "statement": "The available overhang behind the desk edge is unknown; it will be described to resolve AMB-0006."
+    }
+  ]
+}

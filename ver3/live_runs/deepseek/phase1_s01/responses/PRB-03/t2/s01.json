@@ -1,0 +1,76 @@
+{
+  "source_clauses": [
+    "Design a foot pedal for a workbench.",
+    "Pressing it should send a signal to the machine.",
+    "when I take my foot off it must return to its resting position on its own every time.",
+    "It should not move if something brushes against it sideways."
+  ],
+  "requirements": [
+    {
+      "id": 1,
+      "statement": "Pressing the foot pedal must send a signal to the machine.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 2,
+      "statement": "When the foot is removed, the foot pedal must return to its resting position on its own every time.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 3,
+      "statement": "The foot pedal must not move if something brushes against it sideways.",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "kind": "OPERATION",
+      "description": "The user presses the foot pedal to send a signal to the machine."
+    },
+    {
+      "id": 2,
+      "kind": "OPERATION",
+      "description": "The user removes their foot from the pedal and the pedal returns to its resting position on its own."
+    },
+    {
+      "id": 3,
+      "kind": "OPERATION",
+      "description": "Something brushes against the pedal sideways, and the pedal must not move."
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "user",
+      "description": "The person who presses the foot pedal."
+    },
+    {
+      "id": 2,
+      "name": "machine",
+      "description": "The entity that receives the signal from the pedal."
+    },
+    {
+      "id": 3,
+      "name": "sideways object",
+      "description": "An unspecified object that brushes against the pedal sideways."
+    }
+  ],
+  "freedoms": [
+    "The exact mechanism for sending the signal is not specified.",
+    "The means for returning to resting position is not specified.",
+    "The design features that prevent sideways movement are not specified."
+  ],
+  "ambiguities": [
+    "The specific location of the foot pedal on the workbench is not specified.",
+    "The type of signal to be sent is unspecified (e.g., electrical, mechanical).",
+    "The definition of 'sideways' is not precisely defined (relative to what axes).",
+    "The force or pressure required to press the pedal is not specified.",
+    "The pedal's size, shape, or material are not specified."
+  ],
+  "assumptions": [
+    "The foot pedal is intended to be operated by the user's foot.",
+    "The machine is a separate entity that receives the signal.",
+    "The pedal is initially at rest and pressing it is a deliberate action."
+  ]
+}

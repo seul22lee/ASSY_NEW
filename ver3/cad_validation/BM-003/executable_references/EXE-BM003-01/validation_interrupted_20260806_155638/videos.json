@@ -1,0 +1,293 @@
+{
+  "clips": [
+    {
+      "assumptions": {
+        "dynamics": "none - DYNAMICS_NOT_REQUIRED_FOR_THIS_REFERENCE",
+        "kind": "PRESCRIBED_CAD_KINEMATIC_ANIMATION",
+        "poses": "the declared transforms in build.py; nothing is integrated"
+      },
+      "camera": {
+        "eye_mm": [
+          430.0,
+          -520.0,
+          330.0
+        ],
+        "fixed_for_whole_clip": true,
+        "half_height_mm": 185.0,
+        "projection": "orthographic",
+        "target_mm": [
+          0.0,
+          0.0,
+          -10.0
+        ],
+        "up": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "claims_established": [
+        "the declared cycle is STORED -> deploy -> lock -> release -> fold -> STORED",
+        "M4 and M5 together are the deliberate release",
+        "what a reviewer sees corresponds to the accepted B-rep"
+      ],
+      "claims_not_established": [
+        "any force, torque, speed or dynamic behaviour",
+        "non-interference - that is the kernel measurement in validation/motion_report.json, not this animation"
+      ],
+      "codec": "H.264 (libx264), yuv420p, MP4 container",
+      "container_readback": {
+        "codec_reported": "h264",
+        "container_duration_s": 8.75,
+        "container_fps": 24.0,
+        "container_size_px": [
+          1280,
+          720
+        ],
+        "ffmpeg_version": "4.2.2-static",
+        "frames_read_back": 210
+      },
+      "duration_s": 8.75,
+      "engine": "cadquery-ocp tessellation + matplotlib painter + ffmpeg (libx264)",
+      "engine_versions": {
+        "cadquery": "2.4.0",
+        "ffmpeg": "4.2.2-static",
+        "imageio_ffmpeg": "0.5.1",
+        "matplotlib": "3.7.5",
+        "numpy": "1.24.4"
+      },
+      "file": "validation/review/bm003_cad_cycle.mp4",
+      "fps": 24,
+      "frame_count": 210,
+      "geometry_source": "the reference's own B-rep solids, posed by the same functions the validator uses. No proxy geometry.",
+      "human_review": "HUMAN_REVIEW_PENDING",
+      "kind": "REVIEW_EVIDENCE",
+      "output_bytes": 312689,
+      "output_sha256": "44d7aafdabbeebb961816c9199b03ae015dd82876755531c75ea68802fc09964",
+      "reference_id": "EXE-BM003-01",
+      "resolution_px": [
+        1280,
+        720
+      ],
+      "source_geometry_signature_sha256": "65d9ca0a8a13678f480ee2233d45579d8b406d8c70692499ca0b629af0057f56",
+      "state_timeline": [
+        {
+          "first_frame": 0,
+          "frames": 35,
+          "segment": "M1_UNFOLD"
+        },
+        {
+          "first_frame": 35,
+          "frames": 35,
+          "segment": "M2_RING_TURN_TO_LOCK"
+        },
+        {
+          "first_frame": 70,
+          "frames": 35,
+          "segment": "M3_RING_LOWER_TO_LOCK"
+        },
+        {
+          "first_frame": 105,
+          "frames": 35,
+          "segment": "M4_RING_LIFT_TO_RELEASE"
+        },
+        {
+          "first_frame": 140,
+          "frames": 35,
+          "segment": "M5_RING_TURN_TO_RELEASE"
+        },
+        {
+          "first_frame": 175,
+          "frames": 35,
+          "segment": "M6_FOLD"
+        }
+      ],
+      "trajectory_sha256": "c0a475901483a3ec1b8586d016e943b3b1c7bd8589f4bb3b6b36618dc670953e",
+      "video_id": "bm003_cad_cycle"
+    },
+    {
+      "assumptions": {
+        "dynamics": "none",
+        "kind": "PRESCRIBED_CAD_KINEMATIC_ANIMATION",
+        "paths": "the straight-line offsets declared in assembly.yaml"
+      },
+      "camera": {
+        "eye_mm": [
+          430.0,
+          -520.0,
+          330.0
+        ],
+        "fixed_for_whole_clip": true,
+        "half_height_mm": 185.0,
+        "projection": "orthographic",
+        "target_mm": [
+          0.0,
+          0.0,
+          -10.0
+        ],
+        "up": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "claims_established": [
+        "the declared installation order and each body's approach direction"
+      ],
+      "claims_not_established": [
+        "that any path is clear - that is the sweep in validation/assembly_report.json",
+        "insertion force, ease of assembly or process suitability",
+        "the five bayonet turns, which are held frames here and are swept in validation/bayonet_turns.json"
+      ],
+      "codec": "H.264 (libx264), yuv420p, MP4 container",
+      "container_readback": {
+        "codec_reported": "h264",
+        "container_duration_s": 9.63,
+        "container_fps": 24.0,
+        "container_size_px": [
+          1280,
+          720
+        ],
+        "ffmpeg_version": "4.2.2-static",
+        "frames_read_back": 231
+      },
+      "duration_s": 9.625,
+      "engine": "cadquery-ocp tessellation + matplotlib painter + ffmpeg (libx264)",
+      "engine_versions": {
+        "cadquery": "2.4.0",
+        "ffmpeg": "4.2.2-static",
+        "imageio_ffmpeg": "0.5.1",
+        "matplotlib": "3.7.5",
+        "numpy": "1.24.4"
+      },
+      "file": "validation/review/bm003_cad_assembly.mp4",
+      "fps": 24,
+      "frame_count": 231,
+      "geometry_source": "the reference's own B-rep solids, posed by the same functions the validator uses. No proxy geometry.",
+      "human_review": "HUMAN_REVIEW_PENDING",
+      "kind": "REVIEW_EVIDENCE",
+      "output_bytes": 228897,
+      "output_sha256": "245445c291fc92424f34483c280f7e74257a6d90254b147eedaa73101591ff1a",
+      "reference_id": "EXE-BM003-01",
+      "resolution_px": [
+        1280,
+        720
+      ],
+      "source_geometry_signature_sha256": "65d9ca0a8a13678f480ee2233d45579d8b406d8c70692499ca0b629af0057f56",
+      "state_timeline": [
+        {
+          "body": "BODY-HUB",
+          "first_frame": 0,
+          "frames": 7,
+          "kind": "base",
+          "step": "AS-01"
+        },
+        {
+          "body": "BODY-LEG-A",
+          "first_frame": 7,
+          "frames": 21,
+          "kind": "insertion",
+          "step": "AS-02"
+        },
+        {
+          "body": "BODY-PIN-A",
+          "first_frame": 28,
+          "frames": 21,
+          "kind": "insertion",
+          "step": "AS-03"
+        },
+        {
+          "body": "BODY-PIN-A",
+          "first_frame": 49,
+          "frames": 7,
+          "kind": "operation",
+          "step": "AS-04"
+        },
+        {
+          "body": "BODY-LEG-B",
+          "first_frame": 56,
+          "frames": 21,
+          "kind": "insertion",
+          "step": "AS-05"
+        },
+        {
+          "body": "BODY-PIN-B",
+          "first_frame": 77,
+          "frames": 21,
+          "kind": "insertion",
+          "step": "AS-06"
+        },
+        {
+          "body": "BODY-PIN-B",
+          "first_frame": 98,
+          "frames": 7,
+          "kind": "operation",
+          "step": "AS-07"
+        },
+        {
+          "body": "BODY-LEG-C",
+          "first_frame": 105,
+          "frames": 21,
+          "kind": "insertion",
+          "step": "AS-08"
+        },
+        {
+          "body": "BODY-PIN-C",
+          "first_frame": 126,
+          "frames": 21,
+          "kind": "insertion",
+          "step": "AS-09"
+        },
+        {
+          "body": "BODY-PIN-C",
+          "first_frame": 147,
+          "frames": 7,
+          "kind": "operation",
+          "step": "AS-10"
+        },
+        {
+          "body": "BODY-RING",
+          "first_frame": 154,
+          "frames": 21,
+          "kind": "insertion",
+          "step": "AS-11"
+        },
+        {
+          "body": "BODY-RING-CAPTOR",
+          "first_frame": 175,
+          "frames": 21,
+          "kind": "insertion",
+          "step": "AS-12"
+        },
+        {
+          "body": "BODY-RING-CAPTOR",
+          "first_frame": 196,
+          "frames": 7,
+          "kind": "operation",
+          "step": "AS-13"
+        },
+        {
+          "body": "BODY-TOP-SUPPORT",
+          "first_frame": 203,
+          "frames": 21,
+          "kind": "insertion",
+          "step": "AS-14"
+        },
+        {
+          "body": "BODY-TOP-SUPPORT",
+          "first_frame": 224,
+          "frames": 7,
+          "kind": "operation",
+          "step": "AS-15"
+        }
+      ],
+      "trajectory_sha256": "bfd725ea8fc4309bd6d53799b32088f708d55e8128d59f60f257f3cf43d011cf",
+      "video_id": "bm003_cad_assembly"
+    }
+  ],
+  "count": 2,
+  "dynamics": "DYNAMICS_NOT_REQUIRED_FOR_THIS_REFERENCE",
+  "human_review": "HUMAN_REVIEW_PENDING",
+  "reference_id": "EXE-BM003-01",
+  "role": "review aids. No geometric claim in this reference rests on a video."
+}

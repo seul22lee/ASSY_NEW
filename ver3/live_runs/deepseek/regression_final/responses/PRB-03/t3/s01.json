@@ -1,0 +1,133 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Pressing it should send a signal to the machine",
+      "locator": "REQ",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "when I take my foot off it must return to its resting position on its own every time",
+      "locator": "REQ",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "It should not move if something brushes against it sideways.",
+      "locator": "REQ",
+      "quantity_kinds": [],
+      "directionality": "sideways"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Pressing it should send a signal to the machine",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "Pressing it should send a signal",
+      "source_locator": "REQ",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "when I take my foot off it must return to its resting position on its own every time",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "when I take my foot off it must return to its resting position on its own every time",
+      "source_locator": "REQ",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "It should not move if something brushes against it sideways.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "It should not move if something brushes against it sideways.",
+      "source_locator": "REQ",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "pressing pedal",
+      "kind": "OPERATION",
+      "system_boundary": "foot pedal and machine",
+      "actors": ["ACT-0001"],
+      "environment": "workbench"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "releasing pedal",
+      "kind": "OPERATION",
+      "system_boundary": "foot pedal",
+      "actors": ["ACT-0001"],
+      "environment": "workbench"
+    },
+    {
+      "id": "SCN-0003",
+      "name": "side brush",
+      "kind": "OPERATION",
+      "system_boundary": "foot pedal",
+      "actors": ["ACT-0002"],
+      "environment": "workbench"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user's foot",
+      "must_reach": ["pedal"]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "something",
+      "must_reach": ["pedal"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "dimensions and materials of the pedal",
+      "why_free": "not stated"
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "the mechanism for returning to resting position",
+      "why_free": "not stated"
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "the mechanism for sending a signal",
+      "why_free": "not stated"
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "what constitutes 'moving' - whether any displacement is forbidden or only significant movement",
+      "conflicting_clauses": [],
+      "resolvable_when": "clarification or testing",
+      "block_scopes": ["REQ-0003"]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "whether 'every time' implies a specific reliability metric",
+      "conflicting_clauses": [],
+      "resolvable_when": "clarification",
+      "block_scopes": ["REQ-0002"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The pedal is a separate component from the machine.",
+      "why": "the request refers to sending a signal to the machine, implying separation",
+      "would_be_invalidated_by": "evidence that the pedal is part of the machine"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "I need a clamp that fixes a monitor arm to the edge of my desk.",
+      "locator": "req-1",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "Desk edges here are between 18 and 40 mm thick.",
+      "locator": "req-2",
+      "quantity_kinds": ["length"],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "Once it is tight it must not slip or rotate under the weight of the arm.",
+      "locator": "req-3",
+      "quantity_kinds": ["force"],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "I want to be able to take it off and move it to another desk without any tools.",
+      "locator": "req-4",
+      "quantity_kinds": [],
+      "directionality": "none"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "I need a clamp that fixes a monitor arm to the edge of my desk.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "clamp fixes monitor arm to desk edge",
+      "source_locator": "req-1",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "Desk edges here are between 18 and 40 mm thick.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "clamp accommodates desk edge thickness",
+      "source_locator": "req-2",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "Once it is tight it must not slip or rotate under the weight of the arm.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "clamp does not slip or rotate under weight",
+      "source_locator": "req-3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "I want to be able to take it off and move it to another desk without any tools.",
+      "kind": "USABILITY",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "clamp can be removed and moved without tools",
+      "source_locator": "req-4",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Installation",
+      "kind": "ASSEMBLY",
+      "system_boundary": "clamp and desk edge",
+      "actors": ["ACT-0001"],
+      "environment": "desk"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Operation with monitor arm",
+      "kind": "OPERATION",
+      "system_boundary": "clamp and monitor arm",
+      "actors": ["ACT-0001"],
+      "environment": "desk"
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Removal and relocation",
+      "kind": "SERVICE",
+      "system_boundary": "clamp and desk",
+      "actors": ["ACT-0001"],
+      "environment": "other desk"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": ["clamp", "desk edge", "monitor arm"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "mechanism, material, dimensions, weight limit, tool-free mechanism",
+      "why_free": "request does not specify"
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "It is unclear whether the clamp must be tool-free only for removal and relocation or also for tightening/adjusting.",
+      "conflicting_clauses": ["SRC-0003", "SRC-0004"],
+      "resolvable_when": "product definition",
+      "block_scopes": ["REQ-0003", "REQ-0004"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The clamp is intended for a typical desk with a horizontal edge and the monitor arm is attached such that its weight acts vertically.",
+      "why": "The request implies a desk edge clamp and vertical load.",
+      "would_be_invalidated_by": "if the desk edge orientation or load direction is specified differently"
+    }
+  ]
+}

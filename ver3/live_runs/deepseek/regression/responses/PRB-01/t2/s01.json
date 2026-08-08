@@ -1,0 +1,196 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "I want a wall-mounted dispenser for small items.",
+      "locator": "L1",
+      "quantity_kinds": ["NONE"],
+      "directionality": "NONE"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "It should hold about twenty of them",
+      "locator": "L2",
+      "quantity_kinds": ["BAND"],
+      "directionality": "NONE"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "and release exactly one each time I press a lever,",
+      "locator": "L3",
+      "quantity_kinds": ["MAGNITUDE"],
+      "directionality": "NONE"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "so I never get two at once.",
+      "locator": "L4",
+      "quantity_kinds": ["NONE"],
+      "directionality": "NONE"
+    },
+    {
+      "id": "SRC-0005",
+      "verbatim": "I refill it from the top without taking it off the wall.",
+      "locator": "L5",
+      "quantity_kinds": ["NONE"],
+      "directionality": "NONE"
+    },
+    {
+      "id": "SRC-0006",
+      "verbatim": "It must not jam when it is nearly empty.",
+      "locator": "L6",
+      "quantity_kinds": ["NONE"],
+      "directionality": "NONE"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "I want a wall-mounted dispenser for small items.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "wall-mounted dispenser for small items",
+      "source_locator": "L1",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "It should hold about twenty of them",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "hold about twenty of them",
+      "source_locator": "L2",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "release exactly one each time I press a lever,",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "release exactly one each time I press a lever",
+      "source_locator": "L3",
+      "quantity_class": "MAGNITUDE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "so I never get two at once.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "never get two at once",
+      "source_locator": "L4",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0005",
+      "statement_verbatim": "I refill it from the top without taking it off the wall.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "refill it from the top without taking it off the wall",
+      "source_locator": "L5",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0006",
+      "statement_verbatim": "It must not jam when it is nearly empty.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "must not jam when it is nearly empty",
+      "source_locator": "L6",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Normal use",
+      "kind": "OPERATION",
+      "system_boundary": "dispenser",
+      "actors": [
+        {
+          "id": "ACT-0001",
+          "name": "User",
+          "must_reach": ["lever"]
+        }
+      ],
+      "environment": "wall-mounted"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Refill",
+      "kind": "SERVICE",
+      "system_boundary": "dispenser",
+      "actors": [
+        {
+          "id": "ACT-0001",
+          "name": "User",
+          "must_reach": ["top opening"]
+        }
+      ],
+      "environment": "wall-mounted"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "User",
+      "must_reach": ["lever", "top opening"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Mechanism for releasing one item",
+      "why_free": "The request does not specify how it should release exactly one item, only that it must."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "Method of wall mounting",
+      "why_free": "The request does not specify how the dispenser is mounted on the wall."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "Dimensions and materials",
+      "why_free": "The request does not specify dimensions or materials, only that it holds about twenty small items and is wall-mounted."
+    },
+    {
+      "id": "FRE-0004",
+      "decision": "Design of the lever",
+      "why_free": "The request does not specify the shape or operation of the lever, only that pressing it releases exactly one item."
+    },
+    {
+      "id": "FRE-0005",
+      "decision": "What small items are",
+      "why_free": "The request does not specify the type of small items."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "What does 'nearly empty' mean exactly?",
+      "resolvable_when": "When the specific threshold for 'nearly empty' is defined in a follow-up.",
+      "conflicting_clauses": [],
+      "block_scopes": ["REQ-0006"]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "How is 'exactly one' verified in practice?",
+      "resolvable_when": "When the acceptance criteria for 'exactly one' are defined.",
+      "conflicting_clauses": [],
+      "block_scopes": ["REQ-0003"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The user will press the lever to dispense items one at a time.",
+      "why": "The request describes pressing a lever to release items.",
+      "would_be_invalidated_by": "A change to the operation method."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The dispenser will be used for small items that can be stored and released individually.",
+      "why": "The request says 'small items' and 'release exactly one'.",
+      "would_be_invalidated_by": "A specification of items that cannot be individually dispensed."
+    }
+  ]
+}

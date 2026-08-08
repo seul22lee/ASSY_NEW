@@ -1,0 +1,439 @@
+{
+ "_meta": {
+  "answers_prompt_sha256": "4894d3f97ea8c29b",
+  "authored_by": "agent-in-repository",
+  "pairing_history": [
+   "re-paired after the response-schema section was added to the prompt; content unchanged and re-verified against the parser, contract validation and completeness check"
+  ],
+  "reasoning_note": "Two obligations here sit outside mechanics: producing a signal, and a machine receiving it. Both are recorded with the boundary named rather than dropped or mechanised.",
+  "revision_note": "re-declared against the prompt after METER_DISCRETE_QUANTITY was added to the library. This product meters nothing, so the reasoning is unchanged."
+ },
+ "acceptance_contracts": [
+  {
+   "candidate": "CND-0001",
+   "id": "ACC-0001",
+   "obligations": [
+    "OBL-0003",
+    "OBL-0005",
+    "OBL-0007"
+   ],
+   "predicates": [
+    "the surface reaches a defined resting position with no applied load",
+    "the sideways freedom is removed",
+    "travel is bounded at both ends"
+   ]
+  },
+  {
+   "candidate": "CND-0002",
+   "id": "ACC-0002",
+   "obligations": [
+    "OBL-0003",
+    "OBL-0007"
+   ],
+   "predicates": [
+    "under the declared orientation the surface returns unaided",
+    "travel is bounded at both ends"
+   ]
+  }
+ ],
+ "assumptions": [
+  {
+   "id": "ASM-0001",
+   "inferred_by_stage": "s02",
+   "statement": "The product rests on or is fixed to something that reacts the foot load.",
+   "why": "Every load path must terminate somewhere, and a foot pedal is pressed downward against something.",
+   "would_be_invalidated_by": "a scenario in which the pedal is held in the hand or suspended"
+  }
+ ],
+ "candidates": [
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "the return is a force balance the ideal-joint route can address; whether the element survives repetition it cannot",
+    "route": "RIGID_BODY_DYNAMICS"
+   },
+   "family": "ACTUATE",
+   "id": "CND-0001",
+   "obligations_addressed": [
+    "OBL-0001",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0005"
+   ],
+   "obligations_created": [
+    "a stored-energy element and its anchorages",
+    "a catch or stop defining the resting position",
+    "radial support and axial retention at the turning connection"
+   ],
+   "principle": {
+    "ACTUATE": "STORED_ENERGY",
+    "BOUND_MOTION": "HARD_STOP",
+    "GUIDE_MOTION": "JOURNAL_SUPPORT",
+    "MAINTAIN_CONFIGURATION": "SEPARATE_RETAINING_MEMBER",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "The surface turns about a fixed axis and a stored-energy element returns it."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "a gravity return is a moment balance under a declared orientation",
+    "route": "RIGID_BODY_DYNAMICS"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "id": "CND-0002",
+   "obligations_addressed": [
+    "OBL-0001",
+    "OBL-0003",
+    "OBL-0005"
+   ],
+   "obligations_created": [
+    "an orientation assumption under which the surface falls back",
+    "a mass distribution that returns it",
+    "a stop defining the resting position"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "GUIDE_MOTION": "JOURNAL_SUPPORT",
+    "MAINTAIN_CONFIGURATION": "GRAVITY_SEATED",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "The surface turns about a fixed axis and its own weight returns it."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "as CND-0001",
+    "route": "RIGID_BODY_DYNAMICS"
+   },
+   "family": "ACTUATE",
+   "id": "CND-0003",
+   "obligations_addressed": [
+    "OBL-0001",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0005"
+   ],
+   "obligations_created": [
+    "a stored-energy element and its anchorages",
+    "lateral guidance removing the sideways freedom",
+    "travel bounds at both ends"
+   ],
+   "principle": {
+    "ACTUATE": "STORED_ENERGY",
+    "BOUND_MOTION": "HARD_STOP",
+    "GUIDE_MOTION": "PRISMATIC_GUIDE",
+    "MAINTAIN_CONFIGURATION": "SEPARATE_RETAINING_MEMBER",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": false,
+   "summary": "The surface slides on a guided path and a stored-energy element returns it."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "both the motion and the return depend on deformation",
+    "route": "COMPLIANCE_REDUCED_ORDER"
+   },
+   "family": "PERMIT_RELATIVE_MOTION",
+   "id": "CND-0004",
+   "obligations_addressed": [
+    "OBL-0001",
+    "OBL-0003",
+    "OBL-0004"
+   ],
+   "obligations_created": [
+    "a deflection bound and a recovery",
+    "survival of repeated deflection",
+    "resistance to sideways deflection as well as the intended one"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "JOINT_LIMIT_BY_GEOMETRY",
+    "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+    "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "COMPLIANT_FLEXURE",
+    "RETAIN_BODY": "ELASTIC_CAPTURE",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": false,
+   "summary": "The surface is a compliant continuous region that deflects when pressed and recovers."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "as CND-0001",
+    "route": "RIGID_BODY_DYNAMICS"
+   },
+   "family": "CONVERT_MOTION",
+   "id": "CND-0005",
+   "obligations_addressed": [
+    "OBL-0001",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0005"
+   ],
+   "obligations_created": [
+    "a pivot support for every link",
+    "a stored-energy element and its anchorages",
+    "a linkage geometry that keeps the surface attitude"
+   ],
+   "principle": {
+    "ACTUATE": "STORED_ENERGY",
+    "BOUND_MOTION": "HARD_STOP",
+    "CONVERT_MOTION": "LEVER_LINKAGE",
+    "GUIDE_MOTION": "MULTI_POINT_CONSTRAINT",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "A linkage carries the pressed surface so that it moves parallel to itself and is returned by a stored-energy element."
+  }
+ ],
+ "load_cases": [
+  {
+   "applied_to_role": "the pressed surface role",
+   "direction_class": "TRANSVERSE",
+   "id": "LC-0001",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the floor or bench the product stands on",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "every product role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0002",
+   "kind": "GRAVITY",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the floor or bench the product stands on",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "the pressed surface role",
+   "direction_class": "TRANSVERSE",
+   "id": "LC-0003",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the floor or bench the product stands on",
+   "scenario": "SCN-0002"
+  }
+ ],
+ "obligations": [
+  {
+   "derivation_premises": [
+    "A surface the foot cannot reach cannot be pressed."
+   ],
+   "derived_from_requirements": [
+    "REQ-0001",
+    "REQ-0002"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0001",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "A surface exists that a foot displaces, and it is reachable by foot at the workbench."
+  },
+  {
+   "derivation_premises": [
+    "The product can make a displacement observable; whether the signal is electrical, pneumatic or mechanical is outside what these requirements settle."
+   ],
+   "derived_from_requirements": [
+    "REQ-0002"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0002",
+   "involves_actors": [
+    "ACT-0002"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The displacement of that surface is available at the product boundary for the machine to detect."
+  },
+  {
+   "derivation_premises": [
+    "Returning on its own means something other than the user supplies the return.",
+    "A resting position must be defined for a return to be to it."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003"
+   ],
+   "evidence_route": "RIGID_BODY_DYNAMICS",
+   "id": "OBL-0003",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The surface returns to a defined resting position with no user action."
+  },
+  {
+   "derivation_premises": [
+    "Every time is a statement about repetition, which depends on whatever supplies the return not degrading."
+   ],
+   "derived_from_requirements": [
+    "REQ-0004"
+   ],
+   "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+   "id": "OBL-0004",
+   "mandatory": true,
+   "route_available": false,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The return occurs on every cycle, not merely once."
+  },
+  {
+   "derivation_premises": [
+    "A freedom that is neither intended nor prevented is available.",
+    "The requirement names a direction, so the freedom in that direction must be prevented."
+   ],
+   "derived_from_requirements": [
+    "REQ-0005"
+   ],
+   "evidence_route": "MOBILITY_ANALYSIS",
+   "id": "OBL-0005",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The pressed surface does not displace under a sideways disturbance."
+  },
+  {
+   "derivation_premises": [
+    "An unreacted load accelerates the body carrying it."
+   ],
+   "derived_from_requirements": [
+    "REQ-0001",
+    "REQ-0002"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0006",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The foot load reaches a reaction site through a connected path."
+  },
+  {
+   "derivation_premises": [
+    "A resting position is one bound; a pressed position that produces the signal is the other."
+   ],
+   "derived_from_requirements": [
+    "REQ-0002",
+    "REQ-0003"
+   ],
+   "evidence_route": "MOBILITY_ANALYSIS",
+   "id": "OBL-0007",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The travel of the pressed surface is bounded at both ends."
+  },
+  {
+   "derivation_premises": [
+    "A part with no path into the partly built product cannot be installed."
+   ],
+   "derived_from_requirements": [
+    "REQ-0001"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0008",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s04",
+   "scope": "UNIVERSAL",
+   "statement": "An ordered installation sequence exists in which every part has a clear path."
+  }
+ ],
+ "unresolved": [
+  {
+   "alternatives": [
+    "CND-0001",
+    "CND-0002",
+    "CND-0003",
+    "CND-0004",
+    "CND-0005"
+   ],
+   "alternatives_kind": "ENTITY_REFS",
+   "blocks": [
+    "OBL-0003",
+    "OBL-0004"
+   ],
+   "decision": "what supplies the return to rest",
+   "id": "UNR-0001",
+   "kept_open_by": [
+    "FRE-0001"
+   ],
+   "why_open": "Stored energy, the surface's own weight and elastic recovery all return a displaced body, and the requirements name none of them. The choice determines whether the return depends on an orientation assumption, on an element that can degrade, or on a material property."
+  },
+  {
+   "alternatives": [
+    "the product produces the signal",
+    "the product presents a displacement the machine senses",
+    "the product carries a device supplied with the machine"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0002"
+   ],
+   "decision": "where this product ends and the machine begins",
+   "id": "UNR-0002",
+   "kept_open_by": [
+    "AMB-0001",
+    "FRE-0003"
+   ],
+   "why_open": "The requirements say a signal reaches the machine and say nothing about what kind of signal it is or which side produces it. Every obligation about the signal stops at the product boundary for that reason."
+  },
+  {
+   "alternatives": [
+    "free-standing on the floor",
+    "fixed to the workbench",
+    "fixed to the floor"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0006"
+   ],
+   "decision": "whether the product stands free or is fixed to the bench",
+   "id": "UNR-0003",
+   "kept_open_by": [
+    "FRE-0004",
+    "AMB-0005"
+   ],
+   "why_open": "The reaction site for every load differs between the two, and the requirements describe neither."
+  },
+  {
+   "alternatives": [
+    "a stated disturbance",
+    "no quantitative acceptance for the sideways case"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0005"
+   ],
+   "decision": "what sideways disturbance must be resisted",
+   "id": "UNR-0004",
+   "kept_open_by": [
+    "AMB-0003"
+   ],
+   "why_open": "Brushing against it carries no magnitude, so no arrangement can be shown adequate against it; only the presence or absence of the freedom can be decided."
+  }
+ ]
+}

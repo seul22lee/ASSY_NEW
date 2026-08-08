@@ -1,0 +1,161 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a compact desktop platform-lifting device enclosed within a housing.",
+      "locator": "req-intro",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "The user should rotate an external hand crank to raise and lower an internal platform.",
+      "locator": "req-oper",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "The platform should move approximately 80-100 mm and support a payload of approximately 1 kg.",
+      "locator": "req-perf",
+      "quantity_kinds": ["length", "mass"],
+      "directionality": "vertical"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "The mechanism should remain enclosed within the housing during normal operation.",
+      "locator": "req-enclosure",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0005",
+      "verbatim": "The product should be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+      "locator": "req-quality",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0006",
+      "verbatim": "Avoid obvious jamming or unstable operation.",
+      "locator": "req-avoid",
+      "quantity_kinds": [],
+      "directionality": "none"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a compact desktop platform-lifting device enclosed within a housing.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "device is enclosed within a housing",
+      "source_locator": "req-intro",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "The user should rotate an external hand crank to raise and lower an internal platform.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "rotating hand crank raises and lowers platform",
+      "source_locator": "req-oper",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "The platform should move approximately 80-100 mm and support a payload of approximately 1 kg.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "platform moves approximately 80-100 mm and supports payload of approximately 1 kg",
+      "source_locator": "req-perf",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "The mechanism should remain enclosed within the housing during normal operation.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "mechanism remains enclosed within housing during normal operation",
+      "source_locator": "req-enclosure",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0005",
+      "statement_verbatim": "The product should be safe to use, mechanically plausible, easy to assemble, and practical to manufacture.",
+      "kind": "USABILITY",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "product is safe to use, mechanically plausible, easy to assemble, practical to manufacture",
+      "source_locator": "req-quality",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0006",
+      "statement_verbatim": "Avoid obvious jamming or unstable operation.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "no obvious jamming or unstable operation",
+      "source_locator": "req-avoid",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Normal operation",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: hand crank external, internal platform, mechanism, housing. Outside: user's hand, payload placed on platform, table surface housing rests on.",
+      "actors": ["ACT-0001"],
+      "environment": "desktop, indoor"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": ["external hand crank"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "specific mechanism design",
+      "why_free": "text only specifies function, not mechanism"
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "housing material and dimensions",
+      "why_free": "not specified"
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The platform should move approximately 80-100 mm: is this total travel or one direction?",
+      "conflicting_clauses": [],
+      "resolvable_when": "design detail",
+      "block_scopes": ["ReQ-0003"]
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The system boundary is not specified, so it is ambiguous what loads must be reacted and where.",
+      "conflicting_clauses": [],
+      "resolvable_when": "system design stage",
+      "block_scopes": ["SCN-0001"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The external hand crank is part of the product and is accessible from outside the housing.",
+      "why": "The text says 'external hand crank' and 'user should rotate', implying it is accessible.",
+      "would_be_invalidated_by": "If the crank is not part of the product or not accessible."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The device is placed on a stable horizontal surface.",
+      "why": "The term 'desktop' suggests it is placed on a tabletop.",
+      "would_be_invalidated_by": "If the device is held or mounted differently."
+    }
+  ]
+}

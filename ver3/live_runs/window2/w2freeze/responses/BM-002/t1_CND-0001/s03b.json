@@ -1,0 +1,383 @@
+{
+  "mobility": [
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "I",
+        "TY": "I",
+        "TZ": "I",
+        "RX": "I",
+        "RY": "I",
+        "RZ": "I"
+      },
+      "detail": {}
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "I"
+      },
+      "detail": {
+        "TX": {
+          "blocked_by": "RGP-0001",
+          "direction": "translation X",
+          "test": "attempt to translate the crank along X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "blocked_by": "RGP-0001",
+          "direction": "translation Y",
+          "test": "attempt to translate the crank along Y; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "blocked_by": "RGP-0001",
+          "direction": "translation Z",
+          "test": "attempt to translate the crank along Z; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "blocked_by": "RGP-0001",
+          "direction": "rotation X",
+          "test": "attempt to rotate the crank about X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "blocked_by": "RGP-0001",
+          "direction": "rotation Y",
+          "test": "attempt to rotate the crank about Y; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "I"
+      },
+      "detail": {
+        "TX": {
+          "blocked_by": "RGP-0002",
+          "direction": "translation X",
+          "test": "attempt to translate the link along X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "blocked_by": "RGP-0002",
+          "direction": "translation Y",
+          "test": "attempt to translate the link along Y; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "blocked_by": "RGP-0002",
+          "direction": "translation Z",
+          "test": "attempt to translate the link along Z; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "blocked_by": "RGP-0002",
+          "direction": "rotation X",
+          "test": "attempt to rotate the link about X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "blocked_by": "RGP-0002",
+          "direction": "rotation Y",
+          "test": "attempt to rotate the link about Y; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0001",
+      "dof": {
+        "TX": "B",
+        "TY": "I",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "blocked_by": "RGP-0001",
+          "direction": "translation X",
+          "test": "attempt to translate the slider along X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "blocked_by": "RGP-0001",
+          "direction": "translation Z",
+          "test": "attempt to translate the slider along Z; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "blocked_by": "RGP-0001",
+          "direction": "rotation X",
+          "test": "attempt to rotate the slider about X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "blocked_by": "RGP-0001",
+          "direction": "rotation Y",
+          "test": "attempt to rotate the slider about Y; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "blocked_by": "RGP-0001",
+          "direction": "rotation Z",
+          "test": "attempt to rotate the slider about Z; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0001",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "I",
+        "TY": "I",
+        "TZ": "I",
+        "RX": "I",
+        "RY": "I",
+        "RZ": "I"
+      },
+      "detail": {}
+    },
+    {
+      "rigid_group": "RGP-0002",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "I"
+      },
+      "detail": {
+        "TX": {
+          "blocked_by": "RGP-0001",
+          "direction": "translation X",
+          "test": "attempt to translate the crank along X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "blocked_by": "RGP-0001",
+          "direction": "translation Y",
+          "test": "attempt to translate the crank along Y; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "blocked_by": "RGP-0001",
+          "direction": "translation Z",
+          "test": "attempt to translate the crank along Z; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "blocked_by": "RGP-0001",
+          "direction": "rotation X",
+          "test": "attempt to rotate the crank about X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "blocked_by": "RGP-0001",
+          "direction": "rotation Y",
+          "test": "attempt to rotate the crank about Y; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0003",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "B",
+        "TY": "B",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "I"
+      },
+      "detail": {
+        "TX": {
+          "blocked_by": "RGP-0002",
+          "direction": "translation X",
+          "test": "attempt to translate the link along X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "TY": {
+          "blocked_by": "RGP-0002",
+          "direction": "translation Y",
+          "test": "attempt to translate the link along Y; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "blocked_by": "RGP-0002",
+          "direction": "translation Z",
+          "test": "attempt to translate the link along Z; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "blocked_by": "RGP-0002",
+          "direction": "rotation X",
+          "test": "attempt to rotate the link about X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "blocked_by": "RGP-0002",
+          "direction": "rotation Y",
+          "test": "attempt to rotate the link about Y; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        }
+      }
+    },
+    {
+      "rigid_group": "RGP-0004",
+      "configuration": "CFG-0002",
+      "dof": {
+        "TX": "B",
+        "TY": "I",
+        "TZ": "B",
+        "RX": "B",
+        "RY": "B",
+        "RZ": "B"
+      },
+      "detail": {
+        "TX": {
+          "blocked_by": "RGP-0001",
+          "direction": "translation X",
+          "test": "attempt to translate the slider along X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "TZ": {
+          "blocked_by": "RGP-0001",
+          "direction": "translation Z",
+          "test": "attempt to translate the slider along Z; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RX": {
+          "blocked_by": "RGP-0001",
+          "direction": "rotation X",
+          "test": "attempt to rotate the slider about X; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RY": {
+          "blocked_by": "RGP-0001",
+          "direction": "rotation Y",
+          "test": "attempt to rotate the slider about Y; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        },
+        "RZ": {
+          "blocked_by": "RGP-0001",
+          "direction": "rotation Z",
+          "test": "attempt to rotate the slider about Z; it should not move",
+          "why": "KINEMATIC_NECESSITY"
+        }
+      }
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0004",
+        "IFC-0004",
+        "BOD-0001",
+        "World"
+      ]
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0002",
+        "IFC-0001",
+        "BOD-0001",
+        "World"
+      ]
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0002",
+        "JNT-0001",
+        "BOD-0001",
+        "World"
+      ]
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "candidate": "CND-0001",
+      "ordered_hops": [
+        "BOD-0004",
+        "IFC-0004",
+        "BOD-0001",
+        "World"
+      ]
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0001",
+      "access_side": "outside",
+      "activates": [],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0002",
+      "access_side": "front",
+      "activates": [],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0001"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0003",
+      "access_side": "front",
+      "activates": [],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0002"]
+    },
+    {
+      "id": "ASY-0004",
+      "order_index": 4,
+      "body": "BOD-0004",
+      "access_side": "front",
+      "activates": [],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0003"]
+    }
+  ],
+  "unresolved": []
+}

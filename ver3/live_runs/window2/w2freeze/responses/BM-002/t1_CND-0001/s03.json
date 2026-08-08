@@ -1,0 +1,172 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "housing",
+      "instance_identity": "one",
+      "addresses_obligations": ["OBL-0012"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "crank",
+      "instance_identity": "one",
+      "addresses_obligations": []
+    },
+    {
+      "id": "BOD-0003",
+      "role": "link",
+      "instance_identity": "one",
+      "addresses_obligations": []
+    },
+    {
+      "id": "BOD-0004",
+      "role": "slider",
+      "instance_identity": "one",
+      "addresses_obligations": ["OBL-0004"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["housing"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["crank"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["link"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": ["slider"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0002",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0003",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0004",
+      "dof": ["RZ"],
+      "axis_direction": "+Z",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "PRISMATIC",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0004",
+      "dof": ["TY"],
+      "axis_direction": "+Y",
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0002"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": ["OBL-0001"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0002", "BOD-0003"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": []
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0003", "BOD-0004"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": []
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0001", "BOD-0004"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "engaged",
+      "addresses_obligations": []
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "lowered",
+      "kind": "OPERATING",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "raised",
+      "kind": "OPERATING",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0002"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the rotary input"]
+    },
+    {
+      "id": "FRG-0002",
+      "role": "SUPPORT",
+      "owning_bodies": ["BOD-0004"],
+      "required_by_actors": [],
+      "reach_targets": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "axial placement of the crank revolute joint along the Z axis",
+      "why_open": "depends on envelope and enclosure wall thickness",
+      "alternatives": [],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0005"],
+      "blocks": []
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "lengths of crank and link to achieve the required travel",
+      "why_open": "travel band is approximate and dimensioning is deferred",
+      "alternatives": [],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": []
+    }
+  ]
+}

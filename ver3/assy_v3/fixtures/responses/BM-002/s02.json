@@ -1,0 +1,566 @@
+{
+ "_meta": {
+  "answers_prompt_sha256": "1f85ffee1d3ab4a5",
+  "pairing_history": [
+   "re-paired after the response-schema section was added to the prompt; content unchanged and re-verified against the parser, contract validation and completeness check"
+  ]
+ },
+ "acceptance_contracts": [
+  {
+   "candidate": "CND-0001",
+   "id": "ACC-0001",
+   "obligations": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0005"
+   ],
+   "predicates": [
+    "the platform displacement between the extreme input positions lies in the stated band",
+    "the platform's path is constrained to one direction",
+    "a connected path exists from the supporting surface to a reaction site"
+   ]
+  },
+  {
+   "candidate": "CND-0002",
+   "id": "ACC-0002",
+   "obligations": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0005"
+   ],
+   "predicates": [
+    "the driven body cannot rotate with the input",
+    "the engaged length spans the required travel",
+    "a connected path exists from the supporting surface to a reaction site"
+   ]
+  },
+  {
+   "candidate": "CND-0003",
+   "id": "ACC-0003",
+   "obligations": [
+    "OBL-0002",
+    "OBL-0011"
+   ],
+   "predicates": [
+    "engagement is maintained across the whole travel"
+   ]
+  },
+  {
+   "candidate": "CND-0006",
+   "id": "ACC-0004",
+   "obligations": [
+    "OBL-0002",
+    "OBL-0004"
+   ],
+   "predicates": [
+    "the linkage reaches the required travel",
+    "the platform attitude is preserved across the travel"
+   ]
+  }
+ ],
+ "assumptions": [
+  {
+   "id": "ASM-0001",
+   "inferred_by_stage": "s02",
+   "statement": "The product stands on a surface that can react its weight and the payload.",
+   "why": "Every load path must terminate somewhere, and the scenario places the product on a desk.",
+   "would_be_invalidated_by": "a scenario in which the product is held or suspended rather than stood upon"
+  }
+ ],
+ "candidates": [
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "the stroke follows from the geometry and is checkable without force",
+    "route": "MOBILITY_ANALYSIS"
+   },
+   "family": "CONVERT_MOTION",
+   "id": "CND-0001",
+   "obligations_addressed": [
+    "OBL-0001",
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0009"
+   ],
+   "obligations_created": [
+    "a guided path for the slider",
+    "two revolute connections, each needing radial support and axial retention",
+    "a bounded stroke set by the crank radius"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "CONVERT_MOTION": "CRANK_SLIDER",
+    "GUIDE_MOTION": "PRISMATIC_GUIDE",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "A rotating input drives a slider through a link; the slider is the platform."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "its self-locking behaviour is a friction claim and no route here can establish it; the conversion itself is still geometric",
+    "route": "CONTACT_RESOLVING_ANALYSIS"
+   },
+   "family": "CONVERT_MOTION",
+   "id": "CND-0002",
+   "obligations_addressed": [
+    "OBL-0001",
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0009"
+   ],
+   "obligations_created": [
+    "anti-rotation of the driven body, without which the pair does not translate",
+    "axial support of the rotating member",
+    "a travel bound set by the engaged length"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "CONVERT_MOTION": "SCREW_AND_NUT",
+    "GUIDE_MOTION": "PRISMATIC_GUIDE",
+    "PERMIT_RELATIVE_MOTION": "HELICAL_PAIR",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": true,
+   "summary": "A helical pair converts rotation to translation directly."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "engagement is geometric; whether it binds is not",
+    "route": "MOBILITY_ANALYSIS"
+   },
+   "family": "CONVERT_MOTION",
+   "id": "CND-0003",
+   "obligations_addressed": [
+    "OBL-0001",
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0009"
+   ],
+   "obligations_created": [
+    "guidance of the toothed bar",
+    "maintained engagement between the two toothed elements",
+    "radial support of the wheel"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "CONVERT_MOTION": "RACK_AND_PINION",
+    "GUIDE_MOTION": "PRISMATIC_GUIDE",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "A toothed wheel on the input engages a toothed bar carrying the platform."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "keeping a follower on a profile under load is a contact question",
+    "route": "CONTACT_RESOLVING_ANALYSIS"
+   },
+   "family": "CONVERT_MOTION",
+   "id": "CND-0004",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0009"
+   ],
+   "obligations_created": [
+    "a return that keeps the follower against the profile",
+    "guidance of the follower",
+    "a profile whose rise equals the required travel"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "CONVERT_MOTION": "CAM_AND_FOLLOWER",
+    "GUIDE_MOTION": "PRISMATIC_GUIDE",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "DIRECT_BEARING"
+   },
+   "self_locking": false,
+   "summary": "A profiled surface on the input displaces a follower attached to the platform."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "a flexible element transmits by friction or by positive engagement; the former has no route here",
+    "route": "CONTACT_RESOLVING_ANALYSIS"
+   },
+   "family": "CONVERT_MOTION",
+   "id": "CND-0005",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0009"
+   ],
+   "obligations_created": [
+    "tensioning of the flexible element",
+    "supports for each pulley",
+    "something to prevent the platform descending when the input is released"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "CONVERT_MOTION": "FLEXIBLE_ELEMENT_DRIVE",
+    "GUIDE_MOTION": "PRISMATIC_GUIDE",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "TENSION_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "A flexible element around pulleys raises and lowers the platform."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "reachable travel and orientation are geometric",
+    "route": "MOBILITY_ANALYSIS"
+   },
+   "family": "CONVERT_MOTION",
+   "id": "CND-0006",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0009"
+   ],
+   "obligations_created": [
+    "a pivot support for every link",
+    "a displacement ratio that reaches the required travel",
+    "constraint of the platform's orientation through the linkage geometry"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "CONVERT_MOTION": "LEVER_LINKAGE",
+    "GUIDE_MOTION": "MULTI_POINT_CONSTRAINT",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "TRANSMIT_LOAD": "SHEAR_MEMBER"
+   },
+   "self_locking": false,
+   "summary": "Rigid links pivoting to convert input rotation into platform rise."
+  }
+ ],
+ "load_cases": [
+  {
+   "applied_to_role": "the supporting surface role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0001",
+   "kind": "PAYLOAD",
+   "magnitude_or_status": "approximately 1 kg",
+   "reacted_at_role": "the surface the product stands on",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "every moving role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0002",
+   "kind": "GRAVITY",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the surface the product stands on",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "the rotary input role",
+   "direction_class": "MOMENT",
+   "id": "LC-0003",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the surface the product stands on",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "the supporting surface role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0004",
+   "kind": "PAYLOAD",
+   "magnitude_or_status": "approximately 1 kg",
+   "reacted_at_role": "the surface the product stands on",
+   "scenario": "SCN-0002"
+  }
+ ],
+ "obligations": [
+  {
+   "derivation_premises": [
+    "A user cannot operate what cannot be reached."
+   ],
+   "derived_from_requirements": [
+    "REQ-0002"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0001",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "A rotary input exists outside the enclosing body and is reachable by the user."
+  },
+  {
+   "derivation_premises": [
+    "Rotation and translation are different motions; something must convert one into the other."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0002",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "A relation exists that turns rotation of the input into translation of the platform, in both directions."
+  },
+  {
+   "derivation_premises": [
+    "A displacement can only be measured against a defined direction.",
+    "An unconstrained body driven by a converting element does not follow a definite path."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003",
+    "REQ-0004"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0003",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The platform's path is constrained to a definite direction."
+  },
+  {
+   "derivation_premises": [
+    "A surface that carries a payload must keep the attitude that lets it carry it."
+   ],
+   "derived_from_requirements": [
+    "REQ-0005"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0004",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The platform's orientation is preserved wherever the scenario depends on it."
+  },
+  {
+   "derivation_premises": [
+    "An unreacted load accelerates the body carrying it."
+   ],
+   "derived_from_requirements": [
+    "REQ-0005"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0005",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The payload load reaches a reaction site through a connected path."
+  },
+  {
+   "derivation_premises": [
+    "An unreacted force accelerates the element.",
+    "Which components an element carries follows from the converting relation chosen, not from the requirement."
+   ],
+   "derived_from_requirements": [
+    "REQ-0005",
+    "REQ-0011"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0006",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "Every element that carries a load component in the declared scenario has a reaction for that component."
+  },
+  {
+   "derivation_premises": [
+    "An external input driving an internal body must cross the boundary somewhere.",
+    "Crossing is not the same as escaping."
+   ],
+   "derived_from_requirements": [
+    "REQ-0002",
+    "REQ-0006"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0007",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The input crosses the enclosing boundary without any element leaving the enclosure during operation."
+  },
+  {
+   "derivation_premises": [
+    "A payload that cannot be placed cannot be supported."
+   ],
+   "derived_from_requirements": [
+    "REQ-0005"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0008",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "A path exists by which a payload is placed on and removed from the platform, terminating at the platform."
+  },
+  {
+   "derivation_premises": [
+    "The text names a hand-operated input and no other source."
+   ],
+   "derived_from_requirements": [
+    "REQ-0002",
+    "REQ-0007"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0009",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The product is driven only by the user's input; no stored or supplied energy source drives the motion."
+  },
+  {
+   "derivation_premises": [
+    "A part with no path into the partly built product cannot be installed."
+   ],
+   "derived_from_requirements": [
+    "REQ-0009"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0010",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "An ordered installation sequence exists in which every part has a clear path in the configuration produced by the preceding steps."
+  },
+  {
+   "derivation_premises": [
+    "A relation that ceases to transmit within its own range does not perform the required motion."
+   ],
+   "derived_from_requirements": [
+    "REQ-0011"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0011",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The converting relation continues to produce output motion throughout the travel."
+  },
+  {
+   "derivation_premises": [
+    "stated by the requirement it derives from"
+   ],
+   "derived_from_requirements": [
+    "REQ-0001"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0012",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "An enclosed volume exists that contains the moving elements and carries the platform."
+  },
+  {
+   "derivation_premises": [
+    "stated by the requirement it derives from"
+   ],
+   "derived_from_requirements": [
+    "REQ-0008"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0013",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "Every declared relation has a physical realization on all participating bodies."
+  },
+  {
+   "derivation_premises": [
+    "stated by the requirement it derives from"
+   ],
+   "derived_from_requirements": [
+    "REQ-0010"
+   ],
+   "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+   "id": "OBL-0014",
+   "mandatory": true,
+   "route_available": false,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The product is manufacturable by some process at a practical cost."
+  }
+ ],
+ "unresolved": [
+  {
+   "alternatives": [
+    "CND-0001",
+    "CND-0002",
+    "CND-0003",
+    "CND-0004",
+    "CND-0005",
+    "CND-0006"
+   ],
+   "alternatives_kind": "ENTITY_REFS",
+   "blocks": [
+    "OBL-0006"
+   ],
+   "decision": "which converting relation the product uses",
+   "id": "UNR-0001",
+   "kept_open_by": [
+    "FRE-0001",
+    "AMB-0002"
+   ],
+   "why_open": "Six principle families satisfy the conversion obligation and nothing in the requirements distinguishes them. Travel is a band, not a stroke; no packaging envelope is stated; no holding behaviour is required."
+  },
+  {
+   "alternatives": [
+    "holding is required",
+    "holding is not required"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "UNR-0001"
+   ],
+   "decision": "whether the product must hold its position when the input is released",
+   "id": "UNR-0002",
+   "kept_open_by": [
+    "FRE-0007"
+   ],
+   "why_open": "The requirements ask for raising and lowering and are silent on holding. The answer changes which families remain admissible, because some are self-locking and some are not."
+  },
+  {
+   "alternatives": [
+    "a permanent aperture",
+    "a closable aperture",
+    "access only when not operating"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0008"
+   ],
+   "decision": "whether the enclosure may be opened for payload access",
+   "id": "UNR-0003",
+   "kept_open_by": [
+    "AMB-0006"
+   ],
+   "why_open": "Enclosure during operation and payload access are both required and the requirements do not say whether an aperture is permitted."
+  }
+ ]
+}

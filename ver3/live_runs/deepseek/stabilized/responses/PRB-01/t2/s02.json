@@ -1,0 +1,227 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The dispenser must be capable of being mounted on a wall and remaining attached during operation and refilling.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A wall-mounted object must have a physical interface to the wall that resists gravity and operational forces.", "Remaining attached during refilling implies the mounting must withstand loads during that scenario."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The dispenser must provide a storage volume capable of holding approximately twenty items of the specified class.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["Items must be contained within the product boundary; a volume must be allocated."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "Each actuation of the lever must result in the release of exactly one item from the dispenser's storage.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A lever press is a discrete user input; the mechanism must map one input to one item output."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The mechanism must prevent the simultaneous release of more than one item per actuation.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["If two items can exit through the same aperture at the same time, they may be released together."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The refilling operation must be possible from the top while the dispenser remains attached to the wall.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["A top opening must be present and accessible, and the mounting must permit the refilling operation."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The mechanism must continue to function (not jam) when the stored quantity is low.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["The behavior of the item flow may change as the number of items changes; the mechanism must not obstruct that flow."]
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "An explicit definition of 'nearly empty' must be provided to assess jamming behavior.",
+      "derived_from_requirements": ["REQ-0006"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "COMPLIANCE_REDUCED_ORDER",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["Without a quantitative threshold, the requirement cannot be verified."]
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The behavior of the dispenser when the storage is empty or nearly empty must be specified to define 'exactly one each time'.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "COMPLIANCE_REDUCED_ORDER",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": ["'Exactly one' cannot be guaranteed if no items are present; failure behavior must be defined."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the dispenser body",
+      "reacted_at_role": "the wall mounting surface",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the dispenser body",
+      "reacted_at_role": "the wall mounting surface",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the item being dispensed",
+      "reacted_at_role": "the moving closing role",
+      "direction_class": "MOMENT",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the dispenser body",
+      "reacted_at_role": "the wall mounting surface",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0005",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the top opening",
+      "reacted_at_role": "the wall mounting surface",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Gravity-fed dispenser with a rotating indexer",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "INDEXING_ROTOR",
+      "obligations_addressed": ["OBL-0003", "OBL-0004", "OBL-0006"],
+      "obligations_created": ["OBL-0009", "OBL-0010"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Configuration existence and item-to-pocket mapping can be analyzed."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Gravity-fed dispenser with a gated pair",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "GATED_PAIR",
+      "obligations_addressed": ["OBL-0003", "OBL-0004", "OBL-0006"],
+      "obligations_created": ["OBL-0011", "OBL-0012"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Gate timing and item separation can be analyzed."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Gravity-fed dispenser with a metered aperture",
+      "family": "METER_DISCRETE_QUANTITY",
+      "principle": "METERED_APERTURE",
+      "obligations_addressed": ["OBL-0003", "OBL-0004", "OBL-0006"],
+      "obligations_created": ["OBL-0013"],
+      "evidence_route_verdict": {
+        "route": "SWEPT_INTERFERENCE",
+        "available": true,
+        "note": "Path clearance and aperture sizing can be analyzed."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0003", "OBL-0004", "OBL-0006", "OBL-0009", "OBL-0010"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0003", "OBL-0004", "OBL-0006", "OBL-0011", "OBL-0012"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0003", "OBL-0004", "OBL-0006", "OBL-0013"],
+      "predicates": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Choice of metering mechanism",
+      "why_open": "Multiple principle families can satisfy the requirements; the specific trade-offs are not yet visible.",
+      "alternatives": ["INDEXING_ROTOR", "GATED_PAIR", "METERED_APERTURE"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": ["OBL-0003", "OBL-0004", "OBL-0006"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The wall mounting surface is rigid and capable of supporting the dispenser.",
+      "why": "The requirement states wall-mounted, but the wall properties are not specified.",
+      "would_be_invalidated_by": "If the wall is flexible or insufficiently strong."
+    }
+  ]
+}

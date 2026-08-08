@@ -1,0 +1,297 @@
+{
+  "bodies": [
+    {
+      "id": "BOD-0001",
+      "role": "pressed surface",
+      "instance_identity": "single part",
+      "addresses_obligations": ["OBL-0001", "OBL-0003", "OBL-0005", "OBL-0007"]
+    },
+    {
+      "id": "BOD-0002",
+      "role": "stored-energy element",
+      "instance_identity": "single element",
+      "addresses_obligations": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "BOD-0003",
+      "role": "base",
+      "instance_identity": "single part",
+      "addresses_obligations": ["OBL-0006"]
+    },
+    {
+      "id": "BOD-0004",
+      "role": "anchor for stored-energy element on base",
+      "instance_identity": "single part or integral to base",
+      "addresses_obligations": ["OBL-0003"]
+    },
+    {
+      "id": "BOD-0005",
+      "role": "anchor for stored-energy element on surface",
+      "instance_identity": "single part or integral to surface",
+      "addresses_obligations": ["OBL-0003"]
+    },
+    {
+      "id": "BOD-0006",
+      "role": "bearing support",
+      "instance_identity": "single part, possibly split",
+      "addresses_obligations": ["OBL-0005", "OBL-0006", "OBL-0007"]
+    },
+    {
+      "id": "BOD-0007",
+      "role": "stop defining resting position",
+      "instance_identity": "single part or integral to base",
+      "addresses_obligations": ["OBL-0003", "OBL-0007"]
+    },
+    {
+      "id": "BOD-0008",
+      "role": "stop defining pressed position",
+      "instance_identity": "single part or integral to base",
+      "addresses_obligations": ["OBL-0007"]
+    }
+  ],
+  "rigid_groups": [
+    {
+      "id": "RGP-0001",
+      "body": "BOD-0001",
+      "members": ["the surface, including any lever arm"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0002",
+      "body": "BOD-0002",
+      "members": ["the entire compliant element"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0003",
+      "body": "BOD-0003",
+      "members": ["the entire base"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0004",
+      "body": "BOD-0004",
+      "members": ["the entire anchor"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0005",
+      "body": "BOD-0005",
+      "members": ["the entire anchor"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0006",
+      "body": "BOD-0006",
+      "members": ["the entire bearing support"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0007",
+      "body": "BOD-0007",
+      "members": ["the entire stop"],
+      "is_default": true
+    },
+    {
+      "id": "RGP-0008",
+      "body": "BOD-0008",
+      "members": ["the entire stop"],
+      "is_default": true
+    }
+  ],
+  "joints": [
+    {
+      "id": "JNT-0001",
+      "joint_type": "REVOLUTE",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0001",
+      "dof": ["RX"],
+      "axis_direction": "+X",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0002",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0004",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0003",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0001",
+      "child_group": "RGP-0005",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0004",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0004",
+      "child_group": "RGP-0002",
+      "dof": ["TX"],
+      "axis_direction": "+Z",
+      "compliance": {
+        "mode": "DEFORMATION",
+        "direction": "TX",
+        "required_travel": "KNOWN_IN_RANGE",
+        "allowable_travel_status": "DECLARED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "BOD-0002",
+        "root_interface": "IFC-0004",
+        "activation_window": "ALWAYS"
+      }
+    },
+    {
+      "id": "JNT-0005",
+      "joint_type": "COMPLIANT",
+      "parent_group": "RGP-0002",
+      "child_group": "RGP-0005",
+      "dof": ["TX"],
+      "axis_direction": "+Z",
+      "compliance": {
+        "mode": "DEFORMATION",
+        "direction": "TX",
+        "required_travel": "KNOWN_IN_RANGE",
+        "allowable_travel_status": "DECLARED",
+        "actuation": "PRESCRIBED_KINEMATIC",
+        "compliant_element": "BOD-0002",
+        "root_interface": "IFC-0005",
+        "activation_window": "ALWAYS"
+      }
+    },
+    {
+      "id": "JNT-0006",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0006",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0007",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0007",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    },
+    {
+      "id": "JNT-0008",
+      "joint_type": "FIXED",
+      "parent_group": "RGP-0003",
+      "child_group": "RGP-0008",
+      "dof": [],
+      "axis_direction": "NONE",
+      "compliance": null
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-0001",
+      "bodies": ["BOD-0001", "BOD-0006"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "TOUCHING",
+      "addresses_obligations": ["OBL-0005", "OBL-0006"]
+    },
+    {
+      "id": "IFC-0002",
+      "bodies": ["BOD-0001", "BOD-0007"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "TOUCHING",
+      "addresses_obligations": ["OBL-0003", "OBL-0007"]
+    },
+    {
+      "id": "IFC-0003",
+      "bodies": ["BOD-0001", "BOD-0008"],
+      "interaction_kind": "CONTACT",
+      "nominal_status": "CLEARANCE",
+      "addresses_obligations": ["OBL-0007"]
+    },
+    {
+      "id": "IFC-0004",
+      "bodies": ["BOD-0002", "BOD-0004"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "DEFLECTED",
+      "addresses_obligations": ["OBL-0003"]
+    },
+    {
+      "id": "IFC-0005",
+      "bodies": ["BOD-0002", "BOD-0005"],
+      "interaction_kind": "COMPLIANT_INTERACTION",
+      "nominal_status": "DEFLECTED",
+      "addresses_obligations": ["OBL-0003"]
+    },
+    {
+      "id": "IFC-0006",
+      "bodies": ["BOD-0003", "BOD-0004"],
+      "interaction_kind": "FIXED_INTERFACE",
+      "nominal_status": "ATTACHED",
+      "addresses_obligations": ["OBL-0003"]
+    },
+    {
+      "id": "IFC-0007",
+      "bodies": ["BOD-0001", "BOD-0005"],
+      "interaction_kind": "FIXED_INTERFACE",
+      "nominal_status": "ATTACHED",
+      "addresses_obligations": ["OBL-0003"]
+    }
+  ],
+  "configurations": [
+    {
+      "id": "CFG-0001",
+      "name": "rest",
+      "kind": "RESTING",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006", "BOD-0007", "BOD-0008"]
+    },
+    {
+      "id": "CFG-0002",
+      "name": "pressed",
+      "kind": "PRESSED",
+      "bodies_present": ["BOD-0001", "BOD-0002", "BOD-0003", "BOD-0004", "BOD-0005", "BOD-0006", "BOD-0007", "BOD-0008"]
+    }
+  ],
+  "functional_regions": [
+    {
+      "id": "FRG-0001",
+      "role": "ACCESS",
+      "owning_bodies": ["BOD-0001"],
+      "required_by_actors": ["ACT-0001"],
+      "reach_targets": ["the surface that is pressed"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-1001",
+      "decision": "how the stored-energy element is implemented",
+      "why_open": "The candidate says a stored-energy element returns the surface but does not specify its type (coil spring, torsion spring, leaf spring, elastomer, etc.). The choice affects the element's anchorages, its compliance model, and its fatigue behavior.",
+      "alternatives": ["coil spring", "torsion spring", "leaf spring", "elastomer"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": ["OBL-0003", "OBL-0004"]
+    },
+    {
+      "id": "UNR-1002",
+      "decision": "how the base is fixed to the workbench",
+      "why_open": "The requirement says the pedal is for a workbench but does not state whether it is clamped, bolted, or free-standing. The reaction of the foot load depends on that.",
+      "alternatives": ["free-standing", "clamped", "bolted"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0005", "FRE-0004"],
+      "blocks": ["OBL-0006"]
+    },
+    {
+      "id": "UNR-1003",
+      "decision": "how the signal is produced",
+      "why_open": "The candidate must provide a displacement that the machine can detect, but the type of signal is open.",
+      "alternatives": ["mechanical displacement", "electrical switch", "pneumatic valve"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001", "FRE-0003"],
+      "blocks": ["OBL-0002"]
+    }
+  ]
+}

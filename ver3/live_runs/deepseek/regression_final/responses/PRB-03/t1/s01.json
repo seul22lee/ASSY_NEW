@@ -1,0 +1,122 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Pressing it should send a signal to the machine",
+      "locator": "S1",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "when I take my foot off it must return to its resting position on its own every time",
+      "locator": "S2",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "It should not move if something brushes against it sideways",
+      "locator": "S3",
+      "quantity_kinds": [],
+      "directionality": "lateral"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Pressing it should send a signal to the machine",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "Pressing it should send a signal to the machine",
+      "source_locator": "S1",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "when I take my foot off it must return to its resting position on its own every time",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "when I take my foot off it must return to its resting position on its own every time",
+      "source_locator": "S2",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "It should not move if something brushes against it sideways",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "It should not move if something brushes against it sideways",
+      "source_locator": "S3",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Operation of foot pedal",
+      "kind": "OPERATION",
+      "system_boundary": "Foot pedal and machine",
+      "actors": ["ACT-0001", "ACT-0002"],
+      "environment": "workbench"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user's foot",
+      "must_reach": ["pedal"]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "something brushing sideways",
+      "must_reach": ["pedal"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Mechanism of returning to resting position",
+      "why_free": "Not specified in the request."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "Signal type and details",
+      "why_free": "Not specified in the request."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "Physical design and materials",
+      "why_free": "Not specified in the request."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "What constitutes 'move' in 'should not move'? Does it mean no displacement, no activation, or something else?",
+      "conflicting_clauses": [],
+      "resolvable_when": "Design clarification",
+      "block_scopes": ["REQ-0003 verification"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The pedal is operated by foot pressure.",
+      "why": "The request says 'pressing it' and 'take my foot off'.",
+      "would_be_invalidated_by": "If the pedal is operated by something else."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The resting position is the position when not pressed.",
+      "why": "Implied by 'return to its resting position'.",
+      "would_be_invalidated_by": "If a different reference is specified."
+    },
+    {
+      "id": "ASM-0003",
+      "statement": "The signal is sent to the machine.",
+      "why": "The request states 'send a signal to the machine'.",
+      "would_be_invalidated_by": "If the machine is not the intended recipient."
+    }
+  ]
+}

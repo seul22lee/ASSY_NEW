@@ -1,0 +1,151 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "Clamp must fix monitor arm to desk edge.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "Clamp must accommodate desk edge thickness between 18 and 40 mm.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "Clamp must not slip or rotate under weight of monitor arm.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": []
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "Clamp must be removable and movable without tools.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0002",
+      "applied_to_role": "clamp",
+      "reacted_at_role": "desk edge",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "Clamp using screw and nut for clamping, with friction hold for retention.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "HELICAL_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction retention and non-slip require contact analysis which is not available."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "Clamp using cam and follower for quick clamping, with over-centre for retention.",
+      "family": "CONVERT_MOTION",
+      "principle": "CAM_AND_FOLLOWER",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0004"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction retention and non-slip require contact analysis which is not available."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "Clamp using lever linkage for mechanical advantage, with friction hold for retention.",
+      "family": "CONVERT_MOTION",
+      "principle": "LEVER_LINKAGE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0004"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction retention and non-slip require contact analysis which is not available."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0005"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0004", "OBL-0005"],
+      "predicates": []
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0004", "OBL-0005"],
+      "predicates": []
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Choice of clamping mechanism family.",
+      "why_open": "Multiple principle families (screw, cam, lever) can satisfy the functional requirements, and the evidence routes that would distinguish them (e.g., contact analysis for friction retention) are unavailable.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": ["OBL-0003"]
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "Whether the clamp must be tool-free for tightening/adjusting.",
+      "why_open": "The requirement REQ-0004 only mentions removal and relocation, but the ambiguity AMB-0001 questions whether it also applies to tightening/adjusting.",
+      "alternatives": ["Tool-free required for all operations", "Tool-free only for removal and relocation"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0004"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "The clamp is intended for a typical desk with a horizontal edge and the monitor arm is attached such that its weight acts vertically.",
+      "why": "The request implies a desk edge clamp and vertical load.",
+      "would_be_invalidated_by": "if the desk edge orientation or load direction is specified differently"
+    }
+  ]
+}

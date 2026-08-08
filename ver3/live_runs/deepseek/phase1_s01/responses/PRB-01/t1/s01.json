@@ -1,0 +1,86 @@
+{
+  "source_clauses": [
+    "wall-mounted dispenser for small items",
+    "hold about twenty of them",
+    "release exactly one each time I press a lever",
+    "so I never get two at once",
+    "refill it from the top without taking it off the wall",
+    "must not jam when it is nearly empty"
+  ],
+  "requirements": [
+    {
+      "id": 1,
+      "statement": "The dispenser must be wall-mounted.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 2,
+      "statement": "The dispenser must hold approximately twenty items.",
+      "quantity_class": "BAND"
+    },
+    {
+      "id": 3,
+      "statement": "The dispenser must release exactly one item each time the lever is pressed.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 4,
+      "statement": "The dispenser must not release more than one item at a time.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 5,
+      "statement": "The dispenser must be refillable from the top without being taken off the wall.",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": 6,
+      "statement": "The dispenser must not jam when it is nearly empty.",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "kind": "OPERATION",
+      "description": "User presses a lever to dispense one item."
+    },
+    {
+      "id": 2,
+      "kind": "SERVICE",
+      "description": "User refills the dispenser from the top while it remains mounted on the wall."
+    }
+  ],
+  "actors": [
+    {
+      "id": 1,
+      "name": "user",
+      "description": "presses the lever to dispense items",
+      "must_reach": "the lever"
+    },
+    {
+      "id": 2,
+      "name": "user",
+      "description": "refills the dispenser",
+      "must_reach": "the top opening"
+    }
+  ],
+  "freedoms": [
+    "The mechanism for releasing exactly one item is not specified.",
+    "The method for wall-mounting is not specified.",
+    "The material of the dispenser is not specified.",
+    "The dimensions of the dispenser are not specified.",
+    "The items are not specified beyond being small."
+  ],
+  "ambiguities": [
+    "The exact meaning of 'about twenty' is not defined.",
+    "The condition 'when it is nearly empty' is not precisely defined.",
+    "It is unclear whether the dispenser must release exactly one item per press or if it must also prevent multiple items from being released together in other scenarios, but the phrase 'so I never get two at once' suggests a strict no-multiple-release requirement.",
+    "The type of lever (e.g., hand or foot) is not specified."
+  ],
+  "assumptions": [
+    "The user presses the lever with a finger or hand.",
+    "The dispenser is intended for indoor use.",
+    "The small items are of uniform size and shape, but this is not stated."
+  ]
+}

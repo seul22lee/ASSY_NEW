@@ -51,7 +51,8 @@ entity_families:
   Requirement:
     owned_by: s01
     purpose: "A rank-1 source statement, carried verbatim with its qualifier."
-    required_fields: [entity_id, statement_verbatim, kind, verification_kind, observable_verbatim, source_locator]
+    required_fields: [entity_id, statement_verbatim, kind, verification_kind, observable_verbatim, source_locator, quantity_class]
+    quantity_class: [MAGNITUDE, BAND, COMPARATIVE, NONE]
     rules:
       - "The source's own qualifier ('approximately') is preserved, never sharpened."
       - "This is the ONLY family whose creation may consult raw source text (INV-002)."
@@ -59,18 +60,52 @@ entity_families:
   Obligation:
     owned_by: s02
     purpose: "A physical or functional thing that must be true for a requirement to hold."
-    required_fields: [entity_id, statement, derived_from_requirements, mandatory]
+    required_fields: [entity_id, statement, derived_from_requirements, mandatory, scope, satisfiable_at, evidence_route, route_available]
+    optional_fields: [derivation_premises, involves_actors]
+    scope: [UNIVERSAL, CANDIDATE_DISCRIMINATING]
+    satisfiable_at: [s02, s03, s04, s05]
     rules:
       - "Every mandatory obligation must reach a terminal status (INV-008)."
       - "An obligation is never discharged by a label, a field or a relationship."
+      - >
+        scope distinguishes an obligation EVERY candidate must satisfy - an
+        assembly sequence exists, a load reaches a reaction site - from one whose
+        satisfaction DIFFERS BY CANDIDATE. Without it, coverage cannot be read:
+        a universal obligation that no candidate lists looks identical to a
+        discriminating one that every candidate ignored. Found by the first
+        evaluation of the s01+s02 window, where 7 to 9 obligations per case were
+        unaddressed and most of them legitimately so.
+      - >
+        evidence_route and route_available make an unevaluable requirement
+        VISIBLE. A requirement whose obligation has route_available false is
+        addressed and un-evidenceable, which is a different thing from a
+        requirement nobody derived an obligation from.
+      - "involves_actors cites the Actor entities a reachability obligation depends on."
+      - >
+        satisfiable_at names the earliest stage at which an obligation can
+        actually be satisfied. A candidate at s02 is a PRINCIPLE FAMILY, not a
+        mechanism, so an obligation like "every element carrying a load component
+        has a reaction" cannot be addressed there at all - it needs a topology.
+        Without this field, coverage flags every such obligation as unaddressed
+        and the real omissions are invisible among them. Found by the regression
+        run of the first s01+s02 revision.
 
   Candidate:
     owned_by: s02
     purpose: "A mechanism family or arrangement under consideration."
-    required_fields: [entity_id, summary, family, obligations_addressed]
+    required_fields: [entity_id, summary, family, principle, obligations_addressed, obligations_created, evidence_route_verdict]
+    optional_fields: [self_locking]
     rules:
       - "Candidates PERSIST as branches. Stage 02 has NO selected-candidate field (INV-007)."
       - "Element count is never a ranking input; mandatory realization is not a penalty."
+      - >
+        obligations_created is required: a candidate that needs a bearing has
+        CREATED a bearing obligation. Without it, an incomplete candidate looks
+        cheaper than a complete one, which is R-16.
+      - >
+        evidence_route_verdict references the capability registry. Choosing a
+        mechanism partly because it can be evidenced is legitimate and must be
+        RECORDED - three benchmarks did it and none had an owner.
 
   Body:
     owned_by: s03
@@ -85,16 +120,44 @@ entity_families:
 
   Joint:
     owned_by: s03
-    extendable_by: [s04, s05]
-    purpose: "A kinematic relation between two bodies."
-    required_fields: [entity_id, joint_type, parent_body, child_body, axis, parent_frame, child_frame]
+    extendable_by: [s04, s05, s06]
+    purpose: "A kinematic relation between two rigid groups."
+    required_fields: [entity_id, joint_type, parent_group, child_group, dof, axis_direction, frame_ids]
+    fields_owned_by_s04b: [located_frame]
     rules:
       - "A joint_type label alone is inert. A realization on each side is required (INV-008)."
-      - "axis is a unit-bearing vector in a named frame."
+      - "axis_direction is a unit vector in a named frame, and is owned by s03."
+      - >
+        The located FRAME is owned by s04b at PROVISIONAL maturity and promoted
+        to AUTHORITATIVE by s06. s03 cannot know where an axis is: BM-002's crank
+        axis height was determined by a pin-boss radius that is an s05 feature
+        dimension, and fixing it at s03 is CHG-01.
+      - "The joint graph must be SIMULATION-COMPLETE: projectable into a multibody model without re-derivation."
+    compliant_variant:
+      applies_when: "joint_type is compliant"
+      additional_required_fields: [mode, direction, required_travel, allowable_travel, actuation, compliant_element, root_interface, activation_window]
+      actuation: [PRESCRIBED_KINEMATIC]
+      rules:
+        - "NOT a separate family. Compliance is a joint_type of Joint between RigidGroups of one body (proposal D-2). A separate key would contradict that and leave the variant ownerless."
+        - >
+          required_travel and allowable_travel are NEVER one number. required_travel
+          is kinematic and authoritative; allowable_travel is a material fact whose
+          status is UNSUPPORTED until a compliance route exists.
+        - "actuation PRESCRIBED_KINEMATIC states that no force in this model produces the deflection."
+        - "compliant_element and root_interface name the geometry a reduced-order beam model would consume."
+        - "Outside its activation_window the joint coordinate MUST be zero, and s04b checks it."
+        - "An ExcludedClaim for strain is GENERATED from allowable_travel's status, never authored."
 
   Interface:
     owned_by: s03
-    extendable_by: [s05]
+    extendable_by: [s04, s05]
+    fields_owned_by_s04b: [engagement_site]
+    engagement_site_note: >
+      The metric localisation of a symbolic meeting region, created at s04b. s05
+      consumes it to place features and to anchor the ROI, and where the
+      interaction moves the ROI follows this site's frame rather than a fixed box
+      the joint orbits out of. Named as an s05 input before this correction, and
+      produced by nothing.
     purpose: "A region where two bodies meet, with its declared kind."
     required_fields: [entity_id, bodies, interaction_kind, nominal]
     interaction_kinds: [DECLARED_CONTACT, DECLARED_CLEARANCE, DECLARED_INTERFERENCE_FIT, DECLARED_COMPLIANT_INTERACTION, NOT_INTENDED_TO_INTERACT]
@@ -152,9 +215,18 @@ entity_families:
     purpose: >
       A recorded openness. Subsumes Ver2's UnresolvedLayoutChoice and
       LayoutConflict (RETIREMENT_MATRIX undecided U-03, resolved here).
-    required_fields: [entity_id, decision, why_open, alternatives, blocks]
+    required_fields: [entity_id, decision, why_open, alternatives, alternatives_kind, blocks, kept_open_by]
+    alternatives_kind: [ENTITY_REFS, PRINCIPLE_FAMILIES, FREE_TEXT]
     rules:
       - "Recording openness is always permitted. Resolving it silently is never permitted."
+      - >
+        kept_open_by CITES the Ambiguity or Freedom entities that keep this
+        decision open, by ID. Restating them in why_open prose is consumer
+        reconstruction: the upstream stage already typed the fact and the
+        downstream stage derived it again, so nothing can tell whether the two
+        agree. Found by the first evaluation of the s01+s02 window, where every
+        Freedom and every Ambiguity was unreferenced on all three cases.
+      - "alternatives_kind types the alternatives list so a consumer knows whether to dereference it."
 
   VerificationPlanItem:
     owned_by: s08
@@ -173,6 +245,68 @@ entity_families:
       - "A PASS requires a non-empty scope block with all six fields (INV-009)."
       - "Matching is on (requirement_id, criterion_id, scenario_id, observable_id). NEVER on unit (INV-012)."
 
+  RigidGroup:
+    owned_by: s03
+    purpose: >
+      A maximal rigid sub-region of a Body. A Body with exactly one group may
+      omit it; the Body then IS its group and nothing changes for rigid designs.
+    required_fields: [entity_id, body, members, is_default]
+    rules:
+      - "Joints connect RigidGroups, not Bodies. A Body-level reference resolves to its sole group when unambiguous."
+      - "ONE group per compliant MEMBER. Four independent tabs are four groups, not one region."
+      - "Grouping independent compliant members asserts a coupling that does not physically exist."
+
+  LoadCase:
+    owned_by: s02
+    purpose: "An applied load implied by a scenario. CANDIDATE-INDEPENDENT."
+    required_fields: [entity_id, scenario, applied_to_role, reacted_at_role, direction_class, kind, magnitude_or_status]
+    kinds: [GRAVITY, PAYLOAD, ACTOR_APPLIED, REACTION]
+    rules:
+      - "Says what the world does to the product, never what any mechanism carries."
+      - "A magnitude appears only if s01's quantity inventory supplies one; otherwise UNSUPPORTED."
+      - "MUST NOT name a specific element. Which element carries which component is candidate-dependent (SF-5.3)."
+      - >
+        reacted_at_role names WHERE the load leaves the product - the surface it
+        stands on, the hand that holds it, the fixture it mounts to. It is a
+        ROLE, not a body, so it stays candidate-independent. Without it a
+        LoadPath has no declared terminus and 'terminates at a reaction site' is
+        uncheckable.
+
+  LoadPath:
+    owned_by: s03
+    extendable_by: [s04, s06]
+    purpose: "How one LoadCase reaches a reaction site through ONE candidate mechanism."
+    required_fields: [entity_id, load_case, candidate, ordered_hops, maturity]
+    maturity_progression: [HYPOTHESIS, SPATIALLY_INSTANTIATED, AUTHORITATIVE]
+    rules:
+      - "Each hop names the Interface that carries it."
+      - "CANDIDATE-SPECIFIC. Different candidates have different paths for the same load."
+      - "Per-element load components are DERIVED from this path and are NEVER stored as fields."
+      - "No element acquires a reaction obligation from its type. 'Shaft -> bearing' is unreachable by construction."
+
+  FunctionalRegion:
+    owned_by: s03
+    extendable_by: [s04]
+    purpose: "A volume the design promises: access, support, keep-out, aperture."
+    required_fields: [entity_id, role, owning_bodies]
+    authoritative_geometry_fields: [volume]
+    rules:
+      - "s03 declares the role. s04a gives it a metric volume. s04b proves occupancy across every state and path."
+      - "No Feature may intrude into a FunctionalRegion; s05 re-runs the occupancy check."
+
+  AssemblyStep:
+    owned_by: s03
+    extendable_by: [s04]
+    purpose: "One installation operation, its order, its access side and what it activates."
+    required_fields: [entity_id, order_index, body, access_side, activates, termination_strategy, path_kind, depends_on]
+    termination_strategy: [LATER_BODY_COVER, ROTATION, ELASTICITY]
+    path_kind: [RIGID, DEFORMATION_RESOLVED]
+    rules:
+      - "A rigid part installed by one straight translation always leaves the reverse direction open; retention needs one of the three termination strategies."
+      - "A DEFORMATION_RESOLVED path forces NOT_VERIFIED, never PASS. Rigid geometry cannot observe the deflection the path depends on."
+      - "s03 fixes order and access side. Direction FEASIBILITY is proven at s04b."
+      - "Subsumes the precedes(Configuration, Configuration) relation recorded as ENTITY_FAMILY_AUDIT GAP-02."
+
 # =====================================================================
 # 3. Geometric authority
 # =====================================================================
@@ -188,6 +322,77 @@ geometric_authority:
     an annotation-role field, the predicate is INVALID.
   ablation_rule: >
     Dropping every annotation-role field must not change any geometric verdict.
+
+  maturity_rule:
+    principle: >
+      Maturity is a property of a VALUE, not of a stage. Within one patch some
+      values are authoritative and others provisional.
+    vocabulary: [SYMBOLIC, PROVISIONAL, AUTHORITATIVE, FROZEN]
+    required_on: "every authoritative_geometry field, and every Parameter value"
+    why: >
+      Without it a scout-informed placeholder and a solved value are
+      indistinguishable, and no check can refuse immature input - which is how a
+      proxy result gets cited as a CAD result.
+    check_precondition: >
+      A check declares the minimum maturity of its inputs. Running below it is a
+      SCHEMA_FAILURE, not a warning.
+    worked_case: >
+      A joint frame placement is created PROVISIONAL at s04b and promoted to
+      AUTHORITATIVE at s06, because its value depends on a feature envelope that
+      does not exist at s04b (BM-002 CHG-01).
+
+  derived_not_stored:
+    principle: >
+      A value that is a projection of other state is DERIVED and must not be
+      stored as a field.
+    instances:
+      - what: "per-element load components"
+        derived_from: LoadPath
+        why: >
+          A stored field would be candidate-independent-looking about a
+          candidate-dependent fact, and a later stage could not tell whether it
+          was traced or assumed. This is SF-5.3 at the data level.
+      - what: "the pose law"
+        derived_from: "located Joint frames + State joint_coordinates"
+        why: >
+          Authoring it makes motion an s05/s07 concern and contradicts s04's
+          ownership of State and Transition. Deriving it removes the s07 input
+          contradiction entirely.
+      - what: "support"
+        derived_from: "an Interface of contact kind appearing in a LoadPath"
+      - what: "reaction"
+        derived_from: "the terminal hop of a LoadPath"
+
+# =====================================================================
+# 3b. Typed relations
+#     Relations between existing families. NO new family is implied by these.
+# =====================================================================
+typed_relations:
+
+  blocked_by:
+    created_by: s03
+    subject: RigidGroup
+    required_fields: [retained_group, blocked_direction, blocker_body, promised_features, configurations, defeat_specification, driver]
+    optional_fields: [depends_on_compliant_recovery]
+    driver: [LOAD, KINEMATIC_NECESSITY, DECLARED_SCENARIO]
+    rules:
+      - "Direction and blocker are required TOGETHER. A blocking fact without a direction cannot be tested, and one without a named blocker passes when an unrelated body happens to be in the way."
+      - "driver LOAD requires a LoadCase. driver KINEMATIC_NECESSITY does not - a lead-screw nut is anti-rotated because the conversion needs it (NRM-BM-002-007 exclusion b)."
+      - "defeat_specification is authored HERE, with the relation, never reconstructed from geometry at s08."
+      - "depends_on_compliant_recovery names the compliant Joint whose return to zero the retention requires."
+
+  retained_by:
+    created_by: s03
+    purpose: "Joint capture: neither retainer alone suffices."
+    required_fields: [retained_group, retainer_groups, configuration]
+    resolves: "ENTITY_FAMILY_AUDIT GAP-01"
+
+  co_actuated_by:
+    created_by: s03
+    purpose: >
+      Several compliant Joints moved together by one Transition. This is what a
+      compliant REGION is: a set of joints, not an entity.
+    required_fields: [joints, transition]
 
 # =====================================================================
 # 4. What DesignState may never contain
@@ -260,10 +465,26 @@ assurance_families:
     purpose: "A source conflict recorded rather than resolved."
     required_fields: [entity_id, statement, conflicting_clauses, resolvable_when]
 
+  Actor:
+    owned_by: s01
+    purpose: "A participant outside the product that operates or receives it."
+    required_fields: [entity_id, name, must_reach]
+    rules:
+      - >
+        must_reach lists what this actor must be able to operate or access. It is
+        what makes reachability a checkable obligation at s04a rather than an
+        assumption; an actor with nothing to reach is not an actor.
+
   Scenario:
     owned_by: s01
     purpose: "A declared operating scenario with its boundary."
-    required_fields: [entity_id, name, system_boundary, actors, environment]
+    required_fields: [entity_id, name, kind, system_boundary, actors, environment]
+    kinds: [OPERATION, SERVICE, ASSEMBLY, TRANSPORT]
+    rules:
+      - >
+        kind is required. Service is a DIFFERENT activity from operation and
+        retention requirements differ between them; without the distinction a
+        design either forbids service or lets retention mean two things at once.
 
   RejectedAlternative:
     owned_by: any
@@ -286,10 +507,21 @@ assurance_families:
 
   MobilityExpectation:
     owned_by: s03
-    purpose: "Intended and forbidden degrees of freedom for a configuration."
-    required_fields: [entity_id, configuration, intended_dof, forbidden_dof]
+    purpose: "The disposition of EVERY degree of freedom in a configuration."
+    required_fields: [entity_id, configuration, dispositions]
+    disposition_values: [INTENDED, BLOCKED_BY, MAINTAINED_BY_CLASS, IRRELEVANT_BECAUSE]
     rules:
-      - "Unintended-DOF checking requires the forbidden set to be declared, not inferred at check time."
+      - >
+        TOTALITY. dispositions is a TOTAL function: for every rigid group in the
+        configuration, every rigid-body DOF maps to exactly one value. A declared
+        set that omits a DOF cannot fail, and all three BM-001 human-review
+        rejections plus BM-003 R2 were omissions from declared sets.
+      - "BLOCKED_BY must resolve to a blocked_by relation carrying a direction, a named blocker and a defeat specification."
+      - >
+        IRRELEVANT_BECAUSE must name a scenario in which that DOF is both
+        unloaded and unactuated, cross-checked against the LoadCases. This is
+        what converts the one unverifiable disposition into a checkable one.
+      - "This output is a mechanical FMEA obtained free from the joint graph."
 
   Witness:
     owned_by: [s04, s09]
@@ -297,9 +529,21 @@ assurance_families:
       An executable demonstration that something holds: an assembly insertion,
       a mobility count, a full-operation cycle.
     required_fields: [entity_id, witness_kind, subject, method, fidelity, result, artifacts]
-    witness_kinds: [ASSEMBLY_INSERTION, MOBILITY, DOF_ABSENCE, FULL_OPERATION, ENGAGEMENT_PERSISTENCE, RETENTION_PERSISTENCE]
+    witness_kinds: [ASSEMBLY_INSERTION, MOBILITY, DOF_ABSENCE, FULL_OPERATION, ENGAGEMENT_PERSISTENCE, RETENTION_PERSISTENCE, SCOUT]
     rules:
       - "A witness declares its fidelity. A proxy-geometry witness is not a CAD witness."
+      - >
+        A witness of fidelity SCOUT is exploratory geometry. It may ONLY RAISE,
+        never SET: it may raise an UnresolvedDecision, propose a Constraint, or
+        report a measured conflict. It may never supply a value, a pose, a form
+        or a placement.
+      - "A SCOUT witness may not CREATE or EXTEND any other entity, and s07 must never read one."
+      - "It records the parent_state_hash it was built from and must be re-derivable from it."
+      - "Every SCOUT finding must be DISCHARGED before its stage's gate: by a change the owning stage makes for its own reasons, or by a recorded decision not to."
+      - >
+        Laundering barrier: a Parameter value's provenance must cite a Constraint,
+        and a Constraint's provenance must cite a Requirement, an Obligation, a
+        feature envelope or a LoadCase - NEVER a Witness.
 
   ConstructionStatement:
     owned_by: s05
@@ -338,3 +582,30 @@ assurance_families:
     required_fields: [entity_id, question, why_human, relates_to]
     rules:
       - "Every question is PENDING until a human answers it. The pipeline never self-approves."
+
+  # ---- added in Window 2 -------------------------------------------------
+  # Three families the s04 contract requires the stage to CREATE and which the
+  # representation could not express at all. Rule 8 is satisfied by that
+  # absence: an s04a that must produce an Envelope has nowhere to put one.
+  Envelope:
+    owned_by: s04
+    purpose: "A body's provisional extent. Conservative: no-overlap is a proof, overlap is not."
+    required_fields: [entity_id, body, extent, frame, maturity]
+    maturity: [PROVISIONAL, AUTHORITATIVE]
+    rules:
+      - "extent is an axis-aligned half-extent triple in the body frame."
+      - "PROVISIONAL means the value follows from packaging reasoning, not from a feature."
+  SweptVolume:
+    owned_by: s04
+    purpose: "The occupancy of a moving group along a transition, at declared sampling."
+    required_fields: [entity_id, rigid_group, transition, sampling_declaration, occupancy, fidelity]
+    rules:
+      - "sampling_declaration is mandatory and non-adaptive; endpoint-only sampling is refused."
+      - "fidelity records what the occupancy is made of, so a coarse hull is never read as a proof."
+  SelectionDecision:
+    owned_by: s04
+    purpose: "The candidate retained at the selection gate, with the evidence that permitted it."
+    required_fields: [entity_id, selected_candidate, eliminated, evidence, equal_coverage_confirmed]
+    rules:
+      - "May exist only after every retained candidate carries s03 and s04a evidence at equal obligation coverage (INV-007)."
+      - "Never a score and never an arbitrary pick: an undiscriminated tie is an UnresolvedDecision instead."

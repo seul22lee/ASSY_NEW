@@ -1,0 +1,161 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "locator": "clause-1",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "locator": "clause-2",
+      "quantity_kinds": ["count"],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "locator": "clause-3",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "locator": "clause-4",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0005",
+      "verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "locator": "clause-5",
+      "quantity_kinds": [],
+      "directionality": "none"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "compact desktop storage box with a reusable latch",
+      "source_locator": "clause-1",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "open and close repeatedly without accidental opening during normal handling",
+      "source_locator": "clause-2",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "kind": "USABILITY",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "easy for a user to operate while remaining secure during transport",
+      "source_locator": "clause-3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+      "kind": "PROCESS",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "suitable for low-cost manufacturing and should be practical for desktop use",
+      "source_locator": "clause-4",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0005",
+      "statement_verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "mechanically plausible and easy to assemble",
+      "source_locator": "clause-5",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Open and close",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the storage box and its latch. Outside: the user's hands operating the latch.",
+      "actors": ["ACT-0001"],
+      "environment": "desktop use"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Transport",
+      "kind": "TRANSPORT",
+      "system_boundary": "Inside: the storage box and its latch. Outside: the environment during transport, which may impart loads.",
+      "actors": [],
+      "environment": "during transport"
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Manufacture",
+      "kind": "PROCESS",
+      "system_boundary": "Inside: the manufacturing process for the product. Outside: the manufacturing equipment and facilities.",
+      "actors": [],
+      "environment": "low-cost manufacturing"
+    },
+    {
+      "id": "SCN-0004",
+      "name": "Assembly",
+      "kind": "ASSEMBLY",
+      "system_boundary": "Inside: the parts being assembled. Outside: the assembly tools and work surface.",
+      "actors": [],
+      "environment": "easy assembly"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": ["latch"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "The material of the box and latch",
+      "why_free": "The text does not specify any material."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "Dimensions of the box",
+      "why_free": "The text says 'compact' but gives no numeric dimensions."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "The specific mechanism for the latch",
+      "why_free": "The text does not specify a mechanism, only that it is reusable."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The text does not define 'normal handling' or 'transport' precisely.",
+      "conflicting_clauses": [],
+      "resolvable_when": "When the intended use cases are clarified.",
+      "block_scopes": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The latch is part of the product and is not a separate component.",
+      "why": "It is described as a feature of the box.",
+      "would_be_invalidated_by": "If the latch is specified as separate."
+    }
+  ]
+}

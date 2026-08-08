@@ -1,0 +1,545 @@
+{
+ "_meta": {
+  "answers_prompt_sha256": "c272c91a4a3c5246",
+  "pairing_history": [
+   "re-paired after the response-schema section was added to the prompt; content unchanged and re-verified against the parser, contract validation and completeness check"
+  ]
+ },
+ "acceptance_contracts": [
+  {
+   "candidate": "CND-0002",
+   "id": "ACC-0001",
+   "obligations": [
+    "OBL-0003",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0007"
+   ],
+   "predicates": [
+    "a traversable path exists in both directions",
+    "the retaining member blocks the opening motion while engaged",
+    "displacing the retaining member makes the opening motion available",
+    "the retaining member is itself retained"
+   ]
+  },
+  {
+   "candidate": "CND-0001",
+   "id": "ACC-0002",
+   "obligations": [
+    "OBL-0003",
+    "OBL-0005",
+    "OBL-0007"
+   ],
+   "predicates": [
+    "a traversable path exists in both directions",
+    "the catch geometry engages in the closed configuration",
+    "the release surface is reachable from outside"
+   ]
+  },
+  {
+   "candidate": "CND-0003",
+   "id": "ACC-0003",
+   "obligations": [
+    "OBL-0003",
+    "OBL-0005"
+   ],
+   "predicates": [
+    "the closed configuration lies past the toggle point",
+    "a bound exists on travel beyond it"
+   ]
+  }
+ ],
+ "assumptions": [
+  {
+   "id": "ASM-0001",
+   "inferred_by_stage": "s02",
+   "statement": "The product rests on a surface that reacts its weight during operation.",
+   "why": "Every load path must terminate somewhere, and the scenario places the product on a desk.",
+   "would_be_invalidated_by": "a scenario in which the product is held or mounted rather than stood upon"
+  },
+  {
+   "id": "ASM-0002",
+   "inferred_by_stage": "s02",
+   "statement": "The enclosed contents impose a load on the enclosing body.",
+   "why": "A storage volume holds something, and whatever it holds has weight.",
+   "would_be_invalidated_by": "a statement that the contents are negligible or that the volume is nominal"
+  }
+ ],
+ "candidates": [
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "the catch holds by deflecting; no route here can establish its force or its allowable deflection. The motion and the engagement geometry are still checkable.",
+    "route": "COMPLIANCE_REDUCED_ORDER"
+   },
+   "family": "PERMIT_RELATIVE_MOTION",
+   "id": "CND-0001",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0007"
+   ],
+   "obligations_created": [
+    "radial support and axial retention for the rotating relation",
+    "a deflection bound and a recovery for the catch",
+    "a bound on the open travel"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+    "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "RETAIN_BODY": "ELASTIC_CAPTURE"
+   },
+   "self_locking": false,
+   "summary": "The closing element turns about a fixed axis; a compliant catch holds it shut and is pressed to release."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "the retaining member blocks a motion geometrically; that is decidable",
+    "route": "MOBILITY_ANALYSIS"
+   },
+   "family": "PERMIT_RELATIVE_MOTION",
+   "id": "CND-0002",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0007"
+   ],
+   "obligations_created": [
+    "lateral guidance and travel bounds for the sliding relation",
+    "retention of the retaining member itself",
+    "an assembly order in which the covering body comes last"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "MAINTAIN_CONFIGURATION": "SEPARATE_RETAINING_MEMBER",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+    "RETAIN_BODY": "LATER_BODY_COVER"
+   },
+   "self_locking": false,
+   "summary": "The closing element slides along a guided path; a separate member is displaced to release it."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": true,
+    "note": "an over-centre hold is an energy argument; the ideal-joint route can address the barrier but not the disturbance that would defeat it",
+    "route": "RIGID_BODY_DYNAMICS"
+   },
+   "family": "PERMIT_RELATIVE_MOTION",
+   "id": "CND-0003",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0005",
+    "OBL-0006"
+   ],
+   "obligations_created": [
+    "a travel bound past the toggle point",
+    "a force to carry the element back over centre"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "HARD_STOP",
+    "MAINTAIN_CONFIGURATION": "OVER_CENTRE",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "RETAIN_BODY": "LATER_BODY_COVER"
+   },
+   "self_locking": false,
+   "summary": "The closing element turns about a fixed axis and is held shut past a toggle point."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "retention by friction cannot be established by any route available here",
+    "route": "CONTACT_RESOLVING_ANALYSIS"
+   },
+   "family": "PERMIT_RELATIVE_MOTION",
+   "id": "CND-0004",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0005",
+    "OBL-0006"
+   ],
+   "obligations_created": [
+    "a normal load at the friction interface",
+    "a release action that overcomes it"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "JOINT_LIMIT_BY_GEOMETRY",
+    "MAINTAIN_CONFIGURATION": "FRICTION_HOLD",
+    "PERMIT_ASSEMBLY": "INSERT_AND_TURN",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+    "RETAIN_BODY": "GEOMETRIC_UNDERCUT"
+   },
+   "self_locking": true,
+   "summary": "The closing element turns about a fixed axis and is held by a friction interface at that axis."
+  },
+  {
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "the whole motion depends on deformation, so no available route establishes its primary function",
+    "route": "COMPLIANCE_REDUCED_ORDER"
+   },
+   "family": "PERMIT_RELATIVE_MOTION",
+   "id": "CND-0005",
+   "obligations_addressed": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0008"
+   ],
+   "obligations_created": [
+    "a deflection bound and a recovery for the continuous region",
+    "survival of repeated deflection"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "BOUND_MOTION": "JOINT_LIMIT_BY_GEOMETRY",
+    "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+    "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "COMPLIANT_FLEXURE",
+    "RETAIN_BODY": "ELASTIC_CAPTURE"
+   },
+   "self_locking": false,
+   "summary": "The closing element is a compliant continuous region of one body; the same region holds it shut."
+  }
+ ],
+ "load_cases": [
+  {
+   "applied_to_role": "the moving closing role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0001",
+   "kind": "GRAVITY",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk surface the product stands on",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "the release role",
+   "direction_class": "TRANSVERSE",
+   "id": "LC-0002",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk surface the product stands on",
+   "scenario": "SCN-0001"
+  },
+  {
+   "applied_to_role": "the moving closing role",
+   "direction_class": "TRANSVERSE",
+   "id": "LC-0003",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the retaining function's reaction site",
+   "scenario": "SCN-0002"
+  },
+  {
+   "applied_to_role": "the moving closing role",
+   "direction_class": "MOMENT",
+   "id": "LC-0004",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the retaining function's reaction site",
+   "scenario": "SCN-0003"
+  },
+  {
+   "applied_to_role": "the enclosed contents role",
+   "direction_class": "GRAVITY",
+   "id": "LC-0005",
+   "kind": "PAYLOAD",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the desk surface the product stands on",
+   "scenario": "SCN-0001"
+  }
+ ],
+ "obligations": [
+  {
+   "derivation_premises": [
+    "Contents that cannot be reached are not stored, they are sealed in."
+   ],
+   "derived_from_requirements": [
+    "REQ-0001"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0001",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "An enclosed volume exists with an opening through which contents can be reached."
+  },
+  {
+   "derivation_premises": [
+    "Opening and closing are transitions between two states; without both there is nothing to transition between."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0002",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "Two named configurations exist, one giving access to the enclosed volume and one closing it."
+  },
+  {
+   "derivation_premises": [
+    "Repeatedly implies the path is available more than once and in both directions."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0003",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "A traversable path connects the two configurations in both directions."
+  },
+  {
+   "derivation_premises": [
+    "An unconstrained body does not have a repeatable path."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003",
+    "REQ-0009"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0004",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "Whatever moves between the two configurations is carried by a relation that permits exactly the motion required."
+  },
+  {
+   "derivation_premises": [
+    "Reusable means release is non-destructive.",
+    "Without retention the closed configuration is not maintained."
+   ],
+   "derived_from_requirements": [
+    "REQ-0002",
+    "REQ-0004"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0005",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "A retaining function holds the closed configuration and can be engaged and released more than once."
+  },
+  {
+   "derivation_premises": [
+    "Accidental opening is release without the deliberate action."
+   ],
+   "derived_from_requirements": [
+    "REQ-0004",
+    "REQ-0006"
+   ],
+   "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+   "id": "OBL-0006",
+   "mandatory": true,
+   "route_available": false,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The retaining function does not release under the disturbance of ordinary handling."
+  },
+  {
+   "derivation_premises": [
+    "A release the user cannot reach cannot be operated.",
+    "If release required opening the product first, opening would require opening."
+   ],
+   "derived_from_requirements": [
+    "REQ-0005"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0007",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "UNIVERSAL",
+   "statement": "A deliberate user action releases the retaining function, and that action is reachable from outside the product."
+  },
+  {
+   "derivation_premises": [
+    "A component that leaves is a loose piece the user must manage, which the repeated cycle would then depend on."
+   ],
+   "derived_from_requirements": [
+    "REQ-0003",
+    "REQ-0009"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0008",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "Every component remains attached through the whole open-close cycle."
+  },
+  {
+   "derivation_premises": [
+    "A relation named but not embodied is a label, not a mechanism."
+   ],
+   "derived_from_requirements": [
+    "REQ-0009"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0009",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "Every relation the product depends on has a physical realization on all participating bodies."
+  },
+  {
+   "derivation_premises": [
+    "A part with no path into the partly built product cannot be installed."
+   ],
+   "derived_from_requirements": [
+    "REQ-0010"
+   ],
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "id": "OBL-0010",
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "An ordered installation sequence exists in which every part has a clear path in the configuration produced by the preceding steps."
+  },
+  {
+   "derivation_premises": [
+    "An unreacted force accelerates the body carrying it."
+   ],
+   "derived_from_requirements": [
+    "REQ-0006"
+   ],
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "id": "OBL-0011",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The load on the retaining function reaches a reaction site."
+  },
+  {
+   "derivation_premises": [
+    "stated by the requirement it derives from"
+   ],
+   "derived_from_requirements": [
+    "REQ-0007"
+   ],
+   "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+   "id": "OBL-0012",
+   "mandatory": true,
+   "route_available": false,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The product is manufacturable at low cost by some process."
+  },
+  {
+   "derivation_premises": [
+    "stated by the requirement it derives from"
+   ],
+   "derived_from_requirements": [
+    "REQ-0008"
+   ],
+   "evidence_route": "TOLERANCE_ANALYSIS",
+   "id": "OBL-0013",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": false,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The product occupies a space on a desk that a user finds practical."
+  }
+ ],
+ "unresolved": [
+  {
+   "alternatives": [
+    "CND-0001",
+    "CND-0002",
+    "CND-0003",
+    "CND-0004",
+    "CND-0005"
+   ],
+   "alternatives_kind": "ENTITY_REFS",
+   "blocks": [
+    "OBL-0004"
+   ],
+   "decision": "how the closing element moves relative to the enclosed volume",
+   "id": "UNR-0001",
+   "kept_open_by": [
+    "FRE-0001",
+    "FRE-0006"
+   ],
+   "why_open": "Rotation, translation and a compliant continuous region all satisfy the transition obligation, and nothing in the requirements distinguishes them. No opening direction, no face and no envelope is stated."
+  },
+  {
+   "alternatives": [
+    "DETENT_OR_SNAP",
+    "SEPARATE_RETAINING_MEMBER",
+    "OVER_CENTRE",
+    "FRICTION_HOLD"
+   ],
+   "alternatives_kind": "PRINCIPLE_FAMILIES",
+   "blocks": [
+    "OBL-0005",
+    "OBL-0006"
+   ],
+   "decision": "how the closed configuration is maintained",
+   "id": "UNR-0002",
+   "kept_open_by": [
+    "FRE-0002"
+   ],
+   "why_open": "Four principle families maintain a configuration and the requirements name none. The choice is not free of consequence: three of the four depend on claims no available evidence route can establish."
+  },
+  {
+   "alternatives": [
+    "a stated disturbance",
+    "no quantitative acceptance for retention"
+   ],
+   "alternatives_kind": "FREE_TEXT",
+   "blocks": [
+    "OBL-0006"
+   ],
+   "decision": "what disturbance the retention must survive",
+   "id": "UNR-0003",
+   "kept_open_by": [
+    "AMB-0002"
+   ],
+   "why_open": "Ordinary handling and transport are named as conditions and neither carries a magnitude, so no retention can be shown adequate against them."
+  }
+ ]
+}

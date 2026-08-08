@@ -1,0 +1,173 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "Pressing the pedal must result in a signal being sent to the machine.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The requirement states that pressing the pedal sends a signal, implying a functional connection that must be established."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The pedal must return to its resting position on its own every time the user removes their foot.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The requirement specifies that return must happen every time, implying a self-actuating return mechanism."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The pedal must not move when a sideways force is applied, such as from brushing.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["The requirement indicates that the pedal should be resistant to unintended sideways motion."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "pedal",
+      "reacted_at_role": "base",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0002",
+      "applied_to_role": "pedal",
+      "reacted_at_role": "base",
+      "direction_class": "AXIAL",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0003",
+      "applied_to_role": "pedal",
+      "reacted_at_role": "base",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A pedal that uses a revolute pair to allow rotation about a hinge, with a spring for return and a hard stop to limit travel, and a locking mechanism to resist sideways forces.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "REVOLUTE_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "obligations_created": ["OBL-0004"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Dynamics can verify return under ideal joint assumptions."
+      }
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A pedal that uses a prismatic pair to allow vertical translation with a spring return and a detent to prevent sideways motion.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "PRISMATIC_PAIR",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "obligations_created": ["OBL-0005"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Dynamics can verify return under ideal joint assumptions."
+      }
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A pedal that uses a compliant flexure to allow deflection with an inherent spring return and geometric constraints to resist sideways motion.",
+      "family": "PERMIT_RELATIVE_MOTION",
+      "principle": "COMPLIANT_FLEXURE",
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "obligations_created": ["OBL-0006"],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "Compliance analysis is not available at this stage."
+      }
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "predicates": ["Signal sent on press.", "Returns to rest after release.", "No motion under sideways brush."]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "predicates": ["Signal sent on press.", "Returns to rest after release.", "No motion under sideways brush."]
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003"],
+      "predicates": ["Signal sent on press.", "Returns to rest after release.", "No motion under sideways brush."]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "The type of signal sent to the machine has not been determined; it could be mechanical, electrical, or other.",
+      "why_open": "The requirement does not specify the signal type.",
+      "alternatives": ["mechanical", "electrical", "other"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": []
+    },
+    {
+      "id": "UNR-0002",
+      "decision": "The meaning of 'move' in sideways brushing is unclear: it could mean displacement, tilting, or activation.",
+      "why_open": "The requirement does not define 'move' in context.",
+      "alternatives": ["displacement", "tilting", "activation"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0002"],
+      "blocks": []
+    },
+    {
+      "id": "UNR-0003",
+      "decision": "The resting position of the pedal is not defined; it could be a specific orientation or location.",
+      "why_open": "The requirement does not specify what constitutes the resting position.",
+      "alternatives": ["defined orientation", "defined location", "other"],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0003"],
+      "blocks": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The pedal is initially in its resting position when the user presses it.",
+      "why": "To define the initial state for the return requirement.",
+      "would_be_invalidated_by": "Evidence that the pedal is not at rest when pressed."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The sideways brushing force is of a magnitude that would not overcome the pedal's resistance if properly designed.",
+      "why": "To assess the 'not move' requirement without a specified force.",
+      "would_be_invalidated_by": "If a force magnitude is provided."
+    }
+  ]
+}

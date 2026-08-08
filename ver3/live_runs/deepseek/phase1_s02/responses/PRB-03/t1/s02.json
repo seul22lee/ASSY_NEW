@@ -1,0 +1,266 @@
+{
+  "obligations": [
+    {
+      "obligation_id": "OBL-0001",
+      "requirement_id": "REQ-0001",
+      "statement": "Provide a surface that can be pressed by a foot, located at a workbench, and maintain the pressed surface in a rest position when not pressed.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0002",
+      "requirement_id": "REQ-0002",
+      "statement": "Generate a signal when the pressed surface is displaced, such that the signal reaches the machine.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0002"]
+    },
+    {
+      "obligation_id": "OBL-0003",
+      "requirement_id": "REQ-0003",
+      "statement": "Ensure the pressed surface returns to its resting position on its own when the foot is removed.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0004",
+      "requirement_id": "REQ-0004",
+      "statement": "Ensure that every press results in the pressed surface returning to its resting position on its own.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "ADDRESSED_AND_UN-EVIDENCEABLE",
+      "route_available": false,
+      "involves_actors": ["ACT-0001"]
+    },
+    {
+      "obligation_id": "OBL-0005",
+      "requirement_id": "REQ-0005",
+      "statement": "Resist sideways disturbance to prevent unwanted displacement of the pressed surface.",
+      "scope": "UNIVERSAL",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": []
+    }
+  ],
+  "load_cases": [
+    {
+      "load_case_id": "LC-0001",
+      "scenario_id": "SCN-0001",
+      "scenario_name": "pressing and releasing",
+      "loads": [
+        {
+          "load_id": "LOAD-0001",
+          "direction_class": "GRAVITY",
+          "kind": "GRAVITY",
+          "magnitude_or_status": "UNSUPPORTED",
+          "body_role": "the product as a whole",
+          "reacted_at_role": "the floor or bench it sits on",
+          "description": "Self-weight of the product acting downward."
+        },
+        {
+          "load_id": "LOAD-0002",
+          "direction_class": "TRANSVERSE",
+          "kind": "ACTOR_APPLIED",
+          "magnitude_or_status": "UNSUPPORTED",
+          "body_role": "the pressed surface",
+          "reacted_at_role": "the product's base (not specified)",
+          "description": "Foot force applied to the pressed surface during pressing."
+        }
+      ]
+    },
+    {
+      "load_case_id": "LC-0002",
+      "scenario_id": "SCN-0002",
+      "scenario_name": "brushed sideways",
+      "loads": [
+        {
+          "load_id": "LOAD-0003",
+          "direction_class": "TRANSVERSE",
+          "kind": "ACTOR_APPLIED",
+          "magnitude_or_status": "UNSUPPORTED",
+          "body_role": "the pressed surface",
+          "reacted_at_role": "the product's base (not specified)",
+          "description": "Sideways disturbance force applied to the pressed surface."
+        }
+      ]
+    },
+    {
+      "load_case_id": "LC-0003",
+      "scenario_id": "SCN-0003",
+      "scenario_name": "installation at the workbench",
+      "loads": [
+        {
+          "load_id": "LOAD-0004",
+          "direction_class": "NONE",
+          "kind": "REACTION",
+          "magnitude_or_status": "UNSUPPORTED",
+          "body_role": "the product as a whole",
+          "reacted_at_role": "the workbench",
+          "description": "Reaction forces due to fixation to the workbench (method unknown)."
+        }
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "CAND-0001",
+      "name": "Mechanical Push-button with Spring Return",
+      "function_classes": {
+        "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+        "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+        "ACTUATE": "DIRECT_MANUAL",
+        "CONVERT_MOTION": "LEVER_LINKAGE",
+        "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+        "BOUND_MOTION": "HARD_STOP",
+        "TRANSMIT_LOAD": "DIRECT_BEARING"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "obligations_created": [
+        {
+          "obligation_id": "OBL-C1-001",
+          "statement": "Provide a return spring or equivalent to restore the pressed surface to rest.",
+          "scope": "CANDIDATE_DISCRIMINATING"
+        },
+        {
+          "obligation_id": "OBL-C1-002",
+          "statement": "Ensure signal generation occurs upon displacement.",
+          "scope": "CANDIDATE_DISCRIMINATING"
+        }
+      ],
+      "evidence_route_verdict": {
+        "primary_function": "PERMIT_RELATIVE_MOTION",
+        "route_needed": "RIGID_KINEMATIC_GEOMETRY",
+        "route_available": true
+      }
+    },
+    {
+      "candidate_id": "CAND-0002",
+      "name": "Foot Pedal with Treadle and Linkage",
+      "function_classes": {
+        "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+        "CONVERT_MOTION": "LEVER_LINKAGE",
+        "ACTUATE": "DIRECT_MANUAL",
+        "MAINTAIN_CONFIGURATION": "GRAVITY_SEATED",
+        "BOUND_MOTION": "HARD_STOP",
+        "TRANSMIT_LOAD": "DIRECT_BEARING"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "obligations_created": [
+        {
+          "obligation_id": "OBL-C2-001",
+          "statement": "Provide a pivot and a return mechanism (e.g., spring) to restore the pedal.",
+          "scope": "CANDIDATE_DISCRIMINATING"
+        },
+        {
+          "obligation_id": "OBL-C2-002",
+          "statement": "Ensure signal generation upon pedal rotation.",
+          "scope": "CANDIDATE_DISCRIMINATING"
+        }
+      ],
+      "evidence_route_verdict": {
+        "primary_function": "CONVERT_MOTION",
+        "route_needed": "RIGID_BODY_DYNAMICS",
+        "route_available": true
+      }
+    },
+    {
+      "candidate_id": "CAND-0003",
+      "name": "Pneumatic Foot Pedal with Air Signal",
+      "function_classes": {
+        "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+        "CONVERT_MOTION": "WEDGE_OR_INCLINE",
+        "ACTUATE": "DIRECT_MANUAL",
+        "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+        "BOUND_MOTION": "HARD_STOP",
+        "TRANSMIT_LOAD": "SHEAR_MEMBER"
+      },
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005"],
+      "obligations_created": [
+        {
+          "obligation_id": "OBL-C3-001",
+          "statement": "Include a valve or air passage to generate a pneumatic signal.",
+          "scope": "CANDIDATE_DISCRIMINATING"
+        },
+        {
+          "obligation_id": "OBL-C3-002",
+          "statement": "Provide a return spring to reset the pedal.",
+          "scope": "CANDIDATE_DISCRIMINATING"
+        }
+      ],
+      "evidence_route_verdict": {
+        "primary_function": "ACTUATE",
+        "route_needed": "RIGID_BODY_DYNAMICS",
+        "route_available": true
+      }
+    }
+  ],
+  "acceptance_contracts": [],
+  "unresolved": [
+    {
+      "unresolved_id": "UNR-0001",
+      "name": "Signal type and scope",
+      "kept_open_by": ["AMB-0001", "FRE-0003"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": ["electrical", "pneumatic", "mechanical"],
+      "evidence_needed": "A statement of the signal type and boundary with the machine."
+    },
+    {
+      "unresolved_id": "UNR-0002",
+      "name": "Pressing force and travel",
+      "kept_open_by": ["AMB-0002", "FRE-0002"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": ["force value", "travel distance"],
+      "evidence_needed": "Quantitative force and travel requirements."
+    },
+    {
+      "unresolved_id": "UNR-0003",
+      "name": "Sideways disturbance resistance",
+      "kept_open_by": ["AMB-0003"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": ["maximum allowable displacement", "resistance force"],
+      "evidence_needed": "Specification of disturbance force or acceptable displacement."
+    },
+    {
+      "unresolved_id": "UNR-0004",
+      "name": "Reliability criterion",
+      "kept_open_by": ["AMB-0004"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": ["cycle count", "reliability target"],
+      "evidence_needed": "Cycle life or reliability requirement."
+    },
+    {
+      "unresolved_id": "UNR-0005",
+      "name": "Mounting and location",
+      "kept_open_by": ["AMB-0005", "FRE-0004"],
+      "alternatives_kind": "FREE_TEXT",
+      "alternatives": ["free-standing on floor", "fixed to workbench"],
+      "evidence_needed": "Mounting method description."
+    }
+  ],
+  "assumptions": [
+    {
+      "assumption_id": "ASM-0001",
+      "statement": "The pressed surface is a part of the product that moves relative to the product body during pressing."
+    },
+    {
+      "assumption_id": "ASM-0002",
+      "statement": "The product includes a means to generate a signal, but the signal type is not specified and could be electrical, pneumatic, or mechanical."
+    },
+    {
+      "assumption_id": "ASM-0003",
+      "statement": "The product has some base that rests on the workbench or floor, and the base is stationary relative to the workbench during operation."
+    },
+    {
+      "assumption_id": "ASM-0004",
+      "statement": "The return to rest is achieved by some stored energy (e.g., spring) or gravity, as required by REQ-0003."
+    },
+    {
+      "assumption_id": "ASM-0005",
+      "statement": "The side disturbance is applied to the pressed surface, not to the whole product; the requirement is about displacement of the pressed surface under that disturbance."
+    }
+  ]
+}

@@ -1,0 +1,829 @@
+[
+ {
+  "case": "BM-001",
+  "counts": {
+   "Actor": 1,
+   "Ambiguity": 1,
+   "Assumption": 1,
+   "Freedom": 3,
+   "Requirement": 5,
+   "Scenario": 4,
+   "SourceClause": 5
+  },
+  "failures": [
+   {
+    "detail": [
+     "scenario SCN-0003 has no valid kind"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s01",
+    "what": "declared incomplete"
+   },
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0011",
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0012",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0013",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0014",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0015",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0016"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [
+   "scenario SCN-0003 has no valid kind"
+  ],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 8.76,
+  "s01_status": "CONTRACT_INCOMPLETE",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 15.7,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 1
+ },
+ {
+  "case": "BM-002",
+  "counts": {
+   "Actor": 3,
+   "Ambiguity": 2,
+   "Assumption": 2,
+   "Freedom": 5,
+   "Requirement": 6,
+   "Scenario": 3,
+   "SourceClause": 6
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0011",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0012"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 11.06,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 19.59,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 1
+ },
+ {
+  "case": "BM-003",
+  "counts": {
+   "Actor": 1,
+   "Ambiguity": 1,
+   "Assumption": 2,
+   "Freedom": 4,
+   "Requirement": 15,
+   "Scenario": 4,
+   "SourceClause": 15
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0017",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0018"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 18.12,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 21.98,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 1
+ },
+ {
+  "case": "PRB-01",
+  "counts": {
+   "Actor": 2,
+   "Ambiguity": 1,
+   "Assumption": 1,
+   "Freedom": 4,
+   "Requirement": 6,
+   "Scenario": 2,
+   "SourceClause": 6
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0008",
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0009",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-00010",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-00010"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 8.53,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 14.46,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 1
+ },
+ {
+  "case": "PRB-02",
+  "counts": {
+   "Actor": 1,
+   "Ambiguity": 3,
+   "Assumption": 3,
+   "Freedom": 4,
+   "Requirement": 4,
+   "Scenario": 3,
+   "SourceClause": 4
+  },
+  "failures": [
+   {
+    "detail": [
+     "no obligations derived",
+     "no candidates formed"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "declared incomplete"
+   },
+   {
+    "detail": "OPERATION_SCENARIO_WITHOUT_LOADCASE: SCN-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "load_case"
+   },
+   {
+    "detail": "REQUIREMENT_WITHOUT_OBLIGATION: REQ-0001",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "requirement_coverage"
+   },
+   {
+    "detail": "REQUIREMENT_WITHOUT_OBLIGATION: REQ-0002",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "requirement_coverage"
+   },
+   {
+    "detail": "REQUIREMENT_WITHOUT_OBLIGATION: REQ-0003",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "requirement_coverage"
+   },
+   {
+    "detail": "REQUIREMENT_WITHOUT_OBLIGATION: REQ-0004",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "requirement_coverage"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 12.04,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [
+   "no obligations derived",
+   "no candidates formed"
+  ],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 1.95,
+  "s02_status": "CONTRACT_INCOMPLETE",
+  "trial": 1,
+  "unused_s01_families": [
+   "Requirement: 4/4 unreferenced",
+   "Scenario: 3/3 unreferenced",
+   "Actor: 1/1 unreferenced",
+   "Freedom: 4/4 unreferenced",
+   "Ambiguity: 3/3 unreferenced"
+  ]
+ },
+ {
+  "case": "PRB-03",
+  "counts": {
+   "AcceptanceContract": 3,
+   "Actor": 2,
+   "Ambiguity": 2,
+   "Assumption": 5,
+   "Candidate": 3,
+   "Freedom": 3,
+   "LoadCase": 3,
+   "Obligation": 5,
+   "Requirement": 4,
+   "Scenario": 2,
+   "SourceClause": 4,
+   "UnresolvedDecision": 3
+  },
+  "failures": [],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 7.81,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 14.15,
+  "s02_status": "SUCCESS",
+  "trial": 1,
+  "unused_s01_families": [
+   "Freedom: 2/3 unreferenced"
+  ]
+ },
+ {
+  "case": "BM-001",
+  "counts": {
+   "Actor": 2,
+   "Ambiguity": 4,
+   "Assumption": 1,
+   "Freedom": 4,
+   "Requirement": 5,
+   "Scenario": 3,
+   "SourceClause": 5
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0009",
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0010",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0009",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0010",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0009",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0011"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 10.08,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 17.41,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 2
+ },
+ {
+  "case": "BM-002",
+  "counts": {
+   "Actor": 2,
+   "Ambiguity": 1,
+   "Assumption": 2,
+   "Freedom": 3,
+   "Requirement": 10,
+   "Scenario": 2,
+   "SourceClause": 6
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0015",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0015",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0015"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 11.5,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 20.51,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 2
+ },
+ {
+  "case": "BM-003",
+  "counts": {
+   "Actor": 1,
+   "Ambiguity": 4,
+   "Assumption": 2,
+   "Freedom": 4,
+   "Requirement": 13,
+   "Scenario": 3,
+   "SourceClause": 13
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0012",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0012",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0012"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 16.89,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 18.27,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 2
+ },
+ {
+  "case": "PRB-01",
+  "counts": {
+   "Actor": 1,
+   "Ambiguity": 2,
+   "Assumption": 3,
+   "Freedom": 3,
+   "Requirement": 6,
+   "Scenario": 2,
+   "SourceClause": 6
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0009",
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0010",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0011",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0012",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0013"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 9.71,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 15.16,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 2
+ },
+ {
+  "case": "PRB-02",
+  "counts": {
+   "Actor": 1,
+   "Ambiguity": 1,
+   "Assumption": 1,
+   "Freedom": 2,
+   "Requirement": 4,
+   "Scenario": 2,
+   "SourceClause": 4
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0005",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0006"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 7.15,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 10.55,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 2
+ },
+ {
+  "case": "PRB-03",
+  "counts": {
+   "AcceptanceContract": 2,
+   "Actor": 1,
+   "Ambiguity": 1,
+   "Assumption": 2,
+   "Candidate": 2,
+   "Freedom": 1,
+   "LoadCase": 3,
+   "Obligation": 6,
+   "Requirement": 4,
+   "Scenario": 3,
+   "SourceClause": 4,
+   "UnresolvedDecision": 1
+  },
+  "failures": [
+   {
+    "detail": "LOADCASE_ROLE_READS_AS_A_PART: LC-0001.applied_to_role -> 'the pedal'",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "load_case"
+   },
+   {
+    "detail": "LOADCASE_ROLE_READS_AS_A_PART: LC-0001.reacted_at_role -> 'the workbench'",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "load_case"
+   },
+   {
+    "detail": "LOADCASE_ROLE_READS_AS_A_PART: LC-0002.applied_to_role -> 'the pedal'",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "load_case"
+   },
+   {
+    "detail": "LOADCASE_ROLE_READS_AS_A_PART: LC-0002.reacted_at_role -> 'the workbench'",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "load_case"
+   },
+   {
+    "detail": "LOADCASE_ROLE_READS_AS_A_PART: LC-0003.applied_to_role -> 'the pedal'",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "load_case"
+   },
+   {
+    "detail": "LOADCASE_ROLE_READS_AS_A_PART: LC-0003.reacted_at_role -> 'the workbench'",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "load_case"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 6.96,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 12.01,
+  "s02_status": "SUCCESS",
+  "trial": 2,
+  "unused_s01_families": [
+   "Freedom: 1/1 unreferenced"
+  ]
+ },
+ {
+  "case": "BM-001",
+  "counts": {
+   "Actor": 1,
+   "Ambiguity": 2,
+   "Assumption": 2,
+   "Freedom": 5,
+   "Requirement": 5,
+   "Scenario": 3,
+   "SourceClause": 5
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0011",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0012",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0013"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 9.14,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 19.53,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 3
+ },
+ {
+  "case": "BM-002",
+  "counts": {
+   "Actor": 2,
+   "Ambiguity": 4,
+   "Assumption": 3,
+   "Freedom": 3,
+   "Requirement": 7,
+   "Scenario": 2,
+   "SourceClause": 7
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0012",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0012"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 13.71,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 20.37,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 3
+ },
+ {
+  "case": "BM-003",
+  "counts": {
+   "Actor": 1,
+   "Ambiguity": 3,
+   "Assumption": 2,
+   "Freedom": 4,
+   "Requirement": 15,
+   "Scenario": 3,
+   "SourceClause": 15
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0016"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 17.94,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 23.5,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 3
+ },
+ {
+  "case": "PRB-01",
+  "counts": {
+   "AcceptanceContract": 1,
+   "Actor": 1,
+   "Ambiguity": 2,
+   "Assumption": 4,
+   "Candidate": 1,
+   "Freedom": 1,
+   "LoadCase": 5,
+   "Obligation": 14,
+   "Requirement": 5,
+   "Scenario": 2,
+   "SourceClause": 5,
+   "UnresolvedDecision": 2
+  },
+  "failures": [
+   {
+    "detail": "LOADCASE_ROLE_READS_AS_A_PART: LC-0002.applied_to_role -> 'the lever'",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "load_case"
+   },
+   {
+    "detail": "LOADCASE_ROLE_READS_AS_A_PART: LC-0003.applied_to_role -> 'the contents'",
+    "kind": "CHECK_FINDING",
+    "stage": "s02",
+    "what": "load_case"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 10.27,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 19.46,
+  "s02_status": "SUCCESS",
+  "trial": 3,
+  "unused_s01_families": []
+ },
+ {
+  "case": "PRB-02",
+  "counts": {
+   "Actor": 2,
+   "Ambiguity": 1,
+   "Assumption": 1,
+   "Freedom": 2,
+   "Requirement": 4,
+   "Scenario": 2,
+   "SourceClause": 4
+  },
+  "failures": [
+   {
+    "detail": [
+     "DANGLING_REF: CND-0001.obligations_created -> OBL-0012",
+     "DANGLING_REF: CND-0002.obligations_created -> OBL-0013",
+     "DANGLING_REF: CND-0003.obligations_created -> OBL-0014"
+    ],
+    "kind": "CONTRACT_CONDITION",
+    "stage": "s02",
+    "what": "contract validation"
+   }
+  ],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 7.64,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 23.72,
+  "s02_status": "SCHEMA_FAILURE",
+  "trial": 3
+ },
+ {
+  "case": "PRB-03",
+  "counts": {
+   "AcceptanceContract": 3,
+   "Actor": 1,
+   "Ambiguity": 2,
+   "Assumption": 4,
+   "Candidate": 3,
+   "Freedom": 3,
+   "LoadCase": 3,
+   "Obligation": 11,
+   "Requirement": 4,
+   "Scenario": 3,
+   "SourceClause": 4,
+   "UnresolvedDecision": 1
+  },
+  "failures": [],
+  "projection_families": [
+   "Actor",
+   "Ambiguity",
+   "Assumption",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "s01_declared_incomplete": [],
+  "s01_provider": "deepseek (live)",
+  "s01_seconds": 9.32,
+  "s01_status": "SUCCESS",
+  "s02_declared_incomplete": [],
+  "s02_provider": "deepseek (live)",
+  "s02_seconds": 19.28,
+  "s02_status": "SUCCESS",
+  "trial": 3,
+  "unused_s01_families": [
+   "Freedom: 3/3 unreferenced",
+   "Ambiguity: 1/2 unreferenced"
+  ]
+ }
+]

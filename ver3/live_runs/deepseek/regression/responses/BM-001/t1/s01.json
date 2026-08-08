@@ -1,0 +1,257 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "locator": "clause-1",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "locator": "clause-2",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "locator": "clause-3",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "The product should be suitable for low-cost manufacturing.",
+      "locator": "clause-4",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0005",
+      "verbatim": "The product should be practical for desktop use.",
+      "locator": "clause-5",
+      "quantity_kinds": [],
+      "directionality": null
+    },
+    {
+      "id": "SRC-0006",
+      "verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "locator": "clause-6",
+      "quantity_kinds": [],
+      "directionality": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "Design a compact desktop storage box with a reusable latch.",
+      "source_locator": "clause-1",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+      "source_locator": "clause-2",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+      "source_locator": "clause-3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "The product should be suitable for low-cost manufacturing.",
+      "kind": "PROCESS",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "The product should be suitable for low-cost manufacturing.",
+      "source_locator": "clause-4",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0005",
+      "statement_verbatim": "The product should be practical for desktop use.",
+      "kind": "USABILITY",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "The product should be practical for desktop use.",
+      "source_locator": "clause-5",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0006",
+      "statement_verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "kind": "PROCESS",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "The design should be mechanically plausible and easy to assemble.",
+      "source_locator": "clause-6",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Normal handling",
+      "kind": "OPERATION",
+      "system_boundary": "The box with its latch",
+      "actors": [
+        {
+          "id": "ACT-0001"
+        }
+      ],
+      "environment": "Normal handling conditions (not specified further)"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Transport",
+      "kind": "TRANSPORT",
+      "system_boundary": "The box with its latch",
+      "actors": [
+        {
+          "id": "ACT-0001"
+        }
+      ],
+      "environment": "Transport conditions (not specified further)"
+    },
+    {
+      "id": "SCN-0003",
+      "name": "User operation",
+      "kind": "OPERATION",
+      "system_boundary": "The latch",
+      "actors": [
+        {
+          "id": "ACT-0001"
+        }
+      ],
+      "environment": "Desktop use (not specified further)"
+    },
+    {
+      "id": "SCN-0004",
+      "name": "Assembly",
+      "kind": "ASSEMBLY",
+      "system_boundary": "The product",
+      "actors": [],
+      "environment": "Assembly environment (not specified further)"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "User",
+      "must_reach": []
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Material, mechanism, part, and dimension choices",
+      "why_free": "The request does not specify how to achieve the requirements."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "Specific shape, size, and capacity of the box",
+      "why_free": "The request only says 'compact' but does not define dimensions."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "Specific manufacturing process",
+      "why_free": "The request only requires suitability for low-cost manufacturing."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The meaning of 'compact' is not defined.",
+      "resolvable_when": "When target dimensions or capacity are provided.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0002",
+      "statement": "The meaning of 'normal handling' is not defined.",
+      "resolvable_when": "When specific handling conditions are defined.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0003",
+      "statement": "The meaning of 'secure during transport' is not defined.",
+      "resolvable_when": "When specific transport conditions are defined.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0004",
+      "statement": "The meaning of 'easy to operate' is not defined.",
+      "resolvable_when": "When user ability and force thresholds are specified.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0005",
+      "statement": "The meaning of 'low-cost manufacturing' is not defined.",
+      "resolvable_when": "When cost targets or manufacturing constraints are provided.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0006",
+      "statement": "The meaning of 'practical for desktop use' is not defined.",
+      "resolvable_when": "When specific desktop use scenarios are defined.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0007",
+      "statement": "The meaning of 'mechanically plausible' is not defined.",
+      "resolvable_when": "When engineering criteria for plausibility are provided.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0008",
+      "statement": "The meaning of 'easy to assemble' is not defined.",
+      "resolvable_when": "When assembly time or steps are specified.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    },
+    {
+      "id": "AMB-0009",
+      "statement": "The relationship between 'normal handling' and 'transport' is not defined.",
+      "resolvable_when": "When the scope of handling and transport is clarified.",
+      "conflicting_clauses": [],
+      "block_scopes": []
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The box is intended for repeated use by a single user.",
+      "why": "The request mentions repeated opening and closing and user operation.",
+      "would_be_invalidated_by": "If the box is intended for single-use or multiple users."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The latch is a mechanism that can be opened and closed manually.",
+      "why": "The request says 'reusable latch' and 'easy for a user to operate'.",
+      "would_be_invalidated_by": "If the latch is automated or non-manual."
+    },
+    {
+      "id": "ASM-0003",
+      "statement": "The box will be used in a typical indoor desktop environment.",
+      "why": "The request says 'desktop use'.",
+      "would_be_invalidated_by": "If the box is intended for outdoor or extreme environments."
+    }
+  ]
+}

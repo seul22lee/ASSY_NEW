@@ -1,0 +1,197 @@
+# STAGE 03 CONTRACT — topology, mobility and assembly strategy
+#
+# The stage carrying the most new responsibility. Geometry first appears here,
+# and it is SYMBOLIC: frames, axis directions, sidedness. No magnitudes.
+
+schema_version: "0.1.0"
+stage_id: s03
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+derived_from: docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md
+
+engineering_question: >
+  What things are there, how are they connected, what may move, what must not,
+  what reacts what, and in what order does it go together?
+
+engineering_responsibility: >
+  Turn a candidate family into a specific mechanism topology, and account for
+  EVERY degree of freedom in it.
+
+required_inputs:
+  # Corrected in Window 2 by the producer/consumer audit. The previous list
+  # named BodyHypothesis and PhysicalInteractionHypothesis, which no stage
+  # produces and DESIGN_STATE_CONTRACT does not define. s03 OWNS Body and
+  # Interface creation, so it cannot also consume them: the bodies are derived
+  # here from the selected candidate's principle families.
+  from_s02: [Obligation, Candidate, LoadCase, AcceptanceContract, UnresolvedDecision]
+  from_s01_via_state: [Requirement, Scenario, Actor, Freedom, Ambiguity]
+prohibited_inputs: [raw source text, benchmark documentation]
+
+required_discoveries:
+  - "the bodies; and where a body is not rigid, its rigid groups and the compliant joints between them"
+  - "every joint: type, participants, DOF, axis DIRECTION"
+  - "every region where two bodies meet, and its interaction kind"
+  - "the disposition of EVERY degree of freedom in EVERY configuration"
+  - "for each BLOCKED_BY: which body blocks it, in which direction, and how to defeat it for testing"
+  - "for each load case: the ordered path from the load to a reaction site, through THIS candidate"
+  - "the assembly partial order, the access side per step, and the retention-termination strategy per retained body"
+  - "the functional regions the design promises: access, support, keep-out, aperture"
+
+owned_decisions:
+  creates: [Body, RigidGroup, Joint, Interface, Configuration, MobilityExpectation, LoadPath, AssemblyStep, FunctionalRegion]
+  relates: [blocked_by, retained_by]
+  note: "This stage owns the MECHANISM."
+
+dof_disposition_rule:
+  principle: >
+    MobilityExpectation is a TOTAL function, not a declared set. For every rigid
+    group, in every configuration, every rigid-body DOF maps to exactly one of:
+    INTENDED | BLOCKED_BY(relation) | MAINTAINED_BY_CLASS(class) | IRRELEVANT_BECAUSE(reason)
+  why_totality: >
+    A declared set that omits a DOF cannot fail. All three BM-001 human-review
+    rejections and BM-003 R2 were omissions from declared sets. Totality is
+    mechanically checkable; declaration is not.
+  irrelevant_because_rule: >
+    IRRELEVANT_BECAUSE must name a scenario in which that DOF is both unloaded
+    and unactuated, cross-checked against the LoadCases. This converts the one
+    unverifiable disposition into a checkable one.
+
+blocking_relation_rule:
+  required_fields: [retained_group, blocked_direction, blocker_body, promised_features, configurations, defeat_specification, driver]
+  optional_fields: [depends_on_compliant_recovery]
+  driver: [LOAD, KINEMATIC_NECESSITY, DECLARED_SCENARIO]
+  driver_rationale: >
+    A constraint may be required because a load must be reacted, OR because the
+    selected conversion cannot function without it (NRM-BM-002-007 exclusion b:
+    a lead-screw nut is anti-rotated for the second reason and no load case will
+    ever justify it).
+  defeat_specification_rationale: >
+    Authored here, with the relation, and not reconstructed from geometry at s08.
+    A control written from geometry defeats what the geometry suggests rather
+    than what the design claims - which is DEF-01, DEF-02 and NC-17.
+  compliant_recovery_rationale: >
+    A relation whose validity requires a compliant joint to have returned to zero
+    names that joint. HCR-BM001-002 directs that the RECOVERED snap-barb shoulder
+    blocks removal; without the field the model shows it as unconditional.
+
+compliance_rule:
+  granularity: >
+    ONE RigidGroup and ONE compliant Joint PER COMPLIANT MEMBER. Four independent
+    tabs are four groups and four joints, not one region. A "region" is not an
+    entity; it is a set of compliant joints co-actuated by one Transition.
+  required_fields: [mode, direction, required_travel, allowable_travel, actuation, compliant_element, root_interface, activation_window]
+  travel_rule: >
+    required_travel is kinematic and authoritative. allowable_travel is a
+    material fact with status UNSUPPORTED, naming the route that would establish
+    it. They are never one number.
+  actuation: PRESCRIBED_KINEMATIC
+  actuation_rationale: >
+    In the real mechanism a contact drives the deflection; in this model the
+    coordinate is imposed. The field says so, so the structure cannot be read as
+    evidence that the mechanism self-deflects.
+
+load_path_rule:
+  ownership: "candidate-specific, owned here"
+  maturity_progression: [HYPOTHESIS, SPATIALLY_INSTANTIATED, AUTHORITATIVE]
+  maturity_owners: {HYPOTHESIS: s03, SPATIALLY_INSTANTIATED: s04b, AUTHORITATIVE: s06}
+  derived_not_stored: >
+    Per-element load components are DERIVED from the path and are NEVER stored.
+    Storing them reintroduces SF-5.3 at the data level: a
+    candidate-independent-looking field about a candidate-dependent fact.
+  no_role_patterns: >
+    No element acquires a reaction obligation from its type. "Shaft -> bearing"
+    is unreachable by construction: an element carries a component only by
+    appearing in a path traced from a declared applied load through THIS
+    mechanism.
+
+prohibited_decisions:
+  - what: "any qualitative region used as a position"
+    retirement_rows: [R-02, R-03, R-04]
+  - what: "any metric magnitude"
+  - what: "any axis PLACEMENT"
+    rationale: "placement depends on feature envelopes that do not exist yet; BM-002 CHG-01"
+  - what: "any feature shape or dimension"
+  - what: "select a candidate"
+    invariant: INV-007
+  - what: "leave a body-pair meeting region unclassified"
+  - what: "emit a generic block as an embodiment"
+    retirement_row: R-09
+  - what: "store a per-element load component"
+
+structured_outputs:
+  Body: [entity_id, instance_identity, role, created_by_stage]
+  RigidGroup: [entity_id, body, members, is_default]
+  Joint: [entity_id, joint_type, parent_group, child_group, dof, axis_direction, frame_ids]
+  Interface: [entity_id, bodies, interaction_kind, nominal_status]
+  MobilityExpectation: [entity_id, configuration, dispositions]
+  LoadPath: [entity_id, load_case, candidate, ordered_hops, maturity]
+  AssemblyStep: [entity_id, order_index, body, access_side, activates, termination_strategy, path_kind, depends_on]
+  FunctionalRegion: [entity_id, role, owning_bodies]
+  Configuration: [entity_id, name, kind, bodies_present, expected_mobility]
+
+assembly_step_rule:
+  path_kind: [RIGID, DEFORMATION_RESOLVED]
+  deformation_resolved_consequence: >
+    A DEFORMATION_RESOLVED step forces NOT_VERIFIED, never PASS
+    (ASM-BM-003-002). Rigid geometry cannot observe the deflection the path
+    depends on.
+  termination_strategy: [LATER_BODY_COVER, ROTATION, ELASTICITY]
+  termination_rationale: >
+    A rigid part installed by one straight translation always leaves the reverse
+    direction open. Retention therefore needs one of exactly these three. BM-003
+    burned three hinge topologies discovering this.
+  direction_scope: >
+    s03 fixes the ORDER and the ACCESS SIDE. Direction FEASIBILITY belongs to
+    s04 (BM-002's forced +X insertion was an envelope comparison).
+
+allowed_unresolved:
+  - "every magnitude"
+  - "axis placements"
+  - "assembly direction feasibility"
+  - "which of several admissible retention strategies is used, if more than one survives"
+  - "allowable_travel on every compliant joint"
+
+maturity_expectations:
+  geometry: [TOPOLOGY, SYMBOLIC_SPATIAL_RELATIONS, FRAMES_AND_AXIS_DIRECTIONS]
+  authority: "authoritative for topology and direction; nothing metric exists"
+
+deterministic_exit_checks:
+  - id: S03-C1
+    check: "DOF totality: every rigid group, in every configuration, has every DOF dispositioned exactly once"
+  - id: S03-C2
+    check: "every BLOCKED_BY resolves to a relation carrying a direction, a named blocker, a defeat specification and a driver"
+  - id: S03-C3
+    check: "every IRRELEVANT_BECAUSE names a scenario in which the DOF is unloaded and unactuated, consistent with the LoadCases"
+  - id: S03-C4
+    check: "the assembly precedence relation is acyclic"
+  - id: S03-C5
+    check: "every LoadCase has at least one LoadPath terminating at a declared reaction site"
+  - id: S03-C6
+    check: "every Interface has an interaction_kind"
+  - id: S03-C7
+    check: "every Obligation is owned by some body pair or compliant joint"
+  - id: S03-C8
+    check: "every retained body has a termination_strategy"
+  - id: S03-C9
+    check: "every compliant Joint declares mode, direction, required_travel, allowable_travel status, actuation, compliant_element, root_interface and activation_window"
+  - id: S03-C10
+    check: "the joint graph is simulation-complete: it can be projected into a multibody model without re-derivation"
+  - id: S03-C11
+    check: "no per-element load component is stored"
+  - id: S03-C12
+    check: "every FunctionalRegion has a role and at least one owning body"
+
+next_stage_consumer_requirement:
+  consumer: s04a
+  needs: [joint_graph, configurations, body_roles, functional_region_roles, packaging_obligations, actor_reach_requirements]
+  consumer_b: s04b
+  needs_b: [total_dof_disposition, blocking_relations, assembly_steps_with_order_and_access_side, load_paths_as_hypotheses]
+
+llm_role: >
+  High for topology and strategy proposal. NONE for DOF totality: the domain is
+  enumerated mechanically from the joint graph, and the LLM only dispositions
+  each entry.
+knowledge_base_role: >
+  Per capability: the standard DOF disposition template, the standard blocking
+  relations, and the retention trichotomy. This is the checklist BM-001's human
+  reviewer supplied by hand three times.

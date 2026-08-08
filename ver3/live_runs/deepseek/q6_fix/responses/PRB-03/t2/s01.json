@@ -1,0 +1,158 @@
+{
+  "source_clauses": [
+    {
+      "id": "SRC-0001",
+      "verbatim": "Design a foot pedal for a workbench.",
+      "locator": "L1",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0002",
+      "verbatim": "Pressing it should send a signal to the machine",
+      "locator": "L2",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0003",
+      "verbatim": "when I take my foot off it must return to its resting position on its own every time",
+      "locator": "L3",
+      "quantity_kinds": [],
+      "directionality": "none"
+    },
+    {
+      "id": "SRC-0004",
+      "verbatim": "It should not move if something brushes against it sideways.",
+      "locator": "L4",
+      "quantity_kinds": [],
+      "directionality": "sideways"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "REQ-0001",
+      "statement_verbatim": "Design a foot pedal for a workbench.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "A foot pedal is designed.",
+      "source_locator": "L1",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0002",
+      "statement_verbatim": "Pressing it should send a signal to the machine",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "QUANTITATIVE",
+      "observable_verbatim": "Pressing the pedal results in a signal to the machine.",
+      "source_locator": "L2",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0003",
+      "statement_verbatim": "when I take my foot off it must return to its resting position on its own every time",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "KINEMATIC",
+      "observable_verbatim": "Upon foot release, the pedal returns to its resting position on its own.",
+      "source_locator": "L3",
+      "quantity_class": "NONE"
+    },
+    {
+      "id": "REQ-0004",
+      "statement_verbatim": "It should not move if something brushes against it sideways.",
+      "kind": "FUNCTIONAL",
+      "verification_kind": "STRUCTURAL",
+      "observable_verbatim": "No movement occurs when a sideways force is applied.",
+      "source_locator": "L4",
+      "quantity_class": "NONE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "SCN-0001",
+      "name": "Pressing the pedal",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the foot pedal. Outside: the user's foot and the machine.",
+      "actors": ["ACT-0001", "ACT-0002"],
+      "environment": "workbench"
+    },
+    {
+      "id": "SCN-0002",
+      "name": "Releasing the pedal",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the foot pedal. Outside: the user's foot and the machine.",
+      "actors": ["ACT-0001", "ACT-0002"],
+      "environment": "workbench"
+    },
+    {
+      "id": "SCN-0003",
+      "name": "Sideways brushing",
+      "kind": "OPERATION",
+      "system_boundary": "Inside: the foot pedal. Outside: an external object that brushes against it.",
+      "actors": ["ACT-0003"],
+      "environment": "workbench"
+    }
+  ],
+  "actors": [
+    {
+      "id": "ACT-0001",
+      "name": "user",
+      "must_reach": ["pedal"]
+    },
+    {
+      "id": "ACT-0002",
+      "name": "machine",
+      "must_reach": ["pedal (receives signal)"]
+    },
+    {
+      "id": "ACT-0003",
+      "name": "external object",
+      "must_reach": ["pedal (sideways contact)"]
+    }
+  ],
+  "freedoms": [
+    {
+      "id": "FRE-0001",
+      "decision": "Physical form, materials, and mechanism of the pedal",
+      "why_free": "The request does not specify design details."
+    },
+    {
+      "id": "FRE-0002",
+      "decision": "Signal type and interface to the machine",
+      "why_free": "The request does not specify how the signal is sent or what kind of signal."
+    },
+    {
+      "id": "FRE-0003",
+      "decision": "Return mechanism",
+      "why_free": "The request does not specify how the pedal returns to resting position."
+    },
+    {
+      "id": "FRE-0004",
+      "decision": "Method to prevent sideways movement",
+      "why_free": "The request does not specify how the pedal resists sideways motion."
+    }
+  ],
+  "ambiguities": [
+    {
+      "id": "AMB-0001",
+      "statement": "The exact lateral force required to not move is unspecified.",
+      "conflicting_clauses": ["SRC-0004"],
+      "resolvable_when": "during design or testing",
+      "block_scopes": ["REQ-0004"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "A foot pedal is a physical device that can be pressed by a user.",
+      "why": "The term 'foot pedal' implies a physical interface.",
+      "would_be_invalidated_by": "A non-physical or virtual pedal design."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The machine accepts a signal from the pedal.",
+      "why": "The request states 'sends a signal to the machine'.",
+      "would_be_invalidated_by": "The machine not being able to receive signals."
+    }
+  ]
+}

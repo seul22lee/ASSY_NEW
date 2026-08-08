@@ -1,0 +1,176 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "A foot pedal must exist for a workbench.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A requirement for a product to exist implies that the product must have a physical presence and a defined geometry."]
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "A signal must be sent to the machine when the pedal is pressed.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["Pressing the pedal must cause a movement or change that can be interpreted as a signal."]
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The pedal must return to its resting position on its own after foot removal.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["When the actuating force is removed, the pedal must have a tendency to return to a defined resting configuration."]
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The pedal must not move when brushed sideways.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": ["A sideways force must not cause motion; the pedal must be constrained against undesired lateral movement."]
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The pedal must withstand the load of a user's foot pressing on it.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The user applies a force to the pedal, which must be reacted without failure."]
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The pedal must be reachable and operable by the user's foot.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": ["The pedal must be positioned and oriented such that the user can interact with it."]
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the pedal",
+      "reacted_at_role": "the workbench",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0003",
+      "applied_to_role": "the pedal",
+      "reacted_at_role": "the workbench",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the pedal",
+      "reacted_at_role": "the workbench",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A simple pivoting pedal with a return spring and a detent or hard stop to resist sideways motion.",
+      "family": ["MAINTAIN_CONFIGURATION", "CONVERT_MOTION", "BOUND_MOTION"],
+      "principle": ["REVOLUTE_PAIR", "DETENT_OR_SNAP", "HARD_STOP"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Route available for verifying return and stability."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A pedal that slides linearly against a spring, with a guide and a friction hold to resist lateral motion.",
+      "family": ["PERMIT_RELATIVE_MOTION", "MAINTAIN_CONFIGURATION", "GUIDE_MOTION"],
+      "principle": ["PRISMATIC_PAIR", "FRICTION_HOLD", "PRISMATIC_GUIDE"],
+      "obligations_addressed": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "obligations_created": [],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Route available for verifying return and stability."
+      },
+      "self_locking": false
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": [
+        "Pressing the pedal causes a signal to be sent to the machine.",
+        "After foot removal, the pedal returns to its resting position.",
+        "Sideways brushing does not move the pedal."
+      ]
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006"],
+      "predicates": [
+        "Pressing the pedal causes a signal to be sent to the machine.",
+        "After foot removal, the pedal returns to its resting position.",
+        "Sideways brushing does not move the pedal."
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "What constitutes 'moving' in the sideways brushing scenario?",
+      "why_open": "Ambiguity in the acceptance criteria for the sideways brushing scenario; the specific movement threshold is not defined.",
+      "alternatives": ["CND-0001", "CND-0002"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001"],
+      "blocks": ["OBL-0004"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-1001",
+      "statement": "A signal is an electrical or electronic signal.",
+      "why": "The text says 'send a signal to the machine'.",
+      "would_be_invalidated_by": "The machine uses a mechanical or non-electrical signal."
+    }
+  ]
+}
