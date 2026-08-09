@@ -233,6 +233,20 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
             if "semantic_dependency" in spec:
                 deps.append((str(spec["semantic_dependency"]).split(".")[0],
                              "declared semantic dependency"))
+            required_fields = (fams.get(family) or {}).get("required_fields") or []
+            # WHETHER A REFERENT MUST EXIST FOLLOWS THE FIELD'S OWN DECLARATION.
+            #
+            # An OPTIONAL field may simply not be authored, so nothing has to
+            # exist for it to point at. A MANY field is satisfied by the empty
+            # list, which this contract states elsewhere is a VALUE - "this step
+            # activates nothing" is an answer. Only a required single-valued
+            # reference cannot be authored without a referent.
+            #
+            # Treating all three alike demanded upstream material for relations
+            # the stage was free not to author at all.
+            single_required = (fld in required_fields
+                               and spec.get("cardinality") != "many")
+            existence = REQUIRED_NONEMPTY if single_required else MAY_BE_EMPTY
             for dep, why in deps:
                 if dep not in fams or dep in co_produced:
                     continue
@@ -248,10 +262,16 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
                         # existential: the value this stage authors points at
                         # something, so that something must be in the branch it is
                         # authoring for - and one of them is what "points at"
-                        # needs. This is a declaration, not a default: Source A
-                        # says what a REFERENCE means, and it means this.
+                        # needs.
+                        #
+                        # DESIGN_WIDE was tried here and FALSIFIED: it admitted
+                        # another branch's topology through the reference
+                        # dependency, breaking the isolation that
+                        # SELECT-09/10/23 and S3ROOT-16/17 pin. The branch-local
+                        # reading stands; what it cannot express is recorded as
+                        # the L04 finding in the evidence.
                         "population": INVOCATION_BRANCH, "coverage": AT_LEAST_ONE,
-                        "existence": REQUIRED_NONEMPTY,
+                        "existence": existence,
                         "applicability": ALL_MEMBERS}}))
     return out
 

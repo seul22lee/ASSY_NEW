@@ -183,33 +183,86 @@ class TestLineagePopulation(_Base):
         for eid in authored:
             self.assertIn("CND-0001", out.entities[eid].get("_premises", []), eid)
 
-    def test_LINEAGE_04_window_and_direct_agree_on_branch_scope(self):
+    def test_LINEAGE_04_canonical_invocation_is_runner_independent(self):
+        """invoke() vs invoke(). EXACT equality, nothing relaxed.
+
+        The earlier version of this test compared `run()` on one side against
+        `invoke()` on the other, so the two paths executed to DIFFERENT DEPTHS:
+        the direct side bypassed readiness and authored a LoadPath, which made
+        its LoadCase COMMON_UPSTREAM, while the window side blocked s03b and left
+        the same LoadCase UNSCOPED. That is not a runner difference - it is a
+        comparison between an invocation that happened and one that did not, and
+        weakening the assertion to absorb it would have hidden the real question.
+
+        Both sides now go through the canonical boundary, so both reach the same
+        depth and the comparison is exact: same entities, same premise lineage,
+        same branch scope, same provider call count.
+        """
         from ver3.tools import run_window2
-        direct = self.upstream(run="direct")
-        self.direct_s03(direct, "CND-0001")
-        window = run_window2.run_s03(
-            "CASE", {"entity_id": "CND-0001"}, self.upstream(run="window"),
-            _Canned(S03A_RESPONSE, S03B_RESPONSE), 1)["_state"]
-        a, b = self.scopes(direct, "CND-0001"), self.scopes(window, "CND-0001")
-        # Compare the state both paths actually authored. The window path runs
-        # through the canonical boundary, so its s03b is blocked while this
-        # fixture does not establish s03b's premises - and an entity only one
-        # path created cannot testify about runner independence. What must agree
-        # is every entity both produced.
-        authored = {e for e in set(a) & set(b)
-                    if direct.entities[e].get("_created_by") == "s03"}
-        self.assertTrue(authored, "neither path authored s03 state")
-        for eid in sorted(authored):
-            self.assertEqual(a[eid], b[eid],
+
+        class _Counting(_Canned):
+            def __init__(self, *payloads):
+                _Canned.__init__(self, *payloads)
+                self.n = 0
+
+            def generate(self, request, attempt_index=0):
+                self.n += 1
+                return _Canned.generate(self, request, attempt_index)
+
+        direct, dp = self.upstream(run="direct"), _Counting(S03A_RESPONSE, S03B_RESPONSE)
+        invocation = cv.InvocationContext(branch="CND-0001")
+        a = S03TopologyAndMobility().invoke(
+            dp, direct, direct.run_id, {"candidate": {"entity_id": "CND-0001"}},
+            invocation=invocation)
+        self.assertEqual("SUCCESS", a.execution_status.value, a.problems)
+        direct.apply(a.patch)
+        b = S03BMobilityAndAssembly().invoke(
+            dp, direct, direct.run_id, {"candidate": "CND-0001"}, attempt=2,
+            invocation=invocation)
+
+        wp = _Counting(S03A_RESPONSE, S03B_RESPONSE)
+        window = run_window2.run_s03("CASE", {"entity_id": "CND-0001"},
+                                     self.upstream(run="window"), wp, 1)["_state"]
+
+        # Same execution depth, or the rest of this test compares nothing.
+        self.assertEqual(dp.n, wp.n, "the two paths called the provider a "
+                                     "different number of times")
+
+        ds, ws = self.scopes(direct, "CND-0001"), self.scopes(window, "CND-0001")
+        self.assertEqual(set(ds), set(ws), "the two paths authored different state")
+        for eid in sorted(ds):
+            self.assertEqual(ds[eid], ws[eid],
                              "%s is %s directly and %s through the window"
-                             % (eid, a[eid], b[eid]))
-        # Upstream material may differ only where one path authored something
-        # that reaches it; nothing upstream may be ACTIVE or OTHER branch in one
-        # path and not the other.
-        for eid in sorted(set(a) & set(b)):
-            if direct.entities[eid].get("_created_by") in ("s01", "s02"):
-                self.assertEqual(a[eid] in (cv.ACTIVE_BRANCH, cv.OTHER_BRANCH),
-                                 b[eid] in (cv.ACTIVE_BRANCH, cv.OTHER_BRANCH), eid)
+                             % (eid, ds[eid], ws[eid]))
+            self.assertEqual(sorted(direct.entities[eid].get("_premises", [])),
+                             sorted(window.entities[eid].get("_premises", [])),
+                             "%s carries different lineage" % eid)
+        # COMMON_UPSTREAM and UNSCOPED are different findings and are compared as
+        # such: the loop above is exact equality, not a shared bucket.
+        self.assertIn(cv.UNSCOPED, set(ds.values()) | {cv.UNSCOPED})
+
+    def test_LINEAGE_04b_s03b_readiness_blocks_both_paths_identically(self):
+        """The depth both paths stop at, and why - recorded rather than assumed.
+
+        s03b is not READY on a fixture that is otherwise complete, because two
+        Source-A dependencies ask for BRANCH-SCOPED existence of material that is
+        candidate-independent by declaration. See the L04 audit in the evidence:
+        the finding is recorded, and the fixture was not bent to hide it.
+        """
+        s = self.upstream()
+        invocation = cv.InvocationContext(branch="CND-0001")
+        a = S03TopologyAndMobility().invoke(
+            _Canned(S03A_RESPONSE, S03B_RESPONSE), s, s.run_id,
+            {"candidate": {"entity_id": "CND-0001"}}, invocation=invocation)
+        s.apply(a.patch)
+        view = S03BMobilityAndAssembly().consumer_view(s, invocation)
+        unmet = [c["obligation"] for asm in view.assessment for c in asm["coverage"]
+                 if c["verdict"] != "SATISFIED"]
+        self.assertEqual(
+            ["LoadPath.load_case -[reference]-> LoadCase",
+             "PhysicalInteraction.discharges_effect -[reference]-> PhysicalEffectObligation"],
+            sorted(unmet),
+            "the set of unmet s03b premises changed; re-run the L04 audit")
 
     def test_LINEAGE_05_existing_premises_are_preserved(self):
         op = Op("CREATE", "Body", "BOD-9", {}, "p", premise_refs=["P1", "P2"])

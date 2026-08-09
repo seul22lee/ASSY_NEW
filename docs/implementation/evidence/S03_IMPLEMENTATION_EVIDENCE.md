@@ -612,3 +612,102 @@ Impl S-9's. A truthful blocked pipeline is preferred to silent acceptance.
 Not claimed: applicability completeness, retained/committed semantics, mobility runner
 independence, S04A→S04B spatial continuity, engineering establishment. Owners and
 falsifiers are in the registry. **Impl S-4 has NOT begun.**
+
+---
+
+# 19. LINEAGE-04 CANONICAL INVOCATION EQUIVALENCE AUDIT
+
+Baseline `831c176`. One question: for the same state, candidate, responsibility and
+canned responses, does direct canonical invocation produce the same authoritative
+state, lineage and scope as window invocation?
+
+## 19.1 Why the historical comparison was invalid
+
+At `831c176` LINEAGE-04 compared `run()` on the direct side against `invoke()` on the
+window side. Those execute to **different depths**: the direct side bypassed readiness
+and authored `LP-0001`, whose `load_case` reference made `LC-0001` COMMON_UPSTREAM,
+while the window side blocked s03b and left the same `LC-0001` UNSCOPED. `SCE-AUTO`
+followed it for the same reason.
+
+That is not a runner difference — it is a comparison between an invocation that
+happened and one that did not. The relaxation added at `831c176` (compare only jointly
+authored state; permit COMMON_UPSTREAM vs UNSCOPED upstream) absorbed the symptom
+instead of the cause. **It was not justified**, and it is removed.
+
+## 19.2 The five s03b readiness failures, classified before touching anything
+
+All five were **Source A**, all `INVOCATION_BRANCH / AT_LEAST_ONE / REQUIRED_NONEMPTY`:
+
+| dependency | field is | classification |
+|---|---|---|
+| `PhysicalInteraction.at_interface -> Interface` | **optional**, one | **B — Source-A false requirement** |
+| `ConstraintRelation.provider_site -> Interface` | **optional**, one | **B — Source-A false requirement** |
+| `AssemblyStep.activates -> Interface` | required, **many** | **B — Source-A false requirement** |
+| `LoadPath.load_case -> LoadCase` | required, one | **F — later/other-owned population question** |
+| `PhysicalInteraction.discharges_effect -> PhysicalEffectObligation` | required, one | **F** |
+
+**No Interface was invented** and **no LoadCase was made branch-local.** The first three
+were a derivation defect, not fixture incompleteness.
+
+## 19.3 Correction: existence follows the field's own declaration
+
+An **optional** field may simply not be authored, so nothing has to exist for it to
+point at. A **many** field is satisfied by the empty list, which this contract states
+elsewhere is a VALUE. Only a **required single-valued** reference cannot be authored
+without a referent. Source A now derives existence from `required_fields` and
+`cardinality` — existing contract vocabulary, no family or stage named. Three of the
+five failures were false and are gone.
+
+## 19.4 The remaining two, and a falsified hypothesis
+
+`LoadPath.load_case` and `PhysicalInteraction.discharges_effect` demand that
+candidate-independent material be **branch-scoped already** — but its branch-visibility
+is created BY the reference s03b is about to author. The responsibility contract calls
+load cases "the candidate-independent load cases" and declares that premise DESIGN_WIDE,
+which is satisfied; Source A asks for something stricter.
+
+**Hypothesis tested: make Source-A population DESIGN_WIDE. FALSIFIED.** It admitted
+another branch's topology through the reference dependency and broke
+SELECT-09/10/23 and S3ROOT-16/17. The branch-local reading stands; the change was
+reverted and the falsification recorded in the code so it is not retried blind.
+
+No further change was made. Narrowing this correctly needs a discriminator between
+branch-bearing and design-wide referent families that the contracts do not currently
+declare, and inventing one is the instance-selection redesign this pass forbids.
+
+## 19.5 Equivalence result — invoke vs invoke
+
+```
+DIRECT  s03a=SUCCESS  s03b=CONSUMER_CONTEXT_INSUFFICIENT  provider calls=1
+WINDOW  s03a=SUCCESS  s03b=CONSUMER_CONTEXT_INSUFFICIENT  provider calls=1
+
+entity sets equal        : True   (none only-direct, none only-window)
+exact scope differences  : NONE
+premise lineage diffs    : NONE
+```
+
+Both paths reach the same depth, author the same entities, carry the same candidate
+lineage, and classify every entity identically — COMMON_UPSTREAM and UNSCOPED compared
+as the distinct findings they are, not merged into a bucket.
+
+## 19.6 Tests
+
+`LINEAGE-04` is now `invoke` vs `invoke` with exact equality on entity set, premise
+lineage and scope, and asserts equal provider call counts first so a depth difference
+fails rather than being absorbed. `LINEAGE-04b` pins the exact set of unmet s03b
+premises, so the §19.4 finding cannot drift silently. The producer-unit tests
+(LINEAGE-01/02) keep using `run()` and say why: they hold the lineage property, not
+readiness.
+
+## 19.7 Outcome
+
+**A — test-boundary defect confirmed**, with one recorded derivation correction
+(§19.3) and one recorded open finding (§19.4). Canonical invocation is runner
+independent, exactly.
+
+## 19.8 Regression
+
+`610 tests · 610 pass · 0 fail · 22 skipped` — the 22 skips are the R-B window replays
+owned by Impl S-4, unrelated to this audit.
+
+**S-3 remains CLOSED.** Impl S-4 has not begun.
