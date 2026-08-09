@@ -204,23 +204,44 @@ class TestAuthorityModel(unittest.TestCase):
 
 
     # ------------------------------------------------- G. uncontrolled mutation
-    def test_G_direct_field_assignment_on_an_entity_is_refused(self):
-        """The exact shape of the audited defect: e["field"] = value."""
+    def test_G_direct_field_assignment_on_a_read_record_cannot_change_state(self):
+        """The exact shape of the audited defect: e["field"] = value.
+
+        A read hands back a plain copy the caller owns, so the assignment is
+        ordinary and legal - and completely ineffective. What matters is not that
+        it raises but that authoritative state is unreachable this way."""
         s = _with_scale(_state())
-        with self.assertRaisesRegex(AuthorityViolation, "UNCONTROLLED_WRITE"):
-            s.entities["SCL-0001"]["basis"] = "ABSOLUTE"
+        before = s.state_hash()
+        rec = s.entities["SCL-0001"]
+        rec["basis"] = "ABSOLUTE"
+        rec.update({"note": "injected"})
+        self.assertEqual("RELATIVE", s.entities["SCL-0001"]["basis"])
+        self.assertNotIn("note", s.entities["SCL-0001"])
+        self.assertEqual(before, s.state_hash())
 
 
-    def test_G_dict_update_on_an_entity_is_refused(self):
+    def test_G_writing_to_the_entity_table_is_refused(self):
         s = _with_scale(_state())
-        with self.assertRaisesRegex(AuthorityViolation, "UNCONTROLLED_WRITE"):
-            s.entities["SCL-0001"].update({"basis": "ABSOLUTE"})
+        for call in (lambda: s.entities.__setitem__("X", {}),
+                     lambda: s.entities.update({"X": {}}),
+                     lambda: s.entities.pop("SCL-0001"),
+                     lambda: s.entities.popitem()):
+            with self.assertRaisesRegex(AuthorityViolation, "UNCONTROLLED_WRITE"):
+                call()
 
 
     def test_G_inserting_an_entity_directly_is_refused(self):
         s = _state()
         with self.assertRaisesRegex(AuthorityViolation, "UNCONTROLLED_WRITE"):
             s.entities["SCL-0001"] = {"basis": "RELATIVE"}
+
+
+    def test_G_replacing_a_storage_root_is_refused(self):
+        s = _with_scale(_state())
+        for name in ("entities", "by_family", "applied_patches"):
+            with self.subTest(root=name):
+                with self.assertRaisesRegex(AuthorityViolation, "PROTECTED_ROOT"):
+                    setattr(s, name, {})
 
 
     def test_G_deleting_an_entity_is_refused(self):
@@ -245,7 +266,7 @@ class TestAuthorityModel(unittest.TestCase):
         view = project_for("s04", s)
         view["ReferenceScale"][0]["basis"] = "ANYTHING"          # freely regenerable
         assert s.family("ReferenceScale")[0]["basis"] == "RELATIVE"
-        assert type(view["ReferenceScale"][0]) is dict           # not a guarded record
+        assert type(view["ReferenceScale"][0]) is dict           # a plain structure
 
 
     def test_H_authority_class_is_declared_by_contract_with_a_strict_default(self):

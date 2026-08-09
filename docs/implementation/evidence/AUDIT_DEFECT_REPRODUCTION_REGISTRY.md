@@ -37,7 +37,7 @@ model variability to such a test only weakens the evidence.
 
 | ID | Mechanism | Step | Replay type | Status |
 |---|---|---|---|---|
-| **ADR-001** | uncontrolled authoritative write / side-channel engineering fact | **S-1** | STRUCTURAL | **RESOLVED** *(L1 at `2570aa4`; L2 required a hardening pass — see the history)* |
+| **ADR-001** | uncontrolled authoritative write / side-channel engineering fact | **S-1** | STRUCTURAL | **RESOLVED** — L1 at `2570aa4`; L2 took **three** passes (see the history) |
 | ADR-002 | consumer-view omission of a required premise | S-3 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
 | ADR-003 | S04A→S04B spatial commitment loss | S-6 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
 | ADR-004 | silent positional context truncation | S-3 | STRUCTURAL | NOT_YET_ADDRESSABLE |
@@ -53,7 +53,8 @@ model variability to such a test only weakens the evidence.
 
 ## ADR-001 — Uncontrolled authoritative write and side-channel engineering fact
 
-**Status: RESOLVED** *(replay evidence below; S-1)*
+**Status: RESOLVED** — Level 1 and Level 2 both established. Level 2 was claimed twice before
+it was true; the history below records why, because that is the useful part.
 
 | | |
 |---|---|
@@ -82,10 +83,11 @@ model variability to such a test only weakens the evidence.
 | **`s04a_scale`** | `state.s04a_scale = {...}` | `ReferenceScale` entity, recorded as the **premise** of every coordinate expressed in it |
 | **unresolvable target** | `if e is not None` — silently skipped | still not committed, but recorded in `rec["<pass>_uncommitted"]` |
 
-**Cause removed.** The write path no longer exists, and re-creating it is refused at runtime:
-`DesignState.entities` and every entity record are guarded containers that raise
-`AuthorityViolation` unless the controlled boundary is open, and `DesignState.__setattr__`
-refuses any attribute that is not one of the object's six declared attributes.
+**Cause removed.** The write path no longer exists, and re-creating it cannot work: the entity
+table is a read-only mapping that refuses every mutator, a record obtained by reading is a
+plain copy the caller owns, and `DesignState.__setattr__` refuses both side-channel attributes
+and any attempt to replace a storage root. *(Superseded in mechanism by the third pass below;
+the property is unchanged and now holds against a wider interface.)*
 
 ### Evidence
 
@@ -151,9 +153,42 @@ capability exposure. Static scan: 3/3, now also rejecting capability names and
 proof of authority safety.**
 
 **Documented limit, with an executable test.** `object.__setattr__` on a container's private
-slot with a genuine capability still bypasses the guard. This is repository-level
-architectural enforcement, not a security sandbox, and a test asserts the limit is real so it
-cannot quietly stop being true.
+slot with a genuine capability still bypasses the guard.
+
+### Third pass — authority encapsulation *(final)*
+
+**The hardening claim was also too strong, and for an instructive reason: it asserted a
+guarantee over "supported mutation interfaces" without ever defining that phrase.** Three
+categories fell outside it by omission rather than by argument, and each was reachable with
+**ordinary operations only** — no reflection:
+
+| | Bypass at `65ebe1a` | Why the previous tests missed it |
+|---|---|---|
+| **ROOT** | `state.entities = {}` replaced the whole authoritative table | every test asked "does this mutation raise?"; none asked "can the container be swapped out?" |
+| **CAP** | `state.family(f)[0]._cap` handed write authority to any caller, from the **public read API**; and `rec._cap = other` replaced it | the capability had been checked for reachability on `DesignState` and declared closed, while every container still carried it in an ordinary attribute |
+| **BASE** | `dict.__setitem__(rec, k, v)`, `list.append(nested, v)` | an override is only consulted by normal dispatch; base-class calls were never in the mental model |
+
+**The structural finding.** A representation whose authoritative storage *is* a builtin mutable
+container can always be mutated by an ordinary base-class call, however completely its methods
+are overridden. The guarded-subclass approach was therefore **not fixable** and was abandoned.
+
+**Final design — encapsulation.** Authoritative storage is owned by `DesignState` and never
+leaves it. The entity table is exposed as a `Mapping` (not a `dict`, so no inherited mutator
+exists); every read returns a plain recursive copy; `copy_in` on write closes input aliasing.
+Storage roots are write-once. **No capability object exists at all** — `WriteCapability`,
+`GuardedDict` and `GuardedList` were deleted, which is the rare fix that removes code.
+
+**Level-2 evidence.** An 18-row supported-interface matrix, each row executed: ROOT, CAP and
+MUT rows are *supported and rejected* or *supported and safe (acts on the caller's copy)*;
+AUTH rows confirm controlled mutation still works. **One row is outside the guarantee** —
+reflection against name-mangled internal storage — and it carries its own executable test.
+The supported interface was defined **before** the matrix was evaluated, and no path was moved
+across that line to reach the result.
+
+**What the three passes together show.** An exact replay establishes that one path is closed.
+A general invariant is only as strong as the interface definition it is tested against, and an
+undefined interface silently excludes whatever nobody thought of. That is the lesson this
+entry preserves for ADR-002…ADR-011.
 
 ---
 

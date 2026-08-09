@@ -535,3 +535,231 @@ encountered.
 
 The limits of that claim are stated in §17.11 and are covered by executable tests. No claim of
 Python-language impossibility is made.
+
+> **⚠ THIS CLAIM WAS ALSO TOO STRONG, AND IS SUPERSEDED BY §18.** The hardening pass had not
+> defined "supported interface" explicitly, and by leaving base-class calls, storage-root
+> assignment and capability attributes outside its own definition by omission, it certified an
+> invariant it had not tested. Five bypasses using **ordinary operations only** remained. See
+> §18.
+
+
+---
+---
+
+# §18 FINAL AUTHORITY ENCAPSULATION CORRECTION
+
+Third and final S-1 pass. Baseline `65ebe1a`. No architecture decision reopened, no later unit
+begun, no contract, prompt, validator, fixture or benchmark changed, no model called. The
+`2570aa4` and hardening evidence above is preserved unedited, including both overclaims.
+
+## 18.1 The previous claim, and why it was wrong
+
+§17.20 asserted that authoritative state could not be changed "within the repository's
+supported mutation interfaces". **The pass never defined that phrase.** Without a definition,
+three whole categories fell outside it by omission rather than by argument — and each was
+reachable with ordinary Python.
+
+**Why the previous tests missed them.** Every test asked *"does this raise?"* about operations
+routed through the guard. None asked *"is there a way in that never reaches the guard?"* The
+guarded-container design answers the first question exhaustively and the second not at all:
+
+- storage **roots** were never tested, because guarding was about container contents;
+- the **capability** was tested for public reachability on `DesignState` and, once moved to a
+  registry, declared closed — while every guarded container still carried it in a `__slots__`
+  attribute that ordinary `rec._cap` reads;
+- **base-class calls** were never considered, because the mental model was "we overrode the
+  mutators", and an override is only consulted by normal dispatch.
+
+## 18.2 Bypasses reproduced against `65ebe1a`
+
+All five with **ordinary operations only** — no `object.__setattr__`, no reflection.
+
+| Bypass | Reproduction | Result at `65ebe1a` |
+|---|---|---|
+| **ROOT** | `state.entities = {}` · `state.by_family = {}` · `state.applied_patches = []` | succeeded; the entire authoritative table was replaced with an empty dict, with no operation, provenance or history |
+| **CAP-02** | `cap = state.family(f)[0]._cap` → `with cap.granted(): rec["role"] = ...` | succeeded; a record obtained from the **public read API** handed out write authority for the whole state |
+| **CAP-03** | `state.entities[eid]["volume"]._cap` | succeeded; every nested value carried it too |
+| **CAP-04** | `rec._cap = <other>` | succeeded; ordinary assignment replaced the capability |
+| **MUT-04/05** | `dict.__setitem__(rec, k, v)` · `dict.pop(rec, k)` · `list.append(nested, v)` · `dict.__setitem__(state.entities, ...)` | succeeded; base-class calls do not dispatch through an override |
+
+## 18.3 The structural finding
+
+> **A representation whose authoritative storage IS a builtin mutable container can always be
+> mutated by an ordinary base-class call, no matter how completely its methods are
+> overridden.** `dict.__setitem__(obj, k, v)` is documented Python that any module may write.
+
+This is not an oversight in the guarded-container implementation; it is a property of the
+approach. **The guarded-subclass design was therefore not fixable and was abandoned.**
+
+## 18.4 Alternatives considered
+
+| | **A: composition + encapsulated storage** *(selected)* | **B: capability-checked builtin subclasses** *(previous)* | **C: immutable external representation** |
+|---|---|---|---|
+| base-class bypass | **impossible** — no authoritative builtin is ever handed out | **unavoidable** | closed |
+| capability discovery | **no capability exists** | present on every container | none needed |
+| root replacement | closed by attribute taxonomy | orthogonal, was open | orthogonal |
+| nested values | closed — reads are copies | required recursive guarding | closed |
+| input aliasing | closed by copy-in | closed by wrap | closed |
+| existing readers | **unchanged** — plain `dict`/`list` | unchanged | **breaks**: `tuple != list` in equality and geometry |
+| serialization | unchanged | unchanged | round-trips differently |
+| history / provenance | unchanged | unchanged | unchanged |
+| S-2/S-3 fit | views are already plain | needed `thaw` | conversion both ways |
+| complexity | **lowest** — the guard classes disappear | two container types + generated mutators + capability | conversion layer |
+| cost | copy per read | wrap per write | one-time |
+
+**Selected: A.** It is the only option that closes the base-class bypass *structurally* rather
+than by policing, and it removes code rather than adding it.
+
+## 18.5 Selected design
+
+**Authoritative storage is owned by `DesignState` and never leaves it.** Internally: plain
+dicts and lists. Externally:
+
+- **`entities`** → a `ReadOnlyTable`, derived from `collections.abc.Mapping` — **not from
+  `dict`** — so there is no inherited mutator and no base-class call that could reach the
+  backing store. Its own mutators refuse with `UNCONTROLLED_WRITE` and the reason.
+- **`family()`, `standing()`, `entities[id]`, `by_family`, `applied_patches`** → plain
+  recursive copies the caller owns.
+- **`copy_in`** on every write closes input aliasing; **`copy_out`** on every read closes
+  reference-based mutation.
+- **No capability object exists anywhere.** `WriteCapability`, `GuardedDict` and `GuardedList`
+  are deleted. There is nothing to discover, replace or forge.
+
+**Read semantics, stated plainly:** mutating a read result is **legal, ordinary, and
+ineffective** — the semantics of `dict.copy()`, which every Python reader already understands.
+It is not rejected. What matters is not that it raises but that authoritative state is
+unreachable that way.
+
+## 18.6 Storage-root protection — the §4 attribute taxonomy
+
+| Class | Members | Rule |
+|---|---|---|
+| **INITIALIZATION-ONLY INTERNAL ROOT** | the three private storage roots, `run_id`, `c` | written once in `__init__`; `PROTECTED_ROOT` thereafter |
+| **PUBLIC READ INTERFACE** | `entities`, `by_family`, `applied_patches` | properties; assignment is `PROTECTED_ROOT` |
+| **DERIVED / EPHEMERAL** | *(none yet)* | declared when a later unit needs one; freely replaceable because not authoritative |
+| **anything else** | — | `SIDE_CHANNEL_WRITE` |
+
+`_SETTABLE_AFTER_INIT` is **empty**. `__delattr__` is refused. The previous broad whitelist —
+which permitted replacing the authority container itself — is gone.
+
+## 18.7 Final supported-interface matrix
+
+Verified by executing each path against the implementation:
+
+| ID | Path | Result |
+|---|---|---|
+| ROOT-01 | `state.entities = {}` | **SUPPORTED AND REJECTED** — `PROTECTED_ROOT` |
+| ROOT-02 | `state.by_family = {}` / `applied_patches = []` | **SUPPORTED AND REJECTED** |
+| CAP-01 | capability from `DesignState` | **does not exist** — `AttributeError` |
+| CAP-02 | capability from a record | **does not exist** |
+| CAP-03 | capability from a nested value | **does not exist** |
+| CAP-04 | replace capability by assignment | **SUPPORTED AND REJECTED** |
+| MUT-01 | `entities["X"] = {}` | **SUPPORTED AND REJECTED** |
+| MUT-02 | nested mutation on a read record | **SUPPORTED AND SAFE** — acts on the caller's copy; state unchanged |
+| MUT-03 | external alias mutation | **SUPPORTED AND SAFE** — state unchanged |
+| MUT-04 | `dict.__setitem__(entities, …)` | **SUPPORTED AND REJECTED** — `TypeError`; the table is not a dict |
+| MUT-04b | `dict.__setitem__(record, …)` | **SUPPORTED AND SAFE** — acts on the copy |
+| MUT-05 | `list.append(nested, …)` | **SUPPORTED AND SAFE** — acts on the copy |
+| MUT-06 | `del entities[id]` | **SUPPORTED AND REJECTED** |
+| READ-01 | mutate a `family()` / `standing()` / `counts()` result | **SUPPORTED AND SAFE** — state unchanged |
+| AUTH-01 | family-spoofed controlled mutation | **SUPPORTED AND REJECTED** — `FAMILY_MISMATCH` |
+| AUTH-02 | legitimate `apply()` | **SUPPORTED AND SAFE** — works, with full history |
+| AUTH-03 | supersede/invalidate propagation | **SUPPORTED AND SAFE** — dependents go `STALE` |
+| EXCL-01 | `getattr(state, "_DesignState__entities")` then mutate | **OUTSIDE THE GUARANTEE** — reflection; **state does change** |
+
+**No path was moved into "outside the guarantee" to make a test pass.** The single excluded
+row is reading another object's name-mangled private storage, which is deliberately
+implementation-breaking rather than an operation a normal module would perform on something it
+was handed. It has its own executable test so the exclusion cannot quietly become untrue.
+
+## 18.8 Supported interface — the definition now written down
+
+**Included:** attribute lookup · attribute assignment · method invocation on returned objects ·
+**base-class Python-callable mutation APIs**. Base-class calls are inside the contract because
+they are ordinary documented Python; excluding them by omission is what left the hole.
+
+**Excluded:** reading another object's name-mangled private attribute · `object.__setattr__`
+against internals · `ctypes` / memory mutation · monkey-patching interpreter internals.
+Excluded because they are deliberately implementation-breaking, **not because they are hard**.
+
+## 18.9 Files changed
+
+| File | Change |
+|---|---|
+| `ver3/assy_v3/state/authority.py` | rewritten: `copy_in`/`copy_out`/`thaw`, `ReadOnlyTable`. `WriteCapability`, `GuardedDict`, `GuardedList` **deleted** |
+| `ver3/assy_v3/state/design_state.py` | private storage roots; `entities`/`by_family`/`applied_patches` as read-only properties; §4 attribute taxonomy in `__setattr__`/`__delattr__`; copy-in on write, copy-out on read; capability removed from `apply()` |
+| `ver3/tests/state/test_authority_hardening.py` | rewritten to the matrix — 26 tests |
+| `ver3/tests/state/test_authority_model.py` | three tests re-expressed from the retired mechanism to the invariant; root-protection tests added |
+| `ver3/tests/state/test_absorb_writepath_replay.py` | one test re-expressed the same way |
+| `ver3/tests/meta/test_no_uncontrolled_authoritative_writes.py` | protected-root assignment and reflective-handle detection; scope restated |
+
+`projection.py`, `run_window2.py` and `s04_envelope_and_motion.py` needed **no further change**
+— `thaw` is retained as an alias of `copy_out`, so the read-compatibility edits from the
+previous pass remain correct.
+
+## 18.10 Runtime guarantee
+
+> **Repository code using ordinary interfaces cannot replace an authoritative storage root,
+> acquire or replace write authority, mutate authoritative state through a reference a read
+> returned, bypass through an ordinary container interface including base-class calls, or
+> otherwise change authoritative engineering state except through
+> `DesignState.apply(StagePatch)`.**
+
+## 18.11 Static-analysis guarantee
+
+Unchanged in kind and restated in the module's own docstring: **enforcement is encapsulation;
+the scan is early warning.** It now also flags protected-root assignment and reflective
+handles on internal storage. It does not, and does not claim to, prove the absence of Python
+aliasing or reflection.
+
+## 18.12 Residual limitation
+
+**One, and it is the excluded region:** reflection against internal storage — reading a
+name-mangled private attribute, `object.__setattr__`, `ctypes`, monkey-patching. `EXCL-01`
+demonstrates it changes state, deliberately. This is repository-level architectural
+enforcement, not a security sandbox.
+
+Two consequences of the design, neither a defect: reads cost a copy (state is small; suites
+run in seconds), and a read is a **snapshot**, not a live view — a caller wanting current
+values re-reads.
+
+## 18.13 Failure classification
+
+| Failure | Class | Action |
+|---|---|---|
+| 5 bypass classes open at `65ebe1a` | **(B) supported bypass still open** | fixed |
+| 3 tests asserting `AuthorityViolation` on a returned record | **(A) encapsulation implementation** — they encoded the retired mechanism, not the invariant | re-expressed to assert state is unchanged, which is stronger and mechanism-independent |
+| capability-name scan matching `_propagate` and `str.capitalize` | **(A)** | token-bounded regex |
+| `test_package_path` | **(E) pre-existing** | unchanged; still not fixed here |
+
+No **(C) reader-compatibility break** arose — readers get plain structures. No **(D)
+controlled-mutation regression** — all four operations, provenance, history, premise
+propagation and family validation pass unchanged. No **(F)**. No **(G) frozen-architecture
+contradiction**.
+
+## 18.14 Broad validation
+
+| Suite | Result |
+|---|---|
+| `ver3/tests/state` | **62/62 OK** |
+| `ver3/tests/meta` (312) | **311 pass, 1 pre-existing failure** |
+| `ver3/tests/window` | **8/8 OK** |
+| ADR-001 Level 1 | **8/8 OK** |
+| ADR-001 Level 2 | **58/58 OK** |
+| static scan | **4/4 OK** |
+| all stage, tool and provider modules import | **OK** |
+
+## 18.20 Final S-1 status
+
+Against the sixteen completion criteria: `_absorb` remains resolved (1); nested values,
+aliases and container mutators cannot reach state (2, 3, 4); storage roots are not replaceable
+(5); no write authority exists to acquire or replace (6); base-class APIs cannot reach storage
+(7); family authority comes from stored identity (8); the four operations, provenance, history
+and premise propagation are unchanged (9, 10); reads remain usable without conferring write
+authority (11); the scan is defence in depth only (12); both ADR-001 levels pass (13, 14); and
+the one residual bypass requires explicitly excluded reflection (15).
+
+> **S-1 is COMPLETE.**
+
+The supported interface was defined **before** the matrix was evaluated, and no path was moved
+across that line to reach this result.

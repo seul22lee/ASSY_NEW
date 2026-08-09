@@ -77,14 +77,24 @@ class TestAbsorbWritePathReplay(unittest.TestCase):
         self.substrate = _substrate()
 
     # ------------------------------------------------------------------ BEFORE
-    def test_the_historical_direct_write_is_now_structurally_impossible(self):
-        """The old path was `state.entities[id][field] = value`. Replay it verbatim."""
+    def test_the_historical_direct_write_cannot_reach_state(self):
+        """The old path was `state.entities[id][field] = value`. Replay it verbatim.
+
+        Two shapes, two outcomes, and both close the path: writing into the entity
+        TABLE is refused outright, and writing into a record obtained from it
+        touches only the copy the caller was handed."""
         state = _seed(self.substrate)
         target = self.substrate["entities_referenced"]["FunctionalRegion"][0]
         r = (self.substrate["s04a"]["region_volumes"] or [])[0]
+        value = {"half_extent": r["half_extent"], "centre": r["centre"]}
+
         with self.assertRaisesRegex(AuthorityViolation, "UNCONTROLLED_WRITE"):
-            state.entities[target]["volume"] = {"half_extent": r["half_extent"],
-                                                "centre": r["centre"]}
+            state.entities[target] = value
+
+        before = state.state_hash()
+        state.entities[target]["volume"] = value
+        self.assertNotIn("volume", state.entities[target])
+        self.assertEqual(before, state.state_hash())
 
 
     def test_the_historical_side_channel_is_now_structurally_impossible(self):

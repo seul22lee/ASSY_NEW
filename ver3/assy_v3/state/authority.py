@@ -8,47 +8,58 @@ Four authority classes, and every value belongs to exactly one:
                     only, provenance required.
   B  DERIVED        strict consequences of class-A premises. Recomputable.
                     Carries its premise set. Never authored-looking.
-  C  EPHEMERAL      views, serializations, caches, provider payloads. Freely
-                    regenerated. Plain mutable structures, produced by `thaw`.
+  C  EPHEMERAL      views, serializations, caches, provider payloads. Plain
+                    mutable structures. Everything a reader receives is class C.
   D  ASSURANCE      check results and findings. Append-only consumers of
                     class A, never producers of it.
 
-ENFORCEMENT MODEL
-    Authoritative values are stored in guarded containers, RECURSIVELY. A dict
-    becomes a GuardedDict, a list a GuardedList, at every depth. Every mutating
-    method of the underlying type is closed; with the write capability closed,
-    each raises AuthorityViolation.
+ENFORCEMENT MODEL - ENCAPSULATION, NOT GUARDED SUBCLASSES
+    Authoritative storage is owned exclusively by DesignState and NEVER LEAVES
+    IT. Internally it is plain dicts and lists; externally, every read returns a
+    defensive plain copy, and the entity table is exposed only through a
+    read-only mapping.
 
-    Wrapping happens on WRITE, and it CONSTRUCTS NEW CONTAINERS from the input's
-    contents. That is what closes input aliasing: the object a caller passed into
-    an operation is never the object the state holds, so the caller cannot reach
-    back into state through the reference it kept.
+    The previous design subclassed dict and list and guarded their mutators. That
+    cannot satisfy the invariant, and the reason is structural rather than an
+    oversight: for any `dict` subclass, ``dict.__setitem__(obj, k, v)`` is an
+    ordinary Python call that does not dispatch through the override. The same
+    holds for every base-class mutator on both types. A representation whose
+    authoritative storage IS a builtin mutable container therefore always exposes
+    a supported bypass, no matter how completely its methods are overridden.
 
-    Reads are free and cost nothing: GuardedDict IS a dict and GuardedList IS a
-    list, so indexing, `.get`, iteration, equality and json serialization all
-    behave identically for every existing reader.
+    Encapsulation removes the question. There is no capability object to
+    discover, because nothing outside DesignState.apply() ever needs one; and
+    there is no authoritative container to call a base-class mutator on, because
+    no authoritative container is ever handed out.
 
-    A consumer that needs a mutable structure - a projection, a prompt payload, a
-    cache - calls `thaw()` and gets plain dicts and lists. That is class C, and it
-    is deliberately outside the authority model.
+WHAT A READER GETS
+    A plain dict or list it owns. Mutating it is legal, ordinary, and has no
+    effect on state - the same semantics as `dict.copy()`, which is the idiom
+    every Python reader already understands. Mutation is not rejected; it is
+    INEFFECTIVE, which is the property that matters: authoritative state cannot
+    be changed through a reference obtained by reading.
 
-WHAT THIS GUARANTEES, AND WHAT IT DOES NOT
-    Guaranteed: no supported interface in this repository can change authoritative
-    state outside the controlled mutation boundary. Every mutating method of every
-    authoritative container refuses, at every depth, and the write capability is
-    not reachable under any public name.
+SUPPORTED-INTERFACE GUARANTEE, AND ITS LIMIT
+    Guaranteed for ordinary repository operations - attribute assignment,
+    attribute lookup, method invocation on returned objects, and base-class
+    mutation APIs: none of them can change authoritative state outside
+    DesignState.apply().
 
-    NOT guaranteed: immunity to introspection. `object.__setattr__` on a private
-    slot, `gc` traversal, or importing this module and constructing a capability
-    directly can still reach the stored objects. This is repository-level
-    architectural enforcement, not a security sandbox, and the distinction is
-    stated rather than blurred.
+    Not guaranteed against deliberately implementation-breaking reflection:
+    reading a name-mangled private attribute, `object.__setattr__` against
+    internals, `ctypes`, or monkey-patching. Those are excluded because they are
+    not operations a normal module would reasonably perform on an object it was
+    handed - not because they are hard. This is repository-level architectural
+    enforcement, not a security sandbox.
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
+try:                                                  # pragma: no cover
+    from collections.abc import Mapping
+except ImportError:                                   # pragma: no cover
+    from collections import Mapping                   # type: ignore
 from enum import Enum
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, Dict, Iterator
 
 
 class AuthorityClass(str, Enum):
@@ -84,150 +95,102 @@ class AuthorityViolation(Exception):
     """
 
 
-class WriteCapability:
-    """The authority to mutate. Held privately by one DesignState.
+def copy_out(value: Any) -> Any:
+    """A plain, owned copy of an authoritative value. Class C.
 
-    Not a public switch: it is stored name-mangled on the state, refused for
-    reassignment, and never returned by any accessor. Opening it is the act of
-    entering the controlled mutation boundary.
-    """
-
-    __slots__ = ("_open",)
-
-    def __init__(self) -> None:
-        self._open = False
-
-    @property
-    def open(self) -> bool:
-        return self._open
-
-    @contextmanager
-    def granted(self) -> Iterator[None]:
-        previous = self._open
-        self._open = True
-        try:
-            yield
-        finally:
-            self._open = previous
-
-
-def _refuse(container: str, key: Any, op: str) -> None:
-    raise AuthorityViolation(
-        "UNCONTROLLED_WRITE: %s.%s(%r) outside the controlled mutation boundary. "
-        "Class-A state changes only through CREATE / EXTEND / SUPERSEDE / "
-        "INVALIDATE carried by a StagePatch (FA-3). To change a nested value, "
-        "submit an operation describing the change." % (container, op, key))
-
-
-def _is_granted(cap: Any) -> bool:
-    """True only for a real, open capability.
-
-    The type check matters: without it any object exposing ``open = True`` would
-    unlock a container, so a forged capability would be a one-line bypass. With
-    it, forgery requires importing this module and rebinding a private slot
-    through ``object.__setattr__`` - introspection, not a supported interface.
-    """
-    return type(cap) is WriteCapability and cap.open
-
-
-def _guard_methods(cls, base, names, label):
-    """Close every mutating method the base type provides.
-
-    Generated rather than hand-written, so a method cannot be left active by
-    oversight - which is exactly how `popitem` survived the first pass.
-    """
-    for name in names:
-        original = getattr(base, name, None)
-        if original is None:
-            continue                       # not present on this Python version
-
-        def make(name=name, original=original):
-            def guarded(self, *args, **kw):
-                if not _is_granted(self._cap):
-                    _refuse(label, args[0] if args else None, name)
-                return original(self, *args, **kw)
-            guarded.__name__ = name
-            guarded.__qualname__ = "%s.%s" % (cls.__name__, name)
-            return guarded
-
-        setattr(cls, name, make())
-
-
-#: Every mutating name on the mapping API, including 3.9+ in-place union.
-_DICT_MUTATORS = ("__setitem__", "__delitem__", "__ior__", "update",
-                  "setdefault", "pop", "popitem", "clear")
-
-#: Every mutating name on the sequence API, including in-place operators.
-_LIST_MUTATORS = ("__setitem__", "__delitem__", "__iadd__", "__imul__",
-                  "append", "extend", "insert", "pop", "remove", "clear",
-                  "sort", "reverse")
-
-
-class GuardedDict(dict):
-    """An authoritative mapping at any depth. Readable everywhere, writable only
-    inside the controlled mutation boundary."""
-
-    __slots__ = ("_cap",)
-
-    def __init__(self, cap: WriteCapability,
-                 data: Optional[Dict[Any, Any]] = None) -> None:
-        # dict.__init__ does not route through __setitem__, so construction is
-        # not a guarded write and needs no capability.
-        super().__init__(data or {})
-        object.__setattr__(self, "_cap", cap)
-
-    def __reduce__(self):                                  # copy/pickle -> plain
-        return (dict, (dict(self),))
-
-
-class GuardedList(list):
-    """An authoritative sequence at any depth."""
-
-    __slots__ = ("_cap",)
-
-    def __init__(self, cap: WriteCapability, data=None) -> None:
-        super().__init__(data or [])
-        object.__setattr__(self, "_cap", cap)
-
-    def __reduce__(self):
-        return (list, (list(self),))
-
-
-_guard_methods(GuardedDict, dict, _DICT_MUTATORS, "entity")
-_guard_methods(GuardedList, list, _LIST_MUTATORS, "value")
-
-#: The entity table and an entity record are both authoritative mappings. They
-#: are named separately because their error messages and their roles differ, but
-#: the enforcement is identical.
-GuardedEntities = GuardedDict
-GuardedRecord = GuardedDict
-
-
-def wrap(value: Any, cap: WriteCapability) -> Any:
-    """Recursively place a value under authority.
-
-    New containers are constructed at every level, so the caller's objects are
-    never the objects state holds. This is what makes input aliasing impossible
-    rather than merely discouraged.
+    Recursive, so no level of the returned structure is shared with state.
     """
     if isinstance(value, dict):
-        return GuardedDict(cap, {k: wrap(v, cap) for k, v in value.items()})
+        return {k: copy_out(v) for k, v in value.items()}
     if isinstance(value, list):
-        return GuardedList(cap, [wrap(v, cap) for v in value])
+        return [copy_out(v) for v in value]
     if isinstance(value, tuple):
-        return tuple(wrap(v, cap) for v in value)
-    if isinstance(value, set):
-        return frozenset(value)
-    return value                            # scalars, str, bytes, None: immutable
+        return tuple(copy_out(v) for v in value)
+    if isinstance(value, (set, frozenset)):
+        return set(value)
+    return value                            # scalars, str, bytes, None
 
 
-def thaw(value: Any) -> Any:
-    """A plain mutable copy: class C. Nothing thawed can affect class-A state."""
+def copy_in(value: Any) -> Any:
+    """A plain copy for storage, detached from whatever the caller still holds.
+
+    This is what closes input aliasing: the object an operation was given is
+    never the object state keeps.
+    """
     if isinstance(value, dict):
-        return {k: thaw(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)):
-        out = [thaw(v) for v in value]
-        return tuple(out) if isinstance(value, tuple) else out
-    if isinstance(value, frozenset):
+        return {k: copy_in(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [copy_in(v) for v in value]
+    if isinstance(value, tuple):
+        return tuple(copy_in(v) for v in value)
+    if isinstance(value, (set, frozenset)):
         return set(value)
     return value
+
+
+#: Retained under its historical name: `thaw` was what callers used to turn an
+#: authoritative structure into a plain one. Everything is plain on the way out
+#: now, so it is the identity-preserving copy.
+thaw = copy_out
+
+
+class ReadOnlyTable(Mapping):
+    """The entity table as a reader sees it: lookups only.
+
+    Derives from Mapping, not from dict, so there is no inherited mutator and no
+    base-class call that could reach the underlying storage - the bypass that
+    made the previous representation unsalvageable.
+
+    Every value it yields is a defensive copy, so a reader cannot reach stored
+    state through a record either.
+    """
+
+    __slots__ = ("_backing",)
+
+    def __init__(self, backing: Dict[str, Dict[str, Any]]) -> None:
+        object.__setattr__(self, "_backing", backing)
+
+    # -- reads ------------------------------------------------------------
+    def __getitem__(self, key: str) -> Dict[str, Any]:
+        return copy_out(self._backing[key])
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._backing)
+
+    def __len__(self) -> int:
+        return len(self._backing)
+
+    def __contains__(self, key: object) -> bool:
+        return key in self._backing
+
+    def __repr__(self) -> str:
+        return "ReadOnlyTable(%d entities)" % len(self._backing)
+
+    # -- writes, refused with the reason rather than a bare TypeError ------
+    def _refuse(self, op: str, *args: Any) -> None:
+        raise AuthorityViolation(
+            "UNCONTROLLED_WRITE: %s on the entity table. Authoritative state "
+            "changes only through CREATE / EXTEND / SUPERSEDE / INVALIDATE "
+            "carried by a StagePatch and applied by DesignState.apply() (FA-3)."
+            % op)
+
+    def __setitem__(self, *a: Any) -> None:
+        self._refuse("__setitem__")
+
+    def __delitem__(self, *a: Any) -> None:
+        self._refuse("__delitem__")
+
+    def update(self, *a: Any, **kw: Any) -> None:
+        self._refuse("update")
+
+    def setdefault(self, *a: Any) -> None:
+        self._refuse("setdefault")
+
+    def pop(self, *a: Any) -> None:
+        self._refuse("pop")
+
+    def popitem(self, *a: Any) -> None:
+        self._refuse("popitem")
+
+    def clear(self, *a: Any) -> None:
+        self._refuse("clear")

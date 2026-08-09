@@ -1,13 +1,13 @@
 """DEFENCE IN DEPTH for the authority boundary. NOT proof of authority safety.
 
-**The runtime guard in assy_v3/state/authority.py is the enforcement.** Guarded
-containers refuse every mutating method at every depth, and the write capability
-is held in a module-private registry rather than on the state object. This scan
-exists only to catch common accidental bypasses at review time, before anyone
-runs the code that would trip the guard.
+**Encapsulation in assy_v3/state/ is the enforcement.** Authoritative storage is
+owned by DesignState and never leaves it: the entity table is exposed as a
+read-only mapping, and every read hands back a plain copy. There is no capability
+object and no authoritative container in a caller's hands, so there is nothing to
+guard. This scan exists only to catch common accidental misuse at review time.
 
-What it can do: flag the shapes the audit actually found, plus direct use of the
-write capability outside the state module.
+What it can do: flag the shapes the audit actually found, plus reflective access
+to internal storage outside the state package.
 
 What it cannot do, and does not claim: complete Python alias analysis. A write
 reaching state through an alias created in another function is invisible here and
@@ -42,10 +42,17 @@ SCANNED = [os.path.join(VER3, "assy_v3"), os.path.join(VER3, "tools"),
 #: them: it is held off the instance entirely.
 STATE_ATTRS = {"run_id", "c", "entities", "by_family", "applied_patches"}
 
-#: Names that grant or hold write authority. Outside the state package there is
-#: no legitimate reason to touch any of them.
+#: Reflective handles on internal storage, and the vocabulary of the retired
+#: capability design. Outside the state package there is no legitimate reason to
+#: touch any of them.
 CAPABILITY_NAMES = {"granted", "unlocked", "_cap", "_gate", "WriteCapability",
-                    "_CAPABILITIES", "_is_granted"}
+                    "_CAPABILITIES", "_is_granted",
+                    "_DesignState__entities", "_DesignState__by_family",
+                    "_DesignState__applied"}
+
+#: Public read-interface names backed by a protected root. Assigning to one is an
+#: attempt to replace authoritative storage.
+PROTECTED_ROOTS = {"entities", "by_family", "applied_patches"}
 
 
 def _python_files():
@@ -84,9 +91,13 @@ def _violations(path):
                     out.append((node.lineno, "direct write into %s" % base.attr))
             # shape 2:  state.<anything not an allowed attribute> = ...
             if isinstance(tgt, ast.Attribute) and _is_state_ish(tgt.value):
-                if isinstance(tgt.value, ast.Name) and tgt.attr not in STATE_ATTRS:
-                    out.append((node.lineno,
-                                "side-channel attribute %r on state" % tgt.attr))
+                if isinstance(tgt.value, ast.Name):
+                    if tgt.attr in PROTECTED_ROOTS:
+                        out.append((node.lineno,
+                                    "assignment to protected root %r" % tgt.attr))
+                    elif tgt.attr not in STATE_ATTRS:
+                        out.append((node.lineno,
+                                    "side-channel attribute %r on state" % tgt.attr))
 
     # shape 3: reaching for write authority at all, outside the state package
     for node in ast.walk(tree):
@@ -129,6 +140,20 @@ class TestNoUncontrolledAuthoritativeWrites(unittest.TestCase):
         self.assertIn("use of write-capability name '_cap'", kinds)
         self.assertIn("use of write-capability name 'granted'", kinds)
         self.assertIn("object.__setattr__ bypass", kinds)
+
+    def test_the_scan_rejects_protected_root_assignment(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            specimen = os.path.join(tmp, "root.py")
+            with open(specimen, "w") as fh:
+                fh.write("def wipe(state):\n"
+                         "    state.entities = {}\n"
+                         "    state.by_family = {}\n"
+                         "    x = state._DesignState__entities\n")
+            found = _violations(specimen)
+        kinds = {why for _ln, why in found}
+        self.assertIn("assignment to protected root 'entities'", kinds)
+        self.assertIn("assignment to protected root 'by_family'", kinds)
+        self.assertIn("use of write-capability name '_DesignState__entities'", kinds)
 
     def test_the_scan_would_actually_catch_the_historical_defect(self):
         """A guard nobody has seen fail is not evidence. Feed it the old code."""

@@ -1,16 +1,33 @@
-"""The stronger S-1 invariant: authoritative mutation is impossible outside the boundary.
+"""The S-1 supported-interface invariant, and the matrix that defines it.
 
-The first S-1 implementation closed the historical `_absorb` path and guarded the
-outer entity table and entity records. That is not the whole invariant. These
-tests were written to FAIL against commit 2570aa4, each demonstrating a real
-executable bypass, and are preserved as the regression that keeps them closed.
+Repository code using ordinary interfaces must not be able to (1) replace an
+authoritative storage root, (2) acquire or replace write authority, (3) mutate
+state through a reference a read returned, (4) bypass through an ordinary
+container interface, or (5) otherwise change authoritative state except through
+DesignState.apply(StagePatch).
 
-Mechanism-independent throughout: no case, no product, no model.
+SUPPORTED INTERFACE - the definition this file tests against
+    Ordinary Python operations a normal module could reasonably perform on an
+    object DesignState handed it: attribute lookup, attribute assignment, method
+    invocation, and BASE-CLASS Python-callable mutation APIs such as
+    ``dict.__setitem__(obj, k, v)``. Base-class calls are inside the contract
+    because they are ordinary, documented Python that any module may write - the
+    previous design excluded them by omission rather than by argument, and that
+    is exactly what left the hole.
+
+    Excluded: reading a name-mangled private attribute of another object,
+    ``object.__setattr__`` against internals, ctypes, and monkey-patching. These
+    are excluded because they are deliberately implementation-breaking, not
+    because they are difficult. That boundary is itself tested below.
+
+History: written against 65ebe1a, where five of the matrix rows below were OPEN
+using ordinary operations only.
 """
 from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import unittest
 
@@ -18,10 +35,10 @@ REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")
 if REPO not in sys.path:
     sys.path.insert(0, REPO)
 
-from ver3.assy_v3.state.authority import (AuthorityViolation,                # noqa: E402
-                                          WriteCapability, thaw, wrap)
-from ver3.assy_v3.state.design_state import ContractError, DesignState       # noqa: E402
-from ver3.assy_v3.state.patch import Op, StagePatch                          # noqa: E402
+from ver3.assy_v3.state.authority import (AuthorityViolation, ReadOnlyTable,  # noqa: E402
+                                          copy_in, copy_out, thaw)
+from ver3.assy_v3.state.design_state import ContractError, DesignState        # noqa: E402
+from ver3.assy_v3.state.patch import Op, StagePatch                           # noqa: E402
 
 
 def _patch(state, stage, ops, pid="p1"):
@@ -32,7 +49,6 @@ def _patch(state, stage, ops, pid="p1"):
 
 
 def _seeded():
-    """One region owned by s03, with a nested spatial value extended by s04."""
     s = DesignState("harden")
     s.apply(_patch(s, "s03", [
         Op("CREATE", "FunctionalRegion", "FRG-0001",
@@ -53,349 +69,287 @@ def _joint(state):
     return state
 
 
-# =====================================================================
-# GAP A - nested mutable value bypass
-# =====================================================================
-class TestNestedValueBypass(unittest.TestCase):
-    """The outer record was guarded; the values inside it were plain dicts and lists."""
+class _Base(unittest.TestCase):
 
-    def test_nested_dict_field_cannot_be_mutated_in_place(self):
-        s = _seeded()
-        with self.assertRaises(AuthorityViolation):
-            s.entities["FRG-0001"]["volume"]["centre"] = [9, 9, 9]
-
-    def test_nested_list_element_cannot_be_mutated_in_place(self):
-        s = _seeded()
-        with self.assertRaises(AuthorityViolation):
-            s.entities["FRG-0001"]["volume"]["centre"][0] = 999
-
-    def test_nested_list_cannot_be_appended_to(self):
-        s = _seeded()
-        with self.assertRaises(AuthorityViolation):
-            s.entities["FRG-0001"]["owning_bodies"].append("BOD-9999")
-
-    def test_a_blocked_nested_mutation_leaves_state_and_history_untouched(self):
-        s = _seeded()
-        before_hash = s.state_hash()
-        before_ext = len(s.entities["FRG-0001"]["_extensions"])
-        try:
-            s.entities["FRG-0001"]["volume"]["centre"][0] = 999
-        except AuthorityViolation:
-            pass
-        self.assertEqual(before_hash, s.state_hash())
-        self.assertEqual(before_ext, len(s.entities["FRG-0001"]["_extensions"]))
-        self.assertEqual([0.0, 0.0, 0.0], list(s.entities["FRG-0001"]["volume"]["centre"]))
+    def assertStateUnchanged(self, state, before):
+        self.assertEqual(before, state.state_hash())
 
 
 # =====================================================================
-# GAP B - entity-table and record mutator coverage
+# ROOT-01/02 - authoritative storage roots are not replaceable
 # =====================================================================
-class TestContainerMutatorCoverage(unittest.TestCase):
-    """A guard that overrides some inherited mutators and not others is not a guard."""
+class TestStorageRoots(_Base):
 
-    #: Every mutating name on the dict API. Enumerated rather than hand-picked, so
-    #: a method left active is a test failure and not an oversight.
-    DICT_MUTATORS = ("__setitem__", "__delitem__", "__ior__", "update",
-                     "setdefault", "pop", "popitem", "clear")
-    LIST_MUTATORS = ("__setitem__", "__delitem__", "__iadd__", "__imul__",
-                     "append", "extend", "insert", "pop", "remove", "clear",
-                     "sort", "reverse")
-
-    def _assert_all_closed(self, obj, names, kind):
-        import inspect
-        base = dict if kind == "dict" else list
-        left_open = []
-        for name in names:
-            if not hasattr(base, name):
-                continue                      # not present on this Python version
-            own = getattr(type(obj), name, None)
-            inherited = getattr(base, name, None)
-            if own is inherited or own is None:
-                left_open.append(name)
-        self.assertEqual([], left_open,
-                         "%s mutators inherited unguarded on %s: %s"
-                         % (kind, type(obj).__name__, left_open))
-
-    def test_every_dict_mutator_is_closed_on_the_entity_table(self):
+    def test_ROOT_01_entity_root_cannot_be_replaced(self):
         s = _seeded()
-        self._assert_all_closed(s.entities, self.DICT_MUTATORS, "dict")
+        with self.assertRaisesRegex(AuthorityViolation, "PROTECTED_ROOT"):
+            s.entities = {}
+        self.assertIn("FRG-0001", s.entities)
 
-    def test_every_dict_mutator_is_closed_on_an_entity_record(self):
+    def test_ROOT_02_index_and_history_roots_cannot_be_replaced(self):
         s = _seeded()
-        self._assert_all_closed(s.entities["FRG-0001"], self.DICT_MUTATORS, "dict")
+        for name, value in (("by_family", {}), ("applied_patches", [])):
+            with self.subTest(root=name):
+                with self.assertRaisesRegex(AuthorityViolation, "PROTECTED_ROOT"):
+                    setattr(s, name, value)
+        self.assertEqual(["FRG-0001"], s.by_family["FunctionalRegion"])
 
-    def test_every_dict_mutator_is_closed_on_a_nested_value(self):
+    def test_ROOT_identity_attributes_are_write_once(self):
         s = _seeded()
-        self._assert_all_closed(s.entities["FRG-0001"]["volume"],
-                                self.DICT_MUTATORS, "dict")
+        for name in ("run_id", "c"):
+            with self.subTest(attr=name):
+                with self.assertRaisesRegex(AuthorityViolation, "PROTECTED_ROOT"):
+                    setattr(s, name, None)
 
-    def test_every_list_mutator_is_closed_on_a_nested_list(self):
+    def test_ROOT_roots_cannot_be_deleted(self):
         s = _seeded()
-        self._assert_all_closed(s.entities["FRG-0001"]["volume"]["centre"],
-                                self.LIST_MUTATORS, "list")
+        with self.assertRaisesRegex(AuthorityViolation, "PROTECTED_ROOT"):
+            del s.entities
 
-    def test_popitem_on_the_entity_table_is_refused(self):
-        """Named explicitly: it was the one mutator the first pass missed."""
+    def test_ROOT_side_channel_attributes_still_refused(self):
         s = _seeded()
-        with self.assertRaises(AuthorityViolation):
-            s.entities.popitem()
+        for name in ("s04a_reach", "s04a_elimination", "s04a_scale", "anything"):
+            with self.subTest(attr=name):
+                with self.assertRaisesRegex(AuthorityViolation, "SIDE_CHANNEL_WRITE"):
+                    setattr(s, name, ["x"])
 
-    def test_every_enumerated_dict_mutator_actually_raises_on_the_table(self):
+    def test_ROOT_mutating_a_returned_index_copy_does_not_change_state(self):
         s = _seeded()
+        before = s.state_hash()
+        s.by_family["FunctionalRegion"].append("GHOST")
+        s.by_family["Invented"] = ["X"]
+        s.applied_patches.append("ghost-patch")
+        self.assertEqual(["FRG-0001"], s.by_family["FunctionalRegion"])
+        self.assertNotIn("Invented", s.by_family)
+        self.assertNotIn("ghost-patch", s.applied_patches)
+        self.assertStateUnchanged(s, before)
+
+
+# =====================================================================
+# CAP-01..04 - write authority is not part of the object surface
+# =====================================================================
+class TestCapabilityEncapsulation(_Base):
+    """There is no capability object to find. Encapsulation removed the question
+    rather than hiding the answer."""
+
+    #: Token-bounded, so `_propagate` and `str.capitalize` are not false hits.
+    HINT = re.compile(r"(?:^|_)(cap|gate|grant|granted|unlock|unlocked|token|"
+                      r"capability|authorize|authorise)(?:$|_)", re.I)
+
+    def _capability_names(self, obj):
+        return [n for n in dir(obj) if self.HINT.search(n)]
+
+    def _assert_no_capability_surface(self, obj, label):
+        hits = self._capability_names(obj)
+        self.assertEqual([], hits,
+                         "%s exposes capability-shaped names %s" % (label, hits))
+
+    def test_CAP_01_design_state_exposes_no_capability(self):
+        self._assert_no_capability_surface(_seeded(), "DesignState")
+
+    def test_CAP_02_a_record_from_the_read_api_exposes_no_capability(self):
+        s = _seeded()
+        for rec in (s.entities["FRG-0001"], s.family("FunctionalRegion")[0],
+                    s.standing("FunctionalRegion")[0]):
+            self._assert_no_capability_surface(rec, "record")
+            self.assertIs(dict, type(rec))
+
+    def test_CAP_03_a_nested_value_exposes_no_capability(self):
+        s = _seeded()
+        rec = s.entities["FRG-0001"]
+        self._assert_no_capability_surface(rec["volume"], "nested dict")
+        self._assert_no_capability_surface(rec["volume"]["centre"], "nested list")
+        self.assertIs(dict, type(rec["volume"]))
+        self.assertIs(list, type(rec["volume"]["centre"]))
+
+    def test_CAP_04_no_reachable_object_carries_write_authority(self):
+        """Traverse everything a reader can reach and find nothing that grants."""
+        s = _seeded()
+        seen, found = set(), []
+        queue = [s, s.entities, s.by_family, s.applied_patches,
+                 s.entities["FRG-0001"], s.family("FunctionalRegion")[0]]
+        while queue:
+            obj = queue.pop()
+            if id(obj) in seen:
+                continue
+            seen.add(id(obj))
+            found.extend("%s.%s" % (type(obj).__name__, n)
+                         for n in self._capability_names(obj))
+            if isinstance(obj, dict):
+                queue.extend(list(obj.values())[:50])
+            elif isinstance(obj, (list, tuple)):
+                queue.extend(list(obj)[:50])
+        self.assertEqual([], found)
+
+
+# =====================================================================
+# MUT-01..06 - no ordinary container interface reaches storage
+# =====================================================================
+class TestContainerInterfaces(_Base):
+
+    def test_MUT_01_top_level_table_mutators_are_refused(self):
+        s = _seeded()
+        before = s.state_hash()
         calls = {"__setitem__": ("X", {}), "__delitem__": ("FRG-0001",),
                  "update": ({"X": {}},), "setdefault": ("X", {}),
                  "pop": ("FRG-0001",), "popitem": (), "clear": ()}
         for name, args in calls.items():
             with self.subTest(mutator=name):
-                with self.assertRaises(AuthorityViolation):
+                with self.assertRaisesRegex(AuthorityViolation, "UNCONTROLLED_WRITE"):
                     getattr(s.entities, name)(*args)
+        self.assertStateUnchanged(s, before)
 
-
-# =====================================================================
-# GAP C - entity-family authority spoofing
-# =====================================================================
-class TestFamilyAuthoritySpoofing(unittest.TestCase):
-    """Permission belongs to the entity that exists, not to the type the caller claims."""
-
-    def test_extend_may_not_borrow_another_familys_permission(self):
-        """`volume` is extendable on FunctionalRegion. It is not a Joint field."""
-        s = _joint(DesignState("spoof"))
-        with self.assertRaisesRegex(ContractError, "FAMILY_MISMATCH"):
-            s.apply(_patch(s, "s04", [
-                Op("EXTEND", "FunctionalRegion", "JNT-0001",
-                   {"volume": {"centre": [0, 0, 0]}}, "prov:spoof")], pid="p2"))
-
-    def test_the_spoofed_field_did_not_reach_the_entity(self):
-        s = _joint(DesignState("spoof"))
-        try:
-            s.apply(_patch(s, "s04", [
-                Op("EXTEND", "FunctionalRegion", "JNT-0001",
-                   {"volume": {"centre": [0, 0, 0]}}, "prov:spoof")], pid="p2"))
-        except ContractError:
-            pass
-        self.assertNotIn("volume", s.entities["JNT-0001"])
-
-    def test_the_reverse_spoof_is_also_refused(self):
-        s = _seeded()
-        with self.assertRaisesRegex(ContractError, "FAMILY_MISMATCH"):
-            s.apply(_patch(s, "s04", [
-                Op("EXTEND", "Joint", "FRG-0001",
-                   {"frame_origin": [0, 0, 0]}, "prov:spoof")], pid="p2"))
-
-    def test_supersede_validates_the_stored_family(self):
-        s = _seeded()
-        with self.assertRaisesRegex(ContractError, "FAMILY_MISMATCH"):
-            s.apply(_patch(s, "s04", [
-                Op("SUPERSEDE", "Joint", "FRG-0001", {"volume": {}}, "prov:x",
-                   reason="r")], pid="p2"))
-
-    def test_invalidate_validates_the_stored_family(self):
-        s = _seeded()
-        with self.assertRaisesRegex(ContractError, "FAMILY_MISMATCH"):
-            s.apply(_patch(s, "s04", [
-                Op("INVALIDATE", "Joint", "FRG-0001", {}, "prov:x",
-                   reason="r")], pid="p2"))
-
-    def test_a_correctly_declared_family_still_works(self):
-        s = _seeded()
-        s.apply(_patch(s, "s04", [
-            Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
-               {"volume": {"centre": [5, 5, 5]}}, "prov:ok", reason="refined")],
-            pid="p2"))
-        self.assertEqual([5, 5, 5], list(s.entities["FRG-0001"]["volume"]["centre"]))
-
-
-# =====================================================================
-# GAP D - external aliasing of mutation input
-# =====================================================================
-class TestInputAliasing(unittest.TestCase):
-    """A guard on the container does nothing if the caller kept the object."""
-
-    def test_a_mutable_object_passed_to_create_cannot_later_change_state(self):
-        s = DesignState("alias")
-        bodies = ["BOD-0001"]
-        s.apply(_patch(s, "s03", [
-            Op("CREATE", "FunctionalRegion", "FRG-0001",
-               {"role": "ACCESS", "owning_bodies": bodies}, "prov:s03")]))
-        bodies.append("BOD-9999")                       # caller mutates its own list
-        self.assertEqual(["BOD-0001"], list(s.entities["FRG-0001"]["owning_bodies"]))
-
-    def test_a_mutable_object_passed_to_extend_cannot_later_change_state(self):
-        s = _seeded()
-        s2 = DesignState("alias2")
-        s2.apply(_patch(s2, "s03", [
-            Op("CREATE", "FunctionalRegion", "FRG-0002",
-               {"role": "ACCESS", "owning_bodies": ["B"]}, "p")], pid="p0"))
-        centre = [0.0, 0.0, 0.0]
-        s2.apply(_patch(s2, "s04", [
-            Op("EXTEND", "FunctionalRegion", "FRG-0002",
-               {"volume": {"centre": centre}}, "p")], pid="p1"))
-        centre[0] = 999.0
-        self.assertEqual([0.0, 0.0, 0.0],
-                         list(s2.entities["FRG-0002"]["volume"]["centre"]))
-
-    def test_a_mutable_object_passed_to_supersede_cannot_later_change_state(self):
-        s = _seeded()
-        replacement = {"centre": [1.0, 1.0, 1.0]}
-        s.apply(_patch(s, "s04", [
-            Op("SUPERSEDE", "FunctionalRegion", "FRG-0001", {"volume": replacement},
-               "p", reason="refined")], pid="p2"))
-        replacement["centre"][0] = 999.0
-        self.assertEqual([1.0, 1.0, 1.0], list(s.entities["FRG-0001"]["volume"]["centre"]))
-
-    def test_the_retained_prior_value_is_also_alias_safe(self):
-        """FA-1 keeps the prior value. It must not be mutable either."""
-        s = _seeded()
-        s.apply(_patch(s, "s04", [
-            Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
-               {"volume": {"centre": [1, 1, 1]}}, "p", reason="refined")], pid="p2"))
-        prior = s.entities["FRG-0001"]["_superseded"][0]["prior_value"]
-        with self.assertRaises(AuthorityViolation):
-            prior["centre"] = [7, 7, 7]
-
-
-# =====================================================================
-# GAP E - the internal gate must not be a supported public switch
-# =====================================================================
-class TestGateExposure(unittest.TestCase):
-
-    def test_the_gate_is_not_reachable_under_a_public_attribute_name(self):
-        s = _seeded()
-        self.assertFalse(hasattr(s, "_gate"),
-                         "the write capability must not be a public state attribute")
-
-    def test_the_gate_cannot_be_replaced_after_construction(self):
-        s = _seeded()
-
-        class _AlwaysOpen:
-            open = True
-
-        for name in ("_gate", "_DesignState__gate"):
-            with self.subTest(attr=name):
-                with self.assertRaises(AuthorityViolation):
-                    setattr(s, name, _AlwaysOpen())
-
-    def test_a_duck_typed_forged_capability_does_not_open_a_container(self):
-        """An object that merely looks open must not unlock anything."""
-        s = _seeded()
-        rec = s.entities["FRG-0001"]
-
-        class _LooksOpen:
-            open = True
-
-        object.__setattr__(rec, "_cap", _LooksOpen())
-        with self.assertRaises(AuthorityViolation):
-            rec["role"] = "SPOOFED"
-        self.assertEqual("ACCESS", rec["role"])
-
-    def test_no_supported_interface_reaches_the_capability(self):
-        """The honest guarantee: no accessor returns it, no public name holds it,
-        and nothing settable replaces it."""
-        s = _seeded()
-        public = [n for n in dir(s) if not n.startswith("__")]
-        self.assertNotIn("_gate", public)
-        self.assertNotIn("_cap", public)
-        for name in public:
-            value = getattr(s, name)
-            self.assertNotIsInstance(
-                value, WriteCapability,
-                "%s exposes the write capability as a public attribute" % name)
-
-    def test_the_documented_limit_is_real_and_is_introspection_only(self):
-        """Stated rather than hidden: rebinding a private slot with a genuine
-        capability DOES bypass the guard. That is introspection, not a supported
-        interface, and it is why the static scan exists as defence in depth.
-
-        This test exists so the limit is executable evidence rather than a
-        sentence in a document that may or may not still be true."""
-        s = _seeded()
-        rec = s.entities["FRG-0001"]
-        object.__setattr__(rec, "_cap", WriteCapability())
-        forged = getattr(rec, "_cap")
-        with forged.granted():
-            rec["role"] = "BYPASSED"
-        self.assertEqual("BYPASSED", rec["role"])
-
-
-# =====================================================================
-# AUTH-01..08 - mechanism-independent authority properties
-# =====================================================================
-class TestAuthorityProperties(unittest.TestCase):
-    """Properties, not paths. None of these names a case, a product or a model."""
-
-    def test_AUTH_01_state_cannot_change_without_a_controlled_mutation(self):
-        """Every supported mutation attempt, with no patch applied, changes nothing."""
+    def test_MUT_02_nested_mutation_on_a_read_record_cannot_change_state(self):
         s = _seeded()
         before = s.state_hash()
         rec = s.entities["FRG-0001"]
-        attempts = [
-            lambda: s.entities.__setitem__("X", {}),
-            lambda: s.entities.pop("FRG-0001"),
-            lambda: s.entities.popitem(),
-            lambda: s.entities.clear(),
-            lambda: rec.__setitem__("role", "X"),
-            lambda: rec.update({"role": "X"}),
-            lambda: rec.pop("role"),
-            lambda: rec["volume"].__setitem__("centre", [9, 9, 9]),
-            lambda: rec["volume"]["centre"].__setitem__(0, 9),
-            lambda: rec["volume"]["centre"].append(9),
-            lambda: rec["owning_bodies"].clear(),
-            lambda: rec["_extensions"].pop(),
-        ]
-        for i, attempt in enumerate(attempts):
-            with self.subTest(attempt=i):
-                with self.assertRaises(AuthorityViolation):
-                    attempt()
-        self.assertEqual(before, s.state_hash())
+        rec["volume"]["centre"][0] = 999          # legal on the copy the caller owns
+        rec["volume"]["centre"].append(4)
+        rec["owning_bodies"].append("BOD-9999")
+        rec["role"] = "REWRITTEN"
+        self.assertEqual([0.0, 0.0, 0.0], s.entities["FRG-0001"]["volume"]["centre"])
+        self.assertEqual(["BOD-0001"], s.entities["FRG-0001"]["owning_bodies"])
+        self.assertEqual("ACCESS", s.entities["FRG-0001"]["role"])
+        self.assertStateUnchanged(s, before)
 
-    def test_AUTH_02_input_aliases_cannot_reach_back_into_state(self):
-        s = DesignState("auth02")
+    def test_MUT_03_input_aliases_cannot_reach_back_into_state(self):
+        s = DesignState("alias")
         deep = {"a": [{"b": [1, 2, 3]}]}
+        bodies = ["BOD-0001"]
         s.apply(_patch(s, "s04", [
             Op("CREATE", "ReferenceScale", "SCL-0001",
                {"basis": "RELATIVE", "note": deep}, "p")]))
+        s.apply(_patch(s, "s03", [
+            Op("CREATE", "FunctionalRegion", "FRG-0001",
+               {"role": "ACCESS", "owning_bodies": bodies}, "p")], pid="p1"))
         deep["a"][0]["b"][0] = 999
         deep["a"].append("extra")
+        bodies.append("BOD-9999")
         self.assertEqual(1, s.entities["SCL-0001"]["note"]["a"][0]["b"][0])
         self.assertEqual(1, len(s.entities["SCL-0001"]["note"]["a"]))
+        self.assertEqual(["BOD-0001"], s.entities["FRG-0001"]["owning_bodies"])
 
-    def test_AUTH_03_a_value_read_from_state_cannot_be_mutated_to_alter_state(self):
+    def test_MUT_04_dict_base_class_calls_cannot_reach_storage(self):
+        """The bypass that made builtin subclassing unsalvageable.
+
+        `dict.__setitem__(obj, k, v)` does not dispatch through an override, so a
+        dict-subclass representation can always be mutated this way. It is closed
+        here because nothing a reader holds IS the storage: the table is not a
+        dict at all, and a record is a copy."""
         s = _seeded()
-        volume = s.entities["FRG-0001"]["volume"]     # a live reference, by design
-        with self.assertRaises(AuthorityViolation):
-            volume["centre"] = [9, 9, 9]
-        with self.assertRaises(AuthorityViolation):
-            volume["centre"][0] = 9
-        self.assertEqual([0.0, 0.0, 0.0], list(s.entities["FRG-0001"]["volume"]["centre"]))
+        before = s.state_hash()
+        self.assertNotIsInstance(s.entities, dict)
+        for call, args in ((dict.__setitem__, ("X", {})), (dict.pop, ("FRG-0001",)),
+                           (dict.update, ({"X": {}},)), (dict.clear, ())):
+            with self.subTest(call=call.__name__):
+                with self.assertRaises(TypeError):
+                    call(s.entities, *args)
+        rec = s.entities["FRG-0001"]
+        dict.__setitem__(rec, "role", "BASE_CLASS")        # legal on the copy
+        dict.pop(rec, "owning_bodies")
+        self.assertEqual("ACCESS", s.entities["FRG-0001"]["role"])
+        self.assertIn("owning_bodies", s.entities["FRG-0001"])
+        self.assertStateUnchanged(s, before)
 
-    def test_AUTH_04_each_operation_produces_its_required_history(self):
+    def test_MUT_05_list_base_class_calls_cannot_reach_storage(self):
+        s = _seeded()
+        before = s.state_hash()
+        centre = s.entities["FRG-0001"]["volume"]["centre"]
+        list.__setitem__(centre, 0, 999)
+        list.append(centre, 4)
+        list.clear(s.entities["FRG-0001"]["owning_bodies"])
+        self.assertEqual([0.0, 0.0, 0.0], s.entities["FRG-0001"]["volume"]["centre"])
+        self.assertEqual(["BOD-0001"], s.entities["FRG-0001"]["owning_bodies"])
+        self.assertStateUnchanged(s, before)
+
+    def test_MUT_06_entity_deletion_and_replacement_are_refused(self):
+        s = _seeded()
+        before = s.state_hash()
+        with self.assertRaisesRegex(AuthorityViolation, "UNCONTROLLED_WRITE"):
+            del s.entities["FRG-0001"]
+        with self.assertRaisesRegex(AuthorityViolation, "UNCONTROLLED_WRITE"):
+            s.entities["FRG-0001"] = {}
+        self.assertStateUnchanged(s, before)
+        self.assertIn("FRG-0001", s.entities)
+
+
+# =====================================================================
+# READ-01 - the read API is not a write API
+# =====================================================================
+class TestReadApi(_Base):
+
+    def test_READ_01_no_read_result_confers_write_authority(self):
+        s = _seeded()
+        before = s.state_hash()
+        results = [s.entities["FRG-0001"], s.family("FunctionalRegion")[0],
+                   s.standing("FunctionalRegion")[0], s.by_family,
+                   s.applied_patches, s.counts()]
+        for i, obj in enumerate(results):
+            with self.subTest(result=i):
+                if isinstance(obj, dict):
+                    obj["INJECTED"] = "x"
+                elif isinstance(obj, list):
+                    obj.append("INJECTED")
+        self.assertStateUnchanged(s, before)
+        self.assertNotIn("INJECTED", s.entities["FRG-0001"])
+        self.assertNotIn("INJECTED", s.by_family)
+
+    def test_READ_reads_remain_ordinary_and_usable(self):
         s = _seeded()
         rec = s.entities["FRG-0001"]
-        self.assertTrue(rec["_provenance"])                       # CREATE
-        self.assertTrue(rec["_extensions"][0]["provenance"])      # EXTEND
+        self.assertIs(dict, type(rec))
+        self.assertEqual("ACCESS", rec.get("role"))
+        self.assertIn("volume", rec)
+        self.assertEqual([0.0, 0.0, 0.0], rec["volume"]["centre"])   # equality vs list
+        self.assertEqual(3, len(rec["volume"]["centre"]))
+        self.assertEqual(0.0, min(rec["volume"]["centre"]))
+        self.assertTrue(json.dumps(rec))                              # serializable
+        self.assertTrue(json.dumps(s.family("FunctionalRegion")))
+        self.assertEqual(1, len(s.entities))
+        self.assertEqual(["FRG-0001"], list(s.entities))
+        self.assertEqual({"FunctionalRegion": 1}, s.counts())
+
+    def test_READ_two_reads_are_independent_copies(self):
+        s = _seeded()
+        a, b = s.entities["FRG-0001"], s.entities["FRG-0001"]
+        self.assertIsNot(a, b)
+        a["volume"]["centre"][0] = 5
+        self.assertEqual([0.0, 0.0, 0.0], b["volume"]["centre"])
+
+
+# =====================================================================
+# AUTH-01..03 - controlled mutation still correct
+# =====================================================================
+class TestControlledMutationStillCorrect(_Base):
+
+    def test_AUTH_01_family_spoofing_is_refused(self):
+        s = _joint(DesignState("spoof"))
+        self.assertEqual("Joint", s.stored_family("JNT-0001"))
+        for kind, fields, extra in (("EXTEND", {"volume": {}}, {}),
+                                    ("SUPERSEDE", {"volume": {}}, {"reason": "r"}),
+                                    ("INVALIDATE", {}, {"reason": "r"})):
+            with self.subTest(op=kind):
+                with self.assertRaisesRegex(ContractError, "FAMILY_MISMATCH"):
+                    s.apply(_patch(s, "s04", [
+                        Op(kind, "FunctionalRegion", "JNT-0001", fields, "p",
+                           **extra)], pid="p-%s" % kind))
+        self.assertNotIn("volume", s.entities["JNT-0001"])
+
+    def test_AUTH_02_legitimate_mutation_works_and_records_history(self):
+        s = _seeded()
         s.apply(_patch(s, "s04", [
             Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
                {"volume": {"centre": [1, 1, 1]}}, "prov:sup", reason="refined")],
             pid="p2"))
+        rec = s.entities["FRG-0001"]
+        self.assertEqual([1, 1, 1], rec["volume"]["centre"])
         self.assertEqual("refined", rec["_superseded"][0]["reason"])
-        self.assertEqual([0.0, 0.0, 0.0],
-                         list(rec["_superseded"][0]["prior_value"]["centre"]))
-        s.apply(_patch(s, "s04", [
-            Op("INVALIDATE", "FunctionalRegion", "FRG-0001", {}, "prov:inv",
-               reason="withdrawn")], pid="p3"))
-        self.assertEqual("withdrawn", rec["_invalidations"][0]["reason"])
-        self.assertEqual("INVALIDATED", rec["_validity"])
+        self.assertEqual([0.0, 0.0, 0.0], rec["_superseded"][0]["prior_value"]["centre"])
+        self.assertEqual("prov:s03", rec["_provenance"])
+        self.assertEqual("prov:s04a", rec["_extensions"][0]["provenance"])
 
-    def test_AUTH_05_permission_comes_from_stored_identity_not_caller_assertion(self):
-        s = _joint(DesignState("auth05"))
-        self.assertEqual("Joint", s.stored_family("JNT-0001"))
-        with self.assertRaisesRegex(ContractError, "FAMILY_MISMATCH"):
-            s.apply(_patch(s, "s04", [
-                Op("EXTEND", "FunctionalRegion", "JNT-0001",
-                   {"volume": {}}, "p")], pid="p2"))
-
-    def test_AUTH_06_propagation_still_works_after_hardening(self):
-        s = DesignState("auth06")
+    def test_AUTH_03_premise_change_still_propagates(self):
+        s = DesignState("prop")
         s.apply(_patch(s, "s04", [
             Op("CREATE", "ReferenceScale", "SCL-0001", {"basis": "RELATIVE"}, "p")]))
         s.apply(_patch(s, "s03", [
@@ -405,44 +359,56 @@ class TestAuthorityProperties(unittest.TestCase):
             Op("EXTEND", "FunctionalRegion", "FRG-0001",
                {"volume": {"centre": [0, 0, 0]}}, "p",
                premise_refs=["SCL-0001"])], pid="p2"))
+        self.assertEqual("STANDING", s.entities["FRG-0001"]["_validity"])
         s.apply(_patch(s, "s04", [
             Op("INVALIDATE", "ReferenceScale", "SCL-0001", {}, "p",
                reason="withdrawn")], pid="p3"))
         dep = s.entities["FRG-0001"]
         self.assertEqual("STALE", dep["_validity"])
         self.assertEqual("SCL-0001", dep["_stale_because"][0]["premise"])
-        self.assertEqual([0, 0, 0], list(dep["volume"]["centre"]))   # value untouched
+        self.assertEqual([0, 0, 0], dep["volume"]["centre"])       # value untouched
+        self.assertEqual([], s.standing("FunctionalRegion"))
 
-    def test_AUTH_07_ephemeral_views_are_plain_and_freely_mutable(self):
-        from ver3.assy_v3.state.projection import project_for
+    def test_AUTH_a_rejected_patch_changes_nothing(self):
         s = _seeded()
-        view = project_for("s04", s)
-        region = view["FunctionalRegion"][0]
-        self.assertIs(dict, type(region))
-        self.assertIs(dict, type(region["volume"]))
-        self.assertIs(list, type(region["volume"]["centre"]))
-        region["volume"]["centre"][0] = 999          # class C: no guard, no effect
-        region["owning_bodies"].append("X")
-        self.assertEqual([0.0, 0.0, 0.0], list(s.entities["FRG-0001"]["volume"]["centre"]))
-        self.assertEqual(["BOD-0001"], list(s.entities["FRG-0001"]["owning_bodies"]))
+        before = s.state_hash()
+        with self.assertRaises(ContractError):
+            s.apply(_patch(s, "s04", [
+                Op("CREATE", "ReferenceScale", "SCL-0001", {"basis": "R"}, None)],
+                pid="p9"))
+        self.assertStateUnchanged(s, before)
 
-    def test_AUTH_07_thaw_is_recursive_and_wrap_is_its_inverse_in_content(self):
-        s = _seeded()
-        original = s.entities["FRG-0001"]["volume"]
-        plain = thaw(original)
-        self.assertIs(dict, type(plain))
-        self.assertEqual(dict(original), plain)
 
-    def test_AUTH_08_serialization_and_read_only_consumers_are_unaffected(self):
+# =====================================================================
+# The excluded region - stated, and tested, so it stays honest
+# =====================================================================
+class TestSupportedInterfaceBoundary(_Base):
+
+    def test_the_excluded_region_is_reflection_and_is_real(self):
+        """Reading another object's name-mangled private storage is outside the
+        contract. It is excluded because it is deliberately
+        implementation-breaking, not because it is hard - and the exclusion is
+        executable rather than asserted in prose."""
         s = _seeded()
-        blob = json.dumps(s.entities, sort_keys=True)          # state_hash's path
-        self.assertIn("FRG-0001", blob)
-        self.assertEqual(json.loads(blob)["FRG-0001"]["volume"]["centre"], [0.0, 0.0, 0.0])
-        rec = s.entities["FRG-0001"]
-        self.assertEqual("ACCESS", rec.get("role"))            # mapping reads
-        self.assertIn("volume", rec)
-        self.assertEqual(sorted(dict(rec)), sorted(rec.keys()))
-        self.assertEqual([0.0, 0.0, 0.0], rec["volume"]["centre"])   # equality vs list
-        self.assertEqual(3, len(rec["volume"]["centre"]))
-        self.assertEqual(0.0, min(rec["volume"]["centre"]))
-        self.assertTrue(isinstance(rec, dict) and isinstance(rec["volume"]["centre"], list))
+        backing = getattr(s, "_DesignState__entities")     # reflection, by definition
+        backing["FRG-0001"]["role"] = "REFLECTED"
+        self.assertEqual("REFLECTED", s.entities["FRG-0001"]["role"])
+
+    def test_ordinary_operations_never_yield_the_backing_store(self):
+        """The complement: nothing a reader obtains ordinarily IS the storage."""
+        s = _seeded()
+        backing = getattr(s, "_DesignState__entities")
+        for obj in (s.entities, s.by_family, s.applied_patches,
+                    s.entities["FRG-0001"], s.family("FunctionalRegion")[0],
+                    s.counts()):
+            self.assertIsNot(obj, backing)
+            self.assertIsNot(obj, backing.get("FRG-0001"))
+        self.assertIsInstance(s.entities, ReadOnlyTable)
+
+    def test_copy_helpers_are_recursive_in_both_directions(self):
+        original = {"a": [{"b": [1, 2]}], "t": (1, [2])}
+        for made in (copy_out(original), copy_in(original)):
+            self.assertEqual(original, made)
+            self.assertIsNot(original["a"], made["a"])
+            self.assertIsNot(original["a"][0]["b"], made["a"][0]["b"])
+        self.assertIs(thaw, copy_out)
