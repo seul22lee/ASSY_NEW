@@ -37,7 +37,7 @@ model variability to such a test only weakens the evidence.
 
 | ID | Mechanism | Step | Replay type | Status |
 |---|---|---|---|---|
-| **ADR-001** | uncontrolled authoritative write / side-channel engineering fact | **S-1** | STRUCTURAL | **RESOLVED** — L1 at `2570aa4`; L2 took **three** passes (see the history) |
+| **ADR-001** | uncontrolled authoritative write / side-channel engineering fact | **S-1** | STRUCTURAL | **RESOLVED** — L1 at `2570aa4`; L2 took **four** passes (see the history) |
 | ADR-002 | consumer-view omission of a required premise | S-3 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
 | ADR-003 | S04A→S04B spatial commitment loss | S-6 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
 | ADR-004 | silent positional context truncation | S-3 | STRUCTURAL | NOT_YET_ADDRESSABLE |
@@ -53,8 +53,8 @@ model variability to such a test only weakens the evidence.
 
 ## ADR-001 — Uncontrolled authoritative write and side-channel engineering fact
 
-**Status: RESOLVED** — Level 1 and Level 2 both established. Level 2 was claimed twice before
-it was true; the history below records why, because that is the useful part.
+**Status: RESOLVED** — Level 1 and Level 2 both established. Level 2 was claimed three times
+before it was true; the history below records why, because that is the useful part.
 
 | | |
 |---|---|
@@ -185,10 +185,37 @@ reflection against name-mangled internal storage — and it carries its own exec
 The supported interface was defined **before** the matrix was evaluated, and no path was moved
 across that line to reach the result.
 
-**What the three passes together show.** An exact replay establishes that one path is closed.
-A general invariant is only as strong as the interface definition it is tested against, and an
-undefined interface silently excludes whatever nobody thought of. That is the lesson this
-entry preserves for ADR-002…ADR-011.
+### Fourth pass — read-wrapper and internal-mutator encapsulation *(final)*
+
+The encapsulation redesign was correct in representation and was verified against a matrix it
+wrote itself. Two supported paths were not on that list, and both were reachable with
+**ordinary operations only**:
+
+| | Bypass at `14bed10` | Why it survived |
+|---|---|---|
+| **live backing** | `state.entities._backing["FRG-0001"]["role"] = "BYPASS"` changed authoritative state | the wrapper was read-only but **not detached** - it held the live store in an ordinary attribute, so a read-only wrapper around a live mutable object handed the caller exactly what it was protecting |
+| **internal writers** | `state._create(patch, op)` placed an entity **with no validation and `_provenance: None`** | the primitives were still ordinary methods; single-underscore is a naming convention, and the pass's own definition counted ordinary method invocation as supported |
+
+**Correction.** One change of shape applied to both: nothing that can reach storage is an
+attribute of anything a caller holds. `ReadOnlyTable` holds a snapshot; the mutation primitives
+moved to module-private functions taking the store explicitly; and the store itself moved off
+the instance into a module-private registry — which also closed the path the new object-graph
+test found next, since a name-mangled attribute is still reachable through `dir()` plus
+`getattr`. A convenience property added during the fix (`state._s`) leaked storage again and was
+caught by that same invariant within minutes, which is the intended behaviour of the test.
+
+**Level-2 evidence.** An object-graph traversal from the whole supported read surface asserts no
+path yields the live store, a capability, or a callable authoritative writer other than
+`apply`; a companion test calls every public callable and confirms only `apply` moves the state
+hash. Expanded Level 2: 65/65. Level 1 unchanged: 8/8.
+
+**What the four passes together show.** An exact replay establishes that one path is closed. A
+general invariant is only as strong as the interface definition it is tested against — and
+then only as strong as the *enumeration* it is tested with. Three successive claims were true
+of everything their authors thought to list. The durable fixes were the ones that removed the
+category (no capability exists; no authoritative container is handed out; no storage-bearing
+attribute exists) rather than the ones that policed it. That is the lesson this entry preserves
+for ADR-002…ADR-011.
 
 ---
 

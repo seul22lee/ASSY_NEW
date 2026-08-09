@@ -41,6 +41,16 @@ from ver3.assy_v3.state.design_state import ContractError, DesignState        # 
 from ver3.assy_v3.state.patch import Op, StagePatch                           # noqa: E402
 
 
+def _reflect(state):
+    """The excluded region, in one place: reach the private storage registry.
+
+    Every use of this helper marks a test that deliberately steps outside the
+    supported interface, so the boundary stays visible instead of scattered.
+    """
+    from ver3.assy_v3.state import design_state as _ds
+    return _ds._STORAGE[state]
+
+
 def _patch(state, stage, ops, pid="p1"):
     return StagePatch(
         patch_id=pid, run_id=state.run_id, stage_id=stage, stage_attempt=1,
@@ -385,19 +395,20 @@ class TestControlledMutationStillCorrect(_Base):
 class TestSupportedInterfaceBoundary(_Base):
 
     def test_the_excluded_region_is_reflection_and_is_real(self):
-        """Reading another object's name-mangled private storage is outside the
-        contract. It is excluded because it is deliberately
-        implementation-breaking, not because it is hard - and the exclusion is
-        executable rather than asserted in prose."""
+        """Reaching the module-private storage registry is outside the contract.
+
+        It is excluded because it is deliberately implementation-breaking - you
+        must import the state module and index its private registry - not because
+        it is hard. The exclusion is executable rather than asserted in prose."""
         s = _seeded()
-        backing = getattr(s, "_DesignState__entities")     # reflection, by definition
+        backing = _reflect(s).entities                     # reflection, by definition
         backing["FRG-0001"]["role"] = "REFLECTED"
         self.assertEqual("REFLECTED", s.entities["FRG-0001"]["role"])
 
     def test_ordinary_operations_never_yield_the_backing_store(self):
         """The complement: nothing a reader obtains ordinarily IS the storage."""
         s = _seeded()
-        backing = getattr(s, "_DesignState__entities")
+        backing = _reflect(s).entities
         for obj in (s.entities, s.by_family, s.applied_patches,
                     s.entities["FRG-0001"], s.family("FunctionalRegion")[0],
                     s.counts()):
@@ -412,3 +423,152 @@ class TestSupportedInterfaceBoundary(_Base):
             self.assertIsNot(original["a"], made["a"])
             self.assertIsNot(original["a"][0]["b"], made["a"][0]["b"])
         self.assertIs(thaw, copy_out)
+
+
+# =====================================================================
+# LEAK-A / LEAK-B - the two supported paths that survived 14bed10
+# =====================================================================
+class TestReadWrapperDoesNotHoldLiveStorage(_Base):
+    """A read-only wrapper around a LIVE mutable object is not encapsulation.
+
+    At 14bed10 `state.entities._backing` was the live store, reachable by
+    ordinary attribute lookup, and writing through it changed authoritative
+    state with no operation, provenance or validation.
+    """
+
+    def test_LEAK_A_no_public_read_object_holds_live_storage(self):
+        s = _seeded()
+        backing = _reflect(s).entities                       # reflection, for the test only
+        table = s.entities
+        for name in dir(table):
+            if name.startswith("__"):
+                continue
+            value = getattr(table, name, None)
+            self.assertIsNot(value, backing,
+                             "ReadOnlyTable.%s is the live authoritative store" % name)
+
+    def test_LEAK_A_writing_through_any_wrapper_attribute_cannot_change_state(self):
+        s = _seeded()
+        before = s.state_hash()
+        table = s.entities
+        for name in dir(table):
+            if name.startswith("__"):
+                continue
+            value = getattr(table, name, None)
+            if isinstance(value, dict) and "FRG-0001" in value:
+                value["FRG-0001"]["role"] = "BYPASS_A"
+        self.assertEqual("ACCESS", s.entities["FRG-0001"]["role"])
+        self.assertStateUnchanged(s, before)
+
+    def test_LEAK_A_the_snapshot_is_detached_and_stable(self):
+        s = _seeded()
+        table = s.entities
+        s.apply(_patch(s, "s04", [
+            Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
+               {"role": "KEEPOUT"}, "p", reason="r")], pid="pS"))
+        self.assertEqual("ACCESS", table["FRG-0001"]["role"])      # a snapshot
+        self.assertEqual("KEEPOUT", s.entities["FRG-0001"]["role"])  # a fresh read
+
+
+class TestNoSecondMutationEntryPoint(_Base):
+    """At 14bed10 `state._create(patch, op)` placed an entity with no validation
+    and no provenance. Single-underscore is a convention; ordinary method
+    invocation is a supported operation."""
+
+    #: Every primitive that writes authoritative storage.
+    PRIMITIVES = ("_create", "_extend", "_supersede", "_invalidate",
+                  "_propagate", "_merge_premises", "_log")
+
+    def test_LEAK_B_no_mutation_primitive_is_reachable_on_the_state(self):
+        s = _seeded()
+        for name in self.PRIMITIVES:
+            with self.subTest(primitive=name):
+                self.assertFalse(hasattr(s, name),
+                                 "DesignState.%s is a second write API" % name)
+
+    def test_LEAK_B_apply_is_the_only_public_mutating_callable(self):
+        """Inventory the whole public surface and prove exactly one entry mutates."""
+        s = _seeded()
+        mutating = []
+        for name in dir(s):
+            if name.startswith("__"):
+                continue
+            attr = getattr(s, name, None)
+            if not callable(attr):
+                continue
+            probe = _seeded()
+            before = probe.state_hash()
+            try:
+                attr_probe = getattr(probe, name)
+                attr_probe()                       # no-arg call; most reads accept it
+            except Exception:
+                pass
+            if probe.state_hash() != before:
+                mutating.append(name)
+        self.assertEqual([], mutating,
+                         "callables that mutate without a patch: %s" % mutating)
+        # And the one that does mutate, does so only with a patch.
+        before = s.state_hash()
+        s.apply(_patch(s, "s04", [
+            Op("CREATE", "ReferenceScale", "SCL-0001", {"basis": "RELATIVE"}, "p")],
+            pid="pA"))
+        self.assertNotEqual(before, s.state_hash())
+
+    def test_LEAK_B_the_primitives_still_require_storage_reflection_to_use(self):
+        """They exist at module level, and using one needs the private store."""
+        from ver3.assy_v3.state import design_state as ds
+        self.assertTrue(callable(ds._create))
+        s = _seeded()
+        with self.assertRaises(TypeError):
+            ds._create(s)                          # cannot be driven from the state alone
+
+
+class TestPublicObjectGraph(_Base):
+    """One general invariant over the whole supported read surface."""
+
+    MUTATOR_NAMES = {"_create", "_extend", "_supersede", "_invalidate",
+                     "_propagate", "_merge_premises", "_log", "apply"}
+
+    def test_no_supported_path_yields_live_storage_or_a_writer(self):
+        s = _seeded()
+        s.apply(_patch(s, "s04", [
+            Op("CREATE", "ReferenceScale", "SCL-0001", {"basis": "RELATIVE"}, "p")],
+            pid="pG"))
+        store = _reflect(s)
+        live = {id(store.entities), id(store.by_family), id(store.applied)}
+        for rec in store.entities.values():
+            live.add(id(rec))
+
+        roots = [s, s.entities, s.by_family, s.applied_patches, s.counts(),
+                 s.family("FunctionalRegion"), s.standing("FunctionalRegion"),
+                 s.entities["FRG-0001"]]
+        seen, queue, problems = set(), list(roots), []
+        while queue:
+            obj = queue.pop()
+            if id(obj) in seen or isinstance(obj, (str, bytes, int, float, bool, type(None))):
+                continue
+            seen.add(id(obj))
+            if id(obj) in live:
+                problems.append("live authoritative storage reachable: %r" % type(obj))
+                continue
+            if isinstance(obj, dict):
+                queue.extend(list(obj.values())[:100])
+            elif isinstance(obj, (list, tuple, set)):
+                queue.extend(list(obj)[:100])
+            else:
+                for name in dir(obj):
+                    if name.startswith("__"):
+                        continue
+                    try:
+                        value = getattr(obj, name)
+                    except Exception:
+                        continue
+                    if callable(value) and name in self.MUTATOR_NAMES and name != "apply":
+                        problems.append("mutating callable reachable: %s.%s"
+                                        % (type(obj).__name__, name))
+                    if id(value) in live:
+                        problems.append("live storage via %s.%s"
+                                        % (type(obj).__name__, name))
+                    if not callable(value):
+                        queue.append(value)
+        self.assertEqual([], problems)

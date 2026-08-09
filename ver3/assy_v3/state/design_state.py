@@ -7,9 +7,31 @@ import os
 from typing import Any, Dict, Iterable, List, Optional
 
 import yaml
+from weakref import WeakKeyDictionary
 
 from .authority import (AuthorityClass, AuthorityViolation, ReadOnlyTable,
                         ValidityStatus, copy_in, copy_out)
+
+class _Store:
+    """The authoritative storage for one DesignState.
+
+    Held in a module-private registry rather than on the state object, so it is
+    not an attribute of anything a caller can reach - not even under a mangled
+    name. Obtaining one requires importing this module and looking it up here,
+    which is unambiguously reflection rather than an ordinary operation on an
+    object you were handed.
+    """
+
+    __slots__ = ("entities", "by_family", "applied")
+
+    def __init__(self) -> None:
+        self.entities: Dict[str, Dict[str, Any]] = {}
+        self.by_family: Dict[str, List[str]] = {}
+        self.applied: List[str] = []
+
+
+#: DesignState -> its storage. Module-private, and the only handle on it.
+_STORAGE: "WeakKeyDictionary" = WeakKeyDictionary()
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _CONTRACTS = os.path.abspath(os.path.join(_HERE, "..", "..", "contracts"))
@@ -99,12 +121,11 @@ class DesignState:
 
     #: §4 attribute taxonomy.
     #:
-    #: INITIALIZATION-ONLY INTERNAL ROOT - the authoritative storage itself, and
-    #: the identity written once at construction. Replacing one would discard
-    #: state with no operation, provenance or history.
-    _INIT_ATTRS = frozenset(("run_id", "c", "_DesignState__entities",
-                             "_DesignState__by_family", "_DesignState__applied",
-                             "_DesignState__ready"))
+    #: INITIALIZATION-ONLY INTERNAL ROOT - the identity, written once at
+    #: construction. The authoritative storage is not an attribute at all; it
+    #: lives in the module-private registry above, so there is no mangled name
+    #: for ordinary code to reach and nothing on this object to replace.
+    _INIT_ATTRS = frozenset(("run_id", "c"))
 
     #: PUBLIC READ INTERFACE - properties backed by a protected root. Assigning
     #: to one is an attempt to replace the root behind it.
@@ -115,14 +136,10 @@ class DesignState:
     #: because it is not authoritative.
 
     def __init__(self, run_id: str, contracts: Optional[Contracts] = None) -> None:
-        set_ = object.__setattr__
-        set_(self, "_DesignState__ready", False)
-        set_(self, "run_id", run_id)
-        set_(self, "c", contracts or Contracts())
-        set_(self, "_DesignState__entities", {})
-        set_(self, "_DesignState__by_family", {})
-        set_(self, "_DesignState__applied", [])
-        set_(self, "_DesignState__ready", True)
+        object.__setattr__(self, "run_id", run_id)
+        object.__setattr__(self, "c", contracts or Contracts())
+        _STORAGE[self] = _Store()
+
 
     def __setattr__(self, name: str, value: Any) -> None:
         if name in self._SETTABLE_AFTER_INIT:
@@ -145,20 +162,30 @@ class DesignState:
     # ------------------------------------------------------- read surface
     @property
     def entities(self):
-        """Lookups only. Each record comes back as a plain copy the caller owns."""
-        return ReadOnlyTable(self.__entities)
+        """A read-only SNAPSHOT of the entity table.
+
+        Detached from storage: the returned object contains no live reference to
+        anything authoritative, so there is nothing behind it to reach. For a
+        membership test or a family lookup prefer `has_entity` / `stored_family`,
+        which answer without building a snapshot at all.
+        """
+        return ReadOnlyTable(copy_out(_STORAGE[self].entities))
+
+    def has_entity(self, entity_id: str) -> bool:
+        """Membership without materialising a snapshot."""
+        return entity_id in _STORAGE[self].entities
 
     @property
     def by_family(self) -> Dict[str, List[str]]:
-        return copy_out(self.__by_family)
+        return copy_out(_STORAGE[self].by_family)
 
     @property
     def applied_patches(self) -> List[str]:
-        return list(self.__applied)
+        return list(_STORAGE[self].applied)
 
     # ------------------------------------------------------------------ hash
     def state_hash(self) -> str:
-        payload = json.dumps(self.__entities, sort_keys=True,
+        payload = json.dumps(_STORAGE[self].entities, sort_keys=True,
                              separators=(",", ":")).encode()
         return hashlib.sha256(payload).hexdigest()
 
@@ -180,7 +207,7 @@ class DesignState:
                 if not self.c.may_create(patch.stage_id, fam):
                     problems.append(
                         "OWNERSHIP: %s may not create %s (%s)" % (patch.stage_id, fam, eid))
-                if eid in self.__entities or eid in seen:
+                if eid in _STORAGE[self].entities or eid in seen:
                     problems.append("DUPLICATE_ID: %s" % eid)
                 # An empty list is a VALUE - "this clause carries no quantities",
                 # "no actor participates". Only absence and empty string are missing.
@@ -209,7 +236,7 @@ class DesignState:
             # U-4. A declared premise must resolve, or the dependency it claims
             # to record is fiction and FA-5 cannot be computed from it.
             for ref in op.premise_refs:
-                if ref not in self.__entities and ref not in seen:
+                if ref not in _STORAGE[self].entities and ref not in seen:
                     problems.append("DANGLING_PREMISE: %s -> %s" % (eid, ref))
         problems.extend(self._reference_problems(patch, seen))
         return problems
@@ -217,7 +244,7 @@ class DesignState:
     # ------------------------------------------------------- U-4 operations
     def stored_family(self, entity_id: str) -> Optional[str]:
         """The family the entity actually has. The only authority on its identity."""
-        rec = self.__entities.get(entity_id)
+        rec = _STORAGE[self].entities.get(entity_id)
         return None if rec is None else rec.get("_family")
 
     def _family_problem(self, op) -> Optional[str]:
@@ -227,7 +254,7 @@ class DesignState:
         permission belonging to one family can never be evaluated against an
         entity of another.
         """
-        if op.entity_id not in self.__entities:
+        if op.entity_id not in _STORAGE[self].entities:
             return None                     # the operation's own check reports this
         actual = self.stored_family(op.entity_id)
         if actual != op.entity_type:
@@ -245,7 +272,7 @@ class DesignState:
         """
         out: List[str] = []
         eid = op.entity_id
-        if eid not in self.__entities:
+        if eid not in _STORAGE[self].entities:
             out.append("EXTEND_UNKNOWN: %s" % eid)
             return out
         # The STORED family, never the declared one (see _family_problem).
@@ -260,14 +287,14 @@ class DesignState:
             elif permitted[name] != patch.stage_id:
                 out.append("EXTEND_WRONG_STAGE: %s.%s is extendable by %s, not %s"
                            % (fam, name, permitted[name], patch.stage_id))
-            elif self.__entities[eid].get(name) is not None:
+            elif _STORAGE[self].entities[eid].get(name) is not None:
                 out.append("EXTEND_OVER_EXISTING: %s.%s already has a value; "
                            "revision requires SUPERSEDE" % (eid, name))
         return out
 
     def _revision_problems(self, op) -> List[str]:
         out: List[str] = []
-        if op.entity_id not in self.__entities:
+        if op.entity_id not in _STORAGE[self].entities:
             out.append("%s_UNKNOWN: %s" % (op.kind, op.entity_id))
             return out
         if not op.provenance_ref:
@@ -278,7 +305,7 @@ class DesignState:
             if not op.fields:
                 out.append("SUPERSEDE_EMPTY: %s names no field" % op.entity_id)
             for name in op.fields:
-                if name not in self.__entities[op.entity_id]:
+                if name not in _STORAGE[self].entities[op.entity_id]:
                     out.append("SUPERSEDE_ABSENT: %s.%s has no prior value"
                                % (op.entity_id, name))
         return out
@@ -286,7 +313,7 @@ class DesignState:
     def _reference_problems(self, patch, seen: set) -> List[str]:
         """Every typed reference must resolve. A free-string subject is R-20."""
         out: List[str] = []
-        known = set(self.__entities) | seen
+        known = set(_STORAGE[self].entities) | seen
         for op in patch.operations:
             for key, val in op.fields.items():
                 if not key.endswith(("_id", "_ids", "_refs")) and key not in (
@@ -310,93 +337,14 @@ class DesignState:
         problems = self.validate(patch)
         if problems:
             raise ContractError("; ".join(problems))
+        # The primitives live at module level and take the private storage
+        # explicitly. DesignState therefore carries no second mutating method for
+        # ordinary code to call: `apply` is the only way in, and reaching the
+        # primitives requires the storage, which requires reflection.
+        store = _STORAGE[self]
         for op in patch.operations:
-            if op.kind == "CREATE":
-                self._create(patch, op)
-            elif op.kind == "EXTEND":
-                self._extend(patch, op)
-            elif op.kind == "SUPERSEDE":
-                self._supersede(patch, op)
-            elif op.kind == "INVALIDATE":
-                self._invalidate(patch, op)
-        self.__applied.append(patch.patch_id)
-
-    def _log(self, rec, key: str, entry: Dict[str, Any]) -> None:
-        """Append to a per-entity history list."""
-        rec.setdefault(key, []).append(copy_in(entry))
-
-    def _create(self, patch, op) -> None:
-        rec = copy_in(dict(op.fields))
-        rec["entity_id"] = op.entity_id
-        rec["_family"] = op.entity_type
-        rec["_created_by"] = patch.stage_id
-        rec["_provenance"] = op.provenance_ref
-        rec["_authority"] = self.c.authority_class(op.entity_type).value
-        rec["_validity"] = ValidityStatus.STANDING.value
-        if op.premise_refs:
-            rec["_premises"] = list(op.premise_refs)
-        self.__entities[op.entity_id] = rec
-        self.__by_family.setdefault(op.entity_type, []).append(op.entity_id)
-
-    def _extend(self, patch, op) -> None:
-        rec = self.__entities[op.entity_id]
-        for name, value in op.fields.items():
-            rec[name] = copy_in(value)
-        # Provenance is per act, not per entity: the creating stage and the
-        # extending stage are different authors and both must remain visible.
-        self._log(rec, "_extensions",
-                  {"stage": patch.stage_id, "fields": sorted(op.fields),
-                   "provenance": op.provenance_ref,
-                   "premises": list(op.premise_refs)})
-        self._merge_premises(rec, op)
-
-    def _supersede(self, patch, op) -> None:
-        """FA-1: both values are retained. The prior value is never overwritten
-        out of existence, only displaced from being current."""
-        rec = self.__entities[op.entity_id]
-        for name, value in op.fields.items():
-            # The prior value is already wrapped, so the retained history is as
-            # alias-safe as the current value.
-            self._log(rec, "_superseded",
-                      {"field": name, "prior_value": rec.get(name),
-                       "stage": patch.stage_id, "reason": op.reason,
-                       "provenance": op.provenance_ref})
-            rec[name] = copy_in(value)
-        self._merge_premises(rec, op)
-        self._propagate(op.entity_id, "SUPERSEDED", op.reason)
-
-    def _invalidate(self, patch, op) -> None:
-        """The record remains readable. What it loses is unqualified authority."""
-        rec = self.__entities[op.entity_id]
-        rec["_validity"] = ValidityStatus.INVALIDATED.value
-        self._log(rec, "_invalidations",
-                  {"stage": patch.stage_id, "reason": op.reason,
-                   "provenance": op.provenance_ref})
-        self._propagate(op.entity_id, "INVALIDATED", op.reason)
-
-    def _merge_premises(self, rec, op) -> None:
-        if op.premise_refs:
-            rec["_premises"] = sorted(
-                set(rec.get("_premises", [])) | set(op.premise_refs))
-
-    # ------------------------------------------------------- M-5A propagation
-    def _propagate(self, changed_id: str, kind: str, reason: Optional[str]) -> None:
-        """FA-5. A dependent commitment may not silently remain authoritative.
-
-        Computed eagerly on write, because the premise references needed to
-        compute it are recorded at write time. Which propagation strategy to use
-        is an implementation decision the freeze leaves open (§9); this is the
-        one that needs no additional bookkeeping.
-        """
-        for eid, rec in self.__entities.items():
-            if eid == changed_id or changed_id not in rec.get("_premises", []):
-                continue
-            if rec.get("_validity") != ValidityStatus.STANDING.value:
-                continue
-            rec["_validity"] = ValidityStatus.STALE.value
-            self._log(rec, "_stale_because",
-                      {"premise": changed_id, "premise_change": kind,
-                       "reason": reason})
+            _MUTATORS[op.kind](store.entities, store.by_family, self.c, patch, op)
+        _STORAGE[self].applied.append(patch.patch_id)
 
     # ------------------------------------------------------------------ read
     def family(self, name: str) -> List[Dict[str, Any]]:
@@ -410,8 +358,8 @@ class DesignState:
         has no effect on state - the same semantics as ``dict.copy()``. The read
         API is not a write API.
         """
-        return [copy_out(self.__entities[i])
-                for i in self.__by_family.get(name, [])]
+        return [copy_out(_STORAGE[self].entities[i])
+                for i in _STORAGE[self].by_family.get(name, [])]
 
     def standing(self, name: str) -> List[Dict[str, Any]]:
         """Only the entities that still carry unqualified authority."""
@@ -420,4 +368,102 @@ class DesignState:
                 == ValidityStatus.STANDING.value]
 
     def counts(self) -> Dict[str, int]:
-        return {k: len(v) for k, v in sorted(self.__by_family.items())}
+        return {k: len(v) for k, v in sorted(_STORAGE[self].by_family.items())}
+
+
+# =====================================================================
+# The mutation primitives.
+#
+# Module-private and storage-taking, deliberately. As methods they were a second
+# supported write API: ordinary code holding a DesignState could call
+# `state._create(patch, op)` and place an entity with no validation and no
+# provenance - the exact defect S-1 exists to prevent, through a door beside the
+# one that was being guarded. Single-underscore is a naming convention, and
+# ordinary method invocation is a supported operation.
+#
+# Here they are unreachable in practice: using one requires the private storage,
+# and obtaining that requires reflection, which is outside the supported
+# interface. DesignState.apply() is the only supported entry.
+# =====================================================================
+
+def _log(rec: Dict[str, Any], key: str, entry: Dict[str, Any]) -> None:
+    """Append to a per-entity history list."""
+    rec.setdefault(key, []).append(copy_in(entry))
+
+
+def _merge_premises(rec: Dict[str, Any], op) -> None:
+    if op.premise_refs:
+        rec["_premises"] = sorted(set(rec.get("_premises", [])) | set(op.premise_refs))
+
+
+def _propagate(entities: Dict[str, Any], changed_id: str, kind: str,
+               reason: Optional[str]) -> None:
+    """FA-5. A dependent commitment may not silently remain authoritative.
+
+    Computed eagerly on write, because the premise references needed to compute
+    it are recorded at write time. Which propagation strategy to use is an
+    implementation decision the freeze leaves open (§9); this is the one that
+    needs no additional bookkeeping.
+    """
+    for eid, rec in entities.items():
+        if eid == changed_id or changed_id not in rec.get("_premises", []):
+            continue
+        if rec.get("_validity") != ValidityStatus.STANDING.value:
+            continue
+        rec["_validity"] = ValidityStatus.STALE.value
+        _log(rec, "_stale_because",
+             {"premise": changed_id, "premise_change": kind, "reason": reason})
+
+
+def _create(entities, by_family, contracts, patch, op) -> None:
+    rec = copy_in(dict(op.fields))
+    rec["entity_id"] = op.entity_id
+    rec["_family"] = op.entity_type
+    rec["_created_by"] = patch.stage_id
+    rec["_provenance"] = op.provenance_ref
+    rec["_authority"] = contracts.authority_class(op.entity_type).value
+    rec["_validity"] = ValidityStatus.STANDING.value
+    if op.premise_refs:
+        rec["_premises"] = list(op.premise_refs)
+    entities[op.entity_id] = rec
+    by_family.setdefault(op.entity_type, []).append(op.entity_id)
+
+
+def _extend(entities, by_family, contracts, patch, op) -> None:
+    rec = entities[op.entity_id]
+    for name, value in op.fields.items():
+        rec[name] = copy_in(value)
+    # Provenance is per act, not per entity: the creating stage and the
+    # extending stage are different authors and both must remain visible.
+    _log(rec, "_extensions",
+         {"stage": patch.stage_id, "fields": sorted(op.fields),
+          "provenance": op.provenance_ref, "premises": list(op.premise_refs)})
+    _merge_premises(rec, op)
+
+
+def _supersede(entities, by_family, contracts, patch, op) -> None:
+    """FA-1: both values are retained. The prior value is never overwritten out
+    of existence, only displaced from being current."""
+    rec = entities[op.entity_id]
+    for name, value in op.fields.items():
+        _log(rec, "_superseded",
+             {"field": name, "prior_value": copy_in(rec.get(name)),
+              "stage": patch.stage_id, "reason": op.reason,
+              "provenance": op.provenance_ref})
+        rec[name] = copy_in(value)
+    _merge_premises(rec, op)
+    _propagate(entities, op.entity_id, "SUPERSEDED", op.reason)
+
+
+def _invalidate(entities, by_family, contracts, patch, op) -> None:
+    """The record remains readable. What it loses is unqualified authority."""
+    rec = entities[op.entity_id]
+    rec["_validity"] = ValidityStatus.INVALIDATED.value
+    _log(rec, "_invalidations",
+         {"stage": patch.stage_id, "reason": op.reason,
+          "provenance": op.provenance_ref})
+    _propagate(entities, op.entity_id, "INVALIDATED", op.reason)
+
+
+_MUTATORS = {"CREATE": _create, "EXTEND": _extend,
+             "SUPERSEDE": _supersede, "INVALIDATE": _invalidate}

@@ -135,36 +135,42 @@ thaw = copy_out
 
 
 class ReadOnlyTable(Mapping):
-    """The entity table as a reader sees it: lookups only.
+    """The entity table as a reader sees it: a read-only SNAPSHOT.
 
     Derives from Mapping, not from dict, so there is no inherited mutator and no
-    base-class call that could reach the underlying storage - the bypass that
-    made the previous representation unsalvageable.
+    base-class call that could reach its contents - the bypass that made the
+    guarded-subclass representation unsalvageable.
 
-    Every value it yields is a defensive copy, so a reader cannot reach stored
-    state through a record either.
+    It holds a snapshot, never the live store. A read-only wrapper around a live
+    mutable object is not encapsulation: ordinary attribute lookup on the wrapper
+    hands the caller the very thing the wrapper was protecting. The rule this
+    class exists to satisfy is that **a public read object contains no reachable
+    live reference to authoritative storage**, so there is nothing behind it to
+    find.
     """
 
-    __slots__ = ("_backing",)
+    __slots__ = ("_snapshot",)
 
-    def __init__(self, backing: Dict[str, Dict[str, Any]]) -> None:
-        object.__setattr__(self, "_backing", backing)
+    def __init__(self, snapshot: Dict[str, Dict[str, Any]]) -> None:
+        # Already a detached copy when it arrives; taking another would only
+        # double the cost.
+        object.__setattr__(self, "_snapshot", snapshot)
 
     # -- reads ------------------------------------------------------------
     def __getitem__(self, key: str) -> Dict[str, Any]:
-        return copy_out(self._backing[key])
+        return self._snapshot[key]
 
     def __iter__(self) -> Iterator[str]:
-        return iter(self._backing)
+        return iter(self._snapshot)
 
     def __len__(self) -> int:
-        return len(self._backing)
+        return len(self._snapshot)
 
     def __contains__(self, key: object) -> bool:
-        return key in self._backing
+        return key in self._snapshot
 
     def __repr__(self) -> str:
-        return "ReadOnlyTable(%d entities)" % len(self._backing)
+        return "ReadOnlyTable(%d entities, snapshot)" % len(self._snapshot)
 
     # -- writes, refused with the reason rather than a bare TypeError ------
     def _refuse(self, op: str, *args: Any) -> None:

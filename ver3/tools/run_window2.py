@@ -385,19 +385,19 @@ def _commit_s04(state, key: str, raw: Optional[str], rec: Dict[str, Any]) -> Non
 
         for r in parsed.get("region_volumes", []) or []:
             target = r.get("functional_region")
-            if target not in state.entities:
+            if not state.has_entity(target):
                 uncommitted.append("region_volume -> %s" % target)
                 continue
-            ops.append(_Op("EXTEND", state.entities[target]["_family"], target,
+            ops.append(_Op("EXTEND", state.stored_family(target), target,
                            {"volume": {"half_extent": r.get("half_extent"),
                                        "centre": r.get("centre")}},
                            prov, premise_refs=list(premises)))
         for a in parsed.get("assembly_directions", []) or []:
             target = a.get("assembly_step")
-            if target not in state.entities:
+            if not state.has_entity(target):
                 uncommitted.append("assembly_direction -> %s" % target)
                 continue
-            ops.append(_Op("EXTEND", state.entities[target]["_family"], target,
+            ops.append(_Op("EXTEND", state.stored_family(target), target,
                            {"insertion_direction": a.get("direction")},
                            prov, premise_refs=list(premises)))
 
@@ -418,10 +418,10 @@ def _commit_s04(state, key: str, raw: Optional[str], rec: Dict[str, Any]) -> Non
         premises = [existing[0]] if existing else []
         for p in parsed.get("joint_placements", []) or []:
             target = p.get("joint")
-            if target not in state.entities:
+            if not state.has_entity(target):
                 uncommitted.append("joint_placement -> %s" % target)
                 continue
-            ops.append(_Op("EXTEND", state.entities[target]["_family"], target,
+            ops.append(_Op("EXTEND", state.stored_family(target), target,
                            {"frame_origin": p.get("origin")},
                            prov, premise_refs=list(premises)))
 

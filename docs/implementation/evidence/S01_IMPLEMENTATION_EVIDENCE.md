@@ -763,3 +763,205 @@ the one residual bypass requires explicitly excluded reflection (15).
 
 The supported interface was defined **before** the matrix was evaluated, and no path was moved
 across that line to reach this result.
+
+> **⚠ SUPERSEDED BY §19.** The matrix in §18.7 tested the paths it enumerated and did not
+> enumerate two: the read wrapper still *held* the live store in an ordinary attribute, and the
+> mutation primitives were still ordinary methods on `DesignState`. Both were reachable without
+> reflection. See §19.
+
+
+---
+---
+
+# §19 READ-WRAPPER AND INTERNAL-MUTATOR ENCAPSULATION CORRECTION
+
+Fourth and final S-1 pass. Baseline `14bed10`. Narrow scope: two supported-interface authority
+leaks. No architecture reopened, no later unit begun, no contract, prompt, stage, fixture,
+benchmark or model change. §18's evidence, including its overclaim, is preserved unedited.
+
+## 19.1 Why the §18 composition design still leaked authority
+
+§18 changed the *representation* correctly and then verified it against a matrix **it had
+written itself**. Two things were true of the new design and were not on that list:
+
+1. **The read wrapper was read-only but not detached.** `ReadOnlyTable` refused every mutator
+   and held the live store in `_backing`. A read-only wrapper around a live mutable object is
+   not encapsulation — ordinary attribute lookup hands the caller the very thing the wrapper
+   was protecting.
+2. **The mutation primitives were still ordinary methods.** `_create`, `_extend`, `_supersede`,
+   `_invalidate`, `_propagate`, `_merge_premises` and `_log` sat on `DesignState`.
+   Single-underscore is a naming convention; ordinary method invocation is a supported
+   operation, and §18's own definition said so.
+
+The pattern is the same one that produced the two earlier overclaims: **a matrix proves what it
+enumerates.** Each pass closed everything it thought to test.
+
+## 19.2 Before-fix reproductions against `14bed10`
+
+Ordinary operations only — no reflection.
+
+**Leak A — live backing through the public read wrapper**
+
+```
+table   = state.entities
+backing = table._backing                     # ordinary attribute lookup
+backing["FRG-0001"]["role"] = "BYPASS_A"     # -> authoritative state changed
+```
+Reproduced: `state.entities._backing` returned the live `dict`; the write changed state and
+the state hash moved.
+
+**Leak B — direct internal mutator invocation**
+
+```
+state._create(patch_like, Op("CREATE", "ReferenceScale", "SCL-FORGED",
+                             {"basis": "FORGED"}, None))
+```
+Reproduced: the entity was placed **with no validation and with `_provenance: None`** — the
+exact defect S-1 exists to prevent, through a door beside the one being guarded. `_extend`,
+`_invalidate` and `_propagate` were equally callable.
+
+## 19.3 Authoritative-writer inventory
+
+Every callable that writes authoritative storage, classified:
+
+| Callable | Class | After correction |
+|---|---|---|
+| `apply(patch)` | **PUBLIC SUPPORTED ENTRY** | the only one |
+| `_create` `_extend` `_supersede` `_invalidate` | **INTERNAL ONLY** | module-private functions taking the store explicitly |
+| `_propagate` `_merge_premises` `_log` | **INTERNAL ONLY** | same |
+| `validate` `_extend_problems` `_revision_problems` `_reference_problems` `_family_problem` | **READ ONLY** | append to local problem lists, never to storage |
+| `entities` `by_family` `applied_patches` `family` `standing` `counts` `stored_family` `has_entity` `state_hash` | **READ ONLY** | snapshots and copies |
+| *(none)* | DERIVED / EPHEMERAL | declared when a later unit needs one |
+
+## 19.4 Selected correction
+
+**One change of shape, applied to both leaks: nothing that can reach storage is an attribute of
+anything a caller holds.**
+
+- **`ReadOnlyTable` holds a snapshot**, not the live store. `_backing` is gone; `_snapshot` is
+  a detached copy, so there is nothing behind the wrapper to find.
+- **The mutation primitives moved to module level**, taking the storage explicitly. `apply()`
+  dispatches through a private `_MUTATORS` table. `DesignState` carries no other mutating
+  method.
+- **The storage itself moved off the instance** into a module-private `WeakKeyDictionary`.
+  This closes the path the object-graph test found next: with storage as a name-mangled
+  attribute, `dir()` plus `getattr` still reached it. Now there is no attribute to reach, and
+  using a primitive requires the registry — which requires importing the module and indexing
+  its private state. That is unambiguously reflection rather than an ordinary operation on an
+  object you were handed.
+
+**A leak I introduced and the tests caught.** The first attempt exposed storage through a
+convenience property `state._s`. The object-graph invariant failed on it immediately. It was
+removed; `DesignState` now reaches its own store only through the module registry.
+
+## 19.5 Public read behaviour after correction
+
+| API | Returns |
+|---|---|
+| `entities` | `ReadOnlyTable` over a **snapshot**; mutators refuse with `UNCONTROLLED_WRITE` |
+| `entities[id]`, `family()`, `standing()`, `by_family`, `applied_patches`, `counts()` | plain recursive copies the caller owns |
+| `has_entity(id)`, `stored_family(id)` | **new** — answer without materialising a snapshot, so hot paths pay nothing |
+
+A snapshot is a snapshot: a table taken before an `apply()` still shows the old value, and a
+fresh read shows the new one. There is a test for exactly that, so the semantics are recorded
+rather than discovered later.
+
+`projection.py` now builds views from `family()` instead of `entities`, and `_commit_s04` uses
+`has_entity`/`stored_family`. Both are read-compatibility edits within S-1; no stage reasoning
+changed.
+
+## 19.6 Internal mutation topology after correction
+
+```
+    DesignState.apply(StagePatch)          <- the only public mutating entry
+              |
+              v
+    validate(...)  ->  refuse, or
+              |
+              v
+    _MUTATORS[kind](store.entities, store.by_family, contracts, patch, op)
+              |                                   (module-private functions)
+              v
+    _STORAGE[state]                        <- module-private registry
+```
+
+## 19.7 Object-graph invariant
+
+A traversal from the supported public surface — `state`, `entities`, `family()`, `standing()`,
+`by_family`, `applied_patches`, `counts()`, and everything reachable from their results —
+asserts that no path yields the live store, a mutation capability, or a callable authoritative
+writer other than `apply`. A companion test calls every public callable and asserts that only
+`apply` can change the state hash.
+
+## 19.8 Final matrix
+
+| Path | Result |
+|---|---|
+| `state.entities._backing[id][f] = v` | **REFUSED** — no such attribute |
+| `state.entities._snapshot[id][f] = v` | **no effect** — a detached copy |
+| `state._create(...)` / `_extend` / `_supersede` / `_invalidate` / `_propagate` | **REFUSED** — no such method |
+| `state.entities = {}` | **REFUSED** — `PROTECTED_ROOT` |
+| nested mutation on a read record | **no effect** — the caller's copy |
+| `dict.__setitem__(state.entities, ...)` | **REFUSED** — not a dict |
+| `getattr(design_state, "_STORAGE")[state]` then mutate | **OUTSIDE THE GUARANTEE** — state changes |
+
+## 19.9 Files changed
+
+`ver3/assy_v3/state/authority.py` (snapshot-backed `ReadOnlyTable`) ·
+`ver3/assy_v3/state/design_state.py` (module-private `_Store` + `_STORAGE`; primitives moved to
+module level; `has_entity`) · `ver3/assy_v3/state/projection.py` (builds from `family()`) ·
+`ver3/tools/run_window2.py` (cheap read helpers) ·
+`ver3/tests/state/test_authority_hardening.py` (+7 tests) ·
+`ver3/tests/meta/test_no_uncontrolled_authoritative_writes.py` (registry name).
+
+## 19.10 Broad validation
+
+**69/69 state · 8/8 window · 311/312 meta · ADR-001 L1 8/8 · expanded L2 65/65 · all modules
+import.** The single meta failure is the same pre-existing docs path reference, still verified
+failing at HEAD. No model call, no benchmark rerun.
+
+Classification: the two leaks were **(B) supported authority bypass remains**; the `_s`
+property was **(A) encapsulation implementation defect**, caught by the new invariant and
+removed. No **(C)**, **(D)**, **(F)** or **(G)**.
+
+## 19.11 DEFERRED — contract mutability
+
+`state.c` holds parsed contract dictionaries, and ordinary code can mutate them:
+`state.c.families[F]["extendable_fields"]["role"] = "s04"` succeeds.
+
+**This is not an authority bypass and is deliberately not fixed here.** It cannot change any
+authoritative value: it changes the **permissions `apply()` will later consult**, and every
+mutation still goes through validation and still records provenance. Verified: the state hash
+is unchanged by it.
+
+> **DEFER TO U-2B — CONTRACT IMMUTABILITY / CANONICAL-CONTRACT MIGRATION.**
+
+Pulling contract immutability into S-1 would be U-2B scope creep, and U-2B is where the
+contract corpus is reshaped anyway.
+
+## 19.12 Residual limitations
+
+1. **The excluded region, now narrower and sharper:** importing `design_state` and indexing its
+   private `_STORAGE` registry. There is no longer a mangled attribute on the object, so the
+   remaining path requires reaching into another module's private state. Executable test.
+2. **Snapshot semantics** — a read is a point-in-time copy; a caller wanting current values
+   re-reads. Recorded in a test.
+3. **`state.entities` costs a full snapshot per access.** `has_entity` and `stored_family` exist
+   for hot paths, and no production path now uses `entities` in a loop.
+4. **Contract mutability** — §19.11, deferred to U-2B.
+
+## 19.20 Final S-1 status
+
+All fourteen criteria hold: public reads expose no live storage (1) and mutating a read result
+cannot affect state (2); roots are not replaceable (3); no capability is exposed (4); no
+container bypass exists (5); no alternative authoritative writer is callable through the
+supported surface (6); `apply(StagePatch)` is the sole supported entry (7); family authority
+comes from stored identity (8); the four operations, propagation, provenance and history are
+unchanged (9–11); ADR-001 Level 1 and expanded Level 2 pass (12–13); and the one remaining
+bypass requires explicitly excluded reflection (14).
+
+> **S-1 is COMPLETE.**
+
+Stated with the caution the previous three passes earned: this is a claim about the paths that
+have been enumerated and executed, and the enumeration is now recorded as a matrix so the next
+reader can extend it rather than re-derive it.

@@ -8,20 +8,17 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
-from .authority import thaw
-
 #: Families whose content is source text. Never projected at or after s02.
 SOURCE_TEXT_FAMILIES = ("SourceClause",)
 
 
 def project_for(stage_id: str, state) -> Dict[str, List[Dict[str, Any]]]:
     out: Dict[str, List[Dict[str, Any]]] = {}
-    for family, ids in state.by_family.items():
+    for family in state.by_family:
         if stage_id != "s01" and family in SOURCE_TEXT_FAMILIES:
             continue
         # A view is class C: plain, freely mutable, and unable to affect state.
-        # `dict(...)` alone would copy only the top level and leave nested
-        # authoritative containers in the view, where a consumer mutating one
-        # would hit the authority guard for no reason.
-        out[family] = [thaw(state.entities[i]) for i in ids]
+        # `family()` already returns detached copies, so the view is class C by
+        # construction rather than by a conversion step that could be forgotten.
+        out[family] = state.family(family)
     return out
