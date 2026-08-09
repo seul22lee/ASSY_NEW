@@ -2,6 +2,15 @@
 
 Axis A: **GENERATED EVIDENCE**. Axis B: **REVIEW RECORD**.
 
+> **STATUS: the §7 verdict below has been SUPERSEDED by a later design decision.** This
+> record remains accurate as the falsification pass it was. Its verdict — *"ready except for
+> the explicitly provisional R-5 substrate"* — was correct at the time; the R-5 substrate was
+> subsequently **closed by post-audit Design Decision B**, and the architecture is now
+> **FROZEN FOR IMPLEMENTATION PLANNING**. See `S01_S04_ARCHITECTURE_FREEZE.md`.
+>
+> R-5's *audit evidence status* remains PROVISIONAL and is unchanged. The freeze is a design
+> choice, not a re-grading of evidence.
+
 A falsification pass over `S01_S04_ARCHITECTURE_REVISION_PROPOSAL.md` and the pushed audit
 set, at commit `dc65de9`. **This is not a reset.** Four high-risk decisions were attacked;
 the proposal was amended only where the frozen audit evidence required it.
@@ -48,7 +57,7 @@ CAD reference was modified. No experiment was run.
 Attacked and not weakened:
 
 - accumulated persistent DesignState as the substrate
-- semantic consumer sufficiency in place of family whitelists *(the mechanism survived; §7.2 was added beneath it — see §4)*
+- semantic consumer sufficiency in place of family whitelists *(the mechanism survived; a derived required minimum was added beneath it — see §4, and Decision A in the freeze record)*
 - no silent positional slicing; overflow as a recorded status
 - semantic compression applied only after sufficiency is established
 - mobility **domain vs disposition** split
@@ -84,7 +93,7 @@ and its closing line reads *"Package 1 continues"*.
 could then prove the view "complete" against that understatement — the whitelist omission
 one level up.
 
-**Amendment (proposal §7.2–§7.2.4).** The required set is **derived, not declared**:
+**Amendment (proposal §7; renumbered when Decision A was frozen).** The required set is **derived, not declared**:
 
 1. Responsibility is owned by the **stage responsibility contract**, not by the stage.
 2. Every output field declares its **semantic dependencies** — what it is expressed relative
@@ -101,7 +110,7 @@ one level up.
    layer used as a sufficiency sensor.
 6. Six design prohibitions record what would make sufficiency self-fulfilling.
 
-**Why the regress terminates (§7.2.3).** A consumer need list is global and has *no*
+**Why the regress terminates (proposal §7.4).** A consumer need list is global and has *no*
 completeness test — a missing entry is indistinguishable from a fact that was not needed. A
 per-field dependency is local and has a **mechanical** one: every spatial value declares its
 frame, every reference declares its target family, and a field that declares nothing has no

@@ -164,7 +164,9 @@ and five meta-tests parse it.
 
 ## Package 3 — Minimal engineering reference (quality bar only)
 
-**~60 files · ~9,900 lines + 170 PNGs inspected**
+**~60 files · ~9,900 lines · images: 170 candidate universe → ≈97 planned estimate →
+99 final assigned → 99/99 inspected** (see §3E; `P3_COMPLETE.md:19,22,1041` is the
+coverage authority)
 
 Scope rule: the Oracle answers *"what engineering facts matter?"* — never *"what
 exact mechanism must the pipeline produce?"* A mechanically valid alternative

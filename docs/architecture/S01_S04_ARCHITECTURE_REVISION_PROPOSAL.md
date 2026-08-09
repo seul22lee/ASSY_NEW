@@ -53,8 +53,9 @@ Six results shape everything below.
 
 ## §2 DESIGN PRINCIPLES DERIVED FROM EVIDENCE
 
-**P-1 — Sufficiency before economy.** A consumer view is first sized to the reasoning it
-must perform, and only then compressed. *(R-1)*
+**P-1 — Sufficiency before economy.** A consumer view is first sized to *both* sources of
+sufficiency — the representational dependencies of its outputs and the reasoning premises of
+its decisions — and only then compressed. *(R-1, §7)*
 
 **P-2 — Absence is never an assertion.** No deterministic path may convert "no evidence"
 into a positive engineering claim. A domain may be total while the function over it is
@@ -67,8 +68,8 @@ can be referred to, it must be resolvable. *(R-10)*
 
 **P-5 — A commitment is a claim about the design, and claims bind.** A later stage may
 refine or supersede with a stated reason; it may not silently contradict.
-*(R-5 — **the capability need is evidence-supported; the mechanism proposed to meet it is a
-preferred candidate, not frozen.** See §13.0 and §26.1.)*
+*(R-5 — the capability need is evidence-supported; the mechanism is **frozen by post-audit
+design decision**, not by evidence. See §5.4, §5.6, §13.0.)*
 
 **P-6 — Assurance must not test the property its producer guarantees.** *(R-7)*
 
@@ -145,22 +146,92 @@ Every family declares, in one place:
 | **referenceability** | whether other entities may point at it, and by what id |
 | **consumers** | the stages that declare a need for it |
 
-### 5.3 Four mutation modes, and only four
+### 5.3 Authority classes — what the mutation rules apply to
 
-`CREATE` (owner, once) · `EXTEND` (named stage, named field, once, never over an existing
-value) · `SUPERSEDE` (both retained, reason required, dependents marked STALE) ·
-`RECORD` (unresolved / rejected / evidence — additive, never overwriting).
+**FROZEN — DESIGN DECISION B.** Strict mutation semantics apply to authoritative engineering
+state and **not** to every internal value. Four classes, and every value in the system
+belongs to exactly one:
 
-**Direct mutation of stored entities outside these modes is not part of the architecture.**
-Every value that reaches authoritative state does so through a validated patch with
-provenance. *(R-5; addresses the unguarded path P4B §2 recorded.)*
+| Class | What it is | Mutation rule | Provenance |
+|---|---|---|---|
+| **A — AUTHORITATIVE ENGINEERING STATE** | facts the design *asserts*: requirements, physical obligations, load cases, reaction-site requirements, topology, physical interactions, constraint relations, mobility dispositions, spatial commitments, configurations and transitions, selection decisions, and unresolved items that gate commitment | **controlled mutation only** (§5.4) | **required** — method, premises, evidence reference |
+| **B — DETERMINISTIC DERIVED STATE** | strict logical consequences of class-A premises: the enumerated DOF domain, graph indexes, derived adjacency, normalized lookups | **freely recomputable** from its premises | premise set required; **must not masquerade as independently authored engineering fact** |
+| **C — EPHEMERAL / VIEW / CACHE STATE** | prompt serializations, consumer views, rendering caches, transient bounding computations, provider payload structures | **freely regenerated** | the view records what it was built from, for attribution |
+| **D — ASSURANCE ARTIFACTS** | check results, findings, establishment claims *about* committed state | append-only | inputs and their maturity required |
 
-### 5.4 Derived-not-stored, restated
+**Two boundaries are load-bearing and must be visible enough for implementation review to
+detect a violation:**
+
+- **A vs B.** A derived value that is *stored as if authored* is the audited defect. A class-B
+  value carries its premise set; if the premises are insufficient the value is not computed
+  and the gap is reported (§5.5).
+- **A vs D.** An assurance artifact must never become an input that makes the property it
+  asserts true. Class D is a consumer of class A and never a producer of it.
+
+### 5.4 Controlled mutation of authoritative state — normative invariant
+
+> **Authoritative engineering state may change only through explicit, provenance-carrying
+> mutation operations.**
+
+The semantic operations, at minimum:
+
+| Operation | Semantics |
+|---|---|
+| **CREATE** | the owning stage introduces an entity, once |
+| **EXTEND** | a named stage adds a named field, once, never over an existing value |
+| **SUPERSEDE** | a replacement value is recorded with a reason; **both values are retained**; dependents are affected per §5.6 |
+| **INVALIDATE** | a value is marked no longer standing, with a reason; nothing is deleted; dependents are affected per §5.6 |
+
+`RECORD` of unresolved items, rejections and evidence is a `CREATE` in the families that hold
+them — additive, never overwriting.
+
+**Exact implementation APIs may differ.** What is frozen is that the set is explicit,
+closed, and provenance-carrying.
+
+> **No stage, runner, projection helper, absorber, provider adapter or validator may directly
+> mutate authoritative engineering facts outside this controlled path.**
+
+This is a normative architectural invariant, not a style preference. It applies to helper
+code and tooling exactly as it applies to stages — the audited direct write was in a runner,
+not in a stage.
+
+**Audit-status note.** `P4B_FINAL_SYNTHESIS.md` §21 classifies R-5 as **PROVISIONAL**, and
+that classification stands unchanged: it describes what the *evidence* established. The rule
+above is a **post-audit design decision**, motivated by that evidence and not presented as an
+experimentally proven result. The distinction is preserved deliberately — see §13.0.
+
+### 5.5 Derived-not-stored, restated
 
 A value that is a projection of other state is computed on demand and carries its premise
 set. This preserves the existing principle and extends it: **a derived value with an
 incomplete premise set is not computed at all** — it is reported as underivable, naming the
 missing premise. *(R-6, P-2.)*
+
+### 5.6 Premise change must affect dependent commitment — normative invariant
+
+> **If an authoritative premise used by a downstream commitment is superseded or invalidated,
+> that dependent commitment may not silently remain authoritative.**
+
+The architecture must *represent* the consequence. Concepts sufficient at this level:
+`STALE` · `REOPEN_REQUIRED` · `INVALIDATED`. **The final status vocabulary is an
+implementation decision and is deliberately not over-designed here.** The invariant is:
+
+> **changed premise → the affected dependent commitment loses unqualified authority.**
+
+Applies to every dependency of this class, stated as classes:
+
+| Dependent commitment | Premise whose change affects it |
+|---|---|
+| a candidate selection | the feasibility evidence it was decided on |
+| an S04·B refinement | the S04·A spatial commitment it extends |
+| a mobility conclusion | the constraint relation it cites |
+| a support or load-closure conclusion | the reaction-site premise it terminates at |
+| any derived value | any class-A premise in its premise set |
+
+**What the architecture does not fix here:** how propagation is computed — eagerly on write,
+lazily on read, or by recomputing a dependency closure. That is an implementation choice.
+What is fixed is that a dependent commitment cannot remain unqualifiedly authoritative after
+its premise changes.
 
 ---
 
@@ -299,143 +370,252 @@ its own level (§14).
 
 ## §7 PRODUCER-CONSUMER SUFFICIENCY ARCHITECTURE
 
-### 7.1 The contract
+**FROZEN — DESIGN DECISION A.** This section supersedes every earlier formulation in this
+document. Where any other section still reads as though a stage declares its own needs, this
+section governs.
 
-Each stage declares a **Consumer Sufficiency Contract**: the *semantic facts* it requires,
-not the families it wants. Each declared need names:
+### 7.1 Consumer sufficiency has two independent sources
 
-- the **fact class** (e.g. "the spatial arrangement of every body in the selected
-  candidate", "every quantity of class *length* constraining a body extent");
-- its **kind** — authoritative upstream fact · derived projection · provenance/reference ·
-  unresolved fact · spatial commitment · quantitative constraint · topology relation;
-- whether it is **required** or **contributory**;
-- the **reasoning step** that consumes it.
+A consumer view is sufficient only if it satisfies **two separate questions that do not
+imply one another**. Collapsing them into a single checklist is the error this design exists
+to prevent.
 
-### 7.2 Who establishes that the declaration itself is complete
-
-**This is the load-bearing question, and §7.1 alone does not answer it.** A stage that
-declares too little can be proved "sufficient" against its own understatement. That would
-reproduce the whitelist omission at a higher level of abstraction, and it must be closed
-before anything else in this proposal is worth implementing.
-
-**The closure: the required set is derived, not declared.**
-
-**(1) Responsibility is not owned by the stage.** The authoritative source of a stage's
-engineering responsibility is its **stage responsibility contract** — the normative
-statement of which engineering question the stage answers and which entity families and
-fields it may create. It is not the prompt, not the implementation, and not the stage's own
-sufficiency declaration.
-
-**(2) Required fact classes are derived from the stage's declared *outputs*.** Every output
-field a stage may create declares its **semantic dependencies** in the entity-family
-contract: what the value is expressed relative to, what it must be consistent with, and what
-it references. The **derived minimum input set** of a stage is the union of the semantic
-dependencies of every output field it may create.
-
-> A field whose contract says it is *expressed in the frame of the arrangement* thereby
-> makes the arrangement a required input. No one has to remember to ask for it.
-
-**(3) The declaration is bounded below and may only be widened.** A stage may add
-**contributory** needs — facts that improve its reasoning. It **may not declare fewer than
-the derived minimum**. A declaration narrower than the derivation is a contract violation,
-not a preference.
-
-**(4) A stage may not self-validate its own sufficiency.** It may propose contributory
-needs. It may not author the required set, and the check that the *declaration* is adequate
-is a different check, with different inputs, from the check that the *view* satisfies the
-declaration.
-
-### 7.2.1 Four-way independence
-
-| Artifact | Authored by | Read by the sufficiency check? |
+| | **A — REPRESENTATIONAL SUFFICIENCY** | **B — REASONING SUFFICIENCY** |
 |---|---|---|
-| **stage responsibility** | normative contract | **yes — this is the essential one** |
-| **derived required needs** | deterministic derivation over output-field dependencies | yes |
-| **declared contributory needs** | the stage | yes, but they can never reduce the required set |
-| **generated view** | the substrate | yes |
-| **sufficiency assurance** | the assurance layer, never the stage | — |
+| **Question** | *Can the consumer's outputs be represented with complete and traceable meaning?* | *Has the consumer received the engineering premises required by the decisions it is responsible for making?* |
+| **Derived from** | the **output / entity semantic contract** | the **stage responsibility contract** |
+| **Chain** | output field → its declared referent | responsibility → engineering question → required premise class |
+| **Nature of a violation** | an output whose meaning is undefined or untraceable | an output whose meaning is perfectly defined and whose engineering basis is absent |
+| **Example of the class** | a spatial value without its reference frame; a relation without addressable subject and object; a load-path segment without defined endpoints; a mobility statement without a defined DOF domain; a constraint statement without the entity and interaction it constrains | topology synthesis without the relevant load cases; support reasoning without reaction-site requirements; retention topology without disturbance/retention obligations; spatial realization without the relevant quantities and mobility expectations; refinement without the prior spatial commitments |
 
-> **An assurance check that reads only the declaration and the view is structurally
-> incapable of detecting an omitted need.** It must read the output contract from which the
-> requirement derives. This is stated as a prohibition because it is exactly the shape of
-> the failure the audit found.
+**Why both are required.** A stage can produce output that is fully well-formed and fully
+traceable, and still be reasoning without the premises its assigned decision needs. That
+output passes every representational test. **Source B is the one that catches it**, and it
+cannot be derived from output field referents, because the premise is not something the
+output points at — it is something the decision depended on.
 
-### 7.2.2 Distinguishing an omitted need from an unnecessary fact
+### 7.2 The final sufficiency rule
 
-Three signals, none of them benchmark-specific:
+> **Required Consumer View = Representational Dependencies ∪ Engineering Reasoning Premises
+> ∪ explicitly justified contributory context.**
 
-1. **Derivation** — a fact class is necessary iff some output field the stage may create
-   declares a semantic dependency on it. A class nothing depends on is not needed, and its
-   absence is not a finding. This is the primary test and it is mechanical.
-2. **Contradiction against accumulated state** — a stage produces a value that contradicts an
-   authoritative value present in accumulated state and absent from its view. The
-   contradiction is detectable *because* the accumulated state has the value, and it is
-   positive evidence that the class was needed. This converts an omission into an
-   observable event rather than a silent one.
-3. **The producer's own unresolved layer as a sufficiency sensor** — a stage that records an
-   unresolved item naming a fact class which *exists in accumulated state* is reporting an
-   omitted need in its own words. The audit established that this recognition capability is
-   real and precise, and that nothing consumed it; here it is given a consumer.
+**A stage may request additional contributory information. A stage may never narrow the
+required minimum.** A declaration below the architecture-derived minimum is a contract
+violation, not a preference. A stage does not decide, silently or otherwise, that a required
+premise is unnecessary.
 
-Signals 2 and 3 are **detectors, not the guarantee.** The guarantee is signal 1. The
-detectors exist because a derivation is only as complete as the dependency declarations it
-reads.
+### 7.3 The derivation chain, and where independence lies
 
-### 7.2.3 Why the recursion terminates
+```
+Stage Responsibility Contract
+        │
+        ├── derives Engineering Questions
+        │              │
+        │              └── derives Required Reasoning Premise Classes ──┐
+        │                                                              │
+Output / Entity Semantic Contract                                      │
+        │                                                              │
+        └── derives Required Representational Dependencies ────────────┤
+                                                                       ▼
+                                            Required Minimum Consumer Semantics
+                                                                       │
+                                          (+ stage-authored CONTRIBUTORY context,
+                                             which may only widen)
+                                                                       ▼
+                                              Consumer View Construction
+                                                                       ▼
+                                            Independent Sufficiency Assessment
+```
 
-The obvious objection is regress: if a need list can be incomplete, so can a dependency
-declaration. The regress terminates for a structural reason, and the difference is not
-cosmetic.
+**Three properties of this chain are normative:**
 
-| | consumer need list *(rejected as the primitive)* | output-field semantic dependency *(the primitive)* |
+1. **The generated view does not define its own completeness criterion.** The criterion comes
+   from two contracts upstream of the view and upstream of the stage.
+2. **The consuming stage authors neither branch of the minimum.** It may author contributory
+   needs only, and those can only widen.
+3. **The sufficiency assessment reads the contracts, not merely the view.** An assessment
+   whose only inputs are a declaration and a view is structurally incapable of detecting an
+   omitted requirement, and is prohibited.
+
+**What this forecloses:** *stage says it needs X → view contains X → checker declares
+SUFFICIENT.* At no point does a stage's own statement of need enter the minimum.
+
+### 7.4 The residual limitation, stated plainly
+
+**This architecture does not prove that the stage responsibility contracts and entity
+semantic contracts contain all mechanical knowledge that competent reasoning requires.**
+They are human-authored, and a premise class nobody thought of will not appear in either.
+
+**No claim of mathematical completeness of engineering reasoning is made here, and none
+should be read into this document.**
+
+The architectural objective is narrower and achievable:
+
+> **A missing dependency becomes an explicit contract defect — locally attributable, at a
+> named contract, in a named field or premise class — rather than silent context loss at a
+> projection boundary.**
+
+That is the whole of the improvement, and it is enough: the audited failure was not that
+someone chose the wrong families, but that nothing anywhere was obliged to state the
+relationship at all.
+
+Two detectors supplement the derivation, and are detectors only, never the guarantee:
+
+- **contradiction against accumulated state** — a stage produces a value contradicting an
+  authoritative value that exists in state and was absent from its view;
+- **the producer's own unresolved layer as a sufficiency sensor** — a stage recording an
+  unresolved item that names a fact class already present in accumulated state is reporting
+  an omitted premise in its own words.
+
+### 7.5 Two failures, never conflated
+
+| Finding | Meaning | Attributable to |
 |---|---|---|
-| scope | global — "everything this stage's reasoning requires" | local — "what this one field's value means" |
-| completeness test | **none exists**; a missing entry looks exactly like a fact that was not needed | **mechanical** — every field of a given kind must declare its referent, e.g. every spatial value declares its frame, every reference declares its target family |
-| who can check it | nobody, without redoing the engineering | a structural check over the contract |
-| failure signature | silent | the field has no defined meaning, which is itself a finding |
+| **UPSTREAM INSUFFICIENCY** | a required fact class has no instance in accumulated state | the producing stage, or a genuine gap in the problem |
+| **PROJECTION FAILURE** | instances exist in accumulated state and the view does not carry them | the view construction / the boundary |
 
-So the residual risk is not eliminated; it is **moved to a place where it has a completeness
-test.** That is the whole claim, and it is the reason this design is proposed rather than a
-longer whitelist.
+These are different defects with different owners. The audit spent substantial effort
+separating them after the fact; the architecture separates them at the point of failure.
 
-### 7.2.4 What would make consumer sufficiency self-fulfilling
+### 7.6 Budget overflow is a status, never a slice
 
-Design prohibitions, stated so that a later reviewer can test for them:
+A semantically sufficient view that exceeds the budget is reduced by **semantic** means —
+reference-by-id with expansion on demand, role-level summarisation of homogeneous
+collections, omission of contributory (never required) classes — and **what was reduced, and
+by which rule, is recorded**. Positional truncation is not a compression strategy; it is
+undetected information loss.
 
-- deriving the declaration from the view that was sent, or from what the stage happened to use;
-- letting the consuming stage author its own required set;
-- an assurance check whose only inputs are the declaration and the view;
-- defining "sufficient" as *"every declared class was present"* with no term referring to
-  responsibility;
-- silently demoting an unmet required class to contributory to make a call proceed;
+A view that cannot be made sufficient within budget is a recorded condition
+(`CONTEXT_INSUFFICIENT` / `BUDGET_INSUFFICIENT`), not a silently truncated prompt.
+
+### 7.7 What would make consumer sufficiency self-fulfilling
+
+Prohibitions, stated so a reviewer can test for them:
+
+- deriving the minimum from the view that was sent, or from what the stage happened to use;
+- letting the consuming stage author any part of the required minimum;
+- an assessment whose only inputs are the declaration and the view;
+- defining "sufficient" as *"every declared class was present"*, with no term referring to
+  responsibility or to output semantics;
+- silently demoting an unmet required class to contributory so a call can proceed;
 - treating a stage's successful execution as evidence that its view was sufficient.
 
-**The operative definition, therefore:**
+**Operative definition:**
 
 > **Consumer-view completeness ≠ "all facts listed in the declaration happened to be
-> present."** It is: *every fact class on which the stage's permitted outputs semantically
-> depend is present in the view, at sufficient maturity, and any that is not is recorded as
-> an attributable insufficiency.*
+> present."** It is: *every representational dependency of the outputs the stage may create,
+> and every reasoning premise class its assigned decisions require, is present in the view at
+> sufficient maturity — and any that is not is recorded as an attributable insufficiency.*
 
-### 7.3 Three consequences
+### 7.8 Per-stage semantic responsibility matrix
 
-**(a) The view is built from the declaration**, not from a hand-maintained family list. A
-family list cannot express "the arrangement of the *selected* candidate" and cannot notice
-that a needed fact class is absent — which is exactly how the arrangement and the quantities
-were lost.
+Architecture-level. **This is not a prompt specification**, and the premise classes are
+stated as classes, never as instances.
 
-**(b) Sufficiency is evaluated before the call.** If a required fact class has no instance in
-accumulated state, that is an **upstream insufficiency** — attributable to the producer. If
-it has instances that the view does not carry, that is a **projection failure** —
-attributable to the boundary. **These are different findings and must not be conflated**;
-the audit spent significant effort separating them after the fact.
+---
 
-**(c) Budget overflow is a status, never a slice.** When a semantically sufficient view
-exceeds the budget, the architecture must reduce it by *semantic* means — reference-by-id
-with expansion on demand, role-level summarisation of homogeneous collections, omission of
-contributory (never required) classes — and **record what was reduced and by which rule**. A
-view that cannot be made sufficient within budget is a recorded condition, not a silently
-truncated prompt. *(R-1, P-8)*
+**S01 — problem interpretation**
+
+| | |
+|---|---|
+| **Responsibility** | convert a request into typed statements of what is required, what is free, what is ambiguous, and what lies outside the product |
+| **Engineering questions** | what does the source oblige? what does it leave open? what is genuinely undetermined? who acts, and what must be reached? where is the system boundary in each scenario? |
+| **Representational dependencies** | the source itself, with locators; a scenario identity for every boundary-bearing statement |
+| **Reasoning premises** | none upstream — S01 is the only stage that reads raw source |
+| **Contributory** | prior recorded ambiguity vocabulary |
+| **Output semantics** | atomic requirements; ambiguities with what would resolve them; scenarios carrying an explicit system boundary; candidate external sites |
+| **Upstream insufficiency** | source unavailable or unlocatable |
+| **Projection failure** | a source proposition present in the input and absent from the view |
+
+---
+
+**S02 — physical obligation, demand and principle**
+
+| | |
+|---|---|
+| **Responsibility** | establish what must physically be true, what the world does, and which principle families could serve |
+| **Engineering questions** | what must hold regardless of mechanism? what physical effects must occur between which roles? what loads act and where may each be reacted? which principle families could serve, and which of their claims can be evidenced? |
+| **Representational dependencies** | requirement identities; scenario identities; role identities; the quantity types obligations will cite |
+| **Reasoning premises** | **the full requirement set** (an obligation set derived from part of it is unsound); **ambiguities** (an obligation resting on a silently resolved ambiguity is an unrecorded commitment); **scenario boundaries** (a reaction-site requirement cannot be typed external without one); **actors and reach intent** |
+| **Contributory** | principle-family knowledge with declared claim dependencies |
+| **Output semantics** | obligations with premises and evidence route; candidate-independent load cases; physical-effect obligations; reaction-site requirements; candidates with principle assignment |
+| **Upstream insufficiency** | requirements not atomized; no scenario carries a boundary |
+| **Projection failure** | requirements or ambiguities exist and the view omits them |
+
+---
+
+**S03·A — mechanism topology**
+
+| | |
+|---|---|
+| **Responsibility** | state what things exist, what each does, and how they connect — with no magnitude, position or axis placement |
+| **Engineering questions** | what bodies and rigid groups exist? what joins what, of what type, leaving which DOF? what configurations exist and what distinguishes them? which sites must be distinct for a mechanical relationship to exist? |
+| **Representational dependencies** | obligation identities (for `addresses_obligations`); candidate identity; role identities that bodies realize; the DOF domain definition |
+| **Reasoning premises** | **physical-effect obligations** (a topology synthesised without knowing what must be transmitted is invented, not derived); **load cases** (they determine which connections must carry force); **reaction-site requirements**; **the candidate's principle assignment with its claim dependencies**; **quantity classes that constrain topology** (counts, ranges, travel) |
+| **Contributory** | prior rejected topologies with reasons |
+| **Output semantics** | bodies, rigid groups, joints, interfaces, configurations with distinguishing bases, functional regions, required-distinctness declarations |
+| **Upstream insufficiency** | no physical-effect obligation exists for a required function |
+| **Projection failure** | load cases or effect obligations exist and the view omits them |
+
+---
+
+**S03·B — interaction and constraint**
+
+| | |
+|---|---|
+| **Responsibility** | state what physically transmits each required effect, what constrains what, and how load reaches the world |
+| **Engineering questions** | what realizes each required effect? what holds each body where it is put, against what, in which configurations, and how would a test defeat it? how does each load reach an external site? in what order does it assemble, and what retains each part? |
+| **Representational dependencies** | body and rigid-group identities; interface and feature identities; configuration identities; reaction-site identities; effect-obligation identities |
+| **Reasoning premises** | **the full S03·A topology**; **load cases and their reaction-site requirements**; **physical-effect obligations** (to discharge); **disturbance / retention obligations**; **configuration distinguishing bases** (a constraint's configuration set is meaningless without them) |
+| **Contributory** | assembly-order constraints from obligations |
+| **Output semantics** | physical interactions with discharge references; addressable constraint relations; load paths; assembly steps |
+| **Upstream insufficiency** | a load case names no reaction-site requirement |
+| **Projection failure** | retention obligations exist and the view omits them |
+
+---
+
+**S04·A — coarse spatial realization and comparability**
+
+| | |
+|---|---|
+| **Responsibility** | give each retained candidate a provisional arrangement sufficient to decide fit, reach and assemblability, and to make candidates comparable |
+| **Engineering questions** | can this candidate fit at all? can each actor reach what it must? can it be assembled? on what geometric ground would it be eliminated? |
+| **Representational dependencies** | body and rigid-group identities; **one declared reference frame**; region identities; assembly-step identities |
+| **Reasoning premises** | **the full topology and interactions**; **quantities of the classes that bound extent, travel and clearance**; **reach targets and actor requirements**; **envelope and region constraints**; **assembly-order constraints** |
+| **Contributory** | comparable arrangements of sibling candidates |
+| **Output semantics** | extents and centres in one frame, at commitment class `PROVISIONAL` / `COMPARABLE`; reach results; elimination records with geometric reasons |
+| **Upstream insufficiency** | no quantity of a class the extent depends on exists anywhere in state |
+| **Projection failure** | such a quantity exists and the view omits it — **the audited failure** |
+
+---
+
+**Selection gate**
+
+| | |
+|---|---|
+| **Responsibility** | commit to one candidate, or record that the candidates remain indistinguishable |
+| **Engineering questions** | do all retained candidates carry evidence at equal obligation coverage and equal maturity? does any unresolved item block selection? on what recorded ground does one win? |
+| **Representational dependencies** | candidate identities; obligation coverage per candidate; maturity per value |
+| **Reasoning premises** | **every candidate's S04·A evidence**; **every candidate's evidence-route verdict**; **all unresolved items and their blocking scope** |
+| **Contributory** | — |
+| **Output semantics** | a selection decision with recorded ground, or an unresolved decision; never a tie broken silently |
+| **Upstream insufficiency** | candidates carry unequal coverage — this **is** the finding, not an error |
+| **Projection failure** | an unresolved item that blocks selection exists and the gate's inputs omit it |
+
+---
+
+**S04·B — committed spatial and kinematic realization**
+
+| | |
+|---|---|
+| **Responsibility** | place the selected mechanism and describe its motion so that clearance, incidence and distinctness can be computed |
+| **Engineering questions** | where is each joint, in which frame, and on which axis? what coordinate values realize each configuration? which coordinates change in each transition, and along what path? |
+| **Representational dependencies** | joint and body identities; joint incidence; **the reference frame of the arrangement being extended**; configuration and transition identities |
+| **Reasoning premises** | **the selected candidate's S04·A arrangement and its commitment classes** — *the single most consequential premise, and the one the audited system omitted*; **the full topology including axes and link relationships**; **required-distinctness declarations**; **configuration distinguishing bases**; **constraint relations and the interactions maintaining them**; **quantities bounding travel and clearance**; **the selection decision itself** |
+| **Contributory** | superseded S04·A alternatives with reasons |
+| **Output semantics** | joint frames (origin **and** axis); configuration coordinates; transitions with changing coordinates and a declared motion evidence level; refinements or explicit supersessions of S04·A values |
+| **Upstream insufficiency** | no arrangement exists for the selected candidate |
+| **Projection failure** | the arrangement exists in state and the view omits it — **the audited failure, in six of six cases** |
 
 ---
 
@@ -624,30 +804,29 @@ without any geometry knowledge downstream. **This is the mechanism-independent r
 
 ## §13 S04·A → S04·B REFINEMENT SEMANTICS
 
-### 13.0 Status of this section — SELECTED PROVISIONAL ARCHITECTURE
+### 13.0 Status of this section — FROZEN BY DESIGN DECISION B
 
-**R-5 is the one requirement the frozen audit marks PROVISIONAL** (`P4B_FINAL_SYNTHESIS.md`
-§21). Everything in this section, in §5.3's `SUPERSEDE` mode, in §16's invalidation
-semantics and in migration unit **M-4** rests on it, and must not be presented as frozen
-alongside the fourteen FINAL requirements.
+**Two statuses, deliberately kept distinct, and neither is allowed to overwrite the other:**
 
-**Two things are separated and carry different weight:**
+| | Statement |
+|---|---|
+| **AUDIT EVIDENCE STATUS** | `P4B_FINAL_SYNTHESIS.md` §21 classifies **R-5 as PROVISIONAL**. That classification is historically accurate, stands unchanged, and is **not** revised by anything in this document. It records that the evidence for the binding-commitment requirement was contract-level plus a single case, and that P4B question 4 remained open. |
+| **ARCHITECTURE DESIGN CHOICE** | After audit review, the architecture **adopts controlled authoritative mutation (§5.4) and dependent-commitment invalidation (§5.6) as normative principles.** This is a design decision motivated by the audit. It is **not** presented as an experimentally proven result, and adopting it does not make R-5 evidentially stronger than it was. |
 
-| | Statement | Standing |
-|---|---|---|
-| **capability need** | *Later-stage reasoning must not silently invalidate the premises on which an authoritative commitment depends.* | **evidence-supported**; a spatial refinement that contradicts an earlier arrangement, and a selection whose premises change beneath it, are both observed shapes |
-| **architectural mechanism** | commitment classes + supersede-with-reason + invalidation cone + STALE selection | **PREFERRED CANDIDATE PENDING R-5 CLOSURE** — coherent and self-consistent, but not the only design that meets the need |
+> **AUDIT EVIDENCE STATUS ≠ ARCHITECTURE DESIGN CHOICE.** A design may rationally commit
+> where evidence is incomplete. What it may not do is relabel the evidence.
 
-**What must be closed before this mechanism is frozen** — this is P4B unresolved question 4:
-*why does an unguarded direct write into stored entities exist alongside a defined,
-validated `EXTEND` operation that is never exercised?* The answer determines whether
-declaring commitment classes is sufficient, or whether the substrate must also make
-out-of-band writes structurally impossible. Those are different architectures with different
-costs, and the evidence does not currently choose between them.
+**What follows from the decision.** The commitment/refinement mechanism below is **frozen as
+architecture**, not held open pending P4B question 4. The question remains scientifically
+interesting — it is retained in §26 as an unresolved *evidence* question — but it no longer
+gates the architecture, because the decision has been made on design grounds: the
+alternative, allowing arbitrary direct authoritative writes with auditing after the fact,
+is **rejected** (§20.6).
 
-**Not resolved by assumption here.** The mechanism below is written out in full because a
-candidate must be specific enough to be criticised — not because the question is settled.
-Alternatives that remain open are recorded in §26.1.
+**What remains genuinely open is implementation-level, not architectural:** how dependency
+propagation is computed, what the final status vocabulary is, and whether commitment classes
+are stored per value or derived from a dependency graph. Those are implementation decisions
+and are recorded as such in the implementation plan, not as architecture uncertainty.
 
 Every S04·A spatial value carries a commitment class:
 
@@ -825,7 +1004,8 @@ Independence has three degrees, and each check declares which it has:
 | Category | Information required to evaluate | Who may produce it | Self-fulfilling if… | Required independence |
 |---|---|---|---|---|
 | schema / reference integrity | typed state + reference model | deterministic | the writer and the checker share the reference rule | STRUCTURAL |
-| **consumer sufficiency** | the sufficiency declaration **and** the view actually sent | view builder records both | the declaration is derived from the view | STRUCTURAL |
+| **representational sufficiency** | the **output/entity semantic contract** + the view actually sent | contract; view builder records the view | the required set is taken from the view or from the stage | STRUCTURAL |
+| **reasoning sufficiency** | the **stage responsibility contract** → engineering questions → required premise classes, + the view actually sent | contract; view builder | the premise classes are authored by the consuming stage | STRUCTURAL |
 | deterministic consistency | premises + derived values | derivation records premises | the check tests the derivation's own guarantee | PREMISE |
 | mechanical topology consistency | bodies, groups, joints, interactions, constraints | S03 | — | PREMISE |
 | **spatial / topology closure** | topology **and** placements | S03 + S04 | the placer also defines incidence | PREMISE |
@@ -897,18 +1077,19 @@ to invent a mechanism and its justification in one pass. That is why the physica
 
 ### 20.1 Consumer views
 
-| | **A: family whitelist** *(audited)* | **B: whole state** | **C: declared-need views** *(selected)* |
-|---|---|---|---|
-| requirement coverage | fails R-1, R-2 | satisfies R-1 | satisfies R-1, R-2 |
-| semantic clarity | list says nothing about why | none | need names the reasoning step |
-| token cost | low | very high, grows with state | bounded by declaration |
-| LLM burden | may lack a fact | must filter noise | targeted |
-| observability | cannot detect a missing class | cannot attribute a miss | sufficiency is checkable |
-| complexity | trivial | trivial | moderate — declarations must be maintained |
-| premature-commitment risk | high (silent absence) | moderate | low |
+| | **A: family whitelist** *(audited)* | **B: whole state** | **C: stage-declared needs** | **D: architecture-derived two-source minimum** *(SELECTED, §7)* |
+|---|---|---|---|---|
+| who sets the minimum | a hand-maintained list | nobody | **the consuming stage** | **two contracts upstream of the stage** |
+| requirement coverage | fails R-1, R-2 | satisfies R-1 | satisfies R-1 only if the stage declares correctly | satisfies R-1, R-2 |
+| can a consumer under-ask? | n/a | n/a | **yes — silently** | **no** — it may widen only |
+| catches a missing *reasoning premise*? | no | incidentally | only if declared | **yes — derived from responsibility** |
+| token cost | low | very high, grows with state | bounded | bounded by the derived minimum |
+| observability | cannot detect a missing class | cannot attribute a miss | cannot detect an under-declaration | omission surfaces as a **contract defect** |
+| complexity | trivial | trivial | moderate | moderate — two contracts must be authored |
 
-**Selected: C.** B is explicitly rejected: it makes every stage's cognitive load grow with
-accumulated state and still cannot distinguish "absent upstream" from "not projected".
+**Selected: D.** **C is rejected** — it is the whitelist failure one level up, and was an
+earlier formulation in this document. **B is rejected** — cognitive load grows with
+accumulated state, and it still cannot distinguish *absent upstream* from *not projected*.
 
 ### 20.2 Mobility dispositions
 
@@ -954,6 +1135,28 @@ independence is insufficient. C everywhere is rejected on cost with no evidence 
 **Selected: C.** B is rejected on the substantive ground that naming bodies at S02 violates
 the stage's own prohibition, not because the names are old.
 
+### 20.6 Authority and mutation — the HYBRID AUTHORITY MODEL
+
+| | **A: uniform strict mutation for all state** | **B: arbitrary direct writes + audit after the fact** *(effectively the audited system)* | **C: HYBRID AUTHORITY MODEL** *(SELECTED, §5.3–§5.6)* |
+|---|---|---|---|
+| authoritative engineering state | controlled | uncontrolled | **controlled mutation only** |
+| deterministic derived state | controlled — over-heavy, and forces derived values to look authored | uncontrolled | **freely recomputable from its premises** |
+| ephemeral / view / cache | controlled — pure ceremony | uncontrolled | **freely regenerated** |
+| assurance artifacts | mixed with the state they judge | mixed | **separate consumers of committed state** |
+| detectability of an illegal write | high, at high cost | **none** | high, and only where it matters |
+| premise-change propagation | possible | not representable | **required (§5.6)** |
+
+**Selected: C.**
+
+**B is rejected and is no longer an open alternative.** "Allow arbitrary direct authoritative
+writes and audit later" is not an equally viable architecture: the audited system had exactly
+one such path, it wrote spatial commitments — class-A facts — with no provenance, no
+ownership check and no validation, and nothing in the system could have detected it. Auditing
+after the fact is what this review *was*; it is not a control.
+
+**A is rejected** because applying strict semantics to caches and prompt payloads buys
+nothing and, worse, blurs the A/B boundary that §5.3 exists to keep sharp.
+
 ---
 
 ## §21 SELECTED ARCHITECTURE, AND WHETHER THE BOUNDARIES SURVIVE
@@ -982,7 +1185,7 @@ change was preferred, per the brief. The changes are to *what crosses* the bound
 | R-2 | C-12, C-13 | arrangement is a required class in S04·B's contract (§7, §12) | S04·B | S04·A | S04·B | deterministic | spatial closure, PREMISE | S04·B cannot run without it | placements checked against the arrangement they extend |
 | R-3 | C-14, C-15 | required-distinctness declaration on topology (§12) | S03 | S03·A | S04·B, assurance | LLM declares, det. checks | spatial closure, PREMISE | violation is a finding, not a silent pass | two joints declared distinct sharing a location |
 | R-4 | C-17 | Configuration distinguishing basis (§14) | S03 | S03·A | S04·B, assurance | LLM authors, det. compares | state realization, PREMISE | contradiction recorded | two configurations equal on their basis |
-| R-5 **PROVISIONAL** *(need supported; mechanism is a preferred candidate — §13.0)* | C-19 | commitment classes + supersede-with-reason + invalidation cone (§13, §5.3) | shared substrate | any stage | assurance, gate | deterministic | progression validity | superseding a gate premise marks selection STALE | a changed COMPARABLE value with no supersede record |
+| R-5 *(audit status **PROVISIONAL**; mechanism **frozen by design decision** — §13.0)* | C-19 | commitment classes + supersede-with-reason + invalidation cone (§13, §5.3) | shared substrate | any stage | assurance, gate | deterministic | progression validity | superseding a gate premise marks selection STALE | a changed COMPARABLE value with no supersede record |
 | R-6 | C-11, C-18 | domain/disposition split; `UNDISPOSITIONED`; premise rule (§11) | S03 + substrate | det. enumerates, LLM authors | assurance | both, separated | deterministic consistency, PREMISE | disposition completeness is a reported quantity | a disposition with no resolvable premise |
 | R-7 | C-11, C-18 | independence degrees; self-fulfilling disclosure (§17) | assurance layer | assurance | reviewer | deterministic | meta | — | a check whose property its input's producer guarantees |
 | R-8 | C-20 | blocking defined by the consumer's required classes (§16.2) | substrate | any stage | gate, stages | deterministic | progression validity | a blocking item stops the call or the gate | commitment with a blocking item open |
@@ -1038,7 +1241,7 @@ Coherent units, not a patch sequence. **No file is edited by this document.**
 | **M-1 Representation closure** | contract-first | entity-family definitions; the typed-relation model; ownership matrix; the concepts in §8–§10 |
 | **M-2 Sufficiency substrate** | new shared capability | per-stage sufficiency declarations; view construction; the recorded `ConsumerView`; budget policy |
 | **M-3 Authorship boundary** | replaces two derivations | the mobility derivation; the motion-evidence representation; the defaulting sites §11.3 names |
-| **M-4 Commitment substrate** *(**PROVISIONAL** — pending R-5 closure, §13.0)* | extends the patch layer | commitment classes; supersede-with-reason; invalidation cone made operative; treatment of out-of-band writes. **The capability need is established; this mechanism is the preferred candidate and must not be implemented ahead of P4B question 4** |
+| **M-4 Commitment substrate** *(**FROZEN** by Decision B — §13.0)* | extends the patch layer | authority classes; the four controlled operations; premise-change propagation; elimination of out-of-band authoritative writes |
 | **M-5 Gate** | makes an existing concept real | selection preconditions; the two poles' emission points |
 | **M-6 Assurance layer** | new layer | checks relocated to read committed state; independence declarations; self-fulfilling disclosure |
 | **M-7 Status constructs** | reporting and metrics | the four constructs; maturity coverage over S03/S04; metric construct validity |
@@ -1118,22 +1321,25 @@ author it.
 
 ## §26 REMAINING ARCHITECTURE DECISIONS
 
-### 26.1 The R-5 substrate — open alternatives
+### 26.1 The R-5 substrate — CLOSED BY DESIGN DECISION B
 
-Recorded so that the choice is made on evidence rather than inherited from this document:
+Previously recorded here as three open alternatives. **The choice has been made on design
+grounds** (§5.4, §5.6, §13.0):
 
-| Candidate | What it assumes | What would select it |
-|---|---|---|
-| **(a) declarative commitment classes** *(written out in §13, preferred)* | that recording a commitment's class and requiring a reason to supersede it is enough, because writers are cooperative | P4B Q4 resolves to *"the out-of-band write was an expedient, not a needed capability"* |
-| **(b) structurally enforced patch-only mutation** | that no path may write stored state outside a validated patch, at the cost of every convenience path | P4B Q4 resolves to *"the direct write exists because the patch layer could not express the update"* — which would also indict `EXTEND`'s expressiveness |
-| **(c) append-only state with commitments as derived views** | that no value is ever mutated at all; supersession is a new record and current-value is computed | if invalidation proves too costly to maintain incrementally |
+| Candidate | Disposition |
+|---|---|
+| declarative commitment classes with controlled mutation | **SELECTED** — the hybrid authority model of §20.6 |
+| structurally enforced patch-only mutation for *all* state | **rejected** — over-applies strict semantics to derived and ephemeral values, which §5.3 separates for good reason |
+| append-only state with commitments as derived views | **not selected**, and not foreclosed as an *implementation* of the frozen semantics — it satisfies §5.4 and §5.6 and remains an implementation option |
+| arbitrary direct authoritative writes plus auditing after the fact | **rejected outright** — no longer a viable architecture alternative (§20.6) |
 
-**No option is chosen here.** (a) is written out because it is the least disruptive of the
-three and because a candidate must be concrete to be attacked; that is not an argument that
-it is correct.
+**P4B question 4 is retained below as an unresolved evidence question.** It no longer gates
+the architecture.
 
-1. **R-5 is PROVISIONAL, and so is migration unit M-4.** See §13.0 for the full statement of
-   what is supported and what is a candidate. The open alternatives are recorded in §26.1.
+1. **P4B question 4 remains scientifically unresolved** — why an unguarded direct write
+   existed alongside a defined, validated, never-exercised `EXTEND`. R-5's audit status
+   remains PROVISIONAL. **Neither gates the architecture**, which has committed by design
+   decision (§13.0). The answer would inform implementation, not architecture.
 2. **Repeated-member correspondence** rests on one case (C-16). The typed model in §12 is
    proposed as provisional; a second multi-instance case would settle whether it needs a
    dedicated relation or is a property of body identity.
@@ -1183,7 +1389,8 @@ This is not a defect, but leaving it implicit **is** how the audited system reac
 
 | Category | Producer creates | Assurance consumes | Guaranteed by producer? | Claim class | Could a wrong engineering claim still pass? |
 |---|---|---|---|---|---|
-| **Consumer sufficiency** | the view; contributory needs | the **output contract's dependency derivation** + the view | **No** — the required set derives from a contract the stage does not own (§7.2) | FIDELITY | **Yes.** A sufficient view does not make the reasoning right. Its value is *attributive*: it makes a later failure chargeable to the model rather than the boundary |
+| **Representational sufficiency** | the view | the **output/entity semantic contract** + the view | **No** — the required set derives from a contract the stage does not own (§7.3) | FIDELITY | **Yes.** A well-formed view does not make the reasoning right |
+| **Reasoning sufficiency** | the view; contributory needs | the **stage responsibility contract** → premise classes, + the view | **No** — premise classes derive from responsibility, which the stage does not author | FIDELITY | **Yes.** A sufficient view does not make the reasoning right. Its value is *attributive*: it makes a later failure chargeable to the model rather than the boundary |
 | **Mobility — domain totality** | deterministic enumeration | the same enumeration | **Yes, by construction** | **BOOKKEEPING** | n/a — must never be reported as assurance. This is the exact defect the audit found |
 | **Mobility — disposition completeness** | authored relations; derived dispositions | dispositions + the relations they cite | **No** — completeness varies with what was authored | PROVENANCE INTEGRITY | **Yes.** A resolvable premise may still be mechanically false |
 | **Mobility — cross-premise consistency** | S02 load cases / actuation; S03 dispositions | **both, from different producers** | **No** | **ENGINEERING CONSEQUENCE** | A DOF marked `IRRELEVANT` that a load case loads is a real contradiction. **This is where mobility assurance actually lives** |
@@ -1228,8 +1435,8 @@ Every claim the frozen audit withdrew or narrowed, checked against this document
 | All continuity failures are consumer-boundary failures | **No** | §1 item 2 says the *dominant recurrent* continuity failure is sufficiency; §1 items 3–6 and §6 carry capture, representation, reasoning, authorship, gating and assurance failures separately |
 | DOF-grid size alone caused prompt truncation | **No** | §19 attributes the loss to the silent positional slice and to large derived content *competing* for a fixed budget; no single content class is named as the cause |
 | BM fixtures are known human- or agent-authored | **No** | fixtures appear only in migration unit M-9, with no provenance claim. The corrected provenance is in `BENCHMARK_PROBE_EVALUATION_PHILOSOPHY.md` |
-| The model always recognises the defect it commits | **No** | §1 item 4 is conditional — *"Where it names the defect the same artifact commits…"*. §7.2.2 signal 3 uses the recognition layer as a detector, explicitly not as a guarantee |
-| Every spatial miss is a pure model failure | **No** | §1 item 2 and §7.2 hold that a stage's failure is not attributable until sufficiency is established; §24's ordering constraint states this as a migration precondition |
+| The model always recognises the defect it commits | **No** | §1 item 4 is conditional — *"Where it names the defect the same artifact commits…"*. §7.4 uses the recognition layer as a *detector*, explicitly not as a guarantee |
+| Every spatial miss is a pure model failure | **No** | §1 item 2 and §7.5 hold that a stage's failure is not attributable until sufficiency is established; §24's ordering constraint states this as a migration precondition |
 | State lacks the coordinates needed to detect collocated joints | **No** | §12 and §22 R-3 treat detection as available once the premise is declared and the arrangement is projected; the deficit is the premise and the projection, not the coordinates |
 | Zero-length geometry can only be checked with mechanism-specific logic | **Corrected in this pass** | §25 previously rejected "a validator for zero-length links" without qualification, which contradicted §12, §17.2, §22 R-3 and §23. §25.1 now separates the case-specific patch and the over-general invariant (both rejected) from the conditional general invariant (retained and required) |
 
@@ -1237,37 +1444,58 @@ Every claim the frozen audit withdrew or narrowed, checked against this document
 
 ---
 
-## §29 ARCHITECTURE READINESS
+## §29 FINAL ARCHITECTURE CONSISTENCY CHECK AND FREEZE
 
-**Verdict: (B) READY EXCEPT FOR THE EXPLICITLY PROVISIONAL R-5 SUBSTRATE.**
+After Decisions A (§7) and B (§5.3–§5.6, §20.6), the architecture is checked for **one
+coherent answer** to each of fifteen questions.
 
-**Why not (C).** The load-bearing question was consumer-sufficiency declaration
-completeness: if a stage can under-declare and then be proved sufficient against its own
-understatement, the whitelist failure returns in a new form and nothing else matters. §7.2
-closes it structurally rather than by convention — the required set is **derived** from the
-semantic dependencies of the outputs the stage is permitted to create, the stage may widen
-but never narrow it, and the sufficiency check must read the output contract rather than the
-declaration alone. The regress terminates for a stated reason (§7.2.3): a per-field
-dependency has a mechanical completeness test and a consumer need list has none. The
-residual risk is real and is named — it is now located where it can be tested.
+| # | Question | Single answer | Where |
+|---|---|---|---|
+| 1 | What persists? | everything; nothing is deleted; supersession retains both values | §5.2, §5.4 |
+| 2 | What is authoritative? | class A only — the facts the design asserts | §5.3 |
+| 3 | What may be derived? | class B — strict consequences of class-A premises, recomputable, never stored as authored | §5.3, §5.5 |
+| 4 | What is ephemeral? | class C — views, serializations, caches, provider payloads | §5.3 |
+| 5 | What can a stage change? | only what its ownership and field-mutability declaration permit; never another family's authoritative facts | §5.2, §6 |
+| 6 | How may authoritative facts be changed? | CREATE · EXTEND · SUPERSEDE · INVALIDATE, with provenance; **no other path**, including runners and helpers | §5.4 |
+| 7 | What happens when a premise changes? | the dependent commitment loses unqualified authority; the consequence is represented | §5.6 |
+| 8 | What does each stage need to know? | representational dependencies ∪ reasoning premises ∪ justified contributory context | §7.2, §7.8 |
+| 9 | How are those inputs determined? | derived from the output/entity semantic contract and the stage responsibility contract — never by the consuming stage | §7.3 |
+| 10 | Projection failure vs upstream insufficiency? | instances exist in state and the view omits them, vs no instance exists in state — different findings, different owners | §7.5 |
+| 11 | What is LLM engineering authorship? | what must be true and why; what exists and what each thing does; what transmits what; what constrains what; what remains open | §11, §19 |
+| 12 | What is deterministic bookkeeping? | domain enumeration, id maintenance, reference integrity, strict consequence from sufficient typed premises, dependency propagation | §11, §19 |
+| 13 | What does unresolved evidence do? | it blocks exactly when it names a fact class the next consumer's or gate's minimum marks required; otherwise it is carried | §16.2 |
+| 14 | What does assurance establish? | one of four declared claim classes; most checks establish fidelity or provenance integrity, not correctness | §27 |
+| 15 | What does `ENGINEERING_ESTABLISHED` mean? | an ENGINEERING-CONSEQUENCE check, of declared independence, with inputs at or above its minimum maturity, found the property to hold. Never inherited | §17.0, §18, §27 |
 
-**Why not (A).** R-5 is PROVISIONAL in the frozen audit, and §13.0, §5.3, §16 and migration
-unit M-4 all rest on it. The capability need is evidence-supported; the mechanism is a
-preferred candidate among three (§26.1), and P4B question 4 selects between them. Building
-M-4 before that question is answered would freeze a choice the evidence has not made.
+**No question has two answers, and no two sections give incompatible definitions of consumer
+sufficiency or of authority.**
 
-**What this verdict does and does not license.**
+### 29.1 Freeze
 
-| | |
+> **The S01–S04 architecture is FROZEN FOR IMPLEMENTATION PLANNING.**
+
+**This freeze means:** the architecture concepts are fixed enough that an implementation can
+be planned without rediscovering them.
+
+**This freeze does not mean:** that field names are final, that any API is final, that any
+validator is designed, or that any prompt is written. It also does not mean that any
+scientific question the audit left open has been answered.
+
+The short normative statement of the frozen architecture is
+`S01_S04_ARCHITECTURE_FREEZE.md`. **This document remains the rationale**, and where the two
+disagree on a normative rule, the freeze record governs.
+
+### 29.2 What is frozen, and on what grounds
+
+| | Grounds |
 |---|---|
-| **Ready for implementation planning** | M-1 representation closure · M-2 sufficiency substrate · M-3 authorship boundary · M-6 assurance layer · M-7 status constructs · M-8 prompts and schemas *(after M-1)* · M-9 evidence substrate |
-| **Not ready — hold for R-5 closure** | M-4 commitment substrate · M-5 gate, insofar as it depends on invalidation semantics |
-| **Carried as provisional, not blocking** | repeated-member correspondence (§26 item 2, one-case evidence) |
-
-**Three things must be true before an implementation plan is written**, and none is a code
-task: P4B question 4 is answered (selects M-4); the claim-class rule of §27 is adopted, so
-no structural check is counted as engineering assurance; and §27.2's correction holds — the
-gate does not author the verdict on its own preconditions.
+| two-source consumer sufficiency (§7) | audit evidence (C-05, C-12, R-1, R-2) **plus** design decision A on the two-source structure |
+| authority classes and controlled mutation (§5.3–§5.4) | **design decision B**, motivated by audit evidence; R-5's audit status is unchanged and remains PROVISIONAL |
+| premise-change propagation (§5.6) | design decision B |
+| mobility domain/disposition split, `UNDISPOSITIONED` (§11) | audit evidence (C-11, C-18, R-6) |
+| physical-effect → interaction progression, constraint relations, reaction sites (§9, §10) | audit evidence (C-07, C-08, C-10, R-10–R-12) |
+| topology→spatial continuity and S04·A→S04·B refinement (§12, §13) | audit evidence (C-12–C-15, R-2, R-3) |
+| assurance independence, claim classes, four status constructs (§17, §18, §27) | audit evidence (C-21, C-22, R-7, R-9, R-15) |
 
 ---
 
