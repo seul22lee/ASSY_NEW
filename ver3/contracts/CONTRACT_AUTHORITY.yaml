@@ -139,15 +139,35 @@ supported_projection_relations:
     satisfy a test by being clever rather than by being the same fact.
 non_binding_pointer:
   key: see_canonical
+  requires: [file, path, binding]
+  checked_by: [PROJ-05, META-06, META-07]
   meaning: >
     An OPERATIONAL section may point a reader at the canonical value. The pointer
-    is `binding: false` and is never checked for equality - it is a courtesy, not
+    is `binding: false` and is never compared for equality - it is a courtesy, not
     an authority claim.
+  but_not_unchecked: >
+    NON-BINDING means "not semantically equal", not "pointer validity is
+    unchecked". If a section claims a canonical value exists somewhere, that
+    somewhere must resolve: the file exists, the path resolves, and any stage id
+    in the path is a real canonical stage. A dangling pointer misdirects a reader
+    as effectively as a wrong value.
 
 stage_contract_status_vocabulary:
   CANONICAL_PROJECTION:
-    requires: [source, projects]
-    checked_by: [CLOSURE-01, CLOSURE-03, CLOSURE-09]
+    # The declared requirement is the one actually enforced. It said `source`
+    # while the validator reads a nested `canonical_source` with a fragment and a
+    # relation - a schema that describes something other than what is checked is
+    # the same defect this file exists to prevent, one level up.
+    requires: [canonical_source, projected_key, projects]
+    requires_nested:
+      canonical_source: [file, path, relation]
+    checked_by: [PROJ-01, PROJ-02, PROJ-03, PROJ-04, PROJ-05, PROJ-06,
+                 CLOSURE-01, CLOSURE-03, CLOSURE-09]
+    enforcement_note: >
+      PROJ-01..06 establish projection integrity: the source file and fragment
+      resolve, the relation is supported, the projection satisfies it, no
+      unresolved canonical stage id is accepted, and prose cannot pass as an EXACT
+      projection. CLOSURE-01/03/09 remain and cover ownership specifically.
   LEGACY_PRODUCER:
     requires: [describes, canonical_replacement, canonical_source, migration_step,
                authoritative_for_canonical_semantics]

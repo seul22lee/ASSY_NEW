@@ -383,3 +383,46 @@ Classification: the gap was **(A) projection metadata defect**; the 21 reclassif
 **(C) misclassified operational**. No **(B)**, **(E)**, **(F)**, **(G)**, **(H)** or **(I)**.
 
 > **S-2 FINAL FROZEN.** All 19 freeze criteria hold. **S-3 has not begun.**
+
+
+---
+
+## §27 PRE-S3 PROJECTION METADATA HYGIENE
+
+Baseline `2aad3d5`. Alignment of the projection metadata *declaration* with the *validator*
+introduced in §26. **No S-2 semantic contract changed.**
+
+| Issue | Found? | Detail |
+|---|---|---|
+| **A. stale schema metadata** | **Yes** | `CANONICAL_PROJECTION.requires` declared `[source, projects]` while the validator reads a nested `canonical_source` with `file`, `path` and `relation`, plus `projected_key`. A schema describing something other than what is checked is the defect this corpus exists to prevent, one level up. |
+| **B. stale `checked_by`** | **Yes** | It named only `CLOSURE-01/03/09` while projection integrity is enforced by PROJ-01…06. Corrected to name both; the CLOSURE checks were kept, not dropped. |
+| **C. stage-path parser bug** | **Yes — latent** | `stages.s02.engineering_questions` parsed to the single token `s02.engineering_questions`, which would have been rejected as a nonexistent stage. **No projection uses a `stages.` path yet, so PROJ-05 passed vacuously while being wrong.** Fixed generically: only the segment after `stages.` is a stage id, anything deeper is a field, and the prose-joined pointer forms the corpus uses (`s03a and s03b`, `s04a, gate and s04b`) are handled. **No special case for s02** — it appears only as a test example. |
+
+**`see_canonical` pointer validation added.** *Non-binding* means "not semantically equal",
+not "unchecked". PROJ-05b now requires the file to exist, the path to resolve, and any stage id
+in it to be a real canonical stage — while **never** comparing OPERATIONAL prose for equality.
+A dangling pointer misdirects a reader as effectively as a wrong value.
+
+**Tests added.** PROJ-05b plus META-01…08: schema names the fields actually required (and the
+corpus carries them), `checked_by` names the real enforcement, bare and field-depth stage paths
+both resolve the stage id, a nonexistent id is rejected, a valid pointer resolves, a dangling
+one is rejected, and no OPERATIONAL section is in the projection set so nothing compares its
+prose. **25 PROJ/META tests total.**
+
+**Projection model unchanged:** still `EXACT`, `SUBSET`, `ORDERED_SUBSET`. No fuzzy comparison,
+no transformation expressions, no prose promoted to a projection.
+
+**Regression.** 25/25 PROJ+META · 15/15 CLOSURE · 22/22 CON · 69/69 state · ADR-001 L1/L2 OK ·
+**377 meta OK** · 8/8 window · all CI steps OK.
+
+Failure classification: **(A)** stale metadata declaration and **(B)** path-resolution validator
+bug, both fixed. No **(C)** dangling pointer existed. No **(D)**, **(E)**, **(F)** or **(G)**.
+
+**Benchmark-specific OPERATIONAL prose was not touched.** The invariant that it is
+non-authoritative, is not a projection, and cannot become a semantic source merely by carrying
+a `see_canonical` pointer is now enforced by META-08. Cleanup remains later work.
+
+> **No S-2 semantic contract changed.** `DESIGN_STATE_CONTRACT.yaml`,
+> `STAGE_RESPONSIBILITY_CONTRACT.yaml`, ownership, family definitions, reference semantics,
+> mobility authorship, status semantics, engineering questions, reasoning-premise classes and
+> every stage contract file are byte-identical. **S-3 has not begun.**

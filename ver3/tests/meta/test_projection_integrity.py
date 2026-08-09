@@ -34,6 +34,27 @@ RELATIONS = {"EXACT", "SUBSET", "ORDERED_SUBSET"}
 OWNERSHIP_PATH_PREFIX = "entity_families+assurance_families[*].owned_by == "
 
 
+def stage_ids_in(path):
+    """The stage ids a canonical path refers to, for any depth.
+
+    `stages.s02` and `stages.s02.engineering_questions` both name stage `s02`;
+    only the segment after `stages.` is a stage id, and anything deeper is a
+    field. The earlier form split the whole remainder on separators, so
+    `stages.s02.engineering_questions` produced the single token
+    `s02.engineering_questions` and would have been rejected as a nonexistent
+    stage. No projection used a `stages.` path yet, so the check passed
+    vacuously while being wrong.
+
+    Also handles the prose-joined pointer forms the corpus uses, e.g.
+    `stages.s03a and s03b` and `stages.s04a, gate and s04b`.
+    """
+    if not path.startswith("stages."):
+        return []
+    remainder = path[len("stages."):]
+    head = remainder.split(".", 1)[0]           # drop any field path
+    return [tok for tok in head.replace(" and ", " ").replace(",", " ").split() if tok]
+
+
 def _stage_files():
     d = os.path.join(_paths.CONTRACTS, "stages")
     return [os.path.join(d, n) for n in sorted(os.listdir(d)) if n.endswith(".yaml")]
@@ -142,21 +163,41 @@ class TestProjectionMetadata(_Projections):
         problems = []
         for name, doc, section, spec in self.projections():
             path = (spec.get("canonical_source") or {}).get("path", "")
-            if path.startswith("stages."):
-                for sid in path[len("stages."):].replace(" and ", ",").replace(",", " ").split():
-                    if sid not in self.canonical_stages:
-                        problems.append("%s.%s projects canonical stage %r, which does not exist"
-                                        % (name, section, sid))
-        # Non-binding pointers are held to the same existence rule.
+            for sid in stage_ids_in(path):
+                if sid not in self.canonical_stages:
+                    problems.append("%s.%s projects canonical stage %r, which does not exist"
+                                    % (name, section, sid))
+        self.assertEqual([], problems)
+
+    def test_PROJ_05b_non_binding_pointers_are_not_dangling(self):
+        """NON-BINDING means "not semantically equal", not "unchecked".
+
+        A section that claims the canonical value lives somewhere must point
+        somewhere real: the file exists, the path resolves, and any stage id in it
+        is a real canonical stage. A dangling pointer misdirects a reader as
+        effectively as a wrong value. Equality is still never compared."""
+        problems = []
         for name, doc in self.stages.items():
             for section, spec in (doc.get("authority_status") or {}).items():
                 see = spec.get("see_canonical")
                 if not see:
                     continue
-                self.assertFalse(see.get("binding", False),
-                                 "%s.%s: a see_canonical pointer must be non-binding"
-                                 % (name, section))
-                self.assertTrue(os.path.exists(os.path.join(REPO, see["file"])))
+                if see.get("binding", False):
+                    problems.append("%s.%s pointer claims to be binding" % (name, section))
+                if not os.path.exists(os.path.join(REPO, see.get("file", ""))):
+                    problems.append("%s.%s pointer names missing file %r"
+                                    % (name, section, see.get("file")))
+                    continue
+                for sid in stage_ids_in(see.get("path", "")):
+                    if sid not in self.canonical_stages:
+                        problems.append("%s.%s pointer names stage %r, which does not exist"
+                                        % (name, section, sid))
+                if not see.get("path", "").startswith("stages."):
+                    try:
+                        _resolve({"file": see["file"], "path": see["path"]}, self.docs)
+                    except Exception:
+                        problems.append("%s.%s pointer path %r does not resolve"
+                                        % (name, section, see.get("path")))
         self.assertEqual([], problems)
 
     def test_PROJ_06_prose_cannot_pass_as_an_exact_projection(self):
@@ -318,3 +359,87 @@ class TestNegativeControls(_Projections):
             self.assertEqual([], _compare(name, section,
                                           spec["canonical_source"]["relation"],
                                           projected, canonical))
+
+
+# =====================================================================
+# META-01..08 - the declared schema describes what is actually enforced
+# =====================================================================
+class TestSchemaMetadataHygiene(_Projections):
+    """A schema that describes something other than what is checked is the same
+    defect this corpus exists to prevent, one level up."""
+
+    def _vocab(self):
+        return self.docs["ver3/contracts/CONTRACT_AUTHORITY.yaml"][
+            "stage_contract_status_vocabulary"]["CANONICAL_PROJECTION"]
+
+    def test_META_01_schema_names_the_fields_actually_required(self):
+        v = self._vocab()
+        self.assertEqual({"canonical_source", "projected_key", "projects"},
+                         set(v["requires"]))
+        self.assertEqual({"file", "path", "relation"},
+                         set(v["requires_nested"]["canonical_source"]))
+        # And what it names is what the corpus actually carries.
+        for name, _doc, section, spec in self.projections():
+            with self.subTest(where="%s.%s" % (name, section)):
+                for key in v["requires"]:
+                    self.assertIn(key, spec)
+                for key in v["requires_nested"]["canonical_source"]:
+                    self.assertIn(key, spec["canonical_source"])
+
+    def test_META_02_checked_by_names_the_actual_enforcement(self):
+        v = self._vocab()
+        self.assertTrue([c for c in v["checked_by"] if c.startswith("PROJ-")],
+                        "checked_by names no PROJ check while PROJ enforces this")
+        # The still-relevant CLOSURE checks were not dropped.
+        for kept in ("CLOSURE-01", "CLOSURE-03", "CLOSURE-09"):
+            self.assertIn(kept, v["checked_by"])
+
+    def test_META_03_a_bare_stage_path_resolves_its_stage_id(self):
+        self.assertEqual(["s02"], stage_ids_in("stages.s02"))
+
+    def test_META_04_a_field_path_resolves_the_same_stage_id(self):
+        """The bug: this previously produced 's02.engineering_questions'."""
+        self.assertEqual(["s02"], stage_ids_in("stages.s02.engineering_questions"))
+        self.assertEqual(["s01"], stage_ids_in("stages.s01.required_reasoning_premise_classes"))
+        # Prose-joined pointer forms the corpus actually uses.
+        self.assertEqual(["s03a", "s03b"], stage_ids_in("stages.s03a and s03b"))
+        self.assertEqual(["s04a", "gate", "s04b"], stage_ids_in("stages.s04a, gate and s04b"))
+        # Not a stage path at all.
+        self.assertEqual([], stage_ids_in(OWNERSHIP_PATH_PREFIX + "s03"))
+
+    def test_META_05_a_nonexistent_stage_id_is_rejected(self):
+        for sid in stage_ids_in("stages.s99.engineering_questions"):
+            self.assertNotIn(sid, self.canonical_stages)
+        # And a real one is accepted, so the check is not vacuous.
+        self.assertIn(stage_ids_in("stages.s02.engineering_questions")[0],
+                      self.canonical_stages)
+
+    def test_META_06_a_valid_non_binding_pointer_resolves(self):
+        spec = {"file": "ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml",
+                "path": "stages.s02.engineering_questions"}
+        self.assertTrue(_resolve(spec, self.docs))
+        self.assertTrue(all(s in self.canonical_stages
+                            for s in stage_ids_in(spec["path"])))
+
+    def test_META_07_a_dangling_non_binding_pointer_is_rejected(self):
+        with self.assertRaises(KeyError):
+            _resolve({"file": "ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml",
+                      "path": "stages.s02.no_such_field"}, self.docs)
+        self.assertEqual(["s99"], stage_ids_in("stages.s99"))
+        self.assertNotIn("s99", self.canonical_stages)
+
+    def test_META_08_operational_prose_is_never_compared_for_equality(self):
+        """A pointer is a courtesy, not an authority claim. No OPERATIONAL
+        section is in the projection set, so nothing compares its prose."""
+        projected_sections = {(n, s) for n, _d, s, _sp in self.projections()}
+        checked_pointers = 0
+        for name, doc in self.stages.items():
+            for section, spec in (doc.get("authority_status") or {}).items():
+                if not spec.get("see_canonical"):
+                    continue
+                checked_pointers += 1
+                self.assertEqual("OPERATIONAL", spec["class"])
+                self.assertNotIn((name, section), projected_sections)
+                self.assertIs(False, spec["see_canonical"].get("binding"))
+                self.assertIs(False, spec.get("authoritative_for_canonical_semantics"))
+        self.assertTrue(checked_pointers, "no pointers exercised")
