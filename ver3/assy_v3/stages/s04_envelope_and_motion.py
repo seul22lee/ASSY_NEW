@@ -376,10 +376,18 @@ def _contact_pairs_text(mech: Dict[str, Any]) -> str:
 
 
 def _render(obj: Any) -> str:
+    """Deterministic serialization of a ConsumerView payload.
+
+    U-3: the fixed positional character slice is GONE. It was a semantic-selection
+    mechanism disguised as formatting - `sort_keys=True` put RigidGroup last, so
+    the topology was what fell off the end. Budget pressure is now handled
+    semantically before rendering, by ConsumerView, and an unsatisfiable budget is
+    a recorded condition rather than a silent cut.
+    """
     try:
-        return json.dumps(obj, indent=1, sort_keys=True)[:26000]
+        return json.dumps(obj, indent=1, sort_keys=True)
     except Exception:                                                # noqa: BLE001
-        return str(obj)[:26000]
+        return str(obj)
 
 
 # =========================================================================

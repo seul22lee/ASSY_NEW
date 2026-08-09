@@ -29,6 +29,10 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, REPO)
 
 from ver3.assy_v3.state.authority import thaw as _thaw                      # noqa: E402
+from ver3.assy_v3.view import build_consumer_view as _build_consumer_view   # noqa: E402
+import yaml as _yaml                                                        # noqa: E402
+_RESPONSIBILITY = _yaml.safe_load(open(os.path.join(
+    REPO, "ver3", "contracts", "STAGE_RESPONSIBILITY_CONTRACT.yaml")))
 from ver3.assy_v3.state.patch import Op as _Op, StagePatch as _Patch       # noqa: E402
 from ver3.assy_v3.providers.offline import OfflineReplayProvider            # noqa: E402
 from ver3.assy_v3.providers.status import ExecutionStatus                   # noqa: E402
@@ -77,8 +81,13 @@ S03_CHECKS = (
 #: The ONLY families s04 may see. s04's engineering question is about the
 #: mechanism, and if it cannot be answered from the mechanism then that is an
 #: interface failure to record - not a licence to reach back to s01 or s02.
-S03_OWNED = ("Body", "RigidGroup", "Joint", "Interface", "Configuration",
-             "MobilityExpectation", "LoadPath", "AssemblyStep", "FunctionalRegion")
+# U-3: RETIRED. `S03_OWNED` was a hand-written family tuple that decided what
+# later stages could see. It could not express "the arrangement of the selected
+# candidate", and it could not notice that a needed class was absent - which is
+# how the quantities and the S04A arrangement were lost. Consumer context is now
+# derived from the canonical contracts by assy_v3.view; nothing here names a
+# family.
+_RETIRED_S03_OWNED = "replaced by ConsumerView derivation (U-3)"
 
 S04_CHECKS = (
     ("envelope_coverage", envelope_coverage_check),
@@ -93,13 +102,20 @@ S04_CHECKS = (
 )
 
 
-def mechanism_projection(state) -> Dict[str, Any]:
-    """Exactly what s03 produced, and nothing else.
+def consumer_view_for(stage_id, state):
+    """The one semantic boundary between accumulated state and a consuming stage.
 
-    Built by whitelist rather than by removing s01/s02: a blacklist quietly
-    admits every family added later, and this boundary is the thing under test.
+    Derived from the canonical contracts: representational dependencies from the
+    entity semantics of the stage's permitted outputs, reasoning premises from its
+    declared engineering questions. No family is named here and no stage is
+    branched on.
     """
-    return {fam: [_thaw(e) for e in state.family(fam)] for fam in S03_OWNED}
+    return _build_consumer_view(stage_id, state, state.c, _RESPONSIBILITY)
+
+
+def mechanism_projection(state):
+    """The payload a stage prompt receives: a rendering of the ConsumerView."""
+    return consumer_view_for("s04a", state).payload()
 
 
 def interface_gaps(mech: Dict[str, Any]) -> List[str]:
@@ -220,7 +236,7 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
     # Pass B: the mobility grid, load paths and assembly order, given the
     # topology pass A just fixed. Split because one response could not carry
     # both; every field survives, only the emission is halved.
-    mech = {f: [dict(e) for e in state.family(f)] for f in S03_OWNED}
+    mech = consumer_view_for("s03b", state).payload()
     demands = {"LoadCase": [_thaw(e) for e in state.family("LoadCase")],
                "Obligation": [dict(e) for e in state.family("Obligation")],
                "candidate": candidate.get("entity_id")}
@@ -310,7 +326,7 @@ def run_s04(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
             ((S04AEnvelopeAndReach(), "s04a"), (S04BPlacementAndMotion(), "s04b")), start=1):
         started = time.time()
         try:
-            out = stage.run(provider, {"mechanism": mechanism_projection(state)},
+            out = stage.run(provider, {"mechanism": consumer_view_for(key, state).payload()},
                             state, state.run_id, attempt=attempt)
         except Exception as exc:                                    # noqa: BLE001
             fail("PARSER_DEFECT", key, "%s: %s" % (type(exc).__name__, exc),
