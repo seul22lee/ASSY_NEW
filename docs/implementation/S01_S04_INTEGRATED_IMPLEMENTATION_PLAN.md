@@ -66,6 +66,7 @@ mechanisms.
 | **Why** | FA-12, R-10, R-14 |
 | **Affected** | all of `contracts/`, principally `DESIGN_STATE_CONTRACT.yaml`, `ENTITY_FAMILY_AUDIT.yaml`, `STAGE_OWNERSHIP_MATRIX.yaml`, `contracts/stages/S01..S04_CONTRACT.yaml` |
 | **Depends on** | M-1 for the authority-class vocabulary |
+| **Split** | **M-2A — authority-critical canonical substrate** (the minimum without which class-A facts cannot be written through the controlled boundary) · **M-2B — remaining canonical contract migration**. See §7.0 for the exact division and §26 for why the split is required |
 | **Risk** | **medium-high** — contract sprawl (see R-1 in §22) |
 | **Completion established by** | every family resolves to exactly one owner; no dangling reference; no field carries two shapes; a structural check proves every spatial field declares a frame and every reference declares a target family |
 
@@ -77,7 +78,7 @@ mechanisms.
 | **Target** | A required minimum derived from two contracts, a view built to satisfy it, an independent sufficiency assessment, and a recorded `ConsumerView` distinguishing UPSTREAM INSUFFICIENCY from PROJECTION FAILURE. |
 | **Why** | FA-6, FA-7 — the dominant recurrent continuity failure |
 | **Affected** | `state/projection.py` (replaced), a new view-construction module, every stage contract, `tools/run_window2.py`, `tools/run_window.py` |
-| **Depends on** | M-2 (the declarations are the input) |
+| **Depends on** | M-2B (the full semantic-dependency and reasoning-premise declarations are the input) |
 | **Risk** | **high** — the premise mapping could become another manual whitelist (R-2 in §22) |
 | **Completion established by** | removing a required class from state produces UPSTREAM INSUFFICIENCY; removing it from the view alone produces PROJECTION FAILURE; a stage declaring less than the derived minimum fails contract validation |
 
@@ -89,20 +90,39 @@ mechanisms.
 | **Target** | All of the above become class-A facts written through the controlled boundary, with provenance and premise references. |
 | **Why** | FA-3. These are spatial commitments and engineering conclusions, not bookkeeping. |
 | **Affected** | `tools/run_window2.py`, `tools/run_window.py`, `state/design_state.py` |
-| **Depends on** | M-1, and M-2 for the families that `elimination` and `reach` must become |
+| **Depends on** | M-1, and **M-2A** — the authority-critical substrate only. `_absorb`'s three `EXTEND` targets need field-level extendability declarations, and its three side-channel facts need canonical families before they can be written through the boundary. **M-2B is not required** |
 | **Risk** | **medium** — the reason the direct write exists may be that the patch layer could not express the update (P4B Q4, unresolved). If so, `EXTEND`'s expressiveness must be fixed, not bypassed |
 | **Completion established by** | a static check finds no assignment into class-A storage outside the boundary; every previously-absorbed field carries provenance |
 
-### M-5 — Commitment and reopening semantics
+### M-5 — Commitment and reopening semantics — **SPLIT INTO M-5A AND M-5B**
+
+M-5 as originally written depended on M-8 (for the gate) while M-8 depended on M-5 (for
+supersession) — a cycle. The two halves are logically different things and are separated
+here. **This is implementation sequencing only; no architecture changes** (freeze §7 is
+unaltered).
+
+#### M-5A — commitment substrate *(implemented by **U-4**, lands in S-1)*
 
 | | |
 |---|---|
-| **Current** | No commitment class. No supersession. `invalidation_cone` declared and unread. The selection gate is nominal: no `SelectionDecision` is emitted anywhere, and `SAFE_REJECTION` / `FALSE_ACCEPTANCE` have no emitter in the corpus. |
-| **Target** | Commitment classes; supersede-with-reason; premise-change propagation; a gate with externally computed preconditions; both poles reachable. |
-| **Why** | FA-5, freeze §7 |
-| **Affected** | `state/patch.py`, `state/design_state.py`, `tools/run_window2.py`, `contracts/STAGE_PROGRESSION_CONTRACT.yaml`, `contracts/STATUS_SEMANTICS.yaml` |
-| **Depends on** | M-1, M-4; the gate additionally on M-8 |
+| **Current** | No supersession. `invalidation_cone` declared at `patch.py:46` and read nowhere. No premise references anywhere, so a dependency consequence is not computable even in principle. |
+| **Target** | Authoritative commitment identity; provenance; **premise references recorded on every write**; `SUPERSEDE` and `INVALIDATE` semantics; the stale/reopen consequence *mechanism*. |
+| **Why** | FA-5. This is the substrate S04 refinement supersedes *against* — it must exist first |
+| **Affected** | `state/patch.py`, `state/design_state.py`, `PROVENANCE_CONTRACT.yaml` |
+| **Depends on** | M-1, M-2A. **Not M-8** |
 | **Risk** | **medium** — propagation complexity (R-5 in §22) |
+| **Completion established by** | `SUPERSEDE` retains both values and marks dependents by premise reference; `INVALIDATE` leaves no dependent unqualifiedly authoritative |
+
+#### M-5B — selection and gating behaviour *(implemented by **U-8**)*
+
+| | |
+|---|---|
+| **Current** | The gate is nominal. No `SelectionDecision` is emitted anywhere; `SAFE_REJECTION` and `FALSE_ACCEPTANCE` have no emitter in the corpus. Nothing reads `UnresolvedDecision`. |
+| **Target** | The selection gate with externally computed preconditions; blocking semantics; candidate commitment; reopening after a spatial premise change; both poles reachable. |
+| **Why** | freeze §7 |
+| **Affected** | `tools/run_window2.py`, `STAGE_PROGRESSION_CONTRACT.yaml`, `STATUS_SEMANTICS.yaml` |
+| **Depends on** | M-5A, **M-8** — the gate evaluates comparable spatial evidence and reopens on spatial supersession, so the refinement semantics it judges must exist first |
+| **Risk** | **medium** |
 | **Completion established by** | superseding a `COMPARABLE` value marks a dependent selection non-authoritative; a gate cannot fire on a self-authored precondition verdict |
 
 ### M-6 — Mobility domain / disposition separation
@@ -113,7 +133,7 @@ mechanisms.
 | **Target** | Domain enumeration is class B, reported as BOOKKEEPING. Dispositions derive only from authored premises and reference them. Cells with no premise become `UNDISPOSITIONED`, naming what is missing. **Disposition completeness** becomes a reported engineering quantity. |
 | **Why** | FA-4, FA-8; the clearest instance of absence becoming assertion |
 | **Affected** | `stages/s03_topology_and_mobility.py`, `contracts/stages/S03_CONTRACT.yaml`, `DESIGN_STATE_CONTRACT.yaml` |
-| **Depends on** | M-1, M-2, M-7 (constraint relations are the premises) |
+| **Depends on** | M-1, M-2B, M-7 (constraint relations are the premises) |
 | **Risk** | **low-medium** — disposition coverage will fall sharply and visibly; that is the correct result and must not be read as regression |
 | **Completion established by** | a DOF cell with no covering relation and no authored irrelevance yields `UNDISPOSITIONED`; no disposition exists whose premise does not resolve |
 
@@ -125,7 +145,7 @@ mechanisms.
 | **Target** | `PhysicalEffectObligation` (S02, role level) → `PhysicalInteraction` (S03·B) with reference-checkable discharge; addressable `ConstraintRelation`; typed `ReactionSiteRequirement` marked external/internal from the scenario boundary. |
 | **Why** | R-10, R-11, R-12 |
 | **Affected** | `stages/s02_obligation_and_candidates.py`, `stages/s03_topology_and_mobility.py`, `contracts/stages/S02_CONTRACT.yaml`, `S03_CONTRACT.yaml`, `DESIGN_STATE_CONTRACT.yaml`, `ENTITY_FAMILY_AUDIT.yaml` |
-| **Depends on** | M-2 |
+| **Depends on** | M-2B |
 | **Risk** | **medium** — S02's output grows; must not become a mechanism specification |
 | **Completion established by** | every effect obligation is discharged by a named interaction or is explicitly open; every constraint relation is addressable and its provider resolves; every load path terminates at an external site or is recorded open |
 
@@ -137,7 +157,7 @@ mechanisms.
 | **Target** | S04·B receives the selected candidate's arrangement and *extends* it. Required-distinctness declarations from S03. Motion evidence level recorded from the computation performed, never from a constant. No positional slicing. |
 | **Why** | FA-6, FA-11, FA-8, R-2, R-3 |
 | **Affected** | `stages/s04_envelope_and_motion.py`, `stages/s03_topology_and_mobility.py`, `tools/run_window2.py`, `S03_CONTRACT.yaml`, `S04_CONTRACT.yaml` |
-| **Depends on** | M-3 (the arrangement must be a derived required premise), M-1, M-5 |
+| **Depends on** | M-3 (the arrangement must be a derived required premise), M-1, **M-5A** (commitment classes supersede *against* the substrate). **Not M-5B** — the gate judges these semantics and therefore follows them |
 | **Risk** | **medium-high** — views may exceed context (R-3 in §22) |
 | **Completion established by** | the arrangement is present in the S04·B view in every run or the run records an insufficiency; no serialization path truncates positionally; the evidence level is a function of the computation, provably not of a constant |
 
@@ -160,7 +180,7 @@ mechanisms.
 1. **Semantics before syntax.** Contracts and state semantics land before prompts. A prompt is
    a rendering of a contract, never its definition.
 2. **One authority model at a time.** Old and new authority semantics must never both be live
-   (§5).
+   (§5). This is why S-1 is atomic across three units rather than staged.
 3. **Coherent units, not defect-shaped patches.** No implementation unit exists because of one
    observed failure.
 4. **Visible regression is acceptable.** Disposition coverage and establishment counts will
@@ -173,25 +193,36 @@ mechanisms.
 
 ## 4. IMPLEMENTATION UNITS
 
-Nine units. Each is coherent on its own terms and independently reviewable.
+**Ten units.** One more than the first draft: `U-2` is split, because `U-4` cannot remove the
+uncontrolled writes without part of it (§26). No other unit was added, and no unit exists
+because of a single observed defect.
 
 | Unit | Name | Mechanisms | Primary subsystems |
 |---|---|---|---|
 | **U-1** | **Foundation — state and authority** | M-1 | `assy_v3/state/` |
-| **U-2** | **Canonical contract model** | M-2 | `contracts/` |
+| **U-2A** | **Authority-critical canonical substrate** | M-2A | `contracts/` (the subset in §7.0) |
+| **U-4** | **Controlled mutation and commitment substrate** | M-4 **+ M-5A** | `state/`, `tools/run_window*.py` |
+| **U-2B** | **Remaining canonical contract migration** | M-2B | rest of `contracts/` |
 | **U-3** | **Consumer view system** | M-3 | new view module; `state/projection.py` retired |
-| **U-4** | **Controlled mutation and dependency binding** | M-4, part of M-5 | `state/`, `tools/run_window*.py` |
 | **U-5** | **Physical reasoning representation** | M-7 | `stages/s02*`, `stages/s03*`, contracts |
 | **U-6** | **Mobility** | M-6 | `stages/s03*` |
 | **U-7** | **Spatial commitment and refinement** | M-8 | `stages/s04*`, runners |
-| **U-8** | **Commitment and gating** | rest of M-5 | `state/`, runners, progression contract |
+| **U-8** | **Selection and gating** | **M-5B** | `state/`, runners, progression contract |
 | **U-9** | **Assurance and status** | M-9 | new assurance layer; dashboard and profile tools |
+
+**Two mechanism-to-unit bindings, stated explicitly so no "M-5" ambiguity remains:**
+
+> **The commitment substrate (M-5A) is implemented by U-4.** Premise references,
+> `SUPERSEDE`/`INVALIDATE` and the stale/reopen consequence mechanism are part of the
+> controlled-mutation boundary and land with it.
+>
+> **The selection and gating behaviour (M-5B) is implemented by U-8**, and only that.
 
 **Cross-cutting, not separate units** — each lands *inside* the unit that makes it possible:
 
-- **prompt migration** (§15) lands with U-5/U-6/U-7 per stage, never before U-2 and U-3;
+- **prompt migration** (§15) lands with U-5/U-6/U-7 per stage, never before U-2B and U-3;
 - **runner/provider migration** (§16) lands with U-4;
-- **fixture migration** (§17) lands after U-2 and U-3, before the U-9 evidence claims;
+- **fixture migration** (§17) lands after U-2B and U-3, before the U-9 evidence claims;
 - **test architecture** (§18) is built incrementally with every unit.
 
 ---
@@ -199,54 +230,73 @@ Nine units. Each is coherent on its own terms and independently reviewable.
 ## 5. DEPENDENCY DAG
 
 ```
-        U-1 Foundation ──────┬──────────────► U-4 Controlled mutation
-             │               │                       │
-             ▼               │                       ▼
-        U-2 Contracts ───────┼──────────────► U-8 Commitment / gating
-             │               │                       ▲
-             ├──► U-3 Views ─┴───────────────────────┤
-             │        │                              │
-             ├──► U-5 Physical reasoning             │
-             │        │                              │
-             │        ▼                              │
-             └──► U-6 Mobility                       │
-                      │                              │
-        U-3 ─────────►U-7 Spatial / refinement ──────┘
-                      │
-                      ▼
-                 U-9 Assurance / status   ◄── requires U-1…U-8 substantially stable
+   ┌──────────────── ATOMIC FOUNDATION (one release) ────────────────┐
+   │  U-1 Foundation  +  U-2A Authority substrate  +  U-4 Controlled │
+   │                                                mutation (M-5A)  │
+   └────────────────────────────┬────────────────────────────────────┘
+                                │
+                                ▼
+                        U-2B Remaining contracts
+                                │
+                                ▼
+                        U-3 Consumer views
+                                │
+                                ▼
+                      U-5 Physical reasoning
+                                │
+                                ▼
+                          U-6 Mobility
+                                │
+                                ▼
+                 U-7 Spatial commitment & refinement
+                                │
+                                ▼
+                    U-8 Selection & gating (M-5B)
+                                │
+                                ▼
+                    U-9 Assurance & status
+                                │
+                                ▼
+              Fixture regeneration + end-to-end live chain
 ```
 
-**MUST LAND BEFORE**
+**Acyclic.** Every edge points forward; no unit depends on a later one.
 
-| This | Before this | Why |
-|---|---|---|
-| U-1 | everything | the authority-class vocabulary is the substrate |
-| U-2 | U-3 | the required minimum is derived from contract declarations |
-| U-2, U-3 | any prompt rewrite | a prompt renders a contract; rewriting first re-creates prompt-only fields |
-| U-5 | U-6 | constraint relations are the premises dispositions derive from |
-| U-3 | U-7 | S04·B cannot extend an arrangement it does not receive |
-| U-7 | U-8 | the gate operates on comparable spatial evidence |
-| U-1…U-8 | U-9 | assurance must not be finalized against changing state semantics |
+| Unit | DEPENDS ON | ENABLES | MUST LAND ATOMICALLY WITH | MAY LAND IN PARALLEL WITH | MUST NOT BE ENABLED BEFORE |
+|---|---|---|---|---|---|
+| **U-1** | — | U-2A, U-4, everything | **U-2A, U-4** | — | — |
+| **U-2A** | U-1 *(authority-class vocabulary)* | U-4 | **U-1, U-4** | — | — |
+| **U-4** | U-1, U-2A | U-2B, U-7 *(supersede target)*, U-8 | **U-1, U-2A** | — | its `SUPERSEDE`/`INVALIDATE` ops may exist from S-1; **commitment *classes on spatial values* must not** — those are U-7 |
+| **U-2B** | U-1, U-2A, U-4 | U-3, U-5 | — | — | any prompt rewrite |
+| **U-3** | U-2B | U-5, U-7 | — | — | any stage semantic change |
+| **U-5** | U-2B, U-3 | U-6 | — | — | mobility disposition changes |
+| **U-6** | U-1, U-2B, U-5 | U-7 | U-5 *(one S03 semantic change; may also land separately)* | — | counting mobility as engineering-established |
+| **U-7** | U-1, U-3, U-4 *(M-5A)*, U-6 | U-8 | S04 prompt migration | — | the selection gate |
+| **U-8** | U-4 *(M-5A)*, U-7 | U-9 | — | — | engineering-establishment claims |
+| **U-9** | U-1…U-8 substantially stable | fixture regeneration; evidence claims | — | — | generalization claims |
 
-**CAN LAND TOGETHER**
-
-- U-1 + U-2 — they co-define the authority classes and their declarations.
-- U-5 + U-6 — one S03 semantic change; splitting them leaves dispositions citing premises
-  that do not yet exist.
-- U-7 + the S04 prompt migration — the prompt is meaningless without the arrangement.
+**Why U-7 depends on U-6.** Mobility expectations are a declared S04·B *reasoning premise*
+(proposal §7.8). Building the spatial view against a disposition representation that U-6 is
+about to change would require rework, and would briefly place U-7 in the position of
+consuming the very `MAINTAINED_BY_CLASS`-from-absence values the migration exists to remove.
+This is a soundness ordering, not a code-level coupling.
 
 **MUST NOT LAND IN A TEMPORARILY INCONSISTENT STATE**
 
-> **U-1 and U-4 must land as one change.** The moment the controlled boundary exists,
-> `_absorb`'s three direct writes must already be gone. A window in which both the controlled
-> path and an uncontrolled path can write class-A facts is precisely the condition the
-> architecture exists to eliminate, and it would be undetectable from the outside — the state
-> would look correct.
+> **U-1 + U-2A + U-4 are one atomic release.** The moment the controlled boundary exists,
+> `_absorb`'s three direct writes and three side-channel attributes must already be gone —
+> and to remove them, the fields and families they write must already be canonical. A window
+> in which a controlled path and an uncontrolled path can both write class-A facts is exactly
+> the condition the architecture exists to eliminate, and it would be **undetectable from the
+> outside**: the state would look correct.
 
-> **U-2 and U-3 must not straddle a release** in which some stages derive their minimum and
-> others use `S03_OWNED`. Two consumer-sufficiency definitions live at once is the drift the
-> falsification pass just removed from the documents; it must not be reintroduced in code.
+> **U-2B and U-3 must not straddle a release** in which some stages derive their minimum and
+> others still use `S03_OWNED`. Two live consumer-sufficiency definitions is the drift the
+> falsification pass removed from the documents; it must not reappear in code.
+
+> **U-4's `SUPERSEDE` and U-7's commitment classes are distinct.** The *operations* land in
+> S-1; the *classification of spatial values* lands in U-7. Enabling commitment classes early
+> would mean classifying values whose refinement semantics do not yet exist.
 
 ---
 
@@ -270,7 +320,37 @@ Nine units. Each is coherent on its own terms and independently reviewable.
 
 ---
 
-## 7. CANONICAL CONTRACT MIGRATION *(U-2)*
+## 7. CANONICAL CONTRACT MIGRATION *(U-2A + U-2B)*
+
+### 7.0 The authority-critical split
+
+**U-2A is the minimum contract substrate without which class-A facts cannot be written
+through the controlled boundary.** It is defined by exactly one test: *does U-4 need this to
+remove an uncontrolled write?*
+
+**U-2A — authority-critical canonical substrate** *(lands atomically with U-1 and U-4)*
+
+1. **The authority class vocabulary itself**, declarable per field.
+2. **Field-level extendability** for the three fields `_absorb` currently assigns directly —
+   the region volume, the assembly-step insertion direction, and the joint frame — each
+   naming its extending stage and its once-only semantics.
+3. **Canonical families for the three side-channel facts** currently held as bare attributes
+   on the state object: the reach result, the elimination record, and the reference
+   scale/frame. Each needs an identity, an owner and a provenance obligation before it can be
+   written at all.
+4. **Provenance obligations** on every class-A write.
+5. **Reference targets** for the families in (2) and (3), so integrity is checkable at the
+   boundary rather than by the current key-suffix heuristic.
+
+**U-2B — remaining canonical contract migration** *(everything else in §7.1)* — the principle
+shape, `blocked_by` → `ConstraintRelation`, the retirement of the two hypothesis families,
+the promotion of prompt-only fields, `addresses_obligations`, the `MobilityExpectation`
+authorship split, the status vocabulary, and the 14 dangling references.
+
+**None of U-2B is needed to remove an uncontrolled write**, which is why the split exists and
+why it is drawn here rather than anywhere else.
+
+### 7.1 The full canonical migration
 
 Per entity family, one declaration of each: **canonical identity** · **owner** · **authority
 class per field** · **extendability** (which stage, which field, once) · **supersession
@@ -364,6 +444,10 @@ entities, not new families; giving each its own family would be inventing repres
 avoid an EXTEND." **The reasoning is sound and the conclusion is right** — they *are*
 properties of existing entities. The defect is the bypass, not the modelling. The fix is to
 use `EXTEND`, which is precisely the operation the docstring names.
+
+**Precondition for this unit.** Removing the direct writes requires U-2A first: the three
+`EXTEND` targets need field-level extendability declarations, and the three side-channel
+facts need canonical families. U-2A therefore lands in the same atomic release (§7.0, §24.1).
 
 **Provenance and dependency attachment.** Every controlled write carries: the operation, the
 authoring stage or derivation, the premise ids, the evidence reference, and the maturity of
@@ -490,7 +574,7 @@ or stop describing themselves as pipeline maturity.
 
 ## 15. PROMPT MIGRATION
 
-**No prompt text is written in this plan**, and no prompt is rewritten before U-2 and U-3 for
+**No prompt text is written in this plan**, and no prompt is rewritten before U-2B and U-3 for
 its stage. Prompts currently live inside the stage modules — `s03_topology_and_mobility.py` is
 979 lines including its prompts — and several fields exist *only* in prompt text. That
 inversion is what U-2 fixes.
@@ -533,7 +617,7 @@ If a prompt needs a paragraph to explain a concept, the concept belongs in a con
 |---|---|
 | the frozen benchmark/probe **source inputs** | **REQUIRED** — inputs are the one thing that must not change |
 | the Oracle and reference artifacts | **REQUIRED** unchanged — they are independent bars |
-| Window-2 upstream **S01/S02 fixtures** | **REJECT / REGENERATE** after U-2 lands |
+| Window-2 upstream **S01/S02 fixtures** | **REJECT / REGENERATE** after U-2B lands |
 | current stage response artifacts | **REJECT / REGENERATE** — they encode retired shapes |
 | the `pairing_history` stamping tool | **TEMPORARY MIGRATION BRIDGE** — useful during regeneration, not part of the target |
 | current dashboard/profile output shapes | **REJECT** — they merge constructs the freeze separates |
@@ -664,8 +748,8 @@ derived artifacts.
 | **R-5** | Dependency propagation becomes complex | premise refs are recorded at write; the *computation* strategy is deferred until the representation is concrete | if propagation needs a bespoke rule per family, the dependency model is not general |
 | **R-6** | Assurance stays producer-coupled | checks are unreachable from stage modules; every check declares independence and claim class | if most checks land at STRUCTURAL with claim class FIDELITY, Rule A's floor is still unmet and the layer has not delivered |
 | **R-7** | **A cheap model still reasons poorly once information flow is fixed** | this is the open question, not a risk to mitigate away; U-3 makes the attribution possible for the first time | if failures persist *with* verified-sufficient views, the limitation is the model or the stage decomposition — and that is a real, publishable result, not a migration failure |
-| **R-8** | Legacy fixtures encode obsolete semantics | regenerate after U-2; never hand-edit | if regenerated fixtures cannot be produced by a conforming live run, the contract is unsatisfiable |
-| **R-9** | Migration temporarily mixes authority models | U-1+U-4 land together; U-2+U-3 do not straddle a release (§5) | if any release permits both a controlled and an uncontrolled class-A write, stop and revert |
+| **R-8** | Legacy fixtures encode obsolete semantics | regenerate after U-2B; never hand-edit | if regenerated fixtures cannot be produced by a conforming live run, the contract is unsatisfiable |
+| **R-9** | Migration temporarily mixes authority models | U-1+U-2A+U-4 land as one atomic release; U-2B+U-3 do not straddle a release (§5) | if any release permits both a controlled and an uncontrolled class-A write, stop and revert |
 | **R-10** | Visible metric regression is read as failure | success criteria (§19) are engineering-semantic and were written first | if a unit is judged by dashboard colour, the evaluation philosophy has not been adopted |
 
 ---
@@ -673,10 +757,10 @@ derived artifacts.
 ## 23. ROLLBACK AND RECOVERY
 
 - **Unit granularity is the rollback granularity.** Each unit is revertible without leaving a
-  partial authority model behind — which is why U-1+U-4 are one step.
+  partial authority model behind — which is why U-1 + U-2A + U-4 are one step.
 - **State artifacts are regenerable**, so recovery never depends on migrating stored state.
   Inputs, Oracle and reference artifacts are untouched throughout and are the recovery anchor.
-- **The irreversible-in-practice step is U-2**, since retired shapes are not reproduced. It is
+- **The irreversible-in-practice step is U-2B**, since retired shapes are not reproduced. It is
   gated on the structural completeness checks in §19 before anything depends on it.
 - **A unit that fails its engineering-semantic criteria is reverted, not patched forward.**
   Patching forward across an authority-model boundary is how old and new semantics come to
@@ -686,21 +770,93 @@ derived artifacts.
 
 ## 24. FINAL IMPLEMENTATION SEQUENCE
 
-| Step | Unit | Files / subsystems expected to change | Preconditions | Authoritative after this step | Tests required before the next step | Must **not** yet be enabled |
-|---|---|---|---|---|---|---|
-| **S-1** | U-1 + U-4 *(one step)* | `state/design_state.py`, `state/patch.py`, `tools/run_window2.py`, `tools/run_window.py`, `DESIGN_STATE_CONTRACT`, `STAGE_PATCH_CONTRACT`, `PROVENANCE_CONTRACT` | none | authority classes; the four operations; premise refs; **the single class-A write boundary** | A + B: illegal write raises; SUPERSEDE retains both; every former `_absorb` field carries provenance | premise-change *propagation*; commitment classes; any prompt change |
-| **S-2** | U-2 | all of `contracts/`; retirement of prompt-only fields | S-1 | canonical families, owners, field authority, semantic dependencies, stage responsibilities and premise classes | A + B: one owner per family; no dangling reference; every spatial field declares a frame; every reference declares a target | consumer-view derivation; any stage output change |
-| **S-3** | U-3 | new view module; `state/projection.py` retired; `S03_OWNED` deleted; both runners | S-2 | the derived required minimum; the recorded `ConsumerView`; the insufficiency/projection distinction | A + B + C: removal from state vs from view yields distinct findings; narrowing declaration fails; no positional slice remains | stage semantic changes; assurance relocation |
-| **S-4** | U-5 *(+ S02/S03 prompt migration)* | `stages/s02*`, `stages/s03*`, S02/S03 contracts | S-2, S-3 | effect obligations; physical interactions; constraint relations; reaction-site requirements | A–D: discharge closure; provider resolution; load-path closure or explicit openness | mobility disposition changes |
-| **S-5** | U-6 | `stages/s03*`, S03 contract | S-4 | dispositions with premises; `UNDISPOSITIONED`; disposition completeness as a reported quantity | A–D: absent premise ⇒ `UNDISPOSITIONED`; no unresolvable disposition premise; totality labelled BOOKKEEPING | counting mobility as engineering-established |
-| **S-6** | U-7 *(+ S04 prompt migration)* | `stages/s04*`, runners, S03/S04 contracts | S-3, S-5 | commitment classes on spatial values; arrangement continuity; joint axes; distinguishing bases; recorded motion evidence level | A–D: S04·B receives the arrangement or records insufficiency; refinement cannot silently contradict; evidence level tracks the computation | the selection gate; premise propagation across selection |
-| **S-7** | U-8 | `state/`, runners, `STAGE_PROGRESSION_CONTRACT`, `STATUS_SEMANTICS` | S-1, S-6 | premise-change propagation; blocking semantics; the gate; both poles | A–D: superseding a gate premise removes unqualified authority; no selection on unequal coverage; gate cannot self-authorise | engineering-establishment claims |
-| **S-8** | U-9 | new assurance layer; checks removed from `stages/*.py`; `build_pipeline_dashboard.py`, `quality_profile.py`, `compare_maturity.py`, `STATUS_SEMANTICS`, `GENERATED_ASSURANCE_PACKAGE_CONTRACT` | S-1…S-7 substantially stable | independence degrees; claim classes; the four separated status constructs; `ENGINEERING_ESTABLISHED` | A–D: no check reachable from a stage; establishment never inherited; no construct-mixing aggregate | generalization claims |
-| **S-9** | fixture regeneration + full chain | fixtures regenerated from conforming live upstream; both runners converged | S-2…S-8 | a **live S01→S04 chain** as the evidence basis | **E + F**: unseen probes; end-to-end live | any capability claim made from replayed upstream |
+**This section is the single implementation-order authority.** Where any earlier section
+implies a different order, this table governs. It follows §5's DAG exactly.
 
-**No step contains a benchmark-specific patch.** Steps S-4 through S-8 each change a
-*semantics*; benchmark and probe runs are regression evidence at every step and a target at
-none.
+| Step | Units / sub-units | Preconditions | What changes in this step | What becomes authoritative | Tests required before the next step | What must remain disabled |
+|---|---|---|---|---|---|---|
+| **S-1** | **U-1 + U-2A + U-4** *(M-1 + M-2A + M-4 + M-5A)* — **atomic** | none | Authority classes declarable per field. The four operations with provenance and premise references. Extendability declared for the three `_absorb` target fields; canonical families created for the three side-channel facts. **`_absorb` deleted**; both runners write through the boundary. `EXTEND` guarded. `invalidation_cone` made operative. | The single class-A write boundary · the four operations · premise references · `SUPERSEDE`/`INVALIDATE` and the stale-consequence mechanism · canonical identity for the reach result, elimination record and reference frame | **A + B:** a class-A write outside the boundary raises · `SUPERSEDE` retains both values and marks dependents by premise reference · `INVALIDATE` leaves no dependent unqualifiedly authoritative · every formerly-absorbed field carries provenance · a static scan finds no assignment into class-A storage outside the boundary | commitment **classes on spatial values** (U-7) · the selection gate (U-8) · any prompt change · consumer-view derivation |
+| **S-2** | **U-2B** *(M-2B)* | S-1 | The remaining canonical migration of §7.1: one shape per concept, one owner per family, semantic dependencies per field, stage responsibilities and reasoning-premise classes, retirement of prompt-only fields and the two hypothesis families, status vocabulary, dangling references. | Canonical families, owners, field authority, **semantic dependencies**, **stage responsibilities and premise classes** | **A + B:** one owner per family · no dangling reference · no field carries two shapes · every spatial field declares a frame · every reference declares a target family | consumer-view derivation (U-3) · any stage output change |
+| **S-3** | **U-3** *(M-3)* | S-2 | Required-minimum derivation from both contracts; view construction; independent sufficiency assessment; recorded `ConsumerView`. `projection.py` retired; **`S03_OWNED` deleted**; `_render`'s positional slice removed. | The derived required minimum · the recorded `ConsumerView` · the UPSTREAM-INSUFFICIENCY / PROJECTION-FAILURE distinction | **A + B + C:** removal from state vs from the view yields distinct findings · a narrowing declaration fails validation · no serialization path applies a positional slice · budget failure is recorded, never silent | stage semantic changes · assurance relocation |
+| **S-4** | **U-5** *(M-7)* + S02/S03 prompt migration | S-2, S-3 | Physical-effect obligations at S02; physical interactions, constraint relations and reaction-site requirements at S03. Prompts re-derived from contracts. | Effect obligations · physical interactions · addressable constraint relations · reaction-site requirements | **A–D:** every effect obligation discharged or explicitly open · every constraint relation names a resolvable provider · every load path terminates externally or is recorded open | mobility disposition changes |
+| **S-5** | **U-6** *(M-6)* | S-4 | Domain enumeration separated as class B; dispositions derived only from cited premises; `UNDISPOSITIONED` introduced; the `MAINTAINED_BY_CLASS`-from-absence branch deleted; the totality check relabelled BOOKKEEPING. | Dispositions with resolvable premises · `UNDISPOSITIONED` · disposition completeness as a reported quantity | **A–D:** an absent premise yields `UNDISPOSITIONED` · no disposition has an unresolvable premise · totality is reported as BOOKKEEPING and contributes to no establishment claim | counting mobility as engineering-established |
+| **S-6** | **U-7** *(M-8)* + S04 prompt migration | S-1 *(M-5A)*, S-3, S-5 | Commitment classes applied to spatial values; the arrangement becomes a derived required premise of S04·B; joint axes added; distinguishing bases realized; motion evidence level recorded from the computation; the constant `sampling_declaration` deleted. | Commitment classes on spatial values · arrangement continuity · joint frames with axes · recorded motion evidence level | **A–D:** S04·B receives the arrangement or the run records an insufficiency · a refinement cannot silently contradict a binding commitment · a declared required distinctness that realization violates is a finding · the evidence level tracks the computation, provably not a constant | the selection gate (U-8) |
+| **S-7** | **U-8** *(M-5B)* | S-1 *(M-5A)*, S-6 | The selection gate with externally computed preconditions; blocking semantics; candidate commitment; reopening after a spatial premise change; both poles given emitters. | The gate · blocking semantics · `SelectionDecision` · `SAFE_REJECTION` / `FALSE_ACCEPTANCE` | **A–D:** superseding a `COMPARABLE` value marks a dependent selection non-authoritative · no selection on unequal coverage · the gate cannot fire on a self-authored precondition verdict · a tie emits an `UnresolvedDecision` | engineering-establishment claims |
+| **S-8** | **U-9** *(M-9)* | S-1…S-7 substantially stable | Checks relocated out of `stages/*.py` into a layer reading committed state; independence degrees and claim classes declared; the four status constructs separated in reporting. | Independence degrees · claim classes · the four status constructs · `ENGINEERING_ESTABLISHED` | **A–D:** no check reachable from a stage module · establishment never inherited · no aggregate mixes constructs · a non-ENGINEERING-CONSEQUENCE check cannot raise a property to established | generalization claims |
+| **S-9** | fixture regeneration + full chain | S-2…S-8 | Fixtures regenerated from conforming live upstream; the two runners converged. | A **live S01→S04 chain** as the evidence basis | **E + F:** unseen probes · end-to-end live | any capability claim made from replayed upstream |
+
+**No step contains a benchmark-specific patch.** S-4 through S-8 each change a *semantics*;
+benchmark and probe runs are regression evidence at every step and a target at none.
+
+---
+
+## 24.1 FINAL DEPENDENCY RECONCILIATION
+
+**Architecture impact: NONE.** Every item below is implementation sequencing. No frozen
+decision, mechanism or invariant is altered, and `S01_S04_ARCHITECTURE_FREEZE.md` is
+unchanged.
+
+### Inconsistency A — U-4 required part of U-2 while scheduled before it
+
+**Found.** M-4's dependency cell read *"M-1, and M-2 for the families that `elimination` and
+`reach` must become"*, while the sequence placed `S-1 = U-1 + U-4` before `S-2 = U-2`. U-4
+cannot remove `_absorb` without (a) extendability declared for the three fields it assigns
+and (b) canonical families for the three side-channel facts it sets — both contract work.
+
+**Corrected.** `U-2` is **split**. `U-2A` is the authority-critical substrate defined by one
+test — *does U-4 need this to remove an uncontrolled write?* — and lands **atomically with
+U-1 and U-4** as S-1. `U-2B` is everything else and follows as S-2. Nothing in U-2B is needed
+to remove an uncontrolled write, which is where the line is drawn.
+
+**The four questions the correction had to answer:**
+
+| Question | Answer |
+|---|---|
+| What representation exists before U-4 lands? | Only U-2A: authority classes, extendability for the three `_absorb` target fields, canonical families for the reach result / elimination record / reference frame, provenance obligations, reference targets |
+| When do `_absorb` and direct class-A writes disappear? | **In S-1**, in the same release that introduces the boundary |
+| When does controlled mutation become authoritative? | **At the end of S-1**, and it is the only path from that moment |
+| Must the transition be atomic? | **Yes.** A release in which both a controlled and an uncontrolled class-A path exist is undetectable from outside — the state looks correct — which is precisely the failure mode being removed |
+
+### Inconsistency B — M-5 ↔ M-8 cycle
+
+**Found.** M-5 depended on M-8 (*"the gate additionally on M-8"*) while M-8 depended on M-5.
+A genuine cycle at mechanism level.
+
+**Corrected.** M-5 is **split along the line the frozen architecture already draws**:
+
+| | Mechanism | Implemented by | Depends on |
+|---|---|---|---|
+| **commitment substrate** — identity, provenance, premise dependency, `SUPERSEDE`/`INVALIDATE`, stale/reopen consequence | **M-5A** | **U-4** (S-1) | M-1, M-2A |
+| **selection and gating** — the gate, candidate commitment, reopening after spatial premise change, progression consequences | **M-5B** | **U-8** (S-7) | M-5A, M-8 |
+
+**The resulting chain is linear:**
+
+```
+commitment substrate (M-5A, U-4)  →  S04·A→S04·B refinement (M-8, U-7)  →  selection & gating (M-5B, U-8)
+```
+
+M-8's dependency now reads **M-5A, not M-5**. No unit was created for this: the two halves
+were already distributed across U-4 and U-8, and the defect was leaving both under one
+ambiguous label.
+
+### Corrected DAG and sequence
+
+DAG in §5; sequence in §24. **§24 is the single implementation-order authority.**
+
+### Consistency check
+
+| # | Question | Answer |
+|---|---|---|
+| 1 | Does controlled mutation have all required canonical substrate before it becomes active? | **Yes** — U-2A lands in the same atomic release |
+| 2 | Can an uncontrolled class-A write coexist with the new boundary? | **No** — S-1 is atomic and deletes `_absorb` in the same release |
+| 3 | Any U-4 → U-2 dependency left while U-4 is scheduled first? | **No** — U-4 depends on U-2A only, and U-2A is in S-1 |
+| 4 | Any M-5 ↔ M-8 cycle left? | **No** — M-5A precedes M-8; M-5B follows it |
+| 5 | Is the commitment substrate available before S04 refinement needs it? | **Yes** — M-5A lands in S-1; U-7 is S-6 |
+| 6 | Does selection/gating wait for the semantics it evaluates? | **Yes** — U-8 (S-7) follows U-7 (S-6) |
+| 7 | Does the S-* sequence match the DAG? | **Yes** — §24 follows §5 edge for edge |
+| 8 | Do earlier sections still describe the old order? | **No** — §2 dependency cells, §4 units, §5 DAG, §7.0, §9 and §21 are reconciled |
+| 9 | Is the architecture freeze unchanged in substance? | **Yes** — unmodified; it carries no implementation-order reference |
+| 10 | **Can an implementation agent start at S-1 without making a new architecture decision?** | **Yes.** S-1's scope, preconditions, atomicity, authoritative outcome, exit tests and disabled set are all stated; the open items in freeze §9 (propagation strategy, status vocabulary, field names) are implementation choices *within* S-1's successors, not architecture decisions |
 
 ---
 
