@@ -326,7 +326,8 @@ class TestContractGeneralization(_Base):
                 resp["stages"]["s04a"]["engineering_questions"][0],
             "why": "control", "requires_semantics": ["configuration_state"],
             "instance_selection": {"population": "INVOCATION_BRANCH",
-                                   "coverage": "ALL_APPLICABLE"}})
+                                   "coverage": "ALL_APPLICABLE",
+                                   "existence": "REQUIRED_NONEMPTY"}})
         after = derive_source_b("s04a", self.c, resp)
         self.assertEqual(before + 1, len(after))
         self.assertIn("Configuration", after[-1].families)

@@ -70,6 +70,10 @@ class _Base(unittest.TestCase):
         stage.update(stage_extra)
         return resp
 
+    def view(self, stage_id, s, *premises, **kw):
+        return build_consumer_view(stage_id, s, self.c,
+                                   self.responsibility(stage_id, *premises), **kw)
+
     def atom(self, view, premise_class):
         """The one atomic obligation of the premise under test.
 
@@ -84,10 +88,11 @@ class _Base(unittest.TestCase):
         raise AssertionError("no assessment for %s" % premise_class)
 
     def premise(self, name, roles, population, coverage=cv.ALL_APPLICABLE,
-                applicability=None):
+                applicability=None, existence=cv.REQUIRED_NONEMPTY):
         p = {"class": name, "requires_semantics": list(roles),
              "justified_by_question": "control", "why": "control",
-             "instance_selection": {"population": population, "coverage": coverage}}
+             "instance_selection": {"population": population, "coverage": coverage,
+                                    "existence": existence}}
         if applicability:
             p["instance_selection"]["applicability"] = applicability
         return p
@@ -189,10 +194,6 @@ class TestPopulations(_Base):
             self.add(s, "s02", "Candidate", cid, principle={"h": "f"},
                      addresses_obligations=["OBL-1"], obligations_created=[])
         return s, ids
-
-    def view(self, stage_id, s, *premises, **kw):
-        return build_consumer_view(stage_id, s, self.c,
-                                   self.responsibility(stage_id, *premises), **kw)
 
 
     # -- 04 / 05 / 06 / 07: the 19 of 19 case ------------------------
@@ -327,7 +328,7 @@ class TestPopulations(_Base):
     def test_SELECT_15_expected_population_is_independent_of_the_view(self):
         s, ids = self.design()
         rule = {"population": cv.DESIGN_WIDE, "coverage": cv.ALL_APPLICABLE,
-                "applicability": cv.ALL_MEMBERS}
+                "existence": cv.REQUIRED_NONEMPTY, "applicability": cv.ALL_MEMBERS}
         expected = cv.expected_instances(s, self.c, ["Requirement"], rule, None)
         self.assertEqual(set(ids), expected)
         # No view was built. Sufficiency that derived its expectation from the
@@ -453,3 +454,258 @@ class TestPriorSuitesStillHold(_Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# =====================================================================
+# Semantic completeness: existence, and a generic invocation context
+# =====================================================================
+class TestExistenceSemantics(_Base):
+    """Coverage says how completely to select. It cannot also say whether the
+    population may be empty. "Every recorded ambiguity" is satisfied by a design
+    that recorded none; "the full requirement set" is not."""
+
+    def bare(self):
+        s = DesignState(run_id="exist")
+        self.add(s, "s01", "Requirement", "REQ-1", quantity_class="BAND")
+        return s
+
+    def test_SELECT_C01_C07_all_of_nothing_satisfies_a_may_be_empty_premise(self):
+        s = self.bare()
+        self.assertEqual([], list(s.standing("Ambiguity")))
+        v = self.view("s02", s, self.premise(
+            "recorded_ambiguity", ["open_question"], cv.DESIGN_WIDE,
+            existence=cv.MAY_BE_EMPTY))
+        a = self.atom(v, "recorded_ambiguity")
+        self.assertEqual(0, a["expected_count"])
+        self.assertEqual(Sufficiency.SATISFIED.value, a["verdict"])
+        self.assertIn("permits", a["why"])
+
+    def test_SELECT_C02_C09_required_nonempty_with_nothing_is_missing_upstream(self):
+        s = DesignState(run_id="exist")
+        v = self.view("s02", s, self.premise(
+            "requirement_set", ["source_requirement"], cv.DESIGN_WIDE,
+            existence=cv.REQUIRED_NONEMPTY))
+        a = self.atom(v, "requirement_set")
+        self.assertEqual(0, a["expected_count"])
+        self.assertEqual(Sufficiency.MISSING_UPSTREAM.value, a["verdict"])
+
+    def test_SELECT_C02b_the_two_empty_cases_differ(self):
+        """The defect at 57e241f: both were MISSING_UPSTREAM, indistinguishable."""
+        s = self.bare()
+        v = self.view("s02", s,
+                      self.premise("legal_empty", ["open_question"], cv.DESIGN_WIDE,
+                                   existence=cv.MAY_BE_EMPTY),
+                      self.premise("illegal_empty", ["physical_effect_obligation"],
+                                   cv.DESIGN_WIDE, existence=cv.REQUIRED_NONEMPTY))
+        self.assertEqual(0, self.atom(v, "legal_empty")["expected_count"])
+        self.assertEqual(0, self.atom(v, "illegal_empty")["expected_count"])
+        self.assertEqual(Sufficiency.SATISFIED.value,
+                         self.atom(v, "legal_empty")["verdict"])
+        self.assertEqual(Sufficiency.MISSING_UPSTREAM.value,
+                         self.atom(v, "illegal_empty")["verdict"])
+
+    def test_SELECT_C08_zero_unresolved_items_is_a_desired_state(self):
+        s = self.bare()
+        decl = [p for _sid, p in _premises(self.resp)
+                if p["class"] == "unresolved_blocking_scope"][0]
+        self.assertEqual(cv.MAY_BE_EMPTY, decl["instance_selection"]["existence"])
+        v = self.view("gate", s, decl)
+        self.assertEqual(Sufficiency.SATISFIED.value,
+                         self.atom(v, "unresolved_blocking_scope")["verdict"])
+
+    def test_SELECT_C03_every_premise_role_declares_existence(self):
+        seen = {cv.MAY_BE_EMPTY: 0, cv.REQUIRED_NONEMPTY: 0}
+        for sid, p in _premises(self.resp):
+            sel = p["instance_selection"]
+            rows = sel["by_role"] if sel.get("by_role") else [sel]
+            for r in rows:
+                self.assertIn("existence", r, "%s/%s" % (sid, p["class"]))
+                self.assertIn(r["existence"], seen, "%s/%s" % (sid, p["class"]))
+                self.assertTrue(r.get("existence_why"), "%s/%s" % (sid, p["class"]))
+                seen[r["existence"]] += 1
+        self.assertTrue(all(seen.values()), "one existence value is never used: %s" % seen)
+
+    def test_SELECT_C04_coverage_and_existence_are_independent(self):
+        """Four combinations, four outcomes. Neither term implies the other."""
+        s, ids = TestPopulations.design(self, n_requirements=3, n_addressed=1)
+        rule = lambda cov, ex: {"population": cv.DESIGN_WIDE, "coverage": cov,
+                                "existence": ex, "applicability": cv.ALL_MEMBERS}
+        req = lambda cov, ex: cv.Requirement(
+            cv.Source.REASONING_PREMISE, "p", ["Requirement"], {},
+            by_role={"source_requirement": ["Requirement"]},
+            selection={"source_requirement": rule(cov, ex)})
+        one = [{"entity_id": ids[0]}]
+        self.assertEqual(Sufficiency.SATISFIED.value,
+                         cv._assess(s, self.c, req(cv.AT_LEAST_ONE, cv.REQUIRED_NONEMPTY),
+                                    one)["verdict"])
+        self.assertEqual(Sufficiency.PROJECTION_FAILURE.value,
+                         cv._assess(s, self.c, req(cv.ALL_APPLICABLE, cv.REQUIRED_NONEMPTY),
+                                    one)["verdict"])
+        empty = DesignState(run_id="none")
+        self.assertEqual(Sufficiency.SATISFIED.value,
+                         cv._assess(empty, self.c, req(cv.ALL_APPLICABLE, cv.MAY_BE_EMPTY),
+                                    [])["verdict"])
+        self.assertEqual(Sufficiency.MISSING_UPSTREAM.value,
+                         cv._assess(empty, self.c,
+                                    req(cv.AT_LEAST_ONE, cv.REQUIRED_NONEMPTY),
+                                    [])["verdict"])
+
+    def test_SELECT_C05_C06_the_19_of_19_and_19_of_9_behaviour_is_intact(self):
+        s, ids = TestPopulations.design(self)
+        v = self.view("s02", s, self.premise("full_requirements",
+                                             ["source_requirement"], cv.DESIGN_WIDE))
+        a = self.atom(v, "full_requirements")
+        self.assertEqual((19, 19), (a["expected_count"], a["selected_count"]))
+        self.assertEqual(Sufficiency.SATISFIED.value, a["verdict"])
+        rm = derive_required_minimum("s02", self.c, self.responsibility(
+            "s02", self.premise("full_requirements", ["source_requirement"],
+                                cv.DESIGN_WIDE)))
+        nine = [{"entity_id": i} for i in ids[:9]]
+        cover = cv._assess(s, self.c, rm.requirements[-1], nine)["coverage"][0]
+        self.assertEqual((19, 9), (cover["expected_count"], cover["selected_count"]))
+        self.assertEqual(Sufficiency.PROJECTION_FAILURE.value, cover["verdict"])
+
+    def test_SELECT_C21_no_fake_candidate_lineage_was_introduced(self):
+        s, ids = TestPopulations.design(self)
+        for eid in ids[9:]:
+            self.assertEqual([], s.entities[eid].get("_premises", []))
+        self.assertEqual([], list(DesignState(run_id="x").standing("Candidate")))
+
+
+class TestInvocationContext(_Base):
+    """Same premise, same state, different invocation - different population.
+
+    At 57e241f the only structured context reaching an applicability rule was the
+    branch: no scenario, no configuration, no actor. A scenario-specific premise
+    could only be expressed by writing the scenario id INTO the rule, which is a
+    fixture literal in production logic and does not generalise to a second
+    scenario at all.
+    """
+
+    def scenarios(self):
+        s = DesignState(run_id="anchor")
+        self.add(s, "s01", "Scenario", "SCN-MAINT")
+        self.add(s, "s01", "Scenario", "SCN-OP")
+        self.add(s, "s02", "LoadCase", "LC-MAINT", scenario="SCN-MAINT")
+        self.add(s, "s02", "LoadCase", "LC-OP", scenario="SCN-OP")
+        # Declares no reference to Scenario at all, so no scenario anchor can
+        # exclude it: it was never scoped to one.
+        self.add(s, "s01", "Requirement", "REQ-GLOBAL", quantity_class="BAND")
+        return s
+
+    def loads(self):
+        return self.premise("loads", ["load_case", "source_requirement"],
+                            cv.DESIGN_WIDE,
+                            applicability=cv.MATCHES_INVOCATION_ANCHORS)
+
+    def test_SELECT_C10_scenario_anchor_changes_the_expected_population(self):
+        s = self.scenarios()
+        resp = self.responsibility("s03a", self.loads())
+        seen = {}
+        for anchor in ("SCN-MAINT", "SCN-OP"):
+            v = build_consumer_view("s03a", s, self.c, resp,
+                                    invocation=cv.InvocationContext.of(s, None, anchor))
+            seen[anchor] = {e["entity_id"] for e in v.entities
+                            if e.get("_family") in ("LoadCase", "Requirement")}
+        self.assertEqual({"LC-MAINT", "REQ-GLOBAL"}, seen["SCN-MAINT"])
+        self.assertEqual({"LC-OP", "REQ-GLOBAL"}, seen["SCN-OP"])
+        self.assertNotEqual(seen["SCN-MAINT"], seen["SCN-OP"],
+                            "the same state gave the same answer to two questions")
+
+    def test_SELECT_C11_C13_C22_the_rule_holds_no_id_of_any_kind(self):
+        import inspect
+        src = inspect.getsource(cv._matches_invocation_anchors)
+        self.assertIsNone(re.search(r"SCN-|CFG-|LC-|BM-\d|PRB-\d|ACT-", src),
+                          "a fixture id is baked into production applicability")
+        self.assertIsNone(re.search(r"deepseek|gpt-|claude", src, re.I))
+        named = [f for f in self.c.families if re.search(r"['\"]%s['\"]" % f, src)]
+        self.assertEqual([], named, "the rule names families: %s" % named)
+        self.assertNotIn("in rec", src, "no substring matching")
+
+    def test_SELECT_C12_configuration_anchor_does_the_same(self):
+        """A different anchor KIND, the same rule, no new code."""
+        s = DesignState(run_id="cfg")
+        self.add(s, "s03", "Body", "BOD-1")
+        self.add(s, "s03", "Configuration", "CFG-STOWED", name="stowed",
+                 bodies_present=["BOD-1"], expected_mobility=[])
+        self.add(s, "s03", "Configuration", "CFG-DEPLOYED", name="deployed",
+                 bodies_present=["BOD-1"], expected_mobility=[])
+        self.add(s, "s03", "MobilityExpectation", "MEX-STOWED",
+                 configuration="CFG-STOWED", dispositions=[])
+        self.add(s, "s03", "MobilityExpectation", "MEX-DEPLOYED",
+                 configuration="CFG-DEPLOYED", dispositions=[])
+        rule = {"population": cv.DESIGN_WIDE, "coverage": cv.ALL_APPLICABLE,
+                "existence": cv.REQUIRED_NONEMPTY,
+                "applicability": cv.MATCHES_INVOCATION_ANCHORS}
+        got = {}
+        for anchor in ("CFG-STOWED", "CFG-DEPLOYED"):
+            got[anchor] = cv.expected_instances(
+                s, self.c, ["MobilityExpectation"], rule, None, None,
+                cv.InvocationContext.of(s, None, anchor))
+        self.assertEqual({"MEX-STOWED"}, got["CFG-STOWED"])
+        self.assertEqual({"MEX-DEPLOYED"}, got["CFG-DEPLOYED"])
+
+    def test_SELECT_C14_C17_anchors_are_canonical_and_typed_not_free_text(self):
+        s = self.scenarios()
+        self.add(s, "s01", "Actor", "ACT-1")
+        ctx = cv.InvocationContext.of(s, "CND-X", "SCN-MAINT", "ACT-1")
+        self.assertEqual({"Scenario": "SCN-MAINT", "Actor": "ACT-1"}, ctx.anchors,
+                         "the family comes from state, not from the caller")
+        self.assertEqual("CND-X", ctx.branch)
+        self.assertIn("anchors", ctx.as_dict())
+        with self.assertRaises(ValueError):
+            cv.InvocationContext.of(s, None, "not an entity")
+
+    def test_SELECT_C15_unknown_applicability_rule_still_fails_closed(self):
+        with self.assertRaises(ValueError):
+            cv._applicable({"X"}, "NOT_A_RULE", {})
+        s = self.scenarios()
+        resp = self.responsibility("s03a", self.premise(
+            "loads", ["load_case"], cv.DESIGN_WIDE, applicability="NOT_A_RULE"))
+        with self.assertRaises(ValueError):
+            build_consumer_view("s03a", s, self.c, resp)
+
+    def test_SELECT_C16_a_new_relation_needs_no_change_to_the_selection_core(self):
+        """Anchoring on a family nothing anticipated, using the shipped rule."""
+        s = DesignState(run_id="new")
+        self.add(s, "s01", "Actor", "ACT-A")
+        self.add(s, "s01", "Actor", "ACT-B")
+        self.add(s, "s02", "Obligation", "OBL-A", scope="UNIVERSAL",
+                 satisfiable_at="s03", derived_from_requirements=[],
+                 involves_actors=["ACT-A"])
+        self.add(s, "s02", "Obligation", "OBL-B", scope="UNIVERSAL",
+                 satisfiable_at="s03", derived_from_requirements=[],
+                 involves_actors=["ACT-B"])
+        rule = {"population": cv.DESIGN_WIDE, "coverage": cv.ALL_APPLICABLE,
+                "existence": cv.REQUIRED_NONEMPTY,
+                "applicability": cv.MATCHES_INVOCATION_ANCHORS}
+        for anchor, expect in (("ACT-A", "OBL-A"), ("ACT-B", "OBL-B")):
+            got = cv.expected_instances(s, self.c, ["Obligation"], rule, None, None,
+                                        cv.InvocationContext.of(s, None, anchor))
+            self.assertEqual({expect}, got, anchor)
+
+    def test_SELECT_C18_C19_C20_prior_behaviour_is_unchanged(self):
+        s, _ids = TestPopulations.design(self, n_requirements=2, n_addressed=1,
+                                         candidates=("CND-A", "CND-B"))
+        self.add(s, "s03", "Body", "BOD-A", prem=["CND-A"])
+        self.add(s, "s03", "Body", "BOD-B", prem=["CND-B"])
+        v = build_consumer_view("s03b", s, self.c, self.responsibility(
+            "s03b",
+            self.premise("full_requirements", ["source_requirement"], cv.DESIGN_WIDE),
+            self.premise("this_topology", ["topology_element"], cv.INVOCATION_BRANCH)),
+            invocation=cv.InvocationContext(branch="CND-A"))
+        got = {e["entity_id"] for e in v.entities}
+        self.assertIn("REQ-01", got)
+        self.assertIn("REQ-02", got)
+        self.assertIn("BOD-A", got)
+        self.assertNotIn("BOD-B", got)
+        # no candidate at all
+        pre = DesignState(run_id="pre")
+        self.add(pre, "s01", "Requirement", "REQ-1", quantity_class="BAND")
+        v2 = build_consumer_view("s02", pre, self.c, self.responsibility(
+            "s02", self.premise("full_requirements", ["source_requirement"],
+                                cv.DESIGN_WIDE)))
+        self.assertIn("REQ-1", {e["entity_id"] for e in v2.entities})
+        for unknown in ("s03", "s05"):
+            with self.assertRaises(cv.UnknownConsumer):
+                build_consumer_view(unknown, pre, self.c, self.resp)

@@ -258,9 +258,36 @@ stage id fails closed instead of reporting VIEW_READY with nothing.
 **562 tests OK.** Full record:
 [S03_PREMISE_INSTANCE_SELECTION_DECISION.md](S03_PREMISE_INSTANCE_SELECTION_DECISION.md).
 
-## 16.3 Still open
+## 16.3 Instance-selection semantic completeness
+
+Two gaps remained after the substrate. **Coverage was carrying existence**: zero standing
+Ambiguities and zero standing Requirements both reported MISSING_UPSTREAM, though "every
+recorded ambiguity" is fully satisfied by a design that recorded none. `existence`
+(MAY_BE_EMPTY / REQUIRED_NONEMPTY) is now declared on all 29 role-rules with a stated why,
+and assessment evaluates existence **before** coverage. 19 REQUIRED_NONEMPTY, 10
+MAY_BE_EMPTY, decided by one stated rule: required where the premise's own `why` says the
+reasoning is impossible without it, may-be-empty where the `what` is a record that may
+legitimately be empty.
+
+**Applicability had a seam but nothing to dispatch on**: only `branch` reached a rule, so a
+scenario-specific premise could only be written by baking the scenario id into the rule.
+`InvocationContext` now carries canonical typed anchors (family read from state, validated
+against it), and one generic rule — `MATCHES_INVOCATION_ANCHORS` — compares an instance's
+declared references against the invocation's declared anchors, naming neither. Same premise,
+same state: `SCN-MAINT` yields `{LC-MAINT, REQ-GLOBAL}`, `SCN-OP` yields `{LC-OP,
+REQ-GLOBAL}`. The same rule serves configuration and actor anchors with no new code.
+
+Also corrected: the `57e241f` report's population counts summed to 30 for 28 premises; the
+measured split is 13 / 6 / 6 / 2 / 1 mixed. And `INVOCATION_BRANCH` with zero candidates now
+resolves to the design — the work has not branched, so a pre-candidate consumer no longer
+reports its upstream absent while standing in front of it.
+
+**577 tests OK.** Full record: sections 24-41 of
+[S03_PREMISE_INSTANCE_SELECTION_DECISION.md](S03_PREMISE_INSTANCE_SELECTION_DECISION.md).
+
+## 16.4 Still open
 
 Unchanged from §15.5, and deliberately so: consumer-path migration (**s02**, **s03a**,
 **s03b**), `project_for` retirement, ADR-002/003/004 replays.
 
-**S-3 INSTANCE-SELECTION SUBSTRATE READY — RESUME FINAL CONSUMER MIGRATION.**
+**S-3 INSTANCE-SELECTION SEMANTICS COMPLETE — RESUME FINAL CONSUMER MIGRATION.**

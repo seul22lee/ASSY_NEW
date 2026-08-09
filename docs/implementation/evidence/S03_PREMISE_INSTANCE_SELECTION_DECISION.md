@@ -331,3 +331,231 @@ CI: meta discover 485 OK · import boundary OK · run_window2 imports OK
 Not S-3 COMPLETE. The final consumer migration has **not** resumed: `project_for`
 is untouched, S03B's raw demands are untouched, the s03 positional truncation is
 untouched, and Impl S-4 has not begun.
+
+---
+
+# SEMANTIC COMPLETENESS CLOSURE
+
+Baseline `57e241f`. Two remaining gaps: coverage was carrying existence, and
+applicability had a dispatch seam but no invocation context to dispatch on.
+
+## 24. Correction to the prior report
+
+The population counts in the `57e241f` report were wrong — they summed to 30 for
+28 premises. Measured from the contract:
+
+| population | premises |
+| --- | --- |
+| DESIGN_WIDE | 13 |
+| INVOCATION_BRANCH | 6 |
+| COMMITTED_BRANCH | 6 |
+| ALL_RETAINED_BRANCHES | 2 |
+| mixed (`by_role`) | 1 |
+| **total** | **28** |
+
+The prior text said 8 INVOCATION_BRANCH. §6's table above was and remains
+correct; only the summary arithmetic was wrong. Recorded rather than quietly
+adjusted.
+
+## 25. The empty-population defect, reproduced
+
+At `57e241f`, one rule handled every empty population:
+
+```
+recorded_ambiguity   0 standing Ambiguity   -> MISSING_UPSTREAM
+requirement_set      0 standing Requirement -> MISSING_UPSTREAM
+```
+
+The two are **not** the same finding. A request that left nothing ambiguous
+recorded no ambiguity, and the premise "every recorded ambiguity" is completely
+satisfied by that. A design with no requirement has nothing to derive obligations
+from. Both reported identically. Classification **A / C — empty-population
+semantic defect, coverage and existence conflated**.
+
+## 26. Existence vocabulary
+
+- **MAY_BE_EMPTY** — an empty applicable population is a valid design state.
+  Selecting all of nothing *is* all of it.
+- **REQUIRED_NONEMPTY** — the reasoning step cannot proceed without at least one
+  applicable instance. Reported as upstream insufficiency **before** coverage is
+  considered, because nothing was lost and blaming projection would name the
+  wrong party.
+
+Nothing larger was introduced. No premise in the corpus needs a numeric
+cardinality beyond zero-versus-nonzero, so no min/max language exists to be
+misused.
+
+## 27. How each premise was classified
+
+The rule applied, stated so it can be checked rather than trusted:
+
+> **REQUIRED_NONEMPTY** where the premise's own `why` says the reasoning is
+> impossible without it. **MAY_BE_EMPTY** where the `what` is a record of things
+> that may simply not have been recorded.
+
+19 REQUIRED_NONEMPTY, 10 MAY_BE_EMPTY (29 role-rules across 28 premises; the
+mixed premise declares per role). Every one carries an `existence_why`.
+
+MAY_BE_EMPTY: `unresolved_blocking_scope` (nothing unresolved is the desired
+state), `recorded_ambiguity`, `topology_constraining_quantity`,
+`retention_obligation`, `reach_requirement` (both roles — a mechanism with no
+actor has no reach to evaluate), `region_and_envelope_constraint`,
+`required_distinctness`, `constraint_relation`, `travel_bounding_quantity`.
+
+One classification was corrected during the pass: `extent_bounding_quantity` was
+first marked MAY_BE_EMPTY and changed to REQUIRED_NONEMPTY, because its own frozen
+`why` reads *"a scale-dependent judgement without the scale is not a judgement"* —
+which says the judgement cannot be made from an empty set. The rule above decided
+it, not the test that caught it.
+
+## 28. Assessment order
+
+```
+1. derive the applicable expected population   (contracts + state + declaration)
+2. does its cardinality satisfy EXISTENCE?     -> MISSING_UPSTREAM if not
+3. does selected-vs-expected satisfy COVERAGE? -> PROJECTION_FAILURE if not
+```
+
+The generic `if not expected: missing` rule is gone. Every assessment row carries
+`population`, `existence`, `coverage`, `applicability`, expected ids and count,
+selected ids and count.
+
+Orthogonality is pinned by SELECT-C04, which exercises all four combinations and
+gets four different outcomes.
+
+## 29. Applicability context — audit at `57e241f`
+
+| question | answer |
+| --- | --- |
+| What structured context reached a rule? | `state`, `contracts`, `families`, `branch` |
+| Scenario? | **no** |
+| Configuration? | **no** |
+| Actor? | **no** |
+| Generic, or branch-only? | **branch-only** |
+| Two scenario anchors, same state, different populations? | **no** |
+| Two configuration anchors? | **no** |
+
+Reproduced concretely: the scenario rule written at `57e241f` had to compare
+against the literal `"SCN-MAINT"` inside the rule body. That is a fixture id in
+production logic, and it does not generalise to a second scenario at all — the
+rule can only ever answer one question. Classification **D / E**.
+
+## 30. Generic invocation context
+
+`InvocationContext(branch, anchors)`. An anchor is a canonical entity id; its
+family is read from standing state rather than declared, so no family is
+enumerated and a new anchor kind needs no code. `InvocationContext.of(state,
+branch, *ids)` validates each id against state — an anchor that names nothing
+fails there rather than silently selecting nothing later.
+
+It carries **identity, never facts**. It guides selection; it is not a second
+engineering-context channel beside the view.
+
+## 31. One rule, every anchor kind
+
+`MATCHES_INVOCATION_ANCHORS`: an instance applies unless a canonical reference it
+declares to an anchored family holds something other than that anchor. An instance
+that declares no such reference applies **everywhere** — it was never scoped to one
+context, so no anchor can exclude it.
+
+It compares **declared relations** against **declared anchors** and names neither.
+SELECT-C11/C13/C22 assert the rule body contains no fixture id, no model name, no
+family name and no substring matching.
+
+## 32. Scenario, end to end
+
+Same premise, same state, two invocations:
+
+| invocation anchor | expected population |
+| --- | --- |
+| `SCN-MAINT` | `LC-MAINT`, `REQ-GLOBAL` |
+| `SCN-OP` | `LC-OP`, `REQ-GLOBAL` |
+
+`REQ-GLOBAL` declares no reference to Scenario and survives both. No scenario id
+appears in the rule. SELECT-C10.
+
+## 33. Configuration, end to end
+
+A different anchor **kind**, the same rule, no new code:
+`CFG-STOWED → {MEX-STOWED}`, `CFG-DEPLOYED → {MEX-DEPLOYED}`. SELECT-C12.
+
+## 34. Actor seam
+
+Proven, not implemented as a production declaration: an Actor anchor is accepted
+and typed by `InvocationContext.of` (SELECT-C14), and SELECT-C16 anchors on Actor
+through `Obligation.involves_actors` — a canonical relation nothing anticipated —
+using the shipped rule with no change to selection or assessment. No speculative
+Actor applicability was added to the contract, because no current premise needs
+one.
+
+## 35. Coverage AT_LEAST_ONE versus existence REQUIRED_NONEMPTY
+
+They are not the same term twice.
+
+- **Existence** is about upstream, before projection: may the applicable
+  population be empty?
+- **Coverage** is about projection, given a non-empty population: how much of it
+  must arrive?
+
+All four combinations are meaningful and all four are exercised (SELECT-C04). No
+change to Source A was needed or made.
+
+## 36. Regressions held
+
+| | result |
+| --- | --- |
+| 19 of 19 | SATISFIED |
+| 19 expected / 9 selected | PROJECTION_FAILURE |
+| unaddressed requirement | still expected and included |
+| design-wide + branch-local in one view | A's body in, B's out |
+| no-candidate s02 | design-wide premises resolve |
+| unknown consumer stage | `UnknownConsumer` |
+| unknown applicability rule | fails closed, view build raises |
+| no fake candidate lineage | `_premises == []` on the unaddressed ones |
+
+## 37. One completeness fix inside the population model
+
+`INVOCATION_BRANCH` with **zero standing candidates** returned nothing, so a
+consumer running before candidate generation reported its upstream absent while
+standing in front of it. It now resolves to the whole design: positive and
+observable — no alternative has been proposed, so the work has not branched and
+"the branch this invocation is working on" is the design. This is the degenerate
+case of the existing definition, not a new population.
+
+## 38. Files changed
+
+| file | change |
+| --- | --- |
+| `ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml` | `existence` + `existence_why` on all 29 role-rules; `existence` and anchor vocabulary defined |
+| `ver3/assy_v3/view/consumer_view.py` | `MAY_BE_EMPTY`/`REQUIRED_NONEMPTY`; existence assessed before coverage; `InvocationContext`; `MATCHES_INVOCATION_ANCHORS`; invocation threaded through selection and assessment; pre-branch `INVOCATION_BRANCH` |
+| `ver3/tests/meta/test_premise_instance_selection.py` | SELECT-C01..C23 (15 new tests, 39 total) |
+| `ver3/tests/meta/test_consumer_view.py` | synthetic premises declare `existence` |
+
+## 39. Regression
+
+```
+test_premise_instance_selection    39 tests   OK
+full suite (ver3/tests)           577 tests   OK (skipped=1)
+```
+
+## 40. Residual limitations
+
+1. **Source-A self-reference.** At s02, atoms like
+   `Candidate.addresses_obligations -> Obligation` report MISSING_UPSTREAM because
+   obligations do not exist yet — and s02 is the stage that creates them. The
+   report is accurate about absence; what is questionable is treating a stage's
+   own output family as upstream. That is Source-A design and was not reopened.
+2. **`AT_LEAST_ONE` is still used only by Source A** among current declarations.
+   Now demonstrably distinct from existence (§35), so it is a real term, but the
+   reasoning corpus does not use it.
+3. **No applicability declaration ships on any of the 28 premises.** The rule and
+   the context are production code and are exercised end to end by tests;
+   declaring the first real one is a contract decision, deliberately not taken.
+4. `ReferenceScale` instance representation unchanged.
+
+## 41. Status
+
+**S-3 INSTANCE-SELECTION SEMANTICS COMPLETE — RESUME FINAL CONSUMER MIGRATION.**
+
+Impl S-3 is not complete. `project_for`, S03B's raw demands, the `[:24000]`
+truncation and the final ADR replays are all untouched; Impl S-4 has not begun.

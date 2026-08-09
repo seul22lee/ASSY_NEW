@@ -114,7 +114,7 @@ class Requirement:
         """The population/coverage/applicability rule for one atomic obligation."""
         return self.selection.get(obligation) or self.selection.get(self.key) or {
             "population": INVOCATION_BRANCH, "coverage": AT_LEAST_ONE,
-            "applicability": ALL_MEMBERS}
+            "existence": REQUIRED_NONEMPTY, "applicability": ALL_MEMBERS}
 
     def atoms(self) -> List[Tuple[str, List[str]]]:
         """(obligation, families that can satisfy it). One entry when atomic."""
@@ -214,6 +214,7 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
                         # needs. This is a declaration, not a default: Source A
                         # says what a REFERENCE means, and it means this.
                         "population": INVOCATION_BRANCH, "coverage": AT_LEAST_ONE,
+                        "existence": REQUIRED_NONEMPTY,
                         "applicability": ALL_MEMBERS}}))
     return out
 
@@ -238,6 +239,7 @@ def _selection_of(premise: Dict[str, Any], roles: List[str]) -> Dict[str, Dict[s
         for row in decl["by_role"]:
             out[row["role"]] = {"population": row["population"],
                                 "coverage": row["coverage"],
+                                "existence": row["existence"],
                                 "applicability": row.get("applicability") or ALL_MEMBERS}
         missing = [r for r in roles if r not in out]
         if missing:
@@ -245,6 +247,7 @@ def _selection_of(premise: Dict[str, Any], roles: List[str]) -> Dict[str, Dict[s
                            % (premise.get("class"), missing))
         return out
     rule = {"population": decl["population"], "coverage": decl["coverage"],
+            "existence": decl["existence"],
             "applicability": decl.get("applicability") or ALL_MEMBERS}
     return {role: dict(rule) for role in roles} or {premise["class"]: rule}
 
@@ -468,8 +471,57 @@ ALL_RETAINED_BRANCHES = "ALL_RETAINED_BRANCHES"
 ALL_APPLICABLE = "ALL_APPLICABLE"
 AT_LEAST_ONE = "AT_LEAST_ONE"
 
-#: Applicability. One rule is declared today; the registry is the seam.
+#: Existence. Whether the applicable population is allowed to be empty. This is a
+#: different question from coverage: "every recorded ambiguity" is satisfied by a
+#: design that recorded none, "the full requirement set" is not, and one term
+#: cannot carry both.
+MAY_BE_EMPTY = "MAY_BE_EMPTY"
+REQUIRED_NONEMPTY = "REQUIRED_NONEMPTY"
+
+#: Applicability rules. The registry is the seam.
 ALL_MEMBERS = "ALL_MEMBERS"
+MATCHES_INVOCATION_ANCHORS = "MATCHES_INVOCATION_ANCHORS"
+
+
+class InvocationContext:
+    """What THIS reasoning invocation is about. Identity, never facts.
+
+    An anchor is a canonical entity id: the scenario being reasoned about, the
+    configuration, the branch. It GUIDES selection and is not itself engineering
+    content - the moment it carried facts it would be a second context channel
+    beside the view, which is the thing U-3 exists to remove.
+
+    Anchors are typed by the family of the entity they name, read from state
+    rather than declared here, so no family is enumerated and a new anchor kind
+    needs no code.
+    """
+
+    __slots__ = ("branch", "anchors")
+
+    def __init__(self, branch: Optional[str] = None,
+                 anchors: Optional[Dict[str, str]] = None):
+        self.branch = branch
+        self.anchors = dict(anchors or {})
+
+    @classmethod
+    def of(cls, state, branch: Optional[str] = None, *anchor_ids: str):
+        """Anchors given by id alone; their family is read from standing state.
+
+        An id that names nothing fails here rather than silently selecting
+        nothing later.
+        """
+        anchors = {}
+        for eid in anchor_ids:
+            if not state.has_entity(eid):
+                raise ValueError("invocation anchor %r is not in state" % eid)
+            anchors[state.stored_family(eid)] = eid
+        return cls(branch, anchors)
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {"branch": self.branch, "anchors": dict(self.anchors)}
+
+    def __repr__(self) -> str:                                   # pragma: no cover
+        return "InvocationContext(%r, %r)" % (self.branch, self.anchors)
 
 
 _ANCHORS = (DESIGN_WIDE, INVOCATION_BRANCH, COMMITTED_BRANCH, ALL_RETAINED_BRANCHES)
@@ -487,6 +539,13 @@ def _population_members(population: str, state, contracts, branch,
     if population == DESIGN_WIDE:
         return None
     if population == INVOCATION_BRANCH:
+        if not state.standing("Candidate"):
+            # POSITIVE and observable: no alternative has been proposed, so the
+            # work has not branched and "the branch this invocation is working on"
+            # IS the design. Without this a consumer that runs before candidate
+            # generation reported its upstream absent while it was standing in
+            # front of it.
+            return None
         return scopes.in_view(branch)
     if population == COMMITTED_BRANCH:
         committed = committed_branch(state, contracts)
@@ -520,11 +579,49 @@ def _applicable(ids, rule: str, context: Dict[str, Any]):
     return fn(ids, context)
 
 
-APPLICABILITY_RULES: Dict[str, Any] = {ALL_MEMBERS: lambda ids, _ctx: ids}
+def _matches_invocation_anchors(ids, ctx):
+    """Instances scoped to something this invocation is not about are dropped.
+
+    Generic by construction: it compares an instance's DECLARED references
+    against the invocation's DECLARED anchors. It never names a family, a
+    scenario, a configuration or an id - the anchor supplies which, the contract
+    supplies where to look, and the same rule serves every anchor kind that ever
+    exists.
+
+    An instance that declares no reference to an anchored family, or leaves it
+    unset, applies EVERYWHERE. It was not scoped to one context, so no anchor can
+    exclude it.
+    """
+    invocation = ctx.get("invocation")
+    if not invocation or not invocation.anchors:
+        return ids
+    state, contracts = ctx["state"], ctx["contracts"]
+    keep = set()
+    for eid in ids:
+        rec = state.entities.get(eid) if state.has_entity(eid) else None
+        if rec is None:
+            continue
+        scoped_out = False
+        for field, referent in _refs_of(rec, rec.get("_family"), contracts):
+            target = state.stored_family(referent) if state.has_entity(referent) else None
+            anchor = invocation.anchors.get(target)
+            if anchor is not None and referent != anchor:
+                scoped_out = True
+                break
+        if not scoped_out:
+            keep.add(eid)
+    return keep
+
+
+APPLICABILITY_RULES: Dict[str, Any] = {
+    ALL_MEMBERS: lambda ids, _ctx: ids,
+    MATCHES_INVOCATION_ANCHORS: _matches_invocation_anchors,
+}
 
 
 def expected_instances(state, contracts, families: List[str], rule: Dict[str, str],
-                       branch, scopes: Optional["_Scopes"] = None) -> Set[str]:
+                       branch, scopes: Optional["_Scopes"] = None,
+                       invocation: Optional[InvocationContext] = None) -> Set[str]:
     """Which standing instances SHOULD satisfy one atomic obligation.
 
     Computed from the contracts, the authoritative state and the premise's own
@@ -540,7 +637,8 @@ def expected_instances(state, contracts, families: List[str], rule: Dict[str, st
            if members is None or rec["entity_id"] in members}
     return set(_applicable(ids, rule.get("applicability") or ALL_MEMBERS,
                            {"state": state, "contracts": contracts,
-                            "families": list(families), "branch": branch}))
+                            "families": list(families), "branch": branch,
+                            "invocation": invocation}))
 
 
 class _Scopes:
@@ -578,7 +676,8 @@ class _Scopes:
 
 def select_instances(state, contracts, requirement: Requirement,
                      branch: Optional[str],
-                     scopes: Optional[Dict[str, str]] = None):
+                     scopes: Optional[Dict[str, str]] = None,
+                     invocation: Optional[InvocationContext] = None):
     """Which accumulated instances satisfy this requirement, and why each is here.
 
     Eligibility by family is necessary and not sufficient - and the sufficient
@@ -593,7 +692,8 @@ def select_instances(state, contracts, requirement: Requirement,
     seen: Set[str] = set()
     for obligation, families in requirement.atoms():
         rule = requirement.selection_for(obligation)
-        wanted = expected_instances(state, contracts, families, rule, branch, scopes)
+        wanted = expected_instances(state, contracts, families, rule, branch, scopes,
+                                    invocation)
         for family in families:
             for rec in state.standing(family):
                 eid = rec["entity_id"]
@@ -607,6 +707,7 @@ def select_instances(state, contracts, requirement: Requirement,
                                "obligation": obligation,
                                "population": rule.get("population"),
                                "coverage": rule.get("coverage"),
+                               "existence": rule.get("existence"),
                                "applicability": rule.get("applicability"),
                                "branch_scope": scopes.for_branch(branch).get(eid, UNSCOPED),
                                "why_relevant": _why_population(
@@ -749,7 +850,8 @@ _SEVERITY = {Sufficiency.SATISFIED.value: 0, Sufficiency.UNRESOLVED.value: 1,
 
 def _assess_atom(state, contracts, obligation: str, families: List[str],
                  rule: Dict[str, str], selected_ids: Set[str], branch,
-                 scopes: "_Scopes") -> Dict[str, Any]:
+                 scopes: "_Scopes",
+                 invocation: Optional[InvocationContext] = None) -> Dict[str, Any]:
     """One atomic obligation, judged by comparing EXPECTED against SELECTED.
 
     Expected is derived independently - contracts, authoritative state, and the
@@ -766,18 +868,25 @@ def _assess_atom(state, contracts, obligation: str, families: List[str],
     is not there.
     """
     standing = {f: len(state.standing(f)) for f in families}
-    expected = expected_instances(state, contracts, families, rule, branch, scopes)
+    expected = expected_instances(state, contracts, families, rule, branch, scopes,
+                                  invocation)
     got = expected & set(selected_ids)
     coverage = rule.get("coverage") or AT_LEAST_ONE
+    existence = rule.get("existence") or REQUIRED_NONEMPTY
     enough = bool(got) if coverage == AT_LEAST_ONE else got == expected
 
-    if not expected:
-        # "All of nothing" is not satisfaction. An empty applicable population
-        # means the upstream material this question needs was never established,
-        # and reporting that as SATISFIED is the failure the taxonomy exists for.
+    if not expected and existence == REQUIRED_NONEMPTY:
+        # This premise cannot proceed without established material. Reported
+        # before coverage is considered at all: nothing was lost, so calling it a
+        # projection failure would blame the wrong party.
         verdict, why = (Sufficiency.MISSING_UPSTREAM,
-                        "no applicable instance exists in the %s population"
-                        % rule.get("population"))
+                        "no applicable instance exists in the %s population, and "
+                        "this premise requires at least one" % rule.get("population"))
+    elif not expected:
+        # Empty is a valid design state here. "Every recorded X" is satisfied by
+        # a design that recorded none; selecting all of nothing IS all of it.
+        verdict, why = (Sufficiency.SATISFIED,
+                        "no applicable instance exists, which this premise permits")
     elif enough:
         verdict, why = Sufficiency.SATISFIED, "%d of %d applicable instances selected" % (
             len(got), len(expected))
@@ -792,14 +901,15 @@ def _assess_atom(state, contracts, obligation: str, families: List[str],
     return {"obligation": obligation, "families": list(families),
             "standing_instances": standing, "verdict": verdict.value, "why": why,
             "population": rule.get("population"), "coverage": coverage,
-            "applicability": rule.get("applicability"),
+            "existence": existence, "applicability": rule.get("applicability"),
             "expected": sorted(expected), "expected_count": len(expected),
             "selected": sorted(got), "selected_count": len(got)}
 
 
 def _assess(state, contracts, requirement: Requirement,
             selected: List[Dict[str, Any]], branch=None,
-            scopes: Optional["_Scopes"] = None) -> Dict[str, Any]:
+            scopes: Optional["_Scopes"] = None,
+            invocation: Optional[InvocationContext] = None) -> Dict[str, Any]:
     """Structural sufficiency: per atomic obligation, then aggregated.
 
     A compound premise cannot be SATISFIED while a required role is not. No model
@@ -810,7 +920,7 @@ def _assess(state, contracts, requirement: Requirement,
     selected_ids = {r["entity_id"] for r in selected}
     coverage = [_assess_atom(state, contracts, name, fams,
                              requirement.selection_for(name), selected_ids,
-                             branch, scopes)
+                             branch, scopes, invocation)
                 for name, fams in requirement.atoms()]
     worst = (max(coverage, key=lambda c: _SEVERITY[c["verdict"]])["verdict"]
              if coverage else Sufficiency.SATISFIED.value)
@@ -822,7 +932,8 @@ def _assess(state, contracts, requirement: Requirement,
 
 def build_consumer_view(stage_id: str, state, contracts, responsibility,
                         budget_chars: Optional[int] = None,
-                        invocation_branch: Optional[str] = None) -> ConsumerView:
+                        invocation_branch: Optional[str] = None,
+                        invocation: Optional[InvocationContext] = None) -> ConsumerView:
     """Derive the minimum, select instances, assess, and record why.
 
     `invocation_branch` is the explicit control input: the candidate this call is
@@ -832,7 +943,8 @@ def build_consumer_view(stage_id: str, state, contracts, responsibility,
     - so the caller says which it is rather than the view guessing.
     """
     required = derive_required_minimum(stage_id, contracts, responsibility)
-    branch = invocation_branch or committed_branch(state, contracts)
+    branch = (invocation_branch or (invocation.branch if invocation else None)
+              or committed_branch(state, contracts))
 
     selected: Dict[str, Dict[str, Any]] = {}
     traces: List[Dict[str, Any]] = []
@@ -840,11 +952,12 @@ def build_consumer_view(stage_id: str, state, contracts, responsibility,
 
     scopes = _Scopes(state, contracts)
     for req in required.requirements:
-        recs, tr = select_instances(state, contracts, req, branch, scopes)
+        recs, tr = select_instances(state, contracts, req, branch, scopes, invocation)
         for rec in recs:
             selected.setdefault(rec["entity_id"], rec)
         traces.extend(tr)
-        assessment.append(_assess(state, contracts, req, recs, branch, scopes))
+        assessment.append(_assess(state, contracts, req, recs, branch, scopes,
+                                  invocation))
 
     traces.extend(close_references(state, contracts, selected))
 

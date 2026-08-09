@@ -80,12 +80,40 @@ instance_selection_vocabulary:
       One applicable member is enough. This is what a representational dependency
       means: a value that points at something needs the something to exist, not
       all of them.
+  existence:
+    purpose: >
+      Coverage says how completely to select from the applicable population. It
+      does not say whether that population is allowed to be empty. "Every recorded
+      ambiguity" is fully satisfied by a design that recorded none; "the full
+      requirement set" is not. Those are different statements and one term cannot
+      carry both.
+    MAY_BE_EMPTY: >
+      An empty applicable population is a valid design state, not a gap. Selecting
+      all of nothing satisfies the premise. Used where the frozen meaning is
+      "every RECORDED x": the record is complete, and it happens to be empty.
+    REQUIRED_NONEMPTY: >
+      The reasoning step cannot proceed without at least one applicable instance.
+      An empty population is upstream insufficiency and is reported as such,
+      before coverage is considered at all.
   applicability:
     ALL_MEMBERS: >
       Every member of the population applies. This is the default and the only
       rule currently declared. It is named rather than implied so that a premise
       which later applies conditionally declares its condition HERE, next to the
       engineering question, instead of anywhere else.
+    MATCHES_INVOCATION_ANCHORS: >
+      An instance applies when every canonical reference it declares to an
+      anchored family holds that invocation's anchor. An instance that declares no
+      such reference, or leaves it unset, applies everywhere - it is not scoped to
+      one scenario or configuration, so no anchor excludes it. One rule covers
+      scenario, configuration, actor and any future anchor, because it compares
+      DECLARED RELATIONS against DECLARED ANCHORS and names neither.
+    invocation_anchors: >
+      An anchor is a canonical entity id together with the family it belongs to:
+      what THIS reasoning invocation is about. It guides selection and is not
+      itself engineering content - it carries identity, never facts. Anchors are
+      validated against standing state, so an anchor that names nothing fails
+      rather than silently selecting nothing.
     extension: >
       A new rule is a new named entry resolved at one point in the resolver. It
       must be derivable from canonical structured relations - never from text in
@@ -131,6 +159,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a design with no requirement has nothing to be derived from
       what: the FULL requirement set
       justified_by_question: What must hold regardless of mechanism?
       why: An obligation set derived from part of the requirements is unsound; coverage cannot
@@ -141,6 +171,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a request that left nothing ambiguous recorded no ambiguity
       what: every recorded ambiguity
       justified_by_question: What must hold regardless of mechanism?
       why: An obligation resting on a silently resolved ambiguity is an unrecorded commitment.
@@ -150,6 +182,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a load with no declared boundary has nowhere to be reacted
       what: the system boundary declared per scenario
       justified_by_question: What loads act, and where may each be reacted?
       why: A reaction site cannot be typed external without a boundary that says what is outside.
@@ -159,6 +193,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: an effect between roles needs the roles to exist
       what: actors and what they must reach
       justified_by_question: What physical effects must occur between which roles?
       why: An effect between roles needs the roles to exist.
@@ -188,6 +224,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a topology synthesised without knowing what must be transmitted is invented
       what: what must be transmitted, at role level
       justified_by_question: What bodies and rigid groups exist?
       why: A topology synthesised without knowing what must be transmitted is invented rather
@@ -198,6 +236,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: without them no connection is known to carry force
       what: the candidate-independent load cases
       justified_by_question: What joins what, of what type, leaving which DOF?
       why: They determine which connections must carry force.
@@ -207,6 +247,8 @@ stages:
       instance_selection:
         population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: this invocation exists to embody a candidate
       what: the candidate's principle assignment and its claim dependencies
       justified_by_question: What bodies and rigid groups exist?
       why: The principle constrains which topologies are even admissible.
@@ -216,6 +258,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may bound no count, range or travel yet
       what: quantities that bound counts, ranges and travel
       justified_by_question: Which sites must be distinct for a mechanical relationship to exist?
       why: Required distinctness follows from what the mechanism must achieve.
@@ -247,6 +291,8 @@ stages:
       instance_selection:
         population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: there is nothing to hold if nothing was built
       what: the full s03a topology
       justified_by_question: What realizes each required effect?
       why: An interaction names the groups it acts between.
@@ -257,6 +303,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a load path needs a load
       what: load cases and their reaction-site requirements
       justified_by_question: How does each load reach an external site?
       why: A path has no terminus without a declared site.
@@ -266,6 +314,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: discharge is checkable only against an obligation
       what: the effects to discharge
       justified_by_question: What realizes each required effect?
       why: Discharge is only checkable against the obligation it discharges.
@@ -275,6 +325,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may record no disturbance to retain against
       what: disturbance and retention obligations
       justified_by_question: What holds each body where it is put, against what, in which configurations,
         and how would a test defeat it?
@@ -285,6 +337,8 @@ stages:
       instance_selection:
         population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a mechanism is in some configuration
       what: what distinguishes each configuration
       justified_by_question: What holds each body where it is put, against what, in which configurations,
         and how would a test defeat it?
@@ -314,6 +368,8 @@ stages:
       instance_selection:
         population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: extents attach to bodies and their connections
       what: the full topology and its interactions
       justified_by_question: Can this candidate fit at all?
       why: Extents attach to bodies and their connections.
@@ -325,6 +381,9 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: its own why says a scale-dependent judgement without the scale
+          is not a judgement, so the judgement cannot be made from an empty set
       what: quantities bounding extent, travel and clearance
       justified_by_question: Can this candidate fit at all?
       why: A scale-dependent judgement without the scale is not a judgement.
@@ -336,10 +395,14 @@ stages:
         - role: actor_role
           population: DESIGN_WIDE
           coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a mechanism with no actor has no reach to evaluate
           why: an actor is a demand on the design, not a product of any alternative
         - role: functional_region
           population: INVOCATION_BRANCH
           coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: reach with no declared target is vacuous, not missing
           why: a region is authored by s03a while embodying one candidate
       what: actors and their reach targets
       justified_by_question: Can each actor reach what it must?
@@ -351,6 +414,8 @@ stages:
       instance_selection:
         population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may declare no region or allowance
       what: declared regions and envelope constraints
       justified_by_question: Can this candidate fit at all?
       why: Fit is relative to a declared allowance.
@@ -361,6 +426,8 @@ stages:
       instance_selection:
         population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: assemblability is an ordering property and needs an order
       what: assembly order and access constraints
       justified_by_question: Can it be assembled?
       why: Assemblability is an ordering property, not only a geometric one.
@@ -388,6 +455,8 @@ stages:
       instance_selection:
         population: ALL_RETAINED_BRANCHES
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a comparison with nothing to compare is not a comparison
       what: every retained candidate's s04a evidence
       justified_by_question: Do all retained candidates carry evidence at equal obligation coverage
         and equal maturity?
@@ -400,6 +469,8 @@ stages:
       instance_selection:
         population: ALL_RETAINED_BRANCHES
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: one alternative must win on a recorded ground
       what: each candidate's evidence-route verdict
       justified_by_question: On what recorded ground does one win?
       why: Choosing partly because a claim can be evidenced is legitimate and must be recorded.
@@ -409,6 +480,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: nothing unresolved is the desired state, not a gap
       what: all unresolved items and what each blocks
       justified_by_question: Does any unresolved item block selection?
       why: Blocking is defined by what the gate requires.
@@ -433,6 +506,8 @@ stages:
       instance_selection:
         population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: placement must extend the arrangement it was told to work in
       what: the selected candidate's s04a arrangement and its commitment classes
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: A placement that does not extend the arrangement it was told to work in is a fresh
@@ -443,6 +518,8 @@ stages:
       instance_selection:
         population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: an origin without an axis supports no incidence claim
       what: the full topology including axes and link relationships
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: An origin without an axis supports no incidence claim.
@@ -454,6 +531,8 @@ stages:
       instance_selection:
         population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a mechanism may declare no required distinctness
       what: declared required-distinctness
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: Realization must be checkable against the premise that two sites must differ.
@@ -463,6 +542,8 @@ stages:
       instance_selection:
         population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: coordinates realize a configuration, so one must exist
       what: each configuration's distinguishing basis
       justified_by_question: What coordinate values realize each configuration?
       why: Otherwise a name is the only thing distinguishing two states.
@@ -472,6 +553,8 @@ stages:
       instance_selection:
         population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may record no constraint relation to release
       what: constraint relations and the interactions maintaining them
       justified_by_question: Which coordinates change in each transition, and along what path?
       why: A release must alter what maintains it.
@@ -482,6 +565,8 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may bound no travel yet
       what: quantities bounding travel and clearance
       justified_by_question: Which coordinates change in each transition, and along what path?
       why: Motion extent is a quantity.
@@ -491,6 +576,8 @@ stages:
       instance_selection:
         population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: s04b realizes the selected candidate, not an arbitrary one
       what: the selection decision
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: s04b realizes the selected candidate, not an arbitrary one.
