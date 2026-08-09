@@ -28,6 +28,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, REPO)
 
+from ver3.assy_v3.state.patch import Op as _Op, StagePatch as _Patch       # noqa: E402
 from ver3.assy_v3.providers.offline import OfflineReplayProvider            # noqa: E402
 from ver3.assy_v3.providers.status import ExecutionStatus                   # noqa: E402
 from ver3.assy_v3.stages.s01_requirement_capture import S01RequirementCapture  # noqa: E402
@@ -260,7 +261,6 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
         by_config = {}
         for e in entries:
             by_config.setdefault(e["configuration"], []).append(e)
-        from ver3.assy_v3.state.patch import Op as _Op, StagePatch as _Patch
         ops = [_Op("CREATE", "MobilityExpectation", "MEX-%04d" % (i + 1),
                    {"configuration": cfg, "dispositions": rows}, "s03:derivation")
                for i, (cfg, rows) in enumerate(sorted(by_config.items()))]
@@ -331,7 +331,7 @@ def run_s04(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
         state.apply(out.patch)
         # Fold the pass's non-entity results onto the entities that own them, so
         # the checks read one state rather than a response.
-        _absorb(state, key, out.raw_response)
+        _commit_s04(state, key, out.raw_response, rec)
 
     for name, fn in S04_CHECKS:
         try:
@@ -343,12 +343,22 @@ def run_s04(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
     return rec
 
 
-def _absorb(state, key: str, raw: Optional[str]) -> None:
-    """Attach s04 results to the entities they describe.
+def _commit_s04(state, key: str, raw: Optional[str], rec: Dict[str, Any]) -> None:
+    """Commit s04's non-entity results through the controlled mutation boundary.
 
-    region volumes, assembly directions and joint origins are properties OF
-    existing entities, not new families; giving each its own family would be
-    inventing representation to avoid an EXTEND.
+    Region volumes, assembly directions and joint origins are properties OF
+    existing entities, so they enter by EXTEND -- which is what the previous
+    implementation said it wanted to avoid and then avoided by assigning into the
+    entity dict directly, with no operation, no ownership check, no validation
+    and no provenance.
+
+    Reach results, the elimination record and the reference scale were held as
+    bare attributes on the state object. They are engineering conclusions, so
+    they are now entities with an identity, an owner and provenance (U-2A).
+
+    The spatial values are expressed in the reference scale, so the scale is
+    recorded as their premise: superseding or invalidating it costs every
+    coordinate that depends on it its unqualified authority (FA-5).
     """
     if not raw:
         return
@@ -356,23 +366,82 @@ def _absorb(state, key: str, raw: Optional[str]) -> None:
         parsed = json.loads(raw)
     except Exception:                                                # noqa: BLE001
         return
+
+    ops: List[_Op] = []
+    uncommitted: List[str] = []
+    prov = "%s:response" % key
+    scale_id: Optional[str] = None
+
     if key == "s04a":
+        scale = parsed.get("scale")
+        if isinstance(scale, dict) and scale.get("basis"):
+            scale_id = "SCL-0001"
+            ops.append(_Op("CREATE", "ReferenceScale", scale_id,
+                           {"basis": scale.get("basis"),
+                            "absolute": scale.get("absolute"),
+                            "note": scale.get("note")}, prov))
+        premises = [scale_id] if scale_id else []
+
         for r in parsed.get("region_volumes", []) or []:
-            e = state.entities.get(r.get("functional_region"))
-            if e is not None:
-                e["volume"] = {"half_extent": r.get("half_extent"), "centre": r.get("centre")}
+            target = r.get("functional_region")
+            if target not in state.entities:
+                uncommitted.append("region_volume -> %s" % target)
+                continue
+            ops.append(_Op("EXTEND", state.entities[target]["_family"], target,
+                           {"volume": {"half_extent": r.get("half_extent"),
+                                       "centre": r.get("centre")}},
+                           prov, premise_refs=list(premises)))
         for a in parsed.get("assembly_directions", []) or []:
-            e = state.entities.get(a.get("assembly_step"))
-            if e is not None:
-                e["insertion_direction"] = a.get("direction")
-        state.s04a_reach = parsed.get("reach_results", [])
-        state.s04a_elimination = parsed.get("elimination")
-        state.s04a_scale = parsed.get("scale")
+            target = a.get("assembly_step")
+            if target not in state.entities:
+                uncommitted.append("assembly_direction -> %s" % target)
+                continue
+            ops.append(_Op("EXTEND", state.entities[target]["_family"], target,
+                           {"insertion_direction": a.get("direction")},
+                           prov, premise_refs=list(premises)))
+
+        for i, r in enumerate(parsed.get("reach_results", []) or [], start=1):
+            ops.append(_Op("CREATE", "ReachResult", "RCH-%04d" % i,
+                           {"actor": r.get("actor"), "target": r.get("target"),
+                            "reachable": r.get("reachable"),
+                            "approach_side": r.get("approach_side"),
+                            "why": r.get("why")}, prov, premise_refs=list(premises)))
+        elim = parsed.get("elimination")
+        if isinstance(elim, dict) and elim.get("eliminated") is not None:
+            ops.append(_Op("CREATE", "EliminationRecord", "ELM-0001",
+                           {"eliminated": elim.get("eliminated"),
+                            "reason": elim.get("reason")},
+                           prov, premise_refs=list(premises)))
     else:
+        existing = state.by_family.get("ReferenceScale") or []
+        premises = [existing[0]] if existing else []
         for p in parsed.get("joint_placements", []) or []:
-            e = state.entities.get(p.get("joint"))
-            if e is not None:
-                e["frame_origin"] = p.get("origin")
+            target = p.get("joint")
+            if target not in state.entities:
+                uncommitted.append("joint_placement -> %s" % target)
+                continue
+            ops.append(_Op("EXTEND", state.entities[target]["_family"], target,
+                           {"frame_origin": p.get("origin")},
+                           prov, premise_refs=list(premises)))
+
+    # A target that does not exist was silently dropped before S-1. It is still
+    # not committed -- inventing the entity would be worse -- but the drop is
+    # now recorded instead of invisible.
+    rec["%s_uncommitted" % key] = uncommitted
+    if not ops:
+        return
+    patch = _Patch(patch_id="%s-%s-commit" % (state.run_id, key),
+                   run_id=state.run_id, stage_id="s04", stage_attempt=1,
+                   parent_state_hash=state.state_hash(), operations=ops,
+                   execution_status="SUCCESS",
+                   provenance={"purpose": "commit %s spatial results" % key,
+                               "provider": "stage-response"},
+                   declared_incompleteness=[])
+    problems = state.validate(patch)
+    if problems:
+        rec["%s_commit_rejected" % key] = problems
+        return
+    state.apply(patch)
 
 
 def main() -> int:

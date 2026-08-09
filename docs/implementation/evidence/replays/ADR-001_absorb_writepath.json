@@ -1,0 +1,169 @@
+{
+ "adr": "ADR-001",
+ "entities_referenced": {
+  "AssemblyStep": [
+   "ASY-0001",
+   "ASY-0002",
+   "ASY-0003"
+  ],
+  "FunctionalRegion": [
+   "FRG-0001",
+   "FRG-0002",
+   "FRG-0003",
+   "FRG-0004"
+  ],
+  "Joint": [
+   "JNT-0001",
+   "JNT-0002"
+  ]
+ },
+ "historical_defect": {
+  "missing": [
+   "operation",
+   "ownership check",
+   "contract validation",
+   "provenance"
+  ],
+  "path": "run_window2.run_case -> _absorb(state, key, raw) -> state.entities[id][field] = value",
+  "side_channel": [
+   "state.s04a_reach",
+   "state.s04a_elimination",
+   "state.s04a_scale"
+  ]
+ },
+ "provenance": {
+  "note": "Copied verbatim; no value was edited. Trimmed to the keys _absorb read.",
+  "source_artifacts": [
+   "ver3/live_runs/window2/r_final/responses/BM-001/t1_CND-0001/s04a.json",
+   "ver3/live_runs/window2/r_final/responses/BM-001/t1_CND-0001/s04b.json"
+  ]
+ },
+ "s04a": {
+  "assembly_directions": [
+   {
+    "assembly_step": "ASY-0001",
+    "direction": [
+     0,
+     0,
+     1
+    ]
+   },
+   {
+    "assembly_step": "ASY-0002",
+    "direction": [
+     1,
+     0,
+     0
+    ]
+   },
+   {
+    "assembly_step": "ASY-0003",
+    "direction": [
+     0,
+     1,
+     0
+    ]
+   }
+  ],
+  "elimination": {
+   "eliminated": false,
+   "reason": null
+  },
+  "reach_results": [
+   {
+    "actor": "ACT-0001",
+    "approach_side": "+Z",
+    "reachable": true,
+    "target": "interior of enclosed volume",
+    "why": "FRG-0001 is placed on the top face of the closing panel with approach from +Z."
+   },
+   {
+    "actor": "ACT-0001",
+    "approach_side": "+X",
+    "reachable": true,
+    "target": "the retaining function's release",
+    "why": "FRG-0004 is on the +X side of the catch and accessible from +X."
+   }
+  ],
+  "region_volumes": [
+   {
+    "centre": [
+     1.5,
+     0.5,
+     0.0
+    ],
+    "functional_region": "FRG-0001",
+    "half_extent": [
+     0.4,
+     0.8,
+     0.8
+    ]
+   },
+   {
+    "centre": [
+     0.0,
+     -0.8,
+     0.0
+    ],
+    "functional_region": "FRG-0002",
+    "half_extent": [
+     1.8,
+     1.2,
+     0.8
+    ]
+   },
+   {
+    "centre": [
+     1.5,
+     0.3,
+     0.0
+    ],
+    "functional_region": "FRG-0003",
+    "half_extent": [
+     0.3,
+     0.8,
+     0.8
+    ]
+   },
+   {
+    "centre": [
+     2.0,
+     0.8,
+     0.0
+    ],
+    "functional_region": "FRG-0004",
+    "half_extent": [
+     0.2,
+     0.4,
+     0.4
+    ]
+   }
+  ],
+  "scale": {
+   "absolute": null,
+   "basis": "RELATIVE",
+   "note": "No absolute dimensions were provided in the mechanism input. All coordinates are in arbitrary relative units."
+  }
+ },
+ "s04b": {
+  "joint_placements": [
+   {
+    "joint": "JNT-0001",
+    "origin": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "joint": "JNT-0002",
+    "origin": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  ]
+ },
+ "what_this_is": "Reproduction substrate for the historical uncontrolled authoritative-write path. These are the exact s04a/s04b payload fragments the old _absorb() consumed. They are REPRODUCTION SUBSTRATE, NOT AN ANSWER TEMPLATE: no test asserts any coordinate, direction or verdict in this file is correct. The assertions are about which PATH the values take into authoritative state."
+}

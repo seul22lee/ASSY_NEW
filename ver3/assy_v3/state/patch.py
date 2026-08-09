@@ -8,11 +8,22 @@ from typing import Any, Dict, List, Optional
 
 CREATE = "CREATE"
 EXTEND = "EXTEND"
+#: U-4 (S-1). The two controlled operations the architecture requires and the
+#: implementation lacked. Before S-1 a value could only be added, never revised,
+#: so a stage that needed to revise one had no legitimate path and took an
+#: uncontrolled one.
+SUPERSEDE = "SUPERSEDE"
+INVALIDATE = "INVALIDATE"
+
 RELATE = "RELATE"
 RECORD_UNRESOLVED = "RECORD_UNRESOLVED"
 RECORD_REJECTED = "RECORD_REJECTED"
 
-OP_KINDS = (CREATE, EXTEND, RELATE, RECORD_UNRESOLVED, RECORD_REJECTED)
+#: The four controlled operations on class-A state (FA-3).
+CONTROLLED_OPS = (CREATE, EXTEND, SUPERSEDE, INVALIDATE)
+
+OP_KINDS = (CREATE, EXTEND, SUPERSEDE, INVALIDATE,
+            RELATE, RECORD_UNRESOLVED, RECORD_REJECTED)
 
 
 @dataclass(frozen=True)
@@ -22,6 +33,14 @@ class Op:
     entity_id: str
     fields: Dict[str, Any] = field(default_factory=dict)
     provenance_ref: Optional[str] = None
+    #: U-4/M-5A. The class-A entity ids this value depends on. When one of them
+    #: is superseded or invalidated, this value loses unqualified authority
+    #: (FA-5). Empty means "no premise declared", which is not the same as
+    #: "no premise exists" - it is an honest absence, not an assertion.
+    premise_refs: List[str] = field(default_factory=list)
+    #: Required by SUPERSEDE and INVALIDATE. A revision without a stated reason
+    #: is a silent contradiction, which the architecture forbids.
+    reason: Optional[str] = None
 
     def __post_init__(self) -> None:
         if self.kind not in OP_KINDS:

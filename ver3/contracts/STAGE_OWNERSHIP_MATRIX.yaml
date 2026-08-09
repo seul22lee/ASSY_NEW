@@ -86,7 +86,11 @@ stages:
     role: >
       Define named states, the transitions between them, and produce executable
       witnesses that the intended motion exists and the forbidden motion does not.
-    owns: [State, Transition, Witness, Envelope, SweptVolume, SelectionDecision]
+    # U-2A (S-1): the last three are s04a engineering conclusions that were
+    # held as bare attributes on the state object, with no owner, no identity
+    # and no provenance.
+    owns: [State, Transition, Witness, Envelope, SweptVolume, SelectionDecision,
+           ReachResult, EliminationRecord, ReferenceScale]
     extends: [Joint, Body, Configuration]
     may_not:
       - "Treat a rendered sheet as the authoritative artifact (R-01, INV-005)."

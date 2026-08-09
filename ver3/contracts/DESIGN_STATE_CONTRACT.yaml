@@ -46,6 +46,48 @@ identity:
 # 2. Entity families
 #    Fields marked authoritative_geometry MUST have metric types (INV-003).
 # =====================================================================
+# ---------------------------------------------------------------- U-2A (S-1)
+# Frozen architecture FA-2 / FA-3. Added by migration step S-1 as the minimum
+# authority substrate. The COMPLETE per-family classification is U-2B work and
+# is deliberately not attempted here.
+authority_model:
+  schema_version: 1
+  classes:
+    AUTHORITATIVE: "Class A. Engineering state the design asserts. Controlled mutation only; provenance required."
+    DERIVED: "Class B. Strict consequence of class-A premises. Recomputable; carries its premise set."
+    EPHEMERAL: "Class C. Views, serializations, caches, provider payloads. Never stored in DesignState."
+    ASSURANCE: "Class D. Check results and findings. Append-only consumer of class A, never a producer of it."
+  default_class: AUTHORITATIVE
+  default_rationale: >
+    A family with no explicit class is treated as class A, the strictest regime.
+    Defaulting to strict means no family can escape controlled mutation by
+    omission. Misclassifying an assurance artifact as authoritative costs only
+    extra rigour; the reverse would open exactly the hole S-1 exists to close.
+  class_overrides: {}
+  class_overrides_note: >
+    Empty at S-1. Populating it - in particular splitting MobilityExpectation
+    into a derived domain and an authored disposition - is U-6/M-6, and
+    reclassifying the assurance_families block is U-2B.
+  controlled_operations:
+    CREATE: "The owning stage introduces an entity, once."
+    EXTEND: "A permitted stage adds a permitted field, once, never over an existing value."
+    SUPERSEDE: "A replacement value is recorded with a reason. Both values are retained."
+    INVALIDATE: "A value is marked no longer standing, with a reason. Nothing is deleted."
+  mutation_rule: >
+    No stage, runner, projection helper, absorber, provider adapter or validator
+    may mutate class-A facts outside a StagePatch carrying one of the four
+    controlled operations. Enforced at runtime by assy_v3/state/authority.py.
+  validity_vocabulary:
+    STANDING: "Current; no premise it depends on has changed."
+    SUPERSEDED: "A replacement was recorded. This value is retained and readable."
+    INVALIDATED: "Explicitly withdrawn with a reason. The record remains."
+    STALE: "A premise this value depends on changed. The value was not touched; it has lost unqualified authority."
+  premise_rule: >
+    FA-5. An operation may declare the class-A entity ids its value depends on.
+    When such a premise is superseded or invalidated, every dependent whose
+    validity is STANDING becomes STALE. The dependent is never deleted and never
+    silently remains unqualifiedly authoritative.
+
 entity_families:
 
   Requirement:
@@ -119,6 +161,12 @@ entity_families:
       - "A generic block is not an embodiment (R-09)."
 
   Joint:
+    # U-2A (S-1): frame_origin is the field the implementation actually writes
+    # and reads. fields_owned_by_s04b names `located_frame`, which no code
+    # produces or consumes - that divergence is recorded and DEFERRED TO U-2B.
+    # S-1 declares the field in use; it does not rename either one.
+    extendable_fields:
+      frame_origin: s04
     owned_by: s03
     extendable_by: [s04, s05, s06]
     purpose: "A kinematic relation between two rigid groups."
@@ -285,6 +333,10 @@ entity_families:
       - "No element acquires a reaction obligation from its type. 'Shaft -> bearing' is unreachable by construction."
 
   FunctionalRegion:
+    # U-2A (S-1): the field s04a extends. Was written by a runner helper with no
+    # operation and no provenance; now the only permitted path is EXTEND.
+    extendable_fields:
+      volume: s04
     owned_by: s03
     extendable_by: [s04]
     purpose: "A volume the design promises: access, support, keep-out, aperture."
@@ -295,6 +347,10 @@ entity_families:
       - "No Feature may intrude into a FunctionalRegion; s05 re-runs the occupancy check."
 
   AssemblyStep:
+    # U-2A (S-1): declared here for the first time. The field was written
+    # directly by a runner helper and had no contract declaration at all.
+    extendable_fields:
+      insertion_direction: s04
     owned_by: s03
     extendable_by: [s04]
     purpose: "One installation operation, its order, its access side and what it activates."
@@ -310,6 +366,54 @@ entity_families:
 # =====================================================================
 # 3. Geometric authority
 # =====================================================================
+  # -------------------------------------------------------------- U-2A (S-1)
+  # Three engineering conclusions that s04a authored and that were held as bare
+  # attributes on the state object: no identity, no owner, no provenance, and no
+  # contract. Nothing read them. They are class-A facts and are given a home so
+  # that U-4 can remove the side channel. Fields mirror what s04a already emits;
+  # no new semantics are introduced.
+  ReachResult:
+    owned_by: s04
+    authority_class: AUTHORITATIVE
+    purpose: "Whether an actor can reach a target, and from which side. An engineering conclusion of s04a."
+    required_fields:
+      - entity_id
+      - actor
+      - target
+      - reachable
+    optional_fields:
+      - approach_side
+      - why
+    rules:
+      - "s04a authors it from the arrangement it produced. It is a conclusion, not a measurement."
+      - "Held as a bare state attribute before S-1, so no check could read it and no provenance existed."
+  EliminationRecord:
+    owned_by: s04
+    authority_class: AUTHORITATIVE
+    purpose: "Whether s04a eliminated the candidate it was run on, and the geometric reason."
+    required_fields:
+      - entity_id
+      - eliminated
+    optional_fields:
+      - reason
+      - candidate
+    rules:
+      - "Recording an elimination is not selection. The gate that acts on it is U-8/M-5B and does not exist yet."
+      - "An elimination with eliminated=true and no reason is an incomplete record, not a decision."
+  ReferenceScale:
+    owned_by: s04
+    authority_class: AUTHORITATIVE
+    purpose: "The basis in which every s04 spatial value is expressed."
+    required_fields:
+      - entity_id
+      - basis
+    optional_fields:
+      - absolute
+      - note
+    rules:
+      - "A coordinate has no meaning without the basis it is expressed in, so this is a representational premise of every s04 spatial commitment."
+      - "basis RELATIVE with absolute null is a legitimate, honest value. It is not a defect and must not be defaulted to a number."
+
 geometric_authority:
   rule: >
     Pose, orientation, extent, offset, motion path, contact, clearance and

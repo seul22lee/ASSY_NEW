@@ -6,7 +6,7 @@ references:
 - ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
 - ver3/contracts/GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
 audit_scope:
-  families_audited: 41
+  families_audited: 44
   re_run_note: 'The family set grew from 32 to 37 by CONTRACT CHANGE (five families added to DESIGN_STATE_CONTRACT
     under docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md rev 2: RigidGroup, LoadCase, LoadPath, FunctionalRegion,
     AssemblyStep). This audit was RE-RUN over the new set and asks the same consumer question of each.
@@ -20,10 +20,18 @@ audit_scope:
 
     '
   families_added: 0
+  s1_growth_note: >
+    Migration step S-1 (U-2A) added three families by CONTRACT CHANGE:
+    ReachResult, EliminationRecord and ReferenceScale. All three are engineering
+    conclusions s04a already authored and held as bare attributes on the state
+    object, with no identity, no owner and no provenance; nothing could read
+    them. Giving them a family is what allowed the uncontrolled write path to be
+    removed. As with the earlier growth recorded above, the audit itself still
+    adds and deletes nothing - families_added records the audit's own additions.
   families_deleted: 0
   no_stage_contract_frozen_by_this_audit: true
 summary:
-  CORE: 32
+  CORE: 35
   PROVISIONAL: 6
   MERGE_CANDIDATE: 3
   UNSUPPORTED: 0
@@ -720,6 +728,57 @@ families:
       as debt rather than papered over with an invented package id.
 
       '
+  # ------------------------------------------------------------- S-1 (U-2A)
+  ReachResult:
+    owning_stage: s04
+    first_downstream_consumer: s04
+    unique_responsibility: >
+      Whether an actor can reach a target, and from which side. A conclusion
+      ABOUT an arrangement, not a property of any one entity in it, which is why
+      it cannot live on a Body or a FunctionalRegion.
+    duplicates: none
+    duplicates_note: >
+      FunctionalRegion says a volume is promised. This says an actor can get to
+      it in the arrangement s04a produced.
+    required_for_assurance_package: false
+    status: CORE
+    s1_note: >
+      Held as state.s04a_reach before S-1: no entity, no id, no provenance, and
+      no check could read it.
+  EliminationRecord:
+    owning_stage: s04
+    first_downstream_consumer: s04
+    unique_responsibility: >
+      Whether s04a eliminated the candidate it ran on, and the geometric reason.
+    duplicates: none
+    duplicates_note: >
+      SelectionDecision records which candidate WON, at the gate. This records
+      that one candidate is no longer viable on geometric grounds, which is a
+      different act and happens before any gate exists.
+    required_for_assurance_package: false
+    status: CORE
+    s1_note: >
+      Held as state.s04a_elimination before S-1. Recording an elimination is not
+      selection; the gate that would act on it is U-8 and does not exist yet.
+  ReferenceScale:
+    owning_stage: s04
+    first_downstream_consumer: s04
+    unique_responsibility: >
+      The basis in which every s04 spatial value is expressed. A coordinate has
+      no meaning without it, so it is a representational premise of every s04
+      spatial commitment rather than a value of its own.
+    duplicates: none
+    duplicates_note: >
+      Parameter carries a value with a unit. This carries the basis the values
+      are expressed in, including the honest case of a relative basis with no
+      absolute anchor at all.
+    required_for_assurance_package: false
+    status: CORE
+    s1_note: >
+      Held as state.s04a_scale before S-1. It is now the recorded premise of the
+      spatial commitments that depend on it, so withdrawing it costs them their
+      unqualified authority (FA-5).
+
 overlap_analysis:
 - id: OV-01
   group:
