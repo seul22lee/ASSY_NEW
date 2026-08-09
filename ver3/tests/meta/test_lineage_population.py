@@ -41,12 +41,14 @@ S03A_RESPONSE: Dict[str, Any] = {
     "joints": [{"id": "JNT-0001", "joint_type": "REVOLUTE", "parent_group": "RGP-0001",
                 "child_group": "RGP-0001", "dof": ["RZ"], "axis_direction": "Z",
                 "frame_ids": ["F1"]}],
+    "interfaces": [{"id": "IFC-0001", "bodies": ["BOD-0001"],
+                    "interaction_kind": "CONTACT", "nominal_status": "NOMINAL"}],
     "configurations": [{"id": "CFG-0001", "name": "home", "kind": "OPERATIONAL",
                         "bodies_present": ["BOD-0001"], "expected_mobility": []}],
 }
 S03B_RESPONSE: Dict[str, Any] = {
     "load_paths": [{"id": "LP-0001", "load_case": "LC-0001", "candidate": "CND-0001",
-                    "ordered_hops": ["BOD-0001"]}],
+                    "ordered_hops": ["IFC-0001"]}],
     "blocking_relations": [{"rigid_group": "RGP-0001", "configuration": "CFG-0001",
                             "dof": "RZ", "driver": "JOINT_CLASS",
                             "holding_element": "JNT-0001"}],

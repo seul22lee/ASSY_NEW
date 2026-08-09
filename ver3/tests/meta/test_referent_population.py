@@ -39,12 +39,14 @@ S03A = {
     "joints": [{"id": "JNT-A", "joint_type": "REVOLUTE", "parent_group": "RGP-A",
                 "child_group": "RGP-A", "dof": ["RZ"], "axis_direction": "+Z",
                 "frame_ids": ["F1"]}],
+    "interfaces": [{"id": "IFC-A", "bodies": ["BOD-A"],
+                    "interaction_kind": "CONTACT", "nominal_status": "NOMINAL"}],
     "configurations": [{"id": "CFG-A", "name": "home", "kind": "OPERATIONAL",
                         "bodies_present": ["BOD-A"], "expected_mobility": []}],
 }
 S03B = {
     "load_paths": [{"id": "LP-A", "load_case": "LC-1", "candidate": "CND-A",
-                    "ordered_hops": ["BOD-A"]}],
+                    "ordered_hops": ["IFC-A"]}],
     "blocking_relations": [{"rigid_group": "RGP-A", "configuration": "CFG-A",
                             "dof": "RZ", "driver": "JOINT_CLASS",
                             "holding_element": "JNT-A"}],

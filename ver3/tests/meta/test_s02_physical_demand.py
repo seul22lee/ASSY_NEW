@@ -256,24 +256,26 @@ class TestUnseenShape(_Base):
         self.assertNotIn("under_load_case", rec,
                          "an optional field was filled in for the model")
 
-    def test_S4_S02_10_a_physical_demand_naming_a_body_is_refused(self):
-        """"Roles, never bodies." `between_roles` declares Actor, so a body is the
-        wrong family and the write boundary says which.
+    def test_S4_S02_10_between_roles_is_a_role_not_an_entity(self):
+        """"Roles, never bodies" - and never Actors either.
 
-        `resolvable: true` on this field tolerates an id that does not resolve YET
-        - that is the contract's own word and is not weakened here. What it never
-        tolerates is an id that resolves to the wrong thing.
+        This field used to be declared a reference to Actor, which conflated the
+        EXTERNAL participant with the product/function role the freeze means:
+        "a force must pass from the actuation role to the closing role". It is
+        now a role name, carried the way `LoadCase.applied_to_role` already
+        carries one, so there is no entity for it to name wrongly.
+
+        Discharge stays checkable through `PhysicalInteraction.discharges_effect`,
+        which IS addressable - that never depended on roles being entities.
         """
-        payload = _response(["OBL-0002"])
-        payload["physical_effect_obligations"][0]["between_roles"] = ["BOD-0001"]
-        s = self.upstream()
-        self.add(s, "s03", "Body", "BOD-0001")
-        out = S02ObligationAndCandidates().invoke(_Canned(payload), s, s.run_id)
-        self.assertIsNotNone(out.patch, out.problems)
-        with self.assertRaises(ContractError) as caught:
-            s.apply(out.patch)
-        self.assertIn("REFERENCE_FAMILY", str(caught.exception))
-        self.assertIn("BOD-0001", str(caught.exception))
+        spec = self.c.field_semantics("PhysicalEffectObligation")["between_roles"]
+        self.assertEqual("role_name", spec["kind"])
+        self.assertIsNone(self.c.reference_spec("PhysicalEffectObligation",
+                                                "between_roles"))
+        s, out = self.run_s02(CANONICAL_RESPONSE)
+        s.apply(out.patch)
+        self.assertEqual(["ACT-0001"], s.entities["PEO-0001"]["between_roles"],
+                         "the value is carried verbatim, not resolved")
 
 
 if __name__ == "__main__":

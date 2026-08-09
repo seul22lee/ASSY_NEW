@@ -6,7 +6,7 @@ references:
 - ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
 - ver3/contracts/GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
 audit_scope:
-  families_audited: 47
+  families_audited: 48
   re_run_note: 'The family set grew from 32 to 37 by CONTRACT CHANGE (five families added to DESIGN_STATE_CONTRACT
     under docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md rev 2: RigidGroup, LoadCase, LoadPath, FunctionalRegion,
     AssemblyStep). This audit was RE-RUN over the new set and asks the same consumer question of each.
@@ -20,6 +20,12 @@ audit_scope:
 
     '
   families_added: 0
+  s4_growth_note: >
+    Migration step S-4 added one family by CONTRACT CHANGE: ReactionSiteRequirement.
+    The plan's M-7 recorded the gap - "Reaction sites do not exist as a type, so a
+    load path cannot terminate outside the product" - and without it the world had
+    to be modelled as a body, which it is not. As with the earlier growth recorded
+    below, the audit itself still adds and deletes nothing.
   s2_growth_note: >
     Migration step S-2 (U-2B) added three families by CONTRACT CHANGE:
     ConstraintRelation, PhysicalEffectObligation and PhysicalInteraction. The
@@ -40,7 +46,7 @@ audit_scope:
   families_deleted: 0
   no_stage_contract_frozen_by_this_audit: true
 summary:
-  CORE: 38
+  CORE: 39
   PROVISIONAL: 6
   MERGE_CANDIDATE: 3
   UNSUPPORTED: 0
@@ -804,6 +810,20 @@ families:
     required_for_assurance_package: false
     status: CORE
     s2_note: "Replaces the blocked_by typed relation, which had no identity."
+  ReactionSiteRequirement:
+    owning_stage: s02
+    first_downstream_consumer: s03
+    unique_responsibility: >
+      Where a reaction must ultimately be available, at role level, typed EXTERNAL
+      or INTERNAL from the scenario's declared system boundary.
+    duplicates: none
+    duplicates_note: >
+      LoadCase says what the world does and on which role. This says where the
+      reaction it names is allowed to be taken, and whether that place is outside
+      the product. LoadPath is the candidate-specific route to it. Three different
+      facts, three owners.
+    required_for_assurance_package: false
+    status: CORE
   PhysicalEffectObligation:
     owning_stage: s02
     first_downstream_consumer: s03

@@ -156,6 +156,9 @@ semantic_role_vocabulary:
     A recorded openness that may bind a later commitment.
   open_question: >
     Something the source left undetermined, recorded rather than resolved.
+  reaction_site: >
+    Where a reaction must ultimately be available, typed from the scenario's
+    declared system boundary rather than from what kind of thing it is.
   physical_effect_obligation: >
     A physical effect that must occur between roles, stated without naming a mechanism.
   physical_interaction: >
@@ -612,6 +615,39 @@ entity_families:
         LoadPath has no declared terminus and 'terminates at a reaction site' is
         uncheckable.
 
+  ReactionSiteRequirement:
+    semantic_roles: [reaction_site]
+    field_semantics:
+      scenario:
+        kind: reference
+        target: Scenario
+        cardinality: one
+        resolvable: true
+        referent_population: DESIGN_WIDE
+    owned_by: s02
+    authority_class: AUTHORITATIVE
+    addressable: true
+    purpose: >
+      A typed, addressable site derived from a scenario's declared system
+      boundary, marked EXTERNAL or INTERNAL. Candidate-independent: it says WHERE
+      a reaction must ultimately be available, at role level, without naming a
+      mechanism or a coordinate.
+    required_fields: [entity_id, scenario, boundary_side, at_role]
+    optional_fields: [why]
+    boundary_side: [EXTERNAL, INTERNAL]
+    rules:
+      - >
+        S-4 adds it. The plan's M-7 recorded the gap: "Reaction sites do not exist
+        as a type, so a load path cannot terminate outside the product." Without
+        it the world had to be modelled as a body, and it is not one.
+      - >
+        EXTERNAL or INTERNAL is read from the scenario's system boundary, not from
+        the kind of thing the site is. Whether an actor may be a reaction site is a
+        property of that boundary (R-12), never a rule about hands.
+      - >
+        Candidate-independent. Two candidates react at the same declared site and
+        reach it differently; that difference lives in their LoadPaths.
+
   LoadPath:
     field_semantics:
       load_case:
@@ -625,10 +661,29 @@ entity_families:
         target: Candidate
         cardinality: one
         resolvable: false
+      # S-4. The hops were untyped, so a path could be a list of prose and no
+      # closure was checkable. This family's own rule already said what a hop is:
+      # "Each hop names the Interface that carries it."
+      ordered_hops:
+        kind: reference
+        target: Interface
+        cardinality: many
+        resolvable: true
+        referent_population: INVOCATION_BRANCH
+      # Where the path closes. A terminal site EXTERNAL for the scenario the load
+      # acts in closes the path; one terminating inside the product is OPEN - a
+      # legitimate recorded state, not an error to hide (R-12).
+      terminates_at:
+        kind: reference
+        target: ReactionSiteRequirement
+        cardinality: one
+        resolvable: true
+        referent_population: DESIGN_WIDE
     owned_by: s03
     extendable_by: [s04, s06]
     purpose: "How one LoadCase reaches a reaction site through ONE candidate mechanism."
     required_fields: [entity_id, load_case, candidate, ordered_hops, maturity]
+    optional_fields: [terminates_at]
     maturity_progression: [HYPOTHESIS, SPATIALLY_INSTANTIATED, AUTHORITATIVE]
     rules:
       - "Each hop names the Interface that carries it."
@@ -822,7 +877,17 @@ entity_families:
   PhysicalEffectObligation:
     semantic_roles: [physical_effect_obligation]
     field_semantics:
-      between_roles: {kind: reference, target: Actor, cardinality: many, resolvable: true, referent_population: DESIGN_WIDE}
+      # S-4 CORRECTION. This was a reference to Actor, which conflates two things
+      # the architecture keeps apart: an Actor is an EXTERNAL participant, while
+      # these are PRODUCT/FUNCTION roles - "a force must pass from the actuation
+      # role to the closing role". The freeze says "between which roles (never
+      # bodies - they do not exist yet)" and never gives a role an addressable
+      # identity; LoadCase.applied_to_role and reacted_at_role already carry roles
+      # the same way, as declared values.
+      #
+      # Discharge stays checkable through PhysicalInteraction.discharges_effect,
+      # which IS addressable - that never depended on roles being entities.
+      between_roles: {kind: role_name, cardinality: many}
       under_load_case: {kind: reference, target: LoadCase, cardinality: one, resolvable: true, referent_population: DESIGN_WIDE}
       addresses_obligations: {kind: reference, target: Obligation, cardinality: many, resolvable: false, referent_population: DESIGN_WIDE}
     owned_by: s02

@@ -321,13 +321,153 @@ producers (both still declared-with-no-producer), reaction/support/retention at
 symbolic maturity, and `LoadPath` tied to the design-wide `LoadCase` through
 authored interactions. S-5/S-6/S-7 ownership is unchanged.
 
-## 6. Impl S-5 has NOT begun.
+## 6. SLICE 2 — Physical contract alignment, then the S03B realization producer
+
+Baseline for this slice: `b848d3b`.
+
+### 6.1 `PhysicalEffectObligation.between_roles` — Actor was the wrong identity
+
+The freeze: *"between which roles (never bodies — they do not exist yet)"*, and its
+example is *"a force must pass from the actuation role to the closing role"*. Those
+are **product/function roles**. An `Actor` is an **external** participant — the
+architecture keeps the two apart, and the contract had conflated them by declaring
+`between_roles` a reference to `Actor`.
+
+No new ontology was invented, because the freeze never gives a role an addressable
+identity and an existing representation already carries roles the same way:
+`LoadCase.applied_to_role` and `reacted_at_role` are declared values, not references.
+So `between_roles` is now `kind: role_name`, matching its siblings.
+
+Discharge stays checkable through `PhysicalInteraction.discharges_effect`, which **is**
+addressable — the checkability the freeze asks for never depended on roles being
+entities.
+
+### 6.2 `ReactionSiteRequirement` — the family the plan recorded as missing
+
+Plan M-7: *"Reaction sites do not exist as a type, so a load path cannot terminate
+outside the product."* Freeze: *"a typed, addressable site derived from a scenario's
+system boundary, marked external or internal."* Added, owned by **s02**,
+candidate-independent:
+
+```yaml
+ReactionSiteRequirement:
+  semantic_roles: [reaction_site]
+  field_semantics:
+    scenario: {kind: reference, target: Scenario, resolvable: true,
+               referent_population: DESIGN_WIDE}
+  owned_by: s02
+  required_fields: [entity_id, scenario, boundary_side, at_role]
+  boundary_side: [EXTERNAL, INTERNAL]
+```
+
+EXTERNAL/INTERNAL is read from the scenario's boundary, never from what kind of thing
+the site is — *"whether an actor may be a reaction site is a property of that boundary
+(R-12), never a rule about hands."* Without it the world had to be modelled as a body,
+and it is not one.
+
+### 6.3 `LoadPath` — typed hops and typed closure
+
+`ordered_hops` was untyped, so a path could be a list of prose and no closure was
+checkable. The family's **own rule already said what a hop is** — *"Each hop names the
+Interface that carries it"* — so hops are now a typed reference to `Interface`,
+INVOCATION_BRANCH. Added `terminates_at` → `ReactionSiteRequirement`, DESIGN_WIDE,
+**optional**: a path terminating inside the product is OPEN, which R-12 calls a
+legitimate recorded state, and making closure mandatory would force the model to close
+a path it had not established.
+
+### 6.4 No duplicate canonical truth
+
+| | | |
+|---|---|---|
+| candidate-independent | `LoadCase` · `PhysicalEffectObligation` · `ReactionSiteRequirement` | what the world does · what effect must occur · where a reaction may be taken |
+| candidate-specific | `PhysicalInteraction` · `ConstraintRelation` · `LoadPath` | how THIS candidate transmits · what it constrains · how the load reaches the site |
+| external | `Actor` | a participant outside the product |
+| product/function role | declared value (`role_name`, `applied_to_role`, `at_role`) | not an entity, by the freeze's own silence |
+
+Three different facts about load — what the world does, where the reaction may be
+taken, and the route to it — with three owners.
+
+### 6.5 The S03B producer
+
+`to_operations` gained the two branches that did not exist: `PhysicalInteraction` and
+`ConstraintRelation`. `LoadPath` gained typed closure. Optional fields are written only
+when the model supplies them — `terminates_at` above all, because filling it in would be
+this code deciding the engineering.
+
+The prompt now asks for physical realization explicitly, with the effect vocabulary read
+from the contract rather than restated: *"An interaction TRANSMITS; a joint CONSTRAINS.
+They are not the same fact and a joint is not a substitute for one."* And on closure:
+*"an open path is a real answer and saying so is better than closing it with something
+you did not establish."*
+
+Authored shapes:
+
+```json
+"physical_interactions": [{"id": "PHI-A", "groups": ["RGP-A"],
+   "effect": "TRANSMIT_FORCE", "discharges_effect": "PEO-0001",
+   "at_interface": "IFC-A"}]
+"constraint_relations": [{"id": "CRL-A", "retained_group": "RGP-A",
+   "blocked_dofs": ["TX"], "configurations": ["CFG-A"], "driver": "LOAD",
+   "provider_body": "BOD-A", "provider_site": "IFC-A",
+   "maintaining_interaction": "PHI-A"}]
+"load_paths": [{"id": "LDP-A", "load_case": "LC-0001", "candidate": "CND-A",
+   "ordered_hops": ["IFC-A"], "terminates_at": "RSR-0001"}]
+```
+
+### 6.6 Two-candidate isolation
+
+One `LoadCase`, one `PhysicalEffectObligation`, one `ReactionSiteRequirement`; two
+candidates with their own topology. After A realizes it:
+
+- A's three authored facts contain **no B id at all**;
+- `PEO-0001` and `LC-0001` are **COMMON_UPSTREAM for A** — the authored relation created
+  the lineage, exactly as S-3 supports;
+- they remain **UNSCOPED for B**, and `BOD-B` is **OTHER_BRANCH** from A;
+- B then realizes the **same** obligation with a different effect, and there is still
+  exactly **one** `PhysicalEffectObligation` — the demand was not duplicated per
+  candidate. Both paths close at the same declared site.
+
+### 6.7 Nothing is invented
+
+A response authoring no physical fact produces none. A prose value in
+`discharges_effect` is refused (`REFERENCE_NOT_AN_ID`); a missing referent is refused by
+id. `to_operations` is scanned with docstrings stripped for `MAINTAINED_BY_CLASS`,
+`infer`, `synthes`, `default_`. After a successful s03b patch, `Envelope`,
+`ReferenceScale`, `State`, `Transition`, `MobilityExpectation` and `SelectionDecision`
+are all empty — no mobility, spatial or selection work was pulled forward.
+
+### 6.8 Fixture repairs
+
+The typed hops immediately caught canned responses putting a **Body** where the rule
+says an Interface carries the hop. Those fixtures now emit an interface and hop through
+it — the correction working on its first contact, not a test being bent.
+
+### 6.9 Contract bookkeeping
+
+`ENTITY_FAMILY_AUDIT` 47 → 48 families with an `s4_growth_note` recording why;
+`STAGE_OWNERSHIP_MATRIX` and `S02_CONTRACT` give s02 the new family; the
+`reaction_site` semantic role is declared with its engineering meaning.
+
+### 6.10 Regression
+
+`651 run · 651 pass · 0 fail · 22 skipped` — 9 stale-recording, 12 R-B, 1 unrelated.
+Unchanged: the corpus refresh is deliberately still pending (§11 of the slice brief).
+
+### 6.11 Remaining S-4
+
+Assembly-relevant physical interactions beyond the three families; the R-A applicability
+treatment beyond what s02/s03b responsibilities already require; and the corpus refresh,
+which needs an authorized live run. S-5/S-6/S-7/S-8/S-9 ownership is unchanged.
+
+## 7. Impl S-5 has NOT begun.
 
 ## 9. Status
 
-**S-4 IN PROGRESS — S02 CANONICAL PHYSICAL-DEMAND PRODUCER COMPLETE.**
+**S-4 IN PROGRESS — S03B PHYSICAL REALIZATION PRODUCER COMPLETE.**
 
-Slice 1 is done (§5). Candidate-specific physical realization is not.
+Slice 1 (§5) and slice 2 (§6) are done: s02 authors the candidate-independent physical
+demand, and s03b authors the candidate-specific realization. The corpus refresh and the
+remaining S-4 exit criteria are not.
 
 What is complete: the S-3 closure boundary is recorded and frozen (§1), every residual
 has an owner (§1.4), the physical fact inventory is measured (§2), R-B is pinned (§3),

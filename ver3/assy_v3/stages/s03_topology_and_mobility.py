@@ -19,6 +19,7 @@ THE ONE STRUCTURAL IDEA
 """
 from __future__ import annotations
 
+import os
 import re
 from typing import Any, Dict, Iterable, List, Set, Tuple
 
@@ -347,6 +348,18 @@ def dof_domain(groups: Iterable[str], configurations: Iterable[str]) -> List[Tup
     it cannot make the line not exist.
     """
     return [(g, c, d) for g in groups for c in configurations for d in DOF_NAMES]
+
+
+def _EFFECT_KINDS_():
+    """The effect vocabulary, read from the contract rather than restated."""
+    import yaml as _yaml
+    here = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(here, "..", "..", "contracts", "DESIGN_STATE_CONTRACT.yaml")
+    with open(os.path.abspath(path)) as fh:
+        return _yaml.safe_load(fh)["entity_families"]["PhysicalEffectObligation"]["effect"]
+
+
+_EFFECT_KINDS = tuple(_EFFECT_KINDS_())
 
 
 def _candidate_premise(candidate) -> List[str]:
@@ -885,7 +898,17 @@ Return one JSON object. Emit every key. Use exactly these key names.
                         blocker_body, configurations[], dofs[], driver,
                         defeat_specification, promised_features[] (optional)
   irrelevance[]         rigid_group, configuration, dof[], scenario
-  load_paths[]          id "LDP-0001", load_case, candidate, ordered_hops[]
+  physical_interactions[]
+                        id "PHI-0001", groups[], effect, discharges_effect,
+                        at_interface (optional), configurations[] (optional)
+  constraint_relations[]
+                        id "CRL-0001", retained_group, blocked_dofs[],
+                        configurations[], driver, blocked_direction (optional),
+                        provider_body (optional), provider_site (optional),
+                        maintaining_interaction (optional),
+                        defeat_specification (optional)
+  load_paths[]          id "LDP-0001", load_case, candidate, ordered_hops[],
+                        terminates_at (optional)
   assembly_steps[]      id "ASY-0001", order_index, body, access_side,
                         activates[], termination_strategy, path_kind, depends_on[]
   unresolved[]          id "S3U-1001", decision, why_open, alternatives[],
@@ -900,6 +923,32 @@ Return one JSON object. Emit every key. Use exactly these key names.
   termination_strategy  {terminations}
   path_kind             {path_kinds}
   alternatives_kind     ENTITY_REFS | PRINCIPLE_FAMILIES | FREE_TEXT
+
+PHYSICAL REALIZATION
+This candidate must physically do what the input's PHYSICAL EFFECT OBLIGATIONS
+require. Those obligations are candidate-independent: they say WHAT effect must
+occur, between which roles. You say HOW THIS CANDIDATE does it.
+
+  For every effect obligation this candidate realizes, emit a
+  physical_interaction naming the rigid groups between which the effect passes,
+  the effect ({effects}), and the obligation id it discharges. An interaction
+  TRANSMITS; a joint CONSTRAINS. They are not the same fact and a joint is not a
+  substitute for one.
+
+  For every constraint this candidate relies on, emit a constraint_relation: the
+  retained group, which DOFs it removes, in which configurations, and what
+  DRIVES it ({drivers}). Where something provides the constraint, name the
+  providing body or site. Do not leave a constraint standing on nothing, and do
+  not report a constraint you have not decided.
+
+  For every load case, emit a load_path: the ordered interfaces the load passes
+  through, and where it terminates. If the load reaches a declared EXTERNAL
+  reaction site, name it in terminates_at. If it does not, leave terminates_at
+  out - an open path is a real answer and saying so is better than closing it
+  with something you did not establish.
+
+Every reference above is an ID. A description is not an id, and an interaction
+you describe instead of emitting does not exist.
 
 Ids you emit are new. Never reuse an id from the input.
 
@@ -960,6 +1009,7 @@ class S03BMobilityAndAssembly(Stage):
         return S03B_PROMPT.format(
             axis_directions=" | ".join(AXIS_DIRECTIONS),
             drivers=" | ".join(BLOCKING_DRIVERS), dofs=" ".join(DOF_NAMES),
+            effects=" | ".join(_EFFECT_KINDS),
             terminations=" | ".join(TERMINATION_STRATEGIES),
             path_kinds=" | ".join(PATH_KINDS),
             candidate=_render(inputs.get("candidate") or {}),
@@ -997,11 +1047,43 @@ class S03BMobilityAndAssembly(Stage):
     def to_operations(self, parsed):
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
         ops, prov = [], "s03b:relations"
+        # S-4. `PhysicalInteraction` and `ConstraintRelation` have been declared
+        # s03b outputs since S-2 with nothing authoring them. These are the two
+        # branches that did not exist.
+        #
+        # An interaction TRANSMITS and a joint CONSTRAINS - the freeze separates
+        # them deliberately, and this is where the transmission finally has a
+        # home. The model states which groups interact, which effect passes, and
+        # which candidate-independent obligation that discharges; nothing here
+        # infers an interaction from a joint class or from anything's absence.
+        for i in parsed.get("physical_interactions", []):
+            fields = {"groups": i.get("groups", []), "effect": i["effect"],
+                      "discharges_effect": i["discharges_effect"]}
+            for optional in ("at_interface", "configurations"):
+                if i.get(optional):
+                    fields[optional] = i[optional]
+            ops.append(Op("CREATE", "PhysicalInteraction", i["id"], fields, prov))
+        for r in parsed.get("constraint_relations", []):
+            fields = {"retained_group": r["retained_group"],
+                      "blocked_dofs": r.get("blocked_dofs", []),
+                      "configurations": r.get("configurations", []),
+                      "driver": r["driver"]}
+            for optional in ("blocked_direction", "provider_body", "provider_site",
+                             "maintaining_interaction", "defeat_specification",
+                             "release_transition"):
+                if r.get(optional):
+                    fields[optional] = r[optional]
+            ops.append(Op("CREATE", "ConstraintRelation", r["id"], fields, prov))
         for p in parsed.get("load_paths", []):
-            ops.append(Op("CREATE", "LoadPath", p["id"], {
-                "load_case": p["load_case"], "candidate": p["candidate"],
-                "ordered_hops": p.get("ordered_hops", []),
-                "maturity": "HYPOTHESIS"}, prov))
+            fields = {"load_case": p["load_case"], "candidate": p["candidate"],
+                      "ordered_hops": p.get("ordered_hops", []),
+                      "maturity": "HYPOTHESIS"}
+            # Where the path closes. Written only when the model says so: an
+            # unclosed path is a legitimate recorded state (R-12), and filling it
+            # in would be this code deciding the engineering.
+            if p.get("terminates_at"):
+                fields["terminates_at"] = p["terminates_at"]
+            ops.append(Op("CREATE", "LoadPath", p["id"], fields, prov))
         for a in parsed.get("assembly_steps", []):
             ops.append(Op("CREATE", "AssemblyStep", a["id"], {
                 "order_index": a["order_index"], "body": a["body"],
