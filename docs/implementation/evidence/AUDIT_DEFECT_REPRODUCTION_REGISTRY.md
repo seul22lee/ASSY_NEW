@@ -539,5 +539,18 @@ back into S-3 — S-3's boundary is stated in `S03_IMPLEMENTATION_EVIDENCE.md`.
 | **R-I** | Authoritative retained-candidate set | "Retained" has no production truth until selection/gating is authoritative; `ALL_RETAINED_BRANCHES` is a selector substrate only | **S-7** | A, B retained and C eliminated; gate comparison includes A/B and excludes C | The retained set is inferred from presence, runner branch copies, or fixtures | OPEN |
 | **R-J** | Selected / committed / superseded / reopened semantics | `COMMITTED_BRANCH` reads a standing `SelectionDecision`; what makes one authoritative, and what reopens it, is selection semantics | **S-7** | B is committed; the consumer receives B's state; invalidating a premise reopens the commitment | Commitment is inferred from branch order, latest branch, or runner-local state | OPEN |
 | **R-K** | Cross-role / cross-entity engineering establishment — e.g. a reach obligation for an Actor with no correctly related FunctionalRegion | S-3 ensures both facts, if they exist, are not silently dropped. Whether the RELATION must exist is engineering establishment | **S-8** | A reach obligation exists; the required spatial/reach target relation does not | Assurance reports establishment while a mandatory semantic relation is absent | OPEN |
-| **R-L** | A required dependency that genuinely has no valid producer anywhere. *(A second specific case is also closed: Source A demanding branch-scoped existence of design-wide demand material — resolved by declarative `referent_population`, evidence §20.)* | Still a real class of defect, and it must stay DETECTABLE. **Narrowed**: the specific s03a→ReferenceScale case was NOT this — it was a representation/authoring-boundary mismatch and is resolved (§18.4). No "no upstream producer ⇒ ignore" rule exists or may be added | **S-8** | A premise requiring a family no stage's `permitted_output_semantics` declares | A stage requires material nothing can ever author, and the system suppresses it instead of reporting it | OPEN |
+| **R-L** | *(NARROWED to the general principle only.)* A genuinely required dependency with no valid producer must remain VISIBLE, never silently suppressed. Both specific historical cases are closed in Impl S-3: s03a's `Joint.axis_direction` → downstream `ReferenceScale` (representation correction, §18.4) and Source A demanding branch-scoped existence of design-wide demand material (declarative `referent_population`, §20). Neither is an open replay. | Still a real class of defect, and it must stay DETECTABLE. **Narrowed**: the specific s03a→ReferenceScale case was NOT this — it was a representation/authoring-boundary mismatch and is resolved (§18.4). No "no upstream producer ⇒ ignore" rule exists or may be added | **S-8** | A premise requiring a family no stage's `permitted_output_semantics` declares | A stage requires material nothing can ever author, and the system suppresses it instead of reporting it | OPEN |
 | **R-M** | Whole-chain generalization without benchmark-specific repair | Needs every owner above closed | **S-9** | Full live chain on unseen probes | A runner patches an incomplete design, or any benchmark/model-specific context rule exists | OPEN |
+
+
+---
+
+# IMPL STEP OWNERSHIP AFTER S-3
+
+Impl S-3 closed at `b75d033`. The residual owner map, the frozen S-3 invariants, and the
+rule for when a later failure may reopen S-3 are recorded in
+[S04_IMPLEMENTATION_EVIDENCE.md](S04_IMPLEMENTATION_EVIDENCE.md) §1.
+
+**The 22 window replay skips are not S-3 failures and are not full-chain success.** They
+are R-B: the recorded legacy s02 response writes prose into a canonical typed-reference
+field, and the write boundary correctly refuses it. Owner: **Impl S-4**.
