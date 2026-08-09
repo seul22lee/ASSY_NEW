@@ -171,3 +171,47 @@ casually resolved by reopening S-2.
 
 Consumer-path migration (**s02**, **s03a**, **s03b**'s raw `demands` channel),
 `project_for` retirement, ADR-002/003/004 replays. **S-3 remains IN PROGRESS.**
+
+---
+
+# 16. BRANCH / SCOPE LINEAGE SUBSTRATE
+
+Full record: [S03_BRANCH_SCOPE_LINEAGE_DECISION.md](S03_BRANCH_SCOPE_LINEAGE_DECISION.md).
+
+§15.4's **B — contract semantic gap** is now closed. It was: no s03 topology family reaches
+`Candidate` through any declared reference (measured: **2 of 27** families do, `LoadPath` and
+`EliminationRecord`), so relevance fell back to *unreachable from every Candidate ⇒
+COMMON_UPSTREAM* — which cannot tell an orphan from a shared premise.
+
+**Decision:** minimal hybrid over one graph, no new contract concept. `premise_refs` carries
+branch membership downstream (`entity ->* Candidate`); the forward closure of the whole branch
+carries common upstream (`Candidate` *and work built on it* `->* entity`); neither ⇒ UNSCOPED,
+stated positively. The provisional fallback is removed from the code, and a test asserts the
+string is gone.
+
+**The decisive finding:** `run_s03` already received the candidate, passed it to the stage, and
+recorded it in the run log — then the authoritative write discarded it. Same shape as the S-1
+`_absorb` defect, one level up. `_stamp_branch_premise` now persists it.
+
+**Classified changes:** contract representation gap (`Configuration.bodies_present`) · producer
+lineage-population gap (`_stamp_branch_premise`) · view resolution gap (premise edges in the
+graph; directional `scope_of`).
+
+**Regression:** 41 VIEW tests (10 new SCOPE methods) · **520 tests OK**, whole suite.
+
+Three fixtures relied on the unsound fallback. Per policy the rule was not weakened: each gained
+the lineage its semantics require — s03 topology and the s04a scale were built *after*
+commitment to embody it, so withdrawing the candidate must cost their standing (FA-5).
+
+**Residual, recorded not resolved:** `ReferenceScale` is never a reference `target`, so no
+spatial value can say which frame *instance* it is expressed in (six families name a frame
+*family* only). Fourteen families are never referenced by anyone. Later branch-bearing producers
+must stamp the same premise; until migrated their entities classify UNSCOPED — visible exclusion
+rather than invisible inclusion.
+
+## 16.1 Still open
+
+Unchanged from §15.5, and deliberately so: consumer-path migration (**s02**, **s03a**,
+**s03b**), `project_for` retirement, ADR-002/003/004 replays.
+
+**S-3 BRANCH/SCOPE SUBSTRATE READY — RESUME CONSUMER MIGRATION.**

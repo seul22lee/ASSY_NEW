@@ -251,15 +251,28 @@ def _refs_of(entity: Dict[str, Any], family: str, contracts) -> List[Tuple[str, 
 
 
 def _reference_graph(state, contracts) -> Tuple[Dict[str, Set[str]], Dict[str, Set[str]]]:
-    """Forward and reverse canonical references over accumulated state.
+    """The DEPENDS-ON graph: X -> Y means "X depends on Y".
 
-    Built from declared reference semantics only - never from a name heuristic.
+    Two edge kinds, both declared and both meaning the same direction:
+
+      typed reference   the value of X names Y, so X needs Y to mean anything
+      recorded premise  X was authored FROM Y (S-1 `_premises`), so X depends on
+                        it and loses standing when it is withdrawn
+
+    Direction is what makes scope derivable, and the two roles must not be
+    confused. Following the arrow from an entity reaches what it was BUILT ON -
+    including the candidate it embodies. Following it from a Candidate reaches
+    what the candidate itself RESTS ON - the shared upstream material.
+
+    Built from declared semantics only; never from a name heuristic.
     """
     fwd: Dict[str, Set[str]] = {}
     rev: Dict[str, Set[str]] = {}
     for eid in state.entities:
         rec = state.entities[eid]
-        for _fld, ref in _refs_of(rec, rec.get("_family"), contracts):
+        edges = {ref for _fld, ref in _refs_of(rec, rec.get("_family"), contracts)}
+        edges |= {p for p in (rec.get("_premises") or []) if isinstance(p, str)}
+        for ref in edges:
             fwd.setdefault(eid, set()).add(ref)
             rev.setdefault(ref, set()).add(eid)
     return fwd, rev
@@ -282,7 +295,7 @@ def committed_branch(state, contracts) -> Optional[str]:
 
 
 def _branch_of(eid: str, fwd: Dict[str, Set[str]], state, contracts,
-               seen: Optional[Set[str]] = None) -> Set[str]:
+               seen: Optional[Set[str]] = None) -> Set[str]:   # retained for callers
     """Which candidates an entity belongs to, by following canonical references.
 
     An entity that reaches no candidate belongs to none - it is common upstream
@@ -312,56 +325,83 @@ UNSCOPED = "UNSCOPED"
 IN_VIEW = (ACTIVE_BRANCH, COMMON_UPSTREAM)
 
 
-def scope_of(eid, fwd, rev, state, contracts, branch) -> Tuple[str, str]:
-    """Why an entity is, or is not, relevant to this consumer.
+def _closure(starts, g, limit=64):
+    """Everything reachable from `starts` in `g`, including `starts`.
 
-    POSITIVE EVIDENCE ONLY. The earlier rule inferred
-
-        unreachable from every candidate  =>  common to every candidate
-
-    which is not an inference at all: absence of a branch edge is not proof of
-    shared relevance. An orphan and a shared premise both have no candidate path,
-    and treating them alike put unconnected state into every view.
-
-    Common-upstream is now established positively: something that IS branch-scoped
-    references it, so it is material the branches were built on. That is a fact
-    about the reference graph, not a rule about any family - `Requirement` is not
-    common because it is a Requirement, but because an obligation on the active
-    branch cites it.
+    Bounded and cycle-safe: a visited set plus a hard cap, so a reference cycle
+    terminates and a pathological graph cannot run away.
     """
-    owners = _branch_of(eid, fwd, state, contracts)
+    seen, frontier, steps = set(starts), list(starts), 0
+    while frontier and steps < limit:
+        nxt = []
+        for eid in frontier:
+            for ref in g.get(eid, ()):
+                if ref not in seen:
+                    seen.add(ref)
+                    nxt.append(ref)
+        frontier = nxt
+        steps += 1
+    return seen
+
+
+def _reachable(start, fwd, stop_at, limit=64):
+    """Which members of `stop_at` lie strictly downstream of `start`."""
+    return _closure(fwd.get(start, ()), fwd, limit) & set(stop_at)
+
+
+def _branch_rests_on(candidate, fwd, rev):
+    """Everything the candidate and the work built on it depend on.
+
+    `rev` from the candidate gives the branch: the candidate plus every entity
+    built on it. `fwd` from that whole set gives what the branch rests on.
+    """
+    return _closure(_closure({candidate}, rev), fwd)
+
+
+def scope_of(eid, fwd, rev, state, contracts, branch, candidates=None) -> Tuple[str, str]:
+    """Why an entity is, or is not, relevant to this consumer. POSITIVE only.
+
+    Two directions on the depends-on graph, and they mean different things:
+
+      eid  ->* Candidate   the entity was BUILT ON that candidate. It belongs to
+                           that branch.
+      Candidate ->* eid    the candidate, or the work built on it, RESTS ON the
+                           entity. It is upstream material, and it is common
+                           exactly to the candidates whose branches reach it.
+
+    The upstream direction starts from the whole branch, not from the candidate
+    alone. A frame that only the branch's topology names is still material that
+    branch rests on, and a stage that must reason about the topology cannot do it
+    without the frame.
+
+    An entity in neither direction is UNSCOPED. The rule this replaces inferred
+    "unreachable from every candidate => common to every candidate", which is not
+    an inference: an orphan and a shared premise both have no branch edge, so it
+    put unconnected state into every view.
+    """
+    if candidates is None:
+        candidates = {e["entity_id"] for e in state.standing("Candidate")}
+    if eid in candidates:
+        if branch is None or eid == branch:
+            return ACTIVE_BRANCH, "the candidate under consideration"
+        return OTHER_BRANCH, "a different candidate"
+
+    owners = _reachable(eid, fwd, candidates)
     if owners:
         if branch is None:
-            return ACTIVE_BRANCH, "pre-selection: every alternative is in scope"
+            return ACTIVE_BRANCH, "pre-selection: built on %s" % sorted(owners)
         if branch in owners:
-            return ACTIVE_BRANCH, "reaches the committed candidate %s" % branch
-        return OTHER_BRANCH, "reaches only %s" % sorted(owners)
-    for referrer in sorted(rev.get(eid, ())):
-        ref_owners = _branch_of(referrer, fwd, state, contracts)
-        if ref_owners and (branch is None or branch in ref_owners):
-            return COMMON_UPSTREAM, "cited by branch-scoped %s" % referrer
+            return ACTIVE_BRANCH, "built on the committed candidate %s" % branch
+        return OTHER_BRANCH, "built only on %s" % sorted(owners)
 
-    # ---------------------------------------------------------------- GAP
-    # Positive evidence is what this SHOULD require, and the canonical contracts
-    # cannot currently supply it for topology.
-    #
-    # No topology family - Body, RigidGroup, Joint, Interface, Configuration,
-    # FunctionalRegion, AssemblyStep - can reach Candidate through any declared
-    # reference. Only LoadPath can. The runner runs s03 once per candidate, but
-    # nothing in state records WHICH candidate a Body embodies, so an orphan and
-    # a real topology element are structurally identical here.
-    #
-    # Requiring positive evidence would therefore empty every s04 view, and
-    # inferring "no candidate path => common" is the unsound step this rule
-    # exists to remove. Neither is acceptable, so the classification is reported
-    # honestly as provisional and the gap is recorded rather than papered over.
-    # Closing it needs a structured candidate link on topology - an S-2 contract
-    # decision, not a view-layer choice.
-    return (COMMON_UPSTREAM,
-            "PROVISIONAL: no path to any candidate and nothing branch-scoped "
-            "cites it. The contracts cannot distinguish shared upstream material "
-            "from an orphan for this family - see CONTRACT GAP in the S-3 "
-            "evidence")
+    relevant = {branch} if branch else candidates
+    resting = sorted(c for c in relevant if eid in _branch_rests_on(c, fwd, rev))
+    if resting:
+        return COMMON_UPSTREAM, "material the %s branch rests on" % (
+            resting[0] if len(resting) == 1 else "candidates %s" % resting)
+
+    return UNSCOPED, ("no candidate was built on it and no relevant candidate "
+                      "rests on it")
 
 
 def select_instances(state, contracts, requirement: Requirement,
@@ -378,11 +418,12 @@ def select_instances(state, contracts, requirement: Requirement,
     topology because the family matched.
     """
     fwd, rev = _reference_graph(state, contracts)
+    cands = {e["entity_id"] for e in state.standing("Candidate")}
     chosen, traces = [], []
     for family in requirement.families:
         for rec in state.standing(family):
             eid = rec["entity_id"]
-            scope, why = scope_of(eid, fwd, rev, state, contracts, branch)
+            scope, why = scope_of(eid, fwd, rev, state, contracts, branch, cands)
             if scope not in IN_VIEW:
                 continue
             chosen.append(rec)
@@ -403,12 +444,13 @@ def relevant_ids(state, contracts, branch) -> Dict[str, str]:
     absence, which is the one misdiagnosis the taxonomy exists to prevent.
     """
     fwd, rev = _reference_graph(state, contracts)
+    cands = {e["entity_id"] for e in state.standing("Candidate")}
     out = {}
     for eid in state.entities:
         rec = state.entities[eid]
         if rec.get("_validity", STANDING) != STANDING:
             continue
-        scope, _why = scope_of(eid, fwd, rev, state, contracts, branch)
+        scope, _why = scope_of(eid, fwd, rev, state, contracts, branch, cands)
         if scope in IN_VIEW:
             out[eid] = rec.get("_family")
     return out

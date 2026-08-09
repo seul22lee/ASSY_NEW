@@ -1064,6 +1064,16 @@ assurance_families:
     required_fields: [entity_id, candidate, obligations, predicates]
 
   Configuration:
+    # S-3 contract closure. `bodies_present` carries Body IDs and declared no
+    # reference semantics, so the reference graph could not see the edge. This
+    # makes an already-required relationship machine-representable; it changes no
+    # stage responsibility and no engineering meaning.
+    field_semantics:
+      bodies_present:
+        kind: reference
+        target: Body
+        cardinality: many
+        resolvable: false
     semantic_roles: [configuration_state]
     owned_by: s03
     purpose: "A named assembly configuration, e.g. partially assembled, closed."

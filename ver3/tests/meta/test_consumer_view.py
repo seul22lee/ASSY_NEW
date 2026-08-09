@@ -24,6 +24,8 @@ import ver3.assy_v3.view.consumer_view as cv                            # noqa: 
 
 STAGES = ("s01", "s02", "s03a", "s03b", "s04a", "gate", "s04b")
 
+from .test_s3_interface_readiness import _code_only          # noqa: E402
+
 
 class _Base(unittest.TestCase):
 
@@ -40,10 +42,13 @@ class _Base(unittest.TestCase):
         d.update(over)
         return d
 
-    def add(self, s, stage, fam, eid, **over):
+    def add(self, s, stage, fam, eid, prem=None, **over):
+        """`prem` is the branch lineage the producer records: the candidate this
+        entity exists because of."""
         s.apply(StagePatch(patch_id="p-%s" % eid, run_id=s.run_id, stage_id=stage,
                            stage_attempt=1, parent_state_hash=s.state_hash(),
-                           operations=[Op("CREATE", fam, eid, self.req(fam, **over), "p")],
+                           operations=[Op("CREATE", fam, eid, self.req(fam, **over), "p",
+                                          premise_refs=list(prem or []))],
                            execution_status="SUCCESS", provenance={"provider": "t"}))
         return eid
 
@@ -201,6 +206,14 @@ class TestHistoricalReplays(_Base):
         would prove nothing. This carries the chain the historical runs had: a
         candidate, an obligation citing the requirement, and a placed joint whose
         frame cites the scale.
+
+        The s03 topology and the s04a scale record the candidate they exist
+        because of, which is what the migrated producer now writes. They are
+        structurally scoped for the same reason they were always relevant: they
+        were built AFTER the commitment, to embody it. Withdraw CND-0001 and none
+        of them keeps unqualified standing - which is exactly FA-5, and exactly
+        why the old fixture's silence about lineage was a defect in the fixture,
+        not a reason to loosen the scope rule.
         """
         s = self.state("replay")
         self.add(s, "s01", "Requirement", "REQ-0001", quantity_class="BAND")
@@ -208,9 +221,11 @@ class TestHistoricalReplays(_Base):
                  satisfiable_at="s03", derived_from_requirements=["REQ-0001"])
         self.add(s, "s02", "Candidate", "CND-0001", principle={"h": "f"},
                  addresses_obligations=["OBL-0001"], obligations_created=[])
-        self.add(s, "s04", "ReferenceScale", "SCL-0001", basis="RELATIVE")
-        self.add(s, "s03", "Body", "BOD-0001")
-        self.add(s, "s03", "RigidGroup", "RGP-0001", body="BOD-0001")
+        self.add(s, "s04", "ReferenceScale", "SCL-0001", prem=["CND-0001"],
+                 basis="RELATIVE")
+        self.add(s, "s03", "Body", "BOD-0001", prem=["CND-0001"])
+        self.add(s, "s03", "RigidGroup", "RGP-0001", prem=["CND-0001"],
+                 body="BOD-0001")
         self.add(s, "s03", "LoadPath", "LP-0001", candidate="CND-0001",
                  load_case="LC-0001")
         return s
@@ -225,8 +240,18 @@ class TestHistoricalReplays(_Base):
 
     def test_VIEW_12_committed_spatial_state_reaches_s04b(self):
         s = self._seeded()
-        self.add(s, "s03", "Joint", "JNT-0001", parent_group="RGP-0001",
-                 child_group="RGP-0001", frame_origin="SCL-0001")
+        # The joint is topology: it records the candidate it embodies, exactly as
+        # the migrated s03 producer now writes it.
+        s.apply(StagePatch(
+            patch_id="topo", run_id=s.run_id, stage_id="s03", stage_attempt=1,
+            parent_state_hash=s.state_hash(),
+            operations=[Op("CREATE", "Joint", "JNT-0001",
+                           dict({f: "x" for f in self.c.required_fields("Joint")
+                                 if f != "entity_id"},
+                                parent_group="RGP-0001", child_group="RGP-0001",
+                                frame_origin="SCL-0001"), "p",
+                           premise_refs=["CND-0001"])],
+            execution_status="SUCCESS", provenance={"provider": "t"}))
         v = build_consumer_view("s04b", s, self.c, self.resp)
         self.assertIn("SCL-0001", {e["entity_id"] for e in v.entities})
         self.assertTrue(any(r.get("why_relevant") for r in v.why("SCL-0001")))
@@ -440,12 +465,13 @@ class TestCoreCorrections(_Base):
             self.assertTrue(any(r.get("why_relevant") for r in reasons),
                             "%s included with no relevance reason" % rec["entity_id"])
 
-    def test_the_contract_gap_is_recorded_not_papered_over(self):
-        """No topology family reaches Candidate through any declared reference.
+    def test_the_contract_gap_is_now_closed_by_premise_lineage(self):
+        """Topology still cannot reach Candidate by REFERENCE - it never could.
 
-        Until a structured candidate link exists, an orphan and a real topology
-        element are indistinguishable, so the classification says PROVISIONAL
-        rather than asserting shared relevance it cannot establish.
+        The gap is closed by PREMISE lineage instead: s03 records the candidate it
+        embodies, so the depends-on graph carries the edge that the reference
+        graph never had. An orphan is now distinguishable from a real topology
+        element, and the PROVISIONAL fallback is gone.
         """
         edges = {}
         for fam, v in self.c.families.items():
@@ -464,8 +490,168 @@ class TestCoreCorrections(_Base):
             self.assertFalse(reaches(fam), "%s now reaches Candidate - "
                              "the gap may be closeable; revisit the relevance rule" % fam)
         s = self.state()
-        self.add(s, "s03", "Body", "BOD-1")
+        self.add(s, "s02", "Candidate", "CND-1", principle={"h": "f"},
+                 addresses_obligations=[], obligations_created=[])
+        # An orphan: no premise, no reference.
+        self.add(s, "s03", "Body", "BOD-ORPHAN")
+        # Real topology: records the candidate it was built on.
+        s.apply(StagePatch(
+            patch_id="topo", run_id=s.run_id, stage_id="s03", stage_attempt=1,
+            parent_state_hash=s.state_hash(),
+            operations=[Op("CREATE", "Body", "BOD-REAL",
+                           {f: "x" for f in self.c.required_fields("Body")
+                            if f != "entity_id"}, "p", premise_refs=["CND-1"])],
+            execution_status="SUCCESS", provenance={"provider": "t"}))
         fwd, rev = cv._reference_graph(s, self.c)
-        scope, why = cv.scope_of("BOD-1", fwd, rev, s, self.c, None)
-        self.assertEqual(cv.COMMON_UPSTREAM, scope)
-        self.assertIn("PROVISIONAL", why)
+        cands = {"CND-1"}
+        self.assertEqual(cv.UNSCOPED,
+                         cv.scope_of("BOD-ORPHAN", fwd, rev, s, self.c, "CND-1", cands)[0])
+        self.assertEqual(cv.ACTIVE_BRANCH,
+                         cv.scope_of("BOD-REAL", fwd, rev, s, self.c, "CND-1", cands)[0])
+        src = _code_only(cv.scope_of)
+        self.assertNotIn("PROVISIONAL", src, "the unsound fallback is still present")
+
+
+class TestBranchScopeLineage(_Base):
+    """SCOPE-*: branch/common/unscoped from POSITIVE structured evidence.
+
+    Two directions on the depends-on graph, meaning different things:
+      entity ->* Candidate   built on it        -> branch membership
+      Candidate ->* entity   rests on it        -> common upstream
+    Neither -> UNSCOPED. "No path" never implies "common".
+    """
+
+    def _add(self, s, stage, fam, eid, prem=None, **ov):
+        d = {f: "x" for f in self.c.required_fields(fam) if f != "entity_id"}
+        d.update(ov)
+        s.apply(StagePatch(patch_id="p" + eid, run_id=s.run_id, stage_id=stage,
+                           stage_attempt=1, parent_state_hash=s.state_hash(),
+                           operations=[Op("CREATE", fam, eid, d, "p",
+                                          premise_refs=prem or [])],
+                           execution_status="SUCCESS", provenance={"provider": "t"}))
+
+    def _scope(self, s, eid, branch):
+        fwd, rev = cv._reference_graph(s, self.c)
+        cands = {e["entity_id"] for e in s.standing("Candidate")}
+        return cv.scope_of(eid, fwd, rev, s, self.c, branch, cands)
+
+    def _world(self):
+        s = self.state("scope")
+        self._add(s, "s01", "Requirement", "REQ-SHARED", quantity_class="BAND")
+        self._add(s, "s02", "Obligation", "OBL-SHARED", scope="UNIVERSAL",
+                  satisfiable_at="s03", derived_from_requirements=["REQ-SHARED"])
+        for cid in ("CND-A", "CND-B"):
+            self._add(s, "s02", "Candidate", cid, principle={"h": "f"},
+                      addresses_obligations=["OBL-SHARED"], obligations_created=[])
+        self._add(s, "s03", "Body", "BOD-A", prem=["CND-A"])
+        self._add(s, "s03", "Body", "BOD-B", prem=["CND-B"])
+        self._add(s, "s03", "Body", "BOD-ORPHAN")
+        return s
+
+    def test_SCOPE_01_02_03_branch_other_and_orphan(self):
+        s = self._world()
+        self._add(s, "s04", "SelectionDecision", "SEL", selected_candidate="CND-A")
+        self.assertEqual(cv.ACTIVE_BRANCH, self._scope(s, "BOD-A", "CND-A")[0])
+        self.assertEqual(cv.OTHER_BRANCH, self._scope(s, "BOD-B", "CND-A")[0])
+        self.assertEqual(cv.UNSCOPED, self._scope(s, "BOD-ORPHAN", "CND-A")[0])
+
+    def test_SCOPE_04_no_path_is_not_common(self):
+        """The unsound fallback is gone."""
+        s = self.state()
+        self._add(s, "s02", "Candidate", "CND-A", principle={"h": "f"},
+                  addresses_obligations=[], obligations_created=[])
+        self._add(s, "s01", "Requirement", "REQ-U", quantity_class="BAND")
+        scope, why = self._scope(s, "REQ-U", "CND-A")
+        self.assertEqual(cv.UNSCOPED, scope)
+        self.assertNotIn("PROVISIONAL", why)
+
+    def test_SCOPE_05_06_common_upstream_needs_positive_evidence(self):
+        s = self._world()
+        self.assertEqual(cv.COMMON_UPSTREAM, self._scope(s, "REQ-SHARED", "CND-A")[0])
+        bare = self.state()
+        self._add(bare, "s02", "Candidate", "CND-A", principle={"h": "f"},
+                  addresses_obligations=[], obligations_created=[])
+        self._add(bare, "s01", "Requirement", "REQ-SHARED", quantity_class="BAND")
+        self.assertEqual(cv.UNSCOPED, self._scope(bare, "REQ-SHARED", "CND-A")[0])
+
+    def test_SCOPE_07_one_branch_upstream_is_not_common_to_all(self):
+        s = self._world()
+        self._add(s, "s01", "Requirement", "REQ-AONLY", quantity_class="BAND")
+        self._add(s, "s02", "Obligation", "OBL-A", scope="CANDIDATE_DISCRIMINATING",
+                  satisfiable_at="s03", derived_from_requirements=["REQ-AONLY"])
+        s2 = self.state("only-b")
+        self._add(s2, "s01", "Requirement", "REQ-AONLY", quantity_class="BAND")
+        self._add(s2, "s02", "Obligation", "OBL-A", scope="UNIVERSAL",
+                  satisfiable_at="s03", derived_from_requirements=["REQ-AONLY"])
+        self._add(s2, "s02", "Candidate", "CND-A", principle={"h": "f"},
+                  addresses_obligations=["OBL-A"], obligations_created=[])
+        self._add(s2, "s02", "Candidate", "CND-B", principle={"h": "f"},
+                  addresses_obligations=[], obligations_created=[])
+        self.assertEqual(cv.COMMON_UPSTREAM, self._scope(s2, "REQ-AONLY", "CND-A")[0])
+        self.assertEqual(cv.UNSCOPED, self._scope(s2, "REQ-AONLY", "CND-B")[0])
+
+    def test_SCOPE_08_09_pre_and_post_selection(self):
+        s = self._world()
+        self.assertIsNone(cv.committed_branch(s, self.c))
+        self.assertEqual(cv.ACTIVE_BRANCH, self._scope(s, "BOD-A", None)[0])
+        self.assertEqual(cv.ACTIVE_BRANCH, self._scope(s, "BOD-B", None)[0])
+        self._add(s, "s04", "SelectionDecision", "SEL", selected_candidate="CND-A")
+        self.assertEqual("CND-A", cv.committed_branch(s, self.c))
+        self.assertEqual(cv.OTHER_BRANCH, self._scope(s, "BOD-B", "CND-A")[0])
+
+    def test_SCOPE_10_a_new_family_inherits_scope_generically(self):
+        """No resolver change, no list, no stage branch."""
+        s = self._world()
+        self._add(s, "s03", "Interface", "IFC-A", prem=["CND-A"], bodies=["BOD-A"])
+        self.assertEqual(cv.ACTIVE_BRANCH, self._scope(s, "IFC-A", "CND-A")[0])
+        self.assertEqual(cv.OTHER_BRANCH, self._scope(s, "IFC-A", "CND-B")[0])
+
+    def test_SCOPE_11_12_no_family_whitelist_or_benchmark_in_the_resolver(self):
+        """The invariant is NO ENUMERATION, not "no family name ever appears".
+
+        `Candidate` and `SelectionDecision` are typed IDENTITY semantics - the
+        canonical names for "design alternative" and "the commitment to one". The
+        resolver needs those two concepts the way it needs the notion of a
+        reference; naming them is not the same as listing which families a
+        consumer may see, which is what R-2 forbids. The narrow exception is
+        stated here so it cannot quietly widen.
+        """
+        src = _code_only(cv.scope_of, cv._reachable, cv._reference_graph)
+        IDENTITY = {"Candidate", "SelectionDecision"}
+        named = {f for f in self.c.families if "'%s'" % f in src}
+        self.assertTrue(named <= IDENTITY,
+                        "resolver enumerates families beyond commitment identity: %s"
+                        % sorted(named - IDENTITY))
+        self.assertLessEqual(len(named), 2)
+        self.assertIsNone(re.search(r"(BM-\d|PRB-\d|CND-|oracle)", src, re.I))
+
+    def test_SCOPE_16_17_deterministic_and_cycle_safe(self):
+        s = self._world()
+        a = [self._scope(s, e, "CND-A") for e in sorted(s.entities)]
+        b = [self._scope(s, e, "CND-A") for e in sorted(s.entities)]
+        self.assertEqual(a, b)
+        # A reference cycle must terminate.
+        fwd = {"X": {"Y"}, "Y": {"X"}}
+        self.assertEqual(set(), cv._reachable("X", fwd, {"Z"}))
+
+    def test_SCOPE_18_unscoped_does_not_enter_the_view(self):
+        s = self._world()
+        self._add(s, "s04", "SelectionDecision", "SEL", selected_candidate="CND-A")
+        v = build_consumer_view("s04b", s, self.c, self.resp)
+        ids = {e["entity_id"] for e in v.entities}
+        self.assertNotIn("BOD-ORPHAN", ids)
+        self.assertNotIn("BOD-B", ids)
+
+    def test_SCOPE_20_candidate_withdrawal_makes_its_topology_stale(self):
+        """Premise lineage reuses S-1 staleness. This is why Candidate is a
+        PREMISE rather than a duplicated field: withdrawing it must cost the
+        topology built on it its unqualified standing, and FA-5 already says so."""
+        s = self._world()
+        s.apply(StagePatch(patch_id="inv", run_id=s.run_id, stage_id="s02",
+                           stage_attempt=2, parent_state_hash=s.state_hash(),
+                           operations=[Op("INVALIDATE", "Candidate", "CND-A", {}, "p",
+                                          reason="withdrawn")],
+                           execution_status="SUCCESS", provenance={"provider": "t"}))
+        self.assertEqual("STALE", s.entities["BOD-A"]["_validity"])
+        self.assertEqual("STANDING", s.entities["BOD-B"]["_validity"])
+        self.assertNotIn("BOD-A", {e["entity_id"] for e in s.standing("Body")})
