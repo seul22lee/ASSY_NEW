@@ -135,6 +135,138 @@ Residual: the canonical contract is **ahead of most producers by design**, and t
 recorded rather than concealed; `quality_profile.py` still reads a legacy key from raw model
 JSON (not state), recorded as S-8 debt.
 
-> **S-3 has not begun.** No required-minimum derivation, no view construction, no sufficiency
+> **S-3 has not begun.**
+
+> **⚠ The COMPLETE claim above is superseded by §25.** It was true of the canonical
+> sources and their own tests. Two things it did not cover: the loaded contract documents
+> were still reachable and mutable, so the immutability claim was false as implemented; and
+> the stage-contract corpus was never classified, so three files stated canonical facts with
+> no declared authority status. See §25. No required-minimum derivation, no view construction, no sufficiency
 > assessment, no `ConsumerView`, no `UPSTREAM_INSUFFICIENCY`/`PROJECTION_FAILURE` behaviour,
 > and `S03_OWNED` is untouched.
+
+
+---
+---
+
+# §25 BOUNDED CONTRACT-CORPUS CLOSURE
+
+Baseline `ec184b4`. Bounded closure of the gap between the declared authority model and the
+actual corpus. **Not S-3.** No prompt, stage reasoning, mobility runtime, S04 behaviour,
+fixture, benchmark, evaluator, architecture document or CI hygiene change.
+
+## 25.1 Contract-storage mutability — reproduced first
+
+`Contracts` stored the loaded documents in an ordinary attribute. Against `ec184b4`:
+
+```
+docs = c._docs                                   # ordinary attribute lookup
+docs["families"]["Joint"]["owned_by"] = "s99"
+docs["stages"]["s04"]["owns"].append("Requirement")
+```
+
+**All four authorization queries changed** — `owner_of` → `s99`, `extendable_fields` gained a
+field, `may_create("s04","Requirement")` → True, `authority_class` → `EPHEMERAL`. Public
+accessors returned copies while the backing stayed reachable, so **S-2's immutability claim
+was false as implemented**.
+
+## 25.2 Correction
+
+The documents move to a **module-private `WeakKeyDictionary` keyed by the object** — the same
+fix that closed the DesignState read surface at S-1, for the same reason: an object nobody can
+reach cannot be edited. `hasattr(c, "_docs")` is now false; `_d` refuses. Roots still refuse
+replacement with `IMMUTABLE_CONTRACT`. **DesignState authority storage was not reopened.**
+
+## 25.3 Stage-contract classification
+
+All seven files, **63 sections**, four classes and no ambiguous fourth state:
+
+| File | CANONICAL_PROJECTION | LEGACY_PRODUCER | OPERATIONAL |
+|---|---|---|---|
+| S01 | 4 | — | 10 |
+| S02 | 4 | 1 | 10 |
+| S03 | 4 | 3 | 13 |
+| S04 | 3 | — | 3 |
+| S05 | 3 | 1 | 13 |
+| S06 | 3 | — | 11 |
+| S07 | 3 | — | 14 |
+
+## 25.4 True canonical contradictions found — three
+
+Each was resolved by asking the required first question: **is the canonical source wrong, or
+is a projection stale?** In all three the source was right.
+
+1. **`S02.creates` claimed `PhysicalInteraction`** — owned by s03. An artefact of the S-2
+   rename that retired the hypothesis families. Removed; s02 states role-level effect
+   obligations, and realising them is s03's decision.
+2. **`S01.creates` claimed `SystemBoundary`** — a family defined nowhere. The boundary is a
+   **required field of `Scenario`**. The same defect class as the retired hypothesis families,
+   and **found by the corpus-wide check rather than by name** — which is the point of making
+   the tests data-driven.
+3. **Retired relations and superseded field spellings in unclassified sections** — moved into
+   explicitly legacy sections.
+
+`S03.creates` was also completed to match canonical ownership (it omitted `ConstraintRelation`
+and `PhysicalInteraction`, which s03 **owns** even though it does not yet **produce** them).
+
+## 25.5 Legacy retained honestly
+
+Five legacy sections, each naming a canonical replacement, a canonical source, a migration step
+and `authoritative_for_canonical_semantics: false`. s03 gains a `current_producer` block stating
+plainly that it emits `blocked_by`/`retained_by` and does **not** yet emit `ConstraintRelation`
+or `PhysicalInteraction`, migration S-4/U-5.
+
+**Nothing was rewritten to claim conformance**, and the canonical contract was not weakened to
+match a producer — that would carry the audited defect forward under a new name.
+
+## 25.6 Source-of-truth coverage
+
+`CONTRACT_AUTHORITY` now covers the stage corpus, with the four-class vocabulary declared and
+each class bound to the CLOSURE checks that enforce it. A projection may name several declared
+categories; every one must exist.
+
+**How many places must be edited to change one canonical fact?** One authoritative edit, plus
+checked projections. Family owner, field name, reference target, relation meaning, stage
+responsibility and status meaning each have exactly one source; a stale projection now fails a
+test rather than waiting for a reader to notice.
+
+## 25.7 Tests added
+
+**15 CLOSURE tests**, data-driven over `contracts/stages/*.yaml` — none names S02 or S03.
+CLOSURE-01 projection matches source · 02 legacy fully declared · 03 no contradicted ownership ·
+04 no undeclared field alias · 05 retired families absent · 06 retired relations only in legacy
+sections · 07 every section classified · 08 contract storage encapsulated · 09 every projection
+names an existing source · 10 every legacy section has a scheduled step.
+
+One existing CON assertion was **generalised, not weakened**: a projection may name several
+declared categories, and every one must still exist.
+
+## 25.8 Validation
+
+| Suite | Result |
+|---|---|
+| S-1 state authority | **69/69 OK** |
+| ADR-001 Level 1 / Level 2 | **8/8 · 65/65 OK** |
+| S-2 CON (original) | **22/22 OK** |
+| S-2 CLOSURE (new) | **15/15 OK** |
+| Full meta | **352 OK** (skipped 1) — no failures |
+| CI workflow-equivalent, all three steps | **OK**, hygiene from `ec184b4` intact |
+| Window | **8/8 OK** |
+
+Classification: contract storage **(A)**; the three contradictions **(B)/(C)**; unclassified
+legacy **(D)**. All fixed here. No **(E) canonical source error** — every discrepancy resolved
+to a stale projection. No **(F)**, **(G)**, **(H)** or **(I)**.
+
+## 25.9 The two-line S02 change from S-2, re-audited
+
+Verified against the current tree: the prompt still asks for `obligations_addressed`, the model
+response key is unchanged, and the parser maps it to the canonical stored name. No engineering
+decision changed. **The statement remains accurate**, and it was not expanded here.
+
+## 25.10 Deferred
+
+s02 physical reasoning, s03 `PhysicalInteraction` and `ConstraintRelation` production, mobility
+disposition runtime, S04 spatial behaviour, Consumer Sufficiency, prompt rewrite, fixture
+regeneration, evaluator migration — all unchanged and all scheduled.
+
+> **S-2 CLOSED.** All 16 closure exit criteria hold. **S-3 has not begun.**

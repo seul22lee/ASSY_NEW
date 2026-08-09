@@ -4,6 +4,57 @@
 # docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md (revision 2). NO STAGE LOGIC HERE.
 
 schema_version: "0.1.0"
+# ---------------------------------------------------------------- S-2 closure
+# AUTHORITY STATUS of each semantic section. See CONTRACT_AUTHORITY.yaml.
+# A *_CONTRACT.yaml file is not a semantic authority by default.
+authority_status:
+  engineering_question:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "stage responsibility and its declared semantics"
+  engineering_responsibility:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "stage responsibility and its declared semantics"
+  prohibited_decisions:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "stage responsibility and its declared semantics"
+  owned_decisions:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+    projects: "stage responsibility and its declared semantics"
+  required_inputs:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  input_exclusivity:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  required_discoveries:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  structured_outputs:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  allowed_unresolved:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  maturity_expectations:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  deterministic_exit_checks:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  next_stage_consumer_requirement:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  llm_role:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  knowledge_base_role:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+
 stage_id: s01
 status: draft
 governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
@@ -29,7 +80,12 @@ required_discoveries:
   - "the observable behind each requirement"
 
 owned_decisions:
-  creates: [Requirement, SourceClause, Freedom, Ambiguity, Scenario, Actor, SystemBoundary]
+  # CANONICAL PROJECTION of DESIGN_STATE_CONTRACT `owned_by`. SystemBoundary was
+  # listed here and is a family nowhere: the boundary is a REQUIRED FIELD of
+  # Scenario (`system_boundary`). The canonical source is right and this
+  # projection was stale - the same defect class as the retired hypothesis
+  # families, found by the corpus-wide check rather than by name.
+  creates: [Actor, Ambiguity, Freedom, Requirement, Scenario, SourceClause]
   also_owns:
     - "the quantity inventory"
     - "the classification of a source statement as verbatim clause versus derived requirement"

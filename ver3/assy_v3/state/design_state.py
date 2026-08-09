@@ -33,6 +33,12 @@ class _Store:
 #: DesignState -> its storage. Module-private, and the only handle on it.
 _STORAGE: "WeakKeyDictionary" = WeakKeyDictionary()
 
+#: Contracts -> its loaded documents. Same shape of fix, same reason: holding the
+#: documents in an ordinary attribute made `c._docs[...] = ...` an ordinary
+#: operation that changed every authorization query afterwards. The rules that
+#: decide what a mutation may do must not be editable by the code being governed.
+_CONTRACT_DOCS: "WeakKeyDictionary" = WeakKeyDictionary()
+
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _CONTRACTS = os.path.abspath(os.path.join(_HERE, "..", "..", "contracts"))
 
@@ -64,21 +70,21 @@ class Contracts:
     what a caller receives is theirs, and changing it changes nothing.
     """
 
-    __slots__ = ("_docs",)
+    __slots__ = ("__weakref__",)
 
     def __init__(self) -> None:
         ds = _load("DESIGN_STATE_CONTRACT.yaml")
         families: Dict[str, Any] = dict(ds["entity_families"])
         families.update(ds["assurance_families"])
         matrix = _load("STAGE_OWNERSHIP_MATRIX.yaml")
-        object.__setattr__(self, "_docs", {
+        _CONTRACT_DOCS[self] = {
             "families": families,
             "prohibited": ds["prohibited_content"],
             "stages": matrix["stages"],
             "universally_ownable": {
                 e["family"] for e in matrix["universally_ownable"] if "family" in e},
             "authority": ds.get("authority_model", {}),
-        })
+        }
 
     def __setattr__(self, name: str, value: Any) -> None:
         raise ContractError(
@@ -86,45 +92,51 @@ class Contracts:
             "what a mutation is allowed to do; they may not be edited at runtime. "
             "Change the contract file." % name)
 
+    @property
+    def _d(self) -> Dict[str, Any]:
+        raise ContractError(
+            "IMMUTABLE_CONTRACT: the loaded documents are not reachable from this "
+            "object. Read them through the accessors, which return detached copies.")
+
     def __delattr__(self, name: str) -> None:
         self.__setattr__(name, None)
 
     # -- read surface: every accessor hands back a detached copy ----------
     @property
     def families(self) -> Dict[str, Any]:
-        return copy_out(self._docs["families"])
+        return copy_out(_CONTRACT_DOCS[self]["families"])
 
     @property
     def prohibited(self) -> Any:
-        return copy_out(self._docs["prohibited"])
+        return copy_out(_CONTRACT_DOCS[self]["prohibited"])
 
     @property
     def stages(self) -> Dict[str, Any]:
-        return copy_out(self._docs["stages"])
+        return copy_out(_CONTRACT_DOCS[self]["stages"])
 
     @property
     def universally_ownable(self) -> set:
-        return set(self._docs["universally_ownable"])
+        return set(_CONTRACT_DOCS[self]["universally_ownable"])
 
     @property
     def authority(self) -> Dict[str, Any]:
-        return copy_out(self._docs["authority"])
+        return copy_out(_CONTRACT_DOCS[self]["authority"])
 
     def owner_of(self, family: str) -> Optional[Any]:
-        return (self._docs["families"].get(family) or {}).get("owned_by")
+        return (_CONTRACT_DOCS[self]["families"].get(family) or {}).get("owned_by")
 
     def required_fields(self, family: str) -> List[str]:
-        return list((self._docs["families"].get(family) or {}).get("required_fields", []))
+        return list((_CONTRACT_DOCS[self]["families"].get(family) or {}).get("required_fields", []))
 
     def field_semantics(self, family: str) -> Dict[str, Any]:
         """U-2B: reference targets, spatial frames and per-field authority."""
-        return copy_out((self._docs["families"].get(family) or {}).get("field_semantics", {}))
+        return copy_out((_CONTRACT_DOCS[self]["families"].get(family) or {}).get("field_semantics", {}))
 
     # ------------------------------------------------------------- authority
     def authority_class(self, family: str) -> AuthorityClass:
         """FA-2. Declared per family; the contract's default is the strict one."""
-        fam = self._docs["families"].get(family) or {}
-        auth = self._docs["authority"]
+        fam = _CONTRACT_DOCS[self]["families"].get(family) or {}
+        auth = _CONTRACT_DOCS[self]["authority"]
         declared = fam.get("authority_class")
         if declared is None:
             declared = (auth.get("class_overrides", {}) or {}).get(family)
@@ -142,15 +154,15 @@ class Contracts:
         an unguarded dict.update over any field of any entity; it was never
         exercised, so nothing depends on the permissive behaviour.
         """
-        return dict((self._docs["families"].get(family) or {}).get("extendable_fields", {}) or {})
+        return dict((_CONTRACT_DOCS[self]["families"].get(family) or {}).get("extendable_fields", {}) or {})
 
     def may_create(self, stage_id: str, family: str) -> bool:
-        if family in self._docs["universally_ownable"]:
+        if family in _CONTRACT_DOCS[self]["universally_ownable"]:
             return True
         owner = self.owner_of(family)
         if owner == "any":
             return True
-        owns = (self._docs["stages"].get(stage_id) or {}).get("owns", []) or []
+        owns = (_CONTRACT_DOCS[self]["stages"].get(stage_id) or {}).get("owns", []) or []
         return family in owns
 
 

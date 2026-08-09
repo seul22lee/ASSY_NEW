@@ -354,7 +354,13 @@ class TestStatusAndAuthority(_Corpus):
                 self.assertTrue(v["owns"])
                 self.assertTrue(os.path.exists(os.path.join(REPO, v["file"])))
         for proj in self.authority["projections"]:
-            self.assertIn(proj["projects"], srcs)
+            # A projection may legitimately project more than one category (the
+            # stage corpus projects entity semantics AND stage responsibility).
+            # Every category it names must still be a declared source.
+            named = proj["projects"]
+            for cat in (named if isinstance(named, list) else [named]):
+                with self.subTest(projection=proj["file"], category=cat):
+                    self.assertIn(cat, srcs)
 
 
 class TestContractImmutability(_Corpus):

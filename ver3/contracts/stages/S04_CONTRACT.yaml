@@ -5,6 +5,32 @@
 # stage_expectations reference s04 by name.
 
 schema_version: "0.1.0"
+# ---------------------------------------------------------------- S-2 closure
+# AUTHORITY STATUS of each semantic section. See CONTRACT_AUTHORITY.yaml.
+# A *_CONTRACT.yaml file is not a semantic authority by default.
+authority_status:
+  s04a:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "stage responsibility and its declared semantics"
+  selection_gate:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "stage responsibility and its declared semantics"
+  s04b:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "stage responsibility and its declared semantics"
+  why_two_passes:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  llm_role:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  knowledge_base_role:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+
 stage_id: s04
 passes: [s04a, s04b]
 status: draft

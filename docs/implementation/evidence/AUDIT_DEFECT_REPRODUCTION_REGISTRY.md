@@ -48,6 +48,8 @@ model variability to such a test only weakens the evidence.
 | ADR-009 | unresolved recognised, commitment unaffected | S-7 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
 | ADR-010 | self-fulfilling assurance | S-8 | DETERMINISTIC | NOT_YET_ADDRESSABLE |
 | ADR-011 | spatial incidence observable but unchecked | S-8 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
+| **ADR-012** | live contract backing mutable through supported access | **S-2** | STRUCTURAL | **RESOLVED** |
+| **ADR-013** | non-authoritative contract file contradicts canonical semantics undeclared | **S-2** | STRUCTURAL | **RESOLVED** |
 
 ---
 
@@ -373,3 +375,64 @@ is a new finding.
    asserting a historical value, it has become an answer template and must be rewritten.
 5. **Register only mechanisms the frozen audit established.** This registry does not create
    findings.
+
+
+---
+
+## ADR-012 — Live contract backing mutable through supported access
+
+**Status: RESOLVED** *(S-2 closure)*
+
+| | |
+|---|---|
+| **General mechanism** | The rules that decide what a mutation may do are held in an object the governed code can reach and edit. Authoritative state is never touched, so no authority check fires — but every later ownership, extendability, reference and authorization query observes the edited rule. |
+| **Original observation** | `Contracts` stored the loaded documents in an ordinary attribute. `c._docs["families"][F]["owned_by"] = "s99"` succeeded, and `owner_of`, `extendable_fields`, `may_create` and `authority_class` all changed with it. The S-2 immutability claim was therefore false as implemented: public accessors returned copies while the backing stayed reachable. |
+| **Anchors** | S-1 §19.11 deferred contract mutability to U-2B; S-2 implemented copy-on-read but not encapsulation. |
+| **Reproduction input** | A loaded `Contracts` object. No case, no state, no model. |
+| **Replay type** | **STRUCTURAL.** |
+| **Expected post-fix property** | Loaded authoritative contract semantics cannot be modified through supported repository object access. |
+| **Forbidden post-fix condition** | Any object reachable from `Contracts` whose mutation changes a later authorization answer. |
+| **Step** | **S-2 closure** |
+
+**Before / after.** Before: `c._docs` reachable; four authorization queries changed. After: the
+documents live in a module-private registry keyed by the object, exactly the shape of fix that
+closed the DesignState read surface at S-1; `hasattr(c, "_docs")` is false, mutating any read
+changes no query, and every root refuses replacement with `IMMUTABLE_CONTRACT`.
+
+**Level 1** — the reproduction, replayed: `CLOSURE-08` mutates a read and asserts four
+authorization answers are unchanged. **Level 2** — the general invariant: a traversal of the
+whole public `Contracts` surface asserts no attribute is the live store, and legitimate
+queries still work.
+
+---
+
+## ADR-013 — Undeclared second semantic authority
+
+**Status: RESOLVED** *(S-2 closure)*
+
+| | |
+|---|---|
+| **General mechanism** | A file that is not the source of truth states a canonical semantic fact, and nothing marks it as a projection or as a description of legacy behaviour. Readers cannot tell whether it is authoritative, and it can drift from the source silently. |
+| **Original observation** | Three instances, all found by a corpus-wide check rather than by name: **(a)** `S02_CONTRACT` claimed to create `PhysicalInteraction`, which s03 owns — an artefact of the S-2 hypothesis-family rename; **(b)** `S01_CONTRACT` claimed to create `SystemBoundary`, a family defined nowhere, when the boundary is a required FIELD of `Scenario`; **(c)** retired relation names and superseded field spellings sat in sections carrying no legacy marking. |
+| **Anchors** | `CONTRACT_AUTHORITY.yaml`; the S-2 canonical corpus. |
+| **Reproduction input** | The contract corpus. Structural. |
+| **Replay type** | **STRUCTURAL.** |
+| **Expected post-fix property** | Every semantic section of every stage contract declares its authority class — CANONICAL_PROJECTION, LEGACY_PRODUCER, OPERATIONAL or RETIRED — with no ambiguous fourth state; projections match their source; legacy sections name a replacement and a scheduled step. |
+| **Forbidden post-fix condition** | A stage contract asserting canonical ownership, a field name or a relation meaning that the source of truth does not, without declaring itself legacy. |
+| **Step** | **S-2 closure** |
+
+**Before / after.** Before: seven stage files, none declaring authority status; two false
+ownership claims; retired vocabulary indistinguishable from current meaning. After: 7/7 files
+classified across 63 sections; both false claims corrected against the canonical source; legacy
+vocabulary moved into explicitly legacy sections that name their replacement and step.
+
+**Level 1** — the two ownership contradictions are the exact replay, and `CLOSURE-03` fails on
+either if reintroduced. **Level 2** — `CLOSURE-01/02/04/05/06/07/09/10` are data-driven over
+the whole `contracts/stages/*.yaml` corpus, so a new stage file, or a new alias in an old one,
+is caught the same way rather than by name.
+
+**Note on honesty.** The fix did **not** rewrite legacy sections to claim conformance. s03
+still emits `blocked_by`/`retained_by` and does not yet emit `ConstraintRelation` or
+`PhysicalInteraction`; that gap is now stated in a `current_producer` block with its migration
+step, because weakening the canonical contract to match the producer would carry the audited
+defect forward under a new name.

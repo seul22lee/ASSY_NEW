@@ -12,6 +12,102 @@
 # stage forbidden to decide topology, which is why they are not revived.
 # The FAMILIES are defined now; PRODUCING them is S-4 / U-5.
 schema_version: "0.1.0"
+# ---------------------------------------------------------------- S-2 closure
+# AUTHORITY STATUS of each semantic section. See CONTRACT_AUTHORITY.yaml.
+authority_status:
+  owned_decisions:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+    projects: "which families this stage owns (owned_by)"
+  current_producer:
+    class: LEGACY_PRODUCER
+    describes: "what the s03 runtime still emits, ahead of its scheduled migration"
+    canonical_replacement: "ConstraintRelation (addressable) and PhysicalInteraction"
+    canonical_source: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+    migration_step: "S-4 / U-5"
+    authoritative_for_canonical_semantics: false
+  blocking_relation_rule:
+    class: LEGACY_PRODUCER
+    describes: "the blocked_by relation the runtime still authors"
+    canonical_replacement: ConstraintRelation
+    canonical_source: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+    migration_step: "S-4 / U-5"
+    authoritative_for_canonical_semantics: false
+  dof_disposition_rule:
+    class: LEGACY_PRODUCER
+    describes: "the disposition vocabulary the runtime still emits, without UNDISPOSITIONED"
+    canonical_replacement: "MobilityExpectation.authorship_split; UNDISPOSITIONED for an uncovered cell"
+    canonical_source: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+    migration_step: "S-5 / U-6 (ADR-005)"
+    authoritative_for_canonical_semantics: false
+  engineering_question:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "the stage's engineering questions"
+  engineering_responsibility:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "the stage's responsibility"
+  prohibited_decisions:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "what the stage may not decide"
+  required_inputs:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  prohibited_inputs:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  required_discoveries:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  compliance_rule:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  load_path_rule:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  structured_outputs:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  assembly_step_rule:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  allowed_unresolved:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  maturity_expectations:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  deterministic_exit_checks:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  next_stage_consumer_requirement:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  llm_role:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  knowledge_base_role:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+
+# LEGACY PRODUCER RECORD. Honest statement of the gap between what s03 OWNS and
+# what it currently EMITS. Not a claim of conformance.
+current_producer:
+  # The retired relation names live HERE, inside an explicitly legacy section,
+  # and not inside the canonical ownership projection. Structure rather than a
+  # note: a reader and a test both see the classification without reading prose.
+  relates: [blocked_by, retained_by]
+  emits: [blocked_by, retained_by]
+  does_not_yet_emit: [ConstraintRelation, PhysicalInteraction]
+  migration_step: "S-4 / U-5"
+  why_recorded: >
+    The canonical contract is deliberately ahead of this producer. Rewriting this
+    file to claim ConstraintRelation is already produced would be false, and
+    weakening the canonical contract to match the producer would carry the
+    audited defect forward under a new name.
+
 stage_id: s03
 status: draft
 governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
@@ -46,8 +142,12 @@ required_discoveries:
   - "the functional regions the design promises: access, support, keep-out, aperture"
 
 owned_decisions:
-  creates: [Body, RigidGroup, Joint, Interface, Configuration, MobilityExpectation, LoadPath, AssemblyStep, FunctionalRegion]
-  relates: [blocked_by, retained_by]
+  # CANONICAL PROJECTION of DESIGN_STATE_CONTRACT `owned_by`. This is what s03
+  # OWNS, not what it currently emits - the two differ during the migration and
+  # the difference is stated in `current_producer` below rather than hidden by
+  # trimming this list.
+  creates: [AssemblyStep, Body, Configuration, ConstraintRelation, FunctionalRegion,
+            Interface, Joint, LoadPath, MobilityExpectation, PhysicalInteraction, RigidGroup]
   note: "This stage owns the MECHANISM."
 
 dof_disposition_rule:

@@ -88,6 +88,48 @@ projections:
       contract defect - checked by CON-09. Before S-2 at least two fields were
       defined nowhere else.
 
+  # ------------------------------------------------------------ S-2 closure
+  - file: "ver3/contracts/stages/*.yaml"
+    projects: [entity_semantics, stage_responsibility]
+    projects_what: "per-stage ownership, responsibility, and producer interface"
+    rule: >
+      A file named *_CONTRACT.yaml is NOT a semantic authority by default. Every
+      semantic section declares an `authority_status.<section>.class`, and there
+      is no ambiguous fourth state:
+
+        CANONICAL_PROJECTION - repeats a fact owned elsewhere. Must name its
+          source and must match it. Checked by CLOSURE-01 and CLOSURE-03.
+
+        LEGACY_PRODUCER - describes what the CURRENT producer still emits, ahead
+          of its scheduled migration. Must name its canonical replacement, its
+          canonical source, a migration step, and
+          `authoritative_for_canonical_semantics: false`. Checked by CLOSURE-02
+          and CLOSURE-10.
+
+        OPERATIONAL - non-semantic detail that defines no canonical meaning.
+
+        RETIRED - kept only as a record of something withdrawn.
+
+      This is the distinction the corpus lacked: canonical contract says what ASSY
+      MEANS; legacy producer contract says what the code still EMITS until its
+      step. Collapsing them would either falsify the producer or weaken the
+      canonical semantics, and the migration schedule depends on neither.
+
+stage_contract_status_vocabulary:
+  CANONICAL_PROJECTION:
+    requires: [source, projects]
+    checked_by: [CLOSURE-01, CLOSURE-03, CLOSURE-09]
+  LEGACY_PRODUCER:
+    requires: [describes, canonical_replacement, canonical_source, migration_step,
+               authoritative_for_canonical_semantics]
+    checked_by: [CLOSURE-02, CLOSURE-05, CLOSURE-10]
+  OPERATIONAL:
+    requires: [note]
+    checked_by: [CLOSURE-07]
+  RETIRED:
+    requires: [note]
+    checked_by: [CLOSURE-05]
+
 duplication_rule: >
   Where a fact must appear in more than one file, the projection is checked
   against its source by a structural test. Manual agreement is not a mechanism:

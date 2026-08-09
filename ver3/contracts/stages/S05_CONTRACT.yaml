@@ -2,6 +2,69 @@
 # s05 and s06 form ONE bounded convergence block. See S06_CONTRACT convergence.
 
 schema_version: "0.1.0"
+# ---------------------------------------------------------------- S-2 closure
+# AUTHORITY STATUS of each semantic section. See CONTRACT_AUTHORITY.yaml.
+# A *_CONTRACT.yaml file is not a semantic authority by default.
+authority_status:
+  engineering_question:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "stage responsibility and its declared semantics"
+  engineering_responsibility:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "stage responsibility and its declared semantics"
+  prohibited_decisions:
+    class: CANONICAL_PROJECTION
+    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    projects: "stage responsibility and its declared semantics"
+  structured_outputs:
+    class: LEGACY_PRODUCER
+    describes: "the s05 response shape, which still uses the pre-canonical obligation reference name"
+    canonical_replacement: "Realization.addresses_obligations"
+    canonical_source: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+    migration_step: "the step that brings s05 into scope; outside S01-S04"
+    authoritative_for_canonical_semantics: false
+  required_inputs:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  required_discoveries:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  envelope_constraint_rule:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  clearance_constraint_rule:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  owned_decisions:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  construction_frame_rule:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  roi_rule:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  allowed_unresolved:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  maturity_expectations:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  deterministic_exit_checks:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  next_stage_consumer_requirement:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  llm_role:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+  knowledge_base_role:
+    class: OPERATIONAL
+    note: "non-semantic detail; defines no canonical meaning"
+
 stage_id: s05
 status: draft
 governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
