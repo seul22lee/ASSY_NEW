@@ -490,3 +490,26 @@ contradict. *Status:* **open decision.** Neither document was edited — correct
 would change frozen semantics to match a stale sentence, and correcting the plan is outside
 this pass. READINESS-B05 pins the contract to the proposal so the contradiction cannot be
 resolved silently.
+
+
+### ADR-014 extension — machine-readable is not the same as generic
+
+**Exact defect.** Reasoning-premise binding was implemented as a manual family enumeration:
+`satisfied_by.canonical_families`. It satisfied "machine-resolvable" and violated the
+anti-whitelist invariant the implementation plan records as R-2, whose own falsifier is
+"premise declarations start naming families directly". 28/28 named families; 12 enumerated
+several.
+
+**General invariant.** A reasoning premise specifies SEMANTIC REQUIREMENTS; canonical entity
+semantics determine which families satisfy them. A new family satisfying the same semantics
+becomes eligible without editing any consuming stage or any derivation code.
+
+**Resolution.** Families declare `semantic_roles` in the entity contract (what a family IS);
+premises declare `requires_semantics` in the responsibility contract (what a stage NEEDS); a
+generic resolver matches. Family enumerations remaining: 0. The generalization control is a
+synthetic family that participates automatically, paired with a removal control proving the
+resolver follows declarations rather than names.
+
+**Lesson worth keeping.** "Machine-readable" was mistaken for "generic". A format a program can
+parse is not the same as a rule a program can generalise — and the first is easy to reach while
+believing you have the second.

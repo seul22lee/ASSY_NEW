@@ -527,5 +527,90 @@ Deferred unchanged: mobility runtime, `UNDISPOSITIONED`, removal of
 `MAINTAINED_BY_CLASS`-from-absence, premise-backed dispositions — all S-5/U-6. S-3 needs only
 the semantic class, and the legacy producer stays honestly nonconforming.
 
+> **⚠ Source B here was wrong and is corrected in §29.** The `satisfied_by.canonical_families`
+> binding below was machine-readable and still a manual family whitelist — plan R-2's own
+> falsifier. Source A stands unchanged.
+
 > **S-2 → S-3 INTERFACE READY**, with one open item: the plan's §5 mobility rationale
 > contradicts the frozen proposal and needs a decision. **S-3 has not begun.**
+
+
+---
+
+## §29 SOURCE-B SEMANTIC RESOLUTION CORRECTION
+
+Baseline `6ef6dac`. **Source A unchanged.** No ConsumerView, no `projection.py`, `S03_OWNED`
+untouched, no prompt, no runtime.
+
+## 29.1 The conflict, reproduced
+
+The binding added at `6ef6dac` — `satisfied_by: {kind: canonical_families, families: [...]}` —
+was machine-readable **and still a whitelist**. Plan **R-2**'s falsifier is explicit:
+
+> *"if premise declarations start naming families directly, or drift toward instances, the
+> derivation has degenerated"*
+
+**28 of 28 named families directly; 12 were multi-family enumerations**, the worst being
+`s04a.topology_and_interaction` with five. A stage contract had become an inventory of the
+current ontology: a new family satisfying a premise would have been invisible until someone
+edited every stage that needed it.
+
+## 29.2 Alternatives
+
+| | Verdict |
+|---|---|
+| **A. semantic roles on families + `requires_semantics` on premises** | **SELECTED** — smallest; classification lives with family meaning; a new family participates by declaring its own roles |
+| B. structured predicates over existing metadata | rejected: no existing field expresses "is a topology relation"; predicates would have keyed on family names again |
+| C. categories with inheritance/composition | rejected: ontology machinery far beyond the need |
+| D. moving the list to Python, another YAML, or a `if premise ==` branch | rejected — §4 names all three as the same architecture relocated |
+
+## 29.3 What changed
+
+**`DESIGN_STATE_CONTRACT`** gains `semantic_role_vocabulary` (**23 roles**, each with stable
+engineering meaning) and `semantic_roles` on **25 families**. **`STAGE_RESPONSIBILITY_CONTRACT`**
+replaces every `satisfied_by` with `requires_semantics`. **Family enumerations remaining: 0.**
+
+The division: the entity contract says what a family **IS**; the responsibility contract says
+what a stage **NEEDS**; a generic resolver matches. A stage no longer knows any family name.
+
+## 29.4 The 28 premise classes
+
+**21 require a single role; 7 require several.** All 28 resolve. No premise is a "direct
+family binding" — **there is no 1:1 mechanism at all**, which is the strongest form of §6's
+requirement: a single-role premise is just a premise, and if a second family later declares
+that role the premise picks it up automatically. A separate 1:1 binding could not do that, and
+would have been the seam a whitelist grows back through.
+
+SOURCEB-04b additionally forbids a role whose declared meaning names a stage —
+`things_s04a_currently_needs` is unrepresentable.
+
+## 29.5 Resolver and generalization
+
+`resolve_premise_semantics(premise, families)` returns matching families **and a trace**
+(`premise → required role → family declares it`), so S-3 can later explain any inclusion.
+
+**SOURCEB-05, the main evidence:** a synthetic `SyntheticCoupling` declaring `topology_relation`
+is picked up by every premise requiring that role — **no resolver change, no stage-contract
+change** (SOURCEB-07 asserts the responsibility contract is byte-identical after resolution).
+**SOURCEB-06:** removing the role removes participation; re-adding restores it — the resolver
+follows declarations, not names. **SOURCEB-08/09:** the resolver body contains no family name,
+no stage id and no role literal.
+
+## 29.6 Source A and S04B
+
+Source A is untouched: reference targets ∪ spatial frames ∪ explicit dependency ∪ ∅, still
+166/166 derivable. Independence holds — semantic roles do not become representational
+dependencies, and references do not become premises.
+
+**S04B mobility:** unchanged and still deferred. The frozen proposal §7.8 omits mobility, the
+contract matches it, and READINESS-B05 pins that agreement. It concerns **U-6 → U-7 sequencing
+rationale, not S-3**, which consumes this contract. Recorded as **LATER IMPLEMENTATION-PLAN
+RATIONALE CORRECTION REQUIRED BEFORE S-5/S-6**. Neither frozen document was edited.
+
+## 29.7 Regression
+
+**25 readiness tests** · **69/69** state · **402 meta OK** · **8/8** window · all CI steps OK.
+Classification: **(A) manual family-whitelist degeneration**, fixed. No **(E)** Source-A
+regression, no **(G)**.
+
+> **S-3 INTERFACE READY — BEGIN U-3 / M-3 NEXT.**

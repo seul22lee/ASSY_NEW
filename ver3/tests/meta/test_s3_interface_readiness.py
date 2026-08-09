@@ -50,6 +50,33 @@ def _code_only(*funcs):
     return "\n".join(out)
 
 
+# ---------------------------------------------------------------- SOURCE B
+def families_with_role(fams, role):
+    """Every family whose OWN declaration says it carries this semantic role."""
+    return sorted(f for f, v in fams.items()
+                  if role in ((v or {}).get("semantic_roles") or []))
+
+
+def resolve_premise_semantics(premise, fams):
+    """Which families satisfy a premise, and why.
+
+    Generic and stage-agnostic: it reads the roles the premise REQUIRES and the
+    roles each family DECLARES, and matches. It knows no family name, no stage id
+    and no case identifier.
+
+    Returns (families, trace); the trace explains each inclusion so S-3 can later
+    record why an entity was selected.
+    """
+    trace = []
+    out = set()
+    for role in premise.get("requires_semantics", []):
+        for fam in families_with_role(fams, role):
+            out.add(fam)
+            trace.append({"premise": premise.get("class"), "requires_semantics": role,
+                          "family": fam, "because": "family declares this role"})
+    return sorted(out), trace
+
+
 # ---------------------------------------------------------------- SOURCE A
 def derive_representational_dependencies(fams, family, field):
     """The one canonical Source-A rule.
@@ -239,84 +266,169 @@ class TestSourceA(_Base):
 
 
 class TestSourceB(_Base):
+    """SOURCEB-01..14. A premise states semantic requirements; canonical entity
+    semantics decide which families satisfy them."""
 
     def premise_classes(self):
         for sid in S01_S04:
             for pc in self.resp["stages"][sid]["required_reasoning_premise_classes"]:
                 yield sid, pc
 
+    def test_SOURCEB_01_no_premise_enumerates_families(self):
+        """The defect introduced at 6ef6dac, and plan R-2's own falsifier:
+        'premise declarations start naming families directly'."""
+        problems = []
+        for sid, pc in self.premise_classes():
+            for banned in ("satisfied_by", "families", "canonical_families"):
+                if banned in pc:
+                    problems.append("%s: %s declares %s" % (sid, pc["class"], banned))
+            for role in pc.get("requires_semantics", []):
+                if role in self.fams:
+                    problems.append("%s: %s requires %r, a family name"
+                                    % (sid, pc["class"], role))
+        self.assertEqual([], problems)
+
+    def test_SOURCEB_02_every_premise_has_a_semantic_selector(self):
+        for sid, pc in self.premise_classes():
+            with self.subTest(where="%s.%s" % (sid, pc["class"])):
+                self.assertTrue(pc.get("requires_semantics"))
+
+    def test_SOURCEB_03_every_selector_resolves(self):
+        problems = []
+        for sid, pc in self.premise_classes():
+            fams, _t = resolve_premise_semantics(pc, self.fams)
+            if not fams:
+                problems.append("%s: %s resolves to nothing" % (sid, pc["class"]))
+        self.assertEqual([], problems)
+
+    def test_SOURCEB_04_every_role_has_declared_engineering_meaning(self):
+        vocab = self.ds["semantic_role_vocabulary"]
+        used = {r for _s, pc in self.premise_classes() for r in pc["requires_semantics"]}
+        declared = {r for v in self.fams.values() for r in ((v or {}).get("semantic_roles") or [])}
+        for role in used | declared:
+            with self.subTest(role=role):
+                self.assertIn(role, vocab)
+                self.assertTrue(str(vocab[role]).strip())
+        for role in vocab:
+            if role != "extension_rule":
+                self.assertIn(role, declared, "%r declared but no family carries it" % role)
+
+    def test_SOURCEB_04b_no_role_is_a_disguised_whitelist(self):
+        """A role must mean something outside the consumer using it."""
+        for role, meaning in self.ds["semantic_role_vocabulary"].items():
+            if role == "extension_rule":
+                continue
+            with self.subTest(role=role):
+                for sid in S01_S04:
+                    self.assertNotIn(sid, str(meaning).lower(),
+                                     "%r is defined by naming a stage" % role)
+
+    def test_SOURCEB_05_a_synthetic_family_participates_automatically(self):
+        """The main evidence: a new family declaring an existing role is picked
+        up with no resolver change and no stage-contract change."""
+        import copy
+        fams = copy.deepcopy(self.fams)
+        premise = [pc for _s, pc in self.premise_classes()
+                   if "topology_relation" in pc["requires_semantics"]][0]
+        before, _ = resolve_premise_semantics(premise, self.fams)
+        fams["SyntheticCoupling"] = {"owned_by": "s03", "required_fields": ["entity_id"],
+                                     "semantic_roles": ["topology_relation"]}
+        after, trace = resolve_premise_semantics(premise, fams)
+        self.assertNotIn("SyntheticCoupling", before)
+        self.assertIn("SyntheticCoupling", after)
+        self.assertTrue([t for t in trace if t["family"] == "SyntheticCoupling"])
+
+    def test_SOURCEB_06_removing_the_role_removes_participation(self):
+        import copy
+        fams = copy.deepcopy(self.fams)
+        premise = [pc for _s, pc in self.premise_classes()
+                   if "topology_relation" in pc["requires_semantics"]][0]
+        self.assertIn("Joint", resolve_premise_semantics(premise, fams)[0])
+        fams["Joint"]["semantic_roles"] = [r for r in fams["Joint"]["semantic_roles"]
+                                           if r != "topology_relation"]
+        self.assertNotIn("Joint", resolve_premise_semantics(premise, fams)[0])
+        fams["Joint"]["semantic_roles"].append("topology_relation")
+        self.assertIn("Joint", resolve_premise_semantics(premise, fams)[0])
+
+    def test_SOURCEB_07_no_stage_contract_changes_for_a_new_family(self):
+        import copy
+        before = copy.deepcopy(self.resp)
+        fams = copy.deepcopy(self.fams)
+        fams["SyntheticCoupling"] = {"owned_by": "s03", "required_fields": ["entity_id"],
+                                     "semantic_roles": ["topology_relation"]}
+        for sid in S01_S04:
+            for pc in self.resp["stages"][sid]["required_reasoning_premise_classes"]:
+                resolve_premise_semantics(pc, fams)
+        self.assertEqual(before, self.resp)
+
+    def test_SOURCEB_08_09_resolver_has_no_family_or_stage_branch(self):
+        src = _code_only(resolve_premise_semantics, families_with_role)
+        for fam in self.fams:
+            self.assertNotIn("'%s'" % fam, src, "resolver branches on family %s" % fam)
+        for sid in S01_S04:
+            self.assertNotIn("'%s'" % sid, src, "resolver branches on stage %s" % sid)
+        for role in self.ds["semantic_role_vocabulary"]:
+            self.assertNotIn("'%s'" % role, src, "resolver branches on role %s" % role)
+
+    def test_SOURCEB_10_single_role_premises_use_the_same_mechanism(self):
+        """No separate 1:1 binding rule exists, so none can widen into a
+        whitelist. A premise needing one role is just a premise."""
+        single = [(s, pc) for s, pc in self.premise_classes()
+                  if len(pc["requires_semantics"]) == 1]
+        self.assertTrue(single)
+        for sid, pc in single:
+            with self.subTest(where="%s.%s" % (sid, pc["class"])):
+                self.assertNotIn("satisfied_by", pc)
+                self.assertTrue(resolve_premise_semantics(pc, self.fams)[0])
+
+    def test_SOURCEB_11_all_28_premise_classes_resolve(self):
+        total = 0
+        for sid, pc in self.premise_classes():
+            fams, trace = resolve_premise_semantics(pc, self.fams)
+            self.assertTrue(fams, "%s.%s" % (sid, pc["class"]))
+            self.assertTrue(trace)
+            total += 1
+        self.assertEqual(28, total)
+
+    def test_SOURCEB_13_no_benchmark_identifier_participates(self):
+        src = _code_only(resolve_premise_semantics, families_with_role)
+        self.assertIsNone(BENCHMARK_TOKENS.search(src))
+        for _s, pc in self.premise_classes():
+            self.assertIsNone(BENCHMARK_TOKENS.search(str(pc.get("requires_semantics"))))
+        for role, meaning in self.ds["semantic_role_vocabulary"].items():
+            self.assertIsNone(BENCHMARK_TOKENS.search(str(meaning)), role)
+
+    def test_SOURCEB_14_the_trace_is_reproducible(self):
+        premise = [pc for _s, pc in self.premise_classes()
+                   if pc["class"] == "topology_and_interaction"][0]
+        _f, trace = resolve_premise_semantics(premise, self.fams)
+        joint = [t for t in trace if t["family"] == "Joint"][0]
+        self.assertEqual("topology_and_interaction", joint["premise"])
+        self.assertEqual("topology_relation", joint["requires_semantics"])
+        self.assertIn("topology_relation", self.fams["Joint"]["semantic_roles"])
+
     def test_READINESS_B01_every_premise_cites_a_declared_question(self):
         problems = []
         for sid, pc in self.premise_classes():
-            qs = self.resp["stages"][sid]["engineering_questions"]
-            if pc.get("justified_by_question") not in qs:
-                problems.append("%s: %s cites an undeclared question" % (sid, pc["class"]))
+            if pc.get("justified_by_question") not in \
+                    self.resp["stages"][sid]["engineering_questions"]:
+                problems.append("%s: %s" % (sid, pc["class"]))
         self.assertEqual([], problems)
-
-    def test_READINESS_B02_every_premise_has_a_machine_resolvable_binding(self):
-        problems = []
-        for sid, pc in self.premise_classes():
-            sb = pc.get("satisfied_by")
-            if not sb:
-                problems.append("%s: %s has no binding" % (sid, pc["class"]))
-            elif sb.get("kind") != "canonical_families" or not sb.get("families"):
-                problems.append("%s: %s binding is not resolvable" % (sid, pc["class"]))
-        self.assertEqual([], problems)
-
-    def test_READINESS_B03_no_binding_points_to_an_undefined_family(self):
-        problems = []
-        for sid, pc in self.premise_classes():
-            for fam in (pc.get("satisfied_by") or {}).get("families", []):
-                if fam not in self.fams:
-                    problems.append("%s: %s binds to undefined %s" % (sid, pc["class"], fam))
-        self.assertEqual([], problems)
-
-    def test_READINESS_B04_a_binding_names_families_never_a_stage(self):
-        """A premise binding is not an ownership projection and must not let a
-        consuming stage acquire a family."""
-        stage_ids = set(self.resp["stages"]) | {"s01", "s02", "s03", "s04", "s05", "s06", "s07"}
-        for sid, pc in self.premise_classes():
-            for fam in (pc.get("satisfied_by") or {}).get("families", []):
-                self.assertNotIn(fam, stage_ids)
 
     def test_READINESS_B05_s04b_premises_match_the_frozen_proposal(self):
         """The plan claims mobility is a declared s04b premise; the frozen
-        proposal §7.8 does not list it. The contract projects the proposal, and
-        this test pins that agreement so the contradiction cannot be resolved
-        silently in the contract's direction."""
+        proposal §7.8 does not list it. Pinned so it cannot be resolved silently
+        in the contract's direction. It concerns U-6 -> U-7 sequencing rationale,
+        not S-3, which consumes this contract."""
         declared = {pc["class"] for pc in
                     self.resp["stages"]["s04b"]["required_reasoning_premise_classes"]}
         self.assertEqual(
             {"prior_spatial_commitment", "topology_with_axes", "required_distinctness",
              "configuration_basis", "constraint_relation", "travel_bounding_quantity",
              "selection_decision"}, declared)
-        self.assertNotIn("MobilityExpectation",
-                         {f for pc in self.resp["stages"]["s04b"]
-                          ["required_reasoning_premise_classes"]
-                          for f in (pc.get("satisfied_by") or {}).get("families", [])})
-
-    def test_READINESS_B06_a_synthetic_premise_changes_the_set(self):
-        """Generalisation control: adding a premise in the contract changes the
-        derived requirement with no derivation-code change."""
-        import copy
-        resp = copy.deepcopy(self.resp)
-        before = len(resp["stages"]["s04a"]["required_reasoning_premise_classes"])
-        resp["stages"]["s04a"]["required_reasoning_premise_classes"].append({
-            "class": "synthetic", "what": "x",
-            "justified_by_question": resp["stages"]["s04a"]["engineering_questions"][0],
-            "why": "control",
-            "satisfied_by": {"kind": "canonical_families", "families": ["Body"]}})
-        after = resp["stages"]["s04a"]["required_reasoning_premise_classes"]
-        self.assertEqual(before + 1, len(after))
-        self.assertEqual(["Body"], after[-1]["satisfied_by"]["families"])
-
-    def test_no_stage_pair_whitelist_exists_in_derivation_code(self):
-        """The mandatory negative control: stage-specific knowledge lives in the
-        contract, never in Python."""
-        src = _code_only(derive_representational_dependencies, closure)
-        for sid in S01_S04:
-            self.assertNotIn("'%s'" % sid, src, "derivation branches on stage %s" % sid)
-        self.assertIsNone(BENCHMARK_TOKENS.search(src))
+        roles = {r for pc in self.resp["stages"]["s04b"]
+                 ["required_reasoning_premise_classes"] for r in pc["requires_semantics"]}
+        self.assertNotIn("mobility_disposition", roles)
 
 
 class TestSourcesStayIndependent(_Base):
@@ -331,8 +443,9 @@ class TestSourcesStayIndependent(_Base):
         referenced = {s["target"] for v in self.fams.values()
                       for s in ((v or {}).get("field_semantics") or {}).values()
                       if s.get("kind") == "reference"}
-        premised = {f for sid in S01_S04
-                    for pc in self.resp["stages"][sid]["required_reasoning_premise_classes"]
-                    for f in (pc.get("satisfied_by") or {}).get("families", [])}
+        premised = set()
+        for sid in S01_S04:
+            for pc in self.resp["stages"][sid]["required_reasoning_premise_classes"]:
+                premised |= set(resolve_premise_semantics(pc, self.fams)[0])
         self.assertTrue(referenced - premised, "every referenced family is a premise")
         self.assertTrue(premised - referenced, "every premise family is referenced")

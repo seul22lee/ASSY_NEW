@@ -81,35 +81,26 @@ stages:
       justified_by_question: What must hold regardless of mechanism?
       why: An obligation set derived from part of the requirements is unsound; coverage cannot
         be read from a subset.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Requirement
+      requires_semantics:
+      - source_requirement
     - class: recorded_ambiguity
       what: every recorded ambiguity
       justified_by_question: What must hold regardless of mechanism?
       why: An obligation resting on a silently resolved ambiguity is an unrecorded commitment.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Ambiguity
-        - Freedom
+      requires_semantics:
+      - open_question
     - class: scenario_boundary
       what: the system boundary declared per scenario
       justified_by_question: What loads act, and where may each be reacted?
       why: A reaction site cannot be typed external without a boundary that says what is outside.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Scenario
+      requires_semantics:
+      - scenario_context
     - class: actor_and_reach_intent
       what: actors and what they must reach
       justified_by_question: What physical effects must occur between which roles?
       why: An effect between roles needs the roles to exist.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Actor
+      requires_semantics:
+      - actor_role
     permitted_output_semantics:
     - Obligation
     - LoadCase
@@ -135,35 +126,26 @@ stages:
       justified_by_question: What bodies and rigid groups exist?
       why: A topology synthesised without knowing what must be transmitted is invented rather
         than derived.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - PhysicalEffectObligation
+      requires_semantics:
+      - physical_effect_obligation
     - class: load_case
       what: the candidate-independent load cases
       justified_by_question: What joins what, of what type, leaving which DOF?
       why: They determine which connections must carry force.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - LoadCase
+      requires_semantics:
+      - load_case
     - class: candidate_principle
       what: the candidate's principle assignment and its claim dependencies
       justified_by_question: What bodies and rigid groups exist?
       why: The principle constrains which topologies are even admissible.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Candidate
+      requires_semantics:
+      - candidate
     - class: topology_constraining_quantity
       what: quantities that bound counts, ranges and travel
       justified_by_question: Which sites must be distinct for a mechanical relationship to exist?
       why: Required distinctness follows from what the mechanism must achieve.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Requirement
-        - Parameter
+      requires_semantics:
+      - quantity_constraint
     permitted_output_semantics:
     - Body
     - RigidGroup
@@ -190,48 +172,35 @@ stages:
       what: the full s03a topology
       justified_by_question: What realizes each required effect?
       why: An interaction names the groups it acts between.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Body
-        - RigidGroup
-        - Joint
-        - Interface
-        - Configuration
+      requires_semantics:
+      - topology_element
+      - topology_relation
     - class: load_case
       what: load cases and their reaction-site requirements
       justified_by_question: How does each load reach an external site?
       why: A path has no terminus without a declared site.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - LoadCase
+      requires_semantics:
+      - load_case
     - class: physical_effect_obligation
       what: the effects to discharge
       justified_by_question: What realizes each required effect?
       why: Discharge is only checkable against the obligation it discharges.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - PhysicalEffectObligation
+      requires_semantics:
+      - physical_effect_obligation
     - class: retention_obligation
       what: disturbance and retention obligations
       justified_by_question: What holds each body where it is put, against what, in which configurations,
         and how would a test defeat it?
       why: A constraint with no driver is unmotivated and untestable.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Obligation
+      requires_semantics:
+      - physical_obligation
     - class: configuration_basis
       what: what distinguishes each configuration
       justified_by_question: What holds each body where it is put, against what, in which configurations,
         and how would a test defeat it?
       why: A constraint's configuration set is meaningless without them.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Configuration
+      requires_semantics:
+      - configuration_state
     permitted_output_semantics:
     - PhysicalInteraction
     - ConstraintRelation
@@ -255,49 +224,36 @@ stages:
       what: the full topology and its interactions
       justified_by_question: Can this candidate fit at all?
       why: Extents attach to bodies and their connections.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Body
-        - RigidGroup
-        - Joint
-        - Interface
-        - PhysicalInteraction
+      requires_semantics:
+      - topology_element
+      - topology_relation
+      - physical_interaction
     - class: extent_bounding_quantity
       what: quantities bounding extent, travel and clearance
       justified_by_question: Can this candidate fit at all?
       why: A scale-dependent judgement without the scale is not a judgement.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Requirement
-        - Parameter
+      requires_semantics:
+      - quantity_constraint
     - class: reach_requirement
       what: actors and their reach targets
       justified_by_question: Can each actor reach what it must?
       why: Reach cannot be evaluated without a target.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Actor
-        - FunctionalRegion
+      requires_semantics:
+      - actor_role
+      - functional_region
     - class: region_and_envelope_constraint
       what: declared regions and envelope constraints
       justified_by_question: Can this candidate fit at all?
       why: Fit is relative to a declared allowance.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - FunctionalRegion
-        - Envelope
+      requires_semantics:
+      - functional_region
+      - spatial_commitment
     - class: assembly_order_constraint
       what: assembly order and access constraints
       justified_by_question: Can it be assembled?
       why: Assemblability is an ordering property, not only a geometric one.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - AssemblyStep
+      requires_semantics:
+      - assembly_order
     permitted_output_semantics:
     - Envelope
     - FunctionalRegion.volume
@@ -321,29 +277,22 @@ stages:
       justified_by_question: Do all retained candidates carry evidence at equal obligation coverage
         and equal maturity?
       why: Unequal coverage is the finding, and it cannot be seen without all of it.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Envelope
-        - ReachResult
-        - EliminationRecord
-        - ReferenceScale
+      requires_semantics:
+      - spatial_commitment
+      - reach_evidence
+      - elimination_evidence
     - class: evidence_route_verdict
       what: each candidate's evidence-route verdict
       justified_by_question: On what recorded ground does one win?
       why: Choosing partly because a claim can be evidenced is legitimate and must be recorded.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Candidate
+      requires_semantics:
+      - candidate
     - class: unresolved_blocking_scope
       what: all unresolved items and what each blocks
       justified_by_question: Does any unresolved item block selection?
       why: Blocking is defined by what the gate requires.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - UnresolvedDecision
+      requires_semantics:
+      - open_item
     permitted_output_semantics:
     - SelectionDecision
     - UnresolvedDecision
@@ -364,65 +313,47 @@ stages:
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: A placement that does not extend the arrangement it was told to work in is a fresh
         guess. This is the premise the audited pipeline omitted in every case.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Envelope
-        - FunctionalRegion
-        - AssemblyStep
-        - ReferenceScale
+      requires_semantics:
+      - spatial_commitment
     - class: topology_with_axes
       what: the full topology including axes and link relationships
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: An origin without an axis supports no incidence claim.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Joint
-        - RigidGroup
-        - Body
+      requires_semantics:
+      - topology_element
+      - topology_relation
+      - kinematic_axis
     - class: required_distinctness
       what: declared required-distinctness
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: Realization must be checkable against the premise that two sites must differ.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Joint
+      requires_semantics:
+      - topology_relation
     - class: configuration_basis
       what: each configuration's distinguishing basis
       justified_by_question: What coordinate values realize each configuration?
       why: Otherwise a name is the only thing distinguishing two states.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Configuration
+      requires_semantics:
+      - configuration_state
     - class: constraint_relation
       what: constraint relations and the interactions maintaining them
       justified_by_question: Which coordinates change in each transition, and along what path?
       why: A release must alter what maintains it.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - ConstraintRelation
-        - PhysicalInteraction
+      requires_semantics:
+      - constraint_relation
+      - physical_interaction
     - class: travel_bounding_quantity
       what: quantities bounding travel and clearance
       justified_by_question: Which coordinates change in each transition, and along what path?
       why: Motion extent is a quantity.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - Requirement
-        - Parameter
+      requires_semantics:
+      - quantity_constraint
     - class: selection_decision
       what: the selection decision
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: s04b realizes the selected candidate, not an arbitrary one.
-      satisfied_by:
-        kind: canonical_families
-        families:
-        - SelectionDecision
+      requires_semantics:
+      - selection_decision
     permitted_output_semantics:
     - Joint.frame_origin
     - State
@@ -430,21 +361,40 @@ stages:
     - SweptVolume
     prohibited_decisions:
     - Contradicting an s04a commitment without an explicit supersession
-premise_binding_rule: 'Every required_reasoning_premise_class declares `satisfied_by`, a machine-readable
+premise_binding_rule: 'Every required_reasoning_premise_class declares `requires_semantics`: the
+  SEMANTIC
 
-  selector naming the canonical families whose instances satisfy it. This is what lets
-
-  S-3 retrieve premise instances generically: the stage-specific engineering judgement
-
-  lives HERE, in the contract, and the derivation code stays generic. A prose class name
-
-  alone would force S-3 to guess which families qualify, which is a hand-written
-
-  stage-pair whitelist wearing a different hat.
+  ROLES an upstream entity must carry to satisfy it. It never names families.
 
 
-  A binding names FAMILIES, never a stage. It is not a projection of ownership and does
+  This replaces the `satisfied_by.canonical_families` binding introduced at 6ef6dac.
 
-  not imply the consuming stage may create them.
+  That binding was machine-readable and still wrong: it made a stage contract hold an
+
+  inventory of the current ontology, so a new family could satisfy a premise and be
+
+  invisible until someone edited every stage that needed it. The implementation plan
+
+  records exactly that failure mode as R-2, whose own falsifier is ''premise declarations
+
+  start naming families directly''.
+
+
+  The division of labour: DESIGN_STATE_CONTRACT says what a family IS (semantic_roles);
+
+  this file says what a stage NEEDS (requires_semantics); a generic resolver matches
+
+  them. A new family participates by declaring its own roles - no stage contract and no
+
+  resolver code changes.
+
+
+  A premise requiring ONE role is not a special case and gets no separate mechanism: it
+
+  is simply a premise whose semantics happen to be carried by one family today. If a
+
+  second family later declares that role, the premise picks it up automatically - which
+
+  is precisely what a 1:1 family binding would have prevented.
 
   '
