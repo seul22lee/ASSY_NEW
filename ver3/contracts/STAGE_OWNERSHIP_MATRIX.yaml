@@ -27,6 +27,25 @@ references:
 #    a stage that emits a CREATE for a family it does not own is a SCHEMA_FAILURE
 #    at patch validation, not a warning.
 # =====================================================================
+# ---------------------------------------------------------------- U-2B (S-2)
+# This file is a PROJECTION of DESIGN_STATE_CONTRACT, not an authority.
+# See CONTRACT_AUTHORITY.yaml. `owns` must equal the set of families whose
+# owned_by is this stage; `extends` must equal the stages named in some family's
+# extendable_fields. Both are checked structurally - before S-2 three files
+# disagreed about ownership and all three looked authoritative.
+projection_of: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+projection_rule: >
+  OWNER means who is responsible for authoritative creation and meaning.
+  EXTENDER means which later stage may add one specifically declared field.
+  Extending is NOT shared ownership: an extender adds a named field and never
+  acquires the family. Before S-2 the two vocabularies disagreed for 16 stage
+  and family pairs, because `extends` was a free-text aspiration with no
+  field-level declaration behind it.
+extension_rule_v2: >
+  A stage may appear in `extends` for a family only if that family declares a
+  field extendable by that stage. An extension with no field is not an
+  extension; it is an undeclared claim on someone else's family.
+
 stages:
 
   s01:
@@ -40,7 +59,8 @@ stages:
       source text. Every later stage reads DesignState. A later stage that
       re-reads the request is re-interpreting it, and two interpretations of one
       sentence is exactly the failure this forbids.
-    owns: [Requirement, SourceClause, Freedom, Ambiguity, Scenario, Actor]
+    owns: [Actor, Ambiguity, Freedom, Requirement, Scenario, SourceClause]
+
     extends: []
     may_not:
       - "Invent a requirement the source does not state. That is an Assumption."
@@ -52,8 +72,9 @@ stages:
     role: >
       Derive what must physically be true (Obligations) and form the candidate
       mechanism families that could make it true. Candidates persist as branches.
-    owns: [Obligation, Candidate, AcceptanceContract, LoadCase]
-    extends: [Requirement]
+    owns: [AcceptanceContract, Candidate, LoadCase, Obligation, PhysicalEffectObligation]
+
+    extends: []
     may_not:
       - "Select a winner. There is no selected-candidate field (INV-007, R-15)."
       - "Penalise a candidate for element count or for needing realization."
@@ -64,8 +85,9 @@ stages:
     role: >
       Establish the bodies, the joints between them, the interfaces where they
       meet, and the configurations the assembly can be in.
-    owns: [Body, RigidGroup, Joint, Interface, Configuration, MobilityExpectation, LoadPath, FunctionalRegion, AssemblyStep]
-    extends: [Candidate, Obligation]
+    owns: [AssemblyStep, Body, Configuration, ConstraintRelation, FunctionalRegion, Interface, Joint, LoadPath, MobilityExpectation, PhysicalInteraction, RigidGroup]
+
+    extends: []
     may_not:
       - "Use a qualitative region as a position (R-02, R-03, R-04)."
       - "Leave a body-pair meeting region unclassified (interaction_kind is mandatory)."
@@ -89,9 +111,9 @@ stages:
     # U-2A (S-1): the last three are s04a engineering conclusions that were
     # held as bare attributes on the state object, with no owner, no identity
     # and no provenance.
-    owns: [State, Transition, Witness, Envelope, SweptVolume, SelectionDecision,
-           ReachResult, EliminationRecord, ReferenceScale]
-    extends: [Joint, Body, Configuration]
+    owns: [EliminationRecord, Envelope, ReachResult, ReferenceScale, SelectionDecision, State, SweptVolume, Transition, Witness]
+
+    extends: [AssemblyStep, FunctionalRegion, Joint]
     may_not:
       - "Treat a rendered sheet as the authoritative artifact (R-01, INV-005)."
       - "Substitute a constant offset for a motion model (R-07)."
@@ -102,8 +124,9 @@ stages:
     role: >
       Attach the features that make interactions real, bind them into
       Realizations that discharge Obligations, and emit the construction program.
-    owns: [Feature, Realization, Parameter, Constraint, ConstructionStatement]
-    extends: [Body, Joint, Interface, Obligation]
+    owns: [Constraint, ConstructionStatement, Feature, Parameter, Realization]
+
+    extends: []
     may_not:
       - "Create a Body or Joint. It extends s03's (INV-001, R-19)."
       - "Discharge an obligation with a label, a field or a relationship (INV-008)."
@@ -117,7 +140,8 @@ stages:
       with s04b. See ver3/contracts/stages/S06_CONTRACT.yaml convergence_block.
     role: "Solve the constraint system for the parameters, or report why it cannot."
     owns: []
-    extends: [Parameter, Constraint]
+
+    extends: []
     may_not:
       - "Default a missing unit. FP-01 exists for this line (R-21, INV-004)."
       - "Report `feasible` for an underdetermined system."
@@ -129,7 +153,8 @@ stages:
       Compile the ConstructionProgram into actual geometry and sign it. Receives
       ONLY the program and the resolved parameters (INV-006).
     owns: [GeometrySignature]
-    extends: [Body, Feature]
+
+    extends: []
     may_not:
       - "Consult the source request, the Requirements or the Candidates."
       - "Repair an uncompilable statement. It fails, citing the statement (INV-006)."
@@ -140,8 +165,9 @@ stages:
     role: >
       Plan how each requirement will be checked, at what fidelity, in which
       scenario, on which observable — and design the negative controls.
-    owns: [VerificationPlanItem, NegativeControl]
-    extends: [Requirement, Obligation]
+    owns: [NegativeControl, VerificationPlanItem]
+
+    extends: []
     may_not:
       - "Plan a check whose fidelity cannot support the requirement's claim."
       - "Emit a control that cannot fail (INV-013)."
@@ -150,8 +176,9 @@ stages:
   s09:
     name: evidence_execution
     role: "Execute the plan, record what was measured, and run the controls."
-    owns: [EvidenceItem, Witness, NegativeControl]
-    extends: [VerificationPlanItem]
+    owns: [EvidenceItem, NegativeControl, Witness]
+
+    extends: []
     may_not:
       - "Report an outcome without declaring fidelity and contact resolution."
       - "Assert that a control was detected. Detection is MEASURED."
@@ -163,7 +190,8 @@ stages:
       Reconcile evidence across plan items: fidelity coverage, scope gaps,
       control adequacy, and contradictions between two pieces of evidence.
     owns: []
-    extends: [EvidenceItem, NegativeControl, VerificationPlanItem]
+
+    extends: []
     may_not:
       - "Average, outvote or otherwise merge contradictory evidence into agreement."
       - "Upgrade a proxy-fidelity result to the fidelity the requirement needs."
@@ -171,8 +199,9 @@ stages:
   s11:
     name: requirement_evaluation
     role: "Judge each requirement against the consolidated evidence, with scope."
-    owns: [RequirementEvaluation, ExcludedClaim]
-    extends: [Requirement]
+    owns: [ExcludedClaim, RequirementEvaluation]
+
+    extends: []
     may_not:
       - "Emit PASS without a complete six-field scope block (INV-009)."
       - "Leave a mandatory obligation without a terminal status (INV-008)."
@@ -184,7 +213,8 @@ stages:
       Route each failure to the decision and stage that own it, compute the
       invalidation cone, and propose the revision patch. Carry human questions out.
     owns: [FailureProvenance, HumanReviewQuestion]
-    extends: [RequirementEvaluation, UnresolvedDecision]
+
+    extends: []
     may_not:
       - "Attribute a failure to the last stage that touched the artifact by default."
       - "Approve the design. Human questions leave the pipeline PENDING."

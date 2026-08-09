@@ -254,7 +254,12 @@ class S02ObligationAndCandidates(Stage):
             ops.append(Op("CREATE", "Candidate", c["id"], {
                 "summary": c["summary"], "family": c["family"],
                 "principle": c["principle"],
-                "obligations_addressed": c.get("obligations_addressed", []),
+                # U-2B (S-2): stored under the canonical name. The PROMPT and the
+                # model's response key are unchanged - this maps the answer to the
+                # one canonical field, it does not ask a different question. s03
+                # already used the canonical name; s02 and the contract were the
+                # outliers. Prompt alignment is S-4.
+                "addresses_obligations": c.get("obligations_addressed", []),
                 "obligations_created": c.get("obligations_created", []),
                 "evidence_route_verdict": c["evidence_route_verdict"],
                 "self_locking": c.get("self_locking")}, prov))
@@ -475,7 +480,9 @@ def candidate_coverage_check(state) -> List[str]:
     """
     addressed = set()
     for c in state.family("Candidate"):
-        addressed.update(c.get("obligations_addressed") or [])
+        # U-2B (S-2): reads the canonical stored name. Mechanical rename only -
+        # the check asks the same question of the same values.
+        addressed.update(c.get("addresses_obligations") or [])
     return ["DISCRIMINATING_OBLIGATION_UNADDRESSED: %s" % o["entity_id"]
             for o in state.family("Obligation")
             if o.get("scope") == "CANDIDATE_DISCRIMINATING"

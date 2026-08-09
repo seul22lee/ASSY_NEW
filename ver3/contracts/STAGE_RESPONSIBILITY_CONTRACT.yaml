@@ -1,0 +1,297 @@
+# STAGE_RESPONSIBILITY_CONTRACT - what each stage is for, and what it must be given
+#
+# U-2B (S-2). Source of truth for stage responsibility and the reasoning-premise
+# half of Consumer Sufficiency. NO PROMPT TEXT. No benchmark entities.
+
+schema_version: 0.1.0
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+purpose: 'SOURCE OF TRUTH for stage responsibility, engineering questions, and the
+
+  REASONING-PREMISE half of Consumer Sufficiency (freeze §4 source B).
+
+  Added by U-2B/S-2 as the substrate S-3 will consume.
+
+  '
+why_not_a_whitelist: 'A premise class is declared as a SEMANTIC CLASS and must cite the engineering
+
+  question that makes the stage need it. That is what stops S-3''s Consumer
+
+  Sufficiency from becoming another hand-written family list: a class with no
+
+  question behind it is a defect, and a question that plainly depends on
+
+  upstream evidence with no class behind it is also a defect. Both are checked.
+
+  '
+not_the_other_half: 'Representational dependencies - what a value needs to MEAN something - are
+
+  declared per field in DESIGN_STATE_CONTRACT.field_semantics. The two sources
+
+  are deliberately separate constructs and neither implies the other. S-3
+
+  unions them; S-2 must not, and does not.
+
+  '
+s2_scope_note: 'DECLARATION ONLY. No required-minimum derivation, no view construction, no
+
+  sufficiency assessment and no ConsumerView artifact exists yet - those are
+
+  S-3/U-3. S03_OWNED is untouched.
+
+  '
+stages:
+  s01:
+    name: problem interpretation
+    responsibility: Convert a request into typed statements of what is required, what is free,
+      what is ambiguous, and what lies outside the product.
+    engineering_questions:
+    - What does the source oblige?
+    - What does it leave open?
+    - What is genuinely undetermined?
+    - Who acts, and what must each actor reach?
+    - Where is the system boundary in each scenario?
+    required_reasoning_premise_classes: []
+    permitted_output_semantics:
+    - Requirement
+    - Ambiguity
+    - Freedom
+    - Actor
+    - Scenario
+    - Assumption
+    - UnresolvedDecision
+    prohibited_decisions:
+    - Naming any mechanism, material or dimension
+    - Resolving an ambiguity silently
+    - Sharpening a source qualifier
+    no_premises_because: None. s01 is the only stage that may read raw source (INV-002), so it
+      has no upstream engineering evidence to require.
+  s02:
+    name: physical obligation, demand and principle
+    responsibility: Establish what must physically be true, what the world does to the product,
+      and which principle families could serve.
+    engineering_questions:
+    - What must hold regardless of mechanism?
+    - What physical effects must occur between which roles?
+    - What loads act, and where may each be reacted?
+    - Which principle families could serve, and which of their claims can this toolchain evidence?
+    required_reasoning_premise_classes:
+    - class: requirement_set
+      what: the FULL requirement set
+      justified_by_question: What must hold regardless of mechanism?
+      why: An obligation set derived from part of the requirements is unsound; coverage cannot
+        be read from a subset.
+    - class: recorded_ambiguity
+      what: every recorded ambiguity
+      justified_by_question: What must hold regardless of mechanism?
+      why: An obligation resting on a silently resolved ambiguity is an unrecorded commitment.
+    - class: scenario_boundary
+      what: the system boundary declared per scenario
+      justified_by_question: What loads act, and where may each be reacted?
+      why: A reaction site cannot be typed external without a boundary that says what is outside.
+    - class: actor_and_reach_intent
+      what: actors and what they must reach
+      justified_by_question: What physical effects must occur between which roles?
+      why: An effect between roles needs the roles to exist.
+    permitted_output_semantics:
+    - Obligation
+    - LoadCase
+    - PhysicalEffectObligation
+    - Candidate
+    - AcceptanceContract
+    - UnresolvedDecision
+    prohibited_decisions:
+    - Naming a body, joint, interface, count or dimension
+    - Selecting a candidate (INV-007)
+  s03a:
+    name: mechanism topology
+    responsibility: State what things exist, what each does, and how they connect - with no magnitude,
+      position or axis placement.
+    engineering_questions:
+    - What bodies and rigid groups exist?
+    - What joins what, of what type, leaving which DOF?
+    - What configurations exist and what distinguishes them?
+    - Which sites must be distinct for a mechanical relationship to exist?
+    required_reasoning_premise_classes:
+    - class: physical_effect_obligation
+      what: what must be transmitted, at role level
+      justified_by_question: What bodies and rigid groups exist?
+      why: A topology synthesised without knowing what must be transmitted is invented rather
+        than derived.
+    - class: load_case
+      what: the candidate-independent load cases
+      justified_by_question: What joins what, of what type, leaving which DOF?
+      why: They determine which connections must carry force.
+    - class: candidate_principle
+      what: the candidate's principle assignment and its claim dependencies
+      justified_by_question: What bodies and rigid groups exist?
+      why: The principle constrains which topologies are even admissible.
+    - class: topology_constraining_quantity
+      what: quantities that bound counts, ranges and travel
+      justified_by_question: Which sites must be distinct for a mechanical relationship to exist?
+      why: Required distinctness follows from what the mechanism must achieve.
+    permitted_output_semantics:
+    - Body
+    - RigidGroup
+    - Joint
+    - Interface
+    - Configuration
+    - FunctionalRegion
+    - UnresolvedDecision
+    prohibited_decisions:
+    - Any magnitude, position or axis placement
+    - Selecting a candidate
+  s03b:
+    name: interaction and constraint
+    responsibility: State what physically transmits each required effect, what constrains what,
+      and how load reaches the world.
+    engineering_questions:
+    - What realizes each required effect?
+    - What holds each body where it is put, against what, in which configurations, and how would
+      a test defeat it?
+    - How does each load reach an external site?
+    - In what order does it assemble, and what retains each part?
+    required_reasoning_premise_classes:
+    - class: topology
+      what: the full s03a topology
+      justified_by_question: What realizes each required effect?
+      why: An interaction names the groups it acts between.
+    - class: load_case
+      what: load cases and their reaction-site requirements
+      justified_by_question: How does each load reach an external site?
+      why: A path has no terminus without a declared site.
+    - class: physical_effect_obligation
+      what: the effects to discharge
+      justified_by_question: What realizes each required effect?
+      why: Discharge is only checkable against the obligation it discharges.
+    - class: retention_obligation
+      what: disturbance and retention obligations
+      justified_by_question: What holds each body where it is put, against what, in which configurations,
+        and how would a test defeat it?
+      why: A constraint with no driver is unmotivated and untestable.
+    - class: configuration_basis
+      what: what distinguishes each configuration
+      justified_by_question: What holds each body where it is put, against what, in which configurations,
+        and how would a test defeat it?
+      why: A constraint's configuration set is meaningless without them.
+    permitted_output_semantics:
+    - PhysicalInteraction
+    - ConstraintRelation
+    - LoadPath
+    - AssemblyStep
+    - UnresolvedDecision
+    prohibited_decisions:
+    - Position, dimension or axis placement
+    - Selecting a candidate
+  s04a:
+    name: coarse spatial realization and comparability
+    responsibility: Give each retained candidate a provisional arrangement sufficient to decide
+      fit, reach and assemblability, and to make candidates comparable.
+    engineering_questions:
+    - Can this candidate fit at all?
+    - Can each actor reach what it must?
+    - Can it be assembled?
+    - On what geometric ground would it be eliminated?
+    required_reasoning_premise_classes:
+    - class: topology_and_interaction
+      what: the full topology and its interactions
+      justified_by_question: Can this candidate fit at all?
+      why: Extents attach to bodies and their connections.
+    - class: extent_bounding_quantity
+      what: quantities bounding extent, travel and clearance
+      justified_by_question: Can this candidate fit at all?
+      why: A scale-dependent judgement without the scale is not a judgement.
+    - class: reach_requirement
+      what: actors and their reach targets
+      justified_by_question: Can each actor reach what it must?
+      why: Reach cannot be evaluated without a target.
+    - class: region_and_envelope_constraint
+      what: declared regions and envelope constraints
+      justified_by_question: Can this candidate fit at all?
+      why: Fit is relative to a declared allowance.
+    - class: assembly_order_constraint
+      what: assembly order and access constraints
+      justified_by_question: Can it be assembled?
+      why: Assemblability is an ordering property, not only a geometric one.
+    permitted_output_semantics:
+    - Envelope
+    - FunctionalRegion.volume
+    - AssemblyStep.insertion_direction
+    - ReachResult
+    - EliminationRecord
+    - ReferenceScale
+    prohibited_decisions:
+    - Selecting a candidate
+    - Any authoritative dimension
+  gate:
+    name: selection gate
+    responsibility: Commit to one candidate, or record that the candidates remain indistinguishable.
+    engineering_questions:
+    - Do all retained candidates carry evidence at equal obligation coverage and equal maturity?
+    - Does any unresolved item block selection?
+    - On what recorded ground does one win?
+    required_reasoning_premise_classes:
+    - class: candidate_spatial_evidence
+      what: every retained candidate's s04a evidence
+      justified_by_question: Do all retained candidates carry evidence at equal obligation coverage
+        and equal maturity?
+      why: Unequal coverage is the finding, and it cannot be seen without all of it.
+    - class: evidence_route_verdict
+      what: each candidate's evidence-route verdict
+      justified_by_question: On what recorded ground does one win?
+      why: Choosing partly because a claim can be evidenced is legitimate and must be recorded.
+    - class: unresolved_blocking_scope
+      what: all unresolved items and what each blocks
+      justified_by_question: Does any unresolved item block selection?
+      why: Blocking is defined by what the gate requires.
+    permitted_output_semantics:
+    - SelectionDecision
+    - UnresolvedDecision
+    prohibited_decisions:
+    - Breaking a tie silently
+    - Authoring the verdict on its own preconditions
+  s04b:
+    name: committed spatial and kinematic realization
+    responsibility: Place the selected mechanism and describe its motion so that clearance, incidence
+      and distinctness can be computed.
+    engineering_questions:
+    - Where is each joint, in which frame, and on which axis?
+    - What coordinate values realize each configuration?
+    - Which coordinates change in each transition, and along what path?
+    required_reasoning_premise_classes:
+    - class: prior_spatial_commitment
+      what: the selected candidate's s04a arrangement and its commitment classes
+      justified_by_question: Where is each joint, in which frame, and on which axis?
+      why: A placement that does not extend the arrangement it was told to work in is a fresh
+        guess. This is the premise the audited pipeline omitted in every case.
+    - class: topology_with_axes
+      what: the full topology including axes and link relationships
+      justified_by_question: Where is each joint, in which frame, and on which axis?
+      why: An origin without an axis supports no incidence claim.
+    - class: required_distinctness
+      what: declared required-distinctness
+      justified_by_question: Where is each joint, in which frame, and on which axis?
+      why: Realization must be checkable against the premise that two sites must differ.
+    - class: configuration_basis
+      what: each configuration's distinguishing basis
+      justified_by_question: What coordinate values realize each configuration?
+      why: Otherwise a name is the only thing distinguishing two states.
+    - class: constraint_relation
+      what: constraint relations and the interactions maintaining them
+      justified_by_question: Which coordinates change in each transition, and along what path?
+      why: A release must alter what maintains it.
+    - class: travel_bounding_quantity
+      what: quantities bounding travel and clearance
+      justified_by_question: Which coordinates change in each transition, and along what path?
+      why: Motion extent is a quantity.
+    - class: selection_decision
+      what: the selection decision
+      justified_by_question: Where is each joint, in which frame, and on which axis?
+      why: s04b realizes the selected candidate, not an arbitrary one.
+    permitted_output_semantics:
+    - Joint.frame_origin
+    - State
+    - Transition
+    - SweptVolume
+    prohibited_decisions:
+    - Contradicting an s04a commitment without an explicit supersession

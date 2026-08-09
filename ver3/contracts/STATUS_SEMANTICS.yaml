@@ -23,6 +23,76 @@ governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
 #    provider was rate-limited, and this separation is the whole point of having
 #    a distinct vocabulary for it.
 # =====================================================================
+# ---------------------------------------------------------------- U-2B (S-2)
+# The four status constructs, separated. Freeze §8.
+#
+# Before S-2 one badge mixed them: a stage that executed and filled a schema
+# could read as engineering quality, and the maturity construct had no term for
+# the stages where the physical defects occurred. Separating the constructs is
+# what makes "executed" stop implying "established".
+#
+# DECLARATION ONLY. Dashboard aggregation, quality_profile behaviour, evaluator
+# claims and engineering-establishment computation are S-8 / U-9. Tools still
+# using a legacy shape are recorded below as downstream debt, not aliased.
+status_constructs:
+  EXECUTION:
+    asserts: "the model returned, the response parsed, the schema validated"
+    does_not_assert: "anything about the design"
+    vocabulary_source: execution_statuses
+    scope: "one stage attempt"
+  CONTRACT_COMPLETENESS:
+    asserts: "every required output is present and typed"
+    does_not_assert: "that any value is correct"
+    vocabulary: [COMPLETE, INCOMPLETE]
+    scope: "one stage attempt"
+  EVIDENCE_MATURITY:
+    asserts: "the class of evidence behind ONE VALUE"
+    does_not_assert: "that the value is right"
+    vocabulary: [SYMBOLIC, PROVISIONAL, AUTHORITATIVE, FROZEN]
+    scope: "a value, never a stage"
+  ENGINEERING_ESTABLISHMENT:
+    asserts: "an independent check of sufficient independence found ONE PROPERTY to hold"
+    does_not_assert: "that the design is good"
+    vocabulary: [ENGINEERING_ESTABLISHED, NOT_ESTABLISHED, NOT_VERIFIED,
+                 EVIDENCE_INCOMPLETE]
+    note_on_provisional: >
+      PROVISIONAL belongs to EVIDENCE_MATURITY and is deliberately NOT repeated
+      here. A property may be NOT_ESTABLISHED while the value it concerns sits at
+      PROVISIONAL maturity - two constructs describing two things. Repeating the
+      term would be exactly the collapse this section exists to prevent.
+    scope: "a property, never a stage and never a value"
+    only_from: >
+      An ENGINEERING CONSEQUENCE check - two independently authored premises
+      checked against each other. A BOOKKEEPING, FIDELITY or PROVENANCE
+      INTEGRITY result may never raise a property to ENGINEERING_ESTABLISHED.
+
+status_construct_rules:
+  - "A term belongs to exactly one construct. No term may mean two."
+  - "No aggregate may combine terms from different constructs into one value."
+  - "Execution success never implies contract completeness."
+  - "Contract completeness never implies evidence maturity."
+  - "Evidence maturity is a property of a value and never implies establishment."
+  - "NOT_ESTABLISHED is a legitimate permanent state, not a failure."
+  - "Establishment is never inherited - not from a sibling, a stage, a patch or a badge."
+
+status_construct_debt:
+  note: >
+    Recorded, not aliased. Creating a compatibility term would make the canonical
+    vocabulary ambiguous again, which is the defect being removed.
+  rows:
+    - consumer: tools/build_pipeline_dashboard.py
+      current: "maps execution status to one badge and downgrades OK to WARN on any finding"
+      collapses: [EXECUTION, ENGINEERING_ESTABLISHMENT]
+      migration_step: "S-8 / U-9"
+    - consumer: tools/quality_profile.py
+      current: "32 maturity metrics, all s01/s02"
+      collapses: [CONTRACT_COMPLETENESS, EVIDENCE_MATURITY]
+      migration_step: "S-8 / U-9"
+    - consumer: tools/compare_maturity.py
+      current: "compares profiles built from the above"
+      collapses: [EVIDENCE_MATURITY, ENGINEERING_ESTABLISHMENT]
+      migration_step: "S-8 / U-9"
+
 execution_statuses:
 
   SUCCESS:

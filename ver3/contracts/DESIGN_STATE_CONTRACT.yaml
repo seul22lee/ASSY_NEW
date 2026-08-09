@@ -88,6 +88,62 @@ authority_model:
     validity is STANDING becomes STALE. The dependent is never deleted and never
     silently remains unqualifiedly authoritative.
 
+# ---------------------------------------------------------------- U-2B (S-2)
+# Field-level canonical semantics. DESIGN_STATE_CONTRACT is the SOURCE OF TRUTH
+# for entity semantics (see CONTRACT_AUTHORITY.yaml); every other file that
+# mentions a family is a checked projection of this one.
+#
+# Declared per field ONLY where the field carries semantics a reader cannot
+# infer: a reference, a spatial value, or an authority class that differs from
+# the family's. Ordinary scalar fields inherit the family's class and need no
+# entry - this is deliberate, so adding a family does not mean writing a
+# paragraph per field (implementation plan R-1, contract sprawl).
+# U-2B (S-2): two families outside the S01-S04 migration declare more than one
+# owner. That is a real ownership contradiction, and it is recorded rather than
+# silently accepted: a family with several owners has no single stage answerable
+# for its meaning. They are out of scope here because nothing in S01-S04 creates
+# or consumes them; resolving them belongs to whichever step brings s08/s09 into
+# scope. Any NEW multi-owner declaration is a defect.
+multi_owner_exceptions:
+  rule: >
+    A family may declare several owners only with an entry here, a reason, and a
+    step at which it is resolved. Absent an entry, one owner is required.
+  rows:
+    - family: Witness
+      owners: [s04, s09]
+      why: "s04 produces motion witnesses; s09 produces verification witnesses. Two different artifacts under one name."
+      resolution_step: "the step that brings s09 into scope; out of S01-S04"
+    - family: NegativeControl
+      owners: [s08, s09]
+      why: "declared jointly by two stages outside this migration"
+      resolution_step: "the step that brings s08/s09 into scope; out of S01-S04"
+
+field_semantics_rules:
+  reference: >
+    A field whose value identifies another entity. It MUST declare `target`
+    (the family it resolves to) and `cardinality`. `resolvable` says whether an
+    unresolved value is legal; the default is false, so a dangling reference is
+    a defect rather than a style. Before S-2 there was no declaration at all and
+    integrity was guessed from a key-name suffix plus an is-upper-case heuristic.
+  spatial: >
+    A coordinate, axis, extent, offset, path or transform. It MUST declare
+    `frame`: the entity or declaration that establishes what the numbers are
+    measured in. A spatial value with no frame is representation-incomplete -
+    the numbers have no meaning, and two stages can disagree without either
+    being detectably wrong.
+  authority_class: >
+    Overrides the family's class for one field. Used where a family carries both
+    authored engineering conclusions and derived bookkeeping.
+  semantic_dependency: >
+    What must exist for this value to have traceable meaning. This is the
+    REPRESENTATIONAL half of Consumer Sufficiency (freeze §4 source A). It is
+    NOT the reasoning-premise half, which belongs to stage responsibility and
+    lives in STAGE_RESPONSIBILITY_CONTRACT.yaml. The two are kept apart
+    deliberately; S-3 unions them, S-2 must not.
+  enum: >
+    A closed vocabulary. Declared so a reference check does not mistake an
+    enum member for an entity id.
+
 entity_families:
 
   Requirement:
@@ -100,6 +156,17 @@ entity_families:
       - "This is the ONLY family whose creation may consult raw source text (INV-002)."
 
   Obligation:
+    field_semantics:
+      derived_from_requirements:
+        kind: reference
+        target: Requirement
+        cardinality: many
+        resolvable: false
+      involves_actors:
+        kind: reference
+        target: Actor
+        cardinality: many
+        resolvable: false
     owned_by: s02
     purpose: "A physical or functional thing that must be true for a requirement to hold."
     required_fields: [entity_id, statement, derived_from_requirements, mandatory, scope, satisfiable_at, evidence_route, route_available]
@@ -133,9 +200,40 @@ entity_families:
         run of the first s01+s02 revision.
 
   Candidate:
+    field_semantics:
+      addresses_obligations:
+        kind: reference
+        target: Obligation
+        cardinality: many
+        resolvable: false
+      obligations_created:
+        kind: reference
+        target: Obligation
+        cardinality: many
+        resolvable: false
     owned_by: s02
     purpose: "A mechanism family or arrangement under consideration."
-    required_fields: [entity_id, summary, family, principle, obligations_addressed, obligations_created, evidence_route_verdict]
+    # U-2B (S-2): `addresses_obligations` is the one canonical name and meaning
+    # for "the upstream obligations this entity was authored to discharge".
+    # Previously the same concept appeared as obligations_addressed (contract),
+    # addresses_obligations (prompts) and discharges_obligations (Realization).
+    required_fields: [entity_id, summary, family, principle, addresses_obligations, obligations_created, evidence_route_verdict]
+    # U-2B (S-2): ONE canonical shape. The contract previously declared no shape
+    # at all, and three incompatible ones lived in prompts and fixtures - a bare
+    # string, parallel arrays, and a mapping. A candidate performs several
+    # function classes, so only a mapping can say which principle serves which;
+    # a single-principle candidate is a one-entry map.
+    principle_shape:
+      kind: mapping
+      key: function_class
+      value: principle_family
+      cardinality: "one principle_family per function_class; at least one entry"
+      single_principle_form: "a one-entry mapping, never a bare string"
+      rejected_shapes: ["bare string", "parallel arrays of function classes and principle families"]
+      no_compatibility_shim: >
+        No parser may accept a rejected shape. Producers and fixtures still
+        emitting one are LEGACY (see legacy_producers) and migrate at their
+        scheduled step rather than being accommodated here.
     optional_fields: [self_locking]
     rules:
       - "Candidates PERSIST as branches. Stage 02 has NO selected-candidate field (INV-007)."
@@ -161,6 +259,29 @@ entity_families:
       - "A generic block is not an embodiment (R-09)."
 
   Joint:
+    field_semantics:
+      parent_group:
+        kind: reference
+        target: RigidGroup
+        cardinality: one
+        resolvable: false
+      child_group:
+        kind: reference
+        target: RigidGroup
+        cardinality: one
+        resolvable: false
+      joint_type:
+        kind: enum
+      axis_direction:
+        kind: spatial
+        frame: ReferenceScale
+      frame_ids:
+        kind: spatial
+        frame: SELF_DECLARING
+        note: this field IS the frame declaration other spatial values cite
+      frame_origin:
+        kind: spatial
+        frame: ReferenceScale
     # U-2A (S-1): frame_origin is the field the implementation actually writes
     # and reads. fields_owned_by_s04b names `located_frame`, which no code
     # produces or consumes - that divergence is recorded and DEFERRED TO U-2B.
@@ -171,6 +292,8 @@ entity_families:
     extendable_by: [s04, s05, s06]
     purpose: "A kinematic relation between two rigid groups."
     required_fields: [entity_id, joint_type, parent_group, child_group, dof, axis_direction, frame_ids]
+    # U-2B (S-2): declared as a field, not only as an extension target.
+    optional_fields: [frame_origin]
     fields_owned_by_s04b: [located_frame]
     rules:
       - "A joint_type label alone is inert. A realization on each side is required (INV-008)."
@@ -197,6 +320,12 @@ entity_families:
         - "An ExcludedClaim for strain is GENERATED from allowable_travel's status, never authored."
 
   Interface:
+    field_semantics:
+      bodies:
+        kind: reference
+        target: Body
+        cardinality: many
+        resolvable: false
     owned_by: s03
     extendable_by: [s04, s05]
     fields_owned_by_s04b: [engagement_site]
@@ -213,6 +342,14 @@ entity_families:
       - "Every region where two bodies meet is classified. An unclassified region is REPRESENTATION_INCOMPLETE."
 
   Feature:
+    field_semantics:
+      body:
+        kind: reference
+        target: Body
+        cardinality: one
+        resolvable: false
+      feature_kind:
+        kind: enum
     owned_by: s05
     purpose: "A named geometric feature on a body that participates in an interaction."
     required_fields: [entity_id, body, feature_kind, geometry]
@@ -220,14 +357,29 @@ entity_families:
       - "OCCT/CAD face indices are never a persistent identity."
 
   Realization:
+    field_semantics:
+      addresses_obligations:
+        kind: reference
+        target: Obligation
+        cardinality: many
+        resolvable: false
+      participating_features:
+        kind: reference
+        target: Feature
+        cardinality: many
+        resolvable: false
     owned_by: s05
     purpose: "The embodiment that discharges one or more obligations."
-    required_fields: [entity_id, discharges_obligations, participating_features, verification_predicate]
+    required_fields: [entity_id, addresses_obligations, participating_features, verification_predicate]
     rules:
       - "Must cite the obligation IDs it discharges (INV-008)."
       - "A realization with no verification predicate discharges nothing."
 
   State:
+    field_semantics:
+      joint_coordinates:
+        kind: spatial
+        frame: Joint.frame_origin
     owned_by: s04
     purpose: "A named configuration of the mechanism."
     required_fields: [entity_id, name, joint_coordinates]
@@ -236,6 +388,20 @@ entity_families:
       - "Joint coordinates are unit-bearing values, not ordinal intervals (R-03, R-05)."
 
   Transition:
+    field_semantics:
+      from_state:
+        kind: reference
+        target: State
+        cardinality: one
+        resolvable: false
+      to_state:
+        kind: reference
+        target: State
+        cardinality: one
+        resolvable: false
+      path:
+        kind: spatial
+        frame: ReferenceScale
     owned_by: s04
     purpose: "A path between two states."
     required_fields: [entity_id, from_state, to_state, path, sampling_declaration]
@@ -287,6 +453,12 @@ entity_families:
       - "Evidence declares its contact resolution. A declared-pair result is marked as such."
 
   RequirementEvaluation:
+    field_semantics:
+      requirement_id:
+        kind: reference
+        target: Requirement
+        cardinality: one
+        resolvable: false
     owned_by: s11
     required_fields: [entity_id, requirement_id, outcome, scope]
     rules:
@@ -294,6 +466,12 @@ entity_families:
       - "Matching is on (requirement_id, criterion_id, scenario_id, observable_id). NEVER on unit (INV-012)."
 
   RigidGroup:
+    field_semantics:
+      body:
+        kind: reference
+        target: Body
+        cardinality: one
+        resolvable: false
     owned_by: s03
     purpose: >
       A maximal rigid sub-region of a Body. A Body with exactly one group may
@@ -305,6 +483,14 @@ entity_families:
       - "Grouping independent compliant members asserts a coupling that does not physically exist."
 
   LoadCase:
+    field_semantics:
+      scenario:
+        kind: reference
+        target: Scenario
+        cardinality: one
+        resolvable: false
+      direction_class:
+        kind: enum
     owned_by: s02
     purpose: "An applied load implied by a scenario. CANDIDATE-INDEPENDENT."
     required_fields: [entity_id, scenario, applied_to_role, reacted_at_role, direction_class, kind, magnitude_or_status]
@@ -321,6 +507,17 @@ entity_families:
         uncheckable.
 
   LoadPath:
+    field_semantics:
+      load_case:
+        kind: reference
+        target: LoadCase
+        cardinality: one
+        resolvable: false
+      candidate:
+        kind: reference
+        target: Candidate
+        cardinality: one
+        resolvable: false
     owned_by: s03
     extendable_by: [s04, s06]
     purpose: "How one LoadCase reaches a reaction site through ONE candidate mechanism."
@@ -333,6 +530,25 @@ entity_families:
       - "No element acquires a reaction obligation from its type. 'Shaft -> bearing' is unreachable by construction."
 
   FunctionalRegion:
+    field_semantics:
+      owning_bodies:
+        kind: reference
+        target: Body
+        cardinality: many
+        resolvable: false
+      volume:
+        kind: spatial
+        frame: ReferenceScale
+      required_by_actors:
+        kind: reference
+        target: Actor
+        cardinality: many
+        resolvable: false
+      reach_targets:
+        kind: reference
+        target: FunctionalRegion
+        cardinality: many
+        resolvable: false
     # U-2A (S-1): the field s04a extends. Was written by a runner helper with no
     # operation and no provenance; now the only permitted path is EXTEND.
     extendable_fields:
@@ -340,6 +556,12 @@ entity_families:
     owned_by: s03
     extendable_by: [s04]
     purpose: "A volume the design promises: access, support, keep-out, aperture."
+    # U-2B (S-2): required_by_actors and reach_targets existed ONLY in s03 prompt
+    # prose. A model-output field whose sole semantic definition is a prompt has
+    # no canonical home, so nothing could check it and no consumer could rely on
+    # it. Promoted here. The prompt is NOT rewritten in S-2, and may now explain
+    # this contract instead of being it.
+    optional_fields: [volume, required_by_actors, reach_targets]
     required_fields: [entity_id, role, owning_bodies]
     authoritative_geometry_fields: [volume]
     rules:
@@ -347,6 +569,27 @@ entity_families:
       - "No Feature may intrude into a FunctionalRegion; s05 re-runs the occupancy check."
 
   AssemblyStep:
+    field_semantics:
+      body:
+        kind: reference
+        target: Body
+        cardinality: one
+        resolvable: false
+      path_kind:
+        kind: enum
+      activates:
+        kind: reference
+        target: Interface
+        cardinality: many
+        resolvable: false
+      depends_on:
+        kind: reference
+        target: AssemblyStep
+        cardinality: many
+        resolvable: false
+      insertion_direction:
+        kind: spatial
+        frame: ReferenceScale
     # U-2A (S-1): declared here for the first time. The field was written
     # directly by a runner helper and had no contract declaration at all.
     extendable_fields:
@@ -355,6 +598,8 @@ entity_families:
     extendable_by: [s04]
     purpose: "One installation operation, its order, its access side and what it activates."
     required_fields: [entity_id, order_index, body, access_side, activates, termination_strategy, path_kind, depends_on]
+    # U-2B (S-2): declared as a field, not only as an extension target.
+    optional_fields: [insertion_direction]
     termination_strategy: [LATER_BODY_COVER, ROTATION, ELASTICITY]
     path_kind: [RIGID, DEFORMATION_RESOLVED]
     rules:
@@ -373,6 +618,12 @@ entity_families:
   # that U-4 can remove the side channel. Fields mirror what s04a already emits;
   # no new semantics are introduced.
   ReachResult:
+    field_semantics:
+      actor:
+        kind: reference
+        target: Actor
+        cardinality: one
+        resolvable: false
     owned_by: s04
     authority_class: AUTHORITATIVE
     purpose: "Whether an actor can reach a target, and from which side. An engineering conclusion of s04a."
@@ -388,6 +639,12 @@ entity_families:
       - "s04a authors it from the arrangement it produced. It is a conclusion, not a measurement."
       - "Held as a bare state attribute before S-1, so no check could read it and no provenance existed."
   EliminationRecord:
+    field_semantics:
+      candidate:
+        kind: reference
+        target: Candidate
+        cardinality: one
+        resolvable: false
     owned_by: s04
     authority_class: AUTHORITATIVE
     purpose: "Whether s04a eliminated the candidate it was run on, and the geometric reason."
@@ -413,6 +670,74 @@ entity_families:
     rules:
       - "A coordinate has no meaning without the basis it is expressed in, so this is a representational premise of every s04 spatial commitment."
       - "basis RELATIVE with absolute null is a legitimate, honest value. It is not a defect and must not be defaulted to a number."
+
+  # -------------------------------------------------------------- U-2B (S-2)
+  # Canonical substrate only. No stage produces these yet: the physical-effect
+  # progression and the constraint relations dispositions will cite are S-4/U-5.
+  # What S-2 establishes is that the concepts have an identity, an owner and
+  # resolvable references, so no contract requires a family defined nowhere.
+  ConstraintRelation:
+    field_semantics:
+      retained_group: {kind: reference, target: RigidGroup, cardinality: one, resolvable: false}
+      provider_body: {kind: reference, target: Body, cardinality: one, resolvable: true}
+      provider_site: {kind: reference, target: Interface, cardinality: one, resolvable: true}
+      configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false}
+      maintaining_interaction: {kind: reference, target: PhysicalInteraction, cardinality: one, resolvable: true}
+      blocked_direction: {kind: spatial, frame: ReferenceScale}
+    owned_by: s03
+    authority_class: AUTHORITATIVE
+    addressable: true
+    purpose: >
+      What constrains a rigid group, in which direction, in which configurations,
+      provided by what, and how a test would defeat it. Replaces the
+      non-addressable blocked_by relation.
+    required_fields: [entity_id, retained_group, blocked_dofs, configurations, driver]
+    optional_fields: [blocked_direction, provider_body, provider_site,
+                      maintaining_interaction, defeat_specification, release_transition]
+    driver: [LOAD, KINEMATIC_NECESSITY, DECLARED_SCENARIO]
+    rules:
+      - "It has an id, so a mobility disposition can cite it and the citation resolves."
+      - "'Is this DOF constrained?' is answered by the relation existing; 'what constrains it?' by provider_body / provider_site / maintaining_interaction. Two questions, two answers."
+      - "A provider is a resolvable reference or the relation is incomplete. No sentinel string stands in for one."
+      - "S-2 defines it. S-4/U-5 is where s03 begins producing it."
+
+  PhysicalEffectObligation:
+    field_semantics:
+      between_roles: {kind: reference, target: Actor, cardinality: many, resolvable: true}
+      under_load_case: {kind: reference, target: LoadCase, cardinality: one, resolvable: true}
+      addresses_obligations: {kind: reference, target: Obligation, cardinality: many, resolvable: false}
+    owned_by: s02
+    authority_class: AUTHORITATIVE
+    purpose: >
+      What physical effect must occur, between which ROLES, under which load case
+      or scenario - stated without naming a mechanism. Replaces the undefined
+      PhysicalEffectObligation, which named bodies at a stage forbidden to decide them.
+    required_fields: [entity_id, effect, between_roles, addresses_obligations]
+    optional_fields: [under_load_case, persistence]
+    effect: [TRANSMIT_FORCE, TRANSMIT_MOTION, CONVERT_MOTION, PERMIT_MOTION,
+             PREVENT_MOTION, LOCATE, CONTAIN, METER]
+    persistence: [PERSISTENT, INTERMITTENT, RELEASABLE]
+    rules:
+      - "Roles, never bodies. s02 may not decide topology, and a body-level hypothesis decides it."
+      - "S-2 defines it. S-4/U-5 is where s02 begins producing it."
+
+  PhysicalInteraction:
+    field_semantics:
+      groups: {kind: reference, target: RigidGroup, cardinality: many, resolvable: false}
+      at_interface: {kind: reference, target: Interface, cardinality: one, resolvable: true}
+      configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false}
+      discharges_effect: {kind: reference, target: PhysicalEffectObligation, cardinality: one, resolvable: false}
+    owned_by: s03
+    authority_class: AUTHORITATIVE
+    purpose: >
+      What physically transmits a required effect between two rigid groups.
+      Distinct from Joint: a joint CONSTRAINS, an interaction TRANSMITS. Replaces
+      the undefined PhysicalInteraction.
+    required_fields: [entity_id, groups, effect, discharges_effect]
+    optional_fields: [at_interface, configurations]
+    rules:
+      - "Every PhysicalEffectObligation is discharged by a named interaction or is explicitly open. Checkable because the reference resolves."
+      - "S-2 defines it. S-4/U-5 is where s03 begins producing it."
 
 geometric_authority:
   rule: >
@@ -473,7 +798,18 @@ geometric_authority:
 # =====================================================================
 typed_relations:
 
+  # U-2B (S-2): `blocked_by` is RETIRED as an authoritative relation shape. It
+  # had no identity, so a disposition citing it could not be resolved, and
+  # "is this DOF constrained?" and "what constrains it?" could not be asked
+  # separately. Its semantics move to the ConstraintRelation entity family,
+  # which has an id. Retained here only as a retirement record.
   blocked_by:
+    status: RETIRED_BY_S2
+    superseded_by: ConstraintRelation
+    may_be_referenced: false
+    retirement_reason: >
+      Non-addressable. A relation the architecture treats as first-class must
+      have a resolvable id (freeze FA-12, R-10).
     created_by: s03
     subject: RigidGroup
     required_fields: [retained_group, blocked_direction, blocker_body, promised_features, configurations, defeat_specification, driver]
@@ -486,12 +822,26 @@ typed_relations:
       - "depends_on_compliant_recovery names the compliant Joint whose return to zero the retention requires."
 
   retained_by:
+    status: RETIRED_BY_S2
+    superseded_by: ConstraintRelation
+    may_be_referenced: false
+    retirement_reason: >
+      Non-addressable, exactly as blocked_by was. A relation a downstream entity
+      may cite must have a resolvable id; these had none, so the citation could
+      not be checked. Semantics move to the superseding addressable family.
     created_by: s03
     purpose: "Joint capture: neither retainer alone suffices."
     required_fields: [retained_group, retainer_groups, configuration]
     resolves: "ENTITY_FAMILY_AUDIT GAP-01"
 
   co_actuated_by:
+    status: RETIRED_BY_S2
+    superseded_by: PhysicalInteraction
+    may_be_referenced: false
+    retirement_reason: >
+      Non-addressable, exactly as blocked_by was. A relation a downstream entity
+      may cite must have a resolvable id; these had none, so the citation could
+      not be checked. Semantics move to the superseding addressable family.
     created_by: s03
     purpose: >
       Several compliant Joints moved together by one Transition. This is what a
@@ -544,6 +894,9 @@ serialization:
 assurance_families:
 
   SourceClause:
+    field_semantics:
+      directionality:
+        kind: enum
     owned_by: s01
     purpose: "A verbatim span of the source request, with its locator."
     required_fields: [entity_id, verbatim, locator, quantity_kinds, directionality]
@@ -580,6 +933,12 @@ assurance_families:
         assumption; an actor with nothing to reach is not an actor.
 
   Scenario:
+    field_semantics:
+      actors:
+        kind: reference
+        target: Actor
+        cardinality: many
+        resolvable: false
     owned_by: s01
     purpose: "A declared operating scenario with its boundary."
     required_fields: [entity_id, name, kind, system_boundary, actors, environment]
@@ -600,6 +959,17 @@ assurance_families:
       - "Failed alternatives are retained, never deleted. The package must be able to show them."
 
   AcceptanceContract:
+    field_semantics:
+      candidate:
+        kind: reference
+        target: Candidate
+        cardinality: one
+        resolvable: false
+      obligations:
+        kind: reference
+        target: Obligation
+        cardinality: many
+        resolvable: false
     owned_by: s02
     purpose: "What a specific candidate must satisfy to be judged realized."
     required_fields: [entity_id, candidate, obligations, predicates]
@@ -610,17 +980,51 @@ assurance_families:
     required_fields: [entity_id, name, bodies_present, expected_mobility]
 
   MobilityExpectation:
+    field_semantics:
+      configuration:
+        kind: reference
+        target: Configuration
+        cardinality: one
+        resolvable: false
     owned_by: s03
-    purpose: "The disposition of EVERY degree of freedom in a configuration."
+    purpose: >
+      Two different things about degrees of freedom, kept apart: which DOF cells
+      EXIST, and what is known about each.
+    # U-2B (S-2): the authorship split. Before it one field carried both, so
+    # "this cell exists" and "there is engineering evidence for this cell" were
+    # indistinguishable - which is how a deterministic enumerator could appear to
+    # have established a mobility conclusion.
+    #
+    # CONTRACT ONLY. The derivation still behaves exactly as it did; changing it
+    # is S-5 / U-6 (ADR-005).
+    authorship_split:
+      domain:
+        authority_class: DERIVED
+        authored_by: deterministic
+        meaning: "the complete set of (rigid group, configuration, DOF) cells"
+        totality: >
+          Structurally testable, and BOOKKEEPING: it is guaranteed by the
+          enumerator and may never be counted as engineering assurance.
+      disposition:
+        authority_class: AUTHORITATIVE
+        authored_by: "model, or strictly derived from an explicit sufficient premise"
+        premise_required: true
+        premise_target: ConstraintRelation
+        meaning: "what is known about one cell, and on what evidence"
+        completeness: >
+          A separate, reported engineering quantity. NOT implied by domain
+          totality, and not satisfied by it.
     required_fields: [entity_id, configuration, dispositions]
-    disposition_values: [INTENDED, BLOCKED_BY, MAINTAINED_BY_CLASS, IRRELEVANT_BECAUSE]
+    # UNDISPOSITIONED is vocabulary only at S-2; the behaviour is S-5 / U-6.
+    disposition_values: [INTENDED, BLOCKED_BY, MAINTAINED_BY_CLASS, IRRELEVANT_BECAUSE, UNDISPOSITIONED]
     rules:
       - >
         TOTALITY. dispositions is a TOTAL function: for every rigid group in the
         configuration, every rigid-body DOF maps to exactly one value. A declared
         set that omits a DOF cannot fail, and all three BM-001 human-review
         rejections plus BM-003 R2 were omissions from declared sets.
-      - "BLOCKED_BY must resolve to a blocked_by relation carrying a direction, a named blocker and a defeat specification."
+      - "BLOCKED_BY must cite an addressable ConstraintRelation by id. The former blocked_by relation had no identity, so the citation could not be resolved."
+      - "UNDISPOSITIONED is the honest value for a cell no premise covers. Vocabulary at S-2; the behaviour is S-5."
       - >
         IRRELEVANT_BECAUSE must name a scenario in which that DOF is both
         unloaded and unactuated, cross-checked against the LoadCases. This is
@@ -692,6 +1096,19 @@ assurance_families:
   # representation could not express at all. Rule 8 is satisfied by that
   # absence: an s04a that must produce an Envelope has nowhere to put one.
   Envelope:
+    field_semantics:
+      body:
+        kind: reference
+        target: Body
+        cardinality: one
+        resolvable: false
+      extent:
+        kind: spatial
+        frame: Envelope.frame
+      frame:
+        kind: spatial
+        frame: SELF_DECLARING
+        note: this field IS the frame declaration other spatial values cite
     owned_by: s04
     purpose: "A body's provisional extent. Conservative: no-overlap is a proof, overlap is not."
     required_fields: [entity_id, body, extent, frame, maturity]
@@ -700,6 +1117,17 @@ assurance_families:
       - "extent is an axis-aligned half-extent triple in the body frame."
       - "PROVISIONAL means the value follows from packaging reasoning, not from a feature."
   SweptVolume:
+    field_semantics:
+      rigid_group:
+        kind: reference
+        target: RigidGroup
+        cardinality: one
+        resolvable: false
+      transition:
+        kind: reference
+        target: Transition
+        cardinality: one
+        resolvable: false
     owned_by: s04
     purpose: "The occupancy of a moving group along a transition, at declared sampling."
     required_fields: [entity_id, rigid_group, transition, sampling_declaration, occupancy, fidelity]
@@ -707,9 +1135,58 @@ assurance_families:
       - "sampling_declaration is mandatory and non-adaptive; endpoint-only sampling is refused."
       - "fidelity records what the occupancy is made of, so a coarse hull is never read as a proof."
   SelectionDecision:
+    field_semantics:
+      selected_candidate:
+        kind: reference
+        target: Candidate
+        cardinality: one
+        resolvable: false
     owned_by: s04
     purpose: "The candidate retained at the selection gate, with the evidence that permitted it."
     required_fields: [entity_id, selected_candidate, eliminated, evidence, equal_coverage_confirmed]
     rules:
       - "May exist only after every retained candidate carries s03 and s04a evidence at equal obligation coverage (INV-007)."
       - "Never a score and never an arbitrary pick: an undiscriminated tie is an UnresolvedDecision instead."
+
+# ---------------------------------------------------------------- U-2B (S-2)
+# The canonical contract is deliberately AHEAD of several producers. Recording
+# that is the point: a contract quietly weakened to accept what the code already
+# emits would carry the audited defect forward under a new name.
+#
+# No compatibility shim exists for any row below. Each migrates at its step.
+legacy_producers:
+  rule: >
+    A row here means the canonical target is defined, the producer does not yet
+    conform, and no parser accepts the old shape as if it did. It is NOT a claim
+    of conformance.
+  rows:
+    - concept: Candidate.principle
+      canonical: "mapping function_class -> principle_family"
+      current_producers: ["s02 prompt", "Window-1 fixtures"]
+      current_status: NONCONFORMING
+      migration_step: "S-4 (prompt), S-9 (fixture regeneration)"
+    - concept: addresses_obligations
+      canonical: "one name, one meaning, reference to Obligation"
+      current_producers: ["s02 prompt uses addresses_obligations", "fixtures use obligations_addressed"]
+      current_status: NONCONFORMING
+      migration_step: "S-4, S-9"
+    - concept: ConstraintRelation
+      canonical: "addressable entity with an id"
+      current_producers: ["s03 still emits the non-addressable blocked_by shape"]
+      current_status: NONCONFORMING
+      migration_step: "S-4 / U-5"
+    - concept: PhysicalEffectObligation and PhysicalInteraction
+      canonical: "role-level effect obligation discharged by a named interaction"
+      current_producers: ["none - no stage produces these yet"]
+      current_status: NOT_YET_PRODUCED
+      migration_step: "S-4 / U-5"
+    - concept: MobilityExpectation domain and disposition split
+      canonical: "derived domain; authored disposition citing a premise; UNDISPOSITIONED where none"
+      current_producers: ["derive_mobility still emits the pre-split shape"]
+      current_status: NONCONFORMING
+      migration_step: "S-5 / U-6 (ADR-005)"
+    - concept: FunctionalRegion.required_by_actors and reach_targets
+      canonical: "declared in DESIGN_STATE_CONTRACT"
+      current_producers: ["s03 prompt still carries a prose definition"]
+      current_status: "producer emits the same field names; the prompt no longer DEFINES them"
+      migration_step: "S-4 (prompt cites the contract)"

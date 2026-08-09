@@ -1,0 +1,102 @@
+# CONTRACT_AUTHORITY - which file owns which semantic fact
+#
+# U-2B (S-2). Before this file the corpus distributed overlapping semantics
+# across DESIGN_STATE_CONTRACT, ENTITY_FAMILY_AUDIT, STAGE_OWNERSHIP_MATRIX,
+# the stage contracts and prompt prose, with no statement of which one wins.
+# Reviewers reconciled ownership by hand, and the audit found they disagreed.
+#
+# The invariant this file exists to establish:
+#
+#     ONE SEMANTIC FACT HAS ONE AUTHORITATIVE DEFINITION.
+#
+# Everything else that mentions the same fact is a PROJECTION, and a structural
+# test checks each projection against its source rather than asking a reader to.
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+
+sources_of_truth:
+
+  entity_semantics:
+    file: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+    owns:
+      - canonical family identity and purpose
+      - owning stage per family
+      - required and optional fields
+      - authority class (family default and per-field override)
+      - field-level extendability (which stage, which field)
+      - reference targets and cardinality
+      - spatial frame semantics
+      - representational semantic dependencies
+      - relation addressability
+      - enum vocabularies belonging to a family
+
+  stage_responsibility:
+    file: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+    owns:
+      - stage responsibility
+      - engineering questions
+      - required reasoning-premise classes and their justification
+      - permitted output semantics
+      - prohibited decisions
+
+  status_semantics:
+    file: ver3/contracts/STATUS_SEMANTICS.yaml
+    owns:
+      - the four status constructs and their separation
+      - execution status vocabulary
+      - evaluation outcome vocabulary
+      - forbidden collapses
+
+  mutation_semantics:
+    file: ver3/contracts/STAGE_PATCH_CONTRACT.yaml
+    owns:
+      - patch envelope
+      - controlled operation semantics
+
+  provenance_semantics:
+    file: ver3/contracts/PROVENANCE_CONTRACT.yaml
+    owns:
+      - provenance record shape and method vocabulary
+
+projections:
+
+  - file: ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
+    projects: entity_semantics
+    projects_what: "per-stage `owns` and `extends` lists"
+    rule: >
+      Derived from DESIGN_STATE_CONTRACT `owned_by` and `extendable_fields`.
+      It may add prose about a stage's role; it may NOT disagree about who owns
+      or who extends. Checked by CON-01 and CON-08.
+
+  - file: ver3/contracts/ENTITY_FAMILY_AUDIT.yaml
+    projects: entity_semantics
+    projects_what: "per-family consumer analysis and status"
+    rule: >
+      A REVIEW RECORD, not an authority. Its `owning_stage` must agree with
+      DESIGN_STATE_CONTRACT and is checked, but nothing may cite it to settle a
+      semantic question. It was treated as an authority before S-2 and
+      contributed to the ownership disagreements the audit found.
+
+  - file: "ver3/assy_v3/stages/*.py (prompt text)"
+    projects: entity_semantics
+    projects_what: "explanation of fields to a model"
+    rule: >
+      A prompt may EXPLAIN a contract. A prompt may never BE the contract. A
+      model-output field whose only semantic definition is prompt prose is a
+      contract defect - checked by CON-09. Before S-2 at least two fields were
+      defined nowhere else.
+
+duplication_rule: >
+  Where a fact must appear in more than one file, the projection is checked
+  against its source by a structural test. Manual agreement is not a mechanism:
+  the audit found three files disagreeing about ownership while all three looked
+  authoritative.
+
+adding_a_family: >
+  Editing DESIGN_STATE_CONTRACT (the family and its field semantics) plus the
+  STAGE_OWNERSHIP_MATRIX projection line for its owner. Stage responsibility is
+  edited only if the new family changes what a stage is FOR. No unrelated
+  stage-pair whitelist needs touching, which is the sprawl risk the
+  implementation plan records as R-1.

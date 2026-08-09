@@ -1,4 +1,14 @@
 # STAGE 02 CONTRACT — obligation, load and candidate formation
+# U-2B (S-2): the two undefined hypothesis families are RETIRED.
+# They were REQUIRED by this contract, defined by no contract, owned by no
+# stage and produced by no code - the clearest case of a stage contract
+# requiring a concept that did not exist. Replaced by the canonical
+# progression PhysicalEffectObligation (s02, role level) ->
+# PhysicalInteraction (s03). Not aliases: the old names named BODIES at a
+# stage forbidden to decide topology, which is why they are not revived.
+# The FAMILIES are defined now; PRODUCING them is S-4 / U-5.
+# (The retired names are deliberately not written here: a structural test
+#  rejects them anywhere in the canonical corpus.)
 schema_version: "0.1.0"
 stage_id: s02
 status: draft
@@ -27,7 +37,7 @@ required_discoveries:
   - "the evidence route each candidate's primary function would require, and whether it exists"
 
 owned_decisions:
-  creates: [Obligation, Candidate, AcceptanceContract, LoadCase, BodyHypothesis, PhysicalInteractionHypothesis]
+  creates: [Obligation, Candidate, AcceptanceContract, LoadCase, PhysicalEffectObligation, PhysicalInteraction]
   also_owns:
     - "the declaration that a claim class is unevaluable by this toolchain"
 

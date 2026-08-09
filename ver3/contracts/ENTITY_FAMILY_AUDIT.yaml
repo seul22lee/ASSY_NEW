@@ -6,7 +6,7 @@ references:
 - ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
 - ver3/contracts/GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
 audit_scope:
-  families_audited: 44
+  families_audited: 47
   re_run_note: 'The family set grew from 32 to 37 by CONTRACT CHANGE (five families added to DESIGN_STATE_CONTRACT
     under docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md rev 2: RigidGroup, LoadCase, LoadPath, FunctionalRegion,
     AssemblyStep). This audit was RE-RUN over the new set and asks the same consumer question of each.
@@ -20,6 +20,15 @@ audit_scope:
 
     '
   families_added: 0
+  s2_growth_note: >
+    Migration step S-2 (U-2B) added three families by CONTRACT CHANGE:
+    ConstraintRelation, PhysicalEffectObligation and PhysicalInteraction. The
+    first replaces the non-addressable blocked_by relation; the other two replace
+    the two undefined hypothesis families, which a stage contract required and
+    no contract defined. No stage produces any of them yet - that is
+    S-4/U-5 - so this file records their canonical definition, not their use.
+    This file is a REVIEW RECORD and a projection, never an authority: see
+    ver3/contracts/CONTRACT_AUTHORITY.yaml.
   s1_growth_note: >
     Migration step S-1 (U-2A) added three families by CONTRACT CHANGE:
     ReachResult, EliminationRecord and ReferenceScale. All three are engineering
@@ -31,7 +40,7 @@ audit_scope:
   families_deleted: 0
   no_stage_contract_frozen_by_this_audit: true
 summary:
-  CORE: 35
+  CORE: 38
   PROVISIONAL: 6
   MERGE_CANDIDATE: 3
   UNSUPPORTED: 0
@@ -778,6 +787,49 @@ families:
       Held as state.s04a_scale before S-1. It is now the recorded premise of the
       spatial commitments that depend on it, so withdrawing it costs them their
       unqualified authority (FA-5).
+
+  # ------------------------------------------------------------- S-2 (U-2B)
+  ConstraintRelation:
+    owning_stage: s03
+    first_downstream_consumer: s03
+    unique_responsibility: >
+      What constrains a rigid group, in which direction and configurations, and
+      what provides it - as an ADDRESSABLE entity, so a mobility disposition can
+      cite it and the citation resolves.
+    duplicates: none
+    duplicates_note: >
+      Joint constrains by kinematic type. This records a specific constraint on a
+      specific group with a provider and a defeat condition, which a joint type
+      alone cannot express.
+    required_for_assurance_package: false
+    status: CORE
+    s2_note: "Replaces the blocked_by typed relation, which had no identity."
+  PhysicalEffectObligation:
+    owning_stage: s02
+    first_downstream_consumer: s03
+    unique_responsibility: >
+      What physical effect must occur between which ROLES, stated without naming
+      a mechanism.
+    duplicates: none
+    duplicates_note: >
+      Obligation says what must be true. This says what must physically happen,
+      between what, and is the premise topology synthesis was missing.
+    required_for_assurance_package: false
+    status: CORE
+    s2_note: "Replaces the retired body-level hypothesis, which named bodies at a stage forbidden to decide them."
+  PhysicalInteraction:
+    owning_stage: s03
+    first_downstream_consumer: s03
+    unique_responsibility: >
+      What physically transmits a required effect between two rigid groups. A
+      joint CONSTRAINS; an interaction TRANSMITS.
+    duplicates: none
+    duplicates_note: >
+      Interface is where bodies meet. This is what passes through that meeting,
+      and which effect obligation it discharges.
+    required_for_assurance_package: false
+    status: CORE
+    s2_note: "Replaces the retired interaction-level hypothesis, which no contract defined."
 
 overlap_analysis:
 - id: OV-01
