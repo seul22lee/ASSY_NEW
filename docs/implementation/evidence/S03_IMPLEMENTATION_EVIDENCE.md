@@ -25,9 +25,10 @@ implemented and verified; four exit criteria are not yet evidenced.**
 - **Source B** — premise class → `requires_semantics` → families declaring those roles.
   Reuses the S-2 substrate. No family or stage is named.
 - **Instance selection** — eligibility by family is necessary and **not sufficient**. An
-  instance is included when it reaches the committed candidate through canonical references,
-  or reaches no candidate at all and is therefore common upstream material. A qualifying
-  instance of a *different* branch is excluded.
+  instance is included on POSITIVE evidence only: it was built on the committed candidate,
+  or that branch rests on it. *(Superseded in §16 — at the time of writing, reaching no
+  candidate was read as common upstream. It is not evidence, and it now admits nothing.)*
+  A qualifying instance of a *different* branch is excluded.
 - **`committed_branch`** — read from a standing `SelectionDecision` via its declared
   reference, not a case convention.
 - **Bounded closure** — a selected value's referents come too, depth- and visited-bounded.
@@ -209,9 +210,30 @@ spatial value can say which frame *instance* it is expressed in (six families na
 must stamp the same premise; until migrated their entities classify UNSCOPED — visible exclusion
 rather than invisible inclusion.
 
-## 16.1 Still open
+## 16.1 Lineage population boundary
+
+The candidate premise was stamped by `run_window2._stamp_branch_premise`, so the same
+semantic s03 operation given the same candidate produced **different authoritative lineage
+depending on which runner called it** — reproduced before editing: direct execution left
+BOD/RGP/JNT/CFG UNSCOPED where the Window path made them ACTIVE_BRANCH.
+
+Authorship moved to the producer: `Stage.invocation_premises(inputs)` (default none), carried
+onto authored operations by `carry_invocation_premises` in `Stage.run`. Both s03 passes declare
+the candidate from their own inputs; `derived_operations` moved out of the runner so the derived
+DOF disposition carries the same lineage. Only CREATE is stamped — `_merge_premises` writes on
+the entity, so stamping an EXTEND would move a pre-existing requirement onto the branch.
+`_stamp_branch_premise` is deleted, and an AST invariant fences the one remaining tool-side
+premise site (`_commit_s04`, S-4 work) so a new one cannot appear quietly.
+
+Found in passing and closed minimally: `copy.deepcopy(DesignState)` was broken by the S-1
+storage encapsulation, so the Window s03 path could not execute at all.
+
+**538 tests OK.** Full record: §29–45 of
+[S03_BRANCH_SCOPE_LINEAGE_DECISION.md](S03_BRANCH_SCOPE_LINEAGE_DECISION.md).
+
+## 16.2 Still open
 
 Unchanged from §15.5, and deliberately so: consumer-path migration (**s02**, **s03a**,
 **s03b**), `project_for` retirement, ADR-002/003/004 replays.
 
-**S-3 BRANCH/SCOPE SUBSTRATE READY — RESUME CONSUMER MIGRATION.**
+**S-3 LINEAGE POPULATION CLOSED — RESUME CONSUMER MIGRATION.**

@@ -41,7 +41,7 @@ from ver3.assy_v3.stages.s02_obligation_and_candidates import (             # no
     S02ObligationAndCandidates)
 from ver3.assy_v3.stages.s03_topology_and_mobility import (                 # noqa: E402
     S03BMobilityAndAssembly, S03TopologyAndMobility, assembly_acyclic_check,
-    blocking_relation_check, derive_mobility, relations_of,
+    blocking_relation_check, relations_of,
     compliance_check, dof_totality_check, functional_region_check,
     interface_classification_check, irrelevance_check, load_path_check,
     no_magnitude_check, no_selection_check_s03, obligation_ownership_check,
@@ -186,34 +186,6 @@ def seed_window1(case_id: str):
     return state, []
 
 
-def _stamp_branch_premise(patch, candidate_id):
-    """Persist the candidate the topology embodies.
-
-    The runner has always known this - `run_s03` takes the candidate and hands it
-    to the stage - and the authoritative write then dropped it. The fact "this
-    topology was built on candidate X" was produced and discarded, so nothing
-    downstream could tell a real topology element from an orphan.
-
-    It is recorded as a PREMISE because that is what it is: the topology exists
-    because that candidate was chosen to embody, and withdrawing the candidate
-    must cost its topology unqualified standing. S-1's premise machinery already
-    means exactly that (FA-5), so no new concept is introduced and no candidate id
-    is duplicated into a field on ten families.
-    """
-    if not candidate_id:
-        return patch
-    stamped = []
-    for op in patch.operations:
-        if op.kind != "CREATE" or op.entity_id == candidate_id:
-            stamped.append(op)
-            continue
-        refs = sorted(set(op.premise_refs) | {candidate_id})
-        stamped.append(_Op(op.kind, op.entity_type, op.entity_id, op.fields,
-                           op.provenance_ref, premise_refs=refs, reason=op.reason))
-    patch.operations = stamped
-    return patch
-
-
 def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
             provider, trial: int) -> Dict[str, Any]:
     """Embody ONE candidate. Never raises."""
@@ -259,7 +231,6 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
     if out.declared_incompleteness:
         fail("CONTRACT_CONDITION", "declared incomplete", out.declared_incompleteness)
 
-    _stamp_branch_premise(out.patch, candidate.get("entity_id"))
     state.apply(out.patch)
 
     # Pass B: the mobility grid, load paths and assembly order, given the
@@ -286,7 +257,6 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
         if outb.declared_incompleteness:
             fail("CONTRACT_CONDITION", "s03b declared incomplete",
                  outb.declared_incompleteness)
-        _stamp_branch_premise(outb.patch, candidate.get("entity_id"))
         state.apply(outb.patch)
         # DETERMINISTIC DERIVATION. The model authored relations; the pipeline
         # expands them into the total DOF disposition. Bookkeeping the LLM used
@@ -302,15 +272,10 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
         groups = [g["entity_id"] for g in state.family("RigidGroup")]
         configs = [c["entity_id"] for c in state.family("Configuration")]
         joints = [_thaw(j) for j in state.family("Joint")]
-        entries = derive_mobility(groups, configs, joints, relations,
-                                  parsed.get("irrelevance") or [])
-        rec["dof_entries_derived"] = len(entries)
-        by_config = {}
-        for e in entries:
-            by_config.setdefault(e["configuration"], []).append(e)
-        ops = [_Op("CREATE", "MobilityExpectation", "MEX-%04d" % (i + 1),
-                   {"configuration": cfg, "dispositions": rows}, "s03:derivation")
-               for i, (cfg, rows) in enumerate(sorted(by_config.items()))]
+        # The derivation, its operations AND its lineage all belong to the stage.
+        ops = S03BMobilityAndAssembly().derived_operations(
+            parsed, groups, configs, joints, {"demands": demands})
+        rec["dof_entries_derived"] = sum(len(o.fields["dispositions"]) for o in ops)
         if ops:
             dpatch = _Patch(patch_id="%s-s03-derived" % state.run_id,
                             run_id=state.run_id, stage_id="s03", stage_attempt=3,

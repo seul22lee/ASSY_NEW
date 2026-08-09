@@ -365,3 +365,202 @@ unchanged.
 Not "S-3 COMPLETE". The substrate is decided, implemented, populated by s03, and
 falsified. What remains for S-3 is the consumer migration this pass deliberately
 left untouched.
+
+---
+
+# LINEAGE POPULATION BOUNDARY CORRECTION
+
+## 29. Baseline
+
+`dfbfb68`. The branch/scope architecture of §1–§28 is accepted and untouched. The
+Option A/B/C decision is not reopened; `_branch_rests_on` and the closure
+direction are not re-audited.
+
+## 30. The defect, reproduced before anything was edited
+
+Two execution paths, the same semantic s03 operation, the same candidate, the
+same canned response — the only difference is who called the stage.
+
+```
+PATH B  direct canonical execution        PATH A  Window runner
+  BOD-0001  premise_refs []                 BOD-0001  premise_refs ['CND-0001']
+  RGP-0001  premise_refs []                 RGP-0001  premise_refs ['CND-0001']
+  JNT-0001  premise_refs []                 JNT-0001  premise_refs ['CND-0001']
+  CFG-0001  premise_refs []                 CFG-0001  premise_refs ['CND-0001']
+  LP-0001   premise_refs []                 LP-0001   premise_refs ['CND-0001']
+
+scope for CND-0001:                       scope for CND-0001:
+  BOD-0001  UNSCOPED                        BOD-0001  ACTIVE_BRANCH
+  RGP-0001  UNSCOPED                        RGP-0001  ACTIVE_BRANCH
+  JNT-0001  UNSCOPED                        JNT-0001  ACTIVE_BRANCH
+  CFG-0001  UNSCOPED                        CFG-0001  ACTIVE_BRANCH
+  LP-0001   ACTIVE_BRANCH                   LP-0001   ACTIVE_BRANCH
+```
+
+`LP-0001` agrees only because `LoadPath.candidate` is a declared reference — the
+one s03 family that never needed the stamp. Everything else: **same engineering
+result, different authoritative lineage, different design read out of it.**
+
+Classification: **A — TOOL-SPECIFIC SEMANTIC AUTHORSHIP**, producing **D —
+RUNNER-INDEPENDENCE DEFECT**.
+
+## 31. Why tool-specific stamping was semantically insufficient
+
+`premise_refs` is a statement about the *engineering result*: what it rests on,
+and therefore what must cost it standing when withdrawn (FA-5). A statement of
+that kind cannot be a property of the process that happened to invoke the stage.
+At `dfbfb68` the fact was true only when `run_window2` was in the call stack, so
+the same commitment was branch material or an orphan depending on the runner.
+
+## 32. Implementation locations compared
+
+| Option | Verdict |
+| --- | --- |
+| **A** — s03 `to_operations` adds the premises itself | **Cannot**: `to_operations(parsed)` receives only the parsed response, not the invocation inputs, so it cannot see which candidate was being embodied. Widening its signature would put the same fact in two places. |
+| **B** — producer declares an invocation premise; the shared patch-construction path carries it | **SELECTED**. See §33. |
+| **C** — an existing canonical write-boundary mechanism | None exists. `DesignState.apply` is the only other shared boundary and is disqualified below. |
+| **D** — `run_window2` stamping | The defect being removed. |
+| **E** — `DesignState.apply` infers the candidate from runner context | Rejected. `apply` cannot know that a candidate is a *premise* of a value; inferring it would have infrastructure invent engineering dependencies, and it would need exactly the ambient current-candidate context this pass must not introduce. |
+| **F** — post-hoc scan of state after `apply` | Rejected. Reconstructs a fact instead of recording it, and cannot distinguish "authored to embody" from "happened to be present". |
+
+## 33. The selected canonical boundary
+
+`Stage.invocation_premises(inputs) -> List[str]`, defaulting to `[]`, applied in
+`Stage.run` by `carry_invocation_premises(ops, premises)`.
+
+Every runner that executes a stage goes through `Stage.run`, so the fact travels
+with the patch. Authorship stays with the producer: the ids come from the stage's
+own declared inputs, and whether they are genuine premises is a question about
+that stage's responsibility. Infrastructure only unions, deduplicates and
+preserves — §4's division exactly.
+
+No new framework: `StagePatch` / `Op.premise_refs` already existed, and no
+contract concept was added.
+
+## 34. S03A
+
+`S03TopologyAndMobility.invocation_premises` reads `inputs["candidate"]`, the
+record the stage is already given to write its prompt from. s03 is invoked once
+per candidate — its topology exists because that alternative was chosen — so
+every record it authors carries it. All s03a-created families are covered without
+any of them being named.
+
+## 35. S03B
+
+`S03BMobilityAndAssembly.invocation_premises` reads
+`inputs["demands"]["candidate"]`, the id already carried on that pass's demands.
+A single shared reader, `_candidate_premise`, accepts either the record or the
+id, so the two passes cannot drift into disagreeing about what they embody.
+
+The derived DOF disposition is audited separately, as required. It is not
+authored by the model — the contract assigns totality to the pipeline — but it is
+still this candidate's, so it could not be excluded. `derived_operations` moved
+from `run_window2` into `S03BMobilityAndAssembly`, where it builds its operations
+and declares their lineage together.
+
+Nothing in the s03 invocation was found to be candidate-independent.
+
+**One operation kind is excluded, and this is why.** Only `CREATE` carries the
+invocation premise. `_merge_premises` records premises on the **entity**, so
+stamping an `EXTEND` would say the extended entity exists because of this
+invocation — false for anything that already existed. An s04 extension of a
+requirement would silently move that requirement onto the branch. An invocation
+premise can honestly say "this record was authored to embody that", and only a
+`CREATE` authors a record. Pinned by LINEAGE-06c.
+
+## 36. Preservation of existing `premise_refs`
+
+`[P1, P2]` + candidate `C` → `[P1, P2, C]`. Existing entries keep their position;
+new ones append in declaration order. This is stricter than the helper it
+replaces, which sorted and therefore reordered. Dedup is by identity, and a
+candidate is never its own premise. LINEAGE-05, 06, 06b.
+
+## 37. Runner independence
+
+Window and direct execution produce identical `{entity → scope}` maps for the
+same candidate (LINEAGE-04), and the Window path adds no lineage of its own
+(LINEAGE-03 reads the applied state, not the patch). No double stamping: the
+normalizer is idempotent, asserted by stamping the same operations twice.
+
+## 38. Stale / invalidation
+
+Unchanged and reused, not replaced. Invalidating the candidate leaves every
+entity that declares it as a premise without unqualified standing, while
+`REQ-0001` — genuine common upstream — stays STANDING. No second branch-invalidity
+mechanism exists. LINEAGE-10.
+
+## 39. `_stamp_branch_premise` disposition
+
+**Deleted.** Both call sites are gone; no adapter remains in its place. The
+static invariant (§41) fails if a runner starts assigning branch lineage again.
+
+## 40. Pre-existing defect found by the mandatory runner-independence test
+
+`copy.deepcopy(DesignState)` was broken. `run_s03` deep-copies the base state as
+its first act so that one candidate's exploration cannot write into another's;
+after the S-1 encapsulation moved authoritative storage into a module-private
+registry, the copy came back with no table at all and every read raised
+`KeyError`. The Window s03 path therefore could not execute.
+
+Classification: **I — PRE-EXISTING**, but blocking: exit criterion 8 cannot be
+demonstrated without running the Window path. Closed minimally by `__deepcopy__`,
+which forks the storage and shares the immutable contracts. No authority
+semantics changed.
+
+## 41. Static invariant
+
+Structural (AST), not string matching. Over `ver3/tools`, it collects every act of
+premise authorship — a call passing `premise_refs=`, an assignment to
+`.premise_refs`, a function whose name mentions premises — with its enclosing
+function, and asserts:
+
+- **LINEAGE-11**: none of them is in s03/branch/candidate code.
+- **LINEAGE-11c**: the set of enclosing functions is a subset of `{_commit_s04}`,
+  the s04 commit path, which is S-4 work this pass did not migrate. Pinning it by
+  name means a *new* tool-side premise site fails the test rather than joining a
+  crowd. Growing that set is a decision, not an accident.
+- **LINEAGE-11b**, the positive half: `invocation_premises` is declared only under
+  `ver3/assy_v3/stages/`, and the base implementation asserts nothing.
+
+Recorded residual: `_commit_s04` still authors s04 premises in the runner. Same
+class of defect, different stage, explicitly out of this pass's scope.
+
+## 42. Stale documentation
+
+`_branch_of` was dead code — self-recursive, called by nothing — still carrying
+the retired rule and its docstring. Deleted. `select_instances`'s docstring still
+described inclusion as "reaches no candidate at all and is therefore common
+upstream"; corrected to the positive rule. The same sentence in
+`S03_IMPLEMENTATION_EVIDENCE.md` §15 is marked superseded rather than rewritten,
+because that section records what was true when it was written.
+
+`scope_of`'s docstring still names the retired rule — deliberately. It says what
+the current rule replaced and why, which is the opposite of stale.
+
+## 43. Regression
+
+```
+ver3/tests/meta/test_lineage_population.py   18 tests   OK
+full suite (ver3/tests)                     538 tests   OK (skipped=1)
+CI: meta discover 461 OK · import boundary OK · no-stage/no-legacy 13 OK
+```
+
+Covered: S-1 authority and encapsulation, FA-5 premise/staleness, S-2
+canonical/meta, S-3 interface readiness, VIEW, SCOPE, state, Window, full meta,
+CI boundary steps, imports. LINEAGE-14/15 additionally re-run the SCOPE and
+VIEW/core classes inside this module, so the two suites cannot drift apart
+silently.
+
+## 44. Residual `ReferenceScale` limitation — unchanged
+
+Not touched, as instructed. Family-level frame semantics exist; the canonical
+representation still cannot identify which `ReferenceScale` **instance** a
+spatial value uses. It did not block this correction. Remains recorded for the
+later spatial-representation work.
+
+## 45. Status
+
+**S-3 LINEAGE POPULATION CLOSED — RESUME CONSUMER MIGRATION.**
+
+S02/S03A/S03B consumer migration has not resumed. `project_for` is untouched.
+S-4 has not begun.

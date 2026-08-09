@@ -23,7 +23,7 @@ import re
 from typing import Any, Dict, Iterable, List, Set, Tuple
 
 from ..state.patch import Op
-from .base import Stage
+from .base import Stage, carry_invocation_premises
 
 #: The six rigid-body degrees of freedom. The domain of the totality.
 DOF_NAMES = ("TX", "TY", "TZ", "RX", "RY", "RZ")
@@ -349,6 +349,18 @@ def dof_domain(groups: Iterable[str], configurations: Iterable[str]) -> List[Tup
     return [(g, c, d) for g in groups for c in configurations for d in DOF_NAMES]
 
 
+def _candidate_premise(candidate) -> List[str]:
+    """The candidate id an s03 invocation was given, however it was handed over.
+
+    Pass A receives the candidate record; pass B receives its id inside the
+    demands. One reader, so the two passes cannot drift into disagreeing about
+    what they are embodying.
+    """
+    if isinstance(candidate, dict):
+        candidate = candidate.get("entity_id")
+    return [candidate] if isinstance(candidate, str) and candidate else []
+
+
 class S03TopologyAndMobility(Stage):
     stage_id = "s03"
     purpose = "turn a candidate family into a mechanism topology with a total DOF disposition"
@@ -371,6 +383,19 @@ class S03TopologyAndMobility(Stage):
             region_roles=" | ".join(REGION_ROLES),
             candidate=_render(candidate),
             projection=_render(projection))
+
+    def invocation_premises(self, inputs: Dict[str, Any]) -> List[str]:
+        """The candidate this pass was invoked to embody.
+
+        s03 is run once per candidate: the topology it authors exists BECAUSE
+        that alternative was chosen to be worked out. Withdraw the candidate and
+        the topology must lose unqualified standing, which is what declaring it a
+        premise means (FA-5).
+
+        Read from this stage's own declared input, so the fact survives whichever
+        runner made the call.
+        """
+        return _candidate_premise(inputs.get("candidate"))
 
     # ------------------------------------------------------------ operations
     def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:
@@ -929,6 +954,35 @@ class S03BMobilityAndAssembly(Stage):
             path_kinds=" | ".join(PATH_KINDS),
             mechanism=_render(inputs["mechanism"]),
             demands=_render(inputs.get("demands") or {}))
+
+    def invocation_premises(self, inputs):
+        """The same candidate, carried on this pass's demands.
+
+        Pass B works out what holds the topology pass A fixed for one candidate.
+        Its load paths, assembly order and open decisions are that candidate's,
+        for the same reason and with the same consequence under FA-5.
+        """
+        return _candidate_premise((inputs.get("demands") or {}).get("candidate"))
+
+    def derived_operations(self, parsed, groups, configurations, joints, inputs):
+        """The TOTAL DOF disposition, derived from the relations just authored.
+
+        The contract splits the labour: the model authors relations, the pipeline
+        expands them (LLM role NONE for totality). The expansion is still s03
+        output embodying one candidate, so it carries the same premise. Built
+        here rather than in a runner, so every caller derives the same thing with
+        the same lineage.
+        """
+        relations, _renames = relations_of(parsed)
+        entries = derive_mobility(groups, configurations, joints, relations,
+                                  parsed.get("irrelevance") or [])
+        by_config = {}
+        for e in entries:
+            by_config.setdefault(e["configuration"], []).append(e)
+        ops = [Op("CREATE", "MobilityExpectation", "MEX-%04d" % (i + 1),
+                  {"configuration": cfg, "dispositions": rows}, "s03:derivation")
+               for i, (cfg, rows) in enumerate(sorted(by_config.items()))]
+        return carry_invocation_premises(ops, self.invocation_premises(inputs))
 
     def to_operations(self, parsed):
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}

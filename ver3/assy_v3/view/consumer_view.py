@@ -294,29 +294,6 @@ def committed_branch(state, contracts) -> Optional[str]:
     return None
 
 
-def _branch_of(eid: str, fwd: Dict[str, Set[str]], state, contracts,
-               seen: Optional[Set[str]] = None) -> Set[str]:   # retained for callers
-    """Which candidates an entity belongs to, by following canonical references.
-
-    An entity that reaches no candidate belongs to none - it is common upstream
-    premise material and is in scope for every branch. That is a structural fact
-    about the reference graph, not a rule about any family.
-    """
-    seen = seen or set()
-    if eid in seen:
-        return set()
-    seen.add(eid)
-    rec = state.entities.get(eid) if eid in state.entities else None
-    if rec is None:
-        return set()
-    if rec.get("_family") == "Candidate":
-        return {eid}
-    out: Set[str] = set()
-    for ref in fwd.get(eid, ()):
-        out |= _branch_of(ref, fwd, state, contracts, seen)
-    return out
-
-
 #: Relevance outcomes. Only the first two enter a view.
 ACTIVE_BRANCH = "ACTIVE_BRANCH"
 COMMON_UPSTREAM = "COMMON_UPSTREAM"
@@ -408,10 +385,10 @@ def select_instances(state, contracts, requirement: Requirement,
                      branch: Optional[str]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """Which accumulated instances satisfy this requirement, and why each is here.
 
-    Eligibility by family is necessary and not sufficient. An instance is included
-    when it is in scope for the branch under consideration - either because it
-    reaches that candidate through canonical references, or because it reaches no
-    candidate at all and is therefore common upstream premise material.
+    Eligibility by family is necessary and not sufficient. An instance is
+    included when `scope_of` finds POSITIVE evidence that it belongs here: it was
+    built on the branch under consideration, or the branch rests on it. Reaching
+    no candidate is not evidence of anything and admits nothing.
 
     A qualifying instance belonging to a DIFFERENT candidate is excluded: a stage
     working on one committed branch must not silently receive another branch's

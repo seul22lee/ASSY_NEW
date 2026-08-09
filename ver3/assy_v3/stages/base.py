@@ -24,6 +24,38 @@ class StageError(Exception):
     """A programming error in the stage itself. Never a provider condition."""
 
 
+def carry_invocation_premises(ops: List[Op], premises: List[str]) -> List[Op]:
+    """Put the stage's declared invocation premises onto the values it authored.
+
+    This is NORMALIZATION, not authorship. The engineering fact - that this
+    invocation rests on these entities - is stated by the stage in
+    `Stage.invocation_premises`. All that happens here is union, dedup, and
+    preservation: an operation that already declares premises keeps them, in
+    order, and the invocation premises follow.
+
+    Only CREATE carries it. `_merge_premises` records premises on the ENTITY, so
+    stamping an EXTEND would say the extended entity exists because of this
+    invocation - which is false for anything that existed beforehand. An s04
+    extension of a requirement would move that requirement onto the branch. What
+    an invocation premise can honestly say is "this record was authored to embody
+    that", and only a CREATE authors a record.
+    """
+    if not premises:
+        return ops
+    out: List[Op] = []
+    for op in ops:
+        extra = [p for p in premises
+                 if p != op.entity_id and p not in op.premise_refs]
+        if op.kind != "CREATE" or not extra:
+            out.append(op)
+            continue
+        out.append(Op(op.kind, op.entity_type, op.entity_id, op.fields,
+                      op.provenance_ref,
+                      premise_refs=list(op.premise_refs) + extra,
+                      reason=op.reason))
+    return out
+
+
 def _provider_id(provider) -> str:
     """Who actually served the call, asked of the provider rather than assumed.
 
@@ -65,6 +97,20 @@ class Stage:
         """What the contract requires that this response did not supply."""
         return []
 
+    def invocation_premises(self, inputs: Dict[str, Any]) -> List[str]:
+        """Class-A entities that everything THIS invocation authors rests on.
+
+        A stage that is invoked to embody a particular decision says so here, and
+        the fact then travels with the patch no matter which runner called it.
+        Only the stage can state this: the entity ids are in its own declared
+        inputs, and whether they are genuine engineering premises is a question
+        about the stage's responsibility, not about the write mechanism.
+
+        Default: none - which is an honest absence, not an assertion that no
+        premise exists.
+        """
+        return []
+
     # ---------------------------------------------------------------- driver
     def run(self, provider, inputs: Dict[str, Any], state, run_id: str,
             attempt: int = 1) -> StageOutcome:
@@ -92,7 +138,8 @@ class Stage:
         # Letting the KeyError escape instead made a malformed response crash the
         # caller, and a crash is not a status anything downstream can record.
         try:
-            ops = self.to_operations(parsed)
+            ops = carry_invocation_premises(self.to_operations(parsed),
+                                            self.invocation_premises(inputs))
             missing = self.completeness(parsed, inputs)
         except (KeyError, TypeError, AttributeError, IndexError, ValueError) as exc:
             return StageOutcome(

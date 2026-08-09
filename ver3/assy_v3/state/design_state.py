@@ -208,6 +208,28 @@ class DesignState:
         _STORAGE[self] = _Store()
 
 
+    def __deepcopy__(self, memo):
+        """A branch of this run: the same accumulated state, separate storage.
+
+        Exploring one candidate must not write into the state another candidate
+        is exploring, and `copy.deepcopy` is how a caller says so. The default
+        deepcopy copied the attributes and stopped: authoritative storage is not
+        an attribute, it lives in the module-private registry, so the copy came
+        back with no table at all and every read raised. Found by the first test
+        to drive the runner and the producer over the same state.
+
+        The contracts are shared, not copied - they are immutable by
+        construction, and a run's rules must not fork with its state.
+        """
+        import copy as _copy
+        twin = DesignState(self.run_id, self.c)
+        memo[id(self)] = twin
+        src, dst = _STORAGE[self], _STORAGE[twin]
+        dst.entities = _copy.deepcopy(src.entities, memo)
+        dst.by_family = _copy.deepcopy(src.by_family, memo)
+        dst.applied = list(src.applied)
+        return twin
+
     def __setattr__(self, name: str, value: Any) -> None:
         if name in self._SETTABLE_AFTER_INIT:
             object.__setattr__(self, name, value)
