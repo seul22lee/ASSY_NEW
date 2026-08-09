@@ -79,17 +79,36 @@ class Requirement:
     with no reasons is indistinguishable from a whitelist someone wrote down.
     """
 
-    __slots__ = ("source", "key", "families", "trace")
+    __slots__ = ("source", "key", "families", "trace", "by_role")
 
-    def __init__(self, source: Source, key: str, families: List[str], trace: Dict[str, Any]):
+    def __init__(self, source: Source, key: str, families: List[str],
+                 trace: Dict[str, Any], by_role: Optional[Dict[str, List[str]]] = None):
         self.source = source
         self.key = key
         self.families = sorted(families)
         self.trace = trace
+        #: The ATOMIC obligations this requirement is made of.
+        #:
+        #: A premise naming three semantic roles is THREE obligations, not one.
+        #: Flattening them into a family union let one satisfied role mark the
+        #: whole premise satisfied - the union was non-empty, so the question
+        #: "did we select anything?" answered yes while two thirds of the premise
+        #: was missing.
+        #:
+        #: `requires_semantics` means ALL of them. No contract vocabulary
+        #: expresses alternatives, and inferring OR from prose would be a guess.
+        self.by_role = dict(by_role or {})
+
+    def atoms(self) -> List[Tuple[str, List[str]]]:
+        """(obligation, families that can satisfy it). One entry when atomic."""
+        if self.by_role:
+            return sorted(self.by_role.items())
+        return [(self.key, list(self.families))]
 
     def as_dict(self) -> Dict[str, Any]:
         return {"source": self.source.value, "key": self.key,
-                "families": list(self.families), "trace": dict(self.trace)}
+                "families": list(self.families), "trace": dict(self.trace),
+                "by_role": {k: list(v) for k, v in self.by_role.items()}}
 
     def __repr__(self) -> str:                                   # pragma: no cover
         return "Requirement(%s, %s, %s)" % (self.source.value, self.key, self.families)
@@ -144,24 +163,31 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
             spec = spec_all.get(fld)
             if not spec:
                 continue
-            dep, why = None, None
-            if spec.get("kind") == "reference":
-                dep, why = spec.get("target"), "reference target"
+            # A field may carry SEVERAL representational dependencies, and they
+            # compose as a UNION. Accumulating them into one variable made a
+            # later declaration overwrite an earlier one, so a field declaring
+            # both a reference target and an explicit semantic dependency
+            # silently lost the reference.
+            deps: List[Tuple[str, str]] = []
+            if spec.get("kind") == "reference" and spec.get("target"):
+                deps.append((spec["target"], "reference target"))
             elif spec.get("kind") == "spatial":
                 frame = spec.get("frame")
                 if frame and frame != "SELF_DECLARING":
-                    dep, why = frame.split(".")[0], "spatial frame"
+                    deps.append((frame.split(".")[0], "spatial frame"))
             if "semantic_dependency" in spec:
-                dep = str(spec["semantic_dependency"]).split(".")[0]
-                why = "declared semantic dependency"
-            if not dep or dep not in fams:
-                continue
-            out.append(Requirement(
-                Source.REPRESENTATIONAL_DEPENDENCY,
-                "%s.%s -> %s" % (family, fld, dep), [dep],
-                {"output_semantic": semantic, "output_field": "%s.%s" % (family, fld),
-                 "declaration": why, "requires": dep,
-                 "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"}))
+                deps.append((str(spec["semantic_dependency"]).split(".")[0],
+                             "declared semantic dependency"))
+            for dep, why in deps:
+                if dep not in fams:
+                    continue
+                out.append(Requirement(
+                    Source.REPRESENTATIONAL_DEPENDENCY,
+                    "%s.%s -[%s]-> %s" % (family, fld, why.split()[0], dep), [dep],
+                    {"output_semantic": semantic,
+                     "output_field": "%s.%s" % (family, fld),
+                     "declaration": why, "requires": dep,
+                     "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"}))
     return out
 
 
@@ -189,7 +215,8 @@ def derive_source_b(stage_id: str, contracts, responsibility) -> List[Requiremen
              "why": premise.get("why"), "requires_semantics": roles,
              "qualifying_by_role": by_role,
              "source_contract": "STAGE_RESPONSIBILITY_CONTRACT"
-                                ".required_reasoning_premise_classes"}))
+                                ".required_reasoning_premise_classes"},
+            by_role=by_role))
     return out
 
 
@@ -277,6 +304,66 @@ def _branch_of(eid: str, fwd: Dict[str, Set[str]], state, contracts,
     return out
 
 
+#: Relevance outcomes. Only the first two enter a view.
+ACTIVE_BRANCH = "ACTIVE_BRANCH"
+COMMON_UPSTREAM = "COMMON_UPSTREAM"
+OTHER_BRANCH = "OTHER_BRANCH"
+UNSCOPED = "UNSCOPED"
+IN_VIEW = (ACTIVE_BRANCH, COMMON_UPSTREAM)
+
+
+def scope_of(eid, fwd, rev, state, contracts, branch) -> Tuple[str, str]:
+    """Why an entity is, or is not, relevant to this consumer.
+
+    POSITIVE EVIDENCE ONLY. The earlier rule inferred
+
+        unreachable from every candidate  =>  common to every candidate
+
+    which is not an inference at all: absence of a branch edge is not proof of
+    shared relevance. An orphan and a shared premise both have no candidate path,
+    and treating them alike put unconnected state into every view.
+
+    Common-upstream is now established positively: something that IS branch-scoped
+    references it, so it is material the branches were built on. That is a fact
+    about the reference graph, not a rule about any family - `Requirement` is not
+    common because it is a Requirement, but because an obligation on the active
+    branch cites it.
+    """
+    owners = _branch_of(eid, fwd, state, contracts)
+    if owners:
+        if branch is None:
+            return ACTIVE_BRANCH, "pre-selection: every alternative is in scope"
+        if branch in owners:
+            return ACTIVE_BRANCH, "reaches the committed candidate %s" % branch
+        return OTHER_BRANCH, "reaches only %s" % sorted(owners)
+    for referrer in sorted(rev.get(eid, ())):
+        ref_owners = _branch_of(referrer, fwd, state, contracts)
+        if ref_owners and (branch is None or branch in ref_owners):
+            return COMMON_UPSTREAM, "cited by branch-scoped %s" % referrer
+
+    # ---------------------------------------------------------------- GAP
+    # Positive evidence is what this SHOULD require, and the canonical contracts
+    # cannot currently supply it for topology.
+    #
+    # No topology family - Body, RigidGroup, Joint, Interface, Configuration,
+    # FunctionalRegion, AssemblyStep - can reach Candidate through any declared
+    # reference. Only LoadPath can. The runner runs s03 once per candidate, but
+    # nothing in state records WHICH candidate a Body embodies, so an orphan and
+    # a real topology element are structurally identical here.
+    #
+    # Requiring positive evidence would therefore empty every s04 view, and
+    # inferring "no candidate path => common" is the unsound step this rule
+    # exists to remove. Neither is acceptable, so the classification is reported
+    # honestly as provisional and the gap is recorded rather than papered over.
+    # Closing it needs a structured candidate link on topology - an S-2 contract
+    # decision, not a view-layer choice.
+    return (COMMON_UPSTREAM,
+            "PROVISIONAL: no path to any candidate and nothing branch-scoped "
+            "cites it. The contracts cannot distinguish shared upstream material "
+            "from an orphan for this family - see CONTRACT GAP in the S-3 "
+            "evidence")
+
+
 def select_instances(state, contracts, requirement: Requirement,
                      branch: Optional[str]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """Which accumulated instances satisfy this requirement, and why each is here.
@@ -290,22 +377,41 @@ def select_instances(state, contracts, requirement: Requirement,
     working on one committed branch must not silently receive another branch's
     topology because the family matched.
     """
-    fwd, _rev = _reference_graph(state, contracts)
+    fwd, rev = _reference_graph(state, contracts)
     chosen, traces = [], []
     for family in requirement.families:
         for rec in state.standing(family):
             eid = rec["entity_id"]
-            owners = _branch_of(eid, fwd, state, contracts)
-            if branch is not None and owners and branch not in owners:
-                continue                      # another design branch
+            scope, why = scope_of(eid, fwd, rev, state, contracts, branch)
+            if scope not in IN_VIEW:
+                continue
             chosen.append(rec)
             traces.append({"entity_id": eid, "family": family,
                            "source": requirement.source.value,
                            "requirement": requirement.key,
-                           "branch_scope": ("common upstream" if not owners
-                                            else sorted(owners)),
+                           "branch_scope": scope, "why_relevant": why,
                            "trace": requirement.trace})
     return chosen, traces
+
+
+def relevant_ids(state, contracts, branch) -> Dict[str, str]:
+    """Every standing entity that is in scope for this consumer, and why.
+
+    Computed from the reference graph ALONE, independently of what any
+    requirement selected. Assessment needs this: deciding PROJECTION_FAILURE from
+    the view's own contents would let a selection error conclude upstream
+    absence, which is the one misdiagnosis the taxonomy exists to prevent.
+    """
+    fwd, rev = _reference_graph(state, contracts)
+    out = {}
+    for eid in state.entities:
+        rec = state.entities[eid]
+        if rec.get("_validity", STANDING) != STANDING:
+            continue
+        scope, _why = scope_of(eid, fwd, rev, state, contracts, branch)
+        if scope in IN_VIEW:
+            out[eid] = rec.get("_family")
+    return out
 
 
 def close_references(state, contracts, selected: Dict[str, Dict[str, Any]],
@@ -335,6 +441,9 @@ def close_references(state, contracts, selected: Dict[str, Dict[str, Any]],
                 added.append({"entity_id": ref, "family": target.get("_family"),
                               "source": Source.REPRESENTATIONAL_DEPENDENCY.value,
                               "requirement": "closure",
+                              "branch_scope": "REPRESENTATIONAL_CLOSURE",
+                              "why_relevant": ("required to give %s.%s a traceable "
+                                               "meaning" % (eid, fld)),
                               "trace": {"required_by": eid, "via_field": fld,
                                         "declaration": "reference target",
                                         "depth": depth + 1}})
@@ -401,26 +510,63 @@ class ConsumerView:
         return out
 
 
-def _assess(state, contracts, requirement: Requirement,
-            selected: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Structural sufficiency for one requirement. No model is asked."""
-    existing = {f: len(state.standing(f)) for f in requirement.families}
-    any_exists = any(existing.values())
-    if selected:
-        verdict = Sufficiency.SATISFIED
-    elif not any_exists:
-        # Nothing upstream established it. Not our failure, and not permission to
-        # invent it.
-        verdict = Sufficiency.MISSING_UPSTREAM
+#: Worst-wins ordering when aggregating atomic obligations.
+_SEVERITY = {Sufficiency.SATISFIED.value: 0, Sufficiency.UNRESOLVED.value: 1,
+             Sufficiency.MISSING_UPSTREAM.value: 2,
+             Sufficiency.PROJECTION_FAILURE.value: 3}
+
+
+def _assess_atom(state, obligation: str, families: List[str], selected_ids: Set[str],
+                 relevant: Dict[str, str]) -> Dict[str, Any]:
+    """One atomic obligation, judged against accumulated state.
+
+    Three absences that must not be confused:
+
+      nothing exists                     -> MISSING_UPSTREAM
+      it exists but none is in scope     -> MISSING_UPSTREAM, with the reason
+                                            said out loud. We lost nothing, so
+                                            blaming projection would be false.
+      a RELEVANT instance exists and did
+      not reach the view                 -> PROJECTION_FAILURE, ours
+    """
+    standing = {f: len(state.standing(f)) for f in families}
+    covered = any(fam in families for eid, fam in relevant.items() if eid in selected_ids)
+    reachable = any(fam in families for fam in relevant.values())
+    if covered:
+        verdict, why = Sufficiency.SATISFIED, "a relevant instance was selected"
+    elif not any(standing.values()):
+        verdict, why = Sufficiency.MISSING_UPSTREAM, "nothing upstream established it"
+    elif not reachable:
+        verdict, why = (Sufficiency.MISSING_UPSTREAM,
+                        "qualifying entities exist but none is in scope for this "
+                        "consumer; their relevance is not established")
     else:
-        # Qualifying authoritative state exists and did not reach the view. That
-        # is an infrastructure defect, and calling it upstream absence would hide
-        # exactly the failure this architecture was built to expose.
-        verdict = Sufficiency.PROJECTION_FAILURE
+        verdict, why = (Sufficiency.PROJECTION_FAILURE,
+                        "a relevant qualifying instance exists and did not reach "
+                        "the view")
+    return {"obligation": obligation, "families": list(families),
+            "standing_instances": standing, "verdict": verdict.value, "why": why}
+
+
+def _assess(state, contracts, requirement: Requirement,
+            selected: List[Dict[str, Any]],
+            relevant: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    """Structural sufficiency: per atomic obligation, then aggregated.
+
+    A compound premise cannot be SATISFIED while a required role is not. No model
+    is asked, and the view's own contents never decide the verdict.
+    """
+    if relevant is None:
+        relevant = relevant_ids(state, contracts, committed_branch(state, contracts))
+    selected_ids = {r["entity_id"] for r in selected}
+    coverage = [_assess_atom(state, name, fams, selected_ids, relevant)
+                for name, fams in requirement.atoms()]
+    worst = (max(coverage, key=lambda c: _SEVERITY[c["verdict"]])["verdict"]
+             if coverage else Sufficiency.SATISFIED.value)
     return {"requirement": requirement.key, "source": requirement.source.value,
-            "verdict": verdict.value, "families": list(requirement.families),
-            "standing_instances": existing, "selected": len(selected),
-            "trace": requirement.trace}
+            "verdict": worst, "coverage": coverage,
+            "families": list(requirement.families),
+            "selected": len(selected), "trace": requirement.trace}
 
 
 def build_consumer_view(stage_id: str, state, contracts, responsibility,
@@ -433,12 +579,13 @@ def build_consumer_view(stage_id: str, state, contracts, responsibility,
     traces: List[Dict[str, Any]] = []
     assessment: List[Dict[str, Any]] = []
 
+    relevant = relevant_ids(state, contracts, branch)
     for req in required.requirements:
         recs, tr = select_instances(state, contracts, req, branch)
         for rec in recs:
             selected.setdefault(rec["entity_id"], rec)
         traces.extend(tr)
-        assessment.append(_assess(state, contracts, req, recs))
+        assessment.append(_assess(state, contracts, req, recs, relevant))
 
     traces.extend(close_references(state, contracts, selected))
 

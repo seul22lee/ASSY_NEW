@@ -102,3 +102,72 @@ mechanism generalises; what is missing is coverage of the S01→S02 consumer and
 of the second selection system.
 
 > **S-3 IN PROGRESS — CORE IMPLEMENTED, U-3 NOT YET CLOSED. S-4 has not begun.**
+
+
+---
+
+## §15 CORE SEMANTICS CORRECTION (pre-migration)
+
+Baseline `3c9a8eb`, reproduced from scratch. Consumer-path migration deliberately **not**
+started: the core semantics had to be right first, or the migration would have propagated
+them.
+
+## 15.1 Reproduced before editing
+
+| | Reproduction | Result at `3c9a8eb` |
+|---|---|---|
+| **A** | `s04a.topology_and_interaction` requires three roles; only a `Body` present | **`SATISFIED`** — the family union was non-empty, so "did we select anything?" answered yes while two thirds of the premise was missing |
+| **B** | a `Body` with no path to any candidate | **included**, recorded as `"common upstream"` |
+| **C** | a field declaring `target: RigidGroup` **and** `semantic_dependency: ReferenceScale` | yielded **only `ReferenceScale`** — one mutable variable, second declaration overwrote the first |
+
+## 15.2 Corrections landed
+
+1. **`Requirement.by_role` + `atoms()`** — a premise naming three roles is three obligations.
+2. **Source A is a true union** — a field may yield several dependencies, each with its own trace.
+3. **`scope_of` / `relevant_ids`** — relevance is a named classification (`ACTIVE_BRANCH`,
+   `COMMON_UPSTREAM`, `OTHER_BRANCH`, `UNSCOPED`) computed from the reference graph
+   **independently of what any requirement selected**.
+4. **`_assess_atom`** — per-obligation verdicts, worst-wins aggregation. A compound premise
+   cannot be `SATISFIED` while a required role is not. `PROJECTION_FAILURE` is decided against
+   accumulated state, never against the view — otherwise a selection error would conclude
+   upstream absence, the one misdiagnosis this taxonomy exists to prevent.
+
+Closure traces now also carry a relevance reason, so **every** inclusion is explainable.
+
+## 15.3 CONTRACT GAP — why B is landed as PROVISIONAL
+
+Implementing B strictly emptied every s04 view. The cause is not the fix:
+
+> **No topology family — `Body`, `RigidGroup`, `Joint`, `Interface`, `Configuration`,
+> `FunctionalRegion`, `AssemblyStep` — can reach `Candidate` through any declared reference.
+> Only `LoadPath` can.**
+
+The runner runs s03 once per candidate, but **nothing in state records which candidate a
+`Body` embodies**. An orphan and a real topology element are therefore *structurally
+identical*, and the contracts cannot tell them apart.
+
+Both available options were wrong: requiring positive evidence empties the views; inferring
+"no candidate path ⇒ common" is the unsound step the fix exists to remove. So the
+classification is returned as **`COMMON_UPSTREAM` marked `PROVISIONAL`**, with the reason
+stated in the trace, and the gap is recorded rather than papered over. **Closing it needs a
+structured candidate link on topology — an S-2 contract decision, not a view-layer choice.**
+
+A test pins this: if any topology family later *does* reach `Candidate`, it fails and says to
+revisit the relevance rule.
+
+## 15.4 Tests and regression
+
+**31 VIEW tests** (8 new: multi-role coverage, atomic preservation, both Source-A union
+shapes, fault-injected `PROJECTION_FAILURE`, absent-upstream, other-branch exclusion,
+universal relevance reasons, and the contract-gap pin).
+
+**69/69** state · **433 meta OK** · **8/8** window · CI boundary and gate OK.
+
+Classification: **A** compound-premise sufficiency · **C** Source-A union · **E** sufficiency
+classification — all fixed. **B** is **I — contract semantic gap**, recorded, not
+casually resolved by reopening S-2.
+
+## 15.5 Still open
+
+Consumer-path migration (**s02**, **s03a**, **s03b**'s raw `demands` channel),
+`project_for` retirement, ADR-002/003/004 replays. **S-3 remains IN PROGRESS.**
