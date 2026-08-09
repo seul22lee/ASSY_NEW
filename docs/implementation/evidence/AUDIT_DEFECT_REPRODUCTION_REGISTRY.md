@@ -37,7 +37,7 @@ model variability to such a test only weakens the evidence.
 
 | ID | Mechanism | Step | Replay type | Status |
 |---|---|---|---|---|
-| **ADR-001** | uncontrolled authoritative write / side-channel engineering fact | **S-1** | STRUCTURAL | **RESOLVED** |
+| **ADR-001** | uncontrolled authoritative write / side-channel engineering fact | **S-1** | STRUCTURAL | **RESOLVED** *(L1 at `2570aa4`; L2 required a hardening pass — see the history)* |
 | ADR-002 | consumer-view omission of a required premise | S-3 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
 | ADR-003 | S04A→S04B spatial commitment loss | S-6 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
 | ADR-004 | silent positional context truncation | S-3 | STRUCTURAL | NOT_YET_ADDRESSABLE |
@@ -115,6 +115,46 @@ self-test that feeds it the historical code and confirms it fires) and
 **Level 3 — live generalization.** *Not established, and not claimed.* S-1 is structural. A
 live claim requires S-9.
 
+### Resolution history — why Level 2 took two passes
+
+**This entry is kept in two stages deliberately.** The first pass looked resolved and was not,
+and that is worth preserving: it is the concrete example of why the registry requires a general
+invariant alongside an exact replay.
+
+| Pass | Claim supported | What it missed |
+|---|---|---|
+| **Initial S-1** (`2570aa4`) | *Level 1:* the historical `_absorb` path is gone; the facts arrive through controlled operations with provenance | *Level 2 was overstated.* Guarding covered the **top level only** |
+| **Hardening** | *Level 2:* authoritative mutation is impossible outside the boundary through any supported interface | — |
+
+**Five bypass classes were executable after the initial pass**, each reproduced by a failing
+test before any fix (22 of 23 failed):
+
+| | Bypass | Evidence |
+|---|---|---|
+| **A** | nested value mutation — `rec["volume"]["centre"][0] = 999` changed an authoritative spatial commitment with no patch, provenance, history or propagation | the outer record was guarded; its contents were plain dicts and lists |
+| **B** | `state.entities.popitem()` removed an entity silently — mutators were hand-listed and one was missed | six of eight dict mutators closed at the top level; none at any depth |
+| **C** | family-authority spoofing — a declared `entity_type` borrowed another family's field permission; `SUPERSEDE`/`INVALIDATE` checked family not at all | permission was looked up from the caller's assertion, not the stored entity |
+| **D** | input aliasing — a caller that kept the list it passed to an operation could mutate stored state afterwards, including the value `SUPERSEDE` retained | values were stored by reference |
+| **E** | `with state._gate.unlocked():` was a supported one-line bypass, and the gate was replaceable | the capability was a public attribute holding a public boolean |
+
+**After hardening.** Values are recursively guarded at every depth; every mutating method of
+the dict and list APIs is generated-closed rather than hand-listed; operations resolve the
+**stored** family before evaluating any permission; wrapping constructs new containers so
+input aliasing is closed by the same mechanism; and the write capability is held in a
+module-private registry with a type check, so nothing on a state object is the capability and
+a duck-typed forgery cannot open one.
+
+**Post-fix evidence.** Level 1: 8/8 unchanged in intent. Level 2: 64/64, covering top-level
+write, nested mutation, alias mutation, container-mutator bypass, family spoofing and
+capability exposure. Static scan: 3/3, now also rejecting capability names and
+`object.__setattr__` outside the state package — **as defence in depth, explicitly not as
+proof of authority safety.**
+
+**Documented limit, with an executable test.** `object.__setattr__` on a container's private
+slot with a genuine capability still bypasses the guard. This is repository-level
+architectural enforcement, not a security sandbox, and a test asserts the limit is real so it
+cannot quietly stop being true.
+
 ---
 
 ## Pre-registered mechanisms — later steps
@@ -187,7 +227,7 @@ is a new finding.
 | **Anchors** | `P4B` C-10; R-10. |
 | **Reproduction input** | A disposition citing a blocking relation. |
 | **Replay type** | STRUCTURAL — reference resolution needs no model. |
-| **Expected post-fix property** | Every relation the architecture treats as first-class has an id that resolves; an unresolvable reference refuses the patch. **The S-1 substrate exists** (`DANGLING_PREMISE` is already refused); the `ConstraintRelation` family itself is S-4. |
+| **Expected post-fix property** | Every relation the architecture treats as first-class has an id that resolves; an unresolvable reference refuses the patch. **The S-1 substrate exists** (`DANGLING_PREMISE` is refused, and stored-family resolution now prevents one family's permissions being used on another's entity); the `ConstraintRelation` family itself is S-4. |
 | **Forbidden post-fix condition** | A conclusion citing a relation that is not an addressable entity. |
 | **Step / status** | **S-4** · NOT_YET_ADDRESSABLE |
 

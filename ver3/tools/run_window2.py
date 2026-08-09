@@ -28,6 +28,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, REPO)
 
+from ver3.assy_v3.state.authority import thaw as _thaw                      # noqa: E402
 from ver3.assy_v3.state.patch import Op as _Op, StagePatch as _Patch       # noqa: E402
 from ver3.assy_v3.providers.offline import OfflineReplayProvider            # noqa: E402
 from ver3.assy_v3.providers.status import ExecutionStatus                   # noqa: E402
@@ -98,7 +99,7 @@ def mechanism_projection(state) -> Dict[str, Any]:
     Built by whitelist rather than by removing s01/s02: a blacklist quietly
     admits every family added later, and this boundary is the thing under test.
     """
-    return {fam: [dict(e) for e in state.family(fam)] for fam in S03_OWNED}
+    return {fam: [_thaw(e) for e in state.family(fam)] for fam in S03_OWNED}
 
 
 def interface_gaps(mech: Dict[str, Any]) -> List[str]:
@@ -220,7 +221,7 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
     # topology pass A just fixed. Split because one response could not carry
     # both; every field survives, only the emission is halved.
     mech = {f: [dict(e) for e in state.family(f)] for f in S03_OWNED}
-    demands = {"LoadCase": [dict(e) for e in state.family("LoadCase")],
+    demands = {"LoadCase": [_thaw(e) for e in state.family("LoadCase")],
                "Obligation": [dict(e) for e in state.family("Obligation")],
                "candidate": candidate.get("entity_id")}
     try:
@@ -254,7 +255,7 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
         rec["rename_examples"] = sorted(set(renames))[:6]
         groups = [g["entity_id"] for g in state.family("RigidGroup")]
         configs = [c["entity_id"] for c in state.family("Configuration")]
-        joints = [dict(j) for j in state.family("Joint")]
+        joints = [_thaw(j) for j in state.family("Joint")]
         entries = derive_mobility(groups, configs, joints, relations,
                                   parsed.get("irrelevance") or [])
         rec["dof_entries_derived"] = len(entries)

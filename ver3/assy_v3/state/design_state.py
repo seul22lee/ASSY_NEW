@@ -7,9 +7,18 @@ import os
 from typing import Any, Dict, Iterable, List, Optional
 
 import yaml
+from weakref import WeakKeyDictionary
 
 from .authority import (AuthorityClass, AuthorityViolation, GuardedEntities,
-                        GuardedRecord, ValidityStatus, _MutationGate)
+                        ValidityStatus, WriteCapability, wrap)
+
+#: The write capability for each DesignState, held OFF the instance.
+#:
+#: A name-mangled attribute is still discoverable through ``dir()`` and reachable
+#: by its mangled name, which makes it a private-by-convention switch rather than
+#: a private one. Holding it in a module-private registry means no attribute of a
+#: state object is the capability, and only this module can look one up.
+_CAPABILITIES: "WeakKeyDictionary" = WeakKeyDictionary()
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _CONTRACTS = os.path.abspath(os.path.join(_HERE, "..", "..", "contracts"))
@@ -90,15 +99,20 @@ class DesignState:
     #: one of them. Before S-1 three of them were assigned here directly
     #: (``s04a_reach``, ``s04a_elimination``, ``s04a_scale``): no identity, no
     #: owner, no provenance, and nothing read them.
+    #:
+    #: The write capability is deliberately NOT in this set. It is held under a
+    #: name-mangled attribute, is never returned by an accessor, and cannot be
+    #: replaced after construction - a public switch that any caller could flip
+    #: would make the boundary a convention again.
     _ATTRIBUTES = frozenset((
-        "run_id", "c", "entities", "by_family", "applied_patches", "_gate"))
+        "run_id", "c", "entities", "by_family", "applied_patches"))
 
     def __init__(self, run_id: str, contracts: Optional[Contracts] = None) -> None:
-        object.__setattr__(self, "_gate", _MutationGate())
+        cap = WriteCapability()
+        _CAPABILITIES[self] = cap
         self.run_id = run_id
         self.c = contracts or Contracts()
-        with self._gate.unlocked():
-            self.entities: Dict[str, Dict[str, Any]] = GuardedEntities(self._gate)
+        object.__setattr__(self, "entities", GuardedEntities(cap))
         self.by_family: Dict[str, List[str]] = {}
         self.applied_patches: List[str] = []
 
@@ -107,7 +121,8 @@ class DesignState:
             raise AuthorityViolation(
                 "SIDE_CHANNEL_WRITE: DesignState.%s. An engineering fact needs an "
                 "entity with an identity, an owner and provenance - not an "
-                "attribute on the state object (FA-2, FA-3)." % name)
+                "attribute on the state object (FA-2, FA-3). The write capability "
+                "is not settable either." % name)
         object.__setattr__(self, name, value)
 
     # ------------------------------------------------------------------ hash
@@ -146,10 +161,19 @@ class DesignState:
                 if not op.provenance_ref:
                     problems.append("NO_PROVENANCE: %s" % eid)
                 seen.add(eid)
-            elif op.kind == "EXTEND":
-                problems.extend(self._extend_problems(patch, op))
-            elif op.kind in ("SUPERSEDE", "INVALIDATE"):
-                problems.extend(self._revision_problems(op))
+            elif op.kind in ("EXTEND", "SUPERSEDE", "INVALIDATE"):
+                # The entity already exists, so its STORED family is the
+                # authority. A caller-supplied entity_type may not be the source
+                # of truth, or one family's permissions could be borrowed for
+                # another's entity.
+                mismatch = self._family_problem(op)
+                if mismatch:
+                    problems.append(mismatch)
+                    continue
+                if op.kind == "EXTEND":
+                    problems.extend(self._extend_problems(patch, op))
+                else:
+                    problems.extend(self._revision_problems(op))
             # U-4. A declared premise must resolve, or the dependency it claims
             # to record is fiction and FA-5 cannot be computed from it.
             for ref in op.premise_refs:
@@ -159,6 +183,27 @@ class DesignState:
         return problems
 
     # ------------------------------------------------------- U-4 operations
+    def stored_family(self, entity_id: str) -> Optional[str]:
+        """The family the entity actually has. The only authority on its identity."""
+        rec = self.entities.get(entity_id)
+        return None if rec is None else rec.get("_family")
+
+    def _family_problem(self, op) -> Optional[str]:
+        """Resolve by id, then reject a declared type that is not the stored one.
+
+        Evaluated BEFORE any ownership, extendability or field permission, so a
+        permission belonging to one family can never be evaluated against an
+        entity of another.
+        """
+        if op.entity_id not in self.entities:
+            return None                     # the operation's own check reports this
+        actual = self.stored_family(op.entity_id)
+        if actual != op.entity_type:
+            return ("FAMILY_MISMATCH: %s is a %s, not a %s; permissions of the "
+                    "declared family may not be borrowed"
+                    % (op.entity_id, actual, op.entity_type))
+        return None
+
     def _extend_problems(self, patch, op) -> List[str]:
         """EXTEND is a permission, not a dict.update.
 
@@ -167,10 +212,12 @@ class DesignState:
         its own operation so that the prior value survives.
         """
         out: List[str] = []
-        eid, fam = op.entity_id, op.entity_type
+        eid = op.entity_id
         if eid not in self.entities:
             out.append("EXTEND_UNKNOWN: %s" % eid)
             return out
+        # The STORED family, never the declared one (see _family_problem).
+        fam = self.stored_family(eid)
         if not op.provenance_ref:
             out.append("NO_PROVENANCE: %s" % eid)
         permitted = self.c.extendable_fields(fam)
@@ -222,11 +269,16 @@ class DesignState:
 
     # ----------------------------------------------------------------- apply
     def apply(self, patch) -> None:
-        """The controlled mutation boundary. The only way class-A state changes."""
+        """The controlled mutation boundary. The only way class-A state changes.
+
+        The write capability is granted here and nowhere else. Every value that
+        enters is recursively wrapped, so state never holds an object a caller
+        still has a reference to.
+        """
         problems = self.validate(patch)
         if problems:
             raise ContractError("; ".join(problems))
-        with self._gate.unlocked():
+        with _CAPABILITIES[self].granted():
             for op in patch.operations:
                 if op.kind == "CREATE":
                     self._create(patch, op)
@@ -238,8 +290,17 @@ class DesignState:
                     self._invalidate(patch, op)
         self.applied_patches.append(patch.patch_id)
 
+    def _wrap(self, value: Any) -> Any:
+        return wrap(value, _CAPABILITIES[self])
+
+    def _log(self, rec, key: str, entry: Dict[str, Any]) -> None:
+        """Append to a per-entity history list, creating it under authority."""
+        if key not in rec:
+            rec[key] = self._wrap([])
+        rec[key].append(self._wrap(entry))
+
     def _create(self, patch, op) -> None:
-        rec = GuardedRecord(self._gate, op.fields)
+        rec = self._wrap(dict(op.fields))
         rec["entity_id"] = op.entity_id
         rec["_family"] = op.entity_type
         rec["_created_by"] = patch.stage_id
@@ -247,43 +308,50 @@ class DesignState:
         rec["_authority"] = self.c.authority_class(op.entity_type).value
         rec["_validity"] = ValidityStatus.STANDING.value
         if op.premise_refs:
-            rec["_premises"] = list(op.premise_refs)
+            rec["_premises"] = self._wrap(list(op.premise_refs))
         self.entities[op.entity_id] = rec
         self.by_family.setdefault(op.entity_type, []).append(op.entity_id)
 
     def _extend(self, patch, op) -> None:
         rec = self.entities[op.entity_id]
-        rec.update(op.fields)
+        for name, value in op.fields.items():
+            rec[name] = self._wrap(value)
         # Provenance is per act, not per entity: the creating stage and the
         # extending stage are different authors and both must remain visible.
-        rec.setdefault("_extensions", []).append(
-            {"stage": patch.stage_id, "fields": sorted(op.fields),
-             "provenance": op.provenance_ref, "premises": list(op.premise_refs)})
-        if op.premise_refs:
-            rec["_premises"] = sorted(set(rec.get("_premises", [])) | set(op.premise_refs))
+        self._log(rec, "_extensions",
+                  {"stage": patch.stage_id, "fields": sorted(op.fields),
+                   "provenance": op.provenance_ref,
+                   "premises": list(op.premise_refs)})
+        self._merge_premises(rec, op)
 
     def _supersede(self, patch, op) -> None:
         """FA-1: both values are retained. The prior value is never overwritten
         out of existence, only displaced from being current."""
         rec = self.entities[op.entity_id]
-        history = rec.setdefault("_superseded", [])
         for name, value in op.fields.items():
-            history.append({"field": name, "prior_value": rec.get(name),
-                            "stage": patch.stage_id, "reason": op.reason,
-                            "provenance": op.provenance_ref})
-            rec[name] = value
-        if op.premise_refs:
-            rec["_premises"] = sorted(set(rec.get("_premises", [])) | set(op.premise_refs))
+            # The prior value is already wrapped, so the retained history is as
+            # alias-safe as the current value.
+            self._log(rec, "_superseded",
+                      {"field": name, "prior_value": rec.get(name),
+                       "stage": patch.stage_id, "reason": op.reason,
+                       "provenance": op.provenance_ref})
+            rec[name] = self._wrap(value)
+        self._merge_premises(rec, op)
         self._propagate(op.entity_id, "SUPERSEDED", op.reason)
 
     def _invalidate(self, patch, op) -> None:
         """The record remains readable. What it loses is unqualified authority."""
         rec = self.entities[op.entity_id]
         rec["_validity"] = ValidityStatus.INVALIDATED.value
-        rec.setdefault("_invalidations", []).append(
-            {"stage": patch.stage_id, "reason": op.reason,
-             "provenance": op.provenance_ref})
+        self._log(rec, "_invalidations",
+                  {"stage": patch.stage_id, "reason": op.reason,
+                   "provenance": op.provenance_ref})
         self._propagate(op.entity_id, "INVALIDATED", op.reason)
+
+    def _merge_premises(self, rec, op) -> None:
+        if op.premise_refs:
+            rec["_premises"] = self._wrap(
+                sorted(set(rec.get("_premises", [])) | set(op.premise_refs)))
 
     # ------------------------------------------------------- M-5A propagation
     def _propagate(self, changed_id: str, kind: str, reason: Optional[str]) -> None:
@@ -300,8 +368,9 @@ class DesignState:
             if rec.get("_validity") != ValidityStatus.STANDING.value:
                 continue
             rec["_validity"] = ValidityStatus.STALE.value
-            rec.setdefault("_stale_because", []).append(
-                {"premise": changed_id, "premise_change": kind, "reason": reason})
+            self._log(rec, "_stale_because",
+                      {"premise": changed_id, "premise_change": kind,
+                       "reason": reason})
 
     # ------------------------------------------------------------------ read
     def family(self, name: str) -> List[Dict[str, Any]]:

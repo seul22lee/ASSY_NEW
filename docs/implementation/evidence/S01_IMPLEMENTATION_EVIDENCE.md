@@ -304,7 +304,10 @@ Level-3 claim is made.**
 | 14 | Relevant regression passes, or failures explicitly separated | **MET** — 1 pre-existing failure, verified at HEAD, classified in §12 |
 | 15 | No S-2+ functionality prematurely implemented | **MET** — no stage, prompt or validator touched; diff reviewed |
 
-**S-1 is COMPLETE.**
+**S-1 exit criteria were met as written at commit `2570aa4`.** A subsequent hardening pass
+established that criterion 6 — *"no equivalent uncontrolled class-A path remains"* — was
+**true only for the top-level shapes the historical defect used**, and not for the general
+invariant. See §17. **The unqualified COMPLETE claim below is superseded by §17.20.**
 
 ---
 
@@ -345,3 +348,190 @@ Level-3 claim is made.**
 | Fixture regeneration and the live chain | S-9 |
 
 **Implementation stops here. S-2 is not begun.**
+
+
+---
+---
+
+# §17 S-1 AUTHORITY-BOUNDARY HARDENING
+
+Second pass over S-1 only. No architecture decision reopened, no later unit begun, no stage
+reasoning, prompt, validator, fixture or benchmark changed. The original `2570aa4` evidence
+above is preserved unedited.
+
+## 17.1 Why the first implementation was insufficient
+
+`2570aa4` closed the historical `_absorb` path and guarded the entity table and entity
+records. **That is the top level only.** The claim it supported was *"the historical bypass is
+gone"*; the claim S-1 actually owes is *"authoritative mutation is impossible outside the
+boundary."* Those are different, and the gap between them was executable.
+
+Twenty-two of twenty-three reproduction tests failed against `2570aa4` — each one a real
+bypass, not a hypothetical.
+
+## 17.2 Findings, each reproduced before being fixed
+
+| # | Finding | The bypass, executable |
+|---|---|---|
+| **A** | **Nested mutability** | `state.entities[eid]["volume"]["centre"][0] = 999` succeeded. The outer record was guarded; every value inside it was a plain dict or list. An authoritative spatial commitment could be changed with no patch, no provenance, no history and no propagation. |
+| **B** | **Container API coverage** | `GuardedEntities` overrode six mutators and **not `popitem`** — `state.entities.popitem()` removed an entity silently. Nested values had no guard at all. Methods had been hand-listed, so one was missed. |
+| **C** | **Entity-family authority spoofing** | `_extend_problems` looked up permissions using the caller-supplied `op.entity_type`. Declaring `entity_type="FunctionalRegion"` on a Joint borrowed `volume`'s extendability and wrote it onto the Joint. `SUPERSEDE` and `INVALIDATE` checked family not at all. |
+| **D** | **Input and history aliasing** | `Op.fields` values were stored by reference. A caller that kept its list could mutate stored state afterwards. The prior value retained by `SUPERSEDE` was equally reachable. |
+| **E** | **Gate exposure** | `state._gate` was a public attribute holding a public boolean switch: `with state._gate.unlocked(): ...` was a supported one-line bypass. Worse, `_gate` was in the settable-attribute whitelist, so the capability could be **replaced**. |
+
+## 17.3 Selected hardening design
+
+**Recursively guarded containers, wrapped on write.** `GuardedDict` and `GuardedList` replace
+plain containers at *every depth*; mutating methods are **generated** from an enumerated list
+rather than hand-written, so one cannot be left active by oversight — which is exactly how
+`popitem` survived.
+
+Evaluated against the criteria the brief names:
+
+| Criterion | Recursive guards *(selected)* | Frozen/immutable storage | Deep-copy on read |
+|---|---|---|---|
+| runtime enforcement | **loud rejection at every depth** | rejection | **silent no-op** — caller believes the write worked |
+| alias safety | **construction makes new containers, so input aliasing is closed by the same mechanism** | closed | closed |
+| serialization | identical — subclasses of `dict`/`list` | `tuple` serializes, but round-trips differently | identical |
+| existing readers | **unchanged** — `isinstance`, indexing, `.get`, iteration, `==` against a list, `len`, `min` all behave | **breaks**: `tuple != list` in every equality and in geometry code | unchanged |
+| provenance | unaffected | unaffected | unaffected |
+| performance | wrap once per write; **reads cost nothing** | one-time | **cost on every read** |
+| complexity | two container types + one recursive `wrap` | conversion layer both ways | trivial |
+| S-2/S-3 fit | `thaw()` gives class C its plain structures | conversion needed anyway | natural |
+
+Frozen storage was rejected because it breaks reader equality against lists and the geometry
+code that consumes these values. Deep-copy-on-read was rejected because a silent no-op is a
+worse failure mode than a refusal.
+
+**Capability instead of a public gate.** `WriteCapability` is held in a **module-private
+`WeakKeyDictionary` keyed by the state object** — not on the instance at all. A name-mangled
+attribute was tried first and rejected: it is still discoverable through `dir()` and reachable
+by its mangled name, which makes it private by convention rather than private. The capability
+is also **type-checked** at every guard, so a duck-typed object exposing `open = True` cannot
+unlock anything.
+
+**Stored-family resolution.** Every operation targeting an existing entity now resolves the
+entity by id, reads its **stored** `_family`, rejects a mismatch, and only then evaluates
+ownership, extendability and field permission. Caller-supplied `entity_type` is never the
+source of truth for an entity that already exists.
+
+## 17.4 Files changed in this pass
+
+| File | Change |
+|---|---|
+| `ver3/assy_v3/state/authority.py` | rewritten: `WriteCapability`, generated mutator closure, `GuardedDict`/`GuardedList`, `wrap()`, `thaw()`, `_is_granted()` |
+| `ver3/assy_v3/state/design_state.py` | capability moved to a module-private registry; recursive wrapping on every write; `stored_family()` and `_family_problem()`; history appends routed through `_log` |
+| `ver3/assy_v3/state/projection.py` | a view is thawed — class C must be plain and freely mutable |
+| `ver3/tools/run_window2.py` | the three projection helpers thawed |
+| `ver3/assy_v3/stages/s04_envelope_and_motion.py` | **2 lines**: import `thaw`, use it in the mechanism projection. No engineering reasoning, no prompt |
+| `ver3/tests/state/test_authority_hardening.py` | **new** — 34 tests |
+| `ver3/tests/meta/test_no_uncontrolled_authoritative_writes.py` | capability-name and `object.__setattr__` detection; scope restated as defence in depth |
+
+## 17.5 Before / after
+
+| Bypass | Before (`2570aa4`) | After |
+|---|---|---|
+| `rec["volume"]["centre"][0] = 999` | succeeded | `AuthorityViolation` |
+| `rec["owning_bodies"].append(...)` | succeeded | `AuthorityViolation` |
+| `state.entities.popitem()` | succeeded | `AuthorityViolation` |
+| every enumerated dict/list mutator | six of eight closed at top level; none nested | **all closed, at every depth, on every container** |
+| `EXTEND` with a spoofed `entity_type` | wrote the borrowed field | `FAMILY_MISMATCH`; the field never reaches the entity |
+| `SUPERSEDE` / `INVALIDATE` family | unchecked | `FAMILY_MISMATCH` |
+| caller mutates a list it passed to `CREATE` | state changed | state unchanged |
+| caller mutates a value it passed to `SUPERSEDE` | state changed | state unchanged |
+| mutating the retained prior value | succeeded | `AuthorityViolation` |
+| `state._gate` | public attribute, replaceable | **no such attribute**; nothing on the state is the capability |
+| `with state._gate.unlocked():` | supported bypass | no supported path; also flagged statically |
+| duck-typed fake capability | n/a | rejected by type check |
+
+## 17.6 Tests added
+
+34 tests in `test_authority_hardening.py`: nested-value bypass (4), container mutator coverage
+(6, including a systematic assertion that **no** enumerated mutator is inherited unguarded),
+family spoofing (6), input aliasing (4), capability exposure (4), and **AUTH-01…AUTH-08**
+mechanism-independent properties (10).
+
+The mutator-coverage tests enumerate the dict and list mutation APIs and assert each is
+overridden, rather than testing named methods — so the next omission is a failure, not a
+discovery.
+
+## 17.7 ADR-001 Level 1 — exact historical replay
+
+**8/8 pass, unchanged in intent.** The historical payload still drives the current code; the
+engineering facts still arrive; they arrive through controlled operations with provenance; the
+old bypass is absent; premise binding still marks dependents `STALE` while leaving values
+intact. No assertion requires a historical value to be correct.
+
+## 17.8 ADR-001 Level 2 — generalized invariant
+
+**64/64 pass**, now covering every class the brief names: top-level direct write · nested
+in-place mutation · external alias mutation · entity-table mutator bypass · family-spoofed
+mutation · capability exposure and forgery. Plus the static scan (3 tests), which now also
+rejects external use of capability names and `object.__setattr__`.
+
+## 17.9 Runtime guarantee — stated precisely
+
+> **Within the repository's supported mutation interfaces, authoritative engineering state
+> cannot be changed outside the controlled mutation boundary — including through nested
+> mutable values, retained input references, inherited container mutators, and
+> family-authority spoofing.**
+
+Every mutating method of every authoritative container, at every depth, refuses unless a
+genuine `WriteCapability` is open; the capability is granted only inside `DesignState.apply()`
+and is held off the state object in a module-private registry.
+
+## 17.10 Static-analysis guarantee — and its limit
+
+**The AST scan is DEFENCE IN DEPTH, not proof of authority safety.** This is asserted in the
+test module's own docstring so it cannot be misread later. It catches the audited shapes plus
+capability misuse at review time. It does **not** perform alias analysis, and a write reaching
+state through an alias built in another function is invisible to it — and is caught at runtime
+instead.
+
+## 17.11 Guarantee limitations — stated, not hidden
+
+1. **Introspection is not prevented.** `object.__setattr__` on a container's private slot with
+   a genuine `WriteCapability` **does** bypass the guard. This is repository-level
+   architectural enforcement, not a security sandbox. **There is an executable test asserting
+   this limit is real** — the limit is evidence, not a sentence that may quietly stop being
+   true.
+2. **`thaw()` is deliberately unguarded.** That is what class C means.
+3. **A holder of a live reference sees later authorised changes**, since guarded containers are
+   live views. That is correct — it is state, not a snapshot.
+4. **Wrapping costs one traversal per write.** Reads are free.
+
+## 17.12 Failure classification for this pass
+
+| Failure | Class | Action |
+|---|---|---|
+| 22 of 23 reproduction tests failing at `2570aa4` | **(B) previously missed S-1 write bypass** | fixed in this pass |
+| `test_a_forged_capability_does_not_open_a_guarded_container` still failing after the first fix | **(A) hardening implementation defect** — the test asserted more than the design could honestly guarantee | fixed both ways: a type check now genuinely closes duck-typed forgery, and the test was rewritten to assert the honest guarantee plus an explicit test of the real limit |
+| view consumers meeting guarded nested values | **(C) read-compatibility break** | fixed by thawing views (§17.4) |
+| `test_package_path.test_only_permitted_historical_occurrences_remain` | **(E) pre-existing** | unchanged from §12; still verified failing at HEAD, still not fixed here |
+
+No **(G) frozen-architecture contradiction** arose. No **(F)** dependency on a later unit was
+encountered.
+
+## 17.13 Broad validation
+
+| Suite | Result |
+|---|---|
+| `ver3/tests/state` | **69/69 OK** (27 model + 8 replay + 34 hardening) |
+| `ver3/tests/meta` (311) | **310 pass, 1 pre-existing failure** |
+| `ver3/tests/window` | **8/8 OK** |
+| ADR-001 Level 1 | **8/8 OK** |
+| ADR-001 Level 2 | **64/64 OK** |
+| static authority scan | **3/3 OK**, clean over `assy_v3/`, `tools/`, `live_providers/` |
+| all stage, tool and provider modules import | **OK** |
+
+**No model call. No benchmark rerun.**
+
+## 17.20 Revised S-1 claim
+
+> **S-1 is COMPLETE**, in the stronger sense: *within the repository's supported mutation
+> interfaces, authoritative engineering state cannot be changed outside the controlled
+> mutation boundary, including by nested mutable values, retained input aliases, inherited
+> container mutators, family-authority spoofing, or access to the write capability.*
+
+The limits of that claim are stated in §17.11 and are covered by executable tests. No claim of
+Python-language impossibility is made.

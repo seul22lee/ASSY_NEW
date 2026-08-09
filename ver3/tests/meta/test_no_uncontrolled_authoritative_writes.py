@@ -1,15 +1,18 @@
-"""No class-A engineering fact enters DesignState except through the boundary.
+"""DEFENCE IN DEPTH for the authority boundary. NOT proof of authority safety.
 
-The runtime guard in assy_v3/state/authority.py is the enforcement. This test is
-the *general invariant*: it catches the defect class returning under a different
-helper name, in a different file, before anyone runs the code that would trip the
-guard.
+**The runtime guard in assy_v3/state/authority.py is the enforcement.** Guarded
+containers refuse every mutating method at every depth, and the write capability
+is held in a module-private registry rather than on the state object. This scan
+exists only to catch common accidental bypasses at review time, before anyone
+runs the code that would trip the guard.
 
-Deleting `_absorb` proves nothing on its own. The property is that no writer
-anywhere assigns into authoritative state directly.
+What it can do: flag the shapes the audit actually found, plus direct use of the
+write capability outside the state module.
 
-Deliberately small: a source scan for the two shapes the audit actually found,
-not a static-analysis framework.
+What it cannot do, and does not claim: complete Python alias analysis. A write
+reaching state through an alias created in another function is invisible here and
+is caught at runtime instead. Treating this scan as the authority model would be
+the same category error as treating a convention as a boundary.
 """
 from __future__ import annotations
 
@@ -35,8 +38,14 @@ SCANNED = [os.path.join(VER3, "assy_v3"), os.path.join(VER3, "tools"),
 
 #: Attributes DesignState legitimately carries. Anything else assigned onto a
 #: state object is a side-channel engineering fact - the second half of the
-#: audited defect (`state.s04a_reach = ...`).
-STATE_ATTRS = {"run_id", "c", "entities", "by_family", "applied_patches", "_gate"}
+#: audited defect (`state.s04a_reach = ...`). The write capability is not among
+#: them: it is held off the instance entirely.
+STATE_ATTRS = {"run_id", "c", "entities", "by_family", "applied_patches"}
+
+#: Names that grant or hold write authority. Outside the state package there is
+#: no legitimate reason to touch any of them.
+CAPABILITY_NAMES = {"granted", "unlocked", "_cap", "_gate", "WriteCapability",
+                    "_CAPABILITIES", "_is_granted"}
 
 
 def _python_files():
@@ -78,6 +87,20 @@ def _violations(path):
                 if isinstance(tgt.value, ast.Name) and tgt.attr not in STATE_ATTRS:
                     out.append((node.lineno,
                                 "side-channel attribute %r on state" % tgt.attr))
+
+    # shape 3: reaching for write authority at all, outside the state package
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in CAPABILITY_NAMES:
+            out.append((node.lineno,
+                        "use of write-capability name %r" % node.attr))
+        elif isinstance(node, ast.Name) and node.id in CAPABILITY_NAMES:
+            out.append((node.lineno,
+                        "use of write-capability name %r" % node.id))
+        # shape 4: object.__setattr__(x, ...) is the documented introspection
+        # bypass; it has no legitimate use outside the state package.
+        elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+              and node.func.attr == "__setattr__"):
+            out.append((node.lineno, "object.__setattr__ bypass"))
     return out
 
 
@@ -92,6 +115,20 @@ class TestNoUncontrolledAuthoritativeWrites(unittest.TestCase):
             "Class-A state may change only through CREATE / EXTEND / SUPERSEDE / "
             "INVALIDATE carried by a StagePatch (FA-3). Found:\n  " + "\n  ".join(found))
 
+
+    def test_the_scan_rejects_external_use_of_the_write_capability(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            specimen = os.path.join(tmp, "sneaky.py")
+            with open(specimen, "w") as fh:
+                fh.write("def sneak(state, rec):\n"
+                         "    with state._cap.granted():\n"
+                         "        rec['x'] = 1\n"
+                         "    object.__setattr__(rec, '_cap', None)\n")
+            found = _violations(specimen)
+        kinds = {why for _ln, why in found}
+        self.assertIn("use of write-capability name '_cap'", kinds)
+        self.assertIn("use of write-capability name 'granted'", kinds)
+        self.assertIn("object.__setattr__ bypass", kinds)
 
     def test_the_scan_would_actually_catch_the_historical_defect(self):
         """A guard nobody has seen fail is not evidence. Feed it the old code."""

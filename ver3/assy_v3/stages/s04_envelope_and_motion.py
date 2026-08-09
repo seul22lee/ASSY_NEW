@@ -31,6 +31,7 @@ import json
 import math
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
+from ..state.authority import thaw as _thaw
 from ..state.patch import Op
 from .base import Stage
 
@@ -420,7 +421,7 @@ def joint_geometry_check(state) -> List[str]:
     that catches an arrangement produced without regard to the topology.
     """
     boxes = _boxes(state)
-    mech = {f: [dict(e) for e in state.family(f)]
+    mech = {f: [_thaw(e) for e in state.family(f)]
             for f in ("RigidGroup", "Joint", "Interface")}
     problems = []
     for pb, cb in required_contacts(mech):

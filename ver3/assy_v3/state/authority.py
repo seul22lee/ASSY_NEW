@@ -9,17 +9,40 @@ Four authority classes, and every value belongs to exactly one:
   B  DERIVED        strict consequences of class-A premises. Recomputable.
                     Carries its premise set. Never authored-looking.
   C  EPHEMERAL      views, serializations, caches, provider payloads. Freely
-                    regenerated. Never stored in DesignState at all - a
-                    projection returns plain dicts outside the state, which is
-                    what makes class C structurally distinguishable here.
+                    regenerated. Plain mutable structures, produced by `thaw`.
   D  ASSURANCE      check results and findings. Append-only consumers of
                     class A, never producers of it.
 
-The guard classes below exist because the audited defect was not a stage
-misbehaving. It was a runner helper assigning into an entity dict directly, with
-no operation, no ownership check and no provenance - and nothing in the system
-could have detected it. A convention would not have caught that. A locked
-container does.
+ENFORCEMENT MODEL
+    Authoritative values are stored in guarded containers, RECURSIVELY. A dict
+    becomes a GuardedDict, a list a GuardedList, at every depth. Every mutating
+    method of the underlying type is closed; with the write capability closed,
+    each raises AuthorityViolation.
+
+    Wrapping happens on WRITE, and it CONSTRUCTS NEW CONTAINERS from the input's
+    contents. That is what closes input aliasing: the object a caller passed into
+    an operation is never the object the state holds, so the caller cannot reach
+    back into state through the reference it kept.
+
+    Reads are free and cost nothing: GuardedDict IS a dict and GuardedList IS a
+    list, so indexing, `.get`, iteration, equality and json serialization all
+    behave identically for every existing reader.
+
+    A consumer that needs a mutable structure - a projection, a prompt payload, a
+    cache - calls `thaw()` and gets plain dicts and lists. That is class C, and it
+    is deliberately outside the authority model.
+
+WHAT THIS GUARANTEES, AND WHAT IT DOES NOT
+    Guaranteed: no supported interface in this repository can change authoritative
+    state outside the controlled mutation boundary. Every mutating method of every
+    authoritative container refuses, at every depth, and the write capability is
+    not reachable under any public name.
+
+    NOT guaranteed: immunity to introspection. `object.__setattr__` on a private
+    slot, `gc` traversal, or importing this module and constructing a capability
+    directly can still reach the stored objects. This is repository-level
+    architectural enforcement, not a security sandbox, and the distinction is
+    stated rather than blurred.
 """
 from __future__ import annotations
 
@@ -44,18 +67,12 @@ class ValidityStatus(str, Enum):
     what it loses is unqualified authority.
     """
 
-    #: Current, and no premise it depends on has changed.
     STANDING = "STANDING"
-    #: A replacement value was recorded. Both are retained.
     SUPERSEDED = "SUPERSEDED"
-    #: Explicitly withdrawn with a reason. The record remains.
     INVALIDATED = "INVALIDATED"
-    #: A premise this value depends on was superseded or invalidated. The value
-    #: itself was not touched; it has lost unqualified authority.
     STALE = "STALE"
 
 
-#: Statuses that do NOT carry unqualified authority.
 NOT_UNQUALIFIED = (ValidityStatus.SUPERSEDED, ValidityStatus.INVALIDATED,
                    ValidityStatus.STALE)
 
@@ -67,112 +84,150 @@ class AuthorityViolation(Exception):
     """
 
 
-class _MutationGate:
-    """Open only inside the controlled mutation boundary."""
+class WriteCapability:
+    """The authority to mutate. Held privately by one DesignState.
 
-    __slots__ = ("open",)
+    Not a public switch: it is stored name-mangled on the state, refused for
+    reassignment, and never returned by any accessor. Opening it is the act of
+    entering the controlled mutation boundary.
+    """
+
+    __slots__ = ("_open",)
 
     def __init__(self) -> None:
-        self.open = False
+        self._open = False
+
+    @property
+    def open(self) -> bool:
+        return self._open
 
     @contextmanager
-    def unlocked(self) -> Iterator[None]:
-        previous = self.open
-        self.open = True
+    def granted(self) -> Iterator[None]:
+        previous = self._open
+        self._open = True
         try:
             yield
         finally:
-            self.open = previous
+            self._open = previous
 
 
-def _refuse(what: str, key: Any) -> None:
+def _refuse(container: str, key: Any, op: str) -> None:
     raise AuthorityViolation(
-        "UNCONTROLLED_WRITE: %s[%r] outside the controlled mutation boundary. "
+        "UNCONTROLLED_WRITE: %s.%s(%r) outside the controlled mutation boundary. "
         "Class-A state changes only through CREATE / EXTEND / SUPERSEDE / "
-        "INVALIDATE carried by a StagePatch (FA-3)." % (what, key))
+        "INVALIDATE carried by a StagePatch (FA-3). To change a nested value, "
+        "submit an operation describing the change." % (container, op, key))
 
 
-class GuardedRecord(dict):
-    """One authoritative entity. Readable everywhere, writable only by the boundary."""
+def _is_granted(cap: Any) -> bool:
+    """True only for a real, open capability.
 
-    __slots__ = ("_gate",)
+    The type check matters: without it any object exposing ``open = True`` would
+    unlock a container, so a forged capability would be a one-line bypass. With
+    it, forgery requires importing this module and rebinding a private slot
+    through ``object.__setattr__`` - introspection, not a supported interface.
+    """
+    return type(cap) is WriteCapability and cap.open
 
-    def __init__(self, gate: _MutationGate, data: Optional[Dict[str, Any]] = None) -> None:
+
+def _guard_methods(cls, base, names, label):
+    """Close every mutating method the base type provides.
+
+    Generated rather than hand-written, so a method cannot be left active by
+    oversight - which is exactly how `popitem` survived the first pass.
+    """
+    for name in names:
+        original = getattr(base, name, None)
+        if original is None:
+            continue                       # not present on this Python version
+
+        def make(name=name, original=original):
+            def guarded(self, *args, **kw):
+                if not _is_granted(self._cap):
+                    _refuse(label, args[0] if args else None, name)
+                return original(self, *args, **kw)
+            guarded.__name__ = name
+            guarded.__qualname__ = "%s.%s" % (cls.__name__, name)
+            return guarded
+
+        setattr(cls, name, make())
+
+
+#: Every mutating name on the mapping API, including 3.9+ in-place union.
+_DICT_MUTATORS = ("__setitem__", "__delitem__", "__ior__", "update",
+                  "setdefault", "pop", "popitem", "clear")
+
+#: Every mutating name on the sequence API, including in-place operators.
+_LIST_MUTATORS = ("__setitem__", "__delitem__", "__iadd__", "__imul__",
+                  "append", "extend", "insert", "pop", "remove", "clear",
+                  "sort", "reverse")
+
+
+class GuardedDict(dict):
+    """An authoritative mapping at any depth. Readable everywhere, writable only
+    inside the controlled mutation boundary."""
+
+    __slots__ = ("_cap",)
+
+    def __init__(self, cap: WriteCapability,
+                 data: Optional[Dict[Any, Any]] = None) -> None:
+        # dict.__init__ does not route through __setitem__, so construction is
+        # not a guarded write and needs no capability.
         super().__init__(data or {})
-        self._gate = gate
+        object.__setattr__(self, "_cap", cap)
 
-    # -- writes -----------------------------------------------------------
-    def __setitem__(self, key: Any, value: Any) -> None:
-        if not self._gate.open:
-            _refuse("entity", key)
-        super().__setitem__(key, value)
-
-    def __delitem__(self, key: Any) -> None:
-        if not self._gate.open:
-            _refuse("entity", key)
-        super().__delitem__(key)
-
-    def update(self, *args: Any, **kw: Any) -> None:            # type: ignore[override]
-        if not self._gate.open:
-            _refuse("entity", "update")
-        super().update(*args, **kw)
-
-    def setdefault(self, key: Any, default: Any = None) -> Any:  # type: ignore[override]
-        if key not in self and not self._gate.open:
-            _refuse("entity", key)
-        return super().setdefault(key, default)
-
-    def pop(self, *args: Any) -> Any:                            # type: ignore[override]
-        if not self._gate.open:
-            _refuse("entity", args[0] if args else "pop")
-        return super().pop(*args)
-
-    def popitem(self) -> Any:
-        if not self._gate.open:
-            _refuse("entity", "popitem")
-        return super().popitem()
-
-    def clear(self) -> None:
-        if not self._gate.open:
-            _refuse("entity", "clear")
-        super().clear()
+    def __reduce__(self):                                  # copy/pickle -> plain
+        return (dict, (dict(self),))
 
 
-class GuardedEntities(dict):
-    """The entity table. Adding or replacing an entity is a controlled act."""
+class GuardedList(list):
+    """An authoritative sequence at any depth."""
 
-    __slots__ = ("_gate",)
+    __slots__ = ("_cap",)
 
-    def __init__(self, gate: _MutationGate) -> None:
-        super().__init__()
-        self._gate = gate
+    def __init__(self, cap: WriteCapability, data=None) -> None:
+        super().__init__(data or [])
+        object.__setattr__(self, "_cap", cap)
 
-    def __setitem__(self, key: Any, value: Any) -> None:
-        if not self._gate.open:
-            _refuse("entities", key)
-        super().__setitem__(key, value)
+    def __reduce__(self):
+        return (list, (list(self),))
 
-    def __delitem__(self, key: Any) -> None:
-        if not self._gate.open:
-            _refuse("entities", key)
-        super().__delitem__(key)
 
-    def update(self, *args: Any, **kw: Any) -> None:            # type: ignore[override]
-        if not self._gate.open:
-            _refuse("entities", "update")
-        super().update(*args, **kw)
+_guard_methods(GuardedDict, dict, _DICT_MUTATORS, "entity")
+_guard_methods(GuardedList, list, _LIST_MUTATORS, "value")
 
-    def setdefault(self, key: Any, default: Any = None) -> Any:  # type: ignore[override]
-        if key not in self and not self._gate.open:
-            _refuse("entities", key)
-        return super().setdefault(key, default)
+#: The entity table and an entity record are both authoritative mappings. They
+#: are named separately because their error messages and their roles differ, but
+#: the enforcement is identical.
+GuardedEntities = GuardedDict
+GuardedRecord = GuardedDict
 
-    def pop(self, *args: Any) -> Any:                            # type: ignore[override]
-        if not self._gate.open:
-            _refuse("entities", args[0] if args else "pop")
-        return super().pop(*args)
 
-    def clear(self) -> None:
-        if not self._gate.open:
-            _refuse("entities", "clear")
-        super().clear()
+def wrap(value: Any, cap: WriteCapability) -> Any:
+    """Recursively place a value under authority.
+
+    New containers are constructed at every level, so the caller's objects are
+    never the objects state holds. This is what makes input aliasing impossible
+    rather than merely discouraged.
+    """
+    if isinstance(value, dict):
+        return GuardedDict(cap, {k: wrap(v, cap) for k, v in value.items()})
+    if isinstance(value, list):
+        return GuardedList(cap, [wrap(v, cap) for v in value])
+    if isinstance(value, tuple):
+        return tuple(wrap(v, cap) for v in value)
+    if isinstance(value, set):
+        return frozenset(value)
+    return value                            # scalars, str, bytes, None: immutable
+
+
+def thaw(value: Any) -> Any:
+    """A plain mutable copy: class C. Nothing thawed can affect class-A state."""
+    if isinstance(value, dict):
+        return {k: thaw(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        out = [thaw(v) for v in value]
+        return tuple(out) if isinstance(value, tuple) else out
+    if isinstance(value, frozenset):
+        return set(value)
+    return value
