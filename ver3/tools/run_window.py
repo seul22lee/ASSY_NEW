@@ -27,7 +27,7 @@ from ver3.assy_v3.stages.s02_obligation_and_candidates import (           # noqa
     magnitude_fidelity_check,
     created_obligations_check, requirement_coverage_check, obligation_scope_check,
     candidate_coverage_check, openness_citation_check, actor_citation_check)
-from ver3.assy_v3.state import DesignState, project_for                   # noqa: E402
+from ver3.assy_v3.state import DesignState                   # noqa: E402
 
 FIXTURES = os.path.join(REPO, "ver3", "assy_v3", "fixtures", "responses")
 BENCHMARKS = os.path.join(REPO, "ver3", "benchmarks")
@@ -61,13 +61,13 @@ def run_case(case_id: str) -> Dict[str, Any]:
             report["findings"].append(("S01", name, p))
 
     # ---- interface: what s02 is allowed to see ---------------------------
-    proj = project_for("s02", state)
+    proj = S02ObligationAndCandidates().consumer_view(state).payload()
     report["projection_families"] = sorted(proj)
     if "SourceClause" in proj:
         report["findings"].append(("IFACE", "source_text_leaked_to_s02", "SourceClause present"))
 
     # ---- s02: consumes the projection only -------------------------------
-    out2 = S02ObligationAndCandidates().run(provider, {"projection": proj}, state, state.run_id)
+    out2 = S02ObligationAndCandidates().run(provider, {"consumer_view": proj}, state, state.run_id)
     report["s02_status"] = out2.execution_status.value
     report["s02_problems"] = out2.problems
     report["s02_incomplete"] = out2.declared_incompleteness

@@ -172,6 +172,18 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
     """
     fams = _families(contracts)
     stage = responsibility["stages"].get(stage_id) or {}
+    #: Families this stage authors ITSELF. A reference from one of its outputs to
+    #: another is CO-PRODUCED, not a pre-stage input: s02 emits a candidate that
+    #: addresses an obligation s02 emitted in the same patch, and demanding the
+    #: obligation beforehand asks s02 to have already done its own work. Whether
+    #: the co-produced referent actually resolves is real, and it is checked where
+    #: it belongs - at the write boundary, over the patch that contains both.
+    #:
+    #: Derived from the stage's own declared outputs, so a future stage that
+    #: co-produces a mutually-referencing pair needs no change here and no pair is
+    #: named anywhere.
+    co_produced = {_resolve_output(s)[0]
+                   for s in stage.get("permitted_output_semantics", [])}
     out: List[Requirement] = []
     for semantic in stage.get("permitted_output_semantics", []):
         family, field = _resolve_output(semantic)
@@ -197,7 +209,7 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
                 deps.append((str(spec["semantic_dependency"]).split(".")[0],
                              "declared semantic dependency"))
             for dep, why in deps:
-                if dep not in fams:
+                if dep not in fams or dep in co_produced:
                     continue
                 out.append(Requirement(
                     Source.REPRESENTATIONAL_DEPENDENCY,

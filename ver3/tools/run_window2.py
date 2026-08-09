@@ -29,7 +29,7 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, REPO)
 
 from ver3.assy_v3.state.authority import thaw as _thaw                      # noqa: E402
-from ver3.assy_v3.view import build_consumer_view as _build_consumer_view   # noqa: E402
+from ver3.assy_v3.view import InvocationContext                            # noqa: E402
 import yaml as _yaml                                                        # noqa: E402
 _RESPONSIBILITY = _yaml.safe_load(open(os.path.join(
     REPO, "ver3", "contracts", "STAGE_RESPONSIBILITY_CONTRACT.yaml")))
@@ -51,7 +51,7 @@ from ver3.assy_v3.stages.s04_envelope_and_motion import (                   # no
     configuration_interference_check, envelope_coverage_check, joint_geometry_check,
     load_path_reaction_check, region_occupancy_check, sampling_declaration_check,
     selection_gate_check, swept_clearance_check)
-from ver3.assy_v3.state import DesignState, project_for                     # noqa: E402
+from ver3.assy_v3.state import DesignState                                  # noqa: E402
 from ver3.live_providers import env as env_loader                           # noqa: E402
 from ver3.live_providers.deepseek import DeepSeekProvider                   # noqa: E402
 
@@ -102,20 +102,9 @@ S04_CHECKS = (
 )
 
 
-def consumer_view_for(stage_id, state):
-    """The one semantic boundary between accumulated state and a consuming stage.
-
-    Derived from the canonical contracts: representational dependencies from the
-    entity semantics of the stage's permitted outputs, reasoning premises from its
-    declared engineering questions. No family is named here and no stage is
-    branched on.
-    """
-    return _build_consumer_view(stage_id, state, state.c, _RESPONSIBILITY)
-
-
 def mechanism_projection(state):
     """The payload a stage prompt receives: a rendering of the ConsumerView."""
-    return consumer_view_for("s04a", state).payload()
+    return S04AEnvelopeAndReach().consumer_view(state).payload()
 
 
 def interface_gaps(mech: Dict[str, Any]) -> List[str]:
@@ -178,8 +167,9 @@ def seed_window1(case_id: str):
     if out1.patch is None:
         return None, ["s01 replay failed: %s" % out1.problems]
     state.apply(out1.patch)
-    proj = project_for("s02", state)
-    out2 = S02ObligationAndCandidates().run(provider, {"projection": proj}, state, state.run_id)
+    stage2 = S02ObligationAndCandidates()
+    out2 = stage2.run(provider, {"consumer_view": stage2.consumer_view(state).payload()},
+                      state, state.run_id)
     if out2.patch is None:
         return None, ["s02 replay failed: %s" % out2.problems]
     state.apply(out2.patch)
@@ -198,11 +188,15 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
     def fail(kind: str, what: str, detail: Any = None) -> None:
         rec["failures"].append({"kind": kind, "stage": "s03", "what": what, "detail": detail})
 
-    projection = project_for("s03", state)
     started = time.time()
+    # The candidate is the explicit invocation identity: it anchors the branch,
+    # it is what the stage records as a premise, and it is NOT engineering context.
+    invocation = InvocationContext(branch=candidate.get("entity_id"))
+    stage_a = S03TopologyAndMobility()
     try:
-        out = S03TopologyAndMobility().run(
-            provider, {"projection": projection, "candidate": candidate},
+        out = stage_a.run(
+            provider, {"consumer_view": stage_a.consumer_view(state, invocation).payload(),
+                       "candidate": candidate},
             state, state.run_id)
     except Exception as exc:                                        # noqa: BLE001
         fail("PARSER_DEFECT", "%s: %s" % (type(exc).__name__, exc),
@@ -236,14 +230,13 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
     # Pass B: the mobility grid, load paths and assembly order, given the
     # topology pass A just fixed. Split because one response could not carry
     # both; every field survives, only the emission is halved.
-    mech = consumer_view_for("s03b", state).payload()
-    demands = {"LoadCase": [_thaw(e) for e in state.family("LoadCase")],
-               "Obligation": [dict(e) for e in state.family("Obligation")],
-               "candidate": candidate.get("entity_id")}
+    stage_b = S03BMobilityAndAssembly()
     try:
-        outb = S03BMobilityAndAssembly().run(
-            provider, {"mechanism": mech, "demands": demands}, state,
-            state.run_id, attempt=2)
+        outb = stage_b.run(
+            provider,
+            {"consumer_view": stage_b.consumer_view(state, invocation).payload(),
+             "candidate": candidate.get("entity_id")},
+            state, state.run_id, attempt=2)
     except Exception as exc:                                        # noqa: BLE001
         fail("PARSER_DEFECT", "s03b: %s: %s" % (type(exc).__name__, exc))
         rec["s03_status"] = "RAISED"
@@ -273,8 +266,9 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
         configs = [c["entity_id"] for c in state.family("Configuration")]
         joints = [_thaw(j) for j in state.family("Joint")]
         # The derivation, its operations AND its lineage all belong to the stage.
-        ops = S03BMobilityAndAssembly().derived_operations(
-            parsed, groups, configs, joints, {"demands": demands})
+        ops = stage_b.derived_operations(
+            parsed, groups, configs, joints,
+            {"candidate": candidate.get("entity_id")})
         rec["dof_entries_derived"] = sum(len(o.fields["dispositions"]) for o in ops)
         if ops:
             dpatch = _Patch(patch_id="%s-s03-derived" % state.run_id,
@@ -321,7 +315,8 @@ def run_s04(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
             ((S04AEnvelopeAndReach(), "s04a"), (S04BPlacementAndMotion(), "s04b")), start=1):
         started = time.time()
         try:
-            out = stage.run(provider, {"mechanism": consumer_view_for(key, state).payload()},
+            out = stage.run(provider,
+                            {"mechanism": stage.consumer_view(state).payload()},
                             state, state.run_id, attempt=attempt)
         except Exception as exc:                                    # noqa: BLE001
             fail("PARSER_DEFECT", key, "%s: %s" % (type(exc).__name__, exc),

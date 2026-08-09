@@ -285,9 +285,176 @@ reports its upstream absent while standing in front of it.
 **577 tests OK.** Full record: sections 24-41 of
 [S03_PREMISE_INSTANCE_SELECTION_DECISION.md](S03_PREMISE_INSTANCE_SELECTION_DECISION.md).
 
-## 16.4 Still open
+## 16.4 Superseded by §17
 
 Unchanged from §15.5, and deliberately so: consumer-path migration (**s02**, **s03a**,
 **s03b**), `project_for` retirement, ADR-002/003/004 replays.
 
 **S-3 INSTANCE-SELECTION SEMANTICS COMPLETE — RESUME FINAL CONSUMER MIGRATION.**
+
+
+---
+
+# 17. ROOT-CAUSE CLOSURE AND FINAL CONSUMER MIGRATION
+
+Baseline `e20d84f`.
+
+## 17.1 Why this pass exists
+
+Impl S-3 had expanded four times. Each newly discovered semantic question was pulled into
+ConsumerView — family selection, semantic roles, branch scope, design-wide scope, coverage,
+existence, applicability, invocation anchors — and each expansion was locally correct and
+globally wrong: ConsumerView was becoming a general engine for proving the exact complete
+instance set of every possible mechanical-engineering question.
+
+The frozen architecture does not ask Consumer Sufficiency to do that.
+
+## 17.2 Root-cause table
+
+| Issue | Current implementation | The actual semantic question | Owner | S-3 blocker? | Disposition |
+|---|---|---|---|---|---|
+| Source-A demands a stage's own outputs beforehand | every output reference target is a required pre-stage input | is this referent a pre-existing INPUT or co-produced OUTPUT? | **S-3** | yes | **fixed** |
+| Same-patch closure | already worked via `seen`, untested | does a reference to a co-created entity resolve? | **S-3** | no | **kept + tested** |
+| `s03` reaching a consumer lookup | runners passed contract strings by hand | ownership identity vs reasoning responsibility | **S-3** | yes | **fixed** |
+| Two reference authorities | write boundary read field SPELLING, view read `field_semantics` | what makes a field a reference? | **S-3** | yes | **fixed** |
+| s02/s03a/s03b on `project_for` | a second context path | which consumer sees what | **S-3** | yes | **migrated** |
+| s03 `[:24000]` | positional slice | may serialization position remove meaning? | **S-3** | yes | **removed** |
+| Actor exists, no related FunctionalRegion | not represented | must the RELATION exist? | **S-8** | no | deferred R-K |
+| Physical scenario/actor applicability | seam only | which facts physically apply | **S-4** | no | deferred R-A |
+| `obligations_created` holds prose | unenforced (`resolvable: false`) | ids or statements? | **S-4** | no | deferred R-B |
+| Mobility orchestration / disposition-from-absence | runner-bound | mobility semantics | **S-5** | no | deferred R-C/R-D |
+| Multi-anchor same family | one anchor per family | ordered relations | **S-6** | no | deferred R-E |
+| S04A→S04B continuity, ReferenceScale instance, `_commit_s04` | transport only | spatial commitment | **S-6** | no | deferred R-F/R-G/R-H |
+| Retained / committed truth | selector substrate | selection semantics | **S-7** | no | deferred R-I/R-J |
+
+## 17.3 The S-3 boundary, stated
+
+S-3 answers **"was the consumer reliably given what its responsibility says it needs, with
+no silent omission and no competing path?"** It does not answer **"are the engineering
+relationships between those facts established?"** — that is producer semantics and S-8
+assurance. Every deferred item has an owner, a replay and an exit falsifier in
+[AUDIT_DEFECT_REPRODUCTION_REGISTRY.md](AUDIT_DEFECT_REPRODUCTION_REGISTRY.md) §POST-S3.
+
+## 17.4 Source-A availability timing
+
+Reproduced: `derive_source_a("s02", …)` demanded `Obligation`, `Candidate` and `LoadCase`
+before s02 ran — the three families s02 creates. A candidate that addresses an obligation
+s02 emitted in the same patch was read as "the obligation must be in the view beforehand",
+which asks s02 to have already done its own work.
+
+Fixed generically: a referent whose family is in the stage's own `permitted_output_semantics`
+is **co-produced**, not a pre-stage input. Derived from the contract; no stage name, no family
+pair, no exception. SA-TIME-05 asserts the derivation names neither. SA-TIME-06 invents a
+future co-producing pair and it works with no resolver change.
+
+Whether the co-produced referent actually resolves is real and is checked where it belongs:
+the write boundary validates the patch that contains both (SA-TIME-03, and 03b proves order
+inside the patch does not matter).
+
+## 17.5 Responsibility identity
+
+`Stage.stage_id` is **who owns the write**; `Stage.pass_id` / `responsibility_id()` is **which
+engineering responsibility is reasoning**. Both s03 passes author s03 state under s03's
+ownership and consume different contracts. `Stage.consumer_view(state, invocation)` resolves
+it, so no runner keeps a pass→contract table — which is how `"s03"`, an owner and not a
+responsibility, reached a consumer lookup at all. `"s03"` and `"s04"` still fail closed as
+responsibilities (S3ROOT-18), and the two ids stay distinct (S3ROOT-18b).
+
+## 17.6 Canonical reference integrity
+
+The write boundary decided what a reference was from the field's **spelling** — anything
+ending `_id`/`_ids`/`_refs`, plus a hand-kept list of five names that did not — and from the
+**shape of the value**. The consumer boundary read `field_semantics`. Two authorities, and
+they did not overlap: of the six references the contract declares `resolvable: true`
+(`ConstraintRelation.provider_body`, `provider_site`, `maintaining_interaction`,
+`PhysicalEffectObligation.between_roles`, `under_load_case`, `PhysicalInteraction.at_interface`)
+the name-shape rule matched **none**. The boundary was enforcing a set of fields the contract
+never described while ignoring every field it did.
+
+`Contracts.reference_spec(family, field)` is now the single answer, asked by both boundaries.
+Target family and declared cardinality are enforced. **`resolvable` is honoured as the
+contract's own word**: 40 of 46 declared references say a referent need not exist, and
+enforcing resolution everywhere would be a stricter engineering claim than the architecture
+makes (REF-CANON-06).
+
+This immediately surfaced two things worth recording:
+
+1. Test fixtures had been putting the placeholder `"x"` and non-entities into typed reference
+   fields, and creating referents after the entities that named them. The name-shape rule
+   never looked. Fixtures now build structurally valid state (`ver3/tests/meta/_fixtures.py`).
+2. Recorded s02 responses put **prose** in `Candidate.obligations_created`, which the prompt
+   and the contract both declare to be obligation **ids**. `resolvable: false` means the
+   boundary does not reject it. Registered as **R-B**, owner S-4 — not repaired here, and not
+   hidden by weakening the check.
+
+## 17.7 Migration
+
+| consumer | before | after |
+|---|---|---|
+| S02 | `project_for("s02")` | `consumer_view` under responsibility `s02` |
+| S03A | `project_for("s03")` — not even a responsibility | `consumer_view` under `s03a` + explicit candidate |
+| S03B | ConsumerView **plus** raw `LoadCase`/`Obligation` demands | `consumer_view` under `s03b` + explicit candidate |
+| S04A/S04B | ConsumerView | unchanged, now via `Stage.consumer_view` |
+
+Prompt changes are plumbing only: `{projection}` → `{consumer_view}`; S03B's two sections —
+"THE MECHANISM" and "THE LOAD CASES AND OBLIGATIONS" — became the one shape S03A already uses,
+"THE CANDIDATE YOU ARE EMBODYING" plus "TYPED INPUT", because both were now fed from one
+source and keeping two headers over one source would have been misleading. No reasoning
+wording, no hints, no examples were added.
+
+**Candidate identity survives as control, not context**: `InvocationContext(branch=…)` anchors
+the branch, `inputs["candidate"]` feeds `invocation_premises`, and both s03 passes read the
+same key. An id is not a fact.
+
+`project_for` is **deleted**, along with `ver3/assy_v3/state/projection.py`. Its one
+non-semantic rule — INV-002, only s01 may read source text — moved to the consumer boundary,
+which is now the only place a consumer's context is built. `run_window.py`,
+`run_live_window.py` and `repair_prompt_pairing.py` were migrated too; no production or test
+code references it.
+
+## 17.8 Truncation and budget
+
+`s03._render`'s `[:24000]` is gone. ADR-004 is closed **behaviourally**: a payload whose
+last-sorting entry falls beyond 26 000 characters is rendered whole, where the old slice
+provably lost it. Under a budget it cannot meet, the same view returns `BUDGET_INSUFFICIENT`
+with the omission recorded. No renderer in the production package slices (S3ROOT-12).
+
+## 17.9 Production context path
+
+```
+   canonical contracts ──► RequiredMinimum ──┐
+                                             ├──► ConsumerView ──► render() ──► stage prompt
+   accumulated DesignState ──► relevance ────┘        │
+     (authority · branch · population ·               └── assessment: expected vs selected
+      coverage · existence · applicability)
+
+   invocation identity (candidate / branch / anchors) ──► branch anchoring
+                                                     └──► invocation premises (producer lineage)
+```
+
+There is no second engineering-context path. The invocation identity carries ids, never facts.
+
+## 17.10 Regression
+
+```
+609 tests OK (skipped=1)      meta discover 529 OK
+new: test_s3_root_closure.py  32 tests (SA-TIME, REF-CANON, S3ROOT, ADR replays)
+static: project_for 0 · positional slices 0 · name-shape reference authority 0
+        raw demands 0 · S03_OWNED tables 0 · benchmark/model literals 0
+```
+
+## 17.11 What this does NOT claim
+
+Applicability semantics are not complete. Retained and committed branch semantics are not
+complete. Mobility is not runner-independent. S04A→S04B spatial continuity is not solved.
+Engineering establishment is not proven. Each is registered with an owner, a replay and a
+falsifier.
+
+## 17.12 Status
+
+**S-3 COMPLETE — U-3 / M-3 CLOSED.**
+
+The consumer context boundary is authoritative, generic, conservative, traceable, and free of
+competing projection and truncation paths.
+
+**Impl S-4 has NOT begun.**

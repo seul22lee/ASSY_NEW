@@ -363,10 +363,11 @@ def _candidate_premise(candidate) -> List[str]:
 
 class S03TopologyAndMobility(Stage):
     stage_id = "s03"
+    pass_id = "s03a"
     purpose = "turn a candidate family into a mechanism topology with a total DOF disposition"
 
     def prompt(self, inputs: Dict[str, Any]) -> str:
-        projection = inputs["projection"]
+        projection = inputs["consumer_view"]
         candidate = inputs.get("candidate") or {}
         grid = inputs.get("dof_grid_text") or (
             "Emit your rigid groups and configurations first; then disposition\n"
@@ -495,11 +496,19 @@ class S03TopologyAndMobility(Stage):
 
 
 def _render(obj: Any) -> str:
+    """Deterministic serialization of a ConsumerView payload.
+
+    The fixed positional slice is GONE. It was semantic selection disguised as
+    formatting: `sort_keys=True` fixes the order, so what fell off the end was
+    whatever the alphabet put last, and it went without a word. Budget pressure is
+    handled semantically by ConsumerView before anything is rendered, and a budget
+    that cannot hold the required minimum is a recorded condition, not a cut.
+    """
     import json
     try:
-        return json.dumps(obj, indent=1, sort_keys=True)[:24000]
+        return json.dumps(obj, indent=1, sort_keys=True)
     except Exception:                                                # noqa: BLE001
-        return str(obj)[:24000]
+        return str(obj)
 
 
 # =========================================================================
@@ -894,11 +903,12 @@ Return one JSON object. Emit every key. Use exactly these key names.
 
 Ids you emit are new. Never reuse an id from the input.
 
-THE MECHANISM
-{mechanism}
+THE CANDIDATE YOU ARE EMBODYING
+{candidate}
 
-THE LOAD CASES AND OBLIGATIONS
-{demands}
+TYPED INPUT
+-----------
+{mechanism}
 """
 
 
@@ -952,8 +962,8 @@ class S03BMobilityAndAssembly(Stage):
             drivers=" | ".join(BLOCKING_DRIVERS), dofs=" ".join(DOF_NAMES),
             terminations=" | ".join(TERMINATION_STRATEGIES),
             path_kinds=" | ".join(PATH_KINDS),
-            mechanism=_render(inputs["mechanism"]),
-            demands=_render(inputs.get("demands") or {}))
+            candidate=_render(inputs.get("candidate") or {}),
+            mechanism=_render(inputs["consumer_view"]))
 
     def invocation_premises(self, inputs):
         """The same candidate, carried on this pass's demands.
@@ -962,7 +972,7 @@ class S03BMobilityAndAssembly(Stage):
         Its load paths, assembly order and open decisions are that candidate's,
         for the same reason and with the same consequence under FA-5.
         """
-        return _candidate_premise((inputs.get("demands") or {}).get("candidate"))
+        return _candidate_premise(inputs.get("candidate"))
 
     def derived_operations(self, parsed, groups, configurations, joints, inputs):
         """The TOTAL DOF disposition, derived from the relations just authored.

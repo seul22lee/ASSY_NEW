@@ -54,7 +54,7 @@ from ver3.assy_v3.stages.s02_obligation_and_candidates import (            # noq
     created_obligations_check, requirement_coverage_check, obligation_scope_check,
     candidate_coverage_check, openness_citation_check, actor_citation_check)
 from ver3.assy_v3.providers.offline import OfflineReplayProvider           # noqa: E402
-from ver3.assy_v3.state import DesignState, project_for                    # noqa: E402
+from ver3.assy_v3.state import DesignState                    # noqa: E402
 from ver3.live_providers import env as env_loader                          # noqa: E402
 from ver3.live_providers.deepseek import DeepSeekProvider                  # noqa: E402
 
@@ -191,14 +191,14 @@ def run_trial(case_id: str, request_path: str, provider: DeepSeekProvider,
             fail(PARSER_DEFECT, "s01", "check %s raised: %s" % (name, exc))
 
     # ------------------------------------------------------ interface / s02
-    proj = project_for("s02", state)
+    proj = S02ObligationAndCandidates().consumer_view(state).payload()
     rec["projection_families"] = sorted(proj)
     if "SourceClause" in proj:
         fail(INTERFACE_FINDING, "iface", "source text reached s02", sorted(proj))
 
     started = time.time()
     try:
-        out2 = S02ObligationAndCandidates().run(provider, {"projection": proj},
+        out2 = S02ObligationAndCandidates().run(provider, {"consumer_view": proj},
                                                 state, state.run_id)
     except Exception as exc:                                        # noqa: BLE001
         fail(PARSER_DEFECT, "s02", "%s: %s" % (type(exc).__name__, exc),

@@ -17,7 +17,7 @@ import time
 import unittest
 from typing import Any, Dict, List
 
-from . import _paths                                                    # noqa: F401
+from . import _fixtures, _paths                                                    # noqa: F401
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _REPO = os.path.abspath(os.path.join(_HERE, "..", "..", ".."))
@@ -81,21 +81,12 @@ class _Canned:
             ended_at=time.time(), from_cache=True)
 
 
-class _Base(unittest.TestCase):
+class _Base(_fixtures.StateBuilder, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.c = Contracts()
 
-    def add(self, s, stage, fam, eid, prem=None, **over):
-        d = {f: "x" for f in self.c.required_fields(fam) if f != "entity_id"}
-        d.update(over)
-        s.apply(StagePatch(patch_id="p-%s" % eid, run_id=s.run_id, stage_id=stage,
-                           stage_attempt=1, parent_state_hash=s.state_hash(),
-                           operations=[Op("CREATE", fam, eid, d, "p",
-                                          premise_refs=list(prem or []))],
-                           execution_status="SUCCESS", provenance={"provider": "t"}))
-        return eid
 
     def upstream(self, run="lineage", candidates=("CND-0001",)):
         """Everything s03 rests on, and nothing s03 authors."""
@@ -113,17 +104,16 @@ class _Base(unittest.TestCase):
         """The canonical producer path, with no runner helper anywhere near it."""
         provider = _Canned(S03A_RESPONSE, S03B_RESPONSE)
         a = S03TopologyAndMobility().run(
-            provider, {"projection": {}, "candidate": {"entity_id": candidate_id}},
+            provider, {"consumer_view": {}, "candidate": {"entity_id": candidate_id}},
             state, state.run_id)
         self.assertIsNotNone(a.patch, a.problems)
         state.apply(a.patch)
-        demands = {"candidate": candidate_id}
         b = S03BMobilityAndAssembly().run(
-            provider, {"mechanism": {}, "demands": demands}, state,
+            provider, {"consumer_view": {}, "candidate": candidate_id}, state,
             state.run_id, attempt=2)
         self.assertIsNotNone(b.patch, b.problems)
         state.apply(b.patch)
-        return a, b, demands
+        return a, b, {"candidate": candidate_id}
 
     def scopes(self, state, branch):
         fwd, rev = cv._reference_graph(state, self.c)
@@ -160,7 +150,7 @@ class TestLineagePopulation(_Base):
         _a, _b, demands = self.direct_s03(s, "CND-0001")
         ops = S03BMobilityAndAssembly().derived_operations(
             S03B_RESPONSE, ["RGP-0001"], ["CFG-0001"],
-            [dict(j) for j in s.family("Joint")], {"demands": demands})
+            [dict(j) for j in s.family("Joint")], demands)
         self.assertTrue(ops, "no disposition derived")
         for op in ops:
             self.assertEqual(["CND-0001"], list(op.premise_refs))

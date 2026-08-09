@@ -38,9 +38,9 @@ model variability to such a test only weakens the evidence.
 | ID | Mechanism | Step | Replay type | Status |
 |---|---|---|---|---|
 | **ADR-001** | uncontrolled authoritative write / side-channel engineering fact | **S-1** | STRUCTURAL | **RESOLVED** — L1 at `2570aa4`; L2 took **four** passes (see the history) |
-| ADR-002 | consumer-view omission of a required premise | S-3 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
+| ADR-002 | consumer-view omission of a required premise | S-3 | STORED-STATE REPLAY | **RESOLVED** *(S-3 closure)* |
 | ADR-003 | S04A→S04B spatial commitment loss | S-6 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
-| ADR-004 | silent positional context truncation | S-3 | STRUCTURAL | NOT_YET_ADDRESSABLE |
+| ADR-004 | silent positional context truncation | S-3 | STRUCTURAL | **RESOLVED** *(S-3 closure)* |
 | ADR-005 | unsupported mobility completion from absence | S-5 | DETERMINISTIC | NOT_YET_ADDRESSABLE |
 | ADR-006 | non-addressable blocking relation reference | S-4 | STRUCTURAL | NOT_YET_ADDRESSABLE |
 | ADR-007 | state name without physical realization | S-6 | STORED-STATE REPLAY | NOT_YET_ADDRESSABLE |
@@ -238,7 +238,8 @@ is a new finding.
 | **Replay type** | STORED-STATE REPLAY — no model needed to show the view omits a class the contract requires. |
 | **Expected post-fix property** | Every representational dependency and reasoning premise class derived from the two contracts is present in the view, or the run records an attributable insufficiency. |
 | **Forbidden post-fix condition** | A required class present in accumulated state and absent from the view, with no finding. |
-| **Step / status** | **S-3** · NOT_YET_ADDRESSABLE |
+| **Step / status** | **S-3** · **RESOLVED** *(S-3 closure)* |
+| **Closure evidence** | `test_s3_root_closure.TestS3OwnedADRReplays.test_ADR_002*`. The hand-written family tuple is gone and cannot return as a table (AST-checked). The minimum is derived from the two contracts; an authoritative quantity in state reaches the s04a view; and every unmet obligation states its expected and selected counts, so a required class cannot be absent **with no finding**. |
 
 ### ADR-003 — S04A→S04B spatial commitment loss
 
@@ -253,6 +254,7 @@ is a new finding.
 | **Expected post-fix property** | If an earlier pass made an authoritative spatial commitment that a later pass consumes, the later pass receives it and may not silently contradict it; a change must use the permitted supersession semantics. **The S-1 substrate for this exists** — `SUPERSEDE` retains both values with a reason, and premise change propagates — but the S04 refinement semantics that use it are S-6. |
 | **Forbidden post-fix condition** | A downstream spatial value contradicting a binding upstream commitment with no supersession record. |
 | **Step / status** | **S-6** · NOT_YET_ADDRESSABLE |
+| **S-3 boundary** | S-3 established only that a committed spatial entity, IF it exists, is transported to the consumer that must extend it (`test_consumer_view.TestHistoricalReplays.test_VIEW_12`). Whether S04A commits the right arrangement, whether the Envelope identity is correct, and whether S04B refines rather than replaces it are untouched and remain S-6. Transport is not continuity. |
 
 ### ADR-004 — Silent positional context truncation
 
@@ -266,7 +268,8 @@ is a new finding.
 | **Replay type** | STRUCTURAL. |
 | **Expected post-fix property** | Reduction is semantic and recorded; required classes are never dropped; an unsatisfiable budget is a recorded condition. |
 | **Forbidden post-fix condition** | Any positional slice of a serialized view. |
-| **Step / status** | **S-3** · NOT_YET_ADDRESSABLE |
+| **Step / status** | **S-3** · **RESOLVED** *(S-3 closure)* |
+| **Closure evidence** | `test_s3_root_closure.TestS3OwnedADRReplays.test_ADR_004_no_serialized_view_is_positionally_sliced` and `TestTruncationAndBudget`. Behavioural, not literal: a payload whose last-sorting entry falls beyond 26 000 characters is rendered whole, and the same view under a budget it cannot meet returns BUDGET_INSUFFICIENT with the omission recorded. No renderer in the production package slices. |
 
 ### ADR-005 — Unsupported mobility completion from absence
 
@@ -513,3 +516,28 @@ resolver follows declarations rather than names.
 **Lesson worth keeping.** "Machine-readable" was mistaken for "generic". A format a program can
 parse is not the same as a rule a program can generalise — and the first is easy to reach while
 believing you have the second.
+
+---
+
+# POST-S3 OWNED RESIDUALS
+
+Everything Impl S-3 discovered and did not own. None of it is dropped: each has an
+owner step, an executable replay, and a condition that would falsify its closure.
+A step may not close while one of its rows is open, and a row may not be moved
+back into S-3 — S-3's boundary is stated in `S03_IMPLEMENTATION_EVIDENCE.md`.
+
+| # | Defect | Why not S-3 | Owner | Replay | Exit falsifier | Status |
+|---|---|---|---|---|---|---|
+| **R-A** | Physical scenario/actor applicability: which obligations, interactions and load cases actually apply to a given scenario or actor | S-3 can transport them and can express a declared applicability rule; WHICH physical facts apply is physical reasoning, not context transport | **S-4** | One design with several scenarios/actors/load cases; only the physically applicable obligation/interaction relation is established | S-4 decides physical applicability from free text, or from the mere absence of a relation | OPEN |
+| **R-B** | `Candidate.obligations_created` holds prose where the prompt and the contract both say ids | The declaration says `resolvable: false`, so the write boundary does not require resolution; whether the model's obligation ids must resolve is s02 producer meaning | **S-4** | Replay a recorded s02 response: `obligations_created` carries statements, not ids, on every case | An obligation a candidate claims to have created cannot be addressed downstream because it has no id | OPEN |
+| **R-C** | MobilityExpectation production is still assembled by the runner; DOF domain enumeration is not separated from engineering disposition | Deterministic mobility consequence is mobility semantics | **S-5** | A canonical direct caller and `run_window2` produce equivalent deterministic mobility consequences | Runner choice changes the mobility consequence set | OPEN |
+| **R-D** | `MAINTAINED_BY_CLASS` inferred from absence; a missing premise should be `UNDISPOSITIONED` | A disposition authored from absence is an engineering claim, not a context defect | **S-5** | A DOF with no premise; the run authors a positive disposition anyway | Any positive disposition without a resolvable premise | OPEN |
+| **R-E** | Same-family multi-anchor selection (`Transition.from_state`/`to_state`, two Configurations in one invocation) | `InvocationContext` holds one anchor per family; no current premise needs two, and a query algebra for a hypothesis is the drift this pass exists to stop | **S-6** | One invocation genuinely requiring two distinct anchors of one family | The implementation still stores at most one anchor per family where production semantics need two, or loses the ordered relation | OPEN |
+| **R-F** | S04A→S04B exact spatial commitment continuity (ADR-003) | S-3 proved transport only | **S-6** | S04B demonstrably refines the arrangement S04A committed rather than reconstructing it | S04B passes while ignoring or replacing the upstream committed spatial state | OPEN |
+| **R-G** | `ReferenceScale` exact instance/frame semantics: six families name a frame FAMILY, none can name the instance | A spatial representation decision, not a lineage or transport one | **S-6** | A spatial value whose frame instance cannot be identified from the record | A coordinate is consumed as if its frame were known when the record cannot say which one | OPEN |
+| **R-H** | `_commit_s04` still authors s04 premise lineage in runner code | Same class as the s03 defect closed at `475b7ca`, one stage later; fenced so it cannot spread (`test_lineage_population.TestAuthorshipStaysInProductionCode`) | **S-6** | Direct canonical s04 execution and the Window path produce the same premise lineage | The same s04 result carries different lineage depending on the runner | OPEN |
+| **R-I** | Authoritative retained-candidate set | "Retained" has no production truth until selection/gating is authoritative; `ALL_RETAINED_BRANCHES` is a selector substrate only | **S-7** | A, B retained and C eliminated; gate comparison includes A/B and excludes C | The retained set is inferred from presence, runner branch copies, or fixtures | OPEN |
+| **R-J** | Selected / committed / superseded / reopened semantics | `COMMITTED_BRANCH` reads a standing `SelectionDecision`; what makes one authoritative, and what reopens it, is selection semantics | **S-7** | B is committed; the consumer receives B's state; invalidating a premise reopens the commitment | Commitment is inferred from branch order, latest branch, or runner-local state | OPEN |
+| **R-K** | Cross-role / cross-entity engineering establishment — e.g. a reach obligation for an Actor with no correctly related FunctionalRegion | S-3 ensures both facts, if they exist, are not silently dropped. Whether the RELATION must exist is engineering establishment | **S-8** | A reach obligation exists; the required spatial/reach target relation does not | Assurance reports establishment while a mandatory semantic relation is absent | OPEN |
+| **R-L** | Source-A self-reference across stages that do not co-produce: a stage requiring a family no upstream stage authors | The co-production fix covers same-stage; a genuine upstream gap is a contract/producer question | **S-8** | A premise requiring a family that no stage's `permitted_output_semantics` declares | A stage requires upstream material nothing in the pipeline can ever author, and nothing reports it | OPEN |
+| **R-M** | Whole-chain generalization without benchmark-specific repair | Needs every owner above closed | **S-9** | Full live chain on unseen probes | A runner patches an incomplete design, or any benchmark/model-specific context rule exists | OPEN |

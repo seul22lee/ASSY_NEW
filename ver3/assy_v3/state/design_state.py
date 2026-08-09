@@ -156,6 +156,20 @@ class Contracts:
         """
         return dict((_CONTRACT_DOCS[self]["families"].get(family) or {}).get("extendable_fields", {}) or {})
 
+    def reference_spec(self, family: Optional[str], field: str) -> Optional[Dict[str, Any]]:
+        """The declaration that makes a field a reference, or None.
+
+        The ONE place that answers "is this a reference, and to what". Both the
+        write boundary and the consumer boundary ask it, so they cannot disagree.
+        """
+        if not family:
+            return None
+        fam = (_CONTRACT_DOCS[self]["families"].get(family) or {})
+        spec = ((fam.get("field_semantics") or {}).get(field))
+        if isinstance(spec, dict) and spec.get("kind") == "reference":
+            return copy_out(spec)
+        return None
+
     def may_create(self, stage_id: str, family: str) -> bool:
         if family in _CONTRACT_DOCS[self]["universally_ownable"]:
             return True
@@ -400,19 +414,57 @@ class DesignState:
         return out
 
     def _reference_problems(self, patch, seen: set) -> List[str]:
-        """Every typed reference must resolve. A free-string subject is R-20."""
+        """Every DECLARED typed reference must resolve, to the declared family.
+
+        The contract is the authority. This used to decide what a reference was
+        from the SPELLING of the field - anything ending `_id`, `_ids`, `_refs`,
+        plus a hand-kept list of names that did not - and from the SHAPE of the
+        value. That made two reference authorities in one system: the write
+        boundary believed field names, the consumer boundary believed
+        `field_semantics`, and a canonical reference the naming convention did not
+        cover was enforced by neither.
+
+        `seen` carries the ids created earlier in THIS patch, so a patch that
+        creates a candidate and the obligation it addresses validates as one act.
+        Same-patch closure is a write-boundary property, which is why it is
+        checked here and not by any consumer.
+
+        WHETHER a reference must resolve is the contract's word, not this
+        function's: `resolvable` says so per field, and 40 of the 46 declared
+        references say false. Enforcing resolution everywhere would be a stricter
+        engineering claim than the architecture makes. What changes here is that
+        the six that DO say true are now enforced - the name-shape rule matched
+        none of them, so the boundary was checking a set of fields the contract
+        never described while ignoring the ones it did.
+        """
         out: List[str] = []
         known = set(_STORAGE[self].entities) | seen
         for op in patch.operations:
+            family = op.entity_type if op.kind == "CREATE" else self.stored_family(op.entity_id)
             for key, val in op.fields.items():
-                if not key.endswith(("_id", "_ids", "_refs")) and key not in (
-                        "derived_from_requirements", "addresses_obligations",
-                        "obligations_created", "conflicting_clauses", "blocks"):
+                spec = self.c.reference_spec(family, key)
+                if spec is None:
                     continue
-                for ref in (val if isinstance(val, list) else [val]):
-                    if isinstance(ref, str) and ref[:4].isupper() and "-" in ref:
-                        if ref not in known:
-                            out.append("DANGLING_REF: %s.%s -> %s" % (op.entity_id, key, ref))
+                refs = val if isinstance(val, list) else [val]
+                if spec.get("cardinality") == "one" and isinstance(val, list) and len(val) > 1:
+                    out.append("CARDINALITY: %s.%s declares one referent and names %d"
+                               % (op.entity_id, key, len(val)))
+                for ref in refs:
+                    if not isinstance(ref, str) or not ref:
+                        continue
+                    if ref not in known:
+                        if spec.get("resolvable"):
+                            out.append("DANGLING_REF: %s.%s -> %s"
+                                       % (op.entity_id, key, ref))
+                        continue
+                    target = spec.get("target")
+                    actual = (op.entity_type if ref in seen and ref not in _STORAGE[self].entities
+                              else self.stored_family(ref))
+                    if ref in seen and ref not in _STORAGE[self].entities:
+                        actual = _created_family(patch, ref)
+                    if target and actual and actual != target:
+                        out.append("REFERENCE_FAMILY: %s.%s declares %s and names %s, a %s"
+                                   % (op.entity_id, key, target, ref, actual))
         return out
 
     # ----------------------------------------------------------------- apply
@@ -502,6 +554,14 @@ def _propagate(entities: Dict[str, Any], changed_id: str, kind: str,
         rec["_validity"] = ValidityStatus.STALE.value
         _log(rec, "_stale_because",
              {"premise": changed_id, "premise_change": kind, "reason": reason})
+
+
+def _created_family(patch, entity_id: str) -> Optional[str]:
+    """The family a not-yet-applied CREATE in this patch will give an id."""
+    for op in patch.operations:
+        if op.kind == "CREATE" and op.entity_id == entity_id:
+            return op.entity_type
+    return None
 
 
 def _create(entities, by_family, contracts, patch, op) -> None:

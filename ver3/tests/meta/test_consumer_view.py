@@ -9,7 +9,7 @@ import re
 import sys
 import unittest
 
-from . import _paths
+from . import _fixtures, _paths
 
 REPO = _paths.REPO_ROOT
 if REPO not in sys.path:
@@ -27,7 +27,7 @@ STAGES = ("s01", "s02", "s03a", "s03b", "s04a", "gate", "s04b")
 from .test_s3_interface_readiness import _code_only          # noqa: E402
 
 
-class _Base(unittest.TestCase):
+class _Base(_fixtures.StateBuilder, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -37,20 +37,7 @@ class _Base(unittest.TestCase):
     def state(self, run="t"):
         return DesignState(run)
 
-    def req(self, fam, **over):
-        d = {f: "x" for f in self.c.required_fields(fam) if f != "entity_id"}
-        d.update(over)
-        return d
 
-    def add(self, s, stage, fam, eid, prem=None, **over):
-        """`prem` is the branch lineage the producer records: the candidate this
-        entity exists because of."""
-        s.apply(StagePatch(patch_id="p-%s" % eid, run_id=s.run_id, stage_id=stage,
-                           stage_attempt=1, parent_state_hash=s.state_hash(),
-                           operations=[Op("CREATE", fam, eid, self.req(fam, **over), "p",
-                                          premise_refs=list(prem or []))],
-                           execution_status="SUCCESS", provenance={"provider": "t"}))
-        return eid
 
 
 class TestRequiredMinimum(_Base):
@@ -124,8 +111,8 @@ class TestSelection(_Base):
 
     def test_VIEW_07_reference_closure_supplies_referents(self):
         s = self.state()
-        self.add(s, "s03", "RigidGroup", "RGP-1", body="BOD-1")
         self.add(s, "s03", "Body", "BOD-1")
+        self.add(s, "s03", "RigidGroup", "RGP-1", body="BOD-1")
         self.add(s, "s03", "Joint", "JNT-1", parent_group="RGP-1", child_group="RGP-1")
         v = build_consumer_view("s04b", s, self.c, self.resp)
         ids = {e["entity_id"] for e in v.entities}
@@ -223,6 +210,7 @@ class TestHistoricalReplays(_Base):
                  addresses_obligations=["OBL-0001"], obligations_created=[])
         self.add(s, "s04", "ReferenceScale", "SCL-0001", prem=["CND-0001"],
                  basis="RELATIVE")
+        self.add(s, "s02", "LoadCase", "LC-0001")
         self.add(s, "s03", "Body", "BOD-0001", prem=["CND-0001"])
         self.add(s, "s03", "RigidGroup", "RGP-0001", prem=["CND-0001"],
                  body="BOD-0001")
@@ -246,10 +234,10 @@ class TestHistoricalReplays(_Base):
             patch_id="topo", run_id=s.run_id, stage_id="s03", stage_attempt=1,
             parent_state_hash=s.state_hash(),
             operations=[Op("CREATE", "Joint", "JNT-0001",
-                           dict({f: "x" for f in self.c.required_fields("Joint")
-                                 if f != "entity_id"},
-                                parent_group="RGP-0001", child_group="RGP-0001",
-                                frame_origin="SCL-0001"), "p",
+                           self._fields_for(s, self.c, "s03", "Joint",
+                                            {"parent_group": "RGP-0001",
+                                             "child_group": "RGP-0001",
+                                             "frame_origin": "SCL-0001"}), "p",
                            premise_refs=["CND-0001"])],
             execution_status="SUCCESS", provenance={"provider": "t"}))
         v = build_consumer_view("s04b", s, self.c, self.resp)
@@ -447,8 +435,9 @@ class TestCoreCorrections(_Base):
         for cid in ("CND-A", "CND-B"):
             self.add(s, "s02", "Candidate", cid, principle={"h": "f"},
                      addresses_obligations=[], obligations_created=[])
-        self.add(s, "s03", "LoadPath", "LP-A", candidate="CND-A", load_case="LC")
-        self.add(s, "s03", "LoadPath", "LP-B", candidate="CND-B", load_case="LC")
+        self.add(s, "s02", "LoadCase", "LC-1")
+        self.add(s, "s03", "LoadPath", "LP-A", candidate="CND-A", load_case="LC-1")
+        self.add(s, "s03", "LoadPath", "LP-B", candidate="CND-B", load_case="LC-1")
         self.add(s, "s04", "SelectionDecision", "SEL", selected_candidate="CND-A")
         v = build_consumer_view("s04b", s, self.c, self.resp)
         ids = {e["entity_id"] for e in v.entities}
@@ -502,8 +491,8 @@ class TestCoreCorrections(_Base):
             patch_id="topo", run_id=s.run_id, stage_id="s03", stage_attempt=1,
             parent_state_hash=s.state_hash(),
             operations=[Op("CREATE", "Body", "BOD-REAL",
-                           {f: "x" for f in self.c.required_fields("Body")
-                            if f != "entity_id"}, "p", premise_refs=["CND-1"])],
+                           self._fields_for(s, self.c, "s03", "Body", {}), "p",
+                           premise_refs=["CND-1"])],
             execution_status="SUCCESS", provenance={"provider": "t"}))
         fwd, rev = cv._reference_graph(s, self.c)
         cands = {"CND-1"}

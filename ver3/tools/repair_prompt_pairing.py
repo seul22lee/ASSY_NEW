@@ -39,7 +39,7 @@ from ver3.assy_v3.providers.agent_authored import prompt_hash               # no
 from ver3.assy_v3.stages.s01_requirement_capture import S01RequirementCapture  # noqa: E402
 from ver3.assy_v3.stages.s02_obligation_and_candidates import (             # noqa: E402
     S02ObligationAndCandidates)
-from ver3.assy_v3.state import DesignState, project_for                     # noqa: E402
+from ver3.assy_v3.state import DesignState                     # noqa: E402
 
 FIXTURES = os.path.join(REPO, "ver3", "assy_v3", "fixtures", "responses")
 PROBES = os.path.join(REPO, "ver3", "assy_v3", "probes")
@@ -83,7 +83,8 @@ def check_case(root: str, case_id: str) -> List[Dict[str, Any]]:
         if not os.path.isfile(path):
             continue
         if inputs is None:
-            inputs = {"projection": project_for("s02", state)}
+            inputs = {"consumer_view":
+                      S02ObligationAndCandidates().consumer_view(state).payload()}
 
         with open(path) as fh:
             payload = json.load(fh)

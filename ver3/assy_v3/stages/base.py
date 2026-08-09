@@ -83,8 +83,25 @@ class StageOutcome:
 
 
 class Stage:
+    #: WHO OWNS THE WRITE. Provenance and ownership are per stage: both s03 passes
+    #: author s03 state and are governed by s03's ownership.
     stage_id = "sXX"
+
+    #: WHICH ENGINEERING RESPONSIBILITY IS REASONING. A stage may run in more than
+    #: one pass, and the passes ask different questions of different premises, so
+    #: they are different consumers. Defaults to the stage when there is only one.
+    #:
+    #: Declared here so a runner cannot get it wrong: the mapping from a pass to
+    #: its contract used to live in whoever was calling, which is how "s03" - a
+    #: string that is an owner and not a responsibility - reached a consumer
+    #: lookup at all.
+    pass_id = None
+
     purpose = ""
+
+    @classmethod
+    def responsibility_id(cls) -> str:
+        return cls.pass_id or cls.stage_id
 
     # ------------------------------------------------------------ overridden
     def prompt(self, inputs: Dict[str, Any]) -> str:
@@ -96,6 +113,17 @@ class Stage:
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
         """What the contract requires that this response did not supply."""
         return []
+
+    def consumer_view(self, state, invocation=None, budget_chars=None):
+        """This pass's engineering context. The ONE semantic boundary.
+
+        Asked of the stage rather than of the runner, so every caller resolves the
+        same responsibility and no tool keeps its own table of which contract a
+        pass reads.
+        """
+        from ..view import consumer_view_for
+        return consumer_view_for(self.responsibility_id(), state,
+                                 budget_chars=budget_chars, invocation=invocation)
 
     def invocation_premises(self, inputs: Dict[str, Any]) -> List[str]:
         """Class-A entities that everything THIS invocation authors rests on.

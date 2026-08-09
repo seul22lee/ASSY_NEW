@@ -23,7 +23,7 @@ from ver3.assy_v3.stages.s02_obligation_and_candidates import (           # noqa
     magnitude_fidelity_check,
     created_obligations_check, requirement_coverage_check, obligation_scope_check,
     candidate_coverage_check, openness_citation_check, actor_citation_check)
-from ver3.assy_v3.state import DesignState, project_for                   # noqa: E402
+from ver3.assy_v3.state import DesignState                                # noqa: E402
 
 FIXTURES = os.path.join(_REPO, "ver3", "assy_v3", "fixtures", "responses")
 BENCHMARKS = os.path.join(_REPO, "ver3", "benchmarks")
@@ -46,8 +46,9 @@ def _run(case, probe=False):
     o1 = S01RequirementCapture().run(provider, {"request_text": text}, state, case)
     assert o1.patch is not None, o1.problems
     state.apply(o1.patch)
-    proj = project_for("s02", state)
-    o2 = S02ObligationAndCandidates().run(provider, {"projection": proj}, state, case)
+    stage2 = S02ObligationAndCandidates()
+    proj = stage2.consumer_view(state).payload()
+    o2 = stage2.run(provider, {"consumer_view": proj}, state, case)
     assert o2.patch is not None, o2.problems
     state.apply(o2.patch)
     return state, text, proj, o1, o2

@@ -261,9 +261,9 @@ class TestAuthorityModel(unittest.TestCase):
     # ------------------------------------------------- H. derived and ephemeral
     def test_H_a_projection_is_ephemeral_and_carries_no_mutation_semantics(self):
         """Class C is structurally distinguishable: it leaves the state entirely."""
-        from ver3.assy_v3.state.projection import project_for
+        from ver3.assy_v3.view import consumer_view_for
         s = _with_scale(_state())
-        view = project_for("s04", s)
+        view = consumer_view_for("s04a", s).payload()
         view["ReferenceScale"][0]["basis"] = "ANYTHING"          # freely regenerable
         assert s.family("ReferenceScale")[0]["basis"] == "RELATIVE"
         assert type(view["ReferenceScale"][0]) is dict           # a plain structure

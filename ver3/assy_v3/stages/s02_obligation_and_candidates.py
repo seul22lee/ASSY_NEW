@@ -209,7 +209,7 @@ def _render_routes() -> str:
         for r, v in sorted(EVIDENCE_ROUTES.items()))
 
 
-def _render_projection(proj: Dict[str, List[Dict]]) -> str:
+def _render_consumer_view(proj: Dict[str, List[Dict]]) -> str:
     import json
     slim: Dict[str, Any] = {}
     for fam, rows in sorted(proj.items()):
@@ -222,12 +222,12 @@ class S02ObligationAndCandidates(Stage):
     purpose = "derive obligations and load cases, and form candidate principle families"
 
     def prompt(self, inputs: Dict[str, Any]) -> str:
-        proj = inputs["projection"]
+        proj = inputs["consumer_view"]
         if "SourceClause" in proj:
             raise AssertionError(
                 "s02 was handed SourceClause; the projection is not enforcing INV-002")
         return PROMPT.format(families=_render_families(), routes=_render_routes(),
-                             projection=_render_projection(proj))
+                             projection=_render_consumer_view(proj))
 
     # ------------------------------------------------------------ operations
     def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:

@@ -19,7 +19,7 @@ import unittest
 
 import yaml
 
-from . import _paths                                                    # noqa: F401
+from . import _fixtures, _paths                                                    # noqa: F401
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _REPO = os.path.abspath(os.path.join(_HERE, "..", "..", ".."))
@@ -44,7 +44,7 @@ def _premises(resp):
             yield sid, p
 
 
-class _Base(unittest.TestCase):
+class _Base(_fixtures.StateBuilder, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -52,15 +52,6 @@ class _Base(unittest.TestCase):
         with open(_RESP_PATH) as fh:
             cls.resp = yaml.safe_load(fh)
 
-    def add(self, s, stage, fam, eid, prem=None, **over):
-        d = {f: "x" for f in self.c.required_fields(fam) if f != "entity_id"}
-        d.update(over)
-        s.apply(StagePatch(patch_id="p-%s" % eid, run_id=s.run_id, stage_id=stage,
-                           stage_attempt=1, parent_state_hash=s.state_hash(),
-                           operations=[Op("CREATE", fam, eid, d, "p",
-                                          premise_refs=list(prem or []))],
-                           execution_status="SUCCESS", provenance={"provider": "t"}))
-        return eid
 
     def responsibility(self, stage_id, *premises, **stage_extra):
         """A responsibility contract holding exactly the premises under test."""
