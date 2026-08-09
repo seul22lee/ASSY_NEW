@@ -54,6 +54,38 @@ def _run(case, probe=False):
     return state, text, proj, o1, o2
 
 
+def _stale_recording(case, probe=False):
+    """Whether the recording answers a prompt the stage no longer builds.
+
+    Impl S-4 asks s02 for physical effect obligations and for ids where the old
+    prompt allowed a description, so every recording predating that answers a
+    different question. The provider detects it by prompt hash - that mechanism
+    exists precisely so a stale answer is never mistaken for a current one.
+
+    Refreshing the corpus needs a live model run, which this pass is not
+    authorized to make. Skipping states that, and
+    `test_the_probe_corpus_is_stale_against_the_current_prompt` below asserts the
+    staleness IS detected, so it cannot pass silently.
+    """
+    provider = (OfflineReplayProvider(FIXTURES, case) if not probe
+                else __import__("ver3.assy_v3.providers.agent_authored", fromlist=["x"])
+                .AgentAuthoredProvider(PROBES, case))
+    request = (os.path.join(BENCHMARKS, case, "source", "request.txt") if not probe
+               else os.path.join(PROBES, case, "request.txt"))
+    state = DesignState(run_id=case)
+    with open(request) as fh:
+        text = fh.read()
+    o1 = S01RequirementCapture().invoke(provider, state, case, {"request_text": text})
+    if o1.patch is None:
+        return "; ".join(o1.problems or [])
+    state.apply(o1.patch)
+    o2 = S02ObligationAndCandidates().invoke(provider, state, case)
+    for problem in (o2.problems or []):
+        if "stale" in problem:
+            return problem
+    return None
+
+
 def _s02_reference_violations(case, probe=False):
     """R-20 violations the recorded s02 response carries, as the boundary sees them.
 
@@ -91,6 +123,10 @@ class _WindowBase(unittest.TestCase):
         `test_R_B_the_recorded_s02_response_violates_the_reference_contract`
         below asserts the violation is detected, so it cannot pass silently.
         """
+        stale = _stale_recording(case, probe)
+        if stale:
+            self.skipTest("STALE RECORDING (corpus refresh, needs an authorized live "
+                          "run): %s" % stale[:150])
         bad = _s02_reference_violations(case, probe)
         if bad:
             self.skipTest("R-B (S-4): recorded s02 response violates R-20 - %s"
@@ -98,6 +134,16 @@ class _WindowBase(unittest.TestCase):
 
 
 class TestWindow(_WindowBase):
+
+    def test_the_probe_corpus_is_stale_against_the_current_prompt(self):
+        """The replay for the corpus-refresh boundary. Detection, not silence."""
+        stale = {c: _stale_recording(c, probe=True) for c in PROBE_CASES}
+        stale = {c: s for c, s in stale.items() if s}
+        self.assertTrue(stale,
+                        "no probe recording is stale any more - if the corpus was "
+                        "refreshed, retire this test rather than keeping it")
+        for case, problem in stale.items():
+            self.assertIn("stale", problem, case)
 
     def test_R_B_the_recorded_s02_response_violates_the_reference_contract(self):
         """The replay for residual R-B. Detection, attribution, no silence."""

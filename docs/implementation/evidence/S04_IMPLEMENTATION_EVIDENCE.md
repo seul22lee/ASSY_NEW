@@ -171,11 +171,163 @@ refresh are separable, and only the first belongs to a no-model-call pass.
 
 ---
 
-## 5. Impl S-5 has NOT begun. Impl S-4 implementation has NOT begun.
+## 5. SLICE 1 — Pipeline S02 canonical physical-demand producer
+
+Baseline for this slice: `2880db7`.
+
+### 5.1 Obligation vs PhysicalEffectObligation — not duplication
+
+| | Obligation | PhysicalEffectObligation |
+|---|---|---|
+| purpose (contract) | "A physical or functional thing that must be true for a requirement to hold." | "What physical effect must occur, between which ROLES, under which load case - stated without naming a mechanism." |
+| required | statement, derived_from_requirements, mandatory, scope, satisfiable_at, evidence_route, route_available | effect (closed enum), between_roles, addresses_obligations |
+| answers | **what must be true** | **what physical effect makes it true** |
+| owner | s02 | s02 |
+
+The second **refines** the first through `addresses_obligations` and adds what the
+first cannot say: the effect kind, the roles it acts between, and the load case it
+holds under. No semantic truth is stored twice. Its own rule settles the timing:
+*"S-2 defines it. S-4/U-5 is where s02 begins producing it."*
+
+Its other rule — *"Roles, never bodies. s02 may not decide topology"* — is why
+`between_roles` targets Actor, and why a body in that field is refused
+(S4-S02-10).
+
+### 5.2 addresses_obligations vs obligations_created — both needed
+
+| field | claim |
+|---|---|
+| `addresses_obligations` | this principle intends to satisfy a demand that **already exists** |
+| `obligations_created` | this principle **introduces a new demand** by being chosen |
+
+From the contract: *"a candidate that needs a bearing has CREATED a bearing
+obligation. Without it, an incomplete candidate looks cheaper than a complete one,
+which is R-16."* Both target `Obligation`; the obligation itself is owned by the
+`Obligation` family, `owned_by: s02`. Neither field is legacy and neither is
+redundant.
+
+### 5.3 R-B root cause
+
+The recorded response referenced correctly wherever it had **written** the
+obligation, and wrote prose wherever it had **not written one at all**:
+
+```
+obligations_addressed : ['OBL-0002' ... 'OBL-0007']          ids
+obligations_created   : ['radial support and axial retention for the rotating
+                         relation', ...]                      prose
+```
+
+So R-B is not a formatting slip. The candidate-created obligations were never
+authored as entities, which is the same producer gap as the missing
+`PhysicalEffectObligation`: s02 described physical demand instead of writing it.
+
+### 5.4 Producer changes
+
+`ver3/assy_v3/stages/s02_obligation_and_candidates.py`:
+
+- **`to_operations` authors `PhysicalEffectObligation`** — the branch that did not
+  exist. Required fields from the response; `under_load_case` and `persistence`
+  written only when the model supplies them, never defaulted in.
+- **Prompt** gains the `physical_effect_obligations[]` schema, its three reference
+  lines, a rule stating the effect level ("say the effect, never the mechanism";
+  "name ROLES, never bodies"), and a blunt rule that a reference field is never a
+  description — *"if a candidate creates an obligation, write that obligation,
+  give it an id, and put THAT ID in obligations_created."*
+- The effect vocabulary is **read from the contract**, not restated in the prompt,
+  so the two cannot drift (S4-S02-05b).
+- **`completeness` reports a reference answered in prose**, attributing it to the
+  producer instead of leaving a downstream schema failure to read as a contract
+  problem. It **reports and does not repair**: no id is invented, and a test
+  asserts the parsed response is not mutated.
+
+No shim, no prose-to-id conversion, no benchmark branch, no weakening of R-20.
+
+### 5.5 Before / after
+
+```
+R-B response       -> SCHEMA_FAILURE, REFERENCE_NOT_AN_ID on obligations_created,
+                      write boundary refuses the patch          (unchanged)
+canonical response -> SUCCESS, patch applies, CND-0001.obligations_created
+                      = ['OBL-0002'] and OBL-0002 exists as an Obligation
+```
+
+Canonical shape:
+
+```json
+"obligations": [{"id": "OBL-0002", "statement": "the rotating relation must be
+                  supported", "scope": "CANDIDATE_DISCRIMINATING", ...}],
+"physical_effect_obligations": [
+  {"id": "PEO-0001", "effect": "TRANSMIT_FORCE", "between_roles": ["ACT-0001"],
+   "addresses_obligations": ["OBL-0001"], "under_load_case": "LC-0001"}],
+"candidates": [{"id": "CND-0001", "obligations_addressed": ["OBL-0001"],
+                "obligations_created": ["OBL-0002"], ...}]
+```
+
+Same-patch closure: the candidate references an obligation created in the same
+patch, and the write boundary validates it as one act.
+
+### 5.6 Candidate-independence
+
+`PEO-0001` and `PEO-0002` are authored with **no premise and no candidate field**.
+Two candidates address the same `OBL-0001`, and exactly one physical demand exists
+for it — not one per candidate. A candidate that creates nothing has an empty
+`obligations_created`; created and addressed are never conflated.
+
+### 5.7 What s02 still does not author
+
+Asserted, not assumed: after a successful s02 patch, `PhysicalInteraction`,
+`ConstraintRelation`, `LoadPath`, `Body`, `RigidGroup`, `Joint` and `Envelope` are
+all empty. Candidate-specific realization remains the next slice.
+
+### 5.8 Tests
+
+`ver3/tests/meta/test_s02_physical_demand.py` — 12 tests: R-B before/after,
+producer attribution, no-shim scan, PEO production, contract-sourced vocabulary,
+candidate-independence, created-vs-addressed, traceability, the negative list of
+families s02 must not author, plus an **unseen shape** (a `METER` demand between
+roles addressing two obligations, with no load case) and the roles-never-bodies
+refusal.
+
+### 5.9 Recording corpus — a new, honest consequence
+
+Changing the s02 prompt **invalidates every recording made against the old one**,
+and the repo detects it by prompt hash:
+
+```
+recording answers prompt 4894d3f97ea8c29b but the stage built 1eaa4e75e5078e3c;
+the response is stale
+```
+
+That mechanism exists precisely so a stale answer is never mistaken for a current
+one. The 9 probe replays are now skipped as **STALE RECORDING** rather than R-B,
+with `test_the_probe_corpus_is_stale_against_the_current_prompt` asserting the
+staleness is detected so it cannot pass silently. The benchmark replays remain
+R-B.
+
+**No skip was retired.** Both blockers now need the same thing — a corpus refresh
+from an authorized live run — which this pass is not permitted to make. Retiring
+them on stale recordings would have been the mistake §10 warns about.
+
+### 5.10 Regression
+
+`640 run · 640 pass · 0 fail · 22 skipped` — 9 stale-recording (probe), 12 R-B
+(benchmark), 1 unrelated freeze-gate skip. Static scans clean: no benchmark id, no
+`slugify`/`generate_id`/`_coerce` in production.
+
+### 5.11 Next S-4 slice
+
+**S03B physical realization**: `PhysicalInteraction` and `ConstraintRelation`
+producers (both still declared-with-no-producer), reaction/support/retention at
+symbolic maturity, and `LoadPath` tied to the design-wide `LoadCase` through
+authored interactions. S-5/S-6/S-7 ownership is unchanged.
+
+## 6. Impl S-5 has NOT begun.
 
 ## 9. Status
 
-**S-4 NOT CLOSED — PHYSICAL REALIZATION MIGRATION INCOMPLETE.**
+**S-4 IN PROGRESS — S02 CANONICAL PHYSICAL-DEMAND PRODUCER COMPLETE.**
+
+Slice 1 is done (§5). Candidate-specific physical realization is not.
 
 What is complete: the S-3 closure boundary is recorded and frozen (§1), every residual
 has an owner (§1.4), the physical fact inventory is measured (§2), R-B is pinned (§3),

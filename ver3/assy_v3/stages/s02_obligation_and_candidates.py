@@ -20,6 +20,7 @@ from ..knowledge.capability_registry import EVIDENCE_ROUTES, route_for_claim
 from ..state.patch import Op
 from .base import Stage
 
+import os
 import re
 
 DIRECTION_CLASSES = ("AXIAL", "TRANSVERSE", "RADIAL", "MOMENT", "GRAVITY", "NONE")
@@ -121,7 +122,18 @@ RULES
    must type its alternatives list (alternatives_kind: ENTITY_REFS,
    PRINCIPLE_FAMILIES or FREE_TEXT). Do not restate an ambiguity in prose that
    the input already gave you as an entity.
-7. Never name a dimension or a position.
+7. For every physical demand the obligations imply, record a PHYSICAL EFFECT
+   OBLIGATION: what effect must occur, between which ROLES, and under which load
+   case. The effect is one of {effects}. Say the effect, never the mechanism:
+   "rotation must be permitted between the handle role and the body role" is an
+   effect; "use a ball bearing" is a mechanism and belongs to no stage yet.
+   Name ROLES, never bodies - there are no bodies at this stage to name.
+8. Every id you write in a reference field must be an id. A reference field is
+   never a description. If a candidate creates an obligation, write that
+   obligation in the obligations list, give it an id, and put THAT ID in
+   obligations_created. Describing it instead leaves nothing downstream can
+   address, and the obligation you meant does not exist.
+9. Never name a dimension or a position.
 
 PRINCIPLE FAMILIES AVAILABLE (by function class)
 {families}
@@ -146,6 +158,10 @@ marked optional. Every id is a string in the format shown.
   load_cases[]            id "LC-0001", scenario, applied_to_role,
                           reacted_at_role, direction_class, kind,
                           magnitude_or_status
+  physical_effect_obligations[]
+                          id "PEO-0001", effect, between_roles[],
+                          addresses_obligations[], under_load_case (optional),
+                          persistence (optional)
   candidates[]            id "CND-0001", summary, family, principle,
                           obligations_addressed[], obligations_created[],
                           evidence_route_verdict {{route, available (boolean),
@@ -167,6 +183,9 @@ neither place is an error.
   obligations[].derived_from_requirements  requirement ids from the input
   obligations[].involves_actors            actor ids from the input
   load_cases[].scenario                    a scenario id from the input
+  physical_effect_obligations[].between_roles         actor ids from the input
+  physical_effect_obligations[].addresses_obligations obligation ids you emit here
+  physical_effect_obligations[].under_load_case       a load case id you emit here
   candidates[].obligations_addressed       obligation ids you emit here
   candidates[].obligations_created         obligation ids you emit here
   acceptance_contracts[].candidate         a candidate id you emit here
@@ -209,6 +228,24 @@ def _render_routes() -> str:
         for r, v in sorted(EVIDENCE_ROUTES.items()))
 
 
+def _CONTRACT_EFFECTS():
+    import yaml as _yaml
+    here = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(here, "..", "..", "contracts", "DESIGN_STATE_CONTRACT.yaml")
+    with open(os.path.abspath(path)) as fh:
+        doc = _yaml.safe_load(fh)
+    return doc["entity_families"]["PhysicalEffectObligation"]["effect"]
+
+
+#: The effect vocabulary is the contract's, not a second copy of it: restating a
+#: closed set in a prompt is how the two drift apart.
+EFFECT_KINDS = tuple(_CONTRACT_EFFECTS())
+
+
+#: `identity.entity_id.format` - "<type_prefix>-<zero_padded_ordinal>".
+_ENTITY_ID = re.compile(r"^[A-Z][A-Z0-9]*(?:-[A-Za-z0-9]+)+$")
+
+
 def _render_consumer_view(proj: Dict[str, List[Dict]]) -> str:
     import json
     slim: Dict[str, Any] = {}
@@ -227,6 +264,7 @@ class S02ObligationAndCandidates(Stage):
             raise AssertionError(
                 "s02 was handed SourceClause; the projection is not enforcing INV-002")
         return PROMPT.format(families=_render_families(), routes=_render_routes(),
+                             effects=" | ".join(EFFECT_KINDS),
                              projection=_render_consumer_view(proj))
 
     # ------------------------------------------------------------ operations
@@ -250,6 +288,23 @@ class S02ObligationAndCandidates(Stage):
                 "reacted_at_role": l["reacted_at_role"],
                 "direction_class": l["direction_class"], "kind": l["kind"],
                 "magnitude_or_status": l["magnitude_or_status"]}, prov))
+        # S-4. `PhysicalEffectObligation` has been a declared s02 output since S-2
+        # with nothing authoring it - its own contract rule says "S-2 defines it.
+        # S-4/U-5 is where s02 begins producing it." This is that branch.
+        #
+        # It is the PHYSICAL reading of an obligation: what effect must occur,
+        # between which ROLES, under which load case. It does not duplicate the
+        # obligation - the obligation says what must be true, this says what
+        # physical effect makes it true - and it names roles, never bodies,
+        # because s02 may not decide topology.
+        for e in parsed.get("physical_effect_obligations", []):
+            fields = {"effect": e["effect"],
+                      "between_roles": e.get("between_roles", []),
+                      "addresses_obligations": e.get("addresses_obligations", [])}
+            for optional in ("under_load_case", "persistence"):
+                if e.get(optional):
+                    fields[optional] = e[optional]
+            ops.append(Op("CREATE", "PhysicalEffectObligation", e["id"], fields, prov))
         for c in parsed.get("candidates", []):
             ops.append(Op("CREATE", "Candidate", c["id"], {
                 "summary": c["summary"], "family": c["family"],
@@ -258,7 +313,7 @@ class S02ObligationAndCandidates(Stage):
                 # model's response key are unchanged - this maps the answer to the
                 # one canonical field, it does not ask a different question. s03
                 # already used the canonical name; s02 and the contract were the
-                # outliers. Prompt alignment is S-4.
+                # outliers.
                 "addresses_obligations": c.get("obligations_addressed", []),
                 "obligations_created": c.get("obligations_created", []),
                 "evidence_route_verdict": c["evidence_route_verdict"],
@@ -281,12 +336,53 @@ class S02ObligationAndCandidates(Stage):
                 "would_be_invalidated_by": a["would_be_invalidated_by"]}, prov))
         return ops
 
+    #: Response keys that hold ENTITY IDS, and where those ids may come from.
+    #: Kept next to the prompt that asks for them, so the two cannot drift.
+    _REFERENCE_KEYS = (
+        ("candidates", "obligations_addressed"),
+        ("candidates", "obligations_created"),
+        ("physical_effect_obligations", "addresses_obligations"),
+        ("physical_effect_obligations", "between_roles"),
+        ("obligations", "derived_from_requirements"),
+        ("acceptance_contracts", "obligations"),
+    )
+
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
         out: List[str] = []
         if not parsed.get("obligations"):
             out.append("no obligations derived")
         if not parsed.get("candidates"):
             out.append("no candidates formed")
+        out.extend(self._reference_shape_problems(parsed))
+        return out
+
+    def _reference_shape_problems(self, parsed: Dict[str, Any]) -> List[str]:
+        """A reference field answered in prose, reported as the stage's own finding.
+
+        R-B: the recorded responses described the obligations a candidate creates
+        instead of writing them, so a typed reference held
+        "radial support and axial retention for the rotating relation". The write
+        boundary already refuses that. Reporting it HERE attributes it to the
+        producer, where it belongs, instead of leaving a schema failure to be read
+        as a contract problem.
+
+        This REPORTS. It does not repair: nothing here invents an id, and a
+        response that describes an obligation it did not write is incomplete, not
+        convertible.
+        """
+        out: List[str] = []
+        for collection, field in self._REFERENCE_KEYS:
+            for item in parsed.get(collection) or []:
+                if not isinstance(item, dict):
+                    continue
+                value = item.get(field)
+                for ref in (value if isinstance(value, list) else [value]):
+                    if ref is None or _ENTITY_ID.match(str(ref)):
+                        continue
+                    out.append(
+                        "%s %s.%s is not an entity id: %r - if the obligation it "
+                        "describes is real, it belongs in the list as an entity "
+                        "with an id" % (collection, item.get("id"), field, str(ref)[:60]))
         return out
 
 
