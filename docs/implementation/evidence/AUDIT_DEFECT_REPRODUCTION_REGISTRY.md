@@ -436,3 +436,29 @@ still emits `blocked_by`/`retained_by` and does not yet emit `ConstraintRelation
 `PhysicalInteraction`; that gap is now stated in a `current_producer` block with its migration
 step, because weakening the canonical contract to match the producer would carry the audited
 defect forward under a new name.
+
+
+### ADR-013 extension — a projection that is labelled but not checked
+
+**Exact defect.** A stage-contract section is labelled `CANONICAL_PROJECTION` but names only a
+source FILE, so nothing resolves which fact it projects and nothing compares values. At
+`e520048`: **24 labelled, 0 with a resolvable fragment**, and only `owned_decisions` checked —
+by a test hard-coding that section name.
+
+**Why it matters.** A label that is never checked is weaker than no label: it reads as
+enforcement. "One authoritative edit per fact, plus checked projections" was true of ownership
+and of nothing else.
+
+**General invariant.** Every declared canonical projection has a resolvable source fragment and
+a machine-checked relationship to it — and a section that cannot carry that metadata is not a
+projection but operational prose, classified honestly.
+
+**Before / after.** Before: 24 labelled, 3 enforceable. After: 3 labelled, 3 enforceable, with
+21 reclassified as OPERATIONAL carrying non-binding `see_canonical` pointers. Level 1: the six
+negative controls perturb a synthetic canonical value and assert the validator reports it.
+Level 2: the validator is data-driven over the whole stage corpus, so a future projection joins
+the set without anyone remembering to add it.
+
+**Honesty note.** No fake canonical `s03` was invented to make the aggregate stage file
+projectable, and no fuzzy comparison was added to let prose "match" a canonical list. Both
+would have produced a green test over a fact nobody checked.

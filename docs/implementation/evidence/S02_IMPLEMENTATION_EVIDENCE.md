@@ -270,3 +270,116 @@ disposition runtime, S04 spatial behaviour, Consumer Sufficiency, prompt rewrite
 regeneration, evaluator migration — all unchanged and all scheduled.
 
 > **S-2 CLOSED.** All 16 closure exit criteria hold. **S-3 has not begun.**
+
+> **⚠ Superseded by §26.** The closure classified every section, but a section could be
+> labelled CANONICAL_PROJECTION while naming only a source FILE. 24 were so labelled and
+> **0 carried a resolvable fragment**, so "one authoritative edit per fact, plus checked
+> projections" was broader than the enforcement. See §26.
+
+
+---
+---
+
+# §26 CANONICAL PROJECTION INTEGRITY CORRECTION
+
+Baseline `e520048`. Very narrow: make the declared projection invariant true. **Not S-3, not a
+producer migration, not prompt work.** No implementation code changed.
+
+## 26.1 The gap, reproduced first
+
+**24 sections labelled CANONICAL_PROJECTION; 0 with a machine-resolvable source fragment.**
+Every one named a file and nothing more. Only `owned_decisions` was really checked, and by
+CLOSURE-01/03 hard-coding that one section name — so 21 of 24 were unenforced.
+
+## 26.2 Breakdown after honest classification
+
+| | Count |
+|---|---|
+| **Valid projections** (structured value, resolvable fragment, checkable relation) | **3** — `owned_decisions` on S01, S02, S03 |
+| **Operational summaries misclassified as projections** | **21** |
+| Stale contradictions | 0 new — the three found at S-2 closure remain fixed |
+
+The 21 were prose: `engineering_question` and `engineering_responsibility` are **strings**
+while the canonical source holds **lists**, and `prohibited_decisions` carries stage-local
+detail (invariant ids, retirement rows) the canonical list does not. **A paraphrase is not
+equality.** Rather than invent a fuzzy comparison, they are now OPERATIONAL with a
+`see_canonical` pointer marked `binding: false`.
+
+## 26.3 S03 aggregate disposition
+
+The canonical architecture defines `s03a` and `s03b`; the contract file is one `s03`. **No
+fake canonical `s03` entry was created** — that would manufacture a fact rather than check
+one. Its prose sections are OPERATIONAL pointing non-bindingly at `stages.s03a and s03b`; its
+`owned_decisions` is a real EXACT projection of `owned_by == s03`, which needs no aggregation.
+PROJ-05 fails on any pointer to a canonical stage that does not exist.
+
+The same reasoning applies to S05–S07: the frozen architecture defines no canonical
+responsibility for them, so their sections carry a `see_canonical_note` saying so rather than
+a pointer to nothing.
+
+## 26.4 Projection metadata
+
+```yaml
+canonical_source:
+  file:     ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+  path:     "entity_families+assurance_families[*].owned_by == s03"
+  relation: EXACT
+projected_key: creates
+```
+
+Relations are deliberately tiny — `EXACT`, `SUBSET`, `ORDERED_SUBSET`. A larger transformation
+language would let a projection pass by being clever rather than by being the same fact.
+
+## 26.5 Generalized validator
+
+`test_projection_integrity.py` discovers every CANONICAL_PROJECTION in every stage file,
+resolves its fragment, applies its relation and fails on mismatch. **No special case for S02,
+S03, ownership or questions** — a new projection enters the set automatically.
+
+PROJ-01 resolvable file · 02 resolvable fragment · 03 supported relation · 04 relation
+satisfied · 05 no unresolved canonical stage id · 06 prose cannot pass as EXACT · 07 exactly
+one classification per section · 08 legacy declares replacement + step · 09 operational is
+non-authoritative · 10 negative controls.
+
+## 26.6 Negative controls
+
+Six, each perturbing a synthetic copy and asserting the mechanism reports it: **A** stale
+ownership projection · **B** stale question projection · **C** bad source path · **D**
+undeclared relation · **E** unresolved `s03` → `s03a`/`s03b` · **F** prose marked EXACT. A
+seventh asserts the live corpus still passes, proving the controls touched copies only.
+
+## 26.7 Source-of-truth result
+
+**Before:** 24 declared projections, 3 enforceable. **After:** 3 declared projections, 3
+enforceable — and changing the canonical `owned_by` without updating the projection now fails
+CI, demonstrated by control A. The claim is narrower and, for the first time, true.
+
+## 26.8 An error I made and corrected
+
+A regex rewrite of the classification blocks **destroyed all seven stage contracts** —
+top-level keys fell from ~20 to 3. Caught immediately by a key-count assertion, restored with
+`git checkout`, and redone by exact line-span replacement with a per-file assertion that the
+key count is unchanged. No content was lost; the committed diff shows only the
+`authority_status` blocks changing.
+
+## 26.9 Deferred
+
+**Benchmark-specific operational content.** Some OPERATIONAL and legacy sections cite benchmark
+identifiers and retirement rows. It is **not** canonical authority, is not a projection, and
+must never feed automatic Consumer Sufficiency derivation. Recorded as later cleanup debt;
+**not started here**.
+
+Producer migrations unchanged: s02 physical reasoning, s03 canonical family production,
+mobility runtime, S04 spatial, Consumer Sufficiency, prompts, fixtures, evaluator.
+
+## 26.10 Regression
+
+**69/69** state · **368 meta OK** · **8/8** window · ADR-001 L1/L2 OK · **22/22** CON ·
+**15/15** CLOSURE · **16/16** PROJ · all CI steps OK. Two existing CLOSURE assertions were
+**updated to the nested metadata schema, not weakened** — they now additionally require a
+fragment and a relation.
+
+Classification: the gap was **(A) projection metadata defect**; the 21 reclassifications were
+**(C) misclassified operational**. No **(B)**, **(E)**, **(F)**, **(G)**, **(H)** or **(I)**.
+
+> **S-2 FINAL FROZEN.** All 19 freeze criteria hold. **S-3 has not begun.**

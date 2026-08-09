@@ -115,6 +115,35 @@ projections:
       step. Collapsing them would either falsify the producer or weaken the
       canonical semantics, and the migration schedule depends on neither.
 
+# ------------------------------------------------------------ projection integrity
+# A CANONICAL_PROJECTION must be MACHINE-CHECKABLE. Naming a source file alone
+# said where to look and nothing about what to compare, so 24 sections were
+# labelled canonical and only ownership was actually checked. A section that
+# cannot carry this metadata is not a projection - it is operational prose, and
+# classifying it honestly is preferred over inventing a transformation that makes
+# a paraphrase "match".
+projection_metadata_schema:
+  canonical_source:
+    file: "the canonical document"
+    path: "the exact semantic fragment - a dotted path, or a declared derivation"
+    relation: "one of the supported relations below"
+    derived_as: "optional prose describing a derivation path"
+  projected_key: "the key inside the section holding the projected value"
+  projects: "what fact this projects, in one line"
+supported_projection_relations:
+  EXACT: "the projected value must equal the canonical value"
+  SUBSET: "every projected item must exist in the canonical value"
+  ORDERED_SUBSET: "as SUBSET, where order carries meaning"
+  note: >
+    Deliberately tiny. A larger transformation language would let a projection
+    satisfy a test by being clever rather than by being the same fact.
+non_binding_pointer:
+  key: see_canonical
+  meaning: >
+    An OPERATIONAL section may point a reader at the canonical value. The pointer
+    is `binding: false` and is never checked for equality - it is a courtesy, not
+    an authority claim.
+
 stage_contract_status_vocabulary:
   CANONICAL_PROJECTION:
     requires: [source, projects]

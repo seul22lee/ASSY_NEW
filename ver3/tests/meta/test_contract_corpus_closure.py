@@ -85,11 +85,18 @@ class TestSectionClassification(_Corpus):
             for section, spec in (doc.get("authority_status") or {}).items():
                 if spec.get("class") != "CANONICAL_PROJECTION":
                     continue
-                src = spec.get("source")
+                # Projection metadata is nested since the projection-integrity
+                # pass: a source FILE alone was never enough to check anything.
+                cs = spec.get("canonical_source") or {}
+                src = cs.get("file")
                 if not src:
-                    problems.append("%s.%s projects with no source" % (name, section))
+                    problems.append("%s.%s projects with no source file" % (name, section))
                 elif not os.path.exists(os.path.join(REPO, src)):
                     problems.append("%s.%s names a missing source %s" % (name, section, src))
+                if not cs.get("path"):
+                    problems.append("%s.%s names no source fragment" % (name, section))
+                if not cs.get("relation"):
+                    problems.append("%s.%s declares no projection relation" % (name, section))
                 if not (spec.get("projects") or "").strip():
                     problems.append("%s.%s does not say what it projects" % (name, section))
         self.assertEqual([], problems)
@@ -154,7 +161,7 @@ class TestNoSecondAuthority(_Corpus):
             for fam in (doc.get("owned_decisions") or {}).get("creates") or []:
                 if fam not in self.fams:
                     problems.append("%s projects %s, absent from %s"
-                                    % (name, fam, spec.get("source")))
+                                    % (name, fam, (spec.get("canonical_source") or {}).get("file")))
         self.assertEqual([], problems)
 
     def test_CLOSURE_06_retired_relations_are_only_named_in_legacy_sections(self):

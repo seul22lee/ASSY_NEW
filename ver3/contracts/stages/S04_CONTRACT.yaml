@@ -10,27 +10,62 @@ schema_version: "0.1.0"
 # A *_CONTRACT.yaml file is not a semantic authority by default.
 authority_status:
   s04a:
-    class: CANONICAL_PROJECTION
-    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
-    projects: "stage responsibility and its declared semantics"
+    class: OPERATIONAL
+    note: >
+      Stage-local prose or detail. It EXPLAINS; it does not define. Not a
+      projection: a paraphrase of a canonical list is not equality, and
+      treating it as one would make this file a second semantic authority
+      by resemblance rather than by declaration.
+    authoritative_for_canonical_semantics: false
+    see_canonical:
+      file: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+      path: "stages.s04a, gate and s04b"
+      binding: false
+      why: >
+        A non-authoritative pointer for readers. The canonical value
+        lives there, not here.
   selection_gate:
-    class: CANONICAL_PROJECTION
-    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
-    projects: "stage responsibility and its declared semantics"
+    class: OPERATIONAL
+    note: >
+      Stage-local prose or detail. It EXPLAINS; it does not define. Not a
+      projection: a paraphrase of a canonical list is not equality, and
+      treating it as one would make this file a second semantic authority
+      by resemblance rather than by declaration.
+    authoritative_for_canonical_semantics: false
+    see_canonical:
+      file: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+      path: "stages.s04a, gate and s04b"
+      binding: false
+      why: >
+        A non-authoritative pointer for readers. The canonical value
+        lives there, not here.
   s04b:
-    class: CANONICAL_PROJECTION
-    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
-    projects: "stage responsibility and its declared semantics"
+    class: OPERATIONAL
+    note: >
+      Stage-local prose or detail. It EXPLAINS; it does not define. Not a
+      projection: a paraphrase of a canonical list is not equality, and
+      treating it as one would make this file a second semantic authority
+      by resemblance rather than by declaration.
+    authoritative_for_canonical_semantics: false
+    see_canonical:
+      file: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+      path: "stages.s04a, gate and s04b"
+      binding: false
+      why: >
+        A non-authoritative pointer for readers. The canonical value
+        lives there, not here.
   why_two_passes:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   llm_role:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   knowledge_base_role:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
-
+    authoritative_for_canonical_semantics: false
 stage_id: s04
 passes: [s04a, s04b]
 status: draft

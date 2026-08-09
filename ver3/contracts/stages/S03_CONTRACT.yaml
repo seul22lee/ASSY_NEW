@@ -17,83 +17,131 @@ schema_version: "0.1.0"
 authority_status:
   owned_decisions:
     class: CANONICAL_PROJECTION
-    source: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
-    projects: "which families this stage owns (owned_by)"
+    canonical_source:
+      file: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+      path: "entity_families+assurance_families[*].owned_by == s03"
+      derived_as: the set of families whose owned_by is this stage
+      relation: EXACT
+    projected_key: creates
+    projects: which families this stage owns
   current_producer:
-    class: LEGACY_PRODUCER
+    class: "LEGACY_PRODUCER"
     describes: "what the s03 runtime still emits, ahead of its scheduled migration"
     canonical_replacement: "ConstraintRelation (addressable) and PhysicalInteraction"
-    canonical_source: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+    canonical_source: "ver3/contracts/DESIGN_STATE_CONTRACT.yaml"
     migration_step: "S-4 / U-5"
     authoritative_for_canonical_semantics: false
   blocking_relation_rule:
-    class: LEGACY_PRODUCER
+    class: "LEGACY_PRODUCER"
     describes: "the blocked_by relation the runtime still authors"
-    canonical_replacement: ConstraintRelation
-    canonical_source: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+    canonical_replacement: "ConstraintRelation"
+    canonical_source: "ver3/contracts/DESIGN_STATE_CONTRACT.yaml"
     migration_step: "S-4 / U-5"
     authoritative_for_canonical_semantics: false
   dof_disposition_rule:
-    class: LEGACY_PRODUCER
+    class: "LEGACY_PRODUCER"
     describes: "the disposition vocabulary the runtime still emits, without UNDISPOSITIONED"
     canonical_replacement: "MobilityExpectation.authorship_split; UNDISPOSITIONED for an uncovered cell"
-    canonical_source: ver3/contracts/DESIGN_STATE_CONTRACT.yaml
+    canonical_source: "ver3/contracts/DESIGN_STATE_CONTRACT.yaml"
     migration_step: "S-5 / U-6 (ADR-005)"
     authoritative_for_canonical_semantics: false
   engineering_question:
-    class: CANONICAL_PROJECTION
-    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
-    projects: "the stage's engineering questions"
+    class: OPERATIONAL
+    note: >
+      Stage-local prose or detail. It EXPLAINS; it does not define. Not a
+      projection: a paraphrase of a canonical list is not equality, and
+      treating it as one would make this file a second semantic authority
+      by resemblance rather than by declaration.
+    authoritative_for_canonical_semantics: false
+    see_canonical:
+      file: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+      path: "stages.s03a and s03b"
+      binding: false
+      why: >
+        A non-authoritative pointer for readers. The canonical value
+        lives there, not here.
   engineering_responsibility:
-    class: CANONICAL_PROJECTION
-    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
-    projects: "the stage's responsibility"
+    class: OPERATIONAL
+    note: >
+      Stage-local prose or detail. It EXPLAINS; it does not define. Not a
+      projection: a paraphrase of a canonical list is not equality, and
+      treating it as one would make this file a second semantic authority
+      by resemblance rather than by declaration.
+    authoritative_for_canonical_semantics: false
+    see_canonical:
+      file: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+      path: "stages.s03a and s03b"
+      binding: false
+      why: >
+        A non-authoritative pointer for readers. The canonical value
+        lives there, not here.
   prohibited_decisions:
-    class: CANONICAL_PROJECTION
-    source: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
-    projects: "what the stage may not decide"
+    class: OPERATIONAL
+    note: >
+      Stage-local prose or detail. It EXPLAINS; it does not define. Not a
+      projection: a paraphrase of a canonical list is not equality, and
+      treating it as one would make this file a second semantic authority
+      by resemblance rather than by declaration.
+    authoritative_for_canonical_semantics: false
+    see_canonical:
+      file: ver3/contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml
+      path: "stages.s03a and s03b"
+      binding: false
+      why: >
+        A non-authoritative pointer for readers. The canonical value
+        lives there, not here.
   required_inputs:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   prohibited_inputs:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   required_discoveries:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   compliance_rule:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   load_path_rule:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   structured_outputs:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   assembly_step_rule:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   allowed_unresolved:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   maturity_expectations:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   deterministic_exit_checks:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   next_stage_consumer_requirement:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   llm_role:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
+    authoritative_for_canonical_semantics: false
   knowledge_base_role:
-    class: OPERATIONAL
+    class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
-
-# LEGACY PRODUCER RECORD. Honest statement of the gap between what s03 OWNS and
-# what it currently EMITS. Not a claim of conformance.
+    authoritative_for_canonical_semantics: false
 current_producer:
   # The retired relation names live HERE, inside an explicitly legacy section,
   # and not inside the canonical ownership projection. Structure rather than a
