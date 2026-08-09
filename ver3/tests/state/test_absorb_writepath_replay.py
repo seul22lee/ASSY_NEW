@@ -41,7 +41,18 @@ def _substrate():
 def _seed(substrate):
     """The upstream entities the s04 payload refers to. s03 owns all three."""
     state = DesignState("adr-001-replay")
-    ops = []
+    # The bodies and rigid groups the seed's own references name. A typed
+    # reference must denote an entity; the seed used to name three that were
+    # never created, and the boundary could not see it.
+    ops = [Op("CREATE", "Body", "BOD-0001",
+              {"instance_identity": "b", "role": "STRUCTURE",
+               "created_by_stage": "s03", "addresses_obligations": []}, "replay:s03"),
+           Op("CREATE", "RigidGroup", "RGP-0001",
+              {"body": "BOD-0001", "members": ["BOD-0001"], "is_default": True},
+              "replay:s03"),
+           Op("CREATE", "RigidGroup", "RGP-0002",
+              {"body": "BOD-0001", "members": ["BOD-0001"], "is_default": False},
+              "replay:s03")]
     for rid in substrate["entities_referenced"]["FunctionalRegion"]:
         ops.append(Op("CREATE", "FunctionalRegion", rid,
                       {"role": "ACCESS", "owning_bodies": ["BOD-0001"]}, "replay:s03"))
@@ -55,6 +66,15 @@ def _seed(substrate):
                       {"joint_type": "REVOLUTE", "parent_group": "RGP-0001",
                        "child_group": "RGP-0002", "dof": ["RZ"],
                        "axis_direction": [0, 0, 1], "frame_ids": []}, "replay:s03"))
+    # The actor the s04a reach results name. s01 owns it, so it arrives in its
+    # owner's patch - a typed reference must denote an entity, and ownership is
+    # checked at the same boundary.
+    state.apply(StagePatch(
+        patch_id="seed-s01", run_id=state.run_id, stage_id="s01", stage_attempt=1,
+        parent_state_hash=state.state_hash(),
+        operations=[Op("CREATE", "Actor", "ACT-0001",
+                       {"name": "operator", "must_reach": [], "role": "OPERATOR"}, "replay:s01")],
+        execution_status="SUCCESS", provenance={"provider": "replay"}))
     state.apply(StagePatch(
         patch_id="seed", run_id=state.run_id, stage_id="s03", stage_attempt=1,
         parent_state_hash=state.state_hash(), operations=ops,

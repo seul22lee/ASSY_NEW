@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 from typing import Any, Dict, Iterable, List, Optional
 
 import yaml
@@ -429,13 +430,25 @@ class DesignState:
         Same-patch closure is a write-boundary property, which is why it is
         checked here and not by any consumer.
 
-        WHETHER a reference must resolve is the contract's word, not this
-        function's: `resolvable` says so per field, and 40 of the 46 declared
-        references say false. Enforcing resolution everywhere would be a stricter
-        engineering claim than the architecture makes. What changes here is that
-        the six that DO say true are now enforced - the name-shape rule matched
-        none of them, so the boundary was checking a set of fields the contract
-        never described while ignoring the ones it did.
+        Two checks, and they are not the same question.
+
+        STRUCTURE. A typed reference holds an ENTITY ID. `identity.entity_id`
+        declares the format and `references.rule` is explicit: "a free-string
+        subject is a SCHEMA ERROR, not a warning" (R-20). Prose in a reference
+        field is invalid whatever the referent's fate - there is no entity it
+        could ever denote. This is checked for every declared reference.
+
+        EXISTENCE. Whether the named entity must already resolve is per field:
+        `field_semantics_rules.reference` says "`resolvable` says whether an
+        unresolved value is legal; the default is false, so a dangling reference
+        is a defect rather than a style". So `resolvable: false` - the default,
+        and 40 of the 46 declarations - REQUIRES resolution, and the six that say
+        true tolerate an unresolved id.
+
+        `seen` carries the ids created earlier in THIS patch, so a patch creating
+        a candidate and the obligation it addresses validates as one act.
+        Same-patch closure is a write-boundary property, which is why it is
+        checked here and not by any consumer.
         """
         out: List[str] = []
         known = set(_STORAGE[self].entities) | seen
@@ -451,9 +464,16 @@ class DesignState:
                                % (op.entity_id, key, len(val)))
                 for ref in refs:
                     if not isinstance(ref, str) or not ref:
+                        out.append("REFERENCE_NOT_AN_ID: %s.%s holds %r"
+                                   % (op.entity_id, key, ref))
+                        continue
+                    if not _ENTITY_ID.match(ref):
+                        out.append("REFERENCE_NOT_AN_ID: %s.%s holds %r, which is "
+                                   "not an entity id (R-20)"
+                                   % (op.entity_id, key, ref[:60]))
                         continue
                     if ref not in known:
-                        if spec.get("resolvable"):
+                        if not spec.get("resolvable"):
                             out.append("DANGLING_REF: %s.%s -> %s"
                                        % (op.entity_id, key, ref))
                         continue
@@ -554,6 +574,12 @@ def _propagate(entities: Dict[str, Any], changed_id: str, kind: str,
         rec["_validity"] = ValidityStatus.STALE.value
         _log(rec, "_stale_because",
              {"premise": changed_id, "premise_change": kind, "reason": reason})
+
+
+#: `identity.entity_id.format`: "<type_prefix>-<zero_padded_ordinal>". Ids are
+#: opaque and nothing may branch on the ordinal - this only asks whether a value
+#: is an id at all, which is what R-20 makes a schema error rather than a warning.
+_ENTITY_ID = re.compile(r"^[A-Z][A-Z0-9]*(?:-[A-Za-z0-9]+)+$")
 
 
 def _created_family(patch, entity_id: str) -> Optional[str]:

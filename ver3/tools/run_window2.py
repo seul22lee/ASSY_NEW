@@ -163,13 +163,12 @@ def seed_window1(case_id: str):
         return None, ["no recording or request for %s" % case_id]
     provider = OfflineReplayProvider(root, case_id)
     state = DesignState(run_id="w2-%s" % case_id)
-    out1 = S01RequirementCapture().run(provider, {"request_text": text}, state, state.run_id)
+    out1 = S01RequirementCapture().invoke(provider, state, state.run_id,
+                                          {"request_text": text})
     if out1.patch is None:
         return None, ["s01 replay failed: %s" % out1.problems]
     state.apply(out1.patch)
-    stage2 = S02ObligationAndCandidates()
-    out2 = stage2.run(provider, {"consumer_view": stage2.consumer_view(state).payload()},
-                      state, state.run_id)
+    out2 = S02ObligationAndCandidates().invoke(provider, state, state.run_id)
     if out2.patch is None:
         return None, ["s02 replay failed: %s" % out2.problems]
     state.apply(out2.patch)
@@ -194,10 +193,8 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
     invocation = InvocationContext(branch=candidate.get("entity_id"))
     stage_a = S03TopologyAndMobility()
     try:
-        out = stage_a.run(
-            provider, {"consumer_view": stage_a.consumer_view(state, invocation).payload(),
-                       "candidate": candidate},
-            state, state.run_id)
+        out = stage_a.invoke(provider, state, state.run_id,
+                             {"candidate": candidate}, invocation=invocation)
     except Exception as exc:                                        # noqa: BLE001
         fail("PARSER_DEFECT", "%s: %s" % (type(exc).__name__, exc),
              traceback.format_exc(limit=6))
@@ -207,6 +204,7 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
     rec["s03_seconds"] = round(time.time() - started, 2)
     rec["s03_status"] = out.execution_status.value
     rec["s03_response"] = out.raw_response
+    rec["s03_consumer_view"] = out.consumer_view
     rec["s03_declared_incomplete"] = out.declared_incompleteness
 
     if out.execution_status in (ExecutionStatus.PROVIDER_RATE_LIMIT,
@@ -232,11 +230,9 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
     # both; every field survives, only the emission is halved.
     stage_b = S03BMobilityAndAssembly()
     try:
-        outb = stage_b.run(
-            provider,
-            {"consumer_view": stage_b.consumer_view(state, invocation).payload(),
-             "candidate": candidate.get("entity_id")},
-            state, state.run_id, attempt=2)
+        outb = stage_b.invoke(provider, state, state.run_id,
+                              {"candidate": candidate.get("entity_id")},
+                              attempt=2, invocation=invocation)
     except Exception as exc:                                        # noqa: BLE001
         fail("PARSER_DEFECT", "s03b: %s: %s" % (type(exc).__name__, exc))
         rec["s03_status"] = "RAISED"
@@ -244,6 +240,7 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
         return rec
     rec["s03b_status"] = outb.execution_status.value
     rec["s03b_response"] = outb.raw_response
+    rec["s03b_consumer_view"] = outb.consumer_view
     if outb.patch is None or outb.problems:
         fail("CONTRACT_CONDITION", "s03b contract validation", outb.problems)
     else:
@@ -315,9 +312,7 @@ def run_s04(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
             ((S04AEnvelopeAndReach(), "s04a"), (S04BPlacementAndMotion(), "s04b")), start=1):
         started = time.time()
         try:
-            out = stage.run(provider,
-                            {"mechanism": stage.consumer_view(state).payload()},
-                            state, state.run_id, attempt=attempt)
+            out = stage.invoke(provider, state, state.run_id, attempt=attempt)
         except Exception as exc:                                    # noqa: BLE001
             fail("PARSER_DEFECT", key, "%s: %s" % (type(exc).__name__, exc),
                  traceback.format_exc(limit=5))
@@ -325,6 +320,7 @@ def run_s04(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
             return rec
         rec["%s_seconds" % key] = round(time.time() - started, 2)
         rec["%s_status" % key] = out.execution_status.value
+        rec["%s_consumer_view" % key] = out.consumer_view
         rec["%s_response" % key] = out.raw_response
         if out.execution_status in (ExecutionStatus.RESPONSE_TRUNCATED,
                                     ExecutionStatus.RESPONSE_PARSE_FAILURE):

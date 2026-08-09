@@ -191,15 +191,19 @@ def run_trial(case_id: str, request_path: str, provider: DeepSeekProvider,
             fail(PARSER_DEFECT, "s01", "check %s raised: %s" % (name, exc))
 
     # ------------------------------------------------------ interface / s02
-    proj = S02ObligationAndCandidates().consumer_view(state).payload()
-    rec["projection_families"] = sorted(proj)
-    if "SourceClause" in proj:
-        fail(INTERFACE_FINDING, "iface", "source text reached s02", sorted(proj))
+
+    stage2 = S02ObligationAndCandidates()
+    view2 = stage2.consumer_view(state)
+    rec["projection_families"] = sorted(view2.payload())
+    # INV-002 is asserted by the boundary itself now; this check records the
+    # interface finding the harness reports on.
+    if "SourceClause" in view2.payload():
+        fail(INTERFACE_FINDING, "iface", "source text reached s02",
+             sorted(view2.payload()))
 
     started = time.time()
     try:
-        out2 = S02ObligationAndCandidates().run(provider, {"consumer_view": proj},
-                                                state, state.run_id)
+        out2 = stage2.invoke(provider, state, state.run_id)
     except Exception as exc:                                        # noqa: BLE001
         fail(PARSER_DEFECT, "s02", "%s: %s" % (type(exc).__name__, exc),
              traceback.format_exc(limit=6))

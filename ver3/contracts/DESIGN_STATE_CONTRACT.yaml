@@ -344,9 +344,18 @@ entity_families:
         resolvable: false
       joint_type:
         kind: enum
+      # REPRESENTATION CORRECTION (S-3). These cited ReferenceScale, a family
+      # s04a creates, so the s03 responsibilities could never satisfy their own
+      # outputs' dependencies. That contradicted the Joint family's own rule -
+      # "s03 cannot know where an axis is" - and the producers' behaviour: both
+      # emit a token from a closed set (+X/-X/+Y/-Y/+Z/-Z/NONE), not a located
+      # vector. No engineering meaning changes here. The LOCATED axis and frame
+      # remain s04b's, through `frame_origin` and `located_frame`.
       axis_direction:
         kind: spatial
-        frame: ReferenceScale
+        # The frame is the joint's OWN declaration, which is what `frame_ids`
+        # says it is - not a scale that does not exist yet.
+        frame: Joint.frame_ids
       frame_ids:
         kind: spatial
         frame: SELF_DECLARING
@@ -766,7 +775,10 @@ entity_families:
       provider_site: {kind: reference, target: Interface, cardinality: one, resolvable: true}
       configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false}
       maintaining_interaction: {kind: reference, target: PhysicalInteraction, cardinality: one, resolvable: true}
-      blocked_direction: {kind: spatial, frame: ReferenceScale}
+      # Symbolic direction token, same correction as Joint.axis_direction. This
+      # family declares no frame of its own, and the relation it blocks is named
+      # by `retained_group`; the token is a direction class, not a placed vector.
+      blocked_direction: {kind: enum}
     owned_by: s03
     authority_class: AUTHORITATIVE
     addressable: true

@@ -90,12 +90,15 @@ class TestContractCrossReferences(unittest.TestCase):
 
     # -- statuses ------------------------------------------------------------
 
-    def test_execution_statuses_are_the_required_twelve(self):
+    def test_execution_statuses_are_the_required_set(self):
         required = {
             "SUCCESS", "PROVIDER_RATE_LIMIT", "PROVIDER_QUOTA_EXHAUSTED",
             "PROVIDER_UNAVAILABLE", "PROVIDER_TIMEOUT", "RESPONSE_TRUNCATED",
             "RESPONSE_PARSE_FAILURE", "SCHEMA_FAILURE", "CONTRACT_INCOMPLETE",
             "MODEL_CAPABILITY_FAILURE", "SAFE_REJECTION", "FALSE_ACCEPTANCE",
+            # U-3: the consumer's context was insufficient BEFORE the call, so the
+            # call was not made. Not a provider condition and not a schema one.
+            "CONSUMER_CONTEXT_INSUFFICIENT",
         }
         self.assertEqual(required, set(self.status["execution_statuses"]))
 

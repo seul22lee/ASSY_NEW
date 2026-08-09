@@ -45,7 +45,7 @@ def run_case(case_id: str) -> Dict[str, Any]:
 
     # ---- s01: the only stage that sees the request -----------------------
     text = request_text(case_id)
-    out1 = S01RequirementCapture().run(provider, {"request_text": text}, state, state.run_id)
+    out1 = S01RequirementCapture().invoke(provider, state, state.run_id, {"request_text": text})
     report["s01_status"] = out1.execution_status.value
     report["s01_problems"] = out1.problems
     report["s01_incomplete"] = out1.declared_incompleteness
@@ -61,13 +61,15 @@ def run_case(case_id: str) -> Dict[str, Any]:
             report["findings"].append(("S01", name, p))
 
     # ---- interface: what s02 is allowed to see ---------------------------
-    proj = S02ObligationAndCandidates().consumer_view(state).payload()
+
+    stage2 = S02ObligationAndCandidates()
+    proj = stage2.consumer_view(state).payload()
     report["projection_families"] = sorted(proj)
     if "SourceClause" in proj:
         report["findings"].append(("IFACE", "source_text_leaked_to_s02", "SourceClause present"))
 
     # ---- s02: consumes the projection only -------------------------------
-    out2 = S02ObligationAndCandidates().run(provider, {"consumer_view": proj}, state, state.run_id)
+    out2 = stage2.invoke(provider, state, state.run_id)
     report["s02_status"] = out2.execution_status.value
     report["s02_problems"] = out2.problems
     report["s02_incomplete"] = out2.declared_incompleteness

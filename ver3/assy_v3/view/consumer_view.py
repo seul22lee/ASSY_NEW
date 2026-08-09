@@ -36,6 +36,7 @@ DETERMINISTIC
 """
 from __future__ import annotations
 
+import re
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -163,6 +164,17 @@ def _resolve_output(semantic: str) -> Tuple[str, Optional[str]]:
     return semantic, None
 
 
+def _authority_of(responsibility_id: str) -> str:
+    """The owning stage a responsibility writes as.
+
+    `s03a` and `s03b` are two responsibilities of one owner. The split is a
+    trailing pass letter on the stage id and nothing else; this reads it back
+    rather than keeping a table of which pass belongs to which stage.
+    """
+    return responsibility_id[:-1] if re.match(r"^s\d+[a-z]$", responsibility_id) \
+        else responsibility_id
+
+
 def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requirement]:
     """SOURCE A. What must exist for this stage's outputs to have traceable meaning.
 
@@ -184,11 +196,24 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
     #: named anywhere.
     co_produced = {_resolve_output(s)[0]
                    for s in stage.get("permitted_output_semantics", [])}
+    authority = (stage.get("authority_stage")
+                 or (responsibility.get("stages", {}).get(stage_id) or {}).get("owner")
+                 or _authority_of(stage_id))
     out: List[Requirement] = []
     for semantic in stage.get("permitted_output_semantics", []):
         family, field = _resolve_output(semantic)
         spec_all = (fams.get(family) or {}).get("field_semantics") or {}
-        fields = [field] if field else list(spec_all)
+        extendable = (fams.get(family) or {}).get("extendable_fields") or {}
+        if field:
+            fields = [field]
+        else:
+            # A field the contract says ANOTHER stage extends is that stage's to
+            # author, and its dependencies are that stage's to have. Charging the
+            # creating responsibility for them asks s03 to hold what s04 will
+            # write. Derived from `extendable_fields`; no stage is named here and
+            # no field is listed.
+            fields = [f for f in spec_all
+                      if extendable.get(f) in (None, authority)]
         for fld in fields:
             spec = spec_all.get(fld)
             if not spec:

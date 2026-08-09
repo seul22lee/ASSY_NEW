@@ -18,6 +18,19 @@ from typing import Any, Dict, List, Optional
 from ..providers.interfaces import GenerationRequest
 from ..providers.status import ExecutionStatus
 from ..state.patch import Op, StagePatch
+from ..view.consumer_view import ViewStatus
+
+
+def _unmet(assessment: Dict[str, Any]) -> str:
+    """One unsatisfied obligation, said in full: what was expected, what arrived."""
+    parts = []
+    for atom in assessment.get("coverage") or []:
+        if atom["verdict"] == "SATISFIED":
+            continue
+        parts.append("%s: %s (expected %d, selected %d)"
+                     % (atom["obligation"], atom["verdict"],
+                        atom.get("expected_count", 0), atom.get("selected_count", 0)))
+    return "%s -> %s" % (assessment["requirement"], "; ".join(parts) or assessment["verdict"])
 
 
 class StageError(Exception):
@@ -76,6 +89,15 @@ class StageOutcome:
     problems: List[str] = field(default_factory=list)
     declared_incompleteness: List[str] = field(default_factory=list)
     raw_response: Optional[str] = None
+    #: THE EXACT VIEW THIS INVOCATION USED, serialized at the moment of use.
+    #:
+    #: U-3 asks for a recorded ConsumerView: its content, the minimum it was built
+    #: against, and what was compressed by which rule. Production used to take
+    #: `.payload()` and drop the view, so afterwards the only way to ask what a
+    #: stage was given was to rebuild a view from state that had since moved -
+    #: which answers a different question. Recorded here, on the outcome of the
+    #: call, so the record and the call cannot drift apart.
+    consumer_view: Optional[Dict[str, Any]] = None
 
     @property
     def ok(self) -> bool:
@@ -99,6 +121,10 @@ class Stage:
 
     purpose = ""
 
+    #: The input key this stage reads its engineering context from. One key, one
+    #: channel; `invoke` fills it and nothing else may.
+    context_key = "consumer_view"
+
     @classmethod
     def responsibility_id(cls) -> str:
         return cls.pass_id or cls.stage_id
@@ -113,6 +139,37 @@ class Stage:
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
         """What the contract requires that this response did not supply."""
         return []
+
+    def invoke(self, provider, state, run_id: str, inputs: Optional[Dict[str, Any]] = None,
+               attempt: int = 1, invocation=None,
+               budget_chars: Optional[int] = None) -> StageOutcome:
+        """THE canonical consumer invocation boundary. Build, enforce, record, run.
+
+        U-3: "No output is produced from a view known to be insufficient", and the
+        budget ordering ends "otherwise emit CONTEXT_INSUFFICIENT /
+        BUDGET_INSUFFICIENT AND DO NOT CALL". Enforced here, once, so a runner
+        cannot forget it and no runner has to remember how.
+
+        A blocked invocation is not a provider failure and is not silence: it
+        returns an outcome carrying the responsibility, the view, its status, its
+        assessment and the reason - everything needed to say later that the model
+        was never asked, rather than that it was asked and failed.
+        """
+        view = self.consumer_view(state, invocation, budget_chars)
+        record = view.as_dict()
+        if view.status is not ViewStatus.VIEW_READY:
+            return StageOutcome(
+                self.stage_id, ExecutionStatus.CONSUMER_CONTEXT_INSUFFICIENT, None,
+                problems=["%s: consumer context is %s; the provider was not called"
+                          % (self.responsibility_id(), view.status.value)]
+                         + [_unmet(a) for a in view.assessment
+                            if a["verdict"] != "SATISFIED"],
+                consumer_view=record)
+        payload = dict(inputs or {})
+        payload[self.context_key] = view.payload()
+        out = self.run(provider, payload, state, run_id, attempt)
+        out.consumer_view = record
+        return out
 
     def consumer_view(self, state, invocation=None, budget_chars=None):
         """This pass's engineering context. The ONE semantic boundary.

@@ -452,9 +452,163 @@ falsifier.
 
 ## 17.12 Status
 
-**S-3 COMPLETE — U-3 / M-3 CLOSED.**
+**S-3 COMPLETE — U-3 / M-3 CLOSED.** *(Superseded by §18: this claim was premature; three U-3 clauses were still unmet and are closed there.)*
 
 The consumer context boundary is authoritative, generic, conservative, traceable, and free of
 competing projection and truncation paths.
 
 **Impl S-4 has NOT begun.**
+
+---
+
+# 18. FINAL INVOCATION BOUNDARY AND SOURCE-A REPRESENTATION CLOSURE
+
+Baseline `c30bbeb`.
+
+## 18.1 The prior claim was premature
+
+`c30bbeb` said "S-3 COMPLETE — U-3 / M-3 CLOSED". Independent verification against the
+frozen U-3 clauses found three unmet requirements. §17 stays as written; this section
+records what it got wrong rather than editing it.
+
+## 18.2 Three U-3 defects, reproduced
+
+| U-3 clause | Behaviour at `c30bbeb` |
+|---|---|
+| plan §8 step 5: "emit CONTEXT_INSUFFICIENT / BUDGET_INSUFFICIENT **and do not call**"; exit criterion: "**No output is produced from a view known to be insufficient**" | `s02` view `UPSTREAM_INSUFFICIENCY` → **provider calls 1, patch produced**. No production code read `view.status` anywhere. |
+| plan §8 build step 5: "**Recorded `ConsumerView`** — content, the minimum it was built against, what was compressed and by which rule" | `.payload()` taken, view discarded. `StageOutcome` carried nothing. |
+| contract: "`resolvable` says whether an **unresolved value is legal**; the **default is false, so a dangling reference is a defect**" | Implemented **inverted** — resolution enforced only where `resolvable: true`. §17.6's claim that enforcing it everywhere would be "a stricter engineering claim than the architecture makes" was wrong; it was *looser* than the contract. |
+
+## 18.3 The s03a blocker, traced
+
+```
+s03a permitted output: Joint
+  → Joint.axis_direction   kind: spatial, frame: ReferenceScale
+    → ReferenceScale owned by s04a (downstream)
+      → s03a Source A requires it, REQUIRED_NONEMPTY
+        → s03a ConsumerView can never be VIEW_READY
+```
+
+## 18.4 Frozen meaning versus the declaration
+
+The contract contradicted itself. Joint's own rule says **"s03 cannot know where an axis
+is: the located FRAME is owned by s04b"**, and `frame_ids` is declared *"this field IS
+the frame declaration other spatial values cite"* — while `axis_direction` cited a scale
+that does not exist yet. The producer emits a token from a closed set
+(`+X/-X/+Y/-Y/+Z/-Z/NONE`), not a located vector.
+
+**Representation correction, no engineering meaning changed:**
+
+- `Joint.axis_direction.frame`: `ReferenceScale` → **`Joint.frame_ids`** — the joint's own
+  declaration, which the contract already says is what other spatial values cite.
+- `ConstraintRelation.blocked_direction`: `spatial/ReferenceScale` → **`kind: enum`** — the
+  same symbolic token, and that family declares no frame of its own.
+
+The located axis and origin remain s04b's, through `frame_origin` and `located_frame`.
+
+## 18.5 Source A derives from AUTHORABLE output semantics
+
+A field the contract says another stage **extends** is that stage's to author, so its
+dependencies are that stage's to have. Derived from `extendable_fields`; no stage name,
+no field list. Three cases now distinguished:
+
+| case | treatment |
+|---|---|
+| **pre-existing input** | required in the ConsumerView |
+| **same-invocation co-produced** | not required pre-stage; validated at patch closure |
+| **later-EXTEND** | not the creating responsibility's requirement at all |
+
+**The rejected rule is absent.** "No upstream producer ⇒ ignore" appears nowhere: a
+dependency nothing can author must stay visible (registry R-L). After the correction:
+
+```
+s02 / s03a / s03b / s04a  ReferenceScale demanded: False
+s04b                      ReferenceScale demanded: True   ← correct; s04b authors
+                                                            frame_origin, s04a creates
+                                                            the scale upstream
+```
+
+## 18.6 `resolvable`, and structure versus existence
+
+Two independent checks:
+
+- **Structure, always.** A typed reference holds an entity id per
+  `identity.entity_id.format`. R-20: "a free-string subject is a SCHEMA ERROR, not a
+  warning." Prose is rejected whatever the referent's fate.
+- **Existence, per field.** `resolvable: false` (the default, 40 of 46 declarations)
+  **requires** resolution; the six declaring `true` tolerate an unresolved id.
+
+`resolvable: true` never disables the structural check.
+
+## 18.7 The legacy s02 producer now fails honestly
+
+```
+BM-001  s02 view VIEW_READY → provider called → write boundary:
+        SCHEMA_FAILURE: REFERENCE_NOT_AN_ID: CND-0001.obligations_created holds
+        'radial support and axial retention for the rotating relation'
+```
+
+Attributed to the **producer**, not to ConsumerView. No shim, no prompt change, no
+fixture regeneration. Registered as **R-B, owner Impl S-4, OPEN — EXPECTED NEXT-STEP
+BLOCKER**.
+
+## 18.8 The canonical invocation boundary
+
+`Stage.invoke(provider, state, run_id, inputs, attempt, invocation, budget_chars)`:
+build the view → record it → enforce readiness → run only when `VIEW_READY`. Verified:
+
+| case | provider calls | patch | status | view recorded |
+|---|---|---|---|---|
+| insufficient s02 | **0** | none | `CONSUMER_CONTEXT_INSUFFICIENT` | yes (8 requirements) |
+| s04b, no SelectionDecision | **0** | none | `CONSUMER_CONTEXT_INSUFFICIENT` | yes |
+| ready s02 (real case) | 1 | — | `SCHEMA_FAILURE` at the write boundary | yes |
+
+`CONSUMER_CONTEXT_INSUFFICIENT` is declared in `STATUS_SEMANTICS.yaml` as explicitly not
+a provider condition: "the model was never asked" and "the model was asked and failed"
+are different findings, and conflating them destroys the attribution U-3 exists to make.
+No SelectionDecision was invented — s04b is refused, and S-7 will make that state real.
+
+All five runners route through it; no runner keeps its own readiness check.
+
+## 18.9 WIP patch disposition
+
+**Reused:** `Stage.invoke`, `CONSUMER_CONTEXT_INSUFFICIENT`, `StageOutcome.consumer_view`,
+runner routing, the structural-reference check, the `resolvable` correction.
+**Rejected:** nothing was imported that suppresses a dependency for want of a producer,
+weakens typed references, or reinterprets prose. **Added here:** the two representation
+corrections and the authorable-field Source-A derivation, neither of which was in the WIP.
+
+## 18.10 Fixture repairs
+
+Fixtures had been putting non-entities in typed reference fields and naming referents
+nothing created — the old name-shape rule never looked. Repaired to build structurally
+valid state (an Actor for the reach results, bodies for the groups, groups for the
+joints). The lineage suite drives `run` rather than `invoke`, because it holds the
+lineage property; readiness has its own suite, and asserting both in one place would
+make a lineage regression indistinguishable from an incomplete fixture.
+
+## 18.11 Regression
+
+```
+610 tests OK · meta discover 532 OK · imports OK
+static: project_for 0 · name-shape reference authority 0 · raw demands 0 ·
+        provider.generate outside the boundary 0 · payload()→run bypass 0 ·
+        producer-absence suppression 0
+```
+
+## 18.12 Expected live-chain stop
+
+s01 succeeds → s02 view READY → s02 responds → **write boundary rejects the recorded
+`obligations_created` prose** → stop, attributed to R-B / Impl S-4. Full-chain success is
+Impl S-9's. A truthful blocked pipeline is preferred to silent acceptance.
+
+## 18.13 Status
+
+**S-3 COMPLETE — U-3 / M-3 CLOSED**, with the explicit boundary:
+
+> Consumer context and invocation enforcement are complete. The canonical boundary may
+> intentionally stop the legacy pipeline on producer violations owned by later steps.
+
+Not claimed: applicability completeness, retained/committed semantics, mobility runner
+independence, S04A→S04B spatial continuity, engineering establishment. Owners and
+falsifiers are in the registry. **Impl S-4 has NOT begun.**

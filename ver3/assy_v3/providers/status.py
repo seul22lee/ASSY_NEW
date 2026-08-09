@@ -48,6 +48,12 @@ class ExecutionStatus(enum.Enum):
     CONTRACT_INCOMPLETE = "CONTRACT_INCOMPLETE"
     MODEL_CAPABILITY_FAILURE = "MODEL_CAPABILITY_FAILURE"
     SAFE_REJECTION = "SAFE_REJECTION"
+    #: The consumer's context was known to be insufficient BEFORE the call, so
+    #: the call was not made. Deliberately not a PROVIDER_ condition: nothing
+    #: went wrong with the provider, and recording it as one would destroy the
+    #: attribution U-3 exists to make - "the model had what it needed and failed"
+    #: is a different finding from "the model was never asked".
+    CONSUMER_CONTEXT_INSUFFICIENT = "CONSUMER_CONTEXT_INSUFFICIENT"
     FALSE_ACCEPTANCE = "FALSE_ACCEPTANCE"
 
 
@@ -56,6 +62,7 @@ class ExecutionStatus(enum.Enum):
 #: reduce it to a number.
 SEVERITY_ORDER = (
     ExecutionStatus.FALSE_ACCEPTANCE,
+    ExecutionStatus.CONSUMER_CONTEXT_INSUFFICIENT,
     ExecutionStatus.MODEL_CAPABILITY_FAILURE,
     ExecutionStatus.CONTRACT_INCOMPLETE,
     ExecutionStatus.SCHEMA_FAILURE,

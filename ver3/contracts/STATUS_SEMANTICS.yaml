@@ -223,6 +223,27 @@ execution_statuses:
       A benchmark MUST NOT penalise SAFE_REJECTION as an error. A pipeline that
       is punished for declining unsupported claims will learn to assert them.
 
+  CONSUMER_CONTEXT_INSUFFICIENT:
+    meaning: >
+      The consumer's ConsumerView was known to be insufficient BEFORE the call, so
+      the call was not made. U-3: "No output is produced from a view known to be
+      insufficient", and the budget ordering ends "emit CONTEXT_INSUFFICIENT /
+      BUDGET_INSUFFICIENT and do not call".
+    retryable: false
+    design_implication: NONE
+    never_means:
+      - "The provider failed."
+      - "The model was asked and could not answer."
+      - "The design is infeasible."
+    required_behaviour:
+      - "No provider call is made and no model-authored patch is produced."
+      - "The exact ConsumerView, its status and its assessment are recorded on the
+         outcome, so the run can say later that the model was never asked."
+    scoring: >
+      A benchmark MUST NOT charge this to the model. It is the pipeline declining
+      to ask a question it had not established the premises for, and conflating it
+      with a model failure destroys the attribution U-3 exists to make.
+
   FALSE_ACCEPTANCE:
     meaning: >
       The pipeline accepted, passed or emitted something that should have been
@@ -252,6 +273,7 @@ severity_order:
   note: "Used only for run-level roll-up. Not a quality score."
   order:
     - FALSE_ACCEPTANCE
+    - CONSUMER_CONTEXT_INSUFFICIENT
     - MODEL_CAPABILITY_FAILURE
     - CONTRACT_INCOMPLETE
     - SCHEMA_FAILURE

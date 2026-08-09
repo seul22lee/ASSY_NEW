@@ -179,8 +179,8 @@ class S04AEnvelopeAndReach(Stage):
     purpose = "give the topology a provisional arrangement so feasibility can be computed"
 
     def prompt(self, inputs: Dict[str, Any]) -> str:
-        return S04A_PROMPT.format(mechanism=_render(inputs["mechanism"]),
-                                  contact_pairs=_contact_pairs_text(inputs["mechanism"]))
+        return S04A_PROMPT.format(mechanism=_render(inputs["consumer_view"]),
+                                  contact_pairs=_contact_pairs_text(inputs["consumer_view"]))
 
     def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
@@ -198,7 +198,7 @@ class S04AEnvelopeAndReach(Stage):
 
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
         out: List[str] = []
-        bodies = {b["entity_id"] for b in inputs["mechanism"].get("Body", [])}
+        bodies = {b["entity_id"] for b in inputs["consumer_view"].get("Body", [])}
         placed = {e.get("body") for e in parsed.get("envelopes", [])}
         for missing in sorted(bodies - placed):
             out.append("body %s has no extent" % missing)
@@ -223,7 +223,7 @@ class S04AEnvelopeAndReach(Stage):
                 except Exception:                                    # noqa: BLE001
                     pass
         apart = []
-        for pb, cb in required_contacts(inputs["mechanism"]):
+        for pb, cb in required_contacts(inputs["consumer_view"]):
             a, b = boxes.get(pb), boxes.get(cb)
             if not (a and b):
                 continue
@@ -235,7 +235,7 @@ class S04AEnvelopeAndReach(Stage):
                        % (len(apart), "; ".join(apart[:6])
                           + ("; ..." if len(apart) > 6 else "")))
 
-        regions = {r["entity_id"] for r in inputs["mechanism"].get("FunctionalRegion", [])}
+        regions = {r["entity_id"] for r in inputs["consumer_view"].get("FunctionalRegion", [])}
         volumed = {r.get("functional_region") for r in parsed.get("region_volumes", [])}
         for missing in sorted(regions - volumed):
             out.append("functional region %s has no volume" % missing)
@@ -289,7 +289,7 @@ class S04BPlacementAndMotion(Stage):
     purpose = "place the mechanism and describe its motion so clearance can be computed"
 
     def prompt(self, inputs: Dict[str, Any]) -> str:
-        return S04B_PROMPT.format(mechanism=_render(inputs["mechanism"]))
+        return S04B_PROMPT.format(mechanism=_render(inputs["consumer_view"]))
 
     def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
@@ -311,11 +311,11 @@ class S04BPlacementAndMotion(Stage):
 
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
         out: List[str] = []
-        joints = {j["entity_id"] for j in inputs["mechanism"].get("Joint", [])}
+        joints = {j["entity_id"] for j in inputs["consumer_view"].get("Joint", [])}
         placed = {p.get("joint") for p in parsed.get("joint_placements", [])}
         for missing in sorted(joints - placed):
             out.append("joint %s has no placement" % missing)
-        configs = {c["entity_id"] for c in inputs["mechanism"].get("Configuration", [])}
+        configs = {c["entity_id"] for c in inputs["consumer_view"].get("Configuration", [])}
         stated = {s.get("configuration") for s in parsed.get("state_coordinates", [])}
         for missing in sorted(configs - stated):
             out.append("configuration %s has no joint coordinates" % missing)
@@ -327,7 +327,7 @@ class S04BPlacementAndMotion(Stage):
         # clearance result rests on a claim nobody specified, and s04b may not
         # report SUCCESS on it. Upstream incompleteness is inherited, not reset.
         unspecified = []
-        for mex in inputs["mechanism"].get("MobilityExpectation", []):
+        for mex in inputs["consumer_view"].get("MobilityExpectation", []):
             for d in (mex.get("dispositions") or []):
                 if not isinstance(d, dict) or d.get("disposition") != "BLOCKED_BY":
                     continue

@@ -125,13 +125,13 @@ class TestSourceAvailabilityTiming(_Base):
 
     def test_SA_TIME_04_a_referent_in_neither_place_fails(self):
         s = DesignState(run_id="dangle")
-        self.add(s, "s03", "Body", "BOD-1")
-        self.add(s, "s03", "Interface", "IF-1", bodies=["BOD-1"])
-        fields = self._fields_for(s, self.c, "s03", "PhysicalInteraction",
-                                  {"at_interface": "IF-NOWHERE"})
+        self.assertFalse(self.c.reference_spec("RigidGroup", "body")["resolvable"],
+                         "the field under test must be one that MUST resolve")
+        fields = self._fields_for(s, self.c, "s03", "RigidGroup",
+                                  {"body": "BOD-NOWHERE"})
         with self.assertRaises(ContractError) as caught:
             s.apply(self.patch(s, "s03", [
-                Op("CREATE", "PhysicalInteraction", "PI-1", fields, "p")]))
+                Op("CREATE", "RigidGroup", "RGP-1", fields, "p")]))
         self.assertIn("DANGLING_REF", str(caught.exception))
 
     def test_SA_TIME_05_the_distinction_names_no_stage_and_no_family(self):
@@ -157,17 +157,21 @@ class TestSourceAvailabilityTiming(_Base):
 class TestCanonicalReferenceAuthority(_Base):
 
     def test_REF_CANON_01_a_reference_not_named_like_one_is_enforced(self):
-        """`at_interface` ends in no suffix and was in no allowlist, so the old
-        name-shape rule enforced none of the six must-resolve references."""
-        spec = self.c.reference_spec("PhysicalInteraction", "at_interface")
-        self.assertEqual("Interface", spec["target"])
-        self.assertTrue(spec["resolvable"])
+        """`body`, `parent_group`, `at_interface` end in no suffix and were in no
+        allowlist, so the old name-shape rule saw none of them."""
+        for family, field in (("RigidGroup", "body"), ("Joint", "parent_group"),
+                              ("PhysicalInteraction", "at_interface")):
+            spec = self.c.reference_spec(family, field)
+            self.assertIsNotNone(spec, "%s.%s" % (family, field))
+            self.assertFalse(field.endswith(("_id", "_ids", "_refs")))
         s = DesignState(run_id="canon")
-        fields = self._fields_for(s, self.c, "s03", "PhysicalInteraction",
-                                  {"at_interface": "IF-ABSENT"})
-        with self.assertRaises(ContractError):
+        fields = self._fields_for(s, self.c, "s03", "Joint",
+                                  {"parent_group": "RGP-ABSENT",
+                                   "child_group": "RGP-ABSENT"})
+        with self.assertRaises(ContractError) as caught:
             s.apply(self.patch(s, "s03", [
-                Op("CREATE", "PhysicalInteraction", "PI-1", fields, "p")]))
+                Op("CREATE", "Joint", "JNT-1", fields, "p")]))
+        self.assertIn("DANGLING_REF", str(caught.exception))
 
     def test_REF_CANON_02_a_referent_of_the_wrong_family_fails(self):
         s = DesignState(run_id="fam")
@@ -213,10 +217,10 @@ class TestCanonicalReferenceAuthority(_Base):
         graph = __import__("inspect").getsource(cv._refs_of)
         self.assertIn("field_semantics", graph + src)
 
-    def test_REF_CANON_06_resolvable_is_the_contracts_word_not_ours(self):
-        """40 of 46 declared references say they need not resolve. Enforcing
-        resolution everywhere would be a stricter engineering claim than the
-        architecture makes."""
+    def test_REF_CANON_06_resolvable_is_read_the_way_the_contract_defines_it(self):
+        """`field_semantics_rules.reference`: "`resolvable` says whether an
+        UNRESOLVED VALUE IS LEGAL; the default is false, so a dangling reference is
+        a defect rather than a style." So false REQUIRES resolution."""
         n_true = n_false = 0
         for fam in self.c.families:
             for field, spec in (self.c.field_semantics(fam) or {}).items():
@@ -226,12 +230,23 @@ class TestCanonicalReferenceAuthority(_Base):
                     else:
                         n_false += 1
         self.assertTrue(n_true and n_false, "resolvable carries no distinction")
+        self.assertGreater(n_false, n_true, "the default is false")
+        # resolvable: true tolerates an id that does not resolve yet...
         s = DesignState(run_id="soft")
-        self.add(s, "s03", "Body", "BOD-1")
-        # RigidGroup.body is declared resolvable: false.
-        self.assertFalse(self.c.reference_spec("RigidGroup", "body")["resolvable"])
-        self.add(s, "s03", "RigidGroup", "RGP-1", body="BOD-1")
-        self.assertTrue(s.has_entity("RGP-1"))
+        self.assertTrue(self.c.reference_spec("PhysicalInteraction",
+                                              "at_interface")["resolvable"])
+        fields = self._fields_for(s, self.c, "s03", "PhysicalInteraction",
+                                  {"at_interface": "IF-LATER"})
+        s.apply(self.patch(s, "s03", [
+            Op("CREATE", "PhysicalInteraction", "PI-1", fields, "p")]))
+        self.assertTrue(s.has_entity("PI-1"))
+        # ...but never prose. Structure and existence are separate questions.
+        bad = self._fields_for(s, self.c, "s03", "PhysicalInteraction",
+                               {"at_interface": "the interface between the parts"})
+        with self.assertRaises(ContractError) as caught:
+            s.apply(self.patch(s, "s03", [
+                Op("CREATE", "PhysicalInteraction", "PI-2", bad, "p")]))
+        self.assertIn("REFERENCE_NOT_AN_ID", str(caught.exception))
 
 
 # =====================================================================

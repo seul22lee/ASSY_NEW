@@ -61,6 +61,13 @@ def _patch(state, stage, ops, pid="p1"):
 def _seeded():
     s = DesignState("harden")
     s.apply(_patch(s, "s03", [
+        Op("CREATE", "Body", "BOD-0001",
+           {"instance_identity": "b", "role": "STRUCTURE", "created_by_stage": "s03",
+            "addresses_obligations": []}, "prov:s03"),
+        Op("CREATE", "RigidGroup", "RGP-0001",
+           {"body": "BOD-0001", "members": ["BOD-0001"], "is_default": True}, "prov:s03"),
+        Op("CREATE", "RigidGroup", "RGP-0002",
+           {"body": "BOD-0001", "members": ["BOD-0001"], "is_default": False}, "prov:s03"),
         Op("CREATE", "FunctionalRegion", "FRG-0001",
            {"role": "ACCESS", "owning_bodies": ["BOD-0001"]}, "prov:s03")], pid="p0"))
     s.apply(_patch(s, "s04", [
@@ -72,6 +79,13 @@ def _seeded():
 
 def _joint(state):
     state.apply(_patch(state, "s03", [
+        Op("CREATE", "Body", "BOD-0001",
+           {"instance_identity": "b", "role": "STRUCTURE", "created_by_stage": "s03",
+            "addresses_obligations": []}, "prov:s03"),
+        Op("CREATE", "RigidGroup", "RGP-0001",
+           {"body": "BOD-0001", "members": ["BOD-0001"], "is_default": True}, "prov:s03"),
+        Op("CREATE", "RigidGroup", "RGP-0002",
+           {"body": "BOD-0001", "members": ["BOD-0001"], "is_default": False}, "prov:s03"),
         Op("CREATE", "Joint", "JNT-0001",
            {"joint_type": "REVOLUTE", "parent_group": "RGP-0001",
             "child_group": "RGP-0002", "dof": ["RZ"],
@@ -230,6 +244,9 @@ class TestContainerInterfaces(_Base):
             Op("CREATE", "ReferenceScale", "SCL-0001",
                {"basis": "RELATIVE", "note": deep}, "p")]))
         s.apply(_patch(s, "s03", [
+            Op("CREATE", "Body", "BOD-0001",
+           {"instance_identity": "b", "role": "STRUCTURE",
+            "created_by_stage": "s03", "addresses_obligations": []}, "p"),
             Op("CREATE", "FunctionalRegion", "FRG-0001",
                {"role": "ACCESS", "owning_bodies": bodies}, "p")], pid="p1"))
         deep["a"][0]["b"][0] = 999
@@ -315,9 +332,12 @@ class TestReadApi(_Base):
         self.assertEqual(0.0, min(rec["volume"]["centre"]))
         self.assertTrue(json.dumps(rec))                              # serializable
         self.assertTrue(json.dumps(s.family("FunctionalRegion")))
-        self.assertEqual(1, len(s.entities))
-        self.assertEqual(["FRG-0001"], list(s.entities))
-        self.assertEqual({"FunctionalRegion": 1}, s.counts())
+        # The seed now also carries the Body and RigidGroups its own references
+        # name - a typed reference must denote an entity - so the counts are of
+        # the whole seed rather than of the one region under test.
+        self.assertIn("FRG-0001", s.entities)
+        self.assertEqual(1, s.counts()["FunctionalRegion"])
+        self.assertEqual(len(s.entities), sum(s.counts().values()))
 
     def test_READ_two_reads_are_independent_copies(self):
         s = _seeded()
@@ -363,8 +383,11 @@ class TestControlledMutationStillCorrect(_Base):
         s.apply(_patch(s, "s04", [
             Op("CREATE", "ReferenceScale", "SCL-0001", {"basis": "RELATIVE"}, "p")]))
         s.apply(_patch(s, "s03", [
+            Op("CREATE", "Body", "BOD-0001",
+           {"instance_identity": "b", "role": "STRUCTURE",
+            "created_by_stage": "s03", "addresses_obligations": []}, "p"),
             Op("CREATE", "FunctionalRegion", "FRG-0001",
-               {"role": "ACCESS", "owning_bodies": ["B"]}, "p")], pid="p1"))
+               {"role": "ACCESS", "owning_bodies": ["BOD-0001"]}, "p")], pid="p1"))
         s.apply(_patch(s, "s04", [
             Op("EXTEND", "FunctionalRegion", "FRG-0001",
                {"volume": {"centre": [0, 0, 0]}}, "p",

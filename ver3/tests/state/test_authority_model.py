@@ -41,9 +41,15 @@ def _with_scale(state):
 
 
 def _with_region(state, rid="FRG-0001"):
-    state.apply(_patch(state, "s03", [
-        Op("CREATE", "FunctionalRegion", rid,
-           {"role": "ACCESS", "owning_bodies": ["BOD-0001"]}, "prov:test")], pid="p0"))
+    ops = []
+    if not state.has_entity("BOD-0001"):
+        ops.append(Op("CREATE", "Body", "BOD-0001",
+                      {"instance_identity": "b", "role": "STRUCTURE",
+                       "created_by_stage": "s03", "addresses_obligations": []},
+                      "prov:test"))
+    ops.append(Op("CREATE", "FunctionalRegion", rid,
+                  {"role": "ACCESS", "owning_bodies": ["BOD-0001"]}, "prov:test"))
+    state.apply(_patch(state, "s03", ops, pid="p0"))
     return state
 
 
@@ -280,6 +286,12 @@ class TestAuthorityModel(unittest.TestCase):
     # ------------------------------------------------------- I. the S-1 families
     def test_I_the_former_side_channel_facts_have_owners_and_provenance(self):
         s = _state()
+        # The actor the reach result names, from its owning stage. A typed
+        # reference denotes an entity; this one used to denote nothing.
+        s.apply(_patch(s, "s01", [
+            Op("CREATE", "Actor", "ACT-0001",
+               {"name": "operator", "must_reach": [], "role": "OPERATOR"},
+               "s01:capture")], pid="pa"))
         s.apply(_patch(s, "s04", [
             Op("CREATE", "ReachResult", "RCH-0001",
                {"actor": "ACT-0001", "target": "a region", "reachable": True}, "s04a:response"),
