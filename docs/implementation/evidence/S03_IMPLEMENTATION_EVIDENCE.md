@@ -231,9 +231,36 @@ storage encapsulation, so the Window s03 path could not execute at all.
 **538 tests OK.** Full record: §29–45 of
 [S03_BRANCH_SCOPE_LINEAGE_DECISION.md](S03_BRANCH_SCOPE_LINEAGE_DECISION.md).
 
-## 16.2 Still open
+## 16.2 Premise instance selection
+
+The final consumer migration was attempted and **stopped**: migrating s02/s03a off
+`project_for` would have dropped whole populations. Post-s02, branch closure from a
+Candidate reaches `Obligation -> Requirement -> Actor` and stops; Scenario, LoadCase,
+Ambiguity, Freedom, Assumption and UnresolvedDecision were 0-in-scope on every case, and
+BM-003 delivered **9 of 19 requirements** while reporting SATISFIED.
+
+Diagnosis: a premise declared WHAT it needed (semantic roles) and never WHICH instances, so
+one relevance model — branch lineage — was applied to everything. Engineering demands do not
+point at solutions, so design-wide material can carry no branch evidence, and a requirement
+no candidate addresses is *unaddressed*, which is a finding rather than a reason to hide it.
+
+Closed as a **contract representation gap**: all 28 premises now declare
+`instance_selection` (population + coverage, per role where the roles genuinely differ —
+one premise does), with every term defined once in the contract. Sufficiency compares an
+independently derived EXPECTED against SELECTED, so 19/9 is a PROJECTION_FAILURE and "all of
+nothing" is MISSING_UPSTREAM. Manufacturing `Candidate -> Requirement` edges, and adding
+producer premise lineage for visibility, were both rejected: visibility is an
+instance-selection concern, not an engineering dependency.
+
+BM-003 s03a now receives **19 of 19**; s02 works before any candidate exists; an unknown
+stage id fails closed instead of reporting VIEW_READY with nothing.
+
+**562 tests OK.** Full record:
+[S03_PREMISE_INSTANCE_SELECTION_DECISION.md](S03_PREMISE_INSTANCE_SELECTION_DECISION.md).
+
+## 16.3 Still open
 
 Unchanged from §15.5, and deliberately so: consumer-path migration (**s02**, **s03a**,
 **s03b**), `project_for` retirement, ADR-002/003/004 replays.
 
-**S-3 LINEAGE POPULATION CLOSED — RESUME CONSUMER MIGRATION.**
+**S-3 INSTANCE-SELECTION SUBSTRATE READY — RESUME FINAL CONSUMER MIGRATION.**

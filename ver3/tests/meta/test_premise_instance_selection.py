@@ -1,0 +1,455 @@
+"""A premise says WHAT it needs. It must also say WHICH instances.
+
+Semantic roles answer "what kind of information". They cannot answer "from what
+population, how completely". Without that second answer the resolver had one
+relevance model - branch lineage - and applied it to everything, so a demand on
+the whole design was answered from one alternative's material: nineteen standing
+requirements, nine delivered, and the premise reported SATISFIED.
+
+These tests hold the separation: role, population, coverage - independently
+declared, independently traceable, and neither of them a family name.
+"""
+from __future__ import annotations
+
+import copy
+import io
+import os
+import re
+import unittest
+
+import yaml
+
+from . import _paths                                                    # noqa: F401
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_REPO = os.path.abspath(os.path.join(_HERE, "..", "..", ".."))
+
+import ver3.assy_v3.view.consumer_view as cv                            # noqa: E402
+from ver3.assy_v3.state.design_state import Contracts, DesignState       # noqa: E402
+from ver3.assy_v3.state.patch import Op, StagePatch                      # noqa: E402
+from ver3.assy_v3.view import (Sufficiency, ViewStatus,                  # noqa: E402
+                               build_consumer_view, derive_required_minimum)
+
+_RESP_PATH = os.path.join(_REPO, "ver3", "contracts",
+                          "STAGE_RESPONSIBILITY_CONTRACT.yaml")
+
+POPULATIONS = {cv.DESIGN_WIDE, cv.INVOCATION_BRANCH, cv.COMMITTED_BRANCH,
+               cv.ALL_RETAINED_BRANCHES}
+COVERAGES = {cv.ALL_APPLICABLE, cv.AT_LEAST_ONE}
+
+
+def _premises(resp):
+    for sid, stage in sorted((resp.get("stages") or {}).items()):
+        for p in (stage or {}).get("required_reasoning_premise_classes") or []:
+            yield sid, p
+
+
+class _Base(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.c = Contracts()
+        with open(_RESP_PATH) as fh:
+            cls.resp = yaml.safe_load(fh)
+
+    def add(self, s, stage, fam, eid, prem=None, **over):
+        d = {f: "x" for f in self.c.required_fields(fam) if f != "entity_id"}
+        d.update(over)
+        s.apply(StagePatch(patch_id="p-%s" % eid, run_id=s.run_id, stage_id=stage,
+                           stage_attempt=1, parent_state_hash=s.state_hash(),
+                           operations=[Op("CREATE", fam, eid, d, "p",
+                                          premise_refs=list(prem or []))],
+                           execution_status="SUCCESS", provenance={"provider": "t"}))
+        return eid
+
+    def responsibility(self, stage_id, *premises, **stage_extra):
+        """A responsibility contract holding exactly the premises under test."""
+        resp = copy.deepcopy(self.resp)
+        stage = resp["stages"][stage_id]
+        stage["required_reasoning_premise_classes"] = list(premises)
+        stage.update(stage_extra)
+        return resp
+
+    def atom(self, view, premise_class):
+        """The one atomic obligation of the premise under test.
+
+        A view also carries the stage's Source-A dependencies, which have their
+        own verdicts; picking `assessment[0]` would assert about whichever of
+        those happened to sort first.
+        """
+        for a in view.assessment:
+            if a["requirement"] == premise_class:
+                self.assertEqual(1, len(a["coverage"]), premise_class)
+                return a["coverage"][0]
+        raise AssertionError("no assessment for %s" % premise_class)
+
+    def premise(self, name, roles, population, coverage=cv.ALL_APPLICABLE,
+                applicability=None):
+        p = {"class": name, "requires_semantics": list(roles),
+             "justified_by_question": "control", "why": "control",
+             "instance_selection": {"population": population, "coverage": coverage}}
+        if applicability:
+            p["instance_selection"]["applicability"] = applicability
+        return p
+
+
+# =====================================================================
+# The contract corpus
+# =====================================================================
+class TestDeclaredCorpus(_Base):
+
+    def test_SELECT_01_every_premise_declares_which_instances_it_needs(self):
+        rows = list(_premises(self.resp))
+        self.assertEqual(28, len(rows), "the premise corpus changed size")
+        for sid, p in rows:
+            sel = p.get("instance_selection")
+            self.assertTrue(sel, "%s/%s declares no instance_selection"
+                            % (sid, p.get("class")))
+            rules = ([dict(r) for r in sel["by_role"]] if sel.get("by_role")
+                     else [sel])
+            for r in rules:
+                self.assertIn(r["population"], POPULATIONS, "%s/%s" % (sid, p["class"]))
+                self.assertIn(r["coverage"], COVERAGES, "%s/%s" % (sid, p["class"]))
+
+    def test_SELECT_01b_every_premise_resolves_to_a_rule_for_every_role(self):
+        for sid, p in _premises(self.resp):
+            rule = cv._selection_of(p, list(p.get("requires_semantics") or []))
+            for role in p.get("requires_semantics") or []:
+                self.assertIn(role, rule, "%s/%s has no rule for %s"
+                              % (sid, p["class"], role))
+
+    def test_SELECT_02_no_selector_names_a_canonical_family(self):
+        """A population says WHERE to look. The role says what qualifies. If a
+        selector named a family it would be a whitelist wearing a new word."""
+        blob = yaml.safe_dump([p.get("instance_selection")
+                               for _s, p in _premises(self.resp)])
+        named = [f for f in self.c.families if re.search(r"\b%s\b" % f, blob)]
+        self.assertEqual([], named, "instance selectors name families: %s" % named)
+
+    def test_SELECT_02b_each_vocabulary_term_is_defined_once(self):
+        vocab = self.resp["instance_selection_vocabulary"]
+        self.assertEqual(POPULATIONS, set(vocab["population"]))
+        self.assertEqual(COVERAGES, set(vocab["coverage"]))
+        for group in ("population", "coverage"):
+            for term, text in vocab[group].items():
+                self.assertGreater(len(text.split()), 12,
+                                   "%s is named but not defined" % term)
+
+    def test_SELECT_14_role_population_and_coverage_are_separately_traceable(self):
+        rm = derive_required_minimum("s04a", self.c, self.resp)
+        req = [r for r in rm.requirements if r.key == "reach_requirement"][0]
+        # The one premise whose roles genuinely live in different populations.
+        self.assertEqual(cv.DESIGN_WIDE, req.selection_for("actor_role")["population"])
+        self.assertEqual(cv.INVOCATION_BRANCH,
+                         req.selection_for("functional_region")["population"])
+        d = req.as_dict()
+        self.assertIn("selection", d)
+        self.assertIn("requires_semantics", d["trace"])
+
+    def test_SELECT_17_18_19_no_benchmark_model_or_creation_order_logic(self):
+        import inspect
+        src = "\n".join(inspect.getsource(o) for o in (
+            cv._population_members, cv._applicable, cv.expected_instances,
+            cv._selection_of, cv.select_instances, cv._assess_atom))
+        self.assertIsNone(re.search(r"BM-\d|PRB-\d|deepseek|gpt-|claude", src, re.I))
+        self.assertIsNone(re.search(r"created_at|timestamp|creation_order|_created_by",
+                                    src),
+                          "creation order is not engineering scope")
+
+    def test_SELECT_13_unknown_consumer_fails_closed(self):
+        for sid in ("s02", "s03a", "s03b", "s04a", "s04b", "gate"):
+            self.assertTrue(derive_required_minimum(sid, self.c, self.resp).requirements
+                            or sid == "s01")
+        for unknown in ("s03", "s05", ""):
+            with self.assertRaises(cv.UnknownConsumer):
+                derive_required_minimum(unknown, self.c, self.resp)
+
+    def test_SELECT_13b_a_premise_with_no_declaration_fails_closed(self):
+        with self.assertRaises(KeyError):
+            cv._selection_of({"class": "undeclared"}, ["actor_role"])
+
+
+# =====================================================================
+# Populations, against state
+# =====================================================================
+class TestPopulations(_Base):
+
+    def design(self, n_requirements=19, n_addressed=9, candidates=("CND-A",)):
+        """N requirements; only the first `n_addressed` are reachable from a
+        candidate. The rest are UNADDRESSED - which is a finding, not a reason to
+        hide them."""
+        s = DesignState(run_id="sel")
+        ids = []
+        for i in range(1, n_requirements + 1):
+            ids.append(self.add(s, "s01", "Requirement", "REQ-%02d" % i,
+                                quantity_class="BAND"))
+        self.add(s, "s02", "Obligation", "OBL-1", scope="UNIVERSAL",
+                 satisfiable_at="s03", derived_from_requirements=ids[:n_addressed])
+        for cid in candidates:
+            self.add(s, "s02", "Candidate", cid, principle={"h": "f"},
+                     addresses_obligations=["OBL-1"], obligations_created=[])
+        return s, ids
+
+    def view(self, stage_id, s, *premises, **kw):
+        return build_consumer_view(stage_id, s, self.c,
+                                   self.responsibility(stage_id, *premises), **kw)
+
+
+    # -- 04 / 05 / 06 / 07: the 19 of 19 case ------------------------
+    def test_SELECT_04_full_population_means_every_applicable_standing_instance(self):
+        s, ids = self.design()
+        v = self.view("s02", s, self.premise("full_requirements", ["source_requirement"],
+                                             cv.DESIGN_WIDE))
+        got = {e["entity_id"] for e in v.entities if e.get("_family") == "Requirement"}
+        self.assertEqual(set(ids), got, "the full requirement set is not full")
+        a = self.atom(v, "full_requirements")
+        self.assertEqual(19, a["expected_count"])
+        self.assertEqual(19, a["selected_count"])
+        self.assertEqual(Sufficiency.SATISFIED.value, a["verdict"])
+
+    def test_SELECT_05_06_nineteen_expected_nine_selected_is_not_satisfied(self):
+        """The exact blocker. Nine arrive, the premise means all of them."""
+        s, ids = self.design()
+        rm = derive_required_minimum(
+            "s02", self.c, self.responsibility(
+                "s02", self.premise("full_requirements", ["source_requirement"],
+                                    cv.DESIGN_WIDE)))
+        req = rm.requirements[-1]
+        # Fault injection: exactly the nine that carry candidate lineage arrive.
+        nine = [{"entity_id": i} for i in ids[:9]]
+        a = cv._assess(s, self.c, req, nine)
+        cover = a["coverage"][0]
+        self.assertEqual(19, cover["expected_count"])
+        self.assertEqual(9, cover["selected_count"])
+        self.assertNotEqual(Sufficiency.SATISFIED.value, cover["verdict"])
+        self.assertEqual(Sufficiency.PROJECTION_FAILURE.value, cover["verdict"],
+                         "all nineteen exist upstream, so an incomplete view is ours")
+
+    def test_SELECT_07_an_unaddressed_requirement_stays_visible(self):
+        """Not addressed is not irrelevant. It may be the finding."""
+        s, ids = self.design()
+        v = self.view("s02", s, self.premise("full_requirements", ["source_requirement"],
+                                             cv.DESIGN_WIDE))
+        got = {e["entity_id"] for e in v.entities}
+        for eid in ids[9:]:
+            self.assertIn(eid, got, "%s is addressed by no candidate and vanished" % eid)
+            why = v.why(eid)[0]
+            self.assertEqual(cv.UNSCOPED, why["branch_scope"],
+                             "it really has no branch lineage")
+            self.assertEqual(cv.DESIGN_WIDE, why["population"])
+
+    def test_SELECT_20_visibility_added_no_engineering_dependency(self):
+        """The unaddressed requirements are visible and still unaddressed: no
+        premise or reference was invented to reach them."""
+        s, ids = self.design()
+        for eid in ids[9:]:
+            rec = s.entities[eid]
+            self.assertEqual([], rec.get("_premises", []),
+                             "a premise was fabricated for visibility")
+        cand = s.entities["CND-A"]
+        self.assertEqual(["OBL-1"], cand["addresses_obligations"])
+
+    # -- 03: before any candidate exists -----------------------------
+    def test_SELECT_03_design_wide_premises_work_before_any_candidate(self):
+        s = DesignState(run_id="pre")
+        for i in range(1, 4):
+            self.add(s, "s01", "Requirement", "REQ-%d" % i, quantity_class="BAND")
+        self.add(s, "s01", "Ambiguity", "AMB-1")
+        self.add(s, "s01", "Actor", "ACT-1")
+        self.assertEqual([], list(s.standing("Candidate")), "no fake candidate")
+        v = self.view("s02", s,
+                      self.premise("full_requirements", ["source_requirement"],
+                                   cv.DESIGN_WIDE),
+                      self.premise("every_ambiguity", ["open_question"], cv.DESIGN_WIDE))
+        got = {e["entity_id"] for e in v.entities}
+        for eid in ("REQ-1", "REQ-2", "REQ-3", "AMB-1"):
+            self.assertIn(eid, got, "%s missing from a pre-candidate view" % eid)
+        for name in ("full_requirements", "every_ambiguity"):
+            self.assertEqual(Sufficiency.SATISFIED.value,
+                             self.atom(v, name)["verdict"], name)
+
+    # -- 08 / 09 / 10 / 23: populations side by side -----------------
+    def branched(self):
+        s, ids = self.design(n_requirements=2, n_addressed=1,
+                             candidates=("CND-A", "CND-B"))
+        self.add(s, "s02", "LoadCase", "LC-1")
+        self.add(s, "s03", "Body", "BOD-A", prem=["CND-A"])
+        self.add(s, "s03", "Body", "BOD-B", prem=["CND-B"])
+        return s
+
+    def test_SELECT_08_candidate_independent_load_cases_need_no_lineage(self):
+        s = self.branched()
+        self.assertEqual([], s.entities["LC-1"].get("_premises", []))
+        v = self.view("s03a", s, self.premise("loads", ["load_case"], cv.DESIGN_WIDE),
+                      invocation_branch="CND-A")
+        self.assertIn("LC-1", {e["entity_id"] for e in v.entities})
+
+    def test_SELECT_09_10_23_design_wide_and_branch_local_coexist(self):
+        """One view, two relevance models: every requirement, and only this
+        branch's topology."""
+        s = self.branched()
+        v = self.view("s03b", s,
+                      self.premise("full_requirements", ["source_requirement"],
+                                   cv.DESIGN_WIDE),
+                      self.premise("this_topology", ["topology_element"],
+                                   cv.INVOCATION_BRANCH),
+                      invocation_branch="CND-A")
+        got = {e["entity_id"] for e in v.entities}
+        self.assertIn("REQ-01", got)
+        self.assertIn("REQ-02", got, "the unaddressed requirement is still required")
+        self.assertIn("BOD-A", got, "the invocation branch's own topology")
+        self.assertNotIn("BOD-B", got, "another branch's topology reached the view")
+
+    def test_SELECT_11_all_retained_branches_is_representable(self):
+        s = self.branched()
+        v = self.view("gate", s, self.premise("compare", ["topology_element"],
+                                              cv.ALL_RETAINED_BRANCHES),
+                      invocation_branch="CND-A")
+        got = {e["entity_id"] for e in v.entities}
+        self.assertIn("BOD-A", got)
+        self.assertIn("BOD-B", got, "comparison cannot be done from one alternative")
+
+    def test_SELECT_12_committed_branch_is_representable(self):
+        s = self.branched()
+        p = self.premise("committed", ["topology_element"], cv.COMMITTED_BRANCH)
+        v = self.view("s04b", s, p, invocation_branch="CND-A")
+        self.assertEqual(set(), {e["entity_id"] for e in v.entities},
+                         "no selection is recorded, so there is no committed branch")
+        self.assertEqual(Sufficiency.MISSING_UPSTREAM.value,
+                         self.atom(v, "committed")["verdict"])
+        self.add(s, "s04", "SelectionDecision", "SEL-1", selected_candidate="CND-B")
+        v2 = self.view("s04b", s, p, invocation_branch="CND-A")
+        got = {e["entity_id"] for e in v2.entities}
+        self.assertIn("BOD-B", got, "the committed branch is the selected one")
+        self.assertNotIn("BOD-A", got)
+
+    # -- 15: expected is not read off the view -----------------------
+    def test_SELECT_15_expected_population_is_independent_of_the_view(self):
+        s, ids = self.design()
+        rule = {"population": cv.DESIGN_WIDE, "coverage": cv.ALL_APPLICABLE,
+                "applicability": cv.ALL_MEMBERS}
+        expected = cv.expected_instances(s, self.c, ["Requirement"], rule, None)
+        self.assertEqual(set(ids), expected)
+        # No view was built. Sufficiency that derived its expectation from the
+        # selection could only ever agree with itself.
+        empty = cv._assess(s, self.c, cv.Requirement(
+            cv.Source.REASONING_PREMISE, "p", ["Requirement"], {},
+            by_role={"source_requirement": ["Requirement"]},
+            selection={"source_requirement": rule}), [])
+        self.assertEqual(19, empty["coverage"][0]["expected_count"])
+        self.assertEqual(0, empty["coverage"][0]["selected_count"])
+
+    def test_SELECT_15b_genuine_upstream_absence_is_not_projection_failure(self):
+        s = DesignState(run_id="bare")
+        self.add(s, "s01", "Requirement", "REQ-1", quantity_class="BAND")
+        v = self.view("s03a", s, self.premise("loads", ["load_case"], cv.DESIGN_WIDE))
+        a = self.atom(v, "loads")
+        self.assertEqual(0, a["expected_count"])
+        self.assertEqual(Sufficiency.MISSING_UPSTREAM.value, a["verdict"])
+        self.assertEqual(ViewStatus.UPSTREAM_INSUFFICIENCY, v.status)
+
+
+# =====================================================================
+# Extension
+# =====================================================================
+class TestExtension(_Base):
+
+    def test_SELECT_16_a_new_premise_changes_selection_with_no_resolver_change(self):
+        """Declaration only: same role, different population, different view."""
+        s = DesignState(run_id="ext")
+        self.add(s, "s01", "Requirement", "REQ-1", quantity_class="BAND")
+        self.add(s, "s02", "Obligation", "OBL-1", scope="UNIVERSAL",
+                 satisfiable_at="s03", derived_from_requirements=["REQ-1"])
+        self.add(s, "s01", "Requirement", "REQ-LOOSE", quantity_class="BAND")
+        self.add(s, "s02", "Candidate", "CND-A", principle={"h": "f"},
+                 addresses_obligations=["OBL-1"], obligations_created=[])
+        role = ["source_requirement"]
+        narrow = build_consumer_view("s02", s, self.c, self.responsibility(
+            "s02", self.premise("p_new", role, cv.INVOCATION_BRANCH)),
+            invocation_branch="CND-A")
+        broad = build_consumer_view("s02", s, self.c, self.responsibility(
+            "s02", self.premise("p_new", role, cv.DESIGN_WIDE)),
+            invocation_branch="CND-A")
+        n = {e["entity_id"] for e in narrow.entities}
+        b = {e["entity_id"] for e in broad.entities}
+        self.assertNotIn("REQ-LOOSE", n)
+        self.assertIn("REQ-LOOSE", b)
+        self.assertTrue(n < b, "one declaration changed, the view changed with it")
+
+    def test_SELECT_21_22_applicability_is_a_registered_rule_not_a_redesign(self):
+        """CASE A / CASE B. A requirement that applies only in one scenario, or
+        only in one configuration, is a NEW NAMED RULE resolved at one point.
+
+        The rule below is registered by this test, reads a canonical declared
+        reference, and narrows the expected population. Nothing in
+        `select_instances`, `_assess_atom`, `build_consumer_view` or `ConsumerView`
+        is touched - which is the property being falsified.
+        """
+        s = DesignState(run_id="appl")
+        self.add(s, "s01", "Scenario", "SCN-MAINT")
+        self.add(s, "s01", "Scenario", "SCN-OP")
+        self.add(s, "s02", "LoadCase", "LC-MAINT", scenario="SCN-MAINT")
+        self.add(s, "s02", "LoadCase", "LC-OP", scenario="SCN-OP")
+
+        def same_scenario(ids, ctx):
+            state = ctx["state"]
+            return {i for i in ids
+                    if state.entities[i].get("scenario") == "SCN-MAINT"}
+
+        before = set(cv.APPLICABILITY_RULES)
+        cv.APPLICABILITY_RULES["IN_INVOCATION_SCENARIO"] = same_scenario
+        try:
+            resp = self.responsibility("s03a", self.premise(
+                "loads", ["load_case"], cv.DESIGN_WIDE,
+                applicability="IN_INVOCATION_SCENARIO"))
+            v = build_consumer_view("s03a", s, self.c, resp)
+            got = {e["entity_id"] for e in v.entities
+                   if e.get("_family") == "LoadCase"}
+            self.assertEqual({"LC-MAINT"}, got)
+            a = self.atom(v, "loads")
+            self.assertEqual(1, a["expected_count"])
+            self.assertEqual("IN_INVOCATION_SCENARIO", a["applicability"])
+            self.assertEqual(Sufficiency.SATISFIED.value, a["verdict"])
+        finally:
+            cv.APPLICABILITY_RULES.pop("IN_INVOCATION_SCENARIO", None)
+        self.assertEqual(before, set(cv.APPLICABILITY_RULES))
+
+    def test_SELECT_21b_an_undeclared_applicability_rule_fails_closed(self):
+        with self.assertRaises(ValueError):
+            cv._applicable({"X"}, "NOT_A_RULE", {})
+
+    def test_SELECT_21c_the_seam_is_one_dispatch_point(self):
+        import inspect
+        import ast
+        tree = ast.parse(inspect.getsource(cv))
+        registries = [n for n in ast.walk(tree)
+                      if isinstance(n, (ast.Assign, ast.AnnAssign))
+                      and any(getattr(t2, "id", None) == "APPLICABILITY_RULES"
+                              for t2 in (n.targets if isinstance(n, ast.Assign)
+                                         else [n.target]))]
+        self.assertEqual(1, len(registries), "more than one rule registry")
+        calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call)
+                 and getattr(n.func, "id", None) == "_applicable"]
+        self.assertEqual(1, len(calls),
+                         "applicability is resolved in more than one place")
+
+
+class TestPriorSuitesStillHold(_Base):
+    """SELECT-24."""
+
+    def test_SELECT_24_view_scope_and_lineage_suites_remain_green(self):
+        from .test_consumer_view import (TestBranchScopeLineage, TestCoreCorrections,
+                                         TestHistoricalReplays, TestSufficiency)
+        suite = unittest.TestSuite()
+        load = unittest.TestLoader().loadTestsFromTestCase
+        for cls in (TestBranchScopeLineage, TestCoreCorrections,
+                    TestHistoricalReplays, TestSufficiency):
+            suite.addTests(load(cls))
+        result = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)
+        self.assertTrue(result.wasSuccessful(),
+                        "\n".join("%s\n%s" % (case, err) for case, err in
+                                  result.failures + result.errors))
+
+
+if __name__ == "__main__":
+    unittest.main()

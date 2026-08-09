@@ -166,9 +166,9 @@ class TestSufficiency(_Base):
         rel = cv.relevant_ids(s, self.c, cv.committed_branch(s, self.c))
         self.assertIn("REQ-1", rel, "REQ-1 must be relevant for this to be OUR failure")
         # Fault injection: a RELEVANT qualifying instance exists and is omitted.
-        a = cv._assess(s, self.c, req, [], rel)
+        a = cv._assess(s, self.c, req, [])
         self.assertEqual(Sufficiency.PROJECTION_FAILURE.value, a["verdict"])
-        b = cv._assess(s, self.c, req, [{"entity_id": "REQ-1"}], rel)
+        b = cv._assess(s, self.c, req, [{"entity_id": "REQ-1"}])
         self.assertEqual(Sufficiency.SATISFIED.value, b["verdict"])
 
     def test_VIEW_25_every_included_item_has_a_trace(self):
@@ -324,7 +324,9 @@ class TestContractGeneralization(_Base):
         resp["stages"]["s04a"]["required_reasoning_premise_classes"].append({
             "class": "synthetic", "justified_by_question":
                 resp["stages"]["s04a"]["engineering_questions"][0],
-            "why": "control", "requires_semantics": ["configuration_state"]})
+            "why": "control", "requires_semantics": ["configuration_state"],
+            "instance_selection": {"population": "INVOCATION_BRANCH",
+                                   "coverage": "ALL_APPLICABLE"}})
         after = derive_source_b("s04a", self.c, resp)
         self.assertEqual(before + 1, len(after))
         self.assertIn("Configuration", after[-1].families)
@@ -375,7 +377,7 @@ class TestCoreCorrections(_Base):
         self.assertEqual(len(premise["requires_semantics"]), len(req.atoms()))
         rel = cv.relevant_ids(s, self.c, None)
         sel, _ = cv.select_instances(s, self.c, req, None)
-        a = cv._assess(s, self.c, req, sel, rel)
+        a = cv._assess(s, self.c, req, sel)
         self.assertNotEqual(Sufficiency.SATISFIED.value, a["verdict"])
         self.assertEqual(len(premise["requires_semantics"]), len(a["coverage"]))
 
@@ -429,14 +431,14 @@ class TestCoreCorrections(_Base):
                if r.by_role and "quantity_constraint" in r.by_role][0]
         rel = cv.relevant_ids(s, self.c, cv.committed_branch(s, self.c))
         self.assertIn("REQ-1", rel)
-        a = cv._assess(s, self.c, req, [], rel)
+        a = cv._assess(s, self.c, req, [])
         self.assertEqual(Sufficiency.PROJECTION_FAILURE.value, a["verdict"])
 
     def test_VIEW_C19_absent_upstream_is_missing_not_projection_failure(self):
         s = self.state()
         req = [r for r in derive_source_b("s04a", self.c, self.resp)
                if r.by_role and "quantity_constraint" in r.by_role][0]
-        a = cv._assess(s, self.c, req, [], cv.relevant_ids(s, self.c, None))
+        a = cv._assess(s, self.c, req, [])
         self.assertEqual(Sufficiency.MISSING_UPSTREAM.value, a["verdict"])
 
     def test_VIEW_C06_other_branch_stays_excluded(self):

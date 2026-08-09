@@ -40,6 +40,57 @@ s2_scope_note: 'DECLARATION ONLY. No required-minimum derivation, no view constr
   S-3/U-3. S03_OWNED is untouched.
 
   '
+instance_selection_vocabulary:
+  purpose: >
+    A premise says WHAT kind of information a reasoning step needs (its semantic
+    roles). That alone does not say WHICH instances. These terms say where the
+    instances are drawn from and how complete the selection must be, so the
+    answer is declared next to the engineering question instead of being decided
+    by a resolver reading family names.
+  why_not_families: >
+    No term here names an entity family. A population says where to look; the
+    semantic role says what qualifies. Adding a family changes the family's own
+    declared roles and nothing else.
+  population:
+    DESIGN_WIDE: >
+      Every STANDING instance carrying a required role, whatever branch it is in
+      and whether or not any alternative refers to it. This is the population for
+      demands on the design: a requirement no candidate addresses is still a
+      requirement, and its absence from an alternative is itself the finding.
+    INVOCATION_BRANCH: >
+      Instances in scope for the branch this invocation is working on - the
+      candidate it was called to embody, or the committed one when no target is
+      given. Scope is the existing lineage relation: built on that candidate, or
+      material that branch rests on.
+    COMMITTED_BRANCH: >
+      Instances in scope for the branch named by the standing SelectionDecision.
+      When no selection has been recorded there is no such branch, the expected
+      population is empty, and that is reported rather than substituted.
+    ALL_RETAINED_BRANCHES: >
+      Instances in scope for ANY standing candidate - every branch still under
+      consideration, plus what they share. Retained means the candidate is
+      STANDING; a superseded or invalidated one is not. Comparison across
+      alternatives cannot be done from one alternative.
+  coverage:
+    ALL_APPLICABLE: >
+      Every applicable member of the population must be selected. Selecting a
+      subset does not satisfy the premise, because a judgement read off part of a
+      population is not the judgement the question asked for.
+    AT_LEAST_ONE: >
+      One applicable member is enough. This is what a representational dependency
+      means: a value that points at something needs the something to exist, not
+      all of them.
+  applicability:
+    ALL_MEMBERS: >
+      Every member of the population applies. This is the default and the only
+      rule currently declared. It is named rather than implied so that a premise
+      which later applies conditionally declares its condition HERE, next to the
+      engineering question, instead of anywhere else.
+    extension: >
+      A new rule is a new named entry resolved at one point in the resolver. It
+      must be derivable from canonical structured relations - never from text in
+      a field, never from a stage id, never from a model's opinion.
+
 stages:
   s01:
     name: problem interpretation
@@ -77,6 +128,9 @@ stages:
     - Which principle families could serve, and which of their claims can this toolchain evidence?
     required_reasoning_premise_classes:
     - class: requirement_set
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: the FULL requirement set
       justified_by_question: What must hold regardless of mechanism?
       why: An obligation set derived from part of the requirements is unsound; coverage cannot
@@ -84,18 +138,27 @@ stages:
       requires_semantics:
       - source_requirement
     - class: recorded_ambiguity
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: every recorded ambiguity
       justified_by_question: What must hold regardless of mechanism?
       why: An obligation resting on a silently resolved ambiguity is an unrecorded commitment.
       requires_semantics:
       - open_question
     - class: scenario_boundary
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: the system boundary declared per scenario
       justified_by_question: What loads act, and where may each be reacted?
       why: A reaction site cannot be typed external without a boundary that says what is outside.
       requires_semantics:
       - scenario_context
     - class: actor_and_reach_intent
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: actors and what they must reach
       justified_by_question: What physical effects must occur between which roles?
       why: An effect between roles needs the roles to exist.
@@ -122,6 +185,9 @@ stages:
     - Which sites must be distinct for a mechanical relationship to exist?
     required_reasoning_premise_classes:
     - class: physical_effect_obligation
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: what must be transmitted, at role level
       justified_by_question: What bodies and rigid groups exist?
       why: A topology synthesised without knowing what must be transmitted is invented rather
@@ -129,18 +195,27 @@ stages:
       requires_semantics:
       - physical_effect_obligation
     - class: load_case
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: the candidate-independent load cases
       justified_by_question: What joins what, of what type, leaving which DOF?
       why: They determine which connections must carry force.
       requires_semantics:
       - load_case
     - class: candidate_principle
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
       what: the candidate's principle assignment and its claim dependencies
       justified_by_question: What bodies and rigid groups exist?
       why: The principle constrains which topologies are even admissible.
       requires_semantics:
       - candidate
     - class: topology_constraining_quantity
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: quantities that bound counts, ranges and travel
       justified_by_question: Which sites must be distinct for a mechanical relationship to exist?
       why: Required distinctness follows from what the mechanism must achieve.
@@ -169,6 +244,9 @@ stages:
     - In what order does it assemble, and what retains each part?
     required_reasoning_premise_classes:
     - class: topology
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
       what: the full s03a topology
       justified_by_question: What realizes each required effect?
       why: An interaction names the groups it acts between.
@@ -176,18 +254,27 @@ stages:
       - topology_element
       - topology_relation
     - class: load_case
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: load cases and their reaction-site requirements
       justified_by_question: How does each load reach an external site?
       why: A path has no terminus without a declared site.
       requires_semantics:
       - load_case
     - class: physical_effect_obligation
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: the effects to discharge
       justified_by_question: What realizes each required effect?
       why: Discharge is only checkable against the obligation it discharges.
       requires_semantics:
       - physical_effect_obligation
     - class: retention_obligation
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: disturbance and retention obligations
       justified_by_question: What holds each body where it is put, against what, in which configurations,
         and how would a test defeat it?
@@ -195,6 +282,9 @@ stages:
       requires_semantics:
       - physical_obligation
     - class: configuration_basis
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
       what: what distinguishes each configuration
       justified_by_question: What holds each body where it is put, against what, in which configurations,
         and how would a test defeat it?
@@ -221,6 +311,9 @@ stages:
     - On what geometric ground would it be eliminated?
     required_reasoning_premise_classes:
     - class: topology_and_interaction
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
       what: the full topology and its interactions
       justified_by_question: Can this candidate fit at all?
       why: Extents attach to bodies and their connections.
@@ -229,12 +322,25 @@ stages:
       - topology_relation
       - physical_interaction
     - class: extent_bounding_quantity
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: quantities bounding extent, travel and clearance
       justified_by_question: Can this candidate fit at all?
       why: A scale-dependent judgement without the scale is not a judgement.
       requires_semantics:
       - quantity_constraint
     - class: reach_requirement
+      instance_selection:
+        by_role:
+        - role: actor_role
+          population: DESIGN_WIDE
+          coverage: ALL_APPLICABLE
+          why: an actor is a demand on the design, not a product of any alternative
+        - role: functional_region
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          why: a region is authored by s03a while embodying one candidate
       what: actors and their reach targets
       justified_by_question: Can each actor reach what it must?
       why: Reach cannot be evaluated without a target.
@@ -242,6 +348,9 @@ stages:
       - actor_role
       - functional_region
     - class: region_and_envelope_constraint
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
       what: declared regions and envelope constraints
       justified_by_question: Can this candidate fit at all?
       why: Fit is relative to a declared allowance.
@@ -249,6 +358,9 @@ stages:
       - functional_region
       - spatial_commitment
     - class: assembly_order_constraint
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
       what: assembly order and access constraints
       justified_by_question: Can it be assembled?
       why: Assemblability is an ordering property, not only a geometric one.
@@ -273,6 +385,9 @@ stages:
     - On what recorded ground does one win?
     required_reasoning_premise_classes:
     - class: candidate_spatial_evidence
+      instance_selection:
+        population: ALL_RETAINED_BRANCHES
+        coverage: ALL_APPLICABLE
       what: every retained candidate's s04a evidence
       justified_by_question: Do all retained candidates carry evidence at equal obligation coverage
         and equal maturity?
@@ -282,12 +397,18 @@ stages:
       - reach_evidence
       - elimination_evidence
     - class: evidence_route_verdict
+      instance_selection:
+        population: ALL_RETAINED_BRANCHES
+        coverage: ALL_APPLICABLE
       what: each candidate's evidence-route verdict
       justified_by_question: On what recorded ground does one win?
       why: Choosing partly because a claim can be evidenced is legitimate and must be recorded.
       requires_semantics:
       - candidate
     - class: unresolved_blocking_scope
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: all unresolved items and what each blocks
       justified_by_question: Does any unresolved item block selection?
       why: Blocking is defined by what the gate requires.
@@ -309,6 +430,9 @@ stages:
     - Which coordinates change in each transition, and along what path?
     required_reasoning_premise_classes:
     - class: prior_spatial_commitment
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
       what: the selected candidate's s04a arrangement and its commitment classes
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: A placement that does not extend the arrangement it was told to work in is a fresh
@@ -316,6 +440,9 @@ stages:
       requires_semantics:
       - spatial_commitment
     - class: topology_with_axes
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
       what: the full topology including axes and link relationships
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: An origin without an axis supports no incidence claim.
@@ -324,18 +451,27 @@ stages:
       - topology_relation
       - kinematic_axis
     - class: required_distinctness
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
       what: declared required-distinctness
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: Realization must be checkable against the premise that two sites must differ.
       requires_semantics:
       - topology_relation
     - class: configuration_basis
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
       what: each configuration's distinguishing basis
       justified_by_question: What coordinate values realize each configuration?
       why: Otherwise a name is the only thing distinguishing two states.
       requires_semantics:
       - configuration_state
     - class: constraint_relation
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
       what: constraint relations and the interactions maintaining them
       justified_by_question: Which coordinates change in each transition, and along what path?
       why: A release must alter what maintains it.
@@ -343,12 +479,18 @@ stages:
       - constraint_relation
       - physical_interaction
     - class: travel_bounding_quantity
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
       what: quantities bounding travel and clearance
       justified_by_question: Which coordinates change in each transition, and along what path?
       why: Motion extent is a quantity.
       requires_semantics:
       - quantity_constraint
     - class: selection_decision
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
       what: the selection decision
       justified_by_question: Where is each joint, in which frame, and on which axis?
       why: s04b realizes the selected candidate, not an arbitrary one.
