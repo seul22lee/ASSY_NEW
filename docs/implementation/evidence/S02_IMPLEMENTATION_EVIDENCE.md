@@ -426,3 +426,106 @@ a `see_canonical` pointer is now enforced by META-08. Cleanup remains later work
 > `STAGE_RESPONSIBILITY_CONTRACT.yaml`, ownership, family definitions, reference semantics,
 > mobility authorship, status semantics, engineering questions, reasoning-premise classes and
 > every stage contract file are byte-identical. **S-3 has not begun.**
+
+
+---
+
+## §28 S-2 → S-3 INTERFACE READINESS CORRECTION
+
+Baseline `f8225c5`. Verifies the two contract INPUTS S-3 must consume. **No Consumer View,
+no projection change, `S03_OWNED` untouched, no prompt, no runtime.**
+
+## 28.1 Source-A inventory, before correction
+
+| | |
+|---|---|
+| families | 47 |
+| declared fields (excl. `entity_id`) | 203 |
+| reference declarations | 45 |
+| spatial declarations | 10 (2 `SELF_DECLARING`) |
+| enum declarations | 5 |
+| **fields with explicit `semantic_dependency`** | **0** |
+
+**Confirmed:** the schema defined the vocabulary and **no field instantiated it**. CON-12 only
+checked that the two constructs live in different files — it never asked whether Source A could
+actually be *derived*.
+
+## 28.2 The derivation rule — and why no field needed annotating
+
+The right response was **not** to add `semantic_dependency` to 203 fields. The contract already
+carries the relationships structurally:
+
+```
+Representational Dependencies(field) =
+      reference  -> target family
+    ∪ spatial    -> frame (SELF_DECLARING contributes nothing)
+    ∪ explicit semantic_dependency, only where reference/frame cannot express it
+    ∪ ∅          -- a legitimate answer, distinguishable from an absent declaration
+```
+
+Tested against the real S01–S04 output surface: **166 output fields examined, 166 (100%)
+deterministically derivable.** **Zero fields needed an explicit declaration** — the reference
+and frame metadata added at S-2 already covers the corpus. The `semantic_dependency` vocabulary
+remains for case E, validated by READINESS-A04 if ever used.
+
+Closure is **bounded**: a dependency is followed to the family it names and then only that
+family's own spatial frames — never every field of it, which would make the set meaningless.
+
+## 28.3 Prose is not a source
+
+READINESS-A05 proves the derivation reads **only structured metadata**. It scans the derivation
+*code* (docstrings stripped by AST) for free-form keys and case identifiers, **and confirms
+that prose really does contain such identifiers** — so the control is not vacuous. Machine
+derivation that read `rules:` would depend on the audit corpus and stop being
+benchmark-independent.
+
+## 28.4 Source-B binding
+
+All **28 premise classes** across the seven stages now carry
+`satisfied_by: {kind: canonical_families, families: [...]}`. This is what lets S-3 retrieve
+premise instances generically: **the stage-specific engineering judgement lives in the
+contract, and the derivation code stays generic.** READINESS-B06 confirms a synthetic premise
+changes the derived set with no code change; a dedicated control confirms the derivation
+branches on no stage id and mentions no case identifier — **no stage-pair whitelist exists.**
+
+A binding names families, never a stage, and is not an ownership projection (READINESS-B04).
+
+## 28.5 S04B mobility — the plan is stale, not the contract
+
+**Reproduced:** `STAGE_RESPONSIBILITY_CONTRACT.s04b` declares seven premise classes and none is
+mobility. **Resolved against the frozen proposal:** §7.8's S04·B reasoning-premise row lists
+exactly those seven and **does not include mobility expectations**. The contract faithfully
+projects the frozen architecture.
+
+**Therefore the implementation plan sentence is wrong**, not the contract:
+
+> *"Mobility expectations are a declared S04·B reasoning premise (proposal §7.8)."* — plan §5
+
+Adding a mobility premise to the canonical contract would change frozen S-2 semantics to match
+a stale plan sentence, which §0 and §5 forbid. **I have not edited either**, per §23's
+instruction to stop and explain if the plan must change. READINESS-B05 pins the contract to the
+proposal so the contradiction cannot be resolved silently in the contract's direction.
+
+**What this does and does not affect.** The plan's *ordering conclusion* — U-7 after U-6 — may
+still be defensible; it was recorded as "a soundness ordering, not a code-level coupling", and
+S04·B does consume `configuration_basis` and `constraint_relation`, which S-5 touches. What is
+false is the stated *justification*. **This needs a decision before S-3, and is the one open
+item.**
+
+## 28.6 Sources stay independent
+
+CON-12 is strengthened, not blurred: at least one referenced family is not a premise anywhere,
+and at least one premise family is referenced by no output field. Two derivation functions,
+never unioned here — the union is S-3.
+
+## 28.7 Tests, regression, deferred
+
+**17 readiness tests** (A01–A08, B01–B06, closure bound, independence, no-whitelist).
+**69/69** state · **394 meta OK** · **8/8** window · all CI steps OK.
+
+Deferred unchanged: mobility runtime, `UNDISPOSITIONED`, removal of
+`MAINTAINED_BY_CLASS`-from-absence, premise-backed dispositions — all S-5/U-6. S-3 needs only
+the semantic class, and the legacy producer stays honestly nonconforming.
+
+> **S-2 → S-3 INTERFACE READY**, with one open item: the plan's §5 mobility rationale
+> contradicts the frozen proposal and needs a decision. **S-3 has not begun.**

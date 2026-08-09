@@ -462,3 +462,31 @@ the set without anyone remembering to add it.
 **Honesty note.** No fake canonical `s03` was invented to make the aggregate stage file
 projectable, and no fuzzy comparison was added to let prose "match" a canonical list. Both
 would have produced a green test over a fact nobody checked.
+
+
+---
+
+## ADR-014 — Declared vocabulary with no instances; and a plan/contract contradiction
+
+**Status: RESOLVED (A) / OPEN DECISION (B)** *(S-2 → S-3 interface readiness)*
+
+**Defect class A.** A contract declares a semantic vocabulary that nothing instantiates, so a
+downstream consumer cannot derive from it. `field_semantics_rules.semantic_dependency` existed;
+**0 of 203 fields used it.** CON-12 checked only that the two Consumer Sufficiency constructs
+lived in separate files, never that either could be *derived*.
+
+*General invariant:* every permitted consumer output has a machine-derivable representational
+dependency set from structured canonical metadata. *Resolution:* the 45 reference and 10
+spatial declarations already carry the relationships; one derivation rule covers **166/166
+output fields**, and zero explicit annotations were needed. READINESS-A01–A08.
+
+**Defect class B.** Dependency-DAG rationale and canonical stage premise declarations
+contradict each other. The plan states mobility is a declared S04·B premise; the frozen
+proposal §7.8 lists seven premises and mobility is not among them, and the contract projects
+the proposal.
+
+*General invariant:* dependency-DAG rationale and canonical stage premise declarations cannot
+contradict. *Status:* **open decision.** Neither document was edited — correcting the contract
+would change frozen semantics to match a stale sentence, and correcting the plan is outside
+this pass. READINESS-B05 pins the contract to the proposal so the contradiction cannot be
+resolved silently.
