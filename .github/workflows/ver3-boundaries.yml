@@ -33,15 +33,32 @@ jobs:
         run: python -m unittest discover -s ver3/tests/meta -t . -v
 
       - name: assy_v3 imports cleanly with nothing else on the path
-        # An empty boundary that imports nothing cannot violate anything. This
-        # catches an accidental dependency that the AST scan would miss because
-        # it only appears at import time.
+        # The RULE is unchanged and still valid; only its stated premise was
+        # stale. It used to read "an empty boundary that imports nothing cannot
+        # violate anything" - true when the package was a scaffold. The package
+        # now contains S01-S04, so the check has become more meaningful rather
+        # than less: it catches an accidental dependency that the AST scan misses
+        # because it only appears at import time.
         run: python -c "import ver3.assy_v3, ver3.assy_v3.providers; print('assy_v3 boundary ok')"
 
-      - name: No stages package exists
+      # RETIRED: "No stages package exists".
+      #
+      # Its purpose was the progression gate - stage code must not appear before
+      # its contract has been through STAGE_PROGRESSION_CONTRACT step 1. That is
+      # still the property worth holding. What is obsolete is the LIFECYCLE
+      # ASSUMPTION it encoded: that the correct number of stage modules is zero.
+      # S01-S04 now exist deliberately, and migration steps S-1 and S-2 have
+      # already reshaped them, so "stages exist" cannot be a failure condition.
+      #
+      # The property outlived the assertion. tests/meta/test_no_stage_implementation.py
+      # carries the evolved form - "once stage work begins, it fails on any stage
+      # module whose contract has not been through step 1" - and it runs above.
+      # It is invoked by name here so a failure reports the PROPERTY rather than
+      # the milestone, and so retiring the shell check does not quietly reduce
+      # coverage.
+      - name: Stage modules respect the progression gate and the package boundary
         run: |
-          if [ -d ver3/assy_v3/stages ]; then
-            echo "ver3/assy_v3/stages exists; stage implementation has begun without the progression gate." >&2
-            exit 1
-          fi
-          echo "no stages package"
+          python -m unittest -v \
+            ver3.tests.meta.test_no_stage_implementation \
+            ver3.tests.meta.test_no_legacy_imports \
+            ver3.tests.meta.test_package_path

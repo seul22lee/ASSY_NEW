@@ -14,9 +14,24 @@ Two occurrences of the old token survive in ver3/oracles/. They are historical
 observations - whether a package existed at a past moment - and Oracle files are
 immutable to implementation work under INV-017. They are allowed by name here so
 that the check stays exact rather than approximate.
+
+ACTIVE SURFACE vs FROZEN HISTORICAL EVIDENCE
+    The scan protects the ACTIVE surface: code, configuration, workflows and
+    current authoritative documentation. It is not a prohibition on the STRING.
+
+    A frozen record that DESCRIBES the rename - "the path went from X to Y" - is
+    truthful history, not an alias. Reading it as an active path reference is a
+    category error, and the only ways to satisfy it would be to falsify a frozen
+    record or to pin one exact line. Both are worse than the check.
+
+    So frozen historical evidence is excluded by CLASS, with a stated reason,
+    and the class is narrow. Everything else - including every source file, every
+    contract, every workflow and all current documentation - is still scanned,
+    and negative controls below prove an active occurrence still fails.
 """
 
 import os
+import tempfile
 import unittest
 
 from . import _paths
@@ -35,19 +50,44 @@ PERMITTED_HISTORICAL = {
 PROPOSAL_FILE = os.path.join("ver3", "phase0", "ARCHITECTURE_CHANGE_PROPOSALS.yaml")
 
 SCANNED_SUFFIXES = (".py", ".yaml", ".yml", ".md", ".json", ".toml", ".cfg", ".txt")
-SKIP_DIRS = {".git", "__pycache__", "node_modules", "vendor", ".github"}
+SKIP_DIRS = {".git", "__pycache__", "node_modules", "vendor"}
+
+#: Directories holding FROZEN RECORDS OF A PAST STATE. Their content is evidence
+#: about history, so an occurrence of the old token in one of them describes the
+#: rename rather than performing it. Excluded by class, each with a reason.
+#:
+#: `.github/` is NOT here: a workflow is active configuration and is scanned.
+FROZEN_HISTORICAL_DIRS = {
+    # The frozen audit corpus. P4B is COMPLETE AND FROZEN and three records carry
+    # SUPERSEDED HISTORICAL AUDIT RECORD banners; one of them records the rename
+    # event itself. Rewriting it to remove the old name would falsify the record
+    # it exists to preserve.
+    os.path.join("docs", "audit"),
+}
 
 
-def _scan_repo_for_old_token():
+def _is_frozen_evidence(rel_path):
+    return any(rel_path.startswith(d + os.sep) for d in FROZEN_HISTORICAL_DIRS)
+
+
+def _scan_repo_for_old_token(root=None, skip_self=True):
+    """Every occurrence on the ACTIVE surface.
+
+    `root` is parameterised so the rule itself can be tested against a synthetic
+    tree - a check nobody has seen fail is not evidence.
+    """
     hits = []
-    for dirpath, dirnames, filenames in os.walk(_paths.REPO_ROOT):
+    for dirpath, dirnames, filenames in os.walk(root or _paths.REPO_ROOT):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
         for fn in filenames:
             if not fn.endswith(SCANNED_SUFFIXES):
                 continue
             full = os.path.join(dirpath, fn)
-            rel = os.path.relpath(full, _paths.REPO_ROOT)
-            if rel == PROPOSAL_FILE or rel == os.path.join("ver3", "tests", "meta", "test_package_path.py"):
+            rel = os.path.relpath(full, root or _paths.REPO_ROOT)
+            if skip_self and (rel == PROPOSAL_FILE or rel == os.path.join(
+                    "ver3", "tests", "meta", "test_package_path.py")):
+                continue
+            if _is_frozen_evidence(rel):
                 continue
             try:
                 with open(full, "r", encoding="utf-8", errors="replace") as fh:
@@ -165,6 +205,39 @@ class TestChangeProposalRecord(unittest.TestCase):
                 self.assertIn(OLD_TOKEN, entry["previous"])
                 self.assertIn("assy_v3", entry["new"])
                 self.assertNotIn(OLD_TOKEN, entry["new"])
+
+    # ---------------------------------------------------- negative controls
+    def test_an_active_occurrence_is_still_rejected(self):
+        """Narrowing the rule must not blunt it. Active code still fails."""
+        with tempfile.TemporaryDirectory() as tmp:
+            for rel in (os.path.join("ver3", "assy_v3", "live.py"),
+                        os.path.join("ver3", "contracts", "active.yaml"),
+                        os.path.join(".github", "workflows", "ci.yml"),
+                        os.path.join("docs", "architecture", "current.md")):
+                full = os.path.join(tmp, rel)
+                os.makedirs(os.path.dirname(full), exist_ok=True)
+                with open(full, "w") as fh:
+                    fh.write("path: ver3/%s/thing\n" % OLD_TOKEN)
+            found = {h[0] for h in _scan_repo_for_old_token(tmp, skip_self=False)}
+        self.assertEqual(4, len(found),
+                         "an active occurrence escaped the scan: %s" % sorted(found))
+
+    def test_a_frozen_historical_record_is_allowed(self):
+        """A record describing the rename is history, not an alias."""
+        with tempfile.TemporaryDirectory() as tmp:
+            rel = os.path.join("docs", "audit", "P9_FROZEN.md")
+            full = os.path.join(tmp, rel)
+            os.makedirs(os.path.dirname(full), exist_ok=True)
+            with open(full, "w") as fh:
+                fh.write("the package moved from `ver3/%s/` to `ver3/assy_v3/`.\n" % OLD_TOKEN)
+            self.assertEqual([], _scan_repo_for_old_token(tmp, skip_self=False))
+
+    def test_the_frozen_class_is_narrow(self):
+        """One directory class, and it does not swallow the active surface."""
+        self.assertEqual({os.path.join("docs", "audit")}, FROZEN_HISTORICAL_DIRS)
+        for active in ("ver3", os.path.join("docs", "architecture"),
+                       os.path.join("docs", "implementation"), ".github"):
+            self.assertFalse(_is_frozen_evidence(active + os.sep + "x.md"))
 
     def test_acp001_explains_what_it_left_alone(self):
         """The Oracle occurrences must be justified, not merely missed."""
