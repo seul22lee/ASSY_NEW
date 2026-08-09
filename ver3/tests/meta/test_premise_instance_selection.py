@@ -362,11 +362,17 @@ class TestExtension(_Base):
         broad = build_consumer_view("s02", s, self.c, self.responsibility(
             "s02", self.premise("p_new", role, cv.DESIGN_WIDE)),
             invocation_branch="CND-A")
-        n = {e["entity_id"] for e in narrow.entities}
-        b = {e["entity_id"] for e in broad.entities}
-        self.assertNotIn("REQ-LOOSE", n)
-        self.assertIn("REQ-LOOSE", b)
-        self.assertTrue(n < b, "one declaration changed, the view changed with it")
+        # Assert on the premise under test, not on the whole view: the view also
+        # carries this stage's Source-A dependencies, and one of those legitimately
+        # supplies requirements design-wide. What the declaration controls is what
+        # THIS premise expects and selects.
+        na, ba = self.atom(narrow, "p_new"), self.atom(broad, "p_new")
+        self.assertNotIn("REQ-LOOSE", na["expected"])
+        self.assertIn("REQ-LOOSE", ba["expected"])
+        self.assertLess(na["expected_count"], ba["expected_count"],
+                        "one declaration changed, the population changed with it")
+        self.assertEqual(na["selected"], na["expected"])
+        self.assertEqual(ba["selected"], ba["expected"])
 
     def test_SELECT_21_22_applicability_is_a_registered_rule_not_a_redesign(self):
         """CASE A / CASE B. A requirement that applies only in one scenario, or

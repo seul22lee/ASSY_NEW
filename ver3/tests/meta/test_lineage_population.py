@@ -224,9 +224,34 @@ class TestLineagePopulation(_Base):
         window = run_window2.run_s03("CASE", {"entity_id": "CND-0001"},
                                      self.upstream(run="window"), wp, 1)["_state"]
 
-        # Same execution depth, or the rest of this test compares nothing.
+        # Both must have reached s03b, or the rest of this test compares nothing.
+        self.assertEqual("SUCCESS", a.execution_status.value, a.problems)
+        self.assertNotEqual("CONSUMER_CONTEXT_INSUFFICIENT", b.execution_status.value,
+                            "s03b never ran, so this proves no equivalence")
+        self.assertIsNotNone(b.patch, b.problems)
+        direct.apply(b.patch)
+        # The deterministic DOF disposition is part of the same production step:
+        # `derived_operations` lives on the stage, and the window path runs it. It
+        # is included here rather than excluded from the comparison, so the R-C
+        # residual (its orchestration is still runner-bound, owner S-5) cannot
+        # hide a lineage difference behind it.
+        ops = S03BMobilityAndAssembly().derived_operations(
+            S03B_RESPONSE,
+            [g["entity_id"] for g in direct.family("RigidGroup")],
+            [c["entity_id"] for c in direct.family("Configuration")],
+            [dict(j) for j in direct.family("Joint")],
+            {"candidate": "CND-0001"})
+        if ops:
+            direct.apply(StagePatch(
+                patch_id="%s-s03-derived" % direct.run_id, run_id=direct.run_id,
+                stage_id="s03", stage_attempt=3,
+                parent_state_hash=direct.state_hash(), operations=ops,
+                execution_status="SUCCESS",
+                provenance={"purpose": "derive the total DOF disposition",
+                            "provider": "deterministic"}))
         self.assertEqual(dp.n, wp.n, "the two paths called the provider a "
                                      "different number of times")
+        self.assertEqual(2, dp.n, "s03a and s03b must each have been called once")
 
         ds, ws = self.scopes(direct, "CND-0001"), self.scopes(window, "CND-0001")
         self.assertEqual(set(ds), set(ws), "the two paths authored different state")
@@ -238,16 +263,19 @@ class TestLineagePopulation(_Base):
                              sorted(window.entities[eid].get("_premises", [])),
                              "%s carries different lineage" % eid)
         # COMMON_UPSTREAM and UNSCOPED are different findings and are compared as
-        # such: the loop above is exact equality, not a shared bucket.
-        self.assertIn(cv.UNSCOPED, set(ds.values()) | {cv.UNSCOPED})
+        # such: the loop above is exact equality, not a shared bucket. The load
+        # case proves it carries weight - it is upstream material on BOTH sides
+        # only because both authored the load path that reaches it.
+        self.assertEqual(cv.COMMON_UPSTREAM, ds["LC-0001"])
+        self.assertEqual(cv.COMMON_UPSTREAM, ws["LC-0001"])
 
-    def test_LINEAGE_04b_s03b_readiness_blocks_both_paths_identically(self):
-        """The depth both paths stop at, and why - recorded rather than assumed.
+    def test_LINEAGE_04b_s03b_is_ready_and_nothing_is_unmet(self):
+        """The blocker recorded at 1fe7f26 is gone, and the fixture did not move.
 
-        s03b is not READY on a fixture that is otherwise complete, because two
-        Source-A dependencies ask for BRANCH-SCOPED existence of material that is
-        candidate-independent by declaration. See the L04 audit in the evidence:
-        the finding is recorded, and the fixture was not bent to hide it.
+        s03b used to be CONSUMER_CONTEXT_INSUFFICIENT here because two Source-A
+        dependencies asked for BRANCH-SCOPED existence of material that is
+        candidate-independent - which authoring the reference is what creates.
+        The fields now declare where their referent comes from.
         """
         s = self.upstream()
         invocation = cv.InvocationContext(branch="CND-0001")
@@ -258,11 +286,8 @@ class TestLineagePopulation(_Base):
         view = S03BMobilityAndAssembly().consumer_view(s, invocation)
         unmet = [c["obligation"] for asm in view.assessment for c in asm["coverage"]
                  if c["verdict"] != "SATISFIED"]
-        self.assertEqual(
-            ["LoadPath.load_case -[reference]-> LoadCase",
-             "PhysicalInteraction.discharges_effect -[reference]-> PhysicalEffectObligation"],
-            sorted(unmet),
-            "the set of unmet s03b premises changed; re-run the L04 audit")
+        self.assertEqual([], unmet, "s03b is blocked again")
+        self.assertIs(cv.ViewStatus.VIEW_READY, view.status)
 
     def test_LINEAGE_05_existing_premises_are_preserved(self):
         op = Op("CREATE", "Body", "BOD-9", {}, "p", premise_refs=["P1", "P2"])

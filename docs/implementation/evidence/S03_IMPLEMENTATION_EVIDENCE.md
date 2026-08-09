@@ -711,3 +711,135 @@ independent, exactly.
 owned by Impl S-4, unrelated to this audit.
 
 **S-3 remains CLOSED.** Impl S-4 has not begun.
+
+---
+
+# 20. FINAL SOURCE-A REFERENT-POPULATION CLOSURE
+
+Baseline `1fe7f26`.
+
+## 20.1 What §19 got right, and what it got wrong
+
+§19's equivalence finding was sound: direct and window canonical invocation agree
+exactly, and the historical mismatch was a `run()`-vs-`invoke()` depth artifact. But
+its closing label, **"S-3 VERIFIED CLOSED", was premature**: it recorded in §19.4 that
+s03b could not reach VIEW_READY on any sufficient fixture and then closed anyway.
+"Both paths block identically" is not the same as "the consumer can receive what it
+needs". That is corrected here rather than rewritten.
+
+## 20.2 The two blockers, and why they were circular
+
+```
+LoadPath.load_case               -> LoadCase                  INVOCATION_BRANCH
+PhysicalInteraction.discharges_effect -> PhysicalEffectObligation  INVOCATION_BRANCH
+```
+
+Both are demands on the design, not products of any alternative. Requiring them to be
+**branch-scoped already** is circular: authoring `LoadPath.load_case` is precisely what
+makes that load case branch material. s03b could never enter the state it existed to
+create.
+
+## 20.3 Rejected: make Source A design-wide
+
+Tried at `1fe7f26` and **falsified** — it admitted another branch's topology through
+the reference dependency and broke SELECT-09/10/23 and S3ROOT-16/17. Neither answer is
+universal, which is why the population is now declared per field rather than assumed.
+
+## 20.4 Declarative referent population
+
+```yaml
+some_reference:
+  kind: reference
+  target: SomeFamily
+  cardinality: one
+  resolvable: false
+  referent_population: DESIGN_WIDE
+```
+
+Semantics: *the population a consumer may resolve this field's pre-existing referent
+from.* Selection scope for the referent — not applicability, not ownership, not branch
+lineage. It does not touch `cardinality` or `resolvable`. Documented in
+`field_semantics_rules`; vocabulary is the existing population vocabulary; an
+unrecognised value fails closed (`ValueError` naming the field and the vocabulary).
+
+**Default: `INVOCATION_BRANCH`.** An unclassified reference must not silently widen
+what a consumer sees. 30 of the 46 declared references are undeclared and keep it.
+
+## 20.5 Bounded S01–S04 reference audit
+
+16 fields declared `DESIGN_WIDE`, and every one targets material the responsibility
+contract already calls a design-wide demand: **Requirement, Scenario, Actor, LoadCase,
+PhysicalEffectObligation, Obligation**. Everything else — Body, RigidGroup, Joint,
+Interface, Configuration, FunctionalRegion, Candidate, PhysicalInteraction,
+AssemblyStep, Feature, Envelope, State, Transition — stays branch-local, asserted by
+RP-06. Resolved Source-A populations:
+
+```
+s03a  FunctionalRegion.required_by_actors  DESIGN_WIDE
+s03b  PhysicalInteraction.groups           INVOCATION_BRANCH
+      PhysicalInteraction.at_interface     INVOCATION_BRANCH
+      PhysicalInteraction.discharges_effect DESIGN_WIDE
+      ConstraintRelation.retained_group    INVOCATION_BRANCH
+      LoadPath.load_case                   DESIGN_WIDE
+      LoadPath.candidate                   INVOCATION_BRANCH
+      AssemblyStep.body / activates        INVOCATION_BRANCH
+s04a  Envelope.body                        INVOCATION_BRANCH
+      ReachResult.actor                    DESIGN_WIDE
+      EliminationRecord.candidate          INVOCATION_BRANCH
+```
+
+`derive_source_a` contains no family name, no stage name, and no ownership lookup
+(RP-04/05). The 1fe7f26 existence rule is untouched (RP-09), as is co-production
+(RP-10); population and existence are independently declared (RP-08).
+
+## 20.6 Visibility is not lineage
+
+| | LC-1 | PEO-1 |
+|---|---|---|
+| before s03b runs | visible in the view, scope **UNSCOPED** | visible, scope **UNSCOPED** |
+| after the relation is authored | **COMMON_UPSTREAM** | **COMMON_UPSTREAM** |
+
+No premise was stamped on either, and `Candidate.addresses_obligations` is unchanged —
+they are visible **and still not branch material** until a real relation exists
+(S3B-RDY-06/07, POST-LIN-01..05). Candidate B gains nothing from A's relation.
+
+## 20.7 s03b is READY, and runs
+
+```
+s03b view                : VIEW_READY, zero unmet obligations
+LC-1 / PEO-1 in view     : yes          BOD-B (other branch) in view: no
+provider calls           : exactly 1    patch: produced
+```
+
+## 20.8 Canonical equivalence, at full depth
+
+```
+DIRECT  s03a SUCCESS (1 call) → s03b SUCCESS (1 call) → deterministic derivation
+WINDOW  s03a SUCCESS (1 call) → s03b SUCCESS (1 call) → deterministic derivation
+entity sets equal: True · scope differences: NONE · lineage differences: NONE
+LC-0001 COMMON_UPSTREAM on both sides
+```
+
+The deterministic DOF derivation is **included** on both sides rather than excluded, so
+the R-C residual (its orchestration is runner-bound, owner S-5) cannot hide a
+difference behind it.
+
+## 20.9 One test corrected, not weakened
+
+SELECT-16 asserted a narrow premise excludes a loose requirement from the *whole view*.
+Source A now legitimately supplies requirements design-wide, so the assertion was
+confounded. It now asserts on the premise under test — its expected and selected sets —
+which is what the declaration actually controls, and is a stronger claim.
+
+## 20.10 Regression
+
+`627 run · 627 pass · 0 fail · 22 skipped`. The 22 skips are the R-B window replays,
+owned by **Impl S-4**, unchanged and unrelated.
+
+## 20.11 Status
+
+**S-3 COMPLETE — U-3 / M-3 CLOSED.** Consumer context, invocation enforcement, view
+recording and reference integrity are complete, and the canonical boundary may still
+stop the legacy pipeline on producer violations owned by later steps (R-B).
+
+**Impl S-4 has NOT begun.**

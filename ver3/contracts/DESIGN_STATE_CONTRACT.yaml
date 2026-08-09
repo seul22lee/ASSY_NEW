@@ -192,6 +192,19 @@ field_semantics_rules:
     unresolved value is legal; the default is false, so a dangling reference is
     a defect rather than a style. Before S-2 there was no declaration at all and
     integrity was guessed from a key-name suffix plus an is-upper-case heuristic.
+  referent_population: >
+    OPTIONAL on a `reference` field. The population a consumer may resolve this
+    field's PRE-EXISTING referent from, using the vocabulary defined in
+    STAGE_RESPONSIBILITY_CONTRACT.instance_selection_vocabulary. It is selection
+    scope for the referent - not applicability, not ownership, and not branch
+    lineage itself.
+    Absent, the conservative default is INVOCATION_BRANCH: an undeclared
+    reference must not silently widen what a consumer sees.
+    It is declared DESIGN_WIDE where the referent is a demand ON the design
+    rather than a product of any alternative. Requiring such a referent to be
+    branch-scoped ALREADY is circular: the reference being authored is what makes
+    it branch material. Declaring the population does not change `cardinality` or
+    `resolvable`, which remain separate questions.
   spatial: >
     A coordinate, axis, extent, offset, path or transform. It MUST declare
     `frame`: the entity or declaration that establishes what the numbers are
@@ -231,11 +244,13 @@ entity_families:
         target: Requirement
         cardinality: many
         resolvable: false
+        referent_population: DESIGN_WIDE
       involves_actors:
         kind: reference
         target: Actor
         cardinality: many
         resolvable: false
+        referent_population: DESIGN_WIDE
     owned_by: s02
     purpose: "A physical or functional thing that must be true for a requirement to hold."
     required_fields: [entity_id, statement, derived_from_requirements, mandatory, scope, satisfiable_at, evidence_route, route_available]
@@ -276,11 +291,13 @@ entity_families:
         target: Obligation
         cardinality: many
         resolvable: false
+        referent_population: DESIGN_WIDE
       obligations_created:
         kind: reference
         target: Obligation
         cardinality: many
         resolvable: false
+        referent_population: DESIGN_WIDE
     owned_by: s02
     purpose: "A mechanism family or arrangement under consideration."
     # U-2B (S-2): `addresses_obligations` is the one canonical name and meaning
@@ -445,6 +462,7 @@ entity_families:
         target: Obligation
         cardinality: many
         resolvable: false
+        referent_population: DESIGN_WIDE
       participating_features:
         kind: reference
         target: Feature
@@ -543,6 +561,7 @@ entity_families:
         target: Requirement
         cardinality: one
         resolvable: false
+        referent_population: DESIGN_WIDE
     owned_by: s11
     required_fields: [entity_id, requirement_id, outcome, scope]
     rules:
@@ -575,6 +594,7 @@ entity_families:
         target: Scenario
         cardinality: one
         resolvable: false
+        referent_population: DESIGN_WIDE
       direction_class:
         kind: enum
     owned_by: s02
@@ -599,6 +619,7 @@ entity_families:
         target: LoadCase
         cardinality: one
         resolvable: false
+        referent_population: DESIGN_WIDE
       candidate:
         kind: reference
         target: Candidate
@@ -631,6 +652,7 @@ entity_families:
         target: Actor
         cardinality: many
         resolvable: false
+        referent_population: DESIGN_WIDE
       reach_targets:
         kind: reference
         target: FunctionalRegion
@@ -713,6 +735,7 @@ entity_families:
         target: Actor
         cardinality: one
         resolvable: false
+        referent_population: DESIGN_WIDE
     owned_by: s04
     authority_class: AUTHORITATIVE
     purpose: "Whether an actor can reach a target, and from which side. An engineering conclusion of s04a."
@@ -799,9 +822,9 @@ entity_families:
   PhysicalEffectObligation:
     semantic_roles: [physical_effect_obligation]
     field_semantics:
-      between_roles: {kind: reference, target: Actor, cardinality: many, resolvable: true}
-      under_load_case: {kind: reference, target: LoadCase, cardinality: one, resolvable: true}
-      addresses_obligations: {kind: reference, target: Obligation, cardinality: many, resolvable: false}
+      between_roles: {kind: reference, target: Actor, cardinality: many, resolvable: true, referent_population: DESIGN_WIDE}
+      under_load_case: {kind: reference, target: LoadCase, cardinality: one, resolvable: true, referent_population: DESIGN_WIDE}
+      addresses_obligations: {kind: reference, target: Obligation, cardinality: many, resolvable: false, referent_population: DESIGN_WIDE}
     owned_by: s02
     authority_class: AUTHORITATIVE
     purpose: >
@@ -823,7 +846,7 @@ entity_families:
       groups: {kind: reference, target: RigidGroup, cardinality: many, resolvable: false}
       at_interface: {kind: reference, target: Interface, cardinality: one, resolvable: true}
       configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false}
-      discharges_effect: {kind: reference, target: PhysicalEffectObligation, cardinality: one, resolvable: false}
+      discharges_effect: {kind: reference, target: PhysicalEffectObligation, cardinality: one, resolvable: false, referent_population: DESIGN_WIDE}
     owned_by: s03
     authority_class: AUTHORITATIVE
     purpose: >
@@ -1040,6 +1063,7 @@ assurance_families:
         target: Actor
         cardinality: many
         resolvable: false
+        referent_population: DESIGN_WIDE
     owned_by: s01
     purpose: "A declared operating scenario with its boundary."
     required_fields: [entity_id, name, kind, system_boundary, actors, environment]
@@ -1071,6 +1095,7 @@ assurance_families:
         target: Obligation
         cardinality: many
         resolvable: false
+        referent_population: DESIGN_WIDE
     owned_by: s02
     purpose: "What a specific candidate must satisfy to be judged realized."
     required_fields: [entity_id, candidate, obligations, predicates]

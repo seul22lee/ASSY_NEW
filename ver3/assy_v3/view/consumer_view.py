@@ -247,6 +247,11 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
             single_required = (fld in required_fields
                                and spec.get("cardinality") != "many")
             existence = REQUIRED_NONEMPTY if single_required else MAY_BE_EMPTY
+            population = spec.get("referent_population") or INVOCATION_BRANCH
+            if population not in _POPULATIONS:
+                raise ValueError(
+                    "%s.%s declares referent_population %r; the vocabulary is %s"
+                    % (family, fld, population, sorted(_POPULATIONS)))
             for dep, why in deps:
                 if dep not in fams or dep in co_produced:
                     continue
@@ -258,19 +263,20 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
                      "declaration": why, "requires": dep,
                      "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"},
                     selection={"%s.%s -[%s]-> %s" % (family, fld, why.split()[0], dep): {
-                        # A representational dependency is branch-local and
-                        # existential: the value this stage authors points at
-                        # something, so that something must be in the branch it is
-                        # authoring for - and one of them is what "points at"
-                        # needs.
+                        # WHERE the referent may come from is the FIELD's to say.
+                        # A blanket INVOCATION_BRANCH asked a load case to be
+                        # branch-scoped before s03b ran, when authoring
+                        # `LoadPath.load_case` is precisely what makes it branch
+                        # material - a circle the stage could never enter.
                         #
-                        # DESIGN_WIDE was tried here and FALSIFIED: it admitted
-                        # another branch's topology through the reference
-                        # dependency, breaking the isolation that
-                        # SELECT-09/10/23 and S3ROOT-16/17 pin. The branch-local
-                        # reading stands; what it cannot express is recorded as
-                        # the L04 finding in the evidence.
-                        "population": INVOCATION_BRANCH, "coverage": AT_LEAST_ONE,
+                        # Making every dependency DESIGN_WIDE instead was tried
+                        # and FALSIFIED: it admitted another branch's topology and
+                        # broke the isolation SELECT-09/10/23 and S3ROOT-16/17
+                        # pin. So neither answer is universal, and the contract
+                        # declares it per field. Undeclared stays branch-local:
+                        # an unclassified reference must not widen what a consumer
+                        # sees by default.
+                        "population": population, "coverage": AT_LEAST_ONE,
                         "existence": existence,
                         "applicability": ALL_MEMBERS}}))
     return out
@@ -582,6 +588,7 @@ class InvocationContext:
 
 
 _ANCHORS = (DESIGN_WIDE, INVOCATION_BRANCH, COMMITTED_BRANCH, ALL_RETAINED_BRANCHES)
+_POPULATIONS = frozenset(_ANCHORS)
 
 
 def _population_members(population: str, state, contracts, branch,
