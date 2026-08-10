@@ -861,10 +861,20 @@ entity_families:
       - "basis RELATIVE with absolute null is a legitimate, honest value. It is not a defect and must not be defaulted to a number."
 
   # -------------------------------------------------------------- U-2B (S-2)
-  # S-4: THESE NOW HAVE PRODUCERS. s02 authors PhysicalEffectObligation and
-  # ReactionSiteRequirement; s03b authors PhysicalInteraction and
-  # ConstraintRelation. The note below recorded the S-2 state, when they were
-  # canonical substrate with nothing writing them, and is kept for the history.
+  # CURRENT PRODUCER STATUS (S-4):
+  #   PhysicalEffectObligation  canonical producer s02   PRODUCED
+  #   ReactionSiteRequirement   canonical producer s02   PRODUCED
+  #   PhysicalInteraction       canonical producer s03b  PRODUCED
+  #   ConstraintRelation        canonical producer s03b  PRODUCED
+  #   LoadPath                  canonical producer s03b  PRODUCED, and its
+  #                             canonical structure now includes terminates_at
+  #
+  # ConstraintRelation additionally carries LEGACY COMPATIBILITY: the s03b
+  # response still contains blocking_relations[], which the deterministic DOF
+  # expansion consumes. That is NOT a second authoritative physical truth, and
+  # removing it is Impl S-5's (R-C/R-D).
+  #
+  # SUPERSEDED (S-2 state, kept as history, not as current fact):
   #
   # (historical) Canonical substrate only. No stage produces these yet: the physical-effect
   # progression and the constraint relations dispositions will cite are S-4/U-5.

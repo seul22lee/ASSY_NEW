@@ -710,7 +710,116 @@ reported rather than passing in silence.
 
 **Impl S-5 has NOT begun.**
 
-## 9. Impl S-5 has NOT begun.
+## 9. U-5 EXIT-CRITERIA CORRECTION
+
+Baseline for this pass: `615f12d`.
+
+### 9.1 Why §8's COMPLETE claim was premature
+
+§8 closed S-4 against the responsibility description rather than against the plan's
+three explicit U-5 success criteria. Measured against those, **two of the three were
+not enforced at all**:
+
+| criterion | state at `615f12d` |
+|---|---|
+| **U5-1** every PEO discharged or recorded open | enforced |
+| **U5-2** every ConstraintRelation names a valid provider | **not checked** — a relation with neither `provider_body` nor `provider_reaction_site` passed |
+| **U5-3** every LoadPath closes at the correct EXTERNAL site, or is open | **not checked** — `terminates_at` merely existing counted as closed; an INTERNAL site, or the wrong EXTERNAL one, passed |
+
+A third defect: `provider_reaction_site` was in the contract, the prose, the parser
+and the tests but **missing from the response schema** — the model was told about a
+field it was never given a slot for.
+
+### 9.2 U5-2 — a constraint must name what provides it
+
+Both provider fields stay individually optional, because either can answer; the OR
+invariant is enforced in the S-4 completeness layer rather than by making
+`provider_body` globally required. `provider_site` is **not** an answer, and the
+finding says so: *"provider_site says where a constraint acts, not what provides
+it."* An external provider must be EXTERNAL — *"an internal site provides nothing to
+react against."*
+
+Falsified: body provider ✓ · EXTERNAL site provider ✓ · neither ✗ · INTERNAL site ✗ ·
+nonexistent id → `DANGLING_REF` at the write boundary.
+
+### 9.3 U5-3 — a terminus is not closure
+
+A path is closed only when `terminates_at` resolves to a `ReactionSiteRequirement`
+that is EXTERNAL **and is the one its own LoadCase names in `reacted_at_site`** —
+matched by id, never by role text.
+
+Falsified: correct EXTERNAL site ✓ · no terminus with an explicit open ✓ · no
+terminus without one ✗ · INTERNAL terminus ✗ · wrong EXTERNAL terminus ✗ ·
+nonexistent terminus → `DANGLING_REF`.
+
+### 9.4 The S-4 layer is explicit
+
+`_s4_physical_problems` evaluates U5-1, U5-2 and U5-3 and nothing else. The legacy
+`blocking_relations` checks stay below it, clearly marked, and a test asserts the S-4
+layer does not read that channel at all. It reports and never repairs: an obligation
+this candidate cannot discharge, a constraint it has not decided, a path that reaches
+nowhere — each is a real answer when it is **said**, through `unresolved`. What is not
+an answer is silence.
+
+### 9.5 Response schema corrected
+
+`constraint_relations[]` now carries `provider_reaction_site (optional)`, and the
+schema states the invariant where the model reads it: *"AT LEAST ONE of provider_body
+/ provider_reaction_site must identify what provides the constraint. provider_site is
+where it acts and does not answer that."* Hop wording re-verified: Interface ids only,
+no Body or Joint permission anywhere.
+
+### 9.6 `blocking_relations` — described accurately
+
+The earlier evidence said the model "is not asked to author the same constraint
+twice". That was not literally true: the prompt still requests `blocking_relations[]`,
+because the deterministic DOF expansion consumes it. Stated accurately now — it is
+**temporary S-5 debt**, it is compatibility input rather than a second authoritative
+physical truth, and S-4 completeness does not consult it. Removal is Impl S-5
+(R-C/R-D).
+
+### 9.7 Producer metadata made current
+
+`DESIGN_STATE_CONTRACT` and `S03_CONTRACT` both still described these families as
+unproduced. Corrected to the current fact — `PhysicalEffectObligation` and
+`ReactionSiteRequirement` produced by s02; `PhysicalInteraction`, `ConstraintRelation`
+and `LoadPath` (now including `terminates_at`) by s03b — with the S-2-era notes marked
+**SUPERSEDED** and kept as history rather than deleted. `S03_CONTRACT.structured_outputs`
+gained the three physical shapes.
+
+### 9.8 The synthetic chain proves the conditions
+
+The valid run no longer passes on "a patch exists": it asserts
+`_s4_physical_problems(...) == []` against the recorded response and the exact view
+the provider was given. Plus VIEW_READY, provider called once, real provider on the
+constraint, closure at the exact EXTERNAL site the LoadCase names, PEO discharged,
+every typed reference resolving, no candidate-B leakage, and shared-demand lineage
+arising from authored references with no premise stamping. The incomplete/open case
+is kept, and the producer reports rather than repairs.
+
+### 9.9 Regression
+
+`679 run · 679 pass · 0 fail · 22 skipped` — 9 stale-recording, 12 R-B, 1 unrelated
+freeze-gate. The 21 recordings remain **S-9 operational debt** and are not evidence
+about S-4 semantic code.
+
+### 9.10 Defer map (unchanged)
+
+**S-5** `blocking_relations` removal · mobility orchestration · DOF domain/disposition ·
+`UNDISPOSITIONED` · `MAINTAINED_BY_CLASS` removal.
+**S-6** spatial reaction realization · frames/axes/`ReferenceScale` · S04A→S04B continuity.
+**S-7** retained/selected/committed/reopen.
+**S-8** broader applicability · cross-role engineering assurance.
+**S-9** live corpus refresh · full live-chain validation · historical replay retirement.
+
+### 9.11 Status
+
+**S-4 COMPLETE — CANONICAL PHYSICAL REASONING MIGRATION CLOSED**, now against the
+three stated U-5 criteria with positive and negative proof for each.
+
+**Impl S-5 has NOT begun.**
+
+## 10. Impl S-5 has NOT begun.
 
 ## 9. Status
 

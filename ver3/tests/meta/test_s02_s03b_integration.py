@@ -194,6 +194,10 @@ class TestS02ToS03B(_fixtures.StateBuilder, unittest.TestCase):
             invocation=invocation)
         self.assertEqual(before + 1, provider.calls, "the provider was not called")
         self.assertIsNotNone(out.patch, out.problems)
+        # A patch existing is not proof the physical demand was answered.
+        self.assertEqual([], S03BMobilityAndAssembly()._s4_physical_problems(
+            json.loads(out.raw_response), {"consumer_view": view.payload()}),
+            "U5-1/2/3 are not satisfied by this realization")
         s.apply(out.patch)
 
         self.assertEqual("PEO-0001", s.entities["PHI-A"]["discharges_effect"])
@@ -408,3 +412,161 @@ class TestS4ExitAudit(_fixtures.StateBuilder, unittest.TestCase):
                        "EliminationRecord"):
             self.assertEqual([], s.family(family),
                              "%s belongs to a later step" % family)
+
+
+class TestU5ExitCriteria(_fixtures.StateBuilder, unittest.TestCase):
+    """The three U-5 conditions, each with a positive and a negative case.
+
+    U5-1  a physical effect obligation is discharged, or recorded open.
+    U5-2  a constraint relation names what PROVIDES it -- a body or an EXTERNAL
+          reaction site. `provider_site` is where it acts, which is a different
+          question.
+    U5-3  a load path terminates at the EXTERNAL site its own load case names, or
+          is recorded open. A terminus merely existing is not closure.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.c = Contracts()
+
+    VIEW = {
+        "PhysicalEffectObligation": [{"entity_id": "PEO-0001"}],
+        "LoadCase": [{"entity_id": "LC-0001", "reacted_at_site": "RSR-0001"}],
+        "ReactionSiteRequirement": [
+            {"entity_id": "RSR-0001", "boundary_side": "EXTERNAL"},
+            {"entity_id": "RSR-INT", "boundary_side": "INTERNAL"},
+            {"entity_id": "RSR-OTHER", "boundary_side": "EXTERNAL"}],
+    }
+
+    def problems(self, *, discharge=True, provider=("provider_body", "BOD-A"),
+                 terminus="RSR-0001", open_blocks=()):
+        parsed = {
+            "physical_interactions": ([{"id": "PHI-A", "groups": ["RGP-A"],
+                                        "effect": "TRANSMIT_FORCE",
+                                        "discharges_effect": "PEO-0001"}]
+                                      if discharge else []),
+            "constraint_relations": [{"id": "CRL-A", "retained_group": "RGP-A",
+                                      "blocked_dofs": ["TZ"],
+                                      "configurations": ["CFG-A"],
+                                      "driver": "LOAD",
+                                      "provider_site": "IFG-A"}],
+            "load_paths": [{"id": "LDP-A", "load_case": "LC-0001",
+                            "ordered_hops": ["IFC-A"]}],
+            "unresolved": ([{"id": "S3U-1", "blocks": list(open_blocks)}]
+                           if open_blocks else []),
+        }
+        if provider:
+            parsed["constraint_relations"][0][provider[0]] = provider[1]
+        if terminus:
+            parsed["load_paths"][0]["terminates_at"] = terminus
+        return S03BMobilityAndAssembly()._s4_physical_problems(
+            parsed, {"consumer_view": self.VIEW})
+
+    def only(self, problems, prefix):
+        return [p for p in problems if p.startswith(prefix)]
+
+    # -- U5-1 ---------------------------------------------------------
+    def test_U5_PEO_01_discharged_is_complete(self):
+        self.assertEqual([], self.only(self.problems(), "U5-1"))
+
+    def test_U5_PEO_02_explicitly_open_is_complete(self):
+        self.assertEqual([], self.only(
+            self.problems(discharge=False, open_blocks=("PEO-0001",)), "U5-1"))
+
+    def test_U5_PEO_03_neither_is_incomplete(self):
+        found = self.only(self.problems(discharge=False), "U5-1")
+        self.assertTrue(found and "PEO-0001" in found[0], found)
+
+    # -- U5-2 ---------------------------------------------------------
+    def test_U5_CR_01_a_body_provider_is_complete(self):
+        self.assertEqual([], self.only(
+            self.problems(provider=("provider_body", "BOD-A")), "U5-2"))
+
+    def test_U5_CR_02_an_external_reaction_site_is_complete(self):
+        self.assertEqual([], self.only(
+            self.problems(provider=("provider_reaction_site", "RSR-0001")), "U5-2"))
+
+    def test_U5_CR_03_no_provider_is_incomplete(self):
+        found = self.only(self.problems(provider=None), "U5-2")
+        self.assertTrue(found, "a constraint standing on nothing was accepted")
+        self.assertIn("provider_site", found[0],
+                      "the finding must say why the acting site is not an answer")
+
+    def test_U5_CR_04_an_internal_reaction_site_is_incomplete(self):
+        found = self.only(
+            self.problems(provider=("provider_reaction_site", "RSR-INT")), "U5-2")
+        self.assertTrue(found and "INSIDE" in found[0], found)
+
+    def test_U5_CR_05_a_nonexistent_provider_fails_at_the_write_boundary(self):
+        from ver3.assy_v3.state.design_state import ContractError
+        s = DesignState(run_id="cr05")
+        self.add(s, "s03", "Body", "BOD-A")
+        self.add(s, "s03", "RigidGroup", "RGP-A", body="BOD-A")
+        self.add(s, "s03", "Configuration", "CFG-A", bodies_present=["BOD-A"],
+                 expected_mobility=[])
+        payload = {"physical_interactions": [], "load_paths": [],
+                   "assembly_steps": [], "blocking_relations": [], "unresolved": [],
+                   "constraint_relations": [{"id": "CRL-A", "retained_group": "RGP-A",
+                                             "blocked_dofs": ["TZ"],
+                                             "configurations": ["CFG-A"],
+                                             "driver": "LOAD",
+                                             "provider_body": "BOD-NOWHERE"}]}
+        out = S03BMobilityAndAssembly().run(
+            _Canned(payload), {"consumer_view": {}, "candidate": "CND-A"},
+            s, s.run_id, attempt=2)
+        with self.assertRaises(ContractError) as caught:
+            s.apply(out.patch)
+        self.assertIn("DANGLING_REF", str(caught.exception))
+
+    # -- U5-3 ---------------------------------------------------------
+    def test_U5_LP_01_closing_at_the_declared_external_site_is_closed(self):
+        self.assertEqual([], self.only(self.problems(terminus="RSR-0001"), "U5-3"))
+
+    def test_U5_LP_02_no_terminus_but_explicitly_open_is_accepted(self):
+        self.assertEqual([], self.only(
+            self.problems(terminus=None, open_blocks=("LDP-A",)), "U5-3"))
+
+    def test_U5_LP_03_no_terminus_and_no_open_is_incomplete(self):
+        found = self.only(self.problems(terminus=None), "U5-3")
+        self.assertTrue(found and "OPEN path" in found[0], found)
+
+    def test_U5_LP_04_an_internal_terminus_is_not_closure(self):
+        found = self.only(self.problems(terminus="RSR-INT"), "U5-3")
+        self.assertTrue(found and "INTERNAL" in found[0], found)
+
+    def test_U5_LP_05_the_wrong_external_site_is_not_closure(self):
+        """A terminus existing is not enough: it must be the site THIS load case
+        is reacted at, matched by id and not by role text."""
+        found = self.only(self.problems(terminus="RSR-OTHER"), "U5-3")
+        self.assertTrue(found and "RSR-0001" in found[0], found)
+
+    def test_U5_LP_06_a_nonexistent_terminus_fails_at_the_write_boundary(self):
+        from ver3.assy_v3.state.design_state import ContractError
+        s = DesignState(run_id="lp06")
+        self.add(s, "s01", "Requirement", "REQ-1", quantity_class="BAND")
+        self.add(s, "s01", "Actor", "ACT-1")
+        self.add(s, "s01", "Scenario", "SCN-1", actors=["ACT-1"])
+        self.add(s, "s02", "LoadCase", "LC-1", scenario="SCN-1")
+        self.add(s, "s02", "Candidate", "CND-A", principle={"h": "f"},
+                 addresses_obligations=[], obligations_created=[])
+        self.add(s, "s03", "Body", "BOD-A", prem=["CND-A"])
+        self.add(s, "s03", "Interface", "IFC-A", prem=["CND-A"], bodies=["BOD-A"])
+        payload = {"physical_interactions": [], "constraint_relations": [],
+                   "assembly_steps": [], "blocking_relations": [], "unresolved": [],
+                   "load_paths": [{"id": "LDP-A", "load_case": "LC-1",
+                                   "candidate": "CND-A", "ordered_hops": ["IFC-A"],
+                                   "terminates_at": "RSR-NOWHERE"}]}
+        out = S03BMobilityAndAssembly().run(
+            _Canned(payload), {"consumer_view": {}, "candidate": "CND-A"},
+            s, s.run_id, attempt=2)
+        with self.assertRaises(ContractError) as caught:
+            s.apply(out.patch)
+        self.assertIn("DANGLING_REF", str(caught.exception))
+
+    # -- the layer boundary -------------------------------------------
+    def test_U5_the_s4_layer_reads_no_blocking_relation(self):
+        """Canonical physical truth is ConstraintRelation. The legacy channel is
+        mobility compatibility and S-4 completeness does not consult it."""
+        from .test_s3_interface_readiness import _code_only
+        src = _code_only(S03BMobilityAndAssembly._s4_physical_problems)
+        self.assertNotIn("blocking_relations", src)

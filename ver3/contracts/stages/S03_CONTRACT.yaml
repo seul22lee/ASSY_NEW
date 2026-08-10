@@ -147,9 +147,15 @@ current_producer:
   # and not inside the canonical ownership projection. Structure rather than a
   # note: a reader and a test both see the classification without reading prose.
   relates: [blocked_by, retained_by]
-  emits: [blocked_by, retained_by]
-  does_not_yet_emit: [ConstraintRelation, PhysicalInteraction]
+  emits: [blocked_by, retained_by, ConstraintRelation, PhysicalInteraction]
+  does_not_yet_emit: []
   migration_step: "S-4 / U-5"
+  migration_status: >
+    DONE. s03b authors ConstraintRelation and PhysicalInteraction, and s02 authors
+    PhysicalEffectObligation and ReactionSiteRequirement. What survives from the
+    legacy shape is `blocking_relations[]` in the s03b response, which the
+    deterministic DOF expansion still consumes. It is COMPATIBILITY INPUT, not a
+    second authoritative physical truth; removing it is Impl S-5 (R-C/R-D).
   why_recorded: >
     The canonical contract is deliberately ahead of this producer. Rewriting this
     file to claim ConstraintRelation is already produced would be false, and
@@ -280,7 +286,14 @@ structured_outputs:
   Joint: [entity_id, joint_type, parent_group, child_group, dof, axis_direction, frame_ids]
   Interface: [entity_id, bodies, interaction_kind, nominal_status]
   MobilityExpectation: [entity_id, configuration, dispositions]
-  LoadPath: [entity_id, load_case, candidate, ordered_hops, maturity]
+  # S-4: ordered_hops are Interface ids, and terminates_at names the external
+  # ReactionSiteRequirement the load case is reacted at. A path that does not
+  # close is OPEN and is recorded as such, never silently.
+  LoadPath: [entity_id, load_case, candidate, ordered_hops, maturity, terminates_at]
+  PhysicalInteraction: [entity_id, groups, effect, discharges_effect, at_interface, configurations]
+  ConstraintRelation: [entity_id, retained_group, blocked_dofs, configurations, driver,
+                       blocked_direction, provider_body, provider_reaction_site,
+                       provider_site, maintaining_interaction, defeat_specification]
   AssemblyStep: [entity_id, order_index, body, access_side, activates, termination_strategy, path_kind, depends_on]
   FunctionalRegion: [entity_id, role, owning_bodies]
   Configuration: [entity_id, name, kind, bodies_present, expected_mobility]

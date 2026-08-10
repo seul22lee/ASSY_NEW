@@ -911,9 +911,14 @@ Return one JSON object. Emit every key. Use exactly these key names.
   constraint_relations[]
                         id "CRL-0001", retained_group, blocked_dofs[],
                         configurations[], driver, blocked_direction (optional),
-                        provider_body (optional), provider_site (optional),
+                        provider_body (optional),
+                        provider_reaction_site (optional),
+                        provider_site (optional),
                         maintaining_interaction (optional),
                         defeat_specification (optional)
+                        AT LEAST ONE of provider_body / provider_reaction_site
+                        must identify what provides the constraint.
+                        provider_site is where it acts and does not answer that.
   load_paths[]          id "LDP-0001", load_case, candidate, ordered_hops[],
                         terminates_at (optional)
   assembly_steps[]      id "ASY-0001", order_index, body, access_side,
@@ -1035,42 +1040,93 @@ class S03BMobilityAndAssembly(Stage):
         """
         return _candidate_premise(inputs.get("candidate"))
 
-    def _physical_demand_problems(self, parsed, inputs) -> List[str]:
-        """Physical demand this pass was given and neither realized nor left open.
+    def _s4_physical_problems(self, parsed, inputs) -> List[str]:
+        """The three U-5 conditions, and only those.
 
-        S-4 completeness, and deliberately only that. It compares what the
-        consumer view carried against what the response answered, and reports the
-        difference. It INVENTS NOTHING: an obligation this candidate cannot
-        discharge is a real answer, and saying so through `unresolved` is an
-        answer too. What is not an answer is silence.
+        U5-1  every physical effect obligation is discharged by an authored
+              interaction, or explicitly recorded open;
+        U5-2  every constraint relation names what PROVIDES it - a body of this
+              mechanism or a declared external reaction site. `provider_site` is
+              where it acts and does not answer that question;
+        U5-3  every load path terminates at the EXTERNAL reaction site its own
+              load case names, or is explicitly recorded open.
 
-        Whether the realization is physically CORRECT is not asked here - that is
-        engineering establishment, and it is S-8's.
+        It INVENTS NOTHING. An obligation this candidate cannot discharge, a
+        constraint it has not decided, a path that reaches nowhere - each is a
+        real answer when it is SAID, through `unresolved`. What is not an answer
+        is silence.
+
+        Deliberately separate from the legacy `blocking_relations` checks below,
+        which exist only to feed the deterministic DOF expansion and are Impl
+        S-5's to remove (R-C/R-D). Canonical physical truth is ConstraintRelation;
+        a blocking relation is not a second version of it.
         """
         view = inputs.get(self.context_key) or {}
-        answered = {i.get("discharges_effect")
-                    for i in parsed.get("physical_interactions") or []}
-        served = {p.get("load_case") for p in parsed.get("load_paths") or []}
-        # An open item may name what it leaves open, whatever kind it is.
+        by_id = {e.get("entity_id"): e
+                 for family in view.values() if isinstance(family, list)
+                 for e in family if isinstance(e, dict)}
         open_items = {ref for u in parsed.get("unresolved") or []
                       for ref in (u.get("blocks") or [])}
         out: List[str] = []
+
+        # -- U5-1 -----------------------------------------------------
+        discharged = {i.get("discharges_effect")
+                      for i in parsed.get("physical_interactions") or []}
         for demand in view.get("PhysicalEffectObligation") or []:
             eid = demand.get("entity_id")
-            if eid not in answered and eid not in open_items:
-                out.append("%s was given and is neither discharged by an "
-                           "interaction nor recorded open" % eid)
+            if eid not in discharged and eid not in open_items:
+                out.append("U5-1 %s is neither discharged by an interaction nor "
+                           "recorded open" % eid)
+
+        # -- U5-2 -----------------------------------------------------
+        for relation in parsed.get("constraint_relations") or []:
+            rid = relation.get("id")
+            body = relation.get("provider_body")
+            site = relation.get("provider_reaction_site")
+            if not body and not site:
+                out.append("U5-2 %s names no provider; provider_site says where a "
+                           "constraint acts, not what provides it" % rid)
+                continue
+            if site:
+                declared = by_id.get(site)
+                if declared is None:
+                    out.append("U5-2 %s is provided by %s, which this consumer was "
+                               "not given" % (rid, site))
+                elif declared.get("boundary_side") != "EXTERNAL":
+                    out.append("U5-2 %s takes its reaction at %s, which the scenario "
+                               "boundary puts INSIDE the product; an internal site "
+                               "provides nothing to react against" % (rid, site))
+
+        # -- U5-3 -----------------------------------------------------
+        served = {p.get("load_case") for p in parsed.get("load_paths") or []}
         for load in view.get("LoadCase") or []:
             eid = load.get("entity_id")
             if eid not in served and eid not in open_items:
-                out.append("%s was given and has neither a load path nor a "
-                           "recorded reason it has none" % eid)
+                out.append("U5-3 %s has neither a load path nor a recorded reason "
+                           "it has none" % eid)
         for path in parsed.get("load_paths") or []:
-            if not path.get("terminates_at") and path.get("id") not in open_items:
-                out.append("%s terminates nowhere and is not recorded open; a path "
-                           "that does not reach a declared reaction site is an "
-                           "OPEN path, which is a finding and not a silence"
-                           % path.get("id"))
+            pid = path.get("id")
+            if pid in open_items:
+                continue
+            terminus = path.get("terminates_at")
+            load = by_id.get(path.get("load_case")) or {}
+            expected = load.get("reacted_at_site")
+            if not terminus:
+                out.append("U5-3 %s reaches no reaction site and is not recorded "
+                           "open; a path that does not close is an OPEN path, "
+                           "which is a finding and not a silence" % pid)
+                continue
+            declared = by_id.get(terminus)
+            if declared is None:
+                out.append("U5-3 %s terminates at %s, which this consumer was not "
+                           "given" % (pid, terminus))
+            elif declared.get("boundary_side") != "EXTERNAL":
+                out.append("U5-3 %s terminates at %s, which is INTERNAL; the load "
+                           "has not left the product" % (pid, terminus))
+            elif expected and terminus != expected:
+                out.append("U5-3 %s terminates at %s, but %s is reacted at %s; a "
+                           "path that closes somewhere else has not closed this "
+                           "load" % (pid, terminus, path.get("load_case"), expected))
         return out
 
     def derived_operations(self, parsed, groups, configurations, joints, inputs):
@@ -1150,7 +1206,9 @@ class S03BMobilityAndAssembly(Stage):
         return ops
 
     def completeness(self, parsed, inputs):
-        out = self._physical_demand_problems(parsed, inputs)
+        # S-4 canonical physical truth first, then the legacy mobility checks.
+        # The two are different questions and are kept apart deliberately.
+        out = self._s4_physical_problems(parsed, inputs)
         relations, _renames = relations_of(parsed)
         if not relations:
             out.append("no blocking relation: nothing in this mechanism is held")
