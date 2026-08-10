@@ -204,7 +204,11 @@ PERMITTED VALUES
   load case kind    GRAVITY | PAYLOAD | ACTOR_APPLIED | REACTION
   alternatives_kind ENTITY_REFS | PRINCIPLE_FAMILIES | FREE_TEXT
   family            one of the FUNCTION CLASSES listed above
-  principle         one of the PRINCIPLE FAMILIES listed above
+  principle         a MAPPING function_class -> principle_family. Each KEY is one
+                    of the FUNCTION CLASSES listed above and each VALUE is one of
+                    the PRINCIPLE FAMILIES permitted for that function class. A
+                    candidate performing one function class is a one-entry
+                    mapping, never a bare string.
   evidence_route    one of the EVIDENCE ROUTES listed above
   scenario          the id of a Scenario given to you in the typed input
 """

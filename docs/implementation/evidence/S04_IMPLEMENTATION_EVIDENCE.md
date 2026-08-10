@@ -846,7 +846,7 @@ implemented in slices 1-3 (§5-§7). Kept to show what the entry analysis expect
 
 ---
 
-# 11. CLOSURE-CONSISTENCY CORRECTION *(CURRENT STATUS)*
+# 11. CLOSURE-CONSISTENCY CORRECTION *(HISTORICAL — superseded by §14)*
 
 Baseline `fee1f35`. This section supersedes every earlier status claim in this
 document; §8.10 and §9.11 are labelled historical above.
@@ -956,7 +956,7 @@ the remaining stage incompleteness is exclusively later-owned and named.
 
 ---
 
-# 12. CANONICAL PROMPT MIGRATION *(CURRENT STATUS)*
+# 12. CANONICAL PROMPT MIGRATION *(HISTORICAL — superseded by §14)*
 
 Baseline `14c5806`. This section supersedes §11.9 and every earlier status claim.
 
@@ -1076,7 +1076,7 @@ tests prove · J ✓ the defect **class** is gated, not the two examples.
 
 ---
 
-# 13. CLOSURE HYGIENE *(CURRENT STATUS)*
+# 13. CLOSURE HYGIENE *(HISTORICAL — superseded by §14)*
 
 Baseline `1cfb1bb`. This section supersedes §12.11 and every earlier status claim.
 It changed no engineering semantics: `s03_topology_and_mobility.py` is not in the
@@ -1106,6 +1106,10 @@ a `why_it_lingered` note recording exactly this: benign prose in an active list
 reads as done to a human and as open to a machine, and the machine was right.
 
 ## 13.3 `principle` — the honest finding
+
+*(CORRECTED in §14: one line DID contradict it — a field-definition entry that this
+reproduction did not reach, because I looked at prose mentions and not at the
+definition table.)*
 
 The reproduction did **not** find scalar-era wording contradicting the mapping.
 Every live mention concerns the *concept* "principle family" — which is what the
@@ -1184,7 +1188,8 @@ end to end · G ✓ U5 unchanged and the physical module untouched · H ✓
 `_s4_physical_problems == []` · I ✓ both remaining reasons later-owned · J ✓ no S-5
 implementation · K ✓ one CURRENT STATUS · L ✓ the claim matches the tests.
 
-## 13.11 CURRENT STATUS
+## 13.11 Status *(SUPERSEDED — scalar-era `principle` wording remained in one live
+prompt line and the closure gate did not detect it; §14 is current)*
 
 **S-4 VERIFIED CLOSED — NO ACTIVE S-4 MIGRATION DEBT REMAINS.**
 
@@ -1193,6 +1198,107 @@ field and shape drift gated · zero S-4-owned active migration rows · historica
 defects preserved as history only · all remaining incompleteness later-owned.
 
 Deferred: **S-5** mobility/`blocking_relations` · **S-6** spatial · **S-7**
+selection · **S-8** assurance · **S-9** corpus refresh and live-chain.
+
+**Impl S-5 has NOT begun.**
+
+
+---
+
+# 14. FINAL PROMPT-SURFACE CONSISTENCY *(CURRENT STATUS)*
+
+Baseline `239608b`. This section supersedes §11, §12 and §13. Production diff: two
+files. The physical module is not among them.
+
+## 14.1 The residual, exactly
+
+```
+  principle         one of the PRINCIPLE FAMILIES listed above
+```
+
+Line 205 of the live prompt: a **field-definition table entry** giving `principle`
+scalar semantics, while line 64 says *"`principle` is a MAPPING from function class
+to principle family"* and the rendered schema shows
+`principle {function_class: principle_family}`. The model was told two different
+things about the same field.
+
+§13.3 recorded that no such wording remained. That was wrong, and §13.3 now says so:
+I searched the prose mentions and never looked at the definition table.
+
+**Runtime rejection does not make the prompt consistent.** The model reads the
+prompt, not the validator. A contradictory instruction produces a response that is
+then refused — rejection catches the symptom after the call, and the prompt caused
+it.
+
+## 14.2 Root cause of the gate miss
+
+`CH-PRI-03` blacklisted three literal phrases — `"principle is one of"`,
+`"choose one principle"`, `"principle: a principle family"`. The escaped line
+matches none of them. **A blacklist can only catch the wordings someone already
+thought of, which is the wrong shape of test for "no phrasing may mean X".**
+
+## 14.3 The correction
+
+```
+  principle         a MAPPING function_class -> principle_family. Each KEY is one
+                    of the FUNCTION CLASSES listed above and each VALUE is one of
+                    the PRINCIPLE FAMILIES permitted for that function class. A
+                    candidate performing one function class is a one-entry
+                    mapping, never a bare string.
+```
+
+Wording only. No canonical shape changed, no scalar tolerance, no coercion.
+
+## 14.4 The gate now checks the invariant
+
+Structural, not a phrase list: find every line that **defines** the field — a
+definition-table row whose subject is `principle`, continuation lines attached —
+and require the definition to state a mapping. A new scalar phrasing fails whatever
+words it uses.
+
+Falsifiers: the exact escaped sentence fails; four equivalent formulations with
+different words and spacing fail; three valid rewordings pass, so the check is not
+merely rejecting everything.
+
+**The falsifiers found a blind spot in the detector itself**: a tab-separated
+definition slipped through the first pattern. Fixed, and the reason is recorded at
+the pattern.
+
+## 14.5 Everything else, unchanged
+
+| | |
+|---|---|
+| active S-4-owned migration rows | **0** (one active row total: mobility, **S-5 / U-6**) |
+| U5-1 / U5-2 / U5-3 | untouched; `s03_topology_and_mobility.py` not in the diff |
+| synthetic chain | `VIEW_READY` · 1 provider call · patch applies · `_s4_physical_problems == []` |
+| `execution_status` | `CONTRACT_INCOMPLETE`, not forced |
+| remaining reasons | `no blocking relation…` → **S-5** (R-C/R-D) · `no assembly order` → the minimal probe authors none; `AssemblyStep` has a producer |
+
+## 14.6 Regression
+
+`718 run · 718 pass · 0 fail · 22 skipped` — 9 stale-recording, 12 R-B, 1
+freeze-gate.
+
+## 14.7 Static review
+
+No live scalar `principle` semantics; no coercion; `obligations_addressed` still
+absent from live s02 surfaces; physical and mobility code unchanged; no shims, no
+benchmark or model logic, no S-5 implementation.
+
+## 14.8 Self-audit
+
+A ✓ residual reproduced · B ✓ corrected without semantic change · C ✓ every
+model-facing definition says mapping · D ✓ the escaped formulation is caught ·
+E ✓ whitespace variants caught · F ✓ scalar still rejected, never repaired ·
+G ✓ zero active S-4 rows · H ✓ U5 untouched and green · I ✓ `[]` on the chain ·
+J ✓ physical module absent from the diff · K ✓ one CURRENT STATUS · L ✓ the claim
+matches the gate.
+
+## 14.9 CURRENT STATUS
+
+**S-4 VERIFIED CLOSED — FINAL PROMPT-SURFACE CONSISTENCY DEFECT ELIMINATED.**
+
+Deferred: **S-5** mobility / `blocking_relations` · **S-6** spatial · **S-7**
 selection · **S-8** assurance · **S-9** corpus refresh and live-chain.
 
 **Impl S-5 has NOT begun.**

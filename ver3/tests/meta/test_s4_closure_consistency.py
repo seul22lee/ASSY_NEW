@@ -31,6 +31,44 @@ from ver3.assy_v3.stages.s03_topology_and_mobility import (            # noqa: E
 from ver3.assy_v3.state.design_state import Contracts                   # noqa: E402
 
 
+#: A definition-table line: indent, a field name, a column gap, then the
+#: definition. The gap is two-or-more spaces OR a tab - a tab was missed by the
+#: first version of this pattern, which the falsifier below caught.
+_DEFINITION_LINE = re.compile(
+    r"^\s{2,}(?P<field>[a-z_]+)(?:\t+|\s{2,})(?P<meaning>\S.*)$")
+
+
+def _principle_definition_lines(prompt):
+    """Lines that DEFINE `principle`, with any continuation lines attached.
+
+    Structural, not a phrase list: whatever a definition of this field says, it is
+    caught here and must state the mapping.
+    """
+    lines = prompt.split("\n")
+    out = []
+    for i, line in enumerate(lines):
+        m = _DEFINITION_LINE.match(line)
+        if not m or m.group("field") != "principle":
+            continue
+        block = [m.group("meaning")]
+        indent = len(line) - len(line.lstrip())
+        for follow in lines[i + 1:]:
+            if not follow.strip():
+                break
+            following_indent = len(follow) - len(follow.lstrip())
+            if following_indent <= indent or _DEFINITION_LINE.match(follow):
+                break
+            block.append(follow.strip())
+        out.append(" ".join(block))
+    return out
+
+
+def _states_a_mapping(meaning):
+    """Does this definition give the field mapping semantics?"""
+    lowered = meaning.lower()
+    return "mapping" in lowered or "->" in meaning or "function_class:" in lowered
+
+
 def _active_s4_rows(rows):
     """Rows in the ACTIVE migration structure whose owner includes S-4.
 
@@ -459,10 +497,90 @@ class TestClosureHygieneFalsifiers(unittest.TestCase):
             S02ObligationAndCandidates.RESPONSE_ENVELOPE = original
 
     def test_CH_PRI_03_no_live_wording_makes_principle_a_scalar(self):
-        """Every live mention of the field states the mapping."""
+        """Every live line that DEFINES the field states the mapping.
+
+        This used to blacklist three literal phrases, and the sentence that
+        escaped -
+            principle         one of the PRINCIPLE FAMILIES listed above
+        - matched none of them. A blacklist can only catch the wordings someone
+        already thought of, which is the wrong shape of test for "no phrasing may
+        mean X".
+
+        So it checks the invariant instead: wherever the prompt DEFINES the field
+        (a definition-table line whose subject is `principle`), that definition
+        must say mapping. A new scalar phrasing fails whatever words it uses.
+        """
         prompt = self.stage.prompt({"consumer_view": {}})
         self.assertIn("{function_class: principle_family}", prompt)
         self.assertIn("ONE-ENTRY MAPPING", prompt.upper())
-        for phrase in ("principle is one of", "choose one principle",
-                       "principle: a principle family"):
-            self.assertNotIn(phrase.lower(), prompt.lower(), phrase)
+        for line in _principle_definition_lines(prompt):
+            self.assertTrue(_states_a_mapping(line),
+                            "this line defines `principle` and does not say it is "
+                            "a mapping, so the model is told two different things: "
+                            "%r" % line)
+
+
+class TestPrincipleDefinitionInvariant(unittest.TestCase):
+    """S4-PRI-FINAL: the invariant, and the formulations that must fail it.
+
+    The point of these is that none of them is matched by a literal blacklist.
+    They fail because the line DEFINES the field and does not say mapping.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.stage = S02ObligationAndCandidates()
+
+    def test_S4_PRI_FINAL_01_the_live_definition_states_the_mapping(self):
+        definitions = _principle_definition_lines(
+            self.stage.prompt({"consumer_view": {}}))
+        self.assertTrue(definitions, "the prompt no longer defines `principle`; "
+                                     "this invariant is checking nothing")
+        for meaning in definitions:
+            self.assertTrue(_states_a_mapping(meaning), meaning)
+
+    def test_S4_PRI_FINAL_02_the_schema_exposes_the_mapping(self):
+        rendered = self.stage.render_response_schema()
+        self.assertIn("{function_class: principle_family}", rendered)
+
+    def test_S4_PRI_FINAL_03_a_bare_scalar_response_is_still_rejected(self):
+        self.assertTrue(self.stage._principle_shape_problems(
+            {"candidates": [{"id": "CND-1", "principle": "PIVOT"}]}))
+
+    def test_S4_PRI_FINAL_04_the_wording_that_actually_escaped_is_caught(self):
+        escaped = "  principle         one of the PRINCIPLE FAMILIES listed above"
+        found = _principle_definition_lines(escaped)
+        self.assertEqual(1, len(found), "the definition line was not recognised")
+        self.assertFalse(_states_a_mapping(found[0]),
+                         "the exact sentence that escaped still passes")
+
+    def test_S4_PRI_FINAL_05_equivalent_scalar_formulations_also_fail(self):
+        """Different words, different spacing, same wrong meaning."""
+        for variant in (
+                "  principle\tone of the PRINCIPLE FAMILIES listed above",
+                "   principle          a principle family from the list",
+                "  principle     pick the family this candidate uses",
+                "  principle   the PRINCIPLE FAMILY it uses"):
+            found = _principle_definition_lines(variant)
+            self.assertEqual(1, len(found), "not recognised as a definition: %r"
+                             % variant)
+            self.assertFalse(_states_a_mapping(found[0]),
+                             "a scalar formulation passed: %r" % variant)
+
+    def test_S4_PRI_FINAL_05b_valid_rewordings_are_accepted(self):
+        """The check must not merely reject everything."""
+        for variant in (
+                "  principle   a MAPPING function_class -> principle_family",
+                "  principle   mapping from function class to principle family",
+                "  principle   {function_class: principle_family}"):
+            found = _principle_definition_lines(variant)
+            self.assertEqual(1, len(found), variant)
+            self.assertTrue(_states_a_mapping(found[0]), variant)
+
+
+class TestS4FinalClosure(unittest.TestCase):
+
+    def test_S4_FINAL_01_no_active_s4_migration_rows(self):
+        ds = _load("DESIGN_STATE_CONTRACT.yaml")
+        self.assertEqual(
+            [], _active_s4_rows((ds.get("legacy_producers") or {}).get("rows")))
