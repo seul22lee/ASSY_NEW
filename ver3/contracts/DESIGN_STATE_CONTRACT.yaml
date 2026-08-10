@@ -1452,6 +1452,24 @@ superseded_legacy_producers:
       residual: >
         Recorded fixtures still use the old key. Corpus debt (Impl S-9); the live
         producer no longer reads it.
+    - concept: MobilityExpectation domain and disposition split
+      was: >
+        domain enumeration and disposition assignment were one function, and its
+        else branch wrote MAINTAINED_BY_CLASS with a holding class composed from
+        the first joint reaching the group - or the literal "joint class of no
+        joint" when there was none. Absence was used as a premise.
+      now: >
+        the domain is enumerated deterministically and reported as BOOKKEEPING;
+        dispositions come only from a present premise - INTENDED from an authored
+        joint, BLOCKED_BY citing an addressable ConstraintRelation,
+        IRRELEVANT_BECAUSE naming a scenario - and a cell no premise covers is
+        UNDISPOSITIONED, naming what is missing. Disposition completeness is
+        reported as an engineering quantity.
+      closed_by: "S-5 / U-6 (ADR-005)"
+      residual: >
+        Recorded fixtures predating the migration still contain the pre-split
+        shape and the legacy blocking relations. Corpus debt (Impl S-9); no live
+        path reads either.
     - concept: FunctionalRegion.required_by_actors and reach_targets
       was: >
         the s03 prompt carried its own prose definition of these fields, so the
@@ -1478,9 +1496,8 @@ legacy_producers:
     A row here means the canonical target is defined, the producer does not yet
     conform, and no parser accepts the old shape as if it did. It is NOT a claim
     of conformance.
-  rows:
-    - concept: MobilityExpectation domain and disposition split
-      canonical: "derived domain; authored disposition citing a premise; UNDISPOSITIONED where none"
-      current_producers: ["derive_mobility still emits the pre-split shape"]
-      current_status: NONCONFORMING
-      migration_step: "S-5 / U-6 (ADR-005)"
+  #: EMPTY at S-5 closure. Every migration this structure carried has been
+  #: completed and moved to `superseded_legacy_producers`. An empty list is the
+  #: statement "no producer is known to be nonconforming" - which is a claim, and
+  #: a different one from the list having been deleted.
+  rows: []

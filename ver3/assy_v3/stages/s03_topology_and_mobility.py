@@ -29,12 +29,16 @@ from .base import Stage, carry_invocation_premises
 #: The six rigid-body degrees of freedom. The domain of the totality.
 DOF_NAMES = ("TX", "TY", "TZ", "RX", "RY", "RZ")
 
-DISPOSITIONS = ("INTENDED", "BLOCKED_BY", "MAINTAINED_BY_CLASS", "IRRELEVANT_BECAUSE")
+#: The contract's `MobilityExpectation.disposition_values`. UNDISPOSITIONED is the
+#: value for a cell no premise covers - vocabulary since S-2, behaviour since S-5.
+DISPOSITIONS = ("INTENDED", "BLOCKED_BY", "MAINTAINED_BY_CLASS",
+                "IRRELEVANT_BECAUSE", "UNDISPOSITIONED")
 
 #: The compact wire codes. The disposition VOCABULARY is unchanged - only how it
 #: is transmitted - so nothing downstream sees a code.
 _DISPOSITION_CODE = {"I": "INTENDED", "B": "BLOCKED_BY",
-                     "M": "MAINTAINED_BY_CLASS", "R": "IRRELEVANT_BECAUSE"}
+                     "M": "MAINTAINED_BY_CLASS", "R": "IRRELEVANT_BECAUSE",
+                     "U": "UNDISPOSITIONED"}
 
 JOINT_TYPES = ("REVOLUTE", "PRISMATIC", "HELICAL", "SPHERICAL", "PLANAR",
                "CYLINDRICAL", "FIXED", "COMPLIANT")
@@ -266,39 +270,50 @@ TYPED INPUT
 
 
 def derive_mobility(groups: List[str], configurations: List[str],
-                   joints: List[Dict[str, Any]],
-                   relations: List[Dict[str, Any]],
-                   irrelevance: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Compute the TOTAL DOF disposition from authored engineering facts.
+                    joints: List[Dict[str, Any]],
+                    constraints: List[Dict[str, Any]],
+                    irrelevance: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """The DOF domain, and what is known about each cell. Two different facts.
 
-    The model authors joints, a handful of blocking relations, and any DOF it
-    claims irrelevant. Everything else follows mechanically:
+    DOMAIN is deterministic and total: every rigid group x configuration x DOF
+    cell exists, because the enumerator makes it exist. That totality is
+    BOOKKEEPING - it is guaranteed by this function and can never be evidence
+    about the design.
 
-      free by the joint class            -> INTENDED
-      covered by a blocking relation     -> BLOCKED_BY   (overrides INTENDED:
-                                            a retention that removes an intended
-                                            freedom in one configuration is the
-                                            normal case)
-      declared irrelevant                -> IRRELEVANT_BECAUSE
-      otherwise                          -> MAINTAINED_BY_CLASS
+    DISPOSITION is what the design asserts about a cell, and it comes only from a
+    premise that is present, typed and referenceable:
 
-    This is the contract's own division of labour - "LLM role NONE for DOF
-    totality... the LLM only dispositions each entry" - finally implemented.
-    Nothing is compressed away: every entry still exists, carries its reason,
-    and cites the relation or joint that produced it.
+      free by an authored joint's class     -> INTENDED, citing the joint
+      covered by a ConstraintRelation       -> BLOCKED_BY, citing the relation
+      authored irrelevant in a scenario     -> IRRELEVANT_BECAUSE, citing it
+      none of those                         -> UNDISPOSITIONED, naming what is
+                                               missing
+
+    The last line is the change S-5 exists for. This function used to end in an
+    `else` that wrote MAINTAINED_BY_CLASS with a holding class composed from the
+    first joint reaching the group - or the literal "joint class of no joint"
+    when there was none. That is absence used as a premise: the pipeline had no
+    way to say "nothing is known here", so it said "a joint class holds it", and
+    a reviewer could not tell the two apart. MAINTAINED_BY_CLASS remains a valid
+    disposition when something actually justifies it; it is no longer what
+    happens when nothing does.
+
+    The premise for BLOCKED_BY is a `ConstraintRelation` - the addressable
+    physical truth S-4 established - not the legacy blocking relation, which had
+    no identity and so could not be cited.
     """
     by_child: Dict[str, List[Dict[str, Any]]] = {}
     for j in joints:
         by_child.setdefault(j.get("child_group"), []).append(j)
 
     blocked: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
-    for r in relations:
-        group = r.get("retained_group")
-        dofs = r.get("_dofs") or []
-        configs = [c for c in (r.get("configurations") or []) if isinstance(c, str)]
+    for relation in constraints:
+        group = relation.get("retained_group")
+        dofs = [d for d in (relation.get("blocked_dofs") or []) if isinstance(d, str)]
+        configs = [c for c in (relation.get("configurations") or []) if isinstance(c, str)]
         for cfg in (configs or configurations):
             for dof in dofs:
-                blocked[(group, cfg, dof)] = r
+                blocked[(group, cfg, dof)] = relation
 
     irrelevant: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
     for i in irrelevance:
@@ -319,25 +334,56 @@ def derive_mobility(groups: List[str], configurations: List[str],
                 entry: Dict[str, Any] = {"rigid_group": group, "configuration": cfg,
                                          "dof": dof, "derived_by": "s03:derivation"}
                 if key in blocked:
-                    r = blocked[key]
+                    relation = blocked[key]
                     entry.update({"disposition": "BLOCKED_BY",
-                                  "blocking_relation": r.get("id"),
-                                  "blocked_direction": r.get("blocked_direction"),
-                                  "blocker_body": r.get("blocker_body"),
-                                  "defeat_specification": r.get("defeat_specification"),
-                                  "driver": r.get("driver")})
+                                  "constraint_relation": relation.get("id"),
+                                  "blocked_direction": relation.get("blocked_direction"),
+                                  "provider_body": relation.get("provider_body"),
+                                  "provider_reaction_site":
+                                      relation.get("provider_reaction_site"),
+                                  "defeat_specification":
+                                      relation.get("defeat_specification"),
+                                  "driver": relation.get("driver")})
                 elif dof in free:
                     entry.update({"disposition": "INTENDED", "by_joint": source.get(dof)})
                 elif key in irrelevant:
                     entry.update({"disposition": "IRRELEVANT_BECAUSE",
                                   "scenario": irrelevant[key].get("scenario")})
                 else:
-                    entry.update({"disposition": "MAINTAINED_BY_CLASS",
-                                  "holding_class": "joint class of %s"
-                                  % (by_child.get(group, [{}])[0].get("joint_type", "none")
-                                     if by_child.get(group) else "no joint")})
+                    # No premise covers this cell. Say so, and say what would.
+                    entry.update({
+                        "disposition": "UNDISPOSITIONED",
+                        "missing": "no ConstraintRelation covers this DOF in this "
+                                   "configuration, no joint leaves it free, and no "
+                                   "scenario declares it irrelevant"})
                 out.append(entry)
     return out
+
+
+def disposition_completeness(entries: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
+    """How much of the domain rests on evidence, and which cells do not.
+
+    The quantity the audited pipeline could not express. Domain totality was
+    trivially true and told a reviewer nothing; this says what fraction of the
+    cells a premise actually covers, and names the ones it does not.
+
+    A low number is not a failure. It is a measurement, and an honest one is worth
+    more than a total that was guaranteed by construction.
+    """
+    rows = list(entries)
+    undispositioned = [r for r in rows if r.get("disposition") == "UNDISPOSITIONED"]
+    evidenced = len(rows) - len(undispositioned)
+    return {
+        "domain_cells": len(rows),
+        "dispositioned_by_evidence": evidenced,
+        "undispositioned": len(undispositioned),
+        "fraction": (evidenced / len(rows)) if rows else 0.0,
+        "cells_without_evidence": [
+            "%s/%s/%s" % (r.get("rigid_group"), r.get("configuration"), r.get("dof"))
+            for r in undispositioned],
+        "reported_as": "ENGINEERING QUANTITY, unlike domain totality which is "
+                       "BOOKKEEPING",
+    }
 
 
 def dof_domain(groups: Iterable[str], configurations: Iterable[str]) -> List[Tuple[str, str, str]]:
@@ -528,12 +574,14 @@ def _render(obj: Any) -> str:
 # checks
 # =========================================================================
 def dof_totality_check(state) -> List[str]:
-    """S03-C1. Every rigid group, in every configuration, has every DOF
-    dispositioned EXACTLY once.
+    """BOOKKEEPING. Every rigid group, in every configuration, has every DOF
+    dispositioned exactly once.
 
-    The domain comes from the topology, not from the response, so an omission is
-    a missing entry rather than an invisible absence. This is the check the whole
-    stage is shaped around.
+    This tests what the enumerator guarantees, so it can never be evidence about
+    the design - it is reported as bookkeeping and contributes to no establishment
+    claim. The engineering quantity is DISPOSITION COMPLETENESS: how much of the
+    domain rests on evidence, and which cells do not. `disposition_completeness`
+    below reports that.
     """
     groups = [g["entity_id"] for g in state.family("RigidGroup")]
     configs = [c["entity_id"] for c in state.family("Configuration")]
@@ -875,10 +923,11 @@ loads reach the world, and in what order it goes together.
 Do not add or rename bodies, groups, joints, interfaces or configurations. If
 something is missing, say so in unresolved.
 
-1. BLOCKING RELATIONS. (Compatibility input for the DOF expansion below. The
-   CANONICAL constraint output is constraint_relations[] - do not author the same
-   constraint twice; a blocking relation here is only what the DOF grid is
-   expanded from.) For each body that must stay where it is put, state what
+1. WHAT HOLDS EACH BODY. For each body that must stay where it is put, state
+   what stops it, as a constraint_relation below. ONE relation per (retained
+   group, blocked direction) - not one per degree of freedom: the pipeline
+   expands your relations over every DOF and every configuration itself. A
+   mechanism in which nothing is blocked is a pile of loose parts. For each body that must stay where it is put, state what
    stops it. ONE relation per (retained group, blocked direction) - not one per
    degree of freedom: the pipeline expands your relations over every DOF and
    every configuration itself. A mechanism in which nothing is blocked is a pile
@@ -901,9 +950,6 @@ something is missing, say so in unresolved.
 RESPONSE SCHEMA
 Return one JSON object. Emit every key. Use exactly these key names.
 
-  blocking_relations[]  id "BLK-0001", retained_group, blocked_direction,
-                        blocker_body, configurations[], dofs[], driver,
-                        defeat_specification, promised_features[] (optional)
   irrelevance[]         rigid_group, configuration, dof[], scenario
   physical_interactions[]
                         id "PHI-0001", groups[], effect, discharges_effect,
@@ -1129,6 +1175,46 @@ class S03BMobilityAndAssembly(Stage):
                            "load" % (pid, terminus, path.get("load_case"), expected))
         return out
 
+    def _s5_mobility_problems(self, parsed, inputs) -> List[str]:
+        """S-5 mobility completeness, and only that.
+
+        Separate from `_s4_physical_problems` because they are different
+        questions: S-4 asks whether the physical demand was realized, S-5 asks
+        whether every DOF the topology creates has an evidenced disposition.
+
+        DOMAIN TOTALITY is not checked here. It is guaranteed by the enumerator,
+        which makes it bookkeeping - checking what your own code just built is not
+        assurance, and the plan says to report it as such rather than count it.
+
+        What IS reported is disposition completeness: how much of the domain rests
+        on evidence, and which cells do not. An UNDISPOSITIONED cell is not an
+        error to be repaired; it is the honest state, and reporting it is the
+        point. What would be an error is a disposition whose premise does not
+        resolve, or one produced from absence.
+        """
+        relations = {r.get("id") for r in parsed.get("constraint_relations") or []}
+        out: List[str] = []
+        for entry in parsed.get("_derived_mobility") or []:
+            disposition = entry.get("disposition")
+            cell = "%s/%s/%s" % (entry.get("rigid_group"),
+                                 entry.get("configuration"), entry.get("dof"))
+            if disposition == "BLOCKED_BY":
+                cited = entry.get("constraint_relation")
+                if not cited:
+                    out.append("%s is BLOCKED_BY nothing it can name; the "
+                               "disposition has no premise" % cell)
+                elif cited not in relations:
+                    out.append("%s is BLOCKED_BY %s, which this response does not "
+                               "author" % (cell, cited))
+            elif disposition == "INTENDED" and not entry.get("by_joint"):
+                out.append("%s is INTENDED by no joint it can name" % cell)
+            elif disposition == "IRRELEVANT_BECAUSE" and not entry.get("scenario"):
+                out.append("%s is IRRELEVANT_BECAUSE of no named scenario" % cell)
+            elif disposition == "MAINTAINED_BY_CLASS" and not entry.get("holding_class"):
+                out.append("%s is MAINTAINED_BY_CLASS with no class named; this "
+                           "value may not stand in for an absent premise" % cell)
+        return out
+
     def derived_operations(self, parsed, groups, configurations, joints, inputs):
         """The TOTAL DOF disposition, derived from the relations just authored.
 
@@ -1138,8 +1224,8 @@ class S03BMobilityAndAssembly(Stage):
         here rather than in a runner, so every caller derives the same thing with
         the same lineage.
         """
-        relations, _renames = relations_of(parsed)
-        entries = derive_mobility(groups, configurations, joints, relations,
+        entries = derive_mobility(groups, configurations, joints,
+                                  parsed.get("constraint_relations") or [],
                                   parsed.get("irrelevance") or [])
         by_config = {}
         for e in entries:
@@ -1209,19 +1295,22 @@ class S03BMobilityAndAssembly(Stage):
         # S-4 canonical physical truth first, then the legacy mobility checks.
         # The two are different questions and are kept apart deliberately.
         out = self._s4_physical_problems(parsed, inputs)
-        relations, _renames = relations_of(parsed)
+        out.extend(self._s5_mobility_problems(parsed, inputs))
+        relations = parsed.get("constraint_relations") or []
         if not relations:
-            out.append("no blocking relation: nothing in this mechanism is held")
+            out.append("nothing in this mechanism is held: no constraint relation")
         incomplete = []
         for r in relations:
-            absent = [f for f in BLOCKING_REQUIRED
-                      if f != "configurations" and not str(r.get(f) or "").strip()]
-            if not r.get("_dofs"):
-                absent.append("dofs")
+            absent = [f for f in ("retained_group", "driver")
+                      if not str(r.get(f) or "").strip()]
+            if not r.get("blocked_dofs"):
+                absent.append("blocked_dofs")
+            if not (r.get("provider_body") or r.get("provider_reaction_site")):
+                absent.append("a provider")
             if absent:
                 incomplete.append("%s missing %s" % (r.get("id"), ", ".join(absent)))
         if incomplete:
-            out.append("%d blocking relation(s) incomplete: %s"
+            out.append("%d constraint relation(s) incomplete: %s"
                        % (len(incomplete), "; ".join(incomplete[:5])
                           + ("; ..." if len(incomplete) > 5 else "")))
         for i in parsed.get("irrelevance", []):

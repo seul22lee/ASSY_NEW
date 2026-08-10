@@ -255,8 +255,13 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
             parsed = json.loads(outb.raw_response or "{}")
         except Exception:                                           # noqa: BLE001
             parsed = {}
+        # S-5: mobility derives from the canonical ConstraintRelations now. The
+        # legacy parse survives only to RECORD what a pre-migration recording
+        # contained, which is S-9 corpus information and feeds no derivation.
         relations, renames = relations_of(parsed)
-        rec["blocking_relations_authored"] = len(relations)
+        rec["legacy_blocking_relations_in_response"] = len(relations)
+        rec["constraint_relations_authored"] = len(
+            parsed.get("constraint_relations") or [])
         rec["field_renames_bound"] = len(renames)
         rec["rename_examples"] = sorted(set(renames))[:6]
         groups = [g["entity_id"] for g in state.family("RigidGroup")]
