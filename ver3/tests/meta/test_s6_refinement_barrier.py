@@ -143,9 +143,11 @@ class TestRefinementBarrier(_Barrier):
             self.assertTrue(produced, family)
             for e in produced:
                 self.assertEqual("STANDING", e.get("_validity"), e["entity_id"])
-                self.assertIn("ENV-0A", e.get("_premises") or [],
-                              "%s does not rest on the arrangement it realized"
-                              % e["entity_id"])
+        # The occupancy is what the revised extent was swept into, so it is what
+        # names it. The coordinates do not: they are not computed from any box.
+        self.assertIn("ENV-0A",
+                      state.entities["SWV-TRN-A-RGP-G0A"].get("_premises") or [])
+        self.assertEqual(BIG, state.entities["ENV-0A"]["extent"]["half_extent"])
 
     def test_R6_no_swept_volume_from_old_geometry_can_remain_current(self):
         """The exact defect. It used to be STANDING, with a hull four times too
@@ -177,9 +179,14 @@ class TestRefinementBarrier(_Barrier):
         self.revise(state, Op("SUPERSEDE", "Envelope", "ENV-0A",
                               {"extent": {"half_extent": BIG, "centre": [0, 0, 0]}},
                               "test", reason="a later geometric finding"))
-        for family in ("State", "Transition", "SweptVolume"):
-            for e in state.family(family):
-                self.assertEqual("STALE", e.get("_validity"), e["entity_id"])
+        for e in state.family("SweptVolume"):
+            self.assertEqual("STALE", e.get("_validity"), e["entity_id"])
+        # And a change to what the coordinates ARE reaches them and the occupancy
+        # that swept between them - the other half of the same rule.
+        self.revise(state, Op("SUPERSEDE", "State", "STA-CFG-C1A",
+                              {"joint_coordinates": {"JNT-A": 12}}, "test",
+                              reason="the endpoint moved"))
+        self.assertEqual("STALE", state.entities["TRN-A"].get("_validity"))
 
     def test_R8_a_refinement_on_one_branch_leaves_the_other_alone(self):
         state, invs = self.upto_s04a((("A", 2, 2), ("B", 1, 3)))

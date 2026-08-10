@@ -29,11 +29,12 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from ..state.authority import thaw as _thaw
 from ..state.patch import Op
-from .base import Stage
+from .base import Stage, carry_invocation_premises
 
 AXIS_INDEX = {"X": 0, "Y": 1, "Z": 2}
 
@@ -117,9 +118,11 @@ def rotate_about_axis(box: Tuple[List[float], List[float]], axis: str,
 def sample(a: float, b: float, n: int) -> List[float]:
     """Uniform samples INCLUDING interior points.
 
-    Endpoint-only sampling is refused by the contract because it is the most
-    effective way to make an unbuildable mechanism look correct: the ends are
-    exactly where a designer has already checked.
+    Interior points are what make a sweep more than a pair of poses, and the ends
+    are exactly where a designer has already checked - so a computation that
+    evaluates only them is weak evidence. It is not FORBIDDEN evidence: the level
+    records which was done, and whether it suffices belongs to the claim being
+    made, not to the sampler.
     """
     n = max(int(n), 3)
     return [a + (b - a) * i / float(n - 1) for i in range(n)]
@@ -257,7 +260,8 @@ class S04AEnvelopeAndReach(Stage):
         if scale.get("basis"):
             ops.append(Op("CREATE", "ReferenceScale", "SCL-%s" % branch, {
                 "basis": scale.get("basis"), "absolute": scale.get("absolute"),
-                "note": scale.get("note")}, prov))
+                "note": scale.get("note"),
+                "commitment_class": self.COMMITMENT_CLASS}, prov))
             premises = ["SCL-%s" % branch]
         for e in parsed.get("envelopes", []):
             ops.append(Op("CREATE", "Envelope", e["id"], {
@@ -302,6 +306,10 @@ class S04AEnvelopeAndReach(Stage):
         known = {e.get("entity_id") for fam in view.values() if isinstance(fam, list)
                  for e in fam if isinstance(e, dict)}
         prov = "s04a:arrangement"
+        # The basis, and only the basis. A region volume and an insertion
+        # direction are COORDINATES on entities s03 owns, so withdrawing the
+        # basis costs them their meaning - and nothing else s04a produced is a
+        # premise of them.
         premises = (["SCL-%s" % _branch(inputs)]
                     if (parsed.get("scale") or {}).get("basis") else [])
         ops: List[Op] = []
@@ -470,39 +478,98 @@ class S04BPlacementAndMotion(Stage):
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
         ops: List[Op] = []
         prov = "s04b:placement"
-        # THE ARRANGEMENT THIS REALIZATION EXTENDS. Recorded as the premise it
-        # is, so superseding a committed extent costs every coordinate that
-        # rested on it its unqualified authority through the ordinary FA-5 path.
-        premises = self._spatial_premises((inputs or {}).get(self.context_key) or {})
+        view = (inputs or {}).get(self.context_key) or {}
         for st in parsed.get("state_coordinates", []):
+            coords = st.get("coordinates", {})
             ops.append(Op("CREATE", "State", "STA-%s" % st["configuration"], {
                 "name": st["configuration"],
                 "configuration": st["configuration"],
-                "joint_coordinates": st.get("coordinates", {})},
-                prov, premise_refs=list(premises)))
+                "joint_coordinates": coords},
+                prov, premise_refs=self._state_premises(
+                    view, st["configuration"], coords)))
         for t in parsed.get("transitions", []):
             ops.append(Op("CREATE", "Transition", t["id"], {
                 "from_state": "STA-%s" % t["from_configuration"],
                 "to_state": "STA-%s" % t["to_configuration"],
                 "path": {"moving_groups": t.get("moving_groups", [])},
                 "changed_coordinates": t.get("changed_coordinates", [])},
-                prov, premise_refs=list(premises)))
+                prov, premise_refs=self._transition_premises(view, t)))
         return ops
 
-    def _spatial_premises(self, view) -> List[str]:
-        """The s04a arrangement values this realization actually rests on.
+    # ------------------------------------------------------ dependency graph
+    #
+    # A PREMISE IS REQUIRED IFF CHANGING IT CAN CHANGE THIS PRODUCED VALUE, and
+    # `_propagate` is ONE HOP: it stales the direct dependents of the entity that
+    # changed and stops there. So every derived value must name every fact it was
+    # actually made from - a chain of individually-correct links does not carry
+    # staleness along itself.
+    #
+    # This replaces one list - every envelope in the view, on every s04b output -
+    # which was wrong in both directions at once. TOO MUCH: a state's coordinates
+    # are angles and distances computed from no extent at all, and a sweep reads
+    # exactly one body's box, so resizing an unrelated body staled realizations it
+    # cannot affect, which teaches a reader to ignore STALE. TOO LITTLE: none of
+    # them named the Configuration, the endpoint States, the Transition or the
+    # moving RigidGroup, so changing an endpoint coordinate left the swept
+    # occupancy STANDING with a hull computed from the coordinate just replaced.
 
-        The envelopes and the basis they are expressed in, from THIS
-        invocation's view - so a placement carries the arrangement it extended,
-        and superseding that arrangement costs the placement its unqualified
-        authority through the ordinary FA-5 path. Nothing new records it: this is
-        `Op.premise_refs`, the same substrate everything else uses.
+    def _scale_premise(self, view) -> List[str]:
+        """The basis the numbers are in. A premise of every s04 spatial value,
+        which is the contract's own words: "a coordinate has no meaning without
+        the basis it is expressed in"."""
+        return sorted({r["entity_id"] for r in (view.get("ReferenceScale") or [])
+                       if isinstance(r, dict) and r.get("entity_id")})
+
+    def _state_premises(self, view, configuration, coordinates) -> List[str]:
+        """What a realized configuration rests on.
+
+        The Configuration it realizes - withdraw it and these coordinates realize
+        nothing - and the Joints they are coordinates OF. NOT the envelopes: a
+        joint angle is not computed from a body's extent, and saying it was makes
+        an unrelated resize look like it invalidated the kinematics.
         """
-        out = [e["entity_id"] for e in (view.get("Envelope") or [])
-               if isinstance(e, dict) and e.get("entity_id")]
-        out += [r["entity_id"] for r in (view.get("ReferenceScale") or [])
-                if isinstance(r, dict) and r.get("entity_id")]
-        return sorted(set(out))
+        out = {configuration} if configuration else set()
+        out |= {j for j in (coordinates or {}) if isinstance(j, str)}
+        return sorted(out | set(self._scale_premise(view)))
+
+    def _transition_premises(self, view, t) -> List[str]:
+        """Its endpoints, what moves, and which coordinates it says change."""
+        out = {"STA-%s" % t.get("from_configuration"),
+               "STA-%s" % t.get("to_configuration")}
+        out |= {g for g in (t.get("moving_groups") or []) if isinstance(g, str)}
+        out |= {j for j in (t.get("changed_coordinates") or []) if isinstance(j, str)}
+        return sorted(out | set(self._scale_premise(view)))
+
+    def _sweep_premises(self, view, t, group, joint_id, envelope_id) -> List[str]:
+        """Exactly what `sweep_hull` read to produce this occupancy.
+
+        The transition and the moving group it is about, both endpoint states
+        whose coordinates it swept between, the driving joint - whose type, axis
+        and frame origin decide the geometry - and the ONE envelope whose box was
+        swept. Change any of them and this hull is wrong; change any other
+        envelope and it is not.
+        """
+        out = {t.get("id"), group, joint_id, envelope_id,
+               "STA-%s" % t.get("from_configuration"),
+               "STA-%s" % t.get("to_configuration")}
+        return sorted({x for x in out if isinstance(x, str) and x}
+                      | set(self._scale_premise(view)))
+
+    def _coordinate_premises(self, view) -> List[str]:
+        """What a coordinate added to somebody else's entity rests on.
+
+        THE BASIS, AND NOT THE EXTENTS. Premises recorded on an EXTEND land on
+        the ENTITY - `_merge_premises` has no field granularity - so whatever is
+        named here decides the standing of the whole Joint. The basis belongs:
+        withdraw it and `frame_origin` is a triple of numbers meaning nothing,
+        which is the contract's own words and the property ADR-001 pins. The
+        other bodies' extents do not: resizing one would then say the TOPOLOGY
+        had lost authority because a body got bigger.
+
+        What depends on the placement geometrically is the swept occupancy, and
+        it names the Joint and the one swept envelope directly.
+        """
+        return self._scale_premise(view)
 
     def refinement_operations(self, parsed, inputs, state) -> List[Op]:
         """Joint placement, and any supersession of the s04a arrangement.
@@ -521,7 +588,7 @@ class S04BPlacementAndMotion(Stage):
         known = {e.get("entity_id") for fam in view.values() if isinstance(fam, list)
                  for e in fam if isinstance(e, dict)}
         prov = "s04b:placement"
-        premises = self._spatial_premises(view)
+        premises = self._coordinate_premises(view)
         ops: List[Op] = []
         for p in parsed.get("joint_placements") or []:
             target = p.get("joint")
@@ -599,12 +666,13 @@ class S04BPlacementAndMotion(Stage):
         view = inputs.get(self.context_key) or {}
         boxes, gb = _view_boxes(view), {g["entity_id"]: g.get("body")
                                         for g in (view.get("RigidGroup") or [])}
+        envelope_of = {e.get("body"): e.get("entity_id")
+                       for e in (view.get("Envelope") or []) if isinstance(e, dict)}
         joints = {j["entity_id"]: j for j in (view.get("Joint") or [])}
         origins = {p.get("joint"): p.get("origin")
                    for p in (parsed.get("joint_placements") or [])}
         coords = {st.get("configuration"): (st.get("coordinates") or {})
                   for st in (parsed.get("state_coordinates") or [])}
-        premises = self._spatial_premises(view)
         ops: List[Op] = []
         for t in parsed.get("transitions") or []:
             ca = coords.get(t.get("from_configuration")) or {}
@@ -628,14 +696,20 @@ class S04BPlacementAndMotion(Stage):
                                "occupancy": {"aabb": swept["hull"]},
                                "fidelity": swept["motion_evidence_level"]},
                               "s04b:computation",
-                              premise_refs=[jid] + list(premises)))
+                              premise_refs=self._sweep_premises(
+                                  view, t, group, jid, envelope_of.get(body))))
         # THE EVIDENCE LIVES IN ONE PLACE, on the SweptVolume the computation
         # produced. Copying it onto the Transition as well would put the same
         # claim in two records that can disagree - and the Transition is where
         # the constant used to live, which is exactly the shape being removed. A
         # transition with no SweptVolume was not evidenced, and that is readable
         # without a field saying so.
-        return ops
+        #
+        # The invocation premise last, as everywhere else: this occupancy was
+        # computed to evidence ONE candidate's motion, so withdrawing that
+        # candidate costs it standing. `run` passes only `to_operations` through
+        # this, so a derived value has to say it itself.
+        return carry_invocation_premises(ops, self.invocation_premises(inputs))
 
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
         out: List[str] = []
@@ -978,16 +1052,59 @@ def motion_evidence_check(state) -> List[str]:
                 "MOTION_EVIDENCE_OVERSTATED: %s claims %s; %d interior sample(s) "
                 "support %s. The level follows the computation, never the reverse"
                 % (v["entity_id"], level, interior, implied))
-        if interior < 1:
-            problems.append("SAMPLING_ENDPOINT_ONLY: %s was evidenced at its "
-                            "endpoints, which is where a designer has already "
-                            "looked" % v["entity_id"])
+        # ENDPOINTS_ONLY is NOT reported as a defect. It is a level, and the
+        # record says which one: whether it is SUFFICIENT for a claim is an
+        # assurance question about that claim, and answering it here would be
+        # this check deciding how much evidence an unseen argument needs. What
+        # this check owes is that the level matches the computation, which is the
+        # comparison above.
     for t in state.standing("Transition"):
         if not ((t.get("path") or {}).get("moving_groups") or []):
             continue
         if t["entity_id"] not in evidenced:
             problems.append("MOTION_NOT_COMPUTED: %s moves something and no swept "
                             "occupancy was computed for it" % t["entity_id"])
+    return problems
+
+
+def spatial_commitment_check(state) -> List[str]:
+    """Every s04a spatial commitment carries the class it was committed at.
+
+    Read from `spatial_commitments` in the canonical contract, so the check and
+    the declaration cannot drift and a family added there is checked without
+    editing this. ENTITY-LEVEL commitments carry a class on the entity; FIELD-
+    LEVEL ones cannot - runtime has no per-field authority, and a field invented
+    to hold one would declare an enforcement that does not exist - so what is
+    checked for them is that the field is s04's to author and nobody else's,
+    which the boundary already enforces.
+    """
+    import yaml as _yaml
+    here = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(here, "..", "..", "contracts", "DESIGN_STATE_CONTRACT.yaml")
+    with open(os.path.abspath(path)) as fh:
+        doc = _yaml.safe_load(fh)
+    fams = dict(doc["entity_families"])
+    fams.update(doc.get("assurance_families") or {})
+    decl = doc.get("spatial_commitments") or {}
+    problems = []
+    for d in decl.get("entity_level") or []:
+        field = d["class_field"]
+        vocab = fams[d["family"]].get(field) or []
+        for e in state.standing(d["family"]):
+            if e.get(field) not in vocab:
+                problems.append(
+                    "SPATIAL_COMMITMENT_UNCLASSIFIED: %s carries %s=%r, which is "
+                    "not a commitment class; a value nothing may silently "
+                    "contradict has to say what it is"
+                    % (e["entity_id"], field, e.get(field)))
+    for d in decl.get("field_level") or []:
+        owner = (fams[d["family"]].get("extendable_fields") or {}).get(d["field"])
+        if owner != "s04":
+            problems.append(
+                "SPATIAL_COMMITMENT_NOT_ENFORCEABLE: %s.%s is declared an s04a "
+                "commitment and is extendable by %r; the only enforcement a "
+                "field-level commitment has is who may author it"
+                % (d["family"], d["field"], owner))
     return problems
 
 

@@ -304,19 +304,171 @@ Also observed and untouched: `S05_CONTRACT.required_inputs` still names
 
 ---
 
+## 13. ROOT-CAUSE SPATIAL LIFECYCLE PASS (baseline `d06e29b`)
+
+### 13.1 Root gaps, reproduced before editing
+
+**A.** `State.configuration` was written by the producer and declared nowhere:
+absent from `required_fields`, absent from `field_semantics`,
+`reference_spec("State", "configuration") → None`. The write boundary could not
+check it and the realization check read it as a bare string.
+
+**B/C.** The premise sets were wrong **in both directions at once**:
+
+```
+STA-CFG-C0A   ['CND-A', 'ENV-0A', 'ENV-1A', 'SCL-CND-A']
+TRN-A         ['CND-A', 'ENV-0A', 'ENV-1A', 'SCL-CND-A']
+SWV-...       ['ENV-0A', 'ENV-1A', 'JNT-A', 'SCL-CND-A']
+```
+
+Every output carried every envelope in the view — including `ENV-1A`, the other
+body's, which no computation here reads — and **none** named the Configuration,
+the endpoint States, the Transition or the moving RigidGroup.
+
+**D.** With `_propagate` one-hop, that left this:
+
+| change | sweep | state | transition |
+|---|---|---|---|
+| endpoint State coordinate | **STANDING** | STANDING | STANDING |
+| driving Joint axis | STALE | STANDING | STANDING |
+| Transition moving groups | **STANDING** | STANDING | STANDING |
+| Configuration withdrawn | **STANDING** | **STANDING** | STANDING |
+| moving RigidGroup | **STANDING** | STANDING | STANDING |
+
+An occupancy swept between coordinates that had just been replaced stayed
+current.
+
+**E.** Only `Envelope` had an executable commitment class. `ReferenceScale`,
+`FunctionalRegion.volume` and `AssemblyStep.insertion_direction` had none.
+
+**F.** Contract contradictions: **duplicate `S04B-C9`**; `S04B-C2` and the
+SweptVolume rule both declaring endpoint-only sampling **REFUSED**; a Transition
+rule still saying "Sampling is DECLARED" after sampling left the family; and
+`s04a.owned_decisions.creates` claiming "endpoint State poses", a producer that
+never existed.
+
+### 13.2 The canonical dependency graph
+
+`_propagate` is **one hop**, so a derived value that names only the nearest link
+inherits nothing from behind it. Each value names every fact it was made from:
+
+```
+State        Configuration it realizes · the Joints its coordinates are OF · ReferenceScale
+Transition   both endpoint States · the RigidGroups it moves · the Joints it declares changed · ReferenceScale
+SweptVolume  the Transition · the moving RigidGroup · both endpoint States ·
+             the driving Joint · the ONE Envelope whose box was swept · ReferenceScale
+placement    ReferenceScale only — see 13.4
+```
+
+Plus the invocation premise on all of them, which is lineage (S-5), never a
+substitute for a computational premise.
+
+**Not** the other bodies' envelopes, and **not** the extents under a joint angle:
+a coordinate is not computed from a box, and saying it was made an unrelated
+resize look like it invalidated the kinematics — which teaches a reader to ignore
+STALE.
+
+### 13.3 Commitment representation
+
+`spatial_commitments` in the canonical contract, in two kinds because s04a
+authors two kinds:
+
+- **entity-level** — `Envelope`, `ReferenceScale` — carry `commitment_class` on
+  the entity;
+- **field-level** — `FunctionalRegion.volume`, `AssemblyStep.insertion_direction`
+  — **cannot**. Runtime has no per-field authority, and inventing a field to hold
+  one would declare an enforcement that does not exist. What is enforced is what
+  the boundary already enforces: the field is extendable by s04 and by no one
+  else, and a later change is a SUPERSEDE, which requires a reason.
+
+`spatial_commitment_check` reads that declaration — so a family added there is
+checked without editing code — and validates **vocabulary membership**, which a
+required-field rule never could: a class of `"x"` satisfies `required_fields` and
+means nothing. That is why `commitment_class` is in neither family's
+`required_fields`: it would move enforcement to a weaker place and oblige every
+fixture building one of these for an unrelated reason to carry a field it is not
+about.
+
+### 13.4 One correction inside this pass
+
+I first removed **all** premises from the field-level extensions, reasoning that
+premises on an EXTEND land on the entity and would stale an s03-owned Joint when
+an envelope changed. The ADR-001 replay failed, and it was right to: its frozen
+property is *"a coordinate has no meaning without its basis, so withdrawing the
+basis must cost every coordinate its unqualified authority."* The distinction I
+had missed is that the **basis** is a premise of the coordinate's meaning while
+another body's **extent** is not a premise of the origin at all. The placement
+extension names the scale and no extent.
+
+### 13.5 L1–L11
+
+| | claim | result |
+|---|---|---|
+| **L1** | Configuration withdrawn | its State STALE; the sibling's untouched |
+| **L2** | endpoint coordinate changed | Transition **and** SweptVolume STALE |
+| **L3** | driving Joint axis / frame_origin / class changed | SweptVolume STALE in all three |
+| **L4** | moving group's Envelope extent changed | SweptVolume STALE |
+| **L5** | an unrelated body's Envelope changed | State, Transition and SweptVolume all STANDING |
+| **L5b** | the ReferenceScale changed | all three STALE — the one genuinely universal premise, for the reason the contract states |
+| **L6** | branch B's envelope changed | B's sweep STALE, A's realization untouched |
+| **L7** | the premise set is **exactly** what reproduces the value | asserted as set equality, because a subset assertion cannot catch over-declaration and a superset cannot catch under-declaration |
+| **L8** | each premise is load-bearing | five facts changed one at a time; each stales the occupancy |
+| **L9** | a visible fact that was not used | `ENV-1A` is in the view and in no premise set |
+| **L10** | same-invocation revision | the barrier still fires, patch is `["Envelope"]` alone, and the pre-revision occupancy stales |
+| **L11** | prismatic | identical premise set, same code path, different geometry |
+
+**Mutation checks:** restoring the blanket envelope premise (4 failures), the
+sweep naming only the joint (4), State forgetting its Configuration (2), and the
+basis leaving the placement extension (2 — including ADR-001).
+
+### 13.6 Contract corrections
+
+`State.configuration` typed and required · dependency rules stated on State,
+Transition and SweptVolume · `spatial_commitments` declared ·
+`ReferenceScale.commitment_class` vocabulary · endpoint-only **no longer refused**
+anywhere, in the contract, the check or the sampler — it is a level, and whether
+it suffices is an assurance question (S-8 / U-9) · the Transition sampling rule
+removed · duplicate `S04B-C9` renumbered to C12–C14 · `s04a.owned_decisions`
+corrected to what it creates and extends.
+
+### 13.7 Newly discovered, with owners
+
+- **`S05_CONTRACT.required_inputs` still names `blocking_relations`** — owner
+  **S-8**; no live path reads it. Untouched.
+- **`sample()` refuses fewer than 3 poses** while `sweep_hull` supports 2 for
+  ENDPOINTS_ONLY. `sweep_hull` handles the 2-pose case itself, so no current
+  behaviour is wrong; the floor inside `sample` is now redundant rather than
+  contradictory. Owner **S-8** if it ever matters. Untouched.
+
+### 13.8 Closure audit
+
+1 machine-identifiable commitments ✅ · 2 correct granularity ✅ · 3 canonical
+Configuration relation ✅ · 4 actual premises ✅ (L7) · 5 used premise stales
+exactly ✅ (L1–L4, L8) · 6 unrelated leaves current ✅ (L5) · 7 stale endpoints
+cannot support a standing sweep ✅ (L2) · 8 old-envelope computation cannot
+masquerade ✅ (L4, L10) · 9 across branches and joint types ✅ (L6, L11) · 10
+contracts describe the implementation ✅ (13.6) · 11 barrier preserved ✅ (L10 and
+the R-suite) · 12 S-7/S-8/S-9 outside ✅.
+
+Regression, **secondary**: RUN 907 · PASS 907 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
 
-> **S-6 VERIFIED CLOSED — REFINEMENT BARRIER AND RECOMPUTATION LIFECYCLE
-> CONSISTENT.**
+> **S-6 VERIFIED CLOSED — SPATIAL COMMITMENT, REALIZATION AND DERIVED-EVIDENCE
+> LIFECYCLE CONSISTENT.**
 >
-> S04 authors its own conclusions, so a direct invocation and a runner run produce
-> the same canonical state. s04a commits an arrangement with a class; s04b extends
-> it, or supersedes it with a geometric reason — and a supersession is a barrier,
-> so the realization is withheld until it can be reasoned from the arrangement the
-> design now holds, and recomputed from it. No occupancy derived from replaced
-> geometry remains current. A joint without a usable axis computes nothing.
-> Declared distinctness and declared coordinate changes are checked against the
-> coordinates. The motion evidence level is an output of the sweep. Load paths are
-> read through Interfaces.
+> s04a commits an arrangement whose every value declares the class it is
+> committed at. s04b extends it, or supersedes it with a geometric reason — and a
+> supersession is a barrier, so the realization is withheld until it can be
+> reasoned from the arrangement the design now holds. Every current spatial value
+> names exactly the facts it was made from: a State its Configuration, its joints
+> and the basis; a Transition its endpoints, what moves and what changes; a
+> SweptVolume everything the sweep read. Changing one of them stales exactly what
+> it can have made wrong, and changing anything else leaves the rest current. No
+> occupancy derived from replaced geometry remains current, a joint without a
+> usable axis computes nothing, and the motion evidence level is an output of the
+> computation rather than a claim about it.
 >
 > S-3, S-4 and S-5 are unchanged and verified so. **Impl S-7 has NOT begun.**

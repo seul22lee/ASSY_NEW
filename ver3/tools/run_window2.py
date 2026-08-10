@@ -51,6 +51,7 @@ from ver3.assy_v3.stages.s04_envelope_and_motion import (                   # no
     S04AEnvelopeAndReach, S04BPlacementAndMotion, assembly_path_check,
     configuration_interference_check, configuration_realization_check,
     envelope_coverage_check, joint_frame_check, joint_geometry_check,
+    spatial_commitment_check,
     load_path_reaction_check, motion_evidence_check, region_occupancy_check,
     selection_gate_check, swept_clearance_check, transition_realization_check)
 from ver3.assy_v3.state import DesignState                                  # noqa: E402
@@ -96,6 +97,7 @@ S04_CHECKS = (
     ("joint_geometry", joint_geometry_check),
     ("configuration_interference", configuration_interference_check),
     ("region_occupancy", region_occupancy_check),
+    ("spatial_commitment", spatial_commitment_check),
     ("joint_frame", joint_frame_check),
     ("motion_evidence", motion_evidence_check),
     ("configuration_realization", configuration_realization_check),

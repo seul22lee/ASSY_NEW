@@ -98,7 +98,11 @@ s04a:
     - "whether each assembly step's access side is geometrically available"
 
   owned_decisions:
-    creates: [Envelope, endpoint State poses at PROVISIONAL maturity, FunctionalRegion volumes]
+    # S-6 / U-7: s04a creates NO State. It sizes bodies; s04b realizes
+    # configurations in coordinates. The claim described a producer that never
+    # existed, and `State.configuration` now makes the real relation typed.
+    creates: [Envelope, ReferenceScale, ReachResult, EliminationRecord]
+    extends: [FunctionalRegion volume, AssemblyStep insertion_direction]
     also_owns: ["the elimination of a candidate on geometric grounds"]
 
   absolute_scale_rule: >
@@ -262,18 +266,25 @@ s04b:
         record. A level the method cannot support - it unions discrete poses, so
         never SWEPT or CONTINUOUS - may not be claimed by declaring it.
     - id: S04B-C2
-      check: "interior samples exist; endpoint-only sampling is REFUSED"
-    - id: S04B-C9
+      claim_class: BOOKKEEPING
+      check: "the sampling record states how many poses were evaluated and how many were interior"
+      not_a_refusal: >
+        S-6 / U-7. This read "endpoint-only sampling is REFUSED". Endpoint-only
+        is a LEVEL - ENDPOINTS_ONLY - and refusing it categorically was a rule
+        about density pretending to be a rule about truth, sitting beside a
+        declaration written from a constant. Whether that level suffices belongs
+        to the claim being made; assurance owns that question (S-8 / U-9).
+    - id: S04B-C12
       claim_class: ENGINEERING_CONSEQUENCE
       check: "every configuration that DECLARES a distinguishing basis realizes it in coordinates that differ from the siblings it names"
       conditional_on_a_premise: >
         Never "all configurations must differ", which would be a rule about
         products. The premise is Configuration.distinguishing_basis, authored by
         s03; a mechanism that declares none is not asked to satisfy anything.
-    - id: S04B-C10
+    - id: S04B-C13
       claim_class: ENGINEERING_CONSEQUENCE
       check: "a transition's declared changed coordinates are exactly the ones its endpoint states differ on"
-    - id: S04B-C11
+    - id: S04B-C14
       claim_class: PROVENANCE_INTEGRITY
       check: "a placed joint declares an axis that names a coordinate; an origin without a usable axis supports no motion claim and no default is supplied"
       rationale: "NEG-BM-003-006; endpoint-only evidence is the most effective way to make an unbuildable mechanism look correct"

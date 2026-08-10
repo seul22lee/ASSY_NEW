@@ -180,27 +180,31 @@ class TestCommitmentAndRefinement(_S04Chain):
         for e in state.family("Envelope"):
             self.assertIn(e.get("commitment_class"), classes, e["entity_id"])
 
-    def test_G3_superseding_an_arrangement_stales_the_realization(self):
-        """The whole of U-7 in one assertion. The realization cited the envelopes
-        it extended, so revising one costs it unqualified authority."""
+    def test_G3_superseding_an_arrangement_stales_what_it_computed(self):
+        """SUPERSEDES the blanket version of this test.
+
+        It used to require the State and the Transition to stale too, because
+        every s04b output carried every envelope in the view. They do not depend
+        on any extent: a joint angle is not computed from a body's box, and
+        saying it was made an unrelated resize look like it invalidated the
+        kinematics. What an extent change reaches is the OCCUPANCY that was swept
+        from it - and that is the evidence, so that is what must lose authority.
+        """
         state, res = self.spatial()
-        mex = [t for t in state.family("Transition")]
-        self.assertTrue(mex)
-        for t in mex:
-            self.assertEqual("STANDING", t.get("_validity"))
-        env = "ENV-0A"
-        self.assertIn(env, state.entities["STA-CFG-C0A"]["_premises"])
-        self.revise(state, Op("SUPERSEDE", "Envelope", env,
+        for v in state.family("SweptVolume"):
+            self.assertEqual("STANDING", v.get("_validity"))
+        self.assertIn("ENV-0A", state.entities["SWV-TRN-A-RGP-G0A"]["_premises"])
+        self.assertNotIn("ENV-0A", state.entities["STA-CFG-C0A"]["_premises"])
+        self.revise(state, Op("SUPERSEDE", "Envelope", "ENV-0A",
                               {"extent": {"half_extent": [2, 2, 2],
                                           "centre": [0, 0, 0]}}, "test",
                               reason="the body does not fit at the size committed"))
-        for t in state.family("Transition"):
-            self.assertEqual("STALE", t.get("_validity"),
-                             "a realization survived its arrangement changing")
-        self.assertEqual("STALE", state.entities["STA-CFG-C0A"].get("_validity"))
         self.assertTrue(state.family("SweptVolume"))
         for v in state.family("SweptVolume"):
-            self.assertEqual("STALE", v.get("_validity"))
+            self.assertEqual("STALE", v.get("_validity"),
+                             "an occupancy survived the extent it was swept from")
+        self.assertEqual("STANDING", state.entities["STA-CFG-C0A"].get("_validity"),
+                         "a joint angle was staled by a body being resized")
 
     def test_an_unrelated_supersession_does_not_stale_it(self):
         state, _ = self.spatial((("A", 2, 2), ("B", 1, 3)))

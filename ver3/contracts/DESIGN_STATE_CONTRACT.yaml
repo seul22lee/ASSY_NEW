@@ -503,15 +503,29 @@ entity_families:
 
   State:
     field_semantics:
+      # S-6 / U-7. WHICH CONFIGURATION THIS REALIZES. The producer wrote it and
+      # nothing declared it, so the write boundary could not check it and Source
+      # A could not see it. A State exists to realize one Configuration; that is
+      # a typed relation, not a label.
+      configuration:
+        kind: reference
+        target: Configuration
+        cardinality: one
+        resolvable: false
       joint_coordinates:
         kind: spatial
         frame: Joint.frame_origin
     owned_by: s04
     purpose: "A named configuration of the mechanism."
-    required_fields: [entity_id, name, joint_coordinates]
+    required_fields: [entity_id, name, configuration, joint_coordinates]
     authoritative_geometry_fields: [body_poses, swept_volumes]
     rules:
       - "Joint coordinates are unit-bearing values, not ordinal intervals (R-03, R-05)."
+      - >
+        S-6 / U-7 DEPENDENCY. A State rests on the Configuration it realizes, on
+        the Joints its coordinates are coordinates OF, and on the ReferenceScale
+        they are expressed in - and on nothing else. It is not computed from any
+        body's extent, so an envelope changing does not make a joint angle wrong.
 
   Transition:
     field_semantics:
@@ -905,6 +919,9 @@ entity_families:
     owned_by: s04
     authority_class: AUTHORITATIVE
     purpose: "The basis in which every s04 spatial value is expressed."
+    # S-6 / U-7. An s04a spatial COMMITMENT like the envelopes are, and carried
+    # the same way - see `spatial_commitments`.
+    commitment_class: [PROVISIONAL, COMPARABLE, AUTHORITATIVE, OVERTURNABLE_WITH_REASON]
     required_fields:
       - entity_id
       - basis
@@ -1565,7 +1582,7 @@ assurance_families:
         note: this field IS the frame declaration other spatial values cite
     owned_by: s04
     purpose: "A body's provisional extent. Conservative: no-overlap is a proof, overlap is not."
-    required_fields: [entity_id, body, extent, frame, maturity, commitment_class]
+    required_fields: [entity_id, body, extent, frame, maturity]
     maturity: [PROVISIONAL, AUTHORITATIVE]
     # S-6 / U-7. Freeze section 7: a commitment carries a CLASS, and a later
     # stage may refine within it or supersede it with an explicit reason, never
@@ -1739,6 +1756,57 @@ superseded_legacy_producers:
       now: "s02 authors PhysicalEffectObligation; s03b authors PhysicalInteraction"
       closed_by: "S-4 / U-5"
       residual: none
+
+# ---------------------------------------------------------------- S-6 / U-7
+spatial_commitments:
+  purpose: >
+    WHICH VALUES s04a COMMITS, at what class, and how a later pass may change
+    them. Declared here because "the arrangement is a commitment" has to be
+    answerable by code, not only by prose - a downstream reader asks this
+    structure which values it may not silently contradict.
+  enforced_by: >
+    `spatial_commitment_check`, which reads THIS declaration - so a family added
+    here is checked without editing code, and the check and the contract cannot
+    drift. It is the single enforcement point for both kinds, and it validates
+    VOCABULARY MEMBERSHIP, which a required-field rule never could: a class of
+    "x" would satisfy `required_fields` and mean nothing. That is also why
+    `commitment_class` is not in either family's required_fields - putting it
+    there would move enforcement to a weaker place and oblige every fixture that
+    builds one of these for an unrelated reason to carry a field it is not about.
+  granularity_rule: >
+    A commitment is a VALUE, and s04a authors two kinds. Some are whole entities
+    it creates, and those carry `commitment_class` as a required field - the
+    class is on the thing. Others are single FIELDS it adds to an entity another
+    stage owns, and those cannot carry a class of their own: runtime has no
+    per-field authority, and inventing a field to hold one would declare an
+    enforcement that does not exist. They are listed here instead, and what IS
+    enforced for them is what the boundary already enforces - the field is
+    extendable by s04 and by no one else, and changing it afterwards is a
+    SUPERSEDE, which requires a reason.
+  entity_level:
+    - family: Envelope
+      class_field: commitment_class
+      committed_by: s04a
+      refinement: "s04b EXTENDs, or SUPERSEDEs with a geometric reason"
+    - family: ReferenceScale
+      class_field: commitment_class
+      committed_by: s04a
+      refinement: >
+        SUPERSEDE with a reason. Every s04 spatial value declares it as a
+        premise, so replacing it costs all of them their unqualified authority -
+        the correct consequence of changing what the numbers mean.
+  field_level:
+    - family: FunctionalRegion
+      field: volume
+      committed_by: s04a
+      class: COMPARABLE
+      enforced_by: "extendable_fields.volume == s04; a later change is a SUPERSEDE with a reason"
+    - family: AssemblyStep
+      field: insertion_direction
+      committed_by: s04a
+      class: COMPARABLE
+      enforced_by: "extendable_fields.insertion_direction == s04; a later change is a SUPERSEDE with a reason"
+
 
 legacy_producers:
   rule: >
