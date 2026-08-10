@@ -565,15 +565,160 @@ Assembly-relevant physical interactions; the R-A applicability treatment beyond
 what s02/s03b responsibilities already require; and the corpus refresh, which needs
 an authorized live run. S-5/S-6/S-7/S-8/S-9 ownership unchanged.
 
-## 8. Impl S-5 has NOT begun.
+## 8. S-4 EXIT AUDIT
+
+Baseline for this pass: `f548df4`.
+
+### 8.1 Gap table
+
+| issue | current behaviour at f548df4 | S-4 required | owner | action |
+|---|---|---|---|---|
+| S02 PEO producer | authors it | authors it | S-4 | none |
+| S02 RSR producer | authors it | authors it | S-4 | none |
+| `PEO.between_roles` | `role_name`, aligned in contract, producer, prompt, tests | role names | S-4 | none |
+| `LoadCase → RSR` | typed `reacted_at_site` | typed | S-4 | none |
+| S03B PI / CR / LoadPath producers | all three author | all three | S-4 | none |
+| reaction/support representation | symbolic: RSR + provider + closure | symbolic | S-4 | none |
+| **every S-4 reference** | **`resolvable: true` — a named referent need not exist** | must resolve when authored | **S-4** | **MUST_FIX — done, §8.2** |
+| **S03B physical completeness** | **no check: silence about a given demand was indistinguishable from an answer** | detect unanswered demand without inventing | **S-4** | **MUST_FIX — done, §8.3** |
+| prompt / schema / parser / ops | aligned (`provider_reaction_site`, hop wording, termination all consistent) | aligned | S-4 | verified |
+| R-A applicability | bounded requirement met | bounded only | S-4 | resolved, §8.4 |
+| legacy `blocking_relations` | isolated as mobility compatibility input | not canonical truth | S-5 | DEFER_S5 |
+| 21 affected recordings | stale-prompt + pre-migration | operational debt | S-9 | DEFER_S9 |
+
+Two MUST_FIX_S4 items; both fixed in this pass. Everything else is either done or
+has an owner.
+
+### 8.2 MUST_FIX — the S-4 references did not have to resolve
+
+Every reference S-4 added or touched declared `resolvable: true`, which by this
+contract's own words means *"an unresolved value is legal"*. That confused
+**optional field** with **unresolved referent**: the field may be omitted, but a
+site, hop, provider or interface that IS named must exist. A load path terminating
+at a reaction site nothing declared has not been closed, and
+`ConstraintRelation`'s own rule already said it — *"a provider is a resolvable
+reference or the relation is incomplete."*
+
+Flipped to must-resolve: `LoadCase.reacted_at_site`, `LoadPath.ordered_hops`,
+`LoadPath.terminates_at`, `ConstraintRelation.provider_reaction_site`,
+`provider_site`, `provider_body`, `PhysicalInteraction.at_interface`,
+`maintaining_interaction`, `PhysicalEffectObligation.under_load_case`,
+`ReactionSiteRequirement.scenario`.
+
+Each is falsified individually: naming a referent that does not exist is refused
+with `DANGLING_REF`; omitting the optional field is accepted. No S-3 runtime
+semantics changed — the rule *false ⇒ enforce* is untouched; only the declarations
+moved.
+
+**Consequence worth recording: no field in the corpus declares `resolvable: true`
+any more.** Every reference a producer authors either names something that exists
+or is created beside it in the same patch. `REF_CANON_06` no longer counts which
+values the corpus uses; it asserts the runtime honours the declaration in **both**
+directions, exercising the `true` branch against a synthetic declaration so the
+semantics stay tested rather than merely unused.
+
+### 8.3 MUST_FIX — S03B physical completeness
+
+Nothing detected a response that was given physical demand and returned neither a
+realization nor a statement that it was open. Added
+`_physical_demand_problems`, which compares the consumer view against the response:
+
+- a `PhysicalEffectObligation` in the view is discharged by an authored interaction
+  **or** named in `unresolved.blocks`;
+- a `LoadCase` in the view has a load path **or** a recorded reason it has none;
+- a path with no `terminates_at` is recorded open — *"a path that does not reach a
+  declared reaction site is an OPEN path, which is a finding and not a silence."*
+
+It uses `unresolved[]`, which already existed; no new status was invented. It
+**reports and does not repair** — asserted by a test that the parsed response is
+byte-identical afterwards. Whether the realization is physically *correct* is not
+asked: that is engineering establishment, and it is S-8's.
+
+### 8.4 R-A — resolved for S-4, remainder deferred
+
+The bounded requirement is met: an s02 physical demand is traceable to its upstream
+reason (`PEO → addresses_obligations → Obligation → derived_from_requirements →
+Requirement`, plus `under_load_case` and the scenario behind the reaction site);
+s03b receives the design-wide demand through ConsumerView; and unrelated material is
+not made branch-local for visibility — the demand reaches the branch only through
+authored references, carrying no premises. **R-A is resolved for S-4.** Any broader
+applicability question is **DEFER_S8**, not an S-4 expansion.
+
+### 8.5 `blocking_relations` — S-5 debt, stated
+
+`ConstraintRelation` is the canonical physical truth. `blocking_relations[]`
+survives only as compatibility input to the deterministic DOF expansion, is labelled
+as such in the prompt and the contract, and the model is not asked to author the
+same constraint twice. Removing it is **DEFER_S5** with R-C/R-D.
+
+### 8.6 The S-4 probe, end to end
+
+```
+s01 leaves REQ/ACT/SCN
+ s02.invoke  -> OBL-0001, RSR-0001(EXTERNAL), LC-0001(reacted_at_site=RSR-0001),
+                PEO-0001(between_roles = role names, no entity of that name),
+                CND-A, CND-B                                          SUCCESS
+ s03a.invoke -> BOD-A RGP-A IFC-A IFG-A JNT-A CFG-A                   SUCCESS
+ s03b        -> VIEW_READY, zero unmet · provider called once
+             -> PHI-A discharges PEO-0001
+                CRL-A provided by RSR-0001, acting at IFG-A, no provider_body
+                LDP-A LC-0001, hops [IFC-A, IFG-A] all Interface, terminates RSR-0001
+```
+
+Every typed reference resolves; a dangling one is refused for each of the six
+fields individually. `PEO-0001`, `LC-0001` and `RSR-0001` are COMMON_UPSTREAM for A
+**carrying no premises** — lineage from authored references, never stamping. No
+mobility, spatial or selection entity exists afterwards.
+
+An open response is exercised too: a path with no closure plus an `unresolved`
+naming it applies cleanly and completeness stays silent.
+
+### 8.7 Two candidates
+
+Both driven through the real producers. A's facts contain no B id and B's contain no
+A id; both reference the same demand; exactly **one** `PhysicalEffectObligation` and
+**one** `ReactionSiteRequirement` exist; `BOD-B` is OTHER_BRANCH from A; the reaction
+site is COMMON_UPSTREAM for both.
+
+### 8.8 Defer map
+
+| owner | residual |
+|---|---|
+| **S-5** | `blocking_relations` removal · mobility orchestration (R-C) · DOF domain vs disposition, `UNDISPOSITIONED`, no `MAINTAINED_BY_CLASS` from absence (R-D) |
+| **S-6** | metric reaction location · frames / `ReferenceScale` (R-G) · exact axes and origins · S04A→S04B continuity (R-F) · configuration/transition spatial semantics (R-E) · runner-side s04 premise boundary (R-H) |
+| **S-7** | retained / selected / committed / reopen · `SelectionDecision` (R-I, R-J) |
+| **S-8** | broader cross-role engineering assurance (R-K) · general applicability and completeness questions beyond §8.4 · a required dependency with no producer must stay visible (R-L) |
+| **S-9** | live corpus refresh · full benchmark and unseen live-chain validation (R-M) · retirement of the 21 historical replays |
+
+**The 21 affected recordings are operational corpus debt, owned by S-9, and are not
+an S-4 semantic blocker.** They are evidence that the old corpus no longer matches
+current producer semantics — which is what a prompt-hash pin is for.
+
+### 8.9 Regression
+
+`664 run · 664 pass · 0 fail · 22 skipped` — 9 stale-recording, 12 R-B, 1 unrelated
+freeze-gate.
+
+### 8.10 Status
+
+**S-4 COMPLETE — CANONICAL PHYSICAL REASONING MIGRATION CLOSED.**
+
+The canonical physical chain exists end to end: s02 authors candidate-independent
+demand, s03b authors candidate-specific realization, the two stay separate, every
+physical reference resolves, and demand that is neither answered nor declared open is
+reported rather than passing in silence.
+
+**Impl S-5 has NOT begun.**
+
+## 9. Impl S-5 has NOT begun.
 
 ## 9. Status
 
-**S-4 IN PROGRESS — S02→S03B PHYSICAL CHAIN INTEGRATED.**
+**S-4 COMPLETE — CANONICAL PHYSICAL REASONING MIGRATION CLOSED.**
 
-Slice 1 (§5) and slice 2 (§6) are done: s02 authors the candidate-independent physical
-demand, and s03b authors the candidate-specific realization. The corpus refresh and the
-remaining S-4 exit criteria are not.
+Slices 1-3 (§5-§7) built it; the exit audit (§8) closed the two remaining MUST_FIX
+items and assigned every residual an owner. The corpus refresh is S-9's and is not an
+S-4 blocker.
 
 What is complete: the S-3 closure boundary is recorded and frozen (§1), every residual
 has an owner (§1.4), the physical fact inventory is measured (§2), R-B is pinned (§3),

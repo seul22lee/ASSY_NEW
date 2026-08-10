@@ -279,3 +279,132 @@ class TestTwoCandidatesThroughTheRealChain(unittest.TestCase, _fixtures.StateBui
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestS4ExitAudit(_fixtures.StateBuilder, unittest.TestCase):
+    """The S-4 exit checks: references that must resolve, and demand that must be
+    answered or declared open."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.c = Contracts()
+
+    def base(self):
+        s = DesignState(run_id="exit")
+        self.add(s, "s01", "Requirement", "REQ-0001", quantity_class="BAND")
+        self.add(s, "s01", "Actor", "ACT-0001")
+        self.add(s, "s01", "Scenario", "SCN-0001", actors=["ACT-0001"])
+        provider = _Canned(S02, _s03a("A"), _s03b("A"))
+        s.apply(S02ObligationAndCandidates().invoke(provider, s, s.run_id).patch)
+        inv = cv.InvocationContext(branch="CND-A")
+        s.apply(S03TopologyAndMobility().invoke(
+            provider, s, s.run_id, {"candidate": {"entity_id": "CND-A"}},
+            invocation=inv).patch)
+        return s, inv
+
+    # -- every S-4 reference must resolve when it is authored ---------
+    def test_S4_REF_a_named_referent_that_does_not_exist_is_refused(self):
+        from ver3.assy_v3.state.design_state import ContractError
+        cases = {
+            "LoadPath.terminates_at": ("load_paths", 0, "terminates_at", "RSR-NOWHERE"),
+            "LoadPath.ordered_hops": ("load_paths", 0, "ordered_hops", ["IFC-NOWHERE"]),
+            "ConstraintRelation.provider_reaction_site":
+                ("constraint_relations", 0, "provider_reaction_site", "RSR-NOWHERE"),
+            "ConstraintRelation.provider_site":
+                ("constraint_relations", 0, "provider_site", "IFC-NOWHERE"),
+            "PhysicalInteraction.at_interface":
+                ("physical_interactions", 0, "at_interface", "IFC-NOWHERE"),
+            "PhysicalInteraction.discharges_effect":
+                ("physical_interactions", 0, "discharges_effect", "PEO-NOWHERE"),
+        }
+        for label, (collection, idx, field, value) in cases.items():
+            s, inv = self.base()
+            payload = json.loads(json.dumps(_s03b("A")))
+            payload[collection][idx][field] = value
+            out = S03BMobilityAndAssembly().run(
+                _Canned(payload), {"consumer_view": {}, "candidate": "CND-A"},
+                s, s.run_id, attempt=2)
+            with self.assertRaises(ContractError, msg=label) as caught:
+                s.apply(out.patch)
+            self.assertIn("DANGLING_REF", str(caught.exception), label)
+
+    def test_S4_REF_load_case_reacted_at_site_must_resolve(self):
+        from ver3.assy_v3.state.design_state import ContractError
+        s = DesignState(run_id="lc")
+        self.add(s, "s01", "Requirement", "REQ-0001", quantity_class="BAND")
+        self.add(s, "s01", "Actor", "ACT-0001")
+        self.add(s, "s01", "Scenario", "SCN-0001", actors=["ACT-0001"])
+        payload = json.loads(json.dumps(S02))
+        payload["load_cases"][0]["reacted_at_site"] = "RSR-NOWHERE"
+        out = S02ObligationAndCandidates().invoke(_Canned(payload), s, s.run_id)
+        with self.assertRaises(ContractError) as caught:
+            s.apply(out.patch)
+        self.assertIn("DANGLING_REF", str(caught.exception))
+
+    def test_S4_REF_optional_is_not_the_same_as_unresolved(self):
+        """Omitting the field is fine. Naming something that is not there is not."""
+        s, inv = self.base()
+        payload = json.loads(json.dumps(_s03b("A")))
+        del payload["load_paths"][0]["terminates_at"]
+        payload["unresolved"] = [
+            {"id": "S3U-1001", "decision": "where this load is reacted",
+             "why_open": "no external site is reachable in this arrangement",
+             "alternatives": [], "alternatives_kind": "FREE_TEXT",
+             "kept_open_by": [], "blocks": ["LDP-A"]}]
+        out = S03BMobilityAndAssembly().run(
+            _Canned(payload), {"consumer_view": {}, "candidate": "CND-A"},
+            s, s.run_id, attempt=2)
+        s.apply(out.patch)
+        self.assertNotIn("terminates_at", s.entities["LDP-A"])
+
+    # -- demand must be answered, or declared open --------------------
+    def test_S4_COMPLETE_silence_about_a_given_demand_is_reported(self):
+        s, inv = self.base()
+        view = S03BMobilityAndAssembly().consumer_view(s, inv).payload()
+        silent = {"physical_interactions": [], "constraint_relations": [],
+                  "load_paths": [], "assembly_steps": [],
+                  "blocking_relations": [], "unresolved": []}
+        missing = S03BMobilityAndAssembly().completeness(
+            silent, {"consumer_view": view})
+        self.assertTrue(any("PEO-0001" in m for m in missing), missing)
+        self.assertTrue(any("LC-0001" in m for m in missing), missing)
+
+    def test_S4_COMPLETE_an_explicit_open_answer_is_accepted(self):
+        s, inv = self.base()
+        view = S03BMobilityAndAssembly().consumer_view(s, inv).payload()
+        declared = {"physical_interactions": [], "constraint_relations": [],
+                    "load_paths": [], "assembly_steps": [],
+                    "blocking_relations": [],
+                    "unresolved": [{"id": "S3U-1001", "decision": "d",
+                                    "why_open": "w", "alternatives": [],
+                                    "alternatives_kind": "FREE_TEXT",
+                                    "kept_open_by": [],
+                                    "blocks": ["PEO-0001", "LC-0001"]}]}
+        missing = S03BMobilityAndAssembly().completeness(
+            declared, {"consumer_view": view})
+        self.assertEqual([], [m for m in missing
+                              if "PEO-0001" in m or "LC-0001" in m])
+
+    def test_S4_COMPLETE_nothing_is_repaired(self):
+        """Completeness reports. It does not write into the response."""
+        s, inv = self.base()
+        view = S03BMobilityAndAssembly().consumer_view(s, inv).payload()
+        silent = {"physical_interactions": [], "constraint_relations": [],
+                  "load_paths": [], "assembly_steps": [],
+                  "blocking_relations": [], "unresolved": []}
+        before = json.dumps(silent, sort_keys=True)
+        S03BMobilityAndAssembly().completeness(silent, {"consumer_view": view})
+        self.assertEqual(before, json.dumps(silent, sort_keys=True))
+
+    # -- the boundary S-4 must not cross ------------------------------
+    def test_S4_no_later_stage_work_was_pulled_forward(self):
+        s, inv = self.base()
+        provider = _Canned(_s03b("A"))
+        s.apply(S03BMobilityAndAssembly().invoke(
+            provider, s, s.run_id, {"candidate": "CND-A"}, attempt=2,
+            invocation=inv).patch)
+        for family in ("MobilityExpectation", "Envelope", "ReferenceScale",
+                       "State", "Transition", "SweptVolume", "SelectionDecision",
+                       "EliminationRecord"):
+            self.assertEqual([], s.family(family),
+                             "%s belongs to a later step" % family)

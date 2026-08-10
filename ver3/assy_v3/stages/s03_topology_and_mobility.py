@@ -1035,6 +1035,44 @@ class S03BMobilityAndAssembly(Stage):
         """
         return _candidate_premise(inputs.get("candidate"))
 
+    def _physical_demand_problems(self, parsed, inputs) -> List[str]:
+        """Physical demand this pass was given and neither realized nor left open.
+
+        S-4 completeness, and deliberately only that. It compares what the
+        consumer view carried against what the response answered, and reports the
+        difference. It INVENTS NOTHING: an obligation this candidate cannot
+        discharge is a real answer, and saying so through `unresolved` is an
+        answer too. What is not an answer is silence.
+
+        Whether the realization is physically CORRECT is not asked here - that is
+        engineering establishment, and it is S-8's.
+        """
+        view = inputs.get(self.context_key) or {}
+        answered = {i.get("discharges_effect")
+                    for i in parsed.get("physical_interactions") or []}
+        served = {p.get("load_case") for p in parsed.get("load_paths") or []}
+        # An open item may name what it leaves open, whatever kind it is.
+        open_items = {ref for u in parsed.get("unresolved") or []
+                      for ref in (u.get("blocks") or [])}
+        out: List[str] = []
+        for demand in view.get("PhysicalEffectObligation") or []:
+            eid = demand.get("entity_id")
+            if eid not in answered and eid not in open_items:
+                out.append("%s was given and is neither discharged by an "
+                           "interaction nor recorded open" % eid)
+        for load in view.get("LoadCase") or []:
+            eid = load.get("entity_id")
+            if eid not in served and eid not in open_items:
+                out.append("%s was given and has neither a load path nor a "
+                           "recorded reason it has none" % eid)
+        for path in parsed.get("load_paths") or []:
+            if not path.get("terminates_at") and path.get("id") not in open_items:
+                out.append("%s terminates nowhere and is not recorded open; a path "
+                           "that does not reach a declared reaction site is an "
+                           "OPEN path, which is a finding and not a silence"
+                           % path.get("id"))
+        return out
+
     def derived_operations(self, parsed, groups, configurations, joints, inputs):
         """The TOTAL DOF disposition, derived from the relations just authored.
 
@@ -1112,7 +1150,7 @@ class S03BMobilityAndAssembly(Stage):
         return ops
 
     def completeness(self, parsed, inputs):
-        out = []
+        out = self._physical_demand_problems(parsed, inputs)
         relations, _renames = relations_of(parsed)
         if not relations:
             out.append("no blocking relation: nothing in this mechanism is held")

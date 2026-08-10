@@ -220,27 +220,48 @@ class TestCanonicalReferenceAuthority(_Base):
     def test_REF_CANON_06_resolvable_is_read_the_way_the_contract_defines_it(self):
         """`field_semantics_rules.reference`: "`resolvable` says whether an
         UNRESOLVED VALUE IS LEGAL; the default is false, so a dangling reference is
-        a defect rather than a style." So false REQUIRES resolution."""
-        n_true = n_false = 0
-        for fam in self.c.families:
-            for field, spec in (self.c.field_semantics(fam) or {}).items():
-                if isinstance(spec, dict) and spec.get("kind") == "reference":
-                    if spec.get("resolvable"):
-                        n_true += 1
-                    else:
-                        n_false += 1
-        self.assertTrue(n_true and n_false, "resolvable carries no distinction")
-        self.assertGreater(n_false, n_true, "the default is false")
-        # resolvable: true tolerates an id that does not resolve yet...
+        a defect rather than a style." So false REQUIRES resolution.
+
+        Asserted as RUNTIME BEHAVIOUR in both directions, not by counting which
+        values the corpus happens to use. After the S-4 exit audit no field
+        declares `true` at all - every reference a producer authors names
+        something that exists, or is created beside it in the same patch - so the
+        `true` branch is exercised against a synthetic declaration rather than
+        being left untested.
+        """
+        import copy
         s = DesignState(run_id="soft")
-        self.assertTrue(self.c.reference_spec("PhysicalInteraction",
-                                              "at_interface")["resolvable"])
-        fields = self._fields_for(s, self.c, "s03", "PhysicalInteraction",
-                                  {"at_interface": "IF-LATER"})
-        s.apply(self.patch(s, "s03", [
-            Op("CREATE", "PhysicalInteraction", "PI-1", fields, "p")]))
-        self.assertTrue(s.has_entity("PI-1"))
-        # ...but never prose. Structure and existence are separate questions.
+        # false: the declared default. A named referent must exist.
+        self.assertFalse(self.c.reference_spec("RigidGroup", "body")["resolvable"])
+        fields = self._fields_for(s, self.c, "s03", "RigidGroup",
+                                  {"body": "BOD-LATER"})
+        with self.assertRaises(ContractError) as caught:
+            s.apply(self.patch(s, "s03", [
+                Op("CREATE", "RigidGroup", "RGP-1", fields, "p")]))
+        self.assertIn("DANGLING_REF", str(caught.exception))
+
+        # true: tolerated, and only because the declaration says so.
+        class _Permissive:
+            def __init__(self, base):
+                self._b = base
+
+            def __getattr__(self, name):
+                return getattr(self._b, name)
+
+            def reference_spec(self, family, field):
+                spec = self._b.reference_spec(family, field)
+                if spec and family == "RigidGroup" and field == "body":
+                    spec = dict(spec, resolvable=True)
+                return spec
+
+        s2 = DesignState(run_id="permissive", contracts=_Permissive(self.c))
+        s2.apply(self.patch(s2, "s03", [
+            Op("CREATE", "RigidGroup", "RGP-1",
+               self._fields_for(s2, self.c, "s03", "RigidGroup",
+                                {"body": "BOD-LATER"}), "p")]))
+        self.assertTrue(s2.has_entity("RGP-1"))
+
+        # Structure is never optional, whatever the declaration says.
         bad = self._fields_for(s, self.c, "s03", "PhysicalInteraction",
                                {"at_interface": "the interface between the parts"})
         with self.assertRaises(ContractError) as caught:

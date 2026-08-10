@@ -606,11 +606,18 @@ entity_families:
       # This is the authoritative relation, by id, so downstream code never has to
       # rebuild it by comparing role strings. Two fields, two different facts: one
       # records what was said, one records what it resolves to.
+      # S-4 EXIT AUDIT. These declared `resolvable: true`, which by this
+      # contract's own words means "an unresolved value is legal". That confused
+      # OPTIONAL FIELD with UNRESOLVED REFERENT: the field may be omitted, but a
+      # site, hop, provider or interface that IS named must exist. A load
+      # terminating at a reaction site nothing declared has not been closed, and
+      # this family's own rule already said it for providers - "a provider is a
+      # resolvable reference or the relation is incomplete".
       reacted_at_site:
         kind: reference
         target: ReactionSiteRequirement
         cardinality: one
-        resolvable: true
+        resolvable: false
         referent_population: DESIGN_WIDE
     owned_by: s02
     purpose: "An applied load implied by a scenario. CANDIDATE-INDEPENDENT."
@@ -635,7 +642,7 @@ entity_families:
         kind: reference
         target: Scenario
         cardinality: one
-        resolvable: true
+        resolvable: false
         referent_population: DESIGN_WIDE
     owned_by: s02
     authority_class: AUTHORITATIVE
@@ -681,7 +688,7 @@ entity_families:
         kind: reference
         target: Interface
         cardinality: many
-        resolvable: true
+        resolvable: false
         referent_population: INVOCATION_BRANCH
       # Where the path closes. A terminal site EXTERNAL for the scenario the load
       # acts in closes the path; one terminating inside the product is OPEN - a
@@ -690,7 +697,7 @@ entity_families:
         kind: reference
         target: ReactionSiteRequirement
         cardinality: one
-        resolvable: true
+        resolvable: false
         referent_population: DESIGN_WIDE
     owned_by: s03
     extendable_by: [s04, s06]
@@ -867,7 +874,7 @@ entity_families:
     semantic_roles: [constraint_relation]
     field_semantics:
       retained_group: {kind: reference, target: RigidGroup, cardinality: one, resolvable: false}
-      provider_body: {kind: reference, target: Body, cardinality: one, resolvable: true}
+      provider_body: {kind: reference, target: Body, cardinality: one, resolvable: false}
       # S-4. The plan says the provider is a "body or external reaction site", and
       # Body alone could not say the second. A load reacted outside the product is
       # provided by the declared site, not by a body of the product - modelling
@@ -876,10 +883,10 @@ entity_families:
       # PROVIDER IDENTITY, which is candidate-independent when it is external.
       # `provider_site` stays what it was: the candidate-local Interface at which
       # the constraint acts. Who provides and where it acts are different facts.
-      provider_reaction_site: {kind: reference, target: ReactionSiteRequirement, cardinality: one, resolvable: true, referent_population: DESIGN_WIDE}
-      provider_site: {kind: reference, target: Interface, cardinality: one, resolvable: true}
+      provider_reaction_site: {kind: reference, target: ReactionSiteRequirement, cardinality: one, resolvable: false, referent_population: DESIGN_WIDE}
+      provider_site: {kind: reference, target: Interface, cardinality: one, resolvable: false}
       configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false}
-      maintaining_interaction: {kind: reference, target: PhysicalInteraction, cardinality: one, resolvable: true}
+      maintaining_interaction: {kind: reference, target: PhysicalInteraction, cardinality: one, resolvable: false}
       # Symbolic direction token, same correction as Joint.axis_direction. This
       # family declares no frame of its own, and the relation it blocks is named
       # by `retained_group`; the token is a direction class, not a placed vector.
@@ -921,7 +928,7 @@ entity_families:
       # Discharge stays checkable through PhysicalInteraction.discharges_effect,
       # which IS addressable - that never depended on roles being entities.
       between_roles: {kind: role_name, cardinality: many}
-      under_load_case: {kind: reference, target: LoadCase, cardinality: one, resolvable: true, referent_population: DESIGN_WIDE}
+      under_load_case: {kind: reference, target: LoadCase, cardinality: one, resolvable: false, referent_population: DESIGN_WIDE}
       addresses_obligations: {kind: reference, target: Obligation, cardinality: many, resolvable: false, referent_population: DESIGN_WIDE}
     owned_by: s02
     authority_class: AUTHORITATIVE
@@ -942,7 +949,7 @@ entity_families:
     semantic_roles: [physical_interaction]
     field_semantics:
       groups: {kind: reference, target: RigidGroup, cardinality: many, resolvable: false}
-      at_interface: {kind: reference, target: Interface, cardinality: one, resolvable: true}
+      at_interface: {kind: reference, target: Interface, cardinality: one, resolvable: false}
       configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false}
       discharges_effect: {kind: reference, target: PhysicalEffectObligation, cardinality: one, resolvable: false, referent_population: DESIGN_WIDE}
     owned_by: s03
