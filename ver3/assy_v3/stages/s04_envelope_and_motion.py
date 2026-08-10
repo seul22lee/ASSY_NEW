@@ -529,18 +529,62 @@ class S04BPlacementAndMotion(Stage):
                 ops.append(Op("EXTEND", state.stored_family(target), target,
                               {"frame_origin": p.get("origin")},
                               prov, premise_refs=list(premises)))
+        return ops + self._revision_ops(parsed, inputs, state)
+
+    def _revision_ops(self, parsed, inputs, state) -> List[Op]:
+        """The justified supersessions of the arrangement, and only those.
+
+        ONE reader, because the barrier and the commit must agree about what
+        counts as a revision. If the barrier fired on a revision this refused, an
+        invocation would withhold its realization and commit nothing - a stall
+        with no cause a reader could see.
+
+        A revision is applicable when it names an envelope this consumer was
+        given, states a geometric reason, and actually carries a new extent.
+        Anything else is not applied: `completeness` reports a revision with no
+        reason, and a commitment contradicted without one is the defect the
+        commitment class exists to prevent.
+        """
+        parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
+        view = inputs.get(self.context_key) or {}
+        known = {e.get("entity_id") for fam in view.values() if isinstance(fam, list)
+                 for e in fam if isinstance(e, dict)}
+        ops: List[Op] = []
         for r in parsed.get("envelope_revisions") or []:
-            target, why = r.get("envelope"), str(r.get("geometric_reason") or "").strip()
+            target = r.get("envelope")
+            why = str(r.get("geometric_reason") or "").strip()
             if target not in known or not state.has_entity(target) or not why:
                 continue
-            fields = {}
-            if isinstance(r.get("half_extent"), list) and isinstance(r.get("centre"), list):
-                fields["extent"] = {"half_extent": r["half_extent"],
-                                    "centre": r["centre"]}
-            if fields:
-                ops.append(Op("SUPERSEDE", state.stored_family(target), target,
-                              fields, prov, reason=why))
+            if not (isinstance(r.get("half_extent"), list)
+                    and isinstance(r.get("centre"), list)):
+                continue
+            ops.append(Op("SUPERSEDE", state.stored_family(target), target,
+                          {"extent": {"half_extent": r["half_extent"],
+                                      "centre": r["centre"]}},
+                          "s04b:placement", reason=why))
         return ops
+
+    def refinement_barrier(self, parsed, inputs, state):
+        """A revised arrangement is committed alone, then reasoned from.
+
+        Everything else this response proposes - the joint origins, the state
+        coordinates, the transitions - was decided against the extents in the
+        view, and the revision replaces them. Committing both in one patch put a
+        swept occupancy computed from the OLD extent into state as current
+        evidence for the NEW one, and it did not even go stale: it is created
+        after the supersession, so it was never a dependent of it.
+
+        The realization is not discarded. It is withheld until the premises it
+        rests on are the ones the design now holds.
+        """
+        ops = self._revision_ops(parsed, inputs, state)
+        if not ops:
+            return None
+        return (ops,
+                "%d arrangement commitment(s) superseded with a geometric reason; "
+                "the realization is withheld until it can be reasoned from the "
+                "revised arrangement: %s"
+                % (len(ops), ", ".join(sorted(o.entity_id for o in ops))))
 
     def derived_operations(self, parsed, inputs, state) -> List[Op]:
         """The swept occupancy, and the evidence level OF ITS OWN COMPUTATION.

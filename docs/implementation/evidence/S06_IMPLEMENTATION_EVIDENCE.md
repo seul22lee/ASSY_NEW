@@ -207,19 +207,116 @@ Regression, **secondary**: RUN 876 · PASS 876 · FAIL 0 · SKIP 22.
 
 ---
 
+## 12. REFINEMENT-LIFECYCLE CORRECTION (baseline `2177266`)
+
+### 12.1 The defect, reproduced before editing
+
+An s04b response carrying both an envelope revision and a realization:
+
+```
+ENV-0A half_extent            [4, 4, 4]      <- revised, with a geometric reason
+ENV-0A superseded?            True
+SWV-TRN-A-RGP-G0A  hull       (-1.414, -1.414, -1) .. (1.414, 1.414, 1)
+                   validity   STANDING
+hull equals the OLD-geometry hull?              True
+a hull computed from the REVISED extent would be (-5.657, ...) .. (5.657, ...)
+State / Transition validity   STALE
+```
+
+The swept occupancy is **four times too small and STANDING** — current evidence
+for an arrangement the same patch withdrew. `State` and `Transition` did go
+STALE, and the difference is the mechanism: they come from `to_operations`, which
+is ordered *before* the SUPERSEDE, so propagation reached them. The SweptVolume
+comes from `derived_operations`, ordered *after* it, so **it was never a dependent
+of the supersession at all**. The worst artifact was the one that stayed current.
+
+All three hooks read `inputs[context_key]` — the view built when the invocation
+started — confirmed by inspection of `Stage.run` and of each S04B hook.
+
+### 12.2 The correction
+
+`Stage.refinement_barrier(parsed, inputs, state)` returns `(ops, why)` or `None`.
+When it returns operations, `Stage.run` commits **those and nothing else**,
+records `why` as the declared incompleteness, and sets `StageOutcome.refinement_only`
+— a field, so a caller acts on a fact rather than on prose.
+
+S04B fires it when its response carries a justified envelope revision.
+`_revision_ops` is the **single reader** that decides what counts as one, shared
+by the barrier and by `refinement_operations`: if they could disagree, an
+invocation could withhold its realization and commit nothing — a stall with no
+visible cause.
+
+`run_s04` invokes, applies, and re-invokes **once** on `refinement_only`, which
+refreshes the ConsumerView because `invoke` builds it from current state. The
+refresh is bounded: a second refinement-only outcome is reported as "still
+revising", and no realization is committed from an arrangement that never settled.
+
+### 12.3 Files changed, and why each was necessary
+
+| file | why |
+|---|---|
+| `stages/base.py` | the barrier hook, the control field, and the one branch in `run` that commits a barrier alone. Without it the lifecycle has nowhere to live |
+| `stages/s04_envelope_and_motion.py` | `_revision_ops` as the single reader; `refinement_barrier` fires on it. This is the stage whose response can revise |
+| `tools/run_window2.py` | bounded re-invocation. The runner invokes, applies, refreshes and asks again — it reads no response and decides no engineering |
+| `contracts/stages/S04_CONTRACT.yaml` | the lifecycle stated where the stage's contract lives; and `owned_decisions` corrected to what the responsibility contract actually grants — Witness, `Interface engagement_site` and LoadPath maturity moved to `not_owned_here` with their owners rather than being implemented to make prose true |
+
+`DesignState.apply`, `_propagate`, S-3/S-4/S-5 stages and every other stage's
+semantics are **untouched** — the diff is four files.
+
+### 12.4 R1–R10
+
+| | claim | result |
+|---|---|---|
+| **R1** | no revision → one invocation realizes | `refinement_only` false, SUCCESS, State/Transition/SweptVolume produced, joint placed |
+| **R2** | revision → revision only | patch families are `["Envelope"]` alone; no State, no Transition, no SweptVolume, no `frame_origin`; the reason names ENV-0A |
+| **R3** | refreshed view | before `[1,1,1]`, after `[4,4,4]` |
+| **R4** | recomputed geometry | the occupancy differs from the unrevised run and equals `sweep_hull` over the revised extent |
+| **R5** | final currentness | State, Transition and SweptVolume STANDING, each carrying ENV-0A as a premise |
+| **R6** | no stale masquerade | the pre-revision hull appears on no SweptVolume, standing or otherwise |
+| **R7** | later supersession | a revision arriving after a realization stales State, Transition and SweptVolume through the existing substrate |
+| **R8** | branch isolation | branch B's occupancy byte-identical and STANDING; `ENV-0B` unrevised |
+| **R9** | runner neutrality | manual invoke/apply/reinvoke and `run_s04` produce equal canonical state; the refinement is recorded as a lifecycle event, not a failure. **R9b**: an always-revising stage is bounded and reported, and no SweptVolume is committed |
+| **R10** | no S-7 dependency | no SelectionDecision, `committed_branch` still None, gate check empty |
+
+Three further cases hold the barrier's own generality: the default hook returns
+`None`; an unjustified revision neither fires the barrier nor commits (no reason,
+unknown envelope, no extent); and both entry points are asserted to go through
+`_revision_ops`.
+
+**Mutation checks:** ignoring the barrier (8 failures), firing it but committing
+the realization anyway (2 failures + 6 errors), and unbounding the refresh (1).
+
+### 12.5 Newly discovered, and deliberately left alone
+
+**A value created after a SUPERSEDE in the same patch is not a dependent of it.**
+`_propagate` runs at the moment the SUPERSEDE is applied, so an op later in the
+same patch enters STANDING. This is what let the old SweptVolume escape.
+
+On inspection it is **not a substrate defect and was not patched**: a value
+created after the supersession cites the entity's *current* value, so it is
+correctly not stale. The defect was entirely that the derivation read a stale
+*view*, which the barrier fixes. Changing `_propagate` would have made a correct
+value stale. Recorded here because it is subtle and a reader will otherwise
+wonder — owner: none, no change required.
+
+Also observed and untouched: `S05_CONTRACT.required_inputs` still names
+`blocking_relations` (owner **S-8**; no live path reads it).
+
+---
+
 ## CURRENT STATUS
 
-> **S-6 VERIFIED CLOSED — CANONICAL SPATIAL COMMITMENT AND REFINEMENT LIFECYCLE
-> COMPLETE.**
+> **S-6 VERIFIED CLOSED — REFINEMENT BARRIER AND RECOMPUTATION LIFECYCLE
+> CONSISTENT.**
 >
-> S04 authors its own conclusions, in its own patches, so a direct invocation and
-> a runner run produce the same canonical state. s04a commits an arrangement with
-> a class; s04b extends it or supersedes it with a geometric reason, carrying the
-> commitments it rests on as premises, so a changed arrangement costs the
-> realization its authority. A joint without a usable axis computes nothing rather
-> than rotating about a fabricated one. Declared distinctness and declared
-> coordinate changes are checked against the coordinates. The motion evidence
-> level is an output of the sweep and cannot be raised by declaring it. Load paths
-> are read through Interfaces, as S-4 made them.
+> S04 authors its own conclusions, so a direct invocation and a runner run produce
+> the same canonical state. s04a commits an arrangement with a class; s04b extends
+> it, or supersedes it with a geometric reason — and a supersession is a barrier,
+> so the realization is withheld until it can be reasoned from the arrangement the
+> design now holds, and recomputed from it. No occupancy derived from replaced
+> geometry remains current. A joint without a usable axis computes nothing.
+> Declared distinctness and declared coordinate changes are checked against the
+> coordinates. The motion evidence level is an output of the sweep. Load paths are
+> read through Interfaces.
 >
 > S-3, S-4 and S-5 are unchanged and verified so. **Impl S-7 has NOT begun.**

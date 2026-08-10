@@ -311,34 +311,58 @@ def run_s04(case_id: str, state, provider, trial: int,
     for gap in interface_gaps(mech):
         fail("INTERFACE_GAP", "s03->s04", gap)
 
+    #: ONE refresh. A stage that reports refinement-only committed a justified
+    #: revision and withheld everything reasoned from the value it replaced, so
+    #: it is called again against a view that now holds the revision. Bounded:
+    #: a second refinement-only outcome is a stage revising without converging,
+    #: and that is reported rather than looped on.
+    REFRESHES = 1
+
     for attempt, (stage, key) in enumerate(
             ((S04AEnvelopeAndReach(), "s04a"), (S04BPlacementAndMotion(), "s04b")), start=1):
-        started = time.time()
-        try:
-            out = stage.invoke(provider, state, state.run_id,
-                               {"candidate": getattr(invocation, "branch", None)},
-                               attempt=attempt, invocation=invocation)
-        except Exception as exc:                                    # noqa: BLE001
-            fail("PARSER_DEFECT", key, "%s: %s" % (type(exc).__name__, exc),
-                 traceback.format_exc(limit=5))
-            rec["%s_status" % key] = "RAISED"
-            return rec
-        rec["%s_seconds" % key] = round(time.time() - started, 2)
-        rec["%s_status" % key] = out.execution_status.value
-        rec["%s_consumer_view" % key] = out.consumer_view
-        rec["%s_response" % key] = out.raw_response
-        if out.execution_status in (ExecutionStatus.RESPONSE_TRUNCATED,
-                                    ExecutionStatus.RESPONSE_PARSE_FAILURE):
-            fail("RESPONSE_CONDITION", key, out.execution_status.value, out.problems)
-            return rec
-        if out.patch is None or out.problems:
-            fail("CONTRACT_CONDITION", key, "contract validation", out.problems)
-            return rec
-        if out.declared_incompleteness:
-            fail("CONTRACT_CONDITION", key, "declared incomplete", out.declared_incompleteness)
-        # ONE patch per pass, and the runner adds nothing to it.
-        state.apply(out.patch)
-        rec["%s_families" % key] = sorted({op.entity_type for op in out.patch.operations})
+        for refresh in range(REFRESHES + 1):
+            started = time.time()
+            try:
+                out = stage.invoke(provider, state, state.run_id,
+                                   {"candidate": getattr(invocation, "branch", None)},
+                                   attempt=attempt, invocation=invocation)
+            except Exception as exc:                                # noqa: BLE001
+                fail("PARSER_DEFECT", key, "%s: %s" % (type(exc).__name__, exc),
+                     traceback.format_exc(limit=5))
+                rec["%s_status" % key] = "RAISED"
+                return rec
+            rec["%s_seconds" % key] = round(time.time() - started, 2)
+            rec["%s_status" % key] = out.execution_status.value
+            rec["%s_consumer_view" % key] = out.consumer_view
+            rec["%s_response" % key] = out.raw_response
+            if out.execution_status in (ExecutionStatus.RESPONSE_TRUNCATED,
+                                        ExecutionStatus.RESPONSE_PARSE_FAILURE):
+                fail("RESPONSE_CONDITION", key, out.execution_status.value, out.problems)
+                return rec
+            if out.patch is None or out.problems:
+                fail("CONTRACT_CONDITION", key, "contract validation", out.problems)
+                return rec
+            if out.declared_incompleteness and not out.refinement_only:
+                fail("CONTRACT_CONDITION", key, "declared incomplete",
+                     out.declared_incompleteness)
+            # ONE patch per invocation, and the runner adds nothing to it.
+            state.apply(out.patch)
+            rec.setdefault("%s_families" % key, [])
+            rec["%s_families" % key] = sorted(
+                set(rec["%s_families" % key])
+                | {op.entity_type for op in out.patch.operations})
+            if not out.refinement_only:
+                break
+            # A LIFECYCLE EVENT, not a failure: the stage said so itself, in a
+            # field, and the only thing the runner does about it is refresh and
+            # ask again. It reads no response and decides no engineering.
+            rec.setdefault("%s_refinements" % key, []).append(
+                out.declared_incompleteness)
+            if refresh == REFRESHES:
+                fail("CONTRACT_CONDITION", key,
+                     "still revising after %d refresh(es); the realization was "
+                     "never reasoned from a settled arrangement" % REFRESHES,
+                     out.declared_incompleteness)
 
     for name, fn in S04_CHECKS:
         try:

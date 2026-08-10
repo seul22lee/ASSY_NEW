@@ -178,14 +178,44 @@ s04b:
     - "whether each assembly step has a clear insertion path IN THE CONFIGURATION PRODUCED BY THE PRECEDING STEPS"
 
   owned_decisions:
-    creates: [State, Transition, SweptVolume, Witness declarations]
-    extends: [Joint frame_origin, LoadPath maturity to SPATIALLY_INSTANTIATED, Interface engagement_site]
+    # CURRENT, and matched against STAGE_RESPONSIBILITY_CONTRACT.s04b's
+    # permitted_output_semantics rather than against ambition. The three claims
+    # below were in `creates`/`extends` and are owned by neither the
+    # responsibility contract nor any producer, so they are recorded as what they
+    # are instead of being implemented to make prose true.
+    creates: [State, Transition, SweptVolume]
+    extends: [Joint frame_origin]
+    not_owned_here:
+      - what: "Witness declarations"
+        owner: "later stages (DESIGN_STATE_CONTRACT.Witness.owned_by is [s04, s09])"
+        status: "no producer; frozen U-7 does not require one"
+      - what: "Interface engagement_site"
+        owner: "later stages"
+        status: "no field, no producer, not part of U-7"
+      - what: "LoadPath maturity to SPATIALLY_INSTANTIATED"
+        owner: "the maturity progression in S03_CONTRACT.load_path_rule (s04b, later)"
+        status: "not produced; U-7 covers placement and motion evidence, not maturity promotion"
     supersedes: >
       An s04a Envelope, with a GEOMETRIC REASON. The arrangement is a COMMITMENT
       carrying a class; a refinement extends it by default, and contradicting one
       is a supersession that keeps both values and costs every value resting on
       the old one its unqualified authority (FA-5). A revision with no reason is
       refused, which is what makes "may not silently contradict" a behaviour.
+    refinement_lifecycle: >
+      REFINEMENT, REFRESHED PREMISE, RECOMPUTATION - in that order, and the order
+      is the point. Every stage hook reasons from the ConsumerView built when the
+      invocation started, so an invocation that both REVISES a commitment and
+      reasons from it produces evidence for an arrangement it is replacing in the
+      same patch. It does not even go stale: a value created after the
+      supersession was never a dependent of it.
+      An s04b response carrying a justified envelope revision is therefore a
+      BARRIER. That invocation commits the revision ALONE - no joint placement,
+      no State, no Transition, no swept occupancy - and reports
+      `refinement_only`, a field rather than prose. The caller refreshes the view
+      and invokes again; the second invocation reasons from the revised
+      arrangement and computes the occupancy from it. The refresh is BOUNDED: a
+      stage still revising after it is reported, and no realization is committed
+      from an arrangement that never settled.
     written_by: >
       THE STAGE, in the stage's own patch. Until S-6 the runner read the raw s04
       response after the stage returned and wrote the reference scale, the reach

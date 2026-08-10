@@ -89,6 +89,15 @@ class StageOutcome:
     problems: List[str] = field(default_factory=list)
     declared_incompleteness: List[str] = field(default_factory=list)
     raw_response: Optional[str] = None
+    #: THE STAGE ASKED TO BE CALLED AGAINST REFRESHED PREMISES.
+    #:
+    #: A CONTROL SIGNAL, not a status: this invocation committed a justified
+    #: revision of something it was given, and withheld everything that would
+    #: have been reasoned from the pre-revision value. It is machine-readable so
+    #: a caller re-invokes on the fact rather than on prose, and it carries its
+    #: own reason so a run record says why a second call happened.
+    refinement_only: bool = False
+
     #: THE EXACT VIEW THIS INVOCATION USED, serialized at the moment of use.
     #:
     #: U-3 asks for a recorded ConsumerView: its content, the minimum it was built
@@ -149,6 +158,31 @@ class Stage:
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
         """What the contract requires that this response did not supply."""
         return []
+
+    def refinement_barrier(self, parsed: Dict[str, Any], inputs: Dict[str, Any],
+                           state):
+        """Operations that must be committed ALONE, and why - or None.
+
+        THE PROBLEM THIS SOLVES. `to_operations`, `refinement_operations` and
+        `derived_operations` all reason from `inputs[context_key]`, which is the
+        view built when the invocation started. That is correct until the same
+        invocation REVISES something in that view: everything else it produces is
+        then reasoned from a value the same patch is replacing. At S-6 an s04b
+        response revising an envelope and placing the mechanism did exactly that -
+        the swept occupancy was computed from the old extent and entered state
+        STANDING, because it is created after the supersession and so was never a
+        dependent of it. Current evidence, derived from geometry the design had
+        just withdrawn.
+
+        Returning `(ops, why)` makes the invocation a BARRIER: those operations
+        are committed, nothing else is, and the outcome says so. A caller
+        refreshes the view and calls again, and the second call reasons from what
+        the first committed. Bounded by the caller, not open-ended.
+
+        Default: None - a stage that revises nothing has no barrier, and its
+        invocation is unchanged.
+        """
+        return None
 
     def refinement_operations(self, parsed: Dict[str, Any], inputs: Dict[str, Any],
                               state) -> List[Op]:
@@ -275,12 +309,23 @@ class Stage:
         # a SCHEMA_FAILURE, which is what this module's own docstring promises.
         # Letting the KeyError escape instead made a malformed response crash the
         # caller, and a crash is not a status anything downstream can record.
+        refinement_only = False
         try:
-            ops = carry_invocation_premises(self.to_operations(parsed, inputs),
-                                            self.invocation_premises(inputs))
-            ops = ops + self.refinement_operations(parsed, inputs, state)
-            ops = ops + self.derived_operations(parsed, inputs, state)
-            missing = self.completeness(parsed, inputs)
+            barrier = self.refinement_barrier(parsed, inputs, state)
+            if barrier is not None:
+                # ONLY the revision. Everything this response also proposed was
+                # reasoned from the value being replaced, so committing it here
+                # would be committing evidence for an arrangement that no longer
+                # exists. It is not lost - the caller refreshes and calls again.
+                ops, why = barrier
+                ops = carry_invocation_premises(ops, self.invocation_premises(inputs))
+                missing, refinement_only = [why], True
+            else:
+                ops = carry_invocation_premises(self.to_operations(parsed, inputs),
+                                                self.invocation_premises(inputs))
+                ops = ops + self.refinement_operations(parsed, inputs, state)
+                ops = ops + self.derived_operations(parsed, inputs, state)
+                missing = self.completeness(parsed, inputs)
         except (KeyError, TypeError, AttributeError, IndexError, ValueError) as exc:
             return StageOutcome(
                 self.stage_id, ExecutionStatus.SCHEMA_FAILURE, None,
@@ -307,4 +352,5 @@ class Stage:
         patch.execution_status = status.value
         return StageOutcome(self.stage_id, status, patch,
                             declared_incompleteness=missing,
+                            refinement_only=refinement_only,
                             raw_response=result.response.raw_text)
