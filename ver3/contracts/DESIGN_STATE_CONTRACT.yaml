@@ -1452,6 +1452,21 @@ superseded_legacy_producers:
       residual: >
         Recorded fixtures still use the old key. Corpus debt (Impl S-9); the live
         producer no longer reads it.
+    - concept: FunctionalRegion.required_by_actors and reach_targets
+      was: >
+        the s03 prompt carried its own prose definition of these fields, so the
+        contract and the prompt each defined them and could drift apart
+      now: >
+        the producer emits the canonical field names and the prompt cites the
+        contract instead of redefining them
+      closed_by: "S-4 (prompt cites the contract)"
+      residual: none
+      why_it_lingered: >
+        Its status text read like a completion note - "producer emits the same
+        field names" - inside a structure whose own rule says a row means the
+        producer does NOT conform. Benign prose in an active list is still an
+        active claim, which is why the gate now reads placement and ownership
+        rather than the status token.
     - concept: PhysicalEffectObligation and PhysicalInteraction
       was: "none - no stage produced either"
       now: "s02 authors PhysicalEffectObligation; s03b authors PhysicalInteraction"
@@ -1469,8 +1484,3 @@ legacy_producers:
       current_producers: ["derive_mobility still emits the pre-split shape"]
       current_status: NONCONFORMING
       migration_step: "S-5 / U-6 (ADR-005)"
-    - concept: FunctionalRegion.required_by_actors and reach_targets
-      canonical: "declared in DESIGN_STATE_CONTRACT"
-      current_producers: ["s03 prompt still carries a prose definition"]
-      current_status: "producer emits the same field names; the prompt no longer DEFINES them"
-      migration_step: "S-4 (prompt cites the contract)"

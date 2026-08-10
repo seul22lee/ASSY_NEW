@@ -31,6 +31,23 @@ from ver3.assy_v3.stages.s03_topology_and_mobility import (            # noqa: E
 from ver3.assy_v3.state.design_state import Contracts                   # noqa: E402
 
 
+def _active_s4_rows(rows):
+    """Rows in the ACTIVE migration structure whose owner includes S-4.
+
+    Ownership, not status text. A row may be legitimately active if it has been
+    formally transferred to a later step - that shows up as a different
+    `migration_step`, not as a reassuring `current_status`.
+    """
+    out = []
+    for row in rows or []:
+        step = str(row.get("migration_step") or "")
+        if re.search(r"\bS-4\b", step):
+            out.append("%s (owner %r, status %r)"
+                       % (row.get("concept"), step,
+                          str(row.get("current_status"))[:40]))
+    return out
+
+
 def _load(name, *parts):
     with open(os.path.join(_CONTRACTS, *parts, name)) as fh:
         return yaml.safe_load(fh)
@@ -294,18 +311,25 @@ class TestFieldLevelCanonicalAlignment(unittest.TestCase):
         self.assertEqual(before, json.dumps(scalar, sort_keys=True),
                          "the producer rewrote the model's principle")
 
-    def test_GATE_21_no_active_s4_row_claims_the_producer_is_nonconforming(self):
+    def test_GATE_21_no_s4_owned_row_is_still_ACTIVE(self):
+        """PLACEMENT outranks prose.
+
+        This used to key on the status token, so a row whose status read like a
+        completion note - "producer emits the same field names" - sat in the
+        active list and passed. The structure's own rule settles it: "a row here
+        means the canonical target is defined, the producer does not yet conform
+        ... It is NOT a claim of conformance." Being in `rows` IS the claim, and
+        an optimistic sentence inside it does not withdraw it.
+        """
         ds = _load("DESIGN_STATE_CONTRACT.yaml")
-        offending = []
-        for row in (ds.get("legacy_producers") or {}).get("rows") or []:
-            step = str(row.get("migration_step") or "")
-            status = str(row.get("current_status") or "")
-            if re.match(r"^S-4\b", step) and status in ("NONCONFORMING",
-                                                        "NOT_YET_PRODUCED"):
-                offending.append("%s (%s)" % (row.get("concept"), status))
+        self.assertIn("does not yet conform",
+                      (ds.get("legacy_producers") or {}).get("rule", ""),
+                      "the active structure no longer means what this test reads "
+                      "it to mean; re-derive the rule before trusting this check")
+        offending = _active_s4_rows((ds.get("legacy_producers") or {}).get("rows"))
         self.assertEqual([], offending,
-                         "S-4 cannot be closed while it owns an active "
-                         "nonconforming row: %s" % offending)
+                         "S-4 cannot close while it owns an ACTIVE migration row, "
+                         "whatever the row's status text says: %s" % offending)
 
 
 class TestFieldLevelGateActuallyFails(unittest.TestCase):
@@ -351,3 +375,94 @@ class TestFieldLevelGateActuallyFails(unittest.TestCase):
                      if re.match(r"^S-4\b", str(r["migration_step"]))
                      and r["current_status"] in ("NONCONFORMING", "NOT_YET_PRODUCED")]
         self.assertEqual(["invented"], offending)
+
+
+class TestClosureHygieneFalsifiers(unittest.TestCase):
+    """CH-ACTIVE / CH-SURFACE: prove the strengthened checks fail when broken."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.c = Contracts()
+        cls.stage = S02ObligationAndCandidates()
+
+    def test_CH_ACTIVE_01_the_real_contract_has_no_active_s4_row(self):
+        ds = _load("DESIGN_STATE_CONTRACT.yaml")
+        self.assertEqual(
+            [], _active_s4_rows((ds.get("legacy_producers") or {}).get("rows")))
+
+    def test_CH_ACTIVE_02_benign_prose_does_not_rescue_an_active_row(self):
+        """The exact defect: a completed item left active behind a kind sentence."""
+        rows = [{"concept": "invented", "migration_step": "S-4 (prompt cites it)",
+                 "current_status": "producer now conforms; nothing left to do"}]
+        self.assertEqual(1, len(_active_s4_rows(rows)),
+                         "an S-4 row escaped because its status text sounded done")
+
+    def test_CH_ACTIVE_03_a_superseded_row_does_not_fail_the_gate(self):
+        ds = _load("DESIGN_STATE_CONTRACT.yaml")
+        superseded = (ds.get("superseded_legacy_producers") or {}).get("rows") or []
+        self.assertTrue(any(r["concept"].startswith("FunctionalRegion")
+                            for r in superseded), "history was lost, not moved")
+        self.assertEqual([], _active_s4_rows(superseded),
+                         "the history structure is being read as active")
+
+    def test_CH_ACTIVE_04_a_later_owner_may_legitimately_stay_active(self):
+        rows = [{"concept": "mobility", "migration_step": "S-5 / U-6",
+                 "current_status": "NONCONFORMING"}]
+        self.assertEqual([], _active_s4_rows(rows),
+                         "a row transferred to a later step was charged to S-4")
+
+    # -- the model-facing surface is rendered, so it cannot drift ------
+    def test_CH_SURFACE_01_every_envelope_field_reaches_the_model(self):
+        prompt = self.stage.prompt({"consumer_view": {}})
+        for collection, _family, _prefix, fields, _sup in self.stage.RESPONSE_ENVELOPE:
+            for field in fields:
+                self.assertIn(field, prompt,
+                              "%s.%s is declared and never shown to the model"
+                              % (collection, field))
+
+    def test_CH_SURFACE_02_the_schema_is_rendered_not_restated(self):
+        """One list, not three. The schema block is generated from the envelope,
+        so a field cannot be present in one and absent from the other."""
+        source = open(os.path.join(_REPO, "ver3", "assy_v3", "stages",
+                                   "s02_obligation_and_candidates.py")).read()
+        self.assertIn("{response_schema}", source,
+                      "the response schema is hand-written again")
+        rendered = self.stage.render_response_schema()
+        for collection, _f, _p, fields, _s in self.stage.RESPONSE_ENVELOPE:
+            self.assertIn("%s[]" % collection, rendered)
+            for field in fields:
+                self.assertIn(field, rendered)
+
+    def test_CH_SURFACE_03_04_removing_or_renaming_a_field_changes_the_schema(self):
+        """A rename or omission in the envelope is visible in what the model reads,
+        which is what makes the two impossible to maintain separately."""
+        original = S02ObligationAndCandidates.RESPONSE_ENVELOPE
+        try:
+            trimmed = tuple(
+                (c, f, p, tuple(x for x in fields if x != "reacted_at_site"), s)
+                for c, f, p, fields, s in original)
+            S02ObligationAndCandidates.RESPONSE_ENVELOPE = trimmed
+            self.assertNotIn("reacted_at_site",
+                             self.stage.render_response_schema(),
+                             "removing a field left the model-facing schema "
+                             "unchanged, so the two can drift")
+            renamed = tuple(
+                (c, f, p, tuple("obligations_addressed"
+                                if x == "addresses_obligations" else x
+                                for x in fields), s)
+                for c, f, p, fields, s in original)
+            S02ObligationAndCandidates.RESPONSE_ENVELOPE = renamed
+            self.assertIn("obligations_addressed",
+                          self.stage.render_response_schema(),
+                          "a rename did not reach the model-facing schema")
+        finally:
+            S02ObligationAndCandidates.RESPONSE_ENVELOPE = original
+
+    def test_CH_PRI_03_no_live_wording_makes_principle_a_scalar(self):
+        """Every live mention of the field states the mapping."""
+        prompt = self.stage.prompt({"consumer_view": {}})
+        self.assertIn("{function_class: principle_family}", prompt)
+        self.assertIn("ONE-ENTRY MAPPING", prompt.upper())
+        for phrase in ("principle is one of", "choose one principle",
+                       "principle: a principle family"):
+            self.assertNotIn(phrase.lower(), prompt.lower(), phrase)

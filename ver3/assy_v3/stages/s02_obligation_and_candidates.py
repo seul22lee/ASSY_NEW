@@ -164,30 +164,7 @@ list. A
 list may be empty - an empty list is a value. Every field is required unless
 marked optional. Every id is a string in the format shown.
 
-  obligations[]           id "OBL-0001", statement, derived_from_requirements[],
-                          mandatory (boolean), scope, satisfiable_at,
-                          evidence_route, route_available (boolean),
-                          involves_actors[] (optional),
-                          derivation_premises[] (optional)
-  load_cases[]            id "LC-0001", scenario, applied_to_role,
-                          reacted_at_role, direction_class, kind,
-                          magnitude_or_status, reacted_at_site
-  reaction_site_requirements[]
-                          id "RSR-0001", scenario, boundary_side, at_role,
-                          why (optional)
-  physical_effect_obligations[]
-                          id "PEO-0001", effect, between_roles[],
-                          addresses_obligations[], under_load_case (optional),
-                          persistence (optional)
-  candidates[]            id "CND-0001", summary, family,
-                          principle {{function_class: principle_family}},
-                          addresses_obligations[], obligations_created[],
-                          evidence_route_verdict {{route, available (boolean),
-                          note}}, self_locking (optional)
-  acceptance_contracts[]  id "ACC-0001", candidate, obligations[], predicates[]
-  unresolved[]            id "UNR-0001", decision, why_open, alternatives[],
-                          alternatives_kind, kept_open_by[], blocks[]
-  assumptions[]           id "ASM-1001", statement, why, would_be_invalidated_by
+{response_schema}
 
 No required field may be null. Where the answer is "there are none", use an
 empty list for a list field. A null is not an answer; an empty list is.
@@ -323,6 +300,45 @@ class S02ObligationAndCandidates(Stage):
          ("statement", "why", "would_be_invalidated_by"), ("inferred_by_stage",)),
     )
 
+    #: How a field is shown to the model when its name alone is not enough.
+    #: Presentation only - requiredness and meaning stay in the contract.
+    FIELD_NOTES = {
+        "mandatory": "(boolean)", "route_available": "(boolean)",
+        # Rendered into the prompt as a VALUE, so single braces: it is not
+        # passed through str.format a second time.
+        "principle": "{function_class: principle_family}",
+        "evidence_route_verdict": "{route, available (boolean), note}",
+    }
+
+    @classmethod
+    def render_response_schema(cls) -> str:
+        """The response schema, RENDERED FROM THE ENVELOPE.
+
+        It used to be a hand-written block beside a hand-written envelope beside
+        the contract - the same field list in three places, which is how a field
+        drifts. Now there is one list: the envelope declares it, the contract says
+        whether it is required, and this renders what the model reads.
+        """
+        import textwrap
+        from ..state.design_state import Contracts
+        contracts = Contracts()
+        lines = []
+        for collection, family, prefix, fields, _supplied in cls.RESPONSE_ENVELOPE:
+            required = set(contracts.families[family].get("required_fields") or [])
+            shown = ['id "%s0001"' % prefix]
+            for field in fields:
+                note = cls.FIELD_NOTES.get(field, "")
+                mark = "" if field in required else " (optional)"
+                shown.append("%s%s%s" % (field, (" " + note) if note else "", mark))
+            body = textwrap.wrap(", ".join(shown), 52)
+            head = "  %-22s " % (collection + "[]")
+            if len(head) > 25:
+                lines.append("  %s[]" % collection)
+                head = " " * 25
+            lines.append(head + body[0])
+            lines.extend(" " * 25 + part for part in body[1:])
+        return "\n".join(lines)
+
     stage_id = "s02"
     purpose = "derive obligations and load cases, and form candidate principle families"
 
@@ -334,6 +350,7 @@ class S02ObligationAndCandidates(Stage):
         return PROMPT.format(families=_render_families(), routes=_render_routes(),
                              effects=" | ".join(EFFECT_KINDS),
                              collections=len(self.RESPONSE_ENVELOPE),
+                             response_schema=self.render_response_schema(),
                              projection=_render_consumer_view(proj))
 
     # ------------------------------------------------------------ operations

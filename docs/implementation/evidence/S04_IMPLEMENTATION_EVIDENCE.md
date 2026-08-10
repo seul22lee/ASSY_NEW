@@ -1058,7 +1058,7 @@ regression detected · F ✓ zero active S-4 nonconforming rows · G ✓ U5 unch
 H ✓ both remaining incompleteness items owned · I ✓ the status matches what the
 tests prove · J ✓ the defect **class** is gated, not the two examples.
 
-## 12.11 CURRENT STATUS
+## 12.11 Status *(SUPERSEDED — closure claim at `1cfb1bb`, before the closure-hygiene correction; §13 is current)*
 
 **S-4 VERIFIED CLOSED — CANONICAL PROMPT MIGRATION AND PHYSICAL CLOSURE BOTH GATED.**
 
@@ -1070,5 +1070,129 @@ tests prove · J ✓ the defect **class** is gated, not the two examples.
    the canonical contract cannot drift apart in name, shape, collection or
    requiredness; that U5-1/2/3 stay enforced; and that no record can claim a
    producer is nonconforming when it conforms.
+
+**Impl S-5 has NOT begun.**
+
+
+---
+
+# 13. CLOSURE HYGIENE *(CURRENT STATUS)*
+
+Baseline `1cfb1bb`. This section supersedes §12.11 and every earlier status claim.
+It changed no engineering semantics: `s03_topology_and_mobility.py` is not in the
+diff, and U5-1/2/3 are untouched.
+
+## 13.1 What remained after `1cfb1bb`, and why it was hygiene
+
+| issue | pushed | requirement | correction |
+|---|---|---|---|
+| `FunctionalRegion` row still ACTIVE | in `legacy_producers.rows`, status read *"producer emits the same field names; the prompt no longer DEFINES them"* | that structure's own rule: *"a row here means … the producer does not yet conform … NOT a claim of conformance"* | moved to superseded |
+| gate keyed on a status **token** | checked `NONCONFORMING` / `NOT_YET_PRODUCED` | placement and ownership | rewritten to ownership |
+| schema vs envelope | schema hand-written beside the envelope beside the contract | one list | schema **rendered** from the envelope |
+| `principle` wording | schema and rule 3 both state the mapping | one meaning | **no contradiction found** — §13.3 |
+
+None of these is an engineering gap. All four are the same defect: a record or a
+surface that describes the system rather than being derived from it.
+
+## 13.2 FunctionalRegion — closed, and wrongly filed
+
+The migration was complete: the producer emits `required_by_actors` and
+`reach_targets`, and the s03 prompt cites the contract instead of redefining them.
+The row's own status text said so — **inside a structure whose meaning is
+non-conformance**. A completion note in an active list is still an active claim.
+
+Moved to `superseded_legacy_producers` with what was, what is, what closed it, and
+a `why_it_lingered` note recording exactly this: benign prose in an active list
+reads as done to a human and as open to a machine, and the machine was right.
+
+## 13.3 `principle` — the honest finding
+
+The reproduction did **not** find scalar-era wording contradicting the mapping.
+Every live mention concerns the *concept* "principle family" — which is what the
+mapping's values are — while the field itself is stated as a mapping in rule 3, in
+the worked example, and in the rendered schema. I am recording that rather than
+manufacturing a fix: the pre-flight expected a defect here and there is not one.
+
+What was added is a gate, `CH-PRI-03`, so the absence stays true: it asserts the
+mapping form and the one-entry sentence are present and that no phrasing making the
+field a scalar appears.
+
+## 13.4 The response schema is now rendered, not restated
+
+`render_response_schema()` generates the model-facing block from
+`RESPONSE_ENVELOPE`, with requiredness read from `DESIGN_STATE_CONTRACT`. The same
+field list previously lived in three places — envelope, schema block, contract —
+which is how a field drifts. Now:
+
+```
+DESIGN_STATE_CONTRACT   semantic authority (what a field is, whether required)
+RESPONSE_ENVELOPE       the JSON projection (which canonical fields, which surface)
+render_response_schema  the rendered view the model reads
+```
+
+`CH-SURFACE-03/04` prove it: removing a field from the envelope removes it from
+what the model reads, and renaming one renames it there. They cannot be maintained
+apart because there is only one of them.
+
+## 13.5 The gate reasons about placement, not prose
+
+`GATE-21` now fails if any row in the ACTIVE structure has an S-4 owner, whatever
+its status says — and first asserts that the structure still *means* what the check
+reads it to mean, so a contract rewording cannot silently disarm it.
+`CH-ACTIVE-02` proves the exact escape that happened: an S-4 row whose status reads
+*"producer now conforms; nothing left to do"* still fails. `CH-ACTIVE-04` proves a
+row formally transferred to S-5 does not.
+
+## 13.6 Active migration rows
+
+**Zero S-4-owned.** One active row remains: `MobilityExpectation domain and
+disposition split`, owner **S-5 / U-6 (ADR-005)**. Five rows in the superseded
+structure, all with their history intact.
+
+## 13.7 The chain, unchanged
+
+```
+view VIEW_READY · provider calls 1 · patch applies
+_s4_physical_problems   : []
+execution_status        : CONTRACT_INCOMPLETE
+declared_incompleteness : 'no blocking relation…' -> S-5 (R-C/R-D)
+                          'no assembly order'     -> the minimal probe authors none;
+                                                     AssemblyStep has a producer
+```
+
+Not forced to SUCCESS.
+
+## 13.8 Regression
+
+`711 run · 711 pass · 0 fail · 22 skipped` — 9 stale-recording, 12 R-B, 1
+freeze-gate. No recording touched.
+
+## 13.9 Static review
+
+`obligations_addressed`: zero in live prompt, parser, `to_operations` or rendered
+schema; the remainder are recorded probes, fixtures, tests asserting its retirement,
+and the S-9 profiler. No scalar tolerance — the one `isinstance(principle, dict)` is
+the rejection check itself. No shims, no coercion, no benchmark or model logic, no
+mobility work.
+
+## 13.10 Self-audit
+
+A ✓ zero active S-4 rows · B ✓ FunctionalRegion closed and superseded · C ✓ every
+live `principle` instruction means mapping · D ✓ envelope and schema cannot drift ·
+E ✓ optimistic prose does not rescue an active row · F ✓ both migrations canonical
+end to end · G ✓ U5 unchanged and the physical module untouched · H ✓
+`_s4_physical_problems == []` · I ✓ both remaining reasons later-owned · J ✓ no S-5
+implementation · K ✓ one CURRENT STATUS · L ✓ the claim matches the tests.
+
+## 13.11 CURRENT STATUS
+
+**S-4 VERIFIED CLOSED — NO ACTIVE S-4 MIGRATION DEBT REMAINS.**
+
+Physical U-5 semantics gated · canonical prompt migration gated · model-facing
+field and shape drift gated · zero S-4-owned active migration rows · historical
+defects preserved as history only · all remaining incompleteness later-owned.
+
+Deferred: **S-5** mobility/`blocking_relations` · **S-6** spatial · **S-7**
+selection · **S-8** assurance · **S-9** corpus refresh and live-chain.
 
 **Impl S-5 has NOT begun.**
