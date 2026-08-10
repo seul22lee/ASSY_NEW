@@ -25,25 +25,28 @@ authority_status:
     projected_key: creates
     projects: which families this stage owns
   current_producer:
-    class: "LEGACY_PRODUCER"
-    describes: "what the s03 runtime still emits, ahead of its scheduled migration"
+    class: RETIRED
+    describes: >
+      the blocked_by / retained_by shapes this stage used to emit, and the
+      blocking_relation_rule section that modelled them - removed at the S-5
+      correction rather than left classified, because a classification for a
+      section the file no longer contains is metadata about nothing
     canonical_replacement: "ConstraintRelation (addressable) and PhysicalInteraction"
     canonical_source: "ver3/contracts/DESIGN_STATE_CONTRACT.yaml"
-    migration_step: "S-4 / U-5"
+    retired_by: "S-4 / U-5, completed at the S-5 correction"
     authoritative_for_canonical_semantics: false
-  blocking_relation_rule:
-    class: "LEGACY_PRODUCER"
-    describes: "the blocked_by relation the runtime still authors"
-    canonical_replacement: "ConstraintRelation"
-    canonical_source: "ver3/contracts/DESIGN_STATE_CONTRACT.yaml"
-    migration_step: "S-4 / U-5"
+  constraint_relation_rule:
+    class: OPERATIONAL
+    note: "the canonical relation's fields; the semantics live in DESIGN_STATE_CONTRACT"
     authoritative_for_canonical_semantics: false
   dof_disposition_rule:
-    class: "LEGACY_PRODUCER"
-    describes: "the disposition vocabulary the runtime still emits, without UNDISPOSITIONED"
-    canonical_replacement: "MobilityExpectation.authorship_split; UNDISPOSITIONED for an uncovered cell"
-    canonical_source: "ver3/contracts/DESIGN_STATE_CONTRACT.yaml"
-    migration_step: "S-5 / U-6 (ADR-005)"
+    class: OPERATIONAL
+    note: >
+      Now DESCRIBES the live derivation rather than a producer awaiting
+      migration. The canonical meaning lives in
+      DESIGN_STATE_CONTRACT.MobilityExpectation - the authorship split, the
+      disposition vocabulary and the premise declaration - and this section is a
+      reader's summary of it, binding nothing.
     authoritative_for_canonical_semantics: false
   engineering_question:
     class: OPERATIONAL
@@ -146,21 +149,24 @@ current_producer:
   # The retired relation names live HERE, inside an explicitly legacy section,
   # and not inside the canonical ownership projection. Structure rather than a
   # note: a reader and a test both see the classification without reading prose.
-  relates: [blocked_by, retained_by]
-  emits: [blocked_by, retained_by, ConstraintRelation, PhysicalInteraction]
+  relates: []
+  emits: [ConstraintRelation, PhysicalInteraction, MobilityExpectation]
   does_not_yet_emit: []
-  migration_step: "S-4 / U-5"
+  retired_shapes: [blocked_by, retained_by, blocking_relations, mobility, dof_dispositions]
   migration_status: >
-    DONE. s03b authors ConstraintRelation and PhysicalInteraction, and s02 authors
-    PhysicalEffectObligation and ReactionSiteRequirement. What survives from the
-    legacy shape is `blocking_relations[]` in the s03b response, which the
-    deterministic DOF expansion still consumes. It is COMPATIBILITY INPUT, not a
-    second authoritative physical truth; removing it is Impl S-5 (R-C/R-D).
+    RETIRED, not merely superseded. s03b authors ConstraintRelation and
+    PhysicalInteraction and DERIVES MobilityExpectation from them; s02 authors
+    PhysicalEffectObligation and ReactionSiteRequirement. Nothing in this stage
+    reads `blocking_relations`, `mobility` or `dof_dispositions` any more: the
+    alias table, the canonicaliser and the per-DOF relation reconstructor are
+    gone, and s03a's two undocumented parses of `mobility` and `dof_dispositions`
+    - which could still create MobilityExpectation cells from a stale recording
+    after S-5 believed the migration finished - are gone with them. Recordings in
+    those shapes are corpus debt (Impl S-9).
   why_recorded_historical: >
-    SUPERSEDED at S-4/U-5: ConstraintRelation and PhysicalInteraction ARE now
-    produced, so the sentence below no longer describes current behaviour. Kept
-    because it records why the gap was left open through S-2 and S-3, not as a
-    statement of fact about today.
+    SUPERSEDED at S-4/U-5 and completed at the S-5 correction. Kept because it
+    records why the gap was left open through S-2 and S-3, not as a statement of
+    fact about today.
     (historical) The canonical contract is deliberately ahead of this producer.
     Rewriting this file to claim ConstraintRelation is already produced would be
     false, and
@@ -177,8 +183,9 @@ engineering_question: >
   what reacts what, and in what order does it go together?
 
 engineering_responsibility: >
-  Turn a candidate family into a specific mechanism topology, and account for
-  EVERY degree of freedom in it.
+  Turn a candidate family into a specific mechanism topology, state what holds
+  it and how load leaves it, and account for EVERY degree of freedom in it - by
+  citing the premise that disposes each one, or by saying there is none.
 
 required_inputs:
   # Corrected in Window 2 by the producer/consumer audit. The previous list
@@ -194,8 +201,9 @@ required_discoveries:
   - "the bodies; and where a body is not rigid, its rigid groups and the compliant joints between them"
   - "every joint: type, participants, DOF, axis DIRECTION"
   - "every region where two bodies meet, and its interaction kind"
-  - "the disposition of EVERY degree of freedom in EVERY configuration"
-  - "for each BLOCKED_BY: which body blocks it, in which direction, and how to defeat it for testing"
+  - "every constraint relation: what it retains, which DOFs it removes, in which configurations, what drives it, and what PROVIDES it"
+  - "for each constraint relation: in which direction, and how a test would defeat it"
+  - "where a DOF is unloaded and unactuated: the scenario in which that holds"
   - "for each load case: the ordered path from the load to a reaction site, through THIS candidate"
   - "the assembly partial order, the access side per step, and the retention-termination strategy per retained body"
   - "the functional regions the design promises: access, support, keep-out, aperture"
@@ -210,22 +218,57 @@ owned_decisions:
   note: "This stage owns the MECHANISM."
 
 dof_disposition_rule:
-  principle: >
-    MobilityExpectation is a TOTAL function, not a declared set. For every rigid
-    group, in every configuration, every rigid-body DOF maps to exactly one of:
-    INTENDED | BLOCKED_BY(relation) | MAINTAINED_BY_CLASS(class) | IRRELEVANT_BECAUSE(reason)
+  domain: >
+    DETERMINISTIC AND TOTAL, and therefore BOOKKEEPING. Every rigid group x
+    configuration x rigid-body DOF cell exists because the enumerator makes it
+    exist. Its totality is guaranteed by the code that produces it and may never
+    be counted as engineering assurance.
+  disposition: >
+    From a PRESENT, TYPED, REFERENCEABLE PREMISE and from nothing else:
+    BLOCKED_BY citing a ConstraintRelation, INTENDED citing the Joint whose class
+    leaves the DOF free, IRRELEVANT_BECAUSE citing the Scenario in which it is
+    unloaded and unactuated. Which field carries which disposition's premise, and
+    what family it must resolve to, is declared in
+    DESIGN_STATE_CONTRACT.MobilityExpectation.field_semantics.dispositions and
+    enforced at the write boundary.
+  undispositioned: >
+    The value for a cell no premise covers, naming what is missing. It is not an
+    error to be repaired; it is the honest state, and a low disposition
+    completeness is a measurement rather than a regression.
+  applicability: >
+    A premise disposes the cells it DECLARES. A ConstraintRelation expands over
+    its own retained_group, blocked_dofs and configurations; one declaring no
+    configuration holds in none. A Joint declares no configuration set at all and
+    is unconditioned by construction.
+  retired_disposition: >
+    MAINTAINED_BY_CLASS is retired. Its evidence was a class STRING, which names
+    no entity and can never be a resolvable premise. See
+    DESIGN_STATE_CONTRACT.MobilityExpectation.retired_disposition_values.
   why_totality: >
     A declared set that omits a DOF cannot fail. All three BM-001 human-review
     rejections and BM-003 R2 were omissions from declared sets. Totality is
-    mechanically checkable; declaration is not.
+    mechanically checkable; declaration is not. What it is NOT is evidence - see
+    `domain` above.
   irrelevant_because_rule: >
-    IRRELEVANT_BECAUSE must name a scenario in which that DOF is both unloaded
-    and unactuated, cross-checked against the LoadCases. This converts the one
-    unverifiable disposition into a checkable one.
+    IRRELEVANT_BECAUSE must name a Scenario BY ID, and it must resolve. The
+    bounded check available here is scenario-level: a scenario carrying any load
+    case is not one in which a DOF is unloaded (S03-C3). Per-DOF load and
+    actuation resolution is the ENGINEERING CONSEQUENCE check the implementation
+    plan assigns to U-9, and nothing in this stage claims to perform it.
 
-blocking_relation_rule:
-  required_fields: [retained_group, blocked_direction, blocker_body, promised_features, configurations, defeat_specification, driver]
-  optional_fields: [depends_on_compliant_recovery]
+constraint_relation_rule:
+  # The blocking_relation_rule this replaced modelled a non-addressable
+  # `blocked_by` nested structure with a `blocker_body`. It was RETIRED at S-4 /
+  # U-5 and the last reader of its shape went at the S-5 correction; the
+  # canonical fields are below and in DESIGN_STATE_CONTRACT.ConstraintRelation.
+  required_fields: [retained_group, blocked_dofs, configurations, driver]
+  provider_rule: >
+    AT LEAST ONE of provider_body (a body of this mechanism) or
+    provider_reaction_site (a declared EXTERNAL site) must identify what provides
+    the constraint. provider_site says where it acts and does not answer that.
+  optional_fields: [blocked_direction, provider_body, provider_reaction_site,
+                    provider_site, maintaining_interaction, defeat_specification,
+                    release_transition]
   driver: [LOAD, KINEMATIC_NECESSITY, DECLARED_SCENARIO]
   driver_rationale: >
     A constraint may be required because a load must be reacted, OR because the
@@ -331,11 +374,19 @@ maturity_expectations:
 
 deterministic_exit_checks:
   - id: S03-C1
+    claim_class: BOOKKEEPING
     check: "DOF totality: every rigid group, in every configuration, has every DOF dispositioned exactly once"
+    never_assurance: >
+      The enumerator guarantees this. Passing it establishes nothing about the
+      design and it contributes to no establishment claim. The engineering
+      quantity is disposition completeness, which is REPORTED and not checked.
   - id: S03-C2
-    check: "every BLOCKED_BY resolves to a relation carrying a direction, a named blocker, a defeat specification and a driver"
+    claim_class: PROVENANCE_INTEGRITY
+    check: "every BLOCKED_BY cell cites a ConstraintRelation that exists, carrying a direction, a provider, a defeat specification and a driver"
   - id: S03-C3
-    check: "every IRRELEVANT_BECAUSE names a scenario in which the DOF is unloaded and unactuated, consistent with the LoadCases"
+    claim_class: PROVENANCE_INTEGRITY
+    check: "every IRRELEVANT_BECAUSE names a Scenario that resolves and that carries no load case"
+    bounded: "scenario-level. Per-DOF load and actuation resolution is U-9's ENGINEERING CONSEQUENCE check"
   - id: S03-C4
     check: "the assembly precedence relation is acyclic"
   - id: S03-C5
@@ -359,13 +410,17 @@ next_stage_consumer_requirement:
   consumer: s04a
   needs: [joint_graph, configurations, body_roles, functional_region_roles, packaging_obligations, actor_reach_requirements]
   consumer_b: s04b
-  needs_b: [total_dof_disposition, blocking_relations, assembly_steps_with_order_and_access_side, load_paths_as_hypotheses]
+  needs_b: [total_dof_disposition_with_cited_premises, constraint_relations,
+            assembly_steps_with_order_and_access_side, load_paths_as_hypotheses]
 
 llm_role: >
-  High for topology and strategy proposal. NONE for DOF totality: the domain is
-  enumerated mechanically from the joint graph, and the LLM only dispositions
-  each entry.
+  High for topology and strategy proposal. NONE for the DOF grid, in either half
+  of it: the domain is enumerated mechanically from the joint graph, and each
+  disposition is derived from a relation, a joint or an authored irrelevance the
+  model wrote. The model is not asked to disposition cells and no response field
+  accepts one - a per-cell answer cannot carry the premise the disposition needs.
 knowledge_base_role: >
-  Per capability: the standard DOF disposition template, the standard blocking
-  relations, and the retention trichotomy. This is the checklist BM-001's human
-  reviewer supplied by hand three times.
+  Per capability: the standard constraint relations and the retention
+  trichotomy. This is the checklist BM-001's human reviewer supplied by hand
+  three times. The DOF disposition template is gone from this list because the
+  disposition is no longer authored from a template.

@@ -125,9 +125,16 @@ class _Base(_fixtures.StateBuilder, unittest.TestCase):
             state, state.run_id)
         self.assertIsNotNone(a.patch, a.problems)
         state.apply(a.patch)
+        # s03b's view carries the topology s03a just committed. It has to: the
+        # DOF domain is derived from THIS invocation's view, which is what keeps
+        # one candidate's domain out of another's, so an empty view would derive
+        # an empty grid - correctly, and with nothing for a lineage test to read.
         b = S03BMobilityAndAssembly().run(
-            provider, {"consumer_view": {}, "candidate": candidate_id}, state,
-            state.run_id, attempt=2)
+            provider, {"consumer_view": {
+                "RigidGroup": state.family("RigidGroup"),
+                "Configuration": state.family("Configuration"),
+                "Joint": state.family("Joint")},
+                "candidate": candidate_id}, state, state.run_id, attempt=2)
         self.assertIsNotNone(b.patch, b.problems)
         state.apply(b.patch)
         return a, b, {"candidate": candidate_id}
@@ -162,15 +169,21 @@ class TestLineagePopulation(_Base):
 
     def test_LINEAGE_02b_the_derived_disposition_carries_it_too(self):
         """The DOF totality is derived, not authored - and is still this
-        candidate's, so it is stamped by the stage that derives it."""
+        candidate's, so it is stamped by the stage that derives it.
+
+        Read off `b.patch` rather than from a separate call: at the S-5
+        correction the derivation moved inside the invocation, so the lineage
+        question is now about the operations the stage actually emitted.
+        """
         s = self.upstream()
-        _a, _b, demands = self.direct_s03(s, "CND-0001")
-        ops = S03BMobilityAndAssembly().derived_operations(
-            S03B_RESPONSE, ["RGP-0001"], ["CFG-0001"],
-            [dict(j) for j in s.family("Joint")], demands)
+        _a, b, _d = self.direct_s03(s, "CND-0001")
+        ops = [op for op in b.patch.operations
+               if op.entity_type == "MobilityExpectation"]
         self.assertTrue(ops, "no disposition derived")
         for op in ops:
             self.assertEqual(["CND-0001"], list(op.premise_refs))
+            self.assertEqual("s03:derivation", op.provenance_ref,
+                             "derived work is not distinguishable from authored")
 
     def test_LINEAGE_03_window_execution_preserves_the_same_lineage(self):
         from ver3.tools import run_window2
@@ -232,25 +245,16 @@ class TestLineagePopulation(_Base):
                             "s03b never ran, so this proves no equivalence")
         self.assertIsNotNone(b.patch, b.problems)
         direct.apply(b.patch)
-        # The deterministic DOF disposition is part of the same production step:
-        # `derived_operations` lives on the stage, and the window path runs it. It
-        # is included here rather than excluded from the comparison, so the R-C
-        # residual (its orchestration is still runner-bound, owner S-5) cannot
-        # hide a lineage difference behind it.
-        ops = S03BMobilityAndAssembly().derived_operations(
-            S03B_RESPONSE,
-            [g["entity_id"] for g in direct.family("RigidGroup")],
-            [c["entity_id"] for c in direct.family("Configuration")],
-            [dict(j) for j in direct.family("Joint")],
-            {"candidate": "CND-0001"})
-        if ops:
-            direct.apply(StagePatch(
-                patch_id="%s-s03-derived" % direct.run_id, run_id=direct.run_id,
-                stage_id="s03", stage_attempt=3,
-                parent_state_hash=direct.state_hash(), operations=ops,
-                execution_status="SUCCESS",
-                provenance={"purpose": "derive the total DOF disposition",
-                            "provider": "deterministic"}))
+        # NOTHING IS DONE HERE TO MAKE THE TWO PATHS MATCH. This test used to
+        # re-run `derived_operations` by hand on the direct path, because only
+        # the window path performed it - the R-C residual, owned by S-5. That
+        # step is deleted rather than updated: the derivation is inside the
+        # invocation now, so `b.patch` already carries it, and if it did not, the
+        # comparison below would fail instead of being repaired above it.
+        self.assertTrue([op for op in b.patch.operations
+                         if op.entity_type == "MobilityExpectation"],
+                        "the invocation derived no disposition, so the direct "
+                        "path would be missing state the window path has")
         self.assertEqual(dp.n, wp.n, "the two paths called the provider a "
                                      "different number of times")
         self.assertEqual(2, dp.n, "s03a and s03b must each have been called once")

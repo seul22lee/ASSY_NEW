@@ -260,8 +260,30 @@ class TestConceptResolutions(_Corpus):
         self.assertEqual("DERIVED", split["domain"]["authority_class"])
         self.assertEqual("AUTHORITATIVE", split["disposition"]["authority_class"])
         self.assertTrue(split["disposition"]["premise_required"])
-        self.assertEqual("ConstraintRelation", split["disposition"]["premise_target"])
+        # WHICH premise is per disposition. A single premise_target named only
+        # BLOCKED_BY's, so INTENDED and IRRELEVANT_BECAUSE had no declared
+        # evidence type at all - and none of the three was checkable, because a
+        # premise inside a list of records was invisible to both boundaries.
+        self.assertEqual("field_semantics.dispositions.premise_field",
+                         split["disposition"]["premise_target"])
+        premise = me["field_semantics"]["dispositions"]
+        self.assertEqual("premise_record_list", premise["kind"])
+        self.assertEqual("disposition", premise["discriminator"])
+        self.assertEqual({"INTENDED": "by_joint",
+                          "BLOCKED_BY": "constraint_relation",
+                          "IRRELEVANT_BECAUSE": "scenario",
+                          "UNDISPOSITIONED": None}, premise["premise_field"])
+        for field, target in (("by_joint", "Joint"),
+                              ("constraint_relation", "ConstraintRelation"),
+                              ("scenario", "Scenario")):
+            spec = premise["record_field_semantics"][field]
+            self.assertEqual("reference", spec["kind"])
+            self.assertEqual(target, spec["target"])
+            self.assertFalse(spec["resolvable"], "%s may dangle" % field)
         self.assertIn("UNDISPOSITIONED", me["disposition_values"])
+        # Retired, with the record of why kept beside the live vocabulary.
+        self.assertNotIn("MAINTAINED_BY_CLASS", me["disposition_values"])
+        self.assertIn("MAINTAINED_BY_CLASS", me["retired_disposition_values"])
         # Totality is bookkeeping, and the contract says so in as many words.
         self.assertIn("BOOKKEEPING", split["domain"]["totality"])
 

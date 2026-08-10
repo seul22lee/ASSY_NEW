@@ -402,14 +402,21 @@ class TestS4ExitAudit(_fixtures.StateBuilder, unittest.TestCase):
 
     # -- the boundary S-4 must not cross ------------------------------
     def test_S4_no_later_stage_work_was_pulled_forward(self):
+        """SPATIAL and SELECTION work stays where it belongs.
+
+        MobilityExpectation left this list at S-5: s03b derives it from the
+        relations it authors, in its own patch, and its absence here would now
+        mean the derivation had gone missing rather than that a boundary was
+        respected. The families below are S-6 and S-7 work and nothing in the
+        physical layer may produce them.
+        """
         s, inv = self.base()
         provider = _Canned(_s03b("A"))
         s.apply(S03BMobilityAndAssembly().invoke(
             provider, s, s.run_id, {"candidate": "CND-A"}, attempt=2,
             invocation=inv).patch)
-        for family in ("MobilityExpectation", "Envelope", "ReferenceScale",
-                       "State", "Transition", "SweptVolume", "SelectionDecision",
-                       "EliminationRecord"):
+        for family in ("Envelope", "ReferenceScale", "State", "Transition",
+                       "SweptVolume", "SelectionDecision", "EliminationRecord"):
             self.assertEqual([], s.family(family),
                              "%s belongs to a later step" % family)
 

@@ -28,7 +28,9 @@ _REPO = os.path.abspath(os.path.join(_HERE, "..", "..", ".."))
 import ver3.assy_v3.stages.s03_topology_and_mobility as s03            # noqa: E402
 from ver3.assy_v3.stages.s03_topology_and_mobility import (            # noqa: E402
     DOF_NAMES, S03BMobilityAndAssembly, derive_mobility)
-from ver3.assy_v3.state.design_state import Contracts                   # noqa: E402
+from ver3.assy_v3.state.design_state import (Contracts,                 # noqa: E402
+                                             ContractError, DesignState)
+from ver3.assy_v3.state.patch import Op, StagePatch                     # noqa: E402
 
 JOINT = {"entity_id": "JNT-A", "child_group": "RGP-A",
          "joint_type": "REVOLUTE", "axis_direction": "+Z"}
@@ -143,12 +145,38 @@ class TestDisposition(unittest.TestCase):
                          _cell(rows, "RGP-A", "CFG-B", "TZ")["disposition"],
                          "a constraint declared for one configuration governed another")
 
-    def test_S5_DISP_06_a_relation_naming_no_configuration_covers_all(self):
-        """`configurations: []` means the relation holds wherever the group is."""
+    def test_S5_DISP_06_a_relation_naming_no_configuration_holds_in_none(self):
+        """SUPERSEDES the S-5 reading that `configurations: []` meant everywhere.
+
+        Proposal 11.3 permits deterministic "expansion of an authored relation
+        over the DOFs and configurations IT DECLARES". A relation that declares
+        none has said nothing about configurations, and reading silence as the
+        widest possible claim is the same defect as MAINTAINED_BY_CLASS-from-
+        absence in a branch nobody was looking at. s03b reports the relation as
+        incomplete instead.
+        """
         rows = _rows(constraints=[dict(RELATION, configurations=[])],
                      configurations=("CFG-A", "CFG-B"))
         for cfg in ("CFG-A", "CFG-B"):
-            self.assertEqual("BLOCKED_BY", _cell(rows, "RGP-A", cfg, "TZ")["disposition"])
+            self.assertEqual("UNDISPOSITIONED",
+                             _cell(rows, "RGP-A", cfg, "TZ")["disposition"])
+        found = S03BMobilityAndAssembly()._s5_mobility_problems(
+            {"constraint_relations": [dict(RELATION, configurations=[])]},
+            {"consumer_view": {}})
+        self.assertTrue(found and "no configuration" in found[0], found)
+
+    def test_S5_DISP_06b_a_joint_is_unconditioned_because_it_declares_nothing(self):
+        """Silence about a field that exists is not a field that does not exist.
+
+        A ConstraintRelation HAS a configurations field, so leaving it empty is
+        the author declining to say. A Joint has none, so its freedom is
+        unconditioned by construction rather than by default - which is why the
+        two empty-looking cases get opposite answers.
+        """
+        self.assertNotIn("configurations", JOINT)
+        rows = _rows(configurations=("CFG-A", "CFG-B"))
+        for cfg in ("CFG-A", "CFG-B"):
+            self.assertEqual("INTENDED", _cell(rows, "RGP-A", cfg, "RZ")["disposition"])
 
     def test_S5_INF_03_unrelated_entities_do_not_dispose_a_cell(self):
         before = _cell(_rows(), "RGP-A", "CFG-A", "TX")["disposition"]
@@ -205,7 +233,10 @@ class TestCanonicalConstraintInput(unittest.TestCase):
     def test_S5_LEGACY_03_a_response_without_it_derives_normally(self):
         parsed = {"constraint_relations": [RELATION], "irrelevance": []}
         rows = self.stage.derived_operations(
-            parsed, ["RGP-A"], ["CFG-A"], [JOINT], {"candidate": "CND-A"})
+            parsed, {"consumer_view": {"RigidGroup": [{"entity_id": "RGP-A"}],
+                                       "Configuration": [{"entity_id": "CFG-A"}],
+                                       "Joint": [JOINT]},
+                     "candidate": "CND-A"}, None)
         self.assertTrue(rows, "no mobility was derived without the legacy channel")
         dispositions = {d["disposition"]
                         for op in rows for d in op.fields["dispositions"]}
@@ -214,57 +245,185 @@ class TestCanonicalConstraintInput(unittest.TestCase):
 
 
 class TestMobilityCompleteness(unittest.TestCase):
-    """The S-5 layer reports evidence problems; it does not repair them."""
+    """The S-5 layer reports evidence that reaches no cell; it repairs nothing.
+
+    SUPERSEDES the S-5 version of this class, which recomputed the whole grid
+    inside `completeness` to check that every disposition cited a resolvable
+    premise. Two problems: a second derivation of the same fact is the shape of
+    the defect being checked for, and a rule enforced in one stage's completeness
+    method binds one producer. That rule now lives at the WRITE BOUNDARY, where
+    the contract declares which field carries which disposition's premise - see
+    TestPremiseIsTyped, which exercises it through `state.apply`.
+    """
 
     @classmethod
     def setUpClass(cls):
         cls.stage = S03BMobilityAndAssembly()
 
-    def problems(self, entries, relations=(RELATION,)):
+    def problems(self, relations=(RELATION,), irrelevance=()):
         return self.stage._s5_mobility_problems(
-            {"constraint_relations": list(relations), "_derived_mobility": entries},
-            {"consumer_view": {}})
+            {"constraint_relations": list(relations),
+             "irrelevance": list(irrelevance)}, {"consumer_view": {}})
 
-    def test_an_undispositioned_cell_is_not_an_error(self):
-        """It is the honest state. Reporting it is the point of the value."""
+    def test_sufficient_evidence_is_not_a_problem(self):
         self.assertEqual([], self.problems(
-            [{"rigid_group": "RGP-A", "configuration": "CFG-A", "dof": "TX",
-              "disposition": "UNDISPOSITIONED", "missing": "nothing covers it"}]))
+            irrelevance=[{"rigid_group": "RGP-A", "configuration": "CFG-A",
+                          "dof": ["TX"], "scenario": "SCN-1"}]))
 
-    def test_a_disposition_whose_premise_does_not_resolve_is_reported(self):
-        found = self.problems(
-            [{"rigid_group": "RGP-A", "configuration": "CFG-A", "dof": "TZ",
-              "disposition": "BLOCKED_BY", "constraint_relation": "CRL-GHOST"}])
-        self.assertTrue(found and "CRL-GHOST" in found[0], found)
+    def test_a_relation_that_reaches_no_configuration_is_reported(self):
+        found = self.problems(relations=[dict(RELATION, configurations=[])])
+        self.assertTrue(found and "CRL-A" in found[0], found)
 
-    def test_a_disposition_citing_nothing_is_reported(self):
-        for entry, marker in (
-                ({"disposition": "BLOCKED_BY"}, "no premise"),
-                ({"disposition": "INTENDED"}, "no joint"),
-                ({"disposition": "IRRELEVANT_BECAUSE"}, "no named scenario"),
-                ({"disposition": "MAINTAINED_BY_CLASS"}, "no class named")):
-            base = {"rigid_group": "RGP-A", "configuration": "CFG-A", "dof": "TX"}
-            base.update(entry)
-            found = self.problems([base])
-            self.assertTrue(found and marker in found[0],
-                            "%s: %s" % (entry["disposition"], found))
+    def test_an_irrelevance_claim_that_reaches_no_cell_is_reported(self):
+        for missing in ("rigid_group", "configuration", "scenario", "dof"):
+            claim = {"rigid_group": "RGP-A", "configuration": "CFG-A",
+                     "dof": ["TX"], "scenario": "SCN-1"}
+            claim[missing] = [] if missing == "dof" else ""
+            found = self.problems(irrelevance=[claim])
+            self.assertTrue(found and missing in found[0],
+                            "%s: %s" % (missing, found))
 
     def test_it_reports_and_does_not_repair(self):
-        entries = [{"rigid_group": "RGP-A", "configuration": "CFG-A", "dof": "TZ",
-                    "disposition": "BLOCKED_BY", "constraint_relation": "CRL-GHOST"}]
-        before = json.dumps(entries, sort_keys=True)
-        self.problems(entries)
-        self.assertEqual(before, json.dumps(entries, sort_keys=True))
+        relations = [dict(RELATION, configurations=[])]
+        before = json.dumps(relations, sort_keys=True)
+        self.problems(relations=relations)
+        self.assertEqual(before, json.dumps(relations, sort_keys=True))
 
-    def test_MAINTAINED_BY_CLASS_survives_only_when_justified(self):
-        """The contract keeps the value; S-5 removes it as an absence default."""
+    def test_MAINTAINED_BY_CLASS_is_retired_from_the_live_vocabulary(self):
+        """SUPERSEDES "the contract keeps the value".
+
+        S-5 stopped writing it from absence but left it legal, which kept a
+        disposition nothing could back: its evidence was a `holding_class`
+        STRING, and a string names no entity, so it can never be the resolvable
+        premise U-6 requires. No frozen source supplies one - proposal 11.2 and
+        20.2 enumerate exactly INTENDED, CONSTRAINED, IRRELEVANT and
+        UNDISPOSITIONED. A cell it would have covered is UNDISPOSITIONED, which
+        is the true statement.
+        """
         contracts = Contracts()
-        values = contracts.families["MobilityExpectation"]["disposition_values"]
-        self.assertIn("MAINTAINED_BY_CLASS", values)
-        self.assertIn("UNDISPOSITIONED", values)
-        self.assertEqual([], self.problems(
-            [{"rigid_group": "RGP-A", "configuration": "CFG-A", "dof": "TX",
-              "disposition": "MAINTAINED_BY_CLASS", "holding_class": "REVOLUTE"}]))
+        family = contracts.families["MobilityExpectation"]
+        self.assertNotIn("MAINTAINED_BY_CLASS", family["disposition_values"])
+        self.assertNotIn("MAINTAINED_BY_CLASS", s03.DISPOSITIONS)
+        self.assertIn("UNDISPOSITIONED", family["disposition_values"])
+        retired = family["retired_disposition_values"]["MAINTAINED_BY_CLASS"]
+        self.assertTrue(retired["why_retired"].strip(),
+                        "a value was deleted with no record of why")
+
+
+class TestPremiseIsTyped(_fixtures.StateBuilder, unittest.TestCase):
+    """A disposition's premise is a TYPED REFERENCE, checked where state changes.
+
+    Field presence proves nothing: `constraint_relation: "CRL-GHOST"` is a string
+    in a premise-shaped field. These go through `state.apply`, so what they
+    falsify is the boundary every producer passes through - not this producer's
+    good intentions.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.c = Contracts()
+
+    def state(self):
+        s = DesignState(run_id="premise")
+        self.add(s, "s01", "Requirement", "REQ-1", quantity_class="BAND")
+        self.add(s, "s01", "Actor", "ACT-1")
+        self.add(s, "s01", "Scenario", "SCN-1", actors=["ACT-1"])
+        self.add(s, "s03", "Body", "BOD-1")
+        self.add(s, "s03", "RigidGroup", "RGP-1", body="BOD-1", members=["BOD-1"])
+        self.add(s, "s03", "Configuration", "CFG-1", bodies_present=["BOD-1"])
+        self.add(s, "s03", "Joint", "JNT-1", parent_group="RGP-1",
+                 child_group="RGP-1", joint_type="REVOLUTE", axis_direction="+Z",
+                 dof=["RZ"], frame_ids=["F1"])
+        self.add(s, "s03", "ConstraintRelation", "CRL-1", retained_group="RGP-1",
+                 blocked_dofs=["TZ"], configurations=["CFG-1"], driver="LOAD",
+                 provider_body="BOD-1")
+        return s
+
+    def write(self, s, *dispositions):
+        s.apply(StagePatch(
+            patch_id="mex-%d" % len(s.applied_patches), run_id=s.run_id,
+            stage_id="s03", stage_attempt=1, parent_state_hash=s.state_hash(),
+            operations=[Op("CREATE", "MobilityExpectation", "MEX-CFG-1",
+                           {"configuration": "CFG-1",
+                            "dispositions": list(dispositions)}, "s03:derivation")],
+            execution_status="SUCCESS", provenance={"provider": "t"}))
+
+    def cell(self, **over):
+        base = {"rigid_group": "RGP-1", "configuration": "CFG-1", "dof": "TZ"}
+        base.update(over)
+        return base
+
+    def test_GEN_PREM_01_a_well_formed_premise_is_accepted(self):
+        s = self.state()
+        self.write(s,
+                   self.cell(disposition="BLOCKED_BY", constraint_relation="CRL-1"),
+                   self.cell(dof="RZ", disposition="INTENDED", by_joint="JNT-1"),
+                   self.cell(dof="TX", disposition="IRRELEVANT_BECAUSE",
+                             scenario="SCN-1"),
+                   self.cell(dof="TY", disposition="UNDISPOSITIONED",
+                             missing="nothing covers it"))
+        self.assertEqual(4, len(s.entities["MEX-CFG-1"]["dispositions"]))
+
+    def test_GEN_PREM_02_a_citation_that_resolves_to_nothing_is_refused(self):
+        s = self.state()
+        with self.assertRaises(ContractError) as caught:
+            self.write(s, self.cell(disposition="BLOCKED_BY",
+                                    constraint_relation="CRL-GHOST"))
+        self.assertIn("DANGLING_REF", str(caught.exception))
+
+    def test_GEN_PREM_03_prose_in_a_premise_field_is_refused(self):
+        """R-20: a free-string subject is a schema error, not a warning."""
+        s = self.state()
+        with self.assertRaises(ContractError) as caught:
+            self.write(s, self.cell(disposition="IRRELEVANT_BECAUSE",
+                                    scenario="the drawer is closed and nothing pushes it"))
+        self.assertIn("REFERENCE_NOT_AN_ID", str(caught.exception))
+
+    def test_GEN_PREM_04_a_premise_of_the_wrong_family_is_refused(self):
+        """The whole point of typing it. A Joint is not evidence of a constraint."""
+        s = self.state()
+        with self.assertRaises(ContractError) as caught:
+            self.write(s, self.cell(disposition="BLOCKED_BY",
+                                    constraint_relation="JNT-1"))
+        self.assertIn("REFERENCE_FAMILY", str(caught.exception))
+
+    def test_GEN_PREM_05_a_disposition_with_no_premise_at_all_is_refused(self):
+        s = self.state()
+        for disposition in ("BLOCKED_BY", "INTENDED", "IRRELEVANT_BECAUSE"):
+            with self.assertRaises(ContractError) as caught:
+                self.write(s, self.cell(disposition=disposition))
+            self.assertIn("PREMISE_MISSING", str(caught.exception))
+
+    def test_GEN_PREM_06_another_kinds_premise_does_not_count_as_this_ones(self):
+        """Otherwise "cite a ConstraintRelation" is satisfied by citing a Joint
+        under a different key, and the declaration is not a type."""
+        s = self.state()
+        with self.assertRaises(ContractError) as caught:
+            self.write(s, self.cell(disposition="BLOCKED_BY",
+                                    constraint_relation="CRL-1", by_joint="JNT-1"))
+        self.assertIn("PREMISE_WRONG_KIND", str(caught.exception))
+
+    def test_GEN_PREM_07_UNDISPOSITIONED_is_the_only_legal_way_to_hold_none(self):
+        s = self.state()
+        self.write(s, self.cell(disposition="UNDISPOSITIONED", missing="none"))
+        self.assertEqual("UNDISPOSITIONED",
+                         s.entities["MEX-CFG-1"]["dispositions"][0]["disposition"])
+
+    def test_GEN_PREM_08_a_retired_disposition_cannot_enter_state(self):
+        s = self.state()
+        with self.assertRaises(ContractError) as caught:
+            self.write(s, self.cell(disposition="MAINTAINED_BY_CLASS",
+                                    holding_class="REVOLUTE"))
+        self.assertIn("PREMISE_KIND_UNKNOWN", str(caught.exception))
+
+    def test_GEN_PREM_09_the_rule_binds_every_producer_not_this_one(self):
+        """Nothing above went through s03b. The boundary is what is being tested."""
+        import inspect
+        source = inspect.getsource(type(self).test_GEN_PREM_02_a_citation_that_resolves_to_nothing_is_refused)
+        self.assertNotIn("S03B", source)
+        self.assertIsNotNone(
+            Contracts().premise_record_spec("MobilityExpectation", "dispositions"),
+            "the declaration the boundary reads is gone")
 
 
 class TestS5Metadata(unittest.TestCase):
@@ -332,30 +491,57 @@ class TestS4FreezeAndChain(_fixtures.StateBuilder, unittest.TestCase):
         self.assertNotIn("disposition", src,
                          "the S-4 layer started reasoning about mobility")
 
-    def test_S5_CHAIN_the_probe_derives_mobility_from_its_own_topology(self):
+    def test_S5_CHAIN_the_invocation_itself_produces_the_mobility(self):
+        """GEN-OWN-01. `invoke` is enough. No runner step, no second patch.
+
+        The derivation used to be called by `tools/run_window2.py` after the
+        stage returned, so this assertion could not have been written: a caller
+        that did not know to do that got a DesignState with no mobility in it and
+        nothing saying any was missing.
+        """
         tc, I = self.chain()
         s, provider, invocation = tc.chain()
         out = S03BMobilityAndAssembly().invoke(
             provider, s, s.run_id, {"candidate": "CND-A"}, attempt=2,
             invocation=invocation)
+        derived = [op for op in out.patch.operations
+                   if op.entity_type == "MobilityExpectation"]
+        self.assertTrue(derived, "invoke produced no mobility at all")
+        self.assertEqual({"s03:derivation"}, {op.provenance_ref for op in derived},
+                         "the derived rows are not marked as derived")
+        self.assertEqual({"s03b:relations"},
+                         {op.provenance_ref for op in out.patch.operations
+                          if op.entity_type == "ConstraintRelation"},
+                         "authored and derived work became indistinguishable")
         s.apply(out.patch)
-        parsed = json.loads(out.raw_response)
-        ops = S03BMobilityAndAssembly().derived_operations(
-            parsed, [g["entity_id"] for g in s.family("RigidGroup")],
-            [c["entity_id"] for c in s.family("Configuration")],
-            [dict(j) for j in s.family("Joint")], {"candidate": "CND-A"})
-        cells = [d for op in ops for d in op.fields["dispositions"]]
-        self.assertTrue(cells, "no mobility was derived")
+        cells = [d for m in s.family("MobilityExpectation")
+                 for d in m["dispositions"]]
         self.assertEqual({"RGP-A"}, {c["rigid_group"] for c in cells},
                          "candidate B topology entered A's mobility domain")
         blob = json.dumps(cells)
         self.assertNotIn("MAINTAINED_BY_CLASS", blob)
         self.assertIn("UNDISPOSITIONED", blob,
                       "a probe with one constraint should leave cells uncovered")
+        relations = {r["entity_id"] for r in s.family("ConstraintRelation")}
         for cell in cells:
             if cell["disposition"] == "BLOCKED_BY":
-                self.assertIn(cell["constraint_relation"],
-                              {r["id"] for r in parsed["constraint_relations"]})
+                self.assertIn(cell["constraint_relation"], relations)
+
+    def test_S5_CHAIN_GEN_OWN_02_two_callers_see_the_same_state(self):
+        """The decision criterion. Neither caller remembers anything."""
+        tc, I = self.chain()
+        seen = []
+        for _ in range(2):
+            s, provider, invocation = tc.chain()
+            out = S03BMobilityAndAssembly().invoke(
+                provider, s, s.run_id, {"candidate": "CND-A"}, attempt=2,
+                invocation=invocation)
+            s.apply(out.patch)
+            seen.append(json.dumps([m["dispositions"]
+                                    for m in s.family("MobilityExpectation")],
+                                   sort_keys=True))
+        self.assertTrue(seen[0], "no mobility was derived")
+        self.assertEqual(seen[0], seen[1])
 
     def test_S5_CHAIN_a_dof_without_disposition_stays_visible(self):
         """The second variant: remove the constraint and nothing fills the gap."""
@@ -364,8 +550,10 @@ class TestS4FreezeAndChain(_fixtures.StateBuilder, unittest.TestCase):
         parsed = json.loads(json.dumps(I._s03b("A")))
         parsed["constraint_relations"] = []
         ops = S03BMobilityAndAssembly().derived_operations(
-            parsed, ["RGP-A"], ["CFG-A"], [dict(j) for j in s.family("Joint")],
-            {"candidate": "CND-A"})
+            parsed, {"consumer_view": {"RigidGroup": [{"entity_id": "RGP-A"}],
+                                       "Configuration": [{"entity_id": "CFG-A"}],
+                                       "Joint": [dict(j) for j in s.family("Joint")][0:1]},
+                     "candidate": "CND-A"}, s)
         cells = [d for op in ops for d in op.fields["dispositions"]]
         self.assertEqual(len(DOF_NAMES), len(cells),
                          "the domain shrank when evidence was removed")

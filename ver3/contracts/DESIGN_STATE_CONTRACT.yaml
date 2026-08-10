@@ -226,6 +226,22 @@ field_semantics_rules:
   enum: >
     A closed vocabulary. Declared so a reference check does not mistake an
     enum member for an entity id.
+  premise_record_list: >
+    A field holding a LIST OF RECORDS, each of which asserts something and must
+    name the evidence for it. It declares `discriminator` (the record field
+    whose value says what kind of assertion this is), `premise_field` (that
+    value -> the record field that must carry its premise, or null where the
+    value is an explicit statement that there is no evidence) and
+    `record_field_semantics` (per record field, the same declarations a
+    top-level field uses, so a nested reference resolves by exactly the rule a
+    flat one does).
+    Introduced because a premise buried one level down was invisible to both
+    boundaries: the write boundary walked top-level fields only, so a citation
+    could be any string at all, and a contract could declare `premise_required`
+    without anything being able to check it. The discriminator is what makes the
+    premise TYPED rather than merely present - a record may not carry another
+    kind's premise field, so evidence of the wrong kind is a defect and not a
+    matter of interpretation.
 
 entity_families:
 
@@ -1243,6 +1259,46 @@ assurance_families:
         target: Configuration
         cardinality: one
         resolvable: false
+      # S-5 correction. `authorship_split.disposition` declared premise_required
+      # and premise_target in PROSE, and the premise itself was a bare string
+      # inside a list of records - a shape no boundary could see. The write
+      # boundary walks top-level fields, so `constraint_relation: "anything"`
+      # entered state unexamined, and "every disposition cites a resolvable
+      # premise" was a claim about the producer rather than a property of the
+      # data.
+      #
+      # ONE premise field per disposition, each with its own target family. That
+      # is what makes the premise TYPED: the disposition value selects which
+      # field must be present, and the field selects which family it must
+      # resolve to. A single premise_target could not do this - a Joint, a
+      # ConstraintRelation and a Scenario are three different kinds of evidence
+      # for three different claims, and collapsing them would make "is this the
+      # right kind of premise?" unanswerable.
+      dispositions:
+        kind: premise_record_list
+        discriminator: disposition
+        premise_field:
+          INTENDED: by_joint
+          BLOCKED_BY: constraint_relation
+          IRRELEVANT_BECAUSE: scenario
+          UNDISPOSITIONED: null
+        record_field_semantics:
+          by_joint:
+            kind: reference
+            target: Joint
+            cardinality: one
+            resolvable: false
+          constraint_relation:
+            kind: reference
+            target: ConstraintRelation
+            cardinality: one
+            resolvable: false
+          scenario:
+            kind: reference
+            target: Scenario
+            cardinality: one
+            resolvable: false
+            referent_population: DESIGN_WIDE
     owned_by: s03
     purpose: >
       Two different things about degrees of freedom, kept apart: which DOF cells
@@ -1252,8 +1308,9 @@ assurance_families:
     # indistinguishable - which is how a deterministic enumerator could appear to
     # have established a mobility conclusion.
     #
-    # CONTRACT ONLY. The derivation still behaves exactly as it did; changing it
-    # is S-5 / U-6 (ADR-005).
+    # LIVE at S-5 / U-6 (ADR-005): the derivation implements this split, and the
+    # premise declaration above is what makes `premise_required` checkable rather
+    # than asserted.
     authorship_split:
       domain:
         authority_class: DERIVED
@@ -1266,14 +1323,38 @@ assurance_families:
         authority_class: AUTHORITATIVE
         authored_by: "model, or strictly derived from an explicit sufficient premise"
         premise_required: true
-        premise_target: ConstraintRelation
+        # WHICH premise is per disposition and is declared, machine-readably, in
+        # field_semantics.dispositions.premise_field above. A single
+        # premise_target named only BLOCKED_BY's, so the other two dispositions
+        # had no declared evidence type at all.
+        premise_target: "field_semantics.dispositions.premise_field"
         meaning: "what is known about one cell, and on what evidence"
         completeness: >
           A separate, reported engineering quantity. NOT implied by domain
           totality, and not satisfied by it.
     required_fields: [entity_id, configuration, dispositions]
-    # UNDISPOSITIONED is vocabulary only at S-2; the behaviour is S-5 / U-6.
-    disposition_values: [INTENDED, BLOCKED_BY, MAINTAINED_BY_CLASS, IRRELEVANT_BECAUSE, UNDISPOSITIONED]
+    # The LIVE vocabulary. UNDISPOSITIONED was vocabulary only at S-2; the
+    # behaviour arrived at S-5 / U-6.
+    disposition_values: [INTENDED, BLOCKED_BY, IRRELEVANT_BECAUSE, UNDISPOSITIONED]
+    retired_disposition_values:
+      MAINTAINED_BY_CLASS:
+        retired_by: "S-5 / U-6 correction"
+        was: >
+          written by the derivation's else branch with a holding_class composed
+          from the first joint reaching the group, or the literal string "joint
+          class of no joint" when there was none
+        why_retired: >
+          Its evidence was a CLASS STRING. A string names no entity, so it can
+          never be the resolvable premise U-6 requires, and no frozen source
+          supplies one: proposal 11.2 and 20.2 enumerate exactly INTENDED,
+          CONSTRAINED, IRRELEVANT and UNDISPOSITIONED. S-5 stopped producing it
+          from absence but left it in the vocabulary, which kept a legal
+          disposition that nothing could back - an enum member preserved because
+          historical code used it. A cell a joint class would have "maintained"
+          is UNDISPOSITIONED, which is the true statement.
+        historical_data: >
+          Recordings and replays predating the retirement contain it. Corpus debt
+          (Impl S-9); no live producer emits it and the write boundary rejects it.
     rules:
       - >
         TOTALITY. dispositions is a TOTAL function: for every rigid group in the
@@ -1283,9 +1364,22 @@ assurance_families:
       - "BLOCKED_BY must cite an addressable ConstraintRelation by id. The former blocked_by relation had no identity, so the citation could not be resolved."
       - "UNDISPOSITIONED is the honest value for a cell no premise covers. Vocabulary at S-2; the behaviour is S-5."
       - >
+        A PREMISE DISPOSES THE CELLS IT DECLARES AND NO OTHERS. A ConstraintRelation
+        expands over its own retained_group, its own blocked_dofs and its own
+        configurations; one that declares no configuration holds in none, because
+        an empty declaration is the author saying nothing rather than saying
+        everywhere. A Joint declares no configuration set at all, so it is
+        unconditioned by construction - silence about a field that exists is not
+        the same fact as a field that does not.
+      - >
         IRRELEVANT_BECAUSE must name a scenario in which that DOF is both
         unloaded and unactuated, cross-checked against the LoadCases. This is
         what converts the one unverifiable disposition into a checkable one.
+        The scenario is a REFERENCE and must resolve. What the bounded check
+        establishes today is scenario-level: a scenario carrying any load case is
+        not one in which anything is unloaded. Per-DOF load and actuation
+        resolution is the ENGINEERING CONSEQUENCE check the plan assigns to U-9,
+        and no rule here should be read as claiming it already happens.
       - "This output is a mechanical FMEA obtained free from the joint graph."
 
   Witness:
@@ -1425,12 +1519,12 @@ superseded_legacy_producers:
     - concept: ConstraintRelation
       was: "s03 emitted the non-addressable blocked_by shape"
       now: "s03b authors ConstraintRelation with an id and a resolvable provider"
-      closed_by: "S-4 / U-5"
+      closed_by: "S-4 / U-5; the last reader removed at the S-5 correction"
       residual: >
-        `blocking_relations[]` survives in the s03b RESPONSE as compatibility
-        input for the deterministic DOF expansion. It is not a second
-        authoritative physical truth, S-4 completeness does not read it, and
-        removing it is Impl S-5 (R-C/R-D).
+        Recorded fixtures still contain `blocking_relations[]`. Corpus debt (Impl
+        S-9): no live path parses it, and the alias table, the canonicaliser and
+        the per-DOF relation reconstructor that made it usable are deleted. A run
+        record counts what a recording holds, which feeds nothing.
     - concept: Candidate.principle
       was: "the s02 prompt asked for a bare principle family; parsers tolerated a scalar"
       now: >
@@ -1465,11 +1559,41 @@ superseded_legacy_producers:
         IRRELEVANT_BECAUSE naming a scenario - and a cell no premise covers is
         UNDISPOSITIONED, naming what is missing. Disposition completeness is
         reported as an engineering quantity.
-      closed_by: "S-5 / U-6 (ADR-005)"
+      closed_by: "S-5 / U-6 (ADR-005), completed at the S-5 correction"
       residual: >
         Recorded fixtures predating the migration still contain the pre-split
         shape and the legacy blocking relations. Corpus debt (Impl S-9); no live
         path reads either.
+      why_it_took_two_passes: >
+        The first pass changed the derivation and declared the migration closed
+        while THREE live paths still contradicted it, and none of them was in the
+        function that was rewritten. s03a parsed `mobility` and `dof_dispositions`
+        into MobilityExpectation from two branches no prompt documented, so a
+        stale recording replayed through the topology pass still produced
+        MAINTAINED_BY_CLASS cells. The derivation itself was invoked by ONE
+        runner after the stage returned, so a second canonical caller got a state
+        with no mobility at all and no sign of it. And the premise the whole
+        migration is about was a bare string in a list of records, which no
+        boundary could see - `premise_required: true` was a sentence rather than
+        a property. Rewriting the defective function is not the same act as
+        removing every path that reaches its output.
+    - concept: MobilityExpectation premise typing and producer singularity
+      was: >
+        the disposition premise was an undeclared string inside `dispositions[]`,
+        invisible to the write boundary and to Source A; two live producers could
+        create the family and neither responsibility declared it as an output;
+        the derivation was owned by a runner; and a ConstraintRelation naming no
+        configuration was expanded over ALL of them
+      now: >
+        `dispositions` is a declared premise_record_list - the disposition value
+        selects which field must carry its premise and which family that premise
+        must resolve to, checked at the write boundary for every producer. s03b
+        declares MobilityExpectation as an output and derives it inside its own
+        invocation, in the same patch as the relations it derives from. s03a
+        parses no mobility at all. A relation disposes the configurations it
+        declares and no others.
+      closed_by: "S-5 correction"
+      residual: none
     - concept: FunctionalRegion.required_by_actors and reach_targets
       was: >
         the s03 prompt carried its own prose definition of these fields, so the

@@ -28,7 +28,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, REPO)
 
-from ver3.assy_v3.state.authority import thaw as _thaw                      # noqa: E402
 from ver3.assy_v3.view import InvocationContext                            # noqa: E402
 import yaml as _yaml                                                        # noqa: E402
 _RESPONSIBILITY = _yaml.safe_load(open(os.path.join(
@@ -41,7 +40,8 @@ from ver3.assy_v3.stages.s02_obligation_and_candidates import (             # no
     S02ObligationAndCandidates)
 from ver3.assy_v3.stages.s03_topology_and_mobility import (                 # noqa: E402
     S03BMobilityAndAssembly, S03TopologyAndMobility, assembly_acyclic_check,
-    blocking_relation_check, relations_of,
+    constraint_disposition_check, disposition_completeness,
+    legacy_shapes_in_recording,
     compliance_check, dof_totality_check, functional_region_check,
     interface_classification_check, irrelevance_check, load_path_check,
     no_magnitude_check, no_selection_check_s03, obligation_ownership_check,
@@ -63,7 +63,7 @@ OUT_ROOT = os.path.join(REPO, "ver3", "live_runs", "window2")
 
 S03_CHECKS = (
     ("dof_totality", dof_totality_check),
-    ("blocking_relation", blocking_relation_check),
+    ("constraint_disposition", constraint_disposition_check),
     ("irrelevance", irrelevance_check),
     ("assembly_acyclic", assembly_acyclic_check),
     ("load_path", load_path_check),
@@ -247,44 +247,32 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
         if outb.declared_incompleteness:
             fail("CONTRACT_CONDITION", "s03b declared incomplete",
                  outb.declared_incompleteness)
+        # ONE patch. The DOF disposition is derived INSIDE s03b's invocation and
+        # arrives in the same patch as the relations it derives from - this
+        # runner used to derive it afterwards, in a patch of its own, which meant
+        # a caller that did not know to do that got a DesignState with no
+        # mobility in it and no sign anything was missing.
         state.apply(outb.patch)
-        # DETERMINISTIC DERIVATION. The model authored relations; the pipeline
-        # expands them into the total DOF disposition. Bookkeeping the LLM used
-        # to do by hand, done here where it cannot be forgotten.
         try:
             parsed = json.loads(outb.raw_response or "{}")
         except Exception:                                           # noqa: BLE001
             parsed = {}
-        # S-5: mobility derives from the canonical ConstraintRelations now. The
-        # legacy parse survives only to RECORD what a pre-migration recording
-        # contained, which is S-9 corpus information and feeds no derivation.
-        relations, renames = relations_of(parsed)
-        rec["legacy_blocking_relations_in_response"] = len(relations)
         rec["constraint_relations_authored"] = len(
             parsed.get("constraint_relations") or [])
-        rec["field_renames_bound"] = len(renames)
-        rec["rename_examples"] = sorted(set(renames))[:6]
-        groups = [g["entity_id"] for g in state.family("RigidGroup")]
-        configs = [c["entity_id"] for c in state.family("Configuration")]
-        joints = [_thaw(j) for j in state.family("Joint")]
-        # The derivation, its operations AND its lineage all belong to the stage.
-        ops = stage_b.derived_operations(
-            parsed, groups, configs, joints,
-            {"candidate": candidate.get("entity_id")})
-        rec["dof_entries_derived"] = sum(len(o.fields["dispositions"]) for o in ops)
-        if ops:
-            dpatch = _Patch(patch_id="%s-s03-derived" % state.run_id,
-                            run_id=state.run_id, stage_id="s03", stage_attempt=3,
-                            parent_state_hash=state.state_hash(), operations=ops,
-                            execution_status="SUCCESS",
-                            provenance={"purpose": "derive the total DOF disposition",
-                                        "provider": "deterministic"},
-                            declared_incompleteness=[])
-            dproblems = state.validate(dpatch)
-            if dproblems:
-                fail("CONTRACT_CONDITION", "derived mobility rejected", dproblems)
-            else:
-                state.apply(dpatch)
+        cells = [d for op in outb.patch.operations
+                 if op.entity_type == "MobilityExpectation"
+                 for d in (op.fields.get("dispositions") or [])]
+        rec["dof_entries_derived"] = len(cells)
+        # THE ENGINEERING QUANTITY, reported and not checked. Domain totality is
+        # guaranteed by the enumerator and says nothing; this says how much of the
+        # domain rests on evidence and names the cells that do not. A low number
+        # is a measurement. Recorded here because a quantity nothing reports is
+        # not reported - the function existed and no caller ever called it.
+        rec["disposition_completeness"] = disposition_completeness(cells)
+        # S-9 CORPUS INFORMATION. What this recording holds of the shapes the
+        # pipeline no longer speaks. It feeds no derivation, no check and no
+        # state; it exists so the corpus refresh knows what it is looking at.
+        rec["legacy_shapes_in_recording"] = legacy_shapes_in_recording(parsed)
 
     for name, fn in S03_CHECKS:
         try:

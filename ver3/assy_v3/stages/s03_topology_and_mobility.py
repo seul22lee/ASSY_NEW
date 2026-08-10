@@ -8,14 +8,15 @@ sidedness. No magnitude and no axis PLACEMENT - placement depends on feature
 envelopes that do not exist until s04.
 
 THE ONE STRUCTURAL IDEA
-    MobilityExpectation is a TOTAL function, not a declared set. The domain -
-    every rigid group x every configuration x every rigid-body DOF - is
-    enumerated HERE, mechanically, and the model only dispositions each entry.
-    A declared set cannot fail by omission; a total function can, and that is
-    the whole point. The contract puts the LLM role at NONE for the totality and
-    HIGH for the disposition, and this module is built that way: `dof_domain`
-    computes the domain from the joint graph, and the check verifies coverage
-    against it rather than against anything the model said.
+    The DOF DOMAIN and the DISPOSITION of a cell are two different facts and
+    have two different authors. The domain - every rigid group x every
+    configuration x every rigid-body DOF - is enumerated HERE, mechanically, and
+    is BOOKKEEPING: this code guarantees it, so it can never be evidence about
+    the design. What a cell MEANS comes only from a premise that is present,
+    typed and referenceable - a Joint, a ConstraintRelation, an authored
+    irrelevance naming a Scenario - and a cell no premise covers is
+    UNDISPOSITIONED. No stage asks a model to disposition cells one by one, and
+    no branch here composes a disposition out of an absence.
 """
 from __future__ import annotations
 
@@ -26,19 +27,45 @@ from typing import Any, Dict, Iterable, List, Set, Tuple
 from ..state.patch import Op
 from .base import Stage, carry_invocation_premises
 
+def _family(name: str) -> Dict[str, Any]:
+    """One entity family's contract record. READ, never restated.
+
+    A vocabulary spelled out here as well as in the contract is two authorities
+    that drift, and this module has been on the wrong side of that twice.
+    """
+    import yaml as _yaml
+    here = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(here, "..", "..", "contracts", "DESIGN_STATE_CONTRACT.yaml")
+    with open(os.path.abspath(path)) as fh:
+        doc = _yaml.safe_load(fh)
+    # Both sections, because the split is by AUTHORITY CLASS and not by where a
+    # reader should look: MobilityExpectation is declared among the assurance
+    # families, and a lookup that knew only `entity_families` would report the
+    # contract as silent about it.
+    families = dict(doc["entity_families"])
+    families.update(doc.get("assurance_families") or {})
+    return families[name]
+
+
 #: The six rigid-body degrees of freedom. The domain of the totality.
 DOF_NAMES = ("TX", "TY", "TZ", "RX", "RY", "RZ")
 
-#: The contract's `MobilityExpectation.disposition_values`. UNDISPOSITIONED is the
-#: value for a cell no premise covers - vocabulary since S-2, behaviour since S-5.
-DISPOSITIONS = ("INTENDED", "BLOCKED_BY", "MAINTAINED_BY_CLASS",
-                "IRRELEVANT_BECAUSE", "UNDISPOSITIONED")
+#: The LIVE disposition vocabulary, read from the contract.
+#:
+#: MAINTAINED_BY_CLASS is NOT in it. S-5 stopped producing it from absence, and
+#: this correction retires it: its only evidence was a `holding_class` STRING,
+#: which names no entity and therefore can never be the resolvable premise U-6
+#: requires. No frozen source gives it one - proposal 11.2 and 20.2 enumerate
+#: exactly INTENDED, CONSTRAINED (BLOCKED_BY), IRRELEVANT and UNDISPOSITIONED -
+#: and an enum kept because historical code used it is a live path to a
+#: disposition nothing can back.
+DISPOSITIONS = tuple(_family("MobilityExpectation")["disposition_values"])
 
-#: The compact wire codes. The disposition VOCABULARY is unchanged - only how it
-#: is transmitted - so nothing downstream sees a code.
-_DISPOSITION_CODE = {"I": "INTENDED", "B": "BLOCKED_BY",
-                     "M": "MAINTAINED_BY_CLASS", "R": "IRRELEVANT_BECAUSE",
-                     "U": "UNDISPOSITIONED"}
+#: disposition -> the field that must carry its premise. Read from the contract
+#: so the derivation, the write boundary and the prompt cannot disagree about
+#: what backs a disposition.
+PREMISE_FIELD = dict(
+    _family("MobilityExpectation")["field_semantics"]["dispositions"]["premise_field"])
 
 JOINT_TYPES = ("REVOLUTE", "PRISMATIC", "HELICAL", "SPHERICAL", "PLANAR",
                "CYLINDRICAL", "FIXED", "COMPLIANT")
@@ -54,50 +81,16 @@ TERMINATION_STRATEGIES = ("LATER_BODY_COVER", "ROTATION", "ELASTICITY", "NONE")
 
 PATH_KINDS = ("RIGID", "DEFORMATION_RESOLVED")
 
-BLOCKING_DRIVERS = ("LOAD", "KINEMATIC_NECESSITY", "DECLARED_SCENARIO")
-
-#: The blocking relation's fields, taken from S03_CONTRACT.blocking_relation_rule.
-#: The CONTRACT IS AUTHORITATIVE: it models a blocking relation as a first-class
-#: thing carrying retained_group and configurations - relation-level facts, not
-#: per-DOF ones. An earlier implementation buried these inside per-DOF detail,
-#: which is what produced both the bookkeeping explosion and the name drift.
-BLOCKING_REQUIRED = ("retained_group", "blocked_direction", "blocker_body",
-                     "configurations", "defeat_specification", "driver")
-BLOCKING_OPTIONAL = ("promised_features", "depends_on_compliant_recovery")
-
-#: The ONE intentional alias set, declared here and nowhere else. These are the
-#: names a live model used for the same engineering concepts; binding them is not
-#: weakening the validator, it is refusing to call a supplied fact missing. Every
-#: bind is RECORDED so a rename can never be mistaken for a native field.
-BLOCKING_ALIASES = {"blocked_by": "blocker_body", "blocker": "blocker_body",
-                    "direction": "blocked_direction",
-                    "test": "defeat_specification",
-                    "defeat_test": "defeat_specification",
-                    "reason": "driver", "why": "driver",
-                    "group": "retained_group", "rigid_group": "retained_group"}
-
-
-def canonicalise_blocking(raw: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
-    """Bind a blocking relation onto the contract's vocabulary.
-
-    Returns the canonical relation and the list of renames applied. A field that
-    is absent stays absent: this resolves NAMING, never completeness.
-    """
-    out: Dict[str, Any] = {}
-    renamed: List[str] = []
-    for key, value in (raw or {}).items():
-        canon = BLOCKING_ALIASES.get(key, key)
-        if canon != key:
-            renamed.append("%s->%s" % (key, canon))
-        if canon not in out or not str(out.get(canon) or "").strip():
-            out[canon] = value
-    # A blocker given as a one-element list is the same engineering fact as a
-    # blocker given as a string.
-    b = out.get("blocker_body")
-    if isinstance(b, list) and len(b) == 1 and isinstance(b[0], str):
-        out["blocker_body"] = b[0]
-        renamed.append("blocker_body[list]->str")
-    return out, renamed
+#: Why a constraint must exist. The `ConstraintRelation.driver` vocabulary.
+#:
+#: The legacy blocking relation is GONE from this module: its alias table, its
+#: canonicaliser, its required-field list and the parser that read it back out of
+#: per-DOF detail. It had no identity, so a disposition could not cite it, which
+#: is exactly why it could not be the premise the contract asks for. Binding its
+#: field names was the right answer while it was the only shape a model emitted;
+#: keeping the machinery once nothing reads it would be a live compatibility path
+#: to a fact the pipeline no longer recognises.
+CONSTRAINT_DRIVERS = ("LOAD", "KINEMATIC_NECESSITY", "DECLARED_SCENARIO")
 
 
 #: Which DOF each joint class leaves FREE, relative to its own axis. Ordinary
@@ -168,9 +161,10 @@ RULES
    bearing choice from an arbitrary one.
 4. Name the CONFIGURATIONS the product has - the distinct states its mechanism
    can be in that matter to its function.
-5. A later step dispositions every degree of freedom of every rigid group in
-   every configuration, so make the groups and configurations complete and
-   final here: it can only disposition what you declare.
+5. Every degree of freedom of every rigid group in every configuration becomes a
+   line the pipeline enumerates from what you declare here, so make the groups
+   and configurations complete and final. A group you leave out has no lines at
+   all, and a line that does not exist cannot be reported as unexplained.
 6. A later step traces the load paths and the assembly order. Give it what it
    needs: every body a load could pass through, and every interface it could
    cross.
@@ -209,40 +203,6 @@ PERMITTED VALUES
   dof                 {dofs}
   axis_direction      {axis_directions}
   interaction_kind    {interaction_kinds}
-  disposition         {dispositions}
-  driver              {drivers}
-  termination_strategy {terminations} - NONE only for a body nothing retains
-  path_kind           {path_kinds}
-  functional region role {region_roles}
-  alternatives_kind   ENTITY_REFS | PRINCIPLE_FAMILIES | FREE_TEXT
-
-IDS YOU EMIT ARE NEW
-Every id in your response is one you are creating now. The typed input already
-contains ids of its own, and reusing one of them does not extend that entity, it
-collides with it. Use exactly the prefixes shown above and never an id that
-already appears in the input.
-
-REFERENCES BETWEEN ITEMS
-  rigid_groups[].body            a body id you emit
-  joints[].parent_group/child_group  rigid group ids you emit
-  interfaces[].bodies            body ids you emit
-  configurations[].bodies_present body ids you emit
-  functional_regions[] id "FRG-0001", role, owning_bodies[],
-                       required_by_actors[] (actor ids from the input; [] for
-                       SUPPORT and KEEP_OUT regions no actor uses),
-                       reach_targets[] (what those actors must reach through it)
-  unresolved[]         id "S3U-0001", decision, why_open, alternatives[],
-                       alternatives_kind, kept_open_by[], blocks[]
-
-PERMITTED VALUES
-  joint_type          {joint_types}
-  dof                 {dofs}
-  axis_direction      {axis_directions}
-  interaction_kind    {interaction_kinds}
-  disposition         {dispositions}
-  driver              {drivers}
-  termination_strategy {terminations} - NONE only for a body nothing retains
-  path_kind           {path_kinds}
   functional region role {region_roles}
   alternatives_kind   ENTITY_REFS | PRINCIPLE_FAMILIES | FREE_TEXT
 
@@ -283,24 +243,48 @@ def derive_mobility(groups: List[str], configurations: List[str],
     DISPOSITION is what the design asserts about a cell, and it comes only from a
     premise that is present, typed and referenceable:
 
-      free by an authored joint's class     -> INTENDED, citing the joint
       covered by a ConstraintRelation       -> BLOCKED_BY, citing the relation
+      free by an authored joint's class     -> INTENDED, citing the joint
       authored irrelevant in a scenario     -> IRRELEVANT_BECAUSE, citing it
       none of those                         -> UNDISPOSITIONED, naming what is
                                                missing
+
+    Those four are tried IN THAT ORDER, and the order is stated because two
+    premises can reach one cell: a relation that removes a DOF a joint's class
+    leaves free is not a contradiction, it is what a constraint relation is FOR,
+    and the configuration-scoped fact is the specific one. Whether two authored
+    premises about one cell genuinely disagree is a CROSS-PREMISE question with
+    two different authors, which the plan assigns to U-9; this function does not
+    adjudicate it and does not pretend the other premise was absent.
 
     The last line is the change S-5 exists for. This function used to end in an
     `else` that wrote MAINTAINED_BY_CLASS with a holding class composed from the
     first joint reaching the group - or the literal "joint class of no joint"
     when there was none. That is absence used as a premise: the pipeline had no
     way to say "nothing is known here", so it said "a joint class holds it", and
-    a reviewer could not tell the two apart. MAINTAINED_BY_CLASS remains a valid
-    disposition when something actually justifies it; it is no longer what
-    happens when nothing does.
+    a reviewer could not tell the two apart. MAINTAINED_BY_CLASS is now retired
+    outright: its evidence was a class STRING, which names no entity and so can
+    never be the resolvable premise U-6 requires.
 
     The premise for BLOCKED_BY is a `ConstraintRelation` - the addressable
     physical truth S-4 established - not the legacy blocking relation, which had
     no identity and so could not be cited.
+
+    APPLICABILITY IS THE WHOLE QUESTION. A premise disposes the cells it
+    DECLARES and no others: the relation's own `retained_group`, its own
+    `blocked_dofs`, its own `configurations`. Proposal 11.3 permits exactly
+    "expansion of an authored relation over the DOFs and configurations IT
+    DECLARES", and a relation that declares no configuration therefore covers
+    none - reading an empty configuration set as "everywhere" turned the author's
+    silence into the widest possible claim, which is the same defect in a
+    different branch. s03b reports such a relation as incomplete; it does not get
+    to dispose the design in the meantime.
+
+    A Joint is different, and the difference is in the contract rather than in
+    this code: a Joint declares no configuration set at all, so it is
+    unconditioned by construction and its freedom holds wherever the topology
+    does. Silence about a field that exists is not the same fact as a field that
+    does not exist.
     """
     by_child: Dict[str, List[Dict[str, Any]]] = {}
     for j in joints:
@@ -311,7 +295,7 @@ def derive_mobility(groups: List[str], configurations: List[str],
         group = relation.get("retained_group")
         dofs = [d for d in (relation.get("blocked_dofs") or []) if isinstance(d, str)]
         configs = [c for c in (relation.get("configurations") or []) if isinstance(c, str)]
-        for cfg in (configs or configurations):
+        for cfg in configs:
             for dof in dofs:
                 blocked[(group, cfg, dof)] = relation
 
@@ -389,23 +373,15 @@ def disposition_completeness(entries: Iterable[Dict[str, Any]]) -> Dict[str, Any
 def dof_domain(groups: Iterable[str], configurations: Iterable[str]) -> List[Tuple[str, str, str]]:
     """The COMPLETE domain of the mobility function.
 
-    Computed here, from the topology, and never taken from the response. This is
-    what makes omission detectable: the model can fail to disposition a line, but
-    it cannot make the line not exist.
+    Computed here, from the topology, and never taken from a response. This is
+    what makes omission detectable: no premise has to exist for the line to
+    exist, so an uncovered cell is visible as UNDISPOSITIONED rather than absent.
     """
     return [(g, c, d) for g in groups for c in configurations for d in DOF_NAMES]
 
 
-def _EFFECT_KINDS_():
-    """The effect vocabulary, read from the contract rather than restated."""
-    import yaml as _yaml
-    here = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(here, "..", "..", "contracts", "DESIGN_STATE_CONTRACT.yaml")
-    with open(os.path.abspath(path)) as fh:
-        return _yaml.safe_load(fh)["entity_families"]["PhysicalEffectObligation"]["effect"]
-
-
-_EFFECT_KINDS = tuple(_EFFECT_KINDS_())
+#: The effect vocabulary, read from the contract rather than restated.
+_EFFECT_KINDS = tuple(_family("PhysicalEffectObligation")["effect"])
 
 
 def _candidate_premise(candidate) -> List[str]:
@@ -423,23 +399,19 @@ def _candidate_premise(candidate) -> List[str]:
 class S03TopologyAndMobility(Stage):
     stage_id = "s03"
     pass_id = "s03a"
-    purpose = "turn a candidate family into a mechanism topology with a total DOF disposition"
+    #: TOPOLOGY, and not one word about what a DOF means. This pass used to
+    #: declare itself the author of "a total DOF disposition" while its response
+    #: schema exposed no such field - a responsibility statement describing the
+    #: producer it had already stopped being.
+    purpose = "turn a candidate family into a mechanism topology"
 
     def prompt(self, inputs: Dict[str, Any]) -> str:
         projection = inputs["consumer_view"]
         candidate = inputs.get("candidate") or {}
-        grid = inputs.get("dof_grid_text") or (
-            "Emit your rigid groups and configurations first; then disposition\n"
-            "every (rigid group, configuration, DOF) triple over the six DOF\n"
-            "%s. Every triple, exactly once." % ", ".join(DOF_NAMES))
         return PROMPT.format(
             joint_types=" | ".join(JOINT_TYPES), dofs=" | ".join(DOF_NAMES),
             axis_directions=" | ".join(AXIS_DIRECTIONS),
             interaction_kinds=" | ".join(INTERACTION_KINDS),
-            dispositions=" | ".join(DISPOSITIONS),
-            drivers=" | ".join(BLOCKING_DRIVERS),
-            terminations=" | ".join(TERMINATION_STRATEGIES),
-            path_kinds=" | ".join(PATH_KINDS),
             region_roles=" | ".join(REGION_ROLES),
             candidate=_render(candidate),
             projection=_render(projection))
@@ -490,27 +462,21 @@ class S03TopologyAndMobility(Stage):
                 "name": c["name"], "kind": c.get("kind", "OPERATIONAL"),
                 "bodies_present": c.get("bodies_present", []),
                 "expected_mobility": c.get("expected_mobility", [])}, prov))
-        # One MobilityExpectation per configuration, carrying the dispositions
-        # for that configuration. The grouping is ours, not the model's.
-        by_config: Dict[str, List[Dict[str, Any]]] = {}
-        for row in parsed.get("mobility", []):
-            for dof, code in (row.get("dof") or {}).items():
-                entry = {"rigid_group": row["rigid_group"],
-                         "configuration": row["configuration"],
-                         "dof": dof, "disposition": _DISPOSITION_CODE.get(code, code)}
-                d = (row.get("detail") or {}).get(dof)
-                if isinstance(d, dict):
-                    entry.update(d)
-                elif d:
-                    # A detail that is not a mapping still says something; keep
-                    # it verbatim rather than dropping it or crashing on it.
-                    entry["detail_note"] = d
-                by_config.setdefault(row["configuration"], []).append(entry)
-        for d in parsed.get("dof_dispositions", []):        # long form still accepted
-            by_config.setdefault(d["configuration"], []).append(d)
-        for idx, (config, entries) in enumerate(sorted(by_config.items()), start=1):
-            ops.append(Op("CREATE", "MobilityExpectation", "MEX-%04d" % idx, {
-                "configuration": config, "dispositions": entries}, prov))
+        # NO MobilityExpectation. s03a authors TOPOLOGY; the DOF disposition is
+        # derived by s03b from the relations it authors, and that is the only
+        # live route into this family.
+        #
+        # Two branches used to stand here - `mobility` in a compact per-DOF form
+        # and `dof_dispositions` in a long one - and both took a disposition
+        # STRAIGHT FROM THE RESPONSE, premise unexamined. They outlived the
+        # prompt that asked for them, so nothing documented them and a stale
+        # recording replayed through this pass still created MAINTAINED_BY_CLASS
+        # cells: the exact value S-5 exists to remove, arriving by a path S-5 had
+        # not looked at. A second producer for one family is not a compatibility
+        # convenience, it is a second answer to "what does the design claim about
+        # this DOF" - and the older shape could not cite a premise at all.
+        # Recordings in that shape are corpus debt (Impl S-9), not a reason to
+        # keep a parser alive.
         for p in parsed.get("load_paths", []):
             ops.append(Op("CREATE", "LoadPath", p["id"], {
                 "load_case": p["load_case"], "candidate": p["candidate"],
@@ -608,35 +574,48 @@ def dof_totality_check(state) -> List[str]:
     return problems
 
 
-def blocking_relation_check(state) -> List[str]:
-    """S03-C2. Every BLOCKED_BY carries a direction, a blocker, a defeat
-    specification and a driver.
+def constraint_disposition_check(state) -> List[str]:
+    """S03-C2. Every BLOCKED_BY cell cites a ConstraintRelation that exists, and
+    that relation carries a direction, a provider, a defeat specification and a
+    driver.
 
-    The defeat specification is authored here, with the relation, because a
-    negative control written later from geometry defeats what the geometry
-    suggests rather than what the design claims.
+    It reads the CANONICAL fields. It used to read `blocker_body`, a legacy
+    blocking-relation name the derivation stopped emitting at S-5 - so after that
+    migration this check reported every correctly-derived cell as incomplete,
+    which is a validator describing a producer that no longer exists.
+
+    The defeat specification is authored with the relation, because a negative
+    control written later from geometry defeats what the geometry suggests rather
+    than what the design claims.
     """
     problems = []
     bodies = {b["entity_id"] for b in state.family("Body")}
+    relations = {r["entity_id"]: r for r in state.family("ConstraintRelation")}
     for mex in state.family("MobilityExpectation"):
         for d in mex.get("dispositions", []):
             if not isinstance(d, dict) or d.get("disposition") != "BLOCKED_BY":
                 continue
             tag = "%s/%s/%s" % (d.get("rigid_group"), d.get("configuration"), d.get("dof"))
+            cited = d.get("constraint_relation")
+            if not cited or cited not in relations:
+                problems.append("BLOCKED_BY_UNRESOLVED_PREMISE: %s cites %r"
+                                % (tag, cited))
+                continue
             # One finding per incomplete relation, not one per missing field: a
             # check that multiplies a single defect by four turns 70 problems
             # into 280 and buries everything else.
-            missing = [f for f in ("blocked_direction", "blocker_body",
-                                   "defeat_specification", "driver")
-                       if not str(d.get(f) or "").strip()]
+            missing = [f for f in ("blocked_direction", "defeat_specification",
+                                   "driver") if not str(d.get(f) or "").strip()]
+            if not (d.get("provider_body") or d.get("provider_reaction_site")):
+                missing.append("a provider")
             if missing:
                 problems.append("BLOCKING_INCOMPLETE: %s missing %s"
                                 % (tag, ", ".join(missing)))
-            if d.get("driver") and d["driver"] not in BLOCKING_DRIVERS:
+            if d.get("driver") and d["driver"] not in CONSTRAINT_DRIVERS:
                 problems.append("BLOCKING_BAD_DRIVER: %s -> %r" % (tag, d["driver"]))
-            blocker = d.get("blocker_body")
-            if blocker and bodies and blocker not in bodies:
-                problems.append("BLOCKER_NOT_A_BODY: %s -> %r" % (tag, blocker))
+            provider = d.get("provider_body")
+            if provider and bodies and provider not in bodies:
+                problems.append("PROVIDER_NOT_A_BODY: %s -> %r" % (tag, provider))
     return problems
 
 
@@ -926,15 +905,14 @@ something is missing, say so in unresolved.
 1. WHAT HOLDS EACH BODY. For each body that must stay where it is put, state
    what stops it, as a constraint_relation below. ONE relation per (retained
    group, blocked direction) - not one per degree of freedom: the pipeline
-   expands your relations over every DOF and every configuration itself. A
-   mechanism in which nothing is blocked is a pile of loose parts. For each body that must stay where it is put, state what
-   stops it. ONE relation per (retained group, blocked direction) - not one per
-   degree of freedom: the pipeline expands your relations over every DOF and
-   every configuration itself. A mechanism in which nothing is blocked is a pile
-   of loose parts.
+   expands each relation over the DOFs and the CONFIGURATIONS THE RELATION
+   ITSELF NAMES, and over no others. A relation that names no configuration
+   therefore holds nowhere, so name them. A mechanism in which nothing is blocked
+   is a pile of loose parts.
 2. IRRELEVANCE. Only for a DOF that is BOTH unloaded AND unactuated, naming the
-   scenario in which that holds. A scenario carrying a load case is not one.
-   Most mechanisms need none.
+   scenario in which that holds. The scenario is an ID from the input, not a
+   description; a scenario carrying a load case is not one. Most mechanisms need
+   none.
 3. LOAD PATHS. Per load case, the ordered hops from where the load is applied,
    through this mechanism, to the reaction site. A HOP IS AN INTERFACE ID - the
    interface that carries the load across that step. Not a body, not a joint: a
@@ -973,9 +951,9 @@ Return one JSON object. Emit every key. Use exactly these key names.
                         alternatives_kind, kept_open_by[], blocks[]
 
   blocked_direction     {axis_directions}
-  blocker_body          a body id, not a description
+  provider_body         a body id, not a description
   configurations        configuration ids where the relation holds
-  dofs                  which of {dofs} the relation removes
+  blocked_dofs          which of {dofs} the relation removes
   driver                {drivers}
   defeat_specification  how a test would defeat this constraint
   termination_strategy  {terminations}
@@ -1023,38 +1001,21 @@ TYPED INPUT
 """
 
 
-def relations_of(parsed):
-    """Canonical blocking relations, plus every rename applied to obtain them.
+def legacy_shapes_in_recording(parsed) -> Dict[str, int]:
+    """What a RECORDING contains of the shapes this pipeline no longer speaks.
 
-    Accepts the relation list this stage asks for, and ALSO relations still
-    expressed as per-DOF detail: an engineering fact supplied in an older shape
-    is supplied, and calling it missing was the false negative this cycle exists
-    to remove.
+    S-9 corpus information and nothing else: it feeds no derivation, no check and
+    no state, and every caller of it writes into a run record. It replaced a
+    canonicaliser, an alias table and a per-DOF relation reconstructor that
+    existed to make those shapes usable - machinery that is a live compatibility
+    path the moment anything downstream reads what it returns. Counting is not a
+    path, which is the whole difference.
     """
-    relations, renames = [], []
-    for raw in (parsed.get("blocking_relations") or []):
-        if not isinstance(raw, dict):
-            continue
-        rel, renamed = canonicalise_blocking(raw)
-        rel["_dofs"] = [d for d in (rel.get("dofs") or rel.get("dof") or [])
-                        if isinstance(d, str) and d in DOF_NAMES]
-        relations.append(rel)
-        renames += renamed
-    for row in (parsed.get("mobility") or []):
-        if not isinstance(row, dict):
-            continue
-        detail = row.get("detail") if isinstance(row.get("detail"), dict) else {}
-        for dof, code in (row.get("dof") or {}).items():
-            if _DISPOSITION_CODE.get(code, code) != "BLOCKED_BY":
-                continue
-            rel, renamed = canonicalise_blocking(detail.get(dof) or {})
-            rel.setdefault("retained_group", row.get("rigid_group"))
-            rel.setdefault("configurations", [row.get("configuration")])
-            rel["id"] = rel.get("id") or "BLK-%s-%s" % (row.get("rigid_group"), dof)
-            rel["_dofs"] = [dof]
-            relations.append(rel)
-            renames += renamed
-    return relations, renames
+    return {
+        "legacy_blocking_relations": len(parsed.get("blocking_relations") or []),
+        "legacy_mobility_rows": len(parsed.get("mobility") or []),
+        "legacy_dof_dispositions": len(parsed.get("dof_dispositions") or []),
+    }
 
 
 class S03BMobilityAndAssembly(Stage):
@@ -1070,7 +1031,7 @@ class S03BMobilityAndAssembly(Stage):
     def prompt(self, inputs):
         return S03B_PROMPT.format(
             axis_directions=" | ".join(AXIS_DIRECTIONS),
-            drivers=" | ".join(BLOCKING_DRIVERS), dofs=" ".join(DOF_NAMES),
+            drivers=" | ".join(CONSTRAINT_DRIVERS), dofs=" ".join(DOF_NAMES),
             effects=" | ".join(_EFFECT_KINDS),
             terminations=" | ".join(TERMINATION_STRATEGIES),
             path_kinds=" | ".join(PATH_KINDS),
@@ -1102,10 +1063,11 @@ class S03BMobilityAndAssembly(Stage):
         real answer when it is SAID, through `unresolved`. What is not an answer
         is silence.
 
-        Deliberately separate from the legacy `blocking_relations` checks below,
-        which exist only to feed the deterministic DOF expansion and are Impl
-        S-5's to remove (R-C/R-D). Canonical physical truth is ConstraintRelation;
-        a blocking relation is not a second version of it.
+        Deliberately separate from the mobility layer, which asks a different
+        question about the same relations: this one asks whether the physical
+        demand was realized, and S-5's asks what the relations dispose. Canonical
+        physical truth is ConstraintRelation; the legacy blocking relation was not
+        a second version of it and is gone.
         """
         view = inputs.get(self.context_key) or {}
         by_id = {e.get("entity_id"): e
@@ -1176,63 +1138,99 @@ class S03BMobilityAndAssembly(Stage):
         return out
 
     def _s5_mobility_problems(self, parsed, inputs) -> List[str]:
-        """S-5 mobility completeness, and only that.
+        """PREMISE MATERIAL that would dispose nothing, and only that.
 
         Separate from `_s4_physical_problems` because they are different
         questions: S-4 asks whether the physical demand was realized, S-5 asks
-        whether every DOF the topology creates has an evidenced disposition.
+        whether what this response offers as mobility evidence can actually reach
+        a cell.
 
         DOMAIN TOTALITY is not checked here. It is guaranteed by the enumerator,
         which makes it bookkeeping - checking what your own code just built is not
         assurance, and the plan says to report it as such rather than count it.
 
-        What IS reported is disposition completeness: how much of the domain rests
-        on evidence, and which cells do not. An UNDISPOSITIONED cell is not an
-        error to be repaired; it is the honest state, and reporting it is the
-        point. What would be an error is a disposition whose premise does not
-        resolve, or one produced from absence.
+        NOR IS "every disposition cites a resolvable premise" checked here. That
+        moved to the write boundary, where `MobilityExpectation.dispositions`
+        declares which field carries which disposition's premise and which family
+        it must resolve to. A rule enforced in a stage's completeness method binds
+        one producer; the same rule at the write boundary binds every producer
+        there will ever be, including one written after this file - and an earlier
+        version of this method recomputed the grid to check it, which put a second
+        derivation of the same fact in the same class as the defect it was
+        checking for.
+
+        An UNDISPOSITIONED cell is not an error to be repaired; it is the honest
+        state, and reporting how many there are is what `disposition_completeness`
+        is for. What IS an error is evidence that silently reaches no cell: a
+        relation naming no configuration, an irrelevance claim naming no scenario
+        or no DOF. Those look like engineering and dispose nothing.
         """
-        relations = {r.get("id") for r in parsed.get("constraint_relations") or []}
         out: List[str] = []
-        for entry in parsed.get("_derived_mobility") or []:
-            disposition = entry.get("disposition")
-            cell = "%s/%s/%s" % (entry.get("rigid_group"),
-                                 entry.get("configuration"), entry.get("dof"))
-            if disposition == "BLOCKED_BY":
-                cited = entry.get("constraint_relation")
-                if not cited:
-                    out.append("%s is BLOCKED_BY nothing it can name; the "
-                               "disposition has no premise" % cell)
-                elif cited not in relations:
-                    out.append("%s is BLOCKED_BY %s, which this response does not "
-                               "author" % (cell, cited))
-            elif disposition == "INTENDED" and not entry.get("by_joint"):
-                out.append("%s is INTENDED by no joint it can name" % cell)
-            elif disposition == "IRRELEVANT_BECAUSE" and not entry.get("scenario"):
-                out.append("%s is IRRELEVANT_BECAUSE of no named scenario" % cell)
-            elif disposition == "MAINTAINED_BY_CLASS" and not entry.get("holding_class"):
-                out.append("%s is MAINTAINED_BY_CLASS with no class named; this "
-                           "value may not stand in for an absent premise" % cell)
+        for relation in parsed.get("constraint_relations") or []:
+            configs = [c for c in (relation.get("configurations") or [])
+                       if isinstance(c, str) and c.strip()]
+            if not configs:
+                out.append("%s names no configuration, so it removes a DOF "
+                           "nowhere; a relation holds where it says it holds"
+                           % relation.get("id"))
+        for i, claim in enumerate(parsed.get("irrelevance") or []):
+            if not isinstance(claim, dict):
+                out.append("irrelevance claim %d is not a record" % i)
+                continue
+            absent = [f for f in ("rigid_group", "configuration", "scenario")
+                      if not str(claim.get(f) or "").strip()]
+            if not [d for d in (claim.get("dof") or []) if d in DOF_NAMES]:
+                absent.append("dof")
+            if absent:
+                out.append("an irrelevance claim names no %s, so it makes no DOF "
+                           "irrelevant anywhere" % ", ".join(absent))
         return out
 
-    def derived_operations(self, parsed, groups, configurations, joints, inputs):
+    def derived_operations(self, parsed, inputs, state):
         """The TOTAL DOF disposition, derived from the relations just authored.
 
         The contract splits the labour: the model authors relations, the pipeline
         expands them (LLM role NONE for totality). The expansion is still s03
-        output embodying one candidate, so it carries the same premise. Built
-        here rather than in a runner, so every caller derives the same thing with
-        the same lineage.
+        output embodying one candidate, so it carries the same premise.
+
+        IT BELONGS TO THE INVOCATION. This used to be called by
+        `tools/run_window2.py` after `invoke` returned, as a separate patch - so
+        the answer to "does this DesignState have a DOF disposition in it"
+        depended on which caller ran, and a second canonical caller of `invoke`
+        got a state with none. Deriving it here puts it in the stage's own patch,
+        validated at the same write boundary as the relations it derives from,
+        and reachable by every caller for the same reason.
+
+        The topology comes from THIS INVOCATION'S CONSUMER VIEW, which is the
+        only branch-scoped answer to "which topology is this". Reading it from
+        state gave the second candidate a domain built from every group and
+        configuration in the design, including the first candidate's - the two
+        derivations then collided on an id, which is how the scope error
+        announced itself, but the wrong answer was the domain and not the id. A
+        runner passing the topology in as arguments had the same defect and no
+        way to notice it.
         """
-        entries = derive_mobility(groups, configurations, joints,
-                                  parsed.get("constraint_relations") or [],
-                                  parsed.get("irrelevance") or [])
-        by_config = {}
+        view = inputs.get(self.context_key) or {}
+        entries = derive_mobility(
+            [g["entity_id"] for g in view.get("RigidGroup") or []],
+            [c["entity_id"] for c in view.get("Configuration") or []],
+            list(view.get("Joint") or []),
+            parsed.get("constraint_relations") or [],
+            parsed.get("irrelevance") or [])
+        by_config: Dict[str, List[Dict[str, Any]]] = {}
         for e in entries:
             by_config.setdefault(e["configuration"], []).append(e)
-        ops = [Op("CREATE", "MobilityExpectation", "MEX-%04d" % (i + 1),
+        # KEYED ON THE CONFIGURATION, which is this entity's natural key: there is
+        # one mobility expectation per configuration and configurations are
+        # candidate-local. A running MEX-0001 counter numbered from one per
+        # invocation, so the second candidate's derivation collided with the
+        # first's - two candidates could not both have mobility, and the failure
+        # was invisible while a runner derived only what it was pointed at. A
+        # derived id must also be RECOMPUTABLE (FA-4); a counter is a function of
+        # call order, and this is a function of the premises.
+        ops = [Op("CREATE", "MobilityExpectation", "MEX-%s" % cfg,
                   {"configuration": cfg, "dispositions": rows}, "s03:derivation")
-               for i, (cfg, rows) in enumerate(sorted(by_config.items()))]
+               for cfg, rows in sorted(by_config.items())]
         return carry_invocation_premises(ops, self.invocation_premises(inputs))
 
     def to_operations(self, parsed):

@@ -140,6 +140,28 @@ class Stage:
         """What the contract requires that this response did not supply."""
         return []
 
+    def derived_operations(self, parsed: Dict[str, Any], inputs: Dict[str, Any],
+                           state) -> List[Op]:
+        """Class-B state this stage derives from what it has just authored.
+
+        FA-4 state, strictly recomputed from premises the stage itself produced
+        or received - never a second engineering opinion, and never authored.
+
+        It belongs to the STAGE and not to a runner. The DOF disposition grid was
+        derived by `tools/run_window2.py` after s03b returned, which meant a
+        second valid caller of `invoke` observed a DesignState with no mobility
+        in it at all: the derivation happened because one tool remembered to ask
+        for it. Two canonical callers may not see different state because of what
+        one of them remembered.
+
+        Emitted into the SAME patch as the authored operations, so it is validated
+        at the same write boundary and cannot be applied without them. Authorship
+        stays distinguishable per operation through `provenance_ref`.
+
+        Default: none. A stage that derives nothing says so by deriving nothing.
+        """
+        return []
+
     def invoke(self, provider, state, run_id: str, inputs: Optional[Dict[str, Any]] = None,
                attempt: int = 1, invocation=None,
                budget_chars: Optional[int] = None) -> StageOutcome:
@@ -225,6 +247,7 @@ class Stage:
         try:
             ops = carry_invocation_premises(self.to_operations(parsed),
                                             self.invocation_premises(inputs))
+            ops = ops + self.derived_operations(parsed, inputs, state)
             missing = self.completeness(parsed, inputs)
         except (KeyError, TypeError, AttributeError, IndexError, ValueError) as exc:
             return StageOutcome(

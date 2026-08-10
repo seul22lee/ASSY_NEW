@@ -214,10 +214,23 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
             # no field is listed.
             fields = [f for f in spec_all
                       if extendable.get(f) in (None, authority)]
+        # A premise carried inside a list of records is still a representational
+        # dependency of this output: a disposition citing a Scenario cannot be
+        # authored, let alone read, unless the Scenario is there. Flattened to
+        # `field.subfield` so one rule below serves both depths - the nested
+        # declaration brings its own cardinality and population, which is the
+        # point of declaring it in the same vocabulary.
+        pairs: List[Tuple[str, Dict[str, Any]]] = []
         for fld in fields:
             spec = spec_all.get(fld)
             if not spec:
                 continue
+            if spec.get("kind") == "premise_record_list":
+                for sub, subspec in (spec.get("record_field_semantics") or {}).items():
+                    pairs.append(("%s.%s" % (fld, sub), subspec))
+            else:
+                pairs.append((fld, spec))
+        for fld, spec in pairs:
             # A field may carry SEVERAL representational dependencies, and they
             # compose as a UNION. Accumulating them into one variable made a
             # later declaration overwrite an earlier one, so a field declaring

@@ -349,12 +349,20 @@ stages:
     permitted_output_semantics:
     - PhysicalInteraction
     - ConstraintRelation
+    # S-5 correction. s03b DERIVES this from the relations it authors, and that
+    # is now the only live route into the family - but no responsibility declared
+    # it as an output of anything. s03a produced it from two undocumented
+    # response keys while its own list omitted it, so the family with two
+    # producers was declared to have none, and Source A never derived what a
+    # disposition has to be able to name.
+    - MobilityExpectation
     - LoadPath
     - AssemblyStep
     - UnresolvedDecision
     prohibited_decisions:
     - Position, dimension or axis placement
     - Selecting a candidate
+    - Authoring a DOF disposition directly; it is derived from cited premises
   s04a:
     name: coarse spatial realization and comparability
     responsibility: Give each retained candidate a provisional arrangement sufficient to decide

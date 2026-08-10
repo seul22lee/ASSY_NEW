@@ -171,6 +171,24 @@ class Contracts:
             return copy_out(spec)
         return None
 
+    def premise_record_spec(self, family: Optional[str],
+                            field: str) -> Optional[Dict[str, Any]]:
+        """The declaration that makes a field a list of premise-bearing records.
+
+        Same role as `reference_spec` one level down: the ONE place that answers
+        "do these records have to name their evidence, of what kind, and to what
+        family". A premise nested inside a list used to be unreachable by any
+        boundary, so a contract could require one and nothing could tell whether
+        it was there.
+        """
+        if not family:
+            return None
+        fam = (_CONTRACT_DOCS[self]["families"].get(family) or {})
+        spec = ((fam.get("field_semantics") or {}).get(field))
+        if isinstance(spec, dict) and spec.get("kind") == "premise_record_list":
+            return copy_out(spec)
+        return None
+
     def may_create(self, stage_id: str, family: str) -> bool:
         if family in _CONTRACT_DOCS[self]["universally_ownable"]:
             return True
@@ -456,35 +474,96 @@ class DesignState:
             family = op.entity_type if op.kind == "CREATE" else self.stored_family(op.entity_id)
             for key, val in op.fields.items():
                 spec = self.c.reference_spec(family, key)
-                if spec is None:
+                if spec is not None:
+                    out += self._one_reference(patch, seen, known, spec, val,
+                                               "%s.%s" % (op.entity_id, key))
                     continue
-                refs = val if isinstance(val, list) else [val]
-                if spec.get("cardinality") == "one" and isinstance(val, list) and len(val) > 1:
-                    out.append("CARDINALITY: %s.%s declares one referent and names %d"
-                               % (op.entity_id, key, len(val)))
-                for ref in refs:
-                    if not isinstance(ref, str) or not ref:
-                        out.append("REFERENCE_NOT_AN_ID: %s.%s holds %r"
-                                   % (op.entity_id, key, ref))
-                        continue
-                    if not _ENTITY_ID.match(ref):
-                        out.append("REFERENCE_NOT_AN_ID: %s.%s holds %r, which is "
-                                   "not an entity id (R-20)"
-                                   % (op.entity_id, key, ref[:60]))
-                        continue
-                    if ref not in known:
-                        if not spec.get("resolvable"):
-                            out.append("DANGLING_REF: %s.%s -> %s"
-                                       % (op.entity_id, key, ref))
-                        continue
-                    target = spec.get("target")
-                    actual = (op.entity_type if ref in seen and ref not in _STORAGE[self].entities
-                              else self.stored_family(ref))
-                    if ref in seen and ref not in _STORAGE[self].entities:
-                        actual = _created_family(patch, ref)
-                    if target and actual and actual != target:
-                        out.append("REFERENCE_FAMILY: %s.%s declares %s and names %s, a %s"
-                                   % (op.entity_id, key, target, ref, actual))
+                record = self.c.premise_record_spec(family, key)
+                if record is not None:
+                    out += self._premise_records(patch, seen, known, record, val,
+                                                 op.entity_id, key)
+        return out
+
+    def _one_reference(self, patch, seen, known, spec, val, label) -> List[str]:
+        """One declared reference, wherever in the record it sits.
+
+        Shared by the flat and the nested walk deliberately: two copies of this
+        rule would be two answers to "does a reference resolve", which is the
+        divergence `reference_spec` was made the single authority to end.
+        """
+        out: List[str] = []
+        refs = val if isinstance(val, list) else [val]
+        if spec.get("cardinality") == "one" and isinstance(val, list) and len(val) > 1:
+            out.append("CARDINALITY: %s declares one referent and names %d"
+                       % (label, len(val)))
+        for ref in refs:
+            if not isinstance(ref, str) or not ref:
+                out.append("REFERENCE_NOT_AN_ID: %s holds %r" % (label, ref))
+                continue
+            if not _ENTITY_ID.match(ref):
+                out.append("REFERENCE_NOT_AN_ID: %s holds %r, which is not an "
+                           "entity id (R-20)" % (label, ref[:60]))
+                continue
+            if ref not in known:
+                if not spec.get("resolvable"):
+                    out.append("DANGLING_REF: %s -> %s" % (label, ref))
+                continue
+            target = spec.get("target")
+            actual = (_created_family(patch, ref) if ref in seen
+                      and ref not in _STORAGE[self].entities
+                      else self.stored_family(ref))
+            if target and actual and actual != target:
+                out.append("REFERENCE_FAMILY: %s declares %s and names %s, a %s"
+                           % (label, target, ref, actual))
+        return out
+
+    def _premise_records(self, patch, seen, known, record, val, eid, key) -> List[str]:
+        """Every record in a premise-bearing list names evidence of the right kind.
+
+        FA-4 and FA-8, made checkable at the boundary rather than trusted to the
+        producer. Three separate questions, and a record has to pass all three:
+
+        KIND. The discriminator value is one the contract declares. An
+        unrecognised assertion is not a lenient case; nothing downstream knows
+        what it means.
+
+        PRESENCE. The premise field that kind requires is there. A kind mapped to
+        null is an explicit statement that there is no evidence - UNDISPOSITIONED
+        says exactly that - and it is the only way to hold no premise legally.
+
+        TYPE. A record may not carry ANOTHER kind's premise field. Otherwise
+        "cite a Joint" is satisfiable by citing a ConstraintRelation and the
+        declaration stops being a type at all.
+
+        Then each declared reference resolves by the ordinary rule.
+        """
+        out: List[str] = []
+        premise_field = record.get("premise_field") or {}
+        specs = record.get("record_field_semantics") or {}
+        discriminator = record.get("discriminator")
+        rows = val if isinstance(val, list) else [val]
+        for i, row in enumerate(rows):
+            label = "%s.%s[%d]" % (eid, key, i)
+            if not isinstance(row, dict):
+                out.append("PREMISE_RECORD_MALFORMED: %s holds %r" % (label, row))
+                continue
+            kind = row.get(discriminator)
+            if kind not in premise_field:
+                out.append("PREMISE_KIND_UNKNOWN: %s says %s is %r"
+                           % (label, discriminator, kind))
+                continue
+            required = premise_field[kind]
+            if required and not row.get(required):
+                out.append("PREMISE_MISSING: %s is %s and names no %s"
+                           % (label, kind, required))
+            for other, field in premise_field.items():
+                if field and other != kind and row.get(field):
+                    out.append("PREMISE_WRONG_KIND: %s is %s and carries %s, "
+                               "which is %s's premise" % (label, kind, field, other))
+            for fld, spec in specs.items():
+                if spec.get("kind") == "reference" and row.get(fld) is not None:
+                    out += self._one_reference(patch, seen, known, spec,
+                                               row[fld], "%s.%s" % (label, fld))
         return out
 
     # ----------------------------------------------------------------- apply
