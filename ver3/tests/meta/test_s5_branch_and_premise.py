@@ -32,7 +32,7 @@ from ver3.assy_v3.stages.s02_obligation_and_candidates import (        # noqa: E
     S02ObligationAndCandidates)
 from ver3.assy_v3.stages.s03_topology_and_mobility import (            # noqa: E402
     DOF_NAMES, S03BMobilityAndAssembly, S03TopologyAndMobility,
-    accumulated_dof_domain, cited_premises, dof_totality_check)
+    current_dof_domain, cited_premises, dof_totality_check)
 from ver3.assy_v3.state.design_state import Contracts, DesignState      # noqa: E402
 from ver3.assy_v3.state.patch import Op, StagePatch                     # noqa: E402
 from .test_s02_s03b_integration import S02, _Canned                     # noqa: E402
@@ -172,14 +172,14 @@ class TestBranchSafeTotality(_Chain):
     def test_A_TOTAL_01_one_candidate_behaves_exactly_as_before(self):
         """The correction must not be a special case for multi-candidate state."""
         state, _ = self.build([("A", 2, 2)])
-        self.assertEqual(2 * 2 * CELLS, len(accumulated_dof_domain(state)))
+        self.assertEqual(2 * 2 * CELLS, len(current_dof_domain(state)))
         self.assertEqual([], dof_totality_check(state))
 
     def test_A_TOTAL_02_two_equal_branches_report_nothing(self):
         state, _ = self.build([("A", 2, 2), ("B", 2, 2)])
         self.assertEqual([], dof_totality_check(state),
                          "a second alternative was reported as missing mobility")
-        self.assertEqual(2 * (2 * 2 * CELLS), len(accumulated_dof_domain(state)))
+        self.assertEqual(2 * (2 * 2 * CELLS), len(current_dof_domain(state)))
 
     def test_A_TOTAL_03_unequal_branches_sum_their_own_domains(self):
         """2x2 and 1x3. The product of all groups with all configurations is 90;
@@ -188,25 +188,25 @@ class TestBranchSafeTotality(_Chain):
         self.assertEqual(2 * 2 * CELLS, len(self.cells_of(state, "A")))
         self.assertEqual(1 * 3 * CELLS, len(self.cells_of(state, "B")))
         self.assertEqual(2 * 2 * CELLS + 1 * 3 * CELLS,
-                         len(accumulated_dof_domain(state)))
+                         len(current_dof_domain(state)))
         groups = len(state.family("RigidGroup"))
         configs = len(state.family("Configuration"))
         self.assertNotEqual(groups * configs * CELLS,
-                            len(accumulated_dof_domain(state)),
+                            len(current_dof_domain(state)),
                             "the domain is still the design-wide product")
         self.assertEqual([], dof_totality_check(state))
 
     def test_A_TOTAL_04_adding_a_branch_leaves_the_first_untouched(self):
         alone, _ = self.build([("A", 2, 2)])
         together, _ = self.build([("A", 2, 2), ("B", 1, 3)])
-        mine = {c for c in accumulated_dof_domain(together) if c[0].endswith("A")}
-        self.assertEqual(set(accumulated_dof_domain(alone)), mine)
+        mine = {c for c in current_dof_domain(together) if c[0].endswith("A")}
+        self.assertEqual(set(current_dof_domain(alone)), mine)
         self.assertEqual(self.cells_of(alone, "A"), self.cells_of(together, "A"))
 
     def test_A_TOTAL_05_three_branches_are_the_union_of_three(self):
         state, _ = self.build([("A", 2, 2), ("B", 1, 3), ("C", 3, 1)])
         self.assertEqual((2 * 2 + 1 * 3 + 3 * 1) * CELLS,
-                         len(accumulated_dof_domain(state)))
+                         len(current_dof_domain(state)))
         self.assertEqual([], dof_totality_check(state))
 
     def test_A_TOTAL_06_a_genuinely_missing_branch_local_cell_is_caught(self):
@@ -230,7 +230,7 @@ class TestBranchSafeTotality(_Chain):
 
     def test_A_TOTAL_07_a_cross_branch_pair_is_not_demanded(self):
         state, _ = self.build([("A", 2, 2), ("B", 1, 3)])
-        domain = set(accumulated_dof_domain(state))
+        domain = set(current_dof_domain(state))
         crossed = [(g, c) for g, c, _d in domain
                    if g.endswith("A") != c.endswith("A")]
         self.assertEqual([], crossed, "a cell spanning two alternatives")
@@ -330,16 +330,26 @@ class TestPremiseDependency(_Chain):
                               reason="another branch's joint"))
         self.assertEqual("STANDING", self.validity(state, "MEX-CFG-C0A"))
 
-    def test_B_PREM_07_the_set_is_the_union_of_what_was_actually_used(self):
-        """Several premise kinds at once, counted from the produced rows."""
+    def test_B_PREM_07_the_set_is_both_halves_and_nothing_else(self):
+        """Several premise kinds at once, counted from the produced rows.
+
+        TWO HALVES, and the test names them separately because they have
+        different consequences: withdraw a DOMAIN premise and the cells stop
+        existing; withdraw a DISPOSITION premise and the cells remain while the
+        conclusion about them loses standing.
+        """
         state, _ = self.build([("A", 2, 2)], relations=3)
         mex = self.mex_for(state, "CFG-C0A")
         used = {d[s03.PREMISE_FIELD[d["disposition"]]]
                 for d in mex["dispositions"]
                 if s03.PREMISE_FIELD[d["disposition"]]}
         self.assertEqual({"JNT-A", "CRL-0A", "CRL-1A", "CRL-2A", "SCN-IDLE"}, used)
-        # The invocation premise is additional, not a replacement for these.
-        self.assertEqual(used | {"CND-A"}, self.premises(state, "CFG-C0A"))
+        domain = {"CFG-C0A", "RGP-G0A", "RGP-G1A"}
+        self.assertEqual(domain,
+                         set(s03.domain_premises(mex["dispositions"], "CFG-C0A")))
+        # The invocation premise is additional, not a replacement for either.
+        self.assertEqual(used | domain | {"CND-A"},
+                         self.premises(state, "CFG-C0A"))
 
     def test_B_PREM_08_undispositioned_fabricates_no_premise(self):
         state, _ = self.build([("A", 2, 2)], relations=1, irrelevance=False)
@@ -404,7 +414,7 @@ class TestClosureProbe(_Chain):
     def test_PROBE_domain_is_branch_union_and_bookkeeping_is_quiet(self):
         state, _ = self.probe()
         self.assertEqual((2 * 2 + 1 * 3 + 3 * 1) * CELLS,
-                         len(accumulated_dof_domain(state)))
+                         len(current_dof_domain(state)))
         self.assertEqual([], dof_totality_check(state))
         for sfx, n in (("A", 2 * 2), ("B", 1 * 3), ("C", 3 * 1)):
             self.assertEqual(n * CELLS, len(self.cells_of(state, sfx)), sfx)

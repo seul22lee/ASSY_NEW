@@ -65,9 +65,16 @@ authority_model:
     extra rigour; the reverse would open exactly the hole S-1 exists to close.
   class_overrides: {}
   class_overrides_note: >
-    Empty at S-1. Populating it - in particular splitting MobilityExpectation
-    into a derived domain and an authored disposition - is U-6/M-6, and
-    reclassifying the assurance_families block is U-2B.
+    RESOLVED for MobilityExpectation at S-5 / U-6, and the resolution is that no
+    override is needed. The split the note anticipated - a derived domain and an
+    authored disposition inside one family - would have required an authority
+    class this table cannot express, because it maps a FAMILY to a class. What
+    the split actually calls for is that the derived half not be stored at all:
+    the DOF domain is a function of standing branch topology, recomputed on every
+    read, and MobilityExpectation stores dispositions. So the family is
+    AUTHORITATIVE, declared on the family itself, and there is no field in it
+    claiming a class runtime does not enforce.
+    Reclassifying the rest of the assurance_families block remains U-2B.
   controlled_operations:
     CREATE: "The owning stage introduces an entity, once."
     EXTEND: "A permitted stage adds a permitted field, once, never over an existing value."
@@ -1253,6 +1260,11 @@ assurance_families:
     required_fields: [entity_id, name, bodies_present, expected_mobility]
 
   MobilityExpectation:
+    # DECLARED, not defaulted. This entity is the AUTHORITATIVE DISPOSITION
+    # CONTAINER: what it stores is engineering claims about DOF cells. It does
+    # not store the domain, so it carries no class-B content and needs no
+    # per-field override - see authority.class_overrides_note.
+    authority_class: AUTHORITATIVE
     field_semantics:
       configuration:
         kind: reference
@@ -1277,6 +1289,14 @@ assurance_families:
       dispositions:
         kind: premise_record_list
         discriminator: disposition
+        # rigid_group / configuration / dof are the ADDRESS of the derived cell
+        # this claim is about. They identify which cell; they do not assert that
+        # it exists. Cell existence has exactly one executable answer -
+        # `current_dof_domain`, computed from standing branch topology - and no
+        # stored structure is consulted for it. A record whose address is not in
+        # the current domain is a claim about a cell the design no longer has,
+        # which is what DOF_DISPOSITION_OUT_OF_DOMAIN reports.
+        cell_address: [rigid_group, configuration, dof]
         premise_field:
           INTENDED: by_joint
           BLOCKED_BY: constraint_relation
@@ -1315,6 +1335,15 @@ assurance_families:
       domain:
         authority_class: DERIVED
         authored_by: deterministic
+        # NOT STORED. This is what makes the class-B claim operational rather
+        # than prose: the domain is a pure function of standing branch topology,
+        # recomputed on every read, held in no entity and revised by no
+        # operation. An entity that stored it would be a second authority for
+        # cell existence sitting inside an AUTHORITATIVE family - which is the
+        # mismatch this declaration used to describe rather than prevent.
+        stored: false
+        computed_by: "stages.s03_topology_and_mobility.current_dof_domain"
+        recomputed_from: [standing RigidGroup, standing Configuration, branch membership]
         meaning: >
           the complete set of (rigid group, configuration, DOF) cells OF ONE
           BRANCH. A mechanism is a branch's, so a cell pairing one alternative's
@@ -1322,11 +1351,16 @@ assurance_families:
           in any domain. Over accumulated state holding several alternatives the
           domain is the UNION of the branches', never the product of every group
           with every configuration.
+        currentness: >
+          STANDING topology only. Superseded, invalidated and stale records stay
+          readable as history (FA-1) and define nothing: the ConsumerView the
+          producer works from has always been standing-only, so a domain computed
+          over all history was a SECOND currentness rule inside one pipeline.
         totality: >
           Structurally testable, and BOOKKEEPING: it is guaranteed by the
           enumerator and may never be counted as engineering assurance. Scoping
-          it to the branch does not change that - it makes the bookkeeping about
-          the production it is bookkeeping for.
+          it to the branch and to standing topology does not change that - it
+          makes the bookkeeping about the production it is bookkeeping for.
       disposition:
         authority_class: AUTHORITATIVE
         authored_by: "model, or strictly derived from an explicit sufficient premise"
@@ -1347,9 +1381,15 @@ assurance_families:
         # is not a second canonical field: cells that cite nothing, which is what
         # UNDISPOSITIONED does, contribute nothing.
         dependency: >
-          The union of the premises the produced cells actually cite, carried on
-          the creating operation. Availability is not dependency: an entity the
-          consumer view held and no cell used is not a premise.
+          TWO HALVES, both on the creating operation, with different
+          consequences. DOMAIN-DEFINING: the candidate whose branch this is, the
+          Configuration, and every RigidGroup whose cells this record contains -
+          withdraw one and the cells stop being in the current domain, so the
+          grid describing them must lose standing with them. DISPOSITION: the
+          premises the cells actually cite - withdraw one and the cells remain
+          while the conclusion about them loses unqualified authority.
+          Availability is not dependency: an entity the consumer view held and no
+          cell used is not a premise, and UNDISPOSITIONED contributes none.
         completeness: >
           A separate, reported engineering quantity. NOT implied by domain
           totality, and not satisfied by it.

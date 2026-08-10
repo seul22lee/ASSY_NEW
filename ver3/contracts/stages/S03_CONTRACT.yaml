@@ -226,12 +226,24 @@ dof_disposition_rule:
     group in another's configuration is a pair no mechanism contains. Its
     totality is guaranteed by the code that produces it and may never be counted
     as engineering assurance.
+    IT IS NOT STORED. One function computes it - current_dof_domain - from
+    STANDING topology, on every read; no MobilityExpectation and no other record
+    is consulted about whether a cell exists. A disposition's rigid group,
+    configuration and DOF identify WHICH cell it is about, and assert nothing
+    about that cell being there.
   disposition: >
     From a PRESENT, TYPED, REFERENCEABLE PREMISE and from nothing else, and that
     premise is also a DEPENDENCY: it is carried on the creating operation, so
     superseding or invalidating it costs the mobility its unqualified authority
     (FA-5). A citation that is not a dependency lets the design go on claiming a
     DOF is held by something it has withdrawn.
+  dependency: >
+    TWO HALVES with different consequences. The DOMAIN-DEFINING premises - the
+    candidate, the configuration, and every rigid group whose cells the record
+    contains - decide whether those cells are still in the current domain at all.
+    The DISPOSITION premises decide whether the claim about them still stands.
+    Withdraw a rigid group and the cells go with it; withdraw a cited relation
+    and the cells remain while the conclusion loses authority.
     BLOCKED_BY citing a ConstraintRelation, INTENDED citing the Joint whose class
     leaves the DOF free, IRRELEVANT_BECAUSE citing the Scenario in which it is
     unloaded and unactuated. Which field carries which disposition's premise, and
@@ -382,7 +394,11 @@ maturity_expectations:
 deterministic_exit_checks:
   - id: S03-C1
     claim_class: BOOKKEEPING
-    check: "DOF totality: every rigid group, in every configuration OF ITS OWN BRANCH, has every DOF dispositioned exactly once"
+    check: "DOF totality: every STANDING rigid group, in every STANDING configuration OF ITS OWN BRANCH, has every DOF dispositioned exactly once by a STANDING MobilityExpectation"
+    currentness: >
+      Both sides are current. Withdrawn topology does not enlarge the domain, and
+      a grid that lost standing does not satisfy it - a design may not keep
+      credit for the mobility of a group it dropped.
     never_assurance: >
       The enumerator guarantees this. Passing it establishes nothing about the
       design and it contributes to no establishment claim. The engineering

@@ -344,6 +344,24 @@ def derive_mobility(groups: List[str], configurations: List[str],
     return out
 
 
+def domain_premises(entries: Iterable[Dict[str, Any]], configuration: str) -> List[str]:
+    """What the EXISTENCE of these cells rests on. FA-5, the domain half.
+
+    A MobilityExpectation is about one configuration and the rigid groups whose
+    cells it carries; withdraw any of them and the cells it addresses are no
+    longer in the current domain. Recording only the disposition premises left
+    the grid STANDING after its own topology was dropped - it went on describing
+    the mobility of a group the design no longer had, and nothing said so.
+
+    Read off the produced rows, so a MobilityExpectation depends on the groups it
+    actually contains rather than on every group in the branch.
+    """
+    out = {configuration} if configuration else set()
+    out |= {row["rigid_group"] for row in entries
+            if isinstance(row.get("rigid_group"), str) and row["rigid_group"]}
+    return sorted(out)
+
+
 def cited_premises(entries: Iterable[Dict[str, Any]]) -> List[str]:
     """The entities these cells were ACTUALLY DERIVED FROM. FA-4, FA-5.
 
@@ -403,50 +421,76 @@ def disposition_completeness(entries: Iterable[Dict[str, Any]]) -> Dict[str, Any
 
 
 def dof_domain(groups: Iterable[str], configurations: Iterable[str]) -> List[Tuple[str, str, str]]:
-    """The COMPLETE domain of the mobility function, WITHIN ONE BRANCH.
+    """THE enumerator. One branch's groups x one branch's configurations x DOF.
 
-    Computed here, from the topology, and never taken from a response. This is
-    what makes omission detectable: no premise has to exist for the line to
-    exist, so an uncovered cell is visible as UNDISPOSITIONED rather than absent.
+    Computed from the topology and never taken from a response or read back out
+    of anything stored. This is what makes omission detectable: no premise has to
+    exist for the line to exist, so an uncovered cell is visible as
+    UNDISPOSITIONED rather than absent.
 
-    Its arguments are one branch's groups and one branch's configurations,
-    because that is what a mechanism is. Over accumulated state holding several
-    alternatives, use `accumulated_dof_domain`.
+    Every answer to "which mobility cells exist" comes through here. The producer
+    applies it to the branch its invocation is for; `current_dof_domain` applies
+    it to each standing branch and unions the results. One rule, two projections
+    of it, and no second formula in a checker.
     """
     return [(g, c, d) for g in groups for c in configurations for d in DOF_NAMES]
 
 
-def accumulated_dof_domain(state) -> List[Tuple[str, str, str]]:
-    """Every DOF cell the accumulated design ACTUALLY HAS.
+def current_dof_domain(state) -> List[Tuple[str, str, str]]:
+    """WHICH MOBILITY CELLS CURRENTLY EXIST. The one executable answer.
 
-    The union of the branches' domains - not the Cartesian product of everything
-    in state. Two alternatives with two groups and two configurations each have
-    24 cells apiece and 48 between them; the product of all four groups with all
+    Class B, in the operational sense and not only the declared one: it is
+    RECOMPUTED from standing topology on every call and is stored nowhere. No
+    MobilityExpectation, and no other record, is consulted about whether a cell
+    exists - which is what stops a stored structure from becoming a second
+    authority for domain existence. A disposition's rigid_group / configuration /
+    dof identify WHICH derived cell the disposition is about; they do not assert
+    that the cell is there.
+
+    CURRENT means STANDING. Superseded, invalidated and stale topology stays
+    readable as history (FA-1) and defines nothing: withdrawing a rigid group
+    took it out of the ConsumerView the producer works from, so a domain that
+    still contained it was a second currentness rule inside one pipeline, and the
+    checker went on demanding cells for a group the design had dropped.
+
+    THE UNION OF THE BRANCHES', never the Cartesian product of everything in
+    state. Two alternatives with two groups and two configurations each have 24
+    cells apiece and 48 between them; the product of all four groups with all
     four configurations is 96, and the extra 48 are pairs like "candidate A's
     group in candidate B's configuration", which no mechanism contains and no
-    producer could ever disposition. A checker demanding them reports a design as
-    missing half its mobility for having more than one alternative.
+    producer could ever disposition.
 
     A cell exists when its group and its configuration belong to a COMMON BRANCH,
     or when neither belongs to any - the second case being a design that has not
-    branched, where the whole state is the one mechanism and the behaviour is
-    exactly what it was before. Branch membership comes from `branch_membership`,
-    which is the same relation the ConsumerView uses to decide what a branch-
-    scoped consumer may see, so the checker and the producer cannot disagree
-    about which mechanism a group belongs to.
+    branched, where the whole state is the one mechanism. Branch membership comes
+    from `branch_membership`, the same relation the ConsumerView uses to scope a
+    branch, so the producer and every reader answer "which mechanism is this
+    group in" the same way.
     """
     from ..view.consumer_view import branch_membership
 
-    groups = sorted(g["entity_id"] for g in state.family("RigidGroup"))
-    configs = sorted(c["entity_id"] for c in state.family("Configuration"))
+    groups = sorted(g["entity_id"] for g in state.standing("RigidGroup"))
+    configs = sorted(c["entity_id"] for c in state.standing("Configuration"))
     owner = branch_membership(state, state.c, set(groups) | set(configs))
     out: List[Tuple[str, str, str]] = []
     for g in groups:
         for c in configs:
             if (owner.get(g) or set()) & (owner.get(c) or set()) or not (
                     owner.get(g) or owner.get(c)):
-                out.extend((g, c, d) for d in DOF_NAMES)
+                out.extend(dof_domain([g], [c]))
     return out
+
+
+def current_mobility_cells(state) -> List[Dict[str, Any]]:
+    """The disposition rows that are CURRENTLY in force.
+
+    From STANDING MobilityExpectations only. A grid whose topology was withdrawn
+    is retained and readable, and it is not current coverage: letting it answer
+    "is this cell dispositioned" would mean a design could drop a rigid group and
+    keep being credited for the mobility of the group it dropped.
+    """
+    return [d for mex in state.standing("MobilityExpectation")
+            for d in mex.get("dispositions", []) if isinstance(d, dict)]
 
 
 #: The effect vocabulary, read from the contract rather than restated.
@@ -620,30 +664,27 @@ def dof_totality_check(state) -> List[str]:
     domain rests on evidence, and which cells do not. `disposition_completeness`
     below reports that.
 
-    The domain is `accumulated_dof_domain`, the UNION OF THE BRANCHES', because
-    production is branch-scoped and bookkeeping over a different domain is not
-    bookkeeping about production. It used to take the product of every group in
-    state with every configuration in state, so a second alternative made it
-    demand cells like "A's group in B's configuration" - 48 false findings on a
-    two-candidate design in which nothing at all was wrong.
+    BOTH SIDES ARE CURRENT, and that is the point. The domain is
+    `current_dof_domain` - standing topology, branch union - and the coverage is
+    `current_mobility_cells` - standing grids only. Mixing the two currentness
+    rules is how this check kept being wrong in a new way each time: history
+    could enlarge the domain, or a withdrawn grid could satisfy it, and either
+    one makes the report describe a design that is not the one in front of you.
 
-    It still catches a REAL omission: a group of a branch that has no cells in
-    its own branch's configurations is still missing them, and that is what the
-    branch domain asks about.
+    It still catches a REAL omission: a standing group with no cells in its own
+    branch's standing configurations is missing them, and that is exactly what
+    the current domain asks about.
     """
-    domain = accumulated_dof_domain(state)
+    domain = current_dof_domain(state)
     if not domain:
-        return ["DOF_DOMAIN_EMPTY: %d groups, %d configurations"
-                % (len(state.family("RigidGroup")),
-                   len(state.family("Configuration")))]
+        return ["DOF_DOMAIN_EMPTY: %d standing groups, %d standing configurations"
+                % (len(state.standing("RigidGroup")),
+                   len(state.standing("Configuration")))]
     in_domain = set(domain)
     seen: Dict[Tuple[str, str, str], int] = {}
-    for mex in state.family("MobilityExpectation"):
-        for d in mex.get("dispositions", []):
-            if not isinstance(d, dict):
-                continue
-            key = (d.get("rigid_group"), d.get("configuration"), d.get("dof"))
-            seen[key] = seen.get(key, 0) + 1
+    for d in current_mobility_cells(state):
+        key = (d.get("rigid_group"), d.get("configuration"), d.get("dof"))
+        seen[key] = seen.get(key, 0) + 1
     problems = []
     missing = [k for k in domain if k not in seen]
     for k in missing[:12]:
@@ -673,33 +714,35 @@ def constraint_disposition_check(state) -> List[str]:
     than what the design claims.
     """
     problems = []
-    bodies = {b["entity_id"] for b in state.family("Body")}
-    relations = {r["entity_id"]: r for r in state.family("ConstraintRelation")}
-    for mex in state.family("MobilityExpectation"):
-        for d in mex.get("dispositions", []):
-            if not isinstance(d, dict) or d.get("disposition") != "BLOCKED_BY":
-                continue
-            tag = "%s/%s/%s" % (d.get("rigid_group"), d.get("configuration"), d.get("dof"))
-            cited = d.get("constraint_relation")
-            if not cited or cited not in relations:
-                problems.append("BLOCKED_BY_UNRESOLVED_PREMISE: %s cites %r"
-                                % (tag, cited))
-                continue
-            # One finding per incomplete relation, not one per missing field: a
-            # check that multiplies a single defect by four turns 70 problems
-            # into 280 and buries everything else.
-            missing = [f for f in ("blocked_direction", "defeat_specification",
-                                   "driver") if not str(d.get(f) or "").strip()]
-            if not (d.get("provider_body") or d.get("provider_reaction_site")):
-                missing.append("a provider")
-            if missing:
-                problems.append("BLOCKING_INCOMPLETE: %s missing %s"
-                                % (tag, ", ".join(missing)))
-            if d.get("driver") and d["driver"] not in CONSTRAINT_DRIVERS:
-                problems.append("BLOCKING_BAD_DRIVER: %s -> %r" % (tag, d["driver"]))
-            provider = d.get("provider_body")
-            if provider and bodies and provider not in bodies:
-                problems.append("PROVIDER_NOT_A_BODY: %s -> %r" % (tag, provider))
+    # STANDING throughout: this asks whether the mobility the design CURRENTLY
+    # claims rests on relations it CURRENTLY has. A withdrawn grid citing a
+    # withdrawn relation is consistent history, not a present defect.
+    bodies = {b["entity_id"] for b in state.standing("Body")}
+    relations = {r["entity_id"]: r for r in state.standing("ConstraintRelation")}
+    for d in current_mobility_cells(state):
+        if d.get("disposition") != "BLOCKED_BY":
+            continue
+        tag = "%s/%s/%s" % (d.get("rigid_group"), d.get("configuration"), d.get("dof"))
+        cited = d.get("constraint_relation")
+        if not cited or cited not in relations:
+            problems.append("BLOCKED_BY_UNRESOLVED_PREMISE: %s cites %r"
+                            % (tag, cited))
+            continue
+        # One finding per incomplete relation, not one per missing field: a
+        # check that multiplies a single defect by four turns 70 problems into
+        # 280 and buries everything else.
+        missing = [f for f in ("blocked_direction", "defeat_specification",
+                               "driver") if not str(d.get(f) or "").strip()]
+        if not (d.get("provider_body") or d.get("provider_reaction_site")):
+            missing.append("a provider")
+        if missing:
+            problems.append("BLOCKING_INCOMPLETE: %s missing %s"
+                            % (tag, ", ".join(missing)))
+        if d.get("driver") and d["driver"] not in CONSTRAINT_DRIVERS:
+            problems.append("BLOCKING_BAD_DRIVER: %s -> %r" % (tag, d["driver"]))
+        provider = d.get("provider_body")
+        if provider and bodies and provider not in bodies:
+            problems.append("PROVIDER_NOT_A_BODY: %s -> %r" % (tag, provider))
     return problems
 
 
@@ -711,22 +754,21 @@ def irrelevance_check(state) -> List[str]:
     graph, so it is checked against the LoadCases instead: a DOF called
     irrelevant in a scenario that carries a load case is not irrelevant.
     """
-    scenarios = {s["entity_id"] for s in state.family("Scenario")}
-    loaded = {l.get("scenario") for l in state.family("LoadCase")}
+    scenarios = {s["entity_id"] for s in state.standing("Scenario")}
+    loaded = {l.get("scenario") for l in state.standing("LoadCase")}
     problems = []
-    for mex in state.family("MobilityExpectation"):
-        for d in mex.get("dispositions", []):
-            if not isinstance(d, dict) or d.get("disposition") != "IRRELEVANT_BECAUSE":
-                continue
-            tag = "%s/%s/%s" % (d.get("rigid_group"), d.get("configuration"), d.get("dof"))
-            scenario = d.get("scenario")
-            if not str(scenario or "").strip():
-                problems.append("IRRELEVANCE_UNJUSTIFIED: %s names no scenario" % tag)
-                continue
-            if scenarios and scenario in scenarios and scenario in loaded:
-                problems.append(
-                    "IRRELEVANCE_CONTRADICTED: %s cites %s, which carries a load case"
-                    % (tag, scenario))
+    for d in current_mobility_cells(state):
+        if d.get("disposition") != "IRRELEVANT_BECAUSE":
+            continue
+        tag = "%s/%s/%s" % (d.get("rigid_group"), d.get("configuration"), d.get("dof"))
+        scenario = d.get("scenario")
+        if not str(scenario or "").strip():
+            problems.append("IRRELEVANCE_UNJUSTIFIED: %s names no scenario" % tag)
+            continue
+        if scenarios and scenario in scenarios and scenario in loaded:
+            problems.append(
+                "IRRELEVANCE_CONTRADICTED: %s cites %s, which carries a load case"
+                % (tag, scenario))
     return problems
 
 
@@ -1312,9 +1354,16 @@ class S03BMobilityAndAssembly(Stage):
         # was invisible while a runner derived only what it was pointed at. A
         # derived id must also be RECOMPUTABLE (FA-4); a counter is a function of
         # call order, and this is a function of the premises.
+        # BOTH HALVES OF THE DEPENDENCY. What makes these cells EXIST - the
+        # configuration and the rigid groups they address - and what the
+        # dispositions were derived FROM. Withdraw the topology and the grid
+        # loses standing along with the cells it describes; withdraw a cited
+        # relation and the conclusion loses standing while the cells remain.
+        # Those are different consequences of one rule and both are FA-5.
         ops = [Op("CREATE", "MobilityExpectation", "MEX-%s" % cfg,
                   {"configuration": cfg, "dispositions": rows}, "s03:derivation",
-                  premise_refs=cited_premises(rows))
+                  premise_refs=sorted(set(domain_premises(rows, cfg))
+                                      | set(cited_premises(rows))))
                for cfg, rows in sorted(by_config.items())]
         return carry_invocation_premises(ops, self.invocation_premises(inputs))
 

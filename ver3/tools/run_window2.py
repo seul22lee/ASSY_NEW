@@ -40,7 +40,8 @@ from ver3.assy_v3.stages.s02_obligation_and_candidates import (             # no
     S02ObligationAndCandidates)
 from ver3.assy_v3.stages.s03_topology_and_mobility import (                 # noqa: E402
     S03BMobilityAndAssembly, S03TopologyAndMobility, assembly_acyclic_check,
-    constraint_disposition_check, disposition_completeness,
+    constraint_disposition_check, current_mobility_cells,
+    disposition_completeness,
     legacy_shapes_in_recording,
     compliance_check, dof_totality_check, functional_region_check,
     interface_classification_check, irrelevance_check, load_path_check,
@@ -263,6 +264,10 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
                  if op.entity_type == "MobilityExpectation"
                  for d in (op.fields.get("dispositions") or [])]
         rec["dof_entries_derived"] = len(cells)
+        # The CURRENT quantity, over standing grids, not only what this call
+        # emitted. A run that withdrew topology has less current mobility than it
+        # produced, and the record should say the smaller number.
+        cells = current_mobility_cells(state)
         # THE ENGINEERING QUANTITY, reported and not checked. Domain totality is
         # guaranteed by the enumerator and says nothing; this says how much of the
         # domain rests on evidence and names the cells that do not. A low number

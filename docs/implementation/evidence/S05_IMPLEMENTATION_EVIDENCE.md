@@ -1,9 +1,9 @@
 # IMPL S-5 — CANONICAL MOBILITY MIGRATION AND DOF DISPOSITION
 
-Baseline of the final pass: `9b22b0a`. S-4 is frozen at `6e8bd59` and this
+Baseline of the root-cause pass: `dc84dff`. S-4 is frozen at `6e8bd59` and this
 document does not revise its evidence. Sections 0–11 record the correction pass
-that ran on `6ccbe7d`; section 12 records the final pass and carries the one
-CURRENT STATUS.
+that ran on `6ccbe7d`; section 12 the pass on `9b22b0a`; section 13 the
+root-cause pass, which carries the one CURRENT STATUS.
 
 ---
 
@@ -21,8 +21,15 @@ CURRENT STATUS.
 > What `9b22b0a` got right stands and is not re-argued: one producer, ownership
 > inside the invocation, typed per-kind premises checked at the write boundary,
 > `MAINTAINED_BY_CLASS` retired, declared-configuration applicability, contract
-> and metadata aligned. Section 12 covers only the two integration gaps and is
-> the current record.
+> and metadata aligned.
+
+> **SUPERSEDED — `dc84dff` "S-5 VERIFIED CLOSED — BRANCH-SAFE BOOKKEEPING AND
+> PREMISE DEPENDENCY INTEGRATED": each pass repaired one path to "current
+> mobility" while the pipeline still reconstructed it through four that did not
+> agree.**
+>
+> `dc84dff` made the domain branch-safe and made cited premises dependencies.
+> Both stand. What it did not do was make the lifecycle one thing — section 13.
 
 Kept, not erased. What that pass got right stands: the `MAINTAINED_BY_CLASS`-from-
 absence branch is deleted, `UNDISPOSITIONED` exists and behaves, domain and
@@ -805,19 +812,237 @@ premise-shaped field instead of the used one (1 — `B-PREM-10`).
 
 ---
 
+## 13. THE ROOT-CAUSE PASS — ONE MOBILITY LIFECYCLE
+
+Baseline `dc84dff`.
+
+### 13.1 Root cause, reproduced before editing
+
+Four passes each repaired one surface and the next one surfaced, because the
+architecture's A/B split had never been made operational as **one lifecycle**.
+Four disagreeing reconstructions of "current mobility" coexisted:
+
+**A — what the contract declares.** `authorship_split.domain.authority_class:
+DERIVED`, `.disposition.authority_class: AUTHORITATIVE`.
+
+**B — what runtime enforces.**
+
+```
+Contracts().authority_class('MobilityExpectation')  ->  AUTHORITATIVE
+family-level `authority_class` declared?            ->  False   (defaulted)
+authority.class_overrides                           ->  {}
+field_semantics carrying authority_class            ->  []
+```
+
+Authority is **family-level**. The field-level split existed only as prose. The
+contract's own note said so: *"Empty at S-1. Populating it — in particular
+splitting MobilityExpectation into a derived domain and an authored disposition —
+is U-6/M-6"*. U-6 is this step; it had not been done.
+
+**C — a domain-defining premise withdrawn.** Two branches, 2×2 and 1×3, then
+`INVALIDATE RigidGroup RGP-G1A`:
+
+```
+RGP-G1A _validity                INVALIDATED
+still in accumulated domain?     True          <- history defined the domain
+domain cell count                42            (unchanged)
+dof_totality_check               []            (silent)
+MEX-CFG-C0A  _validity=STANDING  holds RGP-G1A  _premises=[CND-A, CRL-0A, JNT-A, SCN-IDLE]
+MEX-CFG-C1A  _validity=STANDING  holds RGP-G1A  _premises=[CND-A, JNT-A]
+```
+
+The grids went on describing the mobility of a group the design had dropped, and
+nothing said so — **the topology a grid addresses was not among its premises**.
+
+**D — two currentness rules in one pipeline.**
+
+```
+ConsumerView RigidGroup            ['RGP-G0A']            standing only
+accumulated_dof_domain groups      ['RGP-G0A','RGP-G1A']  all history
+
+accumulated_dof_domain          family()=2  standing()=0
+dof_totality_check              family()=3  standing()=0
+constraint_disposition_check    family()=3  standing()=0
+irrelevance_check               family()=3  standing()=0
+branch_membership               family()=0  standing()=1
+```
+
+The producer had always been standing-only. Everything downstream of it was not.
+
+### 13.2 Representation decision
+
+The frozen sources permit §3's preferred interpretation, so it is what was
+implemented:
+
+> **MobilityExpectation is the authoritative disposition container. The DOF
+> domain is not a second stored truth — it is a Class-B computation over standing
+> branch topology.**
+
+Authority: proposal §11.2 makes domain enumeration deterministic and disposition
+the authored act; freeze §5 says class B is *"recomputable from premises"*; FA-2
+requires every value to belong to **exactly one** class, which a stored domain
+inside an AUTHORITATIVE family violates.
+
+So the mismatch was removed by **removing the false claim**, not by inventing
+per-field authority metadata runtime ignores — which §3 explicitly forbids:
+
+- `MobilityExpectation.authority_class: AUTHORITATIVE`, **declared** on the
+  family rather than defaulted, because what it stores is dispositions;
+- `authorship_split.domain` gains `stored: false`, `computed_by:
+  current_dof_domain`, `recomputed_from: [standing RigidGroup, standing
+  Configuration, branch membership]`, and a `currentness` clause;
+- `dispositions` declares `cell_address: [rigid_group, configuration, dof]` — the
+  **address** of the derived cell a claim is about, asserting nothing about its
+  existence;
+- `class_overrides_note` records the resolution: no override is needed, because
+  the table maps a family to a class and the derived half is not stored.
+
+`AUDIT-10` asserts all of it, including that **no field declares an
+`authority_class` runtime does not read**. `AUDIT-10b` proves the class-B claim
+behaviourally: topology changes, the stored grids are byte-identical, and the
+domain follows — so it is recomputed, not read back.
+
+### 13.3 Canonical current-domain definition
+
+```
+dof_domain(groups, configurations)      THE enumerator. One branch.
+current_dof_domain(state)               THE current answer:
+    standing RigidGroup
+  × standing Configuration
+  restricted to a COMMON BRANCH (branch_membership — the ConsumerView's relation)
+  ∪ over branches
+  → dof_domain applied per branch
+```
+
+The producer applies `dof_domain` to its invocation's view; every current reader
+applies it through `current_dof_domain`. `AUDIT-1` asserts the enumeration
+expression exists **once** in the module; `AUDIT-9` asserts producer and checker
+agree cell for cell, per branch.
+
+`current_mobility_cells(state)` is the coverage side: rows from **standing**
+grids only.
+
+### 13.4 Dependency definition
+
+```
+premise_refs(MEX) =
+      {candidate}                                   invocation premise
+    ∪ {configuration} ∪ {rigid groups its rows address}      DOMAIN-DEFINING
+    ∪ {premises its rows actually cite}                      DISPOSITION
+```
+
+Two halves with different consequences, and that is the point of separating them:
+withdraw a **domain** premise and the cells stop being in the current domain, so
+the grid loses standing with them; withdraw a **disposition** premise and the
+cells remain while the claim about them loses authority. `AUDIT-7/8` asserts each
+half produces its own consequence and not the other's.
+
+Both are read mechanically off the produced rows. `AUDIT-5/6` asserts the stored
+set is exactly domain ∪ cited ∪ the invocation premise — **nothing else** — and
+that every premise resolves. `AUDIT-6b`: an UNDISPOSITIONED cell contributes no
+engineering premise and still carries its domain premises, because *existence*
+and *evidence* are different claims.
+
+### 13.5 Lifecycle falsifiers
+
+| | case | result |
+|---|---|---|
+| **L1** | clean current branch | current domain (24) **==** produced mobility domain, `dof_totality_check []` |
+| **L2** | three unequal branches 2×2, 1×3, 3×1 | domain 60 = union; equals what was produced |
+| **L3** | INVALIDATE `RigidGroup` | leaves the domain (42→30); **both** grids of that branch STALE; other branch unchanged in domain and validity |
+| **L3b** | — | the withdrawn group is no longer demanded; the branch's *surviving* group is reported as uncovered, which is a real gap, not a false one |
+| **L4** | SUPERSEDE `Configuration` | stays in the domain — FA-1 retains both values and the entity keeps standing — and the dependent grid goes **STALE** |
+| **L4b** | INVALIDATE `Configuration` | leaves the domain; dependent grid STALE; other branch untouched |
+| **L5** | INVALIDATE used `Joint` | domain **unchanged**; affected grid STALE |
+| **L6** | INVALIDATE used `ConstraintRelation` | domain unchanged; affected grid STALE |
+| **L6b** | INVALIDATE the bounded `Scenario` premise | domain unchanged; affected grid STALE |
+| **L7** | INVALIDATE another branch's relation and joint | this branch's domain and validity untouched |
+| **L8** | a stale grid exists | it is **not** current coverage, and the coverage it used to provide is reported as missing |
+| **L9** | a genuine current cell removed | exactly one finding, naming that group, configuration and DOF |
+| **L10** | an artificial cross-branch cell | `DOF_DISPOSITION_OUT_OF_DOMAIN` |
+| **L11** | INVALIDATE the `Candidate` | that branch's topology and mobility stop contributing — via the invocation premise every s03 record already carried — and the other branch is untouched, domain and checks quiet |
+
+**L4 is reported as the substrate defines it, not as the brief phrased it.**
+`SUPERSEDE` replaces a value and retains both (FA-1); it does not withdraw the
+entity, so a superseded configuration is still part of the mechanism. What it is
+is a *premise change*, so the dependent grid stales. `INVALIDATE` is the
+operation that removes it, and `L4b` covers that. Forcing "superseded
+configuration leaves the domain" would have meant deleting an entity the
+architecture says is retained.
+
+### 13.6 Generality
+
+No case names a candidate, parses an id, or depends on a count: branch shapes are
+parameters (2×2, 1×3, 3×1), branch membership is `_reachable` over the depends-on
+graph, and the premise halves are read off produced rows through the contract's
+own map. Nothing in production reads an id suffix. The key property — *changing
+any premise of candidate A's current mobility affects exactly A* — is L3, L7 and
+L11 from both directions.
+
+### 13.7 Files changed
+
+`ver3/assy_v3/stages/s03_topology_and_mobility.py` ·
+`ver3/tools/run_window2.py` ·
+`ver3/contracts/DESIGN_STATE_CONTRACT.yaml` ·
+`ver3/contracts/stages/S03_CONTRACT.yaml` ·
+`ver3/tests/meta/test_s5_lifecycle.py` (new, 25 cases) ·
+`ver3/tests/meta/test_s5_branch_and_premise.py` ·
+this file.
+
+### 13.8 The ten audit questions
+
+| | question | answer |
+|---|---|---|
+| 1 | exactly one executable definition of the current DOF domain? | **YES** — `AUDIT-1`, one enumeration expression in the module |
+| 2 | standing branch topology only? | **YES** — `AUDIT-2` |
+| 3 | can historical topology enlarge the current domain? | **NO** — `AUDIT-3`, history retained and excluded |
+| 4 | can a stale grid satisfy current totality? | **NO** — `AUDIT-4`, `L8` |
+| 5 | every grid carries all domain-defining dependencies? | **YES** — `AUDIT-5/6` |
+| 6 | only actually-used disposition premises? | **YES** — `AUDIT-5/6`, `AUDIT-6b`, `B-PREM-10` |
+| 7 | a domain premise change moves exactly the affected mobility? | **YES** — `L3`, `L4b`, `L11`, `AUDIT-7/8` |
+| 8 | a disposition premise change stales without moving the domain? | **YES** — `L5`, `L6`, `L6b`, `AUDIT-7/8` |
+| 9 | producer and checker over the same current domain? | **YES** — `AUDIT-9`, per branch, cell for cell |
+| 10 | executable authority matches the contract's A/B distinction? | **YES** — `AUDIT-10`, `AUDIT-10b` |
+
+### 13.9 Preserved
+
+`_s4_physical_problems` and U5-1/2/3 unchanged and verified empty; one S03B
+producer; `UNDISPOSITIONED` semantics; `MAINTAINED_BY_CLASS` retired; typed
+disposition premises; the canonical branch relation. No S-6 work, no U-9
+assurance, no recording regeneration.
+
+### 13.10 Remaining S-5-owned blockers
+
+**None.** Deferred with owners, unchanged: per-DOF load/actuation cross-premise
+consistency and assurance relocation → **U-9**; spatial → **S-6**; selection →
+**S-7**; corpus refresh → **S-9**.
+
+### 13.11 Regression — SECONDARY EVIDENCE ONLY
+
+```
+RUN 846   PASS 846   FAIL 0   ERROR 0   SKIP 22
+```
+
+The evidence that carries weight is the four mutations, each caught: computing
+the domain over all history (7 failures), counting stale grids as current
+coverage (4), dropping the domain half of the dependency (5), and reducing the
+domain premises to the configuration alone (3).
+
+---
+
 ## CURRENT STATUS
 
-> **S-5 VERIFIED CLOSED — BRANCH-SAFE BOOKKEEPING AND PREMISE DEPENDENCY
-> INTEGRATED.**
+> **S-5 VERIFIED CLOSED — MOBILITY AUTHORITY, DOMAIN, DEPENDENCY AND VALIDITY
+> LIFECYCLE CONSISTENT.**
 >
-> One live producer, declared by one responsibility, deriving inside its own
-> invocation so every canonical caller sees the same state. Every positive
-> disposition names a typed premise of the right family for its kind, resolved at
-> the write boundary, applying to exactly the cell it declares — **and carried as
-> a dependency, so withdrawing a premise costs the mobility its unqualified
-> authority.** The DOF domain is the union of the branches', so bookkeeping asks
-> about the mechanisms production actually built, and it is still BOOKKEEPING.
-> `MAINTAINED_BY_CLASS` is retired, disposition completeness is reported, and no
-> active S-5-owned migration row remains.
+> One executable definition of which mobility cells currently exist, computed
+> from standing branch topology and stored nowhere, shared by the producer and
+> every current reader. MobilityExpectation is the authoritative disposition
+> container and says so in a declaration runtime enforces; its cell coordinates
+> address derived cells and assert nothing about their existence. Every grid
+> depends on both the topology whose cells it addresses and the premises its
+> dispositions cite, so a domain premise moves the cells and a disposition
+> premise moves only the claim. Withdrawn topology neither enlarges the domain
+> nor satisfies it, and history stays readable throughout.
 >
 > S-4 is unchanged and verified so. **Impl S-6 has NOT begun.**
