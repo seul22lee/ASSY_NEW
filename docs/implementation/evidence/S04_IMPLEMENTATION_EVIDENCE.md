@@ -943,12 +943,132 @@ freeze-gate. The 21 recordings remain **S-9** operational debt.
 **S-8** broader applicability · cross-role engineering assurance.
 **S-9** live corpus refresh · full live-chain validation · historical replay retirement.
 
-## 11.9 CURRENT STATUS
+## 11.9 Status *(SUPERSEDED — closure claim at `14c5806`, before the prompt-surface migration; §12 is current)*
 
 **S-4 VERIFIED CLOSED — CLOSURE CONSISTENCY GATE PASSES.**
 
 The semantic chain is complete, producer surfaces are consistent and gated against
 drift, active metadata states current truth with history preserved separately, and
 the remaining stage incompleteness is exclusively later-owned and named.
+
+**Impl S-5 has NOT begun.**
+
+
+---
+
+# 12. CANONICAL PROMPT MIGRATION *(CURRENT STATUS)*
+
+Baseline `14c5806`. This section supersedes §11.9 and every earlier status claim.
+
+## 12.1 Pre-flight: GO
+
+| issue | pushed behaviour | canonical requirement | S-4? | resolution |
+|---|---|---|---|---|
+| `addresses_obligations` | model asked for `obligations_addressed`; producer renamed it on the way into state | one field, one meaning | **yes** | **migrated** |
+| `Candidate.principle` | schema exposed bare `principle`; two readers accepted a scalar | mapping `function_class → principle_family`; *"no parser may accept a rejected shape"* | **yes** | **migrated** |
+| active NONCONFORMING rows | `Candidate.principle`, `addresses_obligations`, both `migration_step: S-4` | zero S-4-owned active rows at closure | **yes** | **moved to superseded** |
+| S02 field-level alignment | envelope was collection-level only | field-level | **yes** | **extended** |
+| S03B field-level alignment | frozen physical surfaces | unchanged | **yes** | verified, unchanged |
+| compatibility translation | one rename, live | none | **yes** | **removed** |
+| §11.9 status claim | `VERIFIED CLOSED` | stronger than reality | **yes** | **superseded** |
+
+## 12.2 The rename was the migration, not a detail
+
+`to_operations` read `obligations_addressed` and wrote `addresses_obligations`.
+The patch applied, so every earlier gate passed — and that is exactly why the
+adapter's existence *was* the evidence the migration had not happened. The model
+now authors the canonical name and nothing renames anything.
+
+## 12.3 The principle shape
+
+The contract declares one shape and forbids tolerance in the same breath:
+*"no compatibility shim: no parser may accept a rejected shape."* The schema now
+shows `principle {function_class: principle_family}` and the prompt says a
+one-thing candidate is a **one-entry mapping, never a bare string**. A rejected
+shape is **reported**, not coerced — turning a scalar into a one-entry map would
+mean inventing the function class, which is this code deciding the engineering.
+The two readers that accepted a scalar no longer pretend to.
+
+## 12.4 Field-level envelope
+
+`RESPONSE_ENVELOPE` now carries `(collection, family, prefix, exposed fields,
+stage-supplied fields)` in **canonical** field names — a model-facing name that
+differs from the canonical one has to be renamed by somebody, which is the defect.
+Requiredness is read from `DESIGN_STATE_CONTRACT`, never restated: this is a
+mapping of the JSON surface onto canonical families, not a second ontology.
+
+Stage-supplied is a declared third category rather than an exception:
+`Assumption.inferred_by_stage` is this stage's own id, and asking a model which
+stage it is would be theatre. Declaring it means "not exposed" can never quietly
+cover "forgotten".
+
+## 12.5 The gate now fails on the defects that got past it
+
+Twenty-four checks. New at field level: every exposed field is canonical; every
+canonical required field is exposed or declared stage-supplied; **no producer
+semantic rename remains** (`"canonical": x.get("other")` is detected structurally);
+the retired name is absent from the live surface; the principle shape is what is
+asked for and a scalar is reported; and **no active S-4-owned row claims the
+producer is nonconforming**.
+
+Three deliberate mutations prove it fails: renaming the canonical field back,
+surfacing a scalar principle, and an active S-4 NONCONFORMING row. GATE-21 caught
+the real metadata during this pass, before I had moved it.
+
+## 12.6 Active metadata
+
+`Candidate.principle` and `addresses_obligations` are out of the active rows and in
+`superseded_legacy_producers` with what was, what is, what closed it, and the
+residual: recorded fixtures still carry the old key and shape, which is **S-9**
+corpus debt, and no live parser accepts them. **Zero S-4-owned active rows remain**
+— the two left are S-5's mobility split and an S-4 row whose status is a factual
+note, not a nonconformance.
+
+## 12.7 Retired name, classified
+
+36 occurrences remain, **all in recorded probes and fixtures** plus tests that
+assert the name is dead. Zero in live prompt, parser or `to_operations`. The
+profiler reads both keys with a comment saying why: it profiles recorded
+responses, and that corpus is S-9's.
+
+## 12.8 U-5 unchanged, chain unchanged
+
+```
+view VIEW_READY · provider calls 1 · patch applies
+_s4_physical_problems   : []
+execution_status        : CONTRACT_INCOMPLETE
+declared_incompleteness : ['no blocking relation…'  -> S-5 (R-C/R-D)
+                           'no assembly order'      -> the minimal probe authors
+                                                       none; AssemblyStep has a
+                                                       producer already]
+```
+
+Not forced to SUCCESS. U5-1/2/3 and every falsifier are untouched and green.
+
+## 12.9 Regression
+
+`703 run · 703 pass · 0 fail · 22 skipped` — 9 stale-recording, 12 R-B, 1
+freeze-gate. No recording regenerated.
+
+## 12.10 Self-audit
+
+A ✓ canonical field authored directly · B ✓ canonical shape authored directly ·
+C ✓ no semantic translation remains · D ✓ rename regression detected · E ✓ shape
+regression detected · F ✓ zero active S-4 nonconforming rows · G ✓ U5 unchanged ·
+H ✓ both remaining incompleteness items owned · I ✓ the status matches what the
+tests prove · J ✓ the defect **class** is gated, not the two examples.
+
+## 12.11 CURRENT STATUS
+
+**S-4 VERIFIED CLOSED — CANONICAL PROMPT MIGRATION AND PHYSICAL CLOSURE BOTH GATED.**
+
+1. **Is S-4 closed?** Yes.
+2. **Any S-4-owned active migration defects left?** None.
+3. **What remains for S-5+?** S-5 `blocking_relations`/mobility · S-6 spatial ·
+   S-7 selection · S-8 assurance · S-9 corpus refresh and live-chain.
+4. **What does the gate guarantee?** That the model-facing surface, the parser and
+   the canonical contract cannot drift apart in name, shape, collection or
+   requiredness; that U5-1/2/3 stay enforced; and that no record can claim a
+   producer is nonconforming when it conforms.
 
 **Impl S-5 has NOT begun.**

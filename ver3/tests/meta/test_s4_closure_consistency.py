@@ -11,6 +11,7 @@ surfaces - contracts, envelope declarations, producer code - never prose wording
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 import unittest
@@ -57,13 +58,13 @@ class TestResponseEnvelopeCannotDrift(unittest.TestCase):
 
     def test_GATE_02_every_declared_collection_is_consumed(self):
         consumed = set(re.findall(r'parsed\.get\("([a-z_]+)"', self.source))
-        for collection, _family, _prefix in self.stage.RESPONSE_ENVELOPE:
+        for collection, _family, _prefix, _fields, _sup in self.stage.RESPONSE_ENVELOPE:
             self.assertIn(collection, consumed,
                           "%s is offered to the model and read by nothing"
                           % collection)
 
     def test_GATE_03_every_consumed_collection_is_declared(self):
-        declared = {c for c, _f, _p in self.stage.RESPONSE_ENVELOPE}
+        declared = {c for c, _f, _p, _fl, _s in self.stage.RESPONSE_ENVELOPE}
         consumed = set(re.findall(r'parsed\.get\("([a-z_]+)"', self.source))
         # `_dofs`-style internals and the derived-mobility keys are not response
         # collections; only compare what to_operations turns into entities.
@@ -76,19 +77,19 @@ class TestResponseEnvelopeCannotDrift(unittest.TestCase):
         self.assertTrue(consumed)
 
     def test_GATE_04_every_declared_collection_appears_in_the_schema(self):
-        for collection, _family, _prefix in self.stage.RESPONSE_ENVELOPE:
+        for collection, _family, _prefix, _fields, _sup in self.stage.RESPONSE_ENVELOPE:
             self.assertIn("%s[]" % collection, self.prompt,
                           "%s is in the envelope and not in the response schema"
                           % collection)
 
     def test_GATE_05_every_declared_family_is_real_and_stage_owned(self):
-        for _collection, family, _prefix in self.stage.RESPONSE_ENVELOPE:
+        for _collection, family, _prefix, _fields, _sup in self.stage.RESPONSE_ENVELOPE:
             self.assertIn(family, self.c.families, family)
             self.assertTrue(self.c.may_create("s02", family),
                             "s02 offers %s and does not own it" % family)
 
     def test_GATE_06_every_emitted_prefix_is_shown_to_the_model(self):
-        for _collection, _family, prefix in self.stage.RESPONSE_ENVELOPE:
+        for _collection, _family, prefix, _fields, _sup in self.stage.RESPONSE_ENVELOPE:
             self.assertIn(prefix, self.prompt,
                           "%s ids are emitted and the prompt never shows the "
                           "prefix" % prefix)
@@ -208,7 +209,7 @@ class TestTheGateWouldHaveCaughtIt(unittest.TestCase):
                                    "s02_obligation_and_candidates.py")).read()
         try:
             S02ObligationAndCandidates.RESPONSE_ENVELOPE = original + (
-                ("invented_things", "Obligation", "INV-"),)
+                ("invented_things", "Obligation", "INV-", ("statement",), ()),)
             consumed = set(re.findall(r'parsed\.get\("([a-z_]+)"', source))
             self.assertNotIn("invented_things", consumed,
                              "the fabricated collection is somehow consumed")
@@ -218,3 +219,135 @@ class TestTheGateWouldHaveCaughtIt(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestFieldLevelCanonicalAlignment(unittest.TestCase):
+    """Collection-level agreement is not enough.
+
+    The envelope could stay perfectly consistent while the model was asked for
+    `obligations_addressed` and the producer renamed it to
+    `addresses_obligations`. That rename IS the incomplete migration, and it
+    passed every earlier gate.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.c = Contracts()
+        cls.stage = S02ObligationAndCandidates()
+        cls.prompt = cls.stage.prompt({"consumer_view": {}})
+        cls.source = open(os.path.join(
+            _REPO, "ver3", "assy_v3", "stages",
+            "s02_obligation_and_candidates.py")).read()
+
+    def canonical_fields(self, family):
+        spec = self.c.families[family]
+        return (set(spec.get("required_fields") or [])
+                | set(spec.get("optional_fields") or [])) - {"entity_id"}
+
+    def test_GATE_16_every_exposed_field_is_a_canonical_field(self):
+        for collection, family, _prefix, fields, supplied in self.stage.RESPONSE_ENVELOPE:
+            canonical = self.canonical_fields(family)
+            for field in tuple(fields) + tuple(supplied):
+                self.assertIn(field, canonical,
+                              "%s.%s is offered to the model and is not a field of "
+                              "%s" % (collection, field, family))
+
+    def test_GATE_17_every_canonical_required_field_is_exposed(self):
+        for collection, family, _prefix, fields, supplied in self.stage.RESPONSE_ENVELOPE:
+            required = set(self.c.families[family].get("required_fields") or [])
+            missing = required - set(fields) - set(supplied) - {"entity_id"}
+            self.assertEqual(set(), missing,
+                             "%s must author %s and it is neither asked of the "
+                             "model nor declared stage-supplied"
+                             % (collection, sorted(missing)))
+
+    def test_GATE_18_no_producer_semantic_rename_remains(self):
+        """`"canonical": c.get("other_name")` is a rename. Structural extraction
+        under the SAME name is not."""
+        renames = []
+        for canonical, source in re.findall(
+                r'"(\w+)":\s*\w+\.get\(\s*"(\w+)"', self.source):
+            if canonical != source:
+                renames.append("%s <- %s" % (canonical, source))
+        self.assertEqual([], renames,
+                         "the producer renames a model field into a canonical one, "
+                         "which is a compatibility shim: %s" % renames)
+
+    def test_GATE_19_the_retired_legacy_name_is_gone_from_the_live_surface(self):
+        self.assertNotIn("obligations_addressed", self.prompt,
+                         "the model is still asked for the retired field name")
+        code = re.sub(r"#.*", "", self.source)          # comments may record history
+        self.assertNotIn("obligations_addressed", code,
+                         "the live producer still handles the retired field name")
+
+    def test_GATE_20_the_canonical_principle_shape_is_what_is_asked_for(self):
+        shape = self.c.families["Candidate"]["principle_shape"]
+        self.assertEqual("mapping", shape["kind"])
+        self.assertIn("function_class", self.prompt,
+                      "the mapping shape is not shown to the model")
+        # and a rejected shape is reported, never coerced
+        scalar = {"candidates": [{"id": "CND-1", "principle": "PIVOT"}]}
+        self.assertTrue(self.stage._principle_shape_problems(scalar),
+                        "a bare-string principle passes the live producer")
+        before = json.dumps(scalar, sort_keys=True)
+        self.stage._principle_shape_problems(scalar)
+        self.assertEqual(before, json.dumps(scalar, sort_keys=True),
+                         "the producer rewrote the model's principle")
+
+    def test_GATE_21_no_active_s4_row_claims_the_producer_is_nonconforming(self):
+        ds = _load("DESIGN_STATE_CONTRACT.yaml")
+        offending = []
+        for row in (ds.get("legacy_producers") or {}).get("rows") or []:
+            step = str(row.get("migration_step") or "")
+            status = str(row.get("current_status") or "")
+            if re.match(r"^S-4\b", step) and status in ("NONCONFORMING",
+                                                        "NOT_YET_PRODUCED"):
+                offending.append("%s (%s)" % (row.get("concept"), status))
+        self.assertEqual([], offending,
+                         "S-4 cannot be closed while it owns an active "
+                         "nonconforming row: %s" % offending)
+
+
+class TestFieldLevelGateActuallyFails(unittest.TestCase):
+    """Deliberate regressions, proving the gate is not just describing today."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.c = Contracts()
+        cls.stage = S02ObligationAndCandidates()
+
+    def test_GATE_22_a_renamed_canonical_field_is_detected(self):
+        """PM-GATE-01: put the old name back and the field check fails."""
+        original = S02ObligationAndCandidates.RESPONSE_ENVELOPE
+        try:
+            broken = tuple(
+                (c, f, p, tuple("obligations_addressed" if x == "addresses_obligations"
+                                else x for x in fields), s)
+                for c, f, p, fields, s in original)
+            S02ObligationAndCandidates.RESPONSE_ENVELOPE = broken
+            offenders = []
+            for collection, family, _p, fields, _s in broken:
+                spec = self.c.families[family]
+                canonical = (set(spec.get("required_fields") or [])
+                             | set(spec.get("optional_fields") or []))
+                offenders += [f for f in fields if f not in canonical]
+            self.assertIn("obligations_addressed", offenders,
+                          "renaming the canonical field passed the gate")
+        finally:
+            S02ObligationAndCandidates.RESPONSE_ENVELOPE = original
+
+    def test_GATE_23_a_scalar_principle_surface_is_detected(self):
+        """PM-GATE-02."""
+        self.assertTrue(self.stage._principle_shape_problems(
+            {"candidates": [{"id": "CND-1", "principle": "PIVOT"}]}))
+        self.assertTrue(self.stage._principle_shape_problems(
+            {"candidates": [{"id": "CND-1", "principle": []}]}))
+
+    def test_GATE_24_an_active_s4_nonconforming_row_is_detected(self):
+        """PM-GATE-03: the check that would have caught the metadata I left."""
+        rows = [{"concept": "invented", "current_status": "NONCONFORMING",
+                 "migration_step": "S-4"}]
+        offending = [r["concept"] for r in rows
+                     if re.match(r"^S-4\b", str(r["migration_step"]))
+                     and r["current_status"] in ("NONCONFORMING", "NOT_YET_PRODUCED")]
+        self.assertEqual(["invented"], offending)

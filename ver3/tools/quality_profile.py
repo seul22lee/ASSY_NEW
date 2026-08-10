@@ -326,10 +326,16 @@ def profile_s02(out: Dict[str, Any], s01: Dict[str, Any]) -> Dict[str, Any]:
         sum(1 for c in cands if isinstance(c.get("evidence_route_verdict"), dict)), len(cands))
     m["candidate_obligation_refs_resolve"] = frac(
         sum(1 for c in cands
-            for k in ("obligations_addressed", "obligations_created")
+            # `obligations_addressed` is the RETIRED response key. It stays here
+            # because this tool profiles RECORDED responses, which still contain
+            # it - that corpus is Impl S-9 debt. The live producer emits the
+            # canonical name only.
+            for k in ("addresses_obligations", "obligations_addressed",
+                      "obligations_created")
             for o in id_list(c.get(k)) if o in ob_ids),
         sum(1 for c in cands
-            for k in ("obligations_addressed", "obligations_created")
+            for k in ("addresses_obligations", "obligations_addressed",
+                      "obligations_created")
             for _ in id_list(c.get(k))))
 
     # -- premature commitment ------------------------------------------------

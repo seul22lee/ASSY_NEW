@@ -1431,6 +1431,27 @@ superseded_legacy_producers:
         input for the deterministic DOF expansion. It is not a second
         authoritative physical truth, S-4 completeness does not read it, and
         removing it is Impl S-5 (R-C/R-D).
+    - concept: Candidate.principle
+      was: "the s02 prompt asked for a bare principle family; parsers tolerated a scalar"
+      now: >
+        the response schema shows the canonical mapping {function_class:
+        principle_family}, the prompt says a one-thing candidate is a ONE-ENTRY
+        mapping and never a bare string, and a rejected shape is REPORTED rather
+        than coerced - the contract's own `no_compatibility_shim` requires that
+      closed_by: "S-4 / U-5 prompt migration"
+      residual: >
+        Recorded fixtures predating the migration still carry the scalar shape.
+        They are corpus debt (Impl S-9) and no live parser accepts them.
+    - concept: addresses_obligations
+      was: >
+        the model was asked for `obligations_addressed` and the producer renamed
+        it to `addresses_obligations` on the way into state - a semantic rename,
+        which is a compatibility shim rather than a finished migration
+      now: "the model authors `addresses_obligations`; nothing renames anything"
+      closed_by: "S-4 / U-5 prompt migration"
+      residual: >
+        Recorded fixtures still use the old key. Corpus debt (Impl S-9); the live
+        producer no longer reads it.
     - concept: PhysicalEffectObligation and PhysicalInteraction
       was: "none - no stage produced either"
       now: "s02 authors PhysicalEffectObligation; s03b authors PhysicalInteraction"
@@ -1443,16 +1464,6 @@ legacy_producers:
     conform, and no parser accepts the old shape as if it did. It is NOT a claim
     of conformance.
   rows:
-    - concept: Candidate.principle
-      canonical: "mapping function_class -> principle_family"
-      current_producers: ["s02 prompt", "Window-1 fixtures"]
-      current_status: NONCONFORMING
-      migration_step: "S-4 (prompt), S-9 (fixture regeneration)"
-    - concept: addresses_obligations
-      canonical: "one name, one meaning, reference to Obligation"
-      current_producers: ["s02 prompt uses addresses_obligations", "fixtures use obligations_addressed"]
-      current_status: NONCONFORMING
-      migration_step: "S-4, S-9"
     - concept: MobilityExpectation domain and disposition split
       canonical: "derived domain; authored disposition citing a premise; UNDISPOSITIONED where none"
       current_producers: ["derive_mobility still emits the pre-split shape"]

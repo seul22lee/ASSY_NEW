@@ -104,7 +104,12 @@ RULES
    the FUNCTION CLASSES it must perform and the PRINCIPLE FAMILY it uses for
    each. Two candidates are only genuinely different if they differ in a
    principle family, not in wording.
-4. For every candidate record obligations_addressed AND obligations_created. A
+   `principle` is a MAPPING from function class to principle family:
+       "principle": {{"<function class>": "<principle family>", ...}}
+   A candidate that does one thing is a ONE-ENTRY MAPPING, never a bare string.
+   A candidate performs several function classes, and only a mapping can say
+   which principle serves which.
+4. For every candidate record addresses_obligations AND obligations_created. A
    candidate that needs a support has CREATED a support obligation. Omitting
    this makes an incomplete candidate look cheaper than a complete one.
    obligations_created holds the IDS of obligations you already wrote in the
@@ -174,8 +179,9 @@ marked optional. Every id is a string in the format shown.
                           id "PEO-0001", effect, between_roles[],
                           addresses_obligations[], under_load_case (optional),
                           persistence (optional)
-  candidates[]            id "CND-0001", summary, family, principle,
-                          obligations_addressed[], obligations_created[],
+  candidates[]            id "CND-0001", summary, family,
+                          principle {{function_class: principle_family}},
+                          addresses_obligations[], obligations_created[],
                           evidence_route_verdict {{route, available (boolean),
                           note}}, self_locking (optional)
   acceptance_contracts[]  id "ACC-0001", candidate, obligations[], predicates[]
@@ -199,7 +205,7 @@ neither place is an error.
   reaction_site_requirements[].scenario               a scenario id from the input
   physical_effect_obligations[].addresses_obligations obligation ids you emit here
   physical_effect_obligations[].under_load_case       a load case id you emit here
-  candidates[].obligations_addressed       obligation ids you emit here
+  candidates[].addresses_obligations       obligation ids you emit here
   candidates[].obligations_created         obligation ids you emit here
   acceptance_contracts[].candidate         a candidate id you emit here
   acceptance_contracts[].obligations       obligation ids you emit here
@@ -278,15 +284,43 @@ class S02ObligationAndCandidates(Stage):
     #: reference lines, `to_operations`) and drifted every time a family was
     #: added. The prompt said "exactly these six keys" while eight were listed
     #: and eight consumed.
+    #: (json collection, canonical family, emitted id prefix, exposed fields,
+    #:  stage-supplied fields)
+    #:
+    #: A stage-supplied field is canonical and REQUIRED and is written by the
+    #: producer, not asked of the model - `inferred_by_stage` is this stage's own
+    #: id, and asking a model to report which stage it is would be theatre. It is
+    #: declared rather than tolerated, so "not exposed" never quietly covers
+    #: "forgotten".
+    #:
+    #: The fields are CANONICAL field names. That is the point: a model-facing
+    #: name that differs from the canonical one has to be renamed by the producer,
+    #: and a producer that renames is a compatibility shim rather than a finished
+    #: migration. Requiredness is NOT restated here - it is read from
+    #: DESIGN_STATE_CONTRACT, which stays the authority for what a field is.
     RESPONSE_ENVELOPE = (
-        ("obligations", "Obligation", "OBL-"),
-        ("load_cases", "LoadCase", "LC-"),
-        ("reaction_site_requirements", "ReactionSiteRequirement", "RSR-"),
-        ("physical_effect_obligations", "PhysicalEffectObligation", "PEO-"),
-        ("candidates", "Candidate", "CND-"),
-        ("acceptance_contracts", "AcceptanceContract", "ACC-"),
-        ("unresolved", "UnresolvedDecision", "UNR-"),
-        ("assumptions", "Assumption", "ASM-"),
+        ("obligations", "Obligation", "OBL-",
+         ("statement", "derived_from_requirements", "mandatory", "scope",
+          "satisfiable_at", "evidence_route", "route_available",
+          "involves_actors", "derivation_premises"), ()),
+        ("load_cases", "LoadCase", "LC-",
+         ("scenario", "applied_to_role", "reacted_at_role", "reacted_at_site",
+          "direction_class", "kind", "magnitude_or_status"), ()),
+        ("reaction_site_requirements", "ReactionSiteRequirement", "RSR-",
+         ("scenario", "boundary_side", "at_role", "why"), ()),
+        ("physical_effect_obligations", "PhysicalEffectObligation", "PEO-",
+         ("effect", "between_roles", "addresses_obligations", "under_load_case",
+          "persistence"), ()),
+        ("candidates", "Candidate", "CND-",
+         ("summary", "family", "principle", "addresses_obligations",
+          "obligations_created", "evidence_route_verdict", "self_locking"), ()),
+        ("acceptance_contracts", "AcceptanceContract", "ACC-",
+         ("candidate", "obligations", "predicates"), ()),
+        ("unresolved", "UnresolvedDecision", "UNR-",
+         ("decision", "why_open", "alternatives", "alternatives_kind",
+          "kept_open_by", "blocks"), ()),
+        ("assumptions", "Assumption", "ASM-",
+         ("statement", "why", "would_be_invalidated_by"), ("inferred_by_stage",)),
     )
 
     stage_id = "s02"
@@ -362,12 +396,12 @@ class S02ObligationAndCandidates(Stage):
             ops.append(Op("CREATE", "Candidate", c["id"], {
                 "summary": c["summary"], "family": c["family"],
                 "principle": c["principle"],
-                # U-2B (S-2): stored under the canonical name. The PROMPT and the
-                # model's response key are unchanged - this maps the answer to the
-                # one canonical field, it does not ask a different question. s03
-                # already used the canonical name; s02 and the contract were the
-                # outliers.
-                "addresses_obligations": c.get("obligations_addressed", []),
+                # S-4: the model authors the CANONICAL field. This used to read
+                # `obligations_addressed` and write `addresses_obligations` - a
+                # semantic rename in the producer, which is a compatibility shim
+                # and not a completed migration. One field, one meaning, all the
+                # way to the model.
+                "addresses_obligations": c.get("addresses_obligations", []),
                 "obligations_created": c.get("obligations_created", []),
                 "evidence_route_verdict": c["evidence_route_verdict"],
                 "self_locking": c.get("self_locking")}, prov))
@@ -392,7 +426,7 @@ class S02ObligationAndCandidates(Stage):
     #: Response keys that hold ENTITY IDS, and where those ids may come from.
     #: Kept next to the prompt that asks for them, so the two cannot drift.
     _REFERENCE_KEYS = (
-        ("candidates", "obligations_addressed"),
+        ("candidates", "addresses_obligations"),
         ("candidates", "obligations_created"),
         ("physical_effect_obligations", "addresses_obligations"),
         # `between_roles` is NOT here. It carries product/function role names -
@@ -414,6 +448,28 @@ class S02ObligationAndCandidates(Stage):
             out.append("no candidates formed")
         out.extend(self._reference_shape_problems(parsed))
         out.extend(self._reaction_site_problems(parsed))
+        out.extend(self._principle_shape_problems(parsed))
+        return out
+
+    def _principle_shape_problems(self, parsed: Dict[str, Any]) -> List[str]:
+        """A candidate whose principle is not the canonical mapping.
+
+        The contract declares one shape and says so plainly: "no parser may
+        accept a rejected shape". So this REPORTS a bare string; it does not turn
+        one into a one-entry map. A candidate performs several function classes,
+        and a scalar cannot say which principle serves which - inventing the key
+        would be this code deciding the engineering.
+        """
+        out: List[str] = []
+        for candidate in parsed.get("candidates") or []:
+            principle = candidate.get("principle")
+            if isinstance(principle, dict) and principle:
+                continue
+            out.append(
+                "candidate %s gives principle as %s; it is a mapping from "
+                "function class to principle family, and a candidate that does "
+                "one thing is a one-entry mapping"
+                % (candidate.get("id"), type(principle).__name__))
         return out
 
     def _reaction_site_problems(self, parsed: Dict[str, Any]) -> List[str]:
@@ -580,8 +636,8 @@ def candidate_distinctness_check(state) -> List[str]:
     seen: Dict[str, str] = {}
     out = []
     for c in state.family("Candidate"):
-        principle = c.get("principle")
-        key = str(sorted(principle.items())) if isinstance(principle, dict) else str(principle)
+        principle = c.get("principle") or {}
+        key = str(sorted(principle.items()))
         if key in seen:
             out.append("CANDIDATES_NOT_DISTINCT: %s duplicates %s" % (c["entity_id"], seen[key]))
         seen[key] = c["entity_id"]
@@ -593,8 +649,10 @@ def known_principle_check(state) -> List[str]:
     known = {f["family"] for fams in PRINCIPLE_FAMILIES.values() for f in fams}
     out = []
     for c in state.family("Candidate"):
-        p = c.get("principle")
-        used = list(p.values()) if isinstance(p, dict) else [p]
+        # Canonical shape only: the contract rejects a bare string and forbids a
+        # parser from accepting one, so nothing here pretends to read one.
+        p = c.get("principle") or {}
+        used = list(p.values())
         for u in used:
             for token in (u if isinstance(u, list) else [u]):
                 if token not in known:

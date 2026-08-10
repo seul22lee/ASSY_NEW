@@ -51,11 +51,11 @@ S02 = {
          "persistence": "PERSISTENT"}],
     "candidates": [
         {"id": "CND-A", "summary": "a pivoting arrangement", "family": "PIVOT",
-         "principle": {"support": "PIVOT"}, "obligations_addressed": ["OBL-0001"],
+         "principle": {"support": "PIVOT"}, "addresses_obligations": ["OBL-0001"],
          "obligations_created": [],
          "evidence_route_verdict": {"route": "ANALYSIS", "available": True, "note": "n"}},
         {"id": "CND-B", "summary": "a sliding arrangement", "family": "SLIDE",
-         "principle": {"support": "SLIDE"}, "obligations_addressed": ["OBL-0001"],
+         "principle": {"support": "SLIDE"}, "addresses_obligations": ["OBL-0001"],
          "obligations_created": [],
          "evidence_route_verdict": {"route": "ANALYSIS", "available": True, "note": "n"}}],
     "acceptance_contracts": [], "unresolved": [], "assumptions": [],
