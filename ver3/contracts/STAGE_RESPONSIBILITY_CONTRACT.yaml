@@ -452,39 +452,116 @@ stages:
     prohibited_decisions:
     - Selecting a candidate
     - Any authoritative dimension
-  gate:
-    name: selection gate
-    responsibility: Commit to one candidate, or record that the candidates remain indistinguishable.
+  feasibility:
+    name: mechanical feasibility
+    # S-7 / U-8. SPLIT OUT OF `gate`, which asked two questions and answered them
+    # in one act: whether a candidate could work, and which candidate was wanted.
+    # A preference could therefore reach a feasibility judgement, and nothing in
+    # that shape could say that a four-bar which works is not less feasible than
+    # a hinge which works. This half asks only the first question.
+    responsibility: State whether one candidate is mechanically eligible for selection on the
+      engineering evidence established so far.
     engineering_questions:
-    - Do all retained candidates carry evidence at equal obligation coverage and equal maturity?
-    - Does any unresolved item block selection?
-    - On what recorded ground does one win?
+    - Does the established evidence contain anything that stops this candidate working?
+    - Which mechanical domains has the design actually established for it, and which has it not?
+    - Is each hard design requirement satisfied, violated, or not yet evaluable for it?
     required_reasoning_premise_classes:
+    - class: candidate_engineering_evidence
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a feasibility statement about no evidence is not a statement
+      what: this candidate's physical, mobility and spatial evidence
+      justified_by_question: Does the established evidence contain anything that stops this candidate
+        working?
+      why: Feasibility is read off what was established, never generated here.
+      requires_semantics:
+      - physical_interaction
+      - constraint_relation
+      - mobility_disposition
+      - spatial_commitment
+    - class: hard_design_constraint
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may state no hard requirement beyond its source requirements
+      what: the hard requirements the design must satisfy
+      justified_by_question: Is each hard design requirement satisfied, violated, or not yet evaluable
+        for it?
+      why: A requirement is a demand on the design and applies to every alternative, so it is
+        DESIGN_WIDE - its absence from one candidate is the finding, not the reason to skip it.
+      requires_semantics:
+      - design_constraint
+    permitted_output_semantics:
+    - MechanicalFeasibilityAssessment
+    - HardRequirementCompliance
+    - UnresolvedDecision
+    prohibited_decisions:
+    - Comparing candidates, or reading another candidate's evidence at all
+    - Preferring a simpler mechanism; complexity is not infeasibility
+    - Receiving or consulting any selection preference
+    - Authoring a SelectionDecision
+    - Letting a model declare a mechanism feasible
+    - Turning missing evidence into feasibility
+    prohibited_inputs:
+    - Any selection preference or SelectionProfile
+    input_isolation_rule: >
+      PREFERENCE BLINDNESS IS AN INPUT-BOUNDARY PROPERTY, not a prompt
+      instruction. Nothing here declares `selection_preference`, so the consumer
+      view cannot contain one; a SelectionProfile appearing in this
+      responsibility's view is a contract failure and is tested as one. A stage
+      told to ignore a preference has already seen it.
+  selection:
+    name: candidate selection
+    # The other half of `gate`. It runs on ELIGIBLE candidates only, and it is
+    # the first responsibility in the whole pipeline permitted to know what the
+    # user prefers.
+    responsibility: Choose among the mechanically eligible candidates under the user's stated
+      preferences, with a human deciding.
+    engineering_questions:
+    - Which candidates are eligible, and on what established evidence?
+    - How do they compare on metrics the design can actually compute?
+    - What does the user prefer, and does one candidate dominate under it?
+    - What decision-critical concern do the metrics and the preferences not represent?
+    required_reasoning_premise_classes:
+    - class: eligibility_evidence
+      instance_selection:
+        population: ALL_RETAINED_BRANCHES
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a choice among nothing established is not a choice
+      what: every retained candidate's feasibility and hard-requirement results
+      justified_by_question: Which candidates are eligible, and on what established evidence?
+      why: Eligibility is the population this responsibility may act on, and it is decided elsewhere.
+      requires_semantics:
+      - eligibility_evidence
     - class: candidate_spatial_evidence
       instance_selection:
         population: ALL_RETAINED_BRANCHES
         coverage: ALL_APPLICABLE
         existence: REQUIRED_NONEMPTY
         existence_why: a comparison with nothing to compare is not a comparison
-      what: every retained candidate's s04a evidence
-      justified_by_question: Do all retained candidates carry evidence at equal obligation coverage
-        and equal maturity?
-      why: Unequal coverage is the finding, and it cannot be seen without all of it.
+      what: every retained candidate's spatial evidence
+      justified_by_question: How do they compare on metrics the design can actually compute?
+      why: A metric with no state behind it is not a metric, and the comparison must say so.
       requires_semantics:
       - spatial_commitment
       - reach_evidence
       - elimination_evidence
-    - class: evidence_route_verdict
+    - class: selection_preference
       instance_selection:
-        population: ALL_RETAINED_BRANCHES
+        population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
         existence: REQUIRED_NONEMPTY
-        existence_why: one alternative must win on a recorded ground
-      what: each candidate's evidence-route verdict
-      justified_by_question: On what recorded ground does one win?
-      why: Choosing partly because a claim can be evidenced is legitimate and must be recorded.
+        existence_why: choosing without knowing what is wanted is picking
+      what: the user's ranked selection preferences, as a versioned profile
+      justified_by_question: What does the user prefer, and does one candidate dominate under it?
+      why: This is the ONLY responsibility that may see one, and the first point at which the
+        question "which working design do we want" can be asked at all.
       requires_semantics:
-      - candidate
+      - selection_preference
     - class: unresolved_blocking_scope
       instance_selection:
         population: DESIGN_WIDE
@@ -492,16 +569,24 @@ stages:
         existence: MAY_BE_EMPTY
         existence_why: nothing unresolved is the desired state, not a gap
       what: all unresolved items and what each blocks
-      justified_by_question: Does any unresolved item block selection?
-      why: Blocking is defined by what the gate requires.
+      justified_by_question: Which candidates are eligible, and on what established evidence?
+      why: Blocking is defined by what the decision requires.
       requires_semantics:
       - open_item
     permitted_output_semantics:
+    - SelectionProfile
+    - CandidateComparison
+    - SelectionAdvisory
+    - SelectionConcern
+    - HumanDecisionInput
     - SelectionDecision
     - UnresolvedDecision
     prohibited_decisions:
     - Breaking a tie silently
     - Authoring the verdict on its own preconditions
+    - Acting on a candidate that is not eligible, whatever it scores
+    - Letting a model or a screen author the decision
+    - Committing against premises the human was not shown
   s04b:
     name: spatial and kinematic realization
     # S-6 / U-7 SEQUENCING CORRECTION. This responsibility encoded the runtime

@@ -96,8 +96,10 @@ class TestDeclaredCorpus(_Base):
 
     def test_SELECT_01_every_premise_declares_which_instances_it_needs(self):
         rows = list(_premises(self.resp))
-        # 27 live at S-6; s04b's selection_decision is staged behind S-7 / U-8.
-        self.assertEqual(27, len(rows), "the premise corpus changed size")
+        # 30 live at S-7 / U-8: `gate` split into `feasibility` (2 premise
+        # classes) and `selection` (4), replacing the 3 the gate declared.
+        # s04b's selection_decision remains staged behind S-7 / U-8.
+        self.assertEqual(30, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"
@@ -154,7 +156,7 @@ class TestDeclaredCorpus(_Base):
                           "creation order is not engineering scope")
 
     def test_SELECT_13_unknown_consumer_fails_closed(self):
-        for sid in ("s02", "s03a", "s03b", "s04a", "s04b", "gate"):
+        for sid in ("s02", "s03a", "s03b", "s04a", "s04b", "selection"):
             self.assertTrue(derive_required_minimum(sid, self.c, self.resp).requirements
                             or sid == "s01")
         for unknown in ("s03", "s05", ""):
@@ -295,7 +297,7 @@ class TestPopulations(_Base):
 
     def test_SELECT_11_all_retained_branches_is_representable(self):
         s = self.branched()
-        v = self.view("gate", s, self.premise("compare", ["topology_element"],
+        v = self.view("selection", s, self.premise("compare", ["topology_element"],
                                               cv.ALL_RETAINED_BRANCHES),
                       invocation_branch="CND-A")
         got = {e["entity_id"] for e in v.entities}
@@ -310,7 +312,7 @@ class TestPopulations(_Base):
                          "no selection is recorded, so there is no committed branch")
         self.assertEqual(Sufficiency.MISSING_UPSTREAM.value,
                          self.atom(v, "committed")["verdict"])
-        self.add(s, "s04", "SelectionDecision", "SEL-1", selected_candidate="CND-B")
+        self.add(s, "selection", "SelectionDecision", "SEL-1", selected_candidate="CND-B")
         v2 = self.view("s04b", s, p, invocation_branch="CND-A")
         got = {e["entity_id"] for e in v2.entities}
         self.assertIn("BOD-B", got, "the committed branch is the selected one")
@@ -507,7 +509,7 @@ class TestExistenceSemantics(_Base):
         decl = [p for _sid, p in _premises(self.resp)
                 if p["class"] == "unresolved_blocking_scope"][0]
         self.assertEqual(cv.MAY_BE_EMPTY, decl["instance_selection"]["existence"])
-        v = self.view("gate", s, decl)
+        v = self.view("selection", s, decl)
         self.assertEqual(Sufficiency.SATISFIED.value,
                          self.atom(v, "unresolved_blocking_scope")["verdict"])
 

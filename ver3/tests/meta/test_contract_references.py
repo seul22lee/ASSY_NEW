@@ -48,6 +48,13 @@ class TestContractCrossReferences(unittest.TestCase):
                     violations.append("%s extends undefined family %r" % (stage_id, fam))
         self.assertEqual([], violations, "\n" + "\n".join(violations))
 
+    def _projections(self):
+        """STAGES and RESPONSIBILITIES. `gate` owned families and had no matrix
+        entry, which is how SelectionDecision came to be attributed to s04."""
+        out = dict(self.ownership["stages"])
+        out.update((self.ownership.get("responsibilities") or {}).get("entries") or {})
+        return out
+
     def test_every_family_has_an_owner(self):
         """No family may be ownerless.
 
@@ -56,7 +63,7 @@ class TestContractCrossReferences(unittest.TestCase):
         """
         universal = {e["family"] for e in self.ownership["universally_ownable"] if "family" in e}
         owned = set()
-        for spec in self.ownership["stages"].values():
+        for spec in self._projections().values():
             owned.update(spec.get("owns", []))
         ownerless = sorted(set(self.families) - owned - universal)
         self.assertEqual([], ownerless, "families with no owning stage: %s" % ownerless)
@@ -71,9 +78,10 @@ class TestContractCrossReferences(unittest.TestCase):
                 continue
             owners = [declared] if isinstance(declared, str) else list(declared)
             for owner in owners:
-                if owner not in self.ownership["stages"]:
+                projections = self._projections()
+                if owner not in projections:
                     violations.append("%s declares unknown owner %r" % (fam, owner))
-                elif fam not in self.ownership["stages"][owner].get("owns", []) and fam not in universal:
+                elif fam not in projections[owner].get("owns", []) and fam not in universal:
                     violations.append("%s says owner %s, matrix disagrees" % (fam, owner))
         self.assertEqual([], violations, "\n" + "\n".join(violations))
 

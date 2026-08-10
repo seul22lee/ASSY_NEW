@@ -22,7 +22,7 @@ from ver3.assy_v3.view import (Source, Sufficiency, ViewStatus,          # noqa:
                                derive_source_a, derive_source_b, render)
 import ver3.assy_v3.view.consumer_view as cv                            # noqa: E402
 
-STAGES = ("s01", "s02", "s03a", "s03b", "s04a", "gate", "s04b")
+STAGES = ("s01", "s02", "s03a", "s03b", "s04a", "feasibility", "selection", "s04b")
 
 from .test_s3_interface_readiness import _code_only          # noqa: E402
 
@@ -89,7 +89,7 @@ class TestSelection(_Base):
                  addresses_obligations=[], obligations_created=[])
         self.add(s, "s03", "LoadPath", "LP-A", candidate="CND-A")
         self.add(s, "s03", "LoadPath", "LP-B", candidate="CND-B")
-        self.add(s, "s04", "SelectionDecision", "SEL-1", selected_candidate="CND-A")
+        self.add(s, "selection", "SelectionDecision", "SEL-1", selected_candidate="CND-A")
         self.assertEqual("CND-A", cv.committed_branch(s, self.c))
         v = build_consumer_view("s04b", s, self.c, self.resp)
         ids = {e["entity_id"] for e in v.entities}
@@ -103,7 +103,7 @@ class TestSelection(_Base):
                  addresses_obligations=[], obligations_created=[])
         self.add(s, "s02", "Candidate", "CND-B", principle={"h": "f"},
                  addresses_obligations=[], obligations_created=[])
-        self.add(s, "s04", "SelectionDecision", "SEL-1", selected_candidate="CND-B")
+        self.add(s, "selection", "SelectionDecision", "SEL-1", selected_candidate="CND-B")
         v = build_consumer_view("s04b", s, self.c, self.resp)
         self.assertEqual("CND-B", v.branch)
         for t in v.traces:
@@ -259,9 +259,36 @@ class TestArchitecturalRegressions(_Base):
         return "\n".join(open(os.path.join(REPO, p)).read() for p in self.PROD)
 
     def test_VIEW_15_no_stage_specific_branch(self):
-        src = self._src()
+        """No BRANCH on a stage id - which is the property, and is not the same
+        as the word never appearing anywhere in the file.
+
+        S-7 / U-8 named a responsibility `selection`, and `selection` is also
+        what this module calls the instance-selection rule on a Requirement. A
+        substring scan then failed on `__slots__`, which is a false alarm about a
+        real rule. So the check reads the SYNTAX: a stage id used in a
+        comparison, as a subscript, or as a `.get()` key is a branch; a string in
+        a slots tuple is not.
+        """
+        import ast
+        tree = ast.parse(self._src())
+        keys = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Compare):
+                for operand in [node.left] + list(node.comparators):
+                    for sub in ast.walk(operand):
+                        if isinstance(sub, ast.Constant) and isinstance(sub.value, str):
+                            keys.add(sub.value)
+            elif isinstance(node, ast.Subscript):
+                for sub in ast.walk(node.slice):
+                    if isinstance(sub, ast.Constant) and isinstance(sub.value, str):
+                        keys.add(sub.value)
+            elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "get" and node.args
+                    and isinstance(node.args[0], ast.Constant)
+                    and isinstance(node.args[0].value, str)):
+                keys.add(node.args[0].value)
         for sid in STAGES:
-            self.assertNotIn('"%s"' % sid, src, "view code branches on stage %s" % sid)
+            self.assertNotIn(sid, keys, "view code branches on stage %s" % sid)
 
     def test_VIEW_16_no_benchmark_logic(self):
         self.assertIsNone(re.search(r"(BM-\d|PRB-\d|CND-000|oracle)", self._src(), re.I))
@@ -345,7 +372,7 @@ class TestContractGeneralization(_Base):
                  addresses_obligations=[], obligations_created=[])
         self.add(s, "s02", "Candidate", "CND-B", principle={"h": "f"},
                  addresses_obligations=[], obligations_created=[])
-        self.add(s, "s04", "SelectionDecision", "SEL", selected_candidate="CND-A")
+        self.add(s, "selection", "SelectionDecision", "SEL", selected_candidate="CND-A")
         self.add(s, "s03", "LoadPath", "LP-OTHER", candidate="CND-B")
         v = build_consumer_view("s04b", s, self.c, self.resp)
         self.assertNotIn("LP-OTHER", {e["entity_id"] for e in v.entities})
@@ -438,7 +465,7 @@ class TestCoreCorrections(_Base):
         self.add(s, "s02", "LoadCase", "LC-1")
         self.add(s, "s03", "LoadPath", "LP-A", candidate="CND-A", load_case="LC-1")
         self.add(s, "s03", "LoadPath", "LP-B", candidate="CND-B", load_case="LC-1")
-        self.add(s, "s04", "SelectionDecision", "SEL", selected_candidate="CND-A")
+        self.add(s, "selection", "SelectionDecision", "SEL", selected_candidate="CND-A")
         v = build_consumer_view("s04b", s, self.c, self.resp)
         ids = {e["entity_id"] for e in v.entities}
         self.assertNotIn("LP-B", ids, "another candidate's instance leaked in")
@@ -514,7 +541,31 @@ class TestBranchScopeLineage(_Base):
     """
 
     def _add(self, s, stage, fam, eid, prem=None, **ov):
-        d = {f: "x" for f in self.c.required_fields(fam) if f != "entity_id"}
+        """Fill required fields, and fill DECLARED REFERENCES as references.
+
+        "x" in a reference field is prose where an entity id belongs (R-20), so
+        a family whose required fields are all references could not be built at
+        all. A many-reference takes the empty list, which the contract states is
+        a VALUE; a one-reference gets a minimal referent, built under its own
+        declared owner, the way `_fixtures.StateBuilder` does it.
+        """
+        d = {}
+        for f in self.c.required_fields(fam):
+            if f == "entity_id" or f in ov:
+                continue
+            spec = self.c.reference_spec(fam, f)
+            if spec is None:
+                d[f] = "x"
+            elif spec.get("cardinality") == "many":
+                d[f] = []
+            else:
+                target = spec["target"]
+                rid = "%s-AUTO" % target[:3].upper()
+                if not s.has_entity(rid):
+                    owner = self.c.owner_of(target)
+                    at = owner if isinstance(owner, str) and owner != "any" else stage
+                    self._add(s, at, target, rid)
+                d[f] = rid
         d.update(ov)
         s.apply(StagePatch(patch_id="p" + eid, run_id=s.run_id, stage_id=stage,
                            stage_attempt=1, parent_state_hash=s.state_hash(),
@@ -542,7 +593,7 @@ class TestBranchScopeLineage(_Base):
 
     def test_SCOPE_01_02_03_branch_other_and_orphan(self):
         s = self._world()
-        self._add(s, "s04", "SelectionDecision", "SEL", selected_candidate="CND-A")
+        self._add(s, "selection", "SelectionDecision", "SEL", selected_candidate="CND-A")
         self.assertEqual(cv.ACTIVE_BRANCH, self._scope(s, "BOD-A", "CND-A")[0])
         self.assertEqual(cv.OTHER_BRANCH, self._scope(s, "BOD-B", "CND-A")[0])
         self.assertEqual(cv.UNSCOPED, self._scope(s, "BOD-ORPHAN", "CND-A")[0])
@@ -587,7 +638,7 @@ class TestBranchScopeLineage(_Base):
         self.assertIsNone(cv.committed_branch(s, self.c))
         self.assertEqual(cv.ACTIVE_BRANCH, self._scope(s, "BOD-A", None)[0])
         self.assertEqual(cv.ACTIVE_BRANCH, self._scope(s, "BOD-B", None)[0])
-        self._add(s, "s04", "SelectionDecision", "SEL", selected_candidate="CND-A")
+        self._add(s, "selection", "SelectionDecision", "SEL", selected_candidate="CND-A")
         self.assertEqual("CND-A", cv.committed_branch(s, self.c))
         self.assertEqual(cv.OTHER_BRANCH, self._scope(s, "BOD-B", "CND-A")[0])
 
@@ -628,7 +679,7 @@ class TestBranchScopeLineage(_Base):
 
     def test_SCOPE_18_unscoped_does_not_enter_the_view(self):
         s = self._world()
-        self._add(s, "s04", "SelectionDecision", "SEL", selected_candidate="CND-A")
+        self._add(s, "selection", "SelectionDecision", "SEL", selected_candidate="CND-A")
         v = build_consumer_view("s04b", s, self.c, self.resp)
         ids = {e["entity_id"] for e in v.entities}
         self.assertNotIn("BOD-ORPHAN", ids)

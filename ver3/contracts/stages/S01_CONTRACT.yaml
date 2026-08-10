@@ -132,7 +132,11 @@ owned_decisions:
   # Scenario (`system_boundary`). The canonical source is right and this
   # projection was stale - the same defect class as the retired hypothesis
   # families, found by the corpus-wide check rather than by name.
-  creates: [Actor, Ambiguity, Freedom, Requirement, Scenario, SourceClause]
+  # DesignConstraint added at S-7 / U-8: a HARD requirement on the design enters
+  # the authoritative problem here, alongside the requirements it may derive
+  # from, and is ingested deterministically from structured profile data rather
+  # than reinterpreted by a model.
+  creates: [Actor, Ambiguity, DesignConstraint, Freedom, Requirement, Scenario, SourceClause]
   also_owns:
     - "the quantity inventory"
     - "the classification of a source statement as verbatim clause versus derived requirement"

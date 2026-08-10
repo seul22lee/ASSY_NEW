@@ -403,7 +403,7 @@ class TestSchemaMetadataHygiene(_Projections):
         self.assertEqual(["s01"], stage_ids_in("stages.s01.required_reasoning_premise_classes"))
         # Prose-joined pointer forms the corpus actually uses.
         self.assertEqual(["s03a", "s03b"], stage_ids_in("stages.s03a and s03b"))
-        self.assertEqual(["s04a", "gate", "s04b"], stage_ids_in("stages.s04a, gate and s04b"))
+        self.assertEqual(["s04a", "s04b"], stage_ids_in("stages.s04a and s04b"))
         # Not a stage path at all.
         self.assertEqual([], stage_ids_in(OWNERSHIP_PATH_PREFIX + "s03"))
 

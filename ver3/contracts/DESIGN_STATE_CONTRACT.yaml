@@ -183,6 +183,32 @@ semantic_role_vocabulary:
     Whether an actor can reach a target in a given arrangement.
   scenario_context: >
     A declared operating situation and the boundary that bounds it.
+  design_constraint: >
+    A HARD requirement on the design - what may be built at all. Distinct from a
+    preference, which says which buildable thing is wanted and may never make a
+    candidate ineligible. (S-7 / U-8)
+  mobility_disposition: >
+    What is known about one degree of freedom of one rigid group in one
+    configuration, and on what evidence.
+  eligibility_evidence: >
+    Whether ONE candidate may be chosen from at all: can it work, and does it
+    satisfy the hard requirements. Candidate-local and blind to what anyone
+    wants; it decides the population a choice may act on and never which member
+    of that population wins.
+  selection_preference: >
+    What the user WANTS among designs that already work, ranked and versioned. It
+    can never make a candidate ineligible, and it is withheld from every
+    reasoning step that decides whether one is - a preference nothing can see
+    cannot bias anything.
+  selection_evidence: >
+    Deterministic comparison material over eligible candidates, computed from
+    state before anything is asked of a model.
+  advisory: >
+    A reviewer's opinion. CONSIDERED by a decision, never a premise of one: it
+    may raise a concern the metrics do not represent, and it may not decide.
+  human_decision: >
+    What a person submitted at the decision screen, and what they were shown when
+    they submitted it.
   selection_decision: >
     The recorded commitment to one candidate.
   source_requirement: >
@@ -1333,6 +1359,9 @@ assurance_families:
         than about this design.
 
   MobilityExpectation:
+    # Role declared at S-7 / U-8: the family carried none, so a responsibility
+    # needing to know what a DOF is dispositioned as could not ask by role.
+    semantic_roles: [mobility_disposition]
     # DECLARED, not defaulted. This entity is the AUTHORITATIVE DISPOSITION
     # CONTAINER: what it stores is engineering claims about DOF cells. It does
     # not store the domain, so it carries no class-B content and needs no
@@ -1649,6 +1678,303 @@ assurance_families:
         poses, so it can produce ENDPOINTS_ONLY or SAMPLED and never SWEPT or
         CONTINUOUS; the vocabulary containing those words is not permission to
         claim them. A transition with no SweptVolume was not evidenced.
+
+  # ================================================================== S-7 / U-8
+  # THE TWO QUESTIONS SELECTION USED TO ASK AT ONCE.
+  #
+  #   CAN THIS DESIGN WORK?      candidate-local, preference-blind, no winner
+  #   WHICH WORKING DESIGN?      comparison, preferences, advice, a human
+  #
+  # The old `gate` responsibility asked both and answered them in one act, which
+  # is how a preference could reach a feasibility judgement: a four-bar that
+  # works is not less feasible than a hinge that works, and nothing in the old
+  # shape could say so. The families below make the two answers separate facts
+  # with separate producers, separate premises and separate reopening behaviour.
+  #
+  # DECLARED HERE AHEAD OF THEIR PRODUCERS, which is this contract's normal way
+  # of working (`legacy_producers.rule`): S7-A freezes the authority, S7-B..S7-E
+  # build it. A family with no producer is a defined target, never a claim that
+  # anything emits it.
+
+  DesignConstraint:
+    semantic_roles: [design_constraint]
+    field_semantics:
+      derived_from_requirements:
+        kind: reference
+        target: Requirement
+        cardinality: many
+        resolvable: false
+        referent_population: DESIGN_WIDE
+    owned_by: s01
+    authority_class: AUTHORITATIVE
+    purpose: >
+      A HARD requirement on the design, from the user's design profile or from
+      the source. It is not a preference and never becomes one: "all parts must
+      be plastic" constrains what may be built, where "minimise part count" only
+      says which buildable thing is wanted.
+    required_fields: [entity_id, kind, statement, source, evaluability]
+    optional_fields: [parameters, blocks_selection, derived_from_requirements]
+    evaluability: [MACHINE_EVALUABLE, HUMAN_EVALUABLE]
+    rules:
+      - >
+        Ingested DETERMINISTICALLY from structured profile data. A profile that
+        already says PLASTIC_ONLY is a fact, and asking a model to reinterpret it
+        would turn a stated requirement into an inference.
+      - >
+        blocks_selection says whether an unsatisfied instance stops a final
+        choice. Default true. A constraint that blocks nothing is a preference
+        wearing the wrong word.
+
+  HardRequirementCompliance:
+    semantic_roles: [eligibility_evidence]
+    field_semantics:
+      candidate:
+        kind: reference
+        target: Candidate
+        cardinality: one
+        resolvable: false
+      constraint:
+        kind: reference
+        target: DesignConstraint
+        cardinality: one
+        resolvable: false
+        referent_population: DESIGN_WIDE
+    owned_by: feasibility
+    authority_class: AUTHORITATIVE
+    purpose: "Whether ONE candidate satisfies ONE hard requirement, at the maturity the evidence has now."
+    required_fields: [entity_id, candidate, constraint, status, why]
+    status: [NOT_YET_EVALUABLE, SATISFIED, VIOLATED]
+    rules:
+      - >
+        A REQUIREMENT EXISTING IS NOT THE SAME AS ITS BEING EVALUABLE. Absence of
+        a material assignment is not PLASTIC_ONLY satisfied and is not
+        PLASTIC_ONLY violated; it is NOT_YET_EVALUABLE, which is what the design
+        actually knows. Defaulting either way is absence becoming an assertion
+        (FA-8).
+      - >
+        A candidate may be ruled out early ONLY when the requirement is evaluable
+        at the current maturity AND incompatibility is established. VIOLATED is a
+        finding about the candidate; NOT_YET_EVALUABLE is a finding about the
+        evidence.
+      - "This is not mechanical feasibility. A violated requirement is not a broken mechanism."
+
+  MechanicalFeasibilityAssessment:
+    semantic_roles: [eligibility_evidence]
+    field_semantics:
+      candidate:
+        kind: reference
+        target: Candidate
+        cardinality: one
+        resolvable: false
+    owned_by: feasibility
+    authority_class: AUTHORITATIVE
+    purpose: >
+      CAN THIS CANDIDATE WORK, on the engineering evidence established so far.
+      Candidate-local, preference-blind, and never a comparison.
+    required_fields: [entity_id, candidate, status, evaluated_domains, findings]
+    optional_fields: [blocking_findings]
+    status: [FEASIBLE_FOR_SELECTION, INFEASIBLE, NOT_ESTABLISHED]
+    evaluated_domains:
+      - physical_realization
+      - load_reaction_closure
+      - mobility_disposition
+      - required_configurations
+      - motion_and_transitions
+      - spatial_realization
+      - reach
+      - assemblability
+      - gross_interference
+    rules:
+      - >
+        CANDIDATE-LOCAL. It reads one branch's evidence and says whether that
+        branch could work. It never reads another candidate, never ranks, and
+        never prefers a simpler mechanism: two mechanically valid alternatives
+        are both FEASIBLE_FOR_SELECTION however differently complex they are.
+      - >
+        PREFERENCE-BLIND, and enforced at the input boundary rather than by
+        asking a prompt not to look. A SelectionProfile reaching this
+        responsibility's consumer view is a contract failure.
+      - >
+        MISSING EVIDENCE IS NOT FEASIBILITY. A domain the design has not
+        established yields NOT_ESTABLISHED for that domain and for the assessment;
+        it never yields FEASIBLE_FOR_SELECTION. FEASIBLE_FOR_SELECTION means the
+        established evidence contains nothing that stops this candidate - not
+        that the candidate has been proven to work, which is assurance (U-9).
+      - >
+        NOT AUTHORED BY A MODEL. It is derived from what S1-S6 established, so a
+        model cannot declare a mechanism feasible; the name says
+        FOR_SELECTION because it answers eligibility and not engineering truth.
+      - >
+        Local geometric evidence - an EliminationRecord, an interference finding -
+        is INPUT to this, not a decision. s04 reports what it computed; this
+        family decides what that means for eligibility, from the whole picture.
+
+  SelectionProfile:
+    semantic_roles: [selection_preference]
+    owned_by: selection
+    authority_class: AUTHORITATIVE
+    purpose: >
+      WHICH working design is wanted: the user's ranked preferences, materialised
+      as a versioned snapshot at the selection boundary and nowhere earlier.
+    required_fields: [entity_id, profile_version, source_hash, criteria]
+    criteria_shape: "criterion -> {objective: MINIMIZE|MAXIMIZE, priority: HIGH|MEDIUM|LOW}"
+    rules:
+      - >
+        INVISIBLE BEFORE SELECTION. No stage from s01 through the feasibility
+        responsibility may receive one. This is an input-boundary rule, not a
+        prompt instruction: a preference a stage cannot see cannot bias it.
+      - >
+        VERSIONED AND SNAPSHOTTED. A decision names the exact profile it was made
+        under, so changing preferences reopens the choice without touching a
+        single engineering fact.
+      - "A preference is never a constraint. It cannot make a candidate ineligible."
+
+  CandidateComparison:
+    semantic_roles: [selection_evidence]
+    field_semantics:
+      candidates:
+        kind: reference
+        target: Candidate
+        cardinality: many
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+      profile:
+        kind: reference
+        target: SelectionProfile
+        cardinality: one
+        resolvable: false
+        referent_population: DESIGN_WIDE
+    owned_by: selection
+    authority_class: DERIVED
+    purpose: "Deterministic metrics over the ELIGIBLE candidates, computed before anything is asked of a model."
+    required_fields: [entity_id, candidates, profile, metrics]
+    metric_shape: "criterion -> per candidate {value, unit, availability, source_refs}"
+    availability: [AVAILABLE, NOT_AVAILABLE]
+    rules:
+      - >
+        NO SILENT SURROGATE. A metric with no canonical source is NOT_AVAILABLE
+        and says so. Manufactured part count is not Body count unless a contract
+        establishes that equivalence, and substituting one for the other would
+        answer a question the design has not answered.
+      - >
+        Every value names the state facts it was computed from, so a reader can
+        check it and so changing those facts reopens the comparison.
+      - >
+        NO WEIGHTED SCORE. Criterion vectors, dominance, and the profile's tiers.
+        A genuine trade-off stays a trade-off: collapsing one into a number
+        invents a decision the evidence does not contain.
+
+  SelectionAdvisory:
+    semantic_roles: [advisory]
+    field_semantics:
+      candidates:
+        kind: reference
+        target: Candidate
+        cardinality: many
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+      comparison:
+        kind: reference
+        target: CandidateComparison
+        cardinality: one
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+    owned_by: selection
+    authority_class: ASSURANCE
+    purpose: "An engineering reviewer's opinion on an already-eligible field. Advisory, never authoritative."
+    required_fields: [entity_id, candidates, comparison, recommendation, reasoning]
+    optional_fields: [sensitivity]
+    rules:
+      - >
+        MAY NOT AUTHOR MechanicalFeasibilityAssessment, HardRequirementCompliance
+        or SelectionDecision. It advises on candidates already established
+        eligible; it cannot make one eligible and cannot make one ineligible.
+      - >
+        May say which candidate looks preferable under the current priorities,
+        and under which change of priority that would flip. That is judgement
+        about a trade-off, which is what a reviewer is for.
+      - "It is CONSIDERED by a decision, not a premise of it. Rewording it invalidates nothing."
+
+  SelectionConcern:
+    semantic_roles: [advisory]
+    field_semantics:
+      candidate:
+        kind: reference
+        target: Candidate
+        cardinality: one
+        resolvable: false
+      advisory:
+        kind: reference
+        target: SelectionAdvisory
+        cardinality: one
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+    owned_by: selection
+    authority_class: ASSURANCE
+    purpose: >
+      A decision-critical engineering concern the explicit preferences and the
+      deterministic metrics do not represent - what a reviewer would raise and a
+      metric cannot.
+    required_fields: [entity_id, candidate, advisory, issue, importance, evidence_status]
+    optional_fields: [supporting_refs]
+    evidence_status: [SUPPORTED_BY_STATE, PLAUSIBLE_NOT_ESTABLISHED, SPECULATIVE]
+    rules:
+      - >
+        THE STATUS IS THE POINT. "Repeated flexure may be durability-sensitive"
+        is PLAUSIBLE_NOT_ESTABLISHED and is worth raising. "This hinge fails after
+        20,000 cycles" is a number the design does not have, and a concern
+        claiming SUPPORTED_BY_STATE must cite state that supports it or be
+        downgraded.
+      - "A concern raises a question. It never decides one."
+
+  HumanDecisionInput:
+    semantic_roles: [human_decision]
+    field_semantics:
+      selected_candidate:
+        kind: reference
+        target: Candidate
+        cardinality: one
+        resolvable: false
+      comparison:
+        kind: reference
+        target: CandidateComparison
+        cardinality: one
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+      profile:
+        kind: reference
+        target: SelectionProfile
+        cardinality: one
+        resolvable: false
+        referent_population: DESIGN_WIDE
+      reviewed_advisories:
+        kind: reference
+        target: SelectionAdvisory
+        cardinality: many
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+    owned_by: selection
+    authority_class: AUTHORITATIVE
+    purpose: "What a human submitted at the decision screen, and what they were looking at when they submitted it."
+    required_fields: [entity_id, action, rationale, comparison, profile, premise_digest]
+    optional_fields: [selected_candidate, reviewed_advisories]
+    action: [SELECT, KEEP_UNRESOLVED, REQUEST_MORE_EVIDENCE]
+    rules:
+      - >
+        THE UI WRITES THIS AND NOTHING ELSE. A SelectionDecision is written by a
+        deterministic backend writer that re-reads the premises; a screen cannot
+        author a commitment.
+      - >
+        `premise_digest` is what the human was SHOWN. If it does not match the
+        current premises at submit time the decision is refused and the screen
+        must refresh - a person may leave a decision open while the engineering
+        moves under it, and a stale approval is not an approval.
+      - >
+        A human may choose against the advisory. That is not an error to
+        reconcile; it is the reason a human is in the loop, and the rationale
+        records it.
+
+
   SelectionDecision:
     semantic_roles: [selection_decision]
     field_semantics:
@@ -1657,12 +1983,82 @@ assurance_families:
         target: Candidate
         cardinality: one
         resolvable: false
-    owned_by: s04
-    purpose: "The candidate retained at the selection gate, with the evidence that permitted it."
-    required_fields: [entity_id, selected_candidate, eliminated, evidence, equal_coverage_confirmed]
+      eligible_candidates:
+        kind: reference
+        target: Candidate
+        cardinality: many
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+      feasibility_assessments:
+        kind: reference
+        target: MechanicalFeasibilityAssessment
+        cardinality: many
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+      hard_requirement_results:
+        kind: reference
+        target: HardRequirementCompliance
+        cardinality: many
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+      selection_profile:
+        kind: reference
+        target: SelectionProfile
+        cardinality: one
+        resolvable: false
+        referent_population: DESIGN_WIDE
+      comparison:
+        kind: reference
+        target: CandidateComparison
+        cardinality: one
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+      human_decision:
+        kind: reference
+        target: HumanDecisionInput
+        cardinality: one
+        resolvable: false
+        referent_population: DESIGN_WIDE
+      considered_refs:
+        kind: reference
+        target: SelectionAdvisory
+        cardinality: many
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+    # S-7 / U-8: OWNERSHIP MOVED OUT OF s04. s04 authors spatial evidence; it
+    # does not choose. The old `gate` responsibility sat between s04a and s04b
+    # and mixed two questions - "is this candidate mechanically eligible" and
+    # "which eligible one do we want" - which is why a preference could reach a
+    # feasibility judgement and why s04b required a decision that could not exist.
+    owned_by: selection
+    purpose: "The candidate a HUMAN selected, with the evidence that made it eligible and the profile it was judged under."
+    required_fields:
+      - entity_id
+      - selected_candidate
+      - eligible_candidates
+      - feasibility_assessments
+      - hard_requirement_results
+      - selection_profile
+      - comparison
+      - human_decision
+    optional_fields: [considered_refs, rationale]
     rules:
-      - "May exist only after every retained candidate carries s03 and s04a evidence at equal obligation coverage (INV-007)."
+      - >
+        Only a candidate that is SELECTION_ELIGIBLE may be selected: mechanical
+        feasibility FEASIBLE_FOR_SELECTION and every selection-blocking hard
+        requirement SATISFIED. Eligibility is deterministic and is established
+        before this record exists.
       - "Never a score and never an arbitrary pick: an undiscriminated tie is an UnresolvedDecision instead."
+      - >
+        A HUMAN decides. This record is written by a deterministic writer FROM a
+        HumanDecisionInput, after re-checking that the premises the human was
+        shown are still the current ones. No LLM and no UI may author it.
+      - >
+        PREMISES vs CONSIDERED. The feasibility assessments, the hard-requirement
+        results, the comparison and the profile are PREMISES: change one and this
+        decision loses unqualified authority. Advisory material is CONSIDERED -
+        recorded because the human reviewed it, and rewording it invalidates
+        nothing, because the model's wording was never the ground of the choice.
 
 # ---------------------------------------------------------------- U-2B (S-2)
 # The canonical contract is deliberately AHEAD of several producers. Recording

@@ -6,7 +6,7 @@ references:
 - ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
 - ver3/contracts/GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
 audit_scope:
-  families_audited: 48
+  families_audited: 56
   re_run_note: 'The family set grew from 32 to 37 by CONTRACT CHANGE (five families added to DESIGN_STATE_CONTRACT
     under docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md rev 2: RigidGroup, LoadCase, LoadPath, FunctionalRegion,
     AssemblyStep). This audit was RE-RUN over the new set and asks the same consumer question of each.
@@ -47,7 +47,7 @@ audit_scope:
   no_stage_contract_frozen_by_this_audit: true
 summary:
   CORE: 39
-  PROVISIONAL: 6
+  PROVISIONAL: 14
   MERGE_CANDIDATE: 3
   UNSUPPORTED: 0
   note_on_zero_unsupported: 'No family is unproducible or unconsumable, so none is UNSUPPORTED. Two EXPRESSIVENESS
@@ -721,11 +721,158 @@ families:
       as debt rather than papered over with an invented package id.
 
       '
-  SelectionDecision:
-    owning_stage: s04
+  DesignConstraint:
+    owning_stage: s01
+    first_downstream_consumer: s02
+    consumer_note: >
+      A hard requirement bounds what may be built, so it is a demand on the design from the moment the design has one.
+    unique_responsibility: >
+      A hard requirement on the design, held apart from a preference so that what may be built is never decided by what is wanted.
+    duplicates: none
+    overlap_note: >
+      Overlaps Requirement, which is a source statement carried verbatim. A DesignConstraint may derive from one and is machine-evaluable where a Requirement need not be.
+    required_for_assurance_package: false
+    package_items: []
+    status: PROVISIONAL
+    open_question: >
+      Declared at S-7 / U-8 ahead of its producer, which is this contract's
+      normal way of working. What is open is not the meaning - that is frozen -
+      but that S7-B has not yet emitted it.
+    decision_required_before: "S7-B implementation."
+  HardRequirementCompliance:
+    owning_stage: feasibility
     first_downstream_consumer: s05
-    consumer_note: Everything after the gate embodies one candidate; that choice has to be a recorded
-      fact with its evidence.
+    consumer_note: >
+      Whether a candidate satisfies a hard requirement decides whether it may be chosen at all, and everything after the choice embodies the chosen one.
+    unique_responsibility: >
+      Whether one candidate satisfies one hard requirement, at the maturity the evidence has now.
+    duplicates: none
+    overlap_note: >
+      Overlaps MechanicalFeasibilityAssessment, which asks whether the mechanism can work at all. A violated requirement is not a broken mechanism, and the two are kept apart for exactly that reason.
+    required_for_assurance_package: false
+    package_items: []
+    status: PROVISIONAL
+    open_question: >
+      Declared at S-7 / U-8 ahead of its producer, which is this contract's
+      normal way of working. What is open is not the meaning - that is frozen -
+      but that S7-B has not yet emitted it.
+    decision_required_before: "S7-B implementation."
+  MechanicalFeasibilityAssessment:
+    owning_stage: feasibility
+    first_downstream_consumer: s05
+    consumer_note: >
+      Eligibility decides the population a choice may act on, and everything after the choice embodies the chosen candidate.
+    unique_responsibility: >
+      Whether one candidate could work on the engineering evidence established so far.
+    duplicates: none
+    overlap_note: >
+      Overlaps EliminationRecord, which is s04's LOCAL geometric finding. The finding is INPUT to this; this is the verdict on eligibility taken from the whole picture.
+    required_for_assurance_package: false
+    package_items: []
+    status: PROVISIONAL
+    open_question: >
+      Declared at S-7 / U-8 ahead of its producer, which is this contract's
+      normal way of working. What is open is not the meaning - that is frozen -
+      but that S7-B has not yet emitted it.
+    decision_required_before: "S7-B implementation."
+  SelectionProfile:
+    owning_stage: selection
+    first_downstream_consumer: s05
+    consumer_note: >
+      A decision names the profile version it was made under, so the profile outlives the moment of choosing.
+    unique_responsibility: >
+      The user's ranked preferences, versioned, and visible nowhere before a choice is made.
+    duplicates: none
+    overlap_note: >
+      none
+    required_for_assurance_package: false
+    package_items: []
+    status: PROVISIONAL
+    open_question: >
+      Declared at S-7 / U-8 ahead of its producer, which is this contract's
+      normal way of working. What is open is not the meaning - that is frozen -
+      but that S7-C has not yet emitted it.
+    decision_required_before: "S7-C implementation."
+  CandidateComparison:
+    owning_stage: selection
+    first_downstream_consumer: s05
+    consumer_note: >
+      The deterministic ground of a choice, carried with the choice.
+    unique_responsibility: >
+      Deterministic metrics over the eligible candidates, computed before anything is asked of a model.
+    duplicates: none
+    overlap_note: >
+      none
+    required_for_assurance_package: false
+    package_items: []
+    status: PROVISIONAL
+    open_question: >
+      Declared at S-7 / U-8 ahead of its producer, which is this contract's
+      normal way of working. What is open is not the meaning - that is frozen -
+      but that S7-C has not yet emitted it.
+    decision_required_before: "S7-C implementation."
+  SelectionAdvisory:
+    owning_stage: selection
+    first_downstream_consumer: s05
+    consumer_note: >
+      Recorded because a human reviewed it. Advisory, never a premise.
+    unique_responsibility: >
+      A reviewer's opinion on an already-eligible field of candidates.
+    duplicates: none
+    overlap_note: >
+      Overlaps SelectionConcern, which is one raised issue rather than a recommendation over the field.
+    required_for_assurance_package: false
+    package_items: []
+    status: PROVISIONAL
+    open_question: >
+      Declared at S-7 / U-8 ahead of its producer, which is this contract's
+      normal way of working. What is open is not the meaning - that is frozen -
+      but that S7-D has not yet emitted it.
+    decision_required_before: "S7-D implementation."
+  SelectionConcern:
+    owning_stage: selection
+    first_downstream_consumer: s05
+    consumer_note: >
+      A concern raised for a human to weigh, carried with its evidence status.
+    unique_responsibility: >
+      One decision-critical concern the metrics and the preferences do not represent.
+    duplicates: none
+    overlap_note: >
+      Overlaps SelectionAdvisory, which carries the recommendation this concern qualifies.
+    required_for_assurance_package: false
+    package_items: []
+    status: PROVISIONAL
+    open_question: >
+      Declared at S-7 / U-8 ahead of its producer, which is this contract's
+      normal way of working. What is open is not the meaning - that is frozen -
+      but that S7-D has not yet emitted it.
+    decision_required_before: "S7-D implementation."
+  HumanDecisionInput:
+    owning_stage: selection
+    first_downstream_consumer: s05
+    consumer_note: >
+      What the person submitted, and what they were shown when they submitted it.
+    unique_responsibility: >
+      A human's submitted request at the decision screen, with the premise digest they saw.
+    duplicates: none
+    overlap_note: >
+      Overlaps SelectionDecision, which is what a deterministic writer commits after re-checking the premises. The input is a request; the decision is the commitment.
+    required_for_assurance_package: false
+    package_items: []
+    status: PROVISIONAL
+    open_question: >
+      Declared at S-7 / U-8 ahead of its producer, which is this contract's
+      normal way of working. What is open is not the meaning - that is frozen -
+      but that S7-E has not yet emitted it.
+    decision_required_before: "S7-E implementation."
+  SelectionDecision:
+    # S-7 / U-8: owner moved off s04. s04 authors spatial evidence and does not
+    # choose; the responsibility that chooses is `selection`, and it runs after
+    # s04 rather than between its two passes.
+    owning_stage: selection
+    first_downstream_consumer: s05
+    consumer_note: Everything after the decision embodies one candidate; that choice has to be a
+      recorded fact with its evidence, its profile version and the human who made it.
     unique_responsibility: The only family recording which candidate was retained and what permitted it.
     duplicates: none
     overlap_note: 'Overlaps UnresolvedDecision, deliberately: a tie with no discriminating evidence is

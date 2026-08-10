@@ -75,6 +75,11 @@ class TestEntityFamilyAudit(unittest.TestCase):
             with self.subTest(family=name):
                 self.assertIn(entry["first_downstream_consumer"], self.ownership["stages"])
 
+    def _position(self, owner):
+        entry = ((_paths.contract("STAGE_OWNERSHIP_MATRIX.yaml")
+                  .get("responsibilities") or {}).get("entries") or {}).get(owner)
+        return entry["runs_after"] if entry else owner
+
     def test_consumer_is_never_earlier_than_the_owner(self):
         """A family cannot be consumed before it exists.
 
@@ -87,6 +92,10 @@ class TestEntityFamilyAudit(unittest.TestCase):
             owners = [owner] if isinstance(owner, str) else list(owner)
             if owners == ["any"]:
                 continue
+            # A RESPONSIBILITY has a position too: `runs_after` says which
+            # pipeline stage it follows, so "consumer precedes owner" stays
+            # answerable for an owner that is not a numbered stage.
+            owners = [self._position(o) for o in owners]
             earliest_owner = min(owners)
             if entry["first_downstream_consumer"] < earliest_owner:
                 problems.append((name, owners, entry["first_downstream_consumer"]))

@@ -23,7 +23,7 @@ REPO = _paths.REPO_ROOT
 if REPO not in sys.path:
     sys.path.insert(0, REPO)
 
-S01_S04 = ("s01", "s02", "s03a", "s03b", "s04a", "gate", "s04b")
+S01_S04 = ("s01", "s02", "s03a", "s03b", "s04a", "feasibility", "selection", "s04b")
 
 #: Tokens that would mean the derivation had learned from a case rather than a
 #: contract. None may appear in any structured field the derivation reads.
@@ -388,13 +388,14 @@ class TestSourceB(_Base):
             self.assertTrue(fams, "%s.%s" % (sid, pc["class"]))
             self.assertTrue(trace)
             total += 1
-        # 27 LIVE at S-6. s04b's `selection_decision` moved to
+        # 30 LIVE at S-7 / U-8: `gate` (3 classes) became `feasibility` (2) and
+        # `selection` (4). s04b's `selection_decision` moved to
         # `premise_classes_pending_step`: it resolves against COMMITTED_BRANCH,
         # which cannot exist until the S-7 gate, so requiring it made s04b
         # unreachable - the ConsumerView was UPSTREAM_INSUFFICIENCY on every
         # call. The class is preserved with the step that activates it, and the
         # pending corpus is pinned too so it cannot be quietly dropped.
-        self.assertEqual(27, total)
+        self.assertEqual(30, total)
         pending = [pc for s in self.resp["stages"].values()
                    for pc in (s.get("premise_classes_pending_step") or [])]
         self.assertEqual(1, len(pending))

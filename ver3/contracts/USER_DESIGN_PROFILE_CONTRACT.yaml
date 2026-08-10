@@ -1,0 +1,102 @@
+# USER DESIGN PROFILE — the two things a user tells us, kept apart
+#
+# S-7 / U-8. One file, two sections, and the split is the whole point.
+#
+#   design_constraints     what may be BUILT AT ALL
+#   selection_preferences  which buildable thing is WANTED
+#
+# They are not two flavours of one "preference" list. A hard requirement bounds
+# the design and can make a candidate ineligible; a preference can never do
+# that, and a mechanism is not less feasible for being more complex than one
+# somebody would rather have. Modelling both as preferences is what lets a
+# stated wish quietly become an engineering verdict.
+
+schema_version: "0.1.0"
+status: draft
+governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
+declared_by: "S-7 / U-8, substep S7-A. The ingester is S7-B; the profile materialiser is S7-C."
+
+visibility:
+  design_constraints: >
+    ENTER EARLY. Ingested at s01 as DesignConstraint, which is a demand on the
+    design and applies to every alternative. Every stage may see them, because a
+    stage that cannot see what it must satisfy cannot satisfy it.
+  selection_preferences: >
+    INVISIBLE UNTIL SELECTION. No responsibility from s01 through `feasibility`
+    receives one, and the enforcement is the input boundary rather than a
+    sentence in a prompt: nothing before `selection` declares the
+    `selection_preference` semantic role, so the consumer view cannot contain
+    one. A stage told to ignore a preference has already seen it.
+  falsifier: >
+    A SelectionProfile appearing in any pre-selection ConsumerView is a contract
+    failure and is tested as one.
+
+ingestion:
+  design_constraints: >
+    DETERMINISTIC. A profile that already says PLASTIC_ONLY is a structured
+    fact, and handing it to a model to reinterpret would turn a stated
+    requirement into an inference. The ingester maps declared kinds onto
+    DesignConstraint and does not paraphrase.
+  selection_preferences: >
+    DETERMINISTIC, and materialised only at the selection boundary, as a
+    SelectionProfile carrying its version and the hash of the source it came
+    from - so a decision names the exact preferences it was made under and
+    changing them reopens the choice without touching an engineering fact.
+
+design_constraints:
+  meaning: >
+    A HARD requirement. Machine-evaluable ones carry parameters a check can read;
+    human-evaluable ones are recorded and evaluated by a person.
+  entry_shape:
+    kind: "a declared constraint kind"
+    statement: "what it requires, in the user's words"
+    parameters: "structured values a check can read, where the kind has them"
+    blocks_selection: "whether an unsatisfied instance stops a final choice. Default true"
+  evaluation_rule: >
+    A REQUIREMENT EXISTING IS NOT THE SAME AS ITS BEING EVALUABLE. Until the
+    design has the fact a constraint is about, its compliance is
+    NOT_YET_EVALUABLE - never SATISFIED and never VIOLATED. Absence of a material
+    assignment is not "plastic only, satisfied"; it is the design not yet having
+    said. A candidate may be ruled out early only when the constraint is
+    evaluable at the current maturity AND incompatibility is established.
+  example:
+    - kind: MATERIAL_CLASS_ONLY
+      statement: "every manufactured part must be plastic"
+      parameters: {material_class: PLASTIC}
+      blocks_selection: true
+    - kind: MAX_OVERALL_DIMENSION
+      statement: "it must fit through a standard doorway"
+      parameters: {axis: ANY, limit: 760, unit: mm}
+      blocks_selection: true
+    - kind: PROHIBITED_ENERGY_SOURCE
+      statement: "no external electrical power"
+      parameters: {source: MAINS_ELECTRICAL}
+      blocks_selection: true
+
+selection_preferences:
+  meaning: >
+    What is WANTED among designs that already work. Ranked, never weighted into
+    a single score: collapsing a trade-off into a number invents a decision the
+    evidence does not contain.
+  entry_shape:
+    criterion: "what is being preferred over"
+    objective: "MINIMIZE or MAXIMIZE"
+    priority: "HIGH, MEDIUM or LOW - a tier, not a weight"
+  comparison_rule: >
+    Tiers are compared lexicographically and by dominance. Where one candidate
+    dominates under the current tiers the system may say so deterministically;
+    where none does, the trade-off stays a trade-off and a human resolves it.
+  example:
+    part_count: {objective: MINIMIZE, priority: HIGH}
+    assembly_complexity: {objective: MINIMIZE, priority: HIGH}
+    actuation_complexity: {objective: MINIMIZE, priority: MEDIUM}
+    package_volume: {objective: MINIMIZE, priority: MEDIUM}
+    maintainability: {objective: MAXIMIZE, priority: LOW}
+
+not_in_this_file:
+  - what: "a weighting that turns the tiers into one number"
+    why: "a score is a decision, and the decision is a human's"
+  - what: "a preference that makes a candidate ineligible"
+    why: "that is a design constraint, and it belongs in the other section"
+  - what: "a metric value"
+    why: "metrics are computed from state, never stated by the user"

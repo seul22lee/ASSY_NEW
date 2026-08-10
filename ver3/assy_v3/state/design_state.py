@@ -78,10 +78,17 @@ class Contracts:
         families: Dict[str, Any] = dict(ds["entity_families"])
         families.update(ds["assurance_families"])
         matrix = _load("STAGE_OWNERSHIP_MATRIX.yaml")
+        # STAGES AND RESPONSIBILITIES. Ownership is the question the write
+        # boundary asks, and a responsibility owns families exactly as a stage
+        # does - `gate` did, and had no entry here at all, which is how
+        # SelectionDecision came to be listed under s04. Merged at load so
+        # `may_create` asks one thing and there is no second ownership table.
+        owners = dict(matrix["stages"])
+        owners.update((matrix.get("responsibilities") or {}).get("entries") or {})
         _CONTRACT_DOCS[self] = {
             "families": families,
             "prohibited": ds["prohibited_content"],
-            "stages": matrix["stages"],
+            "stages": owners,
             "universally_ownable": {
                 e["family"] for e in matrix["universally_ownable"] if "family" in e},
             "authority": ds.get("authority_model", {}),

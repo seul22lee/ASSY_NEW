@@ -18,7 +18,7 @@ if REPO not in sys.path:
     sys.path.insert(0, REPO)
 
 RETIRED_FAMILIES = ("BodyHypothesis", "PhysicalInteractionHypothesis")
-STAGES_UNDER_S2 = ("s01", "s02", "s03a", "s03b", "s04a", "gate", "s04b")
+STAGES_UNDER_S2 = ("s01", "s02", "s03a", "s03b", "s04a", "feasibility", "selection", "s04b")
 
 
 def _yaml(name):
@@ -51,7 +51,12 @@ class TestFamilyClosure(_Corpus):
     def test_CON_01_every_family_has_exactly_one_owner(self):
         """The source of truth declares it, and every projection agrees."""
         owns = {}
-        for sid, s in self.matrix["stages"].items():
+        # STAGES and RESPONSIBILITIES both own families. `gate` owned two and had
+        # no matrix entry at all, which is how SelectionDecision came to be
+        # attributed to s04: the projection could not express its real owner.
+        projections = dict(self.matrix["stages"])
+        projections.update((self.matrix.get("responsibilities") or {}).get("entries") or {})
+        for sid, s in projections.items():
             for f in (s.get("owns") or []):
                 owns.setdefault(f, []).append(sid)
         uni = {e["family"] for e in self.matrix["universally_ownable"] if "family" in e}
@@ -304,6 +309,11 @@ class TestConceptResolutions(_Corpus):
 class TestStageResponsibility(_Corpus):
 
     def test_CON_10_every_stage_and_the_gate_declare_responsibility(self):
+        """S-7 / U-8: `gate` became `feasibility` and `selection`. It asked two
+        questions and answered them in one act - whether a candidate could work,
+        and which one was wanted - so a preference could reach a feasibility
+        judgement and nothing could say that a four-bar which works is not less
+        feasible than a hinge which works."""
         self.assertEqual(set(STAGES_UNDER_S2), set(self.resp["stages"]))
         for sid, s in self.resp["stages"].items():
             with self.subTest(stage=sid):
