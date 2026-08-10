@@ -388,18 +388,24 @@ class TestSourceB(_Base):
             self.assertTrue(fams, "%s.%s" % (sid, pc["class"]))
             self.assertTrue(trace)
             total += 1
-        # 30 LIVE at S-7 / U-8: `gate` (3 classes) became `feasibility` (2) and
-        # `selection` (4). s04b's `selection_decision` moved to
+        # 32 live after the S7-A correction: `gate` (3) became `feasibility` (4)
+        # and `selection` (4). s04b's `selection_decision` was RETIRED, not
+        # staged - activating it would have meant SelectionDecision -> s04b while
+        # the architecture requires s04b -> feasibility -> selection -> decision.
+        # It moved to
         # `premise_classes_pending_step`: it resolves against COMMITTED_BRANCH,
         # which cannot exist until the S-7 gate, so requiring it made s04b
         # unreachable - the ConsumerView was UPSTREAM_INSUFFICIENCY on every
         # call. The class is preserved with the step that activates it, and the
         # pending corpus is pinned too so it cannot be quietly dropped.
-        self.assertEqual(30, total)
+        self.assertEqual(32, total)
         pending = [pc for s in self.resp["stages"].values()
                    for pc in (s.get("premise_classes_pending_step") or [])]
-        self.assertEqual(1, len(pending))
-        self.assertEqual("S-7 / U-8", pending[0]["activated_by"])
+        self.assertEqual([], pending, "a pending class survived S7-A")
+        retired = [pc for s in self.resp["stages"].values()
+                   for pc in (s.get("retired_premise_classes") or [])]
+        self.assertEqual(1, len(retired))
+        self.assertEqual("S7-A", retired[0]["retired_by"])
 
     def test_SOURCEB_13_no_benchmark_identifier_participates(self):
         src = _code_only(resolve_premise_semantics, families_with_role)
@@ -434,13 +440,15 @@ class TestSourceB(_Base):
         declared = {pc["class"] for pc in
                     self.resp["stages"]["s04b"]["required_reasoning_premise_classes"]}
         pending = {pc["class"] for pc in
-                   self.resp["stages"]["s04b"].get("premise_classes_pending_step") or []}
+                   self.resp["stages"]["s04b"].get("retired_premise_classes") or []}
         self.assertEqual(
             {"prior_spatial_commitment", "topology_with_axes", "required_distinctness",
              "configuration_basis", "constraint_relation", "travel_bounding_quantity"},
             declared)
         # The seventh is not resolved in the contract's direction and not lost:
-        # it is staged behind the step that can satisfy it (S-6 / U-7).
+        # S7-A RETIRED it, because activating it would have made the order
+        # circular - SelectionDecision -> s04b, against s04b -> feasibility ->
+        # selection -> SelectionDecision.
         self.assertEqual({"selection_decision"}, pending)
         roles = {r for pc in self.resp["stages"]["s04b"]
                  ["required_reasoning_premise_classes"] for r in pc["requires_semantics"]}

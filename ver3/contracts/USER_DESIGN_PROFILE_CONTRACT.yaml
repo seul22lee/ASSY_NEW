@@ -18,9 +18,23 @@ declared_by: "S-7 / U-8, substep S7-A. The ingester is S7-B; the profile materia
 
 visibility:
   design_constraints: >
-    ENTER EARLY. Ingested at s01 as DesignConstraint, which is a demand on the
-    design and applies to every alternative. Every stage may see them, because a
-    stage that cannot see what it must satisfy cannot satisfy it.
+    AUTHORITATIVE FROM EARLY REQUIREMENT CAPTURE. Ingested at s01 as
+    DesignConstraint, and standing in DesignState from that moment.
+    EXISTENCE IS NOT VISIBILITY, and the earlier wording here conflated them: it
+    said every stage may see them, which would have meant injecting a hard
+    requirement into every consumer view. Visibility is
+    RESPONSIBILITY-DRIVEN like everything else - a stage receives one when its
+    declared reasoning requires the `design_constraint` role, or when a
+    justified representational dependency reaches it, and not otherwise. Nothing
+    is globally injected; that is what a context dump is.
+  the_asymmetry: >
+    A HARD REQUIREMENT MAY legitimately affect upstream engineering reasoning - a
+    plastic-only design is a different design problem, and a stage that must
+    satisfy it may need to know. A SELECTION PREFERENCE MUST NOT, ever. "May
+    affect" is a permission that each responsibility exercises by declaring the
+    role; "must not" is a prohibition enforced by no responsibility declaring the
+    other role at all. The two are not symmetric and are not implemented the same
+    way.
   selection_preferences: >
     INVISIBLE UNTIL SELECTION. No responsibility from s01 through `feasibility`
     receives one, and the enforcement is the input boundary rather than a

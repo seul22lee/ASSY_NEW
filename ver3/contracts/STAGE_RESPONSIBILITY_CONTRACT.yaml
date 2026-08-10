@@ -138,11 +138,22 @@ stages:
     - Actor
     - Scenario
     - Assumption
+    - DesignConstraint
     - UnresolvedDecision
     prohibited_decisions:
-    - Naming any mechanism, material or dimension
+    - INVENTING a mechanism, material or dimension the source did not state
     - Resolving an ambiguity silently
     - Sharpening a source qualifier
+    carrying_versus_inventing: >
+      "Naming any mechanism, material or dimension" read as a blanket ban, which
+      would have forbidden s01 to record a user who SAID "all parts must be
+      plastic". Two different acts: INVENTING a material the source never stated
+      is prohibited and always was; CARRYING one the source states, with its
+      provenance, is required - refusing to record it would lose a hard
+      requirement the design must satisfy.
+      The test is the source, not the vocabulary. s01 may not infer PLASTIC_ONLY
+      from a request that never says it, and may not sharpen "should be light"
+      into a mass limit.
     no_premises_because: None. s01 is the only stage that may read raw source (INV-002), so it
       has no upstream engineering evidence to require.
   s02:
@@ -481,6 +492,44 @@ stages:
       - constraint_relation
       - mobility_disposition
       - spatial_commitment
+    - class: realized_motion
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a mechanism with no realized motion has no motion to judge
+      what: the coordinates that realize each configuration, the paths between them,
+        and the occupancy each moving group sweeps
+      justified_by_question: Does the established evidence contain anything that stops this candidate
+        working?
+      why: >
+        Four of the declared feasibility domains - required configurations, motion
+        and transitions, gross interference, spatial realization - are decided on
+        exactly these facts. Declaring a domain whose evidence the view cannot
+        contain is a contract that cannot be satisfied, which is what this class
+        was added to fix.
+      requires_semantics:
+      - realized_configuration
+      - motion_path
+      - motion_occupancy
+      - kinematic_axis
+    - class: candidate_local_geometric_finding
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a candidate may have no reach result and no elimination finding
+      what: the reach results and elimination findings s04 computed for this candidate
+      justified_by_question: Does the established evidence contain anything that stops this candidate
+        working?
+      why: >
+        A local geometric finding is INPUT to eligibility and not a verdict on it.
+        s04 reports what it computed; this responsibility decides what that means
+        for whether the candidate may be chosen from.
+      requires_semantics:
+      - reach_evidence
+      - elimination_evidence
+      - assembly_order
     - class: hard_design_constraint
       instance_selection:
         population: DESIGN_WIDE
@@ -498,6 +547,21 @@ stages:
     - MechanicalFeasibilityAssessment
     - HardRequirementCompliance
     - UnresolvedDecision
+    conditional_outputs:
+      HardRequirementCompliance:
+        produced_per: DesignConstraint
+        why: >
+          ONE PER HARD REQUIREMENT. A design that states none produces none, and
+          that is a complete answer rather than a gap. Source A derives what an
+          OUTPUT needs in order to mean something, and correctly says a
+          compliance record needs a constraint to be about - but it then made
+          that referent REQUIRED_NONEMPTY for the stage's readiness, so the
+          feasibility view was UPSTREAM_INSUFFICIENCY on every design without a
+          profile. An output that need not be produced was blocking the stage
+          that need not produce it. Declaring the condition makes the referent
+          MAY_BE_EMPTY for readiness and changes nothing about the record: a
+          compliance record still cannot exist without its constraint, and the
+          write boundary still says so.
     prohibited_decisions:
     - Comparing candidates, or reading another candidate's evidence at all
     - Preferring a simpler mechanism; complexity is not infeasibility
@@ -600,34 +664,38 @@ stages:
     # migrate was unreachable.
     #
     # The premises resolve against the branch THIS INVOCATION names. Nothing is
-    # fabricated: no SelectionDecision is invented, no declaration order decides
-    # anything, and the refinement semantics below do not depend on which
-    # population supplied the branch - so S-7 restores COMMITTED_BRANCH and moves
-    # the pending class back without touching them.
-    premise_classes_pending_step:
-    - class: selection_decision
-      activated_by: "S-7 / U-8"
-      instance_selection:
-        population: COMMITTED_BRANCH
-        coverage: ALL_APPLICABLE
-        existence: REQUIRED_NONEMPTY
-        existence_why: s04b realizes the selected candidate, not an arbitrary one
-      what: the selection decision
-      justified_by_question: Where is each joint, in which frame, and on which axis?
-      why: >
-        s04b realizes the selected candidate, not an arbitrary one - and it will,
-        once a gate can produce one. Held here rather than deleted: the
-        requirement is real and the step that makes it satisfiable has not run.
-        A pending class is not read by the view builder, so it enforces nothing
-        and asserts nothing.
-      requires_semantics:
-      - selection_decision
-    responsibility: Place the selected mechanism and describe its motion so that clearance, incidence
-      and distinctness can be computed.
+    # fabricated: no SelectionDecision is invented and no declaration order
+    # decides anything.
+    #
+    # S7-A CORRECTION: S-6 expected S-7 to restore COMMITTED_BRANCH and move the
+    # pending class back. It does not, and cannot - see `retired_premise_classes`
+    # below. s04b stays candidate-local.
+    responsibility: Place the mechanism of ONE candidate and describe its motion so that clearance,
+      incidence and distinctness can be computed.
     engineering_questions:
     - Where is each joint, in which frame, and on which axis?
     - What coordinate values realize each configuration?
     - Which coordinates change in each transition, and along what path?
+    retired_premise_classes:
+    - class: selection_decision
+      retired_by: "S7-A"
+      was:
+        population: COMMITTED_BRANCH
+        existence: REQUIRED_NONEMPTY
+        activated_by: "S-7 / U-8"
+        what: the selection decision
+      why_retired: >
+        IT IS CIRCULAR UNDER THE SPLIT, and S7-A is the step that would have
+        activated it. Requiring a SelectionDecision before s04b means
+        SelectionDecision -> s04b. But `selection` authors that decision from
+        eligibility, `feasibility` establishes eligibility from the engineering
+        evidence, and s04b is where the motion evidence comes from - so the real
+        order is s04b -> feasibility -> selection -> SelectionDecision. Restoring
+        the premise would close the loop.
+        It is retired rather than deferred: nothing later reactivates it. s04b
+        runs CANDIDATE-LOCALLY, on the branch its invocation names, before any
+        choice exists. No provisional decision is invented and no candidate is
+        selected in order to run it.
     required_reasoning_premise_classes:
     - class: prior_spatial_commitment
       instance_selection:

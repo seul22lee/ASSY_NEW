@@ -131,12 +131,177 @@ Regression, **secondary**: RUN 928 · PASS 928 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-A CORRECTION PASS (baseline `4c2cb32`)
+
+### C.1 Blockers reproduced before editing
+
+**A — feasibility declared domains whose evidence its view could not contain.**
+The real `feasibility` ConsumerView, built over a candidate with S04B evidence
+standing in state:
+
+```
+status          UPSTREAM_INSUFFICIENCY
+State           in view: False | in state: 2
+Transition      in view: False | in state: 1
+SweptVolume     in view: False | in state: 1
+Joint           in view: False | in state: 1
+```
+
+Four of the nine declared domains — required configurations, motion and
+transitions, spatial realization, gross interference — were decided on facts the
+view could not carry.
+
+**Root cause, found by the reproduction:** `State`, `Transition` and
+`SweptVolume` carry **no semantic role at all**. No responsibility could ask for
+them without naming the family, which is the whitelist U-3 exists to remove. The
+same gap `MobilityExpectation` had.
+
+**Sixth blocker, also found by the reproduction:** the view was
+`UPSTREAM_INSUFFICIENCY` for a different reason —
+`HardRequirementCompliance.constraint → DesignConstraint` is a required
+single-valued reference, so Source A made it REQUIRED_NONEMPTY. A design that
+states no hard requirement produces no compliance records, and an output that
+need not be produced was blocking the stage that need not produce it.
+
+**B — the pending S04B rule is circular.** `selection_decision`,
+`COMMITTED_BRANCH`, `REQUIRED_NONEMPTY`, `activated_by: S-7 / U-8`. Activating it
+means `SelectionDecision → s04b`, while the architecture is
+`s04b → feasibility → selection → SelectionDecision`. **S7-A is the step that
+would have activated it.**
+
+**C — existence conflated with visibility.** The profile contract said "every
+stage may see them"; exactly one responsibility declares the role.
+
+**D — reviewed concerns unrecordable.** `HumanDecisionInput` and
+`SelectionDecision.considered_refs` could name a `SelectionAdvisory` and nothing
+could name a `SelectionConcern` — the thing a reviewer is actually for.
+
+**E — ordering ambiguous.** Both responsibilities said `runs_after: s04` and
+nothing said which came first.
+
+### C.2 The feasibility ConsumerView, before and after
+
+```
+BEFORE  UPSTREAM_INSUFFICIENCY
+        18 families, none of State / Transition / SweptVolume / Joint
+
+AFTER   VIEW_READY
+        24 families, including State, Transition, SweptVolume, Joint
+        Witness           absent  (s04-owned, carries no role — not a dump)
+        SelectionProfile  absent  (F11 unchanged)
+```
+
+### C.3 Roles added, and why none is a whitelist
+
+| role | meaning | carried by |
+|---|---|---|
+| `realized_configuration` | the coordinate values that realize one named configuration — what the mechanism is SET TO, as against the configuration, which only names it | `State` |
+| `motion_path` | a path between two realized configurations and which coordinates it changes — how a design says a motion HAPPENS | `Transition` |
+| `motion_occupancy` | the space a moving group occupies along a motion, and at what evidence level | `SweptVolume` |
+
+Each states an engineering meaning, none names a stage, and only the family that
+carries that meaning declares it — asserted as an **equality**, so a fourth
+family quietly acquiring one of these roles fails.
+
+Two premise classes were added to `feasibility`: `realized_motion` (the three
+roles above plus `kinematic_axis`) and `candidate_local_geometric_finding`
+(`reach_evidence`, `elimination_evidence`, `assembly_order`) — the second because
+a local geometric finding is **input** to eligibility and not a verdict on it.
+
+### C.4 The S04B selection dependency, retired
+
+Not deferred — **retired**, with what it used to say kept beside the reason it
+cannot come back. `retired_premise_classes` on s04b records the population, the
+existence, the activation step it claimed, and the circularity. s04b runs
+candidate-locally on the branch its invocation names. No provisional decision is
+invented and no candidate is selected in order to run it.
+
+### C.5 Hard-constraint existence and visibility
+
+> `DesignConstraint` is **authoritative from early requirement capture** and
+> **visible only where the reasoning requires it**.
+
+The asymmetry is stated because it is not symmetric: a hard requirement **may**
+legitimately affect upstream reasoning, and each responsibility exercises that by
+declaring the role; a preference **must not**, ever, and that is enforced by no
+responsibility declaring the other role at all. "May affect" is not "inject into
+every view".
+
+`s01` gains `DesignConstraint` as a permitted output, and its prohibition is
+sharpened from "naming any mechanism, material or dimension" — which would have
+forbidden recording a user who **said** "all parts must be plastic" — to
+**inventing** one the source did not state. The test is the source, not the
+vocabulary.
+
+### C.6 Sequencing
+
+`runs_after_responsibility: feasibility` on `selection`. The resolved order is
+`s04 → feasibility → selection`, asserted by walking the declarations rather than
+by trusting that one happens to require the other's output.
+
+### C.7 Reviewed-concern provenance
+
+`HumanDecisionInput.reviewed_concerns → SelectionConcern[]`, and
+`SelectionDecision.considered_refs` splits into `considered_advisories` and
+`considered_concerns`. Both stay **optional**, both stay out of `required_fields`,
+and the premise fields are untouched — so rewording an advisory or a concern
+stales nothing.
+
+### C.8 Production changed, and why it was unavoidable
+
+| file | change | why |
+|---|---|---|
+| `view/consumer_view.py` | 9 lines: a family listed in the responsibility's `conditional_outputs` has its Source-A referent treated as MAY_BE_EMPTY for **readiness** | without it, a stage is blocked on the referent of an output it need not produce. The record's own requirement is untouched — a compliance record still cannot exist without its constraint, and the write boundary still says so |
+| `stages/s04_envelope_and_motion.py` | **docstring only**: "two passes, one selection gate" retired | the corpus sweep required no CURRENT occurrence to contradict `s04b → feasibility → selection`, and that line did. Zero behavioural change, verified by reading the diff |
+
+No S7-B…S7-F producer exists.
+
+### C.9 A1–A10
+
+| | claim | result |
+|---|---|---|
+| **A1** | the declared motion domains have their evidence | VIEW_READY; nine families present including State, Transition, SweptVolume, Joint |
+| **A2** | no blanket S04 dump | a `Witness` created under s04 does **not** enter — being s04's is not a reason |
+| **A3** | no preference leakage | a standing `SelectionProfile` is still absent |
+| **A4** | nothing requires a decision before s04b | no live class, no COMMITTED_BRANCH population, retirement records the circularity |
+| **A4b** | nothing live is staged for activation | structural: no `premise_classes_pending_step` anywhere; `activated_by` exists only inside the `was:` record of what a retired rule used to say |
+| **A5** | the order resolves | `s04 → feasibility → selection`, walked from the declarations |
+| **A6** | early ingestion by the declared owner | `DSC-1` created by s01 with parameters carried verbatim; `may_create("s02", …)` is False |
+| **A7** | visibility is selective | exactly one responsibility declares the role; s02/s03a/s03b/s04a receive none |
+| **A7b** | a consumer that declares it receives it | `DesignConstraint` in the feasibility view |
+| **A7c** | a design with none is not blocked | the conditional-output declaration |
+| **A8** | carrying is not inventing | s01 may output it; the prohibition names INVENTING; both contracts agree |
+| **A9** | both kinds of reviewed material | `reviewed_advisories` and `reviewed_concerns`, distinct typed many-references |
+| **A10** | review does not create a premise | considered fields optional and separate; the premise set is the required one |
+
+### C.10 Newly discovered, with owners
+
+| | | owner |
+|---|---|---|
+| `State`, `Transition`, `SweptVolume` carried no semantic role — three S-6 families no responsibility could ask for | declared here, because S7-A cannot proceed without them | fixed here |
+| an output produced per-instance blocked its stage when the instance count was zero | one general declaration + 9 lines | fixed here |
+| `s04` module docstring claimed a gate between the passes | docstring only | fixed here |
+| `S05_CONTRACT` still names `blocking_relations` | untouched | **S-8** |
+| `sample()`'s three-pose floor is redundant | untouched | **S-8** |
+
+Regression, **secondary**: RUN 942 · PASS 942 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
 
-> **S-7 / U-8 NOT CLOSED — S7-A (authority freeze) complete; S7-B through S7-F
-> not started.**
+> **S7-A VERIFIED CLOSED — FEASIBILITY / SELECTION AUTHORITY, INPUT SUFFICIENCY,
+> ORDERING AND PREFERENCE ISOLATION CONSISTENT.**
 >
-> The boundary is executable where it can be without producers: the write
-> boundary refuses s04 a `SelectionDecision`, and no pre-selection consumer view
-> can contain a preference. Nothing yet produces a feasibility assessment, a
-> comparison, an advisory or a decision.
+> The split holds and the write boundary enforces it. The feasibility view now
+> contains the evidence its declared domains are decided on, and contains neither
+> a preference nor an s04 family that carries none of its semantics. The order
+> `s04 → feasibility → selection` is machine-readable, and the rule that would
+> have made it circular is retired rather than waiting. A hard requirement exists
+> early and is visible only where the reasoning asks for it; a preference is
+> visible nowhere before selection. A human can record which concerns they read,
+> and reading one creates no premise.
+>
+> **S-7 / U-8 IS NOT CLOSED.** S7-B through S7-F are not started: nothing
+> produces a feasibility assessment, a compliance result, a profile, a
+> comparison, an advisory, a human input or a decision.

@@ -96,10 +96,11 @@ class TestDeclaredCorpus(_Base):
 
     def test_SELECT_01_every_premise_declares_which_instances_it_needs(self):
         rows = list(_premises(self.resp))
-        # 30 live at S-7 / U-8: `gate` split into `feasibility` (2 premise
-        # classes) and `selection` (4), replacing the 3 the gate declared.
-        # s04b's selection_decision remains staged behind S-7 / U-8.
-        self.assertEqual(30, len(rows), "the premise corpus changed size")
+        # 32 live after the S7-A correction: `feasibility` gained the two
+        # classes its declared domains actually need - realized motion, and the
+        # candidate-local geometric findings - without which it declared domains
+        # whose evidence its view could not contain.
+        self.assertEqual(32, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

@@ -187,6 +187,18 @@ semantic_role_vocabulary:
     A HARD requirement on the design - what may be built at all. Distinct from a
     preference, which says which buildable thing is wanted and may never make a
     candidate ineligible. (S-7 / U-8)
+  realized_configuration: >
+    The coordinate values that realize one named configuration - what the
+    mechanism is actually SET TO when it is in that state, as against the
+    configuration itself, which only names it.
+  motion_path: >
+    A path between two realized configurations, and which coordinates it
+    changes. How a design says a motion HAPPENS, distinct from the states it
+    happens between.
+  motion_occupancy: >
+    The space a moving group occupies along a motion, and at what evidence level
+    that occupancy was computed. What makes "does this sweep into something"
+    answerable at all.
   mobility_disposition: >
     What is known about one degree of freedom of one rigid group in one
     configuration, and on what evidence.
@@ -539,6 +551,12 @@ entity_families:
       - "A realization with no verification predicate discharges nothing."
 
   State:
+    # Declared at S7-A. This family, Transition and SweptVolume carried NO
+    # semantic role, so a responsibility needing to know whether a mechanism's
+    # motion works could not ask for them by role and would have had to name the
+    # family - the whitelist U-3 exists to remove. The same gap
+    # MobilityExpectation had.
+    semantic_roles: [realized_configuration]
     field_semantics:
       # S-6 / U-7. WHICH CONFIGURATION THIS REALIZES. The producer wrote it and
       # nothing declared it, so the write boundary could not check it and Source
@@ -565,6 +583,7 @@ entity_families:
         body's extent, so an envelope changing does not make a joint angle wrong.
 
   Transition:
+    semantic_roles: [motion_path]
     field_semantics:
       from_state:
         kind: reference
@@ -1648,6 +1667,7 @@ assurance_families:
         authority through the ordinary FA-5 path. A revision with no reason is
         refused; a revision that is not recorded at all is the audited defect.
   SweptVolume:
+    semantic_roles: [motion_occupancy]
     field_semantics:
       rigid_group:
         kind: reference
@@ -1953,11 +1973,21 @@ assurance_families:
         cardinality: many
         resolvable: false
         referent_population: ALL_RETAINED_BRANCHES
+      # TWO KINDS OF REVIEWED MATERIAL. A record naming only recommendations
+      # could not say which raised ISSUES a person actually read, and a concern
+      # is the thing a reviewer is for - "they saw the advisory it hangs off" is
+      # a different statement. (S7-A correction)
+      reviewed_concerns:
+        kind: reference
+        target: SelectionConcern
+        cardinality: many
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
     owned_by: selection
     authority_class: AUTHORITATIVE
     purpose: "What a human submitted at the decision screen, and what they were looking at when they submitted it."
     required_fields: [entity_id, action, rationale, comparison, profile, premise_digest]
-    optional_fields: [selected_candidate, reviewed_advisories]
+    optional_fields: [selected_candidate, reviewed_advisories, reviewed_concerns]
     action: [SELECT, KEEP_UNRESOLVED, REQUEST_MORE_EVIDENCE]
     rules:
       - >
@@ -2019,9 +2049,15 @@ assurance_families:
         cardinality: one
         resolvable: false
         referent_population: DESIGN_WIDE
-      considered_refs:
+      considered_advisories:
         kind: reference
         target: SelectionAdvisory
+        cardinality: many
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
+      considered_concerns:
+        kind: reference
+        target: SelectionConcern
         cardinality: many
         resolvable: false
         referent_population: ALL_RETAINED_BRANCHES
@@ -2041,7 +2077,10 @@ assurance_families:
       - selection_profile
       - comparison
       - human_decision
-    optional_fields: [considered_refs, rationale]
+    # CONSIDERED, never premise - separate fields from the premise ones above,
+    # so no propagation path runs from a model's wording to this decision's
+    # standing. Rewording an advisory or a concern stales nothing.
+    optional_fields: [considered_advisories, considered_concerns, rationale]
     rules:
       - >
         Only a candidate that is SELECTION_ELIGIBLE may be selected: mechanical

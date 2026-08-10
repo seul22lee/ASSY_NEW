@@ -402,6 +402,12 @@ responsibilities:
     `runs_after` is the pipeline stage a responsibility follows. It gives the
     responsibility a position, which is what an ordering check needs to say that
     a consumer does not precede an owner.
+  runs_after_responsibility_rule: >
+    `runs_after_responsibility` orders one responsibility against another. Both
+    of these follow s04, and that alone does not say which comes first - it left
+    the order in prose and in the incidental fact that one happens to require the
+    other's output. The dependency is real, so it is declared: the resolved order
+    is s04 -> feasibility -> selection.
   entries:
     feasibility:
       name: mechanical_feasibility
@@ -420,6 +426,7 @@ responsibilities:
     selection:
       name: candidate_selection
       runs_after: s04
+      runs_after_responsibility: feasibility
       role: >
         Choose among the ELIGIBLE candidates under the user's stated preferences,
         with a human deciding and a deterministic writer committing. The first

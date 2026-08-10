@@ -1,7 +1,14 @@
-"""S04 - envelope, reach and spatial proof. Two passes, one selection gate.
+"""S04 - envelope, reach and spatial proof. Two passes, and no gate between them.
+
+The module line used to read "two passes, one selection gate", which S7-A
+retired: selection follows s04 entirely, and it follows the feasibility
+responsibility that reads this stage's evidence. Nothing here changes - this is
+the sentence, not the behaviour.
 
 s04a  Can any of these candidates fit, reach and be approached at all?
-      Kills candidates cheaply, each for a stated geometric reason.
+      Records a geometric reason where one cannot. Whether that reason makes a
+      candidate ineligible is the `feasibility` responsibility's to decide, from
+      the whole picture; this stage reports what it computed.
 s04b  Where is everything in each state, what path connects the states, and is
       that path - and every assembly path - actually clear?
 

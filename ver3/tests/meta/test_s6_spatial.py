@@ -484,16 +484,21 @@ class TestSequencingAndFreeze(_S04Chain):
         self.assertEqual([], state.family("SelectionDecision"))
         self.assertEqual([], s04.selection_gate_check(state))
 
-    def test_the_pending_premise_is_recorded_not_deleted(self):
+    def test_the_retired_premise_is_recorded_not_deleted(self):
+        """S-6 staged it behind S-7. S7-A retired it instead: activating it would
+        have meant SelectionDecision -> s04b, while the architecture requires
+        s04b -> feasibility -> selection -> SelectionDecision. What it used to
+        say is kept beside the reason it cannot come back."""
         from ver3.assy_v3.view.boundary import responsibility_contract
         b = responsibility_contract()["stages"]["s04b"]
         live = {c["class"] for c in b["required_reasoning_premise_classes"]}
         self.assertNotIn("selection_decision", live)
-        pending = {c["class"]: c for c in b.get("premise_classes_pending_step") or []}
-        self.assertIn("selection_decision", pending)
-        self.assertEqual("S-7 / U-8", pending["selection_decision"]["activated_by"])
+        self.assertEqual([], b.get("premise_classes_pending_step") or [])
+        retired = {c["class"]: c for c in b.get("retired_premise_classes") or []}
+        self.assertIn("selection_decision", retired)
+        self.assertEqual("S7-A", retired["selection_decision"]["retired_by"])
         self.assertEqual("COMMITTED_BRANCH",
-                         pending["selection_decision"]["instance_selection"]["population"])
+                         retired["selection_decision"]["was"]["population"])
 
     def test_s04a_arrangement_is_a_real_premise_of_s04b(self):
         state, _ = self.build([("A", 2, 2)])

@@ -259,6 +259,15 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
             # the stage was free not to author at all.
             single_required = (fld in required_fields
                                and spec.get("cardinality") != "many")
+            # A CONDITIONAL OUTPUT IS ONE PRODUCED PER INSTANCE OF SOMETHING.
+            # Where the stage declares that, the referent may legitimately not
+            # exist: no instances, no records, and a complete answer. Without it
+            # a stage was blocked on the referent of an output it need not
+            # produce at all - a compliance record needs a constraint to be
+            # about, but a design that states no constraint produces none.
+            # The record's own requirement is untouched; this is about READINESS.
+            if family in (stage.get("conditional_outputs") or {}):
+                single_required = False
             existence = REQUIRED_NONEMPTY if single_required else MAY_BE_EMPTY
             population = spec.get("referent_population") or INVOCATION_BRANCH
             if population not in _POPULATIONS:
