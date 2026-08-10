@@ -875,7 +875,10 @@ loads reach the world, and in what order it goes together.
 Do not add or rename bodies, groups, joints, interfaces or configurations. If
 something is missing, say so in unresolved.
 
-1. BLOCKING RELATIONS. For each body that must stay where it is put, state what
+1. BLOCKING RELATIONS. (Compatibility input for the DOF expansion below. The
+   CANONICAL constraint output is constraint_relations[] - do not author the same
+   constraint twice; a blocking relation here is only what the DOF grid is
+   expanded from.) For each body that must stay where it is put, state what
    stops it. ONE relation per (retained group, blocked direction) - not one per
    degree of freedom: the pipeline expands your relations over every DOF and
    every configuration itself. A mechanism in which nothing is blocked is a pile
@@ -884,8 +887,12 @@ something is missing, say so in unresolved.
    scenario in which that holds. A scenario carrying a load case is not one.
    Most mechanisms need none.
 3. LOAD PATHS. Per load case, the ordered hops from where the load is applied,
-   through this mechanism, to the reaction site. Hops are body, joint or
-   interface ids. Never say how much load anything carries.
+   through this mechanism, to the reaction site. A HOP IS AN INTERFACE ID - the
+   interface that carries the load across that step. Not a body, not a joint: a
+   body is what the load passes through, an interface is what carries it from
+   one body to the next. Terminate at the reaction site the load case names, and
+   if this mechanism does not reach it, leave terminates_at out and say so.
+   Never say how much load anything carries.
 4. ASSEMBLY ORDER. Which body, from which access side, what it depends on, and
    what retains it once placed. A rigid part pushed straight in leaves the
    reverse direction open, so a body that must stay put needs LATER_BODY_COVER,
@@ -937,9 +944,13 @@ occur, between which roles. You say HOW THIS CANDIDATE does it.
 
   For every constraint this candidate relies on, emit a constraint_relation: the
   retained group, which DOFs it removes, in which configurations, and what
-  DRIVES it ({drivers}). Where something provides the constraint, name the
-  providing body or site. Do not leave a constraint standing on nothing, and do
-  not report a constraint you have not decided.
+  DRIVES it ({drivers}). Name what PROVIDES it - a body of this mechanism in
+  provider_body, or, where the reaction is taken outside the product, the
+  declared reaction site in provider_reaction_site. Those are the two kinds of
+  provider there are; the world is not a body. provider_site is a different
+  fact: the interface of this mechanism at which the constraint acts. Do not
+  leave a constraint standing on nothing, and do not report one you have not
+  decided.
 
   For every load case, emit a load_path: the ordered interfaces the load passes
   through, and where it terminates. If the load reaches a declared EXTERNAL
@@ -1068,7 +1079,8 @@ class S03BMobilityAndAssembly(Stage):
                       "blocked_dofs": r.get("blocked_dofs", []),
                       "configurations": r.get("configurations", []),
                       "driver": r["driver"]}
-            for optional in ("blocked_direction", "provider_body", "provider_site",
+            for optional in ("blocked_direction", "provider_body",
+                             "provider_reaction_site", "provider_site",
                              "maintaining_interaction", "defeat_specification",
                              "release_transition"):
                 if r.get(optional):

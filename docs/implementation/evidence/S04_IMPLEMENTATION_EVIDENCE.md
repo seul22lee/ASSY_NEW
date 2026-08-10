@@ -459,11 +459,117 @@ Assembly-relevant physical interactions beyond the three families; the R-A appli
 treatment beyond what s02/s03b responsibilities already require; and the corpus refresh,
 which needs an authorized live run. S-5/S-6/S-7/S-8/S-9 ownership is unchanged.
 
-## 7. Impl S-5 has NOT begun.
+## 7. SLICE 3 — S02 → S03B chain integration
+
+Baseline for this slice: `f3d6d7f`. Four integration gaps around the new producer.
+
+### 7.1 `between_roles` aligned end to end
+
+The contract said `role_name`; the s02 producer still listed the field among the
+keys it checks for entity ids, which would have demanded an entity for something
+the architecture deliberately never made one for. Removed, with the reason written
+where the list is. The prompt now says it outright: *"A role is a name, not an id:
+'the actuation role' is an answer, and an Actor id is a different thing entirely."*
+
+Proven by INT-01/02: `between_roles` carries `["the actuation role", "the closing
+role"]`, no entity of either name exists, and the patch applies.
+
+### 7.2 `ReactionSiteRequirement` has a real s02 producer
+
+Added through the actual path — prompt schema, reference lines, a numbered rule,
+`to_operations`, patch, state. The rule states why it exists: *"The world is not a
+body; it is a site outside the product, and a load that has nowhere declared to be
+reacted has nowhere to go."* INT-01 asserts `RSR-0001._created_by == "s02"`; it is
+produced, never seeded.
+
+### 7.3 `LoadCase → ReactionSiteRequirement`, by id
+
+Decision: `reacted_at_role` **stays** as the source-level description — what the
+request said, in its own words — and a new optional typed `reacted_at_site`
+reference carries the authoritative relation. Two fields, two different facts: one
+records what was said, the other what it resolves to. That is not duplicate truth,
+and it is why nothing downstream compares role strings.
+
+INT-03/04/11: `LC-0001.reacted_at_site == "RSR-0001"`, and the path that closes
+`LC-0001` is found by matching that id against `terminates_at` — no string
+reconstruction anywhere.
+
+### 7.4 `ConstraintRelation` provider semantics
+
+The plan says the provider is a *"body or external reaction site"*, and `Body`
+alone could not say the second. Added `provider_reaction_site` →
+`ReactionSiteRequirement`, DESIGN_WIDE.
+
+**Provider identity and acting site stay separate**, which the new contract rule
+now states: `provider_body` / `provider_reaction_site` say *what provides* the
+constraint; `provider_site` says *where in this candidate it acts*. A
+`ReactionSiteRequirement` was not turned into a candidate-local Interface, and the
+external case no longer has to be attributed to a body — INT-07/08 asserts the
+external relation carries **no** `provider_body`.
+
+### 7.5 `blocking_relations` — isolated, not canonicalized
+
+`constraint_relations[]` is the canonical physical output. `blocking_relations[]`
+remains **compatibility input for the deterministic DOF expansion only**, and the
+prompt now says so where it is asked for, so the model is not asked to author the
+same constraint twice. Separating them is Impl S-5's (R-C/R-D) and was not done
+here. The contract records the boundary on `ConstraintRelation` itself.
+
+Corrected too: `DESIGN_STATE_CONTRACT` and `ENTITY_FAMILY_AUDIT` both claimed these
+families had no producer. They do now, and the historical note is kept as history
+rather than deleted.
+
+### 7.6 S03B prompt made single-valued
+
+The hop wording said *"body, joint or interface ids"* while the contract now types
+hops as `Interface`. One interpretation only: *"A HOP IS AN INTERFACE ID — the
+interface that carries the load across that step. Not a body, not a joint: a body
+is what the load passes through, an interface is what carries it from one body to
+the next."* Same check applied to the interaction, constraint and termination
+wording.
+
+### 7.7 The integration trace
+
+Nothing seeded that a producer should make:
+
+```
+s01 leaves  REQ-0001, ACT-0001, SCN-0001
+  s02.invoke  -> OBL-0001, RSR-0001(EXTERNAL), LC-0001(reacted_at_site=RSR-0001),
+                 PEO-0001(between_roles=role names), CND-A, CND-B      SUCCESS
+  s03a.invoke -> BOD-A, RGP-A, IFC-A, IFG-A, JNT-A, CFG-A              SUCCESS
+  s03b view   -> VIEW_READY, zero unmet
+  s03b.invoke -> PHI-A discharges PEO-0001
+                 CRL-A provided by RSR-0001, acting at IFG-A, no provider_body
+                 LDP-A load_case LC-0001, hops [IFC-A, IFG-A], terminates RSR-0001
+```
+
+All three candidate-specific facts are ACTIVE_BRANCH for A; `PEO-0001`, `LC-0001`
+and `RSR-0001` are COMMON_UPSTREAM **and carry no premises** — the lineage came
+from authored references, not from stamping.
+
+### 7.8 Two candidates, through the real chain
+
+Both candidates driven end to end through the producers. A's facts contain no B id;
+B realizes the same obligation with a different effect; there is still exactly
+**one** `PhysicalEffectObligation` and **one** `ReactionSiteRequirement`; `BOD-B` is
+OTHER_BRANCH from A; the reaction site is COMMON_UPSTREAM for both.
+
+### 7.9 Regression
+
+`657 run · 657 pass · 0 fail · 22 skipped` — 9 stale-recording, 12 R-B, 1
+unrelated. Unchanged: no recording was touched.
+
+### 7.10 Remaining S-4
+
+Assembly-relevant physical interactions; the R-A applicability treatment beyond
+what s02/s03b responsibilities already require; and the corpus refresh, which needs
+an authorized live run. S-5/S-6/S-7/S-8/S-9 ownership unchanged.
+
+## 8. Impl S-5 has NOT begun.
 
 ## 9. Status
 
-**S-4 IN PROGRESS — S03B PHYSICAL REALIZATION PRODUCER COMPLETE.**
+**S-4 IN PROGRESS — S02→S03B PHYSICAL CHAIN INTEGRATED.**
 
 Slice 1 (§5) and slice 2 (§6) are done: s02 authors the candidate-independent physical
 demand, and s03b authors the candidate-specific realization. The corpus refresh and the

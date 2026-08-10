@@ -122,18 +122,26 @@ RULES
    must type its alternatives list (alternatives_kind: ENTITY_REFS,
    PRINCIPLE_FAMILIES or FREE_TEXT). Do not restate an ambiguity in prose that
    the input already gave you as an entity.
-7. For every physical demand the obligations imply, record a PHYSICAL EFFECT
+7. For every place a load must ultimately be reacted, record a REACTION SITE
+   REQUIREMENT: which scenario declares it, whether the scenario's system
+   boundary puts it OUTSIDE the product (EXTERNAL) or inside it (INTERNAL), and
+   at which role. Then name that id in the load case's reacted_at_site. The
+   world is not a body; it is a site outside the product, and a load that has
+   nowhere declared to be reacted has nowhere to go.
+8. For every physical demand the obligations imply, record a PHYSICAL EFFECT
    OBLIGATION: what effect must occur, between which ROLES, and under which load
    case. The effect is one of {effects}. Say the effect, never the mechanism:
    "rotation must be permitted between the handle role and the body role" is an
    effect; "use a ball bearing" is a mechanism and belongs to no stage yet.
-   Name ROLES, never bodies - there are no bodies at this stage to name.
-8. Every id you write in a reference field must be an id. A reference field is
+   Name ROLES, never bodies - there are no bodies at this stage to name. A role
+   is a name, not an id: "the actuation role" is an answer, and an Actor id is
+   a different thing entirely.
+9. Every id you write in a reference field must be an id. A reference field is
    never a description. If a candidate creates an obligation, write that
    obligation in the obligations list, give it an id, and put THAT ID in
    obligations_created. Describing it instead leaves nothing downstream can
    address, and the obligation you meant does not exist.
-9. Never name a dimension or a position.
+10. Never name a dimension or a position.
 
 PRINCIPLE FAMILIES AVAILABLE (by function class)
 {families}
@@ -157,7 +165,10 @@ marked optional. Every id is a string in the format shown.
                           derivation_premises[] (optional)
   load_cases[]            id "LC-0001", scenario, applied_to_role,
                           reacted_at_role, direction_class, kind,
-                          magnitude_or_status
+                          magnitude_or_status, reacted_at_site (optional)
+  reaction_site_requirements[]
+                          id "RSR-0001", scenario, boundary_side, at_role,
+                          why (optional)
   physical_effect_obligations[]
                           id "PEO-0001", effect, between_roles[],
                           addresses_obligations[], under_load_case (optional),
@@ -183,7 +194,8 @@ neither place is an error.
   obligations[].derived_from_requirements  requirement ids from the input
   obligations[].involves_actors            actor ids from the input
   load_cases[].scenario                    a scenario id from the input
-  physical_effect_obligations[].between_roles         actor ids from the input
+  load_cases[].reacted_at_site                        a reaction site id you emit
+  reaction_site_requirements[].scenario               a scenario id from the input
   physical_effect_obligations[].addresses_obligations obligation ids you emit here
   physical_effect_obligations[].under_load_case       a load case id you emit here
   candidates[].obligations_addressed       obligation ids you emit here
@@ -283,11 +295,17 @@ class S02ObligationAndCandidates(Stage):
                 "involves_actors": o.get("involves_actors", []),
                 "derivation_premises": o.get("derivation_premises", [])}, prov))
         for l in parsed.get("load_cases", []):
-            ops.append(Op("CREATE", "LoadCase", l["id"], {
-                "scenario": l["scenario"], "applied_to_role": l["applied_to_role"],
-                "reacted_at_role": l["reacted_at_role"],
-                "direction_class": l["direction_class"], "kind": l["kind"],
-                "magnitude_or_status": l["magnitude_or_status"]}, prov))
+            fields = {"scenario": l["scenario"],
+                      "applied_to_role": l["applied_to_role"],
+                      "reacted_at_role": l["reacted_at_role"],
+                      "direction_class": l["direction_class"], "kind": l["kind"],
+                      "magnitude_or_status": l["magnitude_or_status"]}
+            # The site this load is reacted at, by id. `reacted_at_role` keeps
+            # saying what the source said; this says what it resolves to, so
+            # nothing downstream reconstructs the relation from role strings.
+            if l.get("reacted_at_site"):
+                fields["reacted_at_site"] = l["reacted_at_site"]
+            ops.append(Op("CREATE", "LoadCase", l["id"], fields, prov))
         # S-4. `PhysicalEffectObligation` has been a declared s02 output since S-2
         # with nothing authoring it - its own contract rule says "S-2 defines it.
         # S-4/U-5 is where s02 begins producing it." This is that branch.
@@ -297,6 +315,15 @@ class S02ObligationAndCandidates(Stage):
         # obligation - the obligation says what must be true, this says what
         # physical effect makes it true - and it names roles, never bodies,
         # because s02 may not decide topology.
+        # S-4. Owned by s02 and, until now, authored by nothing. Without it a load
+        # path could not terminate outside the product, and the world had to be
+        # modelled as a body.
+        for r in parsed.get("reaction_site_requirements", []):
+            fields = {"scenario": r["scenario"],
+                      "boundary_side": r["boundary_side"], "at_role": r["at_role"]}
+            if r.get("why"):
+                fields["why"] = r["why"]
+            ops.append(Op("CREATE", "ReactionSiteRequirement", r["id"], fields, prov))
         for e in parsed.get("physical_effect_obligations", []):
             fields = {"effect": e["effect"],
                       "between_roles": e.get("between_roles", []),
@@ -342,7 +369,13 @@ class S02ObligationAndCandidates(Stage):
         ("candidates", "obligations_addressed"),
         ("candidates", "obligations_created"),
         ("physical_effect_obligations", "addresses_obligations"),
-        ("physical_effect_obligations", "between_roles"),
+        # `between_roles` is NOT here. It carries product/function role names -
+        # "the actuation role" - and an Actor is a different, external thing. It
+        # was briefly checked as an id, which would have demanded an entity for
+        # something the architecture deliberately never made one for.
+        ("physical_effect_obligations", "under_load_case"),
+        ("load_cases", "reacted_at_site"),
+        ("reaction_site_requirements", "scenario"),
         ("obligations", "derived_from_requirements"),
         ("acceptance_contracts", "obligations"),
     )

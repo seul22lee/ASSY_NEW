@@ -600,9 +600,22 @@ entity_families:
         referent_population: DESIGN_WIDE
       direction_class:
         kind: enum
+      # S-4. The freeze says a LoadCase is "reacted at which
+      # ReactionSiteRequirement". `reacted_at_role` stays as the SOURCE-LEVEL
+      # description it has always been - what the request said, in its own words.
+      # This is the authoritative relation, by id, so downstream code never has to
+      # rebuild it by comparing role strings. Two fields, two different facts: one
+      # records what was said, one records what it resolves to.
+      reacted_at_site:
+        kind: reference
+        target: ReactionSiteRequirement
+        cardinality: one
+        resolvable: true
+        referent_population: DESIGN_WIDE
     owned_by: s02
     purpose: "An applied load implied by a scenario. CANDIDATE-INDEPENDENT."
     required_fields: [entity_id, scenario, applied_to_role, reacted_at_role, direction_class, kind, magnitude_or_status]
+    optional_fields: [reacted_at_site]
     kinds: [GRAVITY, PAYLOAD, ACTOR_APPLIED, REACTION]
     rules:
       - "Says what the world does to the product, never what any mechanism carries."
@@ -841,7 +854,12 @@ entity_families:
       - "basis RELATIVE with absolute null is a legitimate, honest value. It is not a defect and must not be defaulted to a number."
 
   # -------------------------------------------------------------- U-2B (S-2)
-  # Canonical substrate only. No stage produces these yet: the physical-effect
+  # S-4: THESE NOW HAVE PRODUCERS. s02 authors PhysicalEffectObligation and
+  # ReactionSiteRequirement; s03b authors PhysicalInteraction and
+  # ConstraintRelation. The note below recorded the S-2 state, when they were
+  # canonical substrate with nothing writing them, and is kept for the history.
+  #
+  # (historical) Canonical substrate only. No stage produces these yet: the physical-effect
   # progression and the constraint relations dispositions will cite are S-4/U-5.
   # What S-2 establishes is that the concepts have an identity, an owner and
   # resolvable references, so no contract requires a family defined nowhere.
@@ -850,6 +868,15 @@ entity_families:
     field_semantics:
       retained_group: {kind: reference, target: RigidGroup, cardinality: one, resolvable: false}
       provider_body: {kind: reference, target: Body, cardinality: one, resolvable: true}
+      # S-4. The plan says the provider is a "body or external reaction site", and
+      # Body alone could not say the second. A load reacted outside the product is
+      # provided by the declared site, not by a body of the product - modelling
+      # the world as a body is exactly what ReactionSiteRequirement exists to stop.
+      #
+      # PROVIDER IDENTITY, which is candidate-independent when it is external.
+      # `provider_site` stays what it was: the candidate-local Interface at which
+      # the constraint acts. Who provides and where it acts are different facts.
+      provider_reaction_site: {kind: reference, target: ReactionSiteRequirement, cardinality: one, resolvable: true, referent_population: DESIGN_WIDE}
       provider_site: {kind: reference, target: Interface, cardinality: one, resolvable: true}
       configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false}
       maintaining_interaction: {kind: reference, target: PhysicalInteraction, cardinality: one, resolvable: true}
@@ -865,13 +892,19 @@ entity_families:
       provided by what, and how a test would defeat it. Replaces the
       non-addressable blocked_by relation.
     required_fields: [entity_id, retained_group, blocked_dofs, configurations, driver]
-    optional_fields: [blocked_direction, provider_body, provider_site,
+    optional_fields: [blocked_direction, provider_body, provider_reaction_site, provider_site,
                       maintaining_interaction, defeat_specification, release_transition]
     driver: [LOAD, KINEMATIC_NECESSITY, DECLARED_SCENARIO]
     rules:
       - "It has an id, so a mobility disposition can cite it and the citation resolves."
       - "'Is this DOF constrained?' is answered by the relation existing; 'what constrains it?' by provider_body / provider_site / maintaining_interaction. Two questions, two answers."
       - "A provider is a resolvable reference or the relation is incomplete. No sentinel string stands in for one."
+      - >
+        The provider is a body of the product OR a declared external reaction
+        site. `provider_site` is neither: it is the candidate-local Interface at
+        which the constraint acts. A relation may name where it acts without
+        naming what provides it, and saying only where would leave the constraint
+        standing on nothing.
       - "S-2 defines it. S-4/U-5 is where s03 begins producing it."
 
   PhysicalEffectObligation:
