@@ -118,7 +118,12 @@ multi_owner_exceptions:
   rows:
     - family: Witness
       owners: [s04, s09]
-      why: "s04 produces motion witnesses; s09 produces verification witnesses. Two different artifacts under one name."
+      why: >
+        Two different artifacts under one name: motion witnesses would be s04's
+        and verification witnesses s09's. NEITHER IS PRODUCED - the ownership is
+        declared, the producers are not written, and S04_CONTRACT records Witness
+        under `not_owned_here`. Stated in that tense because the row read as a
+        claim that s04 emits one today.
       resolution_step: "the step that brings s09 into scope; out of S01-S04"
     - family: NegativeControl
       owners: [s08, s09]
@@ -453,13 +458,19 @@ entity_families:
         resolvable: false
     owned_by: s03
     extendable_by: [s04, s05]
-    fields_owned_by_s04b: [engagement_site]
-    engagement_site_note: >
-      The metric localisation of a symbolic meeting region, created at s04b. s05
-      consumes it to place features and to anchor the ROI, and where the
-      interaction moves the ROI follows this site's frame rather than a fixed box
-      the joint orbits out of. Named as an s05 input before this correction, and
-      produced by nothing.
+    # LATER-OWNED, not current. `fields_owned_by_s04b: [engagement_site]` claimed
+    # s04b owns a field it produces nothing for, and S04_CONTRACT already records
+    # it under `not_owned_here` - two files disagreeing about the same ownership.
+    # The concept is kept because it is real and wanted; what is corrected is the
+    # claim that it is current s04b truth.
+    engagement_site_status:
+      owner: "later stages - no producer exists and frozen U-7 does not require one"
+      what: >
+        The metric localisation of a symbolic meeting region. s05 would consume it
+        to place features and to anchor the ROI, so that where the interaction
+        moves the ROI follows this site's frame rather than a fixed box the joint
+        orbits out of. Named as an s05 input before the U-2B correction, and
+        produced by nothing then or now.
     purpose: "A region where two bodies meet, with its declared kind."
     required_fields: [entity_id, bodies, interaction_kind, nominal]
     interaction_kinds: [DECLARED_CONTACT, DECLARED_CLEARANCE, DECLARED_INTERFERENCE_FIT, DECLARED_COMPLIANT_INTERACTION, NOT_INTENDED_TO_INTERACT]
@@ -564,7 +575,11 @@ entity_families:
     # transition whose motion was never evidenced.
     rules:
       - "A constant offset between endpoints is not a motion model (R-07)."
-      - "Sampling is DECLARED, never adaptive-and-unrecorded."
+      # RETIRED at S-6 / U-7: "Sampling is DECLARED, never adaptive-and-
+      # unrecorded." Sampling is not a Transition field and is not declared
+      # anywhere - it is RECORDED by the computation, on the SweptVolume that
+      # computation produced. The rule survived beside the rule that replaced it,
+      # so this family carried both readings at once.
       - >
         changed_coordinates names the joints whose coordinate this transition
         changes. It is checkable against the endpoint states and must agree with
@@ -1616,11 +1631,17 @@ assurance_families:
         cardinality: one
         resolvable: false
     owned_by: s04
-    purpose: "The occupancy of a moving group along a transition, at declared sampling."
+    purpose: "The occupancy of a moving group along a transition, at the sampling the computation performed."
     required_fields: [entity_id, rigid_group, transition, sampling_declaration, occupancy, fidelity]
     fidelity: [ENDPOINTS_ONLY, SAMPLED, SWEPT, CONTINUOUS]
     rules:
-      - "sampling_declaration is mandatory and non-adaptive; endpoint-only sampling is refused."
+      # RETIRED at S-6 / U-7: "endpoint-only sampling is refused". It sat beside
+      # the rule below, which names ENDPOINTS_ONLY as a level this method
+      # produces, and beside a `fidelity` vocabulary containing it - so the
+      # family refused a value it also enumerated. Refusing a density
+      # categorically is a rule about how much evidence an unseen claim needs,
+      # which belongs to the claim and to assurance (S-8 / U-9), not to a schema.
+      - "sampling_declaration is mandatory and non-adaptive. It records what the computation DID."
       - "fidelity records what the occupancy is made of, so a coarse hull is never read as a proof."
       - >
         S-6 / U-7: fidelity is the MOTION EVIDENCE LEVEL, and it is an output of
@@ -1775,8 +1796,10 @@ spatial_commitments:
     builds one of these for an unrelated reason to carry a field it is not about.
   granularity_rule: >
     A commitment is a VALUE, and s04a authors two kinds. Some are whole entities
-    it creates, and those carry `commitment_class` as a required field - the
-    class is on the thing. Others are single FIELDS it adds to an entity another
+    it creates, and those carry `commitment_class` ON THE ENTITY - the class is a
+    field of the thing, validated against the vocabulary by the check named in
+    `enforced_by` rather than by `required_fields`, which could only ask whether
+    something was present. Others are single FIELDS it adds to an entity another
     stage owns, and those cannot carry a class of their own: runtime has no
     per-field authority, and inventing a field to hold one would declare an
     enforcement that does not exist. They are listed here instead, and what IS

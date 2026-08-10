@@ -119,7 +119,10 @@ s04a:
   allowed_unresolved: ["every internal dimension", "all feature detail"]
 
   maturity_expectations:
-    geometry: [ENVELOPES, ENDPOINT_POSES]
+    # ENDPOINT_POSES removed at S-6 / U-7: s04a sizes bodies and authors no
+    # State. Coordinates that realize a configuration are s04b's, and
+    # `State.configuration` now makes that relation typed.
+    geometry: [ENVELOPES]
     authority: PROVISIONAL
     note: "AABB interference is CONSERVATIVE: no-overlap is a proof, overlap is not."
 
@@ -138,7 +141,13 @@ s04a:
       check: "absolute scale, where free, is recorded BOUNDED with its Freedom reference"
 
 selection_gate:
-  position: "between s04a and s04b"
+  # LATER-OWNED (S-7 / U-8). The lifecycle is s04a -> s04b -> selection: the
+  # implementation plan places U-8 after U-7 - "does selection/gating wait for
+  # the semantics it evaluates? Yes" - and s04b's own responsibility has its
+  # selection premise staged behind that step. "Between s04a and s04b" described
+  # a runtime that does not exist and, while it was current prose, was the same
+  # claim that made s04b unreachable.
+  position: "after s04b; the gate is S-7 / U-8 and no current S04 behaviour depends on it"
   precondition: >
     Every retained candidate carries s03 completeness and s04a feasibility at
     equal obligation coverage.
@@ -241,7 +250,10 @@ s04b:
       # R-01, INV-005
     - "a constant offset presented as a motion model"
       # R-07
-    - "adaptive sampling that is not declared"
+    # Still current, and it is about the COMPUTATION rather than about a
+    # declaration a model makes: the sweep is non-adaptive and records the poses
+    # it evaluated, so an adaptive density that left no record is prohibited.
+    - "adaptive sampling that leaves no record of what was evaluated"
 
   allowed_unresolved:
     - "all feature detail and all dimensions"
@@ -287,31 +299,54 @@ s04b:
     - id: S04B-C14
       claim_class: PROVENANCE_INTEGRITY
       check: "a placed joint declares an axis that names a coordinate; an origin without a usable axis supports no motion claim and no default is supplied"
-      rationale: "NEG-BM-003-006; endpoint-only evidence is the most effective way to make an unbuildable mechanism look correct"
+      rationale: >
+        A rotation about a fabricated axis produces a hull, and the hull produces
+        a clearance verdict, with nothing in the record saying the axis was
+        invented. (The sampling rationale that sat here belonged to the retired
+        endpoint-only refusal and was left behind when the checks were
+        renumbered.)
     - id: S04B-C3
       check: "every FunctionalRegion has an occupancy result in every state and along every path"
     - id: S04B-C4
       check: "every AssemblyStep has a swept-path result computed against the preceding configuration"
     - id: S04B-C5
       check: "every provisional LoadPath is confirmed or refuted"
+    # RETIRED at S-6 / U-7. The check named `blocking_relations`, a shape whose
+    # producer went at S-4 / U-5 and whose last reader went at the S-5
+    # correction. What a placer can actually confirm is the canonical relation
+    # the mobility grid cites, so the check is stated over that.
     - id: S04B-C6
-      check: "every declared blocking relation is shown to hold in every configuration where it is claimed"
+      check: "every BLOCKED_BY cell cites a ConstraintRelation, and the motion computed for its configuration does not contradict it"
     - id: S04B-C7
       check: "every compliant joint coordinate is ZERO in every state outside its activation set"
       rationale: "without this, activation_window is an unchecked list of names"
     - id: S04B-C8
       check: "every check declares its input value set"
-    - id: S04B-C9
-      check: "every Interface has a metric engagement_site"
+    # RETIRED at S-6 / U-7: S04B-C9 required "every Interface has a metric
+    # engagement_site". S04 owns no such field - `not_owned_here` above records
+    # it as later-owned and no producer exists - so the check demanded a fact
+    # from a stage that cannot author it. Its id is not reused; C12-C14 are the
+    # checks this step added.
       rationale: "the invalidation cone is computed from these declarations"
 
   next_stage_consumer_requirement:
     consumer: s05
-    needs: [located_joint_frames, states_with_joint_coordinates, paths_with_declared_sampling, swept_volumes, engagement_sites, metric_functional_regions, confirmed_load_paths]
+    # S-6 / U-7. Three of these named things S04 does not produce.
+  # `paths_with_declared_sampling` described sampling as a declaration on a path,
+  # which it is not - the evidence is SweptVolume.fidelity, recorded by the
+  # computation. `engagement_sites` is later-owned. `confirmed_load_paths`
+  # overstated what the spatial check does: it reports a path whose interfaces
+  # cannot carry the load, and reporting nothing is not confirmation.
+  needs: [located_joint_frames, states_with_joint_coordinates, swept_volumes_with_recorded_fidelity, metric_functional_regions, spatially_evaluated_load_paths]
+  later_owned:
+    - what: engagement_sites
+      owner: "later stages; see DESIGN_STATE_CONTRACT.Interface.engagement_site_status"
 
 llm_role: >
   Low. This is computation. The LLM proposes candidate placements for a solver
   to check.
 knowledge_base_role: >
-  Sampling policies per motion class; standard probe sets - escape probes,
-  rotation probes, captivity probes.
+  Standard probe sets - escape probes, rotation probes, captivity probes. NOT
+  sampling policies: the density is a parameter of the computation and the
+  evidence level is its output, so a policy that fixed one from outside would put
+  the claim back in front of the work it is supposed to describe.

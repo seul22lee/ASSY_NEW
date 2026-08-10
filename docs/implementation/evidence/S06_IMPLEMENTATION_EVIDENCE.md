@@ -454,21 +454,97 @@ Regression, **secondary**: RUN 907 · PASS 907 · FAIL 0 · SKIP 22.
 
 ---
 
+## 14. CONTRACT-TRUTH PASS (baseline `6a73f8d`)
+
+Runtime frozen. **The diff is two contract files** — `ver3/assy_v3`, `ver3/tools`
+and `ver3/tests` are byte-identical.
+
+### 14.1 Contradictions reproduced
+
+| | claim, live at `6a73f8d` | why it contradicted the runtime |
+|---|---|---|
+| **A** | `Transition.rules`: *"Sampling is DECLARED, never adaptive-and-unrecorded."* | sampling is not a Transition field; the rule sat **beside** the S-6 rule that replaced it, so the family carried both readings |
+| **B** | `SweptVolume.rules`: *"endpoint-only sampling is refused."* | sat beside a rule naming ENDPOINTS_ONLY as a level this method produces, and beside a `fidelity` vocabulary containing it — the family refused a value it enumerated |
+| **C** | `spatial_commitments.granularity_rule`: entity commitments *"carry `commitment_class` as a required field"* while `enforced_by` says it is deliberately **not** in `required_fields` | one structure, two answers |
+| **D** | `s04a.maturity_expectations.geometry: [ENVELOPES, ENDPOINT_POSES]` | s04a authors no State |
+| **E** | `selection_gate.position: "between s04a and s04b"` | the gate is S-7/U-8 and follows S-6; this was the same claim that made s04b unreachable |
+| **F** | `S04B-C6` over *"every declared blocking relation"* | producer retired at S-4/U-5, last reader at the S-5 correction |
+| **G/I** | `S04B-C9` *"every Interface has a metric engagement_site"* | S04 owns no such field; `not_owned_here` already said so |
+| **H** | `needs: [… paths_with_declared_sampling, engagement_sites, confirmed_load_paths]` | sampling is not a path declaration; engagement sites are later-owned; the check refutes, it does not confirm |
+
+Found by the full-file sweep rather than from the list:
+
+| | | |
+|---|---|---|
+| **J** | `S04B-C14.rationale` still argued the retired endpoint-only refusal | left behind when C9 was renumbered to C12–C14 |
+| **K** | `Interface.fields_owned_by_s04b: [engagement_site]` | the two files disagreed about the same ownership |
+| **L** | `SweptVolume.purpose`: *"at declared sampling"* | same class as B |
+| **M** | `Witness` multi-owner row: *"s04 produces motion witnesses"* | present tense for a producer that does not exist |
+| **N** | `prohibited_decisions`: *"adaptive sampling that is not declared"* | true, and phrased as though a model declares it |
+| **O** | `knowledge_base_role`: *"Sampling policies per motion class"* | a policy fixing density from outside puts the claim back in front of the work |
+
+### 14.2 Corrections
+
+Each retired claim is **replaced by the corrected one and marked with what it
+used to say**, so a reader sees the change rather than a silent absence.
+
+`DESIGN_STATE_CONTRACT` — the Transition sampling rule retired; the SweptVolume
+refusal retired and its purpose corrected; `granularity_rule` reconciled with
+`enforced_by`; `Interface.fields_owned_by_s04b` → `engagement_site_status` with
+its owner; the Witness row's tense corrected.
+
+`S04_CONTRACT` — `ENDPOINT_POSES` removed; `selection_gate.position` → *"after
+s04b; the gate is S-7 / U-8"*; C6 restated over `ConstraintRelation`; C9 retired
+with its id **not reused**; next-stage needs corrected and `engagement_sites`
+moved to `later_owned`; C14's rationale replaced with the axis argument;
+`prohibited_decisions` and `knowledge_base_role` reworded.
+
+### 14.3 Reclassified, not implemented
+
+`engagement_site`, `Witness` production, the selection gate, `blocking_relations`
+— **later-owned or retired**, each pointing at its owner. No production behaviour
+was added to make any of them true.
+
+### 14.4 Full-file sweep
+
+Every remaining occurrence of the listed vocabulary classifies as **CURRENT AND
+TRUE** (the `fidelity` vocabulary, the S-6 dependency and evidence rules,
+`spatial_commitments`, `commitment_class`, the corrected checks), **HISTORICAL**
+(the S-4/S-5 superseded-producer rows, the retirement notes added here),
+**RETIRED** (the `blocking_relations` corpus residuals, C9) or **LATER-OWNED**
+(`SelectionDecision`/`selection_gate`, `Witness`, `engagement_site`). No
+contradictory CURRENT claim remains in either file.
+
+### 14.5 C1–C12
+
+All pass. C11 confirmed by an empty diff over `ver3/assy_v3`, `ver3/tools` and
+`ver3/tests`.
+
+### 14.6 Newly discovered
+
+None beyond the contract claims above; nothing runtime. The two items carried
+from the previous pass are unchanged and untouched: `S05_CONTRACT` still names
+`blocking_relations` (**S-8**, no live reader), and `sample()`'s three-pose floor
+is redundant beside `sweep_hull`'s own two-pose handling (**S-8** if it matters).
+
+Regression, **secondary**: RUN 907 · PASS 907 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
 
-> **S-6 VERIFIED CLOSED — SPATIAL COMMITMENT, REALIZATION AND DERIVED-EVIDENCE
-> LIFECYCLE CONSISTENT.**
+> **S-6 VERIFIED CLOSED — RUNTIME AND AUTHORITATIVE CONTRACT TRUTH CONSISTENT.**
 >
 > s04a commits an arrangement whose every value declares the class it is
 > committed at. s04b extends it, or supersedes it with a geometric reason — and a
 > supersession is a barrier, so the realization is withheld until it can be
 > reasoned from the arrangement the design now holds. Every current spatial value
-> names exactly the facts it was made from: a State its Configuration, its joints
-> and the basis; a Transition its endpoints, what moves and what changes; a
-> SweptVolume everything the sweep read. Changing one of them stales exactly what
-> it can have made wrong, and changing anything else leaves the rest current. No
-> occupancy derived from replaced geometry remains current, a joint without a
-> usable axis computes nothing, and the motion evidence level is an output of the
-> computation rather than a claim about it.
+> names exactly the facts it was made from, so changing one stales exactly what it
+> can have made wrong and changing anything else leaves the rest current. The
+> motion evidence level is an output of the computation, endpoint-only is a level
+> rather than a refusal, and no declaration or constant establishes evidence
+> maturity. The authoritative contracts now say all of that and nothing that
+> contradicts it: what S04 does not own is named with its owner, and what was
+> retired is marked with what it used to claim.
 >
 > S-3, S-4 and S-5 are unchanged and verified so. **Impl S-7 has NOT begun.**
