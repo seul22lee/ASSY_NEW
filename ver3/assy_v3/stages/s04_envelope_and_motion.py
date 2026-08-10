@@ -36,6 +36,28 @@ from ..state.patch import Op
 from .base import Stage
 
 AXIS_INDEX = {"X": 0, "Y": 1, "Z": 2}
+
+#: The frozen motion-evidence vocabulary. The level records WHAT WAS COMPUTED.
+MOTION_EVIDENCE = ("ENDPOINTS_ONLY", "SAMPLED", "SWEPT", "CONTINUOUS")
+
+
+def axis_index(axis: Any) -> Optional[int]:
+    """Which coordinate the axis names, or None.
+
+    NONE IS AN ANSWER. Every caller used to pass through `AXIS_INDEX.get(a, 2)`
+    or `axis or "+Z"`, so a joint with no axis, an unrecognised axis and a joint
+    genuinely about Z were three different facts that reached the geometry as
+    one. A rotation about a fabricated axis produces a swept hull, the hull
+    produces a clearance verdict, and nothing in the record says the axis was
+    invented. Refusing to compute is the only honest answer to a missing premise.
+    """
+    if not isinstance(axis, str):
+        return None
+    return AXIS_INDEX.get(axis.strip().upper().lstrip("+-"))
+
+
+def axis_sign(axis: str) -> float:
+    return -1.0 if str(axis).strip().startswith("-") else 1.0
 REGION_ROLES = ("ACCESS", "SUPPORT", "KEEP_OUT", "APERTURE")
 
 #: Results a spatial check may produce. FAIL is deliberately absent for
@@ -75,7 +97,10 @@ def rotate_about_axis(box: Tuple[List[float], List[float]], axis: str,
     """
     lo, hi = box
     corners = [(x, y, z) for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])]
-    idx = AXIS_INDEX.get(axis.upper().lstrip("+-"), 2)
+    idx = axis_index(axis)
+    if idx is None:
+        raise ValueError("no usable axis: %r. Rotating about a fabricated axis "
+                         "produces a hull, and the hull produces a verdict" % (axis,))
     u, v = [i for i in range(3) if i != idx]
     c, s = math.cos(radians), math.sin(radians)
     out = []
@@ -170,6 +195,22 @@ THE MECHANISM
 """
 
 
+def _branch(inputs) -> str:
+    """The candidate this invocation embodies, as an id fragment.
+
+    s04 runs once per alternative, so every id it mints must be that
+    alternative's. `SCL-0001` and `ELM-0001` were module constants: the second
+    candidate collided with the first and could not have a scale or an
+    elimination record at all - the same defect S-5 found in `MEX-0001`, in a
+    different family. The fragment is the candidate id, which is recomputable
+    where a counter is not.
+    """
+    c = (inputs or {}).get("candidate")
+    if isinstance(c, dict):
+        c = c.get("entity_id")
+    return c if isinstance(c, str) and c else "UNBRANCHED"
+
+
 class S04AEnvelopeAndReach(Stage):
     # Both passes are s04. The contract calls them PASSES of one stage, and the
     # ownership matrix owns families at stage granularity, so a pass id here
@@ -182,18 +223,101 @@ class S04AEnvelopeAndReach(Stage):
         return S04A_PROMPT.format(mechanism=_render(inputs["consumer_view"]),
                                   contact_pairs=_contact_pairs_text(inputs["consumer_view"]))
 
-    def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:
+    def invocation_premises(self, inputs: Dict[str, Any]) -> List[str]:
+        """The candidate this arrangement embodies. s04 runs once per alternative
+        and everything it authors is that alternative's (FA-5)."""
+        b = _branch(inputs)
+        return [b] if b != "UNBRANCHED" else []
+
+    #: The class every s04a spatial value is committed at. COMPARABLE because
+    #: that is what this pass is FOR: an arrangement alternatives are judged
+    #: against. Weaker than AUTHORITATIVE, which no packaging argument earns, and
+    #: stronger than PROVISIONAL, which would say nothing may rest on it.
+    COMMITMENT_CLASS = "COMPARABLE"
+
+    def to_operations(self, parsed: Dict[str, Any], inputs=None) -> List[Op]:
+        """EVERYTHING THIS PASS CONCLUDED, committed by the pass that concluded it.
+
+        The scale, the reach results and the elimination record used to be read
+        out of the raw response by `tools/run_window2._commit_s04` AFTER the
+        stage returned. They are s04a's engineering conclusions, so a caller that
+        did not run that second step got a DesignState without them and nothing
+        saying any were missing - and a runner deciding what a response means is
+        a second semantic authority for one stage's output.
+        """
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
         ops: List[Op] = []
         prov = "s04a:arrangement"
         scale = parsed.get("scale") or {}
+        premises: List[str] = []
+        # THE BASIS FIRST. Every coordinate below is expressed in it, so it is
+        # their premise: withdraw the basis and the numbers mean nothing, which
+        # FA-5 then says about every value that cited it.
+        branch = _branch(inputs)
+        if scale.get("basis"):
+            ops.append(Op("CREATE", "ReferenceScale", "SCL-%s" % branch, {
+                "basis": scale.get("basis"), "absolute": scale.get("absolute"),
+                "note": scale.get("note")}, prov))
+            premises = ["SCL-%s" % branch]
         for e in parsed.get("envelopes", []):
             ops.append(Op("CREATE", "Envelope", e["id"], {
                 "body": e["body"],
                 "extent": {"half_extent": e["half_extent"], "centre": e["centre"]},
                 "frame": "world",
                 "maturity": e.get("maturity", "PROVISIONAL"),
-                "scale_basis": scale.get("basis", "RELATIVE")}, prov))
+                "commitment_class": self.COMMITMENT_CLASS,
+                "scale_basis": scale.get("basis", "RELATIVE")},
+                prov, premise_refs=list(premises)))
+        for i, r in enumerate(parsed.get("reach_results") or [], start=1):
+            ops.append(Op("CREATE", "ReachResult", "RCH-%s-%04d" % (branch, i), {
+                "actor": r.get("actor"), "target": r.get("target"),
+                "reachable": r.get("reachable"),
+                "approach_side": r.get("approach_side"), "why": r.get("why")},
+                prov, premise_refs=list(premises)))
+        elim = parsed.get("elimination")
+        if isinstance(elim, dict) and elim.get("eliminated") is not None:
+            fields = {"eliminated": elim.get("eliminated"),
+                      "reason": elim.get("reason")}
+            # The candidate is a declared REFERENCE, so it is written only where
+            # this invocation actually names one. "UNBRANCHED" is an id fragment
+            # for minting, never an entity - putting it in a reference field
+            # would be prose in a place R-20 calls a schema error.
+            if branch != "UNBRANCHED":
+                fields["candidate"] = branch
+            ops.append(Op("CREATE", "EliminationRecord", "ELM-%s" % branch,
+                          fields, prov, premise_refs=list(premises)))
+        return ops
+
+    def refinement_operations(self, parsed, inputs, state) -> List[Op]:
+        """The volumes and directions this pass adds to entities s03 created.
+
+        EXTEND, because they are properties OF an existing entity and the
+        contract declares s04 as the extender of exactly these two fields. A
+        target this consumer was not given is REPORTED by `completeness` and not
+        written: inventing the entity would be worse, and writing onto one this
+        invocation cannot see would be reaching outside its own branch.
+        """
+        parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
+        view = inputs.get(self.context_key) or {}
+        known = {e.get("entity_id") for fam in view.values() if isinstance(fam, list)
+                 for e in fam if isinstance(e, dict)}
+        prov = "s04a:arrangement"
+        premises = (["SCL-%s" % _branch(inputs)]
+                    if (parsed.get("scale") or {}).get("basis") else [])
+        ops: List[Op] = []
+        for r in parsed.get("region_volumes") or []:
+            target = r.get("functional_region")
+            if target in known and state.has_entity(target):
+                ops.append(Op("EXTEND", state.stored_family(target), target,
+                              {"volume": {"half_extent": r.get("half_extent"),
+                                          "centre": r.get("centre")}},
+                              prov, premise_refs=list(premises)))
+        for a in parsed.get("assembly_directions") or []:
+            target = a.get("assembly_step")
+            if target in known and state.has_entity(target):
+                ops.append(Op("EXTEND", state.stored_family(target), target,
+                              {"insertion_direction": a.get("direction")},
+                              prov, premise_refs=list(premises)))
         return ops
 
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
@@ -239,6 +363,23 @@ class S04AEnvelopeAndReach(Stage):
         volumed = {r.get("functional_region") for r in parsed.get("region_volumes", [])}
         for missing in sorted(regions - volumed):
             out.append("functional region %s has no volume" % missing)
+        # A TARGET THIS CONSUMER WAS NOT GIVEN. Not committed - inventing the
+        # entity would be worse - and not silent either, which is ADR-001's own
+        # property: the historical path dropped it with `if e is not None`, and
+        # the drop was invisible. It was recorded by the runner that did the
+        # writing; now the stage that made the claim records it.
+        known = {e.get("entity_id") for fam in inputs["consumer_view"].values()
+                 if isinstance(fam, list) for e in fam if isinstance(e, dict)}
+        for r in parsed.get("region_volumes") or []:
+            if r.get("functional_region") not in known:
+                out.append("region volume names %s, which this consumer was not "
+                           "given, so it was not committed"
+                           % r.get("functional_region"))
+        for a in parsed.get("assembly_directions") or []:
+            if a.get("assembly_step") not in known:
+                out.append("assembly direction names %s, which this consumer was "
+                           "not given, so it was not committed"
+                           % a.get("assembly_step"))
         return out
 
 
@@ -269,14 +410,35 @@ Return a single JSON object with these keys.
   joint_placements[]   joint, origin [x,y,z]
   state_coordinates[]  configuration, coordinates {{<joint id>: number}}
   transitions[]        id "TRN-0001", from_configuration, to_configuration,
-                       moving_groups[]
+                       moving_groups[], changed_coordinates[] (the joint ids
+                       whose coordinate this transition changes - it is checked
+                       against your own endpoint coordinates, so declare exactly
+                       the ones that differ between them)
+  envelope_revisions[] envelope, half_extent [x,y,z], centre [x,y,z],
+                       geometric_reason - ONLY where placing the mechanism shows
+                       the arrangement you were given cannot hold. The
+                       arrangement is a COMMITMENT: you extend it by default, and
+                       changing one is a supersession that needs a geometric
+                       reason. Both values are kept and everything resting on the
+                       old one loses standing, so this is a real act and not a
+                       correction. Omit it when you are extending, which is
+                       almost always.
   notes                string, may be ""
+
+WHERE EACH JOINT'S AXIS COMES FROM
+The topology already fixed each joint's axis DIRECTION. You are placing the
+origin on that axis, not choosing a new one. A joint whose axis the topology did
+not fix cannot be given one here: say so in notes rather than picking a
+direction, because a placement on an invented axis produces motion evidence for a
+mechanism that does not exist.
 
 REFERENCES
   joint_placements[].joint           a joint id from the input
   state_coordinates[].configuration  a configuration id from the input
   transitions[].from_configuration / to_configuration  configuration ids
   transitions[].moving_groups        rigid group ids from the input
+  transitions[].changed_coordinates  joint ids from the input
+  envelope_revisions[].envelope      an envelope id from the input
 
 THE MECHANISM AND ITS ARRANGEMENT
 {mechanism}
@@ -291,22 +453,144 @@ class S04BPlacementAndMotion(Stage):
     def prompt(self, inputs: Dict[str, Any]) -> str:
         return S04B_PROMPT.format(mechanism=_render(inputs["consumer_view"]))
 
-    def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:
+    def invocation_premises(self, inputs: Dict[str, Any]) -> List[str]:
+        b = _branch(inputs)
+        return [b] if b != "UNBRANCHED" else []
+
+    def to_operations(self, parsed: Dict[str, Any], inputs=None) -> List[Op]:
+        """The states and transitions. NO sampling declaration.
+
+        `sampling_declaration` used to be written here, from the module constant,
+        before any sweep had run - so the record of how the motion was evidenced
+        existed before the motion was computed, and the sweep then read its own
+        density back out of it. The declaration is written by
+        `derived_operations` from what the computation actually evaluated, and a
+        transition whose motion could not be computed carries none.
+        """
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
         ops: List[Op] = []
         prov = "s04b:placement"
-        for s in parsed.get("state_coordinates", []):
-            ops.append(Op("CREATE", "State", "STA-%s" % s["configuration"], {
-                "name": s["configuration"],
-                "joint_coordinates": s.get("coordinates", {})}, prov))
+        # THE ARRANGEMENT THIS REALIZATION EXTENDS. Recorded as the premise it
+        # is, so superseding a committed extent costs every coordinate that
+        # rested on it its unqualified authority through the ordinary FA-5 path.
+        premises = self._spatial_premises((inputs or {}).get(self.context_key) or {})
+        for st in parsed.get("state_coordinates", []):
+            ops.append(Op("CREATE", "State", "STA-%s" % st["configuration"], {
+                "name": st["configuration"],
+                "configuration": st["configuration"],
+                "joint_coordinates": st.get("coordinates", {})},
+                prov, premise_refs=list(premises)))
         for t in parsed.get("transitions", []):
             ops.append(Op("CREATE", "Transition", t["id"], {
                 "from_state": "STA-%s" % t["from_configuration"],
                 "to_state": "STA-%s" % t["to_configuration"],
                 "path": {"moving_groups": t.get("moving_groups", [])},
-                "sampling_declaration": {"kind": "UNIFORM", "samples": SAMPLES,
-                                         "adaptive": False,
-                                         "interior_samples": SAMPLES - 2}}, prov))
+                "changed_coordinates": t.get("changed_coordinates", [])},
+                prov, premise_refs=list(premises)))
+        return ops
+
+    def _spatial_premises(self, view) -> List[str]:
+        """The s04a arrangement values this realization actually rests on.
+
+        The envelopes and the basis they are expressed in, from THIS
+        invocation's view - so a placement carries the arrangement it extended,
+        and superseding that arrangement costs the placement its unqualified
+        authority through the ordinary FA-5 path. Nothing new records it: this is
+        `Op.premise_refs`, the same substrate everything else uses.
+        """
+        out = [e["entity_id"] for e in (view.get("Envelope") or [])
+               if isinstance(e, dict) and e.get("entity_id")]
+        out += [r["entity_id"] for r in (view.get("ReferenceScale") or [])
+                if isinstance(r, dict) and r.get("entity_id")]
+        return sorted(set(out))
+
+    def refinement_operations(self, parsed, inputs, state) -> List[Op]:
+        """Joint placement, and any supersession of the s04a arrangement.
+
+        TWO KINDS OF REFINEMENT, and the difference is the whole of U-7. Placing
+        a joint EXTENDS what s04a left open - s04a sized bodies and said nothing
+        about where axes sit - and needs no reason because it contradicts
+        nothing. Changing an envelope SUPERSEDES a standing commitment, so it
+        carries a geometric reason and both values are retained; a revision
+        without one is refused rather than applied, because a silent
+        contradiction of a binding commitment is the defect this step exists to
+        make impossible.
+        """
+        parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
+        view = inputs.get(self.context_key) or {}
+        known = {e.get("entity_id") for fam in view.values() if isinstance(fam, list)
+                 for e in fam if isinstance(e, dict)}
+        prov = "s04b:placement"
+        premises = self._spatial_premises(view)
+        ops: List[Op] = []
+        for p in parsed.get("joint_placements") or []:
+            target = p.get("joint")
+            if target in known and state.has_entity(target):
+                ops.append(Op("EXTEND", state.stored_family(target), target,
+                              {"frame_origin": p.get("origin")},
+                              prov, premise_refs=list(premises)))
+        for r in parsed.get("envelope_revisions") or []:
+            target, why = r.get("envelope"), str(r.get("geometric_reason") or "").strip()
+            if target not in known or not state.has_entity(target) or not why:
+                continue
+            fields = {}
+            if isinstance(r.get("half_extent"), list) and isinstance(r.get("centre"), list):
+                fields["extent"] = {"half_extent": r["half_extent"],
+                                    "centre": r["centre"]}
+            if fields:
+                ops.append(Op("SUPERSEDE", state.stored_family(target), target,
+                              fields, prov, reason=why))
+        return ops
+
+    def derived_operations(self, parsed, inputs, state) -> List[Op]:
+        """The swept occupancy, and the evidence level OF ITS OWN COMPUTATION.
+
+        Class B: recomputable from the placement, the joint's own axis and the
+        endpoint coordinates, and produced only where those premises are present.
+        A transition whose sweep is not computable gets no SweptVolume and no
+        declaration - the absence is the honest record, and `motion_evidence_check`
+        reports it rather than this code filling it in.
+        """
+        parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
+        view = inputs.get(self.context_key) or {}
+        boxes, gb = _view_boxes(view), {g["entity_id"]: g.get("body")
+                                        for g in (view.get("RigidGroup") or [])}
+        joints = {j["entity_id"]: j for j in (view.get("Joint") or [])}
+        origins = {p.get("joint"): p.get("origin")
+                   for p in (parsed.get("joint_placements") or [])}
+        coords = {st.get("configuration"): (st.get("coordinates") or {})
+                  for st in (parsed.get("state_coordinates") or [])}
+        premises = self._spatial_premises(view)
+        ops: List[Op] = []
+        for t in parsed.get("transitions") or []:
+            ca = coords.get(t.get("from_configuration")) or {}
+            cb = coords.get(t.get("to_configuration")) or {}
+            for group in (t.get("moving_groups") or []):
+                body = gb.get(group)
+                drive = next((j for j in joints.values()
+                              if j.get("child_group") == group), None)
+                if body not in boxes or drive is None:
+                    continue
+                jid = drive["entity_id"]
+                swept = sweep_hull(boxes[body], drive, origins.get(jid),
+                                   float(ca.get(jid, 0) or 0),
+                                   float(cb.get(jid, 0) or 0))
+                if not swept["computable"]:
+                    continue
+                ops.append(Op("CREATE", "SweptVolume",
+                              "SWV-%s-%s" % (t["id"], group),
+                              {"rigid_group": group, "transition": t["id"],
+                               "sampling_declaration": swept["sampling_declaration"],
+                               "occupancy": {"aabb": swept["hull"]},
+                               "fidelity": swept["motion_evidence_level"]},
+                              "s04b:computation",
+                              premise_refs=[jid] + list(premises)))
+        # THE EVIDENCE LIVES IN ONE PLACE, on the SweptVolume the computation
+        # produced. Copying it onto the Transition as well would put the same
+        # claim in two records that can disagree - and the Transition is where
+        # the constant used to live, which is exactly the shape being removed. A
+        # transition with no SweptVolume was not evidenced, and that is readable
+        # without a field saying so.
         return ops
 
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
@@ -321,6 +605,27 @@ class S04BPlacementAndMotion(Stage):
             out.append("configuration %s has no joint coordinates" % missing)
         if len(configs) > 1 and not parsed.get("transitions"):
             out.append("more than one configuration and no transition between them")
+        # An axis this pass cannot use is not this pass's to invent. Reported
+        # where the placement is claimed, so the run records that the motion was
+        # never computable rather than that it was computed.
+        by_id = {j["entity_id"]: j for j in inputs["consumer_view"].get("Joint", [])}
+        for p in parsed.get("joint_placements") or []:
+            j = by_id.get(p.get("joint")) or {}
+            if str(j.get("joint_type", "")).upper() == "FIXED":
+                continue
+            if axis_index(j.get("axis_direction")) is None:
+                out.append("joint %s is placed and its axis %r names no coordinate, "
+                           "so no motion can be computed from it"
+                           % (p.get("joint"), j.get("axis_direction")))
+        for t in parsed.get("transitions") or []:
+            if not (t.get("changed_coordinates") or []):
+                out.append("transition %s declares no changed coordinate, so "
+                           "nothing says what moves" % t.get("id"))
+        for r in parsed.get("envelope_revisions") or []:
+            if not str(r.get("geometric_reason") or "").strip():
+                out.append("a revision of envelope %s states no geometric reason; "
+                           "a commitment is superseded with a reason or extended"
+                           % r.get("envelope"))
 
         # PROPAGATION. s04b proves motion clear against the blocking relations
         # s03 declared. Where those relations carry no defeat specification, the
@@ -343,9 +648,71 @@ class S04BPlacementAndMotion(Stage):
         return out
 
 
-#: Declared once, non-adaptive, with interior samples. Not a tuning knob: a
-#: sampling density chosen per case is a density chosen after seeing the answer.
+#: The density the sweep uses when a caller names none. It is a parameter OF THE
+#: COMPUTATION, not a declaration about it: nothing records an evidence level
+#: from this number, and changing it changes what is computed and therefore what
+#: is recorded. Non-adaptive and per-run, because a density chosen per case is a
+#: density chosen after seeing the answer.
 SAMPLES = 9
+
+
+def sweep_hull(box, joint: Dict[str, Any], origin: Sequence[float],
+               q0: float, q1: float, samples: int = SAMPLES) -> Dict[str, Any]:
+    """Sweep one body between two joint coordinates and RECORD WHAT WAS DONE.
+
+    Returns the hull together with the evidence of its own construction: how many
+    poses were evaluated, how many of them were interior, the method, and the
+    resulting motion evidence level.
+
+    THE LEVEL IS AN OUTPUT, NOT AN INPUT. Before S-6 a parser wrote
+    `sampling_declaration = {samples: 9}` from a module constant when the patch
+    was built - before any sweep existed - a check then validated the property
+    that constant guaranteed, and the sweep read its density back out of the
+    declaration. The claim decided the computation. Here the computation decides
+    the claim, and a caller that changes `samples` changes the recorded level.
+
+    It never returns SWEPT or CONTINUOUS. This method unions the axis-aligned
+    bounds of discrete poses; claiming a continuous sweep would be claiming a
+    computation that did not happen, and the vocabulary having the word in it is
+    not permission to use it.
+
+    `computable` is False, with a reason and no hull, when a premise is missing.
+    Nothing is defaulted so the arithmetic can proceed.
+    """
+    axis = joint.get("axis_direction")
+    idx = axis_index(axis)
+    if idx is None:
+        return {"computable": False,
+                "why": "joint %s declares axis %r, which names no coordinate"
+                       % (joint.get("entity_id"), axis)}
+    prismatic = str(joint.get("joint_type", "")).upper() == "PRISMATIC"
+    if not prismatic and not (isinstance(origin, (list, tuple)) and len(origin) == 3):
+        return {"computable": False,
+                "why": "joint %s has no placed frame origin to rotate about"
+                       % joint.get("entity_id")}
+    n = max(int(samples), 2)
+    poses = ([q0, q1] if n == 2 else sample(q0, q1, n))
+    hull = None
+    for q in poses:
+        if prismatic:
+            delta = [0.0, 0.0, 0.0]
+            delta[idx] = q * axis_sign(axis)
+            box_q = translate(box, delta)
+        else:
+            box_q = rotate_about_axis(box, axis, origin, math.radians(q))
+        hull = box_q if hull is None else (
+            [min(hull[0][i], box_q[0][i]) for i in range(3)],
+            [max(hull[1][i], box_q[1][i]) for i in range(3)])
+    interior = max(len(poses) - 2, 0)
+    return {
+        "computable": True, "hull": hull,
+        "sampling_declaration": {
+            "kind": "UNIFORM", "adaptive": False,
+            "samples": len(poses), "interior_samples": interior,
+            "method": "AABB_UNION_OF_DISCRETE_POSES"},
+        # The one place the level is decided, and it reads only what was done.
+        "motion_evidence_level": "SAMPLED" if interior else "ENDPOINTS_ONLY",
+    }
 
 
 def required_contacts(mech: Dict[str, Any]) -> List[Tuple[str, str]]:
@@ -393,9 +760,27 @@ def _render(obj: Any) -> str:
 # =========================================================================
 # the spatial computation and the checks
 # =========================================================================
+def _extent_box(e) -> Optional[Tuple[List[float], List[float]]]:
+    ext = e.get("extent") or {}
+    c, h = ext.get("centre"), ext.get("half_extent")
+    if isinstance(c, list) and isinstance(h, list) and len(c) == 3 and len(h) == 3:
+        return aabb(c, h)
+    return None
+
+
+def _view_boxes(view) -> Dict[str, Tuple[List[float], List[float]]]:
+    """body -> box, from a CONSUMER VIEW. Branch-scoped by construction."""
+    out = {}
+    for e in (view.get("Envelope") or []):
+        box = _extent_box(e) if isinstance(e, dict) else None
+        if box:
+            out[e.get("body")] = box
+    return out
+
+
 def _boxes(state) -> Dict[str, Tuple[List[float], List[float]]]:
     out = {}
-    for e in state.family("Envelope"):
+    for e in state.standing("Envelope"):
         ext = e.get("extent") or {}
         c, h = ext.get("centre"), ext.get("half_extent")
         if isinstance(c, list) and isinstance(h, list) and len(c) == 3 and len(h) == 3:
@@ -509,23 +894,179 @@ def region_occupancy_check(state) -> List[str]:
     return problems
 
 
-def sampling_declaration_check(state) -> List[str]:
-    """S04B-C1/C2. Sampling is declared, non-adaptive, and has interior samples.
+def motion_evidence_check(state) -> List[str]:
+    """S04B-C1/C2. The recorded evidence level is the one the record supports.
 
-    Endpoint-only evidence is the most effective way to make an unbuildable
-    mechanism look correct, because the endpoints are where a designer has
-    already looked.
+    SUPERSEDES `sampling_declaration_check`, which tested the property a module
+    constant guaranteed: the parser wrote `samples: SAMPLES` and the check
+    confirmed `SAMPLES - 2 >= 1`. It could not fail, and it said nothing about
+    the motion.
+
+    This recomputes the level from the sampling record and requires the recorded
+    level to agree - so a level cannot be raised by declaring it - and refuses
+    any level this method cannot produce. Unioning the bounds of discrete poses
+    is not a swept or continuous computation, and the vocabulary containing those
+    words is not permission to claim them.
+
+    A transition with no declaration at all is REPORTED as not computed, not
+    silently accepted: absent evidence is a state, and a missing record where a
+    computation should have run is a finding.
     """
     problems = []
-    for t in state.family("Transition"):
-        d = t.get("sampling_declaration")
+    evidenced = set()
+    for v in state.standing("SweptVolume"):
+        evidenced.add(v.get("transition"))
+        d = v.get("sampling_declaration")
+        level = v.get("fidelity")
         if not isinstance(d, dict):
-            problems.append("SAMPLING_NOT_DECLARED: %s" % t["entity_id"])
+            problems.append("MOTION_NOT_COMPUTED: %s carries no sampling record, "
+                            "so nothing says how it was evidenced" % v["entity_id"])
             continue
         if d.get("adaptive"):
-            problems.append("SAMPLING_ADAPTIVE: %s" % t["entity_id"])
-        if int(d.get("interior_samples") or 0) < 1:
-            problems.append("SAMPLING_ENDPOINT_ONLY: %s" % t["entity_id"])
+            problems.append("SAMPLING_ADAPTIVE: %s" % v["entity_id"])
+        interior = int(d.get("interior_samples") or 0)
+        implied = "SAMPLED" if interior else "ENDPOINTS_ONLY"
+        if level not in MOTION_EVIDENCE:
+            problems.append("MOTION_EVIDENCE_UNDECLARED: %s -> %r"
+                            % (v["entity_id"], level))
+        elif level != implied:
+            problems.append(
+                "MOTION_EVIDENCE_OVERSTATED: %s claims %s; %d interior sample(s) "
+                "support %s. The level follows the computation, never the reverse"
+                % (v["entity_id"], level, interior, implied))
+        if interior < 1:
+            problems.append("SAMPLING_ENDPOINT_ONLY: %s was evidenced at its "
+                            "endpoints, which is where a designer has already "
+                            "looked" % v["entity_id"])
+    for t in state.standing("Transition"):
+        if not ((t.get("path") or {}).get("moving_groups") or []):
+            continue
+        if t["entity_id"] not in evidenced:
+            problems.append("MOTION_NOT_COMPUTED: %s moves something and no swept "
+                            "occupancy was computed for it" % t["entity_id"])
+    return problems
+
+
+def joint_frame_check(state) -> List[str]:
+    """A located joint carries enough to compute motion, or it carries nothing.
+
+    An origin with no usable axis supports no incidence and no motion claim. It
+    used to support both, because every consumer defaulted a missing axis to Z -
+    so a joint the topology never gave an axis produced a swept hull, and the
+    hull produced a clearance verdict, with nothing in the record saying the axis
+    was invented.
+
+    A FIXED joint legitimately has no axis and drives nothing; it is not asked
+    for one.
+    """
+    problems = []
+    for j in state.standing("Joint"):
+        if str(j.get("joint_type", "")).upper() == "FIXED":
+            continue
+        origin = j.get("frame_origin")
+        placed = isinstance(origin, list) and len(origin) == 3
+        usable = axis_index(j.get("axis_direction")) is not None
+        if placed and not usable:
+            problems.append(
+                "JOINT_FRAME_INCOMPLETE: %s is placed at %s and declares axis %r, "
+                "which names no coordinate; an origin without an axis supports no "
+                "motion claim" % (j["entity_id"], origin, j.get("axis_direction")))
+        if not placed and usable:
+            problems.append("JOINT_NOT_PLACED: %s has an axis and no frame origin"
+                            % j["entity_id"])
+    return problems
+
+
+def _driving_joint(state, group: str) -> Optional[Dict[str, Any]]:
+    """The joint whose coordinate moves this rigid group. One reader."""
+    for j in state.standing("Joint"):
+        if j.get("child_group") == group:
+            return j
+    return None
+
+
+def configuration_realization_check(state) -> List[str]:
+    """A configuration differs from its siblings on the basis s03 DECLARED.
+
+    Conditional on the declaration, never "all configurations must differ": the
+    premise is `Configuration.distinguishing_basis`, authored by s03 because what
+    makes two states different is a mobility statement. Without this, two
+    configurations differ by having different ids, and a realization that gives
+    them identical coordinates cannot be told from one that does not.
+
+    No state name appears here. The basis names a rigid group and a DOF; the
+    joint that drives that group carries the coordinate.
+    """
+    problems = []
+    by_config = {}
+    for st in state.standing("State"):
+        by_config[st.get("configuration") or st.get("name")] = st
+    for cfg in state.standing("Configuration"):
+        basis = cfg.get("distinguishing_basis")
+        if not isinstance(basis, list) or not basis:
+            continue
+        mine = by_config.get(cfg["entity_id"])
+        if mine is None:
+            problems.append("CONFIGURATION_NOT_REALIZED: %s declares a "
+                            "distinguishing basis and has no realized state"
+                            % cfg["entity_id"])
+            continue
+        for item in basis:
+            if not isinstance(item, dict):
+                continue
+            group, dof = item.get("rigid_group"), item.get("dof")
+            others = [o for o in (item.get("differs_from") or [])
+                      if o in by_config] or [k for k in by_config
+                                             if k != cfg["entity_id"]]
+            drive = _driving_joint(state, group)
+            if drive is None:
+                problems.append("DISTINCTNESS_NOT_CHECKABLE: %s names group %s, "
+                                "which no joint drives" % (cfg["entity_id"], group))
+                continue
+            jid = drive["entity_id"]
+            q = (mine.get("joint_coordinates") or {}).get(jid)
+            for other in others:
+                p = (by_config[other].get("joint_coordinates") or {}).get(jid)
+                if q is None or p is None:
+                    problems.append(
+                        "DISTINCTNESS_NOT_CHECKABLE: %s and %s do not both state a "
+                        "coordinate for %s" % (cfg["entity_id"], other, jid))
+                elif q == p:
+                    problems.append(
+                        "DECLARED_DISTINCTNESS_NOT_REALIZED: %s and %s must differ "
+                        "on %s/%s and both realize %s at %r"
+                        % (cfg["entity_id"], other, group, dof, jid, q))
+    return problems
+
+
+def transition_realization_check(state) -> List[str]:
+    """A transition's declared changed coordinates are the ones that change.
+
+    Both directions, because both are wrong. A declared change the endpoints do
+    not make is a claim about motion that does not happen; a coordinate that
+    changes without being declared is motion nobody said would occur, and the
+    clearance evidence was gathered for a different transition than the one the
+    design describes.
+    """
+    problems = []
+    states = {st["entity_id"]: st for st in state.standing("State")}
+    for t in state.standing("Transition"):
+        a, b = states.get(t.get("from_state")), states.get(t.get("to_state"))
+        if not (a and b):
+            continue
+        ca = a.get("joint_coordinates") or {}
+        cb = b.get("joint_coordinates") or {}
+        actual = {j for j in set(ca) | set(cb) if ca.get(j) != cb.get(j)}
+        declared = {j for j in (t.get("changed_coordinates") or [])
+                    if isinstance(j, str)}
+        for j in sorted(declared - actual):
+            problems.append("DECLARED_CHANGE_NOT_REALIZED: %s says %s changes and "
+                            "its endpoints hold it at %r"
+                            % (t["entity_id"], j, ca.get(j)))
+        for j in sorted(actual - declared):
+            problems.append("UNDECLARED_COORDINATE_CHANGE: %s moves %s from %r to "
+                            "%r and does not declare it"
+                            % (t["entity_id"], j, ca.get(j), cb.get(j)))
     return problems
 
 
@@ -558,7 +1099,7 @@ def swept_clearance_check(state) -> List[str]:
             keepouts.append((r["entity_id"], aabb(v["centre"], v["half_extent"])))
 
     problems: List[str] = []
-    for t in state.family("Transition"):
+    for t in state.standing("Transition"):
         a, b = states.get(t.get("from_state")), states.get(t.get("to_state"))
         if not (a and b):
             problems.append("TRANSITION_ENDPOINT_MISSING: %s" % t["entity_id"])
@@ -566,36 +1107,26 @@ def swept_clearance_check(state) -> List[str]:
         ca = a.get("joint_coordinates") or {}
         cb = b.get("joint_coordinates") or {}
         moving = (t.get("path") or {}).get("moving_groups") or []
-        n = int((t.get("sampling_declaration") or {}).get("samples") or SAMPLES)
         for group in moving:
             body = gb.get(group)
             if body not in boxes:
                 continue
             # The joint driving this group: the one whose child it is.
             drive = next((j for j in joints.values() if j.get("child_group") == group), None)
-            if drive is None or drive["entity_id"] not in placements:
-                problems.append("SWEEP_NOT_COMPUTABLE: %s in %s has no placed driving joint"
+            if drive is None:
+                problems.append("SWEEP_NOT_COMPUTABLE: %s in %s has no driving joint"
                                 % (group, t["entity_id"]))
                 continue
             jid = drive["entity_id"]
-            origin = placements[jid]
-            axis = str(drive.get("axis_direction") or "+Z")
-            q0, q1 = float(ca.get(jid, 0) or 0), float(cb.get(jid, 0) or 0)
-            prismatic = str(drive.get("joint_type", "")).upper() == "PRISMATIC"
-            hull = None
-            for q in sample(q0, q1, n):
-                if prismatic:
-                    idx = AXIS_INDEX.get(axis.upper().lstrip("+-"), 2)
-                    delta = [0.0, 0.0, 0.0]
-                    delta[idx] = q * (-1.0 if axis.startswith("-") else 1.0)
-                    box = translate(boxes[body], delta)
-                else:
-                    box = rotate_about_axis(boxes[body], axis, origin, math.radians(q))
-                hull = box if hull is None else (
-                    [min(hull[0][i], box[0][i]) for i in range(3)],
-                    [max(hull[1][i], box[1][i]) for i in range(3)])
-            if hull is None:
+            # ONE sweep implementation, shared with the producer. A second copy
+            # here would be a second answer to "where does this body go".
+            swept = sweep_hull(boxes[body], drive, placements.get(jid),
+                               float(ca.get(jid, 0) or 0), float(cb.get(jid, 0) or 0))
+            if not swept["computable"]:
+                problems.append("SWEEP_NOT_COMPUTABLE: %s in %s: %s"
+                                % (group, t["entity_id"], swept["why"]))
                 continue
+            hull = swept["hull"]
             for rid, kbox in keepouts:
                 if overlaps(hull, kbox):
                     problems.append("SWEEP_ENTERS_KEEP_OUT: %s sweeps into %s during %s"
@@ -661,22 +1192,48 @@ def assembly_path_check(state) -> List[str]:
 def load_path_reaction_check(state) -> List[str]:
     """S04B-C5. Every provisional load path is confirmed or refuted spatially.
 
-    A path is confirmed when consecutive hops are bodies whose envelopes touch,
-    so the load has somewhere to cross. It is refuted when they are disjoint:
-    a load cannot pass between bodies that do not meet.
+    A HOP IS AN INTERFACE, which is what S-4 made `ordered_hops` mean: a body is
+    what a load passes through, an interface is what carries it from one body to
+    the next. This check read hops as BODY ids and filtered by membership in the
+    envelope map, so after S-4 every hop was discarded and the check returned
+    nothing on every path - vacuously green while reporting a spatial conclusion.
+    The identical geometry expressed with body hops produced a finding, which is
+    how the silence was found.
+
+    Two things must hold, and each is a different failure. An interface whose own
+    bodies are apart carries nothing across. Consecutive interfaces that share no
+    body are two crossings with no route between them.
     """
     boxes = _boxes(state)
+    interfaces = {i["entity_id"]: i for i in state.standing("Interface")}
     problems = []
-    for p in state.family("LoadPath"):
+    for p in state.standing("LoadPath"):
         hops = [h for h in (p.get("ordered_hops") or []) if isinstance(h, str)]
-        bodies = [h for h in hops if h in boxes]
-        for a, b in zip(bodies, bodies[1:]):
+        for h in hops:
+            iface = interfaces.get(h)
+            if iface is None:
+                problems.append("LOADPATH_HOP_NOT_AN_INTERFACE: %s in %s names %s, "
+                                "which is no interface of this mechanism"
+                                % (h, p["entity_id"], h))
+                continue
+            pair = [b for b in (iface.get("bodies") or []) if b in boxes]
+            if len(pair) < 2:
+                continue
+            a, b = pair[0], pair[1]
             gap = max(max(boxes[a][0][i] - boxes[b][1][i],
                           boxes[b][0][i] - boxes[a][1][i]) for i in range(3))
             if gap > 0:
-                problems.append("LOADPATH_HOP_DISJOINT: %s -> %s in %s are "
-                                "separated by %.3g; the load cannot cross"
-                                % (a, b, p["entity_id"], gap))
+                problems.append("LOADPATH_HOP_DISJOINT: %s carries %s -> %s in %s, "
+                                "and they are placed %.3g apart; the load cannot "
+                                "cross" % (h, a, b, p["entity_id"], gap))
+        for x, y in zip(hops, hops[1:]):
+            ia, ib = interfaces.get(x), interfaces.get(y)
+            if not (ia and ib):
+                continue
+            if not set(ia.get("bodies") or []) & set(ib.get("bodies") or []):
+                problems.append("LOADPATH_HOPS_NOT_CONNECTED: %s and %s in %s share "
+                                "no body, so the load has no route from one to the "
+                                "other" % (x, y, p["entity_id"]))
     return problems
 
 

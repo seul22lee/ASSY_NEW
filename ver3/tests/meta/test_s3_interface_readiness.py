@@ -388,7 +388,17 @@ class TestSourceB(_Base):
             self.assertTrue(fams, "%s.%s" % (sid, pc["class"]))
             self.assertTrue(trace)
             total += 1
-        self.assertEqual(28, total)
+        # 27 LIVE at S-6. s04b's `selection_decision` moved to
+        # `premise_classes_pending_step`: it resolves against COMMITTED_BRANCH,
+        # which cannot exist until the S-7 gate, so requiring it made s04b
+        # unreachable - the ConsumerView was UPSTREAM_INSUFFICIENCY on every
+        # call. The class is preserved with the step that activates it, and the
+        # pending corpus is pinned too so it cannot be quietly dropped.
+        self.assertEqual(27, total)
+        pending = [pc for s in self.resp["stages"].values()
+                   for pc in (s.get("premise_classes_pending_step") or [])]
+        self.assertEqual(1, len(pending))
+        self.assertEqual("S-7 / U-8", pending[0]["activated_by"])
 
     def test_SOURCEB_13_no_benchmark_identifier_participates(self):
         src = _code_only(resolve_premise_semantics, families_with_role)
@@ -422,10 +432,15 @@ class TestSourceB(_Base):
         not S-3, which consumes this contract."""
         declared = {pc["class"] for pc in
                     self.resp["stages"]["s04b"]["required_reasoning_premise_classes"]}
+        pending = {pc["class"] for pc in
+                   self.resp["stages"]["s04b"].get("premise_classes_pending_step") or []}
         self.assertEqual(
             {"prior_spatial_commitment", "topology_with_axes", "required_distinctness",
-             "configuration_basis", "constraint_relation", "travel_bounding_quantity",
-             "selection_decision"}, declared)
+             "configuration_basis", "constraint_relation", "travel_bounding_quantity"},
+            declared)
+        # The seventh is not resolved in the contract's direction and not lost:
+        # it is staged behind the step that can satisfy it (S-6 / U-7).
+        self.assertEqual({"selection_decision"}, pending)
         roles = {r for pc in self.resp["stages"]["s04b"]
                  ["required_reasoning_premise_classes"] for r in pc["requires_semantics"]}
         self.assertNotIn("mobility_disposition", roles)

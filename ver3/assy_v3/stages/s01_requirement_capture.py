@@ -120,7 +120,7 @@ class S01RequirementCapture(Stage):
         return PROMPT.format(request=inputs["request_text"])
 
     # ------------------------------------------------------------ operations
-    def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:
+    def to_operations(self, parsed: Dict[str, Any], inputs=None) -> List[Op]:
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
         ops: List[Op] = []
         prov = "s01:extraction"

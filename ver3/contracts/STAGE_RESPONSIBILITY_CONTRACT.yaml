@@ -503,7 +503,40 @@ stages:
     - Breaking a tie silently
     - Authoring the verdict on its own preconditions
   s04b:
-    name: committed spatial and kinematic realization
+    name: spatial and kinematic realization
+    # S-6 / U-7 SEQUENCING CORRECTION. This responsibility encoded the runtime
+    # state that will exist AFTER the selection gate: every branch-scoped premise
+    # resolved against COMMITTED_BRANCH and a SelectionDecision was REQUIRED.
+    # The gate is U-8 and the plan places it at S-7, AFTER S-6 - "does
+    # selection/gating wait for the semantics it evaluates? Yes" - so s04b could
+    # not be invoked at all: committed_branch() returns None before a selection
+    # stands, COMMITTED_BRANCH therefore selects nothing, and the ConsumerView
+    # was UPSTREAM_INSUFFICIENCY on every call. The stage the step exists to
+    # migrate was unreachable.
+    #
+    # The premises resolve against the branch THIS INVOCATION names. Nothing is
+    # fabricated: no SelectionDecision is invented, no declaration order decides
+    # anything, and the refinement semantics below do not depend on which
+    # population supplied the branch - so S-7 restores COMMITTED_BRANCH and moves
+    # the pending class back without touching them.
+    premise_classes_pending_step:
+    - class: selection_decision
+      activated_by: "S-7 / U-8"
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: s04b realizes the selected candidate, not an arbitrary one
+      what: the selection decision
+      justified_by_question: Where is each joint, in which frame, and on which axis?
+      why: >
+        s04b realizes the selected candidate, not an arbitrary one - and it will,
+        once a gate can produce one. Held here rather than deleted: the
+        requirement is real and the step that makes it satisfiable has not run.
+        A pending class is not read by the view builder, so it enforces nothing
+        and asserts nothing.
+      requires_semantics:
+      - selection_decision
     responsibility: Place the selected mechanism and describe its motion so that clearance, incidence
       and distinctness can be computed.
     engineering_questions:
@@ -513,7 +546,7 @@ stages:
     required_reasoning_premise_classes:
     - class: prior_spatial_commitment
       instance_selection:
-        population: COMMITTED_BRANCH
+        population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
         existence: REQUIRED_NONEMPTY
         existence_why: placement must extend the arrangement it was told to work in
@@ -525,7 +558,7 @@ stages:
       - spatial_commitment
     - class: topology_with_axes
       instance_selection:
-        population: COMMITTED_BRANCH
+        population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
         existence: REQUIRED_NONEMPTY
         existence_why: an origin without an axis supports no incidence claim
@@ -538,7 +571,7 @@ stages:
       - kinematic_axis
     - class: required_distinctness
       instance_selection:
-        population: COMMITTED_BRANCH
+        population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
         existence: MAY_BE_EMPTY
         existence_why: a mechanism may declare no required distinctness
@@ -549,7 +582,7 @@ stages:
       - topology_relation
     - class: configuration_basis
       instance_selection:
-        population: COMMITTED_BRANCH
+        population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
         existence: REQUIRED_NONEMPTY
         existence_why: coordinates realize a configuration, so one must exist
@@ -560,7 +593,7 @@ stages:
       - configuration_state
     - class: constraint_relation
       instance_selection:
-        population: COMMITTED_BRANCH
+        population: INVOCATION_BRANCH
         coverage: ALL_APPLICABLE
         existence: MAY_BE_EMPTY
         existence_why: a design may record no constraint relation to release
@@ -581,17 +614,6 @@ stages:
       why: Motion extent is a quantity.
       requires_semantics:
       - quantity_constraint
-    - class: selection_decision
-      instance_selection:
-        population: COMMITTED_BRANCH
-        coverage: ALL_APPLICABLE
-        existence: REQUIRED_NONEMPTY
-        existence_why: s04b realizes the selected candidate, not an arbitrary one
-      what: the selection decision
-      justified_by_question: Where is each joint, in which frame, and on which axis?
-      why: s04b realizes the selected candidate, not an arbitrary one.
-      requires_semantics:
-      - selection_decision
     permitted_output_semantics:
     - Joint.frame_origin
     - State

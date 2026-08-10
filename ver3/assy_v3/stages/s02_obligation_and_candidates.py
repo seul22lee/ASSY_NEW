@@ -358,7 +358,7 @@ class S02ObligationAndCandidates(Stage):
                              projection=_render_consumer_view(proj))
 
     # ------------------------------------------------------------ operations
-    def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:
+    def to_operations(self, parsed: Dict[str, Any], inputs=None) -> List[Op]:
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
         ops: List[Op] = []
         prov = "s02:derivation"

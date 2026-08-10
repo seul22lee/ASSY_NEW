@@ -49,9 +49,10 @@ from ver3.assy_v3.stages.s03_topology_and_mobility import (                 # no
     retention_check, simulation_completeness_check)
 from ver3.assy_v3.stages.s04_envelope_and_motion import (                   # noqa: E402
     S04AEnvelopeAndReach, S04BPlacementAndMotion, assembly_path_check,
-    configuration_interference_check, envelope_coverage_check, joint_geometry_check,
-    load_path_reaction_check, region_occupancy_check, sampling_declaration_check,
-    selection_gate_check, swept_clearance_check)
+    configuration_interference_check, configuration_realization_check,
+    envelope_coverage_check, joint_frame_check, joint_geometry_check,
+    load_path_reaction_check, motion_evidence_check, region_occupancy_check,
+    selection_gate_check, swept_clearance_check, transition_realization_check)
 from ver3.assy_v3.state import DesignState                                  # noqa: E402
 from ver3.live_providers import env as env_loader                           # noqa: E402
 from ver3.live_providers.deepseek import DeepSeekProvider                   # noqa: E402
@@ -95,7 +96,10 @@ S04_CHECKS = (
     ("joint_geometry", joint_geometry_check),
     ("configuration_interference", configuration_interference_check),
     ("region_occupancy", region_occupancy_check),
-    ("sampling_declaration", sampling_declaration_check),
+    ("joint_frame", joint_frame_check),
+    ("motion_evidence", motion_evidence_check),
+    ("configuration_realization", configuration_realization_check),
+    ("transition_realization", transition_realization_check),
     ("swept_clearance", swept_clearance_check),
     ("assembly_path", assembly_path_check),
     ("load_path_reaction", load_path_reaction_check),
@@ -291,7 +295,8 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
     return rec
 
 
-def run_s04(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
+def run_s04(case_id: str, state, provider, trial: int,
+            invocation=None) -> Dict[str, Any]:
     """s04a then s04b, from the mechanism projection ONLY. Never raises."""
     rec: Dict[str, Any] = {"case": case_id, "trial": trial, "failures": [],
                            "s04a_status": None, "s04b_status": None,
@@ -310,7 +315,9 @@ def run_s04(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
             ((S04AEnvelopeAndReach(), "s04a"), (S04BPlacementAndMotion(), "s04b")), start=1):
         started = time.time()
         try:
-            out = stage.invoke(provider, state, state.run_id, attempt=attempt)
+            out = stage.invoke(provider, state, state.run_id,
+                               {"candidate": getattr(invocation, "branch", None)},
+                               attempt=attempt, invocation=invocation)
         except Exception as exc:                                    # noqa: BLE001
             fail("PARSER_DEFECT", key, "%s: %s" % (type(exc).__name__, exc),
                  traceback.format_exc(limit=5))
@@ -329,10 +336,9 @@ def run_s04(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
             return rec
         if out.declared_incompleteness:
             fail("CONTRACT_CONDITION", key, "declared incomplete", out.declared_incompleteness)
+        # ONE patch per pass, and the runner adds nothing to it.
         state.apply(out.patch)
-        # Fold the pass's non-entity results onto the entities that own them, so
-        # the checks read one state rather than a response.
-        _commit_s04(state, key, out.raw_response, rec)
+        rec["%s_families" % key] = sorted({op.entity_type for op in out.patch.operations})
 
     for name, fn in S04_CHECKS:
         try:
@@ -344,105 +350,14 @@ def run_s04(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
     return rec
 
 
-def _commit_s04(state, key: str, raw: Optional[str], rec: Dict[str, Any]) -> None:
-    """Commit s04's non-entity results through the controlled mutation boundary.
-
-    Region volumes, assembly directions and joint origins are properties OF
-    existing entities, so they enter by EXTEND -- which is what the previous
-    implementation said it wanted to avoid and then avoided by assigning into the
-    entity dict directly, with no operation, no ownership check, no validation
-    and no provenance.
-
-    Reach results, the elimination record and the reference scale were held as
-    bare attributes on the state object. They are engineering conclusions, so
-    they are now entities with an identity, an owner and provenance (U-2A).
-
-    The spatial values are expressed in the reference scale, so the scale is
-    recorded as their premise: superseding or invalidating it costs every
-    coordinate that depends on it its unqualified authority (FA-5).
-    """
-    if not raw:
-        return
-    try:
-        parsed = json.loads(raw)
-    except Exception:                                                # noqa: BLE001
-        return
-
-    ops: List[_Op] = []
-    uncommitted: List[str] = []
-    prov = "%s:response" % key
-    scale_id: Optional[str] = None
-
-    if key == "s04a":
-        scale = parsed.get("scale")
-        if isinstance(scale, dict) and scale.get("basis"):
-            scale_id = "SCL-0001"
-            ops.append(_Op("CREATE", "ReferenceScale", scale_id,
-                           {"basis": scale.get("basis"),
-                            "absolute": scale.get("absolute"),
-                            "note": scale.get("note")}, prov))
-        premises = [scale_id] if scale_id else []
-
-        for r in parsed.get("region_volumes", []) or []:
-            target = r.get("functional_region")
-            if not state.has_entity(target):
-                uncommitted.append("region_volume -> %s" % target)
-                continue
-            ops.append(_Op("EXTEND", state.stored_family(target), target,
-                           {"volume": {"half_extent": r.get("half_extent"),
-                                       "centre": r.get("centre")}},
-                           prov, premise_refs=list(premises)))
-        for a in parsed.get("assembly_directions", []) or []:
-            target = a.get("assembly_step")
-            if not state.has_entity(target):
-                uncommitted.append("assembly_direction -> %s" % target)
-                continue
-            ops.append(_Op("EXTEND", state.stored_family(target), target,
-                           {"insertion_direction": a.get("direction")},
-                           prov, premise_refs=list(premises)))
-
-        for i, r in enumerate(parsed.get("reach_results", []) or [], start=1):
-            ops.append(_Op("CREATE", "ReachResult", "RCH-%04d" % i,
-                           {"actor": r.get("actor"), "target": r.get("target"),
-                            "reachable": r.get("reachable"),
-                            "approach_side": r.get("approach_side"),
-                            "why": r.get("why")}, prov, premise_refs=list(premises)))
-        elim = parsed.get("elimination")
-        if isinstance(elim, dict) and elim.get("eliminated") is not None:
-            ops.append(_Op("CREATE", "EliminationRecord", "ELM-0001",
-                           {"eliminated": elim.get("eliminated"),
-                            "reason": elim.get("reason")},
-                           prov, premise_refs=list(premises)))
-    else:
-        existing = state.by_family.get("ReferenceScale") or []
-        premises = [existing[0]] if existing else []
-        for p in parsed.get("joint_placements", []) or []:
-            target = p.get("joint")
-            if not state.has_entity(target):
-                uncommitted.append("joint_placement -> %s" % target)
-                continue
-            ops.append(_Op("EXTEND", state.stored_family(target), target,
-                           {"frame_origin": p.get("origin")},
-                           prov, premise_refs=list(premises)))
-
-    # A target that does not exist was silently dropped before S-1. It is still
-    # not committed -- inventing the entity would be worse -- but the drop is
-    # now recorded instead of invisible.
-    rec["%s_uncommitted" % key] = uncommitted
-    if not ops:
-        return
-    patch = _Patch(patch_id="%s-%s-commit" % (state.run_id, key),
-                   run_id=state.run_id, stage_id="s04", stage_attempt=1,
-                   parent_state_hash=state.state_hash(), operations=ops,
-                   execution_status="SUCCESS",
-                   provenance={"purpose": "commit %s spatial results" % key,
-                               "provider": "stage-response"},
-                   declared_incompleteness=[])
-    problems = state.validate(patch)
-    if problems:
-        rec["%s_commit_rejected" % key] = problems
-        return
-    state.apply(patch)
+#: RETIRED at S-6 / U-7. `_commit_s04` read the raw s04 response and wrote the
+#: engineering facts the stages did not: the reference scale, reach results, the
+#: elimination record, region volumes, insertion directions and joint origins. It
+#: was a second semantic authority for one stage's output, and a caller that did
+#: not know to run it got a DesignState missing all of them with nothing saying
+#: so. Every one of those writes now happens inside the stage that concluded it,
+#: through `to_operations` and `refinement_operations`, in the stage's own patch.
+_RETIRED_COMMIT_S04 = "s04 commits its own conclusions (U-7)"
 
 
 def main() -> int:
@@ -499,7 +414,13 @@ def main() -> int:
                 # producer-consumer question this window is asking.
                 _st = rec.pop("_state", None)
                 if _st is not None and rec.get("s03_status") in ("SUCCESS", "CONTRACT_INCOMPLETE"):
-                    s4 = run_s04(case_id, _st, provider, trial)
+                    # THE BRANCH IS NAMED BY THE CALLER. s04 embodies the same
+                    # candidate s03 did, and before the S-7 gate there is no
+                    # committed branch to read it from - so it is stated, not
+                    # inferred from declaration order.
+                    s4 = run_s04(case_id, _st, provider, trial,
+                                 invocation=InvocationContext(
+                                     branch=rec.get("candidate")))
                     rec["s04a_status"] = s4["s04a_status"]
                     rec["s04b_status"] = s4["s04b_status"]
                     rec["failures"] += s4["failures"]

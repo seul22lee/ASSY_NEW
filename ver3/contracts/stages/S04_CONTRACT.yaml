@@ -151,23 +151,47 @@ s04b:
     path - and every assembly path - actually clear?
   engineering_responsibility: >
     Prove spatial feasibility over PATHS, not over endpoints.
-  runs_on: "the selected candidate only"
+  runs_on: >
+    ONE CANDIDATE PER INVOCATION, named by the caller. "The selected candidate
+    only" described the state after the S-7 gate, which does not exist: the
+    responsibility resolved every premise against COMMITTED_BRANCH, so before a
+    selection stands the population was empty and s04b could not be invoked at
+    all. It runs on the branch the invocation names; S-7 restores the committed
+    reading without changing anything below it.
 
   required_inputs:
-    from_s03: [Joint, MobilityExpectation, blocking_relations, AssemblyStep, LoadPath]
-    from_s04a: [Envelope, FunctionalRegion volumes, SelectionDecision]
+    # S-6 / U-7. `blocking_relations` is RETIRED - it was retired from the
+    # producer at S-4/U-5 and its last reader went at the S-5 correction, so a
+    # consumer contract still requiring it described a fact that no longer
+    # exists. The canonical constraint truth is ConstraintRelation, and the
+    # mobility a placer needs is MobilityExpectation. SelectionDecision is not
+    # required here for the same reason `runs_on` no longer says "selected".
+    from_s03: [Joint, MobilityExpectation, ConstraintRelation, AssemblyStep, LoadPath, Configuration]
+    from_s04a: [Envelope, ReferenceScale, FunctionalRegion volumes]
 
   required_discoveries:
     - "the metric placement of every joint frame"
     - "the pose of every rigid group in every state"
-    - "the path between states, with declared sampling"
+    - "the path between states, and WHICH COORDINATES it changes"
     - "the swept volume of every moving group"
     - "whether each provisional load path's reaction region is unoccupied throughout the motion"
     - "whether each assembly step has a clear insertion path IN THE CONFIGURATION PRODUCED BY THE PRECEDING STEPS"
 
   owned_decisions:
-    creates: [located Joint frames, State, Transition, SweptVolume, Witness declarations]
-    extends: [LoadPath maturity to SPATIALLY_INSTANTIATED, Interface engagement_site]
+    creates: [State, Transition, SweptVolume, Witness declarations]
+    extends: [Joint frame_origin, LoadPath maturity to SPATIALLY_INSTANTIATED, Interface engagement_site]
+    supersedes: >
+      An s04a Envelope, with a GEOMETRIC REASON. The arrangement is a COMMITMENT
+      carrying a class; a refinement extends it by default, and contradicting one
+      is a supersession that keeps both values and costs every value resting on
+      the old one its unqualified authority (FA-5). A revision with no reason is
+      refused, which is what makes "may not silently contradict" a behaviour.
+    written_by: >
+      THE STAGE, in the stage's own patch. Until S-6 the runner read the raw s04
+      response after the stage returned and wrote the reference scale, the reach
+      results, the elimination record, the region volumes, the insertion
+      directions and the joint origins - so a caller that did not run that second
+      step got a DesignState missing s04's conclusions with nothing saying so.
 
   pose_law_rule: >
     The pose law is NOT authored. With located joint frames and joint
@@ -197,9 +221,31 @@ s04b:
 
   deterministic_exit_checks:
     - id: S04B-C1
-      check: "sampling is declared and non-adaptive"
+      claim_class: PROVENANCE_INTEGRITY
+      check: "the recorded motion evidence level is the one the sampling record supports, and the computation is non-adaptive"
+      never_a_declaration: >
+        S-6 / U-7. This used to read "sampling is declared and non-adaptive"
+        against a declaration the parser wrote from a module constant before any
+        sweep ran - it validated the property the constant guaranteed and could
+        not fail. The level is now an OUTPUT of the sweep, recorded on the
+        SweptVolume the sweep produced, and this check recomputes it from that
+        record. A level the method cannot support - it unions discrete poses, so
+        never SWEPT or CONTINUOUS - may not be claimed by declaring it.
     - id: S04B-C2
       check: "interior samples exist; endpoint-only sampling is REFUSED"
+    - id: S04B-C9
+      claim_class: ENGINEERING_CONSEQUENCE
+      check: "every configuration that DECLARES a distinguishing basis realizes it in coordinates that differ from the siblings it names"
+      conditional_on_a_premise: >
+        Never "all configurations must differ", which would be a rule about
+        products. The premise is Configuration.distinguishing_basis, authored by
+        s03; a mechanism that declares none is not asked to satisfy anything.
+    - id: S04B-C10
+      claim_class: ENGINEERING_CONSEQUENCE
+      check: "a transition's declared changed coordinates are exactly the ones its endpoint states differ on"
+    - id: S04B-C11
+      claim_class: PROVENANCE_INTEGRITY
+      check: "a placed joint declares an axis that names a coordinate; an origin without a usable axis supports no motion claim and no default is supplied"
       rationale: "NEG-BM-003-006; endpoint-only evidence is the most effective way to make an unbuildable mechanism look correct"
     - id: S04B-C3
       check: "every FunctionalRegion has an occupancy result in every state and along every path"

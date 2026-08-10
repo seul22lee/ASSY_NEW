@@ -82,12 +82,62 @@ def _seed(substrate):
     return state
 
 
+def _stage_ops(state, key, payload, view):
+    """Every operation the CURRENT stage makes from this payload."""
+    from ver3.assy_v3.stages.s04_envelope_and_motion import (
+        S04AEnvelopeAndReach, S04BPlacementAndMotion)
+    stage = (S04AEnvelopeAndReach if key == "s04a" else S04BPlacementAndMotion)()
+    inputs = {"consumer_view": view, "candidate": None}
+    ops = stage.to_operations(payload, inputs)
+    ops += stage.refinement_operations(payload, inputs, state)
+    ops += stage.derived_operations(payload, inputs, state)
+    return stage, inputs, ops
+
+
+def _view_of(state):
+    """What the stages are given: every standing entity, by family.
+
+    The replay is about the WRITE PATH, so the view is supplied directly rather
+    than derived - deriving it would make this a test of Consumer Sufficiency,
+    which has its own suite.
+    """
+    view = {}
+    for eid, rec in state.entities.items():
+        entry = {k: v for k, v in rec.items() if not k.startswith("_")}
+        entry["entity_id"] = eid
+        view.setdefault(rec["_family"], []).append(entry)
+    return view
+
+
 def _run_commit(state, substrate):
-    """Drive the CURRENT code over the HISTORICAL payload, exactly as the runner does."""
-    from ver3.tools.run_window2 import _commit_s04
+    """Drive the CURRENT code over the HISTORICAL payload.
+
+    S-6 / U-7 retired `tools/run_window2._commit_s04`, which is what this replay
+    used to drive: the runner read the raw s04 response and wrote the engineering
+    facts the stages did not. The facts have not moved - they are authored by the
+    stage that concluded them, in the stage's own patch - so the replay drives
+    the stage. The ADR-001 property is unchanged and is now checked one layer
+    closer to the producer.
+    """
     rec = {}
-    _commit_s04(state, "s04a", json.dumps(substrate["s04a"]), rec)
-    _commit_s04(state, "s04b", json.dumps(substrate["s04b"]), rec)
+    for key in ("s04a", "s04b"):
+        payload = json.loads(json.dumps(substrate[key]))
+        stage, inputs, ops = _stage_ops(state, key, payload, _view_of(state))
+        rec["%s_uncommitted" % key] = [
+            p for p in stage.completeness(payload, inputs)
+            if "was not given" in p]
+        if not ops:
+            continue
+        patch = StagePatch(
+            patch_id="replay-%s" % key, run_id=state.run_id, stage_id="s04",
+            stage_attempt=1, parent_state_hash=state.state_hash(),
+            operations=ops, execution_status="SUCCESS",
+            provenance={"provider": "replay"})
+        problems = state.validate(patch)
+        if problems:
+            rec["%s_rejected" % key] = problems
+            continue
+        state.apply(patch)
     return rec
 
 
@@ -131,7 +181,11 @@ class TestAbsorbWritePathReplay(unittest.TestCase):
     def test_the_old_helper_no_longer_exists(self):
         import ver3.tools.run_window2 as rw2
         assert not hasattr(rw2, "_absorb"), "the bypass must be gone, not renamed"
-        assert hasattr(rw2, "_commit_s04")
+        # S-6 / U-7: the runner's own writer is gone too. It was a second
+        # semantic authority for one stage's output, and the facts it wrote are
+        # authored by the stage now - `_run_commit` above drives that path.
+        assert not hasattr(rw2, "_commit_s04"), \
+            "the runner writes s04 engineering meaning again"
 
 
     # ------------------------------------------------------------------- AFTER
@@ -224,10 +278,9 @@ class TestAbsorbWritePathReplay(unittest.TestCase):
         payload["region_volumes"].append(
             {"functional_region": "FRG-DOES-NOT-EXIST", "half_extent": [1, 1, 1],
              "centre": [0, 0, 0]})
-        from ver3.tools.run_window2 import _commit_s04
-        rec = {}
-        _commit_s04(state, "s04a", json.dumps(payload), rec)
-        assert any("FRG-DOES-NOT-EXIST" in u for u in rec["s04a_uncommitted"])
+        stage, inputs, _ops = _stage_ops(state, "s04a", payload, _view_of(state))
+        reported = stage.completeness(payload, inputs)
+        assert any("FRG-DOES-NOT-EXIST" in u for u in reported), reported
         assert "FRG-DOES-NOT-EXIST" not in state.entities
 
 

@@ -54,7 +54,7 @@ def _s02(suffixes):
     return payload
 
 
-def _s03a(sfx, ngroups, nconfigs):
+def _s03a(sfx, ngroups, nconfigs, basis=None):
     """A branch of any shape. Group and configuration COUNTS are parameters, so
     nothing below can be true only for a square topology."""
     gs = ["G%d" % i for i in range(ngroups)]
@@ -70,10 +70,13 @@ def _s03a(sfx, ngroups, nconfigs):
         "joints": [{"id": "JNT-%s" % sfx, "joint_type": "REVOLUTE",
                     "parent_group": "RGP-G0%s" % sfx, "child_group": "RGP-G0%s" % sfx,
                     "dof": ["RZ"], "axis_direction": "+Z", "frame_ids": ["F1"]}],
-        "configurations": [{"id": "CFG-C%d%s" % (j, sfx), "name": "c%d" % j,
-                            "kind": "OPERATIONAL",
-                            "bodies_present": ["BOD-G0%s" % sfx],
-                            "expected_mobility": []} for j in range(nconfigs)],
+        "configurations": [
+            dict({"id": "CFG-C%d%s" % (j, sfx), "name": "c%d" % j,
+                  "kind": "OPERATIONAL", "bodies_present": ["BOD-G0%s" % sfx],
+                  "expected_mobility": []},
+                 **({"distinguishing_basis": (basis or {})["CFG-C%d%s" % (j, sfx)]}
+                    if (basis or {}).get("CFG-C%d%s" % (j, sfx)) else {}))
+            for j in range(nconfigs)],
     }
 
 
@@ -115,7 +118,7 @@ class _Chain(_fixtures.StateBuilder, unittest.TestCase):
     def setUpClass(cls):
         cls.c = Contracts()
 
-    def build(self, shapes, relations=1, irrelevance=True):
+    def build(self, shapes, relations=1, irrelevance=True, basis=None):
         """`shapes` is [(suffix, n_groups, n_configurations), ...]."""
         s = DesignState(run_id="branch")
         self.add(s, "s01", "Requirement", "REQ-0001", quantity_class="BAND")
@@ -124,7 +127,8 @@ class _Chain(_fixtures.StateBuilder, unittest.TestCase):
         self.add(s, "s01", "Scenario", "SCN-IDLE", actors=["ACT-0001"])
         payloads = [_s02([sfx for sfx, _g, _c in shapes])]
         for sfx, ng, nc in shapes:
-            payloads += [_s03a(sfx, ng, nc), _s03b(sfx, relations, irrelevance)]
+            payloads += [_s03a(sfx, ng, nc, basis),
+                         _s03b(sfx, relations, irrelevance)]
         provider = _Canned(*payloads)
         s.apply(S02ObligationAndCandidates().invoke(provider, s, s.run_id).patch)
         outs = {}

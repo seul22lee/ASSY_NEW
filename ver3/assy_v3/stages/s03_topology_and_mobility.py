@@ -190,7 +190,14 @@ empty. Every field is required unless marked optional. No required field is null
                        that the mechanism deflects itself)
   interfaces[]         id "IFC-0001", bodies[], interaction_kind, nominal_status,
                        addresses_obligations[]
-  configurations[]     id "CFG-0001", name, kind, bodies_present[]
+  configurations[]     id "CFG-0001", name, kind, bodies_present[],
+                       distinguishing_basis[] {{rigid_group, dof, differs_from[]}}
+                       - what makes this configuration a DIFFERENT one: the
+                       (rigid group, DOF) pairs whose value differs from the
+                       named sibling configurations. [] when nothing is required
+                       to differ. A later step realizes this in coordinates and
+                       is checked against it, so a name is never what
+                       distinguishes two states
   functional_regions[] id "FRG-0001", role, owning_bodies[],
                        required_by_actors[] (actor ids from the input; [] for
                        SUPPORT and KEEP_OUT regions no actor uses),
@@ -543,7 +550,7 @@ class S03TopologyAndMobility(Stage):
         return _candidate_premise(inputs.get("candidate"))
 
     # ------------------------------------------------------------ operations
-    def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:
+    def to_operations(self, parsed: Dict[str, Any], inputs=None) -> List[Op]:
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
         ops: List[Op] = []
         prov = "s03:topology"
@@ -571,10 +578,15 @@ class S03TopologyAndMobility(Stage):
                 "nominal": i.get("nominal_status", i.get("nominal", "NOMINAL")),
                 "addresses_obligations": i.get("addresses_obligations", [])}, prov))
         for c in parsed.get("configurations", []):
-            ops.append(Op("CREATE", "Configuration", c["id"], {
-                "name": c["name"], "kind": c.get("kind", "OPERATIONAL"),
-                "bodies_present": c.get("bodies_present", []),
-                "expected_mobility": c.get("expected_mobility", [])}, prov))
+            fields = {"name": c["name"], "kind": c.get("kind", "OPERATIONAL"),
+                      "bodies_present": c.get("bodies_present", []),
+                      "expected_mobility": c.get("expected_mobility", [])}
+            # S-6 / U-7 premise. Written only when stated: an empty basis and an
+            # absent one are the same claim - nothing is required to differ - and
+            # the check that realizes it is conditional on the declaration.
+            if c.get("distinguishing_basis"):
+                fields["distinguishing_basis"] = c["distinguishing_basis"]
+            ops.append(Op("CREATE", "Configuration", c["id"], fields, prov))
         # NO MobilityExpectation. s03a authors TOPOLOGY; the DOF disposition is
         # derived by s03b from the relations it authors, and that is the only
         # live route into this family.
@@ -1367,7 +1379,7 @@ class S03BMobilityAndAssembly(Stage):
                for cfg, rows in sorted(by_config.items())]
         return carry_invocation_premises(ops, self.invocation_premises(inputs))
 
-    def to_operations(self, parsed):
+    def to_operations(self, parsed, inputs=None):
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
         ops, prov = [], "s03b:relations"
         # S-4. `PhysicalInteraction` and `ConstraintRelation` have been declared

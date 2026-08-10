@@ -528,13 +528,40 @@ entity_families:
       path:
         kind: spatial
         frame: ReferenceScale
+      changed_coordinates:
+        # JOINT IDS, not coordinates. The name reads spatial and the value is a
+        # list of references: which joints this transition moves. Declaring it
+        # makes the endpoint agreement checkable and stops a spelling heuristic
+        # from calling it a frameless spatial value.
+        kind: reference
+        target: Joint
+        cardinality: many
+        resolvable: false
     owned_by: s04
     purpose: "A path between two states."
-    required_fields: [entity_id, from_state, to_state, path, sampling_declaration]
+    required_fields: [entity_id, from_state, to_state, path, changed_coordinates]
     authoritative_geometry_fields: [path, swept_volume]
+    # S-6 / U-7. `sampling_declaration` LEFT this family. It was written here by
+    # the parser from a module constant before any sweep had run, and a check
+    # then validated the property that constant guaranteed - a declaration
+    # deciding the claim, with the causal arrow pointing the wrong way. The
+    # evidence now lives on the SweptVolume the computation produced, in one
+    # place, and a transition that moves something with no SweptVolume is a
+    # transition whose motion was never evidenced.
     rules:
       - "A constant offset between endpoints is not a motion model (R-07)."
       - "Sampling is DECLARED, never adaptive-and-unrecorded."
+      - >
+        changed_coordinates names the joints whose coordinate this transition
+        changes. It is checkable against the endpoint states and must agree with
+        them: a declared change the coordinates do not make is a finding, and so
+        is a coordinate that changes without being declared.
+      - >
+        Motion evidence is SweptVolume.fidelity and is a FUNCTION OF THE
+        COMPUTATION PERFORMED: how many poses were evaluated and of what kind. It
+        may never be authored ahead of the computation, and a level this
+        pipeline's method cannot support - it unions discrete poses, so never
+        SWEPT or CONTINUOUS - may not be claimed by declaring it.
 
   Parameter:
     semantic_roles: [quantity_constraint]
@@ -897,10 +924,10 @@ entity_families:
   #   LoadPath                  canonical producer s03b  PRODUCED, and its
   #                             canonical structure now includes terminates_at
   #
-  # ConstraintRelation additionally carries LEGACY COMPATIBILITY: the s03b
-  # response still contains blocking_relations[], which the deterministic DOF
-  # expansion consumes. That is NOT a second authoritative physical truth, and
-  # removing it is Impl S-5's (R-C/R-D).
+  # ConstraintRelation carried a legacy compatibility input through S-4: the s03b
+  # response contained blocking_relations[] and the DOF expansion consumed it.
+  # RETIRED at the S-5 correction - no live path parses it - and the last
+  # consumer contract requiring it (S04) was corrected at S-6.
   #
   # SUPERSEDED (S-2 state, kept as history, not as current fact):
   #
@@ -1258,6 +1285,20 @@ assurance_families:
     owned_by: s03
     purpose: "A named assembly configuration, e.g. partially assembled, closed."
     required_fields: [entity_id, name, bodies_present, expected_mobility]
+    # S-6 / U-7. WHAT MAKES THIS CONFIGURATION A DIFFERENT ONE - the (rigid
+    # group, DOF) pairs whose values distinguish it from its named siblings.
+    # s03 authors it, because it is a mobility statement and not a geometry
+    # statement, and s04b must realize it: without it, two configurations differ
+    # only by having different ids, and a realization that gives them identical
+    # coordinates cannot be told from one that does not.
+    optional_fields: [distinguishing_basis]
+    rules:
+      - >
+        distinguishing_basis is a list of {rigid_group, dof, differs_from}. It is
+        OPTIONAL: a mechanism may declare no required distinctness, and the check
+        that realizes it is conditional on the declaration. It is never "all
+        joint pairs must differ", which would be a rule about products rather
+        than about this design.
 
   MobilityExpectation:
     # DECLARED, not defaulted. This entity is the AUTHORITATIVE DISPOSITION
@@ -1524,11 +1565,27 @@ assurance_families:
         note: this field IS the frame declaration other spatial values cite
     owned_by: s04
     purpose: "A body's provisional extent. Conservative: no-overlap is a proof, overlap is not."
-    required_fields: [entity_id, body, extent, frame, maturity]
+    required_fields: [entity_id, body, extent, frame, maturity, commitment_class]
     maturity: [PROVISIONAL, AUTHORITATIVE]
+    # S-6 / U-7. Freeze section 7: a commitment carries a CLASS, and a later
+    # stage may refine within it or supersede it with an explicit reason, never
+    # silently contradict it. Before S-6 an s04a extent carried maturity and no
+    # class, so "s04b may extend this but not contradict it" had nowhere to live
+    # and no operation could be checked against it.
+    commitment_class: [PROVISIONAL, COMPARABLE, AUTHORITATIVE, OVERTURNABLE_WITH_REASON]
     rules:
       - "extent is an axis-aligned half-extent triple in the body frame."
       - "PROVISIONAL means the value follows from packaging reasoning, not from a feature."
+      - >
+        s04a commits COMPARABLE: the arrangement exists so alternatives can be
+        compared on it, which is a stronger claim than PROVISIONAL and a weaker
+        one than AUTHORITATIVE.
+      - >
+        A later pass EXTENDS a commitment - adding what the commitment left open
+        - or SUPERSEDES it with a GEOMETRIC REASON. Superseding is a premise
+        change, so every spatial value that cited this envelope loses unqualified
+        authority through the ordinary FA-5 path. A revision with no reason is
+        refused; a revision that is not recorded at all is the audited defect.
   SweptVolume:
     field_semantics:
       rigid_group:
@@ -1544,9 +1601,16 @@ assurance_families:
     owned_by: s04
     purpose: "The occupancy of a moving group along a transition, at declared sampling."
     required_fields: [entity_id, rigid_group, transition, sampling_declaration, occupancy, fidelity]
+    fidelity: [ENDPOINTS_ONLY, SAMPLED, SWEPT, CONTINUOUS]
     rules:
       - "sampling_declaration is mandatory and non-adaptive; endpoint-only sampling is refused."
       - "fidelity records what the occupancy is made of, so a coarse hull is never read as a proof."
+      - >
+        S-6 / U-7: fidelity is the MOTION EVIDENCE LEVEL, and it is an output of
+        the computation. This pipeline unions the axis-aligned bounds of discrete
+        poses, so it can produce ENDPOINTS_ONLY or SAMPLED and never SWEPT or
+        CONTINUOUS; the vocabulary containing those words is not permission to
+        claim them. A transition with no SweptVolume was not evidenced.
   SelectionDecision:
     semantic_roles: [selection_decision]
     field_semantics:

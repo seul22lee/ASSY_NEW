@@ -96,7 +96,8 @@ class TestDeclaredCorpus(_Base):
 
     def test_SELECT_01_every_premise_declares_which_instances_it_needs(self):
         rows = list(_premises(self.resp))
-        self.assertEqual(28, len(rows), "the premise corpus changed size")
+        # 27 live at S-6; s04b's selection_decision is staged behind S-7 / U-8.
+        self.assertEqual(27, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

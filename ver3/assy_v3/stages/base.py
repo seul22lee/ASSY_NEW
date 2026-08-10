@@ -133,11 +133,42 @@ class Stage:
     def prompt(self, inputs: Dict[str, Any]) -> str:
         raise NotImplementedError
 
-    def to_operations(self, parsed: Dict[str, Any]) -> List[Op]:
+    def to_operations(self, parsed: Dict[str, Any],
+                      inputs: Optional[Dict[str, Any]] = None) -> List[Op]:
+        """What this stage CREATES from its response.
+
+        `inputs` is this invocation's own declared inputs - the same dict
+        `completeness` and `invocation_premises` read. A stage that mints an id
+        needs it: an id built from a module-local counter or constant is the same
+        for every branch, so two candidates collide and only one can have the
+        entity. A stage that keys its output to what it was invoked to embody
+        cannot. Optional so a stage that mints nothing ignores it.
+        """
         raise NotImplementedError
 
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
         """What the contract requires that this response did not supply."""
+        return []
+
+    def refinement_operations(self, parsed: Dict[str, Any], inputs: Dict[str, Any],
+                              state) -> List[Op]:
+        """What this stage authors ONTO entities that already exist.
+
+        `to_operations` CREATES; this EXTENDs and SUPERSEDEs. The difference is
+        not cosmetic: refining an upstream value needs state, both to resolve the
+        target's family and to decide whether this is an extension of a standing
+        commitment or a supersession of one - a question a CREATE never has to
+        ask.
+
+        It exists because the alternative was a runner reading the raw response
+        and writing the engineering facts the stage did not: joint origins,
+        region volumes, insertion directions. Those are the stage's conclusions,
+        and a caller that did not know to perform that second step got a
+        DesignState missing them with nothing saying so.
+
+        Default: none. Ordered before `derived_operations` so a class-B
+        recomputation sees the refined values in the same patch.
+        """
         return []
 
     def derived_operations(self, parsed: Dict[str, Any], inputs: Dict[str, Any],
@@ -245,8 +276,9 @@ class Stage:
         # Letting the KeyError escape instead made a malformed response crash the
         # caller, and a crash is not a status anything downstream can record.
         try:
-            ops = carry_invocation_premises(self.to_operations(parsed),
+            ops = carry_invocation_premises(self.to_operations(parsed, inputs),
                                             self.invocation_premises(inputs))
+            ops = ops + self.refinement_operations(parsed, inputs, state)
             ops = ops + self.derived_operations(parsed, inputs, state)
             missing = self.completeness(parsed, inputs)
         except (KeyError, TypeError, AttributeError, IndexError, ValueError) as exc:
