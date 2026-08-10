@@ -181,7 +181,16 @@ class TestLineagePopulation(_Base):
                if op.entity_type == "MobilityExpectation"]
         self.assertTrue(ops, "no disposition derived")
         for op in ops:
-            self.assertEqual(["CND-0001"], list(op.premise_refs))
+            # The invocation premise is PRESENT, not exclusive. The final S-5
+            # pass also attaches the entities each cell was actually derived
+            # from, so a withdrawn joint or relation stales the grid that rests
+            # on it. Asserting equality here would have made that correction look
+            # like a lineage regression when it is the same property carried
+            # further: what this value depends on.
+            self.assertIn("CND-0001", op.premise_refs,
+                          "the candidate this grid embodies is not recorded")
+            self.assertIn("JNT-0001", op.premise_refs,
+                          "the joint an INTENDED cell cites is not a dependency")
             self.assertEqual("s03:derivation", op.provenance_ref,
                              "derived work is not distinguishable from authored")
 

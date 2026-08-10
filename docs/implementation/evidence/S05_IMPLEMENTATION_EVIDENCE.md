@@ -1,15 +1,28 @@
 # IMPL S-5 — CANONICAL MOBILITY MIGRATION AND DOF DISPOSITION
 
-Baseline of the correction pass: `6ccbe7d`. S-4 is frozen at `6e8bd59` and this
-document does not revise its evidence.
+Baseline of the final pass: `9b22b0a`. S-4 is frozen at `6e8bd59` and this
+document does not revise its evidence. Sections 0–11 record the correction pass
+that ran on `6ccbe7d`; section 12 records the final pass and carries the one
+CURRENT STATUS.
 
 ---
 
-## 0. STATUS OF THE EARLIER CLAIM
+## 0. STATUS OF THE EARLIER CLAIMS
 
 > **SUPERSEDED — `6ccbe7d` "S-5 COMPLETE — CANONICAL MOBILITY MIGRATION AND DOF
 > DISPOSITION CLOSED": migration closed before all live producer, premise and
 > contract paths were verified.**
+
+> **SUPERSEDED — `9b22b0a` "S-5 VERIFIED CLOSED — SINGLE CANONICAL MOBILITY
+> PRODUCER AND PREMISE-BACKED DISPOSITION": branch-scoped production and typed
+> citations were complete, but branch-safe totality bookkeeping and
+> dependency-premise propagation were not yet fully integrated.**
+>
+> What `9b22b0a` got right stands and is not re-argued: one producer, ownership
+> inside the invocation, typed per-kind premises checked at the write boundary,
+> `MAINTAINED_BY_CLASS` retired, declared-configuration applicability, contract
+> and metadata aligned. Section 12 covers only the two integration gaps and is
+> the current record.
 
 Kept, not erased. What that pass got right stands: the `MAINTAINED_BY_CLASS`-from-
 absence branch is deleted, `UNDISPOSITIONED` exists and behaves, domain and
@@ -575,17 +588,236 @@ the premise-record walk from the write boundary (6 failures), removing the
 
 ---
 
+## 12. THE FINAL PASS — BRANCH-SAFE BOOKKEEPING AND PREMISE DEPENDENCY
+
+Baseline `9b22b0a`. Two integration gaps, both reproduced behaviourally on the
+real path before a line of production changed. Neither is new mobility meaning;
+both are already-frozen S-5 semantics that stopped at the edge of a neighbouring
+substrate.
+
+### 12.1 What the two gaps have in common
+
+`9b22b0a` made **production** branch-scoped and made the disposition premise a
+**typed citation**. Each stopped one step short of the thing it was for:
+
+| | `9b22b0a` had | it did not have |
+|---|---|---|
+| **A** | a branch-scoped PRODUCER — s03b derives from its own view | a branch-scoped BOOKKEEPING CHECKER — `dof_totality_check` still took the design-wide Cartesian product |
+| **B** | a typed CITATION — right family, referent resolves, checked at the write boundary | a DEPENDENCY — nothing reached `Op.premise_refs`, so `_propagate` never saw it |
+
+A citation says *where this claim came from*. A dependency says *this claim falls
+if that one does*. They are related and they are not the same fact, which is
+exactly how one could be finished while the other was not.
+
+### 12.2 Issue A — reproduced before repair
+
+Two candidates, deliberately **unequal** — A: 2 groups × 2 configurations;
+B: 1 group × 3 configurations — built through s02 → s03a → s03b with real
+`invoke` calls:
+
+```
+branch A owns                        24 cells
+branch B owns                        18 cells
+expected branch-union cell count     42
+actual existing cell count           42        <- production is correct
+checker-implied Cartesian count      3 groups x 5 configs x 6 = 90
+dof_totality_check findings          13   (48 missing cells, capped at 12 + a tail)
+representative FALSE missing cells:
+    DOF_NOT_DISPOSITIONED: RGP-G0A in CFG-C0B: TX
+    DOF_NOT_DISPOSITIONED: RGP-G0A in CFG-C0B: TY
+    ...
+    DOF_NOT_DISPOSITIONED: and 36 more
+```
+
+`RGP-G0A in CFG-C0B` is candidate A's group in candidate B's configuration — a
+pair no mechanism contains and no producer could ever disposition. **Nothing was
+wrong with the design; the checker was measuring a domain production never had.**
+
+### 12.3 Issue A — the correction, and why it is general
+
+`accumulated_dof_domain(state)`: a cell exists when its group and its
+configuration **belong to a common branch**, or when neither belongs to any.
+The second clause is the unbranched design, where behaviour is exactly what it
+was — which is why `A-TOTAL-01` passes unchanged rather than by special case.
+
+Branch membership comes from `consumer_view.branch_membership`, which is
+`_reachable(entity, depends-on graph, standing candidates)` — **the same
+computation `scope_of` uses to decide ACTIVE_BRANCH**, now factored into
+`branches_built_on` and called from both. There is no second branch ontology, no
+candidate-id parsing, no naming convention and no count: the rule is stated over
+the depends-on graph the S-3 lineage substrate already builds from declared
+references and recorded premises.
+
+`A-TOTAL-10` pins that equivalence: for each of three entities,
+`branch_membership` and `scope_of` agree on which branch it belongs to and which
+it does not.
+
+### 12.4 Issue A — falsifiers
+
+| case | what it falsifies |
+|---|---|
+| `A-TOTAL-01` | one candidate: domain 24, no findings — the correction is not a multi-candidate special case |
+| `A-TOTAL-02` | two equal branches: no findings, domain 48 |
+| `A-TOTAL-03` | **unequal** 2×2 and 1×3: domain 42, and explicitly ≠ 90, the design-wide product |
+| `A-TOTAL-04` | adding candidate B leaves candidate A's domain and cells identical |
+| `A-TOTAL-05` | three branches (2×2, 1×3, 3×1): domain 60 = the union of three |
+| `A-TOTAL-06` | **a real omission is still caught.** One cell removed from candidate A by a real `SUPERSEDE`; the checker returns exactly one finding naming that group, configuration and DOF |
+| `A-TOTAL-07` | no cross-branch pair is in the domain, and none is demanded |
+| `A-TOTAL-08` | the dual: a cross-branch cell that EXISTS is now `DOF_DISPOSITION_OUT_OF_DOMAIN` — the old flat membership test could not see it |
+| `A-TOTAL-09` | it is still BOOKKEEPING: the docstring says so and S03-C1 carries `claim_class: BOOKKEEPING` |
+| `A-TOTAL-10` | branch membership is the ConsumerView's relation, not a second one |
+
+`A-TOTAL-06` is the one that matters, and a mutation proves it is doing work:
+replacing the domain with "whatever was produced" — the self-fulfilling checker —
+makes `A-TOTAL-06` and `A-TOTAL-08` fail. Branch-safe did not become blind.
+
+### 12.5 Issue B — reproduced before repair
+
+Smallest real case, one candidate, through `invoke`:
+
+```
+MEX id                    MEX-CFG-C0A
+premises CITED in cells   ['CRL-A', 'JNT-A', 'SCN-IDLE']
+stored _premises          ['CND-A']            <- only the invocation premise
+   CRL-A     in _premises?  False
+   JNT-A     in _premises?  False
+   SCN-IDLE  in _premises?  False
+
+after INVALIDATE CRL-A (a USED premise, through the real controlled operation):
+   CRL-A _validity         INVALIDATED
+   MEX   _validity         STANDING            <- FA-5 did not fire
+   MEX still cites CRL-A   True
+```
+
+The design went on asserting that a DOF was held by a relation it had withdrawn.
+
+### 12.6 Issue B — the correction, and why it is general
+
+`cited_premises(rows)` collects the premises from the **rows that were actually
+produced**, through the contract's own `disposition → premise-field` map, and
+`derived_operations` passes them as `Op.premise_refs`. Nothing else changed:
+`_create` stores them, `_propagate` reads them, `SUPERSEDE`/`INVALIDATE` fire.
+**No second provenance system** — `B-PREM-12` asserts the derivation still uses
+`premise_refs` and `carry_invocation_premises`.
+
+Three properties follow mechanically from reading the produced rows, and none is
+coded as a case:
+
+- **used, not visible.** The premise enters because a cell cites it. An entity
+  the consumer view held and no cell used is not a dependency — availability is
+  not a claim.
+- **UNDISPOSITIONED contributes nothing.** It maps to no premise field. An honest
+  statement that nothing is known cannot depend on anything.
+- **the set is a set.** A premise cited by many cells appears once; FA-5 asks
+  whether this value rests on that one, not how often.
+
+`B-PREM-11` holds the generality: `cited_premises` reads `PREMISE_FIELD` and
+names no disposition value and no field, so a new disposition kind needs no edit
+here.
+
+### 12.7 Issue B — falsifiers
+
+| case | result |
+|---|---|
+| `B-PREM-01` | `CRL-0A` is cited **and** in `_premises` |
+| `B-PREM-02` | INVALIDATE a used relation → dependent MobilityExpectation **STALE** |
+| `B-PREM-03` | INVALIDATE another branch's relation → this one **STANDING**, that one STALE |
+| `B-PREM-04` | `JNT-A` enters the dependency set |
+| `B-PREM-05` | **SUPERSEDE** the joint (not only INVALIDATE) → STALE. Both are premise changes under FA-5 |
+| `B-PREM-06` | an unrelated joint → no effect |
+| `B-PREM-07` | one joint + three relations + one scenario: the set is exactly the five used, plus the invocation premise `CND-A` |
+| `B-PREM-08` | UNDISPOSITIONED cells yield `[]` — no fabricated premise |
+| `B-PREM-09` | the same premise in three cells appears once |
+| `B-PREM-10` | `SCN-IDLE` is **visible in the view** and unused: it is not in `_premises` |
+| `B-PREM-11` | the collector reads the contract map, naming no kind and no field |
+| `B-PREM-12` | the existing substrate is used, not duplicated |
+
+`B-PREM-10` is the generality case: visibility is not dependency, proved by
+asserting the entity is in the view payload and absent from the premise set.
+
+### 12.8 IRRELEVANT_BECAUSE — the bound is unchanged
+
+The Scenario the S-5 derivation actually uses is attached as a dependency, so
+withdrawing it costs the mobility its standing. That is reference-and-dependency
+correctness. It proves nothing about broader engineering irrelevance, and the
+per-DOF load/actuation check remains **U-9's** exactly as before. No relevance
+engine was built and none was extended.
+
+### 12.9 Closure probe
+
+Three branches of three shapes — 2×2, 1×3, 3×1 — two constraint relations each,
+through the real `invoke`, nothing seeded:
+
+| assertion | result |
+|---|---|
+| branch-local domains | 24 / 18 / 18 cells, each complete |
+| accumulated domain | **60** = (4 + 3 + 3) × 6, the branch union |
+| `dof_totality_check` | **`[]`** — no cross-branch false cells |
+| all four disposition kinds occur | INTENDED, BLOCKED_BY, IRRELEVANT_BECAUSE, UNDISPOSITIONED |
+| every positive premise resolves to its declared family | ✅ |
+| every MEX's `_premises` ⊇ its cited premises | ✅ |
+| INVALIDATE `CRL-0A` | `MEX-CFG-C0A` **STALE**; `MEX-CFG-C0B`, `MEX-CFG-C0C` **STANDING** |
+| `_s4_physical_problems` per branch | **`[]`** |
+| `_s5_mobility_problems` per branch | **`[]`** |
+| `execution_status` per branch | **`SUCCESS`**, `declared_incompleteness []` |
+| producer singularity | every MEX op is `s03:derivation`; a legacy s03a payload still produces none |
+
+### 12.10 Contract corrections
+
+Only what production would otherwise contradict. `MobilityExpectation.authorship_split.domain.meaning`
+now says the domain is one branch's and the accumulated domain is the union;
+`.disposition` gains a `dependency` line saying the cited premises are also the
+operation's premise refs — **derived from the citations, not a second canonical
+field**. `S03_CONTRACT.dof_disposition_rule.domain` and S03-C1's text say
+"of its own branch"; `.disposition` says the premise is also a dependency and why.
+No new family, no new field, no vocabulary change.
+
+### 12.11 Static review
+
+| surface | relationship after this pass |
+|---|---|
+| `dof_domain(groups, configs)` | ONE branch's domain. Used by `accumulated_dof_domain` |
+| `accumulated_dof_domain(state)` | the union of the branches' domains. The only domain a state-wide reader uses |
+| `dof_totality_check` | BOOKKEEPING over `accumulated_dof_domain` |
+| `branch_membership` / `branches_built_on` | the one branch relation, shared with `scope_of` |
+| `cited_premises` | rows → the premises they used, via `PREMISE_FIELD` |
+| `premise_refs` → `_premises` | the existing substrate, populated; `_propagate` unchanged |
+| `by_joint` / `constraint_relation` / `scenario` | typed citations at the write boundary AND dependency inputs |
+| `UNDISPOSITIONED` | no premise field, therefore no dependency |
+| `MobilityExpectation` | one producer, `s03:derivation`, inside s03b's invocation |
+
+Verified absent from the diff: candidate-name special cases, branch-suffix logic,
+benchmark or mechanism ids, a second branch or premise authority, a new provenance
+subsystem, fabricated premises for UNDISPOSITIONED, view material admitted as
+premise without use, S-4 semantic change, S-6 spatial work, U-9 assurance.
+
+### 12.12 Regression — SECONDARY EVIDENCE ONLY
+
+```
+RUN 821   PASS 821   FAIL 0   ERROR 0   SKIP 22
+```
+
+The evidence that carries weight is the four mutations, each caught: restoring the
+design-wide Cartesian domain (7 failures), replacing the domain with what was
+produced (2 — `A-TOTAL-06`/`08`, proving the checker still sees a real omission),
+dropping `premise_refs` from the derived operations (8), and collecting every
+premise-shaped field instead of the used one (1 — `B-PREM-10`).
+
+---
+
 ## CURRENT STATUS
 
-> **S-5 VERIFIED CLOSED — SINGLE CANONICAL MOBILITY PRODUCER AND PREMISE-BACKED
-> DISPOSITION.**
+> **S-5 VERIFIED CLOSED — BRANCH-SAFE BOOKKEEPING AND PREMISE DEPENDENCY
+> INTEGRATED.**
 >
 > One live producer, declared by one responsibility, deriving inside its own
 > invocation so every canonical caller sees the same state. Every positive
 > disposition names a typed premise of the right family for its kind, resolved at
-> the write boundary, applying to exactly the cell it declares.
-> `MAINTAINED_BY_CLASS` is retired. Domain totality is BOOKKEEPING and disposition
-> completeness is reported. `S03_CONTRACT` describes the live producer and no
+> the write boundary, applying to exactly the cell it declares — **and carried as
+> a dependency, so withdrawing a premise costs the mobility its unqualified
+> authority.** The DOF domain is the union of the branches', so bookkeeping asks
+> about the mechanisms production actually built, and it is still BOOKKEEPING.
+> `MAINTAINED_BY_CLASS` is retired, disposition completeness is reported, and no
 > active S-5-owned migration row remains.
 >
 > S-4 is unchanged and verified so. **Impl S-6 has NOT begun.**

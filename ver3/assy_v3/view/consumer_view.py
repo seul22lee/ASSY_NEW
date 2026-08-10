@@ -486,6 +486,31 @@ def _branch_rests_on(candidate, fwd, rev):
     return _closure(_closure({candidate}, rev), fwd)
 
 
+def branches_built_on(eid, fwd, candidates):
+    """The candidates this entity was BUILT ON - its branch membership.
+
+    The ONE answer to "which branch is this". `scope_of` turns it into a
+    relevance verdict for one consumer; a caller that has to reason about the
+    accumulated design rather than about one invocation needs the membership
+    itself, and computing it a second way would be a second branch ontology.
+    """
+    return _reachable(eid, fwd, candidates)
+
+
+def branch_membership(state, contracts, ids) -> Dict[str, Set[str]]:
+    """entity id -> the branches it was built on, over accumulated state.
+
+    Empty for an entity no candidate reaches, and empty for EVERY entity while no
+    candidate stands - which is the same rule `_population_members` applies to
+    INVOCATION_BRANCH: before the work branches, "this branch" is the design.
+    """
+    candidates = {e["entity_id"] for e in state.standing("Candidate")}
+    if not candidates:
+        return {eid: set() for eid in ids}
+    fwd, _rev = _reference_graph(state, contracts)
+    return {eid: branches_built_on(eid, fwd, candidates) for eid in ids}
+
+
 def scope_of(eid, fwd, rev, state, contracts, branch, candidates=None) -> Tuple[str, str]:
     """Why an entity is, or is not, relevant to this consumer. POSITIVE only.
 
@@ -514,7 +539,7 @@ def scope_of(eid, fwd, rev, state, contracts, branch, candidates=None) -> Tuple[
             return ACTIVE_BRANCH, "the candidate under consideration"
         return OTHER_BRANCH, "a different candidate"
 
-    owners = _reachable(eid, fwd, candidates)
+    owners = branches_built_on(eid, fwd, candidates)
     if owners:
         if branch is None:
             return ACTIVE_BRANCH, "pre-selection: built on %s" % sorted(owners)

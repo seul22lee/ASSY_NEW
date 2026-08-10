@@ -1315,10 +1315,18 @@ assurance_families:
       domain:
         authority_class: DERIVED
         authored_by: deterministic
-        meaning: "the complete set of (rigid group, configuration, DOF) cells"
+        meaning: >
+          the complete set of (rigid group, configuration, DOF) cells OF ONE
+          BRANCH. A mechanism is a branch's, so a cell pairing one alternative's
+          group with another's configuration belongs to no mechanism and is not
+          in any domain. Over accumulated state holding several alternatives the
+          domain is the UNION of the branches', never the product of every group
+          with every configuration.
         totality: >
           Structurally testable, and BOOKKEEPING: it is guaranteed by the
-          enumerator and may never be counted as engineering assurance.
+          enumerator and may never be counted as engineering assurance. Scoping
+          it to the branch does not change that - it makes the bookkeeping about
+          the production it is bookkeeping for.
       disposition:
         authority_class: AUTHORITATIVE
         authored_by: "model, or strictly derived from an explicit sufficient premise"
@@ -1329,6 +1337,19 @@ assurance_families:
         # had no declared evidence type at all.
         premise_target: "field_semantics.dispositions.premise_field"
         meaning: "what is known about one cell, and on what evidence"
+        # A CITATION AND A DEPENDENCY ARE TWO FACTS. The premise fields above
+        # make the citation typed and checkable at the write boundary. FA-4
+        # additionally requires a class-B value to carry its premise SET, so the
+        # premises a MobilityExpectation's cells were actually derived from are
+        # also its `Op.premise_refs` - the same substrate every other dependent
+        # value uses, so FA-5 stales it when one of them is superseded or
+        # invalidated. The dependency set is DERIVED from the cited premises and
+        # is not a second canonical field: cells that cite nothing, which is what
+        # UNDISPOSITIONED does, contribute nothing.
+        dependency: >
+          The union of the premises the produced cells actually cite, carried on
+          the creating operation. Availability is not dependency: an entity the
+          consumer view held and no cell used is not a premise.
         completeness: >
           A separate, reported engineering quantity. NOT implied by domain
           totality, and not satisfied by it.

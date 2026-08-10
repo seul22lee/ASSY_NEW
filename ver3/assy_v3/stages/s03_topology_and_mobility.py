@@ -344,6 +344,38 @@ def derive_mobility(groups: List[str], configurations: List[str],
     return out
 
 
+def cited_premises(entries: Iterable[Dict[str, Any]]) -> List[str]:
+    """The entities these cells were ACTUALLY DERIVED FROM. FA-4, FA-5.
+
+    A citation inside a disposition record and a DEPENDENCY are two different
+    facts and were, until this function, only the first. The typed citation makes
+    `constraint_relation: CRL-2` checkable - right family, referent exists - and
+    tells a reader where the claim came from. It does not put CRL-2 into
+    `Op.premise_refs`, so `_propagate` never saw it, and a MobilityExpectation
+    asserting "TX is BLOCKED_BY CRL-2" stayed STANDING after CRL-2 was
+    invalidated. Reference integrity was intact; the design just went on claiming
+    a DOF was held by something it had withdrawn.
+
+    Collected MECHANICALLY from the rows that were produced, through the
+    contract's own disposition -> premise-field map. Three consequences follow
+    from that and none of them is a special case:
+
+      - a cell's premise enters because the derivation USED it. Something merely
+        visible in the consumer view does not - availability is not dependency,
+        and a view is not a claim;
+      - UNDISPOSITIONED maps to no field, so it contributes nothing. An honest
+        statement that nothing is known cannot depend on anything;
+      - the same premise cited by many cells appears once. The dependency is a
+        SET: FA-5 asks whether this value rests on that one, not how often.
+    """
+    out = set()
+    for row in entries:
+        field = PREMISE_FIELD.get(row.get("disposition"))
+        if field and isinstance(row.get(field), str) and row[field]:
+            out.add(row[field])
+    return sorted(out)
+
+
 def disposition_completeness(entries: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
     """How much of the domain rests on evidence, and which cells do not.
 
@@ -371,13 +403,50 @@ def disposition_completeness(entries: Iterable[Dict[str, Any]]) -> Dict[str, Any
 
 
 def dof_domain(groups: Iterable[str], configurations: Iterable[str]) -> List[Tuple[str, str, str]]:
-    """The COMPLETE domain of the mobility function.
+    """The COMPLETE domain of the mobility function, WITHIN ONE BRANCH.
 
     Computed here, from the topology, and never taken from a response. This is
     what makes omission detectable: no premise has to exist for the line to
     exist, so an uncovered cell is visible as UNDISPOSITIONED rather than absent.
+
+    Its arguments are one branch's groups and one branch's configurations,
+    because that is what a mechanism is. Over accumulated state holding several
+    alternatives, use `accumulated_dof_domain`.
     """
     return [(g, c, d) for g in groups for c in configurations for d in DOF_NAMES]
+
+
+def accumulated_dof_domain(state) -> List[Tuple[str, str, str]]:
+    """Every DOF cell the accumulated design ACTUALLY HAS.
+
+    The union of the branches' domains - not the Cartesian product of everything
+    in state. Two alternatives with two groups and two configurations each have
+    24 cells apiece and 48 between them; the product of all four groups with all
+    four configurations is 96, and the extra 48 are pairs like "candidate A's
+    group in candidate B's configuration", which no mechanism contains and no
+    producer could ever disposition. A checker demanding them reports a design as
+    missing half its mobility for having more than one alternative.
+
+    A cell exists when its group and its configuration belong to a COMMON BRANCH,
+    or when neither belongs to any - the second case being a design that has not
+    branched, where the whole state is the one mechanism and the behaviour is
+    exactly what it was before. Branch membership comes from `branch_membership`,
+    which is the same relation the ConsumerView uses to decide what a branch-
+    scoped consumer may see, so the checker and the producer cannot disagree
+    about which mechanism a group belongs to.
+    """
+    from ..view.consumer_view import branch_membership
+
+    groups = sorted(g["entity_id"] for g in state.family("RigidGroup"))
+    configs = sorted(c["entity_id"] for c in state.family("Configuration"))
+    owner = branch_membership(state, state.c, set(groups) | set(configs))
+    out: List[Tuple[str, str, str]] = []
+    for g in groups:
+        for c in configs:
+            if (owner.get(g) or set()) & (owner.get(c) or set()) or not (
+                    owner.get(g) or owner.get(c)):
+                out.extend((g, c, d) for d in DOF_NAMES)
+    return out
 
 
 #: The effect vocabulary, read from the contract rather than restated.
@@ -545,14 +614,29 @@ def dof_totality_check(state) -> List[str]:
 
     This tests what the enumerator guarantees, so it can never be evidence about
     the design - it is reported as bookkeeping and contributes to no establishment
-    claim. The engineering quantity is DISPOSITION COMPLETENESS: how much of the
+    claim. Making it branch-safe does not change that: it still asks whether the
+    cells the producer was supposed to make exist, which is a question about this
+    code. The engineering quantity is DISPOSITION COMPLETENESS: how much of the
     domain rests on evidence, and which cells do not. `disposition_completeness`
     below reports that.
+
+    The domain is `accumulated_dof_domain`, the UNION OF THE BRANCHES', because
+    production is branch-scoped and bookkeeping over a different domain is not
+    bookkeeping about production. It used to take the product of every group in
+    state with every configuration in state, so a second alternative made it
+    demand cells like "A's group in B's configuration" - 48 false findings on a
+    two-candidate design in which nothing at all was wrong.
+
+    It still catches a REAL omission: a group of a branch that has no cells in
+    its own branch's configurations is still missing them, and that is what the
+    branch domain asks about.
     """
-    groups = [g["entity_id"] for g in state.family("RigidGroup")]
-    configs = [c["entity_id"] for c in state.family("Configuration")]
-    if not groups or not configs:
-        return ["DOF_DOMAIN_EMPTY: %d groups, %d configurations" % (len(groups), len(configs))]
+    domain = accumulated_dof_domain(state)
+    if not domain:
+        return ["DOF_DOMAIN_EMPTY: %d groups, %d configurations"
+                % (len(state.family("RigidGroup")),
+                   len(state.family("Configuration")))]
+    in_domain = set(domain)
     seen: Dict[Tuple[str, str, str], int] = {}
     for mex in state.family("MobilityExpectation"):
         for d in mex.get("dispositions", []):
@@ -561,7 +645,7 @@ def dof_totality_check(state) -> List[str]:
             key = (d.get("rigid_group"), d.get("configuration"), d.get("dof"))
             seen[key] = seen.get(key, 0) + 1
     problems = []
-    missing = [k for k in dof_domain(groups, configs) if k not in seen]
+    missing = [k for k in domain if k not in seen]
     for k in missing[:12]:
         problems.append("DOF_NOT_DISPOSITIONED: %s in %s: %s" % k)
     if len(missing) > 12:
@@ -569,7 +653,7 @@ def dof_totality_check(state) -> List[str]:
     for k, n in sorted(seen.items()):
         if n > 1:
             problems.append("DOF_DISPOSITIONED_TWICE: %s in %s: %s" % k)
-        if k[0] not in groups or k[1] not in configs or k[2] not in DOF_NAMES:
+        if k not in in_domain:
             problems.append("DOF_DISPOSITION_OUT_OF_DOMAIN: %s" % (k,))
     return problems
 
@@ -1229,7 +1313,8 @@ class S03BMobilityAndAssembly(Stage):
         # derived id must also be RECOMPUTABLE (FA-4); a counter is a function of
         # call order, and this is a function of the premises.
         ops = [Op("CREATE", "MobilityExpectation", "MEX-%s" % cfg,
-                  {"configuration": cfg, "dispositions": rows}, "s03:derivation")
+                  {"configuration": cfg, "dispositions": rows}, "s03:derivation",
+                  premise_refs=cited_premises(rows))
                for cfg, rows in sorted(by_config.items())]
         return carry_invocation_premises(ops, self.invocation_premises(inputs))
 

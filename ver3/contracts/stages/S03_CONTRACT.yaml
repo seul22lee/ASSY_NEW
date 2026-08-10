@@ -219,12 +219,19 @@ owned_decisions:
 
 dof_disposition_rule:
   domain: >
-    DETERMINISTIC AND TOTAL, and therefore BOOKKEEPING. Every rigid group x
-    configuration x rigid-body DOF cell exists because the enumerator makes it
-    exist. Its totality is guaranteed by the code that produces it and may never
-    be counted as engineering assurance.
+    DETERMINISTIC AND TOTAL WITHIN ONE BRANCH, and therefore BOOKKEEPING. Every
+    rigid group x configuration x rigid-body DOF cell OF THAT BRANCH exists
+    because the enumerator makes it exist. Across accumulated state the domain is
+    the union of the branches': a mechanism is a branch's, and one alternative's
+    group in another's configuration is a pair no mechanism contains. Its
+    totality is guaranteed by the code that produces it and may never be counted
+    as engineering assurance.
   disposition: >
-    From a PRESENT, TYPED, REFERENCEABLE PREMISE and from nothing else:
+    From a PRESENT, TYPED, REFERENCEABLE PREMISE and from nothing else, and that
+    premise is also a DEPENDENCY: it is carried on the creating operation, so
+    superseding or invalidating it costs the mobility its unqualified authority
+    (FA-5). A citation that is not a dependency lets the design go on claiming a
+    DOF is held by something it has withdrawn.
     BLOCKED_BY citing a ConstraintRelation, INTENDED citing the Joint whose class
     leaves the DOF free, IRRELEVANT_BECAUSE citing the Scenario in which it is
     unloaded and unactuated. Which field carries which disposition's premise, and
@@ -375,7 +382,7 @@ maturity_expectations:
 deterministic_exit_checks:
   - id: S03-C1
     claim_class: BOOKKEEPING
-    check: "DOF totality: every rigid group, in every configuration, has every DOF dispositioned exactly once"
+    check: "DOF totality: every rigid group, in every configuration OF ITS OWN BRANCH, has every DOF dispositioned exactly once"
     never_assurance: >
       The enumerator guarantees this. Passing it establishes nothing about the
       design and it contributes to no establishment claim. The engineering
