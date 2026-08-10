@@ -699,7 +699,7 @@ current producer semantics — which is what a prompt-hash pin is for.
 `664 run · 664 pass · 0 fail · 22 skipped` — 9 stale-recording, 12 R-B, 1 unrelated
 freeze-gate.
 
-### 8.10 Status
+### 8.10 Status *(SUPERSEDED — historical claim at `615f12d`; §9 found two of the three U-5 criteria unenforced)*
 
 **S-4 COMPLETE — CANONICAL PHYSICAL REASONING MIGRATION CLOSED.**
 
@@ -834,16 +834,121 @@ has an owner (§1.4), the physical fact inventory is measured (§2), R-B is pinn
 and the `obligations_created` semantics question is decided from the frozen contract
 rather than invented (§4).
 
-What remains, in order:
+**SUPERSEDED — historical plan at `2880db7`.** All four items below were
+implemented in slices 1-3 (§5-§7). Kept to show what the entry analysis expected;
+**not** a current task list.
 
-1. **s02 producer**: author `PhysicalEffectObligation` entities and the obligations
-   candidates create; reference them by id. Prompt and `to_operations` both.
-2. **s03b producer**: author `PhysicalInteraction` and `ConstraintRelation` — the two
-   declared outputs with no producer.
-3. Reaction/support/retention representation at symbolic maturity; `LoadPath` tied to
-   the design-wide `LoadCase` through authored interactions.
-4. The two-candidate isolation probe, the S4-* test matrix, and the R-B replay after
-   the producer fix.
+1. ~~s02 producer for `PhysicalEffectObligation`~~ — done, §5.
+2. ~~s03b producers for `PhysicalInteraction` / `ConstraintRelation`~~ — done, §6.
+3. ~~Reaction/support representation and `LoadPath` closure~~ — done, §6-§7.
+4. ~~Two-candidate probe, S4-* matrix, R-B replay~~ — done, §5-§7.
 
-Each needs producer work of a size that should be started with a full context budget,
-not appended to an analysis pass.
+
+---
+
+# 11. CLOSURE-CONSISTENCY CORRECTION *(CURRENT STATUS)*
+
+Baseline `fee1f35`. This section supersedes every earlier status claim in this
+document; §8.10 and §9.11 are labelled historical above.
+
+## 11.1 Pre-flight verdict: GO
+
+Four issues reproduced against the pushed tree before any edit. None required
+changing frozen engineering meaning or pulling S-5 work forward.
+
+| | issue | pushed behaviour | authority | resolution |
+|---|---|---|---|---|
+| A | `LoadCase → RSR` | `reacted_at_site` optional; U5-3 silently skipped its wrong-terminus check whenever the expectation was absent | freeze: *"LoadCase … reacted at which ReactionSiteRequirement"*; *"every load path terminates at a declared external reaction site or is [open]"* | **FIXED** — required |
+| B | envelope drift | prompt said *"exactly these **six** keys"*; eight declared, eight consumed | one envelope | **FIXED** — declarative spec + gate |
+| C | completeness layering | evidence implied the chain succeeded; `s03b` is actually `CONTRACT_INCOMPLETE` | S-4 ≠ overall | **FIXED** — measured and owned |
+| D | producer metadata | `legacy_producers.rows` still said PEO/PI `NOT_YET_PRODUCED`, CR `NONCONFORMING`, beside `migration_status: DONE` | one active truth | **FIXED** — moved to `superseded_legacy_producers` |
+
+## 11.2 A — the invariant is real now
+
+**Every LoadCase must name its reaction site.** The freeze does not say "may".
+`reacted_at_site` is required in the contract, no longer marked optional in the
+response schema, and s02 completeness adds the one check no reference rule can
+make: **the site's scenario must agree with the load's**. A load acting in one
+scenario cannot be reacted at a site another scenario's boundary declared, and no
+existence check would notice.
+
+Layering is deliberate: typed-id shape, target family and referent existence stay
+the write boundary's and are not duplicated. Omission → `MISSING_REQUIRED`; dangling
+→ `DANGLING_REF`; wrong scenario → producer completeness; wrong/INTERNAL terminus →
+U5-3.
+
+## 11.3 B — drift is now executable, not editorial
+
+`S02ObligationAndCandidates.RESPONSE_ENVELOPE` declares collection → canonical
+family → emitted id prefix, once. The prompt interpolates its length instead of
+stating a number. **It is not a second ontology**: `DESIGN_STATE_CONTRACT` remains
+authoritative for what an entity is, what it references and what it requires; the
+envelope only maps the JSON surface onto those families.
+
+Six gate checks make the failure modes untestable-to-miss: count matches, every
+declared collection is consumed, every entity-producing collection is declared,
+every collection appears in the schema, every family is real and s02-owned, every
+emitted prefix is shown to the model. Two more deliberately break a relationship
+and prove the gate notices — a consistency gate nobody has seen fail is a gate
+nobody knows works.
+
+## 11.4 C — S-4 completeness versus overall completeness
+
+Measured rather than assumed. The synthetic chain's `s03b` returns:
+
+```
+execution_status        : CONTRACT_INCOMPLETE
+declared_incompleteness : ['no blocking relation: nothing in this mechanism is held',
+                           'no assembly order']
+_s4_physical_problems   : []
+```
+
+Both remaining items are owned elsewhere and neither is S-4's: the blocking
+relation is the legacy mobility channel (**S-5**, R-C/R-D), and the assembly order
+is absent because the minimal probe authors no assembly step — `AssemblyStep`
+already has a producer. **`_s4_physical_problems` is empty**, which is the S-4
+claim, and the stage status is not forced to SUCCESS to make the evidence read
+better.
+
+## 11.5 D — one active producer truth
+
+`ConstraintRelation` and `PhysicalEffectObligation`/`PhysicalInteraction` are out of
+the ACTIVE `legacy_producers.rows` — an active row asserts the producer does not
+conform, and that is now false. History moved to `superseded_legacy_producers`,
+which records what was, what is, what closed it, and for `ConstraintRelation` the
+one residual: `blocking_relations[]` is compatibility input, not a second truth,
+and its removal is S-5's. `S03_CONTRACT`'s "claiming ConstraintRelation is already
+produced would be false" is marked SUPERSEDED and kept. A gate check now fails if
+any structured record says DONE and not-emitted at once.
+
+## 11.6 The old assumption that was wrong
+
+Fixtures broke on `reacted_at_site` becoming required. The assumption they encoded —
+**that a canonical LoadCase can exist without naming where it is reacted** — is what
+the freeze contradicts. Fixtures were corrected to name the site; one was corrected
+explicitly rather than letting the builder auto-create a referent, which would have
+quietly minted a second reaction site. No test was weakened.
+
+## 11.7 Regression
+
+`694 run · 694 pass · 0 fail · 22 skipped` — 9 stale-recording, 12 R-B, 1
+freeze-gate. The 21 recordings remain **S-9** operational debt.
+
+## 11.8 Defer map (unchanged)
+
+**S-5** `blocking_relations` removal · mobility orchestration · DOF domain/disposition ·
+`UNDISPOSITIONED` · `MAINTAINED_BY_CLASS` removal.
+**S-6** spatial reaction realization · frames/axes/`ReferenceScale` · S04A→S04B continuity.
+**S-7** retained/selected/committed/reopen.
+**S-8** broader applicability · cross-role engineering assurance.
+**S-9** live corpus refresh · full live-chain validation · historical replay retirement.
+
+## 11.9 CURRENT STATUS
+
+**S-4 VERIFIED CLOSED — CLOSURE CONSISTENCY GATE PASSES.**
+
+The semantic chain is complete, producer surfaces are consistent and gated against
+drift, active metadata states current truth with history preserved separately, and
+the remaining stage incompleteness is exclusively later-owned and named.
+
+**Impl S-5 has NOT begun.**

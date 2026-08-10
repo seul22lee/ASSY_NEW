@@ -90,10 +90,13 @@ class _Base(_fixtures.StateBuilder, unittest.TestCase):
         self.add(s, "s02", "Obligation", "OBL-0001", scope="UNIVERSAL",
                  satisfiable_at="s03", derived_from_requirements=["REQ-0001"],
                  involves_actors=["ACT-0001"])
-        self.add(s, "s02", "LoadCase", "LC-0001", scenario="SCN-0001")
         self.add(s, "s02", "ReactionSiteRequirement", "RSR-0001",
                  scenario="SCN-0001", boundary_side="EXTERNAL",
                  at_role="the surface the product stands on")
+        # Named explicitly: the field is required now, and letting the fixture
+        # builder invent a referent would quietly create a SECOND reaction site.
+        self.add(s, "s02", "LoadCase", "LC-0001", scenario="SCN-0001",
+                 reacted_at_site="RSR-0001")
         self.add(s, "s02", "PhysicalEffectObligation", "PEO-0001",
                  effect="TRANSMIT_FORCE", between_roles=["the actuation role"],
                  addresses_obligations=["OBL-0001"], under_load_case="LC-0001")

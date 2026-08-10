@@ -154,7 +154,8 @@ TYPED INPUT
 {projection}
 
 RESPONSE SCHEMA
-Return a single JSON object with exactly these six keys, each holding a list. A
+Return a single JSON object with exactly these {collections} keys, each holding a
+list. A
 list may be empty - an empty list is a value. Every field is required unless
 marked optional. Every id is a string in the format shown.
 
@@ -165,7 +166,7 @@ marked optional. Every id is a string in the format shown.
                           derivation_premises[] (optional)
   load_cases[]            id "LC-0001", scenario, applied_to_role,
                           reacted_at_role, direction_class, kind,
-                          magnitude_or_status, reacted_at_site (optional)
+                          magnitude_or_status, reacted_at_site
   reaction_site_requirements[]
                           id "RSR-0001", scenario, boundary_side, at_role,
                           why (optional)
@@ -267,6 +268,27 @@ def _render_consumer_view(proj: Dict[str, List[Dict]]) -> str:
 
 
 class S02ObligationAndCandidates(Stage):
+    #: THE RESPONSE ENVELOPE. Which JSON collection carries which canonical
+    #: family, and which id prefix this stage emits for it.
+    #:
+    #: NOT a second ontology: DESIGN_STATE_CONTRACT stays authoritative for what
+    #: an entity IS, what it references and which fields it requires. This only
+    #: maps the model's JSON surface onto those families - and it exists because
+    #: that mapping was maintained by hand in three places (prompt schema,
+    #: reference lines, `to_operations`) and drifted every time a family was
+    #: added. The prompt said "exactly these six keys" while eight were listed
+    #: and eight consumed.
+    RESPONSE_ENVELOPE = (
+        ("obligations", "Obligation", "OBL-"),
+        ("load_cases", "LoadCase", "LC-"),
+        ("reaction_site_requirements", "ReactionSiteRequirement", "RSR-"),
+        ("physical_effect_obligations", "PhysicalEffectObligation", "PEO-"),
+        ("candidates", "Candidate", "CND-"),
+        ("acceptance_contracts", "AcceptanceContract", "ACC-"),
+        ("unresolved", "UnresolvedDecision", "UNR-"),
+        ("assumptions", "Assumption", "ASM-"),
+    )
+
     stage_id = "s02"
     purpose = "derive obligations and load cases, and form candidate principle families"
 
@@ -277,6 +299,7 @@ class S02ObligationAndCandidates(Stage):
                 "s02 was handed SourceClause; the projection is not enforcing INV-002")
         return PROMPT.format(families=_render_families(), routes=_render_routes(),
                              effects=" | ".join(EFFECT_KINDS),
+                             collections=len(self.RESPONSE_ENVELOPE),
                              projection=_render_consumer_view(proj))
 
     # ------------------------------------------------------------ operations
@@ -300,10 +323,13 @@ class S02ObligationAndCandidates(Stage):
                       "reacted_at_role": l["reacted_at_role"],
                       "direction_class": l["direction_class"], "kind": l["kind"],
                       "magnitude_or_status": l["magnitude_or_status"]}
-            # The site this load is reacted at, by id. `reacted_at_role` keeps
-            # saying what the source said; this says what it resolves to, so
-            # nothing downstream reconstructs the relation from role strings.
-            if l.get("reacted_at_site"):
+            # The site this load is reacted at, by id, and REQUIRED: a load with
+            # nowhere declared to be reacted cannot be closed by any candidate.
+            # `reacted_at_role` keeps saying what the source said; this says what
+            # it resolves to, so nothing downstream rebuilds the relation from
+            # role strings. Omission is not silently dropped - the write boundary
+            # reports MISSING_REQUIRED, which is the producer's finding to own.
+            if l.get("reacted_at_site") is not None:
                 fields["reacted_at_site"] = l["reacted_at_site"]
             ops.append(Op("CREATE", "LoadCase", l["id"], fields, prov))
         # S-4. `PhysicalEffectObligation` has been a declared s02 output since S-2
@@ -387,6 +413,36 @@ class S02ObligationAndCandidates(Stage):
         if not parsed.get("candidates"):
             out.append("no candidates formed")
         out.extend(self._reference_shape_problems(parsed))
+        out.extend(self._reaction_site_problems(parsed))
+        return out
+
+    def _reaction_site_problems(self, parsed: Dict[str, Any]) -> List[str]:
+        """A load reacted at a site this response did not declare, or declared for
+        a different scenario.
+
+        Typed-id shape, target family and referent existence are the write
+        boundary's and are not repeated here. What only this stage can see is
+        whether the SCENARIO agrees: a load acting in one scenario cannot be
+        reacted at a site another scenario's boundary declared, and no reference
+        check can notice that.
+        """
+        sites = {r.get("id"): r for r in parsed.get("reaction_site_requirements") or []}
+        out: List[str] = []
+        for load in parsed.get("load_cases") or []:
+            named = load.get("reacted_at_site")
+            if not named:
+                out.append("load case %s names no reaction site; a load with "
+                           "nowhere declared to be reacted cannot be closed"
+                           % load.get("id"))
+                continue
+            site = sites.get(named)
+            if site is None:
+                continue          # existence is the write boundary's to report
+            if site.get("scenario") != load.get("scenario"):
+                out.append("load case %s acts in %s and is reacted at %s, which "
+                           "%s's boundary declared" % (load.get("id"),
+                                                       load.get("scenario"), named,
+                                                       site.get("scenario")))
         return out
 
     def _reference_shape_problems(self, parsed: Dict[str, Any]) -> List[str]:

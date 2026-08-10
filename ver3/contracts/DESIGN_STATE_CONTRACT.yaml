@@ -600,8 +600,13 @@ entity_families:
         referent_population: DESIGN_WIDE
       direction_class:
         kind: enum
-      # S-4. The freeze says a LoadCase is "reacted at which
-      # ReactionSiteRequirement". `reacted_at_role` stays as the SOURCE-LEVEL
+      # S-4. REQUIRED, because the freeze says a LoadCase is "reacted at which
+      # ReactionSiteRequirement" - not "may name one". A load with nowhere
+      # declared to be reacted cannot be closed by any candidate, and leaving the
+      # relation optional made that hole silent: U5-3 skipped its wrong-terminus
+      # check whenever the expectation happened to be missing.
+      #
+      # `reacted_at_role` stays as the SOURCE-LEVEL
       # description it has always been - what the request said, in its own words.
       # This is the authoritative relation, by id, so downstream code never has to
       # rebuild it by comparing role strings. Two fields, two different facts: one
@@ -621,8 +626,8 @@ entity_families:
         referent_population: DESIGN_WIDE
     owned_by: s02
     purpose: "An applied load implied by a scenario. CANDIDATE-INDEPENDENT."
-    required_fields: [entity_id, scenario, applied_to_role, reacted_at_role, direction_class, kind, magnitude_or_status]
-    optional_fields: [reacted_at_site]
+    required_fields: [entity_id, scenario, applied_to_role, reacted_at_role, direction_class, kind, magnitude_or_status,
+                      reacted_at_site]
     kinds: [GRAVITY, PAYLOAD, ACTOR_APPLIED, REACTION]
     rules:
       - "Says what the world does to the product, never what any mechanism carries."
@@ -1408,6 +1413,30 @@ assurance_families:
 # emits would carry the audited defect forward under a new name.
 #
 # No compatibility shim exists for any row below. Each migrates at its step.
+# S-4 CLOSED THESE. They are no longer ACTIVE rows: an active row means "the
+# canonical target exists and the current producer does not conform", and that is
+# now false for all of them. History is kept here and deliberately NOT in `rows` -
+# one active authority, not two.
+superseded_legacy_producers:
+  meaning: >
+    Rows that WERE active and are not any more. Historical record only; nothing
+    reads this to decide current behaviour.
+  rows:
+    - concept: ConstraintRelation
+      was: "s03 emitted the non-addressable blocked_by shape"
+      now: "s03b authors ConstraintRelation with an id and a resolvable provider"
+      closed_by: "S-4 / U-5"
+      residual: >
+        `blocking_relations[]` survives in the s03b RESPONSE as compatibility
+        input for the deterministic DOF expansion. It is not a second
+        authoritative physical truth, S-4 completeness does not read it, and
+        removing it is Impl S-5 (R-C/R-D).
+    - concept: PhysicalEffectObligation and PhysicalInteraction
+      was: "none - no stage produced either"
+      now: "s02 authors PhysicalEffectObligation; s03b authors PhysicalInteraction"
+      closed_by: "S-4 / U-5"
+      residual: none
+
 legacy_producers:
   rule: >
     A row here means the canonical target is defined, the producer does not yet
@@ -1424,16 +1453,6 @@ legacy_producers:
       current_producers: ["s02 prompt uses addresses_obligations", "fixtures use obligations_addressed"]
       current_status: NONCONFORMING
       migration_step: "S-4, S-9"
-    - concept: ConstraintRelation
-      canonical: "addressable entity with an id"
-      current_producers: ["s03 still emits the non-addressable blocked_by shape"]
-      current_status: NONCONFORMING
-      migration_step: "S-4 / U-5"
-    - concept: PhysicalEffectObligation and PhysicalInteraction
-      canonical: "role-level effect obligation discharged by a named interaction"
-      current_producers: ["none - no stage produces these yet"]
-      current_status: NOT_YET_PRODUCED
-      migration_step: "S-4 / U-5"
     - concept: MobilityExpectation domain and disposition split
       canonical: "derived domain; authored disposition citing a premise; UNDISPOSITIONED where none"
       current_producers: ["derive_mobility still emits the pre-split shape"]

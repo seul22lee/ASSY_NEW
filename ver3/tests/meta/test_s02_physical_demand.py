@@ -45,10 +45,17 @@ def _response(obligations_created, physical=True):
              "derived_from_requirements": ["REQ-0001"], "mandatory": True,
              "scope": "CANDIDATE_DISCRIMINATING", "satisfiable_at": "s03",
              "evidence_route": "ANALYSIS", "route_available": True}],
+        # A load case names where it is reacted. The earlier fixture assumed one
+        # could exist without that, which the freeze contradicts: a LoadCase is
+        # "reacted at which ReactionSiteRequirement".
+        "reaction_site_requirements": [
+            {"id": "RSR-0001", "scenario": "SCN-0001", "boundary_side": "EXTERNAL",
+             "at_role": "the ground"}],
         "load_cases": [
             {"id": "LC-0001", "scenario": "SCN-0001", "applied_to_role": "the mover",
-             "reacted_at_role": "the ground", "direction_class": "GRAVITY",
-             "kind": "GRAVITY", "magnitude_or_status": "UNSUPPORTED"}],
+             "reacted_at_role": "the ground", "reacted_at_site": "RSR-0001",
+             "direction_class": "GRAVITY", "kind": "GRAVITY",
+             "magnitude_or_status": "UNSUPPORTED"}],
         "candidates": [
             {"id": "CND-0001", "summary": "a pivoting arrangement", "family": "PIVOT",
              "principle": {"support": "PIVOT"},
