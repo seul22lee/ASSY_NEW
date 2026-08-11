@@ -572,7 +572,183 @@ Regression, **secondary**: RUN 981 · PASS 981 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-B CORRECTION + CLOSURE SWEEP (baseline `b55c00a`)
+
+**Eight blockers reproduced before a line was edited**, and the reproduction
+script is what set the order of work. The correction found three more of the same
+classes on its own sweep. The architecture is unchanged: same view, same three
+families, same one-hop raw-premise union, still no provider.
+
+### C.1 The blockers, and the root cause of each
+
+| | reproduced | root cause |
+|---|---|---|
+| **1** | `DesignConstraint` in state: `[]`; s01 emits none | The family, its rules and its s01 ownership were all declared at S7-A and **no code ever read a profile**. `USER_DESIGN_PROFILE_CONTRACT` said "the ingester is S7-B" and S7-B built the consumer without building the producer. |
+| **2a** | `Actor.must_reach` set, `reach → NOT_APPLICABLE` | Applicability was read off `FunctionalRegion` — the candidate's ANSWER. A candidate that ignored the actor entirely was indistinguishable from a design with no actor. |
+| **2b** | motion PEO present, no Transition, `motion → NOT_APPLICABLE` | Same shape: the demand was never consulted, only the realization. |
+| **3** | `(RGP-G1A, CFG-C0A, RZ)=BLOCKED_BY`, `(…, CFG-C1A, …)=INTENDED` → `FAIL` | The lookup matched `g == group and x == dof` and **dropped the configuration**, asking "is this DOF blocked anywhere" instead of "is this cell free". A latch free when open and held when closed read as a contradiction. |
+| **4** | `PEO.effect=TRANSMIT_FORCE`, interaction `effect=LOCATE` → `PASS` | Discharge was accepted on `discharges_effect == PEO.id` alone. `effect` and `discharges_effect` are two fields precisely because they can disagree, and checking only the reference made the typed vocabulary decorative. |
+| **5** | `CLEARANCE` pair, overlapping boxes → `PASS` | `declared` was every interface with two bodies. "An interface exists" was read as "these two may overlap" — inverting CLEARANCE, the one kind that promises they stay apart. |
+| **6a** | one of two bodies enveloped → `SATISFIED` | "Overall" was measured over `boxes`, the placed subset. The more incomplete the arrangement, the more comfortably it passed. |
+| **6b** | `axis: DIAGONAL` → `SATISFIED` | `AXIS_INDEX.get(axis, 0)` answered a requirement about a direction nobody named by silently measuring X. |
+
+### C.2 Three more of the same classes, found by the sweep
+
+* **A changed coordinate that names no Joint** produced no requirement at all —
+  the declared motion vanishing instead of being questioned. Now
+  `CHANGED_COORDINATE_NOT_A_JOINT`.
+* **`free_dof` defaults an unreadable axis to Z.** That is S-5's settled
+  behaviour and stays so; what was wrong was a feasibility cell address built
+  from the default. Now refused as `REQUIRED_MOTION_AXIS_UNREADABLE`, using the
+  same `axis_index` test `spatial_realization` already applies.
+* **`by_joint` was taken on trust.** The write boundary checks the reference
+  resolves to a Joint, not that the joint's class and axis leave that DOF of that
+  group free — the same defect as the effect discharge, one family over.
+  `_disposition_support` now reads `free_dof`, so the question has the one answer
+  s03's derivation used to author the claim.
+* **`_assemblability` skipped unplaced prior bodies in silence** — partial
+  geometry read as complete, one domain over from §6. Now
+  `INSERTION_GEOMETRY_INCOMPLETE`.
+
+### C.3 The ingress
+
+`ingest_design_constraints(profile)` in `s01_requirement_capture.py`, called from
+s01's own `to_operations` so the constraints are in s01's own patch.
+
+**Two inputs, two paths, and only one goes near a model.** The request text is
+prose and a model reads it. The profile is already structured — a section that
+says `PLASTIC_ONLY` says it in a field — so it is mapped across without asking
+anything. Nothing is completed: a limit with no unit stays a limit with no unit,
+and the compliance record downstream says `NOT_YET_EVALUABLE`.
+
+`evaluability` says WHO the requirement is addressed to, not whether the answer
+will succeed — structured parameters mean a check, a bare sentence means a
+person. Deriving it from whether some registry currently holds an evaluator would
+make an s01 fact depend on what a later stage happens to implement.
+
+**The preference section is never read.** Not filtered afterwards — the ingester
+names one key, `CONSTRAINT_SECTION`, and B27 asserts the source contains no other.
+Ids are `DSC-%04d` in the profile's own order, so the same profile always ingests
+to the same ids and no counter exists.
+
+Wired live: `run_window2.design_profile(case_id)` reads `design_profile.json|yaml`
+beside the request and passes it to s01. Not replayed, because it was never a
+model response.
+
+### C.4 Applicability is now read from the demand
+
+| domain | demand | with no realization |
+|---|---|---|
+| reach | `Actor.must_reach` non-empty | `NOT_ESTABLISHED` + `REACH_REALIZATION_ABSENT` |
+| motion_and_transitions | a `Configuration.distinguishing_basis`, **or** a PEO whose effect is one of `TRANSMIT_MOTION` / `CONVERT_MOTION` / `PERMIT_MOTION` | `NOT_ESTABLISHED` + `REQUIRED_TRANSITION_MISSING` |
+| mobility_disposition | the same motion obligations | `NOT_ESTABLISHED` + `MOTION_DEMANDED_WITHOUT_REALIZATION` |
+
+`PREVENT_MOTION` is deliberately not a motion demand: it requires that motion
+*not* occur, which is a different question and not this one asked backwards
+(B30b). `actor_role` was added to the `declared_physical_demand` premise class —
+without it an actor reached the view only when some candidate happened to
+reference it, so applicability was still being read off the answer one level up.
+
+### C.5 Files changed
+
+| file | why |
+|---|---|
+| `stages/feasibility.py` | six corrections above, plus the three the sweep found |
+| `stages/s01_requirement_capture.py` | the ingress (+59 lines, one new function) |
+| `stages/s04_envelope_and_motion.py` | `interface_expectation` / `INTENDED_CONTACT_KINDS` extracted; `required_contacts` and `configuration_interference_check` now call it. Findings and strings byte-identical |
+| `contracts/DESIGN_STATE_CONTRACT.yaml` | `Interface.interaction_kinds` corrected to the vocabulary in force; `spatial_expectation` declared; `NOT_INTENDED_TO_INTERACT` recorded as declared-and-never-producible |
+| `contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml` | `actor_role` on `declared_physical_demand` |
+| `contracts/ENTITY_FAMILY_AUDIT.yaml` | four "S7-B has not yet emitted it" statements retired; the S-2 growth note dated so it cannot read as current |
+| `contracts/stages/S01_CONTRACT.yaml` | the profile input and `constraint_ingress`; `llm_role` split by input |
+| `contracts/USER_DESIGN_PROFILE_CONTRACT.yaml` | `ingester_status: LIVE` |
+| `tools/run_window2.py` | `design_profile()`; s01 receives it |
+| `tests/meta/test_s7_feasibility.py` | B26–B35, the closure sweep, and the fixture now runs the real s01 |
+
+**The `Interface` vocabulary had NOT ONE VALUE IN COMMON with the producer's.**
+The contract said `DECLARED_CONTACT…NOT_INTENDED_TO_INTERACT`; s03 has always
+emitted, validated and checked `CONTACT`/`CLEARANCE`/`INTERFERENCE_FIT`/
+`COMPLIANT_INTERACTION`. Every interface in every recording would have failed the
+contract's list, and every value the contract named would have been refused by
+s03's own validator. Nothing read the contract, so nothing noticed. Corrected
+toward the runtime — it is frozen S-4/S-6 behaviour with recordings behind it —
+and what is lost by choosing that direction is written down rather than dropped:
+`NOT_INTENDED_TO_INTERACT` is the only kind from which gross interference could
+ever produce a FAIL, and reintroducing it is a producer change owned by **S-8**.
+
+### C.6 Production diff summary
+
+`feasibility.py` +352/−? against `b55c00a`; `s01_requirement_capture.py` +59;
+`s04_envelope_and_motion.py` +29/−9 (extraction only — the 162 S-4/S-5/S-6 tests
+over those checkers pass unchanged); `run_window2.py` +23. No change to
+`DesignState._propagate`, to the generic stale semantics, or to any S-4/S-5/S-6
+engineering meaning.
+
+### C.7 B26–B35, and the sweep
+
+**72 tests** in `test_s7_feasibility.py` — the 34 from S7-B, plus:
+
+| | |
+|---|---|
+| B26, B26b, B26c | profile → s01 → `DesignConstraint` → feasibility view → `HardRequirementCompliance`, with `_created_by == "s01"` asserted; an incomplete parameter set stays incomplete; a bare statement is `HUMAN_EVALUABLE` |
+| B27, B27b, B27c | a preference creates nothing, a preference-only profile creates nothing, an entry with no kind is not invented into one |
+| B28, B28b | same group/DOF, opposite dispositions in two configurations: the basis uses its own configuration's cell **and mutating the other one does not stale the verdict**; a transition still requires the cell at both its ends |
+| B29, B29b | reach demand with no realization → `NOT_ESTABLISHED`; no demand and no region → `NOT_APPLICABLE` |
+| B30, B30b | typed motion PEO with no Transition → both motion domains `NOT_ESTABLISHED`; `TRANSMIT_FORCE`/`PREVENT_MOTION`/`LOCATE` demand no motion |
+| B31, B31b | mismatched effect cannot PASS, and names both facts; the matching effect still discharges |
+| B32, B32b, B32c | `CLEARANCE` + overlap → `NOT_ESTABLISHED` (never FAIL); `CLEARANCE` held apart → PASS; intended contact still exempt |
+| B33, B33b | one body without an extent → `NOT_YET_EVALUABLE`, naming the unplaced body; every body placed decides it both ways |
+| B34, B34b, B34c | unknown axis → `AXIS_NOT_RECOGNIZED`; X and Y measure different spans (a fallback would have made them agree); three ambiguous-scale shapes |
+| B35 – B35f | no active statement says these families are unproduced; the declared ingress is the one that runs; the interface vocabulary matches the producer's; declared domains == evaluators; motion effects come from the declared vocabulary; every demand's role is in the required minimum |
+| SWEEP_01 – SWEEP_10 | the ten defect **classes**, scanned over the module: silent enum defaults, reduced composite keys, id-only typed relations, blanket interface exemption, partial geometry, demand-driven applicability, model-local findings, absence beside FAIL, S7-C leakage, candidate crossing |
+
+**Mutation-tested, not only asserted.** Reinstating the axis fallback (1 failure),
+collapsing the mobility address (1), exempting every interface (1), letting the
+ingester read the preference section (1), and restoring the `DECLARED_`
+vocabulary (1) — each reintroduction is caught by the test written for it.
+
+### C.8 Newly discovered, with owners
+
+* **S-8** — `NOT_INTENDED_TO_INTERACT` is declared and unproducible; it is the
+  only shape from which `gross_interference` could yield a positive FAIL.
+* **S-8** — `assemblability` does not require an AssemblyStep per body, so a
+  partial order passes. **Deliberately not fixed here:** under box geometry an
+  arriving body always overlaps the one it lands on, so requiring a step per body
+  would make the domain `NOT_ESTABLISHED` for every mechanism whose parts touch —
+  correct-looking and vacuous. It needs exact geometry, not a rule change.
+* **S-8** — `free_dof` silently defaults an unreadable axis to Z. Left alone as
+  frozen S-5 behaviour; S7-B now refuses to consume the default, which contains
+  the damage without redefining mobility.
+* **S7-C** — a hard requirement stated only in the request prose is not ingested.
+  Reading it out of prose is the inference `DesignConstraint` exists to avoid, so
+  the honest consequence is that the channel is structured-only.
+
+Regression, **secondary**: RUN 1019 · PASS 1019 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
+
+> **S7-B VERIFIED CLOSED — DETERMINISTIC FEASIBILITY, DEMAND-DRIVEN
+> APPLICABILITY, TYPED PHYSICAL SEMANTICS AND HARD-CONSTRAINT EVALUATION
+> CONSISTENT.**
+>
+> An explicit hard requirement enters through s01's own invocation and comes out
+> the other end as a compliance record. Applicability is read from the demand, so
+> a candidate cannot escape a domain by declining to build the thing that domain
+> examines. A mobility cell is addressed by all three of its components. An
+> interaction discharges an obligation only if it produces that obligation's
+> effect, and a disposition is supported only if the joint it cites really frees
+> that cell. `CLEARANCE` cannot hide a conservative overlap, and a dimensional
+> limit cannot be answered from a partial arrangement or an unrecognised axis.
+> Missing evidence is still never PASS and a conservative overlap is still never
+> FAIL. The contracts describe what runs, and each defect class is a standing
+> test rather than a fixed line.
+>
+> **S-7 / U-8 IS NOT CLOSED.** S7-C through S7-F are not started.
+
+---
+
+## S7-B FIRST-PASS STATUS (superseded by the above; kept, not deleted)
 
 > **S7-B VERIFIED CLOSED — DETERMINISTIC, CANDIDATE-LOCAL MECHANICAL FEASIBILITY
 > AND HARD-REQUIREMENT EVALUATION CONSISTENT.**
@@ -588,7 +764,10 @@ Regression, **secondary**: RUN 981 · PASS 981 · FAIL 0 · SKIP 22.
 > evaluator reads the real ConsumerView and refuses to produce a patch without
 > one. No provider is called.
 >
-> **S-7 / U-8 IS NOT CLOSED.** S7-C through S7-F are not started.
+> Superseded in scope by §C: this pass had built the consumer without the
+> producer, read applicability off the realization rather than the demand, and
+> accepted three typed references on their ids alone. Every claim above still
+> holds; what it did not yet say is recorded there.
 
 ---
 

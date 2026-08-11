@@ -70,6 +70,14 @@ authority_status:
     class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
     authoritative_for_canonical_semantics: false
+  constraint_ingress:
+    class: "OPERATIONAL"
+    note: >
+      HOW the ingester behaves, not what a DesignConstraint means. The meaning is
+      canonical in DESIGN_STATE_CONTRACT and the visibility rule is canonical in
+      USER_DESIGN_PROFILE_CONTRACT; this records the mechanism so that "is there
+      a live producer" is answerable by reading rather than by grepping.
+    authoritative_for_canonical_semantics: false
   required_discoveries:
     class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
@@ -116,9 +124,39 @@ engineering_responsibility: >
 
 required_inputs:
   - raw source request text
+  # S7-B. THE SECOND INPUT, and it is not read the same way. The user design
+  # profile is already structured - a section that says PLASTIC_ONLY says it in
+  # a field - so it is ingested deterministically and never handed to a model.
+  # Optional: a design that ships no profile states no hard requirement THROUGH
+  # THIS CHANNEL, which is a different fact from stating none, and the honest
+  # consequence is that no DesignConstraint exists rather than one inferred from
+  # the prose.
+  - "user design profile (optional): its `design_constraints` section only"
 input_exclusivity: >
   s01 is the ONLY stage that may read raw source text (INV-002, R-13). Every
   later stage reads DesignState.
+constraint_ingress:
+  producer: "`ingest_design_constraints`, called from s01's own to_operations"
+  reads: "design_profile.design_constraints"
+  never_reads: >
+    design_profile.selection_preferences. NOT FILTERED AFTERWARDS - the ingester
+    names one key. A wish that became a DesignConstraint could make a candidate
+    ineligible for being the kind somebody likes less, and the way that is
+    prevented is that no code before `selection` looks at the other section.
+  normalization: >
+    kind, statement and parameters are carried across verbatim. Nothing is
+    completed: a limit with no unit stays a limit with no unit, and the
+    consequence downstream is NOT_YET_EVALUABLE - the design not yet having
+    said, rather than this stage guessing what it meant. An entry with no kind
+    is not a constraint anyone can act on and is not ingested; naming a kind for
+    it would be inventing the requirement.
+  evaluability_rule: >
+    Says WHO the requirement is addressed to, not whether the answer will
+    succeed: an entry carrying structured parameters is for a check, an entry
+    carrying only a sentence is for a person. Deciding it from whether some
+    registry currently holds an evaluator would make an s01 fact depend on what
+    a later stage happens to implement.
+  identity: "DSC-%04d in the profile's own order, so the same profile always ingests to the same ids."
 
 required_discoveries:
   - "per requirement: whether the source supplies a magnitude, a band, a comparative, or nothing"
@@ -210,7 +248,12 @@ next_stage_consumer_requirement:
   must_not_need: [raw source text]
 
 llm_role: >
-  High. Extraction and classification. The failure mode is sharpening, which
-  S01-C2 checks mechanically.
+  High FOR THE REQUEST TEXT. Extraction and classification; the failure mode is
+  sharpening, which S01-C2 checks mechanically.
+
+  NONE FOR THE DESIGN PROFILE. It arrives structured, and handing a stated
+  requirement to a model to reinterpret would turn it into an inference - the
+  one thing this stage exists to prevent. Two inputs, two paths, and only one of
+  them goes near a model.
 knowledge_base_role: >
   None. A knowledge base at s01 would import assumptions the source did not make.

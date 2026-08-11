@@ -840,6 +840,29 @@ def sweep_hull(box, joint: Dict[str, Any], origin: Sequence[float],
     }
 
 
+#: WHAT AN INTERFACE SAYS ABOUT ITS PAIR SHARING SPACE. Three answers, and they
+#: are not interchangeable: a kind whose meaning REQUIRES the pair to meet
+#: exempts that pair from generic interference, and CLEARANCE is the opposite
+#: statement - the design promising they stay apart - so it can exempt nothing.
+#:
+#: EXTRACTED at the S7-B correction. The set lived inline in `required_contacts`
+#: and the CLEARANCE case lived inline in `configuration_interference_check`,
+#: which is how a consumer came to read "an interface exists" as "these two are
+#: allowed to overlap" - the one reading neither of those two places supports.
+TOUCHES, CLEAR, UNDECLARED = "TOUCHES", "CLEAR", "UNDECLARED"
+INTENDED_CONTACT_KINDS = ("CONTACT", "INTERFERENCE_FIT", "COMPLIANT_INTERACTION")
+
+
+def interface_expectation(iface: Optional[Dict[str, Any]]) -> str:
+    """TOUCHES, CLEAR or UNDECLARED for one interface. One reader, one answer."""
+    kind = (iface or {}).get("interaction_kind")
+    if kind in INTENDED_CONTACT_KINDS:
+        return TOUCHES
+    if kind == "CLEARANCE":
+        return CLEAR
+    return UNDECLARED
+
+
 def required_contacts(mech: Dict[str, Any]) -> List[Tuple[str, str]]:
     """Body pairs the topology says are connected.
 
@@ -854,8 +877,7 @@ def required_contacts(mech: Dict[str, Any]) -> List[Tuple[str, str]]:
             pairs.add(tuple(sorted((a, b))))
     for i in mech.get("Interface", []):
         bodies = [x for x in (i.get("bodies") or []) if isinstance(x, str)]
-        if len(bodies) >= 2 and i.get("interaction_kind") in ("CONTACT", "INTERFERENCE_FIT",
-                                                              "COMPLIANT_INTERACTION"):
+        if len(bodies) >= 2 and interface_expectation(i) == TOUCHES:
             pairs.add(tuple(sorted(bodies[:2])))
     return sorted(pairs)
 
@@ -1002,8 +1024,7 @@ def configuration_interference_check(state) -> List[str]:
                 if not overlaps(boxes[present[x]], boxes[present[y]]):
                     continue
                 iface = declared.get(pair)
-                kind = (iface or {}).get("interaction_kind")
-                if kind == "CLEARANCE":
+                if interface_expectation(iface) == CLEAR:
                     problems.append(
                         "CLEARANCE_NOT_VERIFIED: %s and %s overlap as boxes in %s; "
                         "s03 declared CLEARANCE. Boxes overlapping is not proof of "

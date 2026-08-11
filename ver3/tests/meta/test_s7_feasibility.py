@@ -32,6 +32,7 @@ product noun, no benchmark id, no state name.
 """
 from __future__ import annotations
 
+import ast
 import json
 import unittest
 
@@ -39,6 +40,11 @@ from . import _fixtures, _paths                                        # noqa: F
 
 import ver3.assy_v3.view.consumer_view as cv                           # noqa: E402
 import ver3.assy_v3.stages.feasibility as s07                          # noqa: E402
+from ver3.assy_v3.stages.s01_requirement_capture import (             # noqa: E402
+    CONSTRAINT_SECTION, S01RequirementCapture,
+    ingest_design_constraints as s01_ingest)
+import ver3.assy_v3.stages.s03_topology_and_mobility as s03            # noqa: E402
+import ver3.assy_v3.stages.s04_envelope_and_motion as s04              # noqa: E402
 from ver3.assy_v3.stages.s02_obligation_and_candidates import (        # noqa: E402
     S02ObligationAndCandidates)
 from ver3.assy_v3.stages.s03_topology_and_mobility import (            # noqa: E402
@@ -51,6 +57,32 @@ from ver3.assy_v3.state.design_state import Contracts, DesignState      # noqa: 
 from ver3.assy_v3.state.patch import Op, StagePatch                     # noqa: E402
 from ver3.tools import run_window2                                      # noqa: E402
 from .test_s02_s03b_integration import S02, _Canned                     # noqa: E402
+from .test_s3_interface_readiness import _code_only                     # noqa: E402
+
+
+def s01_response(must_reach=()):
+    """What the capture stage returns. No product noun and no quantity."""
+    return {
+        "source_clauses": [{"id": "SRC-0001", "verbatim": "a synthetic request",
+                            "locator": "L1", "quantity_kinds": [],
+                            "directionality": "none"}],
+        "requirements": [{"id": "REQ-0001",
+                          "statement_verbatim": "a synthetic request",
+                          "kind": "FUNCTIONAL", "verification_kind": "STRUCTURAL",
+                          "observable_verbatim": "it holds", "source_locator": "L1",
+                          "quantity_class": "NONE"}],
+        "scenarios": [{"id": "SCN-0001", "name": "use", "kind": "OPERATION",
+                       "system_boundary": "the product inside, the surface it "
+                                          "stands on outside",
+                       "actors": ["ACT-0001"], "environment": "indoor"},
+                      {"id": "SCN-IDLE", "name": "idle", "kind": "OPERATION",
+                       "system_boundary": "the product inside, the surface it "
+                                          "stands on outside",
+                       "actors": ["ACT-0001"], "environment": "indoor"}],
+        "actors": [{"id": "ACT-0001", "name": "the operator",
+                    "must_reach": list(must_reach)}],
+        "freedoms": [], "ambiguities": [], "assumptions": [],
+    }
 
 
 # =====================================================================
@@ -203,11 +235,25 @@ class _Feas(_fixtures.StateBuilder, unittest.TestCase):
     def setUpClass(cls):
         cls.c = Contracts()
 
-    def seed(self):
+    def seed(self, profile=None, must_reach=()):
+        """S01 THROUGH ITS REAL INVOCATION, profile and all.
+
+        The requirement material used to be hand-written into state, which is
+        fine for probing s03 and useless for probing an s01 ingress: a test that
+        inserts the entity it is checking for proves the insertion. Everything
+        below now arrives the way the pipeline makes it.
+
+        `must_reach` is the reach DEMAND and defaults to none. An empty list is
+        a value - this actor reaches for nothing - and the generic fixture
+        placeholder used to fill it with prose, which read as a demand and made
+        every clean mechanism NOT_ESTABLISHED on reach.
+        """
         s = DesignState(run_id="feasibility")
-        self.add(s, "s01", "Requirement", "REQ-0001", quantity_class="BAND")
-        self.add(s, "s01", "Actor", "ACT-0001")
-        self.add(s, "s01", "Scenario", "SCN-0001", actors=["ACT-0001"])
+        out = S01RequirementCapture().invoke(
+            _Canned(s01_response(list(must_reach))), s, s.run_id,
+            {"request_text": "a synthetic request", "design_profile": profile})
+        self.assertIsNotNone(out.patch, out.problems)
+        s.apply(out.patch)
         return s
 
     def branch(self, state, sfx, s03a, s03b, s04a, s04b, apply_b=True):
@@ -262,10 +308,10 @@ class _Feas(_fixtures.StateBuilder, unittest.TestCase):
             # hinge; sweeping a bar through the frame would be testing the probe.
             motion(sfx, "JNT-3%s" % sfx, _group(0, sfx), coords=(0, 10)))
 
-    def candidates(self, state):
+    def candidates(self, state, payload=None):
         if state.family("Candidate"):
             return
-        payload = json.loads(json.dumps(S02))
+        payload = json.loads(json.dumps(payload if payload is not None else S02))
         template = payload["candidates"][0]
         payload["candidates"] = [dict(template, id="CND-%s" % s,
                                       summary="alternative %s" % s)
@@ -496,9 +542,10 @@ class TestModelLocalFindings(_Feas):
         self.assertEqual(s07.NOT_ESTABLISHED, v.status)
         self.assertIn("REACH_BASIS_NOT_ESTABLISHED", v.reason_codes)
         self.assertIn(s07.MODEL_LOCAL_POSITIVE, v.reason_codes)
-        self.assertEqual([], v.premises,
-                         "a model's conclusion was recorded as a premise of the "
-                         "verdict, which would make it evidence for itself")
+        for r in state.family("ReachResult"):
+            self.assertNotIn(r["entity_id"], v.premises,
+                             "a model's conclusion was recorded as a premise of "
+                             "the verdict, which would make it evidence for itself")
 
     def test_B13_an_elimination_record_alone_cannot_make_it_infeasible(self):
         state = self.hinge(s04a=arrangement(HINGE_BOXES, steps=["ASY-0A"],
@@ -763,8 +810,13 @@ class TestIsolationAndDependency(_Feas):
                          "a motion change staled a load verdict it cannot affect")
 
     def test_B22c_an_absence_does_not_get_a_fabricated_premise(self):
-        """NOT_ESTABLISHED by absence names no entity, because there is none to
-        name. Inventing one would make a missing fact look like a present one."""
+        """THE DEMAND IS NAMED; THE MISSING ANSWER IS NOT.
+
+        A configuration declaring a distinguishing basis is a present fact and
+        the reason the domain is unsatisfied, so withdrawing it must cost this
+        verdict its authority. The transition that would have realized it does
+        not exist and gets no id: inventing one would make a missing fact look
+        like a present one."""
         basis = {"CFG-C0A": [{"rigid_group": _group(1, "A"), "dof": "RZ",
                               "differs_from": ["CFG-C1A"]}]}
         state = self.hinge(s03a=topology("A", 2, [(0, 1)], basis=basis),
@@ -773,10 +825,612 @@ class TestIsolationAndDependency(_Feas):
         out = self.assess(state)
         v = self.domain(out, "motion_and_transitions")
         self.assertEqual(s07.NOT_ESTABLISHED, v.status)
-        self.assertEqual([], v.premises)
+        self.assertIn("REQUIRED_TRANSITION_MISSING", v.reason_codes)
+        self.assertEqual(["CFG-C0A"], v.premises)
         op = next(o for o in out.patch.operations
                   if o.entity_id == "FDA-CND-A-MOTION-AND-TRANSITIONS")
-        self.assertEqual(["CND-A"], op.premise_refs)
+        self.assertEqual(["CFG-C0A", "CND-A"], op.premise_refs)
+        # The withdrawn demand costs the verdict its standing, which is what
+        # naming it was for.
+        self.revise(state, Op("SUPERSEDE", "Configuration", "CFG-C0A",
+                              {"distinguishing_basis": []}, "t",
+                              reason="the distinction was withdrawn"), stage="s03")
+        self.assertEqual("STALE",
+                         self.val(state, "FDA-CND-A-MOTION-AND-TRANSITIONS"))
+
+
+# =====================================================================
+# B26-B27 - a hard requirement reaches the evaluator, a wish does not
+# =====================================================================
+PROFILE = {
+    "design_constraints": [
+        {"kind": "MAX_OVERALL_DIMENSION",
+         "statement": "it must fit through a standard doorway",
+         "parameters": {"axis": "ANY", "limit": 100, "unit": "mm"},
+         "blocks_selection": True},
+        {"kind": "MATERIAL_CLASS_ONLY",
+         "statement": "every manufactured part must be plastic",
+         "parameters": {"material_class": "PLASTIC"}, "blocks_selection": True},
+    ],
+    "selection_preferences": {"part_count": {"objective": "MINIMIZE",
+                                             "priority": "HIGH"}},
+}
+
+
+class TestConstraintIngress(_Feas):
+
+    def test_B26_a_stated_hard_requirement_reaches_the_evaluator(self):
+        """THE WHOLE CHAIN, not an entity typed into state. The profile goes in
+        as an s01 input, s01's own invocation emits the DesignConstraint, the
+        feasibility view selects it because the responsibility declares the
+        role, and the evaluator answers it."""
+        state = self.hinge(state=self.seed(profile=PROFILE),
+                           s04a=arrangement(HINGE_BOXES, steps=["ASY-0A"],
+                                            basis="ABSOLUTE",
+                                            absolute={"unit": "mm",
+                                                      "per_unit": 10.0}))
+        made = {c["entity_id"]: c for c in state.family("DesignConstraint")}
+        self.assertEqual(["DSC-0001", "DSC-0002"], sorted(made))
+        self.assertEqual("s01", state.entities["DSC-0001"]["_created_by"])
+        self.assertEqual("s01:profile_ingest",
+                         state.entities["DSC-0001"]["_provenance"])
+        self.assertEqual("MAX_OVERALL_DIMENSION", made["DSC-0001"]["kind"])
+
+        out = self.assess(state)
+        visible = {e["entity_id"] for e in out.consumer_view["entities"]}
+        self.assertIn("DSC-0001", visible, "the view cannot see the requirement")
+        status = {c.get("entity_id"): s for c, s, _c, _u, _w in out.compliance}
+        self.assertEqual({"DSC-0001": s07.SATISFIED,
+                          "DSC-0002": s07.NOT_YET_EVALUABLE}, status)
+        hrc = next(o for o in out.patch.operations
+                   if o.entity_id == "HRC-CND-A-DSC-0001")
+        self.assertIn("DSC-0001", hrc.premise_refs)
+        self.assertIn("CND-A", hrc.premise_refs)
+        self.assertIn("SCL-CND-A", hrc.premise_refs)
+
+    def test_B26b_nothing_is_completed_that_the_user_left_incomplete(self):
+        """A limit with no unit stays a limit with no unit. Inferring mm would
+        answer the requirement from a number nobody supplied."""
+        state = self.seed(profile={"design_constraints": [
+            {"kind": "MAX_OVERALL_DIMENSION", "statement": "it must be small",
+             "parameters": {"axis": "ANY", "limit": 100}}]})
+        self.assertEqual({"axis": "ANY", "limit": 100},
+                         state.entities["DSC-0001"]["parameters"])
+        self.hinge(state=state, s04a=arrangement(
+            HINGE_BOXES, steps=["ASY-0A"], basis="ABSOLUTE",
+            absolute={"unit": "mm", "per_unit": 10.0}))
+        status, codes, _u, _w = TestHardRequirements.status_of(
+            self, self.assess(state))
+        self.assertEqual(s07.NOT_YET_EVALUABLE, status)
+        self.assertIn("UNIT_AMBIGUOUS", codes)
+
+    def test_B26c_a_statement_without_parameters_is_for_a_person(self):
+        state = self.seed(profile={"design_constraints": [
+            {"kind": "LOAD_CAPACITY", "statement": "it must hold a full load"}]})
+        self.assertEqual("HUMAN_EVALUABLE",
+                         state.entities["DSC-0001"]["evaluability"])
+
+    def test_B27_a_preference_is_not_ingested(self):
+        """THE SECTION IS NEVER READ. Not filtered out afterwards - the ingester
+        names one key, and a wish that became a DesignConstraint could make a
+        candidate ineligible for being the kind somebody likes less."""
+        state = self.seed(profile=PROFILE)
+        for c in state.family("DesignConstraint"):
+            self.assertNotIn("part_count", json.dumps(c))
+        self.assertEqual([], state.family("SelectionProfile"))
+        source = __import__("inspect").getsource(s01_ingest)
+        self.assertNotIn("selection_preferences", source)
+        self.assertNotIn("preference", source.lower().split("Deciding")[0]
+                         .split("A selection")[0] or "")
+
+    def test_B27b_a_profile_with_only_preferences_yields_nothing(self):
+        state = self.seed(profile={"selection_preferences": {
+            "part_count": {"objective": "MINIMIZE", "priority": "HIGH"}}})
+        self.assertEqual([], state.family("DesignConstraint"))
+
+    def test_B27c_an_entry_with_no_kind_is_not_invented_into_one(self):
+        state = self.seed(profile={"design_constraints": [
+            {"statement": "something the user typed"}]})
+        self.assertEqual([], state.family("DesignConstraint"))
+
+
+# =====================================================================
+# B28-B32 - demand, address and typed semantics
+# =====================================================================
+class TestDemandDrivenApplicability(_Feas):
+
+    def test_B28_a_required_motion_uses_its_own_configurations_cell(self):
+        """SAME GROUP, SAME DOF, TWO CONFIGURATIONS, OPPOSITE DISPOSITIONS.
+
+        The distinguishing basis is a statement about the configuration that
+        carries it, so the required cell is that one's. Matching on (group, dof)
+        found the other configuration's BLOCKED_BY and reported a contradiction
+        of a motion only this configuration is required to perform."""
+        basis = {"CFG-C1A": [{"rigid_group": _group(1, "A"), "dof": "RZ",
+                              "differs_from": ["CFG-C0A"]}]}
+        state = self.hinge(
+            s03a=topology("A", 2, [(0, 1)], basis=basis),
+            s03b=realization("A", blocked=[(_group(1, "A"), ["RZ"], "CFG-C0A")]),
+            s04b=motion("A", "JNT-0A", _group(1, "A"), transition=False))
+        cells = {(d["rigid_group"], d["configuration"], d["dof"]): d["disposition"]
+                 for m in state.family("MobilityExpectation")
+                 for d in m["dispositions"]
+                 if d["rigid_group"] == "RGP-G1A" and d["dof"] == "RZ"}
+        self.assertEqual({("RGP-G1A", "CFG-C0A", "RZ"): "BLOCKED_BY",
+                          ("RGP-G1A", "CFG-C1A", "RZ"): "INTENDED"}, cells,
+                         "the probe is not probing")
+        out = self.assess(state)
+        v = self.domain(out, "mobility_disposition")
+        self.assertEqual(s07.PASS, v.status, v.summary)
+        self.assertIn("MEX-CFG-C1A", v.premises)
+        self.assertNotIn("MEX-CFG-C0A", v.premises,
+                         "the other configuration's cell was consulted")
+        self.assertNotIn("CRL-0A", v.premises)
+        # And the other configuration is not a premise, so changing it changes
+        # nothing here.
+        self.revise(state, Op("SUPERSEDE", "MobilityExpectation", "MEX-CFG-C0A",
+                              {"dispositions": []}, "t", reason="probe"),
+                    stage="s03")
+        self.assertEqual("STANDING",
+                         self.val(state, "FDA-CND-A-MOBILITY-DISPOSITION"))
+        self.revise(state, Op("SUPERSEDE", "MobilityExpectation", "MEX-CFG-C1A",
+                              {"dispositions": []}, "t", reason="probe"),
+                    stage="s03")
+        self.assertEqual("STALE",
+                         self.val(state, "FDA-CND-A-MOBILITY-DISPOSITION"))
+
+    def test_B28b_a_transition_requires_the_cell_at_both_of_its_ends(self):
+        """The other half of the same rule: a coordinate that changes between
+        two configurations must be free at both ends of the change, so a block
+        in either endpoint is a real contradiction."""
+        state = self.hinge(s03b=realization(
+            "A", blocked=[(_group(1, "A"), ["RZ"], "CFG-C0A")]))
+        v = self.domain(self.assess(state), "mobility_disposition")
+        self.assertEqual(s07.FAIL, v.status)
+        self.assertIn("MEX-CFG-C0A", v.premises)
+
+    def test_B29_a_reach_demand_with_no_realization_is_not_established(self):
+        """The actor must reach something and this candidate declares no access
+        region at all. NOT_APPLICABLE would have let the candidate excuse itself
+        by ignoring the requirement."""
+        state = self.hinge(state=self.seed(must_reach=["the inside"]))
+        self.assertEqual([], [r for r in state.family("FunctionalRegion")],
+                         "the probe is not probing")
+        out = self.assess(state)
+        v = self.domain(out, "reach")
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
+        self.assertIn("REACH_REALIZATION_ABSENT", v.reason_codes)
+        self.assertEqual(["ACT-0001"], v.premises)
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
+
+    def test_B29b_no_actor_demand_and_no_region_is_not_applicable(self):
+        v = self.domain(self.assess(self.hinge()), "reach")
+        self.assertEqual(s07.NOT_APPLICABLE, v.status)
+
+    def test_B30_a_motion_demand_with_no_realization_is_not_established(self):
+        """A typed effect obligation that cannot be discharged without movement,
+        and nothing that moves. Both motion domains are applicable."""
+        s02 = json.loads(json.dumps(S02))
+        s02["physical_effect_obligations"][0]["effect"] = "TRANSMIT_MOTION"
+        state = self.seed()
+        self.candidates(state, payload=s02)
+        r = realization("A")
+        r["physical_interactions"][0]["effect"] = "TRANSMIT_MOTION"
+        self.hinge(state=state, s03b=r,
+                   s04b=motion("A", "JNT-0A", _group(1, "A"), transition=False))
+        self.assertEqual([], state.family("Transition"), "the probe is not probing")
+        out = self.assess(state)
+        for name, code in (("motion_and_transitions", "REQUIRED_TRANSITION_MISSING"),
+                           ("mobility_disposition",
+                            "MOTION_DEMANDED_WITHOUT_REALIZATION")):
+            v = self.domain(out, name)
+            self.assertEqual(s07.NOT_ESTABLISHED, v.status, name)
+            self.assertIn(code, v.reason_codes)
+            self.assertEqual(["PEO-0001"], v.premises, name)
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
+
+    def test_B30b_a_non_motion_obligation_demands_no_motion(self):
+        """PREVENT_MOTION is not this question asked backwards, and
+        TRANSMIT_FORCE is not this question at all."""
+        for effect in ("TRANSMIT_FORCE", "PREVENT_MOTION", "LOCATE"):
+            s02 = json.loads(json.dumps(S02))
+            s02["physical_effect_obligations"][0]["effect"] = effect
+            state = self.seed()
+            self.candidates(state, payload=s02)
+            r = realization("A")
+            r["physical_interactions"][0]["effect"] = effect
+            self.hinge(state=state, s03b=r,
+                       s04b=motion("A", "JNT-0A", _group(1, "A"), transition=False))
+            out = self.assess(state)
+            self.assertEqual(s07.NOT_APPLICABLE,
+                             self.domain(out, "motion_and_transitions").status,
+                             effect)
+
+    def test_B31_an_interaction_that_does_something_else_discharges_nothing(self):
+        """It names the obligation and it does not produce the effect. Pointing
+        at a demand is not answering it."""
+        r = realization("A")
+        r["physical_interactions"][0]["effect"] = "LOCATE"
+        state = self.hinge(s03b=r)
+        out = self.assess(state)
+        v = self.domain(out, "physical_realization")
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
+        self.assertIn("EFFECT_TYPE_MISMATCH", v.reason_codes)
+        self.assertNotEqual(s07.FEASIBLE, out.status)
+        # Both facts are named: the demand and the thing that failed to answer it.
+        self.assertEqual(["PEO-0001", "PHI-A"], sorted(v.premises))
+
+    def test_B31b_the_matching_effect_still_discharges(self):
+        v = self.domain(self.assess(self.hinge()), "physical_realization")
+        self.assertEqual(s07.PASS, v.status)
+
+    def test_B32_a_clearance_pair_that_overlaps_is_not_established(self):
+        """CLEARANCE is the design PROMISING these two stay apart. Treating it
+        as an overlap exemption turned the strongest statement about a pair into
+        the weakest."""
+        top = topology("A", 2, [(0, 1)])
+        top["interfaces"][0]["interaction_kind"] = "CLEARANCE"
+        state = self.hinge(s03a=top)
+        out = self.assess(state)
+        v = self.domain(out, "gross_interference")
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
+        self.assertIn("CLEARANCE_PAIR_OVERLAPS", v.reason_codes)
+        self.assertNotEqual(s07.FAIL, v.status, "an overlap is not a collision")
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
+
+    def test_B32b_a_clearance_pair_that_is_clear_passes(self):
+        """The exemption question and the geometry question are different: a
+        CLEARANCE pair held apart is the promise kept."""
+        top = topology("A", 2, [(0, 1)])
+        top["interfaces"][0]["interaction_kind"] = "CLEARANCE"
+        state = self.hinge(s03a=top,
+                           s04a=arrangement({"BOD-G0A": ([0, 0, 0], [1, 1, 1]),
+                                             "BOD-G1A": ([9, 0, 0], [1, 1, 1])},
+                                            steps=["ASY-0A"]),
+                           s04b=motion("A", "JNT-0A", _group(1, "A"),
+                                       coords=(0, 0)))
+        v = self.domain(self.assess(state), "gross_interference")
+        self.assertEqual(s07.PASS, v.status, v.summary)
+
+    def test_B32c_an_intended_contact_pair_is_still_exempt(self):
+        """A pair declared to touch is supposed to overlap as boxes. Reporting
+        it would be reporting the design."""
+        v = self.domain(self.assess(self.hinge()), "gross_interference")
+        self.assertEqual(s07.PASS, v.status, v.summary)
+
+
+# =====================================================================
+# B33-B34 - a dimension is of the whole thing or of nothing
+# =====================================================================
+class TestDimensionalCompleteness(_Feas):
+
+    def dimensional(self, boxes, axis="ANY", limit=100, unit="mm",
+                    absolute={"unit": "mm", "per_unit": 10.0}, basis="ABSOLUTE"):
+        profile = {"design_constraints": [
+            {"kind": "MAX_OVERALL_DIMENSION", "statement": "it must fit",
+             "parameters": {"axis": axis, "limit": limit, "unit": unit}}]}
+        state = self.hinge(state=self.seed(profile=profile),
+                           s04a=arrangement(boxes, steps=["ASY-0A"],
+                                            basis=basis, absolute=absolute))
+        out = self.assess(state)
+        for c, status, codes, used, why in out.compliance:
+            if c["entity_id"] == "DSC-0001":
+                return status, codes, used, why
+        raise AssertionError("no compliance record")
+
+    def test_B33_a_body_without_an_extent_makes_it_unevaluable(self):
+        """One of two bodies placed. The measured subset was smaller than the
+        product, so the more incomplete the arrangement the more comfortably it
+        passed."""
+        status, codes, used, why = self.dimensional(
+            {"BOD-G0A": ([0, 0, 0], [1, 1, 1])})
+        self.assertEqual(s07.NOT_YET_EVALUABLE, status, why)
+        self.assertIn("EXTENT_INCOMPLETE", codes)
+        self.assertIn("BOD-G1A", used, "the body that has no extent is the fact")
+
+    def test_B33b_every_body_placed_decides_it(self):
+        status, codes, _u, why = self.dimensional(HINGE_BOXES)
+        self.assertEqual(s07.SATISFIED, status, why)
+        self.assertIn("WITHIN_OVERALL_DIMENSION", codes)
+        status, codes, _u, why = self.dimensional(HINGE_BOXES, limit=10)
+        self.assertEqual(s07.VIOLATED, status, why)
+        self.assertIn("OVERALL_DIMENSION_EXCEEDED", codes)
+
+    def test_B34_an_unrecognised_axis_is_not_silently_x(self):
+        status, codes, _u, why = self.dimensional(HINGE_BOXES, axis="DIAGONAL")
+        self.assertEqual(s07.NOT_YET_EVALUABLE, status)
+        self.assertIn("AXIS_NOT_RECOGNIZED", codes)
+        self.assertIn("DIAGONAL", why)
+
+    def test_B34b_each_recognised_axis_measures_its_own_span(self):
+        """X spans 3.5 units and Y spans 2; at 10 mm each the same limit
+        separates them. A fallback to X would have made them agree."""
+        self.assertEqual(s07.VIOLATED,
+                         self.dimensional(HINGE_BOXES, axis="X", limit=30)[0])
+        self.assertEqual(s07.SATISFIED,
+                         self.dimensional(HINGE_BOXES, axis="Y", limit=30)[0])
+
+    def test_B34c_an_ambiguous_or_relative_scale_decides_nothing(self):
+        for kwargs, code in (
+                ({"basis": "RELATIVE", "absolute": None}, "SCALE_NOT_ABSOLUTE"),
+                ({"absolute": {"unit": "in", "per_unit": 10.0}}, "UNIT_AMBIGUOUS"),
+                ({"absolute": {"unit": "mm"}}, "SCALE_FACTOR_MISSING")):
+            status, codes, _u, why = self.dimensional(HINGE_BOXES, **kwargs)
+            self.assertEqual(s07.NOT_YET_EVALUABLE, status, why)
+            self.assertIn(code, codes)
+
+
+# =====================================================================
+# B35 and the closure sweep - the contracts describe what runs
+# =====================================================================
+class TestContractTruth(unittest.TestCase):
+    """Not "is the contract self-consistent" - is it TRUE of the code.
+
+    Each assertion below is a defect class the S7-B correction found, written so
+    that reintroducing it fails here rather than waiting for someone to read the
+    file next to the one they changed."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.state = _paths.contract("DESIGN_STATE_CONTRACT.yaml")
+        cls.resp = _paths.contract("STAGE_RESPONSIBILITY_CONTRACT.yaml")
+        cls.matrix = _paths.contract("STAGE_OWNERSHIP_MATRIX.yaml")
+        cls.audit = _paths.contract("ENTITY_FAMILY_AUDIT.yaml")
+        cls.s01 = _paths.contract("stages/S01_CONTRACT.yaml")
+        cls.profile = _paths.contract("USER_DESIGN_PROFILE_CONTRACT.yaml")
+        cls.fams = dict(cls.state["entity_families"])
+        cls.fams.update(cls.state["assurance_families"])
+
+    #: The three families S7-B produces, and the one it consumes as its input.
+    PRODUCED = ("FeasibilityDomainAssessment", "MechanicalFeasibilityAssessment",
+                "HardRequirementCompliance")
+
+    def test_B35_no_active_statement_says_these_have_no_producer(self):
+        """A contract claiming a live family is unproduced is worse than silence:
+        it tells a reader the check they are looking for cannot exist."""
+        for family in self.PRODUCED + ("DesignConstraint",):
+            entry = self.audit["families"][family]
+            blob = json.dumps(entry)
+            for phrase in ("has not yet emitted", "ahead of its producer",
+                           "no producer", "not yet produced"):
+                self.assertNotIn(phrase, blob,
+                                 "%s: %r is no longer true" % (family, phrase))
+        for family in self.PRODUCED:
+            self.assertEqual("feasibility", self.fams[family]["owned_by"])
+            self.assertIn(family,
+                          self.matrix["responsibilities"]["entries"]["feasibility"]["owns"])
+
+    def test_B35b_the_declared_ingress_is_the_one_that_runs(self):
+        """The contract names a producer, a key it reads and a key it does not.
+        All three are read off the code, not off a neighbouring sentence."""
+        import inspect
+        ingress = self.s01["constraint_ingress"]
+        self.assertIn("ingest_design_constraints", ingress["producer"])
+        self.assertIn("DesignConstraint", self.s01["owned_decisions"]["creates"])
+        self.assertIn("DesignConstraint", self.s01["structured_outputs"])
+        self.assertEqual(CONSTRAINT_SECTION, ingress["reads"].split(".")[-1])
+        source = inspect.getsource(s01_ingest)
+        self.assertIn("CONSTRAINT_SECTION", source)
+        self.assertNotIn("selection_preferences", source)
+        self.assertIn("LIVE", self.profile["ingester_status"])
+
+    def test_B35c_the_interface_vocabulary_is_the_one_the_producer_emits(self):
+        """It was not. Two lists with NOT ONE VALUE IN COMMON, and nothing read
+        the contract's, so every interface in every recording would have failed
+        it and every value it named would have been refused by the validator."""
+        self.assertEqual(sorted(s03.INTERACTION_KINDS),
+                         sorted(self.fams["Interface"]["interaction_kinds"]))
+        expectation = self.fams["Interface"]["spatial_expectation"]
+        self.assertEqual(sorted(s04.INTENDED_CONTACT_KINDS),
+                         sorted(expectation["TOUCHES"]))
+        for kind in expectation["TOUCHES"]:
+            self.assertEqual(s04.TOUCHES,
+                             s04.interface_expectation({"interaction_kind": kind}))
+        for kind in expectation["CLEAR"]:
+            self.assertEqual(s04.CLEAR,
+                             s04.interface_expectation({"interaction_kind": kind}))
+        for kind in expectation["TOUCHES"] + expectation["CLEAR"]:
+            self.assertIn(kind, s03.INTERACTION_KINDS)
+
+    def test_B35d_every_declared_domain_has_an_evaluator_and_the_reverse(self):
+        declared = self.fams["FeasibilityDomainAssessment"]["domain"]
+        self.assertEqual(sorted(declared), sorted(s07.DOMAINS))
+        self.assertEqual(sorted(declared), sorted(s07.DOMAIN_EVALUATORS))
+        self.assertEqual(
+            sorted(declared),
+            sorted(self.fams["MechanicalFeasibilityAssessment"]["evaluated_domains"]))
+        for status in (s07.PASS, s07.FAIL, s07.NOT_ESTABLISHED, s07.NOT_APPLICABLE):
+            self.assertIn(status, self.fams["FeasibilityDomainAssessment"]["status"])
+        for status in (s07.FEASIBLE, s07.INFEASIBLE, s07.MFA_NOT_ESTABLISHED):
+            self.assertIn(status,
+                          self.fams["MechanicalFeasibilityAssessment"]["status"])
+        for status in (s07.SATISFIED, s07.VIOLATED, s07.NOT_YET_EVALUABLE):
+            self.assertIn(status, self.fams["HardRequirementCompliance"]["status"])
+
+    def test_B35e_the_motion_effects_come_from_the_declared_vocabulary(self):
+        """A demand vocabulary invented beside the contract's would decide which
+        obligations count as motion without saying so anywhere readable."""
+        declared = self.fams["PhysicalEffectObligation"]["effect"]
+        for effect in s07.MOTION_EFFECTS:
+            self.assertIn(effect, declared)
+        self.assertNotIn("PREVENT_MOTION", s07.MOTION_EFFECTS,
+                         "demanding that motion NOT occur is a different question")
+
+    def test_B35f_feasibility_declares_the_roles_its_demands_need(self):
+        """Every applicability test reads a family, and a family reaches the view
+        only because some premise class names its role. A demand-driven domain
+        whose demand is not in the required minimum is a rule that cannot fire."""
+        roles = {r for p in self.resp["stages"]["feasibility"]
+                 ["required_reasoning_premise_classes"]
+                 for r in p["requires_semantics"]}
+        for family, role in (("Actor", "actor_role"),
+                             ("PhysicalEffectObligation", "physical_effect_obligation"),
+                             ("LoadCase", "load_case"),
+                             ("LoadPath", "load_route"),
+                             ("DesignConstraint", "design_constraint"),
+                             ("Interface", "topology_relation"),
+                             ("Body", "topology_element")):
+            self.assertIn(role, roles, family)
+            self.assertIn(role, self.fams[family]["semantic_roles"], family)
+
+
+class TestClosureSweep(unittest.TestCase):
+    """The defect CLASSES, swept over the S7-B corpus rather than the lines.
+
+    Every one of these was a real finding somewhere in this pass. A scan is worth
+    more than a fixed list because the last four passes each turned up residue
+    nobody had listed - so what is checked is the shape, everywhere it could
+    recur."""
+
+    @classmethod
+    def setUpClass(cls):
+        import inspect
+        cls.src = inspect.getsource(s07)
+        cls.tree = ast.parse(cls.src)
+        cls.code = _code_only(*[v for v in vars(s07).values()
+                                if inspect.isfunction(v)
+                                and v.__module__ == s07.__name__])
+
+    def test_SWEEP_01_no_unknown_key_is_silently_defaulted(self):
+        """`AXIS_INDEX.get(axis, 0)` answered a requirement about a direction
+        nobody named. Any `.get(x, <literal>)` on a vocabulary lookup is the same
+        shape, so the vocabulary tables may only be subscripted."""
+        for node in ast.walk(self.tree):
+            if not (isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "get" and len(node.args) == 2):
+                continue
+            target = node.func.value
+            name = getattr(target, "attr", None) or getattr(target, "id", "")
+            self.assertNotIn("INDEX", str(name).upper(),
+                             "line %d defaults a vocabulary lookup" % node.lineno)
+            self.assertNotIn("AXES", str(name).upper(),
+                             "line %d defaults a vocabulary lookup" % node.lineno)
+
+    def test_SWEEP_02_the_mobility_address_keeps_all_three_components(self):
+        """A cell is (rigid_group, configuration, dof). Every lookup that drops
+        one asks a different question, and the collapsed form read a closed
+        configuration's block as contradicting an open one's motion."""
+        cells, _amb, _used = s07._required_motion_cells(
+            _EV({"Configuration": [{"entity_id": "CFG-1", "_family": "Configuration",
+                                    "distinguishing_basis": [
+                                        {"rigid_group": "RGP-1", "dof": "RZ"}]}]}))
+        self.assertEqual([("RGP-1", "CFG-1", "RZ")], cells)
+        for cell in cells:
+            self.assertEqual(3, len(cell))
+
+    def test_SWEEP_03_a_typed_relation_is_never_accepted_on_the_id_alone(self):
+        """Three references decide a verdict here, and each one's TYPE is
+        checked as well as its resolution: the effect an interaction produces,
+        the family a changed coordinate names, and whether a cited joint frees
+        the cell citing it."""
+        for marker in ('joint.get("_family") != "Joint"',
+                       'i.get("effect") == effect',
+                       'joint.get("_family") != "Joint"'):
+            self.assertIn(marker, self.src, marker)
+        self.assertIn("_disposition_support", self.src)
+
+    def test_SWEEP_04_interface_existence_is_never_a_blanket_exemption(self):
+        """The exemption set is built from `interface_expectation`, so it cannot
+        contain a kind whose meaning is that the pair stays apart."""
+        self.assertIn("interface_expectation", self.code)
+        self.assertNotIn("in declared", self.code)
+        for kind in s03.INTERACTION_KINDS:
+            expectation = s04.interface_expectation({"interaction_kind": kind})
+            self.assertIn(expectation, (s04.TOUCHES, s04.CLEAR, s04.UNDECLARED))
+            if expectation == s04.TOUCHES:
+                self.assertIn(kind, s04.INTENDED_CONTACT_KINDS)
+
+    def test_SWEEP_05_partial_geometry_is_never_read_as_complete(self):
+        """Three domains measure across bodies, and each says so when one of
+        them has no extent: the dimensional limit, the insertion corridor and
+        the interference sweep. A subset silently measured is a smaller product
+        answering for the real one."""
+        for code in ("EXTENT_INCOMPLETE", "INSERTION_GEOMETRY_INCOMPLETE",
+                     "INTERFERENCE_GEOMETRY_MISSING", "BODY_WITHOUT_ENVELOPE"):
+            self.assertIn(code, self.src, code)
+
+    def test_SWEEP_06_every_demand_has_an_applicability_test(self):
+        """NOT_APPLICABLE may only be returned where the DEMAND is absent. Each
+        occurrence is checked by hand below because the rule is semantic; what
+        this pins is that the demand readers exist and are the ones consulted."""
+        self.assertIn("reach_demands", self.code)
+        self.assertIn("motion_demands", self.code)
+        for domain, reader in (("_reach", "reach_demands"),
+                               ("_mobility_disposition", "motion_demands"),
+                               ("_motion_and_transitions", "motion_demands")):
+            body = self.src.split("def %s(" % domain)[1].split("\ndef ")[0]
+            self.assertIn(reader, body, domain)
+            self.assertIn("NOT_APPLICABLE", body, domain)
+
+    def test_SWEEP_07_no_model_local_finding_reaches_a_deterministic_verdict(self):
+        """A ReachResult and an EliminationRecord may weaken and may not decide.
+        Read structurally: neither family is ever compared to PASS or FAIL."""
+        for family in ("ReachResult", "EliminationRecord"):
+            after = self.src.split('fam("%s")' % family)[1]
+            branch = "\n".join(after.splitlines()[:6])
+            self.assertNotIn("status = PASS", branch, family)
+            self.assertNotIn("status = FAIL", branch, family)
+            self.assertIn("MODEL_LOCAL", branch, family)
+
+    def test_SWEEP_08_no_absence_produces_pass_or_fail(self):
+        """Every branch that reports something MISSING weakens to
+        NOT_ESTABLISHED. Read from the source of each evaluator: a code naming an
+        absence must not sit in the same statement as FAIL."""
+        absence = ("MISSING", "ABSENT", "NOT_COMPUTED", "INCOMPLETE",
+                   "NOT_ESTABLISHED", "UNKNOWN", "NOT_DISPOSITIONED",
+                   "UNDISPOSITIONED", "NOT_CLEAR", "OVERLAPS", "NOT_GIVEN",
+                   "TOO_SHORT", "AMBIGUOUS", "UNREADABLE", "NOT_A_JOINT",
+                   "MISMATCH", "NOT_RESOLVABLE", "NOT_YET")
+        for node in ast.walk(self.tree):
+            if not (isinstance(node, ast.Assign) and len(node.targets) == 1):
+                continue
+            target, value = node.targets[0], node.value
+            if not (isinstance(target, ast.Name) and target.id == "status"):
+                continue
+            if not (isinstance(value, ast.Name) and value.id == "FAIL"):
+                continue
+            window = self.src.splitlines()[max(node.lineno - 6, 0):node.lineno]
+            for line in window:
+                for word in absence:
+                    self.assertNotIn('"%s' % word, line,
+                                     "line %d: an absence sits beside a FAIL:\n%s"
+                                     % (node.lineno, "\n".join(window)))
+
+    def test_SWEEP_09_no_s7c_functionality_is_present(self):
+        """Selection is the other half of the split and is not started. Its
+        families are named nowhere in this module, and neither is any word for
+        ranking one candidate against another."""
+        for family in ("SelectionProfile", "CandidateComparison",
+                       "SelectionAdvisory", "SelectionConcern",
+                       "HumanDecisionInput", "SelectionDecision"):
+            self.assertNotIn(family, self.src, family)
+        for word in ("preference", "rank", "score", "weight", "better",
+                     "prefer", "winner", "best"):
+            self.assertNotIn(word, self.code.lower(), word)
+
+    def test_SWEEP_10_nothing_crosses_a_candidate(self):
+        """The view is the only engineering channel, so a candidate cannot see
+        another's evidence. `state` appears in the entry point and in no
+        evaluator: an evaluator taking it could reach unscoped state."""
+        import inspect
+        for name, fn in vars(s07).items():
+            if not (inspect.isfunction(fn) and fn.__module__ == s07.__name__):
+                continue
+            if name in ("evaluate_candidate_feasibility",):
+                continue
+            self.assertNotIn("state", inspect.signature(fn).parameters, name)
+        entry = self.src.split("def evaluate_candidate_feasibility(")[1]
+        for reach in ("state.family(", "state.standing("):
+            self.assertNotIn(reach, entry,
+                             "the entry point reads unscoped state")
+
+
+class _EV(s07._Evidence):
+    """An _Evidence over a literal view. For the structural sweeps only."""
+
+    def __init__(self, view):
+        s07._Evidence.__init__(self, view, "CND-A")
 
 
 # =====================================================================

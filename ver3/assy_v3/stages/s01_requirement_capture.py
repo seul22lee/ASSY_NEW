@@ -6,6 +6,18 @@ open?
 The only stage that may read raw source text (INV-002). Its failure mode is
 SHARPENING - turning "approximately 300" into 300, or an absent quantity into a
 plausible one - so every check below is aimed at that.
+
+TWO INPUTS, TWO PATHS, AND ONLY ONE OF THEM GOES NEAR A MODEL. The request text
+is prose and needs reading, so a model reads it. The user design profile is
+already structured - a section that says PLASTIC_ONLY says it in a field - and
+`ingest_design_constraints` maps it across without asking anything. Handing a
+stated requirement to a model to reinterpret would turn it into an inference,
+which is the failure this whole stage is built against.
+
+The profile's OTHER section is not read here at all. A selection preference is
+not a weak constraint: it says which buildable thing is wanted, never what may
+be built, and the way it is kept from becoming an engineering verdict is that no
+code before `selection` ever looks at it.
 """
 from __future__ import annotations
 
@@ -158,6 +170,7 @@ class S01RequirementCapture(Stage):
                 "statement": a["statement"], "inferred_by_stage": "s01",
                 "why": a["why"],
                 "would_be_invalidated_by": a["would_be_invalidated_by"]}, prov))
+        ops += ingest_design_constraints((inputs or {}).get("design_profile"))
         return ops
 
     # ---------------------------------------------------------- completeness
@@ -174,6 +187,52 @@ class S01RequirementCapture(Stage):
             if s.get("kind") not in SCENARIO_KINDS:
                 out.append("scenario %s has no valid kind" % s.get("id"))
         return out
+
+
+# --------------------------------------------------- the deterministic ingress
+#: The one key read from the profile. Named here so that "which section does the
+#: ingester see" is answerable by looking, and so that adding a second key is an
+#: edit somebody has to make on purpose.
+CONSTRAINT_SECTION = "design_constraints"
+
+
+def ingest_design_constraints(profile: Any) -> List[Op]:
+    """The user's HARD requirements, carried across without interpretation.
+
+    NOTHING IS INFERRED AND NOTHING IS COMPLETED. The kind, the statement and the
+    parameters are the user's own; a missing limit stays missing, a missing unit
+    stays missing, and the record says so by carrying what was given. Downstream
+    a partial parameter set produces NOT_YET_EVALUABLE, which is the design not
+    yet having said - not this stage guessing what it meant.
+
+    `evaluability` says WHO can answer the requirement, not whether the answer
+    will succeed: an entry carrying structured parameters is addressed to a
+    check, an entry carrying only a sentence is addressed to a person. Deciding
+    it from whether some registry currently holds an evaluator would make an s01
+    fact depend on what a later stage happens to implement this week.
+
+    Ids come from the profile's own order, so the same profile always ingests to
+    the same ids and no counter lives anywhere.
+    """
+    entries = (profile or {}).get(CONSTRAINT_SECTION) or []
+    ops: List[Op] = []
+    for n, entry in enumerate(entries, start=1):
+        if not isinstance(entry, dict) or not entry.get("kind"):
+            # A constraint with no kind is not a constraint anyone can act on,
+            # and naming a kind for it would be inventing the requirement.
+            continue
+        parameters = entry.get("parameters")
+        ops.append(Op("CREATE", "DesignConstraint", "DSC-%04d" % n, {
+            "kind": entry["kind"],
+            "statement": entry.get("statement", ""),
+            "source": entry.get("source", "user design profile"),
+            "evaluability": ("MACHINE_EVALUABLE" if isinstance(parameters, dict)
+                             and parameters else "HUMAN_EVALUABLE"),
+            "parameters": parameters,
+            "blocks_selection": entry.get("blocks_selection", True),
+            "derived_from_requirements": entry.get(
+                "derived_from_requirements", [])}, "s01:profile_ingest"))
+    return ops
 
 
 # ------------------------------------------------------------- s01 checks

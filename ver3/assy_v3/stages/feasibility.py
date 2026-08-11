@@ -17,9 +17,13 @@ than a hinge that works, and nothing here can express the difference.
 
 THREE RULES DECIDE ALMOST EVERYTHING BELOW
 
-    APPLICABILITY BEFORE STATUS. NOT_APPLICABLE means the design poses no
-    question in this domain - no load case, no required motion. It is not a
-    weaker PASS and it never blocks.
+    APPLICABILITY IS READ FROM THE DEMAND, NEVER FROM THE REALIZATION.
+    NOT_APPLICABLE means the design ASKS no question here - no actor must reach
+    anything, no effect requires motion, no load is applied. A demand with no
+    realization is NOT_ESTABLISHED. Reading applicability off the realization
+    would let a candidate escape a domain by failing to produce the very entity
+    that domain examines: no Transition, therefore no motion question, therefore
+    nothing to answer. That is the loudest way absence becomes a pass.
 
     ABSENCE IS NOT_ESTABLISHED. Never PASS, and never FAIL either. A missing
     envelope, an unchecked path, a conservative box overlap are all things the
@@ -72,6 +76,18 @@ FEASIBLE, INFEASIBLE, MFA_NOT_ESTABLISHED = (
 #: sentence is read only by a person, and `summary` is where sentences go.
 MODEL_LOCAL_NEGATIVE = "MODEL_LOCAL_NEGATIVE"
 MODEL_LOCAL_POSITIVE = "MODEL_LOCAL_POSITIVE"
+
+#: THE EFFECTS THAT DEMAND MOTION, taken from `PhysicalEffectObligation.effect`'s
+#: own vocabulary. PREVENT_MOTION is deliberately not among them: it demands that
+#: motion NOT occur, which is a different question and not this one asked
+#: backwards.
+MOTION_EFFECTS = ("TRANSMIT_MOTION", "CONVERT_MOTION", "PERMIT_MOTION")
+
+#: The axes a dimensional limit may be stated on. `ANY` means the largest.
+#: Anything else is a word this code does not know, and it says so rather than
+#: choosing one - an unrecognised axis silently becoming X answered a
+#: requirement about a direction nobody named.
+DIMENSION_AXES = ("ANY", "X", "Y", "Z")
 
 #: DERIVED FROM THE DOMAIN NAME, never a table beside it - an abbreviation list
 #: is a second vocabulary, and the two drift the first time a domain is added.
@@ -188,35 +204,71 @@ class _Evidence:
                 return j
         return None
 
+    # -- WHAT THE DESIGN DEMANDS, as against what it has built ---------
+    def reach_demands(self) -> List[Dict[str, Any]]:
+        """Actors that must reach something. The demand, not its realization.
+
+        `Actor.must_reach` is a REQUIRED field, so an actor that reaches for
+        nothing states an empty list and is not a demand. A FunctionalRegion is
+        how a candidate ANSWERS this; its absence is the answer missing, never
+        the question missing.
+        """
+        return [a for a in self.fam("Actor") if a.get("must_reach")]
+
+    def motion_demands(self) -> List[Dict[str, Any]]:
+        """Effect obligations whose own declared effect requires movement."""
+        return [p for p in self.fam("PhysicalEffectObligation")
+                if p.get("effect") in MOTION_EFFECTS]
+
 
 # =====================================================================
 # the nine domains
 # =====================================================================
 def _physical_realization(ev: _Evidence) -> Verdict:
-    """Every required effect is realized by an interaction this candidate has."""
+    """Every required effect is realized by an interaction that produces IT.
+
+    POINTING AT AN OBLIGATION IS NOT DISCHARGING IT. `discharges_effect` says
+    which demand an interaction answers; `effect` says what the interaction
+    actually does, and the two are separate fields because they can disagree. An
+    interaction that LOCATEs while naming an obligation to TRANSMIT_FORCE has
+    answered nothing, and accepting it on the reference alone made the typed
+    vocabulary decorative - any interaction could discharge any obligation.
+
+    EXACT MATCH, because no canonical compatibility relation between effects
+    exists. Inventing one here - deciding that CONVERT_MOTION covers
+    TRANSMIT_MOTION - would be this file authoring physical semantics that
+    belong to the contract.
+    """
     demands = ev.fam("PhysicalEffectObligation")
     if not demands:
         return Verdict("physical_realization", NOT_APPLICABLE, ["NO_EFFECT_DEMANDED"])
-    discharged = {i.get("discharges_effect"): i for i in ev.fam("PhysicalInteraction")}
-    used, missing = [], []
+    by_demand: Dict[Any, List[Dict[str, Any]]] = {}
+    for i in ev.fam("PhysicalInteraction"):
+        by_demand.setdefault(i.get("discharges_effect"), []).append(i)
+    used, codes, notes = [], [], []
+    status = PASS
     for demand in demands:
-        eid = demand.get("entity_id")
-        interaction = discharged.get(eid)
+        eid, effect = demand.get("entity_id"), demand.get("effect")
         # THE OBLIGATION IS NAMED EITHER WAY. It is a present fact that was read,
         # and it is the reason the domain is unsatisfied; what is absent is the
         # interaction, and that has no id to name. Withdrawing the demand must
         # cost this verdict its authority.
         used.append(eid)
-        if interaction is None:
-            missing.append(eid)
-        else:
-            used.append(interaction.get("entity_id"))
-    if missing:
-        return Verdict("physical_realization", NOT_ESTABLISHED,
-                       ["EFFECT_NOT_DISCHARGED"], used,
-                       "%d effect obligation(s) have no interaction: %s"
-                       % (len(missing), ", ".join(sorted(missing)[:5])))
-    return Verdict("physical_realization", PASS, ["ALL_EFFECTS_DISCHARGED"], used)
+        claimants = by_demand.get(eid) or []
+        used += [i.get("entity_id") for i in claimants]
+        if not claimants:
+            codes.append("EFFECT_NOT_DISCHARGED")
+            notes.append("%s has no interaction" % eid)
+            status = _weaken(status, NOT_ESTABLISHED)
+        elif not any(i.get("effect") == effect for i in claimants):
+            codes.append("EFFECT_TYPE_MISMATCH")
+            notes.append("%s demands %s and the interaction(s) naming it do %s"
+                         % (eid, effect,
+                            ", ".join(sorted({str(i.get("effect")) for i in claimants}))))
+            status = _weaken(status, NOT_ESTABLISHED)
+    if status == PASS:
+        codes.append("ALL_EFFECTS_DISCHARGED")
+    return Verdict("physical_realization", status, codes, used, "; ".join(notes[:5]))
 
 
 def _load_reaction_closure(ev: _Evidence) -> Verdict:
@@ -302,12 +354,25 @@ def _load_reaction_closure(ev: _Evidence) -> Verdict:
 
 
 def _required_motion_cells(ev: _Evidence):
-    """(group, dof, why) triples the design REQUIRES to move, and what is ambiguous.
+    """(group, configuration, dof) cells the design REQUIRES to move.
+
+    THE ADDRESS IS ALL THREE COMPONENTS, because that is what a mobility cell is.
+    Dropping the configuration and matching on (group, dof) asked "is this DOF
+    ever blocked anywhere", which is a different question with a different
+    answer: a latch free when open and held when closed is a correct mechanism,
+    and the collapsed lookup read its closed cell as a contradiction of a motion
+    only its open cell is required to perform.
 
     From declared motion requirements only - a distinguishing basis, or a
     transition whose changed joint has exactly one free DOF. NOT the 6-DOF
     bookkeeping grid: totality is what the enumerator guarantees, and reading a
     feasibility verdict off it would be reading it off this code.
+
+    A distinguishing basis is a statement about the configuration that CARRIES
+    it - "what makes this one a different one" - so it requires that
+    configuration's cell alone. A transition happens BETWEEN two configurations,
+    so it requires the cell in each endpoint: a coordinate that changes from one
+    to the other must be free at both ends of the change.
     """
     cells, ambiguous, used = [], [], []
     for cfg in ev.fam("Configuration"):
@@ -316,30 +381,108 @@ def _required_motion_cells(ev: _Evidence):
                 continue
             group, dof = item.get("rigid_group"), item.get("dof")
             if group and dof:
-                cells.append((group, dof, cfg.get("entity_id")))
+                cells.append((group, cfg.get("entity_id"), dof))
                 used.append(cfg.get("entity_id"))
+    states = {st.get("entity_id"): st for st in ev.fam("State")}
     for t in ev.fam("Transition"):
+        tid = t.get("entity_id")
+        endpoints = [states.get(t.get(f)) for f in ("from_state", "to_state")]
+        configs = [(st or {}).get("configuration") for st in endpoints]
         for jid in (t.get("changed_coordinates") or []):
             joint = ev.by_id.get(jid)
-            if not isinstance(joint, dict):
+            # THE REFERENT MUST BE A VISIBLE JOINT. A changed coordinate that
+            # resolves to no joint in the view - or to an entity of some other
+            # family - produced no requirement at all under the old `continue`:
+            # the motion the transition declared simply vanished instead of being
+            # questioned, which is the demand-hidden-by-absence defect one level
+            # down.
+            if not isinstance(joint, dict) or joint.get("_family") != "Joint":
+                ambiguous.append((
+                    "CHANGED_COORDINATE_NOT_A_JOINT",
+                    "%s declares %s changes and it names no visible joint"
+                    % (tid, jid)))
+                used += [tid, jid]
+                continue
+            # `free_dof` DEFAULTS AN UNREADABLE AXIS TO Z. That default is S-5's
+            # and stays so, but a feasibility verdict must not rest on it: an
+            # axis this pipeline cannot read is a cell nobody actually declared,
+            # so the requirement is unresolvable rather than silently assumed to
+            # be about Z. `spatial_realization` already refuses the same axis;
+            # this refuses it for the cell address it would otherwise fabricate.
+            if s04.axis_index(joint.get("axis_direction")) is None:
+                ambiguous.append((
+                    "REQUIRED_MOTION_AXIS_UNREADABLE",
+                    "%s changes %s whose axis %r names no coordinate"
+                    % (tid, jid, joint.get("axis_direction"))))
+                used += [tid, jid]
                 continue
             free = s03.free_dof(joint.get("joint_type"), joint.get("axis_direction"))
             group = joint.get("child_group")
             if len(free) == 1 and group:
-                cells.append((group, sorted(free)[0], t.get("entity_id")))
-                used += [t.get("entity_id"), jid]
+                for cfg in [c for c in configs if c]:
+                    cells.append((group, cfg, sorted(free)[0]))
+                used += [tid, jid] + [
+                    st.get("entity_id") for st in endpoints if st]
             elif group:
                 # A multi-DOF class: the representation does not say WHICH
                 # coordinate this transition moves, and guessing would invent the
                 # requirement the verdict is about.
-                ambiguous.append((group, joint.get("joint_type"), jid))
-    return cells, ambiguous, used
+                ambiguous.append((
+                    "MULTI_DOF_JOINT_NOT_RESOLVABLE",
+                    "%s leaves more than one DOF free at %s and the "
+                    "representation does not say which one moves" % (jid, group)))
+                used += [tid, jid]
+    return sorted(set(cells)), ambiguous, used
+
+
+def _disposition_support(ev: _Evidence, d, group: str, dof: str):
+    """Whether the joint an INTENDED cell cites really leaves that cell free.
+
+    Reads `free_dof`, so the question "does this joint class free this DOF" has
+    the one answer s03's derivation used to author the claim.
+    """
+    joint = ev.by_id.get(d.get("by_joint"))
+    if not isinstance(joint, dict) or joint.get("_family") != "Joint":
+        return [("DISPOSITION_PREMISE_NOT_A_JOINT",
+                 "%s/%s cites %s, which is no joint of this candidate"
+                 % (group, dof, d.get("by_joint")))]
+    if joint.get("child_group") != group:
+        return [("DISPOSITION_JOINT_DRIVES_ANOTHER_GROUP",
+                 "%s/%s cites %s, whose child is %s"
+                 % (group, dof, joint["entity_id"], joint.get("child_group")))]
+    if s04.axis_index(joint.get("axis_direction")) is None:
+        # `free_dof` would answer from its Z default here, and an answer from a
+        # default cannot confirm or refute anything.
+        return [("DISPOSITION_JOINT_AXIS_UNREADABLE",
+                 "%s/%s cites %s, whose axis %r names no coordinate"
+                 % (group, dof, joint["entity_id"], joint.get("axis_direction")))]
+    if dof not in s03.free_dof(joint.get("joint_type"), joint.get("axis_direction")):
+        return [("DISPOSITION_JOINT_DOES_NOT_FREE_IT",
+                 "%s/%s cites %s, a %s about %s, which leaves %s free"
+                 % (group, dof, joint["entity_id"], joint.get("joint_type"),
+                    joint.get("axis_direction"),
+                    ", ".join(sorted(s03.free_dof(joint.get("joint_type"),
+                                                  joint.get("axis_direction"))))
+                    or "nothing"))]
+    return []
 
 
 def _mobility_disposition(ev: _Evidence) -> Verdict:
     """Every DOF the design requires to move is dispositioned as free."""
     cells, ambiguous, used = _required_motion_cells(ev)
+    demanded = ev.motion_demands()
     if not cells and not ambiguous:
+        if demanded:
+            # THE DEMAND IS THE APPLICABILITY TEST. An effect obligation that
+            # requires movement is a motion question whether or not anything has
+            # been built to answer it, and reporting NOT_APPLICABLE here would
+            # excuse the candidate for having produced nothing to judge.
+            return Verdict("mobility_disposition", NOT_ESTABLISHED,
+                           ["MOTION_DEMANDED_WITHOUT_REALIZATION"],
+                           [p.get("entity_id") for p in demanded],
+                           "%d effect obligation(s) require movement and no "
+                           "configuration or transition declares which DOF moves"
+                           % len(demanded))
         return Verdict("mobility_disposition", NOT_APPLICABLE, ["NO_REQUIRED_MOTION"])
     disposed = {}
     for mex in ev.fam("MobilityExpectation"):
@@ -349,34 +492,52 @@ def _mobility_disposition(ev: _Evidence) -> Verdict:
                           d.get("dof"))] = (mex.get("entity_id"), d)
     codes, notes = [], []
     status = PASS
-    if ambiguous:
-        codes.append("MULTI_DOF_JOINT_NOT_RESOLVABLE")
-        notes.append("%s leaves more than one DOF free and the representation "
-                     "does not say which one moves" % ambiguous[0][2])
+    for code, note in ambiguous:
+        # EACH UNRESOLVABLE REQUIREMENT REPORTS ITS OWN REASON. A multi-DOF
+        # class, an unreadable axis and a coordinate that names no joint are
+        # three different ways the design has not said which cell must move, and
+        # one code standing for all three would describe two of them wrongly.
+        codes.append(code)
+        notes.append(note)
         status = _weaken(status, NOT_ESTABLISHED)
-    for group, dof, _why in cells:
-        rows = [(mid, d) for (g, _c, x), (mid, d) in disposed.items()
-                if g == group and x == dof]
-        if not rows:
+    for cell in cells:
+        group, configuration, dof = cell
+        row = disposed.get(cell)
+        if row is None:
             codes.append("REQUIRED_CELL_NOT_DISPOSITIONED")
-            notes.append("%s/%s has no disposition" % (group, dof))
+            notes.append("%s/%s/%s has no disposition" % cell)
             status = _weaken(status, NOT_ESTABLISHED)
             continue
-        for mid, d in rows:
-            verdict = d.get("disposition")
-            if verdict == "INTENDED" and d.get("by_joint"):
-                used += [mid, d["by_joint"]]
-            elif verdict in ("BLOCKED_BY", "IRRELEVANT_BECAUSE"):
-                codes.append("REQUIRED_MOTION_CONTRADICTED")
-                notes.append("%s/%s must move and is %s" % (group, dof, verdict))
-                status = FAIL
-                used += [mid] + [d[f] for f in ("constraint_relation", "scenario")
-                                 if d.get(f)]
-            else:
-                codes.append("REQUIRED_CELL_UNDISPOSITIONED")
-                notes.append("%s/%s is %s" % (group, dof, verdict))
+        mid, d = row
+        verdict = d.get("disposition")
+        if verdict == "INTENDED" and d.get("by_joint"):
+            used += [mid, d["by_joint"]]
+            # THE CITED JOINT MUST ACTUALLY FREE THIS CELL. `by_joint` is a
+            # reference, and the write boundary checks that it resolves to a
+            # Joint - not that the joint's own class and axis leave this DOF of
+            # this group free. Taking the citation on trust let a disposition
+            # assert mobility its own evidence does not provide, which is the
+            # typed-relation-accepted-by-id defect the effect discharge had.
+            #
+            # NOT_ESTABLISHED rather than FAIL: a miscited premise fails to
+            # support the motion, where a FAIL would claim the design has shown
+            # the motion cannot happen.
+            for code, note in _disposition_support(ev, d, group, dof):
+                codes.append(code)
+                notes.append(note)
                 status = _weaken(status, NOT_ESTABLISHED)
-                used.append(mid)
+        elif verdict in ("BLOCKED_BY", "IRRELEVANT_BECAUSE"):
+            codes.append("REQUIRED_MOTION_CONTRADICTED")
+            notes.append("%s must move in %s and is %s"
+                         % (group + "/" + dof, configuration, verdict))
+            status = FAIL
+            used += [mid] + [d[f] for f in ("constraint_relation", "scenario")
+                             if d.get(f)]
+        else:
+            codes.append("REQUIRED_CELL_UNDISPOSITIONED")
+            notes.append("%s/%s/%s is %s" % (group, configuration, dof, verdict))
+            status = _weaken(status, NOT_ESTABLISHED)
+            used.append(mid)
     if status == PASS:
         codes.append("EVERY_REQUIRED_CELL_INTENDED")
     return Verdict("mobility_disposition", status, codes, used, "; ".join(notes[:5]))
@@ -444,16 +605,22 @@ def _required_configurations(ev: _Evidence) -> Verdict:
 def _motion_and_transitions(ev: _Evidence) -> Verdict:
     """A transition moves exactly the coordinates it says it moves."""
     transitions = ev.fam("Transition")
-    required_change = any(cfg.get("distinguishing_basis")
-                          for cfg in ev.fam("Configuration"))
+    declaring = [cfg for cfg in ev.fam("Configuration")
+                 if cfg.get("distinguishing_basis")]
+    demanded = ev.motion_demands()
     if not transitions:
-        if required_change:
-            # A state change IS required and no transition describes it. Absent,
-            # not inapplicable - that difference is the whole point of the domain.
-            return Verdict("motion_and_transitions", NOT_ESTABLISHED,
-                           ["REQUIRED_TRANSITION_MISSING"], [],
-                           "a configuration declares a distinguishing basis and "
-                           "no transition realizes the change")
+        # A STATE CHANGE IS REQUIRED AND NOTHING DESCRIBES IT. Absent, not
+        # inapplicable - that difference is the whole point of the domain, and
+        # the demand may come from either direction: a configuration declaring
+        # what makes it different, or an effect obligation that cannot be
+        # discharged without movement.
+        if declaring or demanded:
+            return Verdict(
+                "motion_and_transitions", NOT_ESTABLISHED,
+                ["REQUIRED_TRANSITION_MISSING"],
+                [e.get("entity_id") for e in declaring + demanded],
+                "%d motion demand(s) and no transition realizes any of them"
+                % len(declaring + demanded))
         return Verdict("motion_and_transitions", NOT_APPLICABLE, ["NO_REQUIRED_MOTION"])
     codes, notes, used = [], [], []
     status = PASS
@@ -573,21 +740,32 @@ def _reach(ev: _Evidence) -> Verdict:
     way the model leaned. Reporting the model's answer as this pipeline's would
     make a deterministic wrapper the author of an unfalsifiable claim.
     """
+    # THE DEMAND IS THE ACTOR'S, and it exists before any candidate answers it.
+    # Reading applicability off the FunctionalRegion asked the candidate whether
+    # it wished to be examined: declare no access region and the reach question
+    # disappeared, which is exactly how a design that ignores an actor came out
+    # indistinguishable from one that has no actor.
+    demands = ev.reach_demands()
     regions = [r for r in ev.fam("FunctionalRegion")
                if r.get("role") in ("ACCESS", "APERTURE")
                and (r.get("required_by_actors") or r.get("reach_targets"))]
-    if not regions:
+    if not demands and not regions:
         return Verdict("reach", NOT_APPLICABLE, ["NO_REACH_REQUIREMENT"])
-    codes = ["REACH_BASIS_NOT_ESTABLISHED"]
+    codes, used = [], [a.get("entity_id") for a in demands]
+    if demands and not regions:
+        codes.append("REACH_REALIZATION_ABSENT")
+        why = ("%d actor(s) must reach something and this candidate declares no "
+               "access or aperture region that answers it" % len(demands))
+    else:
+        codes.append("REACH_BASIS_NOT_ESTABLISHED")
+        why = ("%d reach requirement(s); no deterministic reach basis exists, so "
+               "a ReachResult is recorded as a model-local finding and decides "
+               "nothing" % max(len(demands), len(regions)))
     results = ev.fam("ReachResult")
     if results:
         codes.append(MODEL_LOCAL_POSITIVE if all(r.get("reachable") for r in results)
                      else MODEL_LOCAL_NEGATIVE)
-    return Verdict(
-        "reach", NOT_ESTABLISHED, codes, [],
-        "%d reach requirement(s); no deterministic reach basis exists, so a "
-        "ReachResult is recorded as a model-local finding and decides nothing"
-        % len(regions))
+    return Verdict("reach", NOT_ESTABLISHED, codes, used, why)
 
 
 def _assemblability(ev: _Evidence) -> Verdict:
@@ -616,6 +794,20 @@ def _assemblability(ev: _Evidence) -> Verdict:
         return Verdict("assemblability", NOT_ESTABLISHED, ["ASSEMBLY_ORDER_MISSING"],
                        [], "%d bodies and no assembly step" % len(bodies))
     boxes, envelope_of = ev.boxes(), ev.envelope_of()
+    # A CORRIDOR IS ONLY CLEAR OF WHAT CAN BE SEEN. A previously-installed body
+    # with no extent used to be skipped in silence, so the fewer bodies an
+    # arrangement had placed the more freely every insertion passed - the same
+    # partial-geometry-read-as-complete defect the dimensional evaluator had, one
+    # domain over. The insertion answer is unestablished while any body is
+    # unplaced, whether or not it is one this step must pass.
+    unplaced = sorted(b["entity_id"] for b in bodies if b["entity_id"] not in boxes)
+    if unplaced:
+        codes.append("INSERTION_GEOMETRY_INCOMPLETE")
+        notes.append("%d body/bodies have no extent (%s), so no insertion path "
+                     "can be shown clear of them"
+                     % (len(unplaced), ", ".join(unplaced[:5])))
+        status = _weaken(status, NOT_ESTABLISHED)
+        used += [b["entity_id"] for b in bodies]
     ordered = sorted(steps.values(), key=lambda s: s.get("order_index") or 0)
     placed: List[str] = []
     for step in ordered:
@@ -676,6 +868,15 @@ def _insertion_hull(boxes, body, direction):
 def _gross_interference(ev: _Evidence) -> Verdict:
     """Nothing sweeps or sits where it must not - as far as boxes can show.
 
+    AN INTERFACE IS NOT A PERMISSION SLIP. Only a kind whose meaning REQUIRES the
+    pair to meet exempts that pair: two bodies declared to touch are supposed to
+    overlap as boxes, and reporting it would be reporting the design. CLEARANCE
+    is the opposite declaration - the design promising these two stay apart - so
+    an overlapping CLEARANCE pair is the promise unverified, and exempting it
+    because "an interface exists" turned the strongest statement about a pair
+    into the weakest. `interface_expectation` is s04's, so the classification has
+    one reader.
+
     NO FAIL PATH, and that is a statement about the evidence rather than about
     the mechanisms. An axis-aligned box overlap is not a collision: the real
     bodies are smaller than their boxes, so no-overlap proves clearance and
@@ -700,8 +901,10 @@ def _gross_interference(ev: _Evidence) -> Verdict:
     # could interfere.
     if len(bodies) < 2 and not moving and not keepouts:
         return Verdict("gross_interference", NOT_APPLICABLE, ["NOTHING_COEXISTS"])
-    declared = {frozenset((i.get("bodies") or [])[:2])
-                for i in ev.fam("Interface") if len(i.get("bodies") or []) >= 2}
+    # pair -> what the interface EXPECTS of it. Only TOUCHES exempts.
+    expectation = {frozenset((i.get("bodies") or [])[:2]): s04.interface_expectation(i)
+                   for i in ev.fam("Interface") if len(i.get("bodies") or []) >= 2}
+    exempt = {p for p, e in expectation.items() if e == s04.TOUCHES}
     envelope_of, codes, notes, used = ev.envelope_of(), [], [], []
     status = PASS
     # EVERY BOX, EVERY INTERFACE AND THE BASIS. "Nothing overlaps that was not
@@ -727,10 +930,13 @@ def _gross_interference(ev: _Evidence) -> Verdict:
                 status = _weaken(status, NOT_ESTABLISHED)
                 used.append(rid)
         for other, obox in boxes.items():
-            if other == body or frozenset((body, other)) in declared:
+            pair = frozenset((body, other))
+            if other == body or pair in exempt:
                 continue
             if s04.overlaps(hull, obox):
-                codes.append("SWEEP_MEETS_UNDECLARED_BODY")
+                codes.append("SWEEP_MEETS_CLEARANCE_PAIR"
+                             if expectation.get(pair) == s04.CLEAR
+                             else "SWEEP_MEETS_UNDECLARED_BODY")
                 notes.append("%s sweeps into %s" % (body, other))
                 status = _weaken(status, NOT_ESTABLISHED)
                 used.append(envelope_of.get(other))
@@ -738,11 +944,16 @@ def _gross_interference(ev: _Evidence) -> Verdict:
     for x in range(len(names)):
         for y in range(x + 1, len(names)):
             pair = frozenset((names[x], names[y]))
-            if pair in declared or not s04.overlaps(boxes[names[x]], boxes[names[y]]):
+            if pair in exempt or not s04.overlaps(boxes[names[x]], boxes[names[y]]):
                 continue
-            codes.append("UNDECLARED_PAIR_OVERLAPS")
-            notes.append("%s and %s overlap and no interface declares the pair"
-                         % (names[x], names[y]))
+            if expectation.get(pair) == s04.CLEAR:
+                codes.append("CLEARANCE_PAIR_OVERLAPS")
+                notes.append("%s and %s are declared CLEARANCE and their boxes "
+                             "overlap" % (names[x], names[y]))
+            else:
+                codes.append("UNDECLARED_PAIR_OVERLAPS")
+                notes.append("%s and %s overlap and no interface declares the pair"
+                             % (names[x], names[y]))
             status = _weaken(status, NOT_ESTABLISHED)
             used += [envelope_of.get(names[x]), envelope_of.get(names[y])]
     if status == PASS:
@@ -815,23 +1026,44 @@ def _prohibited_energy_source(constraint, ev):
 
 
 def _max_overall_dimension(constraint, ev):
-    """Evaluable only when the numbers and the limit are in the same units.
+    """The size of the WHOLE candidate, or no answer at all.
 
-    An extent expressed in a RELATIVE basis and a limit in millimetres are not
-    comparable, and a conversion rule invented here would be this code choosing
-    the scale the design deliberately left free. The condition is the
-    ReferenceScale rule, not a shape assumed here: basis ABSOLUTE and `absolute`
-    stating {unit, per_unit}. s04 is told never to invent an absolute size for
-    something the input left free, so on a design that states no size this is
+    "Overall" is not a property of the bodies that happen to have been placed.
+    Measuring the enveloped subset and calling the result SATISFIED answered a
+    question about a smaller product than the one being designed - and the more
+    incomplete the arrangement, the more comfortably it passed. Every body this
+    candidate has must have an extent, or the overall dimension is not yet a
+    number.
+
+    The units must meet too. An extent in a RELATIVE basis and a limit in
+    millimetres are not comparable, and a conversion invented here would be this
+    code choosing the scale the design deliberately left free. The condition is
+    the ReferenceScale rule: basis ABSOLUTE and `absolute` stating
+    {unit, per_unit}. s04 is told never to invent an absolute size for something
+    the input left free, so on a design that states no size this is
     NOT_YET_EVALUABLE - which is what that design knows.
     """
     params = constraint.get("parameters") or {}
     limit, unit = params.get("limit"), params.get("unit")
     if not isinstance(limit, (int, float)):
         return NOT_YET_EVALUABLE, ["CONSTRAINT_LIMIT_MISSING"], [], ""
+    axis = params.get("axis", "ANY")
+    if axis not in DIMENSION_AXES:
+        # NO FALLBACK. `AXIS_INDEX.get(axis, 0)` answered a requirement about a
+        # direction nobody named by silently measuring X.
+        return (NOT_YET_EVALUABLE, ["AXIS_NOT_RECOGNIZED"], [],
+                "the limit is stated on axis %r; this code knows %s"
+                % (axis, ", ".join(DIMENSION_AXES)))
     scales = ev.fam("ReferenceScale")
     if not scales:
         return NOT_YET_EVALUABLE, ["NO_REFERENCE_SCALE"], [], ""
+    if len(scales) > 1:
+        # Two bases and no rule saying which the extents are in. Picking the
+        # first would be choosing an answer.
+        return (NOT_YET_EVALUABLE, ["SCALE_AMBIGUOUS"],
+                [s.get("entity_id") for s in scales],
+                "%d reference scales are current and nothing says which basis "
+                "these extents are expressed in" % len(scales))
     scale = scales[0]
     if scale.get("basis") != "ABSOLUTE" or not scale.get("absolute"):
         return (NOT_YET_EVALUABLE, ["SCALE_NOT_ABSOLUTE"], [scale.get("entity_id")],
@@ -848,16 +1080,22 @@ def _max_overall_dimension(constraint, ev):
         # a number nobody supplied.
         return (NOT_YET_EVALUABLE, ["SCALE_FACTOR_MISSING"], [scale.get("entity_id")],
                 "the scale states a unit and not what one coordinate is worth in it")
-    boxes = ev.boxes()
-    if not boxes:
-        return NOT_YET_EVALUABLE, ["NO_EXTENT"], [], ""
+    boxes, bodies = ev.boxes(), ev.ids("Body")
+    if not bodies:
+        return NOT_YET_EVALUABLE, ["NO_BODY"], [], ""
+    unplaced = sorted(b for b in bodies if b not in boxes)
+    if unplaced:
+        return (NOT_YET_EVALUABLE, ["EXTENT_INCOMPLETE"], sorted(bodies),
+                "%d of %d bodies have no extent (%s), so there is no overall "
+                "dimension to compare" % (len(unplaced), len(bodies),
+                                          ", ".join(unplaced[:5])))
     envelope_of = ev.envelope_of()
     lo = [min(b[0][i] for b in boxes.values()) for i in range(3)]
     hi = [max(b[1][i] for b in boxes.values()) for i in range(3)]
     spans = [(hi[i] - lo[i]) * per_unit for i in range(3)]
-    axis = params.get("axis", "ANY")
-    measured = max(spans) if axis == "ANY" else spans[s04.AXIS_INDEX.get(axis, 0)]
-    used = [scale.get("entity_id")] + [envelope_of[b] for b in sorted(boxes)]
+    measured = max(spans) if axis == "ANY" else spans[s04.AXIS_INDEX[axis]]
+    used = ([scale.get("entity_id")] + sorted(bodies)
+            + [envelope_of[b] for b in sorted(boxes)])
     if measured > limit:
         return (VIOLATED, ["OVERALL_DIMENSION_EXCEEDED"], used,
                 "%.4g %s exceeds the %s %s limit" % (measured, unit, limit, unit))

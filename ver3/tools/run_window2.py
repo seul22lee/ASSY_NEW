@@ -164,6 +164,24 @@ def discover_cases() -> List[str]:
     return sorted(set(out))
 
 
+def design_profile(case_id: str) -> Optional[Dict[str, Any]]:
+    """The user's structured profile, beside the request it accompanies.
+
+    Optional and read verbatim. A design that ships no profile states no hard
+    requirement THROUGH THIS CHANNEL, which is a different fact from stating
+    none at all - and the honest consequence is that no DesignConstraint exists
+    to evaluate, not that one is inferred from the prose.
+    """
+    for name in ("design_profile.json", "design_profile.yaml"):
+        for base in (os.path.join(BENCHMARKS, case_id, "source"),
+                     os.path.join(PROBES, case_id)):
+            path = os.path.join(base, name)
+            if os.path.isfile(path):
+                with open(path) as fh:
+                    return _yaml.safe_load(fh)
+    return None
+
+
 def seed_window1(case_id: str):
     """Replay S01 and S02. Returns (state, problems)."""
     root = recording_root(case_id)
@@ -172,8 +190,11 @@ def seed_window1(case_id: str):
         return None, ["no recording or request for %s" % case_id]
     provider = OfflineReplayProvider(root, case_id)
     state = DesignState(run_id="w2-%s" % case_id)
+    # THE PROFILE IS NOT REPLAYED, because it was never a model response. It is
+    # structured user input, ingested deterministically beside the recording.
     out1 = S01RequirementCapture().invoke(provider, state, state.run_id,
-                                          {"request_text": text})
+                                          {"request_text": text,
+                                           "design_profile": design_profile(case_id)})
     if out1.patch is None:
         return None, ["s01 replay failed: %s" % out1.problems]
     state.apply(out1.patch)

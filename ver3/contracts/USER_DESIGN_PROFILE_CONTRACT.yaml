@@ -14,7 +14,14 @@
 schema_version: "0.1.0"
 status: draft
 governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
-declared_by: "S-7 / U-8, substep S7-A. The ingester is S7-B; the profile materialiser is S7-C."
+declared_by: "S-7 / U-8, substep S7-A."
+ingester_status: >
+  LIVE since the S7-B correction. `design_constraints` is read by s01
+  (`ingest_design_constraints`), deterministically and without paraphrase;
+  see S01_CONTRACT.constraint_ingress for the mechanism. The
+  `selection_preferences` materialiser is still S7-C's and nothing reads
+  that section today - which is what makes preference blindness a property
+  of the code rather than a promise about it.
 
 visibility:
   design_constraints: >
@@ -47,10 +54,13 @@ visibility:
 
 ingestion:
   design_constraints: >
-    DETERMINISTIC. A profile that already says PLASTIC_ONLY is a structured
-    fact, and handing it to a model to reinterpret would turn a stated
-    requirement into an inference. The ingester maps declared kinds onto
-    DesignConstraint and does not paraphrase.
+    DETERMINISTIC, AND LIVE. A profile that already says PLASTIC_ONLY is a
+    structured fact, and handing it to a model to reinterpret would turn a
+    stated requirement into an inference. The ingester maps declared kinds onto
+    DesignConstraint and does not paraphrase. It also does not COMPLETE: a limit
+    with no unit is carried as a limit with no unit, and the compliance record
+    downstream says NOT_YET_EVALUABLE - the design not yet having said, rather
+    than the ingester guessing what it meant.
   selection_preferences: >
     DETERMINISTIC, and materialised only at the selection boundary, as a
     SelectionProfile carrying its version and the hash of the source it came

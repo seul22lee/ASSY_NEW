@@ -588,8 +588,9 @@ stages:
         coverage: ALL_APPLICABLE
         existence: MAY_BE_EMPTY
         existence_why: a design may demand no physical effect and state no load
-      what: the effects the product must produce, the loads the world applies, and the
-        sites where a reaction must ultimately be available
+      what: the effects the product must produce, the loads the world applies, the
+        sites where a reaction must ultimately be available, and the actors that
+        must reach into it
       justified_by_question: Does the established evidence contain anything that stops this candidate
         working?
       why: >
@@ -606,10 +607,18 @@ stages:
         the same load to every alternative, and a candidate that does not carry
         it has a finding rather than an exemption. Its absence from a branch is
         what makes the branch answerable, not what makes the question skippable.
+
+        THE S7-B CORRECTION ADDED actor_role for the same reason, one domain
+        later. `Actor.must_reach` is where a reach requirement comes from, and
+        the class did not carry it - so an actor arrived only when some
+        candidate happened to declare a region that referenced it, and a
+        candidate that ignored the actor entirely presented a view with no
+        reach demand in it. Applicability was being read off the answer.
       requires_semantics:
       - physical_effect_obligation
       - load_case
       - reaction_site
+      - actor_role
     - class: hard_design_constraint
       instance_selection:
         population: DESIGN_WIDE

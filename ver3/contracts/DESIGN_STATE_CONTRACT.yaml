@@ -516,9 +516,46 @@ entity_families:
         produced by nothing then or now.
     purpose: "A region where two bodies meet, with its declared kind."
     required_fields: [entity_id, bodies, interaction_kind, nominal]
-    interaction_kinds: [DECLARED_CONTACT, DECLARED_CLEARANCE, DECLARED_INTERFERENCE_FIT, DECLARED_COMPLIANT_INTERACTION, NOT_INTENDED_TO_INTERACT]
+    # S7-B CORRECTION - CONTRACT TRUTH. This list read
+    # [DECLARED_CONTACT, DECLARED_CLEARANCE, DECLARED_INTERFERENCE_FIT,
+    #  DECLARED_COMPLIANT_INTERACTION, NOT_INTENDED_TO_INTERACT]
+    # and the producer has always emitted, validated and checked the unprefixed
+    # names. Two vocabularies for one field, and NOT ONE VALUE IN COMMON: every
+    # interface in every recording would have failed this list, and every value
+    # this list names would have been refused by s03's own validator. Nothing
+    # read the contract, so nothing noticed.
+    #
+    # The list is corrected to the one in force rather than the runtime to the
+    # list, because the runtime is frozen S-4/S-5/S-6 behaviour with recordings
+    # behind it, and because the shorter names are the ones every check, prompt
+    # and fixture already uses. What is LOST by doing it this way is recorded
+    # below rather than quietly dropped.
+    interaction_kinds: [CONTACT, CLEARANCE, INTERFERENCE_FIT, COMPLIANT_INTERACTION]
+    # WHAT AN INTERFACE SAYS ABOUT ITS PAIR SHARING SPACE. Declared here because
+    # a consumer asking "may these two overlap?" needs a typed answer, and
+    # without one the S7-B evaluator read "an interface exists" as "these two
+    # are allowed to overlap" - which turned CLEARANCE, the strongest statement
+    # a design can make about a pair staying apart, into an exemption from ever
+    # checking it. `s04.interface_expectation` is the one reader.
+    spatial_expectation:
+      TOUCHES: [CONTACT, INTERFERENCE_FIT, COMPLIANT_INTERACTION]
+      CLEAR: [CLEARANCE]
+      rule: >
+        Only TOUCHES exempts a pair from generic interference: two bodies
+        declared to meet are SUPPOSED to overlap as boxes, and reporting that
+        would be reporting the design. A CLEARANCE pair that overlaps is the
+        promise unverified - NOT_ESTABLISHED, never PASS, and never FAIL either,
+        since a box overlap is not a collision.
     rules:
       - "Every region where two bodies meet is classified. An unclassified region is REPRESENTATION_INCOMPLETE."
+      - >
+        NOT_INTENDED_TO_INTERACT WAS DECLARED HERE AND NEVER PRODUCIBLE - s03's
+        validator rejects it, so no interface has ever carried it. It is the
+        only kind that would let a design say "these two must never meet" as a
+        positive fact, which is also the only shape from which gross
+        interference could ever produce a FAIL rather than a NOT_ESTABLISHED.
+        Reintroducing it is a producer change and belongs with the exact-geometry
+        work, not with a vocabulary edit. (S7-B correction; owner S-8)
 
   Feature:
     field_semantics:
