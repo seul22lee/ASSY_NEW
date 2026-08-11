@@ -1,7 +1,9 @@
 # STAGE 04 CONTRACT — placement, motion and spatial feasibility
 #
-# ONE numbered stage, TWO declared passes at different fidelities. The selection
-# gate sits between them. Numbering is preserved because the frozen Oracle
+# ONE numbered stage, TWO declared passes at different fidelities, and NOTHING
+# between them. "The selection gate sits between them" was retired at S7-A: the
+# order is s04a -> s04b -> feasibility -> selection, and the claim was the one
+# that made s04b unreachable. Numbering is preserved because the frozen Oracle
 # stage_expectations reference s04 by name.
 
 schema_version: "0.1.0"
@@ -114,7 +116,10 @@ s04a:
   prohibited_decisions:
     - "any authoritative dimension"
     - "any feature"
-    - "which surviving candidate wins, before the gate"
+    # S7-A: "before the gate" implied s04 may decide a winner afterwards. It may
+    # not, at any point: choosing is the `selection` responsibility's and s04
+    # authors spatial evidence.
+    - "which candidate wins, at any point - s04 produces evidence and never chooses"
 
   allowed_unresolved: ["every internal dimension", "all feature detail"]
 
@@ -141,13 +146,16 @@ s04a:
       check: "absolute scale, where free, is recorded BOUNDED with its Freedom reference"
 
 selection_gate:
-  # LATER-OWNED (S-7 / U-8). The lifecycle is s04a -> s04b -> selection: the
-  # implementation plan places U-8 after U-7 - "does selection/gating wait for
-  # the semantics it evaluates? Yes" - and s04b's own responsibility has its
-  # selection premise staged behind that step. "Between s04a and s04b" described
-  # a runtime that does not exist and, while it was current prose, was the same
-  # claim that made s04b unreachable.
-  position: "after s04b; the gate is S-7 / U-8 and no current S04 behaviour depends on it"
+  # LATER-OWNED. The lifecycle is s04a -> s04b -> feasibility -> selection.
+  # S-6 read s04b's selection premise as STAGED behind S-7; S7-A RETIRED it
+  # instead, because activating it would have meant SelectionDecision -> s04b
+  # against that order. "Between s04a and s04b" described a runtime that never
+  # existed and was the claim that made s04b unreachable.
+  position: >
+    after s04b, and after the `feasibility` responsibility that reads s04's
+    evidence. It is not a gate between the passes and no current S04 behaviour
+    depends on it; choosing belongs to the `selection` responsibility (S7-C
+    onward).
   precondition: >
     Every retained candidate carries s03 completeness and s04a feasibility at
     equal obligation coverage.

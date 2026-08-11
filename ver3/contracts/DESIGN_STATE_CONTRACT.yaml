@@ -972,7 +972,13 @@ entity_families:
       - reason
       - candidate
     rules:
-      - "Recording an elimination is not selection. The gate that acts on it is U-8/M-5B and does not exist yet."
+      - >
+        Recording an elimination is not selection. S7-A: what ACTS on it is the
+        `feasibility` responsibility, which reads it as one local geometric
+        finding among the evidence and decides whether this candidate is eligible
+        to be chosen from. The choice itself is `selection`'s, later. The rule
+        used to name "the gate that does not exist yet", which was true of a
+        gate that is not coming.
       - "An elimination with eliminated=true and no reason is an incomplete record, not a decision."
   ReferenceScale:
     semantic_roles: [spatial_commitment, spatial_frame]
@@ -1231,7 +1237,11 @@ prohibited_content:
   - what: "a defaulted unit, dimension, face, axis, span, placement or form"
     invariant: INV-004
     retirement_row: R-21
-  - what: "a selected-candidate field before the Stage 03/04 feasibility gate"
+  # S7-A: there is no "Stage 03/04 feasibility gate". Nothing before the
+  # `selection` responsibility may hold a selected candidate, and that is a
+  # stronger and simpler statement than the one that named a gate between two
+  # s04 passes.
+  - what: "a selected-candidate field anywhere before the `selection` responsibility"
     invariant: INV-007
     retirement_row: R-15
   - what: "a free-string subject"

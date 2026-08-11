@@ -459,5 +459,130 @@ class TestReviewedConcernProvenance(_Base):
         self.assertIn("rewording it invalidates nothing", rules)
 
 
+# =====================================================================
+# The corpus sweep, as a standing test
+# =====================================================================
+class TestNoResidueOfTheOldArchitecture(_Base):
+    """Every CURRENT claim in the canonical corpus agrees with
+
+        s04a -> s04b -> feasibility -> selection
+
+    Written as a scanner rather than as a list of known lines, because the last
+    three passes each found residue nobody had listed: a claim in a file nobody
+    thought to look at is exactly the failure this catches.
+    """
+
+    #: Keys whose VALUE is a record of what something used to say. A retirement
+    #: that could not quote the claim it retired would be a deletion, and this
+    #: corpus writes retirements the other way on purpose.
+    HISTORICAL_KEYS = frozenset((
+        "was", "why_retired", "retired_by", "superseded", "superseded_by",
+        "why_it_lingered", "why_it_took_two_passes", "why_recorded_historical",
+        "historical_data", "s1_note", "s7_note", "migration_status",
+        "not_a_refusal", "never_a_declaration", "why_not_a_whitelist",
+        "note_on_window2_growth", "pass_note", "why", "note", "rule",
+        "granularity_rule", "runs_after_rule", "input_isolation_rule",
+        "refinement_lifecycle", "conditional_outputs", "open_question",
+        "carrying_versus_inventing", "duplicates_note", "consumer_note",
+        "why_it_is_here", "position", "the_asymmetry", "visibility",
+        "engagement_site_status", "retired_shapes", "retired_premise_classes",
+        "retired_disposition_values", "superseded_legacy_producers",
+        "not_owned_here", "later_owned", "declared_by", "meaning", "purpose"))
+
+    FILES = ("DESIGN_STATE_CONTRACT.yaml", "STAGE_RESPONSIBILITY_CONTRACT.yaml",
+             "STAGE_OWNERSHIP_MATRIX.yaml", "ENTITY_FAMILY_AUDIT.yaml",
+             "USER_DESIGN_PROFILE_CONTRACT.yaml",
+             "stages/S01_CONTRACT.yaml", "stages/S04_CONTRACT.yaml")
+
+    #: Phrases that can only be a CURRENT claim of the retired architecture.
+    #: Deliberately narrow: "gate" alone is a legitimate word - the progression
+    #: contract uses it for a stage-freeze - so only the shapes that mean THIS
+    #: gate are listed.
+    BANNED = (
+        "gate sits between",
+        "selection gate sits",
+        "before the gate",
+        "at the gate",
+        "the gate that acts on it",
+        "the gate that would act on it",
+        "feasibility gate",
+        "if the gate produces",
+    )
+
+    def current_strings(self, node, key=None, path=""):
+        """Every string that is a CURRENT claim, with where it came from."""
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k in self.HISTORICAL_KEYS:
+                    continue
+                for item in self.current_strings(v, k, "%s.%s" % (path, k)):
+                    yield item
+        elif isinstance(node, list):
+            for i, v in enumerate(node):
+                for item in self.current_strings(v, key, "%s[%d]" % (path, i)):
+                    yield item
+        elif isinstance(node, str):
+            yield path, node
+
+    def test_no_current_claim_of_the_retired_gate_architecture(self):
+        import os
+        found = []
+        for name in self.FILES:
+            doc = _paths.contract(os.path.join(*name.split("/")))
+            for where, text in self.current_strings(doc, path=name):
+                low = text.lower()
+                for phrase in self.BANNED:
+                    if phrase in low:
+                        found.append("%s: %r ... %s" % (where, phrase, text[:90]))
+        self.assertEqual([], found, "\n".join(found))
+
+    def test_no_current_claim_that_s04_selects(self):
+        """The matrix's `responsibilities` block names it because `selection`
+        owns it, which is the point - so only the STAGE projection is scanned."""
+        import os
+        found = []
+        for name, doc in (
+                ("stages/S04_CONTRACT.yaml",
+                 _paths.contract(os.path.join("stages", "S04_CONTRACT.yaml"))),
+                ("STAGE_OWNERSHIP_MATRIX.stages",
+                 _paths.contract("STAGE_OWNERSHIP_MATRIX.yaml")["stages"])):
+            for where, text in self.current_strings(doc, path=name):
+                if "selectiondecision" in text.lower().replace(" ", ""):
+                    found.append("%s: %s" % (where, text[:90]))
+        self.assertEqual([], found, "\n".join(found))
+
+    def test_s01_prohibits_invention_and_not_recording(self):
+        import os
+        s01 = _paths.contract(os.path.join("stages", "S01_CONTRACT.yaml"))
+        for entry in s01["prohibited_decisions"]:
+            what = entry["what"].lower()
+            if "material" in what or "dimension" in what or "mechanism" in what:
+                self.assertTrue(
+                    "invent" in what or "did not state" in what,
+                    "a blanket ban would forbid recording a user who SAID it: %r"
+                    % entry["what"])
+
+    def test_s01_projections_agree_about_the_family_it_owns(self):
+        import os
+        s01 = _paths.contract(os.path.join("stages", "S01_CONTRACT.yaml"))
+        self.assertIn("DesignConstraint", s01["owned_decisions"]["creates"])
+        self.assertIn("DesignConstraint", s01["structured_outputs"])
+        self.assertIn("DesignConstraint",
+                      self.resp["stages"]["s01"]["permitted_output_semantics"])
+        self.assertIn("DesignConstraint", self.matrix["stages"]["s01"]["owns"])
+        self.assertEqual("s01", self.families()["DesignConstraint"]["owned_by"])
+        self.assertEqual("s01", _paths.contract("ENTITY_FAMILY_AUDIT.yaml")
+                         ["families"]["DesignConstraint"]["owning_stage"])
+
+    def test_every_projection_agrees_about_who_owns_the_decision(self):
+        self.assertEqual("selection", self.families()["SelectionDecision"]["owned_by"])
+        self.assertEqual("selection", _paths.contract("ENTITY_FAMILY_AUDIT.yaml")
+                         ["families"]["SelectionDecision"]["owning_stage"])
+        self.assertIn("SelectionDecision",
+                      self.matrix["responsibilities"]["entries"]["selection"]["owns"])
+        for sid, spec in self.matrix["stages"].items():
+            self.assertNotIn("SelectionDecision", spec.get("owns") or [], sid)
+
+
 if __name__ == "__main__":
     unittest.main()

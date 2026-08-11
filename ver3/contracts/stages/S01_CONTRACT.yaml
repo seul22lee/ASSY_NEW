@@ -154,9 +154,21 @@ prohibited_decisions:
     example: "'approximately 300 mm' stays approximate"
   - what: "resolve an Ambiguity"
     instead: "recording it is the deliverable"
-  - what: "name a mechanism, material, part or dimension"
+  # RETIRED at the S7-A sweep. It read as a blanket ban and therefore forbade
+  # s01 to record a user who SAID "all parts must be plastic" - a hard
+  # requirement the design must satisfy, lost because of a word. The prohibition
+  # that was always meant is INVENTION, stated above; carrying an explicit
+  # user-stated requirement is a DesignConstraint with its provenance, and the
+  # test is the source rather than the vocabulary.
+  - what: "name a mechanism, material, part or dimension THE SOURCE DID NOT STATE"
+    superseded: "the blanket form of this rule, retired at the S7-A sweep"
 
 structured_outputs:
+  # S7-A: a hard requirement the user STATED is an s01 output. Its absence here
+  # made this projection and `owned_decisions.creates` disagree about the same
+  # family - the canonical contract said s01 owns it and the shape list did not
+  # mention it.
+  DesignConstraint: [entity_id, kind, statement, source, evaluability]
   Requirement: [entity_id, statement_verbatim, kind, verification_kind, observable_verbatim, source_locator, quantity_class]
   SourceClause: [entity_id, verbatim, locator, quantity_kinds, directionality]
   Scenario: [entity_id, name, kind, system_boundary, actors, environment]

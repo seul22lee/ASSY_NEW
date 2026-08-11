@@ -880,11 +880,11 @@ families:
     required_for_assurance_package: false
     package_items: []
     status: PROVISIONAL
-    open_question: 'If the gate produces no SelectionDecision because nothing discriminates, every later
-      stage has no candidate to embody. Whether the pipeline may proceed with several retained candidates,
-      or must stop, is undecided.
-
-      '
+    open_question: >
+      If nothing discriminates and the human records an UnresolvedDecision
+      instead, every later stage has no candidate to embody. Whether the pipeline
+      may proceed with several retained candidates, or must stop, is undecided.
+      (S7-A: reworded off "the gate", which no longer names anything.)
     decision_required_before: s05 implementation.
     package_debt: 'Added in Window 2 and not yet projected by GENERATED_ASSURANCE_PACKAGE_CONTRACT. Recorded
       as debt rather than papered over with an invented package id.
@@ -914,14 +914,17 @@ families:
       Whether s04a eliminated the candidate it ran on, and the geometric reason.
     duplicates: none
     duplicates_note: >
-      SelectionDecision records which candidate WON, at the gate. This records
-      that one candidate is no longer viable on geometric grounds, which is a
-      different act and happens before any gate exists.
+      SelectionDecision records which candidate a human CHOSE. This records that
+      s04a found a geometric ground against one, which is a different act by a
+      different responsibility and happens earlier: it is INPUT to eligibility,
+      not a verdict on it.
     required_for_assurance_package: false
     status: CORE
     s1_note: >
       Held as state.s04a_elimination before S-1. Recording an elimination is not
-      selection; the gate that would act on it is U-8 and does not exist yet.
+      selection; what acts on it is the `feasibility` responsibility, and the
+      choice itself is `selection`'s. (S7-A: it used to say "the gate that would
+      act on it", and no gate is coming.)
   ReferenceScale:
     owning_stage: s04
     first_downstream_consumer: s04

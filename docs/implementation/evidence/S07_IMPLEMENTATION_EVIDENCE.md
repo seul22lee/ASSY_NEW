@@ -288,20 +288,87 @@ Regression, **secondary**: RUN 942 · PASS 942 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-A CLOSURE SWEEP (baseline `e815985`)
+
+**Production diff is empty.** `ver3/assy_v3` and `ver3/tools` are byte-identical;
+the change is five contract files and one test file.
+
+### D.1 Blockers found in the full sweep
+
+Two were named in the brief. **Ten more were not** — the sweep was written as a
+scan of every canonical and projection file rather than a walk of known lines,
+because the last three passes each turned up residue nobody had listed.
+
+| # | file | CURRENT claim | why it contradicted |
+|---|---|---|---|
+| 1 | `S01_CONTRACT` | `prohibited_decisions`: *"name a mechanism, material, part or dimension"* | a blanket ban forbids **recording** a user who said "all parts must be plastic" |
+| 2 | `S01_CONTRACT` | `structured_outputs` omitted `DesignConstraint` | the file's own `owned_decisions.creates` listed it — one contract, two answers |
+| 3 | `S04_CONTRACT` | file header: *"The selection gate sits between them"* | the claim that made s04b unreachable, still at the top of the file |
+| 4 | `S04_CONTRACT` | `prohibited_decisions`: *"which surviving candidate wins, **before the gate**"* | implied s04 may decide a winner afterwards. It may not, at any point |
+| 5 | `S04_CONTRACT` | `selection_gate` comment: s04b's premise is *"staged behind that step"* | S7-A **retired** it; nothing is staged |
+| 6 | `S04_CONTRACT` | `selection_gate.position`: *"the gate is S-7 / U-8"* | names a gate rather than the `selection` responsibility, and omits `feasibility` from the order |
+| 7 | `DESIGN_STATE_CONTRACT` | `EliminationRecord.rules`: *"The gate that acts on it is U-8/M-5B and does not exist yet"* | what acts on it is `feasibility`. It was true of a gate that is not coming |
+| 8 | `DESIGN_STATE_CONTRACT` | `prohibited_content`: *"a selected-candidate field before the **Stage 03/04 feasibility gate**"* | names the retired architecture. The true rule is stronger and simpler |
+| 9 | `ENTITY_FAMILY_AUDIT` | `SelectionDecision.open_question`: *"If the gate produces no SelectionDecision…"* | a human records an UnresolvedDecision; no gate produces anything |
+| 10 | `ENTITY_FAMILY_AUDIT` | `EliminationRecord.duplicates_note`: *"…WON, **at the gate** … before any gate exists"* | as above |
+| 11 | `ENTITY_FAMILY_AUDIT` | `EliminationRecord.s1_note`: *"the gate that would act on it is U-8"* | as above |
+| 12 | `S04_CONTRACT` | `runs_on`/prohibition wording implying selection precedes s04b | corrected with 3–6 |
+
+**Classified and deliberately left:** `STAGE_PROGRESSION_CONTRACT`'s many uses of
+"gate" mean the **stage-freeze** gate — a different, live concept — and
+`Witness`'s *"before its stage's gate"* is that same one. `COMMITTED_BRANCH`
+survives as a population **vocabulary term** and its resolver, which is correct:
+it is how a post-selection consumer will scope itself. Every other occurrence is
+inside a retirement record.
+
+### D.2 Files changed
+
+`stages/S01_CONTRACT.yaml` · `stages/S04_CONTRACT.yaml` ·
+`DESIGN_STATE_CONTRACT.yaml` · `ENTITY_FAMILY_AUDIT.yaml` ·
+`tests/meta/test_s7_authority_boundary.py`. Every retirement states what it used
+to claim.
+
+### D.3 The sweep is now a standing test
+
+`TestNoResidueOfTheOldArchitecture` walks the seven canonical files, skips the
+keys whose value is a **record of what something used to say** — a retirement
+that could not quote what it retired would be a deletion — and fails on any
+current claim matching a narrow phrase list. "Gate" alone is not banned, because
+the progression contract legitimately uses the word; only the shapes that mean
+*this* gate are.
+
+Three more assertions hold the projections together: `s01`'s five projections
+must all name `DesignConstraint`, no stage projection may name
+`SelectionDecision`, and no prohibition about materials or dimensions may be
+phrased as a blanket ban.
+
+**Mutation checks:** reintroducing "before the gate" (1 failure), the blanket s01
+ban (1), and dropping `DesignConstraint` from one projection (1) — each caught.
+
+### D.4 S7-B producers are still absent
+
+`grep` for the eight declared families across `ver3/assy_v3` and `ver3/tools`
+returns **0**. Nothing produces a feasibility assessment, a compliance result, a
+profile, a comparison, an advisory, a human input or a decision.
+
+Regression, **secondary**: RUN 947 · PASS 947 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
 
-> **S7-A VERIFIED CLOSED — FEASIBILITY / SELECTION AUTHORITY, INPUT SUFFICIENCY,
-> ORDERING AND PREFERENCE ISOLATION CONSISTENT.**
+> **S7-A VERIFIED CLOSED — AUTHORITY, INPUT SUFFICIENCY, ORDERING,
+> HARD-CONSTRAINT SEMANTICS AND PREFERENCE ISOLATION CONSISTENT.**
 >
-> The split holds and the write boundary enforces it. The feasibility view now
-> contains the evidence its declared domains are decided on, and contains neither
-> a preference nor an s04 family that carries none of its semantics. The order
-> `s04 → feasibility → selection` is machine-readable, and the rule that would
-> have made it circular is retired rather than waiting. A hard requirement exists
-> early and is visible only where the reasoning asks for it; a preference is
-> visible nowhere before selection. A human can record which concerns they read,
-> and reading one creates no premise.
+> Every canonical file and projection now agrees on `s04a → s04b → feasibility →
+> selection`. Feasibility is candidate-local and preference-blind, and its view
+> carries the evidence its declared domains are decided on. A hard requirement is
+> authoritative from s01 and visible only where the reasoning asks for it, and
+> recording one a user stated is required where inventing one is forbidden.
+> `SelectionDecision` is owned by `selection` alone and no stage projection
+> claims it. Nothing requires a decision before s04b, and the rule that would
+> have is retired rather than waiting. Advisory material is considered, never
+> premise. The sweep that found this residue is a test now, so a reintroduction
+> fails rather than waiting for someone to look.
 >
-> **S-7 / U-8 IS NOT CLOSED.** S7-B through S7-F are not started: nothing
-> produces a feasibility assessment, a compliance result, a profile, a
-> comparison, an advisory, a human input or a decision.
+> **S-7 / U-8 IS NOT CLOSED.** S7-B through S7-F are not started.
