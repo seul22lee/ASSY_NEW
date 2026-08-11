@@ -40,6 +40,7 @@ from . import _fixtures, _paths                                        # noqa: F
 
 import ver3.assy_v3.view.consumer_view as cv                           # noqa: E402
 import ver3.assy_v3.stages.feasibility as s07                          # noqa: E402
+import ver3.assy_v3.stages.s01_requirement_capture as s01            # noqa: E402
 from ver3.assy_v3.stages.s01_requirement_capture import (             # noqa: E402
     CONSTRAINT_SECTION, S01RequirementCapture,
     ingest_design_constraints as s01_ingest)
@@ -60,8 +61,14 @@ from .test_s02_s03b_integration import S02, _Canned                     # noqa: 
 from .test_s3_interface_readiness import _code_only                     # noqa: E402
 
 
-def s01_response(must_reach=()):
-    """What the capture stage returns. No product noun and no quantity."""
+def s01_response(must_reach=(), requirements=(), hard_constraints=()):
+    """What the capture stage returns. No product noun and no quantity.
+
+    `requirements` and `hard_constraints` are what the model made of the extra
+    sentences a probe puts in the request - transcription and classification,
+    which is what s01 asks a model to do. Whether any of it becomes a
+    DesignConstraint is decided afterwards by code, and that is what B36-B39
+    are about."""
     return {
         "source_clauses": [{"id": "SRC-0001", "verbatim": "a synthetic request",
                             "locator": "L1", "quantity_kinds": [],
@@ -70,7 +77,7 @@ def s01_response(must_reach=()):
                           "statement_verbatim": "a synthetic request",
                           "kind": "FUNCTIONAL", "verification_kind": "STRUCTURAL",
                           "observable_verbatim": "it holds", "source_locator": "L1",
-                          "quantity_class": "NONE"}],
+                          "quantity_class": "NONE"}] + list(requirements),
         "scenarios": [{"id": "SCN-0001", "name": "use", "kind": "OPERATION",
                        "system_boundary": "the product inside, the surface it "
                                           "stands on outside",
@@ -82,6 +89,7 @@ def s01_response(must_reach=()):
         "actors": [{"id": "ACT-0001", "name": "the operator",
                     "must_reach": list(must_reach)}],
         "freedoms": [], "ambiguities": [], "assumptions": [],
+        "hard_constraints": list(hard_constraints),
     }
 
 
@@ -134,12 +142,12 @@ def realization(sfx, hops=(0, 0), steps=(0,), terminates="RSR-0001",
     """s03b for the same mechanism: what discharges the effect, how the load is
     routed through the declared interfaces, and how it goes together."""
     rels = []
-    # ONE RELATION ALWAYS. `candidate_engineering_evidence` requires the
-    # constraint-relation role to be non-empty, so a probe with none is an
-    # unready context rather than a feasible mechanism - and it would be testing
-    # the fixture. The default blocks a DOF no probe below requires to move.
-    if blocked is None:
-        blocked = [(_group(0, sfx), ["TZ"], "CFG-C0%s" % sfx)]
+    # NO RELATION BY DEFAULT. There used to be one, forced in because
+    # `candidate_engineering_evidence` demanded the constraint-relation role be
+    # non-empty - a fixture inventing evidence to get past an input boundary,
+    # which is a fixture testing the boundary rather than the mechanism. The
+    # boundary was the defect and is fixed; a mechanism that blocks nothing is an
+    # ordinary mechanism.
     for n, (group, dofs, cfg) in enumerate(blocked or []):
         rels.append({"id": "CRL-%d%s" % (n, sfx), "retained_group": group,
                      "blocked_dofs": list(dofs), "configurations": [cfg],
@@ -235,7 +243,8 @@ class _Feas(_fixtures.StateBuilder, unittest.TestCase):
     def setUpClass(cls):
         cls.c = Contracts()
 
-    def seed(self, profile=None, must_reach=()):
+    def seed(self, profile=None, must_reach=(), requirements=(),
+             hard_constraints=()):
         """S01 THROUGH ITS REAL INVOCATION, profile and all.
 
         The requirement material used to be hand-written into state, which is
@@ -250,7 +259,8 @@ class _Feas(_fixtures.StateBuilder, unittest.TestCase):
         """
         s = DesignState(run_id="feasibility")
         out = S01RequirementCapture().invoke(
-            _Canned(s01_response(list(must_reach))), s, s.run_id,
+            _Canned(s01_response(list(must_reach), requirements,
+                                 hard_constraints)), s, s.run_id,
             {"request_text": "a synthetic request", "design_profile": profile})
         self.assertIsNotNone(out.patch, out.problems)
         s.apply(out.patch)
@@ -566,13 +576,13 @@ class TestModelLocalFindings(_Feas):
 class TestHardRequirements(_Feas):
 
     def constraint(self, state, kind, **params):
-        self.add(state, "s01", "DesignConstraint", "DSC-0001", kind=kind,
+        self.add(state, "s01", "DesignConstraint", "DSC-P001", kind=kind,
                  statement="a stated hard requirement", source="profile",
                  evaluability="MACHINE_EVALUABLE", parameters=params or None,
                  blocks_selection=True)
         return state
 
-    def status_of(self, out, cid="DSC-0001"):
+    def status_of(self, out, cid="DSC-P001"):
         for constraint, status, codes, used, why in out.compliance:
             if constraint.get("entity_id") == cid:
                 return status, codes, used, why
@@ -784,9 +794,9 @@ class TestIsolationAndDependency(_Feas):
             carried)
         # And what is visible, was not computed from, and is therefore absent:
         # the requirement the obligation came from, the scenario, the actor, the
-        # relation that constrains a DOF nothing requires to move, and s04a's
-        # own elimination finding.
-        for unused in ("REQ-0001", "SCN-0001", "ACT-0001", "OBL-0001", "CRL-0A"):
+        # obligation it addresses, and s04a's own elimination finding.
+        for unused in ("REQ-0001", "SCN-0001", "ACT-0001", "OBL-0001",
+                       "ELM-CND-A"):
             self.assertIn(unused, visible, "the probe is not probing")
             self.assertNotIn(unused, carried)
 
@@ -870,21 +880,21 @@ class TestConstraintIngress(_Feas):
                                             absolute={"unit": "mm",
                                                       "per_unit": 10.0}))
         made = {c["entity_id"]: c for c in state.family("DesignConstraint")}
-        self.assertEqual(["DSC-0001", "DSC-0002"], sorted(made))
-        self.assertEqual("s01", state.entities["DSC-0001"]["_created_by"])
+        self.assertEqual(["DSC-P001", "DSC-P002"], sorted(made))
+        self.assertEqual("s01", state.entities["DSC-P001"]["_created_by"])
         self.assertEqual("s01:profile_ingest",
-                         state.entities["DSC-0001"]["_provenance"])
-        self.assertEqual("MAX_OVERALL_DIMENSION", made["DSC-0001"]["kind"])
+                         state.entities["DSC-P001"]["_provenance"])
+        self.assertEqual("MAX_OVERALL_DIMENSION", made["DSC-P001"]["kind"])
 
         out = self.assess(state)
         visible = {e["entity_id"] for e in out.consumer_view["entities"]}
-        self.assertIn("DSC-0001", visible, "the view cannot see the requirement")
+        self.assertIn("DSC-P001", visible, "the view cannot see the requirement")
         status = {c.get("entity_id"): s for c, s, _c, _u, _w in out.compliance}
-        self.assertEqual({"DSC-0001": s07.SATISFIED,
-                          "DSC-0002": s07.NOT_YET_EVALUABLE}, status)
+        self.assertEqual({"DSC-P001": s07.SATISFIED,
+                          "DSC-P002": s07.NOT_YET_EVALUABLE}, status)
         hrc = next(o for o in out.patch.operations
-                   if o.entity_id == "HRC-CND-A-DSC-0001")
-        self.assertIn("DSC-0001", hrc.premise_refs)
+                   if o.entity_id == "HRC-CND-A-DSC-P001")
+        self.assertIn("DSC-P001", hrc.premise_refs)
         self.assertIn("CND-A", hrc.premise_refs)
         self.assertIn("SCL-CND-A", hrc.premise_refs)
 
@@ -895,7 +905,7 @@ class TestConstraintIngress(_Feas):
             {"kind": "MAX_OVERALL_DIMENSION", "statement": "it must be small",
              "parameters": {"axis": "ANY", "limit": 100}}]})
         self.assertEqual({"axis": "ANY", "limit": 100},
-                         state.entities["DSC-0001"]["parameters"])
+                         state.entities["DSC-P001"]["parameters"])
         self.hinge(state=state, s04a=arrangement(
             HINGE_BOXES, steps=["ASY-0A"], basis="ABSOLUTE",
             absolute={"unit": "mm", "per_unit": 10.0}))
@@ -908,7 +918,7 @@ class TestConstraintIngress(_Feas):
         state = self.seed(profile={"design_constraints": [
             {"kind": "LOAD_CAPACITY", "statement": "it must hold a full load"}]})
         self.assertEqual("HUMAN_EVALUABLE",
-                         state.entities["DSC-0001"]["evaluability"])
+                         state.entities["DSC-P001"]["evaluability"])
 
     def test_B27_a_preference_is_not_ingested(self):
         """THE SECTION IS NEVER READ. Not filtered out afterwards - the ingester
@@ -1114,7 +1124,7 @@ class TestDimensionalCompleteness(_Feas):
                                             basis=basis, absolute=absolute))
         out = self.assess(state)
         for c, status, codes, used, why in out.compliance:
-            if c["entity_id"] == "DSC-0001":
+            if c["entity_id"] == "DSC-P001":
                 return status, codes, used, why
         raise AssertionError("no compliance record")
 
@@ -1158,6 +1168,409 @@ class TestDimensionalCompleteness(_Feas):
             status, codes, _u, why = self.dimensional(HINGE_BOXES, **kwargs)
             self.assertEqual(s07.NOT_YET_EVALUABLE, status, why)
             self.assertIn(code, codes)
+
+
+# =====================================================================
+# B36-B39, B54-B56 - a hard requirement stated in the REQUEST
+# =====================================================================
+def stated(requirement_id, statement, quantity_class, kind=None, parameters=None,
+           locator="L2"):
+    """One extra sentence in the request, as s01 captures it."""
+    req = {"id": requirement_id, "statement_verbatim": statement,
+           "kind": "FUNCTIONAL", "verification_kind": "STRUCTURAL",
+           "observable_verbatim": statement, "source_locator": locator,
+           "quantity_class": quantity_class}
+    entry = ({"requirement": requirement_id, "kind": kind,
+              "statement_verbatim": statement, "parameters": parameters}
+             if kind else None)
+    return req, entry
+
+
+class TestSourceCapture(_Feas):
+    """A hard requirement the user typed must not need a second file to survive."""
+
+    def capture(self, *pairs, **kw):
+        reqs = [r for r, _e in pairs]
+        entries = [e for _r, e in pairs if e]
+        return self.seed(requirements=reqs, hard_constraints=entries, **kw)
+
+    def test_B36_a_material_requirement_in_the_request_survives(self):
+        """No structured profile anywhere. The whole chain from the sentence to
+        the compliance record, and the answer is about the evidence: nothing in
+        the representation assigns a material yet."""
+        state = self.capture(stated("REQ-0002", "All parts must be plastic.",
+                                    "NONE", "MATERIAL_CLASS_ONLY",
+                                    {"material_class": "PLASTIC"}))
+        made = state.family("DesignConstraint")
+        self.assertEqual(1, len(made), made)
+        self.assertEqual("MATERIAL_CLASS_ONLY", made[0]["kind"])
+        self.assertEqual("s01:source_capture",
+                         state.entities[made[0]["entity_id"]]["_provenance"])
+        self.assertEqual([], state.family("SelectionProfile"))
+
+        self.hinge(state=state)
+        out = self.assess(state)
+        visible = {e["entity_id"] for e in out.consumer_view["entities"]}
+        self.assertIn(made[0]["entity_id"], visible)
+        status, codes, used, _why = TestHardRequirements.status_of(
+            self, out, made[0]["entity_id"])
+        self.assertEqual(s07.NOT_YET_EVALUABLE, status)
+        self.assertIn("NO_MATERIAL_AUTHORITY", codes)
+
+    def test_B37_a_stated_dimensional_limit_is_preserved_and_decided(self):
+        """100 mm on a named axis, from the request alone."""
+        state = self.capture(stated(
+            "REQ-0002", "The assembled mechanism must be no wider than 100 mm.",
+            "MAGNITUDE", "MAX_OVERALL_DIMENSION",
+            {"axis": "X", "limit": 100, "unit": "mm"}))
+        made = state.family("DesignConstraint")[0]
+        self.assertEqual({"axis": "X", "limit": 100, "unit": "mm"},
+                         made["parameters"], "the stated values changed")
+        self.hinge(state=state, s04a=arrangement(
+            HINGE_BOXES, steps=["ASY-0A"], basis="ABSOLUTE",
+            absolute={"unit": "mm", "per_unit": 10.0}))
+        status, _c, _u, why = TestHardRequirements.status_of(
+            self, self.assess(state), made["entity_id"])
+        self.assertEqual(s07.SATISFIED, status, why)
+
+    def test_B37b_without_geometry_the_same_limit_decides_nothing(self):
+        state = self.capture(stated(
+            "REQ-0002", "It must be no wider than 100 mm.", "MAGNITUDE",
+            "MAX_OVERALL_DIMENSION", {"axis": "X", "limit": 100, "unit": "mm"}))
+        self.hinge(state=state)          # RELATIVE basis, as s04 leaves it
+        status, codes, _u, why = TestHardRequirements.status_of(
+            self, self.assess(state), "DSC-S001")
+        self.assertEqual(s07.NOT_YET_EVALUABLE, status, why)
+        self.assertIn("SCALE_NOT_ABSOLUTE", codes)
+
+    def test_B37c_an_unstated_axis_is_never_invented(self):
+        """"no wider than 100 mm" with no axis captured. The limit is preserved
+        and the question stays open; choosing ANY would answer a different
+        requirement, and a more permissive one."""
+        state = self.capture(stated(
+            "REQ-0002", "It must be no wider than 100 mm.", "MAGNITUDE",
+            "MAX_OVERALL_DIMENSION", {"limit": 100, "unit": "mm"}))
+        self.assertEqual({"limit": 100, "unit": "mm"},
+                         state.entities["DSC-S001"]["parameters"])
+        self.hinge(state=state, s04a=arrangement(
+            HINGE_BOXES, steps=["ASY-0A"], basis="ABSOLUTE",
+            absolute={"unit": "mm", "per_unit": 10.0}))
+        status, codes, _u, why = TestHardRequirements.status_of(
+            self, self.assess(state), "DSC-S001")
+        self.assertEqual(s07.NOT_YET_EVALUABLE, status, why)
+        self.assertIn("AXIS_NOT_RECOGNIZED", codes)
+
+    def test_B38_a_preference_creates_no_constraint(self):
+        """Both directions. The model classifying it correctly emits nothing;
+        the model classifying it WRONGLY is refused by the kind vocabulary,
+        which contains no way to say 'fewer would be nicer'."""
+        state = self.capture(stated("REQ-0002", "Prefer fewer parts.", "NONE"))
+        self.assertEqual([], state.family("DesignConstraint"))
+
+        state = self.capture(stated("REQ-0002", "Prefer fewer parts.", "NONE",
+                                    "MINIMIZE_PART_COUNT", {"objective": "MIN"}))
+        self.assertEqual([], state.family("DesignConstraint"),
+                         "a wish reached the hard-requirement family")
+
+    def test_B39_ambiguous_prose_is_not_normalized_into_a_limit(self):
+        """"Keep it reasonably compact" is a requirement with no quantity. The
+        refusal is s01's OWN typed capture - quantity_class NONE - not this code
+        reading the sentence."""
+        state = self.capture(stated("REQ-0002", "Keep it reasonably compact.",
+                                    "NONE", "MAX_OVERALL_DIMENSION", None))
+        self.assertEqual([], state.family("DesignConstraint"))
+        self.assertTrue([r for r in state.family("Requirement")
+                         if r["entity_id"] == "REQ-0002"],
+                        "the requirement itself was lost")
+
+    def test_B39b_an_approximate_quantity_is_not_a_limit_either(self):
+        """BAND, not MAGNITUDE. "approximately 100 mm" is not a limit anything
+        can be checked against, and sharpening it is the one thing s01 exists to
+        prevent."""
+        state = self.capture(stated(
+            "REQ-0002", "It should be approximately 100 mm wide.", "BAND",
+            "MAX_OVERALL_DIMENSION", {"axis": "X", "limit": 100, "unit": "mm"}))
+        self.assertEqual([], state.family("DesignConstraint"))
+
+    def test_B39c_a_constraint_naming_no_requirement_is_not_ingested(self):
+        """Traceability is a condition of existence, not a decoration."""
+        state = self.seed(hard_constraints=[
+            {"requirement": "REQ-NOWHERE", "kind": "MATERIAL_CLASS_ONLY",
+             "statement_verbatim": "plastic", "parameters": {"material_class": "P"}}])
+        self.assertEqual([], state.family("DesignConstraint"))
+
+    def test_B54_a_source_constraint_points_back_at_its_sentence(self):
+        state = self.capture(stated("REQ-0002", "All parts must be plastic.",
+                                    "NONE", "MATERIAL_CLASS_ONLY",
+                                    {"material_class": "PLASTIC"},
+                                    locator="para 2"))
+        made = state.entities["DSC-S001"]
+        self.assertEqual(["REQ-0002"], made["derived_from_requirements"])
+        self.assertEqual("para 2", made["source"])
+        self.assertEqual("All parts must be plastic.", made["statement"])
+        self.assertIn("REQ-0002", state.entities["REQ-0002"]["entity_id"])
+
+    def test_B55_the_constraint_does_not_depend_on_a_profile(self):
+        """THE BLOCKER, stated as an equality. The same request with and without
+        a structured profile must not differ in what it demands of the design."""
+        pair = stated("REQ-0002", "All parts must be plastic.", "NONE",
+                      "MATERIAL_CLASS_ONLY", {"material_class": "PLASTIC"})
+        without = self.capture(pair)
+        with_profile = self.capture(pair, profile={"design_constraints": [
+            {"kind": "PROHIBITED_ENERGY_SOURCE", "statement": "no mains",
+             "parameters": {"source": "MAINS_ELECTRICAL"}}]})
+        kinds = lambda s: sorted(c["kind"] for c in s.family("DesignConstraint"))
+        self.assertEqual(["MATERIAL_CLASS_ONLY"], kinds(without))
+        self.assertEqual(["MATERIAL_CLASS_ONLY", "PROHIBITED_ENERGY_SOURCE"],
+                         kinds(with_profile),
+                         "the two channels do not compose")
+
+    def test_B56_changing_a_preference_changes_nothing(self):
+        """Not "the preference is filtered" - the whole downstream answer is
+        identical, entity for entity."""
+        def run(wish):
+            state = self.capture(
+                stated("REQ-0002", "All parts must be plastic.", "NONE",
+                       "MATERIAL_CLASS_ONLY", {"material_class": "PLASTIC"}),
+                stated("REQ-0003", wish, "NONE"),
+                profile={"selection_preferences": {"part_count": {
+                    "objective": "MINIMIZE", "priority": "HIGH"}}})
+            self.hinge(state=state)
+            out = self.assess(state, apply_patch=False)
+            return (sorted(c["kind"] for c in state.family("DesignConstraint")),
+                    [(c.get("entity_id"), s) for c, s, _c, _u, _w in out.compliance],
+                    out.status,
+                    {v.domain: v.status for v in out.verdicts})
+        self.assertEqual(run("Prefer fewer parts."),
+                         run("Minimise cost wherever possible."))
+
+
+# =====================================================================
+# B40-B45, B50-B53 - a named reference is an address
+# =====================================================================
+class TestExactReferences(_Feas):
+
+    def basis_probe(self, differs_from, configs=2, joints=None, coords=None,
+                    basis_on="CFG-C0A", group=None, dof="RZ"):
+        """A hinge whose CFG basis names exactly the siblings given."""
+        group = group or _group(1, "A")
+        basis = {basis_on: [{"rigid_group": group, "dof": dof,
+                             "differs_from": list(differs_from)}]}
+        top = topology("A", 2, [(0, 1)], basis=basis, configs=configs)
+        if joints is not None:
+            top["joints"] = joints
+        placements = [{"joint": j["id"], "origin": [0, 0, 0]}
+                      for j in top["joints"]]
+        s04b = {"joint_placements": placements,
+                "state_coordinates": [
+                    {"configuration": c, "coordinates": dict(v)}
+                    for c, v in (coords or {}).items()],
+                "transitions": [], "envelope_revisions": [], "notes": ""}
+        return self.hinge(s03a=top, s04b=s04b)
+
+    JOINTS = [{"id": "JNT-PA", "joint_type": "PRISMATIC",
+               "parent_group": _group(0, "A"), "child_group": _group(1, "A"),
+               "dof": ["TX"], "axis_direction": "+X", "frame_ids": ["F1"]},
+              {"id": "JNT-RA", "joint_type": "REVOLUTE",
+               "parent_group": _group(0, "A"), "child_group": _group(1, "A"),
+               "dof": ["RZ"], "axis_direction": "+Z", "frame_ids": ["F1"]}]
+
+    def test_B40_an_absent_named_sibling_is_not_rescued(self):
+        """CFG-C1A exists and differs. The basis names CFG-GONE. Comparing
+        against the one that happens to be there is answering a reference to an
+        entity the design does not have."""
+        state = self.basis_probe(["CFG-GONE"], coords={
+            "CFG-C0A": {"JNT-0A": 0}, "CFG-C1A": {"JNT-0A": 90}})
+        v = self.domain(self.assess(state), "required_configurations")
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
+        self.assertIn("DISTINCTNESS_SIBLING_NOT_REALIZED", v.reason_codes)
+        self.assertNotIn("DECLARED_DISTINCTNESS_NOT_REALIZED", v.reason_codes)
+
+    def test_B41_a_named_sibling_that_is_equal_fails(self):
+        state = self.basis_probe(["CFG-C1A"], coords={
+            "CFG-C0A": {"JNT-0A": 60}, "CFG-C1A": {"JNT-0A": 60}})
+        v = self.domain(self.assess(state), "required_configurations")
+        self.assertEqual(s07.FAIL, v.status)
+        self.assertIn("DECLARED_DISTINCTNESS_NOT_REALIZED", v.reason_codes)
+
+    def test_B42_an_unnamed_configuration_cannot_change_the_answer(self):
+        """CFG-C2A is present, realized, and equal to the subject. It is not
+        named, so it is not compared - and the verdict is the one the named
+        sibling earns."""
+        state = self.basis_probe(["CFG-C1A"], configs=3, coords={
+            "CFG-C0A": {"JNT-0A": 0}, "CFG-C1A": {"JNT-0A": 90},
+            "CFG-C2A": {"JNT-0A": 0}})
+        v = self.domain(self.assess(state), "required_configurations")
+        self.assertEqual(s07.PASS, v.status, v.summary)
+        self.assertNotIn("DECLARED_DISTINCTNESS_NOT_REALIZED", v.reason_codes)
+
+    def test_B43_the_driver_is_chosen_by_the_dof_not_by_the_order(self):
+        """A slider and a hinge on one group. The basis is about RZ, and the
+        slider holds the same value in both configurations - so choosing it
+        produced FAIL: an arbitrary pick manufacturing a contradiction."""
+        for order in (self.JOINTS, list(reversed(self.JOINTS))):
+            state = self.basis_probe(
+                ["CFG-C1A"], joints=[dict(j) for j in order],
+                coords={"CFG-C0A": {"JNT-PA": 0, "JNT-RA": 0},
+                        "CFG-C1A": {"JNT-PA": 0, "JNT-RA": 90}})
+            v = self.domain(self.assess(state), "required_configurations")
+            self.assertEqual(s07.PASS, v.status,
+                             "order %s: %s" % ([j["id"] for j in order], v.summary))
+            self.assertIn("JNT-RA", v.premises)
+            self.assertNotIn("JNT-PA", v.premises,
+                             "a joint that carries no part of the requirement")
+
+    def test_B44_two_compatible_drivers_are_ambiguous(self):
+        joints = [dict(j, id="JNT-R%dA" % n, joint_type="REVOLUTE",
+                       axis_direction="+Z", dof=["RZ"])
+                  for n, j in enumerate(self.JOINTS)]
+        state = self.basis_probe(
+            ["CFG-C1A"], joints=joints,
+            coords={"CFG-C0A": {"JNT-R0A": 0, "JNT-R1A": 0},
+                    "CFG-C1A": {"JNT-R0A": 90, "JNT-R1A": 90}})
+        v = self.domain(self.assess(state), "required_configurations")
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
+        self.assertIn("DISTINCTNESS_DRIVER_AMBIGUOUS", v.reason_codes)
+        for jid in ("JNT-R0A", "JNT-R1A"):
+            self.assertIn(jid, v.premises,
+                          "the competing joints are what establish the ambiguity")
+
+    def test_B45_no_compatible_driver_is_not_established(self):
+        joints = [dict(self.JOINTS[0])]          # PRISMATIC X only; basis wants RZ
+        state = self.basis_probe(["CFG-C1A"], joints=joints,
+                                 coords={"CFG-C0A": {"JNT-PA": 0},
+                                         "CFG-C1A": {"JNT-PA": 1}})
+        v = self.domain(self.assess(state), "required_configurations")
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
+        self.assertIn("DISTINCTNESS_DRIVER_UNKNOWN", v.reason_codes)
+
+    def test_B45b_an_unreadable_axis_is_not_a_driver(self):
+        joints = [dict(self.JOINTS[1], axis_direction="DIAGONAL")]
+        state = self.basis_probe(["CFG-C1A"], joints=joints,
+                                 coords={"CFG-C0A": {"JNT-RA": 0},
+                                         "CFG-C1A": {"JNT-RA": 90}})
+        v = self.domain(self.assess(state), "required_configurations")
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
+        self.assertIn("DISTINCTNESS_DRIVER_AXIS_UNREADABLE", v.reason_codes)
+
+    def test_B50_configuration_order_cannot_change_the_answer(self):
+        """The whole assessment, entity for entity, under a permuted view."""
+        def run(reverse):
+            top = topology("A", 2, [(0, 1)], configs=3, basis={
+                "CFG-C0A": [{"rigid_group": _group(1, "A"), "dof": "RZ",
+                             "differs_from": ["CFG-C1A"]}]})
+            if reverse:
+                top["configurations"] = list(reversed(top["configurations"]))
+            coords = {"CFG-C0A": {"JNT-0A": 0}, "CFG-C1A": {"JNT-0A": 90},
+                      "CFG-C2A": {"JNT-0A": 0}}
+            s04b = {"joint_placements": [{"joint": "JNT-0A", "origin": [0, 0, 0]}],
+                    "state_coordinates": [{"configuration": c, "coordinates": v}
+                                          for c, v in coords.items()],
+                    "transitions": [], "envelope_revisions": [], "notes": ""}
+            out = self.assess(self.hinge(s03a=top, s04b=s04b), apply_patch=False)
+            return (out.status,
+                    {v.domain: (v.status, tuple(v.reason_codes), tuple(v.premises))
+                     for v in out.verdicts})
+        self.assertEqual(run(False), run(True))
+
+    def test_B51_joint_order_cannot_change_the_answer(self):
+        def run(order):
+            state = self.basis_probe(
+                ["CFG-C1A"], joints=[dict(j) for j in order],
+                coords={"CFG-C0A": {"JNT-PA": 0, "JNT-RA": 0},
+                        "CFG-C1A": {"JNT-PA": 0, "JNT-RA": 90}})
+            v = self.domain(self.assess(state, apply_patch=False),
+                            "required_configurations")
+            return v.status, tuple(v.reason_codes), tuple(v.premises)
+        self.assertEqual(run(self.JOINTS), run(list(reversed(self.JOINTS))))
+
+    def test_B53_only_the_sibling_actually_compared_is_read(self):
+        """CFG-C2A is realized and equal to the subject; CFG-C1A is the named
+        sibling and differs. Making the UNNAMED one equal cannot change the
+        verdict - which is the whole content of "a named reference is an
+        address"."""
+        def run(unnamed_coordinate):
+            state = self.basis_probe(["CFG-C1A"], configs=3, coords={
+                "CFG-C0A": {"JNT-0A": 0}, "CFG-C1A": {"JNT-0A": 90},
+                "CFG-C2A": {"JNT-0A": unnamed_coordinate}})
+            v = self.domain(self.assess(state, apply_patch=False),
+                            "required_configurations")
+            return v.status, tuple(v.reason_codes)
+        self.assertEqual(run(0), run(45))
+        self.assertEqual((s07.PASS, ("EVERY_CONFIGURATION_REALIZED",)), run(0))
+
+
+# =====================================================================
+# B46-B49, B52 - one load case, several declared routes
+# =====================================================================
+class TestLoadPathMultiplicity(_Feas):
+
+    GOOD = {"id": "LDP-A", "load_case": "LC-0001", "candidate": "CND-A",
+            "ordered_hops": ["IFC-0A", "IFC-0A"], "terminates_at": "RSR-0001"}
+    ALSO_GOOD = {"id": "LDP-2A", "load_case": "LC-0001", "candidate": "CND-A",
+                 "ordered_hops": ["IFC-0A"], "terminates_at": "RSR-0001"}
+    WRONG_SITE = {"id": "LDP-3A", "load_case": "LC-0001", "candidate": "CND-A",
+                  "ordered_hops": ["IFC-0A"], "terminates_at": "RSR-BAD"}
+    OPEN = {"id": "LDP-4A", "load_case": "LC-0001", "candidate": "CND-A",
+            "ordered_hops": ["IFC-0A"]}
+
+    def routed(self, *paths):
+        state = self.seed()
+        self.candidates(state)
+        self.add(state, "s02", "ReactionSiteRequirement", "RSR-BAD",
+                 scenario="SCN-0001", boundary_side="INTERNAL", at_role="inside")
+        r = realization("A")
+        r["load_paths"] = [dict(p) for p in paths]
+        self.hinge(state=state, s03b=r)
+        return state
+
+    def verdict(self, *paths):
+        out = self.assess(self.routed(*paths), apply_patch=False)
+        v = self.domain(out, "load_reaction_closure")
+        return v.status, tuple(v.reason_codes), tuple(v.premises)
+
+    def test_B46_two_valid_routes_pass_in_either_order(self):
+        forward = self.verdict(self.GOOD, self.ALSO_GOOD)
+        backward = self.verdict(self.ALSO_GOOD, self.GOOD)
+        self.assertEqual(s07.PASS, forward[0], forward)
+        self.assertEqual(forward, backward,
+                         "the verdict or its premises depend on insertion order")
+
+    def test_B47_a_valid_route_does_not_excuse_a_contradictory_one(self):
+        """The design asserts both, and one of them closes at the wrong site.
+        Keeping whichever came last decided this by nothing at all."""
+        forward = self.verdict(self.GOOD, self.WRONG_SITE)
+        backward = self.verdict(self.WRONG_SITE, self.GOOD)
+        self.assertEqual(s07.FAIL, forward[0])
+        self.assertIn("TERMINUS_NOT_THE_DECLARED_SITE", forward[1])
+        self.assertIn("DECLARED_ROUTE_CONTRADICTS_ITSELF", forward[1])
+        self.assertEqual(forward, backward)
+
+    def test_B48_a_valid_route_does_not_excuse_an_unresolved_one(self):
+        forward = self.verdict(self.GOOD, self.OPEN)
+        backward = self.verdict(self.OPEN, self.GOOD)
+        self.assertEqual(s07.NOT_ESTABLISHED, forward[0])
+        self.assertIn("LOAD_PATH_OPEN", forward[1])
+        self.assertEqual(forward, backward)
+
+    def test_B49_no_route_at_all_is_not_established(self):
+        state = self.seed()
+        self.candidates(state)
+        r = realization("A")
+        r["load_paths"] = []
+        self.hinge(state=state, s03b=r)
+        v = self.domain(self.assess(state), "load_reaction_closure")
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
+        self.assertIn("LOAD_PATH_MISSING", v.reason_codes)
+
+    def test_B52_the_whole_assessment_is_order_independent(self):
+        def run(paths):
+            out = self.assess(self.routed(*paths), apply_patch=False)
+            return (out.status,
+                    {v.domain: (v.status, tuple(v.reason_codes), tuple(v.premises))
+                     for v in out.verdicts})
+        self.assertEqual(run((self.GOOD, self.ALSO_GOOD)),
+                         run((self.ALSO_GOOD, self.GOOD)))
 
 
 # =====================================================================
@@ -1213,6 +1626,44 @@ class TestContractTruth(unittest.TestCase):
         self.assertIn("CONSTRAINT_SECTION", source)
         self.assertNotIn("selection_preferences", source)
         self.assertIn("LIVE", self.profile["ingester_status"])
+
+    def test_B35g_the_constraint_kinds_are_one_vocabulary(self):
+        """Declared in the contract, mirrored in the ingester, and the mirror is
+        checked - a vocabulary living in two places drifts, and this one decides
+        which stated requirements survive."""
+        declared = self.fams["DesignConstraint"]["kinds"]
+        self.assertEqual(sorted(declared), sorted(s01.CONSTRAINT_KINDS))
+        for kind, spec in declared.items():
+            mirror = s01.CONSTRAINT_KINDS[kind]
+            self.assertEqual(spec["quantitative"], mirror["quantitative"], kind)
+            if spec["quantitative"]:
+                self.assertEqual(spec["quantity"], mirror["quantity"], kind)
+        # Every kind the evaluator can decide must be one the ingester can make.
+        for kind in s07.CONSTRAINT_EVALUATORS:
+            self.assertIn(kind, declared, kind)
+
+    def test_B35h_both_origins_are_declared_and_neither_is_deferred(self):
+        """The contract may not say a source-stated hard requirement waits for a
+        later substep. It does not wait; it is produced here, and prose claiming
+        otherwise would send a reader looking for a producer that exists."""
+        origins = self.fams["DesignConstraint"]["origins"]
+        self.assertEqual({"user_design_profile", "explicit_source_requirement"},
+                         set(origins))
+        # Only the statements ABOUT HARD REQUIREMENTS. The profile contract may
+        # still say the PREFERENCE materialiser is S7-C's, because it is.
+        blob = (json.dumps(self.fams["DesignConstraint"])
+                + json.dumps(self.profile["ingestion"]["design_constraints"])
+                + json.dumps(self.profile["visibility"]["design_constraints"]))
+        for deferral in ("S7-C", "S7-D", "S7-E", "S7-F"):
+            self.assertNotIn(deferral, blob,
+                             "a hard requirement is described as deferred")
+        self.assertIn("S7-C", json.dumps(
+            self.profile["ingestion"]["selection_preferences"])
+            + self.profile["ingester_status"],
+            "the preference materialiser has lost its owner")
+        self.assertEqual("s01", self.fams["DesignConstraint"]["owned_by"])
+        self.assertIn("DesignConstraint",
+                      self.matrix["stages"]["s01"]["owns"])
 
     def test_B35c_the_interface_vocabulary_is_the_one_the_producer_emits(self):
         """It was not. Two lists with NOT ONE VALUE IN COMMON, and nothing read
@@ -1287,9 +1738,24 @@ class TestClosureSweep(unittest.TestCase):
         import inspect
         cls.src = inspect.getsource(s07)
         cls.tree = ast.parse(cls.src)
-        cls.code = _code_only(*[v for v in vars(s07).values()
-                                if inspect.isfunction(v)
-                                and v.__module__ == s07.__name__])
+        # THE CODE, WITH THE PROSE REMOVED. `_code_only` returns an AST dump on
+        # this interpreter, which quietly turns every substring assertion about
+        # an expression into a vacuous one. This blanks the docstring LINES
+        # instead, so what is searched is still source - and a rule explained in
+        # a docstring is not mistaken for the rule being implemented.
+        lines = cls.src.splitlines()
+        for node in ast.walk(cls.tree):
+            body = getattr(node, "body", None)
+            if not isinstance(body, list):
+                continue
+            for child in body:
+                if (isinstance(child, ast.Expr)
+                        and isinstance(getattr(child, "value", None), ast.Constant)
+                        and isinstance(child.value.value, str)):
+                    for n in range(child.lineno - 1,
+                                   (child.end_lineno or child.lineno)):
+                        lines[n] = ""
+        cls.code = "\n".join(lines)
 
     def test_SWEEP_01_no_unknown_key_is_silently_defaulted(self):
         """`AXIS_INDEX.get(axis, 0)` answered a requirement about a direction
@@ -1335,6 +1801,7 @@ class TestClosureSweep(unittest.TestCase):
         contain a kind whose meaning is that the pair stays apart."""
         self.assertIn("interface_expectation", self.code)
         self.assertNotIn("in declared", self.code)
+        self.assertIn("if e == s04.TOUCHES", self.code)
         for kind in s03.INTERACTION_KINDS:
             expectation = s04.interface_expectation({"interaction_kind": kind})
             self.assertIn(expectation, (s04.TOUCHES, s04.CLEAR, s04.UNDECLARED))
@@ -1424,6 +1891,79 @@ class TestClosureSweep(unittest.TestCase):
         for reach in ("state.family(", "state.standing("):
             self.assertNotIn(reach, entry,
                              "the entry point reads unscoped state")
+
+    def test_SWEEP_11_no_named_reference_is_answered_by_another_entity(self):
+        """A canonical reference resolves exactly or becomes unresolved. The one
+        substitution that existed compared a configuration against "some other
+        realized one" when the sibling it named was absent."""
+        self.assertNotIn("or [k for k in realized", self.code)
+        for marker in ("DISTINCTNESS_SIBLING_NOT_REALIZED",
+                       "DISTINCTNESS_NAMES_NO_SIBLING",
+                       "TERMINAL_SITE_NOT_GIVEN",
+                       "CHANGED_COORDINATE_NOT_A_JOINT",
+                       "DISPOSITION_PREMISE_NOT_A_JOINT",
+                       "HOP_NOT_AN_INTERFACE"):
+            self.assertIn(marker, self.src, marker)
+
+    def test_SWEEP_12_every_single_valued_index_is_guarded(self):
+        """`d[k] = v` over a semantic key keeps the last writer. Each index that
+        assumes uniqueness either keys on entity_id - which the write boundary
+        makes unique - or reports the duplicate instead of resolving it."""
+        for guard in ('duplicated("Envelope", "body")',
+                      "CONFIGURATION_REALIZED_TWICE",
+                      "CELL_DISPOSITIONED_TWICE",
+                      "INTERFACE_EXPECTATION_CONFLICT",
+                      "SCALE_AMBIGUOUS",
+                      "ASSEMBLY_ORDER_NOT_TOTAL"):
+            self.assertIn(guard, self.src, guard)
+        # And the multiplicity that is genuinely allowed is accumulated, never
+        # assigned: two paths for one load case, two interactions for one demand.
+        for accumulate in ("by_case.setdefault", "by_demand.setdefault",
+                           "disposed.setdefault"):
+            self.assertIn(accumulate, self.code, accumulate)
+
+    def test_SWEEP_13_no_expression_picks_among_same_family_entities(self):
+        """`next(...)` is the shape that cannot be guarded by a length test, so
+        it is absent from the code entirely; the helper that used it is gone. The
+        remaining `[0]`s are geometry corners or sit under an explicit length
+        test, and each is named here so a new one has to be justified."""
+        self.assertNotIn("next(", self.code)
+        self.assertNotIn("driving_joint", self.code)
+        for expression in ('sorted(free)[0]', 'drivers[0]', 'states[0]',
+                           'sorted(e)[0]', 'scales[0]', 'rows[0]'):
+            self.assertIn(expression, self.src, expression)
+        for guard in ("len(free) == 1", "len(drivers) == 1", "len(states) > 1",
+                      "len(e) == 1", "len(scales) > 1", "len(rows) > 1"):
+            self.assertIn(guard, self.code, guard)
+
+    def test_SWEEP_14_the_address_of_a_driver_is_group_and_dof(self):
+        """Resolution runs through one function, and it takes both components."""
+        import inspect
+        self.assertEqual(["group", "dof"],
+                         [p for p in inspect.signature(s07._Evidence.drivers_for)
+                          .parameters if p != "self"])
+        self.assertIn("dof", inspect.signature(s07._resolve_driver).parameters)
+        body = self.src.split("def _required_configurations(")[1].split("\ndef ")[0]
+        self.assertIn("_resolve_driver(ev, group, dof)", body)
+
+    def test_SWEEP_15_no_hard_demand_is_lost_between_s01_and_feasibility(self):
+        """The two ingestion channels exist, neither depends on the other, and
+        the role that carries the result to feasibility is declared."""
+        import inspect
+        src = inspect.getsource(s01)
+        self.assertIn("def ingest_design_constraints", src)
+        self.assertIn("def capture_design_constraints", src)
+        emitted = src.split("def to_operations")[1].split("\n    # ")[0]
+        for call in ("ingest_design_constraints(", "capture_design_constraints("):
+            self.assertIn(call, emitted, "%s is never called" % call)
+        # Neither channel gates the other: the profile ingester never looks at
+        # the parsed response, and the source capture never looks at the profile.
+        self.assertNotIn("design_profile",
+                         src.split("def capture_design_constraints")[1]
+                         .split("\ndef ")[0])
+        self.assertNotIn("parsed",
+                         src.split("def ingest_design_constraints")[1]
+                         .split("\ndef ")[0])
 
 
 class _EV(s07._Evidence):

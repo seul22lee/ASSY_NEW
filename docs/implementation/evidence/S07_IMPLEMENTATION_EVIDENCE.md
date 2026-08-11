@@ -721,12 +721,217 @@ vocabulary (1) — each reintroduction is caught by the test written for it.
 * **S7-C** — a hard requirement stated only in the request prose is not ingested.
   Reading it out of prose is the inference `DesignConstraint` exists to avoid, so
   the honest consequence is that the channel is structured-only.
+  **This was wrong, and §D fixes it.** The inference to avoid is *deriving* a
+  constraint from prose; *capturing* one the user explicitly stated is what s01
+  does with every other sentence, and calling the whole thing an inference lost a
+  demand rather than protecting one.
 
 Regression, **secondary**: RUN 1019 · PASS 1019 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-B FINAL CORRECTION + SAME-DEFECT-CLASS SWEEP (baseline `1b4ed24`)
+
+Four named blockers, all reproduced before editing, and five more found by the
+sweep. One theme runs through every one of them: **something was substituted for
+a fact that was named or missing** — another sibling for the one a reference
+names, another joint for the one a DOF requires, another route for the one the
+design declared, a structured profile for a sentence the user typed.
+
+### D.1 The blockers, reproduced
+
+| | reproduced from `1b4ed24` | root cause |
+|---|---|---|
+| **1** | request states "All parts must be plastic", no profile → `DesignConstraint: []` | The ingress read `design_profile.design_constraints` and nothing else. A hard requirement the user typed vanished on every design that shipped without a structured file — a family declared authoritative, owned by s01, unreachable from the only input most designs have. |
+| **2** | `differs_from: ["CFG-GONE"]`, CFG-GONE nowhere → **PASS** | `[o for o in named if o in realized] or [k for k in realized if k != cid]` — a named reference filtered to nothing, then replaced by whatever else was realized. A reference to an entity the design does not have earned a PASS from an entity nobody named. |
+| **3** | group with `JNT-PA` (PRISMATIC X) and `JNT-RA` (REVOLUTE Z), basis on `RZ` → **FAIL** | `driving_joint` returned the first joint whose `child_group` matched, ignoring the DOF half of the address. The slider holds the same value in both configurations, so the arbitrary pick did not merely fail to answer — **it manufactured a positive contradiction and declared a working mechanism infeasible.** |
+| **4** | one valid route + one closing internally: `(good, bad)` → FAIL, `(bad, good)` → **PASS** | `paths = {p.load_case: p}` kept whichever was written last. The verdict on a load turned on insertion order. |
+
+### D.2 Five more of the same classes, found by the sweep
+
+* **`Envelope` per body** — `{e["body"]: e["entity_id"]}` in two places. A body
+  with two standing extents silently got the last one, and every geometric answer
+  rested on a choice nothing made. Now `BODY_ENVELOPED_TWICE` across all four
+  geometry-reading domains and the dimensional evaluator.
+* **Disposition per cell** — `disposed[(g, c, d)] = ...` kept the last record, so
+  whether a required cell read INTENDED or BLOCKED_BY could turn on order. Now
+  `CELL_DISPOSITIONED_TWICE`.
+* **`State` per configuration** — `state_for` returned the first match. Now
+  `CONFIGURATION_REALIZED_TWICE`.
+* **Interface expectation per pair** — a pair declared both CONTACT and CLEARANCE
+  resolved by insertion order. Now `INTERFACE_EXPECTATION_CONFLICT`, and a
+  conflicted pair exempts nothing.
+* **`order_index` is not a total order** — two steps sharing an index were
+  installed in view order, so which corridor each was tested against depended on
+  it. Now sorted by `(order_index, entity_id)` and reported as
+  `ASSEMBLY_ORDER_NOT_TOTAL`.
+* **Moving-group driver** — `spatial_realization` checked the first joint on a
+  moving group and left the others uninspected. Now every joint is checked and
+  the ambiguity is reported.
+
+### D.3 The source-capture channel
+
+`capture_design_constraints(parsed)` in s01, beside the profile ingester. Neither
+gates the other and B55 asserts they compose.
+
+**THE MODEL TRANSCRIBES; CODE DECIDES.** Classifying a sentence as a material
+requirement is reading, which is what s01 asks a model to do everywhere else —
+so rule 9 of the prompt asks for it, and the response carries
+`hard_constraints[]`, each naming the Requirement it came from. Turning one into
+a constraint is not reading, and every gate is a typed fact:
+
+```
+kind ∈ DesignConstraint.kinds          (the contract's own vocabulary)
+requirement ∈ this response            (traceability is a condition of existence)
+quantitative kind ⟹ that requirement's quantity_class == MAGNITUDE
+                    and a numeric value in the kind's own parameter
+```
+
+That last gate is the one that matters. "Keep it reasonably compact" arrives as a
+requirement whose `quantity_class` is NONE — **the model offered it as
+`MAX_OVERALL_DIMENSION` in the live run and was refused** — while "no wider than
+100 mm" arrives as MAGNITUDE and passes. Neither outcome required a line of code
+to look at a word. There is no keyword mining anywhere.
+
+Nothing is completed: a stated limit with no axis is carried with no axis, and
+`params.get("axis", "ANY")` — which answered a limit that named no direction by
+measuring the largest span — is gone.
+
+### D.4 Multiplicity, stated rather than assumed
+
+The contract does not guarantee one LoadPath per LoadCase, so S7-B defines the
+policy rather than assuming uniqueness. Each route is classified alone —
+`VALID` / `CONTRADICTORY` / `UNRESOLVED` — and then:
+
+```
+any CONTRADICTORY  → FAIL          the design asserts a route that contradicts itself
+else any UNRESOLVED → NOT_ESTABLISHED   a declared route it has not shown
+else               → PASS
+```
+
+No selection of first, last, shortest or lexicographically smallest. B46–B48
+assert the verdict **and its premise set** are identical under both insertion
+orders.
+
+### D.5 Files changed
+
+| file | change |
+|---|---|
+| `stages/feasibility.py` | +469/−162: exact `differs_from`, `_resolve_driver` on `(group, dof)`, `_classify_path` + multiplicity policy, five multiplicity guards, no default axis |
+| `stages/s01_requirement_capture.py` | +129: prompt rule 9 and the `hard_constraints[]` schema, `capture_design_constraints`, `CONSTRAINT_KINDS`, split id sequences |
+| `contracts/DESIGN_STATE_CONTRACT.yaml` | `DesignConstraint.kinds` and `.origins` declared; both channels stated as live |
+| `contracts/STAGE_RESPONSIBILITY_CONTRACT.yaml` | `candidate_engineering_evidence` split `by_role` — three roles whose absence is a FINDING were `REQUIRED_NONEMPTY` |
+| `contracts/stages/S01_CONTRACT.yaml` | both producers, the source gate, the id note |
+| `tests/meta/test_s7_feasibility.py` | +602: B36–B56 and SWEEP_11–15 |
+
+**`s04_envelope_and_motion.py` is untouched this pass**, as are `_propagate`,
+the stale semantics and every S-4/S-5/S-6 meaning.
+
+### D.6 A sixth input-boundary defect, found by B49
+
+`candidate_engineering_evidence` declared one `REQUIRED_NONEMPTY` rule for seven
+roles, and for three of them it said the wrong thing — the third instance of
+exactly this shape in S-7. A candidate that routes no load has `LOAD_PATH_MISSING`
+to answer for; the boundary made its whole view `UPSTREAM_INSUFFICIENCY`, so
+**nine domains went unanswered in order to hide one finding**. Same for an effect
+discharged by nothing, and for a mechanism that blocks nothing — which is an
+ordinary mechanism. Split `by_role`; the four whose absence means there is no
+candidate to judge stay required.
+
+The probe fixture had been *forcing* a ConstraintRelation to get past that
+boundary, with a comment admitting it was testing the fixture. That is gone too.
+
+### D.7 B36–B56, and the sweep
+
+**105 tests.** B36–B39 (source capture: material survives, dimension decides,
+preference and vague prose refused), B40–B42 (exact `differs_from`), B43–B45
+(driver by `(group, dof)`, ambiguity, no compatible joint), B46–B49 (multiplicity
+in both orders), B50–B52 (configuration / joint / load-path permutation ⇒
+identical verdict AND premises), B53 (only the sibling compared is read), B54
+(provenance back to the sentence), B55 (no profile dependency), B56 (changing a
+preference changes nothing, entity for entity), SWEEP_11–15 (named-reference
+substitution, single-valued indexes, no expression picking among same-family
+entities, the driver address, no hard demand lost).
+
+**Eight mutations, each caught by the test written for it:** restoring the
+sibling fallback (1 failure), first-joint driver (3), last-path-wins (4), default
+axis (1), removing the source channel (3 + 3 errors), dropping the MAGNITUDE gate
+(1), accepting any kind the model names (1).
+
+### D.8 The live chain, from request text alone
+
+s01 → s02 → s03 → s03b → s04a → s04b → feasibility, real invocations, **no
+`design_profile` input at all**:
+
+```
+Requirements captured : REQ-0001 … REQ-0005
+DesignConstraints made: DSC-S001, DSC-S002
+   DSC-S001 MATERIAL_CLASS_ONLY    from REQ-0002  locator=line 2
+   DSC-S002 MAX_OVERALL_DIMENSION  from REQ-0003  locator=line 3
+                                                  {axis:X, limit:100, unit:mm}
+   "Prefer fewer parts" and "Keep it reasonably compact" produced nothing
+
+REQ-0002 "All parts must be plastic."
+  -> DSC-S001 -> HRC-CND-A-DSC-S001 = NOT_YET_EVALUABLE
+REQ-0003 "The assembled mechanism must be no wider than 100 mm."
+  -> DSC-S002 -> HRC-CND-A-DSC-S002 = SATISFIED
+     premises: BOD-G0A BOD-G1A CND-A DSC-S002 ENV-G0A ENV-G1A SCL-CND-A
+
+SelectionProfile in the feasibility view: False
+```
+
+### D.9 Final scope audit
+
+`git diff --check` clean. Six files, all in scope. No producer for any S7-C–F
+family (`SelectionProfile`, `CandidateComparison`, `SelectionAdvisory`,
+`SelectionConcern`, `HumanDecisionInput`: **0 references in production**;
+`SelectionDecision`: 4, all pre-existing readers — the branch resolver and
+`selection_gate_check`, which writes nothing). `_propagate` untouched. No
+`.gitignoreJoey…` file touched. Every `[0]` in the module is a geometry corner or
+sits under an explicit length test; `next(` appears in no code.
+
+### D.10 Still open, with owners
+
+* **S-8** — `NOT_INTENDED_TO_INTERACT` declared and unproducible; the only shape
+  from which `gross_interference` could yield a FAIL.
+* **S-8** — `assemblability` does not require a step per body. Unchanged and for
+  the reason given in §C.8: under box geometry the rule would be correct-looking
+  and vacuous.
+* **S-8** — `free_dof` defaults an unreadable axis to Z. S7-B now refuses to
+  consume that default in **three** places (cell address, distinctness driver,
+  disposition support) rather than redefining mobility.
+* **S-8** — `configuration_realization_check` (frozen s04) still carries the
+  sibling fallback S7-B removed. It reports findings and decides nothing, so it
+  can only under-report where feasibility is now exact; relocating checks is S-8's.
+* **S7-C** — a hard requirement the source states but s01 does not classify into
+  a declared kind stays a Requirement. That is the correct floor: the vocabulary
+  is the gate, and widening it is a contract change, not a code change.
+
+Regression, **secondary**: RUN 1052 · PASS 1052 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
+
+> **S7-B VERIFIED CLOSED — EXPLICIT HARD DEMANDS, EXACT REFERENCES, COMPOSITE
+> ADDRESSES AND MULTIPLICITY ARE DETERMINISTIC.**
+>
+> A hard requirement the user typed into the request survives with no structured
+> profile anywhere, traceable back to the sentence that created it, and a
+> preference cannot become one through either channel. A named reference resolves
+> exactly or becomes unresolved — no sibling stands in for the one a basis names.
+> A requirement addressed to `(group, dof)` is answered by the joint that carries
+> that DOF or by nothing, and two candidates for it are an ambiguity rather than a
+> pick. Every declared load route is evaluated, and the verdict and its premises
+> are identical under any insertion order. Six single-valued indexes that kept
+> whichever record came last now report the duplicate instead of resolving it.
+> Missing evidence is still never replaced with convenient evidence.
+>
+> **S-7 / U-8 IS NOT CLOSED.** S7-C through S7-F are not started.
+
+---
+
+## S7-B CORRECTION-PASS STATUS (superseded by the above; kept, not deleted)
 
 > **S7-B VERIFIED CLOSED — DETERMINISTIC FEASIBILITY, DEMAND-DRIVEN
 > APPLICABILITY, TYPED PHYSICAL SEMANTICS AND HARD-CONSTRAINT EVALUATION
@@ -744,7 +949,9 @@ Regression, **secondary**: RUN 1019 · PASS 1019 · FAIL 0 · SKIP 22.
 > FAIL. The contracts describe what runs, and each defect class is a standing
 > test rather than a fixed line.
 >
-> **S-7 / U-8 IS NOT CLOSED.** S7-C through S7-F are not started.
+> Superseded in scope by §D: this pass read only the structured profile, so a
+> hard requirement typed into the request disappeared; and it still substituted
+> another entity for a named one in four places. Every claim above still holds.
 
 ---
 

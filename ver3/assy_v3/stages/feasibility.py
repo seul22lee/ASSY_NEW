@@ -189,20 +189,52 @@ class _Evidence:
     def group_body(self) -> Dict[str, str]:
         return {g["entity_id"]: g.get("body") for g in self.fam("RigidGroup")}
 
-    def state_for(self, configuration: str) -> Optional[Dict[str, Any]]:
-        # `configuration or name`, exactly as `configuration_realization_check`
-        # indexes it. Two different keyings would disagree about which state
-        # realizes a configuration on precisely the records where it matters.
-        for st in self.fam("State"):
-            if (st.get("configuration") or st.get("name")) == configuration:
-                return st
-        return None
+    def duplicated(self, family: str, field: str) -> List[str]:
+        """Keys of `family` for which `field` holds more than one record.
 
-    def driving_joint(self, group: str) -> Optional[Dict[str, Any]]:
-        for j in self.fam("Joint"):
-            if j.get("child_group") == group:
-                return j
-        return None
+        A one-to-one index built by dict comprehension keeps whichever record it
+        saw last, so a duplicate turns into a silent choice. Where uniqueness is
+        assumed it is asked for here, and a violation becomes a finding instead
+        of a coin toss.
+        """
+        seen: Dict[Any, int] = {}
+        for e in self.fam(family):
+            key = e.get(field)
+            seen[key] = seen.get(key, 0) + 1
+        return sorted(k for k, n in seen.items() if n > 1 and k)
+
+    def joints_of(self, group: str) -> List[Dict[str, Any]]:
+        """EVERY joint whose coordinate moves this group, not the first one.
+
+        `driving_joint` returned `next(j for j in Joint if child_group == group)`,
+        so which joint answered a question was decided by insertion order. On a
+        group carrying a PRISMATIC and a REVOLUTE joint, a basis about RZ was
+        answered by the slider - and answered FAIL, because two configurations
+        that differ in rotation share a translation. An arbitrary choice
+        producing a positive contradiction is the worst form this defect takes.
+        """
+        return [j for j in self.fam("Joint") if j.get("child_group") == group]
+
+    def drivers_for(self, group: str, dof: str):
+        """(joints that carry this cell, joints whose axis cannot be read).
+
+        The address is (rigid_group, dof) and BOTH components select. Compatible
+        means the joint's own class and axis leave that DOF free, asked of
+        `free_dof` so the answer is s03's. An unreadable axis is separated out
+        rather than passed to `free_dof`, which would answer from its Z default.
+        """
+        drivers, unreadable = [], []
+        for j in self.joints_of(group):
+            if s04.axis_index(j.get("axis_direction")) is None:
+                unreadable.append(j)
+            elif dof in s03.free_dof(j.get("joint_type"), j.get("axis_direction")):
+                drivers.append(j)
+        return drivers, unreadable
+
+    def states_for(self, configuration: str) -> List[Dict[str, Any]]:
+        """EVERY state realizing this configuration. Two is not one."""
+        return [st for st in self.fam("State")
+                if (st.get("configuration") or st.get("name")) == configuration]
 
     # -- WHAT THE DESIGN DEMANDS, as against what it has built ---------
     def reach_demands(self) -> List[Dict[str, Any]]:
@@ -271,83 +303,138 @@ def _physical_realization(ev: _Evidence) -> Verdict:
     return Verdict("physical_realization", status, codes, used, "; ".join(notes[:5]))
 
 
+VALID, CONTRADICTORY, UNRESOLVED = "VALID", "CONTRADICTORY", "UNRESOLVED"
+
+
+def _classify_path(ev, load, path, interfaces, boxes, envelope_of):
+    """ONE load path, classified on its own: (verdict, codes, notes, premises).
+
+    Nothing here looks at any other path. Aggregation is the caller's, and
+    keeping the two apart is what makes the answer independent of which path was
+    written down first.
+    """
+    codes, notes, used = [], [], [path.get("entity_id")]
+    verdict = VALID
+    terminus, expected = path.get("terminates_at"), load.get("reacted_at_site")
+    if not terminus:
+        codes.append("LOAD_PATH_OPEN")
+        verdict = UNRESOLVED
+    elif expected and terminus != expected:
+        codes.append("TERMINUS_NOT_THE_DECLARED_SITE")
+        notes.append("%s closes at %s and %s is reacted at %s"
+                     % (path.get("entity_id"), terminus, load.get("entity_id"),
+                        expected))
+        verdict = CONTRADICTORY
+        used += [terminus, expected]
+    else:
+        site = ev.by_id.get(terminus)
+        used.append(terminus)
+        if site is None:
+            codes.append("TERMINAL_SITE_NOT_GIVEN")
+            verdict = UNRESOLVED
+        elif site.get("boundary_side") != "EXTERNAL":
+            codes.append("TERMINAL_SITE_INTERNAL")
+            notes.append("%s closes inside the product" % path.get("entity_id"))
+            verdict = CONTRADICTORY
+    hops = [h for h in (path.get("ordered_hops") or []) if isinstance(h, str)]
+    if len(hops) < 1:
+        codes.append("LOAD_PATH_TOO_SHORT")
+        verdict = _worse(verdict, UNRESOLVED)
+    for h in hops:
+        iface = interfaces.get(h)
+        if iface is None:
+            codes.append("HOP_NOT_AN_INTERFACE")
+            verdict = _worse(verdict, UNRESOLVED)
+            continue
+        used.append(h)
+        pair = [b for b in (iface.get("bodies") or []) if b in boxes]
+        if len(pair) < 2:
+            codes.append("HOP_GEOMETRY_MISSING")
+            verdict = _worse(verdict, UNRESOLVED)
+            continue
+        # THE EXTENTS ARE NAMED WHATEVER THE ANSWER, and so is the basis they
+        # are expressed in. A gap that is not there today is a gap either body
+        # could acquire by being moved, so "these two touch" rests on both
+        # extents exactly as much as "these two are apart" does.
+        used += [e for e in (envelope_of.get(pair[0]),
+                             envelope_of.get(pair[1])) if e] + ev.basis()
+        if s04.box_gap(boxes[pair[0]], boxes[pair[1]]) > 0:
+            codes.append("HOP_BODIES_APART")
+            notes.append("%s carries %s -> %s and they are apart"
+                         % (h, pair[0], pair[1]))
+            verdict = CONTRADICTORY
+    for x, y in zip(hops, hops[1:]):
+        ia, ib = interfaces.get(x), interfaces.get(y)
+        if ia and ib and not (set(ia.get("bodies") or [])
+                              & set(ib.get("bodies") or [])):
+            codes.append("HOPS_NOT_CONNECTED")
+            notes.append("%s and %s share no body" % (x, y))
+            verdict = CONTRADICTORY
+    return verdict, codes, notes, used
+
+
+def _worse(current: str, candidate: str) -> str:
+    """CONTRADICTORY absorbs; UNRESOLVED beats VALID."""
+    if CONTRADICTORY in (current, candidate):
+        return CONTRADICTORY
+    if UNRESOLVED in (current, candidate):
+        return UNRESOLVED
+    return VALID
+
+
 def _load_reaction_closure(ev: _Evidence) -> Verdict:
-    """Every load reaches the site its own load case names, outside the product."""
+    """Every load reaches the site its own load case names, outside the product.
+
+    EVERY PATH IS EVALUATED, NOT ONE OF THEM. The index used to be
+    `{path.load_case: path}`, which keeps whichever path was written last, so a
+    load with two declared routes got a verdict decided by insertion order - a
+    valid route and a route closing inside the product gave PASS or FAIL
+    depending on nothing at all.
+
+    The policy is stated once and applied to all of them: a route the design
+    currently asserts and that contradicts itself is a contradiction whether or
+    not some other route works, because the design is asserting both. An
+    unresolved route beside a valid one leaves the closure unestablished for the
+    same reason - the design declared a route it has not shown.
+    """
     loads = ev.fam("LoadCase")
     if not loads:
         return Verdict("load_reaction_closure", NOT_APPLICABLE, ["NO_LOAD_CASE"])
-    paths = {p.get("load_case"): p for p in ev.fam("LoadPath")}
+    by_case: Dict[Any, List[Dict[str, Any]]] = {}
+    for p in ev.fam("LoadPath"):
+        by_case.setdefault(p.get("load_case"), []).append(p)
     interfaces = {i["entity_id"]: i for i in ev.fam("Interface")}
     boxes = ev.boxes()
     envelope_of = ev.envelope_of()
-    used, codes, notes = [], [], []
-    status = PASS
+    codes, notes, used = _geometry_ambiguity(ev)
+    status = _weaken(PASS, NOT_ESTABLISHED) if codes else PASS
     for load in loads:
         lid = load.get("entity_id")
-        path = paths.get(lid)
         # The load case is named whether or not a path answers it: the demand is
         # present, and withdrawing it withdraws the question.
         used.append(lid)
-        if path is None:
+        routes = by_case.get(lid) or []
+        if not routes:
             codes.append("LOAD_PATH_MISSING")
             notes.append("%s has no path" % lid)
             status = _weaken(status, NOT_ESTABLISHED)
             continue
-        used.append(path.get("entity_id"))
-        terminus, expected = path.get("terminates_at"), load.get("reacted_at_site")
-        if not terminus:
-            codes.append("LOAD_PATH_OPEN")
-            status = _weaken(status, NOT_ESTABLISHED)
-        elif expected and terminus != expected:
-            codes.append("TERMINUS_NOT_THE_DECLARED_SITE")
-            notes.append("%s closes at %s and %s is reacted at %s"
-                         % (path.get("entity_id"), terminus, lid, expected))
+        verdicts = []
+        for path in sorted(routes, key=lambda p: p.get("entity_id") or ""):
+            verdict, path_codes, path_notes, path_used = _classify_path(
+                ev, load, path, interfaces, boxes, envelope_of)
+            verdicts.append(verdict)
+            codes += path_codes
+            notes += path_notes
+            used += path_used
+        if CONTRADICTORY in verdicts:
+            codes.append("DECLARED_ROUTE_CONTRADICTS_ITSELF"
+                         if VALID in verdicts else "LOAD_ROUTE_CONTRADICTED")
             status = FAIL
-            used += [terminus, expected]
-        else:
-            site = ev.by_id.get(terminus)
-            used.append(terminus)
-            if site is None:
-                codes.append("TERMINAL_SITE_NOT_GIVEN")
-                status = _weaken(status, NOT_ESTABLISHED)
-            elif site.get("boundary_side") != "EXTERNAL":
-                codes.append("TERMINAL_SITE_INTERNAL")
-                notes.append("%s closes inside the product" % path.get("entity_id"))
-                status = FAIL
-        hops = [h for h in (path.get("ordered_hops") or []) if isinstance(h, str)]
-        if len(hops) < 1:
-            codes.append("LOAD_PATH_TOO_SHORT")
+        elif UNRESOLVED in verdicts:
             status = _weaken(status, NOT_ESTABLISHED)
-        for h in hops:
-            iface = interfaces.get(h)
-            if iface is None:
-                codes.append("HOP_NOT_AN_INTERFACE")
-                status = _weaken(status, NOT_ESTABLISHED)
-                continue
-            used.append(h)
-            pair = [b for b in (iface.get("bodies") or []) if b in boxes]
-            if len(pair) < 2:
-                codes.append("HOP_GEOMETRY_MISSING")
-                status = _weaken(status, NOT_ESTABLISHED)
-                continue
-            # THE EXTENTS ARE NAMED WHATEVER THE ANSWER, and so is the basis they
-            # are expressed in. A gap that is not there today is a gap either
-            # body could acquire by being moved, so "these two touch" rests on
-            # both extents exactly as much as "these two are apart" does.
-            used += [e for e in (envelope_of.get(pair[0]),
-                                 envelope_of.get(pair[1])) if e] + ev.basis()
-            if s04.box_gap(boxes[pair[0]], boxes[pair[1]]) > 0:
-                codes.append("HOP_BODIES_APART")
-                notes.append("%s carries %s -> %s and they are apart"
-                             % (h, pair[0], pair[1]))
-                status = FAIL
-        for x, y in zip(hops, hops[1:]):
-            ia, ib = interfaces.get(x), interfaces.get(y)
-            if ia and ib and not (set(ia.get("bodies") or [])
-                                  & set(ib.get("bodies") or [])):
-                codes.append("HOPS_NOT_CONNECTED")
-                notes.append("%s and %s share no body" % (x, y))
-                status = FAIL
+        elif len(verdicts) > 1:
+            codes.append("EVERY_DECLARED_ROUTE_CLOSES")
     if status == PASS:
         codes.append("EVERY_LOAD_CLOSES_EXTERNALLY")
     return Verdict("load_reaction_closure", status, codes, used, "; ".join(notes[:5]))
@@ -484,12 +571,18 @@ def _mobility_disposition(ev: _Evidence) -> Verdict:
                            "configuration or transition declares which DOF moves"
                            % len(demanded))
         return Verdict("mobility_disposition", NOT_APPLICABLE, ["NO_REQUIRED_MOTION"])
-    disposed = {}
+    # EVERY DISPOSITION OF A CELL, not the last one indexed. Two records
+    # dispositioning one cell is two answers to what is known about it, and
+    # assignment kept whichever came last - so which MobilityExpectation a
+    # verdict rested on, and whether that verdict was INTENDED or BLOCKED_BY,
+    # could turn on insertion order.
+    disposed: Dict[Any, List[Tuple[str, Dict[str, Any]]]] = {}
     for mex in ev.fam("MobilityExpectation"):
         for d in (mex.get("dispositions") or []):
             if isinstance(d, dict):
-                disposed[(d.get("rigid_group"), d.get("configuration"),
-                          d.get("dof"))] = (mex.get("entity_id"), d)
+                disposed.setdefault((d.get("rigid_group"), d.get("configuration"),
+                                     d.get("dof")), []).append(
+                                         (mex.get("entity_id"), d))
     codes, notes = [], []
     status = PASS
     for code, note in ambiguous:
@@ -502,13 +595,20 @@ def _mobility_disposition(ev: _Evidence) -> Verdict:
         status = _weaken(status, NOT_ESTABLISHED)
     for cell in cells:
         group, configuration, dof = cell
-        row = disposed.get(cell)
-        if row is None:
+        rows = disposed.get(cell) or []
+        if not rows:
             codes.append("REQUIRED_CELL_NOT_DISPOSITIONED")
             notes.append("%s/%s/%s has no disposition" % cell)
             status = _weaken(status, NOT_ESTABLISHED)
             continue
-        mid, d = row
+        if len(rows) > 1:
+            codes.append("CELL_DISPOSITIONED_TWICE")
+            notes.append("%s/%s/%s is dispositioned by %s" % (
+                cell + (", ".join(sorted(m for m, _d in rows)),)))
+            status = _weaken(status, NOT_ESTABLISHED)
+            used += sorted(m for m, _d in rows)
+            continue
+        mid, d = rows[0]
         verdict = d.get("disposition")
         if verdict == "INTENDED" and d.get("by_joint"):
             used += [mid, d["by_joint"]]
@@ -543,8 +643,42 @@ def _mobility_disposition(ev: _Evidence) -> Verdict:
     return Verdict("mobility_disposition", status, codes, used, "; ".join(notes[:5]))
 
 
+def _resolve_driver(ev: _Evidence, group: str, dof: str):
+    """(joint, code, note, premises) for the joint that carries (group, dof).
+
+    ONE COMPATIBLE JOINT OR NO ANSWER. Zero is a requirement the topology does
+    not support; more than one is a requirement the topology does not resolve.
+    Neither is a licence to pick, and picking is what made a slider answer for a
+    hinge. When ambiguity is the finding, the competing joints ARE the positive
+    facts that establish it, so they are the premises.
+    """
+    drivers, unreadable = ev.drivers_for(group, dof)
+    if len(drivers) == 1:
+        return drivers[0], None, None, [drivers[0]["entity_id"]]
+    if len(drivers) > 1:
+        names = sorted(j["entity_id"] for j in drivers)
+        return (None, "DISTINCTNESS_DRIVER_AMBIGUOUS",
+                "%s/%s could be carried by %s and the design does not say which"
+                % (group, dof, " or ".join(names)), names)
+    if unreadable:
+        names = sorted(j["entity_id"] for j in unreadable)
+        return (None, "DISTINCTNESS_DRIVER_AXIS_UNREADABLE",
+                "%s/%s: %s declare axes that name no coordinate"
+                % (group, dof, ", ".join(names)), names)
+    return (None, "DISTINCTNESS_DRIVER_UNKNOWN",
+            "no joint of this candidate leaves %s free at %s" % (dof, group), [])
+
+
 def _required_configurations(ev: _Evidence) -> Verdict:
-    """Each configuration is realized, and declared distinctness is real."""
+    """Each configuration is realized, and declared distinctness is real.
+
+    A NAMED REFERENCE IS AN ADDRESS, NOT A SUGGESTION. `differs_from` names the
+    siblings this configuration must differ from; each is evaluated exactly, and
+    one that is absent or unrealized makes the comparison unestablished. The
+    fallback that compared against "some other realized configuration" turned a
+    reference to an entity the design does not have into a PASS earned by an
+    entity nobody named.
+    """
     configs = ev.fam("Configuration")
     if not configs:
         return Verdict("required_configurations", NOT_APPLICABLE, ["NO_CONFIGURATION"])
@@ -553,46 +687,74 @@ def _required_configurations(ev: _Evidence) -> Verdict:
     realized = {}
     for cfg in configs:
         cid = cfg.get("entity_id")
-        st = ev.state_for(cid)
-        if st is None:
+        states = ev.states_for(cid)
+        if not states:
             codes.append("CONFIGURATION_NOT_REALIZED")
             notes.append("%s has no state" % cid)
             status = _weaken(status, NOT_ESTABLISHED)
             continue
-        realized[cid] = st
-        used += [cid, st.get("entity_id")]
+        if len(states) > 1:
+            # Two states for one configuration is two answers to "what is it set
+            # to". Indexing by configuration used to keep whichever came first.
+            codes.append("CONFIGURATION_REALIZED_TWICE")
+            notes.append("%s is realized by %s" % (cid, ", ".join(
+                sorted(st.get("entity_id") for st in states))))
+            status = _weaken(status, NOT_ESTABLISHED)
+            used += [cid] + sorted(st.get("entity_id") for st in states)
+            continue
+        realized[cid] = states[0]
+        used += [cid, states[0].get("entity_id")]
     for cfg in configs:
         cid = cfg.get("entity_id")
         mine = realized.get(cid)
-        if mine is None:
-            continue
         for item in (cfg.get("distinguishing_basis") or []):
             if not isinstance(item, dict):
                 continue
-            group = item.get("rigid_group")
-            joint = ev.driving_joint(group)
+            group, dof = item.get("rigid_group"), item.get("dof")
+            named = [o for o in (item.get("differs_from") or [])
+                     if isinstance(o, str) and o]
+            used.append(cid)
+            if not named:
+                # "different" with nothing to be different from. Comparing
+                # against everything else was this code inventing the sibling.
+                codes.append("DISTINCTNESS_NAMES_NO_SIBLING")
+                notes.append("%s declares a basis on %s/%s and names no sibling"
+                             % (cid, group, dof))
+                status = _weaken(status, NOT_ESTABLISHED)
+                continue
+            if mine is None:
+                codes.append("DISTINCTNESS_NOT_REALIZED_HERE")
+                status = _weaken(status, NOT_ESTABLISHED)
+                continue
+            joint, code, note, premises = _resolve_driver(ev, group, dof)
+            used += premises
             if joint is None:
-                codes.append("DISTINCTNESS_DRIVER_UNKNOWN")
-                notes.append("no joint drives %s" % group)
+                codes.append(code)
+                notes.append(note)
                 status = _weaken(status, NOT_ESTABLISHED)
                 continue
             jid = joint["entity_id"]
-            others = [o for o in (item.get("differs_from") or []) if o in realized] \
-                or [k for k in realized if k != cid]
             q = (mine.get("joint_coordinates") or {}).get(jid)
-            for other in others:
-                p = (realized[other].get("joint_coordinates") or {}).get(jid)
+            for other in named:
+                sibling = realized.get(other)
+                if sibling is None:
+                    codes.append("DISTINCTNESS_SIBLING_NOT_REALIZED")
+                    notes.append("%s must differ from %s, which this candidate "
+                                 "does not realize" % (cid, other))
+                    status = _weaken(status, NOT_ESTABLISHED)
+                    continue
+                p = (sibling.get("joint_coordinates") or {}).get(jid)
+                used.append(sibling.get("entity_id"))
                 if q is None or p is None:
                     codes.append("DISTINCTNESS_COORDINATE_MISSING")
+                    notes.append("%s and %s do not both state a coordinate for %s"
+                                 % (cid, other, jid))
                     status = _weaken(status, NOT_ESTABLISHED)
                 elif q == p:
                     codes.append("DECLARED_DISTINCTNESS_NOT_REALIZED")
                     notes.append("%s and %s both realize %s at %r"
                                  % (cid, other, jid, q))
                     status = FAIL
-                    used += [jid, realized[other].get("entity_id")]
-                else:
-                    used.append(jid)
     # The coordinates compared above are spatial values, so the basis they are
     # expressed in is a premise of the comparison exactly as it is of them.
     if used:
@@ -661,8 +823,8 @@ def _spatial_realization(ev: _Evidence) -> Verdict:
     if not bodies:
         return Verdict("spatial_realization", NOT_APPLICABLE, ["NO_BODY"])
     boxes, envelope_of = ev.boxes(), ev.envelope_of()
-    codes, notes, used = [], [], []
-    status = PASS
+    codes, notes, used = _geometry_ambiguity(ev)
+    status = _weaken(PASS, NOT_ESTABLISHED) if codes else PASS
     for body in bodies:
         bid = body.get("entity_id")
         if bid not in boxes:
@@ -690,23 +852,32 @@ def _spatial_realization(ev: _Evidence) -> Verdict:
     moving = {g for t in ev.fam("Transition")
               for g in ((t.get("path") or {}).get("moving_groups") or [])}
     for group in sorted(moving):
-        joint = ev.driving_joint(group)
-        if joint is None:
+        drivers = ev.joints_of(group)
+        if not drivers:
             codes.append("MOVING_GROUP_HAS_NO_JOINT")
             status = _weaken(status, NOT_ESTABLISHED)
             continue
-        if s04.axis_index(joint.get("axis_direction")) is None:
-            codes.append("JOINT_AXIS_UNUSABLE")
-            notes.append("%s declares axis %r" % (joint["entity_id"],
-                                                  joint.get("axis_direction")))
+        if len(drivers) > 1:
+            # EVERY joint on the group must be usable, because which one carries
+            # the motion is not stated. Checking the first left the others
+            # unexamined and let insertion order decide what was inspected.
+            codes.append("MOVING_GROUP_DRIVER_AMBIGUOUS")
+            notes.append("%s is moved and %s could carry it" % (group, ", ".join(
+                sorted(j["entity_id"] for j in drivers))))
             status = _weaken(status, NOT_ESTABLISHED)
-            continue
-        origin = joint.get("frame_origin")
-        if not (isinstance(origin, list) and len(origin) == 3):
-            codes.append("JOINT_NOT_PLACED")
-            status = _weaken(status, NOT_ESTABLISHED)
-            continue
-        used.append(joint["entity_id"])
+        for joint in drivers:
+            if s04.axis_index(joint.get("axis_direction")) is None:
+                codes.append("JOINT_AXIS_UNUSABLE")
+                notes.append("%s declares axis %r" % (joint["entity_id"],
+                                                      joint.get("axis_direction")))
+                status = _weaken(status, NOT_ESTABLISHED)
+                continue
+            origin = joint.get("frame_origin")
+            if not (isinstance(origin, list) and len(origin) == 3):
+                codes.append("JOINT_NOT_PLACED")
+                status = _weaken(status, NOT_ESTABLISHED)
+                continue
+            used.append(joint["entity_id"])
     swept = {v.get("transition") for v in ev.fam("SweptVolume")}
     for t in ev.fam("Transition"):
         if ((t.get("path") or {}).get("moving_groups") or []) \
@@ -774,8 +945,8 @@ def _assemblability(ev: _Evidence) -> Verdict:
     bodies = ev.fam("Body")
     if not steps and len(bodies) < 2:
         return Verdict("assemblability", NOT_APPLICABLE, ["NOTHING_TO_ASSEMBLE"])
-    codes, notes, used = [], [], []
-    status = PASS
+    codes, notes, used = _geometry_ambiguity(ev)
+    status = _weaken(PASS, NOT_ESTABLISHED) if codes else PASS
     # A CYCLE AND A CONTRADICTED ORDER ARE POSITIVE CONTRADICTIONS: the order the
     # design states cannot be performed. A dependency naming a step this
     # candidate does not have is an ABSENCE - `depends_on` is not a resolvable
@@ -808,7 +979,21 @@ def _assemblability(ev: _Evidence) -> Verdict:
                      % (len(unplaced), ", ".join(unplaced[:5])))
         status = _weaken(status, NOT_ESTABLISHED)
         used += [b["entity_id"] for b in bodies]
-    ordered = sorted(steps.values(), key=lambda s: s.get("order_index") or 0)
+    # ORDER_INDEX ALONE IS NOT A TOTAL ORDER, and dict order was breaking the
+    # tie - so two steps sharing an index were installed in whichever sequence
+    # the view happened to hold them, and the corridor each was tested against
+    # depended on that. The id breaks the tie deterministically, and a shared
+    # index is reported rather than resolved.
+    shared = sorted(i for i in {s.get("order_index") for s in steps.values()}
+                    if [s for s in steps.values() if s.get("order_index") == i][1:])
+    if shared:
+        codes.append("ASSEMBLY_ORDER_NOT_TOTAL")
+        notes.append("more than one step claims order index %s"
+                     % ", ".join(str(i) for i in shared))
+        status = _weaken(status, NOT_ESTABLISHED)
+        used += sorted(steps)
+    ordered = sorted(steps.values(),
+                     key=lambda s: (s.get("order_index") or 0, s["entity_id"]))
     placed: List[str] = []
     for step in ordered:
         sid, body = step["entity_id"], step.get("body")
@@ -901,12 +1086,27 @@ def _gross_interference(ev: _Evidence) -> Verdict:
     # could interfere.
     if len(bodies) < 2 and not moving and not keepouts:
         return Verdict("gross_interference", NOT_APPLICABLE, ["NOTHING_COEXISTS"])
-    # pair -> what the interface EXPECTS of it. Only TOUCHES exempts.
-    expectation = {frozenset((i.get("bodies") or [])[:2]): s04.interface_expectation(i)
-                   for i in ev.fam("Interface") if len(i.get("bodies") or []) >= 2}
+    # pair -> what the interfaces EXPECT of it. Only TOUCHES exempts, and a pair
+    # declared BOTH ways exempts nothing: a dict comprehension kept whichever
+    # interface came last, so a CONTACT and a CLEARANCE over the same two bodies
+    # resolved by insertion order. Disagreement is a finding, not a tie to break.
+    stated: Dict[Any, set] = {}
+    for i in ev.fam("Interface"):
+        bodies_of = (i.get("bodies") or [])[:2]
+        if len(bodies_of) >= 2:
+            stated.setdefault(frozenset(bodies_of), set()).add(
+                s04.interface_expectation(i))
+    conflicted = {p for p, e in stated.items() if len(e) > 1}
+    expectation = {p: sorted(e)[0] for p, e in stated.items() if len(e) == 1}
     exempt = {p for p, e in expectation.items() if e == s04.TOUCHES}
-    envelope_of, codes, notes, used = ev.envelope_of(), [], [], []
-    status = PASS
+    envelope_of = ev.envelope_of()
+    codes, notes, used = _geometry_ambiguity(ev)
+    status = _weaken(PASS, NOT_ESTABLISHED) if codes else PASS
+    for pair in sorted(conflicted, key=sorted):
+        codes.append("INTERFACE_EXPECTATION_CONFLICT")
+        notes.append("%s are declared both to meet and to stay clear"
+                     % " and ".join(sorted(pair)))
+        status = _weaken(status, NOT_ESTABLISHED)
     # EVERY BOX, EVERY INTERFACE AND THE BASIS. "Nothing overlaps that was not
     # declared" is a statement about the whole arrangement: any extent moving,
     # any pair being declared or undeclared, or the basis being withdrawn makes
@@ -974,6 +1174,23 @@ DOMAIN_EVALUATORS: Dict[str, Callable[[_Evidence], Verdict]] = {
     "assemblability": _assemblability,
     "gross_interference": _gross_interference,
 }
+
+
+def _geometry_ambiguity(ev: _Evidence):
+    """(codes, notes, premises) when a body carries more than one current extent.
+
+    `body -> envelope` is built by dict comprehension in two places, so a body
+    with two standing envelopes silently got whichever was seen last - and every
+    geometric answer downstream rested on a choice nothing made. Which extent is
+    current is the design's to say; where it has said two, no measurement over
+    them is established.
+    """
+    twice = ev.duplicated("Envelope", "body")
+    if not twice:
+        return [], [], []
+    return (["BODY_ENVELOPED_TWICE"],
+            ["%s carry more than one current extent" % ", ".join(twice[:5])],
+            ev.ids("Envelope"))
 
 
 def _weaken(current: str, candidate: str) -> str:
@@ -1047,7 +1264,12 @@ def _max_overall_dimension(constraint, ev):
     limit, unit = params.get("limit"), params.get("unit")
     if not isinstance(limit, (int, float)):
         return NOT_YET_EVALUABLE, ["CONSTRAINT_LIMIT_MISSING"], [], ""
-    axis = params.get("axis", "ANY")
+    # NO DEFAULT AXIS. `params.get("axis", "ANY")` answered a limit that named no
+    # direction by measuring the largest span - a different requirement, and a
+    # more permissive one on every arrangement whose longest axis is not the one
+    # the user meant. An unstated axis is a limit the design has not finished
+    # stating.
+    axis = params.get("axis")
     if axis not in DIMENSION_AXES:
         # NO FALLBACK. `AXIS_INDEX.get(axis, 0)` answered a requirement about a
         # direction nobody named by silently measuring X.
@@ -1081,6 +1303,11 @@ def _max_overall_dimension(constraint, ev):
         return (NOT_YET_EVALUABLE, ["SCALE_FACTOR_MISSING"], [scale.get("entity_id")],
                 "the scale states a unit and not what one coordinate is worth in it")
     boxes, bodies = ev.boxes(), ev.ids("Body")
+    twice = ev.duplicated("Envelope", "body")
+    if twice:
+        return (NOT_YET_EVALUABLE, ["BODY_ENVELOPED_TWICE"], ev.ids("Envelope"),
+                "%s carry more than one current extent, so there is no one "
+                "arrangement to measure" % ", ".join(twice[:5]))
     if not bodies:
         return NOT_YET_EVALUABLE, ["NO_BODY"], [], ""
     unplaced = sorted(b for b in bodies if b not in boxes)

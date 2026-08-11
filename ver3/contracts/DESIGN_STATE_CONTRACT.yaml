@@ -1804,15 +1804,67 @@ assurance_families:
     required_fields: [entity_id, kind, statement, source, evaluability]
     optional_fields: [parameters, blocks_selection, derived_from_requirements]
     evaluability: [MACHINE_EVALUABLE, HUMAN_EVALUABLE]
+    # THE KINDS THIS PIPELINE CAN CARRY, and what each needs before it means
+    # anything. A kind absent from this list is not ingested from either channel:
+    # a constraint nothing can act on is a word, and inventing a kind to hold it
+    # would be inventing the requirement.
+    #
+    # `quantity` names the parameter that carries the number. A QUANTITATIVE kind
+    # may be ingested FROM THE SOURCE only when the Requirement it comes from has
+    # quantity_class MAGNITUDE and that parameter is present and numeric - which
+    # is how "keep it reasonably compact" is refused without any code reading the
+    # prose. s01's own typed capture answers it. (S7-B correction)
+    kinds:
+      MATERIAL_CLASS_ONLY:
+        quantitative: false
+        parameters: [material_class]
+      PROHIBITED_ENERGY_SOURCE:
+        quantitative: false
+        parameters: [source]
+      MAX_OVERALL_DIMENSION:
+        quantitative: true
+        quantity: limit
+        parameters: [axis, limit, unit]
+      LOAD_CAPACITY:
+        quantitative: true
+        quantity: magnitude
+        parameters: [magnitude, unit]
+    origins:
+      user_design_profile: >
+        A structured section the user supplied. Carried across exactly, with no
+        completeness demand: a limit with no unit stays one, and the compliance
+        record downstream says NOT_YET_EVALUABLE.
+      explicit_source_requirement: >
+        A hard requirement the user STATED IN THE REQUEST, captured by s01
+        alongside the Requirement it comes from and normalized deterministically
+        after the model's output. It must name that Requirement, so a constraint
+        always leads back to the sentence that created it.
+
+        A HARD REQUIREMENT MUST NOT DEPEND ON A PROFILE EXISTING. "All parts must
+        be plastic" in the request is the same demand whether or not anyone also
+        wrote it into a structured file, and reading only the profile lost it
+        entirely on every design that shipped without one.
     rules:
       - >
-        Ingested DETERMINISTICALLY from structured profile data. A profile that
-        already says PLASTIC_ONLY is a fact, and asking a model to reinterpret it
-        would turn a stated requirement into an inference.
+        Ingested DETERMINISTICALLY from BOTH channels. A profile that already
+        says PLASTIC_ONLY is a fact, and asking a model to reinterpret it would
+        turn a stated requirement into an inference. A source-stated requirement
+        is transcribed and classified during ordinary capture - which the model
+        may do - and then normalized by code, which is what keeps the parameters
+        the user's.
+      - >
+        NOTHING IS COMPLETED. A stated limit with no unit, or no axis, is carried
+        as stated; the missing piece surfaces downstream as NOT_YET_EVALUABLE.
+        Filling it would answer the requirement from a number nobody supplied.
       - >
         blocks_selection says whether an unsatisfied instance stops a final
         choice. Default true. A constraint that blocks nothing is a preference
         wearing the wrong word.
+      - >
+        A PREFERENCE NEVER BECOMES ONE, and the enforcement is structural in both
+        channels: the profile ingester names one section and never reads the
+        other, and a source-captured entry must carry a kind from the list above -
+        which contains no way to say "fewer" or "smaller is nicer".
 
   HardRequirementCompliance:
     semantic_roles: [eligibility_evidence]

@@ -136,8 +136,34 @@ input_exclusivity: >
   s01 is the ONLY stage that may read raw source text (INV-002, R-13). Every
   later stage reads DesignState.
 constraint_ingress:
+  # TWO CHANNELS, NEITHER GATING THE OTHER. Reading only the profile lost a hard
+  # requirement the user had typed into the request, on every design that shipped
+  # without a structured file - the family declared authoritative, owned here,
+  # and unreachable from the only input most designs have.
+  producers:
+    - "`ingest_design_constraints`: the structured profile section"
+    - "`capture_design_constraints`: what the request itself explicitly states"
   producer: "`ingest_design_constraints`, called from s01's own to_operations"
   reads: "design_profile.design_constraints"
+  reads_from_source: "the response's `hard_constraints`, each naming the Requirement it comes from"
+  source_gate: >
+    THE MODEL TRANSCRIBES; CODE DECIDES. Classifying a sentence the user wrote as
+    a material requirement is reading, which is what this stage asks a model to
+    do everywhere. Turning it into a constraint is not, and every gate is a typed
+    fact rather than a judgement: the kind must be one the canonical vocabulary
+    declares; the entry must name a Requirement from this same response; and a
+    QUANTITATIVE kind needs that Requirement's own quantity_class to be MAGNITUDE
+    with a numeric value in the kind's own parameter.
+
+    That last gate is the one that matters. "Keep it reasonably compact" arrives
+    as a requirement whose quantity_class is NONE, and no amount of a model
+    wanting to call it MAX_OVERALL_DIMENSION gets it past - while "no wider than
+    100 mm" arrives as MAGNITUDE and passes. Neither outcome required a line of
+    code to look at a word.
+  identity_note: >
+    Separate id sequences - DSC-Pnnn for the profile, DSC-Snnn for the source -
+    so adding a profile entry cannot renumber a source-captured constraint out
+    from under a premise that names it.
   never_reads: >
     design_profile.selection_preferences. NOT FILTERED AFTERWARDS - the ingester
     names one key. A wish that became a DesignConstraint could make a candidate

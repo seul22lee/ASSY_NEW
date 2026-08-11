@@ -67,9 +67,23 @@ RULES
 7. Record every actor and what it must reach or operate.
 8. Record what the text deliberately leaves free, and what is genuinely
    ambiguous.
+9. Record every HARD REQUIREMENT the text explicitly states - something that
+   bounds what may be BUILT AT ALL, such as a material class, a maximum
+   dimension, a prohibited energy source or a load the design must carry. Each
+   one names the requirement it comes from and carries only the values the text
+   actually states.
+
+   A PREFERENCE IS NOT ONE. "Prefer fewer parts", "ideally compact", "minimise
+   cost" say which buildable thing is WANTED, and a design is not forbidden for
+   ignoring them. If the text does not forbid something, there is no hard
+   requirement to record, and an empty list is the answer.
+
+   Never supply a number, a unit or an axis the text does not state. If the text
+   says "reasonably compact", that is a requirement with no quantity - record the
+   requirement and no hard constraint.
 
 RESPONSE SCHEMA
-Return a single JSON object with exactly these seven keys, each holding a list.
+Return a single JSON object with exactly these eight keys, each holding a list.
 A list may be empty - an empty list is a value, and means "there are none of
 these", which is a different statement from omitting the key. Every field is
 required unless marked optional. Every id is a string in the format shown.
@@ -85,6 +99,24 @@ required unless marked optional. Every id is a string in the format shown.
   ambiguities[]     id "AMB-0001", statement, conflicting_clauses[],
                     resolvable_when, block_scopes[] (optional)
   assumptions[]     id "ASM-0001", statement, why, would_be_invalidated_by
+  hard_constraints[] requirement (one of your requirement ids), kind,
+                    statement_verbatim, parameters (an object, or null if the
+                    text states no values)
+
+PERMITTED HARD CONSTRAINT KINDS
+A kind not on this list cannot be recorded. That is deliberate: it is what stops
+a wish becoming a constraint, and there is no kind here meaning "less of
+something would be nicer".
+
+  MATERIAL_CLASS_ONLY       parameters {{material_class}}
+  PROHIBITED_ENERGY_SOURCE  parameters {{source}}
+  MAX_OVERALL_DIMENSION     parameters {{axis, limit, unit}} - axis is X, Y, Z
+                            or ANY, and only where the text says which
+  LOAD_CAPACITY             parameters {{magnitude, unit}}
+
+A dimensional or load constraint is recorded ONLY where the requirement it comes
+from has quantity_class MAGNITUDE. An approximate or comparative quantity is a
+requirement, not a limit anything can be checked against.
 
 No required field may be null. Where the answer is "there are none", use an
 empty list for a list field and the string "none" for a text field. A null is
@@ -97,6 +129,7 @@ item of the wrong kind, is an error.
 
   requirements[].source_locator      the `locator` of one of your source_clauses
   scenarios[].actors                 actor ids, "ACT-0001"
+  hard_constraints[].requirement     a requirement id, "REQ-0001"
   ambiguities[].conflicting_clauses  source clause ids, "SRC-0001" - the CLAUSES
                                      whose wording conflicts, never requirement
                                      ids; [] if the ambiguity comes from silence
@@ -171,6 +204,7 @@ class S01RequirementCapture(Stage):
                 "why": a["why"],
                 "would_be_invalidated_by": a["would_be_invalidated_by"]}, prov))
         ops += ingest_design_constraints((inputs or {}).get("design_profile"))
+        ops += capture_design_constraints(parsed)
         return ops
 
     # ---------------------------------------------------------- completeness
@@ -195,6 +229,93 @@ class S01RequirementCapture(Stage):
 #: edit somebody has to make on purpose.
 CONSTRAINT_SECTION = "design_constraints"
 
+#: The key the model answers rule 9 in.
+CAPTURE_SECTION = "hard_constraints"
+
+#: THE KINDS THIS PIPELINE CAN CARRY, mirroring
+#: DESIGN_STATE_CONTRACT.DesignConstraint.kinds - a test asserts they are the
+#: same list, because a vocabulary that lives in two places drifts.
+#:
+#: `quantity` names the parameter that holds the number. A quantitative kind is
+#: accepted FROM THE SOURCE only when s01's own typed capture of the originating
+#: requirement says MAGNITUDE and that parameter is present and numeric. That is
+#: what refuses "keep it reasonably compact" without one line of this file
+#: reading the prose: the requirement's quantity_class is the answer, and s01
+#: already records it.
+CONSTRAINT_KINDS = {
+    "MATERIAL_CLASS_ONLY": {"quantitative": False},
+    "PROHIBITED_ENERGY_SOURCE": {"quantitative": False},
+    "MAX_OVERALL_DIMENSION": {"quantitative": True, "quantity": "limit"},
+    "LOAD_CAPACITY": {"quantitative": True, "quantity": "magnitude"},
+}
+
+
+def capture_design_constraints(parsed: Dict[str, Any]) -> List[Op]:
+    """Hard requirements the USER STATED IN THE REQUEST, normalized by code.
+
+    A HARD REQUIREMENT MUST NOT DEPEND ON A PROFILE EXISTING. "All parts must be
+    plastic" is the same demand whether or not somebody also wrote it into a
+    structured file, and reading only the profile lost it on every design that
+    shipped without one - the family declared authoritative, owned by s01, and
+    unreachable from the only input most designs have.
+
+    THE MODEL TRANSCRIBES; THIS DECIDES. Classifying a sentence the user wrote as
+    a material requirement is reading, which is what s01 asks a model to do
+    everywhere else. Turning it into a constraint is not, and every gate below is
+    a typed fact rather than a judgement:
+
+      the kind must be one this pipeline can carry;
+      it must name a requirement THIS response emits, so the constraint always
+        leads back to the sentence that created it;
+      a quantitative kind needs the originating requirement's own
+        quantity_class == MAGNITUDE and a numeric value in its own parameter.
+
+    That last gate is the one that matters. "Keep it reasonably compact" reaches
+    here as a requirement whose quantity_class is NONE, and no amount of the
+    model wanting to call it MAX_OVERALL_DIMENSION gets it past - while "no wider
+    than 100 mm" arrives as MAGNITUDE and passes. Neither outcome required this
+    code to look at a word.
+
+    Parameters are carried EXACTLY. A stated limit with no axis stays a limit
+    with no axis and surfaces downstream as NOT_YET_EVALUABLE.
+    """
+    requirements = {r.get("id"): r for r in (parsed.get("requirements") or [])
+                    if isinstance(r, dict)}
+    ops: List[Op] = []
+    for n, entry in enumerate(parsed.get(CAPTURE_SECTION) or [], start=1):
+        if not isinstance(entry, dict):
+            continue
+        spec = CONSTRAINT_KINDS.get(entry.get("kind"))
+        if spec is None:
+            # Not a kind anything can act on. Inventing one to hold the sentence
+            # would be inventing the requirement, and the requirement itself is
+            # already recorded - nothing is lost, and nothing is asserted.
+            continue
+        requirement = requirements.get(entry.get("requirement"))
+        if requirement is None:
+            continue
+        parameters = entry.get("parameters")
+        if spec["quantitative"]:
+            if requirement.get("quantity_class") != "MAGNITUDE":
+                continue
+            value = (parameters or {}).get(spec["quantity"])
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                continue
+        ops.append(Op("CREATE", "DesignConstraint", "DSC-S%03d" % n, {
+            "kind": entry["kind"],
+            # The user's own words, taken from the requirement when the entry
+            # does not restate them. Never paraphrased here.
+            "statement": (entry.get("statement_verbatim")
+                          or requirement.get("statement_verbatim", "")),
+            "source": requirement.get("source_locator", ""),
+            "evaluability": ("MACHINE_EVALUABLE" if isinstance(parameters, dict)
+                             and parameters else "HUMAN_EVALUABLE"),
+            "parameters": parameters,
+            "blocks_selection": True,
+            "derived_from_requirements": [requirement["id"]]},
+            "s01:source_capture"))
+    return ops
+
 
 def ingest_design_constraints(profile: Any) -> List[Op]:
     """The user's HARD requirements, carried across without interpretation.
@@ -212,7 +333,9 @@ def ingest_design_constraints(profile: Any) -> List[Op]:
     fact depend on what a later stage happens to implement this week.
 
     Ids come from the profile's own order, so the same profile always ingests to
-    the same ids and no counter lives anywhere.
+    the same ids and no counter lives anywhere. The two channels use separate id
+    sequences - `DSC-Pnnn` and `DSC-Snnn` - so that adding a profile entry cannot
+    renumber a source-captured constraint out from under a premise that names it.
     """
     entries = (profile or {}).get(CONSTRAINT_SECTION) or []
     ops: List[Op] = []
@@ -222,7 +345,7 @@ def ingest_design_constraints(profile: Any) -> List[Op]:
             # and naming a kind for it would be inventing the requirement.
             continue
         parameters = entry.get("parameters")
-        ops.append(Op("CREATE", "DesignConstraint", "DSC-%04d" % n, {
+        ops.append(Op("CREATE", "DesignConstraint", "DSC-P%03d" % n, {
             "kind": entry["kind"],
             "statement": entry.get("statement", ""),
             "source": entry.get("source", "user design profile"),

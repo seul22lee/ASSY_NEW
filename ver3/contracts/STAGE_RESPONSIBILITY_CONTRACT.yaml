@@ -478,11 +478,68 @@ stages:
     - Is each hard design requirement satisfied, violated, or not yet evaluable for it?
     required_reasoning_premise_classes:
     - class: candidate_engineering_evidence
+      # S7-B FINAL CORRECTION. ONE EXISTENCE RULE FOR SEVEN ROLES, and for three
+      # of them it said the wrong thing - the same defect `realized_motion` had.
+      # An absence this responsibility exists to REPORT was being turned into a
+      # refusal to look: a candidate that routes no load has LOAD_PATH_MISSING to
+      # answer for, and REQUIRED_NONEMPTY made its whole view
+      # UPSTREAM_INSUFFICIENCY, so nine domains went unanswered to hide one
+      # finding. Same for an effect discharged by nothing, and for a mechanism
+      # that blocks nothing - which is an ordinary mechanism.
+      #
+      # The four that stay REQUIRED_NONEMPTY are the ones whose absence means
+      # there is no candidate to judge rather than a candidate with a gap.
       instance_selection:
-        population: INVOCATION_BRANCH
-        coverage: ALL_APPLICABLE
-        existence: REQUIRED_NONEMPTY
-        existence_why: a feasibility statement about no evidence is not a statement
+        by_role:
+        - role: topology_element
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: a mechanism with no bodies is not a mechanism
+          why: s03a authors them while embodying one candidate
+        - role: topology_relation
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: bodies with nothing between them are not an arrangement
+          why: s03a authors them while embodying one candidate
+        - role: mobility_disposition
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: the DOF grid is derived for every candidate, so its
+            absence is a producer failure rather than a design fact
+          why: s03b derives it from this candidate's own topology
+        - role: spatial_commitment
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: a feasibility statement about an arrangement that does
+            not exist is not a statement
+          why: s04 authors the arrangement of one candidate
+        - role: physical_interaction
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a candidate that discharges no effect has
+            EFFECT_NOT_DISCHARGED to answer for, and that is a finding this
+            responsibility makes rather than a reason it cannot be made
+          why: s03b authors them while embodying one candidate
+        - role: constraint_relation
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a mechanism that blocks nothing is an ordinary
+            mechanism, not an unready context
+          why: s03b authors them while embodying one candidate
+        - role: load_route
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a candidate that routes no load has LOAD_PATH_MISSING
+            to answer for; demanding a route before the question may be asked
+            hides exactly the answer
+          why: a route belongs to the branch whose interfaces carry it
       what: this candidate's physical, mobility, topological and spatial evidence,
         and how each load is routed through it
       justified_by_question: Does the established evidence contain anything that stops this candidate
