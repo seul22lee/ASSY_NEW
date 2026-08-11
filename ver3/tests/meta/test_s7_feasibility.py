@@ -1574,6 +1574,249 @@ class TestLoadPathMultiplicity(_Feas):
 
 
 # =====================================================================
+# B57-B59 - one vocabulary authority, whichever door the constraint came in
+# =====================================================================
+class TestIngressVocabulary(_Feas):
+
+    def test_B57_a_profile_kind_nothing_can_act_on_is_not_ingested(self):
+        """BEING STRUCTURED IS NOT A LICENCE. A section headed
+        `design_constraints` could carry a wish, and the profile channel took
+        the file's word for it - making a preference into a hard requirement by
+        the one route the other channel is built to refuse."""
+        state = self.seed(profile={"design_constraints": [
+            {"kind": "MINIMIZE_PART_COUNT", "statement": "prefer fewer parts",
+             "parameters": {"objective": "MINIMIZE"}},
+            {"kind": "PREFER_SIMPLE_ASSEMBLY", "statement": "simple would be nice"},
+            {"kind": "UNKNOWN_CUSTOM_KIND", "statement": "whatever"}]})
+        self.assertEqual([], state.family("DesignConstraint"))
+
+    def test_B58_a_profile_kind_the_vocabulary_declares_is_ingested_exactly(self):
+        state = self.seed(profile={"design_constraints": [
+            {"kind": "MATERIAL_CLASS_ONLY",
+             "statement": "every manufactured part must be plastic",
+             "source": "the profile the user supplied",
+             "parameters": {"material_class": "PLASTIC"},
+             "blocks_selection": True}]})
+        made = state.entities["DSC-P001"]
+        self.assertEqual("MATERIAL_CLASS_ONLY", made["kind"])
+        self.assertEqual({"material_class": "PLASTIC"}, made["parameters"])
+        self.assertEqual("the profile the user supplied", made["source"])
+        self.assertEqual("every manufactured part must be plastic",
+                         made["statement"])
+        self.assertTrue(made["blocks_selection"])
+
+    def test_B59_both_channels_ask_the_same_authority(self):
+        """Not "both happen to accept the same list" - the same table object,
+        consulted the same way. A second list would drift the first time a kind
+        is added, and the two channels would disagree about what a hard
+        requirement is."""
+        import inspect
+        for name in ("ingest_design_constraints", "capture_design_constraints"):
+            body = inspect.getsource(getattr(s01, name))
+            self.assertIn("CONSTRAINT_KINDS.get(", body,
+                          "%s does not consult the canonical vocabulary" % name)
+        # And behaviourally: the same kind through either door, the same refusal
+        # through either door.
+        for kind, expected in (("MATERIAL_CLASS_ONLY", 1),
+                               ("MINIMIZE_PART_COUNT", 0)):
+            profile = self.seed(profile={"design_constraints": [
+                {"kind": kind, "statement": "s",
+                 "parameters": {"material_class": "PLASTIC"}}]})
+            source = self.seed(hard_constraints=[
+                {"requirement": "REQ-0001", "kind": kind, "statement_verbatim": "s",
+                 "parameters": {"material_class": "PLASTIC"}}])
+            self.assertEqual(expected, len(profile.family("DesignConstraint")), kind)
+            self.assertEqual(expected, len(source.family("DesignConstraint")), kind)
+
+
+# =====================================================================
+# B60-B64 - an ambiguous extent measures nothing
+# =====================================================================
+class TestAmbiguousGeometry(_Feas):
+    """Detecting a duplicate is not enough: the arbitrary box must be gone.
+
+    `_weaken` does not undo a FAIL, so a domain that noticed the ambiguity and
+    went on measuring could still report a positive contradiction - and which
+    one depended on which envelope the index kept."""
+
+    NEAR = ([1.5, 0, 0], [1, 1, 1])          # touching BOD-G0A
+    FAR = ([9, 0, 0], [1, 1, 1])             # a positive gap from it
+
+    def doubled(self, body="BOD-G1A", order=("NEAR", "FAR"), state=None,
+                **kw):
+        """`body` ends up with two standing extents, in the order given."""
+        state = state if state is not None else self.hinge(**kw)
+        first, second = (getattr(self, o) for o in order)
+        eid = self.envelope_for(state, body)
+        self.revise(state, Op("SUPERSEDE", "Envelope", eid,
+                              {"extent": {"centre": first[0],
+                                          "half_extent": first[1]}},
+                              "t", reason="probe"))
+        self.revise(state, Op("CREATE", "Envelope", "ENV-DUP-%s" % body[-3:],
+                              {"body": body,
+                               "extent": {"centre": second[0],
+                                          "half_extent": second[1]},
+                               "frame": "world", "maturity": "PROVISIONAL"}, "t"))
+        self.assertEqual(2, len([e for e in state.family("Envelope")
+                                 if e["body"] == body]), "the probe is not probing")
+        return state
+
+    def envelope_for(self, state, body):
+        found = [e["entity_id"] for e in state.family("Envelope")
+                 if e["body"] == body]
+        self.assertEqual(1, len(found), found)
+        return found[0]
+
+    def both_orders(self, domain, **kw):
+        out = []
+        for order in (("NEAR", "FAR"), ("FAR", "NEAR")):
+            v = self.domain(self.assess(self.doubled(order=order, **kw),
+                                        apply_patch=False), domain)
+            out.append((v.status, tuple(v.reason_codes)))
+        self.assertEqual(out[0], out[1],
+                         "%s depends on which extent was written last" % domain)
+        return out[0]
+
+    def test_B60_a_doubled_extent_cannot_close_or_break_a_load_route(self):
+        """One extent touches the hop's other body, the other is a positive gap
+        away. Whichever won decided PASS or FAIL."""
+        status, codes = self.both_orders("load_reaction_closure")
+        self.assertEqual(s07.NOT_ESTABLISHED, status)
+        self.assertIn("BODY_ENVELOPED_TWICE", codes)
+        self.assertNotIn("HOP_BODIES_APART", codes,
+                         "a positive contradiction from an arbitrary box")
+
+    def test_B61_a_doubled_extent_cannot_establish_the_arrangement(self):
+        status, codes = self.both_orders("spatial_realization")
+        self.assertEqual(s07.NOT_ESTABLISHED, status)
+        self.assertIn("BODY_ENVELOPED_TWICE", codes)
+        self.assertNotIn("CONNECTED_BODIES_APART", codes)
+
+    def test_B62_a_doubled_extent_cannot_clear_or_convict_a_pair(self):
+        status, codes = self.both_orders("gross_interference")
+        self.assertEqual(s07.NOT_ESTABLISHED, status)
+        self.assertIn("BODY_ENVELOPED_TWICE", codes)
+        self.assertNotIn("NO_CONSERVATIVE_OVERLAP", codes,
+                         "a clearance PASS from an arbitrary box")
+
+    def test_B62b_and_neither_can_it_pass_assemblability(self):
+        status, codes = self.both_orders("assemblability")
+        self.assertEqual(s07.NOT_ESTABLISHED, status)
+        self.assertIn("BODY_ENVELOPED_TWICE", codes)
+        self.assertNotIn("ORDER_CONSISTENT_AND_PATHS_CLEAR", codes)
+
+    def test_B63_a_doubled_extent_decides_no_dimensional_requirement(self):
+        """One extent is within the limit, the other exceeds it."""
+        profile = {"design_constraints": [
+            {"kind": "MAX_OVERALL_DIMENSION", "statement": "it must fit",
+             "parameters": {"axis": "X", "limit": 40, "unit": "mm"}}]}
+        seen = []
+        for order in (("NEAR", "FAR"), ("FAR", "NEAR")):
+            state = self.doubled(
+                order=order, state=self.hinge(state=self.seed(profile=profile),
+                                              s04a=arrangement(
+                    HINGE_BOXES, steps=["ASY-0A"], basis="ABSOLUTE",
+                    absolute={"unit": "mm", "per_unit": 10.0})))
+            status, codes, _u, why = TestHardRequirements.status_of(
+                self, self.assess(state, apply_patch=False))
+            seen.append((status, tuple(codes)))
+            self.assertEqual(s07.NOT_YET_EVALUABLE, status, why)
+            self.assertIn("BODY_ENVELOPED_TWICE", codes)
+        self.assertEqual(seen[0], seen[1])
+
+    def test_B63b_one_extent_each_still_decides_it(self):
+        """The quarantine must not swallow the ordinary case."""
+        profile = {"design_constraints": [
+            {"kind": "MAX_OVERALL_DIMENSION", "statement": "it must fit",
+             "parameters": {"axis": "X", "limit": 40, "unit": "mm"}}]}
+        state = self.hinge(state=self.seed(profile=profile),
+                           s04a=arrangement(HINGE_BOXES, steps=["ASY-0A"],
+                                            basis="ABSOLUTE",
+                                            absolute={"unit": "mm",
+                                                      "per_unit": 10.0}))
+        status, _c, _u, why = TestHardRequirements.status_of(
+            self, self.assess(state))
+        self.assertEqual(s07.SATISFIED, status, why)
+
+    def test_B62c_a_pair_described_two_ways_requires_no_contact(self):
+        """FOUND BY THE SWEEP, not by the brief. `gross_interference` refused to
+        exempt a pair declared both CONTACT and CLEARANCE - and
+        `spatial_realization` went on requiring the contact and FAILING when the
+        boxes were apart. A recognised ambiguity leaking into a positive
+        contradiction one domain over."""
+        top = topology("A", 2, [(0, 1)])
+        top["interfaces"].append({"id": "IFC-CLR", "bodies": ["BOD-G0A", "BOD-G1A"],
+                                  "interaction_kind": "CLEARANCE",
+                                  "nominal_status": "NOMINAL"})
+        state = self.hinge(s03a=top,
+                           s04a=arrangement({"BOD-G0A": ([0, 0, 0], [1, 1, 1]),
+                                             "BOD-G1A": ([9, 0, 0], [1, 1, 1])},
+                                            steps=["ASY-0A"]),
+                           s04b=motion("A", "JNT-0A", _group(1, "A"),
+                                       coords=(0, 0)))
+        out = self.assess(state, apply_patch=False)
+        v = self.domain(out, "spatial_realization")
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status, v.summary)
+        self.assertIn("INTERFACE_EXPECTATION_CONFLICT", v.reason_codes)
+        self.assertNotIn("CONNECTED_BODIES_APART", v.reason_codes,
+                         "a contradictory description produced a broken mechanism")
+        self.assertEqual(s07.NOT_ESTABLISHED,
+                         self.domain(out, "gross_interference").status)
+
+    def test_B62d_two_current_bases_measure_nothing(self):
+        """Also from the sweep. `SCALE_AMBIGUOUS` was reported by the dimensional
+        evaluator and by nothing else, so two current bases still fed box_gap -
+        arithmetic across a boundary nothing defines, and it could FAIL."""
+        state = self.hinge()
+        # ON THE BRANCH, or the view never sees it and the probe proves nothing:
+        # an unscoped entity is not this candidate's evidence.
+        self.revise(state, Op("CREATE", "ReferenceScale", "SCL-SECOND",
+                              {"basis": "RELATIVE", "absolute": None,
+                               "note": "a second current basis"}, "t",
+                              premise_refs=["CND-A"]))
+        self.assertEqual(2, len(state.family("ReferenceScale")))
+        out = self.assess(state, apply_patch=False)
+        for name in ("spatial_realization", "load_reaction_closure",
+                     "gross_interference", "assemblability"):
+            v = self.domain(out, name)
+            self.assertEqual(s07.NOT_ESTABLISHED, v.status, name)
+            self.assertIn("SCALE_AMBIGUOUS", v.reason_codes, name)
+        self.assertNotEqual(s07.INFEASIBLE, out.status)
+
+    def test_B64_an_unrelated_doubled_extent_does_not_contaminate(self):
+        """A third body, doubled, that no load route touches. The domains that
+        genuinely read every body say so; the one that does not is untouched -
+        and does not carry the duplicate envelopes as premises."""
+        state = self.hinge(s03a=topology("A", 3, [(0, 1), (1, 2)]),
+                           s03b=realization("A", hops=(0, 0)),
+                           s04a=arrangement(
+                               {"BOD-G0A": ([0, 0, 0], [1, 1, 1]),
+                                "BOD-G1A": ([1.5, 0, 0], [1, 1, 1]),
+                                "BOD-G2A": ([3.0, 0, 0], [1, 1, 1])},
+                               steps=["ASY-0A"]))
+        clean = self.domain(self.assess(state, apply_patch=False),
+                            "load_reaction_closure")
+        self.assertEqual(s07.PASS, clean.status, clean.summary)
+
+        doubled = self.doubled(body="BOD-G2A", state=state,
+                               order=("NEAR", "FAR"))
+        out = self.assess(doubled, apply_patch=False)
+        route = self.domain(out, "load_reaction_closure")
+        self.assertEqual(s07.PASS, route.status,
+                         "an unrelated body's ambiguity reached a route that "
+                         "never measured it")
+        self.assertEqual(clean.premises, route.premises,
+                         "the premise set moved for a body nothing measured")
+        for eid in ("ENV-DUP-G2A",):
+            self.assertNotIn(eid, route.premises)
+        # The domains that DO read every body report it, as they should.
+        for name in ("spatial_realization", "gross_interference"):
+            v = self.domain(out, name)
+            self.assertEqual(s07.NOT_ESTABLISHED, v.status, name)
+            self.assertIn("BODY_ENVELOPED_TWICE", v.reason_codes, name)
+
+
+# =====================================================================
 # B35 and the closure sweep - the contracts describe what runs
 # =====================================================================
 class TestContractTruth(unittest.TestCase):
@@ -1664,6 +1907,20 @@ class TestContractTruth(unittest.TestCase):
         self.assertEqual("s01", self.fams["DesignConstraint"]["owned_by"])
         self.assertIn("DesignConstraint",
                       self.matrix["stages"]["s01"]["owns"])
+
+    def test_B35i_the_contracts_state_the_two_closure_invariants(self):
+        """Both are properties a reader must be able to find without running the
+        code: one vocabulary authority for every ingress, and geometry that
+        cannot establish a verdict when it is ambiguous."""
+        rules = " ".join(self.fams["DesignConstraint"]["rules"])
+        self.assertIn("ONE VOCABULARY AUTHORITY", rules)
+        self.assertIn("kinds",
+                      self.profile["ingestion"]["design_constraints"])
+        self.assertIn("shared_gate", self.s01["constraint_ingress"])
+        source = _paths.CONTRACTS + "/DESIGN_STATE_CONTRACT.yaml"
+        with open(source) as fh:
+            text = fh.read()
+        self.assertIn("AMBIGUOUS GEOMETRY ESTABLISHES NOTHING", text)
 
     def test_B35c_the_interface_vocabulary_is_the_one_the_producer_emits(self):
         """It was not. Two lists with NOT ONE VALUE IN COMMON, and nothing read
@@ -1909,7 +2166,7 @@ class TestClosureSweep(unittest.TestCase):
         """`d[k] = v` over a semantic key keeps the last writer. Each index that
         assumes uniqueness either keys on entity_id - which the write boundary
         makes unique - or reports the duplicate instead of resolving it."""
-        for guard in ('duplicated("Envelope", "body")',
+        for guard in ("def extent_status",
                       "CONFIGURATION_REALIZED_TWICE",
                       "CELL_DISPOSITIONED_TWICE",
                       "INTERFACE_EXPECTATION_CONFLICT",

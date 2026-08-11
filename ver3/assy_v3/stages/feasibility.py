@@ -180,28 +180,106 @@ class _Evidence:
         """
         return self.ids("ReferenceScale")
 
+    #: What this candidate currently says a body's extent is.
+    UNIQUE, MISSING, AMBIGUOUS = "UNIQUE", "MISSING", "AMBIGUOUS"
+
+    def _envelopes_by_body(self) -> Dict[Any, List[Dict[str, Any]]]:
+        out: Dict[Any, List[Dict[str, Any]]] = {}
+        for e in self.fam("Envelope"):
+            out.setdefault(e.get("body"), []).append(e)
+        return out
+
+    def extent_status(self, body: str) -> str:
+        """UNIQUE, MISSING or AMBIGUOUS. Three answers, not two.
+
+        DETECTING A DUPLICATE IS NOT ENOUGH. The evaluator used to notice that a
+        body carried two current extents, weaken to NOT_ESTABLISHED - and then go
+        on to measure with whichever box the map happened to keep, which could
+        still produce a positive FAIL. `_weaken` does not undo a FAIL, so an
+        ambiguity that was recognised still decided the verdict, and which way it
+        decided depended on insertion order.
+        """
+        found = self._envelopes_by_body().get(body) or []
+        usable = [e for e in found if s04._extent_box(e)]
+        if len(usable) == 1:
+            return self.UNIQUE
+        return self.AMBIGUOUS if len(found) > 1 else self.MISSING
+
     def boxes(self) -> Dict[str, Tuple[List[float], List[float]]]:
-        return s04._view_boxes(self.view)
+        """body -> its ONE current extent. AMBIGUOUS BODIES ARE ABSENT.
+
+        A body the design describes twice is a body this responsibility has no
+        usable geometry for, so it is left out exactly as an unplaced one is -
+        and every predicate downstream, which already refuses to measure what it
+        cannot see, refuses this too. That is the whole quarantine: no geometric
+        answer can be built from a box nobody chose.
+
+        s04's `_view_boxes` keeps the last envelope per body and is still what
+        s04's own refinement barrier reads; it is left alone and simply not used
+        for an authoritative verdict.
+        """
+        if len(self.basis()) > 1:
+            # TWO CURRENT BASES, so two extents are not two numbers in one
+            # coordinate system - and comparing them would be arithmetic across
+            # a boundary nothing defines. The same quarantine: unmeasurable
+            # rather than measured badly.
+            return {}
+        out = {}
+        for body, found in self._envelopes_by_body().items():
+            usable = [e for e in found if s04._extent_box(e)]
+            if body and len(usable) == 1:
+                out[body] = s04._extent_box(usable[0])
+        return out
 
     def envelope_of(self) -> Dict[str, str]:
-        return {e.get("body"): e.get("entity_id") for e in self.fam("Envelope")}
+        """body -> the id of its ONE extent. Ambiguous bodies are absent here
+        too: naming one of two competing envelopes as the premise of a value
+        would record a dependency on a record nothing selected."""
+        out = {}
+        for body, found in self._envelopes_by_body().items():
+            usable = [e for e in found if s04._extent_box(e)]
+            if body and len(usable) == 1:
+                out[body] = usable[0].get("entity_id")
+        return out
+
+    def pair_expectation(self):
+        """(pair -> TOUCHES/CLEAR/UNDECLARED, pairs the design describes twice).
+
+        Only TOUCHES exempts a pair from interference, and a pair declared BOTH
+        ways exempts nothing: a dict comprehension kept whichever interface came
+        last, so a CONTACT and a CLEARANCE over the same two bodies resolved by
+        insertion order. Disagreement is a finding, not a tie to break.
+
+        One reader for both domains that ask. `gross_interference` needs to know
+        which pairs are exempt; `spatial_realization` needs to know which pairs
+        the topology REQUIRES to touch, and a pair the design describes two ways
+        requires nothing it can be held to.
+        """
+        stated: Dict[Any, set] = {}
+        for i in self.fam("Interface"):
+            bodies_of = (i.get("bodies") or [])[:2]
+            if len(bodies_of) >= 2:
+                stated.setdefault(frozenset(bodies_of), set()).add(
+                    s04.interface_expectation(i))
+        return ({p: sorted(e)[0] for p, e in stated.items() if len(e) == 1},
+                {p for p, e in stated.items() if len(e) > 1})
+
+    def envelopes_of(self, body: str) -> List[str]:
+        """Every envelope id currently claiming this body. What an ambiguity is
+        made of, and therefore what a finding about it rests on."""
+        return sorted(e.get("entity_id")
+                      for e in (self._envelopes_by_body().get(body) or [])
+                      if e.get("entity_id"))
 
     def group_body(self) -> Dict[str, str]:
         return {g["entity_id"]: g.get("body") for g in self.fam("RigidGroup")}
 
-    def duplicated(self, family: str, field: str) -> List[str]:
-        """Keys of `family` for which `field` holds more than one record.
-
-        A one-to-one index built by dict comprehension keeps whichever record it
-        saw last, so a duplicate turns into a silent choice. Where uniqueness is
-        assumed it is asked for here, and a violation becomes a finding instead
-        of a coin toss.
-        """
-        seen: Dict[Any, int] = {}
-        for e in self.fam(family):
-            key = e.get(field)
-            seen[key] = seen.get(key, 0) + 1
-        return sorted(k for k, n in seen.items() if n > 1 and k)
+    #: RETIRED. `duplicated("Envelope", "body")` reported that a body carried
+    #: two extents and left the arbitrary box in play, so a recognised ambiguity
+    #: could still decide a verdict. `extent_status` and `boxes` replace it by
+    #: making the ambiguous body unmeasurable rather than merely noted - a
+    #: detector beside a lookup that ignores it is worse than neither.
+    _RETIRED_DUPLICATED = "replaced by extent_status/boxes quarantine"
 
     def joints_of(self, group: str) -> List[Dict[str, Any]]:
         """EVERY joint whose coordinate moves this group, not the first one.
@@ -349,7 +427,16 @@ def _classify_path(ev, load, path, interfaces, boxes, envelope_of):
         used.append(h)
         pair = [b for b in (iface.get("bodies") or []) if b in boxes]
         if len(pair) < 2:
-            codes.append("HOP_GEOMETRY_MISSING")
+            # WHICH bodies, and WHY each is unmeasurable. An ambiguous extent
+            # and an absent one are both reasons this hop cannot be checked, and
+            # they are not the same fact.
+            for b in (iface.get("bodies") or []):
+                if b in boxes:
+                    continue
+                code, note, premises = _extent_finding(ev, b, "HOP_GEOMETRY_MISSING")
+                codes.append(code)
+                notes.append(note)
+                used += premises
             verdict = _worse(verdict, UNRESOLVED)
             continue
         # THE EXTENTS ARE NAMED WHATEVER THE ANSWER, and so is the basis they
@@ -406,8 +493,8 @@ def _load_reaction_closure(ev: _Evidence) -> Verdict:
     interfaces = {i["entity_id"]: i for i in ev.fam("Interface")}
     boxes = ev.boxes()
     envelope_of = ev.envelope_of()
-    codes, notes, used = _geometry_ambiguity(ev)
-    status = _weaken(PASS, NOT_ESTABLISHED) if codes else PASS
+    used, codes, notes = [], [], []
+    status = PASS
     for load in loads:
         lid = load.get("entity_id")
         # The load case is named whether or not a path answers it: the demand is
@@ -823,13 +910,15 @@ def _spatial_realization(ev: _Evidence) -> Verdict:
     if not bodies:
         return Verdict("spatial_realization", NOT_APPLICABLE, ["NO_BODY"])
     boxes, envelope_of = ev.boxes(), ev.envelope_of()
-    codes, notes, used = _geometry_ambiguity(ev)
-    status = _weaken(PASS, NOT_ESTABLISHED) if codes else PASS
+    codes, notes, used = [], [], []
+    status = PASS
     for body in bodies:
         bid = body.get("entity_id")
         if bid not in boxes:
-            codes.append("BODY_WITHOUT_ENVELOPE")
-            notes.append("%s has no extent" % bid)
+            code, note, premises = _extent_finding(ev, bid, "BODY_WITHOUT_ENVELOPE")
+            codes.append(code)
+            notes.append(note)
+            used += premises
             status = _weaken(status, NOT_ESTABLISHED)
         else:
             used.append(envelope_of.get(bid))
@@ -839,9 +928,22 @@ def _spatial_realization(ev: _Evidence) -> Verdict:
     # requirement, not only the answer to it.
     mech = {f: ev.fam(f) for f in ("RigidGroup", "Joint", "Interface")}
     used += ev.ids("RigidGroup", "Joint", "Interface", "Body") + ev.basis()
+    _expectation, conflicted = ev.pair_expectation()
     for pb, cb in s04.required_contacts(mech):
         a, b = boxes.get(pb), boxes.get(cb)
         if not (a and b):
+            continue
+        if frozenset((pb, cb)) in conflicted:
+            # THE PAIR IS DESCRIBED TWO WAYS - required to meet and required to
+            # stay clear. Whether they are apart cannot decide anything: it
+            # contradicts one declaration and satisfies the other, so a FAIL here
+            # would report a broken mechanism where the description is what is
+            # broken. `gross_interference` already calls this out; the finding
+            # must not leak past it into a positive contradiction.
+            codes.append("INTERFACE_EXPECTATION_CONFLICT")
+            notes.append("%s and %s are declared both to meet and to stay clear"
+                         % (pb, cb))
+            status = _weaken(status, NOT_ESTABLISHED)
             continue
         if s04.box_gap(a, b) > 0:
             codes.append("CONNECTED_BODIES_APART")
@@ -945,8 +1047,8 @@ def _assemblability(ev: _Evidence) -> Verdict:
     bodies = ev.fam("Body")
     if not steps and len(bodies) < 2:
         return Verdict("assemblability", NOT_APPLICABLE, ["NOTHING_TO_ASSEMBLE"])
-    codes, notes, used = _geometry_ambiguity(ev)
-    status = _weaken(PASS, NOT_ESTABLISHED) if codes else PASS
+    codes, notes, used = [], [], []
+    status = PASS
     # A CYCLE AND A CONTRADICTED ORDER ARE POSITIVE CONTRADICTIONS: the order the
     # design states cannot be performed. A dependency naming a step this
     # candidate does not have is an ABSENCE - `depends_on` is not a resolvable
@@ -972,12 +1074,14 @@ def _assemblability(ev: _Evidence) -> Verdict:
     # domain over. The insertion answer is unestablished while any body is
     # unplaced, whether or not it is one this step must pass.
     unplaced = sorted(b["entity_id"] for b in bodies if b["entity_id"] not in boxes)
-    if unplaced:
-        codes.append("INSERTION_GEOMETRY_INCOMPLETE")
-        notes.append("%d body/bodies have no extent (%s), so no insertion path "
-                     "can be shown clear of them"
-                     % (len(unplaced), ", ".join(unplaced[:5])))
+    for bid in unplaced:
+        code, note, premises = _extent_finding(ev, bid,
+                                               "INSERTION_GEOMETRY_INCOMPLETE")
+        codes.append(code)
+        notes.append(note)
+        used += premises
         status = _weaken(status, NOT_ESTABLISHED)
+    if unplaced:
         used += [b["entity_id"] for b in bodies]
     # ORDER_INDEX ALONE IS NOT A TOTAL ORDER, and dict order was breaking the
     # tie - so two steps sharing an index were installed in whichever sequence
@@ -1086,22 +1190,11 @@ def _gross_interference(ev: _Evidence) -> Verdict:
     # could interfere.
     if len(bodies) < 2 and not moving and not keepouts:
         return Verdict("gross_interference", NOT_APPLICABLE, ["NOTHING_COEXISTS"])
-    # pair -> what the interfaces EXPECT of it. Only TOUCHES exempts, and a pair
-    # declared BOTH ways exempts nothing: a dict comprehension kept whichever
-    # interface came last, so a CONTACT and a CLEARANCE over the same two bodies
-    # resolved by insertion order. Disagreement is a finding, not a tie to break.
-    stated: Dict[Any, set] = {}
-    for i in ev.fam("Interface"):
-        bodies_of = (i.get("bodies") or [])[:2]
-        if len(bodies_of) >= 2:
-            stated.setdefault(frozenset(bodies_of), set()).add(
-                s04.interface_expectation(i))
-    conflicted = {p for p, e in stated.items() if len(e) > 1}
-    expectation = {p: sorted(e)[0] for p, e in stated.items() if len(e) == 1}
+    expectation, conflicted = ev.pair_expectation()
     exempt = {p for p, e in expectation.items() if e == s04.TOUCHES}
     envelope_of = ev.envelope_of()
-    codes, notes, used = _geometry_ambiguity(ev)
-    status = _weaken(PASS, NOT_ESTABLISHED) if codes else PASS
+    codes, notes, used = [], [], []
+    status = PASS
     for pair in sorted(conflicted, key=sorted):
         codes.append("INTERFACE_EXPECTATION_CONFLICT")
         notes.append("%s are declared both to meet and to stay clear"
@@ -1113,8 +1206,12 @@ def _gross_interference(ev: _Evidence) -> Verdict:
     # it a different statement.
     used += (ev.ids("Interface", "Body")
              + [e for e in (envelope_of.get(b) for b in boxes) if e] + ev.basis())
-    if [b for b in bodies if b not in boxes]:
-        codes.append("INTERFERENCE_GEOMETRY_MISSING")
+    for bid in sorted(b for b in bodies if b not in boxes):
+        code, note, premises = _extent_finding(ev, bid,
+                                               "INTERFERENCE_GEOMETRY_MISSING")
+        codes.append(code)
+        notes.append(note)
+        used += premises
         status = _weaken(status, NOT_ESTABLISHED)
     for volume in ev.fam("SweptVolume"):
         occupancy = (volume.get("occupancy") or {}).get("aabb")
@@ -1176,21 +1273,27 @@ DOMAIN_EVALUATORS: Dict[str, Callable[[_Evidence], Verdict]] = {
 }
 
 
-def _geometry_ambiguity(ev: _Evidence):
-    """(codes, notes, premises) when a body carries more than one current extent.
+def _extent_finding(ev: _Evidence, body: str, missing_code: str):
+    """(code, note, premises) for ONE body whose extent cannot be measured.
 
-    `body -> envelope` is built by dict comprehension in two places, so a body
-    with two standing envelopes silently got whichever was seen last - and every
-    geometric answer downstream rested on a choice nothing made. Which extent is
-    current is the design's to say; where it has said two, no measurement over
-    them is established.
+    Reported where the body is actually read, not as a blanket prefix on the
+    domain: a body nothing in this domain measures is not a reason this domain
+    cannot answer, and staling a load closure because some unrelated body was
+    described twice is STALE that fires for no reason.
+
+    An ambiguity names EVERY envelope claiming the body - those are the current
+    positive facts that establish it - where a plain absence names none.
     """
-    twice = ev.duplicated("Envelope", "body")
-    if not twice:
-        return [], [], []
-    return (["BODY_ENVELOPED_TWICE"],
-            ["%s carry more than one current extent" % ", ".join(twice[:5])],
-            ev.ids("Envelope"))
+    if len(ev.basis()) > 1:
+        return ("SCALE_AMBIGUOUS",
+                "%d reference scales are current, so no two extents are stated "
+                "in one basis" % len(ev.basis()), ev.basis())
+    if ev.extent_status(body) == ev.AMBIGUOUS:
+        return ("BODY_ENVELOPED_TWICE",
+                "%s carries more than one current extent (%s), so no measurement "
+                "over it is established" % (body, ", ".join(ev.envelopes_of(body))),
+                ev.envelopes_of(body))
+    return missing_code, "%s has no extent" % body, []
 
 
 def _weaken(current: str, candidate: str) -> str:
@@ -1303,13 +1406,14 @@ def _max_overall_dimension(constraint, ev):
         return (NOT_YET_EVALUABLE, ["SCALE_FACTOR_MISSING"], [scale.get("entity_id")],
                 "the scale states a unit and not what one coordinate is worth in it")
     boxes, bodies = ev.boxes(), ev.ids("Body")
-    twice = ev.duplicated("Envelope", "body")
-    if twice:
-        return (NOT_YET_EVALUABLE, ["BODY_ENVELOPED_TWICE"], ev.ids("Envelope"),
-                "%s carry more than one current extent, so there is no one "
-                "arrangement to measure" % ", ".join(twice[:5]))
     if not bodies:
         return NOT_YET_EVALUABLE, ["NO_BODY"], [], ""
+    twice = sorted(b for b in bodies if ev.extent_status(b) == ev.AMBIGUOUS)
+    if twice:
+        return (NOT_YET_EVALUABLE, ["BODY_ENVELOPED_TWICE"],
+                sorted(bodies) + [e for b in twice for e in ev.envelopes_of(b)],
+                "%s carry more than one current extent, so there is no one "
+                "arrangement to measure" % ", ".join(twice[:5]))
     unplaced = sorted(b for b in bodies if b not in boxes)
     if unplaced:
         return (NOT_YET_EVALUABLE, ["EXTENT_INCOMPLETE"], sorted(bodies),

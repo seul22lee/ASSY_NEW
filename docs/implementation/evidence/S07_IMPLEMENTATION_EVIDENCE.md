@@ -911,7 +911,142 @@ Regression, **secondary**: RUN 1052 · PASS 1052 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-B CLOSURE PASS (baseline `b761bbb`)
+
+Two named blockers, both reproduced before editing; two more of the same classes
+found by the sweep. Narrow by construction: **no S7-B area was reopened**, and
+every existing invariant is asserted unchanged.
+
+### E.1 The two blockers
+
+**Structured profile bypassed the kind vocabulary.** The source channel gated on
+`CONSTRAINT_KINDS`; the profile channel took the file's word for it, on the
+reasoning that a structured input is already a fact. So a section headed
+`design_constraints` could carry `MINIMIZE_PART_COUNT` and make a wish into a
+hard requirement **by the one route the other channel is built to refuse**.
+Reproduced: `MINIMIZE_PART_COUNT` and `UNKNOWN_CUSTOM_KIND` both ingested. Fixed
+with the same call the source channel makes — one table, no second list. Being
+structured says a value was not inferred; it does not say the value is one
+anything can act on.
+
+**Ambiguity detected and then measured anyway.** `BODY_ENVELOPED_TWICE` was
+reported and `_weaken`-ed to NOT_ESTABLISHED — and `_weaken` does not undo a
+FAIL, so the arbitrarily-chosen box went on to produce a positive contradiction:
+
+```
+order (near, far):  spatial_realization   FAIL   CONNECTED_BODIES_APART
+                    load_reaction_closure FAIL   HOP_BODIES_APART
+order (far, near):  spatial_realization   NOT_ESTABLISHED
+                    load_reaction_closure NOT_ESTABLISHED
+```
+
+A recognised ambiguity deciding the verdict, and deciding it differently
+depending on which envelope was written last.
+
+### E.2 The quarantine
+
+One strict accessor rather than a detector beside a lookup that ignores it.
+`_Evidence.extent_status(body)` answers **UNIQUE / MISSING / AMBIGUOUS**, and
+`boxes()` returns only UNIQUE bodies — so an ambiguous body is simply *absent*
+from the geometry map and behaves exactly as an unplaced one, which every
+predicate already refuses to measure. `envelope_of()` excludes it too, because
+naming one of two competing envelopes as a premise would record a dependency on
+a record nothing selected.
+
+Nothing had to be added at each FAIL site: the quarantine is upstream of all of
+them. `duplicated()` is retired, and the retirement says why — *a detector beside
+a lookup that ignores it is worse than neither*.
+
+Reported per body where the body is actually read, not as a blanket prefix, so
+B64 holds: a duplicate on a body no load route measures leaves
+`load_reaction_closure` PASS **with an unchanged premise set**, while
+`spatial_realization` and `gross_interference` — which genuinely read every body
+— report it.
+
+`s04._view_boxes` is untouched and still keeps the last envelope per body; it is
+s04's own refinement barrier that reads it, and feasibility simply stopped
+consuming it for an authoritative verdict.
+
+### E.3 Two more of the same class, found by the sweep
+
+* **A pair described two ways still required a contact.**
+  `gross_interference` refused to exempt a pair declared both CONTACT and
+  CLEARANCE — and `spatial_realization` went on requiring the contact and
+  **FAILING** when the boxes were apart. Being apart contradicts one declaration
+  and satisfies the other, so the FAIL reported a broken mechanism where the
+  description is what is broken. `pair_expectation()` is now one reader for both
+  domains, and a conflicted pair requires nothing it can be held to.
+* **Two current ReferenceScales still fed `box_gap`.** `SCALE_AMBIGUOUS` was
+  reported by the dimensional evaluator and by nothing else, so two bases could
+  produce a geometric FAIL — arithmetic across a boundary nothing defines.
+  `boxes()` now returns nothing at all when the basis is ambiguous, which routes
+  it through the same quarantine.
+
+The other six recognised ambiguities were checked and are already safe:
+`CONFIGURATION_REALIZED_TWICE`, `CELL_DISPOSITIONED_TWICE`,
+`DISTINCTNESS_DRIVER_AMBIGUOUS` all `continue` before the comparison;
+`ASSEMBLY_ORDER_NOT_TOTAL` and `MOVING_GROUP_DRIVER_AMBIGUOUS` weaken and cannot
+reach a FAIL that depends on the tie-break; `SCALE_AMBIGUOUS` returns early in
+the dimensional evaluator. None was reopened.
+
+### E.4 B57–B64
+
+| | |
+|---|---|
+| B57 | three unsupported profile kinds → no `DesignConstraint` |
+| B58 | a declared kind → ingested with source, statement, parameters and `blocks_selection` exact |
+| B59 | both channels consult `CONSTRAINT_KINDS.get(` — asserted structurally *and* behaviourally, same kind and same refusal through either door |
+| B60 | doubled extent + load route → `NOT_ESTABLISHED` in both orders, no `HOP_BODIES_APART` |
+| B61 | → `NOT_ESTABLISHED`, no `CONNECTED_BODIES_APART` |
+| B62 / B62b | → `NOT_ESTABLISHED`, no `NO_CONSERVATIVE_OVERLAP`, no `ORDER_CONSISTENT_AND_PATHS_CLEAR` |
+| B62c / B62d | *(sweep)* conflicted pair requires no contact; two bases measure nothing |
+| B63 / B63b | doubled extent → `NOT_YET_EVALUABLE` in both orders; one extent each still decides SATISFIED |
+| B64 | an unrelated doubled extent does not contaminate — same verdict **and same premises** |
+
+**117 tests.** Five mutations, each caught by the test written for it: removing
+the profile gate (2 failures), removing the source gate (1), restoring
+last-envelope-wins (5), letting a conflicted pair require a contact (1),
+measuring across two bases (1).
+
+### E.5 Files changed
+
+`feasibility.py` (+228/−69 — the quarantine, `pair_expectation`, `_extent_finding`),
+`s01_requirement_capture.py` (+13/−4 — the profile gate), three contracts stating
+the two invariants, and the tests. **No S4/S5/S6 production, no `_propagate`, no
+view module.**
+
+### E.6 Scope audit
+
+`git diff --check` clean. Six files. Zero references to `SelectionProfile`,
+`CandidateComparison`, `SelectionAdvisory`, `SelectionConcern` or
+`HumanDecisionInput` in production; `SelectionDecision` appears only in the three
+pre-existing readers. No `.gitignoreJoey…` file touched. No hidden default was
+introduced — the fix makes geometry *unavailable*, which is the opposite of a
+default.
+
+Regression, **secondary**: RUN 1065 · PASS 1065 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
+
+> **S7-B VERIFIED CLOSED — ALL HARD-CONSTRAINT INGRESSES SHARE ONE VOCABULARY
+> AUTHORITY AND AMBIGUOUS GEOMETRY CANNOT PRODUCE AUTHORITATIVE VERDICTS.**
+>
+> A hard requirement enters through two doors and both ask the same table what a
+> kind means, so a preference cannot become a constraint by arriving in a
+> structured file. A body the design describes twice has no extent any verdict
+> may use — not a noted duplicate beside a box that still measures, but no box at
+> all — and the same holds for a pair described two ways and for coordinates
+> stated in two bases. Every domain answers `NOT_ESTABLISHED` there, in either
+> insertion order, and a duplicate on a body a domain does not measure changes
+> neither its verdict nor its premises.
+>
+> **S-7 / U-8 IS NOT CLOSED.** S7-C through S7-F are not started.
+
+---
+
+## S7-B FINAL-CORRECTION STATUS (superseded by the above; kept, not deleted)
 
 > **S7-B VERIFIED CLOSED — EXPLICIT HARD DEMANDS, EXACT REFERENCES, COMPOSITE
 > ADDRESSES AND MULTIPLICITY ARE DETERMINISTIC.**
@@ -927,7 +1062,9 @@ Regression, **secondary**: RUN 1052 · PASS 1052 · FAIL 0 · SKIP 22.
 > whichever record came last now report the duplicate instead of resolving it.
 > Missing evidence is still never replaced with convenient evidence.
 >
-> **S-7 / U-8 IS NOT CLOSED.** S7-C through S7-F are not started.
+> Superseded in scope by §E: reporting a duplicate is not quarantining it, and
+> the profile channel was still taking a file's word for what a hard requirement
+> is. Every claim above still holds.
 
 ---
 

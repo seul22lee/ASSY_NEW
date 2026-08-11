@@ -57,7 +57,10 @@ ingestion:
     DETERMINISTIC, AND LIVE. A profile that already says PLASTIC_ONLY is a
     structured fact, and handing it to a model to reinterpret would turn a
     stated requirement into an inference. The ingester maps declared kinds onto
-    DesignConstraint and does not paraphrase. It also does not COMPLETE: a limit
+    DesignConstraint and does not paraphrase. It maps only the kinds
+    DESIGN_STATE_CONTRACT.DesignConstraint.kinds declares - the same authority
+    the source channel uses - because being structured says a value was not
+    inferred, not that it is one anything can act on. It also does not COMPLETE: a limit
     with no unit is carried as a limit with no unit, and the compliance record
     downstream says NOT_YET_EVALUABLE - the design not yet having said, rather
     than the ingester guessing what it meant.

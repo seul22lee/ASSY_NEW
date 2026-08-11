@@ -340,9 +340,16 @@ def ingest_design_constraints(profile: Any) -> List[Op]:
     entries = (profile or {}).get(CONSTRAINT_SECTION) or []
     ops: List[Op] = []
     for n, entry in enumerate(entries, start=1):
-        if not isinstance(entry, dict) or not entry.get("kind"):
-            # A constraint with no kind is not a constraint anyone can act on,
-            # and naming a kind for it would be inventing the requirement.
+        if not isinstance(entry, dict):
+            continue
+        # THE SAME VOCABULARY AUTHORITY AS THE SOURCE CHANNEL, and for the same
+        # reason. A constraint with no kind, or with a kind nothing can act on,
+        # is not a constraint anyone can act on - and being structured is not a
+        # licence to invent one. This channel used to accept whatever kind the
+        # file named, so a section headed `design_constraints` could carry
+        # MINIMIZE_PART_COUNT and make a wish into a hard requirement by the
+        # route the other channel is built to refuse.
+        if CONSTRAINT_KINDS.get(entry.get("kind")) is None:
             continue
         parameters = entry.get("parameters")
         ops.append(Op("CREATE", "DesignConstraint", "DSC-P%03d" % n, {

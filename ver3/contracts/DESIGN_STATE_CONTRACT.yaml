@@ -1697,6 +1697,13 @@ assurance_families:
   # Three families the s04 contract requires the stage to CREATE and which the
   # representation could not express at all. Rule 8 is satisfied by that
   # absence: an s04a that must produce an Envelope has nowhere to put one.
+  # AMBIGUOUS GEOMETRY ESTABLISHES NOTHING. A body carrying more than one current
+  # extent has no extent any deterministic verdict may use: `feasibility` treats
+  # it exactly as an unplaced body, so no gap, overlap, insertion corridor or
+  # overall dimension can be computed from a box that nothing selected. Detecting
+  # the duplicate and then measuring with whichever one an index kept is how a
+  # recognised ambiguity still decided a verdict - and decided it differently
+  # depending on which envelope was written last. (S7-B closure)
   Envelope:
     semantic_roles: [spatial_commitment]
     field_semantics:
@@ -1863,8 +1870,16 @@ assurance_families:
       - >
         A PREFERENCE NEVER BECOMES ONE, and the enforcement is structural in both
         channels: the profile ingester names one section and never reads the
-        other, and a source-captured entry must carry a kind from the list above -
-        which contains no way to say "fewer" or "smaller is nicer".
+        other, and EVERY entry from EITHER channel must carry a kind from the
+        list above - which contains no way to say "fewer" or "smaller is nicer".
+      - >
+        ONE VOCABULARY AUTHORITY, WHICHEVER DOOR THE CONSTRAINT CAME IN. The
+        profile channel used to take the file's word for the kind, on the
+        reasoning that a structured input is already a fact - so a section headed
+        `design_constraints` could carry MINIMIZE_PART_COUNT and make a wish into
+        a hard requirement by the one route the other channel is built to refuse.
+        Being structured says the value was not inferred; it does not say the
+        value is one anything can act on. (S7-B closure)
 
   HardRequirementCompliance:
     semantic_roles: [eligibility_evidence]

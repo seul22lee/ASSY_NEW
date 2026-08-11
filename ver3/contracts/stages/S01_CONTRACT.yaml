@@ -146,6 +146,12 @@ constraint_ingress:
   producer: "`ingest_design_constraints`, called from s01's own to_operations"
   reads: "design_profile.design_constraints"
   reads_from_source: "the response's `hard_constraints`, each naming the Requirement it comes from"
+  shared_gate: >
+    BOTH CHANNELS CONSULT THE SAME TABLE. `kind` must be one
+    DESIGN_STATE_CONTRACT.DesignConstraint.kinds declares, whether the entry came
+    from the profile or from the request - a second list would drift the first
+    time a kind is added, and the two doors would then disagree about what a hard
+    requirement is.
   source_gate: >
     THE MODEL TRANSCRIBES; CODE DECIDES. Classifying a sentence the user wrote as
     a material requirement is reading, which is what this stage asks a model to
