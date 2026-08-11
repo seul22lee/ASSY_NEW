@@ -483,21 +483,73 @@ stages:
         coverage: ALL_APPLICABLE
         existence: REQUIRED_NONEMPTY
         existence_why: a feasibility statement about no evidence is not a statement
-      what: this candidate's physical, mobility and spatial evidence
+      what: this candidate's physical, mobility, topological and spatial evidence,
+        and how each load is routed through it
       justified_by_question: Does the established evidence contain anything that stops this candidate
         working?
-      why: Feasibility is read off what was established, never generated here.
+      why: >
+        Feasibility is read off what was established, never generated here.
+
+        S7-B ADDED topology_element, topology_relation AND load_route, for the
+        same reason `realized_motion` was added: the declared domains could not
+        be decided from the declared inputs. Whether connected bodies actually
+        touch is asked of the joint graph and the CONTACT interfaces, and
+        Source A reached neither - an interface arrived only when an assembly
+        step happened to activate it, so a body pair the topology connects could
+        go unchecked while the view looked complete. A load route is
+        candidate-specific in a way its load case is not: two candidates carry
+        the same load through different interfaces, so the route belongs to the
+        branch and the demand does not.
       requires_semantics:
       - physical_interaction
       - constraint_relation
       - mobility_disposition
       - spatial_commitment
+      - topology_element
+      - topology_relation
+      - load_route
     - class: realized_motion
+      # S7-B. ONE EXISTENCE RULE FOR FOUR ROLES SAID THE WRONG THING ABOUT TWO OF
+      # THEM. "A mechanism with no realized motion has no motion to judge" is the
+      # reason a motion domain reports NOT_APPLICABLE - and it was written as
+      # REQUIRED_NONEMPTY, which says the opposite: a static candidate became an
+      # UNREADY CONTEXT and got no assessment at all. Having nothing to judge is
+      # an answer; being unable to judge is not, and one field cannot carry both.
+      #
+      # The split is by role because the roles differ in kind. A configuration
+      # that no state realizes is missing evidence. A path that does not exist,
+      # and an occupancy for a motion nobody declared, are absences the design
+      # meant.
       instance_selection:
-        population: INVOCATION_BRANCH
-        coverage: ALL_APPLICABLE
-        existence: REQUIRED_NONEMPTY
-        existence_why: a mechanism with no realized motion has no motion to judge
+        by_role:
+        - role: realized_configuration
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: a configuration no state realizes is a question this
+            responsibility cannot answer, not one it need not ask
+          why: s04b authors the coordinates while embodying one candidate
+        - role: motion_path
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a mechanism that is required to hold still declares no
+            path, and that is an answer rather than a gap
+          why: a transition belongs to the candidate whose coordinates it moves
+        - role: motion_occupancy
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: no motion, no volume swept; demanding one would demand a
+            computation of nothing
+          why: an occupancy is computed from one candidate's arrangement
+        - role: kinematic_axis
+          population: INVOCATION_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: a mechanism is its bodies and the joints between them; with
+            no joint there is no mechanism to judge
+          why: joints are authored by s03a while embodying one candidate
       what: the coordinates that realize each configuration, the paths between them,
         and the occupancy each moving group sweeps
       justified_by_question: Does the established evidence contain anything that stops this candidate
@@ -530,6 +582,34 @@ stages:
       - reach_evidence
       - elimination_evidence
       - assembly_order
+    - class: declared_physical_demand
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may demand no physical effect and state no load
+      what: the effects the product must produce, the loads the world applies, and the
+        sites where a reaction must ultimately be available
+      justified_by_question: Does the established evidence contain anything that stops this candidate
+        working?
+      why: >
+        TWO OF THE NINE DOMAINS ARE ABOUT DEMANDS, NOT ABOUT MECHANISMS. Physical
+        realization asks whether every required effect is discharged by an
+        interaction, and load reaction closure asks whether every load reaches the
+        site its own load case names - and neither can be asked of the mechanism
+        alone. Source A reached a PhysicalEffectObligation only through the
+        interaction that discharges it, so exactly the undischarged obligations -
+        the ones the domain exists to find - were the ones the view could not
+        contain, and the domain would have reported PASS by seeing nothing.
+
+        DESIGN_WIDE because a demand is candidate-independent: the world applies
+        the same load to every alternative, and a candidate that does not carry
+        it has a finding rather than an exemption. Its absence from a branch is
+        what makes the branch answerable, not what makes the question skippable.
+      requires_semantics:
+      - physical_effect_obligation
+      - load_case
+      - reaction_site
     - class: hard_design_constraint
       instance_selection:
         population: DESIGN_WIDE
@@ -544,6 +624,7 @@ stages:
       requires_semantics:
       - design_constraint
     permitted_output_semantics:
+    - FeasibilityDomainAssessment
     - MechanicalFeasibilityAssessment
     - HardRequirementCompliance
     - UnresolvedDecision

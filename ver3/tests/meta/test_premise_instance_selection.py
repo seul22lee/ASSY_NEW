@@ -96,11 +96,17 @@ class TestDeclaredCorpus(_Base):
 
     def test_SELECT_01_every_premise_declares_which_instances_it_needs(self):
         rows = list(_premises(self.resp))
-        # 32 live after the S7-A correction: `feasibility` gained the two
-        # classes its declared domains actually need - realized motion, and the
+        # 32 after the S7-A correction: `feasibility` gained the two classes its
+        # declared domains actually need - realized motion, and the
         # candidate-local geometric findings - without which it declared domains
         # whose evidence its view could not contain.
-        self.assertEqual(32, len(rows), "the premise corpus changed size")
+        #
+        # 33 at S7-B, for the third instance of the same defect. Two domains are
+        # about DEMANDS - effects that must occur, loads the world applies, sites
+        # a reaction must reach - and the class that would carry them did not
+        # exist, so an undischarged obligation was exactly what the view could
+        # not contain.
+        self.assertEqual(33, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

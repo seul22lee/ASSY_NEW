@@ -164,6 +164,11 @@ semantic_role_vocabulary:
     A direction about or along which relative motion is defined.
   load_case: >
     A candidate-independent demand the world places on the product.
+  load_route: >
+    How ONE load reaches a declared reaction site through ONE candidate
+    mechanism. Candidate-specific where the demand it answers is not: two
+    alternatives carry the same load through different interfaces, and that
+    difference is the whole of what this role names. (S7-B)
   open_item: >
     A recorded openness that may bind a later commitment.
   open_question: >
@@ -798,6 +803,13 @@ entity_families:
         reach it differently; that difference lives in their LoadPaths.
 
   LoadPath:
+    # S7-B. THE FAMILY CARRIED NO ROLE AT ALL, so nothing could ask for it by
+    # what it is. A consumer view is assembled from declared roles, and a
+    # responsibility whose job includes "does every load close outside the
+    # product" could not name the family that answers it - the paths arrived in
+    # no view, and a load closure domain would have read an empty list as
+    # nothing to close.
+    semantic_roles: [load_route]
     field_semantics:
       load_case:
         kind: reference
@@ -997,6 +1009,16 @@ entity_families:
     rules:
       - "A coordinate has no meaning without the basis it is expressed in, so this is a representational premise of every s04 spatial commitment."
       - "basis RELATIVE with absolute null is a legitimate, honest value. It is not a defect and must not be defaulted to a number."
+      # S7-B. WHAT MAKES A DIMENSIONAL REQUIREMENT EVALUABLE AT ALL. A limit in
+      # millimetres and an extent in a relative basis are not comparable, and any
+      # rule converting between them would be a consumer choosing the scale this
+      # family deliberately leaves free.
+      - >
+        A stored coordinate becomes comparable with a stated quantity ONLY when
+        basis is ABSOLUTE and `absolute` states both the unit and what one
+        coordinate is worth in it - {unit, per_unit}. Anything less is
+        NOT_YET_EVALUABLE for a dimensional requirement, which is a finding about
+        the evidence and not about the design.
 
   # -------------------------------------------------------------- U-2B (S-2)
   # CURRENT PRODUCER STATUS (S-4):
@@ -1788,7 +1810,7 @@ assurance_families:
         evidence.
       - "This is not mechanical feasibility. A violated requirement is not a broken mechanism."
 
-  MechanicalFeasibilityAssessment:
+  FeasibilityDomainAssessment:
     semantic_roles: [eligibility_evidence]
     field_semantics:
       candidate:
@@ -1799,10 +1821,68 @@ assurance_families:
     owned_by: feasibility
     authority_class: AUTHORITATIVE
     purpose: >
+      ONE mechanical domain's verdict for ONE candidate. The domain is the unit
+      of dependency: what a motion verdict rests on is not what a load verdict
+      rests on, and a single record for all nine could only carry the union - so
+      changing an envelope would have staled the load closure it cannot affect.
+    required_fields: [entity_id, candidate, domain, status, reason_codes]
+    optional_fields: [summary]
+    domain:
+      - physical_realization
+      - load_reaction_closure
+      - mobility_disposition
+      - required_configurations
+      - motion_and_transitions
+      - spatial_realization
+      - reach
+      - assemblability
+      - gross_interference
+    status: [PASS, FAIL, NOT_ESTABLISHED, NOT_APPLICABLE]
+    rules:
+      - >
+        NO `evidence_refs` FIELD. The operation's `premise_refs` ARE the evidence:
+        exactly the current positive facts this verdict was read from, and
+        nothing that merely happened to be in the view. A second reference list
+        beside them would be a second answer to "what did you use".
+      - >
+        APPLICABILITY IS DECIDED BEFORE STATUS. NOT_APPLICABLE means the design
+        poses no question in this domain - no load case, no required motion - and
+        it never blocks. It is not a weaker PASS.
+      - >
+        ABSENCE IS NOT_ESTABLISHED AND NEVER PASS, and never FAIL either: a
+        conservative overlap, a missing envelope, a path that cannot be checked
+        are all things the design has not established. FAIL is reserved for a
+        current typed fact that positively contradicts a requirement.
+      - >
+        A MODEL-LOCAL CONCLUSION DECIDES NOTHING. A ReachResult or an
+        EliminationRecord contributes a reason code - MODEL_LOCAL_NEGATIVE,
+        MODEL_LOCAL_POSITIVE - and cannot by itself produce PASS or FAIL. A
+        deterministic wrapper around a model's opinion is still the model's
+        opinion.
+
+  MechanicalFeasibilityAssessment:
+    semantic_roles: [eligibility_evidence]
+    field_semantics:
+      candidate:
+        kind: reference
+        target: Candidate
+        cardinality: one
+        resolvable: false
+      domain_assessments:
+        kind: reference
+        target: FeasibilityDomainAssessment
+        cardinality: many
+        resolvable: false
+    owned_by: feasibility
+    authority_class: AUTHORITATIVE
+    purpose: >
       CAN THIS CANDIDATE WORK, on the engineering evidence established so far.
       Candidate-local, preference-blind, and never a comparison.
-    required_fields: [entity_id, candidate, status, evaluated_domains, findings]
-    optional_fields: [blocking_findings]
+    required_fields: [entity_id, candidate, status, domain_assessments]
+    # `findings` is a HUMAN-READABLE SUMMARY and is not a second domain-status
+    # authority. The canonical per-domain result is `domain_assessments`; free
+    # text beside it that could disagree is how two answers start.
+    optional_fields: [findings, blocking_findings, evaluated_domains]
     status: [FEASIBLE_FOR_SELECTION, INFEASIBLE, NOT_ESTABLISHED]
     evaluated_domains:
       - physical_realization
@@ -1814,7 +1894,19 @@ assurance_families:
       - reach
       - assemblability
       - gross_interference
+    aggregation: >
+      any applicable domain FAIL -> INFEASIBLE; else any applicable domain
+      NOT_ESTABLISHED -> NOT_ESTABLISHED; else FEASIBLE_FOR_SELECTION.
+      NOT_APPLICABLE never blocks. Complexity, part count, preference and
+      relative quality are not inputs, and a mechanism is not less feasible for
+      having more joints than one somebody would rather have.
     rules:
+      - >
+        ITS PREMISES ARE THE DOMAIN ASSESSMENTS AND EVERYTHING THEY USED.
+        `_propagate` is ONE HOP, so naming the domain records would not carry the
+        raw facts behind them: an envelope changing would stale the domain
+        verdict and leave this record STANDING on it. The union of the raw
+        premises is carried directly, for the same reason S-6 gave.
       - >
         CANDIDATE-LOCAL. It reads one branch's evidence and says whether that
         branch could work. It never reads another candidate, never ranks, and

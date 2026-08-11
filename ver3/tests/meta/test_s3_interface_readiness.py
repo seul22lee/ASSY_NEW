@@ -381,7 +381,11 @@ class TestSourceB(_Base):
                 self.assertNotIn("satisfied_by", pc)
                 self.assertTrue(resolve_premise_semantics(pc, self.fams)[0])
 
-    def test_SOURCEB_11_all_28_premise_classes_resolve(self):
+    # The name carried "28" and the assertion had said 32 since S7-A: a test name
+    # that states a count goes stale every time the count changes, and a stale
+    # name on a passing test is the quietest kind of wrong. The count belongs in
+    # the assertion, where changing it is a visible edit.
+    def test_SOURCEB_11_every_premise_class_resolves(self):
         total = 0
         for sid, pc in self.premise_classes():
             fams, trace = resolve_premise_semantics(pc, self.fams)
@@ -398,7 +402,13 @@ class TestSourceB(_Base):
         # unreachable - the ConsumerView was UPSTREAM_INSUFFICIENCY on every
         # call. The class is preserved with the step that activates it, and the
         # pending corpus is pinned too so it cannot be quietly dropped.
-        self.assertEqual(32, total)
+        #
+        # 33 at S7-B: `feasibility` gained `declared_physical_demand`. Two of its
+        # nine domains are about what the design DEMANDS - an effect that must
+        # occur, a load the world applies - and no class carried them, so the
+        # undischarged obligations the domain exists to find were exactly what
+        # its view could not contain.
+        self.assertEqual(33, total)
         pending = [pc for s in self.resp["stages"].values()
                    for pc in (s.get("premise_classes_pending_step") or [])]
         self.assertEqual([], pending, "a pending class survived S7-A")

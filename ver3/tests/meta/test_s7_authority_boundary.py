@@ -60,7 +60,8 @@ class TestTheSplit(_Base):
     def test_feasibility_may_not_author_a_decision(self):
         outputs = self.resp["stages"]["feasibility"]["permitted_output_semantics"]
         self.assertNotIn("SelectionDecision", outputs)
-        self.assertEqual(["MechanicalFeasibilityAssessment",
+        self.assertEqual(["FeasibilityDomainAssessment",
+                          "MechanicalFeasibilityAssessment",
                           "HardRequirementCompliance", "UnresolvedDecision"],
                          outputs)
 

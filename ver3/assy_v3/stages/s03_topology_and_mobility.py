@@ -784,11 +784,16 @@ def irrelevance_check(state) -> List[str]:
     return problems
 
 
-def assembly_acyclic_check(state) -> List[str]:
-    """S03-C4. The assembly precedence relation is acyclic, and its order is a
-    linear extension of it."""
-    steps = {s["entity_id"]: s for s in state.family("AssemblyStep")}
-    problems = []
+def assembly_order_problems(steps: Dict[str, Dict[str, Any]]) -> List[str]:
+    """Cycles, unknown dependencies, and an order that contradicts one.
+
+    EXTRACTED at S7-B from `assembly_acyclic_check`, which keeps its exact
+    findings and its exact strings. The structural question - can this be built
+    in the order it claims - is asked by the check over accumulated state and by
+    the feasibility evaluator over one candidate's view, and two walks of the
+    same graph would be two answers.
+    """
+    problems: List[str] = []
     colour: Dict[str, int] = {}
 
     def visit(node: str, trail: List[str]) -> None:
@@ -814,6 +819,13 @@ def assembly_acyclic_check(state) -> List[str]:
                     problems.append("ASSEMBLY_ORDER_CONTRADICTS_DEPENDENCY: %s before %s"
                                     % (sid, dep))
     return problems
+
+
+def assembly_acyclic_check(state) -> List[str]:
+    """S03-C4. The assembly precedence relation is acyclic, and its order is a
+    linear extension of it."""
+    return assembly_order_problems(
+        {s["entity_id"]: s for s in state.family("AssemblyStep")})
 
 
 def load_path_check(state) -> List[str]:

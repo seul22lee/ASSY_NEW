@@ -366,7 +366,7 @@ class S04AEnvelopeAndReach(Stage):
             a, b = boxes.get(pb), boxes.get(cb)
             if not (a and b):
                 continue
-            gap = max(max(a[0][i] - b[1][i], b[0][i] - a[1][i]) for i in range(3))
+            gap = box_gap(a, b)
             if gap > 0:
                 apart.append("%s and %s placed %.3g apart" % (pb, cb, gap))
         if apart:
@@ -885,6 +885,32 @@ def _render(obj: Any) -> str:
 # =========================================================================
 # the spatial computation and the checks
 # =========================================================================
+def box_gap(a: Tuple[List[float], List[float]],
+            b: Tuple[List[float], List[float]]) -> float:
+    """Largest separation between two boxes on any axis. Positive means apart.
+
+    EXTRACTED at S7-B, unchanged: this expression stood in three places, and a
+    feasibility evaluator needed a fourth. One formula, so a reader asking "are
+    these two apart" gets one answer.
+    """
+    return max(max(a[0][i] - b[1][i], b[0][i] - a[1][i]) for i in range(3))
+
+
+def coordinate_change_disagreement(from_coords, to_coords, declared):
+    """(declared-but-not-realized, realized-but-not-declared) joint ids.
+
+    EXTRACTED at S7-B from `transition_realization_check`, which keeps its exact
+    findings and its exact strings. Both directions are wrong in different ways:
+    a declared change the endpoints do not make is a claim about motion that does
+    not happen, and a coordinate that changes undeclared is motion nobody said
+    would occur.
+    """
+    ca, cb = from_coords or {}, to_coords or {}
+    actual = {j for j in set(ca) | set(cb) if ca.get(j) != cb.get(j)}
+    said = {j for j in (declared or []) if isinstance(j, str)}
+    return sorted(said - actual), sorted(actual - said)
+
+
 def _extent_box(e) -> Optional[Tuple[List[float], List[float]]]:
     ext = e.get("extent") or {}
     c, h = ext.get("centre"), ext.get("half_extent")
@@ -946,7 +972,7 @@ def joint_geometry_check(state) -> List[str]:
         a, b = boxes.get(pb), boxes.get(cb)
         if not (a and b):
             continue
-        gap = max(max(a[0][i] - b[1][i], b[0][i] - a[1][i]) for i in range(3))
+        gap = box_gap(a, b)
         if gap > 0:
             problems.append("JOINED_BODIES_DO_NOT_MEET: the topology connects %s "
                             "and %s, but they are placed %.3g apart" % (pb, cb, gap))
@@ -1224,14 +1250,13 @@ def transition_realization_check(state) -> List[str]:
             continue
         ca = a.get("joint_coordinates") or {}
         cb = b.get("joint_coordinates") or {}
-        actual = {j for j in set(ca) | set(cb) if ca.get(j) != cb.get(j)}
-        declared = {j for j in (t.get("changed_coordinates") or [])
-                    if isinstance(j, str)}
-        for j in sorted(declared - actual):
+        not_realized, undeclared = coordinate_change_disagreement(
+            ca, cb, t.get("changed_coordinates"))
+        for j in not_realized:
             problems.append("DECLARED_CHANGE_NOT_REALIZED: %s says %s changes and "
                             "its endpoints hold it at %r"
                             % (t["entity_id"], j, ca.get(j)))
-        for j in sorted(actual - declared):
+        for j in undeclared:
             problems.append("UNDECLARED_COORDINATE_CHANGE: %s moves %s from %r to "
                             "%r and does not declare it"
                             % (t["entity_id"], j, ca.get(j), cb.get(j)))
@@ -1388,8 +1413,7 @@ def load_path_reaction_check(state) -> List[str]:
             if len(pair) < 2:
                 continue
             a, b = pair[0], pair[1]
-            gap = max(max(boxes[a][0][i] - boxes[b][1][i],
-                          boxes[b][0][i] - boxes[a][1][i]) for i in range(3))
+            gap = box_gap(boxes[a], boxes[b])
             if gap > 0:
                 problems.append("LOADPATH_HOP_DISJOINT: %s carries %s -> %s in %s, "
                                 "and they are placed %.3g apart; the load cannot "

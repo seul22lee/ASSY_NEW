@@ -6,7 +6,7 @@ references:
 - ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
 - ver3/contracts/GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
 audit_scope:
-  families_audited: 56
+  families_audited: 57
   re_run_note: 'The family set grew from 32 to 37 by CONTRACT CHANGE (five families added to DESIGN_STATE_CONTRACT
     under docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md rev 2: RigidGroup, LoadCase, LoadPath, FunctionalRegion,
     AssemblyStep). This audit was RE-RUN over the new set and asks the same consumer question of each.
@@ -47,7 +47,7 @@ audit_scope:
   no_stage_contract_frozen_by_this_audit: true
 summary:
   CORE: 39
-  PROVISIONAL: 14
+  PROVISIONAL: 15
   MERGE_CANDIDATE: 3
   UNSUPPORTED: 0
   note_on_zero_unsupported: 'No family is unproducible or unconsumable, so none is UNSUPPORTED. Two EXPRESSIVENESS
@@ -739,6 +739,27 @@ families:
       normal way of working. What is open is not the meaning - that is frozen -
       but that S7-B has not yet emitted it.
     decision_required_before: "S7-B implementation."
+  FeasibilityDomainAssessment:
+    owning_stage: feasibility
+    first_downstream_consumer: s05
+    consumer_note: >
+      One domain's verdict for one candidate. Eligibility rests on all of them,
+      and everything after the choice embodies the chosen candidate.
+    unique_responsibility: >
+      The DOMAIN is the unit of dependency: a motion verdict and a load verdict
+      rest on different facts, and one record for all nine could carry only the
+      union.
+    duplicates: none
+    overlap_note: >
+      Overlaps MechanicalFeasibilityAssessment, which AGGREGATES these into one
+      eligibility answer and holds no independent domain status of its own.
+    required_for_assurance_package: false
+    package_items: []
+    status: PROVISIONAL
+    open_question: >
+      Declared and produced at S7-B. What is open is re-evaluation when new
+      evidence arrives, which is S7-F.
+    decision_required_before: "S7-F implementation."
   HardRequirementCompliance:
     owning_stage: feasibility
     first_downstream_consumer: s05

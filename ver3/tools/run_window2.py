@@ -54,6 +54,8 @@ from ver3.assy_v3.stages.s04_envelope_and_motion import (                   # no
     spatial_commitment_check,
     load_path_reaction_check, motion_evidence_check, region_occupancy_check,
     selection_gate_check, swept_clearance_check, transition_realization_check)
+from ver3.assy_v3.stages.feasibility import (                              # noqa: E402
+    evaluate_candidate_feasibility)
 from ver3.assy_v3.state import DesignState                                  # noqa: E402
 from ver3.live_providers import env as env_loader                           # noqa: E402
 from ver3.live_providers.deepseek import DeepSeekProvider                   # noqa: E402
@@ -376,6 +378,56 @@ def run_s04(case_id: str, state, provider, trial: int,
     return rec
 
 
+def run_feasibility(case_id: str, state, trial: int,
+                    invocation=None) -> Dict[str, Any]:
+    """Ask whether ONE candidate is mechanically eligible. NO PROVIDER.
+
+    The signature has no `provider` because there is nothing here to ask a model:
+    a model may not declare a mechanism feasible, so the responsibility is a
+    deterministic reading of what s01-s04 established.
+
+    The runner APPLIES AND RECORDS. It does not read a domain verdict, does not
+    aggregate one, and does not decide what an INFEASIBLE means for the run - a
+    runner interpreting an engineering result is the second semantic authority
+    U-7 removed from s04, and it would be the same defect here.
+    """
+    candidate = getattr(invocation, "branch", None)
+    rec: Dict[str, Any] = {"case": case_id, "trial": trial, "candidate": candidate,
+                           "failures": [], "feasibility_status": None}
+
+    def fail(kind: str, what: str, detail: Any = None) -> None:
+        rec["failures"].append({"kind": kind, "stage": "feasibility",
+                                "what": what, "detail": detail})
+
+    started = time.time()
+    try:
+        outcome = evaluate_candidate_feasibility(state, candidate)
+    except Exception as exc:                                        # noqa: BLE001
+        fail("PARSER_DEFECT", "%s: %s" % (type(exc).__name__, exc),
+             traceback.format_exc(limit=5))
+        rec["feasibility_status"] = "RAISED"
+        return rec
+    rec["feasibility_seconds"] = round(time.time() - started, 2)
+    rec["feasibility_consumer_view"] = outcome.consumer_view
+    if outcome.patch is None:
+        # A REFUSAL IS A RESULT. An unready view means the design has not
+        # established what a feasibility statement would have to be read from,
+        # and producing one anyway is exactly what "missing evidence is not
+        # feasibility" forbids.
+        fail("CONTRACT_CONDITION", "no assessment was produced", outcome.problems)
+        rec["feasibility_status"] = "NOT_PRODUCED"
+        return rec
+    state.apply(outcome.patch)
+    rec["feasibility_status"] = outcome.status
+    rec["feasibility_domains"] = {v.domain: v.status for v in outcome.verdicts}
+    rec["feasibility_families"] = sorted({op.entity_type
+                                          for op in outcome.patch.operations})
+    rec["hard_requirements"] = {c.get("entity_id"): s
+                                for c, s, _codes, _used, _why in outcome.compliance}
+    rec["counts"] = state.counts()
+    return rec
+
+
 #: RETIRED at S-6 / U-7. `_commit_s04` read the raw s04 response and wrote the
 #: engineering facts the stages did not: the reference scale, reach results, the
 #: elimination record, region volumes, insertion directions and joint origins. It
@@ -459,13 +511,26 @@ def main() -> int:
                             os.makedirs(d, exist_ok=True)
                             with open(os.path.join(d, "%s.json" % k), "w") as fh:
                                 fh.write(raw)
+                    # UNCONDITIONAL ON THE CHECK FINDINGS. s04's checks report
+                    # what they found; whether any of it stops the candidate is
+                    # this responsibility's question, and skipping it when a
+                    # check fired would answer that question in the runner.
+                    fz = run_feasibility(case_id, _st, trial,
+                                         invocation=InvocationContext(
+                                             branch=rec.get("candidate")))
+                    rec["feasibility_status"] = fz["feasibility_status"]
+                    rec["feasibility_domains"] = fz.get("feasibility_domains")
+                    rec["hard_requirements"] = fz.get("hard_requirements")
+                    rec["failures"] += fz["failures"]
                 trials.append(rec)
                 kinds: Dict[str, int] = {}
                 for f in rec["failures"]:
                     kinds[f["kind"]] = kinds.get(f["kind"], 0) + 1
-                print("  t%d %-8s %-9s s03=%-14s s04a=%-10s s04b=%-10s %5.1fs %s"
+                print("  t%d %-8s %-9s s03=%-14s s04a=%-10s s04b=%-10s "
+                      "feas=%-22s %5.1fs %s"
                       % (trial, case_id, rec["candidate"], rec["s03_status"],
                          str(rec.get("s04a_status")), str(rec.get("s04b_status")),
+                         str(rec.get("feasibility_status")),
                          time.time() - t0,
                          ", ".join("%s:%d" % kv for kv in sorted(kinds.items())) or "CLEAN"))
                 with open(os.path.join(out_dir, "trials.json"), "w") as fh:
