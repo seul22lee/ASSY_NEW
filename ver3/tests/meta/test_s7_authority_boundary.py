@@ -383,12 +383,20 @@ class TestHardConstraintVisibility(_fixtures.StateBuilder, _Base):
         self.assertFalse(self.c.may_create("s02", "DesignConstraint"))
 
     def test_A7_visibility_is_selective_not_global(self):
-        """It exists from s01 and appears only where the reasoning needs it."""
+        """It exists from s01 and appears only where the reasoning needs it.
+
+        TWO consumers declare it now, and the second is not a widening. S7-C's
+        eligibility rule is "feasible AND every blocking requirement satisfied",
+        so the set of blocking requirements is half the question - and reaching
+        constraints only through the compliance records that cite them would make
+        a MISSING blocking record invisible, which is exactly the case selection
+        exists to detect. What this test pins is that the list is SHORT and
+        justified, not that it has one entry."""
         s = self.world()
         declaring = [sid for sid, spec in self.resp["stages"].items()
                      if any("design_constraint" in pc["requires_semantics"]
                             for pc in spec["required_reasoning_premise_classes"])]
-        self.assertEqual(["feasibility"], declaring)
+        self.assertEqual(["feasibility", "selection"], declaring)
         for sid in ("s02", "s03a", "s03b", "s04a"):
             view = cv.build_consumer_view(
                 sid, s, self.c, self.resp,

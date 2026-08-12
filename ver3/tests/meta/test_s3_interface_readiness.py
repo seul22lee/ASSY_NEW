@@ -408,7 +408,10 @@ class TestSourceB(_Base):
         # occur, a load the world applies - and no class carried them, so the
         # undischarged obligations the domain exists to find were exactly what
         # its view could not contain.
-        self.assertEqual(33, total)
+        #
+        # 35 at S7-C: `selection` gained the design-wide hard requirements and
+        # the topology its counting metrics count.
+        self.assertEqual(35, total)
         pending = [pc for s in self.resp["stages"].values()
                    for pc in (s.get("premise_classes_pending_step") or [])]
         self.assertEqual([], pending, "a pending class survived S7-A")

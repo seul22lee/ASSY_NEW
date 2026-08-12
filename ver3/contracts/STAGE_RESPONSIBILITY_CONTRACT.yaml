@@ -749,11 +749,36 @@ stages:
       requires_semantics:
       - eligibility_evidence
     - class: candidate_spatial_evidence
+      # S7-C. ONE EXISTENCE RULE FOR THREE ROLES, and for two of them it said the
+      # wrong thing - the fourth time this shape has appeared in S-7. A design
+      # with no actor produces no ReachResult and a candidate nobody eliminated
+      # produces no EliminationRecord; demanding either made the selection view
+      # UPSTREAM_INSUFFICIENCY on an ordinary design, so the comparison could not
+      # be asked at all. Neither is read by any metric. The arrangement is
+      # different: with no spatial commitment anywhere there is no design to
+      # compare.
       instance_selection:
-        population: ALL_RETAINED_BRANCHES
-        coverage: ALL_APPLICABLE
-        existence: REQUIRED_NONEMPTY
-        existence_why: a comparison with nothing to compare is not a comparison
+        by_role:
+        - role: spatial_commitment
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: a comparison of alternatives none of which has been given
+            an arrangement is not a comparison
+          why: s04 authors the arrangement of each candidate
+        - role: reach_evidence
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a design whose actors reach for nothing produces no reach
+            result, and that is an answer rather than a gap
+          why: s04a records it while embodying one candidate
+        - role: elimination_evidence
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a candidate nobody eliminated has no elimination record
+          why: s04a records it while embodying one candidate
       what: every retained candidate's spatial evidence
       justified_by_question: How do they compare on metrics the design can actually compute?
       why: A metric with no state behind it is not a metric, and the comparison must say so.
@@ -761,6 +786,43 @@ stages:
       - spatial_commitment
       - reach_evidence
       - elimination_evidence
+    - class: candidate_topology_evidence
+      # S7-C. WHAT THE COUNTING METRICS ARE COUNTS OF. `rigid_body_count` and
+      # `joint_count` are counts of canonical entities, so the entities have to be
+      # in the view - and they are asked for by the ENGINEERING role they carry,
+      # not by a family list written for this consumer's convenience.
+      instance_selection:
+        population: ALL_RETAINED_BRANCHES
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a candidate with no bodies and no relations is not an alternative
+      what: every retained candidate's bodies and the relations between them
+      justified_by_question: How do they compare on metrics the design can actually compute?
+      why: A count with nothing to count is not a measurement, and a count taken over
+        entities the consumer cannot see would be a number with no provenance.
+      requires_semantics:
+      - topology_element
+      - topology_relation
+    - class: hard_design_constraint
+      # S7-C. THE FULL DESIGN-WIDE SET, not the subset some compliance record
+      # happens to reference. A blocking constraint with NO HardRequirementCompliance
+      # for a mechanically feasible candidate is precisely what makes that
+      # candidate's eligibility unestablished - and reaching constraints only
+      # through the compliance records that cite them would make exactly that case
+      # invisible: the missing record would hide the requirement it is missing for.
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may state no hard requirement, and none is not a gap
+      what: every hard requirement the design states, and whether each blocks a choice
+      justified_by_question: Which candidates are eligible, and on what established evidence?
+      why: Eligibility is feasibility AND every blocking requirement satisfied, so the set
+        of blocking requirements is half the question. DESIGN_WIDE because a requirement
+        applies to every alternative; its absence from one candidate's evidence is the
+        finding, not an exemption.
+      requires_semantics:
+      - design_constraint
     - class: selection_preference
       instance_selection:
         population: DESIGN_WIDE

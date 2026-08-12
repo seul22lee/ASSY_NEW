@@ -305,27 +305,28 @@ class _Feas(_fixtures.StateBuilder, unittest.TestCase):
             s04b if s04b is not None else motion(
                 sfx, "JNT-0%s" % sfx, _group(1, sfx)), **kw)
 
-    def fourbar(self, state=None, sfx="B"):
+    def fourbar(self, state=None, sfx="B", s04a=None):
         state = state if state is not None else self.seed()
         self.candidates(state)
         pairs = [(0, 1), (1, 2), (2, 3), (3, 0)]
         return self.branch(
             state, sfx, topology(sfx, 4, pairs),
             realization(sfx, hops=(0, 1), steps=(0,)),
+            s04a if s04a is not None else
             arrangement({k.replace("B", sfx): v for k, v in FOURBAR_BOXES.items()},
                         steps=["ASY-0%s" % sfx]),
             # A SMALL ROTATION. The four-bar is judged on the same rules as the
             # hinge; sweeping a bar through the frame would be testing the probe.
             motion(sfx, "JNT-3%s" % sfx, _group(0, sfx), coords=(0, 10)))
 
-    def candidates(self, state, payload=None):
+    def candidates(self, state, payload=None, suffixes=("A", "B")):
         if state.family("Candidate"):
             return
         payload = json.loads(json.dumps(payload if payload is not None else S02))
         template = payload["candidates"][0]
         payload["candidates"] = [dict(template, id="CND-%s" % s,
                                       summary="alternative %s" % s)
-                                 for s in ("A", "B")]
+                                 for s in suffixes]
         state.apply(S02ObligationAndCandidates().invoke(
             _Canned(payload), state, state.run_id).patch)
 

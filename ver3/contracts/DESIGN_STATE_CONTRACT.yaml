@@ -2054,6 +2054,21 @@ assurance_families:
         under, so changing preferences reopens the choice without touching a
         single engineering fact.
       - "A preference is never a constraint. It cannot make a candidate ineligible."
+      - >
+        ONE CURRENT SNAPSHOT. `source_hash` is SHA-256 over the canonicalized
+        preference mapping ALONE - not the hard requirements, not the request, not
+        any engineering fact - so the same preferences in a different key order
+        are the same snapshot and produce the same entity. A changed preference
+        SUPERSEDES the standing profile rather than overwriting it, and the
+        comparison built on the old one goes STALE by ordinary propagation while
+        every feasibility artifact stays STANDING. (S7-C)
+      - >
+        A MALFORMED PROFILE IS NOT PARTIALLY MATERIALISED. An invalid objective or
+        priority rejects the whole snapshot: dropping the bad criterion and keeping
+        the rest would record a preference set the user never stated. An unknown
+        CRITERION NAME is not malformed - the user may want something this pipeline
+        cannot yet measure, and the metric registry answers NOT_AVAILABLE rather
+        than the profile silently forgetting the request. (S7-C)
 
   CandidateComparison:
     semantic_roles: [selection_evidence]
@@ -2070,12 +2085,34 @@ assurance_families:
         cardinality: one
         resolvable: false
         referent_population: DESIGN_WIDE
+      # S7-C. THE CANDIDATES THE COMPARISON DID NOT DISCRIMINATE BETWEEN, typed
+      # so a reader can follow it and so the write boundary checks it. NOT a
+      # winner: a frontier of one says the deterministic comparison ran out of
+      # candidates to distinguish, which is a fact about the metrics rather than
+      # a commitment to anything.
+      frontier:
+        kind: reference
+        target: Candidate
+        cardinality: many
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
     owned_by: selection
     authority_class: DERIVED
     purpose: "Deterministic metrics over the ELIGIBLE candidates, computed before anything is asked of a model."
-    required_fields: [entity_id, candidates, profile, metrics]
-    metric_shape: "criterion -> per candidate {value, unit, availability, source_refs}"
+    required_fields: [entity_id, candidates, profile, metrics, outcome, frontier]
+    optional_fields: [stopping_priority, unavailable_criteria]
+    # S7-C. `availability` and `reason_code` are REQUIRED of every entry, because
+    # a metric shape that can omit them lets absence look like an unfilled field.
+    metric_shape: "criterion -> per candidate {availability, value, unit, reason_code, source_refs}"
     availability: [AVAILABLE, NOT_AVAILABLE]
+    # WHAT THE DETERMINISTIC COMPARISON WAS ABLE TO SAY. Four answers, and none of
+    # them is a choice.
+    outcome:
+      - SOLE_ELIGIBLE
+      - DOMINANT_UNDER_PROFILE
+      - TRADEOFF_UNRESOLVED
+      - NOT_COMPARABLE
+    stopping_priority: [HIGH, MEDIUM, LOW]
     rules:
       - >
         NO SILENT SURROGATE. A metric with no canonical source is NOT_AVAILABLE
@@ -2089,6 +2126,30 @@ assurance_families:
         NO WEIGHTED SCORE. Criterion vectors, dominance, and the profile's tiers.
         A genuine trade-off stays a trade-off: collapsing one into a number
         invents a decision the evidence does not contain.
+      - >
+        TIERS ARE EVALUATED HIGH, THEN MEDIUM, THEN LOW, and a lower tier may only
+        be reached when the tier above produced an EXACT TIE. A tier where
+        candidates trade off against one another is TRADEOFF_UNRESOLVED and the
+        comparison stops there: letting MEDIUM pick between two candidates that
+        disagree at HIGH would answer the important question with the unimportant
+        one. (S7-C)
+      - >
+        NOT_AVAILABLE IS NEITHER GOOD NOR BAD. Never a sentinel value, never
+        infinity, never zero, never "worst". A criterion needed at the tier being
+        evaluated and unavailable for any candidate still in the frontier stops
+        the comparison as NOT_COMPARABLE - the available subset is not a smaller
+        version of the question the user asked. (S7-C)
+      - >
+        THE POPULATION IS EVERY ELIGIBLE CANDIDATE AND NOTHING ELSE. Eligibility is
+        decided upstream and read, never re-derived under preference: a candidate
+        whose eligibility cannot be established from current evidence makes the
+        POPULATION unestablished, and no comparison is written at all. Comparing
+        the subset that happened to be knowable would publish a conclusion about a
+        design nobody has. (S7-C)
+      - >
+        NO TIE-BREAK EXISTS. Not candidate id, not insertion order, not the order
+        the criteria were written in. Where the evidence does not discriminate, the
+        frontier holds every candidate it did not discriminate between. (S7-C)
 
   SelectionAdvisory:
     semantic_roles: [advisory]

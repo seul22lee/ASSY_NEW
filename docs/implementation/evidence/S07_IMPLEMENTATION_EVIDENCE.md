@@ -2,8 +2,8 @@
 
 Baseline `9f98cbc`. S-3, S-4, S-5 and S-6 are closed and are not reopened.
 
-This step is planned in six substeps (§20). **This document records S7-A and
-S7-B.** S7-C through S7-F are not started.
+This step is planned in six substeps (§20). **This document records S7-A,
+S7-B and S7-C.** S7-D through S7-F are not started.
 
 ---
 
@@ -1028,7 +1028,207 @@ Regression, **secondary**: RUN 1065 · PASS 1065 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-C — DETERMINISTIC SELECTION SUBSTRATE (baseline `4cc10f8`)
+
+S7-B asked "can this candidate work" one candidate at a time. S7-C asks the one
+question no single branch can answer — how the retained alternatives compare —
+and it asks it of one accumulated DesignState. **It does not choose.** Every
+outcome is a statement about the evidence, and the commitment is a human's.
+
+### F.1 Production architecture
+
+`ver3/assy_v3/stages/selection.py`, named for the responsibility as `feasibility`
+is. Two deliberate phases:
+
+```
+materialize_selection_profile(state, selection_preferences) -> SelectionProfileOutcome
+        ↓  apply through DesignState
+evaluate_candidate_comparison(state)                        -> SelectionComparisonOutcome
+```
+
+The profile must be in state before the view is built. Building the view first
+and special-casing the missing profile would make the preference a side channel
+rather than the authoritative snapshot it is. No provider, no prompt, and
+`evaluate_candidate_comparison` takes **no invocation and no branch** — the
+question is design-wide, so there is no parameter through which one alternative's
+private state could arrive (C57).
+
+### F.2 The orchestration defect, reproduced and fixed
+
+`run_s03` did `state = copy.deepcopy(base_state)` per candidate, so a run ended
+with **N private designs and no design**. Selection compares retained
+alternatives; there was nothing to compare, and merging two entity dictionaries
+would have bypassed the write boundary that makes an entity authoritative.
+
+Isolation between candidates was never the state's job — it is the ConsumerView's,
+which is branch-scoped by construction. Copying the state to get isolation solved
+a solved problem in the one place that also destroyed the design-wide question.
+The copy is gone; every candidate is embodied into one accumulated state, and
+`run_selection` is called once per case after the last alternative is in.
+
+### F.3 Profile materialisation
+
+| | |
+|---|---|
+| `source_hash` | SHA-256 over the canonicalized preference mapping **alone**. Key order is not meaning, so the same preferences in any order are the same snapshot and the same entity id (`SPF-<hash>`). No counter exists. |
+| idempotent | calling twice returns `PROFILE_UNCHANGED` and writes nothing |
+| changed preferences | the standing profile is INVALIDATED, not overwritten; the comparison built on it goes STALE by ordinary propagation |
+| malformed | an invalid objective or priority rejects the **whole** snapshot — dropping the bad criterion would record a preference set the user never stated |
+| unknown criterion name | **preserved**. The user may want something this pipeline cannot measure, and the registry answers NOT_AVAILABLE rather than the profile forgetting the request |
+| no source | `NO_SELECTION_PREFERENCES`, no profile. Inventing one would invent the user's answer |
+| explicitly empty | a real snapshot of "nothing ranked" — one eligible candidate is SOLE_ELIGIBLE, several are TRADEOFF_UNRESOLVED |
+| already ambiguous | more than one standing profile refuses comparison rather than picking |
+
+### F.4 Eligibility, and the population rule
+
+Read from upstream truth and never recomputed. `eligibility(ev)` **has no
+parameter through which a preference could arrive**, and its body names no
+criterion, objective or priority — asserted structurally, which is C-I1 in its
+strongest form.
+
+```
+no current MFA            → UNRESOLVED
+two current MFAs          → UNRESOLVED          (never first-wins)
+MFA != FEASIBLE           → INELIGIBLE          (no compliance record needed:
+                                                 the prerequisite already failed)
+blocking HRC missing/dup  → UNRESOLVED
+any blocking VIOLATED     → INELIGIBLE
+any blocking not SATISFIED→ INELIGIBLE at current maturity
+otherwise                 → ELIGIBLE
+```
+
+`blocks_selection` absent is **true**, the contract's declared default.
+Non-blocking constraints do not affect eligibility, and every constraint is a
+premise because whether it blocks is the fact being used.
+
+**Any** unresolved candidate makes the population unestablished and **no
+CandidateComparison is written at all**. `known ineligible` and `eligibility
+unknown` are different facts.
+
+### F.5 Metric registry
+
+| supported | means | unit |
+|---|---|---|
+| `rigid_body_count` | candidate-relevant standing Body count | count |
+| `joint_count` | candidate-relevant standing Joint count | count |
+| `package_volume` | volume of the box enclosing the **whole** candidate | `<unit>^3` |
+
+`package_volume` requires every candidate body to have exactly one usable extent
+on exactly one ABSOLUTE basis with a stated unit and `per_unit` — missing,
+doubled, relative or unfactored geometry is NOT_AVAILABLE, never approximate. It
+is not the sum of the bodies' boxes: two 20 mm cubes 15 mm apart enclose 14 000
+mm³ where the sum is 16 000 (C26b).
+
+Everything else — `part_count`, `assembly_complexity`, `actuation_complexity`,
+`maintainability` — is `NOT_AVAILABLE` / `NO_CANONICAL_METRIC_SOURCE`. A Body is
+not a manufactured part and a Joint is not an actuator, however well they
+correlate, and no alias exists in the table.
+
+Branch partitioning is `branch_membership`, the canonical helper, applied only to
+ids the view already admitted. Nothing is inferred from an id's spelling, its
+position or the order it was created in.
+
+### F.6 Comparison
+
+```
+1 eligible                → SOLE_ELIGIBLE
+tier: any metric missing  → NOT_COMPARABLE at that tier, no lower-tier fallback
+tier: one dominates       → DOMINANT_UNDER_PROFILE
+tier: exact tie           → descend to the next tier
+tier: genuine tradeoff    → TRADEOFF_UNRESOLVED at that tier, STOP
+all tiers exhausted       → TRADEOFF_UNRESOLVED
+```
+
+Pareto dominance per criterion on its own objective. `compare`, `_dominates` and
+`_better` contain **no arithmetic across criteria at all** — asserted from the
+AST — so there is no weight, no normalization and no utility function to hide one
+in. No candidate id, insertion order or criterion order is ever consulted.
+
+### F.7 Dependencies
+
+`CandidateComparison.premise_refs` carries, directly: the profile; every
+Candidate; every MFA read; every DesignConstraint whose `blocks_selection` was
+inspected; every blocking HRC required; and the exact source facts of every
+metric computed. Because propagation is one hop, premising the profile and the
+assessments would leave the record standing when an envelope a volume was
+measured from is superseded.
+
+Exactness both ways: a `joint_count`-only comparison does **not** premise
+envelopes or scales (C43), a `package_volume` one does (C42/C44), an excluded
+candidate's MFA changing **does** stale it because the population may have moved
+(C46), and an unrelated fact does not (C45).
+
+### F.8 In-scope defects found and fixed during the pass
+
+* **The runner's per-candidate `deepcopy`** — §F.2. Without it there is no
+  accumulated state and C-I9 is unimplementable.
+* **`candidate_spatial_evidence` demanded `reach_evidence` and
+  `elimination_evidence`** as REQUIRED_NONEMPTY — the fourth appearance of this
+  shape in S-7. A design whose actors reach for nothing produces no ReachResult
+  and a candidate nobody eliminated produces no EliminationRecord, so the
+  selection view was UPSTREAM_INSUFFICIENCY on an ordinary design and the
+  comparison could not be asked at all. Neither is read by any metric. Split
+  `by_role`; `spatial_commitment` stays required.
+* **Selection could not see the design-wide `DesignConstraint` set** — reaching
+  constraints only through the compliance records that cite them would make a
+  MISSING blocking record invisible, which is precisely the case C-I2 exists to
+  detect. Added the `hard_design_constraint` premise class.
+* **No topology in the view** — `rigid_body_count` and `joint_count` are counts
+  of canonical entities. Added `candidate_topology_evidence` by engineering role,
+  not by a family list written for this consumer.
+* **`ENTITY_FAMILY_AUDIT` claimed both families were unproduced.**
+
+### F.9 C01–C57
+
+**68 tests** in `test_s7_selection.py`, all against the real ConsumerView and the
+real write boundary. C01–C09 profile; C10–C19 eligibility over five candidates
+(A/B eligible, C infeasible, D violated, E unevaluable); C20–C31 metrics;
+C32–C41 dominance; C42–C48 dependency and lifecycle; C49–C51 population edges;
+C52–C57 authority and the design-wide runner. C11 runs the same design under four
+opposite preference sets and asserts the eligible set is byte-identical.
+
+**Ten mutations, each caught by the test written for it:** preference reaching
+eligibility (2 failures), `part_count` answered by the Body count (2),
+NOT_AVAILABLE as infinity (2), MEDIUM resolving a HIGH tradeoff (1), first MFA
+wins (1), first HRC wins (1), candidate id breaking a tie (2), reading raw state
+instead of the view (1), premising the whole view (2), the runner computing the
+winner (1).
+
+### F.10 Scope audit
+
+`git diff --check` clean. Zero production references to `SelectionAdvisory`,
+`SelectionConcern` or `HumanDecisionInput`; `SelectionDecision`'s four are the
+same pre-existing readers as before this pass, and `selection.py` names none of
+them. `_propagate` untouched. No S4/S5/S6/S7-B production file changed. No
+`.gitignoreJoey…` file touched.
+
+Regression, **secondary**: RUN 1133 · PASS 1133 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
+
+> **S7-C VERIFIED CLOSED — ELIGIBILITY POPULATION, VERSIONED PREFERENCES,
+> CANONICAL METRICS AND TIERED DETERMINISTIC COMPARISON CONSISTENT.**
+>
+> A preference enters state once, at the selection boundary, as a content-hashed
+> snapshot no earlier consumer can see — and it cannot reach eligibility, which is
+> read from upstream truth by a function that has no parameter through which one
+> could arrive. Every retained candidate is accounted for before anything is
+> compared, and one whose eligibility is unknown stops the comparison rather than
+> vanishing from it. Three metrics measure exactly what they are named for and
+> everything else stays NOT_AVAILABLE, which is neither an advantage nor a
+> disadvantage. Tiers are evaluated HIGH then MEDIUM then LOW, a lower one reached
+> only after an exact tie, and a genuine tradeoff stays a tradeoff. There is no
+> weighted score and no tie-break of any kind. The comparison names the raw facts
+> it used, and it runs on one accumulated design that every candidate was embodied
+> into.
+>
+> **S-7 / U-8 IS NOT CLOSED.** S7-D, S7-E and S7-F are not started.
+
+---
+
+## S7-B FINAL STATUS
 
 > **S7-B VERIFIED CLOSED — ALL HARD-CONSTRAINT INGRESSES SHARE ONE VOCABULARY
 > AUTHORITY AND AMBIGUOUS GEOMETRY CANNOT PRODUCE AUTHORITATIVE VERDICTS.**

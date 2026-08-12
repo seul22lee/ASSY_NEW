@@ -56,6 +56,8 @@ from ver3.assy_v3.stages.s04_envelope_and_motion import (                   # no
     selection_gate_check, swept_clearance_check, transition_realization_check)
 from ver3.assy_v3.stages.feasibility import (                              # noqa: E402
     evaluate_candidate_feasibility)
+from ver3.assy_v3.stages.selection import (                                 # noqa: E402
+    evaluate_candidate_comparison, materialize_selection_profile)
 from ver3.assy_v3.state import DesignState                                  # noqa: E402
 from ver3.live_providers import env as env_loader                           # noqa: E402
 from ver3.live_providers.deepseek import DeepSeekProvider                   # noqa: E402
@@ -207,9 +209,22 @@ def seed_window1(case_id: str):
 
 def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
             provider, trial: int) -> Dict[str, Any]:
-    """Embody ONE candidate. Never raises."""
-    import copy
-    state = copy.deepcopy(base_state)
+    """Embody ONE candidate INTO THE ACCUMULATED DESIGN. Never raises.
+
+    THE DEEP COPY IS GONE. Each candidate used to be embodied into a private
+    `copy.deepcopy(base_state)`, so the run ended with N design states each
+    holding one alternative and no state holding the design. Selection compares
+    retained alternatives, and there was nothing for it to compare: two Python
+    dictionaries are not one accumulated DesignState, and merging them would be
+    bypassing the write boundary that makes an entity authoritative.
+
+    Isolation between candidates was never the state's job. It is the
+    ConsumerView's, which is branch-scoped by construction - that is what S-5 and
+    S-6 built, and `branch_membership` is what answers whose evidence a fact is.
+    Copying the state to get isolation was solving a solved problem in the one
+    place that also destroyed the design-wide question.
+    """
+    state = base_state
     rec: Dict[str, Any] = {"case": case_id, "candidate": candidate.get("entity_id"),
                            "trial": trial, "failures": [], "counts": {},
                            "s03_status": None, "s03_response": None}
@@ -449,6 +464,71 @@ def run_feasibility(case_id: str, state, trial: int,
     return rec
 
 
+def run_selection(case_id: str, state, trial: int,
+                  selection_preferences=None) -> Dict[str, Any]:
+    """Materialise the preferences, then compare. NO PROVIDER, NO BRANCH.
+
+    DESIGN-WIDE, and called ONCE for the whole case rather than once per
+    candidate: comparison is the one question no single alternative can answer,
+    and it is asked of the accumulated state every candidate was embodied into.
+
+    The runner APPLIES AND RECORDS. It derives no eligibility, computes no
+    metric, performs no dominance and names no winner - a runner doing any of
+    those would be a second selection authority, and the outcome it printed would
+    be the one nobody could trace to a patch.
+    """
+    rec: Dict[str, Any] = {"case": case_id, "trial": trial, "failures": [],
+                           "profile_status": None, "comparison_status": None}
+
+    def fail(kind: str, what: str, detail: Any = None) -> None:
+        rec["failures"].append({"kind": kind, "stage": "selection",
+                                "what": what, "detail": detail})
+
+    started = time.time()
+    try:
+        profile = materialize_selection_profile(state, selection_preferences)
+    except Exception as exc:                                        # noqa: BLE001
+        fail("PARSER_DEFECT", "%s: %s" % (type(exc).__name__, exc),
+             traceback.format_exc(limit=5))
+        rec["profile_status"] = "RAISED"
+        return rec
+    rec["profile_status"] = profile.status
+    rec["profile"] = profile.profile_id
+    if profile.problems:
+        fail("CONTRACT_CONDITION", "the stated preferences were not materialised",
+             profile.problems)
+    if profile.patch is not None:
+        state.apply(profile.patch)
+
+    try:
+        comparison = evaluate_candidate_comparison(state)
+    except Exception as exc:                                        # noqa: BLE001
+        fail("PARSER_DEFECT", "%s: %s" % (type(exc).__name__, exc),
+             traceback.format_exc(limit=5))
+        rec["comparison_status"] = "RAISED"
+        return rec
+    rec["selection_seconds"] = round(time.time() - started, 2)
+    rec["comparison_status"] = comparison.status
+    rec["selection_consumer_view"] = comparison.consumer_view
+    rec["eligible"] = list(comparison.eligible)
+    rec["population"] = {k: v[0] for k, v in comparison.population.items()}
+    if comparison.patch is None:
+        # NOT A FAILURE WHEN THE DESIGN SIMPLY CANNOT SUPPORT A COMPARISON. An
+        # unestablished population and no eligible candidate are results; only a
+        # patch the boundary refused is a failure.
+        if comparison.problems:
+            fail("CONTRACT_CONDITION", comparison.status, comparison.problems)
+        return rec
+    state.apply(comparison.patch)
+    # RECORDED, NOT INTERPRETED. `outcome` and `frontier` are copied out of the
+    # entity the evaluator wrote; nothing here reads a metric or ranks anything.
+    rec["outcome"] = comparison.outcome
+    rec["frontier"] = list(comparison.frontier)
+    rec["stopping_priority"] = comparison.stopping_priority
+    rec["counts"] = state.counts()
+    return rec
+
+
 #: RETIRED at S-6 / U-7. `_commit_s04` read the raw s04 response and wrote the
 #: engineering facts the stages did not: the reference scale, reach results, the
 #: elimination record, region volumes, insertion directions and joint origins. It
@@ -489,6 +569,7 @@ def main() -> int:
                 print("  %-8s SEED FAILED: %s" % (case_id, problems))
                 continue
             candidates = base.family("Candidate")[:args.candidates]
+            accumulated = base
             for cand in candidates:
                 t0 = time.time()
                 rec = run_s03(case_id, cand, base, provider, trial)
@@ -512,6 +593,11 @@ def main() -> int:
                 # work from a declared-incomplete producer, which is exactly the
                 # producer-consumer question this window is asking.
                 _st = rec.pop("_state", None)
+                if _st is not None:
+                    # THE SAME OBJECT s03 EMBODIED INTO, and the same one every
+                    # other candidate is embodied into. Selection needs one
+                    # accumulated design, not N private ones.
+                    accumulated = _st
                 if _st is not None and rec.get("s03_status") in ("SUCCESS", "CONTRACT_INCOMPLETE"):
                     # THE BRANCH IS NAMED BY THE CALLER. s04 embodies the same
                     # candidate s03 did, and before the S-7 gate there is no
@@ -558,6 +644,21 @@ def main() -> int:
                     json.dump(trials, fh, indent=1, sort_keys=True)
                 with open(os.path.join(out_dir, "model_run_records.json"), "w") as fh:
                     json.dump(provider.records, fh, indent=1, sort_keys=True)
+            # ONCE PER CASE, after every candidate has been embodied into the one
+            # accumulated design. Comparison is not a per-candidate act and there
+            # is nothing to compare until the last alternative is in.
+            sel = run_selection(case_id, accumulated, trial,
+                                design_profile(case_id) is not None
+                                and (design_profile(case_id) or {}).get(
+                                    "selection_preferences") or None)
+            print("  t%d %-8s SELECTION profile=%-24s comparison=%-26s %s"
+                  % (trial, case_id, str(sel.get("profile_status")),
+                     str(sel.get("comparison_status")),
+                     "%s %s" % (sel.get("outcome") or "",
+                                sel.get("frontier") or "")))
+            trials.append(sel)
+            with open(os.path.join(out_dir, "trials.json"), "w") as fh:
+                json.dump(trials, fh, indent=1, sort_keys=True)
 
     by_kind: Dict[str, int] = {}
     for t in trials:

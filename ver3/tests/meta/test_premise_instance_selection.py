@@ -106,7 +106,11 @@ class TestDeclaredCorpus(_Base):
         # a reaction must reach - and the class that would carry them did not
         # exist, so an undischarged obligation was exactly what the view could
         # not contain.
-        self.assertEqual(33, len(rows), "the premise corpus changed size")
+        #
+        # 35 at S7-C: `selection` gained the design-wide hard requirements, whose
+        # blocking half decides eligibility, and the topology its counting
+        # metrics are counts of. Both are asked for by engineering role.
+        self.assertEqual(35, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"
