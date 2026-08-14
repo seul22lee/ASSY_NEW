@@ -57,6 +57,8 @@ from ver3.assy_v3.stages.s04_envelope_and_motion import (                   # no
 from ver3.assy_v3.stages.feasibility import (                              # noqa: E402
     evaluate_candidate_feasibility)
 from ver3.assy_v3.stages.selection import (                                 # noqa: E402
+    ELIGIBILITY_NOT_ESTABLISHED, NO_ELIGIBLE_CANDIDATES,
+    NO_SELECTION_PREFERENCES, PROFILE_MISSING,
     evaluate_candidate_comparison, materialize_selection_profile)
 from ver3.assy_v3.state import DesignState                                  # noqa: E402
 from ver3.live_providers import env as env_loader                           # noqa: E402
@@ -182,6 +184,26 @@ def design_profile(case_id: str) -> Optional[Dict[str, Any]]:
                 with open(path) as fh:
                     return _yaml.safe_load(fh)
     return None
+
+
+def selection_preferences(profile: Optional[Dict[str, Any]]):
+    """The stated preferences, or None when no source stated any.
+
+    PRESENCE AND VALUE ARE DIFFERENT QUESTIONS, and truthiness cannot tell them
+    apart. `{}` is falsy, so `profile.get("selection_preferences") or None`
+    turned an explicit "I have preferences, and none of them is ranked" into "no
+    preference source exists" - and the design lost a snapshot the user had
+    actually supplied. The materialiser already distinguishes the two; the
+    orchestration was collapsing them before it got there.
+
+    Read by key presence, which is the only thing that answers "did the user
+    supply this section".
+    """
+    if not isinstance(profile, dict):
+        return None
+    if "selection_preferences" not in profile:
+        return None
+    return profile["selection_preferences"]
 
 
 def seed_window1(case_id: str):
@@ -513,10 +535,21 @@ def run_selection(case_id: str, state, trial: int,
     rec["eligible"] = list(comparison.eligible)
     rec["population"] = {k: v[0] for k, v in comparison.population.items()}
     if comparison.patch is None:
-        # NOT A FAILURE WHEN THE DESIGN SIMPLY CANNOT SUPPORT A COMPARISON. An
-        # unestablished population and no eligible candidate are results; only a
-        # patch the boundary refused is a failure.
-        if comparison.problems:
+        # A RESULT IS NOT A FAILURE, and the runner has to know which is which.
+        # A user who stated no preference, a population that is not established
+        # and a design with no eligible candidate all leave nothing to compare -
+        # and saying so IS the answer. It was recording each of them as a
+        # contract failure because each carries problems explaining itself, which
+        # made "the design has nothing to choose between" indistinguishable from
+        # "the pipeline is broken".
+        #
+        # A missing profile is a result only when no preference was stated. If
+        # one WAS stated and the comparison still cannot see it, that is a real
+        # condition.
+        results = [ELIGIBILITY_NOT_ESTABLISHED, NO_ELIGIBLE_CANDIDATES]
+        if profile.status == NO_SELECTION_PREFERENCES:
+            results.append(PROFILE_MISSING)
+        if comparison.status not in results:
             fail("CONTRACT_CONDITION", comparison.status, comparison.problems)
         return rec
     state.apply(comparison.patch)
@@ -648,9 +681,7 @@ def main() -> int:
             # accumulated design. Comparison is not a per-candidate act and there
             # is nothing to compare until the last alternative is in.
             sel = run_selection(case_id, accumulated, trial,
-                                design_profile(case_id) is not None
-                                and (design_profile(case_id) or {}).get(
-                                    "selection_preferences") or None)
+                                selection_preferences(design_profile(case_id)))
             print("  t%d %-8s SELECTION profile=%-24s comparison=%-26s %s"
                   % (trial, case_id, str(sel.get("profile_status")),
                      str(sel.get("comparison_status")),

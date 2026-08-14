@@ -2100,7 +2100,7 @@ assurance_families:
     authority_class: DERIVED
     purpose: "Deterministic metrics over the ELIGIBLE candidates, computed before anything is asked of a model."
     required_fields: [entity_id, candidates, profile, metrics, outcome, frontier]
-    optional_fields: [stopping_priority, unavailable_criteria]
+    optional_fields: [stopping_priority, unavailable_criteria, incomparable_criteria]
     # S7-C. `availability` and `reason_code` are REQUIRED of every entry, because
     # a metric shape that can omit them lets absence look like an unfilled field.
     metric_shape: "criterion -> per candidate {availability, value, unit, reason_code, source_refs}"
@@ -2150,6 +2150,15 @@ assurance_families:
         NO TIE-BREAK EXISTS. Not candidate id, not insertion order, not the order
         the criteria were written in. Where the evidence does not discriminate, the
         frontier holds every candidate it did not discriminate between. (S7-C)
+      - >
+        TWO ESTABLISHED VALUES ARE NOT TWO COMPARABLE NUMBERS. A criterion whose
+        AVAILABLE records are stated in more than one unit is NOT_COMPARABLE for
+        that frontier - 2 cm3 is not less than 1000 mm3, and `<` says it is. The
+        incompatibility belongs to the PAIR rather than to either record, so it
+        stops the tier being evaluated and is reported in
+        `incomparable_criteria`; the metric itself stays AVAILABLE, because it
+        was established. No conversion is attempted: nothing in this repository
+        is an authority on what one unit is worth in another. (S7-C correction)
 
   SelectionAdvisory:
     semantic_roles: [advisory]

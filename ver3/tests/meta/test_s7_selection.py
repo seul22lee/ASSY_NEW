@@ -970,6 +970,184 @@ class TestAuthority(_Selection):
 
 
 # =====================================================================
+# C58-C60 - the runner must not collapse an explicit empty profile
+# =====================================================================
+class TestRunnerProfileSemantics(_Selection):
+    """PRESENCE AND VALUE ARE DIFFERENT QUESTIONS, and truthiness cannot tell
+    them apart. `{}` is falsy, so the orchestration turned an explicit "I have
+    preferences and none of them is ranked" into "no preference source exists" -
+    and the design lost a snapshot the user had actually supplied. The
+    materialiser always understood the difference; the runner threw it away
+    before getting there.
+
+    Composed exactly as `main` composes it: the extractor, then the runner."""
+
+    def through_the_runner(self, document, state=None):
+        preferences = run_window2.selection_preferences(document)
+        state = state if state is not None else self.built()
+        return state, run_window2.run_selection("SYN", state, 1, preferences)
+
+    def test_C58_an_explicit_empty_profile_survives_the_runner(self):
+        state, rec = self.through_the_runner({"selection_preferences": {}})
+        self.assertEqual(sel.PROFILE_WRITTEN, rec["profile_status"])
+        self.assertNotEqual(sel.NO_SELECTION_PREFERENCES, rec["profile_status"])
+        profiles = state.standing("SelectionProfile")
+        self.assertEqual(1, len(profiles))
+        self.assertEqual({}, profiles[0]["criteria"])
+        self.assertEqual([], list(profiles[0]["criteria"]))
+
+    def test_C59_an_absent_source_still_creates_nothing(self):
+        for document in (None, {"design_constraints": []}):
+            state, rec = self.through_the_runner(document)
+            self.assertEqual(sel.NO_SELECTION_PREFERENCES, rec["profile_status"],
+                             repr(document))
+            self.assertEqual([], state.family("SelectionProfile"))
+            self.assertIsNone(rec.get("outcome"))
+            self.assertEqual([], rec["failures"])
+
+    def test_C59b_the_extractor_reads_presence_not_truth(self):
+        """The three inputs are three different statements. Only the third is
+        the user saying they have no ranking."""
+        self.assertIsNone(run_window2.selection_preferences(None))
+        self.assertIsNone(run_window2.selection_preferences({"design_constraints": []}))
+        self.assertEqual({}, run_window2.selection_preferences(
+            {"selection_preferences": {}}))
+        import inspect
+        body = inspect.getsource(run_window2.selection_preferences).split('"""', 2)[2]
+        self.assertIn('"selection_preferences" not in profile', body)
+        self.assertNotIn("or None", body)
+
+    def test_C60_an_explicit_empty_profile_discriminates_nothing(self):
+        """Two eligible candidates and no stated ranking. The honest answer is
+        that the evidence does not discriminate - not whichever candidate sorts
+        first."""
+        state, rec = self.through_the_runner({"selection_preferences": {}})
+        self.assertEqual(sel.COMPARISON_WRITTEN, rec["comparison_status"])
+        self.assertEqual(sel.TRADEOFF_UNRESOLVED, rec["outcome"])
+        self.assertEqual(["CND-A", "CND-B"], sorted(rec["frontier"]))
+        self.assertEqual(2, len(rec["frontier"]))
+        self.assertEqual([], state.family("SelectionDecision"))
+
+
+# =====================================================================
+# C61-C64 - two established values are not two comparable numbers
+# =====================================================================
+class TestUnitComparability(_Selection):
+
+    def outcome(self, criteria, values):
+        """`values` is {criterion: {candidate: (value, unit) or None}}."""
+        metrics = {c: {k: (sel.Metric(sel.AVAILABLE, v[0], v[1])
+                           if v is not None else sel._unavailable("PROBE"))
+                       for k, v in per.items()}
+                   for c, per in values.items()}
+        population = sorted(next(iter(values.values())))
+        return sel.compare(criteria, metrics, population)
+
+    def test_C61_differing_units_are_not_compared_numerically(self):
+        """`2 < 1000` is arithmetic, not physics. A is the smaller volume and the
+        numbers say the opposite."""
+        outcome, frontier, stopping = self.outcome(
+            prefs(package_volume=(MINIMIZE, HIGH)),
+            {"package_volume": {"CND-A": (1000, "mm^3"), "CND-B": (2, "cm^3")}})
+        self.assertEqual(sel.NOT_COMPARABLE, outcome)
+        self.assertEqual(HIGH, stopping)
+        self.assertEqual(["CND-A", "CND-B"], frontier)
+
+    def test_C61b_and_the_direction_of_the_mismatch_does_not_matter(self):
+        """Whichever candidate holds the odd unit, the answer is the same - so
+        no unit is quietly canonical."""
+        first = self.outcome(prefs(package_volume=(MINIMIZE, HIGH)),
+                             {"package_volume": {"CND-A": (1000, "mm^3"),
+                                                 "CND-B": (2, "cm^3")}})
+        second = self.outcome(prefs(package_volume=(MINIMIZE, HIGH)),
+                              {"package_volume": {"CND-A": (2, "cm^3"),
+                                                  "CND-B": (1000, "mm^3")}})
+        self.assertEqual(first, second)
+
+    def test_C62_the_same_unit_still_compares(self):
+        outcome, frontier, stopping = self.outcome(
+            prefs(package_volume=(MINIMIZE, HIGH)),
+            {"package_volume": {"CND-A": (1000, "mm^3"), "CND-B": (2000, "mm^3")}})
+        self.assertEqual(sel.DOMINANT_UNDER_PROFILE, outcome)
+        self.assertEqual(["CND-A"], frontier)
+
+    def test_C62b_counts_are_always_commensurate(self):
+        """`count` is one unit, so the counting metrics never trip this."""
+        outcome, frontier, _s = self.outcome(
+            prefs(joint_count=(MINIMIZE, HIGH)),
+            {"joint_count": {"CND-A": (1, "count"), "CND-B": (4, "count")}})
+        self.assertEqual(sel.DOMINANT_UNDER_PROFILE, outcome)
+        self.assertEqual(["CND-A"], frontier)
+
+    def test_C63_an_incompatible_tier_is_not_bypassed_by_the_next_one(self):
+        """MEDIUM discriminates cleanly and does not get to. The user called
+        package volume the important question; it is unanswerable, and answering
+        a different one instead would be answering a question nobody asked."""
+        outcome, frontier, stopping = self.outcome(
+            prefs(package_volume=(MINIMIZE, HIGH), joint_count=(MINIMIZE, MEDIUM)),
+            {"package_volume": {"CND-A": (1000, "mm^3"), "CND-B": (2, "cm^3")},
+             "joint_count": {"CND-A": (10, "count"), "CND-B": (1, "count")}})
+        self.assertEqual(sel.NOT_COMPARABLE, outcome)
+        self.assertEqual(HIGH, stopping)
+        self.assertEqual(["CND-A", "CND-B"], frontier)
+
+    def test_C64_an_unreached_tier_cannot_undo_a_resolved_one(self):
+        """HIGH already discriminated, so LOW was never evaluated and its unit
+        mismatch is irrelevant."""
+        outcome, frontier, stopping = self.outcome(
+            prefs(joint_count=(MINIMIZE, HIGH), package_volume=(MINIMIZE, LOW)),
+            {"joint_count": {"CND-A": (1, "count"), "CND-B": (4, "count")},
+             "package_volume": {"CND-A": (1000, "mm^3"), "CND-B": (2, "cm^3")}})
+        self.assertEqual(sel.DOMINANT_UNDER_PROFILE, outcome)
+        self.assertEqual(["CND-A"], frontier)
+        self.assertEqual(HIGH, stopping)
+
+    def test_C64b_the_record_says_which_criteria_did_not_meet(self):
+        """Through the real chain, on two candidates measured in different units
+        because their arrangements were stated on different bases. Both metrics
+        are AVAILABLE - the incompatibility is a property of the pair."""
+        state = self.seed()
+        self.candidates(state)
+        self.hinge(state, sfx="A",
+                   s04a=self.absolute("A", HINGE_BOXES, per_unit=10.0, unit="mm"))
+        self.fourbar(state,
+                     s04a=self.absolute("B", FOURBAR_BOXES, per_unit=1.0, unit="cm"))
+        self.feasible(state)
+        out = self.compare(state, prefs(package_volume=(MINIMIZE, HIGH)))
+        for candidate in ("CND-A", "CND-B"):
+            self.assertEqual(sel.AVAILABLE,
+                             self.metric(out, "package_volume", candidate)["availability"])
+        self.assertEqual(sel.NOT_COMPARABLE, out.outcome)
+        self.assertEqual(HIGH, out.stopping_priority)
+        fields = out.patch.operations[0].fields
+        self.assertEqual(["package_volume"], fields["incomparable_criteria"])
+        self.assertEqual([], fields["unavailable_criteria"],
+                         "an incompatible pair is not an unavailable metric")
+
+    def test_C64c_no_conversion_table_was_invented(self):
+        """Nothing in this repository is an authority on what one unit is worth
+        in another. A conversion would have to be a NUMBER somewhere in the
+        comparison path, so the assertion is structural: the four functions that
+        decide an ordering contain no numeric literal other than 0 and 1 - the
+        length tests - and nothing in the module is named for converting."""
+        import inspect
+        for fn in (sel.compare, sel._dominates, sel._better,
+                   sel.incomparable_criteria):
+            tree = ast.parse(inspect.getsource(fn).lstrip())
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Constant) and isinstance(
+                        node.value, (int, float)) and not isinstance(node.value, bool):
+                    self.assertIn(node.value, (0, 1),
+                                  "%s contains the factor %r"
+                                  % (fn.__name__, node.value))
+        for name in vars(sel):
+            for word in ("CONVERSION", "convert", "FACTOR", "SI_"):
+                self.assertNotIn(word, name, name)
+        # And the check that replaced it is a comparison of the units themselves.
+        self.assertIn("len({metrics[c][k].unit for k in frontier}) > 1",
+                      inspect.getsource(sel.compare))
+
+# =====================================================================
 # The contracts describe what runs
 # =====================================================================
 class TestContractTruth(unittest.TestCase):
@@ -995,6 +1173,13 @@ class TestContractTruth(unittest.TestCase):
                          sorted(sel.PRIORITIES))
         for field in ("outcome", "frontier"):
             self.assertIn(field, self.fams["CandidateComparison"]["required_fields"])
+        # A NOT_COMPARABLE record must say which of its two reasons it had.
+        for field in ("stopping_priority", "unavailable_criteria",
+                      "incomparable_criteria"):
+            self.assertIn(field,
+                          self.fams["CandidateComparison"]["optional_fields"], field)
+        rules = " ".join(self.fams["CandidateComparison"]["rules"])
+        self.assertIn("TWO ESTABLISHED VALUES ARE NOT TWO COMPARABLE NUMBERS", rules)
 
     def test_no_scoring_word_appears_in_the_declaration(self):
         blob = json.dumps(self.fams["CandidateComparison"])

@@ -498,6 +498,18 @@ def _dominates(objectives, va, vb) -> bool:
     return any(_better(objectives[c], va[c], vb[c]) for c in objectives)
 
 
+def incomparable_criteria(criteria, metrics, population: Sequence[str]):
+    """Criteria whose AVAILABLE values are stated in more than one unit.
+
+    Reported beside the outcome so a NOT_COMPARABLE record says which of the two
+    reasons it had - a criterion nobody could measure, or one measured in units
+    that do not meet.
+    """
+    return sorted(c for c in criteria
+                  if len({metrics[c][k].unit for k in population
+                          if metrics[c][k].availability == AVAILABLE}) > 1)
+
+
 def compare(criteria: Dict[str, Dict[str, str]], metrics, population: Sequence[str]):
     """(outcome, frontier, stopping_priority). No candidate id is ever consulted.
 
@@ -519,7 +531,18 @@ def compare(criteria: Dict[str, Dict[str, str]], metrics, population: Sequence[s
         # a higher one nobody could evaluate.
         missing = sorted(c for c in tier for k in frontier
                          if metrics[c][k].availability != AVAILABLE)
-        if missing:
+        # AND THEY MUST BE THE SAME QUANTITY. Two established values are not two
+        # comparable numbers: 2 cm3 is not less than 1000 mm3, and `<` says it
+        # is. This is a property of the PAIR, not of either record - both metrics
+        # are perfectly AVAILABLE - so it belongs here and not in the evaluator
+        # that computed them.
+        #
+        # No conversion is attempted. Nothing in this repository is an authority
+        # on what one unit is worth in another, and inventing a table here would
+        # make this file that authority.
+        incomparable = sorted(c for c in tier
+                              if len({metrics[c][k].unit for k in frontier}) > 1)
+        if missing or incomparable:
             return NOT_COMPARABLE, frontier, priority
         values = {k: {c: metrics[c][k].value for c in tier} for k in frontier}
         # STEP 2 - Pareto dominance within the tier.
@@ -627,7 +650,9 @@ def evaluate_candidate_comparison(state, run_id: Optional[str] = None,
         "stopping_priority": stopping,
         "unavailable_criteria": sorted(
             c for c in metrics
-            if any(m.availability != AVAILABLE for m in metrics[c].values()))},
+            if any(m.availability != AVAILABLE for m in metrics[c].values())),
+        "incomparable_criteria": incomparable_criteria(criteria, metrics,
+                                                       eligible)},
         "selection:comparison", premise_refs=sorted(premises))]
     patch = StagePatch(
         patch_id="%s-selection-comparison-%s" % (run_id or state.run_id, eid),

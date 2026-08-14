@@ -1206,7 +1206,125 @@ Regression, **secondary**: RUN 1133 · PASS 1133 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-C CORRECTION PASS (baseline `853e42f`)
+
+Two runtime blockers, both reproduced before editing. The structure was right;
+both defects were at a **boundary** — one where the orchestration handed the
+materialiser its input, one where two established values met.
+
+### G.1 An explicit empty profile did not survive the runner
+
+The frozen semantics distinguish "no preference source" from
+`selection_preferences: {}` — the second is the user saying they have a snapshot
+and nothing in it is ranked. The materialiser always understood the difference.
+The orchestration threw it away first:
+
+```
+no profile at all           -> None
+profile with no key         -> None
+selection_preferences: {}   -> None      ← the same as "no source"
+```
+
+`{}` is falsy, so `profile.get("selection_preferences") or None` collapsed it.
+**Presence and value are different questions and truthiness cannot tell them
+apart.** `selection_preferences(profile)` now reads by key presence, and `main`
+calls it. Explicit `{}` reaches the materialiser, becomes a real versioned
+profile with `criteria == {}`, and two eligible candidates under it come out
+`TRADEOFF_UNRESOLVED` — not whichever sorts first.
+
+### G.2 Metric values were compared across incompatible units
+
+`package_volume` records a value **and a unit**, and `compare` read only the
+value. Reproduced live, with the two candidates' arrangements stated on different
+bases:
+
+```
+CND-A  AVAILABLE  14000.0 mm^3
+CND-B  AVAILABLE  7.776   cm^3
+outcome: DOMINANT_UNDER_PROFILE   frontier: ['CND-B']
+```
+
+`7.776 < 14000` is arithmetic, not physics. The verdict happened to be right for
+these numbers and would have been wrong for `1000 mm^3` against `2 cm^3`.
+
+The fix is at the comparison layer, where it belongs: **the incompatibility is a
+property of the PAIR, not of either record** — both metrics are perfectly
+AVAILABLE, each computed correctly from its own basis. Before dominance, every
+criterion of the tier being evaluated must hold one unit across the frontier;
+otherwise the tier stops as `NOT_COMPARABLE`, and `incomparable_criteria` on the
+record says which criterion did not meet.
+
+**No conversion was invented.** Nothing in this repository is an authority on
+what one unit is worth in another, and a table here would have made this file
+that authority. C64c asserts it structurally: the four functions that decide an
+ordering contain no numeric literal other than 0 and 1.
+
+### G.3 One more C-I violation, found and fixed in the same pass
+
+The runner recorded `NO_SELECTION_PREFERENCES`, `ELIGIBILITY_NOT_ESTABLISHED`
+and `NO_ELIGIBLE_CANDIDATES` as `CONTRACT_CONDITION` **failures**, because each
+carries problems explaining itself. That made "the design has nothing to choose
+between" indistinguishable from "the pipeline is broken" — a runner changing an
+already-frozen S7-C meaning, which is §5's third audit class. It now classifies:
+a result is not a failure, and a missing profile is a result only when no
+preference was stated.
+
+### G.4 C58–C64
+
+| | |
+|---|---|
+| C58 | explicit `{}` through the real runner → `PROFILE_WRITTEN`, one standing profile, `criteria == {}` |
+| C59 / C59b | `None` and a document with no key → no profile, no failure; the extractor reads presence, and its body contains no `or None` |
+| C60 | explicit `{}` + two eligible → `TRADEOFF_UNRESOLVED`, frontier `[A, B]`, no decision |
+| C61 / C61b | `1000 mm^3` vs `2 cm^3` → `NOT_COMPARABLE` at HIGH, and the answer is the same whichever candidate holds the odd unit |
+| C62 / C62b | same unit still compares; `count` is always commensurate |
+| C63 | MEDIUM discriminates cleanly and does not get to |
+| C64 / C64b / C64c | an unreached LOW mismatch cannot undo a resolved HIGH; the live record names `package_volume` as incomparable with `unavailable_criteria` empty; no conversion factor exists |
+
+### G.5 Bounded audit
+
+**Presence/value collapse** — every `or {}` / `or []` / `or None` in the
+selection path reviewed. All are constructor defaults or absent-vs-empty reads
+where the two forms mean the same thing; none collapses a state the S7-C contract
+distinguishes.
+
+**Metric comparability** — all three registered metrics emit an explicit unit on
+every AVAILABLE record (`count`, `count`, `<unit>^3`), and the gate runs before
+any ordering.
+
+**Runner/component mismatch** — `run_selection` contains none of `eligibility(`,
+`compare(`, `evaluate_metric(`, `METRIC_REGISTRY`, `_dominates`, `Metric(` or
+`incomparable_criteria(`. Fixed the one mismatch found (§G.3).
+
+### G.6 Files changed
+
+`tools/run_window2.py` (the extractor, the result/failure classification),
+`assy_v3/stages/selection.py` (unit gate, `incomparable_criteria`),
+`contracts/DESIGN_STATE_CONTRACT.yaml` (the field and the rule), and the tests.
+No `_propagate` change, no S7-B production file, no S4/S5/S6 semantic change.
+
+Regression, **secondary**: RUN 1145 · PASS 1145 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
+
+> **S7-C VERIFIED CLOSED — LIVE PROFILE SEMANTICS AND CROSS-CANDIDATE METRIC
+> COMPARABILITY ARE CONSISTENT.**
+>
+> An explicit empty preference snapshot survives the real orchestration as a real
+> versioned profile, and an absent source still creates nothing — because the
+> runner reads presence rather than truth. Two established metric values are never
+> ordered across units that do not meet: the incompatibility stops the tier being
+> evaluated, a lower tier cannot bypass it, an unreached tier cannot undo a result
+> already established above it, and no conversion factor exists anywhere in the
+> comparison. Every S7-C invariant from the previous pass holds unchanged.
+>
+> **S-7 / U-8 IS NOT CLOSED.** S7-D, S7-E and S7-F are not started.
+
+---
+
+## S7-C FIRST-PASS STATUS (superseded by the above; kept, not deleted)
 
 > **S7-C VERIFIED CLOSED — ELIGIBILITY POPULATION, VERSIONED PREFERENCES,
 > CANONICAL METRICS AND TIERED DETERMINISTIC COMPARISON CONSISTENT.**
@@ -1224,7 +1342,9 @@ Regression, **secondary**: RUN 1133 · PASS 1133 · FAIL 0 · SKIP 22.
 > it used, and it runs on one accumulated design that every candidate was embodied
 > into.
 >
-> **S-7 / U-8 IS NOT CLOSED.** S7-D, S7-E and S7-F are not started.
+> Superseded in scope by §G: the orchestration collapsed an explicit empty
+> preference snapshot, and the comparison ordered values across units that do not
+> meet. Every claim above still holds.
 
 ---
 
