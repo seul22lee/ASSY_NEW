@@ -1210,11 +1210,23 @@ class TestContractTruth(unittest.TestCase):
             self.assertIn(role, roles, family)
             self.assertIn(role, self.fams[family]["semantic_roles"], family)
 
-    def test_only_selection_declares_the_preference_role(self):
+    def test_no_pre_selection_responsibility_declares_the_preference_role(self):
+        """The isolation is about WHO IS BEFORE THE BOUNDARY, not about a count.
+        `selection` and `selection_advisory` are two passes of one owner and both
+        are at it: the reviewer must know the exact profile the comparison was
+        made under, or its sensitivity statement would be about a preference it
+        invented. Every responsibility upstream declares none."""
         declaring = [sid for sid, spec in self.resp["stages"].items()
                      if any("selection_preference" in (p.get("requires_semantics") or [])
                             for p in spec.get("required_reasoning_premise_classes") or [])]
-        self.assertEqual(["selection"], declaring)
+        self.assertEqual(["selection", "selection_advisory"], sorted(declaring))
+        for upstream in ("s01", "s02", "s03a", "s03b", "s04a", "s04b",
+                         "feasibility"):
+            self.assertNotIn(upstream, declaring, upstream)
+        for sid in declaring:
+            self.assertEqual("selection",
+                             self.resp["stages"][sid].get("authority_stage", sid),
+                             "%s is not a pass of the selection owner" % sid)
 
     def test_eligibility_cannot_see_a_preference_at_all(self):
         """C-I1 IN ITS STRONGEST FORM. Not "the code does not use the profile" -

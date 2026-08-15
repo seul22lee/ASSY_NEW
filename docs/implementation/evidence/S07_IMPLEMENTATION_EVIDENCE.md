@@ -2,8 +2,8 @@
 
 Baseline `9f98cbc`. S-3, S-4, S-5 and S-6 are closed and are not reopened.
 
-This step is planned in six substeps (§20). **This document records S7-A,
-S7-B and S7-C.** S7-D through S7-F are not started.
+This step is planned in six substeps (§20). **This document records S7-A
+through S7-D.** S7-E and S7-F are not started.
 
 ---
 
@@ -1307,7 +1307,168 @@ Regression, **secondary**: RUN 1145 · PASS 1145 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-D — LLM ENGINEERING ADVISORY (baseline `fe87859`)
+
+The first model call after the deterministic substrate, and the whole of its job
+is the question no registered metric can answer. **It decides nothing.**
+
+### H.1 Production architecture
+
+`ver3/assy_v3/stages/selection_advisory.py`, class
+`SelectionEngineeringReview`, with `stage_id = "selection"` and
+`pass_id = "selection_advisory"` — a SECOND CONSUMER PASS of one owner, exactly
+as s03a/s03b are. It is a separate pass because the deterministic comparison is
+its INPUT: making `CandidateComparison` a required premise of the `selection`
+view would demand the entity before the pass that creates it could run.
+
+It goes through the ordinary `Stage` boundary and builds no parallel caller, so
+it inherits view-sufficiency enforcement (the provider is not called on an
+unready view), provider status handling, JSON parse handling, the recorded
+ConsumerView, and normal write validation.
+
+### H.2 The advisory ConsumerView
+
+Six premise classes: the comparison (`selection_evidence`, REQUIRED_NONEMPTY —
+with none the provider is never reached), the profile it was made under, the
+eligibility evidence, the reviewable engineering state, the design-wide hard
+constraints and the open items.
+
+The engineering class is declared `by_role`, because the absences are
+legitimate: `topology_element`, `topology_relation`, `spatial_commitment` and
+`mobility_disposition` are REQUIRED_NONEMPTY; `motion_path`, `motion_occupancy`,
+`physical_interaction`, `load_route`, `assembly_order` and `reach_evidence` are
+MAY_BE_EMPTY. A static mechanism, a design with no actor and a candidate with no
+load case are ordinary — and S-7 has already made the mistake of demanding each
+of those and rendering a view unready for a question it could have answered.
+
+### H.3 The model schema, and what it may not carry
+
+```json
+{"recommendation": {"kind": "PREFER_CANDIDATE|NO_CLEAR_PREFERENCE",
+                    "candidate": "id or null"},
+ "reasoning": "...", "sensitivity": "...",
+ "concerns": [{"candidate", "issue", "importance", "evidence_status",
+               "supporting_refs"}]}
+```
+
+Exactly four top-level keys and five concern keys, pinned by test. A response
+carrying `selected_candidate`, `eligibility`, `feasibility`,
+`hard_requirement_status`, `score`, `weighted_score` or `selection_decision` is
+**discarded whole** — not trimmed. A model that tried to author a verdict here
+may have tried where nothing checks.
+
+### H.4 What the producer owns, so the model cannot
+
+| field | derived from |
+|---|---|
+| `candidates` | copied from `CandidateComparison.candidates` |
+| `comparison` | the comparison's own id |
+| `comparison_alignment` | the comparison's outcome and frontier — `comparison_alignment(comparison, recommended)` takes no other parameter |
+| `recommended_candidate` | validated against the population; omitted, not null, when there is none |
+| every entity id | content hashes, no counter |
+
+`PREFER_CANDIDATE` requires a candidate and `NO_CLEAR_PREFERENCE` forbids one; a
+frontier of one gives ALIGNS or DEPARTS, and a frontier of several gives
+NO_DETERMINISTIC_PREFERENCE whatever the reviewer says. **Departing is legal and
+explicit** — that is what a reviewer is for; what is forbidden is departing
+silently.
+
+### H.5 Evidence calibration
+
+`SUPPORTED_BY_STATE` with no reference that is current in the reviewed view is
+downgraded to `PLAUSIBLE_NOT_ESTABLISHED`, with `evidence_note` recording why.
+**Downgraded, not rejected** — the reviewer may well be right that it matters,
+and losing the concern would lose the engineering. It is never raised the other
+way: refs happening to resolve is not the same fact as those refs supporting the
+claim. A fabricated id is dropped before it can enter state, and dropping it is
+what triggers the downgrade.
+
+### H.6 Dependencies
+
+`invocation_premises` returns `visible_ids(payload)` — **the exact provider
+exposure**, so every entity serialized into the prompt becomes a premise of
+everything the call authors. Deliberately broader than the refs the model cited:
+a deterministic stage knows which fields it computed from, a model can use
+anything it was shown, and premising only the citations would be a currentness
+claim the reviewer never made. `supporting_refs` answers "what supports this
+concern"; `premise_refs` answers "what could have shaped this text". Different
+questions, and D36/D37/D42 assert the distinction.
+
+### H.7 D01–D55
+
+**55 tests** in `test_s7_advisory.py`, all against the real Stage boundary with
+canned and failing providers. Sequencing D01–D05 (no comparison ⇒ zero provider
+calls; two comparisons ⇒ zero; the comparison must be applied, not merely
+computed). Population D06–D10. Response authority D11–D14. Recommendation
+D15–D22. Empty profile D23–D24. Evidence D25–D32. Hallucination boundary
+D33–D35. Dependency D36–D42. Provider D43–D48. Runner and scope D49–D55.
+
+**Nine mutations, each caught by the test written for it:** recommending an
+excluded candidate (1 failure), letting the model author the population (1),
+keeping SUPPORTED_BY_STATE with no refs (2), allowing a fabricated ref (1),
+premising only the citations (3), letting the model author the alignment (1
+after the gap it exposed was closed), creating a decision from the
+recommendation (1), calling the provider with no comparison (1), letting the
+runner normalize the output (1).
+
+### H.8 In-scope defects found and fixed during the pass
+
+* **A null reference is not an absent field.** `recommended_candidate: None` was
+  refused by the write boundary — correctly: a declared reference holding None is
+  a reference to nothing, and `NO_CLEAR_PREFERENCE` means the reviewer named
+  nobody. The field is now omitted.
+* **Advisory identity moved with concern order.** The id hashed the raw response,
+  so reordering the concern list produced a new advisory and, through it, new
+  concern ids — a reordering looking like new engineering. The hash is taken over
+  a normalized response.
+* **Nothing asserted that the model could not author the alignment.** Found by
+  the mutation pass rather than by the tests: widening the response keys and
+  reading `alignment` from the model went undetected. D11b and D11c close it.
+* `ENTITY_FAMILY_AUDIT` claimed both families were unproduced.
+
+### H.9 Bounded D-I1…D-I12 audit
+
+`Op(CREATE, …)` appears for exactly two families. The module contains no
+`state.family(`, `state.standing(`, `state.entities`, `DesignState` or
+`request_text` — it reads `inputs[context_key]` and nothing else, so the reviewer
+sees only the recorded view and there is no second channel. Zero references to
+`SelectionDecision`, `HumanDecisionInput`, `UnresolvedDecision`, `MFA`, `HRC` or
+`FeasibilityDomainAssessment`. All three `[0]` subscripts sit under an explicit
+length test. D41 asserts entity-for-entity that a review disturbs no
+deterministic record; D55 recomputes the whole population after one.
+
+### H.10 Scope
+
+No `HumanDecisionInput` producer, no `SelectionDecision` producer, no UI, no
+S7-F machinery. `_propagate` untouched. S7-B and S7-C production files untouched.
+
+Regression, **secondary**: RUN 1202 · PASS 1202 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
+
+> **S7-D VERIFIED CLOSED — LLM REVIEW IS ELIGIBLE-POPULATION-BOUND,
+> EVIDENCE-CALIBRATED, NON-AUTHORITATIVE AND DECISION-SAFE.**
+>
+> The provider cannot be reached without one current comparison, and the
+> population the reviewer may speak about is copied from it — a response naming
+> anyone else is discarded whole rather than trimmed. Nothing the model writes
+> touches eligibility, the comparison or a decision, and the eligible set is
+> asserted entity-for-entity across a review that argues against it. A
+> recommendation is machine-readable, names only an eligible candidate, and its
+> agreement or disagreement with the deterministic frontier is computed rather
+> than claimed. A concern may be important and unestablished at once; claimed
+> state support without a current reference is downgraded rather than lost, and a
+> fabricated citation never enters state. What the review depends on is what the
+> model was SHOWN, not what it chose to cite — so a fact it read changing costs it
+> its standing, while rewording it costs the engineering nothing.
+>
+> **S-7 / U-8 IS NOT CLOSED.** S7-E and S7-F are not started.
+
+---
+
+## S7-C FINAL STATUS
 
 > **S7-C VERIFIED CLOSED — LIVE PROFILE SEMANTICS AND CROSS-CANDIDATE METRIC
 > COMPARABILITY ARE CONSISTENT.**

@@ -110,7 +110,13 @@ class TestDeclaredCorpus(_Base):
         # 35 at S7-C: `selection` gained the design-wide hard requirements, whose
         # blocking half decides eligibility, and the topology its counting
         # metrics are counts of. Both are asked for by engineering role.
-        self.assertEqual(35, len(rows), "the premise corpus changed size")
+        #
+        # 41 at S7-D: the `selection_advisory` pass declares six of its own. A
+        # reviewer asked what the deterministic comparison does NOT represent has
+        # to see the comparison, the profile it was made under, why the
+        # population is eligible, and the engineering state a concern could come
+        # from - a reviewer shown only the metrics could only restate them.
+        self.assertEqual(41, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

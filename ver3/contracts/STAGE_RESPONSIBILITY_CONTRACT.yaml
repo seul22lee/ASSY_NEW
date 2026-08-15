@@ -860,6 +860,199 @@ stages:
     - Acting on a candidate that is not eligible, whatever it scores
     - Letting a model or a screen author the decision
     - Committing against premises the human was not shown
+  selection_advisory:
+    # S7-D. A SECOND CONSUMER PASS OF ONE OWNER, exactly as s03a/s03b and
+    # s04a/s04b are - `authority_stage` says so, and everything it writes is
+    # written as `selection`. It is a separate PASS because the deterministic
+    # comparison is its INPUT: making CandidateComparison a required premise of
+    # the `selection` view would have demanded the entity before the pass that
+    # creates it could run.
+    name: selection engineering review
+    authority_stage: selection
+    responsibility: Say what engineering trade-off or decision-critical concern the
+      deterministic comparison and the explicit preferences do not represent.
+    engineering_questions:
+    - What does the deterministic comparison not represent about these candidates?
+    - Which concern would a reviewer raise that no registered metric can express?
+    - Under what change of priority would the comparison's answer flip?
+    required_reasoning_premise_classes:
+    - class: deterministic_comparison
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a review of a comparison that does not exist is not a review;
+          with none the provider is not called at all
+      what: the current deterministic comparison of the eligible candidates
+      justified_by_question: What does the deterministic comparison not represent about
+        these candidates?
+      why: The reviewer's whole question is what this does NOT say, so it must see
+        exactly what it does say - and the population it may speak about is this
+        record's, never one of its own choosing.
+      requires_semantics:
+      - selection_evidence
+    - class: selection_preference
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a reviewer who does not know what was wanted cannot say what
+          the comparison under it failed to represent
+      what: the exact versioned profile the comparison was made under
+      justified_by_question: Under what change of priority would the comparison's answer
+        flip?
+      why: Sensitivity to a preference change is a statement about a specific profile.
+        Without the profile a reviewer would be inventing the preference it reasons
+        about, which is the one thing an advisory may never do.
+      requires_semantics:
+      - selection_preference
+    - class: eligibility_evidence
+      instance_selection:
+        population: ALL_RETAINED_BRANCHES
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a review of an unestablished population is a review of nothing
+      what: why each retained candidate is or is not eligible
+      justified_by_question: What does the deterministic comparison not represent about
+        these candidates?
+      why: The reviewer may not change eligibility and must understand it - a concern
+        about a candidate already excluded is noise, and a recommendation of one is
+        malformed.
+      requires_semantics:
+      - eligibility_evidence
+    - class: reviewable_engineering_evidence
+      # BY ROLE, because the absences are legitimate. A static mechanism has no
+      # transition, a design with no actor has no reach result, a candidate with
+      # no load case has no route - and S-7 has already made the mistake of
+      # demanding each of those and rendering the whole view unready for a
+      # question it could have answered.
+      instance_selection:
+        by_role:
+        - role: topology_element
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: a candidate with no bodies is not an alternative to review
+          why: s03a authors them while embodying one candidate
+        - role: topology_relation
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: bodies with nothing between them are not an arrangement
+          why: s03a authors them while embodying one candidate
+        - role: spatial_commitment
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: a reviewer comparing arrangements needs the arrangements
+          why: s04 authors the arrangement of each candidate
+        - role: mobility_disposition
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: the DOF grid is derived for every candidate, so its absence
+            is a producer failure rather than a design fact
+          why: s03b derives it from each candidate's own topology
+        - role: motion_path
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a mechanism required to hold still declares no path
+          why: a transition belongs to the candidate whose coordinates it moves
+        - role: motion_occupancy
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: no motion, no volume swept
+          why: an occupancy is computed from one candidate's arrangement
+        - role: physical_interaction
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a candidate that discharges no effect has a finding, not a
+            reason the review cannot happen
+          why: s03b authors them while embodying one candidate
+        - role: load_route
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a design with no load case routes nothing
+          why: a route belongs to the branch whose interfaces carry it
+        - role: assembly_order
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a candidate whose assembly is not yet ordered has no step
+          why: s03b authors the order while embodying one candidate
+        - role: reach_evidence
+          population: ALL_RETAINED_BRANCHES
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a design whose actors reach for nothing produces no result
+          why: s04a records it while embodying one candidate
+      what: the current engineering evidence for every reviewable candidate
+      justified_by_question: Which concern would a reviewer raise that no registered
+        metric can express?
+      why: A concern the metric registry cannot express has to come from somewhere,
+        and the only honest somewhere is the engineering state itself. A reviewer shown
+        only the metrics could only restate them.
+      requires_semantics:
+      - topology_element
+      - topology_relation
+      - spatial_commitment
+      - mobility_disposition
+      - motion_path
+      - motion_occupancy
+      - physical_interaction
+      - load_route
+      - assembly_order
+      - reach_evidence
+    - class: hard_design_constraint
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may state no hard requirement, and none is not a gap
+      what: every hard requirement the design states
+      justified_by_question: Which concern would a reviewer raise that no registered
+        metric can express?
+      why: A requirement the design must satisfy is context for a concern about whether
+        it comfortably does. The reviewer may not decide compliance - that is decided
+        upstream - and may say a candidate looks close to a limit.
+      requires_semantics:
+      - design_constraint
+    - class: unresolved_blocking_scope
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: nothing unresolved is the desired state, not a gap
+      what: all unresolved items and what each blocks
+      justified_by_question: Which concern would a reviewer raise that no registered
+        metric can express?
+      why: What the design has already recorded as open is exactly what a reviewer
+        should not raise again as if it were new.
+      requires_semantics:
+      - open_item
+    permitted_output_semantics:
+    - SelectionAdvisory
+    - SelectionConcern
+    prohibited_decisions:
+    - Deciding feasibility, compliance or eligibility
+    - Changing the population it was given
+    - Recomputing or overwriting the deterministic comparison
+    - Inventing a metric value, a measurement or a user preference
+    - Authoring a decision, or a human's input to one
+    - Resolving a deterministic tie
+    authority_rule: >
+      A REVIEWER, NOT AN AUTHORITY. Everything this pass writes is ASSURANCE: it is
+      CONSIDERED by a later decision and is never a premise of one. A deterministic
+      function writing `evidence_status: SUPPORTED_BY_STATE` does not make the
+      sentence beside it engineering truth - the status describes how well the
+      concern is supported, and nothing more. No stage after this one may treat an
+      advisory's reasoning or a concern's issue as an engineering premise merely
+      because the record exists.
+
   s04b:
     name: spatial and kinematic realization
     # S-6 / U-7 SEQUENCING CORRECTION. This responsibility encoded the runtime

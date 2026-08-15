@@ -18,7 +18,11 @@ if REPO not in sys.path:
     sys.path.insert(0, REPO)
 
 RETIRED_FAMILIES = ("BodyHypothesis", "PhysicalInteractionHypothesis")
-STAGES_UNDER_S2 = ("s01", "s02", "s03a", "s03b", "s04a", "feasibility", "selection", "s04b")
+#: `selection_advisory` is S7-D's: a SECOND CONSUMER PASS of `selection`,
+#: exactly as s03b is of s03. It owns no family and adds no owner - what it
+#: adds is a view, because the deterministic comparison is its input.
+STAGES_UNDER_S2 = ("s01", "s02", "s03a", "s03b", "s04a", "feasibility",
+                   "selection", "selection_advisory", "s04b")
 
 
 def _yaml(name):

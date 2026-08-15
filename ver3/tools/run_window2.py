@@ -60,6 +60,8 @@ from ver3.assy_v3.stages.selection import (                                 # no
     ELIGIBILITY_NOT_ESTABLISHED, NO_ELIGIBLE_CANDIDATES,
     NO_SELECTION_PREFERENCES, PROFILE_MISSING,
     evaluate_candidate_comparison, materialize_selection_profile)
+from ver3.assy_v3.stages.selection_advisory import (                        # noqa: E402
+    ADVISORY_NOT_APPLICABLE, COMPARISON_AMBIGUOUS, SelectionEngineeringReview)
 from ver3.assy_v3.state import DesignState                                  # noqa: E402
 from ver3.live_providers import env as env_loader                           # noqa: E402
 from ver3.live_providers.deepseek import DeepSeekProvider                   # noqa: E402
@@ -562,6 +564,64 @@ def run_selection(case_id: str, state, trial: int,
     return rec
 
 
+def run_selection_advisory(case_id: str, state, provider, trial: int) -> Dict[str, Any]:
+    """Ask a reviewer what the deterministic comparison does not represent.
+
+    ORCHESTRATION ONLY. The runner does not build the reasoning, does not check a
+    supporting reference, does not downgrade an evidence status, does not compute
+    whether the review agrees with the frontier and does not read the model's
+    JSON. All of that is the producer's, behind the ordinary Stage boundary -
+    which is also what guarantees the provider is not called on an unready view.
+
+    NO COMPARISON, NO CALL. A design with nothing to compare has nothing to
+    review, and that is a result rather than a failure: an advisory produced
+    without a comparison would be a reviewer's opinion about a population nobody
+    established.
+    """
+    rec: Dict[str, Any] = {"case": case_id, "trial": trial, "failures": [],
+                           "advisory_status": None}
+
+    def fail(kind: str, what: str, detail: Any = None) -> None:
+        rec["failures"].append({"kind": kind, "stage": "selection_advisory",
+                                "what": what, "detail": detail})
+
+    comparisons = state.standing("CandidateComparison")
+    if len(comparisons) != 1:
+        # Asked of state rather than of the view so that "the provider was not
+        # called" is recorded even before a view is built. The Stage boundary
+        # would refuse it too; this says why in the run record.
+        rec["advisory_status"] = (ADVISORY_NOT_APPLICABLE if not comparisons
+                                  else COMPARISON_AMBIGUOUS)
+        rec["comparisons"] = sorted(c["entity_id"] for c in comparisons)
+        return rec
+
+    started = time.time()
+    try:
+        out = SelectionEngineeringReview().invoke(provider, state, state.run_id)
+    except Exception as exc:                                        # noqa: BLE001
+        fail("PARSER_DEFECT", "%s: %s" % (type(exc).__name__, exc),
+             traceback.format_exc(limit=5))
+        rec["advisory_status"] = "RAISED"
+        return rec
+    rec["advisory_seconds"] = round(time.time() - started, 2)
+    rec["advisory_status"] = out.execution_status.value
+    rec["advisory_consumer_view"] = out.consumer_view
+    rec["advisory_response"] = out.raw_response
+    if out.patch is None:
+        # A PROVIDER FAILURE IS NOT "NO CONCERN EXISTS". The comparison stands
+        # untouched and the run records that the reviewer was asked and did not
+        # answer - which is a different fact from being asked and finding nothing.
+        fail("RESPONSE_CONDITION", out.execution_status.value, out.problems)
+        return rec
+    state.apply(out.patch)
+    rec["advisory"] = [op.entity_id for op in out.patch.operations
+                       if op.entity_type == "SelectionAdvisory"]
+    rec["concerns"] = [op.entity_id for op in out.patch.operations
+                       if op.entity_type == "SelectionConcern"]
+    rec["counts"] = state.counts()
+    return rec
+
+
 #: RETIRED at S-6 / U-7. `_commit_s04` read the raw s04 response and wrote the
 #: engineering facts the stages did not: the reference scale, reach results, the
 #: elimination record, region volumes, insertion directions and joint origins. It
@@ -688,6 +748,13 @@ def main() -> int:
                      "%s %s" % (sel.get("outcome") or "",
                                 sel.get("frontier") or "")))
             trials.append(sel)
+            # AFTER the comparison is applied, because reviewing what the metrics
+            # do not say requires them to have said it.
+            adv = run_selection_advisory(case_id, accumulated, provider, trial)
+            print("  t%d %-8s ADVISORY %-28s %s"
+                  % (trial, case_id, str(adv.get("advisory_status")),
+                     "%s concern(s)" % len(adv.get("concerns") or [])))
+            trials.append(adv)
             with open(os.path.join(out_dir, "trials.json"), "w") as fh:
                 json.dump(trials, fh, indent=1, sort_keys=True)
 

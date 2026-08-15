@@ -2175,11 +2175,27 @@ assurance_families:
         cardinality: one
         resolvable: false
         referent_population: ALL_RETAINED_BRANCHES
+      # S7-D. WHO THE REVIEWER WOULD PICK, typed - so a reader can follow it and
+      # the write boundary checks it. An opinion about an already-eligible field;
+      # naming it `selected_candidate` would make it read like a commitment, and
+      # no field here is one.
+      recommended_candidate:
+        kind: reference
+        target: Candidate
+        cardinality: one
+        resolvable: false
+        referent_population: ALL_RETAINED_BRANCHES
     owned_by: selection
     authority_class: ASSURANCE
     purpose: "An engineering reviewer's opinion on an already-eligible field. Advisory, never authoritative."
-    required_fields: [entity_id, candidates, comparison, recommendation, reasoning]
-    optional_fields: [sensitivity]
+    required_fields: [entity_id, candidates, comparison, recommendation, reasoning, comparison_alignment]
+    optional_fields: [sensitivity, recommended_candidate]
+    recommendation: [PREFER_CANDIDATE, NO_CLEAR_PREFERENCE]
+    # WHETHER THE REVIEWER AGREES WITH THE DETERMINISTIC COMPARISON, computed by
+    # the producer from the comparison's own outcome and frontier. The model does
+    # not author it: a reviewer saying "I agree with the metrics" is a claim about
+    # the metrics, and the metrics already said what they said.
+    comparison_alignment: [ALIGNS_WITH_FRONTIER, DEPARTS_FROM_FRONTIER, NO_DETERMINISTIC_PREFERENCE]
     rules:
       - >
         MAY NOT AUTHOR MechanicalFeasibilityAssessment, HardRequirementCompliance
@@ -2190,6 +2206,24 @@ assurance_families:
         and under which change of priority that would flip. That is judgement
         about a trade-off, which is what a reviewer is for.
       - "It is CONSIDERED by a decision, not a premise of it. Rewording it invalidates nothing."
+      - >
+        THE STRUCTURAL FIELDS ARE THE PRODUCER'S, NOT THE MODEL'S. `candidates` is
+        copied from the comparison, `comparison` names it, `comparison_alignment`
+        is computed from its outcome and frontier, and `recommended_candidate` is
+        validated against its population. A model asked to author any of them
+        would be a model deciding who is eligible - and a reviewer recommending a
+        candidate nobody may choose has not given an opinion, it has given a
+        malformed one. (S7-D)
+      - >
+        PREFER_CANDIDATE REQUIRES A CANDIDATE AND NO_CLEAR_PREFERENCE FORBIDS ONE.
+        "I prefer one" naming nothing, and "I have no preference" naming one, are
+        both a recommendation that does not say what it means. (S7-D)
+      - >
+        DEPARTING FROM THE FRONTIER IS LEGAL AND EXPLICIT. A reviewer may prefer a
+        candidate the registered metrics do not favour - that is what a reviewer
+        is FOR, because the concern being raised is one no metric represents. What
+        is forbidden is departing SILENTLY: the disagreement is a field, so a
+        human sees it. (S7-D)
 
   SelectionConcern:
     semantic_roles: [advisory]
@@ -2212,8 +2246,12 @@ assurance_families:
       deterministic metrics do not represent - what a reviewer would raise and a
       metric cannot.
     required_fields: [entity_id, candidate, advisory, issue, importance, evidence_status]
-    optional_fields: [supporting_refs]
+    optional_fields: [supporting_refs, evidence_note]
     evidence_status: [SUPPORTED_BY_STATE, PLAUSIBLE_NOT_ESTABLISHED, SPECULATIVE]
+    # HOW MUCH HUMAN ATTENTION IT DESERVES, and nothing else. HIGH eliminates no
+    # candidate, touches no eligibility and carries no authority: a concern raises
+    # a question and never decides one.
+    importance: [HIGH, MEDIUM, LOW]
     rules:
       - >
         THE STATUS IS THE POINT. "Repeated flexure may be durability-sensitive"
@@ -2222,6 +2260,23 @@ assurance_families:
         claiming SUPPORTED_BY_STATE must cite state that supports it or be
         downgraded.
       - "A concern raises a question. It never decides one."
+      - >
+        SUPPORT IS PRESERVED OR DOWNGRADED, NEVER UPGRADED. The model proposes an
+        evidence status and the deterministic writer checks it: SUPPORTED_BY_STATE
+        with no valid current reference becomes PLAUSIBLE_NOT_ESTABLISHED, and
+        `evidence_note` records why. It is never raised the other way, because
+        refs happening to resolve is not the same fact as those refs supporting
+        the claim - only the reviewer can say that, and only about what it saw.
+        (S7-D)
+      - >
+        A REFERENCE THAT WAS NOT IN THE REVIEWED VIEW NEVER ENTERS STATE. An id
+        the model invented resolves to nothing and would make a fabricated
+        citation look like provenance; it is dropped, and dropping it is what
+        triggers the downgrade. (S7-D)
+      - >
+        IMPORTANCE IS NOT AUTHORITY. A HIGH concern changes no eligibility, no
+        feasibility verdict and no comparison. It changes what a human is asked to
+        look at. (S7-D)
 
   HumanDecisionInput:
     semantic_roles: [human_decision]
