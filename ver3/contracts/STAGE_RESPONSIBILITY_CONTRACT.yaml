@@ -1053,6 +1053,249 @@ stages:
       advisory's reasoning or a concern's issue as an engineering premise merely
       because the record exists.
 
+  selection_human_review:
+    # S7-E. THE THIRD CONSUMER PASS OF ONE OWNER. It calls no provider and it
+    # writes nothing by itself: what it produces is the EXACT material a human is
+    # shown, and the only thing that may be written afterwards is what that human
+    # submitted. Declared as a pass rather than folded into `selection` for the
+    # same reason `selection_advisory` is: the deterministic comparison is its
+    # INPUT, and requiring CandidateComparison inside the `selection` view would
+    # demand the entity before the pass that creates it could run.
+    name: human selection review
+    authority_stage: selection
+    responsibility: Assemble exactly what a human may review before committing to one
+      candidate, and record what they submitted after seeing it.
+    engineering_questions:
+    - What is the human being asked to choose between, and on what established evidence?
+    - What did the deterministic comparison and the stated preferences actually say?
+    - What did a reviewer draw attention to, if anything?
+    - What exactly was on the screen when the person submitted?
+    required_reasoning_premise_classes:
+    - class: deterministic_comparison
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a decision screen with no comparison behind it is asking a
+          person to choose from nothing established
+      what: the current deterministic comparison of the eligible candidates
+      justified_by_question: What did the deterministic comparison and the stated
+        preferences actually say?
+      why: The comparison is the population the human may choose from and the evidence
+        they are choosing on. Exactly one must be current; two is a question about
+        which review is in force, and answering it here would be this code deciding it.
+      requires_semantics:
+      - selection_evidence
+    - class: selection_preference
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a person cannot see what the comparison was made under if the
+          profile it names is not there
+      what: the exact versioned profile the comparison was made under
+      justified_by_question: What did the deterministic comparison and the stated
+        preferences actually say?
+      why: A screen that showed a comparison without the preferences it was computed
+        under would let a reader assume a default nobody stated. An explicitly empty
+        profile is a real answer and is shown as one.
+      requires_semantics:
+      - selection_preference
+    - class: eligibility_evidence
+      instance_selection:
+        population: ALL_RETAINED_BRANCHES
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a choice among candidates whose eligibility is not established
+          is not a choice
+      what: every retained candidate's feasibility and hard-requirement results
+      justified_by_question: What is the human being asked to choose between, and on
+        what established evidence?
+      why: The screen must be able to say WHY the population it offers is the eligible
+        one, and the writer must be able to establish that again at submit time from
+        the same canonical semantics rather than from the comparison's own list.
+      requires_semantics:
+      - eligibility_evidence
+    - class: reviewable_candidate_population
+      # THE FULL RETAINED SET, not the comparison's list. A candidate with no
+      # feasibility assessment is exactly what makes the population unestablished,
+      # and reaching candidates only through the assessments that mention them
+      # would hide the one case that matters: the missing record would hide the
+      # candidate it is missing for.
+      instance_selection:
+        population: ALL_RETAINED_BRANCHES
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a decision among no alternatives is not a decision
+      what: every alternative the design still holds
+      justified_by_question: What is the human being asked to choose between, and on
+        what established evidence?
+      why: Eligibility is computed over the retained population, so the population is
+        half the question. Deriving it from the comparison would make the comparison
+        the authority on its own correctness.
+      requires_semantics:
+      - candidate
+    - class: hard_design_constraint
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may state no hard requirement, and none is not a gap
+      what: every hard requirement the design states, and whether each blocks a choice
+      justified_by_question: What is the human being asked to choose between, and on
+        what established evidence?
+      why: Which requirements block a selection is half of what makes a candidate
+        eligible, so the same design-wide set the eligibility semantics read must be
+        visible to the screen that claims the population is eligible.
+      requires_semantics:
+      - design_constraint
+    - class: advisory_material
+      # MAY_BE_EMPTY, AND THAT IS THE POINT. A provider failure must not acquire
+      # veto authority over a human decision: the advisory is ASSURANCE, and a
+      # screen that refused to appear without one would make an LLM outage the
+      # reason a person could not choose.
+      instance_selection:
+        population: ALL_RETAINED_BRANCHES
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: no reviewer was asked, or the reviewer was asked and failed,
+          and neither is a reason a human may not decide
+      what: the current review of these candidates and the concerns it raised
+      justified_by_question: What did a reviewer draw attention to, if anything?
+      why: A human deciding against a reviewer's opinion is the reason a human is in
+        the loop, and they can only do that if they are shown it. Its absence is
+        represented as absence rather than filled in.
+      requires_semantics:
+      - advisory
+    permitted_output_semantics:
+    - HumanDecisionInput
+    prohibited_decisions:
+    - Authoring a commitment, or any operation on SelectionDecision
+    - Choosing a candidate on the human's behalf, from the frontier or from anywhere
+    - Deciding eligibility, feasibility, compliance or the comparison
+    - Presenting material the submission was not made against
+    - Refusing a human decision because no advisory exists
+    authority_rule: >
+      ONE SNAPSHOT, ONE SUBMISSION. What the human is shown is assembled once, and
+      the submission carries the digest of exactly that material. A screen that
+      re-read state between rendering and submitting could commit against premises
+      nobody saw, which is the difference between an approval and a signature on a
+      blank page.
+
+  selection_decision:
+    # S7-E. THE DETERMINISTIC COMMITMENT WRITER. No provider, no prompt, no screen
+    # logic: it resolves a submitted HumanDecisionInput, rebuilds the review from
+    # CURRENT state, and refuses to write anything if the person was looking at
+    # something else. It is the only producer of SelectionDecision.
+    name: selection commitment
+    authority_stage: selection
+    responsibility: Commit the candidate a human selected, if and only if what they were
+      shown is still what the design currently says.
+    engineering_questions:
+    - What did the human submit, and against which review?
+    - Is that review still the current one?
+    - Is the selected candidate still in the currently eligible population?
+    required_reasoning_premise_classes:
+    - class: human_decision
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: there is nothing to commit until a human has submitted something
+      what: the submitted human decisions
+      justified_by_question: What did the human submit, and against which review?
+      why: A commitment exists only because a person asked for one. This is the whole
+        of the writer's authority to act, and it is read rather than inferred - no
+        frontier, no recommendation and no sole eligible candidate substitutes for it.
+      requires_semantics:
+      - human_decision
+    - class: deterministic_comparison
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a commitment against a comparison that is no longer current is
+          a commitment against premises nobody saw
+      what: the current deterministic comparison of the eligible candidates
+      justified_by_question: Is that review still the current one?
+      why: The submission names the comparison it was made against, and the writer
+        compares that to what is current now rather than trusting the submission.
+      requires_semantics:
+      - selection_evidence
+    - class: selection_preference
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: the profile the decision is recorded under has to exist for the
+          record to mean anything
+      what: the exact versioned profile the comparison was made under
+      justified_by_question: Is that review still the current one?
+      why: Changing what you want reopens the choice. A decision naming a superseded
+        profile would claim a person judged under preferences that are no longer the
+        design's.
+      requires_semantics:
+      - selection_preference
+    - class: eligibility_evidence
+      instance_selection:
+        population: ALL_RETAINED_BRANCHES
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: nothing may be committed on an unestablished population
+      what: every retained candidate's feasibility and hard-requirement results
+      justified_by_question: Is the selected candidate still in the currently eligible
+        population?
+      why: Eligibility is re-established at submit time from the same canonical
+        semantics the comparison used. The comparison's own candidate list is evidence
+        to cross-check and never a substitute for the check.
+      requires_semantics:
+      - eligibility_evidence
+    - class: reviewable_candidate_population
+      instance_selection:
+        population: ALL_RETAINED_BRANCHES
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a commitment among no alternatives is not a commitment
+      what: every alternative the design still holds
+      justified_by_question: Is the selected candidate still in the currently eligible
+        population?
+      why: The population eligibility is computed over, so that a candidate which has
+        appeared or been retired since the screen was rendered changes the answer
+        rather than being invisible to it.
+      requires_semantics:
+      - candidate
+    - class: hard_design_constraint
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may state no hard requirement, and none is not a gap
+      what: every hard requirement the design states, and whether each blocks a choice
+      justified_by_question: Is the selected candidate still in the currently eligible
+        population?
+      why: A requirement that became blocking, or a compliance record that became
+        VIOLATED, is exactly the change that must stop a commitment the human asked
+        for before it happened.
+      requires_semantics:
+      - design_constraint
+    permitted_output_semantics:
+    - SelectionDecision
+    prohibited_decisions:
+    - Selecting a candidate the human did not name
+    - Committing on a digest the writer did not recompute from current state
+    - Trusting the comparison's candidate list in place of re-establishing eligibility
+    - Treating advisory material as a premise of the commitment
+    - Replacing, superseding or withdrawing a standing commitment
+    - Creating a commitment from a non-select action
+    authority_rule: >
+      THE HUMAN IS THE ONLY CHOOSER AND THE PREMISES ARE RE-READ. Everything this
+      pass writes rests on two independent facts: a person submitted a SELECT, and
+      the material they saw is still current. Neither implies the other, and
+      neither is taken on trust from the client that submitted it. Advisory
+      material the human considered is RECORDED and is never a premise, so
+      rewording a review after the fact cannot disturb a commitment the wording
+      was never the ground of.
+
   s04b:
     name: spatial and kinematic realization
     # S-6 / U-7 SEQUENCING CORRECTION. This responsibility encoded the runtime

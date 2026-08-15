@@ -1212,14 +1212,18 @@ class TestContractTruth(unittest.TestCase):
 
     def test_no_pre_selection_responsibility_declares_the_preference_role(self):
         """The isolation is about WHO IS BEFORE THE BOUNDARY, not about a count.
-        `selection` and `selection_advisory` are two passes of one owner and both
-        are at it: the reviewer must know the exact profile the comparison was
-        made under, or its sensitivity statement would be about a preference it
-        invented. Every responsibility upstream declares none."""
+        All four declarers are passes of ONE owner and all four are at the
+        boundary: the reviewer must know the exact profile the comparison was
+        made under or its sensitivity statement would be about a preference it
+        invented; the human review must show what the comparison was computed
+        under rather than let a reader assume a default; and the writer records
+        the decision under a named profile version. Every responsibility upstream
+        declares none, which is the property - not the number."""
         declaring = [sid for sid, spec in self.resp["stages"].items()
                      if any("selection_preference" in (p.get("requires_semantics") or [])
                             for p in spec.get("required_reasoning_premise_classes") or [])]
-        self.assertEqual(["selection", "selection_advisory"], sorted(declaring))
+        self.assertEqual(["selection", "selection_advisory", "selection_decision",
+                          "selection_human_review"], sorted(declaring))
         for upstream in ("s01", "s02", "s03a", "s03b", "s04a", "s04b",
                          "feasibility"):
             self.assertNotIn(upstream, declaring, upstream)

@@ -288,6 +288,20 @@ class _Evidence:
                 if candidate in self.membership.get(e.get("entity_id"), set())]
 
 
+def evidence_of(state, payload: Dict[str, Any]) -> "_Evidence":
+    """The indexed engineering evidence behind one consumer payload.
+
+    ONE CONSTRUCTION, so `eligibility` cannot be asked the same question two ways.
+    S7-E re-establishes the eligible population at submit time and must reach that
+    answer through exactly this path: a writer that rebuilt the index itself would
+    be a second opinion about which entity belongs to which branch, and the two
+    would agree until the day they did not.
+    """
+    admitted = sorted(e["entity_id"] for rows in payload.values() for e in rows
+                      if isinstance(e, dict) and e.get("entity_id"))
+    return _Evidence(payload, branch_membership(state, state.c, admitted))
+
+
 def _blocks_selection(constraint: Dict[str, Any]) -> bool:
     """ABSENT MEANS TRUE, which is the contract's declared default. Reading the
     absence as false would let a requirement nobody marked stop blocking."""
@@ -594,9 +608,7 @@ def evaluate_candidate_comparison(state, run_id: Optional[str] = None,
             consumer_view=view.as_dict())
 
     payload = view.payload()
-    admitted = sorted(e["entity_id"] for rows in payload.values() for e in rows
-                      if isinstance(e, dict) and e.get("entity_id"))
-    ev = _Evidence(payload, branch_membership(state, state.c, admitted))
+    ev = evidence_of(state, payload)
 
     profiles = ev.fam("SelectionProfile")
     if len(profiles) != 1:

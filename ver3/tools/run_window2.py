@@ -62,6 +62,8 @@ from ver3.assy_v3.stages.selection import (                                 # no
     evaluate_candidate_comparison, materialize_selection_profile)
 from ver3.assy_v3.stages.selection_advisory import (                        # noqa: E402
     ADVISORY_NOT_APPLICABLE, COMPARISON_AMBIGUOUS, SelectionEngineeringReview)
+from ver3.assy_v3.stages.selection_decision import (                        # noqa: E402
+    build_human_review_snapshot)
 from ver3.assy_v3.state import DesignState                                  # noqa: E402
 from ver3.live_providers import env as env_loader                           # noqa: E402
 from ver3.live_providers.deepseek import DeepSeekProvider                   # noqa: E402
@@ -622,6 +624,44 @@ def run_selection_advisory(case_id: str, state, provider, trial: int) -> Dict[st
     return rec
 
 
+AWAITING_HUMAN_DECISION = "AWAITING_HUMAN_DECISION"
+
+
+def run_selection_checkpoint(case_id: str, state, trial: int) -> Dict[str, Any]:
+    """Report whether a human could now be asked to decide. IT DOES NOT DECIDE.
+
+    THE RUN STOPS HERE BY DESIGN. A batch process cannot answer the question this
+    checkpoint asks, and the three ways it could pretend to - take the frontier,
+    take the advisory's recommendation, take the sole eligible candidate - are the
+    three things S7-E exists to prevent. Recording AWAITING_HUMAN_DECISION is the
+    honest end of an unattended run: a design with one eligible candidate is still
+    a design nobody has chosen.
+
+    No submission is fabricated, so nothing here writes to state at all. What it
+    produces is the readiness fact and the digest of the review a person would be
+    shown, which is what makes it possible to tell later whether they were shown
+    the same design this run produced.
+    """
+    rec: Dict[str, Any] = {"case": case_id, "trial": trial, "failures": [],
+                           "checkpoint_status": None}
+    review = build_human_review_snapshot(state)
+    rec["review_status"] = review.status
+    if not review.ready:
+        rec["checkpoint_status"] = review.status
+        rec["review_problems"] = review.problems
+        return rec
+    snapshot = review.snapshot
+    rec["checkpoint_status"] = AWAITING_HUMAN_DECISION
+    rec["premise_digest"] = snapshot.digest
+    rec["comparison"] = snapshot.comparison["entity_id"]
+    rec["profile"] = snapshot.profile["entity_id"]
+    rec["eligible_candidates"] = list(snapshot.eligible_candidates)
+    rec["reviewed_advisories"] = snapshot.advisory_ids()
+    rec["reviewed_concerns"] = snapshot.concern_ids()
+    rec["counts"] = state.counts()
+    return rec
+
+
 #: RETIRED at S-6 / U-7. `_commit_s04` read the raw s04 response and wrote the
 #: engineering facts the stages did not: the reference scale, reach results, the
 #: elimination record, region volumes, insertion directions and joint origins. It
@@ -755,6 +795,13 @@ def main() -> int:
                   % (trial, case_id, str(adv.get("advisory_status")),
                      "%s concern(s)" % len(adv.get("concerns") or [])))
             trials.append(adv)
+            # THE END OF WHAT A BATCH RUN MAY DO. What comes next is a person's,
+            # and the run records that it is waiting rather than inventing one.
+            checkpoint = run_selection_checkpoint(case_id, accumulated, trial)
+            print("  t%d %-8s CHECKPOINT %-26s %s"
+                  % (trial, case_id, str(checkpoint.get("checkpoint_status")),
+                     "digest=%s" % str(checkpoint.get("premise_digest"))[:12]))
+            trials.append(checkpoint)
             with open(os.path.join(out_dir, "trials.json"), "w") as fh:
                 json.dump(trials, fh, indent=1, sort_keys=True)
 

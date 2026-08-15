@@ -21,8 +21,13 @@ RETIRED_FAMILIES = ("BodyHypothesis", "PhysicalInteractionHypothesis")
 #: `selection_advisory` is S7-D's: a SECOND CONSUMER PASS of `selection`,
 #: exactly as s03b is of s03. It owns no family and adds no owner - what it
 #: adds is a view, because the deterministic comparison is its input.
+#: S7-E adds two more consumer passes of the `selection` owner: the review a
+#: human is shown, and the deterministic writer that commits what they submitted.
+#: Passes, not owners - `authority_stage` says whose they write as - and not
+#: numbered stages, because s05 through s12 are taken and mean other things.
 STAGES_UNDER_S2 = ("s01", "s02", "s03a", "s03b", "s04a", "feasibility",
-                   "selection", "selection_advisory", "s04b")
+                   "selection", "selection_advisory", "selection_human_review",
+                   "selection_decision", "s04b")
 
 
 def _yaml(name):

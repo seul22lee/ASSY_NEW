@@ -66,9 +66,16 @@ class TestTheSplit(_Base):
                          outputs)
 
     def test_only_selection_may(self):
+        """S7-E moved the output declaration onto the PASS that writes it. Still
+        one owner and still one writer: `selection_decision` is a pass of
+        `selection`, everything it writes is written as `selection`, and no other
+        owner - and no screen and no model - may declare the family at all."""
         declaring = [sid for sid, spec in self.resp["stages"].items()
                      if "SelectionDecision" in (spec.get("permitted_output_semantics") or [])]
-        self.assertEqual(["selection"], declaring)
+        self.assertEqual(["selection", "selection_decision"], sorted(declaring))
+        for sid in declaring:
+            self.assertEqual("selection",
+                             self.resp["stages"][sid].get("authority_stage", sid))
 
     def test_selection_decision_is_no_longer_s04s(self):
         """It was s04's because `gate` had no ownership entry at all, so the one
@@ -385,8 +392,12 @@ class TestHardConstraintVisibility(_fixtures.StateBuilder, _Base):
     def test_A7_visibility_is_selective_not_global(self):
         """It exists from s01 and appears only where the reasoning needs it.
 
-        THREE consumers declare it now, and none of them is a widening. Each
-        runs after eligibility is decided and none can decide it. S7-C's
+        FIVE consumers declare it now, and none of them is a widening. Each
+        runs after eligibility is decided and none can decide it - the two S7-E
+        passes because a screen claiming a population is eligible must be able to
+        show WHY, and because the writer re-establishes eligibility at submit
+        time from the same design-wide set rather than from the comparison's
+        list. S7-C's
         eligibility rule is "feasible AND every blocking requirement satisfied",
         so the set of blocking requirements is half the question - and reaching
         constraints only through the compliance records that cite them would make
@@ -397,8 +408,12 @@ class TestHardConstraintVisibility(_fixtures.StateBuilder, _Base):
         declaring = [sid for sid, spec in self.resp["stages"].items()
                      if any("design_constraint" in pc["requires_semantics"]
                             for pc in spec["required_reasoning_premise_classes"])]
-        self.assertEqual(["feasibility", "selection", "selection_advisory"],
-                         declaring)
+        self.assertEqual(["feasibility", "selection", "selection_advisory",
+                          "selection_decision", "selection_human_review"],
+                         sorted(declaring))
+        for sid in declaring:
+            self.assertIn(self.resp["stages"][sid].get("authority_stage", sid),
+                          ("feasibility", "selection"))
         for sid in ("s02", "s03a", "s03b", "s04a"):
             view = cv.build_consumer_view(
                 sid, s, self.c, self.resp,

@@ -116,7 +116,15 @@ class TestDeclaredCorpus(_Base):
         # to see the comparison, the profile it was made under, why the
         # population is eligible, and the engineering state a concern could come
         # from - a reviewer shown only the metrics could only restate them.
-        self.assertEqual(41, len(rows), "the premise corpus changed size")
+        #
+        # 53 at S7-E: the two downstream selection passes declare six each. The
+        # review pass needs the comparison, the profile it was made under, why
+        # the population is eligible, the retained population itself, the
+        # requirements that decide blocking, and - MAY_BE_EMPTY - whatever a
+        # reviewer said. The writer needs the same five plus the submitted human
+        # decision, because a commitment rests on two independent facts: a person
+        # asked for it, and what they were shown is still what the design says.
+        self.assertEqual(53, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

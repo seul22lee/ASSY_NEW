@@ -49,8 +49,14 @@ audit_scope:
   families_deleted: 0
   no_stage_contract_frozen_by_this_audit: true
 summary:
-  CORE: 39
-  PROVISIONAL: 15
+  # S7-E: four families moved PROVISIONAL -> CORE. HumanDecisionInput and
+  # SelectionDecision were declared ahead of their producers, which is this
+  # contract's normal way of working, and both now have one. SelectionAdvisory
+  # and SelectionConcern were open on one question - what a human does with a
+  # review - and S7-E answered it: shown before the submission, considered after
+  # the commitment, a premise of neither.
+  CORE: 43
+  PROVISIONAL: 11
   MERGE_CANDIDATE: 3
   UNSUPPORTED: 0
   note_on_zero_unsupported: 'No family is unproducible or unconsumable, so none is UNSUPPORTED. Two EXPRESSIVENESS
@@ -848,12 +854,14 @@ families:
       Overlaps SelectionConcern, which is one raised issue rather than a recommendation over the field.
     required_for_assurance_package: false
     package_items: []
-    status: PROVISIONAL
+    status: CORE
     open_question: >
-      Declared and produced at S7-D. What is open is what a human does with it,
-      which is S7-E - and that a review is CONSIDERED by a decision rather than a
-      premise of one is frozen, not open.
-    decision_required_before: "S7-E implementation."
+      Declared and produced at S7-D; what a human does with it was answered at
+      S7-E. It is inside the review a person decides from - so changing it before
+      they submit forces a re-review - and it is recorded on the commitment as
+      CONSIDERED material, never as a premise, so rewording it afterwards
+      disturbs nothing. Nothing about this family is open.
+    decision_required_before: none.
   SelectionConcern:
     owning_stage: selection
     first_downstream_consumer: s05
@@ -866,12 +874,14 @@ families:
       Overlaps SelectionAdvisory, which carries the recommendation this concern qualifies.
     required_for_assurance_package: false
     package_items: []
-    status: PROVISIONAL
+    status: CORE
     open_question: >
-      Declared and produced at S7-D. What is open is what a human does with it,
-      which is S7-E - and that a review is CONSIDERED by a decision rather than a
-      premise of one is frozen, not open.
-    decision_required_before: "S7-E implementation."
+      Declared and produced at S7-D; what a human does with it was answered at
+      S7-E. It is inside the review a person decides from - so changing it before
+      they submit forces a re-review - and it is recorded on the commitment as
+      CONSIDERED material, never as a premise, so rewording it afterwards
+      disturbs nothing. Nothing about this family is open.
+    decision_required_before: none.
   HumanDecisionInput:
     owning_stage: selection
     first_downstream_consumer: s05
@@ -884,12 +894,13 @@ families:
       Overlaps SelectionDecision, which is what a deterministic writer commits after re-checking the premises. The input is a request; the decision is the commitment.
     required_for_assurance_package: false
     package_items: []
-    status: PROVISIONAL
+    status: CORE
     open_question: >
-      Declared at S-7 / U-8 ahead of its producer, which is this contract's
-      normal way of working. What is open is not the meaning - that is frozen -
-      but that S7-E has not yet emitted it.
-    decision_required_before: "S7-E implementation."
+      Declared and produced at S7-E. The `selection_human_review` pass assembles
+      the snapshot and the submission records the digest of exactly it; nothing
+      here is open. What a later step does with a KEEP_UNRESOLVED or a
+      REQUEST_MORE_EVIDENCE - reopening, re-running evidence - is S7-F.
+    decision_required_before: "S7-F lifecycle work."
   SelectionDecision:
     # S-7 / U-8: owner moved off s04. s04 authors spatial evidence and does not
     # choose; the responsibility that chooses is `selection`, and it runs after
@@ -900,16 +911,23 @@ families:
       recorded fact with its evidence, its profile version and the human who made it.
     unique_responsibility: The only family recording which candidate was retained and what permitted it.
     duplicates: none
-    overlap_note: 'Overlaps UnresolvedDecision, deliberately: a tie with no discriminating evidence is
-      an UnresolvedDecision and NOT a SelectionDecision. The two are mutually exclusive by construction.'
+    overlap_note: 'Overlaps UnresolvedDecision only where that family''s own preconditions hold. S7-E
+      separated three things one word was carrying: TRADEOFF_UNRESOLVED is a CandidateComparison outcome,
+      KEEP_UNRESOLVED is a HumanDecisionInput action, and a generic UnresolvedDecision requires typed
+      kept_open_by evidence that a human declining to commit does not create. A tie with no discriminating
+      evidence is a comparison outcome and is not a SelectionDecision; it is not automatically an
+      UnresolvedDecision either.'
     required_for_assurance_package: false
     package_items: []
-    status: PROVISIONAL
+    status: CORE
     open_question: >
-      If nothing discriminates and the human records an UnresolvedDecision
-      instead, every later stage has no candidate to embody. Whether the pipeline
-      may proceed with several retained candidates, or must stop, is undecided.
-      (S7-A: reworded off "the gate", which no longer names anything.)
+      Produced at S7-E by the `selection_decision` pass, and only from a human
+      SELECT whose review the writer recomputed. What remains open is what the
+      pipeline does when a human keeps the choice open: every later stage embodies
+      one candidate, and whether it may proceed with several retained candidates
+      or must stop is S7-F lifecycle work rather than a property of this family.
+      (S7-A: reworded off "the gate", which no longer names anything. S7-E: the
+      producer is live and the openness is narrowed to what it actually is.)
     decision_required_before: s05 implementation.
     package_debt: 'Added in Window 2 and not yet projected by GENERATED_ASSURANCE_PACKAGE_CONTRACT. Recorded
       as debt rather than papered over with an invented package id.

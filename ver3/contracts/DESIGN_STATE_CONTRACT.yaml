@@ -2333,7 +2333,31 @@ assurance_families:
       - >
         A human may choose against the advisory. That is not an error to
         reconcile; it is the reason a human is in the loop, and the rationale
-        records it.
+        records it. The only prohibition is a candidate outside the currently
+        eligible population - preference cannot make someone eligible, and
+        neither can a reviewer or a person.
+      - >
+        HISTORICAL PROVENANCE, SO IT CARRIES NO PREMISES. "I submitted this after
+        seeing snapshot X" stays true when X stops being current, and that is
+        exactly the fact a stale submission is made of: a record that went STALE
+        with the comparison could not be found afterwards to be refused, and the
+        evidence that a person submitted against an old view would have quietly
+        disappeared. What was shown is recorded in the fields and in the digest;
+        the record claims nothing about it still holding. Nothing rewrites or
+        erases it, and a refused submission stays. (S7-E)
+      - >
+        `premise_digest` IS A DIGEST OF THE REVIEW SNAPSHOT, not of the design.
+        A whole-state hash would make every unrelated write a reason to ask a
+        person to look again, which trains people to click through the thing that
+        exists to stop them. It covers the comparison, the profile, the
+        eligibility basis and the advisory material actually shown - the values,
+        not just the ids, so the same entity revised is a different review. (S7-E)
+      - >
+        THE UI SUPPLIES THREE THINGS: the action, the candidate when the action
+        is SELECT, and the rationale. Which comparison, which profile, which
+        advisory material and the digest all come from the snapshot that was
+        rendered, so a client cannot claim to have reviewed one thing while
+        submitting against another. (S7-E)
 
 
   SelectionDecision:
@@ -2418,7 +2442,18 @@ assurance_families:
         feasibility FEASIBLE_FOR_SELECTION and every selection-blocking hard
         requirement SATISFIED. Eligibility is deterministic and is established
         before this record exists.
-      - "Never a score and never an arbitrary pick: an undiscriminated tie is an UnresolvedDecision instead."
+      - >
+        NEVER A SCORE AND NEVER AN ARBITRARY PICK. Three different things were
+        being said with one word, and S7-E had to separate them before a writer
+        could act: TRADEOFF_UNRESOLVED is a CandidateComparison OUTCOME - the
+        deterministic evidence did not discriminate; KEEP_UNRESOLVED is a
+        HumanDecisionInput ACTION - a person declined to commit, which is an
+        answer and creates no decision of any kind; and a generic
+        UnresolvedDecision is emitted only where its own canonical preconditions
+        genuinely exist, because that family REQUIRES `kept_open_by` to cite the
+        Ambiguity or Freedom entities keeping the item open. Manufacturing one
+        from a human's decision not to choose would fabricate exactly that typed
+        evidence, and a fabricated openness is worse than a recorded one. (S7-E)
       - >
         A HUMAN decides. This record is written by a deterministic writer FROM a
         HumanDecisionInput, after re-checking that the premises the human was
@@ -2429,6 +2464,22 @@ assurance_families:
         decision loses unqualified authority. Advisory material is CONSIDERED -
         recorded because the human reviewed it, and rewording it invalidates
         nothing, because the model's wording was never the ground of the choice.
+      - >
+        THE SAME MATERIAL, TWO DIFFERENT QUESTIONS, AND THEY HAVE DIFFERENT
+        ANSWERS. Before submission the advisory and the concerns are inside the
+        review digest, because a person reading an opinion that has since changed
+        is reading an old screen and must look again. After a commitment exists
+        they are outside its premise set, because what made the candidate
+        choosable was the engineering evidence and never the sentence beside it.
+        A record that went stale on a reworded advisory would teach a reader that
+        the model's prose was load-bearing. (S7-E)
+      - >
+        WRITTEN BY THE `selection_decision` PASS, from a HumanDecisionInput whose
+        `premise_digest` the writer RECOMPUTED from current state - never from the
+        digest the submission carried, and never from the comparison's candidate
+        list in place of re-establishing eligibility. A screen submits a claim
+        about what it showed; only the design can say whether that is still what
+        it says. (S7-E)
 
 # ---------------------------------------------------------------- U-2B (S-2)
 # The canonical contract is deliberately AHEAD of several producers. Recording

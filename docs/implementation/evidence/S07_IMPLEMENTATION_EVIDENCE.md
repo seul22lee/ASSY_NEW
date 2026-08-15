@@ -1586,7 +1586,286 @@ Regression, **secondary**: RUN 1222 · PASS 1222 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-E — HUMAN CHECKPOINT AND DETERMINISTIC COMMITMENT (baseline `04fc6db`)
+
+The first step at which a `SelectionDecision` may exist. Everything before it
+produced evidence; this one produces a commitment, and only because a person
+asked for one.
+
+### J.1 Production architecture
+
+```
+current deterministic state ─┐
+optional advisory material ──┴─> build_human_review_snapshot(state)
+                                      │  ONE immutable snapshot, ONE digest
+                                      ▼
+                                 the screen renders THAT
+                                      │  action + candidate + rationale
+                                      ▼
+                        materialize_human_decision_input(...)
+                                      │  HumanDecisionInput, and nothing else
+                                      ▼
+                          commit_human_selection(state, id)
+                            rebuild ▸ digest ▸ context ▸ action ▸ eligibility
+                                      ▼
+                        SELECT ⇒ SelectionDecision
+        KEEP_UNRESOLVED / REQUEST_MORE_EVIDENCE ⇒ no commitment
+```
+
+| file | what it is |
+|---|---|
+| `assy_v3/stages/selection_decision.py` | the whole backend: snapshot, digest, submission, writer. No provider, no prompt, no screen |
+| `assy_v3/ui/selection_checkpoint.py` | the page logic, written against a SURFACE so it is testable without a browser |
+| `tools/selection_checkpoint.py` | `streamlit run` entry point; hands `streamlit` in as the surface |
+| `tools/run_window2.py` | `run_selection_checkpoint` — reports `AWAITING_HUMAN_DECISION` and writes nothing |
+
+Two new consumer passes of the ONE `selection` owner —
+`selection_human_review` and `selection_decision`, both `authority_stage:
+selection`. Not new owners, not numbered stages, and deliberately downstream: the
+existing `selection` view must not require CandidateComparison or the pass that
+creates it becomes circular, and `selection_advisory` is frozen.
+
+### J.2 The snapshot, and what its digest covers
+
+`HumanReviewSnapshot` is a frozen dataclass and is **not a DesignState family**.
+It holds the comparison, the profile the comparison names, the retained
+candidates, the per-candidate eligibility verdict WITH its basis, the assessments
+and compliance records that basis was read from, the requirements consulted for
+their blocking semantics, and whatever advisory material exists.
+
+```
+premise_digest = SHA-256(canonical(snapshot.payload()))
+```
+
+`sort_keys` recursively, so mapping order is not meaning; collections whose order
+carries nothing are sorted by id when the snapshot is built, so arrival order
+cannot reach the digest; ordered values INSIDE a record — the comparison's own
+candidate list, its frontier — are left exactly as authored. **Values, not ids**:
+E09 changes one string inside a shown record and the digest moves.
+
+It is **not** `state_hash()`. An unrelated entity does not stale a review (E10,
+E32) and a fact the eligibility basis rests on does, even when every id the
+submission names is unchanged (E23c) — which is the case that proves the digest
+is doing work no id comparison could.
+
+### J.3 What the human supplies, and what the backend does
+
+The UI supplies three things: an action, a candidate when the action is SELECT,
+and a rationale. `comparison`, `profile`, `reviewed_advisories`,
+`reviewed_concerns`, `premise_digest` and the entity id all come from the
+snapshot that was rendered — **there is no parameter through which a client could
+claim to have reviewed something else** (E22, asserted against the signature).
+
+Actions are matched exactly. `SELECT` requires a non-empty string candidate that
+was on the screen; the other two require the candidate to be **absent**, not
+falsy — `""`, `0`, `False`, `[]` and `{}` are four malformed submissions wearing
+the one legitimate way to say a person named nobody. The rationale is required
+and is not coerced: `0` is not the string `"0"`, and interpreting a human's reason
+is the one thing this code must never do.
+
+Identity is content-derived over (digest, action, candidate, rationale). The same
+submission twice is one submission; a different reason is a different submission
+and **both stay**, because a human input is historical provenance.
+
+**HumanDecisionInput carries no premise refs at all.** "I submitted this after
+seeing snapshot X" stays true when X stops being current — that is exactly what a
+stale submission is made of, and a record that went STALE with the comparison
+could not be found afterwards to be refused (E61b).
+
+### J.4 Submit-time validation order
+
+| # | check | refusal |
+|---|---|---|
+| 1 | resolve the named submission through the pass's own view | `INVALID_HUMAN_INPUT` |
+| 2 | a standing commitment already exists | `SELECTION_UNCHANGED` on replay, else `DECISION_ALREADY_STANDING` |
+| 3 | rebuild the review from CURRENT state | `STALE_SUBMISSION` |
+| 4 | recomputed digest == submitted digest | `STALE_SUBMISSION` |
+| 5/6 | the comparison, profile and reviewed material the submission NAMES | `SUBMISSION_CONTEXT_MISMATCH` |
+| 7 | non-select actions stop here, accepted | `HUMAN_KEPT_UNRESOLVED` / `MORE_EVIDENCE_REQUESTED` |
+| 8 | eligibility re-established; population established; candidate in it | `SELECTION_CONTEXT_INCONSISTENT` / `SELECTION_NO_LONGER_ELIGIBLE` |
+| 9 | the comparison's population cross-checked against the recomputed one | `SELECTION_CONTEXT_INCONSISTENT` |
+| 10 | write | `SELECTION_COMMITTED` |
+
+Eligibility comes from **S7-C's own semantics**, through the smallest extraction
+that makes one construction path possible: `selection.evidence_of(state, payload)`
+feeding `selection.eligibility(ev)`. The comparison's candidate list is evidence
+to cross-check and is never the authority on whether its candidates are still
+choosable — E31 adds a second current assessment, which supersedes nothing, and
+the writer refuses a screen that is otherwise perfectly fresh.
+
+### J.5 Premises versus considered material
+
+```
+premise_refs  = the assessments, the compliance records, the requirements
+                consulted, the candidates, the comparison, the profile,
+                and the HumanDecisionInput
+considered_*  = the advisory and concern ids the person actually reviewed
+```
+
+Advisory material is inside the digest BEFORE submission and outside the premise
+set AFTER commitment. The two are different questions: a person reading an
+opinion that has since changed is reading an old screen (E26/E27), and a
+commitment whose ground was engineering evidence does not move when a reviewer
+rewords a sentence (E62/E63/E64). E65 pins the premise set exactly — five
+families, and less than half the design.
+
+### J.6 The screen
+
+Streamlit is not installed in this environment, so **no browser behaviour is
+claimed to have been tested**. The page logic is written against a surface
+protocol and is exercised in full through a recording surface: what is rendered,
+what may be chosen, and what a submission does. `tools/selection_checkpoint.py`
+is a ~70-line adapter that passes `streamlit` in as that surface and is
+source-audited rather than executed.
+
+The screen renders from the snapshot and from nothing else — `render_review`
+takes no state and reaches for no state method (E66b, structural). The candidate
+control starts on a placeholder and pressing submit on it decides nothing (E68).
+The frontier is never relabelled a winner (E68b). The advisory is labelled
+`Advisory / reviewer opinion - not a decision` above its own text (E71), its
+absence is stated rather than filled in (E44), and every control stays live
+without one (E70). A stale submission produces the refresh message and
+**`ui.submit` contains no snapshot rebuild** — an auto-retry would erase the
+checkpoint (E69).
+
+### J.7 The batch runner
+
+`run_selection_checkpoint` reports readiness and the digest a person would be
+shown, and writes nothing. There is no path from `frontier[0]`, from a
+recommendation, or from a sole eligible candidate to a submission — the words do
+not appear in the runner at all (E75). An unattended run ends at
+`AWAITING_HUMAN_DECISION`, which is the honest end of a run that cannot answer
+the question the checkpoint asks.
+
+### J.8 E01–E78
+
+**98 test methods** in `test_s7_human_decision.py`, all against the real chain and
+the real boundaries. Review snapshot E01–E11 · human input E12–E22b · stale
+submission E23–E32 · selection authority E33–E41 · advisory optionality E42–E44 ·
+non-select actions E45–E48b · the commitment E49–E56c · dependency E57–E65 · the
+screen E66–E72b · runner and scope E73–E78b · contract truth E79–E84.
+
+### J.9 Eleven mutations
+
+| mutation | caught by |
+|---|---|
+| the frontier is auto-selected | E36, E37, E38, E39, E41, E50 |
+| the advisory recommendation is auto-selected | E37, E38, E75b |
+| the screen writes the commitment itself | E67, E69, E70, E72 |
+| `premise_digest` is the whole `state_hash()` | E21, E22, E23, E31, E32 and 30 more |
+| the submitted digest is trusted rather than recomputed | E23c, E25, E31 |
+| eligibility is read off `CandidateComparison.candidates` | E31 |
+| advisory ids become premises of the decision | E62, E63, E64, E65 |
+| no advisory means no checkpoint | E01, E05, E42, E44, E70 and 30 more |
+| a stale screen refreshes and resubmits itself | E69 |
+| a non-select action picks a candidate anyway | E16, E17, E45 |
+| a standing commitment is silently replaced | E55, E56, E56b |
+
+### J.10 In-scope defects found and fixed during the pass
+
+* **The `REVIEW_PROFILE_NOT_CURRENT` guard looked unreachable.** Through the
+  ordinary path a profile change supersedes the comparison premised on it, so the
+  first probe could not reach the branch at all and the write boundary refused a
+  dangling reference. E04b now reaches it the only way it can be reached — a
+  comparison naming the OLD profile after a new one stands — rather than leaving
+  a defensive branch nothing exercises.
+* **A same-id compliance record was written twice.** The first stale-submit
+  probes re-created `HRC-<candidate>-<constraint>`, which the write boundary
+  correctly refused as a duplicate id. Re-evaluating a requirement is a
+  withdrawal and a new record, and the fixture now does what the pipeline does.
+* **Two source audits were measuring prose.** The module docstrings say the words
+  "provider" and "SelectionDecision" in order to state that neither is reachable,
+  and the first version of E67/E76 flagged the sentence saying so. The audits now
+  run over code with docstrings and comments blanked, and E76 pins the only two
+  surviving mentions: the provenance of the two patches, saying a human and a
+  deterministic function produced them.
+
+### J.11 Bounded E-I1…E-I14 audit
+
+**Hidden auto-selection.** `frontier[0]`, `candidates[0]`, `eligible[0]`,
+`SOLE_ELIGIBLE` and `DOMINANT_UNDER_PROFILE` appear in no S7-E file and in no
+part of the runner. `recommended_candidate` appears twice, both times inside the
+screen's rendering of the advisory - which §13 requires it to show. Every dict
+literal that sets `selected_candidate` sets it from the human input (E75b, by
+AST).
+
+**UI authority.** The screen constructs no `Op` and no `StagePatch`; the only two
+`state.apply` calls apply patches the backend produced, which is the declared
+path. `SelectionDecision` is written in exactly one place in the package. The
+Streamlit entry point contains no `apply` at all.
+
+**Stale-submit leakage.** A changed profile, comparison, advisory, concern,
+feasibility assessment or compliance record all stop an old submission
+(E24-E30); so does a new requirement that supersedes nothing and leaves every
+named id identical (E23c). An entity nobody saw does not (E10, E32).
+
+**Eligibility leakage.** The writer recomputes through `selection.evidence_of` ->
+`selection.eligibility`, the one construction path, which is preference-blind by
+S7-C's own tests. The profile is used for identity, for matching and for the
+record - never in the eligibility computation. A candidate outside the current
+eligible set cannot be committed even when the preference ranks it first
+(E39-E41), and an unestablished population stops a commitment even from a screen
+rendered a moment ago (E31).
+
+**Considered/premise leakage.** The premise set is exactly the eligibility basis
+plus the comparison, the profile and the human input - five families, and less
+than half the design (E65). Rewording an advisory or a concern after the fact
+leaves the decision STANDING (E62, E63).
+
+**Non-select leakage.** Neither non-select action writes a SelectionDecision, and
+neither fabricates an `UnresolvedDecision`, an `Ambiguity` or a `Freedom` - the
+words appear nowhere in the module (E45-E48).
+
+**Existing-decision leakage.** A standing commitment is never superseded,
+withdrawn or replaced; a different submission gets `DECISION_ALREADY_STANDING`
+and the same one is idempotent (E55, E56, E56b).
+
+**Runner leakage.** `run_window2.py` contains no `materialize_human_decision_input`,
+no `commit_human_selection`, and neither family name (E75). The checkpoint
+reporter applies nothing and leaves state byte-identical (E74).
+
+Zero unresolved S7-E-owned blockers.
+
+### J.12 Scope
+
+No S7-F: nothing reopens, supersedes or withdraws a commitment, and no rerun is
+triggered by `REQUEST_MORE_EVIDENCE`. `_propagate` untouched — E77 asserts it
+carries no family name and no S7-E special case. S7-B, S7-C and S7-D production
+semantics untouched: E78 asserts every deterministic record byte-for-byte across
+a full human decision, and E78b that this step's only two `Op` families are
+`HumanDecisionInput` and `SelectionDecision`. No `COMMITTED_BRANCH` premise
+returned to s04b (E84).
+
+Regression, **secondary**: RUN 1320 · PASS 1320 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
+
+> **S7-E VERIFIED CLOSED — HUMAN REVIEW IS SNAPSHOT-BOUND, STALE-SAFE AND THE
+> ONLY SOURCE OF SELECTION COMMITMENT.**
+>
+> No commitment exists without an explicit human SELECT: a frontier of one, a
+> dominant candidate and a reviewer's recommendation are all evidence, and none
+> of them writes anything. The person decides from ONE immutable snapshot, and
+> the digest they submit is a digest of exactly that material - not of the design,
+> so an entity nobody saw does not stale an approval, and not of ids alone, so a
+> fact the eligible population was read from cannot move underneath one. At
+> submit the writer recomputes the review rather than trusting what was sent, and
+> re-establishes eligibility through S7-C's own semantics rather than reading the
+> comparison's candidate list. Any currently eligible candidate may be chosen,
+> including against both the frontier and the advisory; nothing outside the
+> eligible set may be chosen at all. A provider failure cannot veto a human, and
+> advisory wording forces a re-review before a submission and disturbs nothing
+> after a commitment. Declining to commit is an answer that writes no decision and
+> fabricates no open-item evidence, and a standing commitment is left exactly
+> where it is.
+>
+> **S-7 / U-8 IS NOT CLOSED.** S7-F is not started.
+
+---
+
+## S7-D FINAL STATUS
 
 > **S7-D VERIFIED CLOSED — MODEL RESPONSE SCHEMA IS CLOSED, STRICTLY TYPED AND
 > AUTHORITY-SAFE.**
