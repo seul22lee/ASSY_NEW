@@ -118,7 +118,8 @@ S8-I3 the dependency direction is producer → committed state → assurance, an
 `stages/*.py` module may import, invoke or reach an assurance check.
 S8-I4 every current S01–S04 check is inventoried exactly once as A producer
 validation · B bookkeeping · C independent assurance · D shared pure
-computation.
+computation. The inventory is data and the classification is a set equality
+(`test_s8_closure_hygiene.py`), reconstructed from the `237b1ba` baseline.
 S8-I5 every registered check declares check_id, independence_degree,
 claim_class, property_scope and its authoritative inputs.
 S8-I6 STRUCTURAL / PREMISE / EXTERNAL keep their architectural meaning; no
@@ -153,7 +154,14 @@ s08/s09, no provider in assurance, `.gitignoreJoey…` untouched.
 
 Every S01–S04 check at baseline, classified exactly once.
 
-**A — producer / write-boundary validation (30).** They refuse malformed writes
+The baseline is **41 module-level checks** in `stages/*.py` at `237b1ba`,
+reconstructed from that commit rather than remembered, and every one of them has
+exactly one disposition. The counts below are asserted as SET EQUALITIES by
+`tests/meta/test_s8_closure_hygiene.py`; the totals in the first version of this
+document did not reconcile with its own tables, which is precisely the kind of
+claim a closure record may not make.
+
+**A — producer / write-boundary validation (32).** They refuse malformed writes
 and they stay where they are. Deterministic is not independent: the module that
 wrote the value is the module deciding the value is well formed, which is the
 right place for that question and the wrong place for any other.
@@ -170,22 +178,40 @@ guarantees) and `motion_evidence` (records the computation performed, never its
 sufficiency). Neither is registered as assurance; both are named in
 `NOT_ASSURANCE` so their absence is visible rather than merely true.
 
-**C — independent assurance (11 capabilities, six of them relocated).**
-`quantitative_continuity` ← s02 `magnitude_fidelity`;
-`mobility_disposition_completeness` ← s03 `constraint_disposition` + the
-provenance half of `irrelevance`; `mobility_cross_premise_consistency` ← the
-cross-author half of `irrelevance`; `topology_to_spatial_fidelity` ← s04
-`joint_geometry`; `required_distinctness_non_degeneracy` and
-`state_configuration_realization` ← s04 `configuration_realization` +
-`transition_realization`; `commitment_validity` ← s04 `selection_gate`. Five have
-no predecessor: `consumer_sufficiency`, `reference_integrity`,
-`physical_relation_closure`, `reach_demand_realization`, and the split above.
+**C — independent assurance (11 capabilities, seven of them carrying relocated
+code).** SEVEN baseline checks were relocated, onto seven capabilities — two of
+them split, because one of the questions each was asking compares two producers
+and the other does not:
 
-**D — shared pure computation (3).** `_boxes`, `box_gap`, `required_contacts` and
-`coordinate_change_disagreement` are imported from the s04 module by the
-assurance layer. Box arithmetic has no opinion about whether a design is good,
-and a second implementation would be a second answer to "do these boxes touch".
-The direction that matters is untouched: no stage reaches assurance.
+| baseline check | pre-S8 owner | became |
+|---|---|---|
+| `magnitude_fidelity_check` | s02 | `quantitative_continuity` |
+| `constraint_disposition_check` | s03 | `mobility_disposition_completeness` |
+| `irrelevance_check` | s03 | `mobility_disposition_completeness` (names a scenario) **and** `mobility_cross_premise_consistency` (contradicted by a load) |
+| `joint_geometry_check` | s04 | `topology_to_spatial_fidelity` |
+| `configuration_realization_check` | s04 | `required_distinctness_non_degeneracy` **and** `state_configuration_realization` |
+| `transition_realization_check` | s04 | `state_configuration_realization` |
+| `selection_gate_check` | s04 | `commitment_validity` |
+
+**FOUR capabilities are new work with no baseline predecessor** and are counted
+separately, never as relocations: `consumer_sufficiency`, `reference_integrity`,
+`physical_relation_closure`, `reach_demand_realization`. Seven plus four is the
+whole registry, asserted as a set equality rather than as a sum.
+
+**D — shared pure computation (9 references, derived from the AST).** Seven
+callables and two constants, imported from the producing modules by the assurance
+layer: `_s04._boxes`, `_s04._thaw`, `_s04.box_gap`, `_s04.required_contacts`,
+`_s04._driving_joint`, `_s04.coordinate_change_disagreement`,
+`_s03.current_mobility_cells`, and the constants `_s03.CONSTRAINT_DRIVERS` and
+`_s03.QUALIFIER_WORDS`. Box arithmetic has no opinion about whether a design is
+good, and a second implementation would be a second answer to "do these boxes
+touch". The direction that matters is untouched: no stage reaches assurance.
+
+*Bounded debt, recorded not fixed:* this makes the assurance layer import two
+producing modules. It is class-D sharing by the S8-I4 rule and it is not a
+producer reaching assurance, but a future pass may prefer to lift the geometry
+helpers into a module neither side owns. That is a move, not a semantic change,
+and it is out of scope for a hygiene patch.
 
 ### The one check that had stopped describing its subject
 
@@ -255,10 +281,13 @@ helpers as class-D shared pure computation.
 `requests`, no socket and no `generate(`. A check that had to ask a model would
 be an opinion about an opinion.
 
-**S8-I4 inventory.** All 41 checks classified once: 30 producer validations that
-stay, 2 bookkeeping, 11 assurance capabilities (6 relocated, 5 new), 4 shared
-pure computations. The producer set and the registry are disjoint by name, which
-is asserted rather than described.
+**S8-I4 inventory.** All 41 baseline checks classified exactly once: 32 producer
+validations that stay, 2 bookkeeping, 7 relocated onto assurance capabilities.
+The registry is those 7 relocation targets plus 4 new capabilities, and the
+assurance layer shares 9 pure computations with the producing modules. Every one
+of those numbers is a set equality in `test_s8_closure_hygiene.py`, reconstructed
+from the baseline commit; the producer set and the registry are disjoint by
+name.
 
 **S8-I5 / S8-I6 / S8-I7 declarations.** Every registered check declares all five
 fields; four malformed declarations are refused by `Check.validate`, and an
