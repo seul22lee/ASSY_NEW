@@ -289,7 +289,11 @@ class Stage:
         req = GenerationRequest(
             purpose=self.purpose, stage_id=self.stage_id,
             prompt_text=self.prompt(inputs), max_output_tokens=32000,
-            deadline_s=120.0, temperature=0.0, seed=7)
+            deadline_s=120.0, temperature=0.0, seed=7,
+            # The run and attempt are the caller's to state, and the provider's
+            # record is required to carry both. Passing them here is what lets a
+            # model-run record be tied back to the run that produced it.
+            run_id=run_id, stage_attempt=attempt)
         result = provider.generate(req)
         if result.execution_status is not ExecutionStatus.SUCCESS or result.response is None:
             return StageOutcome(self.stage_id, result.execution_status, None,

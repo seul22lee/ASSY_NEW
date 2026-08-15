@@ -40,6 +40,8 @@ from typing import Any, Dict, List, Optional
 
 from ver3.assy_v3.providers.interfaces import (GenerationRequest, GenerationResponse,
                                                GenerationResult, ProviderCapabilities)
+from ver3.assy_v3.providers.resolution import (ExperimentOverrides, ParameterResolution,
+                                               resolve, verify_payload)
 from ver3.assy_v3.providers.status import ExecutionStatus
 
 from .env import require
@@ -54,6 +56,16 @@ DEFAULT_MODEL = "deepseek-chat"
 #: clamp is recorded, because a silently reduced cap produces a truncation the
 #: caller cannot explain.
 MAX_OUTPUT_TOKENS_CEILING = 8192
+
+#: DeepSeek's chat-completions API accepts no seed parameter. Declared here so the
+#: resolution boundary can record a requested seed as UNSUPPORTED rather than
+#: erasing it, and so `capabilities()` and the resolver cannot drift apart.
+SUPPORTS_SEED = False
+
+#: It accepts a response FORMAT MODE (`{"type": "json_object"}`) but no schema. The
+#: shape itself is stated by the prompt and enforced by the parser, which is a
+#: different mechanism and is recorded as one.
+SUPPORTS_RESPONSE_SCHEMA = False
 
 #: HTTP status -> execution status. Each maps to a DIFFERENT operational
 #: response: a rate limit can be waited out, an exhausted quota cannot.
@@ -97,7 +109,7 @@ class DeepSeekProvider:
     provider_id = "deepseek"
 
     def __init__(self, model: Optional[str] = None, base_url: Optional[str] = None,
-                 temperature: float = 1.0, top_p: Optional[float] = None,
+                 temperature: Optional[float] = None, top_p: Optional[float] = None,
                  json_object_mode: bool = True, max_attempts: int = 3,
                  backoff_s: float = 4.0, timeout_s: Optional[float] = None) -> None:
         # Presence is checked here so a misconfiguration fails immediately and
@@ -115,6 +127,33 @@ class DeepSeekProvider:
         #: One ModelRunRecord per attempt, in order. The caller drains this.
         self.records: List[Dict[str, Any]] = []
 
+    @property
+    def overrides(self) -> ExperimentOverrides:
+        """What THIS EXPERIMENT decides, separated from what a stage asks for.
+
+        These are the constructor arguments, named for what they are. `temperature`
+        defaults to None rather than to a number, so a provider built with no
+        argument states no opinion and the stage's request stands — a numeric
+        default would be an override nobody wrote down, which is the defect S9-B
+        exists to remove.
+        """
+        return ExperimentOverrides(
+            model=self.model, temperature=self.temperature, top_p=self.top_p,
+            deadline_s=self.timeout_s,
+            response_format="json_object" if self.json_object_mode else None)
+
+    def resolve(self, request: GenerationRequest) -> ParameterResolution:
+        """Stage request + experiment overrides -> the effective specification.
+
+        Resolved BEFORE the transport boundary, so the provider never reinterprets
+        a request after receiving it; `_attempt` builds its body from the result
+        and from nothing else.
+        """
+        return resolve(request, self.overrides,
+                       max_output_tokens_ceiling=MAX_OUTPUT_TOKENS_CEILING,
+                       supports_seed=SUPPORTS_SEED,
+                       supports_response_schema=SUPPORTS_RESPONSE_SCHEMA)
+
     # ------------------------------------------------------------ capability
     def capabilities(self) -> ProviderCapabilities:
         return ProviderCapabilities(
@@ -122,8 +161,9 @@ class DeepSeekProvider:
             context_window_tokens=65536, max_output_tokens=MAX_OUTPUT_TOKENS_CEILING,
             supports_structured_output=True,
             # DeepSeek accepts no seed parameter. Declaring support would be a
-            # determinism claim the provider does not make.
-            supports_seed=False,
+            # determinism claim the provider does not make. Read from the same
+            # constant the resolver uses, so the two cannot disagree.
+            supports_seed=SUPPORTS_SEED,
             requests_per_minute=None, tokens_per_minute=None, daily_quota_requests=None,
             notes=("Live HTTP provider. Serves a model alias, so the served model "
                    "is recorded per call and may differ from the one requested."))
@@ -154,23 +194,29 @@ class DeepSeekProvider:
     # --------------------------------------------------------------- one try
     def _attempt(self, request: GenerationRequest, attempt: int,
                  retry_wait_s: float) -> GenerationResult:
-        max_tokens = min(request.max_output_tokens or MAX_OUTPUT_TOKENS_CEILING,
-                         MAX_OUTPUT_TOKENS_CEILING)
-        clamped = (request.max_output_tokens or 0) > MAX_OUTPUT_TOKENS_CEILING
+        # EVERY generation parameter is resolved here, before the transport
+        # boundary, and the body is built from the resolution rather than from
+        # this object's attributes. That is what makes "what was sent" and "what
+        # was recorded" the same fact instead of two hopefully-equal ones.
+        resolution = self.resolve(request)
 
         payload: Dict[str, Any] = {
-            "model": self.model,
             "messages": [{"role": "user", "content": request.prompt_text}],
-            "max_tokens": max_tokens,
-            "temperature": self.temperature,
             "stream": False,
         }
-        if self.top_p is not None:
-            payload["top_p"] = self.top_p
-        if self.json_object_mode:
-            payload["response_format"] = {"type": "json_object"}
+        payload.update(resolution.payload_fragment())
 
-        timeout = self.timeout_s or request.deadline_s or 120.0
+        # A body that contradicts its own resolution is a malformed request, which
+        # the provider interface says is the one thing `generate` may raise on. It
+        # is deliberately NOT an ExecutionStatus: the status vocabulary is the
+        # contract's and describes how a call behaved, not how this code is wrong.
+        mismatches = verify_payload(resolution, payload)
+        if mismatches:
+            raise ValueError("payload contradicts the resolved parameters: "
+                             + "; ".join(mismatches))
+
+        max_tokens = resolution.effective("max_output_tokens")
+        timeout = resolution.transport_timeout() or 120.0
         started = time.time()
 
         # The header is built here and referenced nowhere else. It is not stored
@@ -180,6 +226,9 @@ class DeepSeekProvider:
             data=json.dumps(payload).encode("utf-8"),
             headers={"Content-Type": "application/json",
                      "Authorization": "Bearer " + self._api_key})
+        # The requested model is read back from the resolution rather than from
+        # self.model, so substitution is compared against what was actually sent.
+        requested_model = resolution.effective("model")
 
         status = ExecutionStatus.SUCCESS
         error_detail: Optional[str] = None
@@ -235,9 +284,9 @@ class DeepSeekProvider:
                     "output_tokens": u.get("completion_tokens", "NOT_REPORTED"),
                     "cached_input_tokens": u.get("prompt_cache_hit_tokens"),
                 }
-                if served and served != self.model:
+                if served and served != requested_model:
                     fallback = ("provider served %r for requested %r; recorded rather "
-                                "than assumed equivalent" % (served, self.model))
+                                "than assumed equivalent" % (served, requested_model))
                 if truncated:
                     # PR-05: never parsed, never repaired, reported as its own status.
                     status = ExecutionStatus.RESPONSE_TRUNCATED
@@ -255,12 +304,28 @@ class DeepSeekProvider:
         # Shaped by ver3/contracts/MODEL_RUN_RECORD_CONTRACT.yaml. No credential
         # appears in it; the only strings taken from the call are the prompt, the
         # response and the provider's own error text.
+        run_id = request.run_id or "NOT_REPORTED"
+        stage_attempt = request.stage_attempt if request.stage_attempt is not None else 1
         self.records.append({
+            # ---- identity (MODEL_RUN_RECORD_CONTRACT required fields) --------
+            # model_run_id is derived rather than random so that re-running the
+            # same attempt of the same stage in the same run names the same
+            # record. A random id would make two views of one attempt look like
+            # two attempts.
+            "model_run_id": "%s|%s|sa%s|a%d" % (run_id, request.stage_id,
+                                                stage_attempt, attempt),
+            "run_id": run_id,
             "stage_id": request.stage_id,
+            "stage_attempt": stage_attempt,
             "attempt_index": attempt,
             "purpose": request.purpose,
             "provider_id": self.provider_id,
-            "model_id_requested": self.model,
+            # The contract asks for "the exact model identifier requested AND, if
+            # different, the one served". model_id carries the requested identity;
+            # the requested/served pair below answers the second half precisely.
+            "model_id": requested_model,
+            "model_version_string": served or "NOT_REPORTED",
+            "model_id_requested": requested_model,
             "model_id_served": served or "NOT_REPORTED",
             "model_substitution": fallback,
             "request": {
@@ -272,11 +337,23 @@ class DeepSeekProvider:
                 "prompt_chars": len(request.prompt_text),
                 "max_output_tokens": max_tokens,
                 "max_output_tokens_clamped_from":
-                    request.max_output_tokens if clamped else None,
+                    request.max_output_tokens
+                    if resolution.by_name("max_output_tokens").status == "SENT_AS_CLAMPED"
+                    else None,
                 "deadline_s": timeout,
-                "parameters": {"temperature": self.temperature, "top_p": self.top_p,
-                               "response_format": "json_object" if self.json_object_mode
-                                                  else "text"},
+                # The effective values, taken from the same resolution the body
+                # was built from. Previously these were re-read off the adapter,
+                # so a record could agree with the object while disagreeing with
+                # the wire.
+                "parameters": {
+                    "temperature": resolution.effective("temperature"),
+                    "top_p": resolution.effective("top_p"),
+                    "response_format": resolution.effective("response_format"),
+                },
+                # The whole journey of every parameter: requested, override,
+                # effective, whether it was sent, and why not when it was not.
+                "parameter_resolution": resolution.as_record(),
+                "experiment_overrides": self.overrides.as_record(),
             },
             "response": {
                 "response_sha256": sha256(raw_text) if raw_text else None,
@@ -296,13 +373,17 @@ class DeepSeekProvider:
                        "duration_s": round(ended - started, 3),
                        "retry_wait_s": retry_wait_s},
             "determinism": {
-                "temperature": self.temperature, "top_p": self.top_p,
-                "seed": None,
+                "temperature": resolution.effective("temperature"),
+                "top_p": resolution.effective("top_p"),
+                "seed": resolution.effective("seed"),
                 # The provider offers no seed guarantee. Claiming determinism it
                 # does not offer would be worse than recording its absence.
-                "seed_honoured": "UNKNOWN",
+                # NOT_SUPPORTED is stronger than UNKNOWN and is only used when the
+                # provider declares it cannot carry a seed at all.
+                "seed_honoured": ("UNKNOWN" if SUPPORTS_SEED else "NOT_SUPPORTED"),
+                "seed_requested_by_stage": request.seed,
                 "temperature_requested_by_stage": request.temperature,
-                "temperature_actually_sent": self.temperature,
+                "temperature_actually_sent": resolution.effective("temperature"),
             },
         })
 

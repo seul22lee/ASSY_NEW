@@ -76,6 +76,16 @@ class GenerationRequest:
     seed: Optional[int] = None
     response_schema: Optional[Mapping[str, Any]] = None
     metadata: Mapping[str, str] = field(default_factory=dict)
+    #: The run and stage attempt this call belongs to. MODEL_RUN_RECORD_CONTRACT
+    #: requires both on every record, and the provider cannot know either: only
+    #: the caller does. They were previously absent, which left a record unable to
+    #: say which run or which attempt produced it — and a fixture promoted from
+    #: such a record could not state its own origin (S9-I5).
+    #:
+    #: Optional so that a caller with no run context is still well-formed; the
+    #: record then says NOT_REPORTED rather than carrying a fabricated identity.
+    run_id: Optional[str] = None
+    stage_attempt: Optional[int] = None
 
 
 @dataclass(frozen=True)
