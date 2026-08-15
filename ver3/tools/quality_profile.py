@@ -402,6 +402,34 @@ def profile_s02(out: Dict[str, Any], s01: Dict[str, Any]) -> Dict[str, Any]:
 #: Metrics that carry the engineering meaning. Structural conformance metrics
 #: are reported but excluded from the headline: a response that parses is a
 #: precondition for quality, not evidence of it.
+#: S-8 / U-9. The same names, split by the construct each describes: a metric
+#: about whether a required output is present is CONTRACT_COMPLETENESS, and one
+#: about whether a value survived from its source unchanged is FIDELITY. They
+#: were averaged together, which is why the average meant nothing.
+FIDELITY_KEYS = (
+    "clause_verbatim_is_verbatim", "requirement_wording_grounded_in_source",
+    "requirements_free_of_invented_numerals", "qualifiers_preserved_with_their_number",
+    "free_of_mechanism_leak", "source_sentences_represented_by_a_clause",
+    "obligations_showing_their_derivation", "load_cases_free_of_part_nouns",
+    "free_of_hidden_reconstruction", "free_of_premature_commitment",
+)
+
+COMPLETENESS_KEYS = tuple(k for k in (
+    "requirements_whose_locator_resolves", "freedoms_saying_why_they_are_free",
+    "ambiguities_saying_what_would_resolve_them", "actors_declaring_what_they_must_reach",
+    "scenarios_declaring_a_system_boundary", "produced_any_freedom",
+    "produced_any_ambiguity", "requirements_carried_into_an_obligation",
+    "obligations_with_resolvable_requirement_refs", "scope_is_discriminating_at_all",
+    "obligations_handed_to_a_later_stage", "declares_some_obligation_un_evidenceable",
+    "load_cases_declaring_a_reaction_site", "candidates_differ_in_principle",
+    "candidates_declaring_what_they_create", "candidates_with_an_evidence_verdict",
+    "produced_any_unresolved_decision", "unresolved_citing_what_keeps_them_open",
+    "unresolved_with_typed_alternatives", "upstream_entities_used_downstream",
+    "acceptance_contracts_with_predicates",
+))
+
+#: Kept as the enumeration of what is measured at all. It is NOT a construct and
+#: nothing may average across it.
 MATURITY_KEYS = (
     # s01
     "clause_verbatim_is_verbatim", "requirement_wording_grounded_in_source",
@@ -424,15 +452,46 @@ MATURITY_KEYS = (
 )
 
 
-def maturity_index(profile: Dict[str, Any]) -> Tuple[Optional[float], int]:
-    """Unweighted mean of the applicable maturity metrics, and how many applied.
+#: S-8 / U-9. THE HEADLINE IS RETIRED, not renamed.
+#:
+#: `maturity_index` was the unweighted mean of the metrics above, and the metrics
+#: above are not one construct: "obligations with resolvable requirement refs" is
+#: CONTRACT_COMPLETENESS, "requirements free of invented numerals" is FIDELITY of
+#: transport, and neither is EVIDENCE_MATURITY, which STATUS_SEMANTICS defines as
+#: a property of ONE VALUE. Averaging them produced a number that went up when a
+#: schema was filled and looked like engineering quality.
+#:
+#: It is not reappearing as quality, readiness or confidence. A single number
+#: over these metrics is invalid whatever it is called, because the invalidity is
+#: in the averaging and not in the noun.
+RETIRED_MATURITY_INDEX = (
+    "maturity_index averaged CONTRACT_COMPLETENESS, FIDELITY and evidence terms "
+    "into one scalar. Retired at S-8 / U-9; use construct_profile(), which "
+    "reports the groups separately, and the assurance layer for establishment.")
 
-    Unweighted on purpose: a weighting would encode an opinion about which kind
-    of engineering care matters most, and that opinion would be fitted to the
-    outputs in front of me.
+
+def construct_profile(profile: Dict[str, Any]) -> Dict[str, Any]:
+    """The same metrics, grouped by the construct each one actually describes.
+
+    Descriptive and per group. No cross-group total exists here and none may be
+    computed from what it returns: the two groups answer different questions, and
+    a mean of the two answers is a number about nothing. ENGINEERING
+    ESTABLISHMENT is deliberately absent - it is not a metric over model output,
+    it is what the independent assurance layer establishes property by property.
     """
-    vals = [profile[k] for k in MATURITY_KEYS
-            if k in profile and isinstance(profile.get(k), (int, float))]
-    if not vals:
-        return None, 0
-    return round(sum(vals) / float(len(vals)), 3), len(vals)
+    groups = {"CONTRACT_COMPLETENESS": COMPLETENESS_KEYS,
+              "FIDELITY": FIDELITY_KEYS}
+    out: Dict[str, Any] = {}
+    for construct, keys in groups.items():
+        values = [profile[k] for k in keys
+                  if k in profile and isinstance(profile.get(k), (int, float))]
+        out[construct] = {
+            "metrics": {k: profile[k] for k in keys if k in profile},
+            "applied": len(values),
+            # Within one construct, over metrics that describe the same thing.
+            # This is the only aggregation the contract permits, and it is
+            # reported per construct so it can never become a headline.
+            "mean": round(sum(values) / float(len(values)), 3) if values else None,
+        }
+    out["note"] = RETIRED_MATURITY_INDEX
+    return out

@@ -20,7 +20,6 @@ from ver3.assy_v3.stages.s01_requirement_capture import (                 # noqa
 from ver3.assy_v3.stages.s02_obligation_and_candidates import (           # noqa: E402
     S02ObligationAndCandidates, no_selection_check, load_case_check,
     candidate_distinctness_check, known_principle_check, evidence_route_check,
-    magnitude_fidelity_check,
     created_obligations_check, requirement_coverage_check, obligation_scope_check,
     candidate_coverage_check, openness_citation_check, actor_citation_check)
 from ver3.assy_v3.state import DesignState                                # noqa: E402
@@ -110,6 +109,17 @@ def _s02_reference_violations(case, probe=False):
             if "REFERENCE_NOT_AN_ID" in p or "DANGLING_REF" in p]
 
 
+
+def _assurance(state, check_id):
+    """The FAIL findings of one independent capability (S-8 / U-9).
+
+    The magnitude check moved: the stage that carried the number out of the
+    requirement is no longer the one certifying it did not sharpen it.
+    """
+    from ver3.assy_v3.assurance import problems
+    return problems(state, check_id)
+
+
 class _WindowBase(unittest.TestCase):
 
     def _require_applicable_s02(self, case, probe=False):
@@ -174,7 +184,8 @@ class TestWindow(_WindowBase):
                         ("mechanism_leak", mechanism_leakage_check(state, text)),
                         ("no_selection", no_selection_check(state)),
                         ("load_case", load_case_check(state)),
-                        ("magnitude_fidelity", magnitude_fidelity_check(state)),
+                        ("quantitative_continuity",
+                         _assurance(state, "quantitative_continuity")),
                         ("distinctness", candidate_distinctness_check(state)),
                         ("known_principle", known_principle_check(state)),
                         ("evidence_route", evidence_route_check(state)),
@@ -237,7 +248,8 @@ class TestProbesLiveReasoning(_WindowBase):
                         ("sharpening", sharpening_check(state, text)),
                         ("mechanism_leak", mechanism_leakage_check(state, text)),
                         ("load_case", load_case_check(state)),
-                        ("magnitude_fidelity", magnitude_fidelity_check(state)),
+                        ("quantitative_continuity",
+                         _assurance(state, "quantitative_continuity")),
                         ("known_principle", known_principle_check(state)),
                         ("requirement_coverage", requirement_coverage_check(state)),
                         ("obligation_scope", obligation_scope_check(state)),

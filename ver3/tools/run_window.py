@@ -24,9 +24,9 @@ from ver3.assy_v3.stages.s01_requirement_capture import (                 # noqa
 from ver3.assy_v3.stages.s02_obligation_and_candidates import (           # noqa: E402
     S02ObligationAndCandidates, no_selection_check, load_case_check,
     candidate_distinctness_check, known_principle_check, evidence_route_check,
-    magnitude_fidelity_check,
     created_obligations_check, requirement_coverage_check, obligation_scope_check,
     candidate_coverage_check, openness_citation_check, actor_citation_check)
+from ver3.assy_v3.assurance import problems as assurance_problems
 from ver3.assy_v3.state import DesignState                   # noqa: E402
 
 FIXTURES = os.path.join(REPO, "ver3", "assy_v3", "fixtures", "responses")
@@ -84,7 +84,12 @@ def run_case(case_id: str) -> Dict[str, Any]:
 
     for name, fn in (("no_selection", lambda: no_selection_check(state)),
                      ("load_case", lambda: load_case_check(state)),
-                     ("magnitude_fidelity", lambda: magnitude_fidelity_check(state)),
+                     # QUANTITATIVE CONTINUITY MOVED (S-8 / U-9). The stage that
+                     # carried the number no longer certifies that it did not
+                     # sharpen it; the independent layer reads the committed
+                     # Requirement and LoadCase and answers that.
+                     ("quantitative_continuity",
+                      lambda: assurance_problems(state, "quantitative_continuity")),
                      ("distinctness", lambda: candidate_distinctness_check(state)),
                      ("known_principle", lambda: known_principle_check(state)),
                      ("evidence_route", lambda: evidence_route_check(state)),

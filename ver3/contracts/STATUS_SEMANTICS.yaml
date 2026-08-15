@@ -78,20 +78,72 @@ status_construct_rules:
 status_construct_debt:
   note: >
     Recorded, not aliased. Creating a compatibility term would make the canonical
-    vocabulary ambiguous again, which is the defect being removed.
+    vocabulary ambiguous again, which is the defect being removed. CLEARED at
+    S-8 / U-9; the rows are kept because a debt that vanishes without a record of
+    how it was paid is indistinguishable from one nobody noticed.
   rows:
     - consumer: tools/build_pipeline_dashboard.py
-      current: "maps execution status to one badge and downgrades OK to WARN on any finding"
-      collapses: [EXECUTION, ENGINEERING_ESTABLISHMENT]
+      was: "maps execution status to one badge and downgrades OK to WARN on any finding"
+      collapsed: [EXECUTION, ENGINEERING_ESTABLISHMENT]
       migration_step: "S-8 / U-9"
+      resolved: >
+        The downgrade is gone rather than renamed. The badge reports EXECUTION -
+        whether the machinery ran - and engineering findings are reported on
+        their own axis by the assurance layer. A patch the write boundary refused
+        still downgrades it, because that IS an execution fact.
     - consumer: tools/quality_profile.py
-      current: "32 maturity metrics, all s01/s02"
-      collapses: [CONTRACT_COMPLETENESS, EVIDENCE_MATURITY]
+      was: "32 maturity metrics, all s01/s02"
+      collapsed: [CONTRACT_COMPLETENESS, EVIDENCE_MATURITY]
       migration_step: "S-8 / U-9"
+      resolved: >
+        `maturity_index` is retired. The metrics are grouped by the construct
+        each one actually describes - completeness of required outputs, fidelity
+        of transport - and `construct_profile` reports the groups separately.
+        Within-group means are permitted; there is no total and no successor
+        noun.
     - consumer: tools/compare_maturity.py
-      current: "compares profiles built from the above"
-      collapses: [EVIDENCE_MATURITY, ENGINEERING_ESTABLISHMENT]
+      was: "compares profiles built from the above"
+      collapsed: [EVIDENCE_MATURITY, ENGINEERING_ESTABLISHMENT]
       migration_step: "S-8 / U-9"
+      resolved: >
+        Comparison is per construct, side by side. There is no median maturity
+        index, because the two rows answer different questions and a number
+        between them answers neither.
+
+# =====================================================================
+# 1b. Independent assurance - S-8 / U-9
+#
+#     What a check is allowed to claim, declared before it runs. The vocabulary
+#     is closed on purpose: the failure being removed is a check quietly
+#     claiming more than its position entitles it to.
+# =====================================================================
+assurance_declarations:
+  independence_degree:
+    STRUCTURAL: "The checker reads the same declaration the writer wrote to."
+    PREMISE: "The checker compares premises authored by different producing stages."
+    EXTERNAL: >
+      The precondition is recomputed from committed state by a reader that is
+      not the actor being judged. The gate does not report that it fired.
+  claim_class:
+    BOOKKEEPING: "A count, a coverage, an enumeration completed. Establishes nothing."
+    FIDELITY: "A value survived transport between stages unchanged. Establishes nothing."
+    PROVENANCE_INTEGRITY: "Every claim traces to a resolvable premise. Establishes nothing."
+    ENGINEERING_CONSEQUENCE: >
+      Two independently authored premises agree about a physical property of the
+      design. The ONLY class that may raise a property to ENGINEERING_ESTABLISHED,
+      and it raises exactly the property it names.
+  rules:
+    - "A check declares both values before it runs; a missing declaration is a registry error."
+    - "An ENGINEERING_CONSEQUENCE claim from a single author is refused, unless the degree is EXTERNAL."
+    - "Establishment is per property. There is no stage-established and no design-established."
+    - >
+      Results are an immutable snapshot bound to the exact DesignState revision
+      they read. Assurance writes nothing into DesignState: the act of assessing
+      the design may not change the design being assessed.
+  emitters:
+    FALSE_ACCEPTANCE: >
+      `commitment_validity`. Before S-8 this status had no emitter at all - the
+      most serious defect class in the vocabulary, and nothing could report one.
 
 execution_statuses:
 

@@ -50,10 +50,10 @@ from ver3.assy_v3.stages.s01_requirement_capture import (                  # noq
 from ver3.assy_v3.stages.s02_obligation_and_candidates import (            # noqa: E402
     S02ObligationAndCandidates, no_selection_check, load_case_check,
     candidate_distinctness_check, known_principle_check, evidence_route_check,
-    magnitude_fidelity_check,
     created_obligations_check, requirement_coverage_check, obligation_scope_check,
     candidate_coverage_check, openness_citation_check, actor_citation_check)
 from ver3.assy_v3.providers.offline import OfflineReplayProvider           # noqa: E402
+from ver3.assy_v3.assurance import problems as assurance_problems
 from ver3.assy_v3.state import DesignState                    # noqa: E402
 from ver3.live_providers import env as env_loader                          # noqa: E402
 from ver3.live_providers.deepseek import DeepSeekProvider                  # noqa: E402
@@ -245,7 +245,12 @@ def run_trial(case_id: str, request_path: str, provider: DeepSeekProvider,
     state.apply(out2.patch)
     for name, fn in (("no_selection", lambda: no_selection_check(state)),
                      ("load_case", lambda: load_case_check(state)),
-                     ("magnitude_fidelity", lambda: magnitude_fidelity_check(state)),
+                     # QUANTITATIVE CONTINUITY MOVED (S-8 / U-9). The stage that
+                     # carried the number no longer certifies that it did not
+                     # sharpen it; the independent layer reads the committed
+                     # Requirement and LoadCase and answers that.
+                     ("quantitative_continuity",
+                      lambda: assurance_problems(state, "quantitative_continuity")),
                      ("distinctness", lambda: candidate_distinctness_check(state)),
                      ("known_principle", lambda: known_principle_check(state)),
                      ("evidence_route", lambda: evidence_route_check(state)),

@@ -254,7 +254,8 @@ class TestRefinementBarrier(_Barrier):
         self.call_s04b(state, invs["A"], self.realization())
         self.assertEqual([], state.family("SelectionDecision"))
         self.assertIsNone(cv.committed_branch(state, self.c))
-        self.assertEqual([], s04.selection_gate_check(state))
+        from ver3.assy_v3.assurance import problems
+        self.assertEqual([], problems(state, "commitment_validity"))
 
 
 class TestBarrierGenerality(_Barrier):

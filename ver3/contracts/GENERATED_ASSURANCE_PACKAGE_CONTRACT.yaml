@@ -150,6 +150,19 @@ nature:
       - "The package cannot omit an entity that its section selects for."
       - "Re-projecting an unchanged DesignState yields a byte-identical package."
       - "Fixing the package means fixing the state — never editing the output."
+  assurance_results:
+    statement: >
+      S-8 / U-9. Independent check results are an IMMUTABLE SNAPSHOT bound to the
+      exact DesignState revision they read, carrying that revision's hash and,
+      per check, the revisions of the entities the check actually used.
+    why: >
+      Writing them into DesignState would make assessing the design change the
+      design being assessed - the state hash would move and a second run would
+      see something the first did not. A snapshot satisfies the projection rule
+      above exactly: an unchanged state re-projects to a byte-identical result,
+      and a snapshot whose bound hash is not the current one is HISTORICAL and
+      says so rather than being presented as current.
+    never: "A stored finding family. That would be the second design world this section forbids."
   materialization:
     when: "After every stage, not only at S12."
     why: >

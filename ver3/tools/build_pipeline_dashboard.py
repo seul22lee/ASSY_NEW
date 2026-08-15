@@ -871,8 +871,12 @@ def render_stage_panel(case: Dict[str, Any], sid: str, meta: Dict[str, Any],
             status = BAD
         else:
             status = WARN
-        if status == OK and ev["findings"]:
-            status = WARN
+        # S-8 / U-9: THE DOWNGRADE IS GONE. A recorded finding is an engineering
+        # observation and this badge reports EXECUTION - whether the machinery
+        # ran. Turning OK into WARN because a check found something merged two
+        # constructs into one colour, and a reader could no longer tell a
+        # provider timeout from a mechanism that does not work. Findings are
+        # listed below, on their own axis.
         why = ("Recorded validator status %s, from %s%s. This page reports that "
                "verdict; it does not compute one."
                % (ev["status"], ev["source"],
@@ -898,7 +902,9 @@ def render_stage_panel(case: Dict[str, Any], sid: str, meta: Dict[str, Any],
             "this case. The output is shown; it is not shown as correct.")
     elif wstat != "SUCCESS":
         status = BAD
-    elif findings or wprob:
+    elif wprob:
+        # Patch-level problems are the write boundary refusing the stage's own
+        # output, which IS an execution fact. Engineering findings are not.
         status = WARN
     else:
         status = OK

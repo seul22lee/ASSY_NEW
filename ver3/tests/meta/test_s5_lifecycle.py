@@ -400,8 +400,10 @@ class TestRootCauseAudit(_Lifecycle):
         """`branch_membership` is the ConsumerView's relation, and the mobility
         lifecycle readers all use standing state."""
         self.assertIn("branch_membership", inspect.getsource(s03.current_dof_domain))
-        for fn in (s03.dof_totality_check, s03.constraint_disposition_check,
-                   s03.irrelevance_check):
+        from ver3.assy_v3.assurance import checks as _checks
+        for fn in (s03.dof_totality_check,
+                   _checks.mobility_disposition_completeness,
+                   _checks.mobility_cross_premise_consistency):
             src = inspect.getsource(fn)
             self.assertNotIn('state.family("MobilityExpectation")', src,
                              "%s reads history as current" % fn.__name__)

@@ -29,7 +29,8 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, REPO)
 
 from ver3.tools.quality_profile import (                                    # noqa: E402
-    MATURITY_KEYS, maturity_index, profile_s01, profile_s02)
+    COMPLETENESS_KEYS, FIDELITY_KEYS, MATURITY_KEYS, RETIRED_MATURITY_INDEX,
+    construct_profile, profile_s01, profile_s02)
 
 FIXTURES = os.path.join(REPO, "ver3", "assy_v3", "fixtures", "responses")
 PROBES = os.path.join(REPO, "ver3", "assy_v3", "probes")
@@ -74,10 +75,17 @@ def collect() -> List[Dict[str, Any]]:
         combined = dict(p1)
         if p2:
             combined.update({k: v for k, v in p2.items() if k != "_counts"})
-        index, applied = maturity_index(combined)
+        # S-8 / U-9: PER CONSTRUCT, AND NO TOTAL. What used to be one
+        # `maturity` number averaged completeness together with fidelity; the
+        # two describe different things and the mean described neither.
+        constructs = construct_profile(combined)
         rows.append({"case": case_id, "kind": kind_of(case_id), "origin": origin,
                      "trial": trial, "s01": p1, "s02": p2,
-                     "maturity": index, "metrics_applied": applied,
+                     "constructs": {c: constructs[c]["mean"]
+                                    for c in ("CONTRACT_COMPLETENESS", "FIDELITY")},
+                     "metrics_applied": {c: constructs[c]["applied"]
+                                         for c in ("CONTRACT_COMPLETENESS",
+                                                   "FIDELITY")},
                      "has_s02": p2 is not None})
 
     for root in (FIXTURES, PROBES):
@@ -110,9 +118,14 @@ def summarise(rows: List[Dict[str, Any]], title: str) -> None:
         return
     print("\n%s" % title)
     for r in sorted(rows, key=lambda r: (r["kind"], r["case"], r["trial"])):
-        idx = "  n/a" if r["maturity"] is None else "%5.3f" % r["maturity"]
-        print("   %-10s %-9s %-3s  maturity %s over %2d metrics   s02:%s"
-              % (r["case"], r["kind"], r["trial"], idx, r["metrics_applied"],
+        def cell(construct):
+            value = r["constructs"].get(construct)
+            return "  n/a" if value is None else "%5.3f" % value
+        print("   %-10s %-9s %-3s  completeness %s (%2d)  fidelity %s (%2d)  s02:%s"
+              % (r["case"], r["kind"], r["trial"],
+                 cell("CONTRACT_COMPLETENESS"),
+                 r["metrics_applied"]["CONTRACT_COMPLETENESS"],
+                 cell("FIDELITY"), r["metrics_applied"]["FIDELITY"],
                  "yes" if r["has_s02"] else "NO"))
 
 
@@ -159,20 +172,25 @@ def main() -> int:
     summarise(recorded, "RECORDED (agent-authored) — the current quality bar")
     summarise(live, "LIVE (independent provider) — what is being stabilised")
 
-    def med(rows, pred):
-        v = [r["maturity"] for r in rows if pred(r) and r["maturity"] is not None]
+    def med(rows, pred, construct):
+        v = [r["constructs"][construct] for r in rows
+             if pred(r) and r["constructs"].get(construct) is not None]
         return statistics.median(v) if v else None
 
-    print("\nMEDIAN MATURITY INDEX")
-    for label, rs in (("recorded", recorded), ("live", live)):
-        b = med(rs, lambda r: r["kind"] == "benchmark")
-        p = med(rs, lambda r: r["kind"] == "probe")
-        print("   %-9s benchmarks %s   probes %s   %s"
-              % (label,
-                 "  n/a" if b is None else "%5.3f" % b,
-                 "  n/a" if p is None else "%5.3f" % p,
-                 "" if (b is None or p is None) else
-                 "probe-vs-benchmark gap %+.3f" % (p - b)))
+    # PER CONSTRUCT, SIDE BY SIDE. There is no median maturity index any more,
+    # and no successor to it: the two rows below answer different questions and
+    # a number between them answers neither.
+    print("\nMEDIAN, PER CONSTRUCT (%s)" % RETIRED_MATURITY_INDEX.split(".")[0])
+    for construct in ("CONTRACT_COMPLETENESS", "FIDELITY"):
+        for label, rs in (("recorded", recorded), ("live", live)):
+            b = med(rs, lambda r: r["kind"] == "benchmark", construct)
+            p = med(rs, lambda r: r["kind"] == "probe", construct)
+            print("   %-22s %-9s benchmarks %s   probes %s   %s"
+                  % (construct, label,
+                     "  n/a" if b is None else "%5.3f" % b,
+                     "  n/a" if p is None else "%5.3f" % p,
+                     "" if (b is None or p is None) else
+                     "probe-vs-benchmark gap %+.3f" % (p - b)))
 
     if live:
         print("\nPER-METRIC, LIVE ONLY — benchmarks as the reference, probes as the evaluation set")

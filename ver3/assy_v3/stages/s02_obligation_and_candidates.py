@@ -587,39 +587,6 @@ def _reads_as_a_role(text: str) -> bool:
     return len(re.findall(r"[A-Za-z]+", t)) >= 3
 
 
-def magnitude_fidelity_check(state) -> List[str]:
-    """S02. A magnitude carried from a requirement keeps that requirement's hedge.
-
-    s01 is protected against sharpening by `sharpening_check`; nothing protected
-    s02, and a live run duly turned "approximately 1 kg" into "1 kg" one call in
-    eighteen. The stage cannot re-read the source (INV-002), so the comparison is
-    against the Requirement entities it was given, which is where the quantity
-    legitimately reaches it.
-    """
-    hedged: List[str] = []
-    for r in state.family("Requirement"):
-        text = str(r.get("statement_verbatim", "")).lower()
-        for q in QUALIFIER_WORDS:
-            if re.search(r"\b%s\b" % re.escape(q), text):
-                hedged.append(text)
-                break
-    problems = []
-    for l in state.family("LoadCase"):
-        magnitude = str(l.get("magnitude_or_status", ""))
-        if not magnitude or magnitude == "UNSUPPORTED":
-            continue
-        low = magnitude.lower()
-        if any(re.search(r"\b%s\b" % re.escape(q), low) for q in QUALIFIER_WORDS):
-            continue
-        for number in re.findall(r"\d+(?:\.\d+)?", magnitude):
-            if any(number in h for h in hedged):
-                problems.append(
-                    "MAGNITUDE_SHARPENED: %s -> %r drops the qualifier the "
-                    "requirement carried with %s" % (l["entity_id"], magnitude, number))
-                break
-    return problems
-
-
 def load_case_check(state) -> List[str]:
     """S02-C4/C5/C6. Load cases are candidate-independent and complete."""
     out = []

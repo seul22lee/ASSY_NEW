@@ -79,6 +79,18 @@ def s04b_response(joint, configs, group, coords=(0, 90), changed=None,
     }
 
 
+
+def _assurance(state, check_id):
+    """The FAIL findings of one independent capability.
+
+    S-8 / U-9 moved these out of the s04 module. The computation is the same and
+    the position is not: the stage that authored the placement no longer reports
+    whether the placement realizes what s03 declared.
+    """
+    from ver3.assy_v3.assurance import problems
+    return problems(state, check_id)
+
+
 class _S04Chain(_Chain):
     """s01..s03 through the real chain, then s04 on a named branch."""
 
@@ -315,11 +327,11 @@ class TestRealization(_S04Chain):
 
     def test_G6_declared_distinctness_that_realization_violates_is_a_finding(self):
         ok, _ = self.spatial(basis=self.BASIS)
-        self.assertEqual([], s04.configuration_realization_check(ok))
+        self.assertEqual([], _assurance(ok, "required_distinctness_non_degeneracy"))
         same = s04b_response("JNT-A", ["CFG-C0A", "CFG-C1A"], "RGP-G0A",
                              coords=(30, 30), changed=[])
         bad, _ = self.spatial(s04b=same, basis=self.BASIS)
-        found = s04.configuration_realization_check(bad)
+        found = _assurance(bad, "required_distinctness_non_degeneracy")
         self.assertTrue(any("DECLARED_DISTINCTNESS_NOT_REALIZED" in p for p in found),
                         found)
 
@@ -328,25 +340,25 @@ class TestRealization(_S04Chain):
         same = s04b_response("JNT-A", ["CFG-C0A", "CFG-C1A"], "RGP-G0A",
                              coords=(30, 30), changed=[])
         state, _ = self.spatial(s04b=same)
-        self.assertEqual([], s04.configuration_realization_check(state))
+        self.assertEqual([], _assurance(state, "required_distinctness_non_degeneracy"))
 
     def test_G7_a_declared_change_the_endpoints_do_not_make_is_a_finding(self):
         state, _ = self.spatial(
             s04b=s04b_response("JNT-A", ["CFG-C0A", "CFG-C1A"], "RGP-G0A",
                                coords=(30, 30), changed=["JNT-A"]))
-        found = s04.transition_realization_check(state)
+        found = _assurance(state, "state_configuration_realization")
         self.assertTrue(any("DECLARED_CHANGE_NOT_REALIZED" in p for p in found), found)
 
     def test_G7b_a_change_that_happens_and_is_not_declared_is_also_a_finding(self):
         state, _ = self.spatial(
             s04b=s04b_response("JNT-A", ["CFG-C0A", "CFG-C1A"], "RGP-G0A",
                                coords=(0, 90), changed=[]))
-        found = s04.transition_realization_check(state)
+        found = _assurance(state, "state_configuration_realization")
         self.assertTrue(any("UNDECLARED_COORDINATE_CHANGE" in p for p in found), found)
 
     def test_G7c_a_truthful_transition_is_quiet(self):
         state, _ = self.spatial()
-        self.assertEqual([], s04.transition_realization_check(state))
+        self.assertEqual([], _assurance(state, "state_configuration_realization"))
 
 
 # =====================================================================
@@ -482,7 +494,7 @@ class TestSequencingAndFreeze(_S04Chain):
     def test_no_selection_decision_was_fabricated(self):
         state, _ = self.spatial()
         self.assertEqual([], state.family("SelectionDecision"))
-        self.assertEqual([], s04.selection_gate_check(state))
+        self.assertEqual([], _assurance(state, "commitment_validity"))
 
     def test_the_retired_premise_is_recorded_not_deleted(self):
         """S-6 staged it behind S-7. S7-A retired it instead: activating it would

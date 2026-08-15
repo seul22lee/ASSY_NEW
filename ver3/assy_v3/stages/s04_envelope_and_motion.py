@@ -981,28 +981,6 @@ def envelope_coverage_check(state) -> List[str]:
     return problems
 
 
-def joint_geometry_check(state) -> List[str]:
-    """Bodies a joint connects must actually meet.
-
-    Computed, not asserted: two boxes joined by a joint whose envelopes are
-    disjoint describe a mechanism whose parts do not touch. This is the check
-    that catches an arrangement produced without regard to the topology.
-    """
-    boxes = _boxes(state)
-    mech = {f: [_thaw(e) for e in state.family(f)]
-            for f in ("RigidGroup", "Joint", "Interface")}
-    problems = []
-    for pb, cb in required_contacts(mech):
-        a, b = boxes.get(pb), boxes.get(cb)
-        if not (a and b):
-            continue
-        gap = box_gap(a, b)
-        if gap > 0:
-            problems.append("JOINED_BODIES_DO_NOT_MEET: the topology connects %s "
-                            "and %s, but they are placed %.3g apart" % (pb, cb, gap))
-    return problems
-
-
 def configuration_interference_check(state) -> List[str]:
     """S04A-C4. AABB interference per configuration, reported CONSERVATIVELY.
 
@@ -1202,90 +1180,6 @@ def _driving_joint(state, group: str) -> Optional[Dict[str, Any]]:
     return None
 
 
-def configuration_realization_check(state) -> List[str]:
-    """A configuration differs from its siblings on the basis s03 DECLARED.
-
-    Conditional on the declaration, never "all configurations must differ": the
-    premise is `Configuration.distinguishing_basis`, authored by s03 because what
-    makes two states different is a mobility statement. Without this, two
-    configurations differ by having different ids, and a realization that gives
-    them identical coordinates cannot be told from one that does not.
-
-    No state name appears here. The basis names a rigid group and a DOF; the
-    joint that drives that group carries the coordinate.
-    """
-    problems = []
-    by_config = {}
-    for st in state.standing("State"):
-        by_config[st.get("configuration") or st.get("name")] = st
-    for cfg in state.standing("Configuration"):
-        basis = cfg.get("distinguishing_basis")
-        if not isinstance(basis, list) or not basis:
-            continue
-        mine = by_config.get(cfg["entity_id"])
-        if mine is None:
-            problems.append("CONFIGURATION_NOT_REALIZED: %s declares a "
-                            "distinguishing basis and has no realized state"
-                            % cfg["entity_id"])
-            continue
-        for item in basis:
-            if not isinstance(item, dict):
-                continue
-            group, dof = item.get("rigid_group"), item.get("dof")
-            others = [o for o in (item.get("differs_from") or [])
-                      if o in by_config] or [k for k in by_config
-                                             if k != cfg["entity_id"]]
-            drive = _driving_joint(state, group)
-            if drive is None:
-                problems.append("DISTINCTNESS_NOT_CHECKABLE: %s names group %s, "
-                                "which no joint drives" % (cfg["entity_id"], group))
-                continue
-            jid = drive["entity_id"]
-            q = (mine.get("joint_coordinates") or {}).get(jid)
-            for other in others:
-                p = (by_config[other].get("joint_coordinates") or {}).get(jid)
-                if q is None or p is None:
-                    problems.append(
-                        "DISTINCTNESS_NOT_CHECKABLE: %s and %s do not both state a "
-                        "coordinate for %s" % (cfg["entity_id"], other, jid))
-                elif q == p:
-                    problems.append(
-                        "DECLARED_DISTINCTNESS_NOT_REALIZED: %s and %s must differ "
-                        "on %s/%s and both realize %s at %r"
-                        % (cfg["entity_id"], other, group, dof, jid, q))
-    return problems
-
-
-def transition_realization_check(state) -> List[str]:
-    """A transition's declared changed coordinates are the ones that change.
-
-    Both directions, because both are wrong. A declared change the endpoints do
-    not make is a claim about motion that does not happen; a coordinate that
-    changes without being declared is motion nobody said would occur, and the
-    clearance evidence was gathered for a different transition than the one the
-    design describes.
-    """
-    problems = []
-    states = {st["entity_id"]: st for st in state.standing("State")}
-    for t in state.standing("Transition"):
-        a, b = states.get(t.get("from_state")), states.get(t.get("to_state"))
-        if not (a and b):
-            continue
-        ca = a.get("joint_coordinates") or {}
-        cb = b.get("joint_coordinates") or {}
-        not_realized, undeclared = coordinate_change_disagreement(
-            ca, cb, t.get("changed_coordinates"))
-        for j in not_realized:
-            problems.append("DECLARED_CHANGE_NOT_REALIZED: %s says %s changes and "
-                            "its endpoints hold it at %r"
-                            % (t["entity_id"], j, ca.get(j)))
-        for j in undeclared:
-            problems.append("UNDECLARED_COORDINATE_CHANGE: %s moves %s from %r to "
-                            "%r and does not declare it"
-                            % (t["entity_id"], j, ca.get(j), cb.get(j)))
-    return problems
-
-
 def swept_clearance_check(state) -> List[str]:
     """S04B. Sweep every moving group along every transition and test occupancy.
 
@@ -1449,20 +1343,4 @@ def load_path_reaction_check(state) -> List[str]:
                 problems.append("LOADPATH_HOPS_NOT_CONNECTED: %s and %s in %s share "
                                 "no body, so the load has no route from one to the "
                                 "other" % (x, y, p["entity_id"]))
-    return problems
-
-
-def selection_gate_check(state) -> List[str]:
-    """INV-007. A SelectionDecision may exist only with equal-coverage evidence,
-    and a tie is an UnresolvedDecision, never a pick."""
-    problems = []
-    for d in state.family("SelectionDecision"):
-        if not d.get("equal_coverage_confirmed"):
-            problems.append("SELECTION_WITHOUT_EQUAL_COVERAGE: %s" % d["entity_id"])
-        if not (d.get("evidence") or []):
-            problems.append("SELECTION_WITHOUT_EVIDENCE: %s" % d["entity_id"])
-    blob = json.dumps([e for e in state.family("SelectionDecision")]).lower()
-    for token in ('"score', '"rank', '"best_'):
-        if token in blob:
-            problems.append("SELECTION_BY_SCORE: %s" % token)
     return problems

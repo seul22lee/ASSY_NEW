@@ -22,8 +22,6 @@ import unittest
 from . import _fixtures, _paths                                        # noqa: F401
 
 import ver3.assy_v3.view.consumer_view as cv                           # noqa: E402
-from ver3.assy_v3.stages.s04_envelope_and_motion import (              # noqa: E402
-    selection_gate_check)
 from ver3.assy_v3.state.design_state import (Contracts, ContractError,  # noqa: E402
                                              DesignState)
 from ver3.assy_v3.state.patch import Op, StagePatch                     # noqa: E402
@@ -212,16 +210,23 @@ class TestFrozenSemantics(_Base):
 # =====================================================================
 class TestNoCompetingAuthority(_Base):
 
-    def test_the_old_gate_check_authors_nothing(self):
-        """It validates a decision that already exists. Left in place because
-        relocating checks is S-8 / U-9's, and classified so it cannot be mistaken
-        for the owner of selection."""
+    def test_the_gate_check_moved_out_and_still_authors_nothing(self):
+        """S-8 / U-9 RELOCATED IT, which is what this test was waiting for.
+
+        It used to live in the s04 module - the gate reporting that the gate had
+        fired correctly, which §14 calls the highest self-fulfilling risk on the
+        matrix. It is now `commitment_validity` in the independent layer,
+        EXTERNAL, and it recomputes the preconditions from committed records
+        rather than reading a field the committing code wrote."""
         import inspect
-        src = inspect.getsource(selection_gate_check)
+        from ver3.assy_v3.assurance import checks, problems
+        from ver3.assy_v3.stages import s04_envelope_and_motion as s04mod
+        self.assertFalse(hasattr(s04mod, "selection_gate_check"))
+        src = inspect.getsource(checks.commitment_validity)
         for writing in ('Op("', ".apply(", "StagePatch("):
-            self.assertNotIn(writing, src, "the gate check writes state")
+            self.assertNotIn(writing, src, "the commitment check writes state")
         s = DesignState(run_id="gate")
-        self.assertEqual([], selection_gate_check(s))
+        self.assertEqual([], problems(s, "commitment_validity"))
 
     def test_no_contract_places_selection_between_the_s04_passes(self):
         s04 = _paths.contract(__import__("os").path.join("stages", "S04_CONTRACT.yaml"))

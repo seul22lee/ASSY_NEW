@@ -23,7 +23,7 @@ from ver3.assy_v3.stages.s02_obligation_and_candidates import (        # noqa: E
     S02ObligationAndCandidates)
 from ver3.assy_v3.stages.s03_topology_and_mobility import (            # noqa: E402
     DOF_NAMES, S03BMobilityAndAssembly, S03TopologyAndMobility,
-    derive_mobility, irrelevance_check, constraint_disposition_check)
+    derive_mobility)
 from ver3.assy_v3.state.design_state import Contracts, DesignState      # noqa: E402
 from .test_s02_s03b_integration import S02, _Canned                     # noqa: E402
 
@@ -57,6 +57,17 @@ def cell(grid, group, cfg, dof):
 # =====================================================================
 # PRODUCER SINGULARITY
 # =====================================================================
+
+def _assurance(state, check_id):
+    """The FAIL findings of one independent capability.
+
+    S-8 / U-9 moved these out of the stage module: the code is the same
+    and the position is not, which is the whole of what independence is.
+    """
+    from ver3.assy_v3.assurance import problems
+    return problems(state, check_id)
+
+
 class TestProducerSingularity(unittest.TestCase):
     """One live route into MobilityExpectation, and it is the derived one.
 
@@ -307,8 +318,15 @@ class TestIrrelevancePremise(_fixtures.StateBuilder, unittest.TestCase):
 
     def test_GEN_IRR_02_the_same_claim_fails_when_the_load_fact_changes(self):
         """Only the scenario the claim rests on differs between these two."""
-        self.assertEqual([], irrelevance_check(self._state_with("SCN-IDLE")))
-        found = irrelevance_check(self._state_with("SCN-LOAD"))
+        # S-8 / U-9: the same computation, asked by the independent layer. A
+        # DOF called irrelevant in a scenario that carries a load is a
+        # contradiction between two AUTHORS - s02 wrote the load case and s03
+        # wrote the disposition - which is why it is the check that establishes
+        # rather than merely reports.
+        self.assertEqual([], _assurance(self._state_with("SCN-IDLE"),
+                                        "mobility_cross_premise_consistency"))
+        found = _assurance(self._state_with("SCN-LOAD"),
+                           "mobility_cross_premise_consistency")
         self.assertTrue(found and "IRRELEVANCE_CONTRADICTED" in found[0], found)
 
     def test_GEN_IRR_03_what_a_bare_scenario_id_does_and_does_not_establish(self):
@@ -323,7 +341,8 @@ class TestIrrelevancePremise(_fixtures.StateBuilder, unittest.TestCase):
             "MobilityExpectation", "dispositions")["record_field_semantics"]
         self.assertEqual("Scenario", spec["scenario"]["target"])
         self.assertFalse(spec["scenario"]["resolvable"])
-        self.assertEqual([], irrelevance_check(self._state_with("SCN-IDLE")))
+        self.assertEqual([], _assurance(self._state_with("SCN-IDLE"),
+                                        "mobility_cross_premise_consistency"))
 
     def test_GEN_IRR_04_a_claim_that_reaches_no_cell_is_reported(self):
         found = S03BMobilityAndAssembly()._s5_mobility_problems(
@@ -529,8 +548,8 @@ class TestCanonicalProbe(_fixtures.StateBuilder, unittest.TestCase):
 
     def test_PROBE_06_the_stage_checks_pass_on_it(self):
         s, _ = self.chain()
-        self.assertEqual([], constraint_disposition_check(s))
-        self.assertEqual([], irrelevance_check(s))
+        self.assertEqual([], _assurance(s, "mobility_disposition_completeness"))
+        self.assertEqual([], _assurance(s, "mobility_cross_premise_consistency"))
         self.assertEqual([], s03.dof_totality_check(s))
 
     def test_PROBE_07_it_does_not_force_success(self):

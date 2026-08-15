@@ -40,20 +40,20 @@ from ver3.assy_v3.stages.s02_obligation_and_candidates import (             # no
     S02ObligationAndCandidates)
 from ver3.assy_v3.stages.s03_topology_and_mobility import (                 # noqa: E402
     S03BMobilityAndAssembly, S03TopologyAndMobility, assembly_acyclic_check,
-    constraint_disposition_check, current_mobility_cells,
+    current_mobility_cells,
     disposition_completeness,
     legacy_shapes_in_recording,
     compliance_check, dof_totality_check, functional_region_check,
-    interface_classification_check, irrelevance_check, load_path_check,
+    interface_classification_check, load_path_check,
     no_magnitude_check, no_selection_check_s03, obligation_ownership_check,
     retention_check, simulation_completeness_check)
 from ver3.assy_v3.stages.s04_envelope_and_motion import (                   # noqa: E402
     S04AEnvelopeAndReach, S04BPlacementAndMotion, assembly_path_check,
-    configuration_interference_check, configuration_realization_check,
-    envelope_coverage_check, joint_frame_check, joint_geometry_check,
+    configuration_interference_check,
+    envelope_coverage_check, joint_frame_check,
     spatial_commitment_check,
     load_path_reaction_check, motion_evidence_check, region_occupancy_check,
-    selection_gate_check, swept_clearance_check, transition_realization_check)
+    swept_clearance_check)
 from ver3.assy_v3.stages.feasibility import (                              # noqa: E402
     evaluate_candidate_feasibility)
 from ver3.assy_v3.stages.selection import (                                 # noqa: E402
@@ -64,6 +64,8 @@ from ver3.assy_v3.stages.selection_advisory import (                        # no
     ADVISORY_NOT_APPLICABLE, COMPARISON_AMBIGUOUS, SelectionEngineeringReview)
 from ver3.assy_v3.stages.selection_decision import (                        # noqa: E402
     build_human_review_snapshot)
+from ver3.assy_v3.assurance import run_assurance                            # noqa: E402
+from ver3.assy_v3.assurance.status import report as assurance_report        # noqa: E402
 from ver3.assy_v3.lifecycle.s7_reconcile import (                           # noqa: E402
     ABSENT, CURRENT_COMMITMENT, REVIEW_NOT_READY, UNSPECIFIED,
     current_commitment, reconcile_s7)
@@ -79,8 +81,6 @@ OUT_ROOT = os.path.join(REPO, "ver3", "live_runs", "window2")
 
 S03_CHECKS = (
     ("dof_totality", dof_totality_check),
-    ("constraint_disposition", constraint_disposition_check),
-    ("irrelevance", irrelevance_check),
     ("assembly_acyclic", assembly_acyclic_check),
     ("load_path", load_path_check),
     ("interface_classification", interface_classification_check),
@@ -107,18 +107,14 @@ _RETIRED_S03_OWNED = "replaced by ConsumerView derivation (U-3)"
 
 S04_CHECKS = (
     ("envelope_coverage", envelope_coverage_check),
-    ("joint_geometry", joint_geometry_check),
     ("configuration_interference", configuration_interference_check),
     ("region_occupancy", region_occupancy_check),
     ("spatial_commitment", spatial_commitment_check),
     ("joint_frame", joint_frame_check),
     ("motion_evidence", motion_evidence_check),
-    ("configuration_realization", configuration_realization_check),
-    ("transition_realization", transition_realization_check),
     ("swept_clearance", swept_clearance_check),
     ("assembly_path", assembly_path_check),
     ("load_path_reaction", load_path_reaction_check),
-    ("selection_gate", selection_gate_check),
 )
 
 
@@ -630,6 +626,28 @@ def run_selection_advisory(case_id: str, state, provider, trial: int) -> Dict[st
 AWAITING_HUMAN_DECISION = "AWAITING_HUMAN_DECISION"
 
 
+def run_assurance_pass(case_id: str, state, trial: int,
+                       attempts=()) -> Dict[str, Any]:
+    """Ask the independent layer what the committed design establishes.
+
+    AFTER THE STATE IS COMMITTED, and never before: assurance reads what the
+    pipeline actually wrote, not what a stage was about to write. It authors
+    nothing, calls no provider, and cannot change a verdict it is judging.
+
+    The four constructs come back side by side. An engineering finding here does
+    NOT touch the execution statuses recorded above it - a design whose geometry
+    is wrong and a run whose provider timed out are two different situations, and
+    one symbol that can mean both eventually means neither.
+    """
+    rec: Dict[str, Any] = {"case": case_id, "trial": trial, "failures": []}
+    snapshot = run_assurance(state)
+    rec["assurance"] = snapshot.as_dict()
+    rec["status_constructs"] = assurance_report(snapshot, execution=list(attempts))
+    rec["established_properties"] = snapshot.established()
+    rec["engineering_findings"] = [f.as_dict() for f in snapshot.findings("FAIL")]
+    return rec
+
+
 def run_selection_checkpoint(case_id: str, state, trial: int) -> Dict[str, Any]:
     """Report whether a human could now be asked to decide. IT DOES NOT DECIDE.
 
@@ -841,6 +859,15 @@ def main() -> int:
                   % (trial, case_id, str(checkpoint.get("checkpoint_status")),
                      "digest=%s" % str(checkpoint.get("premise_digest"))[:12]))
             trials.append(checkpoint)
+            # THE INDEPENDENT LAYER, LAST. Everything above it wrote; this only
+            # reads, and what it reports is a separate axis rather than a
+            # downgrade of anything already recorded.
+            assured = run_assurance_pass(case_id, accumulated, trial,
+                                         attempts=trials)
+            print("  t%d %-8s ASSURANCE established=%-3d finding(s)=%d"
+                  % (trial, case_id, len(assured["established_properties"]),
+                     len(assured["engineering_findings"])))
+            trials.append(assured)
             with open(os.path.join(out_dir, "trials.json"), "w") as fh:
                 json.dump(trials, fh, indent=1, sort_keys=True)
 
