@@ -156,7 +156,13 @@ Every S01–S04 check at baseline, classified exactly once.
 
 The baseline is **41 module-level checks** in `stages/*.py` at `237b1ba`,
 reconstructed from that commit rather than remembered, and every one of them has
-exactly one disposition. The counts below are asserted as SET EQUALITIES by
+exactly one disposition. The reconstruction is STAGE-QUALIFIED: the exact-set
+proof compares `(stage, check)` pairs, so it covers both the identity of every
+baseline check and which producer owned it — `magnitude_fidelity_check` was
+s02's, `irrelevance_check` s03's, `selection_gate_check` s04's — and the
+per-stage distribution (3 · 12 · 13 · 13) is counted from the recovered pairs
+rather than maintained beside them. Ownership decides disposition, so asserting
+the names alone would have proved the smaller half. The counts below are asserted as SET EQUALITIES by
 `tests/meta/test_s8_closure_hygiene.py`; the totals in the first version of this
 document did not reconcile with its own tables, which is precisely the kind of
 claim a closure record may not make.

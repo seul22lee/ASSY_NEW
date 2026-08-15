@@ -167,12 +167,15 @@ def _checks_in(source: str):
 # =====================================================================
 class TestBaselineInventory(unittest.TestCase):
 
-    def test_S8H_01_the_record_is_the_actual_pre_s8_baseline(self):
-        """Reconstructed from the commit the record names, not remembered.
+    def recovered_baseline(self):
+        """(stage, check) for every check in `stages/*.py` at the baseline commit.
 
-        Skipped rather than guessed where git is unavailable: an inventory test
-        that silently passed on a missing baseline would be the same defect it
-        exists to remove.
+        STAGE-QUALIFIED, because the name alone proves the wrong thing. A set of
+        bare names shows that the inventory lists the right checks and says
+        nothing about whether `magnitude_fidelity_check` was s02's or
+        `selection_gate_check` was s04's - and the disposition of each one turns
+        on which producer owned it. Recovering the pair makes the ownership
+        column falsifiable against the commit instead of asserted beside it.
         """
         recovered = set()
         for stage, path in sorted(STAGE_FILES.items()):
@@ -182,10 +185,38 @@ class TestBaselineInventory(unittest.TestCase):
             if shown.returncode != 0:
                 self.skipTest("the %s baseline is not reachable from this tree"
                               % BASELINE_COMMIT)
-            recovered |= _checks_in(shown.stdout)
-        self.assertEqual(recovered, set(BASELINE_INVENTORY),
-                         "the recorded inventory is not the baseline")
+            recovered |= {(stage, name) for name in _checks_in(shown.stdout)}
+        return recovered
+
+    def test_S8H_01_the_record_is_the_actual_pre_s8_baseline(self):
+        """Reconstructed from the commit the record names, not remembered.
+
+        Skipped rather than guessed where git is unavailable: an inventory test
+        that silently passed on a missing baseline would be the same defect it
+        exists to remove.
+        """
+        recovered = self.recovered_baseline()
+        declared = {(stage, name) for name, (stage, _d, _t)
+                    in BASELINE_INVENTORY.items()}
+        self.assertEqual(recovered, declared,
+                         "the recorded inventory is not the baseline, in name "
+                         "or in who owned it")
         self.assertEqual(41, len(recovered))
+
+    def test_S8H_01b_the_per_stage_distribution_is_the_commit_s(self):
+        """Counted from the recovered pairs, so the distribution is a
+        consequence of the baseline rather than a second thing to maintain."""
+        recovered = self.recovered_baseline()
+        by_stage = {}
+        for stage, _name in recovered:
+            by_stage[stage] = by_stage.get(stage, 0) + 1
+        self.assertEqual({"s01": 3, "s02": 12, "s03": 13, "s04": 13}, by_stage)
+        self.assertEqual(41, sum(by_stage.values()))
+        # and the inventory's own ownership column agrees, stage by stage
+        for stage, count in sorted(by_stage.items()):
+            self.assertEqual(count, sum(1 for _n, (s, _d, _t)
+                                        in BASELINE_INVENTORY.items()
+                                        if s == stage), stage)
 
     def test_S8H_02_every_baseline_check_is_classified_exactly_once(self):
         producer, bookkeeping, relocated = (_by(RETAINED_PRODUCER),
