@@ -67,10 +67,18 @@ PLAUSIBLE_NOT_ESTABLISHED = "PLAUSIBLE_NOT_ESTABLISHED"
 SPECULATIVE = "SPECULATIVE"
 EVIDENCE_STATUS = (SUPPORTED_BY_STATE, PLAUSIBLE_NOT_ESTABLISHED, SPECULATIVE)
 
-#: The only keys the response may carry. A field pretending to author a verdict
-#: is not trimmed away - a response shaped like an authority is refused, because
-#: a model that tried is a model that may try again in the part nobody checked.
+#: A CLOSED SCHEMA AT EVERY LEVEL THE MODEL OWNS, not a blacklist of names
+#: somebody thought of. A key outside these sets is refused wherever it appears,
+#: so a field pretending to author a verdict cannot hide one object deeper than
+#: the check - which is exactly where the first version left it: the top level
+#: was pinned and `recommendation` was read with `.get`, so
+#: `{"kind": ..., "candidate": ..., "selected_candidate": ...}` crossed the
+#: boundary with the forbidden field merely ignored.
+#:
+#: A blacklist would have to anticipate the name. A closed key set does not.
 RESPONSE_KEYS = frozenset(("recommendation", "reasoning", "sensitivity", "concerns"))
+RESPONSE_OPTIONAL = frozenset(("sensitivity",))
+RECOMMENDATION_KEYS = frozenset(("kind", "candidate"))
 CONCERN_KEYS = frozenset(("candidate", "issue", "importance", "evidence_status",
                           "supporting_refs"))
 
@@ -134,25 +142,36 @@ ineligible, or in breach of a requirement. Those are decided elsewhere.
 Importance says how much attention it deserves, not how much authority it has.
 
 RESPONSE SCHEMA
-Return a single JSON object with exactly these keys and no others.
+Return a single JSON object. EVERY object below - this one, the recommendation
+and each concern - carries exactly the keys listed for it and no others. An
+extra key anywhere, at any depth, discards the whole response; so does a missing
+one, and so does a value of the wrong type. Nothing is written when that happens,
+so a review worth having is a review that answers in this shape.
 
-  recommendation   object {{kind, candidate}}
+  recommendation   object {{kind, candidate}} - both keys always present
                    kind is "PREFER_CANDIDATE" or "NO_CLEAR_PREFERENCE".
                    PREFER_CANDIDATE names a candidate from the comparison's
-                   population; NO_CLEAR_PREFERENCE names none and sets it null.
-  reasoning        your engineering review, in prose
-  sensitivity      optional: under what change of stated priority the answer
-                   would flip. Omit or use "none" if none applies.
-  concerns[]       candidate, issue, importance, evidence_status,
-                   supporting_refs[]
+                   population; NO_CLEAR_PREFERENCE sets candidate to null, and
+                   only null - not "", not 0, not [].
+  reasoning        your engineering review, in prose. A non-empty string.
+  sensitivity      optional STRING: under what change of stated priority the
+                   answer would flip. OMIT THE KEY if none applies - a null is
+                   not the way to say nothing.
+  concerns[]       a LIST, always present, [] when you have none. Never null and
+                   never the word "none". Each entry is an object with exactly
+                   candidate, issue, importance, evidence_status,
+                   supporting_refs.
 
   importance       HIGH | MEDIUM | LOW
   evidence_status  SUPPORTED_BY_STATE | PLAUSIBLE_NOT_ESTABLISHED | SPECULATIVE
-  supporting_refs  entity ids from the state below. [] where you have none.
+  supporting_refs  a LIST of entity ids from the state below, [] where you have
+                   none. A LIST EVEN FOR ONE ID: "JNT-0A" is not a reference,
+                   ["JNT-0A"] is.
 
 Do not emit a selected candidate, a score, a weighted score, an eligibility
-verdict, a feasibility verdict or a hard-requirement status. Those are not
-yours, and a response containing one is discarded.
+verdict, a feasibility verdict or a hard-requirement status - not at the top
+level, not inside the recommendation, and not inside a concern. Those are not
+yours, and a response containing one is discarded entirely.
 
 THE PROFILE THE USER STATED
 ---------------------------
@@ -234,11 +253,15 @@ def normalized(response: Dict[str, Any]) -> Dict[str, Any]:
     THE SAME CONCERNS IN A DIFFERENT ORDER ARE THE SAME REVIEW. Hashing the raw
     response made a reordering produce a new advisory id and, through it, new
     concern ids - a reordering looking like new engineering.
+
+    Only ever a VALIDATED response, so it reads its keys directly. Tolerating a
+    missing or mistyped one here would be a second, laxer opinion about what a
+    response is, in the one place a strict boundary was supposed to settle.
     """
     out = dict(response)
-    concerns = [c for c in (response.get("concerns") or []) if isinstance(c, dict)]
     out["concerns"] = sorted(
-        concerns, key=lambda c: json.dumps(c, sort_keys=True, default=str))
+        response["concerns"],
+        key=lambda c: json.dumps(c, sort_keys=True, default=str))
     return out
 
 
@@ -258,9 +281,9 @@ def concern_identity(advisory_id: str, concern: Dict[str, Any]) -> str:
     The same set of concerns written in a different order is the same set. Using
     the index would have made a reordering look like new engineering.
     """
-    return "CNC-%s" % _digest(advisory_id, concern.get("candidate"),
-                              concern.get("issue"),
-                              concern.get("evidence_status"))[:12].upper()
+    return "CNC-%s" % _digest(advisory_id, concern["candidate"],
+                              concern["issue"],
+                              concern["evidence_status"])[:12].upper()
 
 
 # =====================================================================
@@ -303,10 +326,21 @@ class SelectionEngineeringReview(Stage):
             raise ValueError(why)
         population = [c for c in (comparison.get("candidates") or [])
                       if isinstance(c, str)]
-        recommendation, recommended = _read_recommendation(parsed, population)
-        concerns = _read_concerns(parsed, population, set(visible_ids(payload)))
+        # STRUCTURE FIRST, EVIDENCE SECOND, and never the two in one pass. If the
+        # response is not the shape that was asked for, nothing is written at all
+        # - so a malformed field can never arrive downstream disguised as a weak
+        # claim.
+        response = validate_response(parsed, population)
+        recommendation = response["recommendation"]
+        recommended = response["candidate"]
+        concerns = calibrate(response["concerns"], set(visible_ids(payload)))
 
-        advisory_id = advisory_identity(comparison["entity_id"], parsed)
+        # FROM THE VALIDATED RESPONSE, not the raw parse. Nothing unvalidated
+        # reaches the hash, so there is no second reader of the model's JSON with
+        # its own idea of what the keys are. Pre-calibration deliberately: two
+        # reviews that differ only in how much support they CLAIMED are two
+        # reviews, and downgrading one of them must not merge them.
+        advisory_id = advisory_identity(comparison["entity_id"], response)
         # THE PRODUCER'S FIELDS. The population is the comparison's, the
         # alignment is computed from it, and neither was asked of the model.
         fields = {
@@ -314,15 +348,17 @@ class SelectionEngineeringReview(Stage):
             "comparison": comparison["entity_id"],
             "recommendation": recommendation,
             "comparison_alignment": comparison_alignment(comparison, recommended),
-            "reasoning": _text(parsed, "reasoning")}
+            "reasoning": response["reasoning"]}
         if recommended is not None:
             # OMITTED RATHER THAN NULL. A declared reference holding None is not
             # an absent field, it is a reference to nothing - and NO_CLEAR_
             # PREFERENCE means the reviewer named nobody, not that it named
             # nothing.
             fields["recommended_candidate"] = recommended
-        if parsed.get("sensitivity"):
-            fields["sensitivity"] = parsed["sensitivity"]
+        if response.get("sensitivity"):
+            # Typed above; what is decided here is only whether an empty
+            # statement is worth a field, and it is not.
+            fields["sensitivity"] = response["sensitivity"]
         ops = [Op("CREATE", "SelectionAdvisory", advisory_id, fields,
                   "selection_advisory:review")]
         for concern in concerns:
@@ -344,88 +380,156 @@ def _render(obj: Any) -> str:
         return str(obj)
 
 
-def _text(parsed: Dict[str, Any], key: str) -> str:
-    value = parsed[key]
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError("%s must be a non-empty string" % key)
+def _object(value: Any, allowed, what: str, optional=frozenset()) -> Dict[str, Any]:
+    """A model-owned object with EXACTLY the keys it is allowed, and no others.
+
+    Both directions. A missing required key is a response that does not say what
+    it means; an extra one is a model reaching for a field somebody else owns,
+    and the fact that the producer would have ignored it is not a defence - the
+    next reader might not.
+    """
+    if not isinstance(value, dict):
+        raise ValueError("%s must be an object, not %s"
+                         % (what, type(value).__name__))
+    extra = sorted(set(value) - allowed)
+    if extra:
+        raise ValueError("%s carries keys it may not author: %s"
+                         % (what, ", ".join(extra)))
+    missing = sorted(allowed - optional - set(value))
+    if missing:
+        raise ValueError("%s omits %s" % (what, ", ".join(missing)))
     return value
 
 
-def _read_recommendation(parsed: Dict[str, Any], population) -> Tuple[str, Optional[str]]:
-    """The reviewer's opinion, validated against the population it may speak of.
+def _string(value: Any, what: str) -> str:
+    """A string, and nothing that merely looks like one.
 
-    A MALFORMED RECOMMENDATION IS NOT PARTIALLY MATERIALISED. "I prefer one" that
-    names nothing, "I have no preference" that names one, and a preference for a
-    candidate nobody may choose are all a recommendation that does not say what
-    it means - and keeping the reasoning beside a dropped recommendation would
-    record a review the model did not give.
+    No coercion: 123 is not "123" and [] is not "". A model that sent the wrong
+    type sent the wrong answer, and turning it into text here would be this code
+    deciding what it meant. `bool` is excluded explicitly because it is an `int`
+    subclass and would otherwise pass a numeric check somewhere later.
     """
-    extra = sorted(set(parsed) - RESPONSE_KEYS)
-    if extra:
-        # A RESPONSE SHAPED LIKE AN AUTHORITY IS REFUSED, not trimmed. A model
-        # that tried to author a verdict here may have tried in the part nobody
-        # checks, and the honest response to that is to discard the whole thing.
-        raise ValueError("response carries keys this pass may not author: %s"
-                         % ", ".join(extra))
-    block = parsed["recommendation"]
-    if not isinstance(block, dict):
-        raise ValueError("recommendation must be {kind, candidate}")
-    kind = block.get("kind")
-    if kind not in RECOMMENDATIONS:
-        raise ValueError("recommendation kind %r; the vocabulary is %s"
-                         % (kind, list(RECOMMENDATIONS)))
-    candidate = block.get("candidate")
+    if isinstance(value, bool) or not isinstance(value, str):
+        raise ValueError("%s must be a string, not %s"
+                         % (what, type(value).__name__))
+    if not value.strip():
+        raise ValueError("%s is empty" % what)
+    return value
+
+
+def _member(value: Any, vocabulary, what: str) -> str:
+    if isinstance(value, bool) or not isinstance(value, str):
+        raise ValueError("%s must be a string, not %s"
+                         % (what, type(value).__name__))
+    if value not in vocabulary:
+        raise ValueError("%s is %r; the vocabulary is %s"
+                         % (what, value, list(vocabulary)))
+    return value
+
+
+def _ref_list(value: Any, what: str) -> List[str]:
+    """A list of non-empty strings. A BARE STRING IS NOT ONE.
+
+    Python would iterate `"JNT-0A"` character by character, so a malformed field
+    became six references that resolve to nothing - and the concern was then
+    DOWNGRADED for lacking support it had in fact supplied in the wrong shape.
+    A schema failure laundered into an evidence finding is the worst of both:
+    the model is told nothing and the record says something false about why.
+    """
+    if isinstance(value, str):
+        raise ValueError("%s is a string; a list of ids was required, and a "
+                         "string would be read one character at a time" % what)
+    if not isinstance(value, list):
+        raise ValueError("%s must be a list of ids, not %s"
+                         % (what, type(value).__name__))
+    return [_string(ref, "%s[%d]" % (what, n)) for n, ref in enumerate(value)]
+
+
+def validate_response(parsed: Any, population) -> Dict[str, Any]:
+    """THE ONE BOUNDARY between a model's JSON and this design's state.
+
+    Everything structural happens here and nothing structural happens anywhere
+    else, so "what can cross" is answerable by reading one function. It runs
+    entirely BEFORE the evidence validator, because the two are different
+    questions and conflating them is what let a malformed field arrive disguised
+    as a weak claim:
+
+        BAD SCHEMA      the response is not the shape that was asked for.
+                        Nothing is written, at all.
+        BAD EVIDENCE    the response is well-formed and claims more support than
+                        it has. The concern is kept and its status corrected.
+    """
+    _object(parsed, RESPONSE_KEYS, "the response", RESPONSE_OPTIONAL)
+    block = _object(parsed["recommendation"], RECOMMENDATION_KEYS,
+                    "the recommendation")
+    kind = _member(block["kind"], RECOMMENDATIONS, "recommendation kind")
+    candidate = block["candidate"]
     if kind == NO_CLEAR_PREFERENCE:
-        if candidate:
-            raise ValueError("NO_CLEAR_PREFERENCE names %r" % candidate)
-        return kind, None
-    if not candidate:
-        raise ValueError("PREFER_CANDIDATE names no candidate")
-    if candidate not in population:
-        raise ValueError("%s is not one of the candidates this comparison holds "
-                         "(%s)" % (candidate, ", ".join(sorted(population))))
-    return kind, candidate
-
-
-def _read_concerns(parsed: Dict[str, Any], population, visible) -> List[Dict[str, Any]]:
-    """Each concern, validated and its evidence calibrated. Sorted by content.
-
-    Sorted so that the same set of concerns in a different order produces the
-    same records - a reordering is not new engineering, and identity taken from
-    list position would have said it was.
-    """
-    raw = parsed.get("concerns") or []
-    if not isinstance(raw, list):
-        raise ValueError("concerns must be a list")
-    out = []
-    for concern in raw:
-        if not isinstance(concern, dict):
-            raise ValueError("a concern must be an object")
-        extra = sorted(set(concern) - CONCERN_KEYS)
-        if extra:
-            raise ValueError("a concern carries fields this pass may not author: "
-                             "%s" % ", ".join(extra))
-        candidate = concern.get("candidate")
+        # EXACTLY None. `if candidate:` accepted "", 0, False, [] and {} as "no
+        # candidate" - five malformed values masquerading as the one legitimate
+        # way to say nothing was preferred.
+        if candidate is not None:
+            raise ValueError("NO_CLEAR_PREFERENCE names %r; only null means "
+                             "no candidate was preferred" % (candidate,))
+    else:
+        _string(candidate, "the recommended candidate")
         if candidate not in population:
-            raise ValueError("a concern names %r, which this comparison does not "
-                             "hold" % candidate)
-        if concern.get("importance") not in IMPORTANCE:
-            raise ValueError("importance %r; the vocabulary is %s"
-                             % (concern.get("importance"), list(IMPORTANCE)))
-        claimed = concern.get("evidence_status")
-        if claimed not in EVIDENCE_STATUS:
-            raise ValueError("evidence_status %r; the vocabulary is %s"
-                             % (claimed, list(EVIDENCE_STATUS)))
-        issue = concern.get("issue")
-        if not isinstance(issue, str) or not issue.strip():
-            raise ValueError("a concern states no issue")
+            raise ValueError("%s is not one of the candidates this comparison "
+                             "holds (%s)" % (candidate, ", ".join(sorted(population))))
+    out = {"recommendation": kind, "candidate": candidate,
+           "reasoning": _string(parsed["reasoning"], "reasoning")}
+    if "sensitivity" in parsed:
+        # TYPE FIRST, then meaning. An absent key is "no sensitivity statement";
+        # a present one of the wrong type is a malformed response, and deciding
+        # which by truthiness would have accepted 0 and [] as both.
+        out["sensitivity"] = _string(parsed["sensitivity"], "sensitivity")
+    concerns = parsed["concerns"]
+    if not isinstance(concerns, list):
+        raise ValueError("concerns must be a list, not %s"
+                         % type(concerns).__name__)
+    out["concerns"] = [_validated_concern(c, population, n)
+                       for n, c in enumerate(concerns)]
+    return out
+
+
+def _validated_concern(raw: Any, population, index: int) -> Dict[str, Any]:
+    """One concern, structurally. ONE MALFORMED CONCERN FAILS THE RESPONSE.
+
+    Writing the valid ones and dropping the rest would publish a review the model
+    did not give - and the reader would have no way to know a concern had been
+    silently removed.
+    """
+    what = "concern %d" % (index + 1)
+    concern = _object(raw, CONCERN_KEYS, what)
+    candidate = _string(concern["candidate"], "%s candidate" % what)
+    if candidate not in population:
+        raise ValueError("%s names %s, which this comparison does not hold"
+                         % (what, candidate))
+    return {"candidate": candidate,
+            "issue": _string(concern["issue"], "%s issue" % what),
+            "importance": _member(concern["importance"], IMPORTANCE,
+                                  "%s importance" % what),
+            "evidence_status": _member(concern["evidence_status"], EVIDENCE_STATUS,
+                                       "%s evidence_status" % what),
+            "supporting_refs": _ref_list(concern["supporting_refs"],
+                                         "%s supporting_refs" % what)}
+
+
+def calibrate(concerns, visible) -> List[Dict[str, Any]]:
+    """The EVIDENCE half, over already-structurally-valid concerns.
+
+    Preserve or downgrade, never upgrade. Sorted by content so that the same set
+    of concerns in a different order produces the same records - a reordering is
+    not new engineering.
+    """
+    out = []
+    for concern in concerns:
         # ONLY WHAT THE REVIEWER ACTUALLY SAW. An id that was not in the payload
         # resolves to nothing, and storing it would make a fabricated citation
         # look like provenance.
-        refs = sorted({r for r in (concern.get("supporting_refs") or [])
-                       if isinstance(r, str) and r in visible})
-        status, note = claimed, None
-        if claimed == SUPPORTED_BY_STATE and not refs:
+        refs = sorted({r for r in concern["supporting_refs"] if r in visible})
+        status, note = concern["evidence_status"], None
+        if status == SUPPORTED_BY_STATE and not refs:
             # DOWNGRADED, NEVER FAILED. Overclaiming how well a concern is
             # supported is not a reason to lose the concern - the reviewer may be
             # right that it matters. It is a reason to record what it actually
@@ -433,9 +537,7 @@ def _read_concerns(parsed: Dict[str, Any], population, visible) -> List[Dict[str
             status = PLAUSIBLE_NOT_ESTABLISHED
             note = ("the review claimed state support and supplied no reference "
                     "that is current in the state it was shown")
-        record = {"candidate": candidate, "issue": issue,
-                  "importance": concern["importance"], "evidence_status": status,
-                  "supporting_refs": refs}
+        record = dict(concern, evidence_status=status, supporting_refs=refs)
         if note:
             record["evidence_note"] = note
         out.append(record)

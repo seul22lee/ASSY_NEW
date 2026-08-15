@@ -1446,7 +1446,166 @@ Regression, **secondary**: RUN 1202 · PASS 1202 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-D RESPONSE-BOUNDARY CORRECTION PASS (baseline `dd86ba5`)
+
+Scope: one defect class — **the model response schema was pinned at the top level
+and lenient everywhere below it**. No new advisory behaviour, no S7-E, no S7-F,
+no S7-B/S7-C reopening.
+
+### I.1 The defect class, reproduced first
+
+Ten malformed responses, each run through the real Stage boundary against the
+pushed tree. Every one was accepted:
+
+| response | before | after |
+|---|---|---|
+| `recommendation` carries `selected_candidate` | SUCCESS — wrote the advisory | SCHEMA_FAILURE |
+| `recommendation` carries an unknown key | SUCCESS | SCHEMA_FAILURE |
+| `NO_CLEAR_PREFERENCE` with `candidate: ""` | SUCCESS | SCHEMA_FAILURE |
+| `NO_CLEAR_PREFERENCE` with `candidate: 0` | SUCCESS | SCHEMA_FAILURE |
+| `NO_CLEAR_PREFERENCE` with `candidate: []` | SUCCESS | SCHEMA_FAILURE |
+| `sensitivity: 123` | SUCCESS — wrote `sensitivity: 123` | SCHEMA_FAILURE |
+| `concerns: null` | SUCCESS | SCHEMA_FAILURE |
+| `concerns: {}` | SUCCESS | SCHEMA_FAILURE |
+| `supporting_refs: "JNT-0A"` | SUCCESS, refs `[]`, **downgraded** | SCHEMA_FAILURE |
+| `supporting_refs: ["JNT-0A", 7]` | SUCCESS, kept the string, `SUPPORTED_BY_STATE` | SCHEMA_FAILURE |
+
+The last two are the sharpest. A bare string was **iterated character by
+character**: a malformed field became six references that resolve to nothing, and
+the concern was then downgraded for lacking support it had in fact supplied in
+the wrong shape. A schema failure laundered into an evidence finding tells the
+model nothing and tells the record something false about why.
+
+The first two are the most dangerous. The top level was closed and
+`recommendation` was read with `.get`, so a field claiming somebody else's
+authority merely had to sit **one object deeper than the check**. That it was
+ignored by this reader is not a defence; the next reader might not ignore it.
+
+### I.2 One validation path, and it is closed at every level
+
+```python
+RESPONSE_KEYS        = {recommendation, reasoning, sensitivity, concerns}
+RESPONSE_OPTIONAL    = {sensitivity}
+RECOMMENDATION_KEYS  = {kind, candidate}
+CONCERN_KEYS         = {candidate, issue, importance, evidence_status,
+                        supporting_refs}
+```
+
+`_object` enforces each set **in both directions** — an extra key is a model
+reaching for a field somebody else owns, a missing one is a response that does
+not say what it means. A **closed key set, not a blacklist**: a blacklist has to
+anticipate the name.
+
+Typing is strict and nothing is coerced. `_string` rejects `bool` explicitly
+(it is an `int` subclass and would otherwise pass a numeric check somewhere
+later) and rejects blank strings; `123` is not `"123"`, because a model that sent
+the wrong type sent the wrong answer and converting it here would be this code
+deciding what it meant. `NO_CLEAR_PREFERENCE` requires **exactly `None`** —
+`if candidate:` had accepted `""`, `0`, `False`, `[]` and `{}` as five malformed
+values masquerading as the one legitimate way to say nothing was preferred.
+`sensitivity` is optional but must be a string when present: **absent is not
+null**. `concerns` must be a list — not `null`, not `{}`, not `"none"`.
+
+One malformed concern fails the whole response. Writing the valid ones and
+dropping the rest would publish a review the model did not give, and the reader
+would have no way to know a concern had been removed.
+
+### I.3 Bad schema and bad evidence are different findings
+
+| | | |
+|---|---|---|
+| **BAD SCHEMA** | the response is not the shape that was asked for | `SCHEMA_FAILURE`, zero writes, no partial materialization |
+| **BAD EVIDENCE** | the response is well-formed and claims more support than it has | the concern is **kept** and its status corrected |
+
+`validate_response` runs entirely before `calibrate`, and `calibrate` contains no
+structural check at all — D68d asserts both, by source. **The frozen exception is
+preserved exactly:** a structurally valid concern citing an id that does not
+exist is still downgraded to `PLAUSIBLE_NOT_ESTABLISHED` with its
+`evidence_note`, never rejected (D62). The reviewer may be right that it matters.
+
+### I.4 D56–D68, and the property rather than the examples
+
+**77 test methods** in `test_s7_advisory.py`, up from 57. D56 nested authority fields ·
+D57 unknown nested keys · D57b missing keys · D58 exactly-null · D59 non-empty
+eligible string · D60 the bare string · D61 mixed-type lists · **D62 the
+fabricated ref still downgrades** · D63/D63b sensitivity typing and absence ·
+D64 reasoning · D65 concerns-is-a-list · D66/D66b/D66c concern keys and types ·
+D67 one bad concern writes nothing · D68 producer fields at all three levels.
+
+**D68b is the property:** a valid object plus one arbitrary extra key is rejected
+at every model-owned level, whatever the key is called — so the same gap cannot
+reappear under a name nobody thought to blacklist. D68c pins the four key sets as
+the declared schema.
+
+### I.5 Six mutations, each caught
+
+| mutation | caught by |
+|---|---|
+| the recommendation loses its exact-key check | D56, D57, D68, D68b |
+| `candidate is not None` becomes `if candidate` | D58 |
+| `supporting_refs` accepts a bare string | D60 |
+| an extra concern field is silently ignored | D31b, D66, D67 |
+| a non-string `sensitivity` is coerced with `str()` | D63 |
+| valid concerns are kept when another is malformed | D30, D31, D31b |
+
+### I.6 One more same-class violation, found by the audit and fixed in the pass
+
+The advisory id was hashed from the **raw parse**, not the validated response —
+a second reader of the model's JSON with its own, laxer idea of what the keys
+are, in the one place a strict boundary was meant to settle. `advisory_identity`
+now takes the validated response and `normalized` reads its keys directly.
+Deliberately still **pre-calibration**: two reviews differing only in how much
+support they *claimed* are two reviews, and downgrading one must not merge them.
+
+The prompt now states the schema the boundary actually enforces — closed objects
+at every depth, `null` only for `NO_CLEAR_PREFERENCE`, an omitted rather than
+null `sensitivity`, and `["JNT-0A"]` rather than `"JNT-0A"`. Refusing a response
+for a rule that was never stated would be a boundary arguing with itself.
+
+### I.7 Bounded D-I1…D-I12 audit
+
+Every read of `parsed` in the module: `to_operations` passes it to
+`validate_response` and nothing else; `validate_response` is where all four key
+sets and all typing live. No `if candidate:`, `if sensitivity:` or
+`for ref in supporting_refs:` occurs before type validation — the only surviving
+truthiness test on a model value is `if response.get("sensitivity")`, which runs
+on an **already-typed** string and decides only whether an empty statement earns
+a field. `.get`/`or []` remain only on the **producer's own payload**, which is
+this design's data and not the model's. Authority split, evidence direction,
+premise breadth and the two-family write set are unchanged.
+
+### I.8 Files changed
+
+| file | change |
+|---|---|
+| `assy_v3/stages/selection_advisory.py` | closed key sets, `_object`/`_string`/`_member`/`_ref_list`, `validate_response`, `_validated_concern`, identity from the validated response, prompt schema |
+| `tests/meta/test_s7_advisory.py` | D56–D68, D68b property, D68c/D68d |
+| `docs/implementation/evidence/S07_IMPLEMENTATION_EVIDENCE.md` | this section |
+
+Regression, **secondary**: RUN 1222 · PASS 1222 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
+
+> **S7-D VERIFIED CLOSED — MODEL RESPONSE SCHEMA IS CLOSED, STRICTLY TYPED AND
+> AUTHORITY-SAFE.**
+>
+> Every object the model owns carries exactly the keys it is allowed and no
+> others, at every depth — so a field reaching for somebody else's authority
+> cannot hide one level below the check, and cannot reappear under a name nobody
+> thought to blacklist. Nothing is coerced: a number is not a string, `null` is
+> not an absent key, and only `null` means no candidate was preferred. A
+> malformed response writes nothing at all, whole or partial. And the two
+> failures stay separate — a response in the wrong shape is refused, while a
+> well-formed concern that claims more support than it has is kept and corrected
+> downward. What was being refused now matches what the prompt asks for.
+>
+> **S-7 / U-8 IS NOT CLOSED.** S7-E and S7-F are not started.
+
+---
+
+## S7-D FIRST-PASS STATUS (superseded by the above; kept, not deleted)
 
 > **S7-D VERIFIED CLOSED — LLM REVIEW IS ELIGIBLE-POPULATION-BOUND,
 > EVIDENCE-CALIBRATED, NON-AUTHORITATIVE AND DECISION-SAFE.**

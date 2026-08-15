@@ -841,6 +841,228 @@ class TestRunnerAndScope(_Advisory):
 
 
 # =====================================================================
+# D56-D68 - the response boundary is a closed, strictly typed schema
+# =====================================================================
+class TestResponseSchema(_Advisory):
+    """THE MODEL IS OUTSIDE THE AUTHORITY BOUNDARY, so the parse is part of the
+    safety contract rather than a convenience.
+
+    Every case here crossed the boundary before this pass. The one that shows why
+    strictness matters most is D60: `supporting_refs: "JNT-0A"` was iterated
+    CHARACTER BY CHARACTER, so a malformed field became six references that
+    resolve to nothing - and the concern was then downgraded for lacking support
+    it had in fact supplied in the wrong shape. A schema failure laundered into
+    an evidence finding tells the model nothing and tells the record something
+    false about why."""
+
+    def refused(self, response, state=None):
+        state = state if state is not None else self.compared()[0]
+        _s, out, _p = self.reviewed(response, state=state)
+        self.assertEqual(ExecutionStatus.SCHEMA_FAILURE, out.execution_status,
+                         json.dumps(response, default=str)[:200])
+        self.assertIsNone(out.patch)
+        self.assertEqual([], state.family("SelectionAdvisory"))
+        self.assertEqual([], state.family("SelectionConcern"))
+        return out
+
+    def recommendation(self, **block):
+        return {"recommendation": block, "reasoning": "a review", "concerns": []}
+
+    def test_D56_a_nested_authority_field_is_refused(self):
+        """The top level was pinned and the recommendation was read with `.get`,
+        so a forbidden field one object deeper was merely ignored. Being ignored
+        by this reader is not a defence - the next one might not."""
+        for hidden in ("selected_candidate", "winner", "score", "eligibility",
+                       "comparison_alignment", "recommended_candidate",
+                       "selection_decision", "premise_refs", "entity_id"):
+            self.refused(self.recommendation(
+                **{"kind": "PREFER_CANDIDATE", "candidate": "CND-A",
+                   hidden: "CND-A"}))
+
+    def test_D57_an_unknown_nested_field_is_refused(self):
+        """A CLOSED SCHEMA, not a blacklist. A blacklist has to anticipate the
+        name; this does not."""
+        for unknown in ("foo", "note", "confidence", "rationale"):
+            self.refused(self.recommendation(
+                **{"kind": "PREFER_CANDIDATE", "candidate": "CND-A",
+                   unknown: "bar"}))
+
+    def test_D57b_a_recommendation_missing_a_required_key_is_refused(self):
+        """Both directions. A response that omits `candidate` does not say what
+        it means either."""
+        self.refused(self.recommendation(kind="NO_CLEAR_PREFERENCE"))
+        self.refused(self.recommendation(candidate=None))
+        self.refused({"reasoning": "x", "concerns": []})
+
+    def test_D58_no_clear_preference_requires_exactly_null(self):
+        """Five falsy values were being accepted as the one legitimate way to say
+        nothing was preferred."""
+        for masquerade in ("", 0, False, True, [], {}, "CND-A"):
+            self.refused(self.recommendation(kind="NO_CLEAR_PREFERENCE",
+                                             candidate=masquerade))
+        state, _cmp = self.compared()
+        state, out, _p = self.reviewed(
+            self.recommendation(kind="NO_CLEAR_PREFERENCE", candidate=None),
+            state=state)
+        self.assertEqual(ExecutionStatus.SUCCESS, out.execution_status)
+
+    def test_D59_prefer_candidate_requires_a_non_empty_eligible_string(self):
+        for bad in (None, "", 0, False, [], {}, ["CND-A"], "CND-ELSEWHERE"):
+            self.refused(self.recommendation(kind="PREFER_CANDIDATE",
+                                             candidate=bad))
+        state, _cmp = self.compared()
+        state, out, _p = self.reviewed(
+            self.recommendation(kind="PREFER_CANDIDATE", candidate="CND-A"),
+            state=state)
+        self.assertEqual(ExecutionStatus.SUCCESS, out.execution_status)
+
+    def test_D60_a_bare_string_of_refs_is_refused_not_iterated(self):
+        self.refused(review(concerns=[dict(
+            concern("CND-A", evidence_status="SUPPORTED_BY_STATE"),
+            supporting_refs="JNT-0A")]))
+
+    def test_D61_a_mixed_type_ref_list_is_refused(self):
+        for refs in (["JNT-0A", 7], [1, 2], ["JNT-0A", None], ["JNT-0A", ""],
+                     ["JNT-0A", ["JNT-0B"]], None, {}, 7):
+            self.refused(review(concerns=[dict(
+                concern("CND-A", evidence_status="SUPPORTED_BY_STATE"),
+                supporting_refs=refs)]))
+
+    def test_D62_a_fabricated_ref_still_downgrades_rather_than_refusing(self):
+        """THE DISTINCTION THIS WHOLE CLASS IS ABOUT. A well-formed list holding
+        an id that does not exist is a claim about evidence, not a malformed
+        response - so the concern is kept and its status corrected."""
+        state, _cmp = self.compared()
+        state, out, _p = self.reviewed(review(concerns=[
+            concern("CND-A", "possible fatigue sensitivity", importance="HIGH",
+                    evidence_status="SUPPORTED_BY_STATE", refs=["FAKE-ID"])]),
+            state=state)
+        self.assertEqual(ExecutionStatus.SUCCESS, out.execution_status)
+        record = state.family("SelectionConcern")[0]
+        self.assertEqual("PLAUSIBLE_NOT_ESTABLISHED", record["evidence_status"])
+        self.assertEqual([], record["supporting_refs"])
+        self.assertIn("claimed state support", record["evidence_note"])
+        self.assertEqual("HIGH", record["importance"])
+
+    def test_D63_a_sensitivity_of_the_wrong_type_is_refused(self):
+        for bad in (None, 0, True, [], {}, 1.5):
+            self.refused(review(sensitivity=bad))
+        state, _cmp = self.compared()
+        state, out, _p = self.reviewed(review(sensitivity="a real statement"),
+                                        state=state)
+        self.assertEqual(ExecutionStatus.SUCCESS, out.execution_status)
+        self.assertEqual("a real statement",
+                         self.advisory_of(state)["sensitivity"])
+
+    def test_D63b_an_absent_sensitivity_is_valid_and_writes_no_field(self):
+        """Absent means no statement. `null` is not the way to say that."""
+        state, _cmp = self.compared()
+        state, out, _p = self.reviewed(review(), state=state)
+        self.assertEqual(ExecutionStatus.SUCCESS, out.execution_status)
+        self.assertNotIn("sensitivity", self.advisory_of(state))
+
+    def test_D64_a_reasoning_of_the_wrong_type_is_refused(self):
+        for bad in (None, 123, [], {}, True, "", "   "):
+            self.refused(review(reasoning=bad))
+
+    def test_D65_concerns_must_be_a_list(self):
+        # Built by hand: the helper coerces with `list(...)`, which is exactly
+        # the leniency under test.
+        # No tuple case: the boundary is JSON, which has no tuples - one would
+        # arrive as a list and the test would be asserting about the encoder.
+        for bad in (None, {}, "none", 0, "  ", "[]", 1.0, True):
+            self.refused(dict(review(), concerns=bad))
+        state, _cmp = self.compared()
+        state, out, _p = self.reviewed(review(concerns=[]), state=state)
+        self.assertEqual(ExecutionStatus.SUCCESS, out.execution_status)
+        self.assertEqual([], state.family("SelectionConcern"))
+
+    def test_D66_a_concern_carrying_an_extra_key_is_refused(self):
+        for hidden in ("eligibility", "feasibility", "score", "decision",
+                       "hard_requirement_status", "comparison_alignment",
+                       "entity_id", "premise_refs", "advisory", "foo"):
+            self.refused(review(concerns=[
+                dict(concern("CND-A"), **{hidden: "INELIGIBLE"})]))
+
+    def test_D66b_a_concern_missing_a_required_key_is_refused(self):
+        for dropped in ("candidate", "issue", "importance", "evidence_status",
+                        "supporting_refs"):
+            partial = concern("CND-A")
+            del partial[dropped]
+            self.refused(review(concerns=[partial]))
+
+    def test_D66c_concern_field_types_are_strict(self):
+        for field, bad in (("candidate", 0), ("candidate", ""),
+                           ("candidate", ["CND-A"]), ("issue", None),
+                           ("issue", 123), ("issue", ""),
+                           ("importance", 0), ("importance", True),
+                           ("importance", ["HIGH"]),
+                           ("evidence_status", None), ("evidence_status", 1)):
+            self.refused(review(concerns=[dict(concern("CND-A"),
+                                               **{field: bad})]))
+
+    def test_D67_one_malformed_concern_writes_nothing_at_all(self):
+        """Writing the valid ones and dropping the rest would publish a review
+        the model did not give, and the reader would have no way to know."""
+        state, _cmp = self.compared()
+        self.refused(review(concerns=[
+            concern("CND-A", "a perfectly good concern", importance="HIGH"),
+            dict(concern("CND-B", "the malformed one"), eligibility="NO")]),
+            state=state)
+
+    def test_D68_no_producer_field_can_be_authored_at_any_level(self):
+        """Top level, inside the recommendation, and inside a concern. The same
+        closed-key rule refuses all three."""
+        producer_owned = ("candidates", "comparison", "comparison_alignment",
+                          "recommended_candidate", "entity_id", "premise_refs",
+                          "selected_candidate", "winner", "eligibility",
+                          "feasibility", "hard_requirement_status", "score",
+                          "weighted_score", "selection_decision")
+        for field in producer_owned:
+            self.refused(review(**{field: "CND-A"}))
+            self.refused(self.recommendation(
+                **{"kind": "NO_CLEAR_PREFERENCE", "candidate": None,
+                   field: "CND-A"}))
+            self.refused(review(concerns=[dict(concern("CND-A"),
+                                               **{field: "CND-A"})]))
+
+    def test_D68b_one_extra_key_refuses_every_model_owned_object(self):
+        """THE PROPERTY, not the examples. Any extra key at any model-owned
+        level, whatever it is called - so the same gap cannot reappear under a
+        name nobody thought to blacklist."""
+        for extra in ("x", "note", "verdict", "authority", "_meta", "1",
+                      "candidate_id", "status"):
+            self.refused(review(**{extra: "anything"}))
+            self.refused(self.recommendation(
+                **{"kind": "NO_CLEAR_PREFERENCE", "candidate": None,
+                   extra: "anything"}))
+            self.refused(review(concerns=[dict(concern("CND-A"),
+                                               **{extra: "anything"})]))
+
+    def test_D68c_the_closed_key_sets_are_the_declared_schema(self):
+        self.assertEqual({"recommendation", "reasoning", "sensitivity",
+                          "concerns"}, set(adv.RESPONSE_KEYS))
+        self.assertEqual({"sensitivity"}, set(adv.RESPONSE_OPTIONAL))
+        self.assertEqual({"kind", "candidate"}, set(adv.RECOMMENDATION_KEYS))
+        self.assertEqual({"candidate", "issue", "importance", "evidence_status",
+                          "supporting_refs"}, set(adv.CONCERN_KEYS))
+
+    def test_D68d_structure_is_validated_before_evidence_ever_runs(self):
+        """The two are different questions and the order is the whole point: a
+        malformed field must never reach the evidence validator, where it would
+        arrive disguised as a weak claim."""
+        import inspect
+        writer = inspect.getsource(adv.SelectionEngineeringReview.to_operations)
+        self.assertLess(writer.index("validate_response("),
+                        writer.index("calibrate("),
+                        "evidence is calibrated before the shape is checked")
+        calibrate = inspect.getsource(adv.calibrate)
+        for structural in ("isinstance", "raise ValueError"):
+            self.assertNotIn(structural, calibrate,
+                             "the evidence validator does structural work")
+
+
+# =====================================================================
 # The contracts describe what runs
 # =====================================================================
 class TestContractTruth(unittest.TestCase):
