@@ -505,11 +505,13 @@ class S04BPlacementAndMotion(Stage):
 
     # ------------------------------------------------------ dependency graph
     #
-    # A PREMISE IS REQUIRED IFF CHANGING IT CAN CHANGE THIS PRODUCED VALUE, and
-    # `_propagate` is ONE HOP: it stales the direct dependents of the entity that
-    # changed and stops there. So every derived value must name every fact it was
-    # actually made from - a chain of individually-correct links does not carry
-    # staleness along itself.
+    # A PREMISE IS REQUIRED IFF CHANGING IT CAN CHANGE THIS PRODUCED VALUE. When
+    # this was written propagation stopped after one hop, so every derived value
+    # had to name every fact it was actually made from or a chain of
+    # individually-correct links carried no staleness along itself. S7-F made the
+    # walk transitive; the lists below are unchanged, because naming what a value
+    # was made from is what provenance IS - the walk decides currentness, not
+    # what the record is allowed to say about itself.
     #
     # This replaces one list - every envelope in the view, on every s04b output -
     # which was wrong in both directions at once. TOO MUCH: a state's coordinates

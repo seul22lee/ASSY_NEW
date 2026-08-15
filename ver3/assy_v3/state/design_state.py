@@ -617,6 +617,29 @@ class DesignState:
     def counts(self) -> Dict[str, int]:
         return {k: len(v) for k, v in sorted(_STORAGE[self].by_family.items())}
 
+    def entity_revision_digest(self, entity_id: str) -> Optional[str]:
+        """WHICH VERSION of this entity is current, as an opaque string.
+
+        S7-F. A LIFECYCLE API, NOT AN ENGINEERING ONE. It answers one question -
+        "is this the same record I evaluated last time?" - and it answers it
+        without saying anything about what the record means. Engineering fields
+        are still read exclusively through the ConsumerView; a reconciler that
+        read values here would be a second channel, which is the thing the view
+        exists to remove.
+
+        Over the authored content and the validity, so an entity that gained a
+        field, had one superseded, or stopped being current is a different
+        revision under the same id. Not over the whole state: one candidate's
+        envelope moving must not change another candidate's evaluation basis.
+        """
+        rec = _STORAGE[self].entities.get(entity_id)
+        if rec is None:
+            return None
+        content = {k: v for k, v in rec.items()
+                   if not k.startswith("_") or k == "_validity"}
+        return hashlib.sha256(json.dumps(content, sort_keys=True, default=str,
+                                         separators=(",", ":")).encode()).hexdigest()
+
 
 # =====================================================================
 # The mutation primitives.
@@ -633,6 +656,21 @@ class DesignState:
 # interface. DesignState.apply() is the only supported entry.
 # =====================================================================
 
+def _authority_of(stage_id: Optional[str]) -> Optional[str]:
+    """The owner a pass writes as. `s03b` is s03's; `selection_advisory` writes
+    as `selection` already. The same reading `consumer_view` does, and no table
+    of which pass belongs to which owner."""
+    if not stage_id:
+        return None
+    return stage_id[:-1] if re.match(r"^s\d+[a-z]$", stage_id) else stage_id
+
+
+def skip_ids(patch) -> List[str]:
+    """The entities this patch creates. They are co-authored with everything
+    else it does and are never staled by it."""
+    return [op.entity_id for op in patch.operations if op.kind == "CREATE"]
+
+
 def _log(rec: Dict[str, Any], key: str, entry: Dict[str, Any]) -> None:
     """Append to a per-entity history list."""
     rec.setdefault(key, []).append(copy_in(entry))
@@ -643,23 +681,65 @@ def _merge_premises(rec: Dict[str, Any], op) -> None:
         rec["_premises"] = sorted(set(rec.get("_premises", [])) | set(op.premise_refs))
 
 
-def _propagate(entities: Dict[str, Any], changed_id: str, kind: str,
-               reason: Optional[str]) -> None:
-    """FA-5. A dependent commitment may not silently remain authoritative.
+def _dependents(entities: Dict[str, Any]) -> Dict[str, List[str]]:
+    """premise id -> the entities that named it. Built per propagation.
 
-    Computed eagerly on write, because the premise references needed to compute
-    it are recorded at write time. Which propagation strategy to use is an
-    implementation decision the freeze leaves open (§9); this is the one that
-    needs no additional bookkeeping.
+    Deterministic order, because a traversal whose shape depends on dictionary
+    iteration is a traversal nobody can reproduce from the record.
     """
-    for eid, rec in entities.items():
-        if eid == changed_id or changed_id not in rec.get("_premises", []):
-            continue
-        if rec.get("_validity") != ValidityStatus.STANDING.value:
-            continue
-        rec["_validity"] = ValidityStatus.STALE.value
-        _log(rec, "_stale_because",
-             {"premise": changed_id, "premise_change": kind, "reason": reason})
+    out: Dict[str, List[str]] = {}
+    for eid in sorted(entities):
+        for premise in entities[eid].get("_premises", []) or []:
+            out.setdefault(premise, []).append(eid)
+    return out
+
+
+def _propagate(entities: Dict[str, Any], changed_id: str, kind: str,
+               reason: Optional[str], skip=()) -> None:
+    """FA-5, TRANSITIVELY. A dependent commitment may not silently remain
+    authoritative - and neither may a commitment that depends on one.
+
+    S7-F. This walked ONE HOP until now, which made correctness depend on every
+    producer copying the whole raw premise closure into every output: a
+    comparison premised on the assessments would have stayed standing when an
+    envelope the assessment read was superseded, because the assessment went
+    STALE and the walk stopped there. Redundant raw premises hid the gap rather
+    than closing it, and no producer can be relied on to remember forever.
+
+    Currentness is a property of the graph, so the graph is what is walked:
+    breadth-first from the changed entity, a visited set so a cycle terminates
+    and a diamond is visited once, and every entity recording BOTH the premise
+    that reached it and the change at the root of the walk. One transition to
+    STALE per entity, however many paths arrive at it.
+
+    `skip` is the set of entities created by the very patch making this change.
+    A patch's own outputs are CO-AUTHORED with it, exactly as a co-produced
+    reference is at the view boundary; staling them would have the writer
+    invalidate its own work in the act of doing it.
+    """
+    dependents = _dependents(entities)
+    seen = {changed_id}
+    frontier, hops = [changed_id], 0
+    while frontier:
+        hops += 1
+        nxt: List[str] = []
+        for premise in frontier:
+            for eid in dependents.get(premise, ()):
+                if eid in seen or eid in skip:
+                    continue
+                seen.add(eid)
+                rec = entities.get(eid)
+                if rec is None or rec.get("_validity") != ValidityStatus.STANDING.value:
+                    # Already not current. Its own dependents were reached when
+                    # it stopped being current, so the walk does not continue
+                    # through it and nothing is logged twice.
+                    continue
+                rec["_validity"] = ValidityStatus.STALE.value
+                _log(rec, "_stale_because",
+                     {"premise": premise, "premise_change": kind,
+                      "reason": reason, "root": changed_id, "hops": hops})
+                nxt.append(eid)
+        frontier = nxt
 
 
 #: `identity.entity_id.format`: "<type_prefix>-<zero_padded_ordinal>". Ids are
@@ -700,6 +780,28 @@ def _extend(entities, by_family, contracts, patch, op) -> None:
          {"stage": patch.stage_id, "fields": sorted(op.fields),
           "provenance": op.provenance_ref, "premises": list(op.premise_refs)})
     _merge_premises(rec, op)
+    # S7-F. AN EXTENSION IS AN AUTHORITATIVE CHANGE, so it propagates like one -
+    # but not to the owner's own passes.
+    #
+    # `_extend_problems` already restricts EXTEND to a field the contract
+    # DECLARES extendable, by exactly the stage the contract names, and only
+    # where no value exists: changing an authored value is a SUPERSEDE and
+    # always was. So an extension is the OWNER'S RECORD BEING COMPLETED BY THE
+    # STAGE THE CONTRACT SAID WOULD COMPLETE IT - s03 authors a Joint and s04
+    # places it - and the owner's other passes were never entitled to that field.
+    # Staling them would make the pipeline unable to finish one design: s03b's
+    # DOF grid would be withdrawn the moment s04a placed the joint it was
+    # derived from, and no deterministic step could restore it.
+    #
+    # What DOES lose authority is a conclusion drawn from OUTSIDE the owner. A
+    # feasibility verdict about a region that has since gained its volume was
+    # decided over a record that no longer says what it said.
+    owner = contracts.owner_of(rec.get("_family"))
+    _propagate(entities, op.entity_id, "EXTENDED",
+               "%s gained %s" % (op.entity_id, ", ".join(sorted(op.fields))),
+               skip=set(skip_ids(patch)) | {
+                   eid for eid, other in entities.items()
+                   if _authority_of(other.get("_created_by")) == owner})
 
 
 def _supersede(entities, by_family, contracts, patch, op) -> None:
@@ -713,7 +815,8 @@ def _supersede(entities, by_family, contracts, patch, op) -> None:
               "provenance": op.provenance_ref})
         rec[name] = copy_in(value)
     _merge_premises(rec, op)
-    _propagate(entities, op.entity_id, "SUPERSEDED", op.reason)
+    _propagate(entities, op.entity_id, "SUPERSEDED", op.reason,
+               skip=set(skip_ids(patch)))
 
 
 def _invalidate(entities, by_family, contracts, patch, op) -> None:
@@ -723,7 +826,8 @@ def _invalidate(entities, by_family, contracts, patch, op) -> None:
     _log(rec, "_invalidations",
          {"stage": patch.stage_id, "reason": op.reason,
           "provenance": op.provenance_ref})
-    _propagate(entities, op.entity_id, "INVALIDATED", op.reason)
+    _propagate(entities, op.entity_id, "INVALIDATED", op.reason,
+               skip=set(skip_ids(patch)))
 
 
 _MUTATORS = {"CREATE": _create, "EXTEND": _extend,

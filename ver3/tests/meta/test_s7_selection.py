@@ -754,7 +754,21 @@ class TestDependency(_Selection):
                               "t", reason="probe"))
         self.assertEqual("STALE", self.val(state, eid))
 
-    def test_C45_an_unrelated_fact_leaves_it_standing(self):
+    def test_C45_a_fact_no_metric_read_still_reaches_the_population(self):
+        """RESTATED AT S7-F, and the restatement is the point.
+
+        This pinned one-hop precision: a geometry change did not stale a
+        comparison of JOINT COUNTS, because no metric here read the geometry.
+        With transitive currentness the same change reaches the comparison by a
+        different road - the envelope is what the spatial verdict was decided
+        over, that verdict is what the feasibility assessment aggregates, and
+        that assessment is what makes the candidate part of the population being
+        compared. A comparison whose eligibility evidence has been withdrawn is
+        not a current comparison, whatever its metrics happened to read.
+
+        What must still be precise is the SCOPE: the other candidate's evidence
+        is untouched, and the comparison comes back saying the same thing about
+        joint counts once feasibility has been re-established."""
         state = self.built()
         out = self.compare(state, prefs(joint_count=(MINIMIZE, HIGH)))
         eid = out.patch.operations[0].entity_id
@@ -762,8 +776,23 @@ class TestDependency(_Selection):
                               {"extent": {"centre": [0, 0, 0],
                                           "half_extent": [3, 3, 3]}},
                               "t", reason="probe"))
-        self.assertEqual("STANDING", self.val(state, eid),
-                         "a geometry change staled a comparison of joint counts")
+        self.assertEqual("STALE", self.val(state, eid))
+        self.assertEqual("STANDING", self.val(state, "MFA-CND-B"),
+                         "one candidate's geometry reached the other's evidence")
+
+    def test_C45b_an_unrelated_fact_leaves_it_standing(self):
+        """The precision half, with a fact nothing in the chain rests on."""
+        state = self.built()
+        out = self.compare(state, prefs(joint_count=(MINIMIZE, HIGH)))
+        eid = out.patch.operations[0].entity_id
+        self.revise(state, Op("CREATE", "Ambiguity", "AMB-PROBE",
+                              {"statement": "an unrelated open question",
+                               "conflicting_clauses": [],
+                               "resolvable_when": "somebody says"}, "t"),
+                    stage="s01")
+        self.assertEqual("STANDING", self.val(state, eid))
+        for candidate in ("CND-A", "CND-B"):
+            self.assertEqual("STANDING", self.val(state, "MFA-%s" % candidate))
 
     def test_C46_an_excluded_candidates_assessment_change_stales_it(self):
         """The population is part of the answer. A candidate that was ineligible
@@ -803,12 +832,16 @@ class TestDependency(_Selection):
         self.assertEqual(sel.PROFILE_UNCHANGED, second.status)
         self.assertEqual(profiles, len(state.family("SelectionProfile")))
         again = sel.evaluate_candidate_comparison(state)
-        # THE SAME IDENTITY, derived from the same profile - so the second
-        # invocation cannot make a second record. The write boundary refuses it
-        # as a duplicate rather than doubling the design's answer.
+        # THE SAME COMPARISON OF THE SAME EVIDENCE IS NOT A SECOND COMPARISON.
+        # This used to be enforced by the write boundary refusing a duplicate id,
+        # which was true and was the wrong reason: it made "did anything change?"
+        # a question about identity collisions. S7-F asks it directly, so
+        # repeating the invocation is silent rather than rejected - and a
+        # reconcile over a design nobody touched writes nothing at all.
+        self.assertEqual(sel.COMPARISON_UNCHANGED, again.status)
         self.assertIsNone(again.patch)
-        self.assertTrue(any("DUPLICATE_ID" in p for p in again.problems),
-                        again.problems)
+        self.assertEqual([], again.problems)
+        self.assertEqual(1, len(state.family("CandidateComparison")))
         self.assertEqual(1, len(state.family("CandidateComparison")))
 
 

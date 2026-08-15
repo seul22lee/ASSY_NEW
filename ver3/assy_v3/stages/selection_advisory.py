@@ -45,6 +45,7 @@ import json
 from typing import Any, Dict, List, Optional, Tuple
 
 from ..state.patch import Op
+from ..view.consumer_view import ViewStatus
 from .base import Stage
 
 #: Everything this pass writes is written AS `selection`. The pass is a consumer
@@ -206,6 +207,101 @@ def _one_comparison(payload: Dict[str, Any]):
                                                   for c in found))))
 
 
+def canonical_context(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """The reviewed context as content: what the reviewer would be SHOWN.
+
+    Bookkeeping is stripped - a premise list merging or a provenance id changing
+    is not a change to what the review is about - and everything is ordered, so
+    the same context assembled twice is the same context.
+    """
+    return {family: [{k: v for k, v in sorted(rec.items())
+                      if not k.startswith("_") or k == "_family"}
+                     for rec in sorted(rows, key=lambda r: r.get("entity_id") or "")]
+            for family, rows in sorted(payload.items())
+            if isinstance(rows, list)}
+
+
+def review_context_digest(payload: Dict[str, Any]) -> str:
+    """WHAT THE REVIEWER SAW, as one string.
+
+    S7-F. `premise_refs` records the ids that were exposed, and propagation
+    withdraws the review when one of THOSE is revised. It cannot see the other
+    half: an entity that did not exist when the review was made and would be in
+    the payload now. The reviewer never saw it, and a review presented as current
+    would be claiming to have considered something it could not have.
+
+    Over the exact provider exposure, so it is computable from state alone - a
+    lifecycle step can ask "would this reviewer see the same design today?"
+    without asking a model anything.
+    """
+    return hashlib.sha256(
+        json.dumps(canonical_context(payload), sort_keys=True, default=str,
+                   separators=(",", ":")).encode()).hexdigest()
+
+
+def current_review_context(state):
+    """(status, digest) for the review a reviewer would be given right now.
+
+    NO PROVIDER IS CALLED. This is the deterministic half of the advisory pass,
+    and it exists so lifecycle can retire a review that has been overtaken
+    without a model being asked to produce one nobody wanted.
+    """
+    from ..view import consumer_view_for
+
+    view = consumer_view_for(PASS_ID, state)
+    if view.status is not ViewStatus.VIEW_READY:
+        return view.status.value, None
+    payload = view.payload()
+    comparison, why = _one_comparison(payload)
+    if comparison is None:
+        return (ADVISORY_NOT_APPLICABLE if "no current" in (why or "")
+                else COMPARISON_AMBIGUOUS), None
+    return "REVIEW_CONTEXT_CURRENT", review_context_digest(payload)
+
+
+ADVISORY_UNCHANGED = "ADVISORY_UNCHANGED"
+ADVISORY_RETIRED = "ADVISORY_RETIRED"
+
+
+def retire_overtaken_advisories(state, run_id=None, attempt: int = 1):
+    """Withdraw reviews of a design the reviewer would no longer be shown.
+
+    S7-F. (status, patch, retired ids). NO PROVIDER, and nothing is written in
+    place of what is withdrawn: an advisory is ASSURANCE, and a design with no
+    current review is an ordinary state a human may still decide in. Producing a
+    replacement here would be this lifecycle step deciding that a model should be
+    asked - which is a person's call, and is why the refresh is explicit.
+
+    The concerns hanging off a withdrawn review lose authority by ordinary
+    propagation: they name it as their premise, and it stopped being current.
+    """
+    from ..state.patch import StagePatch
+
+    standing = state.standing("SelectionAdvisory")
+    if not standing:
+        return ADVISORY_UNCHANGED, None, []
+    status, digest = current_review_context(state)
+    overtaken = [a for a in sorted(standing, key=lambda a: a["entity_id"])
+                 if digest is None or a.get("review_context_digest") != digest]
+    if not overtaken:
+        return ADVISORY_UNCHANGED, None, []
+    why = ("the review context is %s; this review was of a design the reviewer "
+           "would no longer be shown" % (status if digest is None else "different"))
+    ops = [Op("INVALIDATE", "SelectionAdvisory", a["entity_id"], {},
+              "selection_advisory:lifecycle", reason=why) for a in overtaken]
+    patch = StagePatch(
+        patch_id="%s-advisory-retired" % (run_id or state.run_id),
+        run_id=run_id or state.run_id, stage_id="selection",
+        stage_attempt=attempt, parent_state_hash=state.state_hash(),
+        operations=ops, execution_status="SUCCESS",
+        provenance={"purpose": "retire a review the design has moved past",
+                    "provider": "deterministic"})
+    problems = state.validate(patch)
+    if problems:
+        return ADVISORY_RETIRED, None, problems
+    return ADVISORY_RETIRED, patch, [a["entity_id"] for a in overtaken]
+
+
 def visible_ids(payload: Dict[str, Any]) -> List[str]:
     """Every canonical entity id the provider payload actually contains.
 
@@ -348,7 +444,11 @@ class SelectionEngineeringReview(Stage):
             "comparison": comparison["entity_id"],
             "recommendation": recommendation,
             "comparison_alignment": comparison_alignment(comparison, recommended),
-            "reasoning": response["reasoning"]}
+            "reasoning": response["reasoning"],
+            # WHAT THIS REVIEW WAS OF. Authored by the producer from the exact
+            # payload the provider was given - never by the model, which cannot
+            # be asked to certify what it was shown.
+            "review_context_digest": review_context_digest(payload)}
         if recommended is not None:
             # OMITTED RATHER THAN NULL. A declared reference holding None is not
             # an absent field, it is a reference to nothing - and NO_CLEAR_

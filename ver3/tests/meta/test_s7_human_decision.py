@@ -1289,12 +1289,38 @@ class TestRunnerAndScope(_Decision):
                                   for eid in state.entities})
 
     def test_E75_the_runner_cannot_choose(self):
+        """RESTATED AT S7-F. The runner must now say whether the decision it
+        reports is the CURRENT commitment or history, so the family name alone
+        stopped being the right thing to forbid - a read is how it tells the
+        truth about currentness, and refusing to look was how it could have
+        reported a stale decision as a settled design.
+
+        What is forbidden is AUTHORING. Every mention of the family in the runner
+        is an argument to a state READ, asserted by AST rather than by spelling."""
         source = _source("tools", "run_window2.py")
         for fabrication in ("materialize_human_decision_input",
                             "commit_human_selection", "HumanDecisionInput",
-                            "SelectionDecision", "frontier[0]", "candidates[0]",
+                            "frontier[0]", "candidates[0]",
                             "recommended_candidate"):
             self.assertNotIn(fabrication, source)
+        tree = ast.parse(source)
+        reads = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) \
+                    and node.func.attr in ("family", "standing"):
+                for arg in node.args:
+                    if isinstance(arg, ast.Str):
+                        reads.add((id(node), arg.s))
+        mentions = [n for n in ast.walk(tree)
+                    if isinstance(n, ast.Str) and n.s == "SelectionDecision"]
+        self.assertTrue(mentions)
+        self.assertEqual(len(mentions),
+                         len([r for r in reads if r[1] == "SelectionDecision"]),
+                         "the runner names SelectionDecision somewhere that is "
+                         "not a read of current state")
+        for op in ("Op(", "StagePatch("):
+            self.assertNotIn(op, inspect.getsource(
+                run_window2.run_selection_checkpoint))
         checkpoint = inspect.getsource(run_window2.run_selection_checkpoint)
         self.assertNotIn("apply", checkpoint)
         self.assertNotIn("Op(", checkpoint)

@@ -45,6 +45,7 @@ import hashlib
 import json
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+from ..lifecycle.records import address_operations
 from ..state.patch import Op, StagePatch
 from ..view.consumer_view import ViewStatus, branch_membership
 from . import s04_envelope_and_motion as s04
@@ -80,6 +81,21 @@ CONTEXT_NOT_READY = "CONTEXT_NOT_READY"
 COMPARISON_WRITTEN = "COMPARISON_WRITTEN"
 PROFILE_WRITTEN = "PROFILE_WRITTEN"
 PROFILE_UNCHANGED = "PROFILE_UNCHANGED"
+
+#: S7-F lifecycle outcomes. A comparison that says the same thing about the same
+#: evidence is not a new comparison, and a comparison the current evidence can no
+#: longer support is not a comparison at all.
+COMPARISON_UNCHANGED = "COMPARISON_UNCHANGED"
+COMPARISON_RETIRED = "COMPARISON_RETIRED"
+COMPARISON_MULTIPLICITY = "COMPARISON_MULTIPLICITY"
+PROFILE_RETIRED = "PROFILE_RETIRED"
+NO_PROFILE_TO_RETIRE = "NO_PROFILE_TO_RETIRE"
+
+#: Everything the evaluator can say that means "no comparison may stand now".
+NO_COMPARISON_POSSIBLE = (NO_SELECTION_PREFERENCES, PROFILE_INVALID,
+                          PROFILE_AMBIGUOUS, ELIGIBILITY_NOT_ESTABLISHED,
+                          NO_ELIGIBLE_CANDIDATES, PROFILE_MISSING,
+                          CONTEXT_NOT_READY)
 
 
 # =====================================================================
@@ -250,6 +266,42 @@ def materialize_selection_profile(state, selection_preferences: Any,
     return SelectionProfileOutcome(
         PROFILE_WRITTEN if not problems else PROFILE_INVALID, eid, source_hash,
         selection_preferences, None if problems else patch, problems)
+
+
+def retire_selection_profile(state, run_id: Optional[str] = None,
+                             attempt: int = 1) -> SelectionProfileOutcome:
+    """The user stopped stating preferences. THE OLD SNAPSHOT IS NOT STILL THEIRS.
+
+    S7-F. `None` means no preference source was supplied and nothing is claimed;
+    an explicit `{}` means the user stated that nothing is ranked, which is a
+    real answer and a real profile. This is the third case: a source that USED to
+    state preferences and no longer does. Leaving the old snapshot standing would
+    have the design keep asserting a preference the user has withdrawn, and every
+    comparison under it would go on claiming to be under what somebody wants.
+
+    Retiring it is enough by itself: the comparison premised on it loses
+    authority through ordinary propagation, and so does anything premised on that.
+    """
+    standing = state.standing("SelectionProfile")
+    if not standing:
+        return SelectionProfileOutcome(NO_PROFILE_TO_RETIRE)
+    ops = [Op("INVALIDATE", "SelectionProfile", p["entity_id"], {},
+              "selection:profile",
+              reason="the stated selection preferences were withdrawn; this "
+                     "snapshot is no longer what the user asks for")
+           for p in sorted(standing, key=lambda p: p["entity_id"])]
+    patch = StagePatch(
+        patch_id="%s-selection-profile-retired" % (run_id or state.run_id),
+        run_id=run_id or state.run_id, stage_id=RESPONSIBILITY,
+        stage_attempt=attempt, parent_state_hash=state.state_hash(),
+        operations=ops, execution_status="SUCCESS",
+        provenance={"purpose": "retire a withdrawn preference snapshot",
+                    "provider": "deterministic"})
+    problems = state.validate(patch)
+    return SelectionProfileOutcome(
+        PROFILE_RETIRED if not problems else PROFILE_INVALID,
+        standing[0]["entity_id"], None, None,
+        None if problems else patch, problems)
 
 
 # =====================================================================
@@ -579,6 +631,36 @@ def compare(criteria: Dict[str, Dict[str, str]], metrics, population: Sequence[s
 # =====================================================================
 # the invocation
 # =====================================================================
+def retire_candidate_comparison(state, why: str, run_id: Optional[str] = None,
+                                attempt: int = 1) -> SelectionComparisonOutcome:
+    """Withdraw a comparison the current evidence can no longer support.
+
+    S7-F. YESTERDAY'S COMPARISON IS NOT TODAY'S ANSWER MERELY BECAUSE TODAY
+    PRODUCED NONE. When the evaluator says the population cannot be established,
+    or that there is no profile to compare under, the design has stopped being
+    able to say how its alternatives compare - and a record left standing would
+    go on saying it, to a human, with an eligible population that is no longer
+    the design's.
+    """
+    standing = state.standing("CandidateComparison")
+    if not standing:
+        return SelectionComparisonOutcome(COMPARISON_RETIRED, problems=[])
+    ops = [Op("INVALIDATE", "CandidateComparison", c["entity_id"], {},
+              "selection:comparison", reason=why)
+           for c in sorted(standing, key=lambda c: c["entity_id"])]
+    patch = StagePatch(
+        patch_id="%s-selection-comparison-retired" % (run_id or state.run_id),
+        run_id=run_id or state.run_id, stage_id=RESPONSIBILITY,
+        stage_attempt=attempt, parent_state_hash=state.state_hash(),
+        operations=ops, execution_status="SUCCESS",
+        provenance={"purpose": "retire a comparison the current evidence cannot "
+                               "support", "provider": "deterministic"})
+    problems = state.validate(patch)
+    return SelectionComparisonOutcome(COMPARISON_RETIRED,
+                                      patch=None if problems else patch,
+                                      problems=problems)
+
+
 def evaluate_candidate_comparison(state, run_id: Optional[str] = None,
                                   attempt: int = 1) -> SelectionComparisonOutcome:
     """What the design can deterministically say about its retained alternatives.
@@ -641,9 +723,11 @@ def evaluate_candidate_comparison(state, run_id: Optional[str] = None,
     metrics = {c: {k: evaluate_metric(ev, c, k) for k in eligible} for c in criteria}
     outcome, frontier, stopping = compare(criteria, metrics, eligible)
 
-    # THE RAW FACTS, DIRECTLY. `_propagate` is one hop, so premising the profile
-    # and the assessments would leave this standing when an envelope a volume was
-    # measured from is superseded: the assessment is not what changed.
+    # THE RAW FACTS, DIRECTLY. Carried because propagation stopped after one hop
+    # when this was written: premising only the profile and the assessments would
+    # have left this standing when an envelope a volume was measured from was
+    # superseded. S7-F made the walk transitive, so the raw union is no longer
+    # what makes this correct - it is kept because it is true.
     premises = {profile["entity_id"]}
     for _candidate, (_verdict, _why, used) in sorted(population.items()):
         premises |= set(used)
@@ -651,8 +735,8 @@ def evaluate_candidate_comparison(state, run_id: Optional[str] = None,
         for candidate in sorted(metrics[criterion]):
             premises |= set(metrics[criterion][candidate].source_refs)
 
-    eid = "CCP-%s" % profile["source_hash"][:12].upper()
-    ops = [Op("CREATE", "CandidateComparison", eid, {
+    address = "CCP-%s" % profile["source_hash"][:12].upper()
+    fields = {
         "candidates": list(eligible),
         "profile": profile["entity_id"],
         "metrics": {c: {k: m.as_dict() for k, m in sorted(per.items())}
@@ -664,8 +748,30 @@ def evaluate_candidate_comparison(state, run_id: Optional[str] = None,
             c for c in metrics
             if any(m.availability != AVAILABLE for m in metrics[c].values())),
         "incomparable_criteria": incomparable_criteria(criteria, metrics,
-                                                       eligible)},
-        "selection:comparison", premise_refs=sorted(premises))]
+                                                       eligible)}
+    standing = state.standing("CandidateComparison")
+    if len(standing) > 1:
+        return SelectionComparisonOutcome(
+            COMPARISON_MULTIPLICITY, population=population,
+            problems=["%d current comparisons: %s. Which one is in force is not "
+                      "this code's to decide"
+                      % (len(standing),
+                         ", ".join(sorted(c["entity_id"] for c in standing)))],
+            consumer_view=view.as_dict())
+    ops, eid = address_operations(
+        state, "CandidateComparison", address, fields, sorted(premises),
+        "selection:comparison", standing[0] if standing else None,
+        replaced_reason="recompared over the current evidence; this comparison "
+                        "was made over a revision the design no longer has")
+    if not ops:
+        # THE SAME COMPARISON OF THE SAME EVIDENCE. Reconciling a design nobody
+        # changed must not produce a second answer to a question that already
+        # has one.
+        return SelectionComparisonOutcome(
+            COMPARISON_UNCHANGED, outcome, frontier, eligible, population,
+            {c: {k: m.as_dict() for k, m in per.items()}
+             for c, per in metrics.items()},
+            stopping, None, [], view.as_dict())
     patch = StagePatch(
         patch_id="%s-selection-comparison-%s" % (run_id or state.run_id, eid),
         run_id=run_id or state.run_id, stage_id=RESPONSIBILITY,

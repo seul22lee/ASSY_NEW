@@ -64,6 +64,9 @@ from ver3.assy_v3.stages.selection_advisory import (                        # no
     ADVISORY_NOT_APPLICABLE, COMPARISON_AMBIGUOUS, SelectionEngineeringReview)
 from ver3.assy_v3.stages.selection_decision import (                        # noqa: E402
     build_human_review_snapshot)
+from ver3.assy_v3.lifecycle.s7_reconcile import (                           # noqa: E402
+    ABSENT, CURRENT_COMMITMENT, REVIEW_NOT_READY, UNSPECIFIED,
+    current_commitment, reconcile_s7)
 from ver3.assy_v3.state import DesignState                                  # noqa: E402
 from ver3.live_providers import env as env_loader                           # noqa: E402
 from ver3.live_providers.deepseek import DeepSeekProvider                   # noqa: E402
@@ -652,12 +655,48 @@ def run_selection_checkpoint(case_id: str, state, trial: int) -> Dict[str, Any]:
         return rec
     snapshot = review.snapshot
     rec["checkpoint_status"] = AWAITING_HUMAN_DECISION
+    # WHAT IS ACTUALLY COMMITTED, and never what merely once was. A decision
+    # whose premises moved is history: reporting it as the current commitment is
+    # how a run tells a reader the design is settled when it has reopened.
+    committed = current_commitment(state)
+    rec["current_commitment"] = committed["entity_id"] if committed else None
+    rec["historical_decisions"] = sorted(
+        d["entity_id"] for d in state.family("SelectionDecision")
+        if d.get("_validity") != "STANDING")
+    if committed:
+        rec["checkpoint_status"] = CURRENT_COMMITMENT
     rec["premise_digest"] = snapshot.digest
     rec["comparison"] = snapshot.comparison["entity_id"]
     rec["profile"] = snapshot.profile["entity_id"]
     rec["eligible_candidates"] = list(snapshot.eligible_candidates)
     rec["reviewed_advisories"] = snapshot.advisory_ids()
     rec["reviewed_concerns"] = snapshot.concern_ids()
+    rec["counts"] = state.counts()
+    return rec
+
+
+def run_s7_reconcile(case_id: str, state, trial: int,
+                     selection_preferences=UNSPECIFIED) -> Dict[str, Any]:
+    """Re-establish what S-7 says after the design moved. IT STILL CANNOT CHOOSE.
+
+    Orchestration only: the coordinator asks each owner to answer again over the
+    current state, and this records what it reported. No provider is handed over,
+    so no review is refreshed here - asking for an opinion is a person's decision.
+    A run that reopens a commitment ends where the first one did, waiting for a
+    human, because that is the only thing that can close it.
+    """
+    rec: Dict[str, Any] = {"case": case_id, "trial": trial, "failures": [],
+                           "reconcile": None}
+    out = reconcile_s7(state, selection_preferences=selection_preferences)
+    rec["reconcile"] = out.as_dict()
+    rec["checkpoint_status"] = out.human_state
+    committed = current_commitment(state)
+    rec["current_commitment"] = committed["entity_id"] if committed else None
+    if out.problems:
+        rec["failures"].append({"kind": "LIFECYCLE_CONDITION",
+                                "stage": "s7_reconcile",
+                                "what": "reconciliation reported problems",
+                                "detail": out.problems})
     rec["counts"] = state.counts()
     return rec
 

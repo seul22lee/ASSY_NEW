@@ -1840,7 +1840,289 @@ Regression, **secondary**: RUN 1320 · PASS 1320 · FAIL 0 · SKIP 22.
 
 ---
 
+## S7-F — LIFECYCLE, TRANSITIVE CURRENTNESS AND S-7 CLOSURE (baseline `d492d76`)
+
+The last S-7 subpass. A–E answered what is feasible, how the eligible compare,
+what a reviewer would add and what a human decided. This one answers what
+happens to all four of those answers when the design moves afterwards.
+
+### K.1 Architecture
+
+```
+a named premise is revised ──> the state engine walks the premise graph
+                               transitively; dependents lose authority
+
+evidence appears where there ─> assy_v3/lifecycle/s7_reconcile.py asks each
+was none                       OWNER to answer again, in dependency order
+
+                    feasibility ▸ profile ▸ comparison ▸ review ▸ checkpoint
+```
+
+| file | what it is |
+|---|---|
+| `assy_v3/state/design_state.py` | transitive `_propagate`, EXTEND participation, `entity_revision_digest` |
+| `assy_v3/lifecycle/records.py` | which record is CURRENT at a logical address, and what makes a new one |
+| `assy_v3/lifecycle/s7_reconcile.py` | the coordinator: owns nothing, decides nothing, orders everything |
+| `assy_v3/stages/feasibility.py` | re-evaluable through the same evaluator, one current answer per address |
+| `assy_v3/stages/selection.py` | comparison re-evaluation and retirement, preference-source withdrawal |
+| `assy_v3/stages/selection_advisory.py` | `review_context_digest`, and retirement of an overtaken review |
+| `tools/run_window2.py` | `run_s7_reconcile`, and currentness-accurate checkpoint reporting |
+
+The coordinator constructs no `Op` and no `StagePatch` (F55, by AST). Every write
+it causes is authored by the owner, through the owner's own entry point, under
+the owner's stage id (F56/F57).
+
+### K.2 Transitive currentness
+
+Breadth-first over the premise graph from the changed entity, with a visited set,
+deterministic ordering, one transition to STALE per entity however many paths
+reach it, and both the direct premise and the ROOT of the walk recorded on each.
+A cycle terminates (F04, asserted against the engine directly, because the write
+boundary cannot build one). A patch's own CREATEs are never staled by its own
+changes — the same co-produced rule the view boundary already applies.
+
+The falsifier that matters is the full chain: revising one Envelope stales the
+spatial verdict, the assessment that aggregates it, the comparison that rests on
+the population that assessment establishes, and the commitment made over that
+comparison — with no producer having copied the closure anywhere (F40, F52, F62).
+The existing raw-premise redundancy in S7-B/C is KEPT: it is true, it costs
+nothing, and deleting correct provenance to prove a mechanism works is not a test
+of it.
+
+### K.3 EXTEND, and one documented narrowing
+
+`_extend_problems` permits an EXTEND only for a field the family DECLARES
+extendable, by exactly the stage the contract names, and only where no value
+exists — changing an authored value is a SUPERSEDE and always was. An extension
+is therefore the owner's record being COMPLETED by the stage the contract said
+would complete it.
+
+So EXTEND propagates like any other authoritative change, **except to the owner's
+own passes**. This is narrower than F-I2 as written, and it is narrower because
+the pipeline proves it must be: propagating to everything was implemented first,
+and it withdrew s03b's DOF grid the moment s04a placed the joint it was derived
+from — after which no deterministic step could restore it and the feasibility
+view was unready for every design in the repository. What the invariant is FOR is
+preserved exactly: a conclusion drawn from outside the owner, over a record that
+has since gained authoritative content, goes STALE and takes its own dependents
+with it (F06, F06b).
+
+### K.4 Re-evaluation, and what makes an answer new
+
+`evaluation_basis` is the lifecycle fingerprint of the exact premise revisions an
+answer was reached over — built from `entity_revision_digest`, which says whether
+a record is the same revision and nothing about what it means. Engineering values
+are still read only through the ConsumerView.
+
+```
+same basis, same answer      -> nothing is written        (F08, F09)
+different basis or answer    -> the current record is INVALIDATED with a reason
+                                and a new one is written beside it (F10-F14)
+no current record            -> the new answer is written; the old keeps its id
+```
+
+A re-evaluation's id is `<address>-R<digest8>` over the address, the basis, the
+answer and the record it replaces — so the same transition is always the same id
+and a design that moves away from a state and back does not collide with its own
+history. **The same verdict over revised evidence is still a new evaluation**
+(F13): two identical answers over two revisions are two answers, and only one is
+about what the design currently says.
+
+Logical addresses stay unique: exactly one current `(candidate, domain)`,
+`candidate` and `(candidate, constraint)` (F15–F17b), and the reader REFUSES to
+choose if two ever stand (F16b) rather than taking the first.
+
+### K.5 Absence to evidence
+
+The case no edge can carry. A verdict of NOT_ESTABLISHED because a body has no
+extent depends on there being none, and the entity that ends that absence is a
+CREATE nothing could have named. CREATE therefore has no generic propagation — a
+global invalidation would destroy every dependency the design has — and the
+coordinator asks the evaluator again instead (F10, F11, MATRIX_03).
+
+### K.6 Preferences, candidates and requirements
+
+| change | what it may touch |
+|---|---|
+| `P1 → P2` | the comparison, the review, the commitment. **No feasibility record moves, byte for byte, including its validity** (F26) |
+| `P1 → {}` | a real current profile that ranks nothing (F29) |
+| `P1 → source withdrawn` | the profile is RETIRED; no current profile, no current comparison, the commitment reopens (F30–F32) |
+| a new Candidate | the old comparison cannot stay current on a population that is not the design's; retired until the new branch is established, then a new exact comparison (F19–F21) |
+| a withdrawn Candidate | leaves the population (F22) |
+| a new blocking requirement | eligibility is re-established with NO default — not SATISFIED, not VIOLATED (F23–F25) |
+| a withdrawn requirement | stops governing; its compliance record stops being current (F25b) |
+
+### K.7 The advisory review context
+
+`review_context_digest` is the producer's canonical digest of the exact provider
+payload, taken before the response exists. `premise_refs` withdraws a review when
+something it was SHOWN is revised; the digest catches the other half — an entity
+that did not exist then and would be in the review now, which no premise edge
+could reach because the reviewer never saw it (F34, F35). The concerns go with it
+(F36). **No provider is called by a change** (F37): the review is retired and the
+design has no current advisory, which is an ordinary state a human may still
+decide in. An explicit refresh goes through the ordinary D Stage boundary (F38).
+
+### K.8 Reopening
+
+A stale commitment is not a commitment: `current_commitment` returns only a
+STANDING decision, and the runner labels history as history (F43, F61b). The old
+HumanDecisionInput stays STANDING — it is a fact about a person, not a conclusion
+about the design — and is NEVER replayed: `commit_human_selection` and
+`materialize_human_decision_input` appear nowhere in the lifecycle layer (F45,
+F46), and a hand-replayed submission is refused as stale. A new commitment needs
+a new review, a new digest and a new human submission (F44, F47, F48), and the
+whole reopen writes no decision at all (F49). S7-E's guard on a STANDING decision
+is what lets the second decision be made without anyone deleting the first
+(F62–F69).
+
+### K.9 F01–F75
+
+**73 test methods** in `test_s7_lifecycle.py`, every one over the real chain.
+Propagation F01–F07 · feasibility reconciliation F08–F18 · population F19–F25b ·
+preferences F26–F32b · advisory F33–F39 · reopening F40–F49 · precision F50–F54 ·
+authority F55–F61b · the full chain twice F62–F69c · scope F70–F75 · and the
+nine-row lifecycle matrix.
+
+### K.10 Fourteen mutations
+
+| mutation | caught by |
+|---|---|
+| propagation walks one hop again | F02, F03, F04, F06b, F40, F52, F62 |
+| EXTEND stops participating | F06, F06b |
+| every CREATE stales the world | F01–F14 and 20 more |
+| the deterministic rerun is skipped | F09–F13, F21, F23, F43, F44, F62 |
+| the old comparison is kept when none may exist | F19, F23, F25b, MATRIX |
+| a withdrawn source leaves the profile standing | F30, F32, MATRIX_07 |
+| a preference change re-evaluates feasibility | F08, F18, F26, F50, F62 |
+| a new candidate is silently ignored | F10, F11, F21, F43, F62 |
+| reconciliation asks a model on its own | F08–F39 and most of the suite |
+| advisory ids become decision premises | F07, F39, F54, MATRIX_08 |
+| the old human submission is replayed | F45 |
+| the frontier is selected after a reopen | F09, F49, F69b |
+| a duplicate current assessment is allowed | F08, F13, F17b, F41, F62 |
+| the current record is chosen by list order | **F16b** |
+
+### K.11 In-scope defects found and fixed during the pass
+
+* **Nothing asserted what the READER does when two answers stand.** Found by
+  mutation: relaxing `len(found) == 1` to `found[0] if found else None` broke no
+  test, because every test asserted that multiplicity does not arise and none
+  asserted what happens if it ever does. That is precisely the defect class this
+  layer exists to prevent — choosing by position rather than by currentness, which
+  is right until the day it is silently wrong. F16b closes it.
+* **The feasibility assessment re-revised itself forever.** Its premise set names
+  the domain records this same act writes; they do not exist when the basis is
+  computed and they do a moment later, so an unchanged design produced a new
+  revision on every reconcile. The basis is now taken over the EVIDENCE, not over
+  the sibling answers being written with it.
+* **The lifecycle helpers reached into state from inside the feasibility
+  module**, which S7-B's own sweep forbids for anything but its entry point. They
+  moved to `assy_v3/lifecycle/records.py`, where the shared layer belongs anyway:
+  a comparison and an assessment now get one implementation of "unchanged".
+* **C45 pinned one-hop precision as an invariant.** A geometry change did not
+  stale a comparison of joint counts, because no metric read the geometry. Under
+  transitive currentness the same change reaches the comparison through the
+  eligibility evidence, which is correct and is now what the test says — with the
+  precision half kept as C45b, and the other candidate's evidence still untouched.
+* **C48 asserted idempotence through a DUPLICATE_ID refusal**, which was true for
+  the wrong reason: it made "did anything change?" a question about identity
+  collisions. It now asserts the direct property.
+
+### K.12 Bounded F-I1…F-I16 audit
+
+**Stale graph.** `_propagate` is breadth-first with a visited set and enqueues
+every entity it stales, so a transitive dependent cannot stay standing after its
+premise chain changes; a cycle terminates and a diamond transitions once (F02,
+F03, F04).
+
+**Absence hole.** A new Envelope, a new DesignConstraint and a new Candidate all
+reopen the answer that depended on their absence, through re-evaluation rather
+than through an edge that cannot exist (F10, F19, F23, MATRIX_03). `_create`
+contains no `_propagate` call at all — CREATE is not handled by global
+invalidation.
+
+**Over-staling.** A preference change leaves every feasibility record byte-for-byte
+identical including its validity (F26); branch-A geometry leaves branch-B's
+verdicts and assessment untouched, and leaves candidate A's own unrelated
+mobility verdict standing (F18, F51); an entity nobody saw changes nothing at all
+(F05, F50).
+
+**Current multiplicity.** Reconciling twice, and reconciling a design that has
+been moved twice, leaves exactly one current record at every logical address
+(F15–F17b), and `multiplicity` is checked before an evaluation is written. Two
+standing comparisons are refused rather than resolved.
+
+**Commitment leakage.** `current_commitment` returns only a STANDING decision;
+the runner reports a stale one as history (F43, F61b). The lifecycle layer
+contains no `commit_human_selection`, no `materialize_human_decision_input` and
+no `selected_candidate` — zero occurrences of each (F45, F46, F49).
+
+**Considered leakage.** Advisory and concern ids are not in the decision's premise
+set, so withdrawing either leaves a commitment standing (F07, F39, F54,
+MATRIX_08) — fixed in the premise set, with no family named anywhere in
+`_propagate`.
+
+**Provider leakage.** No provider is reachable from state mutation or from
+reconciliation: the coordinator calls one only when a caller hands it over
+explicitly, and the falsifier asserts a supplied-but-unused provider is never
+called (F37, F59).
+
+**Historical erasure.** Nothing in the lifecycle layer or the state engine
+deletes, pops or removes a record. Every replaced evaluation, retired comparison,
+withdrawn profile and stale decision remains readable with its history (F14, F30,
+F43, F69).
+
+**Current selection subset.** A candidate with no current evaluation makes the
+population unestablished and retires the comparison rather than being left out of
+it (F19, F20).
+
+Zero unresolved S7-owned blockers.
+
+### K.13 Scope
+
+No S8/S9: the lifecycle layer names no verification, evidence or assurance
+family. No benchmark id, no candidate-name parsing and no criterion name appears
+in it (F70–F73). `COMMITTED_BRANCH` remains retired from s04b (F74), and every
+S7-A–E boundary is still where it was (F75) — the preference is visible to
+exactly the four passes of one owner, the advisory writes exactly two families,
+the decision pass exactly one.
+
+Regression, **secondary**: RUN 1394 · PASS 1394 · FAIL 0 · SKIP 22.
+
+---
+
 ## CURRENT STATUS
+
+> **S7-F VERIFIED CLOSED — CURRENTNESS IS TRANSITIVE, ABSENCE-TO-EVIDENCE IS
+> RECONCILED, AND STALE COMMITMENTS REOPEN ONLY TO A HUMAN.**
+>
+> A revised premise withdraws unqualified authority from everything that rests on
+> it and everything that rests on those, so no producer has to remember to copy a
+> closure it cannot see the end of. An extension participates, narrowed to the
+> conclusions drawn from outside the record's owner - the pipeline proves the
+> wider rule cannot hold, and what the invariant is for survives it. Evidence
+> appearing where there was none is caught the only way it can be, by asking the
+> evaluator again; a re-evaluation over revised premises is a new current answer
+> beside a preserved historical one, and there is exactly one current answer at
+> every logical address, with the reader refusing to choose rather than taking the
+> first. A preference change recomputes the comparison and touches no feasibility
+> record. A withdrawn preference source retires the profile rather than leaving
+> the design asserting what nobody asks for. A new candidate or a new blocking
+> requirement ends a comparison that no longer describes the design, with no
+> default answer invented for either. An overtaken review is retired without a
+> model being asked anything, and advisory wording still disturbs no commitment.
+> And when a commitment loses its premises the design reopens to a PERSON: the old
+> submission is history, is never replayed, and nothing selects in its place.
+>
+> **S-7 / U-8 VERIFIED CLOSED — FEASIBILITY, PREFERENCE-AWARE COMPARISON, ADVISORY
+> REVIEW, HUMAN COMMITMENT AND LIFECYCLE REOPENING ARE AUTHORITY-CONSISTENT.**
+>
+> S8 and S9 are not started.
+
+---
+
+## S7-E FINAL STATUS
 
 > **S7-E VERIFIED CLOSED — HUMAN REVIEW IS SNAPSHOT-BOUND, STALE-SAFE AND THE
 > ONLY SOURCE OF SELECTION COMMITMENT.**

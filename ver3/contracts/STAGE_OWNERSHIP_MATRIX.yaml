@@ -402,6 +402,14 @@ responsibilities:
     `runs_after` is the pipeline stage a responsibility follows. It gives the
     responsibility a position, which is what an ordering check needs to say that
     a consumer does not precede an owner.
+  coordination_rule: >
+    S7-F. A LIFECYCLE COORDINATOR IS NOT A RESPONSIBILITY AND OWNS NOTHING.
+    `assy_v3/lifecycle` asks the responsibilities below to answer again over
+    current state, in dependency order, and applies what they produce. Every
+    write it causes is authored BY THE OWNER through the owner's own entry point
+    and carries the owner's stage id; nothing is written under a lifecycle
+    authority, and no family names one. It is listed nowhere in this matrix for
+    exactly that reason - a coordinator with an ownership entry would be an owner.
   runs_after_responsibility_rule: >
     `runs_after_responsibility` orders one responsibility against another. Both
     of these follow s04, and that alone does not say which comes first - it left

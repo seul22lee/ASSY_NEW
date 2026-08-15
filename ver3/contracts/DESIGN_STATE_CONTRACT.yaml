@@ -91,9 +91,33 @@ authority_model:
     STALE: "A premise this value depends on changed. The value was not touched; it has lost unqualified authority."
   premise_rule: >
     FA-5. An operation may declare the class-A entity ids its value depends on.
-    When such a premise is superseded or invalidated, every dependent whose
-    validity is STANDING becomes STALE. The dependent is never deleted and never
-    silently remains unqualifiedly authoritative.
+    When such a premise is REVISED - superseded, invalidated, or extended with an
+    authoritative field by a stage that does not own it - every dependent whose
+    validity is STANDING becomes STALE, and so does every dependent of THOSE, all
+    the way out. Currentness is a property of the graph and is walked as one
+    (S7-F): before that it stopped after a single hop, which made correctness
+    depend on every producer copying the whole premise closure into every output.
+    The dependent is never deleted and never silently remains unqualifiedly
+    authoritative.
+  extension_rule: >
+    AN EXTENSION IS A COMPLETION, AND STILL AN AUTHORITATIVE CHANGE. EXTEND is
+    permitted only for a field the family DECLARES extendable, by exactly the
+    stage named as its author, and only where no value exists - changing an
+    authored value is a SUPERSEDE. So the owner's own passes are not staled by
+    one: s03 authors a Joint and s04 places it, and s03b's DOF grid was never
+    entitled to the placement it did not have. A conclusion drawn from OUTSIDE
+    the owner is staled, because it was decided over a record that has since
+    gained authoritative content. (S7-F)
+  absence_rule: >
+    A PREMISE THAT IS AN ABSENCE HAS NO ID, so no edge can carry it. A feasibility
+    answer of NOT_ESTABLISHED because no load path exists depends on there being
+    none, and the entity that ends that absence is a CREATE nothing could have
+    named in advance. CREATE therefore has no generic propagation - a global
+    invalidation would destroy every dependency it has - and absence-to-evidence
+    is closed the other way: the deterministic responsibilities are asked to
+    answer again over current state, and their new answers replace what stands
+    where the two differ. The two mechanisms are complementary and neither
+    substitutes for the other. (S7-F)
 
 # ---------------------------------------------------------------- U-2B (S-2)
 # Field-level canonical semantics. DESIGN_STATE_CONTRACT is the SOURCE OF TRUTH
@@ -2006,11 +2030,23 @@ assurance_families:
       having more joints than one somebody would rather have.
     rules:
       - >
-        ITS PREMISES ARE THE DOMAIN ASSESSMENTS AND EVERYTHING THEY USED.
-        `_propagate` is ONE HOP, so naming the domain records would not carry the
-        raw facts behind them: an envelope changing would stale the domain
-        verdict and leave this record STANDING on it. The union of the raw
-        premises is carried directly, for the same reason S-6 gave.
+        ITS PREMISES ARE THE DOMAIN ASSESSMENTS AND EVERYTHING THEY USED. The raw
+        union was originally carried because propagation stopped after one hop,
+        so naming the domain records alone would have left this standing on a
+        verdict that had just lost authority. S7-F made propagation transitive
+        and the union is kept anyway: it is true, it costs nothing, and deleting
+        correct provenance to demonstrate that a mechanism works is not a test
+        of it.
+      - >
+        RE-EVALUABLE, AND ONE CURRENT ANSWER PER CANDIDATE. When the evidence it
+        was reached over is revised, or evidence appears where there was none,
+        the same evaluator answers again: the previous record is INVALIDATED with
+        a reason and remains readable, and the new answer is written beside it
+        carrying `evaluation_basis` - the lifecycle fingerprint of the exact
+        premise revisions it was decided over. Two answers over the same basis
+        are one answer, so reconciling an unchanged design writes nothing. Two
+        STANDING assessments for one candidate is a lifecycle defect and is
+        reported as one. (S7-F)
       - >
         CANDIDATE-LOCAL. It reads one branch's evidence and says whether that
         branch could work. It never reads another candidate, never ranks, and
@@ -2277,6 +2313,17 @@ assurance_families:
         IMPORTANCE IS NOT AUTHORITY. A HIGH concern changes no eligibility, no
         feasibility verdict and no comparison. It changes what a human is asked to
         look at. (S7-D)
+      - >
+        A REVIEW IS OF A DESIGN, AND THE DESIGN MOVES. `review_context_digest` is
+        the producer's canonical digest of the EXACT payload the provider was
+        given, taken before the response exists and never authored by the model.
+        `premise_refs` withdraws the review when something it was shown is
+        revised; the digest catches the other half - an entity that did not exist
+        then and would be in the review now - which no premise edge could, because
+        the reviewer never saw it. When the two differ the review is retired
+        WITHOUT a provider being called: an advisory is assurance, a design with
+        no current review is an ordinary state a human may still decide in, and
+        asking for a new opinion is a person's decision. (S7-F)
 
   HumanDecisionInput:
     semantic_roles: [human_decision]

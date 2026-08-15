@@ -54,6 +54,12 @@ from __future__ import annotations
 import math
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
+from ..lifecycle.records import (CURRENT_MULTIPLICITY,             # noqa: F401
+                                 address_operations,
+                                 current_assessment,
+                                 current_compliance,
+                                 current_domain_assessment,
+                                 multiplicity)
 from ..state.patch import Op, StagePatch
 from ..view.consumer_view import InvocationContext, ViewStatus
 from . import s03_topology_and_mobility as s03
@@ -174,9 +180,11 @@ class _Evidence:
         A premise of any verdict that read a spatial value, for the reason S-6
         gave about the values themselves: withdraw the basis and the numbers mean
         nothing. It has to be named HERE and not left to the envelope that
-        carries it - `_propagate` is one hop, so superseding the scale stales the
-        envelope and stops, leaving a verdict standing on an extent that has just
-        lost its authority.
+        carries it: propagation walked one hop when this was written, so
+        superseding the scale staled the envelope and stopped, leaving a verdict
+        standing on an extent that had just lost its authority. S7-F made the
+        walk transitive and the direct premise stays, because what a verdict was
+        decided from is provenance rather than a mechanism.
         """
         return self.ids("ReferenceScale")
 
@@ -1492,39 +1500,57 @@ def evaluate_candidate_feasibility(state, candidate_id: str,
     compliance = evaluate_hard_requirements(ev)
     status = aggregate(verdicts)
 
+    conflicting = multiplicity(state, candidate_id)
+    if conflicting:
+        # A CANDIDATE WITH TWO CURRENT ANSWERS is a lifecycle defect, and
+        # evaluating again over an address nobody can read would bury it.
+        return FeasibilityOutcome(candidate_id, CURRENT_MULTIPLICITY, verdicts,
+                                  compliance, None, conflicting, view.as_dict())
+
     prov = "feasibility:deterministic"
     ops: List[Op] = []
     domain_ids, raw_union = [], set()
     for v in verdicts:
-        eid = "FDA-%s-%s" % (candidate_id, _TOKEN[v.domain])
+        made, eid = address_operations(
+            state, "FeasibilityDomainAssessment",
+            "FDA-%s-%s" % (candidate_id, _TOKEN[v.domain]),
+            {"candidate": candidate_id, "domain": v.domain, "status": v.status,
+             "reason_codes": v.reason_codes, "summary": v.summary},
+            sorted({candidate_id} | set(v.premises)), prov,
+            current_domain_assessment(state, candidate_id, v.domain))
+        ops += made
         domain_ids.append(eid)
         raw_union |= set(v.premises)
-        ops.append(Op("CREATE", "FeasibilityDomainAssessment", eid,
-                      {"candidate": candidate_id, "domain": v.domain,
-                       "status": v.status, "reason_codes": v.reason_codes,
-                       "summary": v.summary},
-                      prov, premise_refs=sorted({candidate_id} | set(v.premises))))
-    # THE RAW UNION IS CARRIED DIRECTLY. `_propagate` is one hop, so naming the
-    # domain records would leave this standing when an envelope the spatial
-    # verdict read is superseded: the domain record goes STALE and stops there.
-    ops.append(Op("CREATE", "MechanicalFeasibilityAssessment",
-                  "MFA-%s" % candidate_id,
-                  {"candidate": candidate_id, "status": status,
-                   "domain_assessments": domain_ids,
-                   "evaluated_domains": list(DOMAINS),
-                   "findings": [_finding(v) for v in verdicts
-                                if v.status in (FAIL, NOT_ESTABLISHED)]},
-                  prov,
-                  premise_refs=sorted({candidate_id} | set(domain_ids) | raw_union)))
+    # THE RAW UNION IS CARRIED AS WELL AS THE DOMAIN RECORDS. S7-F made
+    # propagation transitive, so naming the domain records is enough on its own
+    # now; the raw premises stay because they are true, they cost nothing, and
+    # deleting correct provenance to demonstrate a mechanism is not a test of it.
+    made, _mfa = address_operations(
+        state, "MechanicalFeasibilityAssessment", "MFA-%s" % candidate_id,
+        {"candidate": candidate_id, "status": status,
+         "domain_assessments": domain_ids, "evaluated_domains": list(DOMAINS),
+         "findings": [_finding(v) for v in verdicts
+                      if v.status in (FAIL, NOT_ESTABLISHED)]},
+        sorted({candidate_id} | set(domain_ids) | raw_union), prov,
+        current_assessment(state, candidate_id),
+        basis_over=sorted({candidate_id} | raw_union))
+    ops += made
     for constraint, hstatus, codes, used, why in compliance:
         cid = constraint.get("entity_id")
-        ops.append(Op("CREATE", "HardRequirementCompliance",
-                      "HRC-%s-%s" % (candidate_id, cid),
-                      {"candidate": candidate_id, "constraint": cid,
-                       "status": hstatus, "why": why or "; ".join(codes)},
-                      prov,
-                      premise_refs=sorted({candidate_id, cid}
-                                          | {u for u in used if u})))
+        made, _hrc = address_operations(
+            state, "HardRequirementCompliance",
+            "HRC-%s-%s" % (candidate_id, cid),
+            {"candidate": candidate_id, "constraint": cid, "status": hstatus,
+             "why": why or "; ".join(codes)},
+            sorted({candidate_id, cid} | {u for u in used if u}), prov,
+            current_compliance(state, candidate_id, cid))
+        ops += made
+    if not ops:
+        # NOTHING TO SAY THAT IS NOT ALREADY SAID. Reconciling a design nobody
+        # changed writes nothing at all, or every reconcile would be a revision
+        # and the history would fill with copies of one answer.
+        return FeasibilityOutcome(candidate_id, status, verdicts, compliance,
+                                  None, [], view.as_dict())
 
     patch = StagePatch(
         patch_id="%s-%s-feasibility" % (run_id or state.run_id, candidate_id),
