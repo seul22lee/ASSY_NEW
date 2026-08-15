@@ -28,18 +28,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, REPO)
 
+from ver3.assy_v3.pipeline import (CHECK_FINDING, INTERFACE_FINDING,      # noqa: E402
+                                   PARSER_DEFECT, Progression,
+                                   full_live_qualification,
+                                   s03_passes, s04_passes, window1)
 from ver3.assy_v3.view import InvocationContext                            # noqa: E402
 import yaml as _yaml                                                        # noqa: E402
 _RESPONSIBILITY = _yaml.safe_load(open(os.path.join(
     REPO, "ver3", "contracts", "STAGE_RESPONSIBILITY_CONTRACT.yaml")))
-from ver3.assy_v3.state.patch import Op as _Op, StagePatch as _Patch       # noqa: E402
 from ver3.assy_v3.providers.offline import OfflineReplayProvider            # noqa: E402
-from ver3.assy_v3.providers.status import ExecutionStatus                   # noqa: E402
-from ver3.assy_v3.stages.s01_requirement_capture import S01RequirementCapture  # noqa: E402
-from ver3.assy_v3.stages.s02_obligation_and_candidates import (             # noqa: E402
-    S02ObligationAndCandidates)
 from ver3.assy_v3.stages.s03_topology_and_mobility import (                 # noqa: E402
-    S03BMobilityAndAssembly, S03TopologyAndMobility, assembly_acyclic_check,
+    assembly_acyclic_check,
     current_mobility_cells,
     disposition_completeness,
     legacy_shapes_in_recording,
@@ -48,7 +47,7 @@ from ver3.assy_v3.stages.s03_topology_and_mobility import (                 # no
     no_magnitude_check, no_selection_check_s03, obligation_ownership_check,
     retention_check, simulation_completeness_check)
 from ver3.assy_v3.stages.s04_envelope_and_motion import (                   # noqa: E402
-    S04AEnvelopeAndReach, S04BPlacementAndMotion, assembly_path_check,
+    S04AEnvelopeAndReach, assembly_path_check,
     configuration_interference_check,
     envelope_coverage_check, joint_frame_check,
     spatial_commitment_check,
@@ -67,8 +66,7 @@ from ver3.assy_v3.stages.selection_decision import (                        # no
 from ver3.assy_v3.assurance import run_assurance                            # noqa: E402
 from ver3.assy_v3.assurance.status import report as assurance_report        # noqa: E402
 from ver3.assy_v3.lifecycle.s7_reconcile import (                           # noqa: E402
-    ABSENT, CURRENT_COMMITMENT, REVIEW_NOT_READY, UNSPECIFIED,
-    current_commitment, reconcile_s7)
+    CURRENT_COMMITMENT, UNSPECIFIED, current_commitment, reconcile_s7)
 from ver3.assy_v3.state import DesignState                                  # noqa: E402
 from ver3.live_providers import env as env_loader                           # noqa: E402
 from ver3.live_providers.deepseek import DeepSeekProvider                   # noqa: E402
@@ -209,127 +207,87 @@ def selection_preferences(profile: Optional[Dict[str, Any]]):
     return profile["selection_preferences"]
 
 
-def seed_window1(case_id: str):
-    """Replay S01 and S02. Returns (state, problems)."""
+def seed_window1(case_id: str, progression=None):
+    """Replay S01 and S02 through the canonical progression.
+
+    Returns (state, problems, progression). The progression is returned so the
+    replayed response source travels with the run: a later live S03/S04 cannot
+    make this chain full-live, and the record is what says so.
+    """
     root = recording_root(case_id)
     text = request_text(case_id)
     if root is None or text is None:
-        return None, ["no recording or request for %s" % case_id]
+        return None, ["no recording or request for %s" % case_id], progression or Progression()
+    progression = progression or Progression()
     provider = OfflineReplayProvider(root, case_id)
     state = DesignState(run_id="w2-%s" % case_id)
     # THE PROFILE IS NOT REPLAYED, because it was never a model response. It is
-    # structured user input, ingested deterministically beside the recording.
-    out1 = S01RequirementCapture().invoke(provider, state, state.run_id,
-                                          {"request_text": text,
-                                           "design_profile": design_profile(case_id)})
-    if out1.patch is None:
-        return None, ["s01 replay failed: %s" % out1.problems]
-    state.apply(out1.patch)
-    out2 = S02ObligationAndCandidates().invoke(provider, state, state.run_id)
-    if out2.patch is None:
-        return None, ["s02 replay failed: %s" % out2.problems]
-    state.apply(out2.patch)
-    return state, []
+    # structured user input, ingested deterministically beside the recording -
+    # and now on the live path too, which previously ingested none.
+    out1, out2 = window1(provider, state, text, progression,
+                         design_profile=design_profile(case_id))
+    if out1 is None or out1.patch is None:
+        return None, ["s01 replay failed: %s" % (out1.problems if out1 else "raised")], progression
+    if out2 is None or out2.patch is None:
+        return None, ["s02 replay failed: %s" % (out2.problems if out2 else "raised")], progression
+    return state, [], progression
 
 
 def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
-            provider, trial: int) -> Dict[str, Any]:
+            provider, trial: int, progression=None) -> Dict[str, Any]:
     """Embody ONE candidate INTO THE ACCUMULATED DESIGN. Never raises.
+
+    THE PASSES THEMSELVES ARE THE PIPELINE'S. This function chooses the
+    candidate, names the branch and reports; it no longer decides invocation
+    order, patch acceptance or failure layer, because a runner that decided
+    those was a second stage semantics.
 
     THE DEEP COPY IS GONE. Each candidate used to be embodied into a private
     `copy.deepcopy(base_state)`, so the run ended with N design states each
-    holding one alternative and no state holding the design. Selection compares
-    retained alternatives, and there was nothing for it to compare: two Python
-    dictionaries are not one accumulated DesignState, and merging them would be
-    bypassing the write boundary that makes an entity authoritative.
-
-    Isolation between candidates was never the state's job. It is the
-    ConsumerView's, which is branch-scoped by construction - that is what S-5 and
-    S-6 built, and `branch_membership` is what answers whose evidence a fact is.
-    Copying the state to get isolation was solving a solved problem in the one
-    place that also destroyed the design-wide question.
+    holding one alternative and no state holding the design. Isolation between
+    candidates is the ConsumerView's job - it is branch-scoped by construction -
+    and copying the state to get it destroyed the design-wide question selection
+    has to ask.
     """
     state = base_state
+    progression = progression or Progression()
     rec: Dict[str, Any] = {"case": case_id, "candidate": candidate.get("entity_id"),
                            "trial": trial, "failures": [], "counts": {},
-                           "s03_status": None, "s03_response": None}
-
-    def fail(kind: str, what: str, detail: Any = None) -> None:
-        rec["failures"].append({"kind": kind, "stage": "s03", "what": what, "detail": detail})
+                           "s03a_status": None, "s03a_response": None}
 
     started = time.time()
     # The candidate is the explicit invocation identity: it anchors the branch,
     # it is what the stage records as a premise, and it is NOT engineering context.
     invocation = InvocationContext(branch=candidate.get("entity_id"))
-    stage_a = S03TopologyAndMobility()
-    try:
-        out = stage_a.invoke(provider, state, state.run_id,
-                             {"candidate": candidate}, invocation=invocation)
-    except Exception as exc:                                        # noqa: BLE001
-        fail("PARSER_DEFECT", "%s: %s" % (type(exc).__name__, exc),
-             traceback.format_exc(limit=6))
-        rec["s03_status"] = "RAISED"
-        rec["s03_seconds"] = round(time.time() - started, 2)
-        return rec
-    rec["s03_seconds"] = round(time.time() - started, 2)
-    rec["s03_status"] = out.execution_status.value
-    rec["s03_response"] = out.raw_response
-    rec["s03_consumer_view"] = out.consumer_view
-    rec["s03_declared_incomplete"] = out.declared_incompleteness
+    out_a, out_b = s03_passes(provider, state, progression, candidate,
+                              invocation=invocation)
 
-    if out.execution_status in (ExecutionStatus.PROVIDER_RATE_LIMIT,
-                                ExecutionStatus.PROVIDER_QUOTA_EXHAUSTED,
-                                ExecutionStatus.PROVIDER_UNAVAILABLE,
-                                ExecutionStatus.PROVIDER_TIMEOUT):
-        fail("PROVIDER_CONDITION", out.execution_status.value, out.problems)
-        return rec
-    if out.execution_status in (ExecutionStatus.RESPONSE_TRUNCATED,
-                                ExecutionStatus.RESPONSE_PARSE_FAILURE):
-        fail("RESPONSE_CONDITION", out.execution_status.value, out.problems)
-        return rec
-    if out.patch is None or out.problems:
-        fail("CONTRACT_CONDITION", "contract validation", out.problems)
-        return rec
-    if out.declared_incompleteness:
-        fail("CONTRACT_CONDITION", "declared incomplete", out.declared_incompleteness)
+    rec["s03a_seconds"] = round(time.time() - started, 2)
+    e_a = progression.by_responsibility("s03a")
+    rec["s03a_status"] = e_a.execution_status if e_a else None
+    rec["s03a_response"] = out_a.raw_response if out_a else None
+    rec["s03a_consumer_view"] = out_a.consumer_view if out_a else None
+    rec["s03a_declared_incomplete"] = out_a.declared_incompleteness if out_a else None
+    rec["s03a_response_source"] = e_a.response_source if e_a else None
 
-    state.apply(out.patch)
-
-    # Pass B: the mobility grid, load paths and assembly order, given the
-    # topology pass A just fixed. Split because one response could not carry
-    # both; every field survives, only the emission is halved.
-    stage_b = S03BMobilityAndAssembly()
-    try:
-        outb = stage_b.invoke(provider, state, state.run_id,
-                              {"candidate": candidate.get("entity_id")},
-                              attempt=2, invocation=invocation)
-    except Exception as exc:                                        # noqa: BLE001
-        fail("PARSER_DEFECT", "s03b: %s: %s" % (type(exc).__name__, exc))
-        rec["s03_status"] = "RAISED"
+    if e_a is None or not e_a.patch_applied:
+        rec["failures"] = progression.failures
         rec["_state"] = state
         return rec
-    rec["s03b_status"] = outb.execution_status.value
-    rec["s03b_response"] = outb.raw_response
-    rec["s03b_consumer_view"] = outb.consumer_view
-    if outb.patch is None or outb.problems:
-        fail("CONTRACT_CONDITION", "s03b contract validation", outb.problems)
-    else:
-        if outb.declared_incompleteness:
-            fail("CONTRACT_CONDITION", "s03b declared incomplete",
-                 outb.declared_incompleteness)
-        # ONE patch. The DOF disposition is derived INSIDE s03b's invocation and
-        # arrives in the same patch as the relations it derives from - this
-        # runner used to derive it afterwards, in a patch of its own, which meant
-        # a caller that did not know to do that got a DesignState with no
-        # mobility in it and no sign anything was missing.
-        state.apply(outb.patch)
+
+    e_b = progression.by_responsibility("s03b")
+    rec["s03b_status"] = e_b.execution_status if e_b else None
+    rec["s03b_response"] = out_b.raw_response if out_b else None
+    rec["s03b_consumer_view"] = out_b.consumer_view if out_b else None
+
+    if e_b is not None and e_b.patch_applied and out_b is not None:
         try:
-            parsed = json.loads(outb.raw_response or "{}")
+            parsed = json.loads(out_b.raw_response or "{}")
         except Exception:                                           # noqa: BLE001
             parsed = {}
         rec["constraint_relations_authored"] = len(
             parsed.get("constraint_relations") or [])
-        cells = [d for op in outb.patch.operations
+        cells = [d for op in out_b.patch.operations
                  if op.entity_type == "MobilityExpectation"
                  for d in (op.fields.get("dispositions") or [])]
         rec["dof_entries_derived"] = len(cells)
@@ -339,21 +297,20 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
         cells = current_mobility_cells(state)
         # THE ENGINEERING QUANTITY, reported and not checked. Domain totality is
         # guaranteed by the enumerator and says nothing; this says how much of the
-        # domain rests on evidence and names the cells that do not. A low number
-        # is a measurement. Recorded here because a quantity nothing reports is
-        # not reported - the function existed and no caller ever called it.
+        # domain rests on evidence and names the cells that do not.
         rec["disposition_completeness"] = disposition_completeness(cells)
         # S-9 CORPUS INFORMATION. What this recording holds of the shapes the
-        # pipeline no longer speaks. It feeds no derivation, no check and no
-        # state; it exists so the corpus refresh knows what it is looking at.
+        # pipeline no longer speaks. It feeds no derivation, no check and no state.
         rec["legacy_shapes_in_recording"] = legacy_shapes_in_recording(parsed)
 
     for name, fn in S03_CHECKS:
         try:
             for p in fn(state):
-                fail("CHECK_FINDING", name, p)
+                progression.fail(CHECK_FINDING, "s03", name, p)
         except Exception as exc:                                    # noqa: BLE001
-            fail("PARSER_DEFECT", "check %s raised: %s" % (name, exc))
+            progression.fail(PARSER_DEFECT, "s03",
+                             "check %s raised: %s" % (name, exc))
+    rec["failures"] = progression.failures
     rec["counts"] = state.counts()
     # handed to s04 so the consumer works from the producer's actual state
     rec["_state"] = state
@@ -361,80 +318,42 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
 
 
 def run_s04(case_id: str, state, provider, trial: int,
-            invocation=None) -> Dict[str, Any]:
-    """s04a then s04b, from the mechanism projection ONLY. Never raises."""
+            invocation=None, progression=None) -> Dict[str, Any]:
+    """s04a then s04b, from the mechanism projection ONLY. Never raises.
+
+    The refresh-on-refinement loop and the acceptance rule live in the pipeline;
+    what remains here is the interface report and the record.
+    """
+    progression = progression or Progression()
     rec: Dict[str, Any] = {"case": case_id, "trial": trial, "failures": [],
                            "s04a_status": None, "s04b_status": None,
                            "s04a_response": None, "s04b_response": None}
 
-    def fail(kind: str, stage: str, what: str, detail: Any = None) -> None:
-        rec["failures"].append({"kind": kind, "stage": stage, "what": what,
-                                "detail": detail})
-
     mech = mechanism_projection(state)
     rec["projection_families"] = sorted(k for k, v in mech.items() if v)
     for gap in interface_gaps(mech):
-        fail("INTERFACE_GAP", "s03->s04", gap)
+        progression.fail(INTERFACE_FINDING, "s03->s04", gap)
 
-    #: ONE refresh. A stage that reports refinement-only committed a justified
-    #: revision and withheld everything reasoned from the value it replaced, so
-    #: it is called again against a view that now holds the revision. Bounded:
-    #: a second refinement-only outcome is a stage revising without converging,
-    #: and that is reported rather than looped on.
-    REFRESHES = 1
+    outcomes = s04_passes(provider, state, progression, invocation=invocation)
 
-    for attempt, (stage, key) in enumerate(
-            ((S04AEnvelopeAndReach(), "s04a"), (S04BPlacementAndMotion(), "s04b")), start=1):
-        for refresh in range(REFRESHES + 1):
-            started = time.time()
-            try:
-                out = stage.invoke(provider, state, state.run_id,
-                                   {"candidate": getattr(invocation, "branch", None)},
-                                   attempt=attempt, invocation=invocation)
-            except Exception as exc:                                # noqa: BLE001
-                fail("PARSER_DEFECT", key, "%s: %s" % (type(exc).__name__, exc),
-                     traceback.format_exc(limit=5))
-                rec["%s_status" % key] = "RAISED"
-                return rec
-            rec["%s_seconds" % key] = round(time.time() - started, 2)
-            rec["%s_status" % key] = out.execution_status.value
-            rec["%s_consumer_view" % key] = out.consumer_view
-            rec["%s_response" % key] = out.raw_response
-            if out.execution_status in (ExecutionStatus.RESPONSE_TRUNCATED,
-                                        ExecutionStatus.RESPONSE_PARSE_FAILURE):
-                fail("RESPONSE_CONDITION", key, out.execution_status.value, out.problems)
-                return rec
-            if out.patch is None or out.problems:
-                fail("CONTRACT_CONDITION", key, "contract validation", out.problems)
-                return rec
-            if out.declared_incompleteness and not out.refinement_only:
-                fail("CONTRACT_CONDITION", key, "declared incomplete",
-                     out.declared_incompleteness)
-            # ONE patch per invocation, and the runner adds nothing to it.
-            state.apply(out.patch)
-            rec.setdefault("%s_families" % key, [])
+    for key, out in zip(("s04a", "s04b"), list(outcomes) + [None, None]):
+        execution = progression.by_responsibility(key)
+        rec["%s_status" % key] = execution.execution_status if execution else None
+        rec["%s_response" % key] = out.raw_response if out else None
+        rec["%s_consumer_view" % key] = out.consumer_view if out else None
+        rec["%s_response_source" % key] = execution.response_source if execution else None
+        if out is not None and out.patch is not None:
             rec["%s_families" % key] = sorted(
-                set(rec["%s_families" % key])
-                | {op.entity_type for op in out.patch.operations})
-            if not out.refinement_only:
-                break
-            # A LIFECYCLE EVENT, not a failure: the stage said so itself, in a
-            # field, and the only thing the runner does about it is refresh and
-            # ask again. It reads no response and decides no engineering.
-            rec.setdefault("%s_refinements" % key, []).append(
-                out.declared_incompleteness)
-            if refresh == REFRESHES:
-                fail("CONTRACT_CONDITION", key,
-                     "still revising after %d refresh(es); the realization was "
-                     "never reasoned from a settled arrangement" % REFRESHES,
-                     out.declared_incompleteness)
+                {op.entity_type for op in out.patch.operations})
 
     for name, fn in S04_CHECKS:
         try:
             for p in fn(state):
-                fail("CHECK_FINDING", "s04", name, p)
+                progression.fail(CHECK_FINDING, "s04", name, p)
         except Exception as exc:                                    # noqa: BLE001
-            fail("PARSER_DEFECT", "s04", "check %s raised: %s" % (name, exc))
+            progression.fail(PARSER_DEFECT, "s04",
+                             "check %s raised: %s" % (name, exc))
+    rec["failures"] = progression.failures
     rec["counts"] = state.counts()
     return rec
 
@@ -754,7 +673,8 @@ def main() -> int:
     trials: List[Dict[str, Any]] = []
     for trial in range(1, args.trials + 1):
         for case_id in cases:
-            base, problems = seed_window1(case_id)
+            progression = Progression()
+            base, problems, progression = seed_window1(case_id, progression)
             if base is None:
                 print("  %-8s SEED FAILED: %s" % (case_id, problems))
                 continue
@@ -762,8 +682,9 @@ def main() -> int:
             accumulated = base
             for cand in candidates:
                 t0 = time.time()
-                rec = run_s03(case_id, cand, base, provider, trial)
-                for _k in ("s03", "s03b"):
+                rec = run_s03(case_id, cand, base, provider, trial,
+                              progression=progression)
+                for _k in ("s03a", "s03b"):
                     _raw = rec.pop("%s_response" % _k, None)
                     if _raw:
                         _d = os.path.join(out_dir, "responses", case_id,
@@ -788,15 +709,18 @@ def main() -> int:
                     # other candidate is embodied into. Selection needs one
                     # accumulated design, not N private ones.
                     accumulated = _st
-                if _st is not None and rec.get("s03_status") in ("SUCCESS", "CONTRACT_INCOMPLETE"):
+                if _st is not None and rec.get("s03a_status") in ("SUCCESS", "CONTRACT_INCOMPLETE"):
                     # THE BRANCH IS NAMED BY THE CALLER. s04 embodies the same
                     # candidate s03 did, and before the S-7 gate there is no
                     # committed branch to read it from - so it is stated, not
                     # inferred from declaration order.
                     s4 = run_s04(case_id, _st, provider, trial,
                                  invocation=InvocationContext(
-                                     branch=rec.get("candidate")))
+                                     branch=rec.get("candidate")),
+                                 progression=progression)
                     rec["s04a_status"] = s4["s04a_status"]
+                    rec["s04a_response_source"] = s4.get("s04a_response_source")
+                    rec["s04b_response_source"] = s4.get("s04b_response_source")
                     rec["s04b_status"] = s4["s04b_status"]
                     rec["failures"] += s4["failures"]
                     rec["s04_counts"] = s4.get("counts")
@@ -819,13 +743,20 @@ def main() -> int:
                     rec["feasibility_domains"] = fz.get("feasibility_domains")
                     rec["hard_requirements"] = fz.get("hard_requirements")
                     rec["failures"] += fz["failures"]
+                # THE QUALIFICATION, from the recorded response sources. This
+                # window replays S01 and S02, so it is always False here - and
+                # saying so in the record is the point: a live S03/S04 must never
+                # let a replayed upstream be read as end-to-end evidence.
+                qualified, reasons = full_live_qualification(progression)
+                rec["full_live"] = {"qualified": qualified, "reasons": reasons}
+                rec["progression"] = progression.as_record()
                 trials.append(rec)
                 kinds: Dict[str, int] = {}
                 for f in rec["failures"]:
                     kinds[f["kind"]] = kinds.get(f["kind"], 0) + 1
                 print("  t%d %-8s %-9s s03=%-14s s04a=%-10s s04b=%-10s "
                       "feas=%-22s %5.1fs %s"
-                      % (trial, case_id, rec["candidate"], rec["s03_status"],
+                      % (trial, case_id, rec["candidate"], rec["s03a_status"],
                          str(rec.get("s04a_status")), str(rec.get("s04b_status")),
                          str(rec.get("feasibility_status")),
                          time.time() - t0,

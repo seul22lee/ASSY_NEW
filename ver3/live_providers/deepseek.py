@@ -40,6 +40,7 @@ from typing import Any, Dict, List, Optional
 
 from ver3.assy_v3.providers.interfaces import (GenerationRequest, GenerationResponse,
                                                GenerationResult, ProviderCapabilities)
+from ver3.assy_v3.providers.replay_integrity import LIVE
 from ver3.assy_v3.providers.resolution import (ExperimentOverrides, ParameterResolution,
                                                resolve, verify_payload)
 from ver3.assy_v3.providers.status import ExecutionStatus
@@ -107,6 +108,10 @@ class DeepSeekProvider:
     """
 
     provider_id = "deepseek"
+    #: DECLARED. The orchestration reads this rather than inferring liveness from
+    #: which script started the run, which is what made a full-live claim a
+    #: statement about a filename.
+    response_source = LIVE
 
     def __init__(self, model: Optional[str] = None, base_url: Optional[str] = None,
                  temperature: Optional[float] = None, top_p: Optional[float] = None,

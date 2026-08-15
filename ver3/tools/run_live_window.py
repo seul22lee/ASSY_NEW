@@ -37,21 +37,24 @@ import json
 import os
 import sys
 import time
-import traceback
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, REPO)
 
-from ver3.assy_v3.providers.status import ExecutionStatus                  # noqa: E402
+import yaml                                                                # noqa: E402
 from ver3.assy_v3.stages.s01_requirement_capture import (                  # noqa: E402
-    S01RequirementCapture, sharpening_check, locator_check, mechanism_leakage_check)
+    sharpening_check, locator_check, mechanism_leakage_check)
 from ver3.assy_v3.stages.s02_obligation_and_candidates import (            # noqa: E402
     S02ObligationAndCandidates, no_selection_check, load_case_check,
     candidate_distinctness_check, known_principle_check, evidence_route_check,
     created_obligations_check, requirement_coverage_check, obligation_scope_check,
     candidate_coverage_check, openness_citation_check, actor_citation_check)
+from ver3.assy_v3.pipeline import (CHECK_FINDING, PARSER_DEFECT,           # noqa: E402
+                                   PROVIDER_CONDITION, Progression,
+                                   full_live_qualification,
+                                   response_source_of, window1)
 from ver3.assy_v3.providers.offline import OfflineReplayProvider           # noqa: E402
 from ver3.assy_v3.assurance import problems as assurance_problems
 from ver3.assy_v3.state import DesignState                    # noqa: E402
@@ -64,15 +67,10 @@ PROBES = os.path.join(REPO, "ver3", "assy_v3", "probes")
 ENV_FILE = os.path.join(REPO, "ver3", ".env")
 OUT_ROOT = os.path.join(REPO, "ver3", "live_runs", "deepseek")
 
-#: Failure kinds. The point of the vocabulary is that only CHECK_FINDING and
-#: CONTRACT_INCOMPLETE are evidence about reasoning; the rest are evidence about
-#: the wire, the response format, or our own code.
-PROVIDER_CONDITION = "PROVIDER_CONDITION"
-RESPONSE_CONDITION = "RESPONSE_CONDITION"
-PARSER_DEFECT = "PARSER_DEFECT"
-CONTRACT_CONDITION = "CONTRACT_CONDITION"
-CHECK_FINDING = "CHECK_FINDING"
-INTERFACE_FINDING = "INTERFACE_FINDING"
+# FAILURE KINDS COME FROM THE PIPELINE. They were defined here and again in
+# run_window2 with slightly different membership, which is how one condition came
+# to have two names. Imported above; only CHECK_FINDING and the contract kinds are
+# evidence about reasoning, the rest are about the wire, the format or our code.
 
 
 def discover_cases() -> "Dict[str, str]":
@@ -109,6 +107,23 @@ def recording_root(case_id: str) -> Optional[str]:
     return None
 
 
+def design_profile(case_id: str) -> Optional[Dict[str, Any]]:
+    """The user's structured profile, beside the request it accompanies.
+
+    Read here as well as in Window 2 because the SEEDING path used to ingest it
+    and the live path did not, so the same source produced different committed
+    state depending on which runner ran it. Same locations, same verbatim read.
+    """
+    for name in ("design_profile.json", "design_profile.yaml"):
+        for base in (os.path.join(BENCHMARKS, case_id, "source"),
+                     os.path.join(PROBES, case_id)):
+            path = os.path.join(base, name)
+            if os.path.isfile(path):
+                with open(path) as fh:
+                    return yaml.safe_load(fh)
+    return None
+
+
 def run_trial(case_id: str, request_path: str, provider: DeepSeekProvider,
               trial: int, seed_s01: bool = False) -> Dict[str, Any]:
     """One full S01 -> S02 pass. Returns a trial record; never raises.
@@ -120,6 +135,7 @@ def run_trial(case_id: str, request_path: str, provider: DeepSeekProvider,
     """
     text = read(request_path)
     state = DesignState(run_id="live-%s-t%d" % (case_id, trial))
+    progression = Progression()
     rec: Dict[str, Any] = {
         "case": case_id, "trial": trial, "failures": [], "counts": {},
         "s01_status": None, "s02_status": None,
@@ -130,10 +146,6 @@ def run_trial(case_id: str, request_path: str, provider: DeepSeekProvider,
         rec["failures"].append({"kind": kind, "stage": stage, "what": what,
                                 "detail": detail})
 
-    rec["s01_provider"] = "offline-replay (SEEDED, not live)" if seed_s01 else "deepseek (live)"
-    rec["s02_provider"] = "deepseek (live)"
-
-    # ---------------------------------------------------------------- s01
     s01_provider = provider
     if seed_s01:
         root = recording_root(case_id)
@@ -141,46 +153,30 @@ def run_trial(case_id: str, request_path: str, provider: DeepSeekProvider,
             fail(PROVIDER_CONDITION, "s01", "no recording to seed from")
             return rec
         s01_provider = OfflineReplayProvider(root, case_id)
+    # Read from what the providers DECLARE, so the record cannot say "live"
+    # because of the script that happened to start the run.
+    rec["s01_provider"] = response_source_of(s01_provider)
+    rec["s02_provider"] = response_source_of(provider)
+
+    # ------------------------------------------------------- s01 and s02
+    # THE CANONICAL PROGRESSION. This runner used to call S01's inner driver
+    # directly, which skipped the ConsumerView, the readiness gate and the view
+    # record - the one path in the repository that did. It now goes where every
+    # other caller goes, and differs from the replay runner in its provider only.
     started = time.time()
-    try:
-        out1 = S01RequirementCapture().run(s01_provider, {"request_text": text},
-                                           state, state.run_id)
-    except Exception as exc:                                        # noqa: BLE001
-        # The stage driver raised. That is OUR code failing on a response shape
-        # it did not expect, not the model failing - so it is a parser defect.
-        fail(PARSER_DEFECT, "s01", "%s: %s" % (type(exc).__name__, exc),
-             traceback.format_exc(limit=6))
-        rec["s01_status"] = "RAISED"
-        rec["s01_response"] = _last_raw(provider)
-        rec["s01_seconds"] = round(time.time() - started, 2)
-        return rec
+    _out1, out2 = window1(provider, state, text, progression,
+                          design_profile=design_profile(case_id),
+                          s01_provider=s01_provider)
     rec["s01_seconds"] = round(time.time() - started, 2)
-    rec["s01_status"] = out1.execution_status.value
-    rec["s01_response"] = out1.raw_response
-    rec["s01_declared_incomplete"] = out1.declared_incompleteness
+    e1 = progression.by_responsibility("s01")
+    rec["s01_status"] = e1.execution_status if e1 else None
+    rec["s01_view_status"] = e1.view_status if e1 else None
+    rec["s01_response"] = _out1.raw_response if _out1 else _last_raw(provider)
+    rec["s01_declared_incomplete"] = _out1.declared_incompleteness if _out1 else None
+    if e1 is None or not e1.patch_applied:
+        rec["failures"] = progression.failures
+        return rec
 
-    if out1.execution_status in (ExecutionStatus.PROVIDER_RATE_LIMIT,
-                                 ExecutionStatus.PROVIDER_QUOTA_EXHAUSTED,
-                                 ExecutionStatus.PROVIDER_UNAVAILABLE,
-                                 ExecutionStatus.PROVIDER_TIMEOUT):
-        fail(PROVIDER_CONDITION, "s01", out1.execution_status.value, out1.problems)
-        return rec
-    if out1.execution_status in (ExecutionStatus.RESPONSE_TRUNCATED,
-                                 ExecutionStatus.RESPONSE_PARSE_FAILURE):
-        fail(RESPONSE_CONDITION, "s01", out1.execution_status.value, out1.problems)
-        return rec
-    if out1.patch is None:
-        fail(CONTRACT_CONDITION, "s01", "no patch: %s" % out1.execution_status.value,
-             out1.problems)
-        return rec
-    if out1.problems:
-        fail(CONTRACT_CONDITION, "s01", "contract validation", out1.problems)
-        return rec
-    if out1.declared_incompleteness:
-        fail(CONTRACT_CONDITION, "s01", "declared incomplete",
-             out1.declared_incompleteness)
-
-    state.apply(out1.patch)
     for name, fn in (("sharpening", lambda: sharpening_check(state, text)),
                      ("locator", lambda: locator_check(state)),
                      ("mechanism_leak", lambda: mechanism_leakage_check(state, text))):
@@ -191,58 +187,20 @@ def run_trial(case_id: str, request_path: str, provider: DeepSeekProvider,
             fail(PARSER_DEFECT, "s01", "check %s raised: %s" % (name, exc))
 
     # ------------------------------------------------------ interface / s02
+    # S02 already ran inside the canonical progression above, against the same
+    # provider and through the same boundary. What is left here is reporting.
+    rec["projection_families"] = sorted(
+        S02ObligationAndCandidates().consumer_view(state).payload())
+    e2 = progression.by_responsibility("s02")
+    rec["s02_status"] = e2.execution_status if e2 else None
+    rec["s02_view_status"] = e2.view_status if e2 else None
+    rec["s02_response"] = out2.raw_response if out2 else _last_raw(provider)
+    rec["s02_declared_incomplete"] = out2.declared_incompleteness if out2 else None
+    if e2 is None or not e2.patch_applied:
+        rec["counts"] = state.counts()
+        rec["failures"] = progression.failures + rec["failures"]
+        return rec
 
-    stage2 = S02ObligationAndCandidates()
-    view2 = stage2.consumer_view(state)
-    rec["projection_families"] = sorted(view2.payload())
-    # INV-002 is asserted by the boundary itself now; this check records the
-    # interface finding the harness reports on.
-    if "SourceClause" in view2.payload():
-        fail(INTERFACE_FINDING, "iface", "source text reached s02",
-             sorted(view2.payload()))
-
-    started = time.time()
-    try:
-        out2 = stage2.invoke(provider, state, state.run_id)
-    except Exception as exc:                                        # noqa: BLE001
-        fail(PARSER_DEFECT, "s02", "%s: %s" % (type(exc).__name__, exc),
-             traceback.format_exc(limit=6))
-        rec["s02_status"] = "RAISED"
-        rec["s02_response"] = _last_raw(provider)
-        rec["s02_seconds"] = round(time.time() - started, 2)
-        rec["counts"] = state.counts()
-        return rec
-    rec["s02_seconds"] = round(time.time() - started, 2)
-    rec["s02_status"] = out2.execution_status.value
-    rec["s02_response"] = out2.raw_response
-    rec["s02_declared_incomplete"] = out2.declared_incompleteness
-
-    if out2.execution_status in (ExecutionStatus.PROVIDER_RATE_LIMIT,
-                                 ExecutionStatus.PROVIDER_QUOTA_EXHAUSTED,
-                                 ExecutionStatus.PROVIDER_UNAVAILABLE,
-                                 ExecutionStatus.PROVIDER_TIMEOUT):
-        fail(PROVIDER_CONDITION, "s02", out2.execution_status.value, out2.problems)
-        rec["counts"] = state.counts()
-        return rec
-    if out2.execution_status in (ExecutionStatus.RESPONSE_TRUNCATED,
-                                 ExecutionStatus.RESPONSE_PARSE_FAILURE):
-        fail(RESPONSE_CONDITION, "s02", out2.execution_status.value, out2.problems)
-        rec["counts"] = state.counts()
-        return rec
-    if out2.patch is None:
-        fail(CONTRACT_CONDITION, "s02", "no patch: %s" % out2.execution_status.value,
-             out2.problems)
-        rec["counts"] = state.counts()
-        return rec
-    if out2.problems:
-        fail(CONTRACT_CONDITION, "s02", "contract validation", out2.problems)
-        rec["counts"] = state.counts()
-        return rec
-    if out2.declared_incompleteness:
-        fail(CONTRACT_CONDITION, "s02", "declared incomplete",
-             out2.declared_incompleteness)
-
-    state.apply(out2.patch)
     for name, fn in (("no_selection", lambda: no_selection_check(state)),
                      ("load_case", lambda: load_case_check(state)),
                      # QUANTITATIVE CONTINUITY MOVED (S-8 / U-9). The stage that
@@ -268,6 +226,12 @@ def run_trial(case_id: str, request_path: str, provider: DeepSeekProvider,
 
     rec["counts"] = state.counts()
     rec["unused_s01_families"] = _unused(state)
+    rec["progression"] = progression.as_record()
+    # S01->S02 is not the full chain, so this can only ever be False here. It is
+    # recorded anyway, with its reasons, so a window-1 trial can never be read as
+    # end-to-end evidence by a later reader who did not know which tool ran it.
+    qualified, reasons = full_live_qualification(progression)
+    rec["full_live"] = {"qualified": qualified, "reasons": reasons}
     return rec
 
 

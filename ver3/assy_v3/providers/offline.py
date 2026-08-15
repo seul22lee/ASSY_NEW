@@ -14,11 +14,18 @@ from typing import Optional
 
 from .interfaces import (GenerationRequest, GenerationResponse, GenerationResult,
                          ProviderCapabilities)
+from .replay_integrity import REPLAY, pairing_status
 from .status import ExecutionStatus
 
 
 class OfflineReplayProvider:
     """Replays fixtures/responses/<case_id>/<stage_id>.json."""
+
+    provider_id = "offline-replay"
+    #: DECLARED, not inferred. A run used to be "live" because a particular
+    #: script started it, which is a fact about a filename rather than about
+    #: where the response came from.
+    response_source = REPLAY
 
     def __init__(self, root: str, case_id: str) -> None:
         self.root = root
@@ -43,6 +50,10 @@ class OfflineReplayProvider:
                 from_cache=False, error_detail="no recording at %s" % path)
         with open(path) as fh:
             raw = fh.read()
+        # INTEGRITY IS RECORDED FOR EVERY REPLAY, on both corpora. Enforcement is
+        # the caller's policy (S9-C centralises the mechanism, S9-E regenerates
+        # what fails it); silence about it is what was not acceptable.
+        self.last_pairing = pairing_status(raw, request.prompt_text)
         return GenerationResult(
             execution_status=ExecutionStatus.SUCCESS,
             response=GenerationResponse(

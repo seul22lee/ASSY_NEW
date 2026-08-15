@@ -18,9 +18,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, REPO)
 
+from ver3.assy_v3.pipeline import Progression, response_source_of, window1  # noqa: E402
 from ver3.assy_v3.providers.offline import OfflineReplayProvider          # noqa: E402
 from ver3.assy_v3.stages.s01_requirement_capture import (                 # noqa: E402
-    S01RequirementCapture, sharpening_check, locator_check, mechanism_leakage_check)
+    sharpening_check, locator_check, mechanism_leakage_check)
 from ver3.assy_v3.stages.s02_obligation_and_candidates import (           # noqa: E402
     S02ObligationAndCandidates, no_selection_check, load_case_check,
     candidate_distinctness_check, known_principle_check, evidence_route_check,
@@ -41,18 +42,24 @@ def request_text(case_id: str) -> str:
 def run_case(case_id: str) -> Dict[str, Any]:
     provider = OfflineReplayProvider(FIXTURES, case_id)
     state = DesignState(run_id="win-%s" % case_id)
-    report: Dict[str, Any] = {"case": case_id, "findings": []}
+    progression = Progression()
+    report: Dict[str, Any] = {"case": case_id, "findings": [],
+                              "response_source": response_source_of(provider)}
 
-    # ---- s01: the only stage that sees the request -----------------------
+    # ---- s01 and s02 through the canonical progression -------------------
+    # Identical to the live runner's path in everything but the provider. That
+    # is the S9-C property: substituting the response source changes where the
+    # answer comes from and nothing else.
     text = request_text(case_id)
-    out1 = S01RequirementCapture().invoke(provider, state, state.run_id, {"request_text": text})
-    report["s01_status"] = out1.execution_status.value
-    report["s01_problems"] = out1.problems
-    report["s01_incomplete"] = out1.declared_incompleteness
-    if out1.patch is None:
-        report["findings"].append(("S01", "NO_PATCH", out1.problems))
+    out1, out2 = window1(provider, state, text, progression)
+    report["s01_status"] = out1.execution_status.value if out1 else None
+    report["s01_problems"] = out1.problems if out1 else []
+    report["s01_incomplete"] = out1.declared_incompleteness if out1 else None
+    e1 = progression.by_responsibility("s01")
+    if e1 is None or not e1.patch_applied:
+        report["findings"].append(("S01", "NO_PATCH", report["s01_problems"]))
+        report["progression"] = progression.as_record()
         return report
-    state.apply(out1.patch)
 
     for name, fn in (("sharpening", lambda: sharpening_check(state, text)),
                      ("locator", lambda: locator_check(state)),
@@ -60,27 +67,24 @@ def run_case(case_id: str) -> Dict[str, Any]:
         for p in fn():
             report["findings"].append(("S01", name, p))
 
-    # ---- interface: what s02 is allowed to see ---------------------------
-
-    stage2 = S02ObligationAndCandidates()
-    proj = stage2.consumer_view(state).payload()
+    # ---- interface: what s02 was allowed to see --------------------------
+    proj = S02ObligationAndCandidates().consumer_view(state).payload()
     report["projection_families"] = sorted(proj)
     if "SourceClause" in proj:
         report["findings"].append(("IFACE", "source_text_leaked_to_s02", "SourceClause present"))
 
-    # ---- s02: consumes the projection only -------------------------------
-    out2 = stage2.invoke(provider, state, state.run_id)
-    report["s02_status"] = out2.execution_status.value
-    report["s02_problems"] = out2.problems
-    report["s02_incomplete"] = out2.declared_incompleteness
-    if out2.patch is None:
-        report["findings"].append(("S02", "NO_PATCH", out2.problems))
-        return report
-    if out2.problems:
-        for p in out2.problems:
+    # ---- s02 already ran in the progression above ------------------------
+    report["s02_status"] = out2.execution_status.value if out2 else None
+    report["s02_problems"] = out2.problems if out2 else []
+    report["s02_incomplete"] = out2.declared_incompleteness if out2 else None
+    e2 = progression.by_responsibility("s02")
+    if e2 is None or not e2.patch_applied:
+        for p in report["s02_problems"]:
             report["findings"].append(("S02", "contract", p))
+        if not report["s02_problems"]:
+            report["findings"].append(("S02", "NO_PATCH", []))
+        report["progression"] = progression.as_record()
         return report
-    state.apply(out2.patch)
 
     for name, fn in (("no_selection", lambda: no_selection_check(state)),
                      ("load_case", lambda: load_case_check(state)),
@@ -105,6 +109,7 @@ def run_case(case_id: str) -> Dict[str, Any]:
     # ---- interface: unused and reconstructed -----------------------------
     report["counts"] = state.counts()
     report["unused_s01_families"] = _unused(state, proj)
+    report["progression"] = progression.as_record()
     return report
 
 

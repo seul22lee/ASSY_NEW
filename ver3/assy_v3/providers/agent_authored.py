@@ -23,22 +23,23 @@ WHAT IT IS NOT EVIDENCE OF
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import time
 
 from .interfaces import (GenerationRequest, GenerationResponse, GenerationResult,
                          ProviderCapabilities)
+from .replay_integrity import PAIRED, REPLAY, pairing_status, prompt_hash
 from .status import ExecutionStatus
-
-
-def prompt_hash(text: str) -> str:
-    return hashlib.sha256(text.encode()).hexdigest()[:16]
 
 
 class AgentAuthoredProvider:
     """Serves recordings that declare the prompt they answer."""
+
+    provider_id = "agent-authored"
+    #: A recorded response is a replayed response whoever authored it. The
+    #: authorship question is separate and is answered by `model_id`.
+    response_source = REPLAY
 
     def __init__(self, root: str, case_id: str, strict_prompt: bool = True) -> None:
         self.root = root
@@ -71,7 +72,8 @@ class AgentAuthoredProvider:
             parsed = {}
         declared = (parsed.get("_meta") or {}).get("answers_prompt_sha256")
         actual = prompt_hash(request.prompt_text)
-        if self.strict_prompt and declared and declared != actual:
+        self.last_pairing = pairing_status(raw, request.prompt_text)
+        if self.strict_prompt and self.last_pairing not in (PAIRED, "UNDECLARED"):
             return GenerationResult(
                 execution_status=ExecutionStatus.PROVIDER_UNAVAILABLE, response=None,
                 attempt_index=attempt_index, started_at=started, ended_at=time.time(),
