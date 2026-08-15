@@ -14,12 +14,18 @@ from typing import Optional
 
 from .interfaces import (GenerationRequest, GenerationResponse, GenerationResult,
                          ProviderCapabilities)
-from .replay_integrity import REPLAY, pairing_status
+from .replay_integrity import REPLAY, pairing_status, producing_identity
 from .status import ExecutionStatus
 
 
 class OfflineReplayProvider:
-    """Replays fixtures/responses/<case_id>/<stage_id>.json."""
+    """Replays fixtures/responses/<case_id>/<responsibility_id>.json.
+
+    ADDRESSED BY THE PRODUCING PASS, not by the owner. Keying on `stage_id`
+    resolved both s03 passes to one file, so s03b was served s03a's answer and
+    the difference was undetectable. s01 and s02 are unaffected: their owner and
+    their responsibility are the same string.
+    """
 
     provider_id = "offline-replay"
     #: DECLARED, not inferred. A run used to be "live" because a particular
@@ -42,7 +48,8 @@ class OfflineReplayProvider:
 
     def generate(self, request: GenerationRequest, attempt_index: int = 0) -> GenerationResult:
         started = time.time()
-        path = os.path.join(self.root, self.case_id, "%s.json" % request.stage_id)
+        path = os.path.join(self.root, self.case_id,
+                            "%s.json" % producing_identity(request))
         if not os.path.isfile(path):
             return GenerationResult(
                 execution_status=ExecutionStatus.PROVIDER_UNAVAILABLE, response=None,

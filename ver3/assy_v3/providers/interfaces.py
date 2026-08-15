@@ -86,6 +86,19 @@ class GenerationRequest:
     #: record then says NOT_REPORTED rather than carrying a fabricated identity.
     run_id: Optional[str] = None
     stage_attempt: Optional[int] = None
+    #: WHICH PRODUCING PASS is asking. `stage_id` above says who OWNS the write,
+    #: and two passes share an owner: s03a and s03b are both s03, s04a and s04b
+    #: are both s04. A replay keyed on the owner therefore cannot tell them apart
+    #: and serves one pass's answer to the other.
+    #:
+    #: Sourced from `Stage.responsibility_id()` and nowhere else, so no caller
+    #: keeps a second mapping from pass to identity. Defaults to None, which a
+    #: consumer reads as "falls back to the owner" — correct for s01 and s02,
+    #: where owner and responsibility are the same string.
+    #: Derived by `replay_integrity.producing_identity`, not by a method here:
+    #: this module is definitions only, and a property with a body would be an
+    #: implementation living in the interface it describes.
+    responsibility_id: Optional[str] = None
 
 
 @dataclass(frozen=True)

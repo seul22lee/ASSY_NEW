@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 #: Response-source labels. Defined here rather than in the pipeline package so a
 #: provider can declare its source without importing the orchestration it serves.
@@ -127,3 +127,157 @@ def meets_current_fixture_rule(raw_text: str, prompt_text: str) -> bool:
     here, which is the debt S9-E clears rather than a rule to be softened.
     """
     return pairing_status(raw_text, prompt_text) == PAIRED
+
+
+# ==========================================================================
+# S9-D: the identities a CURRENT fixture must carry
+#
+# The pairing hash above binds a response to the PROMPT it answered, which is
+# necessary and nowhere near sufficient. A prompt is derived from the source and
+# from committed upstream state, so a pairing proves the question matched - not
+# which source the question was about, not which of two passes of one stage
+# asked it, and not that any model ever produced the answer.
+#
+# These four identities are what a promoted fixture must carry, and each exists
+# because a specific substitution went undetected without it.
+# ==========================================================================
+
+#: sha256 of the source request bytes. ONE rule for every corpus: the benchmark
+#: manifests already publish `request_sha256` over the same bytes, and the probes
+#: have no manifest, so computing it is what lets both be checked identically
+#: without inventing a probe-specific scheme or fabricating a probe manifest.
+SOURCE_KEY = "source_sha256"
+#: WHICH PRODUCING PASS. s03a and s03b share an owner; without this a fixture for
+#: one is indistinguishable from a fixture for the other.
+RESPONSIBILITY_KEY = "responsibility_id"
+#: sha256 of the RAW accepted model response, before any packaging.
+RESPONSE_KEY = "raw_response_sha256"
+#: Which run and attempt promoted it - the S9-B model-run identity, reused rather
+#: than re-invented.
+PROMOTION_KEY = "model_run_id"
+
+#: Every identity a current fixture must carry. Absence of any one is a failure,
+#: not a warning: a fixture that cannot say which source it answers is not usable
+#: as evidence about that source.
+REQUIRED_FIXTURE_IDENTITIES = (SOURCE_KEY, RESPONSIBILITY_KEY, RESPONSE_KEY,
+                               PROMOTION_KEY)
+
+
+def producing_identity(request) -> str:
+    """WHICH PASS a request is for - the identity replay and fixtures key on.
+
+    Lives here rather than on `GenerationRequest` because that module is
+    definitions only; a property with a body there would be an implementation
+    inside the interface it defines.
+
+    Falls back to the owner when no responsibility is stated, which is correct
+    for s01 and s02 - their owner and their responsibility are the same string -
+    and keeps every caller predating the field working unchanged.
+    """
+    return getattr(request, "responsibility_id", None) or request.stage_id
+
+
+def canonical_source_identity(request_bytes: bytes) -> str:
+    """THE source/request identity. One function, every corpus.
+
+    Benchmarks additionally publish this in `source_manifest.request_sha256`;
+    probes publish nothing. Both are checked with this, so the asymmetry in what
+    a corpus DECLARES never becomes an asymmetry in what is CHECKED.
+    """
+    return hashlib.sha256(request_bytes).hexdigest()
+
+
+def canonical_source_identity_of_file(path: str) -> str:
+    with open(path, "rb") as fh:
+        return canonical_source_identity(fh.read())
+
+
+def fixture_identities(raw_text: str) -> Dict[str, Any]:
+    """The identities a fixture declares, with None for each it does not."""
+    try:
+        parsed = json.loads(raw_text)
+        meta = (parsed.get("_meta") or {}) if isinstance(parsed, dict) else {}
+    except Exception:                                              # noqa: BLE001
+        meta = {}
+    return {key: meta.get(key) for key in REQUIRED_FIXTURE_IDENTITIES}
+
+
+def verify_current_fixture(raw_text: str, *, prompt_text: str, source_sha256: str,
+                           responsibility_id: str) -> List[str]:
+    """Everything wrong with replaying this artifact here, as reasons.
+
+    Reasons rather than a bool, because "which binding failed" is the whole
+    diagnostic value - a source mismatch and a responsibility mismatch are
+    different defects with different remedies, and collapsing them to False
+    would make a substituted pass look like a stale prompt.
+
+    DELIBERATELY DOES NOT CONSULT `pairing_history`. A migration note may explain
+    an old artifact; it may not make a current one valid.
+    """
+    problems: List[str] = []
+    declared = fixture_identities(raw_text)
+
+    for key in REQUIRED_FIXTURE_IDENTITIES:
+        if not declared.get(key):
+            problems.append("fixture declares no %s" % key)
+
+    if declared.get(SOURCE_KEY) and declared[SOURCE_KEY] != source_sha256:
+        problems.append("fixture answers source %s but this run is source %s"
+                        % (declared[SOURCE_KEY][:16], source_sha256[:16]))
+
+    if declared.get(RESPONSIBILITY_KEY) and \
+            declared[RESPONSIBILITY_KEY] != responsibility_id:
+        problems.append("fixture is %s's response, requested as %s"
+                        % (declared[RESPONSIBILITY_KEY], responsibility_id))
+
+    status = pairing_status(raw_text, prompt_text)
+    if status != PAIRED:
+        problems.append("prompt pairing is %s" % status)
+    return problems
+
+
+def promotion_fidelity_problems(fixture_body: str, accepted_raw: str) -> List[str]:
+    """Does the promoted artifact still say exactly what the model said?
+
+    Packaging may add `_meta` AROUND a response. It may not touch the answer.
+    Compared as parsed content with `_meta` removed, because re-serializing JSON
+    is not byte-stable and a byte comparison would fail on formatting while
+    passing nothing useful. Semantic equality catches what matters: a field added,
+    removed or changed between what was accepted and what was stored.
+    """
+    problems: List[str] = []
+    try:
+        promoted = json.loads(fixture_body)
+    except Exception as exc:                                       # noqa: BLE001
+        return ["promoted fixture is not readable JSON: %s" % exc]
+    try:
+        accepted = json.loads(accepted_raw)
+    except Exception as exc:                                       # noqa: BLE001
+        return ["accepted response is not readable JSON: %s" % exc]
+
+    meta = promoted.pop("_meta", None) if isinstance(promoted, dict) else None
+    if meta is None:
+        problems.append("promoted fixture carries no _meta provenance")
+
+    if isinstance(accepted, dict):
+        accepted.pop("_meta", None)
+
+    if promoted != accepted:
+        added = sorted(set(promoted) - set(accepted)) if isinstance(promoted, dict) else []
+        lost = sorted(set(accepted) - set(promoted)) if isinstance(accepted, dict) else []
+        detail = []
+        if added:
+            detail.append("added %s" % added)
+        if lost:
+            detail.append("lost %s" % lost)
+        if not detail:
+            detail.append("a retained field's value changed")
+        problems.append("promoted fixture differs from the accepted response: %s"
+                        % "; ".join(detail))
+    # A declared response hash must be the hash of the response actually accepted.
+    declared = fixture_identities(fixture_body).get(RESPONSE_KEY)
+    actual = hashlib.sha256(accepted_raw.encode("utf-8")).hexdigest()
+    if declared and declared != actual:
+        problems.append("declared %s does not hash the accepted response"
+                        % RESPONSE_KEY)
+    return problems

@@ -29,7 +29,8 @@ import time
 
 from .interfaces import (GenerationRequest, GenerationResponse, GenerationResult,
                          ProviderCapabilities)
-from .replay_integrity import PAIRED, REPLAY, pairing_status, prompt_hash
+from .replay_integrity import (PAIRED, REPLAY, pairing_status,
+                               producing_identity, prompt_hash)
 from .status import ExecutionStatus
 
 
@@ -58,7 +59,8 @@ class AgentAuthoredProvider:
 
     def generate(self, request: GenerationRequest, attempt_index: int = 0) -> GenerationResult:
         started = time.time()
-        path = os.path.join(self.root, self.case_id, "%s.json" % request.stage_id)
+        path = os.path.join(self.root, self.case_id,
+                            "%s.json" % producing_identity(request))
         if not os.path.isfile(path):
             return GenerationResult(
                 execution_status=ExecutionStatus.PROVIDER_UNAVAILABLE, response=None,

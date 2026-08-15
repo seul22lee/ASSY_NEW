@@ -311,3 +311,148 @@ that remains necessary.
 
 **Next steps are S9-B (provider fidelity) and S9-C (runner convergence).** Both are pure
 code work, provable with fake transports and replay providers, and require no API quota.
+
+---
+
+# S9-C AND S9-D — what was built, and the two defects found while building it
+
+## 11. Defects discovered during S9-C, recorded rather than hidden
+
+Both were found by validation rather than by review, and both were defects in the
+S-9 work itself. They are kept here because the closure tests are only worth
+something if they can be shown to falsify real failure modes — and these are the
+real failure modes they now falsify.
+
+### 11a. The public surface accepted its own private module
+
+`s03_passes` and `s04_passes` were never exported from `assy_v3.pipeline`, so all
+three runners failed to import — seven errors across the relevant suite. The
+targeted suite passed anyway, because the surface test asked whether each symbol
+existed on the package **or** on the private module. The `or` accepted the private
+module and hid the missing exports.
+
+**Correction:** the test now requires the name on the public package **and** in
+`__all__`, with a direct import of all three runners beside it.
+
+### 11b. An owner was used where a producing responsibility belongs
+
+`StageExecution` recorded `stage.stage_id`. But `stage_id` says WHO OWNS THE WRITE,
+and two passes share an owner:
+
+| class | `stage_id` | `responsibility_id()` |
+|---|---|---|
+| S03TopologyAndMobility | `s03` | `s03a` |
+| S03BMobilityAndAssembly | **`s03`** | `s03b` |
+| S04AEnvelopeAndReach | `s04` | `s04a` |
+| S04BPlacementAndMotion | **`s04`** | `s04b` |
+
+Six producing responsibilities, **four** owners. Every pass-level lookup asked for
+`s03b`, `s04a` or `s04b` and found nothing, so `full_live_qualification` — the
+predicate built to certify end-to-end evidence — **could never return True for any
+run whatsoever**. `PRODUCING_STAGES` was wrong twice over: it omitted the B-passes
+and named `s03`, an owner, where the A-pass responsibility belongs.
+
+**The architectural guard already existed.** `Stage.responsibility_id()` has
+declared this separately all along, and `base.py`'s own comment names the mistake:
+*"s03 — a string that is an owner and not a responsibility — reached a consumer
+lookup at all."* The defect was discarding half of a distinction the architecture
+had already drawn.
+
+**Why the first tests missed it:** they hand-built `StageExecution` records with
+the ids they expected, so they agreed with an implementation that never produced
+those ids. The test asserted the author's assumption, not the system's behaviour.
+
+**Correction:** `StageExecution` carries `stage_id` and `responsibility_id`
+separately, both taken from the stage object. The qualification set is
+`PRODUCING_RESPONSIBILITIES = (s01, s02, s03a, s03b, s04a, s04b)`, named for what
+it holds. `by_stage` became `by_responsibility`; `owned_by` answers the ownership
+question and returns **both** passes.
+
+**Negative controls now in place:**
+
+* mutating `responsibility_id` back to `stage.stage_id` fails S9C_24;
+* removing `s03b`, `s04a` or `s04b` one at a time each fails qualification by name;
+* the responsibility set is checked three ways — `STAGE_RESPONSIBILITY_CONTRACT`,
+  the real Stage classes, and the pipeline constant — by exact set equality. The
+  contract is authored independently of the other two and **has said `s03a` all
+  along**; had this oracle existed, the defect would have failed on its first run.
+
+No ownership semantics changed: `patch.stage_id`, `may_create`, `_authority_of`,
+`GenerationRequest.stage_id` and `patch_id` are untouched.
+
+## 12. S9-D — artifact inventory, mechanically derived
+
+Computed by `ver3/tools/artifact_inventory.py`, by resolution rather than by
+listing, so an artifact that becomes replay-consumable without a disposition shows
+up as a test failure instead of a silence.
+
+| disposition | count |
+|---|---|
+| `CURRENT_REGENERATION_TARGET` | **12** |
+| `HISTORICAL_LIVE_EVIDENCE` | 314 |
+| `HISTORICAL_MIGRATION_EVIDENCE` | 1 |
+| `REPLAY_REGRESSION_ONLY` | 0 |
+| `RETIRE` | 0 |
+| `FROZEN_SOURCE_OR_REFERENCE` | 9 |
+
+Active replay corpus is 13 files; **12** are regeneration targets. The thirteenth,
+`probes/PRB-01/s02.pre_revision.json`, resolves for no producing responsibility, so
+no replay can serve it — it is migration evidence and is retained rather than
+deleted.
+
+`live_runs` is 314 = 278 stage responses + 18 `trials.json` + 18
+`model_run_records.json`; s01 102, s02 70, s03 37, s03b 19, s04a 25, s04b 25. **69**
+of those (s03b + s04a + s04b) were unreachable under owner-keyed replay, which is
+why no S03/S04 fixture has ever existed.
+
+**The S9-E paid target set is therefore 12, not 13.**
+
+## 13. The S9-D rules
+
+**Source identity — one rule, both corpora.** `sha256(request bytes)`. Benchmarks
+additionally publish it as `source_manifest.request_sha256` and all three match
+exactly; probes publish nothing and are checked with the same function. No
+probe-specific scheme, and no fabricated probe manifest.
+
+**Replay addressing — by producing responsibility.** `<case>/<responsibility>.json`.
+`s03a` and `s03b` now address different artifacts, as do `s04a` and `s04b`. `s01`
+and `s02` are unaffected: their owner and responsibility are the same string.
+
+**Request identity.** `GenerationRequest` carries `stage_id` (owner, unchanged) and
+a new `responsibility_id`, sourced from `Stage.responsibility_id()` and nowhere
+else. `producing_identity` falls back to the owner when no pass is stated.
+
+**Fixture integrity — four bindings**, each present because a specific substitution
+went undetected without it:
+
+```
+source_sha256        which source it answers
+responsibility_id    which producing pass produced it
+raw_response_sha256  which raw response it is
+model_run_id         which run and attempt promoted it
+```
+
+plus the existing prompt pairing. **Every current fixture is missing all four** —
+asserted, not merely described. They cannot be re-stamped into validity, because
+the identities they lack are facts about a live execution that never happened.
+
+**`pairing_history` remains a migration bridge.** `pairing_status` deliberately
+does not consult it, so a re-stamping note cannot make a stale fixture valid;
+`integrity_report` keeps it visible so S-9 can count what it retires.
+
+**Promotion.** Provider success is not promotion. The ladder —
+`PROVIDER_FAILED → RESPONSE_UNUSABLE → PARSER_FAILED → CONTRACT_FAILED →
+NOT_ACCEPTED → ACCEPTED` — is kept whole, and only `ACCEPTED` may be promoted. A
+hand-edited response can never be promoted whatever else is true of it. Fidelity is
+proved by comparing parsed content with `_meta` removed, because JSON
+re-serialization is not byte-stable; enrichment, deletion and alteration are all
+caught.
+
+**Retry selection is frozen before S9-E:** `FIRST_CONFORMING` — the first eligible
+attempt is promoted, later attempts are retained and not consulted. Every attempt
+keeps its own `model_run_id`, so a retry cannot overwrite its predecessor.
+
+**Dry run.** The whole loop runs on synthetic responses with no paid call: promote
+→ integrity → write → replay through the ordinary `window1` pipeline. The replayed
+pass records `consumer_view_recorded`, `response_source = REPLAY`, and pairing
+`PAIRED`, and the run is correctly refused full-live qualification.

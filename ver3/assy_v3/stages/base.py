@@ -293,7 +293,11 @@ class Stage:
             # The run and attempt are the caller's to state, and the provider's
             # record is required to carry both. Passing them here is what lets a
             # model-run record be tied back to the run that produced it.
-            run_id=run_id, stage_attempt=attempt)
+            run_id=run_id, stage_attempt=attempt,
+            # WHICH PASS IS ASKING. Taken from the stage, because the stage is
+            # the only thing that knows: `stage_id` above is the owner, and both
+            # passes of s03 and s04 share it.
+            responsibility_id=self.responsibility_id())
         result = provider.generate(req)
         if result.execution_status is not ExecutionStatus.SUCCESS or result.response is None:
             return StageOutcome(self.stage_id, result.execution_status, None,
