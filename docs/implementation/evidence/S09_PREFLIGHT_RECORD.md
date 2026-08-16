@@ -521,3 +521,89 @@ The mutated-fixture test now fails at the boundary rather than passing.
 `FROZEN_SOURCE_OR_REFERENCE` 9. The 12 targets are unmodified and carry **zero**
 current identities — asserted by test, so a later pass cannot quietly stamp them.
 The S9-E paid target set remains 12.
+
+---
+
+## 15. S9-E — first paid campaign, and the boundary defect it exposed
+
+**Baseline frozen before the first paid call:** HEAD `45b833d`, remote matching,
+12 regeneration targets enumerated, 652 source/reference files aggregated to
+`4948d24f3ec1d5ea6bb358df57411b4dfaae16b498382998be51cf9efe100296`.
+
+### 15a. A stale capability declaration, corrected
+
+The first canary truncated S02 at ~29k characters with `finish_reason: length`.
+`MAX_OUTPUT_TOKENS_CEILING` declared 8192 while the stage requests 32000, so every
+request was clamped and any answer larger than 8192 tokens was manufactured into a
+truncation — then reported as the model's failure.
+
+Probed against the live endpoint before changing anything: **8192, 16384, 32768 and
+65536 are all accepted** by the served model. The ceiling is now 65536, so the
+stage's 32000 passes unclamped. The pipeline had behaved correctly throughout — it
+read truncation from the finish reason, refused to parse it, recorded
+`RESPONSE_TRUNCATED`. What was wrong was the *declaration*, which is an S9-I7
+concern: a declared capability that understates the provider is not conservative.
+
+### 15b. Temperature is an experiment decision, declared before the answers
+
+Regeneration first used the stage's requested 0.0. Greedy decoding degenerated:
+S02 emitted **206 near-duplicate obligations** (`OBL-0001`…`OBL-0206`) and ran to
+the cap without closing the object, at two different caps. The repository's own
+live protocol already answers this — both live runners default to
+`--temperature 1.0` — so regeneration uses that, declared as an experiment override
+and recorded per attempt. Choosing the configuration before seeing answers is not
+resampling; `FIRST_CONFORMING` is unchanged.
+
+### 15c. THE BLOCKER — S02 cannot see the id namespace it authors into
+
+At T=1.0 the degeneration disappeared and a new, **systematic** failure appeared.
+Three independent attempts, all rejected by contract validation with the *identical*
+error:
+
+```
+DUPLICATE_ID: ASM-0001
+```
+
+Diagnosed rather than retried:
+
+* S01 commits assumptions `ASM-0001`, `ASM-0002`.
+* The S02 prompt's schema block shows every family's example id at first index —
+  `ACC-0001`, `UNR-0001`, **`ASM-0001`**.
+* The S02 prompt renders **zero** committed `Assumption` entities. Grepping the
+  actual 19,066-character prompt from the retained model-run record finds no
+  occurrence of `Assumption` and no committed `ASM-` id.
+
+So S02 is asked to author into a **shared id namespace without being shown what is
+already occupied**, and dutifully starts at the example it was given. This is not
+model noise: three samples, one error, and it will recur for every case whose S01
+emits an assumption.
+
+**Why the corpus never showed it.** Every existing fixture is agent-authored, and
+that author could see the committed state. The defect was invisible for exactly as
+long as no independent model was asked the question — which is the debt D-2 that
+S-9 exists to clear, arriving precisely on schedule.
+
+**Attribution.** The architecture behaved correctly at every layer: the response
+parsed, the contract caught the collision, the write boundary refused the patch,
+and the failure was recorded rather than repaired. The defect is in the CONSUMER
+BOUNDARY — S02's view does not carry the family it extends — not in the model's
+reasoning. That distinction is what the plan means by "the architecture exists so
+that a failure can be attributed to reasoning rather than to a boundary."
+
+### 15d. State at the end of this pass
+
+| | |
+|---|---|
+| s01 regeneration | **proven end-to-end**: live → parser → contracts → accepted patch → FIRST_CONFORMING → ledger → fixture → strict CURRENT replay `ESTABLISHED` |
+| s02 regeneration | **blocked** by 15c on every attempt |
+| targets promoted | **0** — the one successful s01 write was reverted |
+| source/reference hashes | **unchanged**, re-verified: `4948d24f…` |
+
+The BM-001 s01 fixture *was* successfully regenerated and passed strict CURRENT
+replay, which is the whole S9-E chain working. It was then **reverted**: a
+live-derived s01 beside a stale agent-authored s02 is an incoherent pair, because
+the s02 recording answers a prompt derived from the *old* s01 state. A half-migrated
+case is worse than an unmigrated one.
+
+All paid attempts are retained under `ver3/live_runs/s9e/` (canary1–canary4),
+including every failed one.

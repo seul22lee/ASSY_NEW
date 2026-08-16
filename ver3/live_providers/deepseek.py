@@ -53,10 +53,23 @@ API_KEY_VAR = "DEEPSEEK_API_KEY"
 DEFAULT_BASE_URL = "https://api.deepseek.com"
 DEFAULT_MODEL = "deepseek-chat"
 
-#: DeepSeek's documented output ceiling. A request above it is clamped, and the
-#: clamp is recorded, because a silently reduced cap produces a truncation the
+#: The output ceiling this client will request. A request above it is clamped, and
+#: the clamp is recorded, because a silently reduced cap produces a truncation the
 #: caller cannot explain.
-MAX_OUTPUT_TOKENS_CEILING = 8192
+#:
+#: WAS 8192, AND THAT WAS THE HARM IT EXISTED TO PREVENT. The stage asks for
+#: 32000; the clamp cut every request to 8192, so any responsibility whose answer
+#: is larger truncated - which is exactly what happened to S02 on the first S9-E
+#: regeneration attempt, at ~29k characters with finish_reason "length". The
+#: pipeline behaved correctly throughout: it read the truncation from the finish
+#: reason, refused to parse it, and recorded RESPONSE_TRUNCATED. What was wrong
+#: was the declaration.
+#:
+#: Verified against the live endpoint before changing: 8192, 16384, 32768 and
+#: 65536 are all accepted by the served model. A declared capability that
+#: understates the provider is not conservative - it manufactures truncation and
+#: then reports it as the model's failure.
+MAX_OUTPUT_TOKENS_CEILING = 65536
 
 #: DeepSeek's chat-completions API accepts no seed parameter. Declared here so the
 #: resolution boundary can record a requested seed as UNSUPPORTED rather than

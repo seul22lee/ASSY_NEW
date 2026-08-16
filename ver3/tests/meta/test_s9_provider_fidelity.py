@@ -301,14 +301,21 @@ class TestParameterAuthority(_ProviderCase):
         And it follows the SAME rule as everything else - requested, then a
         transport normalization that is recorded - rather than its own.
         """
+        over = ds.MAX_OUTPUT_TOKENS_CEILING + 1000
         p = ds.DeepSeekProvider()
-        _r, transport, rec = self.run_once(p, a_request(max_output_tokens=32000))
+        _r, transport, rec = self.run_once(p, a_request(max_output_tokens=over))
         self.assertEqual(ds.MAX_OUTPUT_TOKENS_CEILING, transport.payload["max_tokens"])
-        self.assertEqual(32000, rec["request"]["max_output_tokens_clamped_from"])
+        self.assertEqual(over, rec["request"]["max_output_tokens_clamped_from"])
         entry = rec["request"]["parameter_resolution"]["max_output_tokens"]
-        self.assertEqual((32000, ds.MAX_OUTPUT_TOKENS_CEILING, "SENT_AS_CLAMPED"),
+        self.assertEqual((over, ds.MAX_OUTPUT_TOKENS_CEILING, "SENT_AS_CLAMPED"),
                          (entry["requested"], entry["effective"], entry["status"]))
-        # Under the ceiling nothing is clamped and nothing claims to have been.
+        # Under the ceiling nothing is clamped and nothing claims to have been -
+        # including the 32000 the stage actually asks for, which the old 8192
+        # declaration cut down and thereby truncated every large answer.
+        p2 = ds.DeepSeekProvider()
+        _r2, t2, rec2 = self.run_once(p2, a_request(max_output_tokens=32000))
+        self.assertEqual(32000, t2.payload["max_tokens"])
+        self.assertIsNone(rec2["request"]["max_output_tokens_clamped_from"])
         p2 = ds.DeepSeekProvider()
         _r2, t2, rec2 = self.run_once(p2, a_request(max_output_tokens=100))
         self.assertEqual(100, t2.payload["max_tokens"])
