@@ -1,19 +1,24 @@
-"""Can the downstream actually represent the benchmarks it will be asked to run?
+"""Can the downstream REPRESENT the benchmarks it will be asked to run?
 
 The prior review left this question open, and an open capability question is the
 kind that gets answered by a run failing at the kernel months later. This file
-answers it BEFORE any paid work: BM-001 (hinged cover with a snap latch), BM-002
-(enclosed hand-cranked platform lift) and BM-003 (folding three-leg stand) are
-decomposed into the CAPABILITY CLASSES they need, and each class is exercised.
+answers the part of it that needs no kernel: the opcode vocabulary, the solver
+formulations that BM-001, BM-002 and BM-003 actually require, and the limits of
+both. It is stdlib-only and runs on every push.
+
+The COMPILING half - putting each geometric archetype through a real
+OpenCascade build - is `ver3/tests/kernel/test_capability_geometry.py`, run by
+the downstream CI job. The split is by dependency: this file was briefly one
+suite, and the boundaries job, which installs nothing but PyYAML, discovered the
+geometry tests and failed for an environment reason that had nothing to do with
+any boundary. Moving them is the fix; skip-guarding them would have left a suite
+that reports success by not running.
 
 Two rules this file holds itself to.
 
 FIRST, no reference geometry. Rebuild policy rule 4 forbids the executable
 references from being a production input, and a capability test that copied
-their dimensions would be checking reproduction rather than capability. Every
-shape below is a generic archetype with invented numbers - a shelled box, a
-cantilever, a rotated cut. What is asserted is that the CLASS compiles, never
-that the result resembles anyone's answer.
+their dimensions would be checking reproduction rather than capability.
 
 SECOND, the limits are recorded as tests too. A capability suite that only
 demonstrates successes is a brochure. Where the vocabulary cannot express
@@ -24,7 +29,7 @@ test tells them the limit moved rather than staying quietly green.
 
 import unittest
 
-from ver3.assy_v3.downstream import compiler, ir, solver
+from ver3.assy_v3.downstream import ir, solver
 
 
 def const(value, unit="mm"):
@@ -39,20 +44,6 @@ def op(name, *args):
     return {"op": name, "args": list(args)}
 
 
-def stmt(eid, operation, operands=(), body="BOD-1", axis=None, **params):
-    record = {"entity_id": eid, "operation": operation,
-              "operands": list(operands), "parameters": dict(params),
-              "body": body}
-    if axis:
-        record["axis"] = axis
-    return record
-
-
-def compile_body(records, values=None):
-    return compiler.compile_program(ir.ConstructionProgram.parse(records),
-                                    dict(values or {}))
-
-
 def declare(eid, symbol, unit):
     return ir.ParameterDecl.parse({"entity_id": eid, "symbol": symbol,
                                    "unit": unit, "status": "DECLARED"})
@@ -64,120 +55,13 @@ def relate(eid, relation, lhs, rhs, kind="DIMENSIONAL"):
         "expression": {"relation": relation, "lhs": lhs, "rhs": rhs}})
 
 
-# ======================================================================
-# GEOMETRY - what the closed opcode set can build
-# ======================================================================
+class TestPoseIsNotAnOpcodeQuestion(unittest.TestCase):
+    """The half of the orientation argument that needs no kernel.
 
-class TestEnclosureClass(unittest.TestCase):
-    """A shelled housing with a through-bore.
-
-    BM-001 needs a box that opens (shell plus a hinge bore); BM-002 needs a
-    housing the mechanism stays inside. Both are the same capability class: a
-    solid hollowed by a CUT, then bored by a rotated CYLINDER.
+    Deliberately OUTSIDE the kernel-guarded classes above, so the frame rule is
+    still checked in the stdlib boundary job. It reads the opcode table, and an
+    opcode table is not geometry.
     """
-
-    def _shelled_box_with_bore(self):
-        return [
-            stmt("A", "BOX", dx=const(100), dy=const(60), dz=const(40)),
-            stmt("B", "BOX", dx=const(94), dy=const(54), dz=const(36)),
-            stmt("C", "TRANSLATE", ["B"], dx=const(3), dy=const(3), dz=const(3)),
-            stmt("D", "CUT", ["A", "C"]),
-            stmt("E", "CYLINDER", radius=const(2), height=const(60)),
-            stmt("F", "ROTATE", ["E"], axis="X", angle=const(-90, "deg")),
-            stmt("G", "TRANSLATE", ["F"], dx=const(50), dy=const(60), dz=const(38)),
-            stmt("H", "CUT", ["D", "G"]),
-        ]
-
-    def test_a_shelled_enclosure_with_a_bore_compiles(self):
-        result = compile_body(self._shelled_box_with_bore())
-        self.assertTrue(result.ok, result.problems)
-        self.assertTrue(result.bodies, "compiled without producing a body")
-
-    def test_the_shell_is_hollow_rather_than_solid(self):
-        """Otherwise 'it compiled' would be true of a solid block."""
-        result = compile_body(self._shelled_box_with_bore())
-        solid = compile_body([stmt("A", "BOX", dx=const(100), dy=const(60),
-                                   dz=const(40))])
-        self.assertTrue(solid.ok, solid.problems)
-        self.assertLess(result.bodies[0].volume, solid.bodies[0].volume,
-                        "the CUT removed nothing; this is a solid block that "
-                        "happens to compile")
-
-
-class TestCantileverWithAngledLeadInClass(unittest.TestCase):
-    """BM-001's snap latch: an arm, a barb, and a ramp that lets it deflect in.
-
-    There is no CHAMFER opcode, so the question is whether the FUNCTION - an
-    angled lead-in face - is reachable at all. It is: a rotated BOX cut against
-    the barb produces the ramp. A true filleted radius is not reachable, and
-    `TestRecordedLimits` says so rather than this test implying otherwise.
-    """
-
-    def test_a_cantilever_with_a_rotated_lead_in_cut_compiles(self):
-        arm = [
-            stmt("A", "BOX", dx=const(20), dy=const(3), dz=const(2)),
-            stmt("B", "BOX", dx=const(3), dy=const(3), dz=const(3)),
-            stmt("C", "TRANSLATE", ["B"], dx=const(18), dy=const(0), dz=const(1)),
-            stmt("D", "UNION", ["A", "C"]),
-            stmt("E", "BOX", dx=const(6), dy=const(6), dz=const(6)),
-            stmt("F", "ROTATE", ["E"], axis="Y", angle=const(35, "deg")),
-            stmt("G", "TRANSLATE", ["F"], dx=const(21), dy=const(0), dz=const(3)),
-            stmt("H", "CUT", ["D", "G"]),
-        ]
-        result = compile_body(arm)
-        self.assertTrue(result.ok, result.problems)
-
-    def test_the_angled_cut_actually_removed_material(self):
-        base = compile_body([
-            stmt("A", "BOX", dx=const(20), dy=const(3), dz=const(2)),
-            stmt("B", "BOX", dx=const(3), dy=const(3), dz=const(3)),
-            stmt("C", "TRANSLATE", ["B"], dx=const(18), dy=const(0), dz=const(1)),
-            stmt("D", "UNION", ["A", "C"])])
-        cut = compile_body([
-            stmt("A", "BOX", dx=const(20), dy=const(3), dz=const(2)),
-            stmt("B", "BOX", dx=const(3), dy=const(3), dz=const(3)),
-            stmt("C", "TRANSLATE", ["B"], dx=const(18), dy=const(0), dz=const(1)),
-            stmt("D", "UNION", ["A", "C"]),
-            stmt("E", "BOX", dx=const(6), dy=const(6), dz=const(6)),
-            stmt("F", "ROTATE", ["E"], axis="Y", angle=const(35, "deg")),
-            stmt("G", "TRANSLATE", ["F"], dx=const(21), dy=const(0), dz=const(3)),
-            stmt("H", "CUT", ["D", "G"])])
-        self.assertTrue(base.ok and cut.ok)
-        self.assertLess(cut.bodies[0].volume, base.bodies[0].volume,
-                        "the ramp cut nothing away, so this proves no lead-in")
-
-
-class TestArbitraryOrientationIsReachable(unittest.TestCase):
-    """ROTATE names one of X/Y/Z. That is not a limit on reachable orientation.
-
-    BM-003's legs point in three different directions, which reads at first like
-    a demand for arbitrary-axis rotation. Two answers, and the second is the one
-    that matters.
-
-    Within a body, composed principal rotations reach any orientation - that is
-    what Euler angles are - and the test below shows a composition behaving as a
-    rigid motion.
-
-    Between bodies, the question does not arise: the construction_frame_rule puts
-    every statement in the OWNING BODY'S OWN FRAME and keeps world placement out
-    of the program entirely, so where a leg points is a pose applied downstream
-    from located joint frames. It is s03/s04's to decide, and no opcode could
-    express it without s07 compiling a world layout it has no State to compile.
-    """
-
-    def test_composed_principal_rotations_are_a_rigid_motion(self):
-        flat = compile_body([stmt("A", "BOX", dx=const(60), dy=const(10),
-                                  dz=const(4))])
-        turned = compile_body([
-            stmt("A", "BOX", dx=const(60), dy=const(10), dz=const(4)),
-            stmt("B", "ROTATE", ["A"], axis="X", angle=const(30, "deg")),
-            stmt("C", "ROTATE", ["B"], axis="Z", angle=const(40, "deg"))])
-        self.assertTrue(flat.ok and turned.ok)
-        self.assertAlmostEqual(flat.bodies[0].volume, turned.bodies[0].volume,
-                               delta=1e-6,
-                               msg="a rotation changed the volume, so this is "
-                                   "not a rigid motion and the composition is "
-                                   "not doing what the test claims")
 
     def test_no_opcode_places_a_body_in_the_world(self):
         """The rule that makes the pose question s04's rather than s07's."""
@@ -363,9 +247,17 @@ class TestNoReferenceGeometryReachedThisSuite(unittest.TestCase):
         self.assertGreater(len(self._literals_outside_this_check()), 50)
 
     def test_no_path_into_reference_or_oracle_geometry(self):
+        """A PATH into those directories, not a mention of them.
+
+        The first version flagged any literal containing a banned word and a
+        slash anywhere, so this file's own docstring - which names the
+        benchmarks it reasons about, and cites a sibling file by path - tripped
+        it. Requiring the separator to be ADJACENT to the directory name is what
+        makes it a path test rather than a word filter.
+        """
         for text in self._literals_outside_this_check():
             for banned in self.OFF_LIMITS:
-                if banned in text and "/" in text:
+                if banned + "/" in text or "/" + banned in text:
                     self.fail("a literal names a path into %s: %r"
                               % (banned, text[:80]))
 

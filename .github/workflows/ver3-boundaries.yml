@@ -109,10 +109,20 @@ jobs:
             ver3.tests.meta.test_downstream_integration \
             ver3.tests.meta.test_downstream_currentness
 
-      - name: The benchmarks are representable by the vocabulary that must run them
-        # BM-001, BM-002 and BM-003 decomposed into capability classes, each one
-        # compiled or solved - and each RECORDED LIMIT asserted too, so the day
-        # an opcode is added the suite reports that the boundary moved rather
-        # than staying quietly green. Runs here because the geometry classes
-        # need the kernel.
-        run: python -m unittest -v ver3.tests.meta.test_downstream_capability
+      - name: The benchmarks are BUILDABLE by the opcode set that must build them
+        # BM-001, BM-002 and BM-003 decomposed into geometric capability classes
+        # and put through a real OpenCascade compile.
+        #
+        # These live in ver3/tests/kernel, NOT ver3/tests/meta, and the placement
+        # is the point. The boundaries job above discovers everything under
+        # ver3/tests/meta with nothing but PyYAML installed, so an OpenCascade
+        # test placed there fails that job for an environment reason unrelated to
+        # any boundary. Separating by DEPENDENCY keeps the stdlib job stdlib and
+        # keeps these unguarded: the kernel-presence step above has already run,
+        # so a failure here is always a real failure and never a skip.
+        #
+        # The kernel-INDEPENDENT half of the same review - opcode vocabulary,
+        # solver formulations, and the recorded limits of both - is
+        # ver3.tests.meta.test_downstream_capability, which the boundaries job
+        # runs on every push.
+        run: python -m unittest -v ver3.tests.kernel.test_capability_geometry
