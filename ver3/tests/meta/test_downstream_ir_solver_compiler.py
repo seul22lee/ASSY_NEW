@@ -134,11 +134,11 @@ class TestSolverSemantics(unittest.TestCase):
         self.assertEqual(ir.INFEASIBLE, r.solver_status)
 
     def test_mixed_units_are_unsupported_not_silently_combined(self):
-        """The bug this test was written for: a set of units, not the first one."""
+        """A length is not an angle, and the report says which two it saw."""
         bad = C("CON-0006", "==", REF("PRM-0003"), {"const": 5, "unit": "deg"})
         r = solver.solve(self.params, [bad])
         self.assertEqual(ir.UNSUPPORTED_FORMULATION, r.solver_status)
-        self.assertTrue(any("mixes units" in p for p in r.problems))
+        self.assertTrue(any("mm" in p and "deg" in p for p in r.problems), r.problems)
 
     def test_a_nonlinear_formulation_is_refused_rather_than_approximated(self):
         nl = C("CON-0007", "==", REF("PRM-0003"),
@@ -146,12 +146,117 @@ class TestSolverSemantics(unittest.TestCase):
         self.assertEqual(ir.UNSUPPORTED_FORMULATION,
                          solver.solve(self.params, [nl]).solver_status)
 
-    def test_scaling_by_a_constant_is_supported(self):
+    def test_scaling_by_a_dimensionless_constant_is_supported(self):
+        """A scale factor is a pure number, and only that spelling is a scaling.
+
+        This test previously multiplied a length by `0.5 mm` and asserted the
+        result was a length. That is dimensionally wrong - a length times a
+        length is an area - and it passed because units were compared as strings.
+        """
         half = C("CON-0008", "==", REF("PRM-0003"),
-                 {"op": "*", "args": [REF("PRM-0001"), {"const": 0.5, "unit": "mm"}]})
+                 {"op": "*", "args": [REF("PRM-0001"), {"const": 0.5, "unit": "1"}]})
         r = solver.solve(self.params, [half])
         self.assertEqual(ir.FEASIBLE, r.solver_status)
         self.assertAlmostEqual(2.0, r.settled["PRM-0003"])
+
+    def test_a_length_times_a_length_is_not_a_length(self):
+        """The defect the test above used to enshrine."""
+        area = C("CON-0012", "==", REF("PRM-0003"),
+                 {"op": "*", "args": [MM(0.5), MM(10)]})
+        r = solver.solve(self.params, [area])
+        self.assertEqual(ir.UNSUPPORTED_FORMULATION, r.solver_status)
+        self.assertTrue(any("mm^2" in p for p in r.problems), r.problems)
+
+    def test_an_area_parameter_accepts_a_product_of_lengths(self):
+        area = [P(entity_id="PRM-0020", symbol="face", unit="mm2")]
+        c = C("CON-0013", "==", REF("PRM-0020"),
+              {"op": "*", "args": [MM(2), MM(3)]})
+        r = solver.solve(area, [c])
+        self.assertEqual(ir.FEASIBLE, r.solver_status)
+        self.assertAlmostEqual(6.0, r.settled["PRM-0020"])
+
+    def test_a_coupled_two_by_two_system_has_a_unique_solution(self):
+        """The correctness gap: this returned UNDERDETERMINED before.
+
+        Neither row reduces to one unknown on its own, so a solver that only
+        settles convenient rows sees a free family where there is exactly one
+        answer.
+        """
+        x, y = P(entity_id="PRM-X", symbol="x"), P(entity_id="PRM-Y", symbol="y")
+        r = solver.solve([x, y], [
+            C("CON-A", "==", {"op": "+", "args": [REF("PRM-X"), REF("PRM-Y")]}, MM(10)),
+            C("CON-B", "==", {"op": "-", "args": [REF("PRM-X"), REF("PRM-Y")]}, MM(2))])
+        self.assertEqual(ir.FEASIBLE, r.solver_status)
+        self.assertAlmostEqual(6.0, r.settled["PRM-X"])
+        self.assertAlmostEqual(4.0, r.settled["PRM-Y"])
+        self.assertEqual(2, r.rank)
+
+    def test_a_coupled_three_by_three_system_resolves(self):
+        p = [P(entity_id="PRM-X", symbol="x"), P(entity_id="PRM-Y", symbol="y"),
+             P(entity_id="PRM-Z", symbol="z")]
+        r = solver.solve(p, [
+            C("CON-A", "==",
+              {"op": "+", "args": [REF("PRM-X"), REF("PRM-Y"), REF("PRM-Z")]}, MM(6)),
+            C("CON-B", "==", {"op": "-", "args": [REF("PRM-X"), REF("PRM-Y")]}, MM(1)),
+            C("CON-C", "==", {"op": "-", "args": [REF("PRM-Y"), REF("PRM-Z")]}, MM(1))])
+        self.assertEqual(ir.FEASIBLE, r.solver_status)
+        self.assertAlmostEqual(3.0, r.settled["PRM-X"])
+        self.assertAlmostEqual(2.0, r.settled["PRM-Y"])
+        self.assertAlmostEqual(1.0, r.settled["PRM-Z"])
+
+    def test_a_rank_deficient_system_is_underdetermined_not_solved(self):
+        """Two rows saying the same thing determine one direction, not two."""
+        x, y = P(entity_id="PRM-X", symbol="x"), P(entity_id="PRM-Y", symbol="y")
+        double = lambda i: {"op": "*", "args": [REF(i), {"const": 2, "unit": "1"}]}
+        r = solver.solve([x, y], [
+            C("CON-A", "==", {"op": "+", "args": [REF("PRM-X"), REF("PRM-Y")]}, MM(10)),
+            C("CON-B", "==", {"op": "+", "args": [double("PRM-X"), double("PRM-Y")]},
+              MM(20))])
+        self.assertEqual(ir.UNDERDETERMINED, r.solver_status)
+        self.assertEqual(1, r.rank)
+        self.assertEqual({}, r.settled)
+
+    def test_a_contradictory_coupled_system_is_infeasible(self):
+        x, y = P(entity_id="PRM-X", symbol="x"), P(entity_id="PRM-Y", symbol="y")
+        add = {"op": "+", "args": [REF("PRM-X"), REF("PRM-Y")]}
+        r = solver.solve([x, y], [C("CON-A", "==", add, MM(10)),
+                                  C("CON-B", "==", add, MM(11))])
+        self.assertEqual(ir.INFEASIBLE, r.solver_status)
+        self.assertTrue(r.conflicting)
+
+    def test_a_value_without_solver_evidence_is_not_trusted_as_settled(self):
+        """The posture S05-C10 rests on.
+
+        A Parameter carrying a number but still DECLARED has not been solved -
+        s05 may not set a value except by citing a solver artifact. Treating that
+        number as known would be R-23 exactly: copying an existing value and
+        calling it solved.
+        """
+        declared = ir.ParameterDecl.parse(
+            {"entity_id": "PRM-0030", "symbol": "a", "unit": "mm",
+             "status": ir.DECLARED, "value": 99.0})
+        r = solver.solve([declared], [])
+        self.assertEqual(ir.UNDERDETERMINED, r.solver_status)
+        self.assertEqual({}, r.settled)
+        self.assertIn("PRM-0030", r.free_parameters)
+
+    def test_a_solved_value_is_carried_as_known(self):
+        solved = ir.ParameterDecl.parse(
+            {"entity_id": "PRM-0031", "symbol": "a", "unit": "mm",
+             "status": ir.SOLVED, "value": 99.0})
+        r = solver.solve([solved], [])
+        self.assertEqual(ir.FEASIBLE, r.solver_status)
+        self.assertAlmostEqual(99.0, r.settled["PRM-0031"])
+
+    def test_a_coupled_system_is_order_independent(self):
+        """S06-C6 over the elimination itself, not only over the easy path."""
+        x, y = P(entity_id="PRM-X", symbol="x"), P(entity_id="PRM-Y", symbol="y")
+        a = C("CON-A", "==", {"op": "+", "args": [REF("PRM-X"), REF("PRM-Y")]}, MM(10))
+        b = C("CON-B", "==", {"op": "-", "args": [REF("PRM-X"), REF("PRM-Y")]}, MM(2))
+        first = solver.solve([x, y], [a, b]).as_record()
+        second = solver.solve([y, x], [b, a]).as_record()
+        self.assertEqual(json.dumps(first, sort_keys=True),
+                         json.dumps(second, sort_keys=True))
 
     def test_a_declared_bound_violation_is_infeasible(self):
         params = list(self.params)
