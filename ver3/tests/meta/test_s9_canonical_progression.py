@@ -35,7 +35,7 @@ RUNNERS = ("run_window.py", "run_live_window.py", "run_window2.py")
 
 
 def _producing_stage_classes():
-    """The real classes behind the six producing responsibilities, in order."""
+    """The real classes behind the producing responsibilities, in order."""
     from ver3.assy_v3.stages.s01_requirement_capture import S01RequirementCapture
     from ver3.assy_v3.stages.s02_obligation_and_candidates import (
         S02ObligationAndCandidates)
@@ -43,9 +43,10 @@ def _producing_stage_classes():
         S03BMobilityAndAssembly, S03TopologyAndMobility)
     from ver3.assy_v3.stages.s04_envelope_and_motion import (
         S04AEnvelopeAndReach, S04BPlacementAndMotion)
+    from ver3.assy_v3.stages.s05_embodiment import S05Embodiment
     return (S01RequirementCapture, S02ObligationAndCandidates,
             S03TopologyAndMobility, S03BMobilityAndAssembly,
-            S04AEnvelopeAndReach, S04BPlacementAndMotion)
+            S04AEnvelopeAndReach, S04BPlacementAndMotion, S05Embodiment)
 
 
 def _real_responsibilities():
@@ -275,7 +276,7 @@ class TestResponseSourceProvenance(unittest.TestCase):
             p.record(_live(stage))
         qualified, reasons = prog.full_live_qualification(p)
         self.assertFalse(qualified)
-        self.assertEqual(4, len([r for r in reasons if "did not execute" in r]))
+        self.assertEqual(5, len([r for r in reasons if "did not execute" in r]))
 
     def test_S9C_11_an_undeclared_provider_cannot_qualify(self):
         """Silence is not a live response."""
@@ -317,7 +318,7 @@ class TestOwnershipVersusResponsibility(unittest.TestCase):
         # responsibilities (feasibility, the four selection ones) are excluded
         # because they are not the S01->S04 producing chain.
         declared = sorted(k for k in contract["stages"]
-                          if re.match(r"^s0[1-4][a-z]?$", k))
+                          if re.match(r"^s0[1-5][a-z]?$", k))
         from_classes = sorted(_real_responsibilities())
         from_pipeline = sorted(prog.PRODUCING_RESPONSIBILITIES)
 
@@ -327,7 +328,11 @@ class TestOwnershipVersusResponsibility(unittest.TestCase):
         self.assertEqual(declared, from_pipeline,
                          "the contract and the pipeline qualification set "
                          "disagree about which responsibilities produce S01-S04")
-        self.assertEqual(6, len(declared))
+        # Seven since s05 became a declared producing responsibility. s06 and
+        # s07 are NOT here and must not be: they are deterministic services, and
+        # a set whose members must have been served LIVE cannot hold a stage that
+        # never contacts a provider.
+        self.assertEqual(7, len(declared))
         # And the downstream responsibilities are genuinely excluded rather than
         # accidentally absent.
         for downstream in ("feasibility", "selection", "selection_advisory",
@@ -342,7 +347,8 @@ class TestOwnershipVersusResponsibility(unittest.TestCase):
         shares a responsibility. This is the fact that makes owner identity
         unusable as a pass key.
         """
-        (s01, s02, s03a, s03b, s04a, s04b) = [c() for c in _producing_stage_classes()]
+        (s01, s02, s03a, s03b, s04a, s04b, s05) = [
+            c() for c in _producing_stage_classes()]
 
         # OWNERSHIP COLLIDES. Both passes author s03 state under s03's authority.
         self.assertEqual(s03a.stage_id, s03b.stage_id)
@@ -353,8 +359,12 @@ class TestOwnershipVersusResponsibility(unittest.TestCase):
         # RESPONSIBILITY DOES NOT. They ask different questions of different premises.
         self.assertNotEqual(s03a.responsibility_id(), s03b.responsibility_id())
         self.assertNotEqual(s04a.responsibility_id(), s04b.responsibility_id())
-        self.assertEqual(6, len({c.responsibility_id()
-                                 for c in (s01, s02, s03a, s03b, s04a, s04b)}))
+        # s05 is the case where owner and responsibility COINCIDE - one pass, not
+        # two - which is why the rule has to be "ask the object", not "strip a
+        # trailing letter".
+        self.assertEqual(s05.stage_id, s05.responsibility_id())
+        self.assertEqual(7, len({c.responsibility_id()
+                                 for c in (s01, s02, s03a, s03b, s04a, s04b, s05)}))
         # And only four owners for six producing responsibilities.
         self.assertEqual(4, len({c.stage_id
                                  for c in (s01, s02, s03a, s03b, s04a, s04b)}))
@@ -368,7 +378,7 @@ class TestOwnershipVersusResponsibility(unittest.TestCase):
         produced those ids at all.
         """
         expected = {"s01": "s01", "s02": "s02", "s03a": "s03", "s03b": "s03",
-                    "s04a": "s04", "s04b": "s04"}
+                    "s04a": "s04", "s04b": "s04", "s05": "s05"}
         for cls in _producing_stage_classes():
             stage = cls()
             # Exactly what execute_stage does, asked of the object itself.
@@ -419,7 +429,7 @@ class TestOwnershipVersusResponsibility(unittest.TestCase):
                 response_source=prog.LIVE, provider_id="deepseek",
                 execution_status="SUCCESS", patch_applied=True))
 
-        self.assertEqual(6, len(p.executions))
+        self.assertEqual(7, len(p.executions))
         self.assertIsNotNone(p.by_responsibility("s03a"))
         self.assertIsNotNone(p.by_responsibility("s03b"))
         self.assertIsNotNone(p.by_responsibility("s04a"))
@@ -428,7 +438,7 @@ class TestOwnershipVersusResponsibility(unittest.TestCase):
         self.assertEqual(2, len(p.owned_by("s03")))
         self.assertEqual(2, len(p.owned_by("s04")))
         # Response sources are keyed by responsibility, so nothing is lost.
-        self.assertEqual(6, len(p.response_sources()))
+        self.assertEqual(7, len(p.response_sources()))
 
         # AND THE PREDICATE NOW SUCCEEDS. Before the fix it could not: three of
         # the six lookups returned None whatever the run actually did.

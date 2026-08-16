@@ -22,12 +22,12 @@ records what the provider serving each stage declared, and full-live qualificati
 reads those records. A provider that declares nothing is UNDECLARED and can never
 satisfy a live claim - silence is not a live response.
 
-WHY SIX STAGES AND NOT FOUR
+WHY SEVEN RESPONSIBILITIES AND NOT FIVE CONTRACTS
 
-"S01 to S04" names four contracts and SIX producing responsibilities: S03 is split
-into topology and mobility passes, S04 into envelope and placement passes, because
-one response could not carry either pair. A full-live check that tested four
-strings would pass a run whose S03·B was replayed.
+"S01 to S05" names five contracts and SEVEN producing responsibilities: S03 is
+split into topology and mobility passes and S04 into envelope and placement
+passes, because one response could not carry either pair. A full-live check that
+tested contract names would pass a run whose S03·B was replayed.
 """
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ REPLAY = "REPLAY"
 #: The provider declares nothing. Never treated as live.
 UNDECLARED = "UNDECLARED"
 
-#: Every LLM-producing RESPONSIBILITY from S01 through S04, in progression order.
+#: Every LLM-producing RESPONSIBILITY from S01 through S05, in progression order.
 #:
 #: NOT stages. `s03` and `s04` are OWNERS - they say who may write the state - and
 #: each owns two reasoning passes that ask different questions of different
@@ -56,7 +56,20 @@ UNDECLARED = "UNDECLARED"
 #: distinct model calls happen, so a run whose S03·B was replayed would satisfy it.
 #: The name says responsibilities because the first version of this said stages and
 #: was wrong in exactly that way.
-PRODUCING_RESPONSIBILITIES = ("s01", "s02", "s03a", "s03b", "s04a", "s04b")
+#: s05 JOINS THE SET, and that is a real change to what a full-live claim means.
+#: Embodiment is model-owned - its contract puts llm_role HIGH for feature
+#: proposal and program shape - so a chain that stopped at s04b and called itself
+#: end-to-end was claiming coverage of a stage it never asked a model about.
+#:
+#: s06 and s07 are deliberately NOT here. They are deterministic services with
+#: llm_role NONE, and a set whose members must have been served LIVE cannot hold
+#: a stage that never calls a provider. Whether they COMPLETED is a different
+#: question from whether the chain was live, and it is asked separately.
+PRODUCING_RESPONSIBILITIES = ("s01", "s02", "s03a", "s03b", "s04a", "s04b", "s05")
+
+#: The deterministic downstream. Recorded, currentness-sensitive and required for
+#: an end-to-CAD claim - but never evidence that a model was asked anything.
+DETERMINISTIC_RESPONSIBILITIES = ("s06", "s07")
 
 # --------------------------------------------------------------------------
 # Failure layers. Previously duplicated in two runners with slightly different
@@ -165,11 +178,61 @@ class StageExecution:
                 "problems": list(self.problems)}
 
 
+@dataclass(frozen=True)
+class DeterministicExecution:
+    """One run of a deterministic downstream service. NOT a StageExecution.
+
+    A SEPARATE TYPE, and that is the whole point. `StageExecution` carries
+    `response_source` and `provider_id` because a producing responsibility asked
+    a provider something. s06 and s07 ask nobody: their contracts put `llm_role`
+    at NONE, and s07 additionally owns no engineering decision at all.
+
+    Recording them as StageExecutions would have forced a `response_source` onto
+    a stage that has no response and a `provider_id` onto one that contacted no
+    provider. The honest values would have been placeholders, and a placeholder
+    in a provenance field is the kind of thing a later reader believes. So the
+    fields do not exist here rather than being filled with "none".
+
+    What IS recorded is what a deterministic service can actually be asked
+    afterwards: what it was given, what it concluded, and whether it wrote.
+    """
+
+    responsibility_id: str
+    stage_id: str
+    #: What the service reports about its own run - a solver_status, or whether
+    #: the compile succeeded. Its vocabulary belongs to the service.
+    outcome: str
+    #: sha256 of the exact input, so "identical input, identical output" is a
+    #: checkable claim rather than an intention (S06-C6, S07-C5).
+    input_digest: str = ""
+    patch_applied: bool = False
+    problems: Tuple[str, ...] = ()
+    #: The evidence entity this run registered, if any - a solver artifact id or
+    #: a GeometrySignature id. It is how a settled value or a compiled body is
+    #: traced back to the run that produced it.
+    evidence_id: Optional[str] = None
+
+    def as_record(self) -> Dict[str, Any]:
+        return {"responsibility_id": self.responsibility_id,
+                "stage_id": self.stage_id,
+                "kind": "DETERMINISTIC",
+                "outcome": self.outcome,
+                "input_digest": self.input_digest,
+                "patch_applied": self.patch_applied,
+                "evidence_id": self.evidence_id,
+                "problems": list(self.problems)}
+
+
 @dataclass
 class Progression:
     """The executions of one chain, in order, with their failures."""
 
     executions: List[StageExecution] = field(default_factory=list)
+    #: Deterministic runs, kept in their own list. Mixing them into `executions`
+    #: would put a member with no response source into every set that reads one -
+    #: including full-live qualification, which would then have to special-case
+    #: the very stages it must not count.
+    deterministic: List["DeterministicExecution"] = field(default_factory=list)
     failures: List[Dict[str, Any]] = field(default_factory=list)
 
     def record(self, execution: StageExecution) -> StageExecution:
@@ -189,6 +252,16 @@ class Progression:
         invocations are real executions and both are evidence.
         """
         return [e for e in self.executions
+                if e.responsibility_id == responsibility_id]
+
+    def record_deterministic(self, execution: "DeterministicExecution"
+                             ) -> "DeterministicExecution":
+        self.deterministic.append(execution)
+        return execution
+
+    def deterministic_by_responsibility(self, responsibility_id: str
+                                        ) -> List["DeterministicExecution"]:
+        return [e for e in self.deterministic
                 if e.responsibility_id == responsibility_id]
 
     def by_responsibility(self, responsibility_id: str) -> Optional[StageExecution]:
@@ -221,6 +294,7 @@ class Progression:
 
     def as_record(self) -> Dict[str, Any]:
         return {"executions": [e.as_record() for e in self.executions],
+                "deterministic": [e.as_record() for e in self.deterministic],
                 "response_sources": self.response_sources(),
                 "failures": list(self.failures)}
 

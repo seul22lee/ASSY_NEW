@@ -94,7 +94,10 @@ class TestResponsibilityAddressing(unittest.TestCase):
             self.assertIs(ExecutionStatus.PROVIDER_UNAVAILABLE,
                           result.execution_status)
             seen[responsibility] = result.error_detail
-        self.assertEqual(6, len(set(seen.values())),
+        # One artifact per producing responsibility, and the count follows the
+        # set rather than a number typed here - s05 joining it must not silently
+        # weaken the property to "most of them are distinct".
+        self.assertEqual(len(PRODUCING_RESPONSIBILITIES), len(set(seen.values())),
                          "two producing responsibilities resolved to one artifact")
         for pair in (("s03a", "s03b"), ("s04a", "s04b")):
             self.assertNotEqual(seen[pair[0]], seen[pair[1]], pair)

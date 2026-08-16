@@ -1715,11 +1715,37 @@ assurance_families:
         feature envelope or a LoadCase - NEVER a Witness.
 
   ConstructionStatement:
+    field_semantics:
+      body:
+        kind: reference
+        target: Body
+        cardinality: one
+        resolvable: false
+      feature:
+        kind: reference
+        target: Feature
+        cardinality: one
+        resolvable: false
+      # AN AXIS NAME, not a direction vector. ROTATE turns about one of the
+      # owning body's own axes, so the value is X, Y or Z and carries no frame of
+      # its own - the frame is the body's, by the construction frame rule. A
+      # spatial declaration here would claim a coordinate this field never holds.
+      axis:
+        kind: enum
     owned_by: s05
     purpose: "One step of the ConstructionProgram that Stage 07 compiles."
     required_fields: [entity_id, operation, operands, parameters]
+    # Declared so state can hold them. `body` is what the construction frame rule
+    # implies - a statement is expressed in the OWNING body's own frame, so there
+    # is an owning body - and s07 refuses a statement it cannot attribute to one.
+    # The COMPILER requires it; storage does not, and the required_fields above
+    # are left as authored rather than widened to suit an implementation.
+    # `axis` is required by ROTATE and by nothing else; `feature` links the step
+    # to the Feature it realizes, which is what makes geometry traceable upstream.
+    optional_fields: [body, axis, feature]
     rules:
       - "Stage 07 compiles these or fails, preserving the originating statement (INV-006)."
+      - "Expressed in the owning body's own frame. World placement never appears in a construction program."
 
   GeometrySignature:
     owned_by: s07

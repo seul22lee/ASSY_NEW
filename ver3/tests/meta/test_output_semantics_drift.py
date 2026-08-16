@@ -36,13 +36,15 @@ from ver3.assy_v3.stages.s03_topology_and_mobility import (
     S03BMobilityAndAssembly, S03TopologyAndMobility)
 from ver3.assy_v3.stages.s04_envelope_and_motion import (
     S04AEnvelopeAndReach, S04BPlacementAndMotion)
+from ver3.assy_v3.stages.s05_embodiment import S05Embodiment
 
 #: Every class that reasons as one of the producing responsibilities. Listed
 #: because a class must be imported to be asked its own responsibility id; the
 #: test below proves the list covers the contract rather than trusting it.
 PRODUCING_CLASSES = (S01RequirementCapture, S02ObligationAndCandidates,
                      S03TopologyAndMobility, S03BMobilityAndAssembly,
-                     S04AEnvelopeAndReach, S04BPlacementAndMotion)
+                     S04AEnvelopeAndReach, S04BPlacementAndMotion,
+                     S05Embodiment)
 
 
 class TestScanIsComplete(unittest.TestCase):
