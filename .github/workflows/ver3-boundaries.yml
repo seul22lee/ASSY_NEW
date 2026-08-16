@@ -62,3 +62,37 @@ jobs:
             ver3.tests.meta.test_no_stage_implementation \
             ver3.tests.meta.test_no_legacy_imports \
             ver3.tests.meta.test_package_path
+
+  # THE DETERMINISTIC DOWNSTREAM, with a real CAD kernel.
+  #
+  # Split into its own job because it is the one part of this repository with a
+  # heavy binary dependency, and the boundary job above must stay fast and
+  # stdlib-only. Split, NOT skipped: the s07 compiler tests are the only thing
+  # standing between "the program compiled" and a kernel quietly supplying a
+  # number nobody decided (R-24), and a suite that skips them in CI is a suite
+  # that does not cover the CAD stage at all.
+  #
+  # `cadquery-ocp-novtk` is the OpenCascade binding without the visualization
+  # stack, which is the whole of what a compiler needs. Pinned, because a kernel
+  # version change moves geometry and would move the signatures that S07-C5
+  # compares.
+  downstream:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyYAML and the OpenCascade kernel
+        run: python -m pip install --upgrade pyyaml cadquery-ocp-novtk==7.9.3.1.1
+
+      - name: The kernel is actually present
+        # Asserted before the tests run, so an install that silently produced no
+        # kernel fails HERE rather than as a suite full of skips.
+        run: |
+          python -c "from ver3.assy_v3.downstream import compiler; compiler.kernel(); print('OpenCascade kernel ok')"
+
+      - name: Typed IR, s06 solver and s07 compiler
+        run: python -m unittest -v ver3.tests.meta.test_downstream_ir_solver_compiler

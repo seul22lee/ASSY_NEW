@@ -1,0 +1,158 @@
+{
+ "compile": {
+  "bodies": [
+   {
+    "bbox": [
+     -1e-07,
+     -1e-07,
+     -1e-07,
+     40.0000001,
+     30.0000001,
+     20.0000001
+    ],
+    "body_id": "BOD-0001",
+    "is_valid": true,
+    "single_connected_solid": true,
+    "solid_count": 1,
+    "statement_map": {
+     "CST-0002": "FEA-0001"
+    },
+    "volume": 21738.05328941535
+   }
+  ],
+  "dependency_cone": [],
+  "exports": {
+   "native_brep_per_body": {
+    "BOD-0001": "ver3/out/cad/DEV-FIXTURE-01/BOD-0001.brep"
+   },
+   "step_per_body": {
+    "BOD-0001": "ver3/out/cad/DEV-FIXTURE-01/BOD-0001.step"
+   }
+  },
+  "failed_statement": null,
+  "ok": true,
+  "problems": [],
+  "roundtrip": {
+   "brep": {
+    "BOD-0001": 3.637978807091713e-12
+   },
+   "step": {
+    "BOD-0001": 3.6818169819736536e-15
+   }
+  },
+  "signature": {
+   "critical_dimensions": {
+    "BOD-0001": [
+     -1e-07,
+     -1e-07,
+     -1e-07,
+     40.0000001,
+     30.0000001,
+     20.0000001
+    ]
+   },
+   "per_body": {
+    "BOD-0001": {
+     "bbox": [
+      -1e-07,
+      -1e-07,
+      -1e-07,
+      40.0000001,
+      30.0000001,
+      20.0000001
+     ],
+     "solid_count": 1,
+     "volume": 21738.053289415
+    }
+   },
+   "signature_sha256": "07da11eeb8e61e8788fbe4dd0bc63f79404abe85e42b4d255f2be21ab826899b"
+  }
+ },
+ "provenance": "DEVELOPMENT/CONTRACT FIXTURE - not benchmark output, not live-derived",
+ "solver": {
+  "active_set": [],
+  "conflicting": [],
+  "formulation_sha256": "59c60133f9447ff054140b6c5349928f044ab204fce0aa8ba682819a15a28e2e",
+  "free_parameters": [],
+  "margins": {},
+  "problems": [],
+  "residuals": {
+   "CON-0001": 0.0
+  },
+  "settled": {
+   "PRM-0001": 4.0,
+   "PRM-0002": 2.0,
+   "PRM-0003": 6.0
+  },
+  "solver_id": "assy.downstream.solver/1",
+  "solver_status": "feasible"
+ },
+ "statements": [
+  {
+   "body": "BOD-0001",
+   "entity_id": "CST-0001",
+   "operation": "BOX",
+   "parameters": {
+    "dx": {
+     "const": 40,
+     "unit": "mm"
+    },
+    "dy": {
+     "const": 30,
+     "unit": "mm"
+    },
+    "dz": {
+     "const": 20,
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "body": "BOD-0001",
+   "entity_id": "CST-0002",
+   "feature": "FEA-0001",
+   "operation": "CYLINDER",
+   "parameters": {
+    "height": {
+     "const": 30,
+     "unit": "mm"
+    },
+    "radius": {
+     "ref": "PRM-0003"
+    }
+   }
+  },
+  {
+   "body": "BOD-0001",
+   "entity_id": "CST-0003",
+   "operands": [
+    "CST-0002"
+   ],
+   "operation": "TRANSLATE",
+   "parameters": {
+    "dx": {
+     "const": 20,
+     "unit": "mm"
+    },
+    "dy": {
+     "const": 15,
+     "unit": "mm"
+    },
+    "dz": {
+     "const": -5,
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "body": "BOD-0001",
+   "entity_id": "CST-0004",
+   "operands": [
+    "CST-0001",
+    "CST-0003"
+   ],
+   "operation": "CUT",
+   "parameters": {}
+  }
+ ]
+}

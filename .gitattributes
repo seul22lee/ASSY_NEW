@@ -1,0 +1,10 @@
+# CAD artifacts are kernel output, not source.
+#
+# OpenCascade writes trailing whitespace into BREP and STEP, and `git diff
+# --check` reports it. The bytes are the geometry: stripping whitespace to
+# satisfy a hygiene check would alter an artifact whose volume and signature are
+# compared against declared tolerances (S07-C3/C4/C5). Marked binary so git
+# neither checks nor normalizes them, and never guesses a line ending.
+*.brep binary
+*.step binary
+*.STEP binary
