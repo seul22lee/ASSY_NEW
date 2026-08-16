@@ -14,7 +14,10 @@ from typing import Optional
 
 from .interfaces import (GenerationRequest, GenerationResponse, GenerationResult,
                          ProviderCapabilities)
-from .replay_integrity import REPLAY, pairing_status, producing_identity
+from .replay_integrity import (CURRENT_REPLAY, INTEGRITY_ESTABLISHED,
+                               INTEGRITY_NOT_ESTABLISHED, LEGACY_REPLAY, REPLAY,
+                               current_replay_problems, pairing_status,
+                               producing_identity)
 from .status import ExecutionStatus
 
 
@@ -33,9 +36,31 @@ class OfflineReplayProvider:
     #: where the response came from.
     response_source = REPLAY
 
-    def __init__(self, root: str, case_id: str) -> None:
+    def __init__(self, root: str, case_id: str, trust: str = LEGACY_REPLAY,
+                 source_sha256: Optional[str] = None,
+                 ledger: Optional[dict] = None) -> None:
+        """`trust` decides whether integrity is CHECKED or merely RECORDED.
+
+        LEGACY is the default because the corpus predates S9-E: every active
+        artifact is agent-authored and carries none of the current identities.
+        Defaulting to CURRENT would break the regression suite the corpus still
+        supports, and the only way to keep it working would be to stamp the
+        identities on by hand - which is the forgery S9-E exists to avoid.
+
+        LEGACY never becomes CURRENT by accident: a legacy replay reports
+        integrity NOT_ESTABLISHED, and nothing reads that as a current fixture.
+        """
+        if trust not in (LEGACY_REPLAY, CURRENT_REPLAY):
+            raise ValueError("unknown replay trust class %r" % trust)
         self.root = root
         self.case_id = case_id
+        self.trust = trust
+        #: The canonical identity of the request being replayed. Required in
+        #: CURRENT mode: without it a fixture can only be checked against itself.
+        self.source_sha256 = source_sha256
+        #: Retained promotion evidence. The trusted side of the anchor.
+        self.ledger = ledger
+        self.last_integrity: dict = {}
 
     def capabilities(self) -> ProviderCapabilities:
         return ProviderCapabilities(
@@ -57,10 +82,37 @@ class OfflineReplayProvider:
                 from_cache=False, error_detail="no recording at %s" % path)
         with open(path) as fh:
             raw = fh.read()
-        # INTEGRITY IS RECORDED FOR EVERY REPLAY, on both corpora. Enforcement is
-        # the caller's policy (S9-C centralises the mechanism, S9-E regenerates
-        # what fails it); silence about it is what was not acceptable.
+        # INTEGRITY IS RECORDED FOR EVERY REPLAY and ENFORCED for a current one.
+        # Recording alone was the S9-D gap: the rule existed, promotion and the
+        # audits called it, and the ordinary path returned SUCCESS whatever it
+        # said.
         self.last_pairing = pairing_status(raw, request.prompt_text)
+        responsibility = producing_identity(request)
+        problems = current_replay_problems(
+            raw, prompt_text=request.prompt_text,
+            source_sha256=self.source_sha256, responsibility_id=responsibility,
+            ledger=self.ledger)
+        established = self.trust == CURRENT_REPLAY and not problems
+        self.last_integrity = {
+            "trust": self.trust,
+            "current_fixture_integrity": (INTEGRITY_ESTABLISHED if established
+                                          else INTEGRITY_NOT_ESTABLISHED),
+            "responsibility_id": responsibility,
+            "pairing": self.last_pairing,
+            "problems": problems,
+        }
+        if self.trust == CURRENT_REPLAY and problems:
+            # THE ARTIFACT CANNOT BE SERVED. Reported exactly as a missing
+            # recording is, because that is what it amounts to: there is no
+            # usable response here for this request. It is deliberately not a
+            # schema, contract or assurance status - nothing about the DESIGN
+            # failed, and saying otherwise would blame the model for our corpus.
+            return GenerationResult(
+                execution_status=ExecutionStatus.PROVIDER_UNAVAILABLE, response=None,
+                attempt_index=attempt_index, started_at=started, ended_at=time.time(),
+                from_cache=False,
+                error_detail="current-fixture integrity not established for %s: %s"
+                             % (responsibility, "; ".join(problems)))
         return GenerationResult(
             execution_status=ExecutionStatus.SUCCESS,
             response=GenerationResponse(

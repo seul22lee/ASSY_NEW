@@ -155,12 +155,37 @@ RESPONSE_KEY = "raw_response_sha256"
 #: Which run and attempt promoted it - the S9-B model-run identity, reused rather
 #: than re-invented.
 PROMOTION_KEY = "model_run_id"
+#: sha256 of the response content in CANONICAL form, with `_meta` removed.
+#:
+#: `raw_response_sha256` above hashes the original raw text, which cannot be
+#: reproduced from a stored fixture - JSON re-serialization is not byte-stable -
+#: so it can only ever be compared ledger-to-fixture. Both sides then agree while
+#: the artifact's actual content has been edited, which is precisely what a
+#: post-promotion hand-enrichment does. This hash is RECOMPUTABLE from the
+#: fixture, so the content it describes is the content actually present.
+CONTENT_KEY = "canonical_content_sha256"
 
 #: Every identity a current fixture must carry. Absence of any one is a failure,
 #: not a warning: a fixture that cannot say which source it answers is not usable
 #: as evidence about that source.
 REQUIRED_FIXTURE_IDENTITIES = (SOURCE_KEY, RESPONSIBILITY_KEY, RESPONSE_KEY,
-                               PROMOTION_KEY)
+                               PROMOTION_KEY, CONTENT_KEY)
+
+
+def canonical_content_hash(body: Any) -> str:
+    """The hash of a response's CONTENT, independent of how it was formatted.
+
+    `_meta` is removed first, because provenance is packaging: adding it must not
+    change the identity of the answer it describes. Sorted keys and fixed
+    separators make the serialization canonical, so the same content hashes the
+    same however it was written to disk.
+    """
+    if isinstance(body, str):
+        body = json.loads(body)
+    content = {k: v for k, v in body.items() if k != "_meta"} \
+        if isinstance(body, dict) else body
+    canonical = json.dumps(content, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def producing_identity(request) -> str:
@@ -230,6 +255,21 @@ def verify_current_fixture(raw_text: str, *, prompt_text: str, source_sha256: st
         problems.append("fixture is %s's response, requested as %s"
                         % (declared[RESPONSIBILITY_KEY], responsibility_id))
 
+    # THE CONTENT MUST BE THE CONTENT IT CLAIMS. Recomputed from the artifact
+    # rather than compared between two stored copies of the same claim, so an
+    # edit made after promotion cannot leave every declared identity agreeing.
+    if declared.get(CONTENT_KEY):
+        try:
+            actual_content = canonical_content_hash(raw_text)
+        except Exception as exc:                                   # noqa: BLE001
+            problems.append("fixture content is not readable: %s" % exc)
+        else:
+            if actual_content != declared[CONTENT_KEY]:
+                problems.append(
+                    "fixture content hashes %s but declares %s; it was altered "
+                    "after promotion" % (actual_content[:16],
+                                         declared[CONTENT_KEY][:16]))
+
     status = pairing_status(raw_text, prompt_text)
     if status != PAIRED:
         problems.append("prompt pairing is %s" % status)
@@ -280,4 +320,86 @@ def promotion_fidelity_problems(fixture_body: str, accepted_raw: str) -> List[st
     if declared and declared != actual:
         problems.append("declared %s does not hash the accepted response"
                         % RESPONSE_KEY)
+    return problems
+
+
+# ==========================================================================
+# S9-D CLOSURE HARDENING: a rule that governs the path it was written for
+#
+# `verify_current_fixture` above existed from the first S9-D commit and was
+# called by promotion, by the dry run and by audits - and by no replay. Ordinary
+# replay read the artifact, recorded a pairing status beside it and returned
+# SUCCESS whatever that status said. A rule enforced only where it is convenient
+# is a rule the target path does not have.
+#
+# Two trust classes, because the corpus is mid-migration and pretending
+# otherwise would force exactly the metadata forgery S9-E exists to avoid.
+# ==========================================================================
+
+#: Bounded regression on artifacts that predate S9-E. Consumable, and never
+#: current: it cannot support a current-fixture claim, a generalization claim or
+#: any part of full-live qualification.
+LEGACY_REPLAY = "LEGACY"
+#: The target class. Every current identity is checked BEFORE a response is
+#: returned, and a failure is a failure rather than a warning.
+CURRENT_REPLAY = "CURRENT"
+
+REPLAY_TRUST_CLASSES = (LEGACY_REPLAY, CURRENT_REPLAY)
+
+#: What a replay says about itself afterwards. NOT_ESTABLISHED is the honest
+#: state of every artifact in the corpus until S9-E replaces it - not a defect,
+#: and not something a stamp can change.
+INTEGRITY_ESTABLISHED = "ESTABLISHED"
+INTEGRITY_NOT_ESTABLISHED = "NOT_ESTABLISHED"
+
+
+def anchor_problems(raw_text: str, ledger: Optional[Dict[str, Any]]) -> List[str]:
+    """Does this fixture's promotion identity resolve to retained evidence?
+
+    A `model_run_id` that is merely NON-EMPTY proves nothing: a fixture can carry
+    an invented one and look complete. What makes it evidence is that it resolves
+    to a retained promotion record whose responsibility, source and accepted
+    raw-response hash are the same facts the fixture states.
+
+    The ledger is the trusted side. Without one, a current claim cannot be made
+    at all - which is why this returns a problem rather than passing by default.
+    """
+    identities = fixture_identities(raw_text)
+    model_run_id = identities.get(PROMOTION_KEY)
+    if ledger is None:
+        return ["no promotion ledger, so %s resolves to nothing" % PROMOTION_KEY]
+    if not model_run_id:
+        return ["fixture declares no %s to resolve" % PROMOTION_KEY]
+
+    entry = (ledger.get("entries") or {}).get(model_run_id)
+    if entry is None:
+        return ["%s %r is in no retained promotion record"
+                % (PROMOTION_KEY, model_run_id)]
+
+    problems: List[str] = []
+    for key in (RESPONSIBILITY_KEY, SOURCE_KEY, RESPONSE_KEY, CONTENT_KEY):
+        if identities.get(key) != entry.get(key):
+            problems.append(
+                "fixture %s=%r disagrees with the promotion record's %r"
+                % (key, identities.get(key), entry.get(key)))
+    return problems
+
+
+def current_replay_problems(raw_text: str, *, prompt_text: str,
+                            source_sha256: Optional[str],
+                            responsibility_id: str,
+                            ledger: Optional[Dict[str, Any]] = None) -> List[str]:
+    """Everything that stops this artifact being replayed as a CURRENT fixture.
+
+    The full rule in one call, so the replay boundary cannot enforce a subset of
+    it by accident. Source identity is required: replaying "for whatever request
+    this is" is how a fixture for one benchmark answers another.
+    """
+    if not source_sha256:
+        return ["no canonical source identity was supplied, so the fixture "
+                "cannot be checked against the request being replayed"]
+    problems = verify_current_fixture(raw_text, prompt_text=prompt_text,
+                                      source_sha256=source_sha256,
+                                      responsibility_id=responsibility_id)
+    problems.extend(anchor_problems(raw_text, ledger))
     return problems

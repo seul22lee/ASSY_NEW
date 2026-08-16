@@ -151,6 +151,7 @@ def fixture_body(attempt: AttemptOutcome, prompt_text: str) -> str:
         ri.RESPONSIBILITY_KEY: attempt.responsibility_id,
         ri.RESPONSE_KEY: sha256(attempt.raw_response),
         ri.PROMOTION_KEY: attempt.model_run_id,
+        ri.CONTENT_KEY: ri.canonical_content_hash(attempt.raw_response),
     })
     body["_meta"] = meta
     return json.dumps(body, indent=1, sort_keys=True)
@@ -174,3 +175,60 @@ class PromotionLedger:
 
     def attempts_recorded(self) -> int:
         return sum(len(e["attempts"]) for e in self.entries)
+
+
+# --------------------------------------------------------------------------
+# The promotion ledger: what makes a fixture's identities checkable
+# --------------------------------------------------------------------------
+
+#: Filename of the retained promotion evidence beside a corpus.
+LEDGER_NAME = "promotion_ledger.json"
+
+
+def ledger_entry(attempt: AttemptOutcome) -> Dict[str, Any]:
+    """The retained facts a fixture's identities must agree with."""
+    return {ri.RESPONSIBILITY_KEY: attempt.responsibility_id,
+            ri.SOURCE_KEY: attempt.source_sha256,
+            ri.RESPONSE_KEY: sha256(attempt.raw_response or ""),
+            ri.CONTENT_KEY: ri.canonical_content_hash(attempt.raw_response or "{}"),
+            "attempt_index": attempt.attempt_index,
+            "stage": attempt.stage}
+
+
+def build_ledger(promoted: Sequence[AttemptOutcome]) -> Dict[str, Any]:
+    """A ledger keyed by model-run identity.
+
+    THIS IS THE TRUSTED SIDE. A fixture stating its own `model_run_id` proves
+    nothing on its own - an invented one looks exactly as complete as a real one.
+    What makes it evidence is resolving here, to a record of an attempt that
+    actually happened, and agreeing with it on responsibility, source and the
+    hash of the raw response that was accepted.
+
+    Built from attempts rather than from fixtures, so the ledger cannot be
+    derived from the thing it is meant to check.
+    """
+    entries: Dict[str, Any] = {}
+    for attempt in promoted:
+        if eligibility_problems(attempt):
+            # Only a promotable attempt may anchor a current fixture. Recording
+            # a failed one here would let it vouch for something.
+            continue
+        entries[attempt.model_run_id] = ledger_entry(attempt)
+    return {"entries": entries, "selection_rule": SELECTION_RULE}
+
+
+def write_ledger(directory: str, ledger: Dict[str, Any]) -> str:
+    import os
+    path = os.path.join(directory, LEDGER_NAME)
+    with open(path, "w") as fh:
+        json.dump(ledger, fh, indent=1, sort_keys=True)
+    return path
+
+
+def read_ledger(directory: str) -> Optional[Dict[str, Any]]:
+    import os
+    path = os.path.join(directory, LEDGER_NAME)
+    if not os.path.isfile(path):
+        return None
+    with open(path) as fh:
+        return json.load(fh)

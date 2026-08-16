@@ -456,3 +456,68 @@ keeps its own `model_run_id`, so a retry cannot overwrite its predecessor.
 → integrity → write → replay through the ordinary `window1` pipeline. The replayed
 pass records `consumer_view_recorded`, `response_source = REPLAY`, and pairing
 `PAIRED`, and the run is correctly refused full-live qualification.
+
+---
+
+## 14. S9-D closure hardening — a rule enforced on the path it was written for
+
+**The gap, found after `7019e54`.** `verify_current_fixture` was written in the
+S9-D core commit and called by promotion, by the dry run and by the audits — and
+by **no replay**. `OfflineReplayProvider.generate` read the artifact, recorded a
+pairing status beside it, and returned `SUCCESS` whatever that status said.
+`AgentAuthoredProvider` enforced the pairing alone, and even then let `UNDECLARED`
+through. A grep for callers found the verifier used **only from tests**.
+
+So the distinction that mattered was:
+
+```
+integrity rule DEFINED        yes, in 7019e54
+integrity rule ENFORCED       no, on the ordinary replay path
+```
+
+A rule enforced only where it is convenient is a rule the target path does not
+have. That is the whole of this pass; no S9-D semantics were redesigned.
+
+**Two trust classes, because the corpus is mid-migration.**
+
+| | `LEGACY` (default) | `CURRENT` (opt-in) |
+|---|---|---|
+| serves stale artifacts | yes, for bounded regression | **no** |
+| integrity | recorded, `NOT_ESTABLISHED` | **enforced before any response is returned** |
+| may support a current-fixture / full-live / generalization claim | never | current-fixture only |
+
+`LEGACY` is the default deliberately. Every active artifact predates S9-E and
+carries none of the current identities; defaulting to `CURRENT` would break the
+regression the corpus still supports, and the only way to keep it working would be
+to stamp the identities on by hand — the forgery S9-E exists to avoid. There is no
+implicit fallback: `CURRENT` failing returns a failure, it does not degrade to
+`LEGACY`.
+
+**What `CURRENT` enforces before returning a response:** canonical source identity,
+producing responsibility, raw-response identity, promotion identity anchored to a
+retained ledger, and prompt pairing. Failure returns `PROVIDER_UNAVAILABLE` with
+the reasons named — the same mechanism a missing recording already used, because
+that is what it amounts to: no usable response exists here for this request.
+Deliberately **not** a schema, contract or assurance status; nothing about the
+design failed, and saying otherwise would blame the model for our corpus.
+
+**The chains are anchored, not asserted.** A `model_run_id` that is merely
+non-empty proves nothing — an invented one looks exactly as complete as a real one.
+It must now resolve in a promotion ledger built from attempts (never from
+fixtures), and agree with it on responsibility, source, raw-response hash and
+content hash.
+
+**A defect this hardening's own tests caught.** `raw_response_sha256` hashes the
+original raw text, which cannot be reproduced from a stored fixture — JSON
+re-serialization is not byte-stable — so it could only ever be compared
+ledger-to-fixture. Both sides then agreed while the artifact's content had been
+edited, which is exactly what a post-promotion hand-enrichment does. Added
+`canonical_content_sha256`: `_meta` stripped, keys sorted, fixed separators, so it
+is **recomputable from the artifact** and describes the content actually present.
+The mutated-fixture test now fails at the boundary rather than passing.
+
+**Counts unchanged.** Active replay corpus 13; `CURRENT_REGENERATION_TARGET` 12;
+`HISTORICAL_MIGRATION_EVIDENCE` 1; `HISTORICAL_LIVE_EVIDENCE` 314;
+`FROZEN_SOURCE_OR_REFERENCE` 9. The 12 targets are unmodified and carry **zero**
+current identities — asserted by test, so a later pass cannot quietly stamp them.
+The S9-E paid target set remains 12.

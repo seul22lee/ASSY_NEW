@@ -120,7 +120,8 @@ def _fixture(responsibility="s03b", source=SOURCE, prompt=PROMPT,
             ri.SOURCE_KEY: source,
             ri.RESPONSIBILITY_KEY: responsibility,
             ri.RESPONSE_KEY: hashlib.sha256(raw.encode()).hexdigest(),
-            ri.PROMOTION_KEY: model_run_id}
+            ri.PROMOTION_KEY: model_run_id,
+            ri.CONTENT_KEY: ri.canonical_content_hash(raw)}
     for key in omit:
         meta.pop(key, None)
     meta.update(meta_extra or {})
@@ -599,3 +600,221 @@ class TestOwnerResponsibilityAcrossLayers(unittest.TestCase):
             self.assertEqual(first.stage_id, second.stage_id)
             self.assertNotEqual(first().responsibility_id(),
                                 second().responsibility_id())
+
+
+# =====================================================================
+# S9-D CLOSURE HARDENING — the rule enforced on the path it was written for
+# =====================================================================
+class TestCurrentReplayEnforcement(unittest.TestCase):
+    """Every test here drives the ORDINARY replay boundary.
+
+    The gap this closes: `verify_current_fixture` was called by promotion, by the
+    dry run and by audits, and by no replay. A rule enforced only where it is
+    convenient is a rule the target path does not have - so these assert on the
+    provider's own GenerationResult, never on a helper invocation.
+    """
+
+    def setUp(self):
+        import shutil, tempfile
+        self.tmp = tempfile.mkdtemp(prefix="s9d_strict_")
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        self.case = "CASE-STRICT"
+        os.makedirs(os.path.join(self.tmp, self.case))
+        self.prompt = "the prompt the stage built"
+        self.raw = json.dumps({"answer": 1})
+        self.source = ri.canonical_source_identity(b"the request bytes")
+        self.attempt = pr.AttemptOutcome(
+            responsibility_id="s03b", source_sha256=self.source,
+            model_run_id="run-9|s03|sa2|a1", attempt_index=1,
+            stage=pr.ACCEPTED, raw_response=self.raw)
+        self.ledger = pr.build_ledger([self.attempt])
+        self._write(pr.fixture_body(self.attempt, self.prompt))
+
+    def _write(self, body, name="s03b.json"):
+        with open(os.path.join(self.tmp, self.case, name), "w") as fh:
+            fh.write(body)
+
+    def _replay(self, trust=ri.CURRENT_REPLAY, source=None, ledger="default",
+                responsibility="s03b", prompt=None):
+        provider = OfflineReplayProvider(
+            self.tmp, self.case, trust=trust,
+            source_sha256=self.source if source is None else source,
+            ledger=self.ledger if ledger == "default" else ledger)
+        request = GenerationRequest(
+            purpose="p", stage_id="s03", prompt_text=prompt or self.prompt,
+            max_output_tokens=1, deadline_s=1.0,
+            responsibility_id=responsibility)
+        return provider, provider.generate(request)
+
+    # ---------------------------------------------------------- positive
+    def test_S9D_38_a_conforming_current_fixture_replays(self):
+        provider, result = self._replay()
+        self.assertIs(ExecutionStatus.SUCCESS, result.execution_status)
+        self.assertEqual(self.raw, json.dumps(
+            {k: v for k, v in json.loads(result.response.raw_text).items()
+             if k != "_meta"}))
+        self.assertEqual(ri.INTEGRITY_ESTABLISHED,
+                         provider.last_integrity["current_fixture_integrity"])
+        self.assertEqual(ri.CURRENT_REPLAY, provider.last_integrity["trust"])
+        self.assertEqual([], provider.last_integrity["problems"])
+
+    # ---------------------------------------------------------- negatives
+    def _rejected(self, result, provider, needle):
+        self.assertIs(ExecutionStatus.PROVIDER_UNAVAILABLE,
+                      result.execution_status,
+                      "an invalid current fixture returned a usable response")
+        self.assertIsNone(result.response)
+        self.assertIn("integrity not established", result.error_detail)
+        self.assertIn(needle, result.error_detail)
+        self.assertEqual(ri.INTEGRITY_NOT_ESTABLISHED,
+                         provider.last_integrity["current_fixture_integrity"])
+
+    def test_S9D_39_wrong_source_is_rejected_at_the_boundary(self):
+        provider, result = self._replay(
+            source=ri.canonical_source_identity(b"a different benchmark"))
+        self._rejected(result, provider, "source")
+
+    def test_S9D_40_a_missing_source_identity_cannot_be_waved_through(self):
+        """Replaying "for whatever request this is" is how one benchmark's
+        answer serves another."""
+        provider, result = self._replay(source="")
+        self._rejected(result, provider, "canonical source identity")
+
+    def test_S9D_41_a_pass_substitution_is_rejected_at_the_boundary(self):
+        """s03b's artifact requested as s03a, and the s04 pair too."""
+        self._write(pr.fixture_body(self.attempt, self.prompt), "s03a.json")
+        provider, result = self._replay(responsibility="s03a")
+        self._rejected(result, provider, "s03b")
+
+        s04 = pr.AttemptOutcome(
+            responsibility_id="s04a", source_sha256=self.source,
+            model_run_id="run-9|s04|sa1|a1", attempt_index=1,
+            stage=pr.ACCEPTED, raw_response=self.raw)
+        self.ledger = pr.build_ledger([self.attempt, s04])
+        self._write(pr.fixture_body(s04, self.prompt), "s04b.json")
+        provider, result = self._replay(responsibility="s04b")
+        self._rejected(result, provider, "s04a")
+
+    def test_S9D_42_a_broken_raw_response_identity_is_rejected(self):
+        body = json.loads(pr.fixture_body(self.attempt, self.prompt))
+        body["_meta"][ri.RESPONSE_KEY] = "0" * 64
+        self._write(json.dumps(body))
+        provider, result = self._replay()
+        self._rejected(result, provider, ri.RESPONSE_KEY)
+
+    def test_S9D_43_an_unresolvable_model_run_id_is_rejected(self):
+        """FALSIFIES the "non-empty therefore real" reading of an identity."""
+        body = json.loads(pr.fixture_body(self.attempt, self.prompt))
+        body["_meta"][ri.PROMOTION_KEY] = "run-invented|s03|sa2|a1"
+        self._write(json.dumps(body))
+        provider, result = self._replay()
+        self._rejected(result, provider, "no retained promotion record")
+
+    def test_S9D_44_no_ledger_means_no_current_claim(self):
+        provider, result = self._replay(ledger=None)
+        self._rejected(result, provider, "no promotion ledger")
+
+    def test_S9D_45_a_stale_pairing_is_rejected(self):
+        provider, result = self._replay(prompt="a prompt built from moved state")
+        self._rejected(result, provider, "pairing is STALE")
+
+    def test_S9D_46_pairing_history_cannot_rescue_a_current_replay(self):
+        """FALSIFIES S9-I14 at the boundary rather than in a helper."""
+        body = json.loads(pr.fixture_body(self.attempt, self.prompt))
+        for key in ri.REQUIRED_FIXTURE_IDENTITIES:
+            body["_meta"].pop(key, None)
+        body["_meta"][ri.MIGRATION_BRIDGE_KEY] = ["re-paired; content unchanged"]
+        self._write(json.dumps(body))
+        provider, result = self._replay()
+        self._rejected(result, provider, ri.SOURCE_KEY)
+
+    def test_S9D_47_a_fixture_mutated_after_promotion_is_rejected(self):
+        """The artifact was valid when written and was edited afterwards."""
+        body = json.loads(pr.fixture_body(self.attempt, self.prompt))
+        body["invented_clearance_mm"] = 12          # hand enrichment
+        self._write(json.dumps(body))
+        provider, result = self._replay()
+        # CAUGHT BY RECOMPUTATION, not by comparing two copies of one claim.
+        # Every declared identity still agrees with the ledger - the edit changed
+        # the content, and the content hash is the only one derived from what is
+        # actually there.
+        self._rejected(result, provider, "altered after promotion")
+        self.assertTrue(ri.promotion_fidelity_problems(json.dumps(body), self.raw))
+
+    # ---------------------------------------------------- legacy vs current
+    def test_S9D_48_the_same_stale_artifact_is_legacy_yes_current_no(self):
+        """FALSIFIES the shortcut that would make S9-E unnecessary.
+
+        One artifact, two trust classes. Legacy keeps the intermediate
+        regression capability; current refuses it, so a metadata-poor response
+        can never be counted as regenerated.
+        """
+        stale = json.dumps({"answer": 1, "_meta": {
+            ri.PAIRING_KEY: ri.prompt_hash(self.prompt),
+            ri.MIGRATION_BRIDGE_KEY: ["re-paired after the schema section"]}})
+        self._write(stale)
+
+        legacy_provider, legacy = self._replay(trust=ri.LEGACY_REPLAY)
+        self.assertIs(ExecutionStatus.SUCCESS, legacy.execution_status)
+        self.assertEqual(ri.LEGACY_REPLAY, legacy_provider.last_integrity["trust"])
+        self.assertEqual(ri.INTEGRITY_NOT_ESTABLISHED,
+                         legacy_provider.last_integrity["current_fixture_integrity"])
+        self.assertTrue(legacy_provider.last_integrity["problems"],
+                        "legacy still REPORTS why it is not current")
+
+        current_provider, current = self._replay(trust=ri.CURRENT_REPLAY)
+        self._rejected(current, current_provider, ri.SOURCE_KEY)
+
+    def test_S9D_49_legacy_is_the_default_and_current_is_opt_in(self):
+        """Defaulting to strict would break the regression the corpus supports,
+        and the only way to keep it would be to forge the identities."""
+        provider = OfflineReplayProvider(self.tmp, self.case)
+        self.assertEqual(ri.LEGACY_REPLAY, provider.trust)
+        with self.assertRaises(ValueError):
+            OfflineReplayProvider(self.tmp, self.case, trust="SOMEWHAT")
+
+    def test_S9D_50_the_twelve_targets_are_not_current_and_are_unmodified(self):
+        """FALSIFIES §16: stale artifacts stamped into compliance.
+
+        Every regeneration target must still be missing every current identity.
+        If one ever passes, it was either regenerated by S9-E or forged.
+        """
+        for path in inv.inventory()["regeneration_targets"]:
+            with open(os.path.join(_paths.REPO_ROOT, path)) as fh:
+                body = fh.read()
+            identities = ri.fixture_identities(body)
+            self.assertEqual([], [k for k, v in identities.items() if v],
+                             "%s carries a current identity it cannot have "
+                             "earned before S9-E" % path)
+
+    def test_S9D_51_an_integrity_rejection_is_never_an_engineering_finding(self):
+        """FALSIFIES the attribution collapse §10 forbids.
+
+        A corpus defect must not be reported as the design failing, so the
+        status may not be a schema, contract or assurance term.
+        """
+        _provider, result = self._replay(source="")
+        for forbidden in (ExecutionStatus.SCHEMA_FAILURE,
+                          ExecutionStatus.CONTRACT_INCOMPLETE,
+                          ExecutionStatus.FALSE_ACCEPTANCE,
+                          ExecutionStatus.SAFE_REJECTION,
+                          ExecutionStatus.MODEL_CAPABILITY_FAILURE):
+            self.assertIsNot(forbidden, result.execution_status)
+
+    def test_S9D_52_a_current_replay_still_cannot_qualify_as_full_live(self):
+        """Enforced integrity makes a fixture trustworthy, not live."""
+        from ver3.assy_v3.pipeline import (LIVE, REPLAY, Progression,
+                                           StageExecution,
+                                           full_live_qualification)
+        provider, result = self._replay()
+        self.assertIs(ExecutionStatus.SUCCESS, result.execution_status)
+        self.assertEqual(REPLAY, provider.response_source)
+        p = Progression()
+        for responsibility in ("s01", "s02", "s03a", "s03b", "s04a", "s04b"):
+            p.record(StageExecution(
+                stage_id="s03", responsibility_id=responsibility,
+                response_source=REPLAY if responsibility == "s03b" else LIVE,
+                provider_id="x", execution_status="SUCCESS", patch_applied=True))
+        qualified, reasons = full_live_qualification(p)
+        self.assertFalse(qualified)
+        self.assertTrue(any("s03b" in r for r in reasons), reasons)
