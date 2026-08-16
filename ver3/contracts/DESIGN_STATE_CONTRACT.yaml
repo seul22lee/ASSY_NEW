@@ -438,8 +438,14 @@ entity_families:
     extendable_by: [s05, s06, s07]
     purpose: "A rigid part of the product."
     required_fields: [entity_id, instance_identity, role, created_by_stage]
+    optional_fields: [compiled]
     authoritative_geometry_fields: [pose, extent, swept_volume]
     annotation_fields: [region_label, canonical_role]
+    # Compilation facts only. NOT the geometry fields above, which are s04's
+    # spatial commitments: s07 compiles bodies in their own frames and never
+    # places one in the world (INV-006).
+    extendable_fields:
+      compiled: s07
     rules:
       - "pose is a frame/transform with units. An enum may annotate it, never be it (INV-003)."
       - "A generic block is not an embodiment (R-09)."
@@ -582,6 +588,11 @@ entity_families:
         work, not with a vocabulary edit. (S7-B correction; owner S-8)
 
   Feature:
+    # s07 records which construction statement produced this feature's geometry.
+    # A compilation fact, not an engineering one - s07 owns no engineering
+    # decision and this field asserts none.
+    extendable_fields:
+      compiled_by_statement: s07
     field_semantics:
       body:
         kind: reference
@@ -593,6 +604,7 @@ entity_families:
     owned_by: s05
     purpose: "A named geometric feature on a body that participates in an interaction."
     required_fields: [entity_id, body, feature_kind, geometry]
+    optional_fields: [compiled_by_statement]
     rules:
       - "OCCT/CAD face indices are never a persistent identity."
 
@@ -707,16 +719,39 @@ entity_families:
     semantic_roles: [quantity_constraint]
     owned_by: s05
     extendable_by: [s06]
+    # THE ENFORCED AUTHORITY. `extendable_by` above is prose; the write boundary
+    # reads `extendable_fields` and refuses anything absent from it, so a family
+    # named there with no field listed here grants nothing. Exactly two fields,
+    # both settlement facts:
+    #   value      what the solver determined
+    #   solved_by  the solver artifact that determined it
+    # s06 owns no engineering decision, and these are the only two things it
+    # learns. `status` is deliberately NOT here: s05 declares it and a revision
+    # of an authored value is a SUPERSEDE, not an extension.
+    extendable_fields:
+      value: s06
+      solved_by: s06
     purpose: "A named quantity the design depends on."
     required_fields: [entity_id, symbol, unit, status]
+    # Declared, because an extendable field must be a field the family HAS.
+    # Optional because a Parameter is authored before it is settled: s05 declares
+    # it with no value, and s06 fills these two or the parameter stays free.
+    optional_fields: [value, solved_by, lower, upper]
     rules:
       - "unit is MANDATORY. 'dimensionless' is explicit. A null unit is a schema error (INV-004)."
+      - "A value without a cited solver artifact is not settled (S05-C10, R-23)."
 
   Constraint:
     owned_by: s05
     extendable_by: [s06]
+    # One field: what the settlement said about this relation. s06 may record an
+    # outcome against a constraint; it may not rewrite the relation, because the
+    # relation is s05's engineering statement.
+    extendable_fields:
+      settlement: s06
     purpose: "A relation the parameters must satisfy."
     required_fields: [entity_id, expression, parameters, kind]
+    optional_fields: [settlement]
 
   UnresolvedDecision:
     semantic_roles: [open_item]

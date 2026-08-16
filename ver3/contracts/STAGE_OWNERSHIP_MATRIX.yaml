@@ -150,7 +150,7 @@ stages:
     role: "Solve the constraint system for the parameters, or report why it cannot."
     owns: []
 
-    extends: []
+    extends: [Constraint, Parameter]
     may_not:
       - "Default a missing unit. FP-01 exists for this line (R-21, INV-004)."
       - "Report `feasible` for an underdetermined system."
@@ -163,7 +163,7 @@ stages:
       ONLY the program and the resolved parameters (INV-006).
     owns: [GeometrySignature]
 
-    extends: []
+    extends: [Body, Feature]
     may_not:
       - "Consult the source request, the Requirements or the Candidates."
       - "Repair an uncompilable statement. It fails, citing the statement (INV-006)."

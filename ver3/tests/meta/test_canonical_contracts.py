@@ -27,7 +27,13 @@ RETIRED_FAMILIES = ("BodyHypothesis", "PhysicalInteractionHypothesis")
 #: numbered stages, because s05 through s12 are taken and mean other things.
 STAGES_UNDER_S2 = ("s01", "s02", "s03a", "s03b", "s04a", "feasibility",
                    "selection", "selection_advisory", "selection_human_review",
-                   "selection_decision", "s04b")
+                   "selection_decision", "s04b",
+                   # s05 joins the declared responsibilities when the embodiment
+                   # producer becomes real. It is a numbered pipeline stage AND a
+                   # producing responsibility - the two coincide here, unlike the
+                   # s03/s04 passes - and it needs a declaration because an
+                   # undeclared consumer fails closed rather than defaulting.
+                   "s05")
 
 
 def _yaml(name):

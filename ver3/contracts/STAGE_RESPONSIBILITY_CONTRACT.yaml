@@ -1473,6 +1473,127 @@ stages:
     - SweptVolume
     prohibited_decisions:
     - Contradicting an s04a commitment without an explicit supersession
+  s05:
+    name: physical embodiment
+    # THE CANONICAL DECLARATION, added because the runtime needs one.
+    #
+    # ver3/contracts/stages/S05_CONTRACT.yaml has described this stage in detail
+    # for a long time and classifies itself OPERATIONAL - it explains, it does not
+    # define canonical semantics. Nothing here contradicts it; this is the entry
+    # `consumer_view_for`, `derive_source_a` and the write boundary actually read,
+    # and without it s05 could not be given a view at all: an undeclared
+    # responsibility fails closed, which is correct and is why it had to be
+    # declared rather than special-cased.
+    responsibility: Realize every declared relation as named geometry, and surface the constraints
+      that geometry imposes back onto the layout.
+    engineering_questions:
+    - What actual geometry on which body makes each declared relation real?
+    - Which feature realizes each side of each interaction?
+    - What does that geometry demand of the layout, as a constraint?
+    - In what order is each body constructed, in its own frame?
+    required_reasoning_premise_classes:
+    - class: interaction_to_realize
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a stage that realizes interactions as geometry has nothing to realize
+          without them
+      what: the physical interactions this branch declared
+      justified_by_question: Which feature realizes each side of each interaction?
+      why: A feature pair exists because an interaction demanded it; without the interaction
+        the geometry is invented.
+      requires_semantics:
+      - physical_interaction
+    - class: topology_with_axes
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: a feature is geometry ON a body, and it needs the body to be on
+      what: the bodies, groups and joints this branch committed
+      justified_by_question: What actual geometry on which body makes each declared relation
+        real?
+      why: s05 may not create a Body, RigidGroup or Joint (INV-001); it extends s03's by
+        id, so it must be able to see them.
+      requires_semantics:
+      - topology_element
+      - topology_relation
+      - kinematic_axis
+    - class: spatial_commitment
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: an envelope constraint binds a layout parameter, and there is no
+          layout to bind without the spatial commitments
+      what: the located arrangement this branch committed
+      justified_by_question: What does that geometry demand of the layout, as a constraint?
+      why: The envelope constraint rule is a statement about layout; a feature that implies
+        a minimum envelope must emit it against something.
+      requires_semantics:
+      - spatial_commitment
+    - class: obligation_to_discharge
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: S05-C4 requires every obligation to be cited by some realization,
+          which cannot be checked against obligations the stage never saw
+      what: the full obligation set
+      justified_by_question: What actual geometry on which body makes each declared relation
+        real?
+      why: A Realization must cite the obligation ids it discharges (INV-008), and coverage
+        cannot be read from a subset.
+      requires_semantics:
+      - physical_obligation
+    - class: declared_clearance_relation
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a branch may declare no clearance or interference-free pair yet
+      what: the constraint relations this branch declared
+      justified_by_question: What does that geometry demand of the layout, as a constraint?
+      why: S05-C9 turns every declared clearance and interference-free pair into a Constraint;
+        the convergence block can only converge on constraints it was given.
+      requires_semantics:
+      - constraint_relation
+    - class: occupancy_to_avoid
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a branch may declare no functional region
+      what: the regions this branch reserved
+      justified_by_question: What actual geometry on which body makes each declared relation
+        real?
+      why: S05-C8 re-runs occupancy against the new geometry, so the regions a feature may
+        not intrude into have to be visible.
+      requires_semantics:
+      - functional_region
+    permitted_output_semantics:
+    # CANONICAL NAMES ONLY. S05_CONTRACT.structured_outputs is classified
+    # LEGACY_PRODUCER and still spells these `Feature.rigid_group`,
+    # `Realization.discharges_obligations` and `ROI`. DESIGN_STATE_CONTRACT is the
+    # authority: a Feature is on a `body`, a Realization `addresses_obligations`,
+    # and there is no ROI family. Writing both spellings would be two truths.
+    - Feature
+    - Realization
+    - Parameter
+    - Constraint
+    - ConstructionStatement
+    - UnresolvedDecision
+    prohibited_decisions:
+    - Creating a Body, RigidGroup or Joint; s05 extends s03's by id (INV-001, R-19)
+    - Discharging an obligation with a label, a field or a relationship rather than a
+      Realization carrying a verification predicate (INV-008)
+    - Emitting a Parameter with a null unit (INV-004, R-21)
+    - Setting a Parameter VALUE except by citing a solver artifact; this is what makes the
+      s05/s06 loop safe without a sequential barrier (R-23)
+    - Changing topology, DOF disposition, interaction kinds, load paths or assembly order;
+      those escalate to s03
+    - Expressing a ConstructionStatement in any frame but the owning body's own
 premise_binding_rule: 'Every required_reasoning_premise_class declares `requires_semantics`: the
   SEMANTIC
 

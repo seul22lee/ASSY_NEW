@@ -124,7 +124,12 @@ class TestDeclaredCorpus(_Base):
         # reviewer said. The writer needs the same five plus the submitted human
         # decision, because a commitment rests on two independent facts: a person
         # asked for it, and what they were shown is still what the design says.
-        self.assertEqual(53, len(rows), "the premise corpus changed size")
+        # 59 at S-9: s05 declares six. Embodiment needs the interactions it
+        # realizes, the topology it attaches geometry to, the spatial commitment
+        # its envelope constraints bind, the full obligation set S05-C4 checks
+        # coverage against, and - MAY_BE_EMPTY - the declared clearances S05-C9
+        # turns into constraints and the regions S05-C8 keeps features out of.
+        self.assertEqual(59, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"
@@ -184,7 +189,13 @@ class TestDeclaredCorpus(_Base):
         for sid in ("s02", "s03a", "s03b", "s04a", "s04b", "selection"):
             self.assertTrue(derive_required_minimum(sid, self.c, self.resp).requirements
                             or sid == "s01")
-        for unknown in ("s03", "s05", ""):
+        for sid in ("s05",):
+            self.assertTrue(derive_required_minimum(sid, self.c, self.resp).requirements,
+                            "s05 is a declared responsibility and must resolve")
+        # `s03` is an OWNER and not a responsibility, which is the distinction
+        # this test exists for; "" is the empty case. `s05` used to appear here
+        # and no longer can - it is declared.
+        for unknown in ("s03", ""):
             with self.assertRaises(cv.UnknownConsumer):
                 derive_required_minimum(unknown, self.c, self.resp)
 
@@ -731,6 +742,8 @@ class TestInvocationContext(_Base):
             "s02", self.premise("full_requirements", ["source_requirement"],
                                 cv.DESIGN_WIDE)))
         self.assertIn("REQ-1", {e["entity_id"] for e in v2.entities})
-        for unknown in ("s03", "s05"):
+        # `s05` was an unknown consumer until it was declared; `s03` still is,
+        # because it names an owner rather than a producing responsibility.
+        for unknown in ("s03", "s04"):
             with self.assertRaises(cv.UnknownConsumer):
                 build_consumer_view(unknown, pre, self.c, self.resp)
