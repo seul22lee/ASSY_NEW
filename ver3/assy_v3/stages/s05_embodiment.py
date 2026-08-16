@@ -59,6 +59,10 @@ RULES
    BODY that realizes that side of it. A feature names the body it is on, its
    kind, and a short geometry description. Two bodies that touch need two
    features, one on each.
+   Give each feature an `envelope` - {{"centre": [x,y,z], "half_extent": [x,y,z]}}
+   in the same frame as the functional regions below - so its occupancy can be
+   checked against the regions the design reserved. A feature with no envelope
+   cannot be checked and is reported as incomplete, not as passing.
 2. For every obligation below, emit a REALIZATION citing the obligation ids it
    discharges, the features that do the discharging, and a verification
    predicate - a sentence a later check could test. A realization with no
@@ -73,6 +77,9 @@ RULES
      - CLEARANCE: every declared clearance and interference-free pair below must
        become a constraint. The settlement loop can only converge on constraints
        it has been given.
+   A CLEARANCE or INTERFERENCE_FREE constraint must also name the interface it
+   governs, as `governs_interface`. A declared clearance with no constraint
+   naming it is a clearance the settlement loop was never given.
    A constraint is a typed relation, not prose:
      {{"relation": "==" | "<=" | ">=", "lhs": <expr>, "rhs": <expr>}}
    where <expr> is one of
@@ -132,14 +139,14 @@ class S05Embodiment(Stage):
     #: `addresses_obligations`, and no ROI family at all.
     RESPONSE_ENVELOPE = (
         ("features", "Feature", "FEA-",
-         ("body", "feature_kind", "geometry"), ()),
+         ("body", "feature_kind", "geometry", "envelope"), ()),
         ("realizations", "Realization", "RLZ-",
          ("addresses_obligations", "participating_features",
           "verification_predicate"), ()),
         ("parameters", "Parameter", "PRM-",
          ("symbol", "unit"), ("status",)),
         ("constraints", "Constraint", "CON-",
-         ("expression", "parameters", "kind"), ()),
+         ("expression", "parameters", "kind", "governs_interface"), ()),
         ("construction_statements", "ConstructionStatement", "CST-",
          ("body", "operation", "operands", "parameters"), ()),
         ("unresolved", "UnresolvedDecision", "S5U-",
@@ -204,11 +211,25 @@ class S05Embodiment(Stage):
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
         ops: List[Op] = []
         prov = "s05:embodiment"
+        # The basis every envelope coordinate is expressed in. Taken from the
+        # view rather than rebuilt from an id convention, because the scale is a
+        # committed entity and guessing its name in a second place is how two
+        # spellings of one id start. s04 states the rule this follows: withdraw
+        # the basis and the numbers mean nothing.
+        scales = sorted(_ids(inputs.get(self.context_key) or {}, "ReferenceScale")) \
+            if inputs else []
         for f in parsed.get("features", []):
-            ops.append(Op("CREATE", "Feature", f["id"], {
-                "body": f["body"], "feature_kind": f["feature_kind"],
-                "geometry": f["geometry"]}, prov,
-                premise_refs=[f["body"]]))
+            fields = {"body": f["body"], "feature_kind": f["feature_kind"],
+                      "geometry": f["geometry"]}
+            premises = [f["body"]]
+            if f.get("envelope") is not None:
+                fields["envelope"] = f["envelope"]
+                # ONLY when there is an envelope. A feature with no coordinates
+                # does not rest on the frame, and premising it anyway would stale
+                # geometry that a change of basis cannot affect.
+                premises += scales
+            ops.append(Op("CREATE", "Feature", f["id"], fields, prov,
+                          premise_refs=premises))
         for r in parsed.get("realizations", []):
             obligations = list(r.get("addresses_obligations") or [])
             features = list(r.get("participating_features") or [])
@@ -222,11 +243,18 @@ class S05Embodiment(Stage):
                 "symbol": p["symbol"], "unit": p["unit"],
                 "status": ir.DECLARED}, prov))
         for c in parsed.get("constraints", []):
-            ops.append(Op("CREATE", "Constraint", c["id"], {
-                "expression": c["expression"],
-                "parameters": c.get("parameters", []),
-                "kind": c["kind"]}, prov,
-                premise_refs=list(c.get("parameters") or [])))
+            fields = {"expression": c["expression"],
+                      "parameters": c.get("parameters", []),
+                      "kind": c["kind"]}
+            premises = list(c.get("parameters") or [])
+            if c.get("governs_interface"):
+                # A typed reference AND a premise: the constraint expresses that
+                # interface's clearance, so a change to the interface withdraws
+                # standing from the constraint that spoke for it.
+                fields["governs_interface"] = c["governs_interface"]
+                premises.append(c["governs_interface"])
+            ops.append(Op("CREATE", "Constraint", c["id"], fields, prov,
+                          premise_refs=premises))
         for s in parsed.get("construction_statements", []):
             fields = {"body": s["body"], "operation": s["operation"],
                       "operands": s.get("operands", []),
@@ -309,20 +337,71 @@ def _features_by_body(parsed: Dict[str, Any]) -> Dict[str, Set[str]]:
     return out
 
 
-def check_c1_interface_features(parsed, view) -> List[str]:
-    """S05-C1: every Interface has a Feature on EACH participant.
+#: Required of every Joint by DESIGN_STATE_CONTRACT. A record missing one of
+#: these is not a joint the contract recognises, whatever its label says.
+JOINT_REQUIRED = ("joint_type", "parent_group", "child_group", "dof",
+                  "axis_direction", "frame_ids")
 
-    An interface is two bodies meeting. One feature realizes one side of it, so a
-    single feature leaves the other side unrealised - the geometry would touch
-    nothing.
+
+def compliant_joints_by_bodies(view) -> Dict[frozenset, List[Dict[str, Any]]]:
+    """Well-formed COMPLIANT joints, keyed by the body pair they connect.
+
+    Well-formed is doing real work here. The Joint contract says "a joint_type
+    label alone is inert", so a record calling itself COMPLIANT while omitting an
+    axis or a frame is not the alternative S05-C1 permits - it is an incomplete
+    joint wearing a label, and admitting it would let any interface skip its
+    features by writing one word.
+    """
+    groups = _body_of_group(view)
+    out: Dict[frozenset, List[Dict[str, Any]]] = {}
+    for joint in _rows(view, "Joint"):
+        if str(joint.get("joint_type", "")).upper() != "COMPLIANT":
+            continue
+        if any(not joint.get(field) for field in JOINT_REQUIRED):
+            continue
+        parent = groups.get(joint.get("parent_group"))
+        child = groups.get(joint.get("child_group"))
+        if parent and child:
+            out.setdefault(frozenset((parent, child)), []).append(joint)
+    return out
+
+
+def check_c1_interface_features(parsed, view) -> List[str]:
+    """S05-C1: every Interface has a Feature on EACH participant, OR a declared
+    compliant Joint.
+
+    The alternative is the contract's own wording and was previously missing:
+    the check demanded features on both sides unconditionally, so a legitimate
+    compliant realization - where one flexing member IS the interface - was
+    rejected for not having a second rigid face.
+
+    A compliant joint is admitted only when it is well formed AND actually
+    realized by geometry on at least one participant. Both halves matter: the
+    first stops a bare label from excusing an interface, and the second stops a
+    complete-looking joint record from standing in for the flexure nobody drew.
     """
     by_body = _features_by_body(parsed)
+    compliant = compliant_joints_by_bodies(view)
     out = []
     for iface in _rows(view, "Interface"):
-        for body in (iface.get("bodies") or []):
-            if not by_body.get(body):
-                out.append("S05-C1: interface %s involves body %s and no feature "
-                           "realizes that side" % (iface.get("entity_id"), body))
+        bodies = [b for b in (iface.get("bodies") or []) if b]
+        missing = [b for b in bodies if not by_body.get(b)]
+        if not missing:
+            continue
+        joints = compliant.get(frozenset(bodies)) if len(bodies) == 2 else None
+        if joints:
+            # The compliant member's own geometry. A joint that flexes is a
+            # feature of a body; if no participant carries one, nothing was
+            # embodied and the joint is still a label.
+            if any(by_body.get(b) for b in bodies):
+                continue
+            out.append("S05-C1: interface %s is declared compliant by %s and no "
+                       "feature realizes the compliant member"
+                       % (iface.get("entity_id"), joints[0].get("entity_id")))
+            continue
+        for body in missing:
+            out.append("S05-C1: interface %s involves body %s and no feature "
+                       "realizes that side" % (iface.get("entity_id"), body))
     return out
 
 
@@ -491,18 +570,51 @@ def check_c7_no_parameter_cycle(parsed) -> List[str]:
 def check_c8_region_intrusion(parsed, view) -> List[str]:
     """S05-C8: no Feature intrudes into a FunctionalRegion.
 
-    Re-run of s04b occupancy against the NEW geometry. A feature that declares
-    itself inside a reserved region is reported; a feature whose geometry cannot
-    be resolved to a region is not silently passed - it is simply not yet
-    comparable, and the compiler's own occupancy check is where that lands.
+    A RE-RUN of s04b's occupancy against the new geometry, and deliberately the
+    same arithmetic: `aabb` and `overlaps` are imported from the s04 module that
+    already owns them rather than reimplemented, so the two stages cannot come to
+    different answers about the same boxes.
+
+    The first version of this read `intrudes_region` off the response - a key no
+    contract declares and no producer emits - so it read None and passed on
+    everything. A feature that cannot be evaluated is now reported as
+    INCOMPLETE rather than as clean: silence about occupancy is the failure mode
+    this check exists to prevent.
     """
-    reserved = {r.get("entity_id"): r for r in _rows(view, "FunctionalRegion")}
+    from .s04_envelope_and_motion import aabb, overlaps
+
+    regions = []
+    for r in _rows(view, "FunctionalRegion"):
+        volume = r.get("volume")
+        if not isinstance(volume, dict):
+            continue          # a region with no volume is s04's problem, not s05's
+        centre, half = volume.get("centre"), volume.get("half_extent")
+        if not (isinstance(centre, list) and isinstance(half, list)):
+            continue
+        regions.append((r, aabb(centre, half)))
+    if not regions:
+        return []
+
     out = []
     for f in parsed.get("features") or []:
-        intrudes = f.get("intrudes_region") or f.get("inside_region")
-        if intrudes and intrudes in reserved:
-            out.append("S05-C8: feature %s intrudes into functional region %s"
-                       % (f.get("id"), intrudes))
+        envelope = f.get("envelope")
+        centre = (envelope or {}).get("centre")
+        half = (envelope or {}).get("half_extent")
+        if not (isinstance(centre, list) and isinstance(half, list)):
+            out.append("S05-C8: feature %s declares no usable envelope, so its "
+                       "occupancy against %d declared region(s) cannot be "
+                       "evaluated" % (f.get("id"), len(regions)))
+            continue
+        box = aabb(centre, half)
+        for region, region_box in regions:
+            # A region the feature's own body reserved is the promise being
+            # broken by the promiser, which is exactly s04b's rule.
+            if region.get("role") not in ("ACCESS", "APERTURE", "KEEP_OUT"):
+                continue
+            if overlaps(box, region_box):
+                out.append("S05-C8: feature %s intrudes into %s region %s"
+                           % (f.get("id"), region.get("role"),
+                              region.get("entity_id")))
     return out
 
 
@@ -512,29 +624,33 @@ CLEARANCE_KINDS = ("CLEARANCE", "INTERFERENCE_FIT")
 
 
 def check_c9_clearance_constraints(parsed, view) -> List[str]:
-    """S05-C9: every declared clearance pair has a Constraint.
+    """S05-C9: every declared clearance pair has a Constraint that names it.
 
-    Per interface, not in aggregate. The recorded history is the argument: a
-    clearance that was never declared as a constraint produced a BUILD FAILURE
-    patched by hand rather than an INFEASIBILITY that triggered a re-solve, and a
-    regression rode along undetected for three revisions. The convergence block
-    can only converge on constraints it has been given, so a count is not enough
-    - each clearance needs its own.
+    Per interface and by TYPED REFERENCE. `Constraint.governs_interface` is a
+    declared reference to the Interface whose clearance the constraint expresses,
+    so the link is something production emits and DesignState validates rather
+    than something a test injects - the first version looked for `interface` and
+    `realizes` keys that no contract declares, which made the link set
+    permanently empty.
+
+    The recorded history is the argument for per-interface rather than in
+    aggregate: a clearance that was never given to the settlement loop produced a
+    BUILD FAILURE patched by hand instead of an INFEASIBILITY that triggered a
+    re-solve, and a regression rode along undetected for three revisions. One
+    constraint cannot speak for five clearances.
     """
-    constrained: Set[str] = set()
-    for c in parsed.get("constraints") or []:
-        if str(c.get("kind", "")).upper() not in ("CLEARANCE", "INTERFERENCE_FREE"):
-            continue
-        for ref in (c.get("realizes") or []) + ([c.get("interface")] if c.get("interface") else []):
-            constrained.add(ref)
+    governed = {c.get("governs_interface")
+                for c in parsed.get("constraints") or []
+                if str(c.get("kind", "")).upper() in
+                ("CLEARANCE", "INTERFERENCE_FREE") and c.get("governs_interface")}
     out = []
     for iface in _rows(view, "Interface"):
         if str(iface.get("interaction_kind", "")).upper() not in CLEARANCE_KINDS:
             continue
-        if iface.get("entity_id") not in constrained:
+        if iface.get("entity_id") not in governed:
             out.append("S05-C9: interface %s declares %s and no Constraint "
-                       "expresses it" % (iface.get("entity_id"),
-                                          iface.get("interaction_kind")))
+                       "governs it" % (iface.get("entity_id"),
+                                       iface.get("interaction_kind")))
     return out
 
 

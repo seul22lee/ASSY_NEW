@@ -108,3 +108,11 @@ jobs:
             ver3.tests.meta.test_supersede_authority \
             ver3.tests.meta.test_downstream_integration \
             ver3.tests.meta.test_downstream_currentness
+
+      - name: The benchmarks are representable by the vocabulary that must run them
+        # BM-001, BM-002 and BM-003 decomposed into capability classes, each one
+        # compiled or solved - and each RECORDED LIMIT asserted too, so the day
+        # an opcode is added the suite reports that the boundary moved rather
+        # than staying quietly green. Runs here because the geometry classes
+        # need the kernel.
+        run: python -m unittest -v ver3.tests.meta.test_downstream_capability

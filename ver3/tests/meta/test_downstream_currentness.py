@@ -272,6 +272,12 @@ class TestIntegratedDevelopmentChain(unittest.TestCase):
                 self.assertNotIn("provider_id", record)
 
     def test_artifacts_were_written_and_round_tripped(self):
+        # Both loops below are vacuous on an empty export map, and an empty map
+        # is exactly what a compile that produced no geometry leaves behind.
+        self.assertTrue(self.trace["exports"]["step_per_body"],
+                        "nothing was exported, so the round-trip proves nothing")
+        self.assertTrue(self.trace["roundtrip"]["brep"],
+                        "no body was re-read, so the tolerance holds trivially")
         for path in self.trace["exports"]["step_per_body"].values():
             self.assertTrue(os.path.isfile(path))
         for delta in self.trace["roundtrip"]["brep"].values():
@@ -282,3 +288,70 @@ class TestIntegratedDevelopmentChain(unittest.TestCase):
         for banned in ("BM-001", "BM-002", "BM-003", "cad_validation"):
             with self.subTest(term=banned):
                 self.assertNotIn(banned, blob)
+
+
+class TestSpatialFactsRestOnTheirFrame(unittest.TestCase):
+    """A Feature carrying an envelope rests on the basis it is expressed in.
+
+    s04 already states the rule for its own coordinates: "withdraw the basis and
+    the numbers mean nothing." `Feature.envelope` is the same shape in the same
+    frame - it is what S05-C8 compares against a FunctionalRegion volume - and it
+    was premised only on its body. A revised ReferenceScale therefore left every
+    feature envelope looking current while its numbers had silently changed
+    meaning, and C8 would have re-run the intrusion test on coordinates that no
+    longer said what they used to.
+
+    The premise is conditional on ACTUALLY carrying an envelope: a feature with
+    no coordinates does not rest on the frame, and premising it anyway would
+    stale geometry a change of basis cannot affect.
+    """
+
+    def _ops(self, envelope):
+        from ver3.assy_v3.stages.s05_embodiment import S05Embodiment
+        stage = S05Embodiment()
+        feature = {"id": "FEA-1", "body": "BOD-1", "feature_kind": "FACE",
+                   "geometry": "a face"}
+        if envelope is not None:
+            feature["envelope"] = envelope
+        view = {"ReferenceScale": [{"entity_id": "SCL-CND-0001"}]}
+        ops = stage.to_operations({"features": [feature]},
+                                  {stage.context_key: view})
+        return [o for o in ops if o.entity_id == "FEA-1"][0]
+
+    def test_the_fixture_supplies_a_scale_to_depend_on(self):
+        """Otherwise both assertions below compare against an absent premise."""
+        op = self._ops({"centre": [0, 0, 0], "half_extent": [1, 1, 1]})
+        self.assertIn("BOD-1", op.premise_refs)
+
+    def test_an_envelope_rests_on_the_reference_scale(self):
+        op = self._ops({"centre": [0, 0, 0], "half_extent": [1, 1, 1]})
+        self.assertIn("SCL-CND-0001", op.premise_refs,
+                      "the envelope's coordinates are expressed in this basis; "
+                      "without the premise a revised basis leaves them current")
+
+    def test_a_feature_without_an_envelope_does_not(self):
+        op = self._ops(None)
+        self.assertNotIn("SCL-CND-0001", op.premise_refs,
+                         "a feature with no coordinates does not rest on the "
+                         "frame, and staling it would be a false dependency")
+
+
+class TestGovernsInterfaceIsADependency(unittest.TestCase):
+    """S05-C9's typed reference is also a currentness edge.
+
+    A CLEARANCE constraint speaks FOR an interface. If the interface is revised,
+    the constraint that expressed its clearance no longer stands on what it was
+    derived from - so `governs_interface` must be a premise, not only a field
+    the check can read.
+    """
+
+    def test_a_clearance_constraint_rests_on_the_interface_it_governs(self):
+        from ver3.assy_v3.stages.s05_embodiment import S05Embodiment
+        ops = S05Embodiment().to_operations({"constraints": [{
+            "id": "CON-1", "kind": "CLEARANCE", "parameters": ["PRM-1"],
+            "governs_interface": "IFC-1",
+            "expression": {"relation": ">=", "lhs": {"ref": "PRM-1"},
+                           "rhs": {"const": 0.5, "unit": "mm"}}}]}, None)
+        op = [o for o in ops if o.entity_id == "CON-1"][0]
+        self.assertIn("IFC-1", op.premise_refs)
+        self.assertIn("PRM-1", op.premise_refs)

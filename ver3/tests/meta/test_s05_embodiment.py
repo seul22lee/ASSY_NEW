@@ -214,53 +214,187 @@ class TestC7NoParameterCycle(unittest.TestCase):
         self.assertEqual([], s05.check_c7_no_parameter_cycle(parsed))
 
 
+def box(cx, cy, cz, hx=1.0, hy=1.0, hz=1.0):
+    return {"centre": [cx, cy, cz], "half_extent": [hx, hy, hz]}
+
+
+def region(rid, role, centre, half, bodies=("BOD-1",)):
+    return {"entity_id": rid, "role": role, "owning_bodies": list(bodies),
+            "volume": {"centre": list(centre), "half_extent": list(half)}}
+
+
 class TestC8RegionIntrusion(unittest.TestCase):
-    """S05-C8: no Feature intrudes into a FunctionalRegion."""
+    """S05-C8: real occupancy from canonical envelopes.
 
-    V = view(FunctionalRegion=[{"entity_id": "FRG-1", "role": "ACCESS",
-                                "owning_bodies": ["BOD-1"]}])
+    The previous implementation read `intrudes_region` off the response - a key
+    no contract declares and no producer emits - so it read None and passed on
+    everything. These cases use `Feature.envelope`, which is canonical, and the
+    same aabb/overlaps arithmetic s04b uses.
+    """
 
-    def test_a_feature_outside_every_region_passes(self):
-        self.assertEqual([], s05.check_c8_region_intrusion(
-            {"features": [feature("FEA-1", "BOD-1")]}, self.V))
+    V = view(FunctionalRegion=[region("FRG-1", "ACCESS", (0, 0, 0), (5, 5, 5))])
 
-    def test_a_feature_declaring_intrusion_is_reported(self):
+    def test_the_fixture_declares_a_usable_region(self):
+        """Otherwise every case below passes for the wrong reason."""
+        volume = self.V["FunctionalRegion"][0]["volume"]
+        self.assertIn("centre", volume)
+        self.assertIn("half_extent", volume)
+
+    def test_a_feature_clearly_outside_the_region_passes(self):
         parsed = {"features": [dict(feature("FEA-1", "BOD-1"),
-                                    intrudes_region="FRG-1")]}
+                                    envelope=box(100, 100, 100))]}
+        self.assertEqual([], s05.check_c8_region_intrusion(parsed, self.V))
+
+    def test_a_feature_clearly_intruding_is_reported(self):
+        parsed = {"features": [dict(feature("FEA-1", "BOD-1"),
+                                    envelope=box(0, 0, 0))]}
         problems = s05.check_c8_region_intrusion(parsed, self.V)
         self.assertTrue(any("FRG-1" in p for p in problems), problems)
 
+    def test_a_touching_boundary_is_decided_deterministically(self):
+        """Whatever the answer, it must be the SAME answer s04b would give -
+        which is why the arithmetic is imported rather than reimplemented."""
+        from ver3.assy_v3.stages.s04_envelope_and_motion import aabb, overlaps
+        touching = box(6, 0, 0)          # region half-extent 5, feature half 1
+        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=touching)]}
+        expected = overlaps(aabb(touching["centre"], touching["half_extent"]),
+                            aabb([0, 0, 0], [5, 5, 5]))
+        problems = s05.check_c8_region_intrusion(parsed, self.V)
+        self.assertEqual(bool(expected), bool(problems))
+
+    def test_a_feature_without_an_envelope_is_incomplete_not_clean(self):
+        """The exact defect: silence about occupancy read as a pass."""
+        parsed = {"features": [feature("FEA-1", "BOD-1")]}
+        problems = s05.check_c8_region_intrusion(parsed, self.V)
+        self.assertTrue(any("cannot be evaluated" in p for p in problems), problems)
+
+    def test_a_region_whose_role_reserves_nothing_raises_no_false_failure(self):
+        v = view(FunctionalRegion=[region("FRG-2", "GRIP", (0, 0, 0), (5, 5, 5))])
+        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(0, 0, 0))]}
+        self.assertEqual([], s05.check_c8_region_intrusion(parsed, v))
+
+    def test_no_regions_declared_means_nothing_to_intrude(self):
+        parsed = {"features": [feature("FEA-1", "BOD-1")]}
+        self.assertEqual([], s05.check_c8_region_intrusion(parsed, view()))
+
 
 class TestC9ClearanceConstraints(unittest.TestCase):
-    """S05-C9: every declared clearance pair has a Constraint, per interface.
-
-    In aggregate would not do: one constraint would cover five clearances, and
-    the settlement loop can only converge on constraints it was given.
-    """
+    """S05-C9: the link is a typed canonical reference, not an injected key."""
 
     V = view(Interface=[
-        {"entity_id": "IFC-1", "bodies": ["BOD-1", "BOD-2"], "interaction_kind": "CLEARANCE"},
-        {"entity_id": "IFC-2", "bodies": ["BOD-2", "BOD-3"], "interaction_kind": "CLEARANCE"},
-        {"entity_id": "IFC-3", "bodies": ["BOD-1", "BOD-3"], "interaction_kind": "CONTACT"}])
+        {"entity_id": "IFC-1", "bodies": ["BOD-1", "BOD-2"],
+         "interaction_kind": "CLEARANCE"},
+        {"entity_id": "IFC-2", "bodies": ["BOD-2", "BOD-3"],
+         "interaction_kind": "CLEARANCE"},
+        {"entity_id": "IFC-3", "bodies": ["BOD-1", "BOD-3"],
+         "interaction_kind": "CONTACT"}])
 
-    def test_a_constraint_for_each_clearance_passes(self):
-        parsed = {"constraints": [
-            {"id": "CON-1", "kind": "CLEARANCE", "interface": "IFC-1"},
-            {"id": "CON-2", "kind": "CLEARANCE", "interface": "IFC-2"}]}
+    @staticmethod
+    def clearance(cid, interface):
+        return {"id": cid, "kind": "CLEARANCE", "parameters": [],
+                "expression": {"relation": ">=", "lhs": {"ref": "PRM-1"},
+                               "rhs": {"const": 0.5, "unit": "mm"}},
+                "governs_interface": interface}
+
+    def test_a_governing_constraint_for_each_clearance_passes(self):
+        parsed = {"constraints": [self.clearance("CON-1", "IFC-1"),
+                                  self.clearance("CON-2", "IFC-2")]}
         self.assertEqual([], s05.check_c9_clearance_constraints(parsed, self.V))
 
-    def test_one_constraint_does_not_cover_two_clearances(self):
-        parsed = {"constraints": [{"id": "CON-1", "kind": "CLEARANCE",
-                                   "interface": "IFC-1"}]}
+    def test_one_constraint_cannot_speak_for_two_clearances(self):
+        parsed = {"constraints": [self.clearance("CON-1", "IFC-1")]}
         problems = s05.check_c9_clearance_constraints(parsed, self.V)
         self.assertTrue(any("IFC-2" in p for p in problems), problems)
 
-    def test_a_contact_interface_needs_no_clearance_constraint(self):
-        parsed = {"constraints": [
-            {"id": "CON-1", "kind": "CLEARANCE", "interface": "IFC-1"},
-            {"id": "CON-2", "kind": "CLEARANCE", "interface": "IFC-2"}]}
+    def test_a_constraint_with_no_governed_interface_does_not_count(self):
+        """The false-green shape: a clearance constraint that names nothing."""
+        parsed = {"constraints": [dict(self.clearance("CON-1", "IFC-1"),
+                                       governs_interface=None)]}
+        problems = s05.check_c9_clearance_constraints(parsed, self.V)
+        self.assertTrue(any("IFC-1" in p for p in problems), problems)
+
+    def test_a_non_clearance_interface_needs_no_such_constraint(self):
+        parsed = {"constraints": [self.clearance("CON-1", "IFC-1"),
+                                  self.clearance("CON-2", "IFC-2")]}
         self.assertTrue(all("IFC-3" not in p for p in
                             s05.check_c9_clearance_constraints(parsed, self.V)))
+
+    def test_a_dimensional_constraint_naming_an_interface_does_not_satisfy_it(self):
+        parsed = {"constraints": [dict(self.clearance("CON-1", "IFC-1"),
+                                       kind="DIMENSIONAL"),
+                                  self.clearance("CON-2", "IFC-2")]}
+        problems = s05.check_c9_clearance_constraints(parsed, self.V)
+        self.assertTrue(any("IFC-1" in p for p in problems), problems)
+
+    def test_the_relation_survives_the_patch_path(self):
+        """Production must be able to express every positive case above."""
+        ops = S05Embodiment().to_operations(
+            {"constraints": [self.clearance("CON-1", "IFC-1")]})
+        self.assertEqual("IFC-1", ops[0].fields["governs_interface"])
+        self.assertIn("IFC-1", ops[0].premise_refs)
+
+
+class TestC1CompliantJointAlternative(unittest.TestCase):
+    """S05-C1 admits `a declared compliant Joint` as the contract says it does."""
+
+    @staticmethod
+    def joint(jid, jtype="COMPLIANT", **over):
+        rec = {"entity_id": jid, "joint_type": jtype, "parent_group": "RGP-1",
+               "child_group": "RGP-2", "dof": ["RZ"], "axis_direction": "+Z",
+               "frame_ids": ["FRM-1"]}
+        rec.update(over)
+        return rec
+
+    V_RIGID = view(Interface=[{"entity_id": "IFC-1", "bodies": ["BOD-1", "BOD-2"],
+                               "interaction_kind": "CONTACT"}])
+
+    def _compliant(self, **over):
+        return view(
+            Interface=[{"entity_id": "IFC-1", "bodies": ["BOD-1", "BOD-2"],
+                        "interaction_kind": "COMPLIANT_INTERACTION"}],
+            RigidGroup=[{"entity_id": "RGP-1", "body": "BOD-1"},
+                        {"entity_id": "RGP-2", "body": "BOD-2"}],
+            Joint=[self.joint("JNT-1", **over)])
+
+    def test_a_rigid_interface_still_needs_both_sides(self):
+        parsed = {"features": [feature("FEA-1", "BOD-1")]}
+        problems = s05.check_c1_interface_features(parsed, self.V_RIGID)
+        self.assertTrue(any("BOD-2" in p for p in problems), problems)
+
+    def test_both_sides_featured_passes(self):
+        parsed = {"features": [feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")]}
+        self.assertEqual([], s05.check_c1_interface_features(parsed, self.V_RIGID))
+
+    def test_a_legitimate_compliant_joint_satisfies_one_side(self):
+        """The contract's own alternative, previously rejected outright."""
+        parsed = {"features": [feature("FEA-1", "BOD-1", "SNAP_ARM")]}
+        self.assertEqual([], s05.check_c1_interface_features(parsed, self._compliant()))
+
+    def test_a_compliant_label_with_no_geometry_does_not_excuse_the_interface(self):
+        """`A joint_type label alone is inert.`"""
+        problems = s05.check_c1_interface_features({"features": []}, self._compliant())
+        self.assertTrue(any("compliant member" in p for p in problems), problems)
+
+    def test_an_incomplete_joint_record_is_not_a_compliant_realization(self):
+        """A joint missing an axis is not the alternative; it is an incomplete joint."""
+        parsed = {"features": [feature("FEA-1", "BOD-1")]}
+        problems = s05.check_c1_interface_features(
+            parsed, self._compliant(axis_direction=""))
+        self.assertTrue(any("BOD-2" in p for p in problems), problems)
+
+    def test_a_non_compliant_joint_is_not_the_alternative(self):
+        parsed = {"features": [feature("FEA-1", "BOD-1")]}
+        problems = s05.check_c1_interface_features(
+            parsed, self._compliant(joint_type="REVOLUTE"))
+        self.assertTrue(any("BOD-2" in p for p in problems), problems)
+
+    def test_a_compliant_joint_between_other_bodies_does_not_apply(self):
+        v = self._compliant()
+        v["RigidGroup"] = [{"entity_id": "RGP-1", "body": "BOD-8"},
+                           {"entity_id": "RGP-2", "body": "BOD-9"}]
+        parsed = {"features": [feature("FEA-1", "BOD-1")]}
+        problems = s05.check_c1_interface_features(parsed, v)
+        self.assertTrue(any("BOD-2" in p for p in problems), problems)
 
 
 class TestC10SolverEvidence(unittest.TestCase):
@@ -326,7 +460,9 @@ class TestS05ProducesCanonicalNames(unittest.TestCase):
                       {"id": "CST-1", "body": "B", "operation": "BOX", "parameters": {}}],
                   "unresolved": [{"id": "S5U-1", "decision": "d", "why_open": "w",
                                   "alternatives_kind": "FREE_TEXT"}]}
-        for op in S05Embodiment().to_operations(parsed):
+        ops = S05Embodiment().to_operations(parsed)
+        self.assertTrue(ops, "no operation was produced, so nothing is checked")
+        for op in ops:
             with self.subTest(family=op.entity_type):
                 self.assertIn(op.entity_type, permitted)
 
@@ -346,3 +482,90 @@ class TestS05SchemaDoesNotAnchorOnOccupiedIds(unittest.TestCase):
 
 if __name__ == "__main__":                                       # pragma: no cover
     unittest.main()
+
+
+class TestNoCheckReadsAFamilyTheViewNeverGrants(unittest.TestCase):
+    """The structural false-green, closed statically.
+
+    `_rows` returns `[]` for a family the consumer view does not carry, and the
+    payload omits an empty family entirely - so at runtime "granted but nothing
+    there" and "never granted at all" are the same empty list. A check reading
+    an ungranted family therefore cannot fail on ANY input, and reports
+    compliance while asking nothing.
+
+    S05-C3 was exactly that: it read `MobilityExpectation` to find the DOFs
+    dispositioned BLOCKED_BY, and the s05 required minimum did not include it.
+    Every cell was skipped, the check returned no problems, and the suite was
+    green. The repair was a premise class (`limit_to_produce`), not a deleted
+    check - a stage cannot be asked to satisfy a demand it was never shown.
+
+    This asserts the property rather than the instance: every family literal
+    reachable from any check function must be in the derived required minimum.
+    It runs off the AST and the contract, so a new check that reads a new family
+    fails here until the premise granting it is declared.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import ast
+        from ver3.assy_v3.state.design_state import Contracts
+        from ver3.assy_v3.view import derive_required_minimum
+        from . import _paths
+
+        cls.granted = derive_required_minimum(
+            "s05", Contracts(),
+            _paths.contract("STAGE_RESPONSIBILITY_CONTRACT.yaml")).families()
+
+        source = open(s05.__file__).read()
+        tree = ast.parse(source)
+        # Helpers that read the view, and the checks that call them. Resolved
+        # one level deep so `_blocking_relations(view)` counts as a read of
+        # ConstraintRelation by whichever check calls it.
+        reads, helpers = {}, {}
+        for fn in ast.walk(tree):
+            if not isinstance(fn, ast.FunctionDef):
+                continue
+            direct, called = set(), set()
+            for n in ast.walk(fn):
+                if not isinstance(n, ast.Call) or not isinstance(n.func, ast.Name):
+                    continue
+                if n.func.id in ("_rows", "_ids"):
+                    if len(n.args) > 1 and isinstance(n.args[1], ast.Constant):
+                        direct.add(n.args[1].value)
+                else:
+                    called.add(n.func.id)
+            (reads if fn.name.startswith("check_c") else helpers)[fn.name] = \
+                (direct, called)
+            if fn.name.startswith("check_c"):
+                helpers[fn.name] = (direct, called)
+        cls.reads, cls.helpers = reads, helpers
+
+    def _families_of(self, name):
+        direct, called = self.helpers[name]
+        out = set(direct)
+        for callee in called:
+            if callee in self.helpers and callee != name:
+                out |= self.helpers[callee][0]
+        return out
+
+    def test_the_audit_found_the_checks(self):
+        """Otherwise the loop below iterates over nothing and proves nothing."""
+        self.assertEqual(10, len(self.reads),
+                         "expected ten checks; the AST scan found %d"
+                         % len(self.reads))
+
+    def test_every_family_a_check_reads_is_granted_to_s05(self):
+        for name in sorted(self.reads):
+            for family in sorted(self._families_of(name)):
+                with self.subTest(check=name, family=family):
+                    self.assertIn(
+                        family, self.granted,
+                        "%s reads %s, which the s05 consumer view does not "
+                        "grant. The read returns [] on every input, so the "
+                        "check cannot fail. Declare the premise class that "
+                        "grants it, or drop the check." % (name, family))
+
+    def test_c3_specifically_can_now_see_the_dispositions(self):
+        """The instance that was broken, pinned so it cannot silently return."""
+        self.assertIn("MobilityExpectation", self._families_of("check_c3_limit_pairs"))
+        self.assertIn("MobilityExpectation", self.granted)

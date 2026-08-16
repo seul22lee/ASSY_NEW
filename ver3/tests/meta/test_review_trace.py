@@ -149,6 +149,12 @@ class TestTheTraceNeverJudgesTheEngineering(_Built):
 
 class TestReferenceCadIsLabelled(_Built):
 
+    def test_there_are_references_to_label(self):
+        """Both loops below iterate the reference list. With no references they
+        pass while checking nothing, and 'reference CAD is correctly labelled'
+        would be true of a trace carrying no reference CAD at all."""
+        self.assertTrue(self.trace["reference_cad"]["references"])
+
     def test_reference_cad_is_not_claimed_as_pipeline_output(self):
         self.assertFalse(self.trace["reference_cad"]["is_pipeline_output"])
 
@@ -203,6 +209,50 @@ class TestTheUiIsAProjectionOfTheTrace(unittest.TestCase):
 
     def test_it_warns_that_contract_is_not_mechanical_correctness(self):
         self.assertIn("not a claim that the mechanism", self.html)
+
+    def test_every_renderable_status_has_a_legend_entry(self):
+        """A badge the page cannot explain is a badge the reviewer cannot weigh.
+
+        The legend was keyed on the NAMES of the status constants rather than
+        their VALUES - `REPLAYED` for a status whose value is `REPLAY`, and
+        `LIVE_MODEL` for `LIVE_DEEPSEEK`. Those entries matched nothing, so a
+        page showing two REPLAY nodes explained neither while the legend itself
+        looked complete. Derived from STATUS_CLASS, which is the UI's own list
+        of statuses it will render, so renaming one fails here.
+        """
+        source = open(ui.__file__).read()
+        meaning = re.search(r"const PROVENANCE_MEANING = \{(.*?)\n\};",
+                            source, re.S)
+        self.assertTrue(meaning, "the legend table is gone or was renamed")
+        explained = set(re.findall(r"^\s*([A-Z_]+):", meaning.group(1), re.M))
+        self.assertTrue(explained, "the legend parsed to nothing")
+        for status in ui.STATUS_CLASS:
+            with self.subTest(status=status):
+                self.assertIn(status, explained,
+                              "%s renders as a badge but the legend never "
+                              "explains it" % status)
+
+    def test_section_numbers_are_not_hardcoded_per_template(self):
+        """Numbers that skip read as sections that failed to load.
+
+        They were written for the fullest node, so a deterministic node - which
+        has no prompt and no raw response - rendered 1,2,3,4 and then 11. A
+        shared counter numbers them in emission order instead.
+        """
+        source = open(ui.__file__).read()
+        literals = re.findall(r"section\('(\d+) \u00b7 ", source)
+        self.assertTrue(literals, "no numbered sections found to check")
+        self.assertIn("++SEC", source,
+                      "section numbers are literal again; a node that skips a "
+                      "section will show a gap")
+        self.assertNotIn("<h2>11 \u00b7", source,
+                         "the review header bypasses the counter")
+
+    def test_the_legend_explains_the_statuses_actually_on_this_page(self):
+        """The end-to-end form: what a reviewer of THIS page can actually read."""
+        for status in {n["status"] for n in self.trace["nodes"]}:
+            with self.subTest(status=status):
+                self.assertIn(status, self.html)
 
     def test_every_node_reaches_the_page(self):
         for n in self.trace["nodes"]:

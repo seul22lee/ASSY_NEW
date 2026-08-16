@@ -68,6 +68,11 @@ LIVE_MODEL = "LIVE_DEEPSEEK"
 REPLAYED = "REPLAY"
 DETERMINISTIC = "DETERMINISTIC"
 NOT_EXERCISED = "NOT_EXERCISED"
+#: Authored for development against the canonical interfaces. NOT a replay: no
+#: recorded response was served, so calling it REPLAY claimed a provenance that
+#: does not exist. It is its own classification precisely so it cannot be mistaken
+#: for either of the two that carry evidential weight.
+DEVELOPMENT_FIXTURE_STATUS = "DEVELOPMENT_FIXTURE"
 NOT_IMPLEMENTED = "NOT_IMPLEMENTED"
 BLOCKED_UPSTREAM = "BLOCKED_BY_UPSTREAM"
 
@@ -229,7 +234,12 @@ def downstream_nodes(state, progression):
                 for fam in ("Feature", "Realization", "Parameter", "Constraint",
                             "ConstructionStatement")}
     if any(produced.values()):
-        out.append(node("s05", "physical embodiment", MODEL_OWNED, REPLAYED,
+        # Committed s05 state exists. HOW it got there is the caller's to say -
+        # a replayed recording, a live call, or an authored development fixture -
+        # and this function cannot see which, so it does not guess. The caller
+        # overwrites `status` with the truth it knows.
+        out.append(node("s05", "physical embodiment", MODEL_OWNED,
+                        DEVELOPMENT_FIXTURE_STATUS,
                         stage_owner_id="s05",
                         declared_llm_role="HIGH for feature proposal and program "
                                           "shape; NONE for completeness",
@@ -530,7 +540,8 @@ def build_development_trace(out_dir):
     nodes = downstream_nodes(state, progression)
     for n in nodes:
         if n["responsibility_id"] == "s05":
-            n.update({"contract": "ACCEPTED", "state_before": before,
+            n.update({"status": DEVELOPMENT_FIXTURE_STATUS,
+                      "contract": "ACCEPTED", "state_before": before,
                       "state_after": after,
                       "state_diff": state_diff(before, after),
                       "parsed": embodiment,
@@ -541,7 +552,10 @@ def build_development_trace(out_dir):
         "benchmark_id": "DEV-INTEGRATED",
         "provenance": DEVELOPMENT_FIXTURE,
         "is_live": False,
+        "is_replay": False,
         "is_benchmark_result": False,
+        "s9e_promotion_eligible": False,
+        "full_live_qualified": False,
         "repo_commit": repo_commit(),
         "source_text": "A development fixture exercising the canonical downstream "
                        "seam. It is not a design request and answers no benchmark.",
@@ -554,8 +568,10 @@ def build_development_trace(out_dir):
         "progression": progression.as_record(),
         "reference_cad": {"is_pipeline_output": False, "references": []},
         "notes": {
-            "replay_is_not_live": "This fixture is not a live run and claims no "
-                                  "model provenance.",
+            "replay_is_not_live": "This fixture is neither live nor a replay. No "
+                                  "recorded response was served and no provider "
+                                  "was contacted, so it claims no model "
+                                  "provenance of either kind.",
             "contract_is_not_mechanical": "Compilation success is a geometric "
                                           "fact, not a mechanical judgement.",
         },

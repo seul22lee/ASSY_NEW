@@ -88,6 +88,7 @@ class TestOccupancyIsDerivedFromAuthoritativeState(unittest.TestCase):
         """Derived, not sampled. Every family s02 may create, compared to state."""
         view = S02ObligationAndCandidates().consumer_view(self.state)
         families = cv.creatable_families("s02", responsibility_contract())
+        self.assertTrue(families, "s02 creates nothing, so this compares nothing")
         for family in sorted(families):
             with self.subTest(family=family):
                 in_state = sorted(e["entity_id"] for e in self.state.family(family))
@@ -232,7 +233,11 @@ class TestLeastPrivilege(unittest.TestCase):
 
     def test_no_assumption_field_content_reaches_the_prompt(self):
         """The ids arrive; what the assumptions SAY does not."""
-        for a in self.parsed.get("assumptions") or []:
+        assumptions = self.parsed.get("assumptions") or []
+        self.assertTrue(assumptions,
+                        "the fixture carries no assumption, so 'its content does "
+                        "not leak' is a statement about nothing")
+        for a in assumptions:
             for field in ("statement", "why", "would_be_invalidated_by"):
                 value = a.get(field)
                 if isinstance(value, str) and len(value) > 20:
@@ -240,6 +245,9 @@ class TestLeastPrivilege(unittest.TestCase):
                         self.assertNotIn(value, self.prompt)
 
     def test_occupancy_holds_ids_and_nothing_else(self):
+        self.assertTrue(self.view.occupancy,
+                        "empty occupancy satisfies 'holds ids and nothing else' "
+                        "without holding anything")
         for family, ids in self.view.occupancy.items():
             with self.subTest(family=family):
                 self.assertTrue(all(isinstance(i, str) for i in ids))

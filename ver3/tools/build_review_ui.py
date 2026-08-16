@@ -40,6 +40,7 @@ DEFAULT_OUT = os.path.join(VER3, "out", "review")
 STATUS_CLASS = {
     "LIVE_DEEPSEEK": "live", "REPLAY": "replay", "DETERMINISTIC": "det",
   "EXECUTED": "det", "EXECUTED_NO_WRITE": "blocked",
+  "DEVELOPMENT_FIXTURE": "absent",
     "NOT_EXERCISED": "none", "NOT_IMPLEMENTED": "absent",
     "BLOCKED_BY_UPSTREAM": "blocked",
 }
@@ -81,8 +82,12 @@ h2:first-of-type{margin-top:0}
 .grid{display:grid;grid-template-columns:170px 1fr;gap:5px 14px;font-size:13px}
 .grid dt{color:var(--dim)}
 .grid dd{margin:0;word-break:break-word}
+/* pre-wrap, because the source request is prose: unwrapped it ran off the
+   panel and the reviewer had to scroll sideways to read the request they are
+   reviewing against. Long unbroken tokens (hashes, paths) still get to break. */
 pre{background:#0b0d11;border:1px solid var(--line);border-radius:6px;padding:11px;
-overflow:auto;max-height:420px;font-size:12px;line-height:1.5}
+overflow:auto;max-height:420px;font-size:12px;line-height:1.5;
+white-space:pre-wrap;overflow-wrap:anywhere}
 details{border:1px solid var(--line);border-radius:6px;padding:9px 11px;margin:9px 0;
 background:#12151b}
 summary{cursor:pointer;color:var(--dim);font-size:12.5px}
@@ -146,6 +151,42 @@ function flow(){
   ).join('<span class="arrow">→</span>') + `</div>`;
 }
 
+// What each status on THIS page means, derived from the statuses actually
+// present. The banner used to explain REPLAY unconditionally - so a page whose
+// nodes were DEVELOPMENT_FIXTURE showed a badge with no explanation beside a
+// paragraph about a status that was nowhere on screen. A reviewer cannot weigh
+// evidence whose provenance the page never names.
+// Keyed on the STATUS VALUES the trace actually carries, not on the names of
+// the Python constants that hold them. A first version keyed on `REPLAYED` and
+// `LIVE_MODEL`; the values are `REPLAY` and `LIVE_DEEPSEEK`, so those entries
+// matched nothing and the two REPLAY nodes on the BM-001 page went unexplained
+// while the legend looked complete. `test_review_trace` now derives the
+// required keys from STATUS_CLASS so a renamed status fails rather than
+// silently dropping out of the legend.
+const PROVENANCE_MEANING = {
+  LIVE_DEEPSEEK: 'served by a live provider call in this run.',
+  REPLAY: 'a recorded response replayed through the real parser and contracts. ' +
+            'That is not live-model evidence.',
+  DEVELOPMENT_FIXTURE: 'authored by hand to exercise the seam. No provider was ' +
+            'contacted and no recorded response was served, so it is neither ' +
+            'live nor a replay, and it answers no benchmark.',
+  DETERMINISTIC: 'produced by a deterministic service, with no model involved.',
+  EXECUTED: 'produced by a deterministic service - a solver or a CAD kernel - ' +
+            'with no model involved.',
+  EXECUTED_NO_WRITE: 'ran, but wrote nothing to state.',
+  NOT_EXERCISED: 'did not run in this run.',
+  NOT_IMPLEMENTED: 'not built. The node is present so its absence cannot read ' +
+            'as a stage that passed.',
+  BLOCKED_BY_UPSTREAM: 'could not run because something it depends on did not.'
+};
+
+function provenanceLegend(){
+  const present = [...new Set(T.nodes.map(n=>n.status))].filter(s=>PROVENANCE_MEANING[s]);
+  if(!present.length) return '';
+  return 'What the statuses on this page mean:<br>' + present.map(s=>
+    `<code>${esc(s)}</code> — ${PROVENANCE_MEANING[s]}`).join('<br>');
+}
+
 function kv(o){
   return '<dl class="grid">' + Object.entries(o).map(([k,v])=>
     `<dt>${esc(k)}</dt><dd>${v==null||v===''?'<span class="dim">—</span>':esc(v)}</dd>`
@@ -154,7 +195,7 @@ function kv(o){
 
 function reviewPanel(n){
   const r = R[key(n)]||{};
-  return `<h2>11 · Human mechanical review</h2>
+  return `<h2>${++SEC} · Human mechanical review</h2>
   <div class="warnbox">The system status above is a <b>contract</b> judgment —
   schema, references and authority. It is <b>not</b> a statement that the
   engineering is sound. That judgment is yours.</div>
@@ -173,9 +214,18 @@ function reviewPanel(n){
   <div id="rmsg" class="dim" style="margin-top:6px"></div>`;
 }
 
-function section(t, body){ return `<h2>${t}</h2>${body}`; }
+// Sections number themselves in the order they are EMITTED. They used to carry
+// hardcoded numbers written for the fullest node - so a deterministic node, which
+// has no prompt or raw response, rendered 1,2,3,4 and then 11, and the gap read
+// as seven sections that failed to load rather than seven that do not apply.
+let SEC = 0;
+function section(t, body){
+  const numbered = /^\d+ \u00b7 /.test(t) ? t.replace(/^\d+ \u00b7 /, ++SEC + ' \u00b7 ') : t;
+  return `<h2>${numbered}</h2>${body}`;
+}
 
 function show(i){
+  SEC = 0;
   const n = T.nodes[i];
   document.querySelectorAll('.node').forEach((b,j)=>b.classList.toggle('sel', j===i));
   let h = `<h1 style="margin:0 0 3px;font-size:19px">${esc(n.responsibility_id.toUpperCase())}
@@ -335,20 +385,21 @@ function wireReview(n){
 }
 
 function overview(){
+  SEC = 0;
   const counted = {};
   T.nodes.forEach(n=>counted[n.status]=(counted[n.status]||0)+1);
   let h = `<h1 style="margin:0 0 3px;font-size:19px">${esc(T.benchmark_id)} — pipeline</h1>
    <div class="dim" style="margin-bottom:12px">run <code>${esc(T.run_id)}</code> ·
-   commit <code>${esc((T.repo_commit||'').slice(0,12))}</code> ·
-   source sha <code>${esc((T.source_sha256||'').slice(0,16))}</code></div>`;
+   commit <code>${esc((T.repo_commit||'').slice(0,12))}</code>${
+     T.source_sha256 ? ' · source sha <code>'+esc(T.source_sha256.slice(0,16))+'</code>' : ''
+   }</div>`;
   h += flow();
   h += `<div class="warnbox"><b>Read this before reviewing.</b><br>
     A green <i>contract</i> badge means the response satisfied schema, references and
     authority. It is not a claim that the mechanism, proportions, load path, kinematics
     or manufacturability are sound — those are exactly what you are being asked to judge,
     and every node starts at <code>NOT_REVIEWED</code>.<br><br>
-    Nodes marked <code>REPLAY</code> are recorded responses replayed through the real
-    parser and contracts. That is not live-model evidence.</div>`;
+    ${provenanceLegend()}</div>`;
   h += section('Source request', `<pre>${esc(T.source_text)}</pre>`);
   h += section('Status summary', `<table><tr><th>status</th><th>nodes</th></tr>` +
     Object.entries(counted).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v}</td></tr>`).join('')+`</table>`);

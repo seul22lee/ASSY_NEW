@@ -1559,6 +1559,24 @@ stages:
         the convergence block can only converge on constraints it was given.
       requires_semantics:
       - constraint_relation
+    - class: limit_to_produce
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a branch may declare no blocked degree of freedom
+      what: the mobility dispositions this branch declared
+      justified_by_question: What actual geometry on which body makes each declared relation
+        real?
+      why: >-
+        S05-C3 asks whether a feature pair can PRODUCE a travel limit that a
+        MobilityExpectation dispositions as BLOCKED_BY. Without this premise the
+        stage could not see the disposition, the check read a family the view
+        never granted, and the empty read passed as compliance - the check could
+        not fail, on any input. A stage cannot be asked to satisfy a demand it
+        was never shown.
+      requires_semantics:
+      - mobility_disposition
     - class: occupancy_to_avoid
       instance_selection:
         population: INVOCATION_BRANCH

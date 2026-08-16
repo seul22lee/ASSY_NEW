@@ -2,9 +2,9 @@
 
 NOT AN ADAPTER, AND THE NAME MATTERS
 
-This module was called `canonical_io.py` and the rebuild policy rejected it: rule 3
-forbids a compatibility adapter without approval, and the check matches on the
-name because that is how a shim announces itself. The rejection was right about
+This module was called `adapters.py`, and the rebuild policy rejected that name:
+rule 3 forbids a compatibility adapter without approval, and the check matches on
+the name because that is how a shim announces itself. The rejection was right about
 the name and would have been wrong about the module, so the module was renamed
 rather than exempted - an exception list entry would have bought a permanent
 "adapter" in the tree for the sake of one file's filename.
@@ -25,11 +25,18 @@ a patch whose every operation is inside declared authority.
 WHAT THESE MAY WRITE, AND HOW THAT IS ENFORCED
 
 s06 extends `Parameter.value`, `Parameter.solved_by` and `Constraint.settlement`.
-s07 creates `GeometrySignature` and extends `Body.compiled` and
-`Feature.compiled_by_statement`. Nothing else - and the write boundary is what
-actually enforces it: these functions build operations, and `DesignState.validate`
-refuses any that stray. The fields are listed in DESIGN_STATE_CONTRACT under
-`extendable_fields`, which is the only declaration the runtime reads.
+
+s07 EXTENDS NOTHING. It creates a `GeometrySignature` and that is all, because an
+extension from outside the owner withdraws standing from everything concluded over
+that record - so writing a compilation fact onto a Body staled every construction
+statement premised on it, in the ordinary successful flow. The per-body
+measurements and the statement-to-feature mapping live on the signature, which
+s07 owns outright.
+
+The write boundary is what actually enforces this: these functions build
+operations, and `DesignState.validate` refuses any that stray. The fields are
+listed in DESIGN_STATE_CONTRACT under `extendable_fields`, which is the only
+declaration the runtime reads.
 
 NO MODEL PROVENANCE
 

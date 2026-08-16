@@ -582,7 +582,21 @@ entity_families:
         work, not with a vocabulary edit. (S7-B correction; owner S-8)
 
   Feature:
+    # The spatial claim an occupancy check needs, and the reason it is canonical.
+    #
+    # S05-C8 re-runs s04b's occupancy against the NEW geometry. It cannot do that
+    # from `geometry`, which is prose. The first implementation read
+    # `intrudes_region` off the response - a key no contract declares and no
+    # producer emits - so the check read None and passed on everything.
+    #
+    # Same shape as FunctionalRegion.volume and the same frame, so the two are
+    # comparable by declaration rather than by an assumed convention, and the
+    # same aabb/overlaps helpers judge both.
+    optional_fields: [envelope]
     field_semantics:
+      envelope:
+        kind: spatial
+        frame: ReferenceScale
       body:
         kind: reference
         target: Body
@@ -739,7 +753,23 @@ entity_families:
       settlement: s06
     purpose: "A relation the parameters must satisfy."
     required_fields: [entity_id, expression, parameters, kind]
-    optional_fields: [settlement]
+    # WHICH INTERFACE THIS CONSTRAINT GOVERNS.
+    #
+    # S05-C9 requires every declared clearance to become a Constraint. The first
+    # implementation looked for `interface`/`realizes` keys that no contract
+    # declares, so the link set was always empty and the rule could only be
+    # satisfied by a test injecting a field production never writes.
+    #
+    # A typed reference instead: the Constraint points at the Interface whose
+    # clearance it expresses. Direction chosen so the constraint - the later,
+    # derived thing - carries the reference, as every other derived family does.
+    optional_fields: [settlement, governs_interface]
+    field_semantics:
+      governs_interface:
+        kind: reference
+        target: Interface
+        cardinality: one
+        resolvable: false
 
   UnresolvedDecision:
     semantic_roles: [open_item]

@@ -129,7 +129,17 @@ class TestDeclaredCorpus(_Base):
         # its envelope constraints bind, the full obligation set S05-C4 checks
         # coverage against, and - MAY_BE_EMPTY - the declared clearances S05-C9
         # turns into constraints and the regions S05-C8 keeps features out of.
-        self.assertEqual(59, len(rows), "the premise corpus changed size")
+        #
+        # 60 at S-9 semantic hardening: s05 declares a seventh, `limit_to_produce`.
+        # S05-C3 asks whether a feature pair can PRODUCE a travel limit that a
+        # MobilityExpectation dispositions as BLOCKED_BY - and the mobility
+        # dispositions were not among the six. The check read a family the view
+        # never granted, `_rows` returned the empty list it returns for anything
+        # absent, every cell was skipped, and the check reported compliance while
+        # being unable to fail on any input. The premise is the repair rather
+        # than a deleted check, because a stage cannot be asked to satisfy a
+        # demand it was never shown.
+        self.assertEqual(60, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"
