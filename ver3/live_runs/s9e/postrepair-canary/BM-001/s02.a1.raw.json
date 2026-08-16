@@ -1,0 +1,468 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must be compact.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "A product that is not compact fails the requirement that it be compact."
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must have a reusable latch that can be opened and closed repeatedly.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "A latch that cannot be operated repeatedly is not reusable."
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The box must not open accidentally during normal handling.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If the latch opens under normal handling, then accidental opening occurs."
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The latch must be easy for a user to operate.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "If the latch is not easy to operate, the requirement is not met."
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The latch must remain secure during transport.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If the latch opens during transport, it is not secure."
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The product must be suitable for low-cost manufacturing.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": "If the product is not low-cost to manufacture, it fails the requirement."
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The product must be practical for desktop use.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "A product that is not practical for desktop use fails the requirement."
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The design must be mechanically plausible.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "A design that is not mechanically plausible fails the requirement."
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The product must be easy to assemble.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If the product is not easy to assemble, it fails the requirement."
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "Relative motion must be permitted between the latch and the box body to allow opening and closing.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "If the latch cannot move relative to the box, it cannot be opened or closed."
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "The latch must maintain its configuration when closed to prevent accidental opening.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If the latch does not maintain its closed configuration, it may open accidentally."
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The motion of the latch must be bounded to prevent over-rotation or over-travel.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If the latch motion is unbounded, it may not function reliably."
+    },
+    {
+      "id": "OBL-0013",
+      "statement": "The latch must be retained to the box body during operation and transport.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If the latch separates from the box, it cannot be operated or secure."
+    },
+    {
+      "id": "OBL-0014",
+      "statement": "The user must be able to reach and operate the latch.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "If the user cannot reach the latch, they cannot operate it."
+    },
+    {
+      "id": "OBL-0015",
+      "statement": "The box must resist loads imposed by stored contents without deformation that affects operation.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": "If the box deforms under contents, it may not be practical for desktop use."
+    },
+    {
+      "id": "OBL-0016",
+      "statement": "The product must tolerate normal handling loads without accidental opening.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If normal handling loads cause opening, the requirement fails."
+    },
+    {
+      "id": "OBL-0017",
+      "statement": "The product must withstand transport loads without opening.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If transport loads cause opening, the latch is not secure."
+    },
+    {
+      "id": "OBL-0018",
+      "statement": "The assembly process must not require special tooling.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s03",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If special tooling is required, it may be less easy to assemble."
+    },
+    {
+      "id": "OBL-0019",
+      "statement": "The product must be manufactured from low-cost materials.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": "If the material is expensive, the product may not be low-cost."
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the latch",
+      "reacted_at_role": "the box body",
+      "reacted_at_site": "RSR-0001",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the box body",
+      "reacted_at_role": "the desk surface",
+      "reacted_at_site": "RSR-0002",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the box body",
+      "reacted_at_role": "the desk surface",
+      "reacted_at_site": "RSR-0002",
+      "direction_class": "TRANSVERSE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the latch",
+      "reacted_at_role": "the box body",
+      "reacted_at_site": "RSR-0001",
+      "direction_class": "AXIAL",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0005",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the box body",
+      "reacted_at_role": "the surroundings",
+      "reacted_at_site": "RSR-0003",
+      "direction_class": "TRANSVERSE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0006",
+      "scenario": "SCN-0003",
+      "applied_to_role": "the box body and latch components",
+      "reacted_at_role": "the assembly environment",
+      "reacted_at_site": "RSR-0004",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "reaction_site_requirements": [
+    {
+      "id": "RSR-0001",
+      "scenario": "SCN-0001",
+      "boundary_side": "INTERNAL",
+      "at_role": "the box body",
+      "why": "The latch is inside the system boundary; the box body is the only internal site that can react the latch force."
+    },
+    {
+      "id": "RSR-0002",
+      "scenario": "SCN-0001",
+      "boundary_side": "EXTERNAL",
+      "at_role": "the desk surface",
+      "why": "The desk surface is outside the system boundary and supports the box."
+    },
+    {
+      "id": "RSR-0003",
+      "scenario": "SCN-0002",
+      "boundary_side": "EXTERNAL",
+      "at_role": "the surroundings",
+      "why": "During transport, external disturbances act on the box from the surroundings."
+    },
+    {
+      "id": "RSR-0004",
+      "scenario": "SCN-0003",
+      "boundary_side": "EXTERNAL",
+      "at_role": "the assembly environment",
+      "why": "The assembly environment is outside the system boundary and reacts the forces applied during assembly."
+    }
+  ],
+  "physical_effect_obligations": [
+    {
+      "id": "PEO-0001",
+      "effect": "PERMIT_MOTION",
+      "between_roles": "the latch and the box body",
+      "addresses_obligations": ["OBL-0010"],
+      "under_load_case": "LC-0001",
+      "persistence": "repeated during operation"
+    },
+    {
+      "id": "PEO-0002",
+      "effect": "MAINTAIN_CONFIGURATION",
+      "between_roles": "the latch and the box body",
+      "addresses_obligations": ["OBL-0011"],
+      "under_load_case": "LC-0004",
+      "persistence": "during transport"
+    },
+    {
+      "id": "PEO-0003",
+      "effect": "BOUND_MOTION",
+      "between_roles": "the latch and the box body",
+      "addresses_obligations": ["OBL-0012"],
+      "under_load_case": "LC-0001",
+      "persistence": "during operation"
+    },
+    {
+      "id": "PEO-0004",
+      "effect": "RETAIN_BODY",
+      "between_roles": "the latch and the box body",
+      "addresses_obligations": ["OBL-0013"],
+      "under_load_case": "LC-0001",
+      "persistence": "during operation and transport"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A latch using a spring-loaded sliding bolt guided by a slot.",
+      "family": "ACTUATE",
+      "principle": {
+        "ACTUATE": "DIRECT_MANUAL",
+        "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+        "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+        "BOUND_MOTION": "HARD_STOP",
+        "RETAIN_BODY": "ELASTIC_CAPTURE",
+        "GUIDE_MOTION": "PRISMATIC_GUIDE"
+      },
+      "addresses_obligations": ["OBL-0002", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": ["OBL-0002", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can confirm the prismatic slider and detent provide the required motion and retention."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A latch consisting of a rotating catch with a spring-loaded detent.",
+      "family": "ACTUATE",
+      "principle": {
+        "ACTUATE": "DIRECT_MANUAL",
+        "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+        "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+        "BOUND_MOTION": "HARD_STOP",
+        "RETAIN_BODY": "ROTATION_LOCK",
+        "GUIDE_MOTION": "JOURNAL_SUPPORT"
+      },
+      "addresses_obligations": ["OBL-0002", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": ["OBL-0002", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "evidence_route_verdict": {
+        "route": "MOBILITY_ANALYSIS",
+        "available": true,
+        "note": "Mobility analysis can confirm the rotary motion and detent provide the required function."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A latch using a compliant flexure that snaps over a lip.",
+      "family": "ACTUATE",
+      "principle": {
+        "ACTUATE": "DIRECT_MANUAL",
+        "PERMIT_RELATIVE_MOTION": "COMPLIANT_FLEXURE",
+        "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+        "BOUND_MOTION": "HARD_STOP",
+        "RETAIN_BODY": "ELASTIC_CAPTURE",
+        "GUIDE_MOTION": "MULTI_POINT_CONSTRAINT"
+      },
+      "addresses_obligations": ["OBL-0002", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "obligations_created": ["OBL-0002", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "No compliance analysis route is available; cannot verify deflection forces or snap forces."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0002", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "predicates": "The latch can be slid open and closed manually; when closed, a detent holds it and a hard stop bounds its travel; the latch remains attached to the box."
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0002", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "predicates": "The latch can be rotated open and closed manually; when closed, a detent holds it and a hard stop bounds its rotation; the latch remains attached to the box."
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0002", "OBL-0010", "OBL-0011", "OBL-0012", "OBL-0013", "OBL-0014"],
+      "predicates": "The latch can be flexed open and closed manually; when closed, a detent holds it and a hard stop bounds its deflection; the latch remains attached to the box."
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Choosing between sliding, rotating, and flexing latch mechanisms requires knowing the required security level and acceptable actuation force.",
+      "why_open": "Ambiguity AMB-0001 leaves unclear how secure the latch must be during transport, and ambiguity AMB-0002 leaves unclear what normal handling entails.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0001", "AMB-0002"],
+      "blocks": ["OBL-0003", "OBL-0004", "OBL-0005"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The stored contents are relatively light (e.g., paper clips, pens), not heavy tools or books.",
+      "why": "The requirements do not specify the weight of contents; assuming light contents keeps the structural load modest.",
+      "would_be_invalidated_by": "If the contents are specified to be heavy, the structural strength obligations would change."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The box will be placed on a flat, stable desk surface.",
+      "why": "No surface condition is specified; assuming a flat surface avoids tipping loads.",
+      "would_be_invalidated_by": "If the box is used on uneven or moving surfaces, additional stability constraints would arise."
+    }
+  ]
+}

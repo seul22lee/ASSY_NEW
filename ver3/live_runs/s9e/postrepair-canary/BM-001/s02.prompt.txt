@@ -1,0 +1,352 @@
+You are deciding what must physically be true of a product, what
+loads act on it, and which families of mechanism could satisfy both.
+
+You receive TYPED REQUIREMENTS AND CONTEXT. You do not receive the original
+request and you must not try to reconstruct it. Work only from what is below.
+
+RULES
+1. Derive OBLIGATIONS. EVERY requirement must be cited by at least one
+   obligation - including the ones nothing here can evidence. Each obligation
+   carries:
+     - scope: UNIVERSAL if every candidate must satisfy it, or
+       CANDIDATE_DISCRIMINATING if how it is satisfied differs by candidate;
+     - evidence_route and route_available, taken from the routes listed below.
+       A requirement whose route does not exist is ADDRESSED AND
+       UN-EVIDENCEABLE, which is a different thing from a requirement nobody
+       derived an obligation from. Make it visible.
+     - involves_actors, citing the Actor ids, whenever the obligation is about
+       something an actor must reach or operate.
+     - derivation_premises: the physical premise that makes the requirement
+       imply this obligation. A premise is a claim about the world that could
+       turn out to be FALSE - "contents that cannot be reached are not stored",
+       "a load that is not reacted accelerates the body". Not a restatement of
+       the requirement and not a noun phrase. Without it, a later stage that
+       finds this obligation unsatisfiable cannot tell whether the obligation
+       was wrong or the requirement was.
+     - satisfiable_at: a candidate here is a PRINCIPLE FAMILY, not a mechanism.
+       There are no elements, no contacts, no dimensions and no geometry yet, so
+       an obligation about any of those is NOT satisfiable at s02 and must name
+       the earliest stage that could settle it. Marking such an obligation s02
+       makes work look done that nobody has done.
+   Across the whole set: if every obligation is UNIVERSAL then nothing here
+   distinguishes one candidate from another, and the stage that has to choose
+   between them will have no grounds. Obligations whose SATISFACTION DIFFERS by
+   principle family are CANDIDATE_DISCRIMINATING; say so.
+
+   THIS LIST IS WRITTEN FIRST AND CANNOT BE ADDED TO LATER. Everything after it
+   can only refer back to it. So finish choosing your candidate families BEFORE
+   you write this list, and include here every obligation those families bring
+   with them - the supports, retentions, bounds, clearances and access each
+   principle family REQUIRES in order to work at all. Those are obligations in
+   exactly the same sense as the ones derived from requirements, and they are
+   the ones you will list in obligations_created under rule 4. An obligation you
+   only discover while writing the candidates has nowhere left to go: its id
+   will point at nothing, and nobody downstream can ever check it.
+2. Derive LOAD CASES. A load case says what the WORLD does to the product: which
+   scenario, on which body ROLE, reacted at which ROLE, in which direction class
+   (AXIAL, TRANSVERSE, RADIAL, MOMENT, GRAVITY, NONE), of which kind (GRAVITY,
+   PAYLOAD, ACTOR_APPLIED, REACTION), with a magnitude ONLY if the requirements
+   supply one, otherwise magnitude_or_status = "UNSUPPORTED".
+   A load case must NOT name a specific part and must NOT say which element
+   carries what. That depends on the mechanism, which does not exist yet.
+   applied_to_role and reacted_at_role are ROLES, written as the phrase that
+   says what the thing DOES - "the surface the product stands on", "the body the
+   product grips", "the moving closing role". A single noun or an identifier is
+   a part, not a role: `base`, `housing`, `PLATFORM`, `box_body` all name things
+   that do not exist yet. Every load terminates somewhere OUTSIDE the product,
+   at a site the scenario's system boundary puts outside it; a load reacted
+   against the product itself has not been reacted.
+   If the requirements state a magnitude with a qualifier, the qualifier travels
+   with the number: "approximately 1 kg" does not become "1 kg" here.
+3. Form CANDIDATES from the principle families offered below. A candidate names
+   the FUNCTION CLASSES it must perform and the PRINCIPLE FAMILY it uses for
+   each. Two candidates are only genuinely different if they differ in a
+   principle family, not in wording.
+   `principle` is a MAPPING from function class to principle family:
+       "principle": {"<function class>": "<principle family>", ...}
+   A candidate that does one thing is a ONE-ENTRY MAPPING, never a bare string.
+   A candidate performs several function classes, and only a mapping can say
+   which principle serves which.
+4. For every candidate record addresses_obligations AND obligations_created. A
+   candidate that needs a support has CREATED a support obligation. Omitting
+   this makes an incomplete candidate look cheaper than a complete one.
+   obligations_created holds the IDS of obligations you already wrote in the
+   obligations list under rule 1 - it is a reference list, not a place to
+   introduce something new. If you find yourself needing an id that is not
+   already in that list, the omission happened back at rule 1, and the answer is
+   to have put it there, not to invent an id here.
+5. For every candidate record its evidence_route_verdict from the routes below:
+   which route its primary function would need, and whether that route exists.
+   If the route does not exist, say so - do not avoid the candidate for it.
+6. NEVER select a winner. NEVER score. If several candidates remain plausible
+   and nothing distinguishes them, emit an UnresolvedDecision naming the
+   evidence that WOULD distinguish them. Every UnresolvedDecision must CITE, by
+   id, the Ambiguity or Freedom entities that keep it open (kept_open_by) and
+   must type its alternatives list (alternatives_kind: ENTITY_REFS,
+   PRINCIPLE_FAMILIES or FREE_TEXT). Do not restate an ambiguity in prose that
+   the input already gave you as an entity.
+7. For every place a load must ultimately be reacted, record a REACTION SITE
+   REQUIREMENT: which scenario declares it, whether the scenario's system
+   boundary puts it OUTSIDE the product (EXTERNAL) or inside it (INTERNAL), and
+   at which role. Then name that id in the load case's reacted_at_site. The
+   world is not a body; it is a site outside the product, and a load that has
+   nowhere declared to be reacted has nowhere to go.
+8. For every physical demand the obligations imply, record a PHYSICAL EFFECT
+   OBLIGATION: what effect must occur, between which ROLES, and under which load
+   case. The effect is one of TRANSMIT_FORCE | TRANSMIT_MOTION | CONVERT_MOTION | PERMIT_MOTION | PREVENT_MOTION | LOCATE | CONTAIN | METER. Say the effect, never the mechanism:
+   "rotation must be permitted between the handle role and the body role" is an
+   effect; "use a ball bearing" is a mechanism and belongs to no stage yet.
+   Name ROLES, never bodies - there are no bodies at this stage to name. A role
+   is a name, not an id: "the actuation role" is an answer, and an Actor id is
+   a different thing entirely.
+9. Every id you write in a reference field must be an id. A reference field is
+   never a description. If a candidate creates an obligation, write that
+   obligation in the obligations list, give it an id, and put THAT ID in
+   obligations_created. Describing it instead leaves nothing downstream can
+   address, and the obligation you meant does not exist.
+10. Never name a dimension or a position.
+
+PRINCIPLE FAMILIES AVAILABLE (by function class)
+  PERMIT_RELATIVE_MOTION: REVOLUTE_PAIR, PRISMATIC_PAIR, HELICAL_PAIR, PLANAR_PAIR, SPHERICAL_PAIR, COMPLIANT_FLEXURE
+  CONVERT_MOTION: CRANK_SLIDER, SCREW_AND_NUT, RACK_AND_PINION, CAM_AND_FOLLOWER, LEVER_LINKAGE, FLEXIBLE_ELEMENT_DRIVE, WEDGE_OR_INCLINE
+  MAINTAIN_CONFIGURATION: KINEMATIC_BLOCK, OVER_CENTRE, DETENT_OR_SNAP, FRICTION_HOLD, GRAVITY_SEATED, SEPARATE_RETAINING_MEMBER
+  BOUND_MOTION: HARD_STOP, JOINT_LIMIT_BY_GEOMETRY
+  RETAIN_BODY: LATER_BODY_COVER, ROTATION_LOCK, ELASTIC_CAPTURE, GEOMETRIC_UNDERCUT
+  GUIDE_MOTION: PRISMATIC_GUIDE, JOURNAL_SUPPORT, MULTI_POINT_CONSTRAINT
+  TRANSMIT_LOAD: DIRECT_BEARING, SHEAR_MEMBER, TENSION_MEMBER
+  PERMIT_ASSEMBLY: STRAIGHT_INSERTION, INSERT_AND_TURN, ELASTIC_INSERTION
+  ACTUATE: DIRECT_MANUAL, STORED_ENERGY, EXTERNAL_POWER
+  METER_DISCRETE_QUANTITY: ESCAPEMENT, SINGLE_ITEM_POCKET, INDEXING_ROTOR, GATED_PAIR, METERED_APERTURE
+
+EVIDENCE ROUTES AVAILABLE
+  COMPLIANCE_REDUCED_ORDER: deflection force, allowable travel, snap insertion force (available: False)
+  CONTACT_RESOLVING_ANALYSIS: friction retention, jamming, binding, engagement force (available: False)
+  MANUFACTURING_PROCESS_ANALYSIS: mouldability, process suitability, cost (available: False)
+  MATERIAL_PROPERTY_ANALYSIS: strength, stiffness, wear, fatigue, lifetime (available: False)
+  MOBILITY_ANALYSIS: degree-of-freedom availability, absence of a motion path (available: True)
+  RIGID_BODY_DYNAMICS: ideal-joint torque, back-drive under ideal joints, quasi-static balance (available: True)
+  RIGID_KINEMATIC_GEOMETRY: configuration existence, pose, reachability (available: True)
+  SWEPT_INTERFERENCE: path clearance, swept occupancy, assembly insertion, kinematic blocking (available: True)
+  TOLERANCE_ANALYSIS: fit under variation, stack-up (available: False)
+
+TYPED INPUT
+-----------
+{
+ "Actor": [
+  {
+   "entity_id": "ACT-0001",
+   "must_reach": [
+    "the latch"
+   ],
+   "name": "User"
+  }
+ ],
+ "Ambiguity": [
+  {
+   "block_scopes": [],
+   "conflicting_clauses": [],
+   "entity_id": "AMB-0001",
+   "resolvable_when": "Further specification of transport conditions or required security level.",
+   "statement": "The meaning of 'secure during transport' is not precisely defined."
+  },
+  {
+   "block_scopes": [],
+   "conflicting_clauses": [],
+   "entity_id": "AMB-0002",
+   "resolvable_when": "Further specification of what constitutes normal handling.",
+   "statement": "The meaning of 'normal handling' is not defined."
+  },
+  {
+   "block_scopes": [],
+   "conflicting_clauses": [],
+   "entity_id": "AMB-0003",
+   "resolvable_when": "Further specification of size or volume.",
+   "statement": "The term 'compact' is subjective and may be interpreted differently."
+  }
+ ],
+ "Freedom": [
+  {
+   "decision": "Exact dimensions of the storage box",
+   "entity_id": "FRE-0001",
+   "why_free": "The request only says 'compact', without specifying any size."
+  },
+  {
+   "decision": "Material of the storage box and latch",
+   "entity_id": "FRE-0002",
+   "why_free": "The request only says 'low-cost manufacturing', without specifying the material."
+  },
+  {
+   "decision": "Mechanism of the latch",
+   "entity_id": "FRE-0003",
+   "why_free": "The request only says 'reusable', without specifying the type."
+  },
+  {
+   "decision": "Design of the assembly method",
+   "entity_id": "FRE-0004",
+   "why_free": "The request only says 'easy to assemble', without specifying how."
+  }
+ ],
+ "Requirement": [
+  {
+   "entity_id": "REQ-0001",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "The box is compact and has a reusable latch.",
+   "quantity_class": "NONE",
+   "source_locator": "line 1",
+   "statement_verbatim": "Design a compact desktop storage box with a reusable latch.",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "entity_id": "REQ-0002",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "The box can be opened and closed repeatedly without accidental opening during normal handling.",
+   "quantity_class": "NONE",
+   "source_locator": "line 2",
+   "statement_verbatim": "The box should open and close repeatedly without accidental opening during normal handling.",
+   "verification_kind": "KINEMATIC"
+  },
+  {
+   "entity_id": "REQ-0003",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "The latch is easy to operate and remains secure during transport.",
+   "quantity_class": "NONE",
+   "source_locator": "line 3",
+   "statement_verbatim": "The latch should be easy for a user to operate while remaining secure during transport.",
+   "verification_kind": "FUNCTIONAL"
+  },
+  {
+   "entity_id": "REQ-0004",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "The product is suitable for low-cost manufacturing and practical for desktop use.",
+   "quantity_class": "NONE",
+   "source_locator": "line 4",
+   "statement_verbatim": "The product should be suitable for low-cost manufacturing and should be practical for desktop use.",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "entity_id": "REQ-0005",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "The design is mechanically plausible and easy to assemble.",
+   "quantity_class": "NONE",
+   "source_locator": "line 5",
+   "statement_verbatim": "The design should be mechanically plausible and easy to assemble.",
+   "verification_kind": "STRUCTURAL"
+  }
+ ],
+ "Scenario": [
+  {
+   "actors": [
+    "ACT-0001"
+   ],
+   "entity_id": "SCN-0001",
+   "environment": "normal handling conditions",
+   "kind": "OPERATION",
+   "name": "Repeated open/close operation",
+   "system_boundary": "Inside: the storage box and its latch. Outside: the user's hand, the desk surface, and any items stored inside."
+  },
+  {
+   "actors": [],
+   "entity_id": "SCN-0002",
+   "environment": "transport conditions",
+   "kind": "TRANSPORT",
+   "name": "Transport with latch engaged",
+   "system_boundary": "Inside: the storage box and its latch. Outside: the transport environment, including any vibration or movement."
+  },
+  {
+   "actors": [],
+   "entity_id": "SCN-0003",
+   "environment": "assembly environment",
+   "kind": "ASSEMBLY",
+   "name": "Assembly",
+   "system_boundary": "Inside: the storage box components. Outside: the assembly process and tooling, but no specific tools are named."
+  }
+ ]
+}
+
+RESPONSE SCHEMA
+Return a single JSON object with exactly these 8 keys, each holding a
+list. A
+list may be empty - an empty list is a value. Every field is required unless
+marked optional. Every id is a string in the format shown.
+
+  obligations[]          id "OBL-0001", statement, derived_from_requirements,
+                         mandatory (boolean), scope, satisfiable_at,
+                         evidence_route, route_available (boolean),
+                         involves_actors (optional), derivation_premises
+                         (optional)
+  load_cases[]           id "LC-0001", scenario, applied_to_role,
+                         reacted_at_role, reacted_at_site, direction_class,
+                         kind, magnitude_or_status
+  reaction_site_requirements[]
+                         id "RSR-0001", scenario, boundary_side, at_role, why
+                         (optional)
+  physical_effect_obligations[]
+                         id "PEO-0001", effect, between_roles,
+                         addresses_obligations, under_load_case (optional),
+                         persistence (optional)
+  candidates[]           id "CND-0001", summary, family, principle
+                         {function_class: principle_family},
+                         addresses_obligations, obligations_created,
+                         evidence_route_verdict {route, available (boolean),
+                         note}, self_locking (optional)
+  acceptance_contracts[] id "ACC-0001", candidate, obligations, predicates
+  unresolved[]           id "UNR-0001", decision, why_open, alternatives,
+                         alternatives_kind, kept_open_by, blocks
+  assumptions[]          id "ASM-0001", statement, why,
+                         would_be_invalidated_by
+
+No required field may be null. Where the answer is "there are none", use an
+empty list for a list field. A null is not an answer; an empty list is.
+
+REFERENCES BETWEEN ITEMS
+Each field below holds ids of the kind named. Ids beginning REQ-, SCN-, ACT-,
+FRE- and AMB- come from the TYPED INPUT you were given; ids beginning OBL-,
+CND- and LC- are ones you emit here. A reference to an id that appears in
+neither place is an error.
+
+  obligations[].derived_from_requirements  requirement ids from the input
+  obligations[].involves_actors            actor ids from the input
+  load_cases[].scenario                    a scenario id from the input
+  load_cases[].reacted_at_site                        a reaction site id you emit
+  reaction_site_requirements[].scenario               a scenario id from the input
+  physical_effect_obligations[].addresses_obligations obligation ids you emit here
+  physical_effect_obligations[].under_load_case       a load case id you emit here
+  candidates[].addresses_obligations       obligation ids you emit here
+  candidates[].obligations_created         obligation ids you emit here
+  acceptance_contracts[].candidate         a candidate id you emit here
+  acceptance_contracts[].obligations       obligation ids you emit here
+  unresolved[].kept_open_by                ambiguity and freedom ids from the
+                                           input - never a restatement in prose
+  unresolved[].blocks                      obligation ids you emit here
+  unresolved[].alternatives                typed by alternatives_kind: candidate
+                                           ids for ENTITY_REFS, family names for
+                                           PRINCIPLE_FAMILIES, prose for FREE_TEXT
+
+PERMITTED VALUES
+  scope             UNIVERSAL | CANDIDATE_DISCRIMINATING
+  satisfiable_at    s02 | s03 | s04 | s05 - the EARLIEST stage at which this
+                    obligation can be addressed at all. A candidate here is a
+                    principle family and not yet a mechanism, so an obligation
+                    about elements, contacts or dimensions is not satisfiable
+                    at s02 and must say so rather than appear unaddressed.
+  direction_class   AXIAL | TRANSVERSE | RADIAL | MOMENT | GRAVITY | NONE
+  load case kind    GRAVITY | PAYLOAD | ACTOR_APPLIED | REACTION
+  alternatives_kind ENTITY_REFS | PRINCIPLE_FAMILIES | FREE_TEXT
+  family            one of the FUNCTION CLASSES listed above
+  principle         a MAPPING function_class -> principle_family. Each KEY is one
+                    of the FUNCTION CLASSES listed above and each VALUE is one of
+                    the PRINCIPLE FAMILIES permitted for that function class. A
+                    candidate performing one function class is a one-entry
+                    mapping, never a bare string.
+  evidence_route    one of the EVIDENCE ROUTES listed above
+  scenario          the id of a Scenario given to you in the typed input
+
+IDS ALREADY IN USE
+These entities already exist in the design state. The ids are listed
+so you do not reuse one: every id you emit must be new. This is an
+identity list and nothing more - it says which ids are taken, not
+what those entities say, and it is not something to reason from.
+The example ids in the response schema show the FORMAT of an id.
+They are not offers of an available id, and the first index is
+commonly the one already taken.
+  Assumption: ASM-0001, ASM-0002

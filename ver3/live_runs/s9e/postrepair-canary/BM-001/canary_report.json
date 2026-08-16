@@ -1,0 +1,388 @@
+{
+ "campaign_purpose": "S9-E coherent post-repair S01->S02 canary",
+ "case": "BM-001",
+ "committed_after_s01": {
+  "Assumption": [
+   "ASM-0001",
+   "ASM-0002"
+  ]
+ },
+ "committed_counts": {
+  "Actor": 1,
+  "Ambiguity": 3,
+  "Assumption": 2,
+  "Freedom": 4,
+  "Requirement": 5,
+  "Scenario": 3,
+  "SourceClause": 5
+ },
+ "counts_after_s02": {
+  "Actor": 1,
+  "Ambiguity": 3,
+  "Assumption": 2,
+  "Freedom": 4,
+  "Requirement": 5,
+  "Scenario": 3,
+  "SourceClause": 5
+ },
+ "duplicate_id_blocker_reproduced": true,
+ "output_ceiling": 65536,
+ "run_id": "s9e-canary-BM-001",
+ "s01": {
+  "canonical_content_sha256": "416fe142e18f76acd4f3bf0535f342f09db7b0edc776930eda0902f3471d4487",
+  "consumer_view_status": "VIEW_READY",
+  "declared_incompleteness": [],
+  "execution_status": "SUCCESS",
+  "patch_applied": true,
+  "problems": [],
+  "prompt_chars": 6619,
+  "prompt_pairing_hash": "c73e5fe9f416eda8",
+  "provider_id": "deepseek",
+  "raw_chars": 6221,
+  "raw_response_sha256": "7d3aac3c7450f45456bd1a5e91d4cd08c3a6d81218482f32f099779086aee789",
+  "response_source": "LIVE",
+  "responsibility_id": "s01",
+  "rung": "ACCEPTED",
+  "seconds": 9.6,
+  "stage_owner_id": "s01",
+  "view_namespace_occupancy": {}
+ },
+ "s01_model_run_records": [
+  {
+   "attempt_index": 1,
+   "determinism": {
+    "seed": null,
+    "seed_honoured": "NOT_SUPPORTED",
+    "seed_requested_by_stage": 7,
+    "temperature": 1.0,
+    "temperature_actually_sent": 1.0,
+    "temperature_requested_by_stage": 0.0,
+    "top_p": null
+   },
+   "error_detail": null,
+   "execution_status": "SUCCESS",
+   "model_id": "deepseek-chat",
+   "model_id_requested": "deepseek-chat",
+   "model_id_served": "deepseek-v4-flash",
+   "model_run_id": "s9e-canary-BM-001|s01|sa1|a1",
+   "model_substitution": "provider served 'deepseek-v4-flash' for requested 'deepseek-chat'; recorded rather than assumed equivalent",
+   "model_version_string": "deepseek-v4-flash",
+   "provider_id": "deepseek",
+   "purpose": "convert a raw product request into typed requirements and context",
+   "request": {
+    "deadline_s": 120.0,
+    "experiment_overrides": {
+     "deadline_s": null,
+     "model": "deepseek-chat",
+     "response_format": "json_object",
+     "temperature": 1.0,
+     "top_p": null
+    },
+    "max_output_tokens": 32000,
+    "max_output_tokens_clamped_from": null,
+    "parameter_resolution": {
+     "deadline_s": {
+      "channel": "transport",
+      "effective": 120.0,
+      "note": "applied to the connection, not sent to the model",
+      "override": null,
+      "requested": 120.0,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "max_output_tokens": {
+      "channel": "payload",
+      "effective": 32000,
+      "note": "",
+      "override": null,
+      "requested": 32000,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "model": {
+      "channel": "payload",
+      "effective": "deepseek-chat",
+      "note": "the stage states no model; selecting one is an experiment decision",
+      "override": "deepseek-chat",
+      "requested": null,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "response_format": {
+      "channel": "payload",
+      "effective": "json_object",
+      "note": "format mode is a transport capability; the shape itself is the parser's",
+      "override": "json_object",
+      "requested": null,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "response_schema": {
+      "channel": "none",
+      "effective": null,
+      "note": "",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_NOT_REQUESTED"
+     },
+     "seed": {
+      "channel": "none",
+      "effective": null,
+      "note": "the provider accepts no seed parameter; the requested value is retained and no determinism is claimed",
+      "override": null,
+      "requested": 7,
+      "sent": false,
+      "status": "NOT_SENT_UNSUPPORTED"
+     },
+     "temperature": {
+      "channel": "payload",
+      "effective": 1.0,
+      "note": "the stage asks for a reproducible answer; the repeated-trial protocol asks for sampling, and the experiment says which run this is",
+      "override": 1.0,
+      "requested": 0.0,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "top_p": {
+      "channel": "none",
+      "effective": null,
+      "note": "accepted on the request and no longer discarded without trace",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_NOT_REQUESTED"
+     }
+    },
+    "parameters": {
+     "response_format": "json_object",
+     "temperature": 1.0,
+     "top_p": null
+    },
+    "prompt_chars": 6619,
+    "prompt_sha256": "c73e5fe9f416eda83a64cde332e37c4c6f908e36c924c286b2d05034823f10b1",
+    "prompt_text": "You are performing requirement capture on a product request.\n\nRead the request below and convert it into typed statements. You are the only\nstage that will ever see this text; every later stage reads only what you emit.\n\nRULES\n1. Never invent a requirement the text does not state.\n2. Never sharpen a qualifier. \"approximately 80-100 mm\" stays approximate and is\n   a BAND, not a magnitude.\n3. Never resolve an ambiguity. Record it.\n4. Never name a mechanism, a material, a part or a dimension. If the text does\n   not say how, you do not say how.\n5. For every requirement record its quantity_class: MAGNITUDE (a number),\n   BAND (a range or an approximate value), COMPARATIVE (more/less than\n   something) or NONE (no quantity at all). NONE is a fact and must be recorded\n   as one.\n6. Record every scenario with a kind: OPERATION, SERVICE, ASSEMBLY or TRANSPORT.\n   Service is a different activity from operation and the distinction matters.\n   For each scenario state its SYSTEM BOUNDARY as what is inside it and what is\n   outside it. Naming the product is not a boundary. The later stage has to know\n   where a load may be reacted, and it can only react a load against something\n   the boundary places outside the product - a surface it stands on, a structure\n   it is fixed to, a body it grips. A boundary that omits the outside leaves\n   every load with nowhere to go.\n7. Record every actor and what it must reach or operate.\n8. Record what the text deliberately leaves free, and what is genuinely\n   ambiguous.\n9. Record every HARD REQUIREMENT the text explicitly states - something that\n   bounds what may be BUILT AT ALL, such as a material class, a maximum\n   dimension, a prohibited energy source or a load the design must carry. Each\n   one names the requirement it comes from and carries only the values the text\n   actually states.\n\n   A PREFERENCE IS NOT ONE. \"Prefer fewer parts\", \"ideally compact\", \"minimise\n   cost\" say which buildable thing is WANTED, and a design is not forbidden for\n   ignoring them. If the text does not forbid something, there is no hard\n   requirement to record, and an empty list is the answer.\n\n   Never supply a number, a unit or an axis the text does not state. If the text\n   says \"reasonably compact\", that is a requirement with no quantity - record the\n   requirement and no hard constraint.\n\nRESPONSE SCHEMA\nReturn a single JSON object with exactly these eight keys, each holding a list.\nA list may be empty - an empty list is a value, and means \"there are none of\nthese\", which is a different statement from omitting the key. Every field is\nrequired unless marked optional. Every id is a string in the format shown.\n\n  source_clauses[]  id \"SRC-0001\", verbatim, locator, quantity_kinds[],\n                    directionality\n  requirements[]    id \"REQ-0001\", statement_verbatim, kind, verification_kind,\n                    observable_verbatim, source_locator, quantity_class\n  scenarios[]       id \"SCN-0001\", name, kind, system_boundary, actors[],\n                    environment\n  actors[]          id \"ACT-0001\", name, must_reach[]\n  freedoms[]        id \"FRE-0001\", decision, why_free\n  ambiguities[]     id \"AMB-0001\", statement, conflicting_clauses[],\n                    resolvable_when, block_scopes[] (optional)\n  assumptions[]     id \"ASM-0001\", statement, why, would_be_invalidated_by\n  hard_constraints[] requirement (one of your requirement ids), kind,\n                    statement_verbatim, parameters (an object, or null if the\n                    text states no values)\n\nPERMITTED HARD CONSTRAINT KINDS\nA kind not on this list cannot be recorded. That is deliberate: it is what stops\na wish becoming a constraint, and there is no kind here meaning \"less of\nsomething would be nicer\".\n\n  MATERIAL_CLASS_ONLY       parameters {material_class}\n  PROHIBITED_ENERGY_SOURCE  parameters {source}\n  MAX_OVERALL_DIMENSION     parameters {axis, limit, unit} - axis is X, Y, Z\n                            or ANY, and only where the text says which\n  LOAD_CAPACITY             parameters {magnitude, unit}\n\nA dimensional or load constraint is recorded ONLY where the requirement it comes\nfrom has quantity_class MAGNITUDE. An approximate or comparative quantity is a\nrequirement, not a limit anything can be checked against.\n\nNo required field may be null. Where the answer is \"there are none\", use an\nempty list for a list field and the string \"none\" for a text field. A null is\nnot an answer; an empty list is.\n\nREFERENCES BETWEEN ITEMS\nEvery field below holds ids of items YOU emit in this same response, in the\nexact id format shown above. A reference to an id you did not emit, or to an\nitem of the wrong kind, is an error.\n\n  requirements[].source_locator      the `locator` of one of your source_clauses\n  scenarios[].actors                 actor ids, \"ACT-0001\"\n  hard_constraints[].requirement     a requirement id, \"REQ-0001\"\n  ambiguities[].conflicting_clauses  source clause ids, \"SRC-0001\" - the CLAUSES\n                                     whose wording conflicts, never requirement\n                                     ids; [] if the ambiguity comes from silence\n                                     rather than from two clauses disagreeing\n\nPERMITTED VALUES\nThree different fields are called `kind`. They do not share a vocabulary, and a\nvalue from one is never valid in another.\n  requirement kind        FUNCTIONAL | USABILITY | PROCESS\n  verification_kind       STRUCTURAL | KINEMATIC | QUANTITATIVE\n  quantity_class          MAGNITUDE | BAND | COMPARATIVE | NONE\n  scenario kind           OPERATION | SERVICE | ASSEMBLY | TRANSPORT\n  system_boundary         a sentence naming what is inside and what is outside\n  quantity_kinds          the kinds of quantity the clause mentions, such as\n                          length, mass, count, force, time; [] if it states none\n  directionality          the direction the clause states, such as vertical,\n                          lateral, downward, bidirectional; \"none\" if it states\n                          no direction\n  source_locator          the `locator` of one of the source_clauses you emit\n  statement_verbatim      wording taken from the request, not paraphrased\n\nREQUEST\n-------\nDesign a compact desktop storage box with a reusable latch. The box should open and close repeatedly without accidental opening during normal handling. The latch should be easy for a user to operate while remaining secure during transport. The product should be suitable for low-cost manufacturing and should be practical for desktop use. The design should be mechanically plausible and easy to assemble.\n\n"
+   },
+   "response": {
+    "finish_reason": "stop",
+    "raw_text": "{\n  \"source_clauses\": [\n    {\n      \"id\": \"SRC-0001\",\n      \"verbatim\": \"Design a compact desktop storage box with a reusable latch.\",\n      \"locator\": \"line 1\",\n      \"quantity_kinds\": [],\n      \"directionality\": \"none\"\n    },\n    {\n      \"id\": \"SRC-0002\",\n      \"verbatim\": \"The box should open and close repeatedly without accidental opening during normal handling.\",\n      \"locator\": \"line 2\",\n      \"quantity_kinds\": [],\n      \"directionality\": \"none\"\n    },\n    {\n      \"id\": \"SRC-0003\",\n      \"verbatim\": \"The latch should be easy for a user to operate while remaining secure during transport.\",\n      \"locator\": \"line 3\",\n      \"quantity_kinds\": [],\n      \"directionality\": \"none\"\n    },\n    {\n      \"id\": \"SRC-0004\",\n      \"verbatim\": \"The product should be suitable for low-cost manufacturing and should be practical for desktop use.\",\n      \"locator\": \"line 4\",\n      \"quantity_kinds\": [],\n      \"directionality\": \"none\"\n    },\n    {\n      \"id\": \"SRC-0005\",\n      \"verbatim\": \"The design should be mechanically plausible and easy to assemble.\",\n      \"locator\": \"line 5\",\n      \"quantity_kinds\": [],\n      \"directionality\": \"none\"\n    }\n  ],\n  \"requirements\": [\n    {\n      \"id\": \"REQ-0001\",\n      \"statement_verbatim\": \"Design a compact desktop storage box with a reusable latch.\",\n      \"kind\": \"FUNCTIONAL\",\n      \"verification_kind\": \"STRUCTURAL\",\n      \"observable_verbatim\": \"The box is compact and has a reusable latch.\",\n      \"source_locator\": \"line 1\",\n      \"quantity_class\": \"NONE\"\n    },\n    {\n      \"id\": \"REQ-0002\",\n      \"statement_verbatim\": \"The box should open and close repeatedly without accidental opening during normal handling.\",\n      \"kind\": \"FUNCTIONAL\",\n      \"verification_kind\": \"KINEMATIC\",\n      \"observable_verbatim\": \"The box can be opened and closed repeatedly without accidental opening during normal handling.\",\n      \"source_locator\": \"line 2\",\n      \"quantity_class\": \"NONE\"\n    },\n    {\n      \"id\": \"REQ-0003\",\n      \"statement_verbatim\": \"The latch should be easy for a user to operate while remaining secure during transport.\",\n      \"kind\": \"FUNCTIONAL\",\n      \"verification_kind\": \"FUNCTIONAL\",\n      \"observable_verbatim\": \"The latch is easy to operate and remains secure during transport.\",\n      \"source_locator\": \"line 3\",\n      \"quantity_class\": \"NONE\"\n    },\n    {\n      \"id\": \"REQ-0004\",\n      \"statement_verbatim\": \"The product should be suitable for low-cost manufacturing and should be practical for desktop use.\",\n      \"kind\": \"FUNCTIONAL\",\n      \"verification_kind\": \"STRUCTURAL\",\n      \"observable_verbatim\": \"The product is suitable for low-cost manufacturing and practical for desktop use.\",\n      \"source_locator\": \"line 4\",\n      \"quantity_class\": \"NONE\"\n    },\n    {\n      \"id\": \"REQ-0005\",\n      \"statement_verbatim\": \"The design should be mechanically plausible and easy to assemble.\",\n      \"kind\": \"FUNCTIONAL\",\n      \"verification_kind\": \"STRUCTURAL\",\n      \"observable_verbatim\": \"The design is mechanically plausible and easy to assemble.\",\n      \"source_locator\": \"line 5\",\n      \"quantity_class\": \"NONE\"\n    }\n  ],\n  \"scenarios\": [\n    {\n      \"id\": \"SCN-0001\",\n      \"name\": \"Repeated open/close operation\",\n      \"kind\": \"OPERATION\",\n      \"system_boundary\": \"Inside: the storage box and its latch. Outside: the user's hand, the desk surface, and any items stored inside.\",\n      \"actors\": [\"ACT-0001\"],\n      \"environment\": \"normal handling conditions\"\n    },\n    {\n      \"id\": \"SCN-0002\",\n      \"name\": \"Transport with latch engaged\",\n      \"kind\": \"TRANSPORT\",\n      \"system_boundary\": \"Inside: the storage box and its latch. Outside: the transport environment, including any vibration or movement.\",\n      \"actors\": [],\n      \"environment\": \"transport conditions\"\n    },\n    {\n      \"id\": \"SCN-0003\",\n      \"name\": \"Assembly\",\n      \"kind\": \"ASSEMBLY\",\n      \"system_boundary\": \"Inside: the storage box components. Outside: the assembly process and tooling, but no specific tools are named.\",\n      \"actors\": [],\n      \"environment\": \"assembly environment\"\n    }\n  ],\n  \"actors\": [\n    {\n      \"id\": \"ACT-0001\",\n      \"name\": \"User\",\n      \"must_reach\": [\"the latch\"]\n    }\n  ],\n  \"freedoms\": [\n    {\n      \"id\": \"FRE-0001\",\n      \"decision\": \"Exact dimensions of the storage box\",\n      \"why_free\": \"The request only says 'compact', without specifying any size.\"\n    },\n    {\n      \"id\": \"FRE-0002\",\n      \"decision\": \"Material of the storage box and latch\",\n      \"why_free\": \"The request only says 'low-cost manufacturing', without specifying the material.\"\n    },\n    {\n      \"id\": \"FRE-0003\",\n      \"decision\": \"Mechanism of the latch\",\n      \"why_free\": \"The request only says 'reusable', without specifying the type.\"\n    },\n    {\n      \"id\": \"FRE-0004\",\n      \"decision\": \"Design of the assembly method\",\n      \"why_free\": \"The request only says 'easy to assemble', without specifying how.\"\n    }\n  ],\n  \"ambiguities\": [\n    {\n      \"id\": \"AMB-0001\",\n      \"statement\": \"The meaning of 'secure during transport' is not precisely defined.\",\n      \"conflicting_clauses\": [],\n      \"resolvable_when\": \"Further specification of transport conditions or required security level.\"\n    },\n    {\n      \"id\": \"AMB-0002\",\n      \"statement\": \"The meaning of 'normal handling' is not defined.\",\n      \"conflicting_clauses\": [],\n      \"resolvable_when\": \"Further specification of what constitutes normal handling.\"\n    },\n    {\n      \"id\": \"AMB-0003\",\n      \"statement\": \"The term 'compact' is subjective and may be interpreted differently.\",\n      \"conflicting_clauses\": [],\n      \"resolvable_when\": \"Further specification of size or volume.\"\n    }\n  ],\n  \"assumptions\": [\n    {\n      \"id\": \"ASM-0001\",\n      \"statement\": \"The storage box is intended for indoor desktop use.\",\n      \"why\": \"The request mentions 'desktop use' and 'normal handling'.\",\n      \"would_be_invalidated_by\": \"A specific requirement for outdoor or harsh environments.\"\n    },\n    {\n      \"id\": \"ASM-0002\",\n      \"statement\": \"The latch is manually operated by a user.\",\n      \"why\": \"The request mentions 'easy for a user to operate'.\",\n      \"would_be_invalidated_by\": \"A requirement for automatic or tool-based operation.\"\n    }\n  ],\n  \"hard_constraints\": []\n}",
+    "reasoning_content_present": false,
+    "reasoning_content_stored": false,
+    "response_chars": 6221,
+    "response_sha256": "7d3aac3c7450f45456bd1a5e91d4cd08c3a6d81218482f32f099779086aee789",
+    "truncated": false
+   },
+   "run_id": "s9e-canary-BM-001",
+   "stage_attempt": 1,
+   "stage_id": "s01",
+   "timing": {
+    "duration_s": 9.394,
+    "ended_at": 1786859007.3533537,
+    "retry_wait_s": 0.0,
+    "started_at": 1786858997.9592957
+   },
+   "usage": {
+    "cached_input_tokens": 1536,
+    "input_tokens": 1554,
+    "output_tokens": 1613
+   }
+  }
+ ],
+ "s02": {
+  "canonical_content_sha256": "33c3e04605fa2b4908bc049fd6ac9ada63f0d55197947a454051cf4aab880c12",
+  "consumer_view_status": "VIEW_READY",
+  "declared_incompleteness": [
+   "load case LC-0004 acts in SCN-0002 and is reacted at RSR-0001, which SCN-0001's boundary declared"
+  ],
+  "execution_status": "SCHEMA_FAILURE",
+  "patch_applied": false,
+  "problems": [
+   "DUPLICATE_ID: ASM-0001",
+   "DUPLICATE_ID: ASM-0002"
+  ],
+  "prompt_chars": 18957,
+  "prompt_pairing_hash": "ed0155e9155eee21",
+  "provider_id": "deepseek",
+  "raw_chars": 18030,
+  "raw_response_sha256": "b44cb53ab5f9a2a114c00a01b760107fa85e1eb49b3c45ece0e786d126e73e06",
+  "response_source": "LIVE",
+  "responsibility_id": "s02",
+  "rung": "CONTRACT_FAILED",
+  "seconds": 28.7,
+  "stage_owner_id": "s02",
+  "view_namespace_occupancy": {
+   "Assumption": [
+    "ASM-0001",
+    "ASM-0002"
+   ]
+  }
+ },
+ "s02_called": true,
+ "s02_model_run_records": [
+  {
+   "attempt_index": 1,
+   "determinism": {
+    "seed": null,
+    "seed_honoured": "NOT_SUPPORTED",
+    "seed_requested_by_stage": 7,
+    "temperature": 1.0,
+    "temperature_actually_sent": 1.0,
+    "temperature_requested_by_stage": 0.0,
+    "top_p": null
+   },
+   "error_detail": null,
+   "execution_status": "SUCCESS",
+   "model_id": "deepseek-chat",
+   "model_id_requested": "deepseek-chat",
+   "model_id_served": "deepseek-v4-flash",
+   "model_run_id": "s9e-canary-BM-001|s02|sa1|a1",
+   "model_substitution": "provider served 'deepseek-v4-flash' for requested 'deepseek-chat'; recorded rather than assumed equivalent",
+   "model_version_string": "deepseek-v4-flash",
+   "provider_id": "deepseek",
+   "purpose": "derive obligations and load cases, and form candidate principle families",
+   "request": {
+    "deadline_s": 120.0,
+    "experiment_overrides": {
+     "deadline_s": null,
+     "model": "deepseek-chat",
+     "response_format": "json_object",
+     "temperature": 1.0,
+     "top_p": null
+    },
+    "max_output_tokens": 32000,
+    "max_output_tokens_clamped_from": null,
+    "parameter_resolution": {
+     "deadline_s": {
+      "channel": "transport",
+      "effective": 120.0,
+      "note": "applied to the connection, not sent to the model",
+      "override": null,
+      "requested": 120.0,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "max_output_tokens": {
+      "channel": "payload",
+      "effective": 32000,
+      "note": "",
+      "override": null,
+      "requested": 32000,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "model": {
+      "channel": "payload",
+      "effective": "deepseek-chat",
+      "note": "the stage states no model; selecting one is an experiment decision",
+      "override": "deepseek-chat",
+      "requested": null,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "response_format": {
+      "channel": "payload",
+      "effective": "json_object",
+      "note": "format mode is a transport capability; the shape itself is the parser's",
+      "override": "json_object",
+      "requested": null,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "response_schema": {
+      "channel": "none",
+      "effective": null,
+      "note": "",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_NOT_REQUESTED"
+     },
+     "seed": {
+      "channel": "none",
+      "effective": null,
+      "note": "the provider accepts no seed parameter; the requested value is retained and no determinism is claimed",
+      "override": null,
+      "requested": 7,
+      "sent": false,
+      "status": "NOT_SENT_UNSUPPORTED"
+     },
+     "temperature": {
+      "channel": "payload",
+      "effective": 1.0,
+      "note": "the stage asks for a reproducible answer; the repeated-trial protocol asks for sampling, and the experiment says which run this is",
+      "override": 1.0,
+      "requested": 0.0,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "top_p": {
+      "channel": "none",
+      "effective": null,
+      "note": "accepted on the request and no longer discarded without trace",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_NOT_REQUESTED"
+     }
+    },
+    "parameters": {
+     "response_format": "json_object",
+     "temperature": 1.0,
+     "top_p": null
+    },
+    "prompt_chars": 18957,
+    "prompt_sha256": "ed0155e9155eee211a2b443024338c9e5648cd59c7cbbf93a5301ec691fab6dd",
+    "prompt_text": "You are deciding what must physically be true of a product, what\nloads act on it, and which families of mechanism could satisfy both.\n\nYou receive TYPED REQUIREMENTS AND CONTEXT. You do not receive the original\nrequest and you must not try to reconstruct it. Work only from what is below.\n\nRULES\n1. Derive OBLIGATIONS. EVERY requirement must be cited by at least one\n   obligation - including the ones nothing here can evidence. Each obligation\n   carries:\n     - scope: UNIVERSAL if every candidate must satisfy it, or\n       CANDIDATE_DISCRIMINATING if how it is satisfied differs by candidate;\n     - evidence_route and route_available, taken from the routes listed below.\n       A requirement whose route does not exist is ADDRESSED AND\n       UN-EVIDENCEABLE, which is a different thing from a requirement nobody\n       derived an obligation from. Make it visible.\n     - involves_actors, citing the Actor ids, whenever the obligation is about\n       something an actor must reach or operate.\n     - derivation_premises: the physical premise that makes the requirement\n       imply this obligation. A premise is a claim about the world that could\n       turn out to be FALSE - \"contents that cannot be reached are not stored\",\n       \"a load that is not reacted accelerates the body\". Not a restatement of\n       the requirement and not a noun phrase. Without it, a later stage that\n       finds this obligation unsatisfiable cannot tell whether the obligation\n       was wrong or the requirement was.\n     - satisfiable_at: a candidate here is a PRINCIPLE FAMILY, not a mechanism.\n       There are no elements, no contacts, no dimensions and no geometry yet, so\n       an obligation about any of those is NOT satisfiable at s02 and must name\n       the earliest stage that could settle it. Marking such an obligation s02\n       makes work look done that nobody has done.\n   Across the whole set: if every obligation is UNIVERSAL then nothing here\n   distinguishes one candidate from another, and the stage that has to choose\n   between them will have no grounds. Obligations whose SATISFACTION DIFFERS by\n   principle family are CANDIDATE_DISCRIMINATING; say so.\n\n   THIS LIST IS WRITTEN FIRST AND CANNOT BE ADDED TO LATER. Everything after it\n   can only refer back to it. So finish choosing your candidate families BEFORE\n   you write this list, and include here every obligation those families bring\n   with them - the supports, retentions, bounds, clearances and access each\n   principle family REQUIRES in order to work at all. Those are obligations in\n   exactly the same sense as the ones derived from requirements, and they are\n   the ones you will list in obligations_created under rule 4. An obligation you\n   only discover while writing the candidates has nowhere left to go: its id\n   will point at nothing, and nobody downstream can ever check it.\n2. Derive LOAD CASES. A load case says what the WORLD does to the product: which\n   scenario, on which body ROLE, reacted at which ROLE, in which direction class\n   (AXIAL, TRANSVERSE, RADIAL, MOMENT, GRAVITY, NONE), of which kind (GRAVITY,\n   PAYLOAD, ACTOR_APPLIED, REACTION), with a magnitude ONLY if the requirements\n   supply one, otherwise magnitude_or_status = \"UNSUPPORTED\".\n   A load case must NOT name a specific part and must NOT say which element\n   carries what. That depends on the mechanism, which does not exist yet.\n   applied_to_role and reacted_at_role are ROLES, written as the phrase that\n   says what the thing DOES - \"the surface the product stands on\", \"the body the\n   product grips\", \"the moving closing role\". A single noun or an identifier is\n   a part, not a role: `base`, `housing`, `PLATFORM`, `box_body` all name things\n   that do not exist yet. Every load terminates somewhere OUTSIDE the product,\n   at a site the scenario's system boundary puts outside it; a load reacted\n   against the product itself has not been reacted.\n   If the requirements state a magnitude with a qualifier, the qualifier travels\n   with the number: \"approximately 1 kg\" does not become \"1 kg\" here.\n3. Form CANDIDATES from the principle families offered below. A candidate names\n   the FUNCTION CLASSES it must perform and the PRINCIPLE FAMILY it uses for\n   each. Two candidates are only genuinely different if they differ in a\n   principle family, not in wording.\n   `principle` is a MAPPING from function class to principle family:\n       \"principle\": {\"<function class>\": \"<principle family>\", ...}\n   A candidate that does one thing is a ONE-ENTRY MAPPING, never a bare string.\n   A candidate performs several function classes, and only a mapping can say\n   which principle serves which.\n4. For every candidate record addresses_obligations AND obligations_created. A\n   candidate that needs a support has CREATED a support obligation. Omitting\n   this makes an incomplete candidate look cheaper than a complete one.\n   obligations_created holds the IDS of obligations you already wrote in the\n   obligations list under rule 1 - it is a reference list, not a place to\n   introduce something new. If you find yourself needing an id that is not\n   already in that list, the omission happened back at rule 1, and the answer is\n   to have put it there, not to invent an id here.\n5. For every candidate record its evidence_route_verdict from the routes below:\n   which route its primary function would need, and whether that route exists.\n   If the route does not exist, say so - do not avoid the candidate for it.\n6. NEVER select a winner. NEVER score. If several candidates remain plausible\n   and nothing distinguishes them, emit an UnresolvedDecision naming the\n   evidence that WOULD distinguish them. Every UnresolvedDecision must CITE, by\n   id, the Ambiguity or Freedom entities that keep it open (kept_open_by) and\n   must type its alternatives list (alternatives_kind: ENTITY_REFS,\n   PRINCIPLE_FAMILIES or FREE_TEXT). Do not restate an ambiguity in prose that\n   the input already gave you as an entity.\n7. For every place a load must ultimately be reacted, record a REACTION SITE\n   REQUIREMENT: which scenario declares it, whether the scenario's system\n   boundary puts it OUTSIDE the product (EXTERNAL) or inside it (INTERNAL), and\n   at which role. Then name that id in the load case's reacted_at_site. The\n   world is not a body; it is a site outside the product, and a load that has\n   nowhere declared to be reacted has nowhere to go.\n8. For every physical demand the obligations imply, record a PHYSICAL EFFECT\n   OBLIGATION: what effect must occur, between which ROLES, and under which load\n   case. The effect is one of TRANSMIT_FORCE | TRANSMIT_MOTION | CONVERT_MOTION | PERMIT_MOTION | PREVENT_MOTION | LOCATE | CONTAIN | METER. Say the effect, never the mechanism:\n   \"rotation must be permitted between the handle role and the body role\" is an\n   effect; \"use a ball bearing\" is a mechanism and belongs to no stage yet.\n   Name ROLES, never bodies - there are no bodies at this stage to name. A role\n   is a name, not an id: \"the actuation role\" is an answer, and an Actor id is\n   a different thing entirely.\n9. Every id you write in a reference field must be an id. A reference field is\n   never a description. If a candidate creates an obligation, write that\n   obligation in the obligations list, give it an id, and put THAT ID in\n   obligations_created. Describing it instead leaves nothing downstream can\n   address, and the obligation you meant does not exist.\n10. Never name a dimension or a position.\n\nPRINCIPLE FAMILIES AVAILABLE (by function class)\n  PERMIT_RELATIVE_MOTION: REVOLUTE_PAIR, PRISMATIC_PAIR, HELICAL_PAIR, PLANAR_PAIR, SPHERICAL_PAIR, COMPLIANT_FLEXURE\n  CONVERT_MOTION: CRANK_SLIDER, SCREW_AND_NUT, RACK_AND_PINION, CAM_AND_FOLLOWER, LEVER_LINKAGE, FLEXIBLE_ELEMENT_DRIVE, WEDGE_OR_INCLINE\n  MAINTAIN_CONFIGURATION: KINEMATIC_BLOCK, OVER_CENTRE, DETENT_OR_SNAP, FRICTION_HOLD, GRAVITY_SEATED, SEPARATE_RETAINING_MEMBER\n  BOUND_MOTION: HARD_STOP, JOINT_LIMIT_BY_GEOMETRY\n  RETAIN_BODY: LATER_BODY_COVER, ROTATION_LOCK, ELASTIC_CAPTURE, GEOMETRIC_UNDERCUT\n  GUIDE_MOTION: PRISMATIC_GUIDE, JOURNAL_SUPPORT, MULTI_POINT_CONSTRAINT\n  TRANSMIT_LOAD: DIRECT_BEARING, SHEAR_MEMBER, TENSION_MEMBER\n  PERMIT_ASSEMBLY: STRAIGHT_INSERTION, INSERT_AND_TURN, ELASTIC_INSERTION\n  ACTUATE: DIRECT_MANUAL, STORED_ENERGY, EXTERNAL_POWER\n  METER_DISCRETE_QUANTITY: ESCAPEMENT, SINGLE_ITEM_POCKET, INDEXING_ROTOR, GATED_PAIR, METERED_APERTURE\n\nEVIDENCE ROUTES AVAILABLE\n  COMPLIANCE_REDUCED_ORDER: deflection force, allowable travel, snap insertion force (available: False)\n  CONTACT_RESOLVING_ANALYSIS: friction retention, jamming, binding, engagement force (available: False)\n  MANUFACTURING_PROCESS_ANALYSIS: mouldability, process suitability, cost (available: False)\n  MATERIAL_PROPERTY_ANALYSIS: strength, stiffness, wear, fatigue, lifetime (available: False)\n  MOBILITY_ANALYSIS: degree-of-freedom availability, absence of a motion path (available: True)\n  RIGID_BODY_DYNAMICS: ideal-joint torque, back-drive under ideal joints, quasi-static balance (available: True)\n  RIGID_KINEMATIC_GEOMETRY: configuration existence, pose, reachability (available: True)\n  SWEPT_INTERFERENCE: path clearance, swept occupancy, assembly insertion, kinematic blocking (available: True)\n  TOLERANCE_ANALYSIS: fit under variation, stack-up (available: False)\n\nTYPED INPUT\n-----------\n{\n \"Actor\": [\n  {\n   \"entity_id\": \"ACT-0001\",\n   \"must_reach\": [\n    \"the latch\"\n   ],\n   \"name\": \"User\"\n  }\n ],\n \"Ambiguity\": [\n  {\n   \"block_scopes\": [],\n   \"conflicting_clauses\": [],\n   \"entity_id\": \"AMB-0001\",\n   \"resolvable_when\": \"Further specification of transport conditions or required security level.\",\n   \"statement\": \"The meaning of 'secure during transport' is not precisely defined.\"\n  },\n  {\n   \"block_scopes\": [],\n   \"conflicting_clauses\": [],\n   \"entity_id\": \"AMB-0002\",\n   \"resolvable_when\": \"Further specification of what constitutes normal handling.\",\n   \"statement\": \"The meaning of 'normal handling' is not defined.\"\n  },\n  {\n   \"block_scopes\": [],\n   \"conflicting_clauses\": [],\n   \"entity_id\": \"AMB-0003\",\n   \"resolvable_when\": \"Further specification of size or volume.\",\n   \"statement\": \"The term 'compact' is subjective and may be interpreted differently.\"\n  }\n ],\n \"Freedom\": [\n  {\n   \"decision\": \"Exact dimensions of the storage box\",\n   \"entity_id\": \"FRE-0001\",\n   \"why_free\": \"The request only says 'compact', without specifying any size.\"\n  },\n  {\n   \"decision\": \"Material of the storage box and latch\",\n   \"entity_id\": \"FRE-0002\",\n   \"why_free\": \"The request only says 'low-cost manufacturing', without specifying the material.\"\n  },\n  {\n   \"decision\": \"Mechanism of the latch\",\n   \"entity_id\": \"FRE-0003\",\n   \"why_free\": \"The request only says 'reusable', without specifying the type.\"\n  },\n  {\n   \"decision\": \"Design of the assembly method\",\n   \"entity_id\": \"FRE-0004\",\n   \"why_free\": \"The request only says 'easy to assemble', without specifying how.\"\n  }\n ],\n \"Requirement\": [\n  {\n   \"entity_id\": \"REQ-0001\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"The box is compact and has a reusable latch.\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"line 1\",\n   \"statement_verbatim\": \"Design a compact desktop storage box with a reusable latch.\",\n   \"verification_kind\": \"STRUCTURAL\"\n  },\n  {\n   \"entity_id\": \"REQ-0002\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"The box can be opened and closed repeatedly without accidental opening during normal handling.\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"line 2\",\n   \"statement_verbatim\": \"The box should open and close repeatedly without accidental opening during normal handling.\",\n   \"verification_kind\": \"KINEMATIC\"\n  },\n  {\n   \"entity_id\": \"REQ-0003\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"The latch is easy to operate and remains secure during transport.\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"line 3\",\n   \"statement_verbatim\": \"The latch should be easy for a user to operate while remaining secure during transport.\",\n   \"verification_kind\": \"FUNCTIONAL\"\n  },\n  {\n   \"entity_id\": \"REQ-0004\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"The product is suitable for low-cost manufacturing and practical for desktop use.\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"line 4\",\n   \"statement_verbatim\": \"The product should be suitable for low-cost manufacturing and should be practical for desktop use.\",\n   \"verification_kind\": \"STRUCTURAL\"\n  },\n  {\n   \"entity_id\": \"REQ-0005\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"The design is mechanically plausible and easy to assemble.\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"line 5\",\n   \"statement_verbatim\": \"The design should be mechanically plausible and easy to assemble.\",\n   \"verification_kind\": \"STRUCTURAL\"\n  }\n ],\n \"Scenario\": [\n  {\n   \"actors\": [\n    \"ACT-0001\"\n   ],\n   \"entity_id\": \"SCN-0001\",\n   \"environment\": \"normal handling conditions\",\n   \"kind\": \"OPERATION\",\n   \"name\": \"Repeated open/close operation\",\n   \"system_boundary\": \"Inside: the storage box and its latch. Outside: the user's hand, the desk surface, and any items stored inside.\"\n  },\n  {\n   \"actors\": [],\n   \"entity_id\": \"SCN-0002\",\n   \"environment\": \"transport conditions\",\n   \"kind\": \"TRANSPORT\",\n   \"name\": \"Transport with latch engaged\",\n   \"system_boundary\": \"Inside: the storage box and its latch. Outside: the transport environment, including any vibration or movement.\"\n  },\n  {\n   \"actors\": [],\n   \"entity_id\": \"SCN-0003\",\n   \"environment\": \"assembly environment\",\n   \"kind\": \"ASSEMBLY\",\n   \"name\": \"Assembly\",\n   \"system_boundary\": \"Inside: the storage box components. Outside: the assembly process and tooling, but no specific tools are named.\"\n  }\n ]\n}\n\nRESPONSE SCHEMA\nReturn a single JSON object with exactly these 8 keys, each holding a\nlist. A\nlist may be empty - an empty list is a value. Every field is required unless\nmarked optional. Every id is a string in the format shown.\n\n  obligations[]          id \"OBL-0001\", statement, derived_from_requirements,\n                         mandatory (boolean), scope, satisfiable_at,\n                         evidence_route, route_available (boolean),\n                         involves_actors (optional), derivation_premises\n                         (optional)\n  load_cases[]           id \"LC-0001\", scenario, applied_to_role,\n                         reacted_at_role, reacted_at_site, direction_class,\n                         kind, magnitude_or_status\n  reaction_site_requirements[]\n                         id \"RSR-0001\", scenario, boundary_side, at_role, why\n                         (optional)\n  physical_effect_obligations[]\n                         id \"PEO-0001\", effect, between_roles,\n                         addresses_obligations, under_load_case (optional),\n                         persistence (optional)\n  candidates[]           id \"CND-0001\", summary, family, principle\n                         {function_class: principle_family},\n                         addresses_obligations, obligations_created,\n                         evidence_route_verdict {route, available (boolean),\n                         note}, self_locking (optional)\n  acceptance_contracts[] id \"ACC-0001\", candidate, obligations, predicates\n  unresolved[]           id \"UNR-0001\", decision, why_open, alternatives,\n                         alternatives_kind, kept_open_by, blocks\n  assumptions[]          id \"ASM-0001\", statement, why,\n                         would_be_invalidated_by\n\nNo required field may be null. Where the answer is \"there are none\", use an\nempty list for a list field. A null is not an answer; an empty list is.\n\nREFERENCES BETWEEN ITEMS\nEach field below holds ids of the kind named. Ids beginning REQ-, SCN-, ACT-,\nFRE- and AMB- come from the TYPED INPUT you were given; ids beginning OBL-,\nCND- and LC- are ones you emit here. A reference to an id that appears in\nneither place is an error.\n\n  obligations[].derived_from_requirements  requirement ids from the input\n  obligations[].involves_actors            actor ids from the input\n  load_cases[].scenario                    a scenario id from the input\n  load_cases[].reacted_at_site                        a reaction site id you emit\n  reaction_site_requirements[].scenario               a scenario id from the input\n  physical_effect_obligations[].addresses_obligations obligation ids you emit here\n  physical_effect_obligations[].under_load_case       a load case id you emit here\n  candidates[].addresses_obligations       obligation ids you emit here\n  candidates[].obligations_created         obligation ids you emit here\n  acceptance_contracts[].candidate         a candidate id you emit here\n  acceptance_contracts[].obligations       obligation ids you emit here\n  unresolved[].kept_open_by                ambiguity and freedom ids from the\n                                           input - never a restatement in prose\n  unresolved[].blocks                      obligation ids you emit here\n  unresolved[].alternatives                typed by alternatives_kind: candidate\n                                           ids for ENTITY_REFS, family names for\n                                           PRINCIPLE_FAMILIES, prose for FREE_TEXT\n\nPERMITTED VALUES\n  scope             UNIVERSAL | CANDIDATE_DISCRIMINATING\n  satisfiable_at    s02 | s03 | s04 | s05 - the EARLIEST stage at which this\n                    obligation can be addressed at all. A candidate here is a\n                    principle family and not yet a mechanism, so an obligation\n                    about elements, contacts or dimensions is not satisfiable\n                    at s02 and must say so rather than appear unaddressed.\n  direction_class   AXIAL | TRANSVERSE | RADIAL | MOMENT | GRAVITY | NONE\n  load case kind    GRAVITY | PAYLOAD | ACTOR_APPLIED | REACTION\n  alternatives_kind ENTITY_REFS | PRINCIPLE_FAMILIES | FREE_TEXT\n  family            one of the FUNCTION CLASSES listed above\n  principle         a MAPPING function_class -> principle_family. Each KEY is one\n                    of the FUNCTION CLASSES listed above and each VALUE is one of\n                    the PRINCIPLE FAMILIES permitted for that function class. A\n                    candidate performing one function class is a one-entry\n                    mapping, never a bare string.\n  evidence_route    one of the EVIDENCE ROUTES listed above\n  scenario          the id of a Scenario given to you in the typed input\n\nIDS ALREADY IN USE\nThese entities already exist in the design state. The ids are listed\nso you do not reuse one: every id you emit must be new. This is an\nidentity list and nothing more - it says which ids are taken, not\nwhat those entities say, and it is not something to reason from.\nThe example ids in the response schema show the FORMAT of an id.\nThey are not offers of an available id, and the first index is\ncommonly the one already taken.\n  Assumption: ASM-0001, ASM-0002\n"
+   },
+   "response": {
+    "finish_reason": "stop",
+    "raw_text": "{\n  \"obligations\": [\n    {\n      \"id\": \"OBL-0001\",\n      \"statement\": \"The product must be compact.\",\n      \"derived_from_requirements\": [\"REQ-0001\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s03\",\n      \"evidence_route\": \"RIGID_KINEMATIC_GEOMETRY\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"A product that is not compact fails the requirement that it be compact.\"\n    },\n    {\n      \"id\": \"OBL-0002\",\n      \"statement\": \"The product must have a reusable latch that can be opened and closed repeatedly.\",\n      \"derived_from_requirements\": [\"REQ-0001\", \"REQ-0002\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s02\",\n      \"evidence_route\": \"MOBILITY_ANALYSIS\",\n      \"route_available\": true,\n      \"involves_actors\": [\"ACT-0001\"],\n      \"derivation_premises\": \"A latch that cannot be operated repeatedly is not reusable.\"\n    },\n    {\n      \"id\": \"OBL-0003\",\n      \"statement\": \"The box must not open accidentally during normal handling.\",\n      \"derived_from_requirements\": [\"REQ-0002\"],\n      \"mandatory\": true,\n      \"scope\": \"CANDIDATE_DISCRIMINATING\",\n      \"satisfiable_at\": \"s04\",\n      \"evidence_route\": \"RIGID_BODY_DYNAMICS\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If the latch opens under normal handling, then accidental opening occurs.\"\n    },\n    {\n      \"id\": \"OBL-0004\",\n      \"statement\": \"The latch must be easy for a user to operate.\",\n      \"derived_from_requirements\": [\"REQ-0003\"],\n      \"mandatory\": true,\n      \"scope\": \"CANDIDATE_DISCRIMINATING\",\n      \"satisfiable_at\": \"s04\",\n      \"evidence_route\": \"RIGID_BODY_DYNAMICS\",\n      \"route_available\": true,\n      \"involves_actors\": [\"ACT-0001\"],\n      \"derivation_premises\": \"If the latch is not easy to operate, the requirement is not met.\"\n    },\n    {\n      \"id\": \"OBL-0005\",\n      \"statement\": \"The latch must remain secure during transport.\",\n      \"derived_from_requirements\": [\"REQ-0003\"],\n      \"mandatory\": true,\n      \"scope\": \"CANDIDATE_DISCRIMINATING\",\n      \"satisfiable_at\": \"s04\",\n      \"evidence_route\": \"RIGID_BODY_DYNAMICS\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If the latch opens during transport, it is not secure.\"\n    },\n    {\n      \"id\": \"OBL-0006\",\n      \"statement\": \"The product must be suitable for low-cost manufacturing.\",\n      \"derived_from_requirements\": [\"REQ-0004\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s04\",\n      \"evidence_route\": \"MANUFACTURING_PROCESS_ANALYSIS\",\n      \"route_available\": false,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If the product is not low-cost to manufacture, it fails the requirement.\"\n    },\n    {\n      \"id\": \"OBL-0007\",\n      \"statement\": \"The product must be practical for desktop use.\",\n      \"derived_from_requirements\": [\"REQ-0004\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s03\",\n      \"evidence_route\": \"RIGID_KINEMATIC_GEOMETRY\",\n      \"route_available\": true,\n      \"involves_actors\": [\"ACT-0001\"],\n      \"derivation_premises\": \"A product that is not practical for desktop use fails the requirement.\"\n    },\n    {\n      \"id\": \"OBL-0008\",\n      \"statement\": \"The design must be mechanically plausible.\",\n      \"derived_from_requirements\": [\"REQ-0005\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s03\",\n      \"evidence_route\": \"MOBILITY_ANALYSIS\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"A design that is not mechanically plausible fails the requirement.\"\n    },\n    {\n      \"id\": \"OBL-0009\",\n      \"statement\": \"The product must be easy to assemble.\",\n      \"derived_from_requirements\": [\"REQ-0005\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s03\",\n      \"evidence_route\": \"SWEPT_INTERFERENCE\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If the product is not easy to assemble, it fails the requirement.\"\n    },\n    {\n      \"id\": \"OBL-0010\",\n      \"statement\": \"Relative motion must be permitted between the latch and the box body to allow opening and closing.\",\n      \"derived_from_requirements\": [\"REQ-0002\"],\n      \"mandatory\": true,\n      \"scope\": \"CANDIDATE_DISCRIMINATING\",\n      \"satisfiable_at\": \"s02\",\n      \"evidence_route\": \"MOBILITY_ANALYSIS\",\n      \"route_available\": true,\n      \"involves_actors\": [\"ACT-0001\"],\n      \"derivation_premises\": \"If the latch cannot move relative to the box, it cannot be opened or closed.\"\n    },\n    {\n      \"id\": \"OBL-0011\",\n      \"statement\": \"The latch must maintain its configuration when closed to prevent accidental opening.\",\n      \"derived_from_requirements\": [\"REQ-0002\", \"REQ-0003\"],\n      \"mandatory\": true,\n      \"scope\": \"CANDIDATE_DISCRIMINATING\",\n      \"satisfiable_at\": \"s02\",\n      \"evidence_route\": \"MOBILITY_ANALYSIS\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If the latch does not maintain its closed configuration, it may open accidentally.\"\n    },\n    {\n      \"id\": \"OBL-0012\",\n      \"statement\": \"The motion of the latch must be bounded to prevent over-rotation or over-travel.\",\n      \"derived_from_requirements\": [\"REQ-0002\"],\n      \"mandatory\": true,\n      \"scope\": \"CANDIDATE_DISCRIMINATING\",\n      \"satisfiable_at\": \"s03\",\n      \"evidence_route\": \"MOBILITY_ANALYSIS\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If the latch motion is unbounded, it may not function reliably.\"\n    },\n    {\n      \"id\": \"OBL-0013\",\n      \"statement\": \"The latch must be retained to the box body during operation and transport.\",\n      \"derived_from_requirements\": [\"REQ-0001\", \"REQ-0003\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s03\",\n      \"evidence_route\": \"RIGID_BODY_DYNAMICS\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If the latch separates from the box, it cannot be operated or secure.\"\n    },\n    {\n      \"id\": \"OBL-0014\",\n      \"statement\": \"The user must be able to reach and operate the latch.\",\n      \"derived_from_requirements\": [\"REQ-0003\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s03\",\n      \"evidence_route\": \"RIGID_KINEMATIC_GEOMETRY\",\n      \"route_available\": true,\n      \"involves_actors\": [\"ACT-0001\"],\n      \"derivation_premises\": \"If the user cannot reach the latch, they cannot operate it.\"\n    },\n    {\n      \"id\": \"OBL-0015\",\n      \"statement\": \"The box must resist loads imposed by stored contents without deformation that affects operation.\",\n      \"derived_from_requirements\": [\"REQ-0004\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s04\",\n      \"evidence_route\": \"MATERIAL_PROPERTY_ANALYSIS\",\n      \"route_available\": false,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If the box deforms under contents, it may not be practical for desktop use.\"\n    },\n    {\n      \"id\": \"OBL-0016\",\n      \"statement\": \"The product must tolerate normal handling loads without accidental opening.\",\n      \"derived_from_requirements\": [\"REQ-0002\"],\n      \"mandatory\": true,\n      \"scope\": \"CANDIDATE_DISCRIMINATING\",\n      \"satisfiable_at\": \"s04\",\n      \"evidence_route\": \"RIGID_BODY_DYNAMICS\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If normal handling loads cause opening, the requirement fails.\"\n    },\n    {\n      \"id\": \"OBL-0017\",\n      \"statement\": \"The product must withstand transport loads without opening.\",\n      \"derived_from_requirements\": [\"REQ-0003\"],\n      \"mandatory\": true,\n      \"scope\": \"CANDIDATE_DISCRIMINATING\",\n      \"satisfiable_at\": \"s04\",\n      \"evidence_route\": \"RIGID_BODY_DYNAMICS\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If transport loads cause opening, the latch is not secure.\"\n    },\n    {\n      \"id\": \"OBL-0018\",\n      \"statement\": \"The assembly process must not require special tooling.\",\n      \"derived_from_requirements\": [\"REQ-0005\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s03\",\n      \"evidence_route\": \"SWEPT_INTERFERENCE\",\n      \"route_available\": true,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If special tooling is required, it may be less easy to assemble.\"\n    },\n    {\n      \"id\": \"OBL-0019\",\n      \"statement\": \"The product must be manufactured from low-cost materials.\",\n      \"derived_from_requirements\": [\"REQ-0004\"],\n      \"mandatory\": true,\n      \"scope\": \"UNIVERSAL\",\n      \"satisfiable_at\": \"s04\",\n      \"evidence_route\": \"MANUFACTURING_PROCESS_ANALYSIS\",\n      \"route_available\": false,\n      \"involves_actors\": [],\n      \"derivation_premises\": \"If the material is expensive, the product may not be low-cost.\"\n    }\n  ],\n  \"load_cases\": [\n    {\n      \"id\": \"LC-0001\",\n      \"scenario\": \"SCN-0001\",\n      \"applied_to_role\": \"the latch\",\n      \"reacted_at_role\": \"the box body\",\n      \"reacted_at_site\": \"RSR-0001\",\n      \"direction_class\": \"AXIAL\",\n      \"kind\": \"ACTOR_APPLIED\",\n      \"magnitude_or_status\": \"UNSUPPORTED\"\n    },\n    {\n      \"id\": \"LC-0002\",\n      \"scenario\": \"SCN-0001\",\n      \"applied_to_role\": \"the box body\",\n      \"reacted_at_role\": \"the desk surface\",\n      \"reacted_at_site\": \"RSR-0002\",\n      \"direction_class\": \"GRAVITY\",\n      \"kind\": \"GRAVITY\",\n      \"magnitude_or_status\": \"UNSUPPORTED\"\n    },\n    {\n      \"id\": \"LC-0003\",\n      \"scenario\": \"SCN-0001\",\n      \"applied_to_role\": \"the box body\",\n      \"reacted_at_role\": \"the desk surface\",\n      \"reacted_at_site\": \"RSR-0002\",\n      \"direction_class\": \"TRANSVERSE\",\n      \"kind\": \"ACTOR_APPLIED\",\n      \"magnitude_or_status\": \"UNSUPPORTED\"\n    },\n    {\n      \"id\": \"LC-0004\",\n      \"scenario\": \"SCN-0002\",\n      \"applied_to_role\": \"the latch\",\n      \"reacted_at_role\": \"the box body\",\n      \"reacted_at_site\": \"RSR-0001\",\n      \"direction_class\": \"AXIAL\",\n      \"kind\": \"REACTION\",\n      \"magnitude_or_status\": \"UNSUPPORTED\"\n    },\n    {\n      \"id\": \"LC-0005\",\n      \"scenario\": \"SCN-0002\",\n      \"applied_to_role\": \"the box body\",\n      \"reacted_at_role\": \"the surroundings\",\n      \"reacted_at_site\": \"RSR-0003\",\n      \"direction_class\": \"TRANSVERSE\",\n      \"kind\": \"REACTION\",\n      \"magnitude_or_status\": \"UNSUPPORTED\"\n    },\n    {\n      \"id\": \"LC-0006\",\n      \"scenario\": \"SCN-0003\",\n      \"applied_to_role\": \"the box body and latch components\",\n      \"reacted_at_role\": \"the assembly environment\",\n      \"reacted_at_site\": \"RSR-0004\",\n      \"direction_class\": \"AXIAL\",\n      \"kind\": \"ACTOR_APPLIED\",\n      \"magnitude_or_status\": \"UNSUPPORTED\"\n    }\n  ],\n  \"reaction_site_requirements\": [\n    {\n      \"id\": \"RSR-0001\",\n      \"scenario\": \"SCN-0001\",\n      \"boundary_side\": \"INTERNAL\",\n      \"at_role\": \"the box body\",\n      \"why\": \"The latch is inside the system boundary; the box body is the only internal site that can react the latch force.\"\n    },\n    {\n      \"id\": \"RSR-0002\",\n      \"scenario\": \"SCN-0001\",\n      \"boundary_side\": \"EXTERNAL\",\n      \"at_role\": \"the desk surface\",\n      \"why\": \"The desk surface is outside the system boundary and supports the box.\"\n    },\n    {\n      \"id\": \"RSR-0003\",\n      \"scenario\": \"SCN-0002\",\n      \"boundary_side\": \"EXTERNAL\",\n      \"at_role\": \"the surroundings\",\n      \"why\": \"During transport, external disturbances act on the box from the surroundings.\"\n    },\n    {\n      \"id\": \"RSR-0004\",\n      \"scenario\": \"SCN-0003\",\n      \"boundary_side\": \"EXTERNAL\",\n      \"at_role\": \"the assembly environment\",\n      \"why\": \"The assembly environment is outside the system boundary and reacts the forces applied during assembly.\"\n    }\n  ],\n  \"physical_effect_obligations\": [\n    {\n      \"id\": \"PEO-0001\",\n      \"effect\": \"PERMIT_MOTION\",\n      \"between_roles\": \"the latch and the box body\",\n      \"addresses_obligations\": [\"OBL-0010\"],\n      \"under_load_case\": \"LC-0001\",\n      \"persistence\": \"repeated during operation\"\n    },\n    {\n      \"id\": \"PEO-0002\",\n      \"effect\": \"MAINTAIN_CONFIGURATION\",\n      \"between_roles\": \"the latch and the box body\",\n      \"addresses_obligations\": [\"OBL-0011\"],\n      \"under_load_case\": \"LC-0004\",\n      \"persistence\": \"during transport\"\n    },\n    {\n      \"id\": \"PEO-0003\",\n      \"effect\": \"BOUND_MOTION\",\n      \"between_roles\": \"the latch and the box body\",\n      \"addresses_obligations\": [\"OBL-0012\"],\n      \"under_load_case\": \"LC-0001\",\n      \"persistence\": \"during operation\"\n    },\n    {\n      \"id\": \"PEO-0004\",\n      \"effect\": \"RETAIN_BODY\",\n      \"between_roles\": \"the latch and the box body\",\n      \"addresses_obligations\": [\"OBL-0013\"],\n      \"under_load_case\": \"LC-0001\",\n      \"persistence\": \"during operation and transport\"\n    }\n  ],\n  \"candidates\": [\n    {\n      \"id\": \"CND-0001\",\n      \"summary\": \"A latch using a spring-loaded sliding bolt guided by a slot.\",\n      \"family\": \"ACTUATE\",\n      \"principle\": {\n        \"ACTUATE\": \"DIRECT_MANUAL\",\n        \"PERMIT_RELATIVE_MOTION\": \"PRISMATIC_PAIR\",\n        \"MAINTAIN_CONFIGURATION\": \"DETENT_OR_SNAP\",\n        \"BOUND_MOTION\": \"HARD_STOP\",\n        \"RETAIN_BODY\": \"ELASTIC_CAPTURE\",\n        \"GUIDE_MOTION\": \"PRISMATIC_GUIDE\"\n      },\n      \"addresses_obligations\": [\"OBL-0002\", \"OBL-0010\", \"OBL-0011\", \"OBL-0012\", \"OBL-0013\", \"OBL-0014\"],\n      \"obligations_created\": [\"OBL-0002\", \"OBL-0010\", \"OBL-0011\", \"OBL-0012\", \"OBL-0013\", \"OBL-0014\"],\n      \"evidence_route_verdict\": {\n        \"route\": \"MOBILITY_ANALYSIS\",\n        \"available\": true,\n        \"note\": \"Mobility analysis can confirm the prismatic slider and detent provide the required motion and retention.\"\n      },\n      \"self_locking\": true\n    },\n    {\n      \"id\": \"CND-0002\",\n      \"summary\": \"A latch consisting of a rotating catch with a spring-loaded detent.\",\n      \"family\": \"ACTUATE\",\n      \"principle\": {\n        \"ACTUATE\": \"DIRECT_MANUAL\",\n        \"PERMIT_RELATIVE_MOTION\": \"REVOLUTE_PAIR\",\n        \"MAINTAIN_CONFIGURATION\": \"DETENT_OR_SNAP\",\n        \"BOUND_MOTION\": \"HARD_STOP\",\n        \"RETAIN_BODY\": \"ROTATION_LOCK\",\n        \"GUIDE_MOTION\": \"JOURNAL_SUPPORT\"\n      },\n      \"addresses_obligations\": [\"OBL-0002\", \"OBL-0010\", \"OBL-0011\", \"OBL-0012\", \"OBL-0013\", \"OBL-0014\"],\n      \"obligations_created\": [\"OBL-0002\", \"OBL-0010\", \"OBL-0011\", \"OBL-0012\", \"OBL-0013\", \"OBL-0014\"],\n      \"evidence_route_verdict\": {\n        \"route\": \"MOBILITY_ANALYSIS\",\n        \"available\": true,\n        \"note\": \"Mobility analysis can confirm the rotary motion and detent provide the required function.\"\n      },\n      \"self_locking\": true\n    },\n    {\n      \"id\": \"CND-0003\",\n      \"summary\": \"A latch using a compliant flexure that snaps over a lip.\",\n      \"family\": \"ACTUATE\",\n      \"principle\": {\n        \"ACTUATE\": \"DIRECT_MANUAL\",\n        \"PERMIT_RELATIVE_MOTION\": \"COMPLIANT_FLEXURE\",\n        \"MAINTAIN_CONFIGURATION\": \"DETENT_OR_SNAP\",\n        \"BOUND_MOTION\": \"HARD_STOP\",\n        \"RETAIN_BODY\": \"ELASTIC_CAPTURE\",\n        \"GUIDE_MOTION\": \"MULTI_POINT_CONSTRAINT\"\n      },\n      \"addresses_obligations\": [\"OBL-0002\", \"OBL-0010\", \"OBL-0011\", \"OBL-0012\", \"OBL-0013\", \"OBL-0014\"],\n      \"obligations_created\": [\"OBL-0002\", \"OBL-0010\", \"OBL-0011\", \"OBL-0012\", \"OBL-0013\", \"OBL-0014\"],\n      \"evidence_route_verdict\": {\n        \"route\": \"COMPLIANCE_REDUCED_ORDER\",\n        \"available\": false,\n        \"note\": \"No compliance analysis route is available; cannot verify deflection forces or snap forces.\"\n      },\n      \"self_locking\": true\n    }\n  ],\n  \"acceptance_contracts\": [\n    {\n      \"id\": \"ACC-0001\",\n      \"candidate\": \"CND-0001\",\n      \"obligations\": [\"OBL-0002\", \"OBL-0010\", \"OBL-0011\", \"OBL-0012\", \"OBL-0013\", \"OBL-0014\"],\n      \"predicates\": \"The latch can be slid open and closed manually; when closed, a detent holds it and a hard stop bounds its travel; the latch remains attached to the box.\"\n    },\n    {\n      \"id\": \"ACC-0002\",\n      \"candidate\": \"CND-0002\",\n      \"obligations\": [\"OBL-0002\", \"OBL-0010\", \"OBL-0011\", \"OBL-0012\", \"OBL-0013\", \"OBL-0014\"],\n      \"predicates\": \"The latch can be rotated open and closed manually; when closed, a detent holds it and a hard stop bounds its rotation; the latch remains attached to the box.\"\n    },\n    {\n      \"id\": \"ACC-0003\",\n      \"candidate\": \"CND-0003\",\n      \"obligations\": [\"OBL-0002\", \"OBL-0010\", \"OBL-0011\", \"OBL-0012\", \"OBL-0013\", \"OBL-0014\"],\n      \"predicates\": \"The latch can be flexed open and closed manually; when closed, a detent holds it and a hard stop bounds its deflection; the latch remains attached to the box.\"\n    }\n  ],\n  \"unresolved\": [\n    {\n      \"id\": \"UNR-0001\",\n      \"decision\": \"Choosing between sliding, rotating, and flexing latch mechanisms requires knowing the required security level and acceptable actuation force.\",\n      \"why_open\": \"Ambiguity AMB-0001 leaves unclear how secure the latch must be during transport, and ambiguity AMB-0002 leaves unclear what normal handling entails.\",\n      \"alternatives\": [\"CND-0001\", \"CND-0002\", \"CND-0003\"],\n      \"alternatives_kind\": \"ENTITY_REFS\",\n      \"kept_open_by\": [\"AMB-0001\", \"AMB-0002\"],\n      \"blocks\": [\"OBL-0003\", \"OBL-0004\", \"OBL-0005\"]\n    }\n  ],\n  \"assumptions\": [\n    {\n      \"id\": \"ASM-0001\",\n      \"statement\": \"The stored contents are relatively light (e.g., paper clips, pens), not heavy tools or books.\",\n      \"why\": \"The requirements do not specify the weight of contents; assuming light contents keeps the structural load modest.\",\n      \"would_be_invalidated_by\": \"If the contents are specified to be heavy, the structural strength obligations would change.\"\n    },\n    {\n      \"id\": \"ASM-0002\",\n      \"statement\": \"The box will be placed on a flat, stable desk surface.\",\n      \"why\": \"No surface condition is specified; assuming a flat surface avoids tipping loads.\",\n      \"would_be_invalidated_by\": \"If the box is used on uneven or moving surfaces, additional stability constraints would arise.\"\n    }\n  ]\n}",
+    "reasoning_content_present": false,
+    "reasoning_content_stored": false,
+    "response_chars": 18030,
+    "response_sha256": "b44cb53ab5f9a2a114c00a01b760107fa85e1eb49b3c45ece0e786d126e73e06",
+    "truncated": false
+   },
+   "run_id": "s9e-canary-BM-001",
+   "stage_attempt": 1,
+   "stage_id": "s02",
+   "timing": {
+    "duration_s": 28.542,
+    "ended_at": 1786859036.1872795,
+    "retry_wait_s": 0.0,
+    "started_at": 1786859007.644947
+   },
+   "usage": {
+    "cached_input_tokens": 2432,
+    "input_tokens": 4762,
+    "output_tokens": 5435
+   }
+  }
+ ],
+ "s02_precall_gate": {
+  "PASS": true,
+  "committed_not_in_rendered_occupancy": [],
+  "committed_not_in_view": [],
+  "consumer_view_occupancy": {
+   "Assumption": [
+    "ASM-0001",
+    "ASM-0002"
+   ]
+  },
+  "occupancy_section_present": true,
+  "rendered_prompt_chars": 18957,
+  "semantic_assumption_leaked": [],
+  "semantic_families_in_view": [
+   "Actor",
+   "Ambiguity",
+   "Freedom",
+   "Requirement",
+   "Scenario"
+  ],
+  "view_status": "VIEW_READY"
+ },
+ "s02_prompt_equals_precall_prompt": true,
+ "source_path": "ver3/benchmarks/BM-001/source/request.txt",
+ "source_sha256": "a37a822a1f759dece5d1966c431be44281a68071628248fa69f76547141578d4",
+ "temperature": 1.0
+}
