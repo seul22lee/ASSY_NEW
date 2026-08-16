@@ -156,6 +156,13 @@ stages:
     - Where is the system boundary in each scenario?
     required_reasoning_premise_classes: []
     permitted_output_semantics:
+    # S-9. `SourceClause` was missing while s01 has authored it since the stage
+    # existed, and DESIGN_STATE_CONTRACT names s01 its `owned_by`. The omission
+    # was invisible because nothing compared this list against the code - the
+    # same gap that let s02 author `Assumption` undeclared. Both are repaired
+    # here, and tests/meta/test_output_semantics_drift.py now derives the answer
+    # from the source so neither can drift again.
+    - SourceClause
     - Requirement
     - Ambiguity
     - Freedom
@@ -163,6 +170,11 @@ stages:
     - Scenario
     - Assumption
     - DesignConstraint
+    # DECLARED AND NOT PRODUCED, legitimately. `UnresolvedDecision` is
+    # `universally_ownable`: any stage may discover something is open. A standing
+    # permission is not a claim that this stage exercises it, which is why the
+    # drift guard admits an unproduced entry only when the matrix makes it
+    # universal - and would reject one that named a stage-specific family.
     - UnresolvedDecision
     prohibited_decisions:
     - INVENTING a mechanism, material or dimension the source did not state
@@ -243,6 +255,24 @@ stages:
     - Candidate
     - AcceptanceContract
     - UnresolvedDecision
+    # S-9 / D-2. THE OMISSION THAT BLOCKED REGENERATION.
+    #
+    # s02 has authored `Assumption` since S-2 - the response envelope carries an
+    # `assumptions` collection and `to_operations` emits the CREATE - and the
+    # write boundary has always permitted it, because STAGE_OWNERSHIP_MATRIX
+    # makes the family `universally_ownable`: "Any stage may need to assume.
+    # Every stage must SAY so." This list was the one place that did not say so.
+    #
+    # The cost was not cosmetic. `derive_source_a` reads this list to decide
+    # which families are CO-PRODUCED, and a family absent from it is a family the
+    # consumer view has no reason to carry. So s02 was asked to author into a
+    # namespace it could not see: s01 commits ASM-0001 and ASM-0002, the schema
+    # example shows ASM-0001, and three independent live attempts were rejected
+    # with the identical DUPLICATE_ID: ASM-0001.
+    #
+    # Declaring it is the repair. The family is co-produced now, so occupancy -
+    # not semantic content - is what reaches the prompt.
+    - Assumption
     prohibited_decisions:
     - Naming a body, joint, interface, count or dimension
     - Selecting a candidate (INV-007)

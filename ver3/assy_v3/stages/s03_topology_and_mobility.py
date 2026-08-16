@@ -602,17 +602,19 @@ class S03TopologyAndMobility(Stage):
         # this DOF" - and the older shape could not cite a premise at all.
         # Recordings in that shape are corpus debt (Impl S-9), not a reason to
         # keep a parser alive.
-        for p in parsed.get("load_paths", []):
-            ops.append(Op("CREATE", "LoadPath", p["id"], {
-                "load_case": p["load_case"], "candidate": p["candidate"],
-                "ordered_hops": p.get("ordered_hops", []),
-                "maturity": "HYPOTHESIS"}, prov))
-        for a in parsed.get("assembly_steps", []):
-            ops.append(Op("CREATE", "AssemblyStep", a["id"], {
-                "order_index": a["order_index"], "body": a["body"],
-                "access_side": a["access_side"], "activates": a.get("activates", []),
-                "termination_strategy": a.get("termination_strategy"),
-                "path_kind": a["path_kind"], "depends_on": a.get("depends_on", [])}, prov))
+        #
+        # NO LoadPath and NO AssemblyStep either, for the same reason and found
+        # the same way. S-9's output-semantics scan compared what this class can
+        # CREATE against what s03a declares, and these two were produced and
+        # undeclared - the identical shape the paragraph above describes, left
+        # behind when that clean-up removed only the families it had gone looking
+        # for. `load_paths` and `assembly_steps` appear nowhere in this pass's
+        # PROMPT: only S03B_PROMPT asks for them, so no live response can carry
+        # the keys and no recording in the corpus does. They are declared outputs
+        # of s03b, which authors them from the interactions and constraints it
+        # has just written - a premise s03a does not have, since it has decided
+        # no interaction yet. Parsing them here was a second producer for two
+        # more families, silently reachable by a stale recording.
         for f in parsed.get("functional_regions", []):
             ops.append(Op("CREATE", "FunctionalRegion", f["id"], {
                 "role": f["role"], "owning_bodies": f.get("owning_bodies", []),

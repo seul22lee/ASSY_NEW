@@ -392,6 +392,76 @@ def derive_required_minimum(stage_id: str, contracts, responsibility) -> Require
 
 
 # =====================================================================
+# Namespace occupancy
+#
+# A SECOND KIND OF SUFFICIENCY, and deliberately not a third source of the
+# required minimum above. That minimum answers "what must this consumer KNOW to
+# reason". This answers "what must it know to AUTHOR without colliding", and the
+# two are different questions with different privileges.
+#
+# THE RULE, stated generally:
+#
+#   If a responsibility may CREATE entities in family F, and committed
+#   DesignState may already contain entities in F, the responsibility must
+#   receive enough identity-level context to know which ids in F are occupied.
+#
+# S9-E found the consequence of not having it. `Assumption` is universally
+# ownable, so s01 and s02 both author into one namespace. s01 commits ASM-0001
+# and ASM-0002; s02's view carried no Assumption at all, because a co-produced
+# family is correctly excluded from the SEMANTIC minimum; and the response schema
+# shows every family's example id at first index. Three independent live attempts
+# were rejected with the identical DUPLICATE_ID: ASM-0001. The model was asked to
+# author into a namespace it could not see, and the defect is here rather than in
+# its reasoning.
+#
+# WHY IT IS NOT SEMANTIC VISIBILITY
+#
+# Least privilege is the point. s02 needs to know ASM-0001 is taken. It does not
+# need to know what s01 assumed, and granting it the family's semantic content to
+# solve an id collision would widen the view for a reason that has nothing to do
+# with reasoning. So this carries IDS ONLY - no statement, no why, no fields.
+# =====================================================================
+def creatable_families(responsibility_id: str, responsibility) -> Set[str]:
+    """Families this responsibility may bring into existence.
+
+    Read from `permitted_output_semantics`, FAMILY-level entries only. A dotted
+    entry like `Joint.frame_origin` is a field this responsibility may author
+    onto a Joint somebody else created - an EXTEND, which occupies no new id and
+    can collide with nothing.
+    """
+    stage = (responsibility.get("stages") or {}).get(responsibility_id) or {}
+    return {s.split(".", 1)[0]
+            for s in stage.get("permitted_output_semantics", []) if "." not in s}
+
+
+def derive_namespace_occupancy(responsibility_id: str, state,
+                               responsibility) -> Dict[str, List[str]]:
+    """Which ids are already taken in each family this responsibility may create.
+
+    DERIVED FROM COMMITTED DESIGNSTATE and from nothing else. Not from the
+    prompt's examples, not from a fixture, not from `pairing_history`, not from a
+    counter and not from a prefix range - every one of those is a claim about
+    what was written somewhere rather than about what state actually holds, and
+    the write boundary rejects a duplicate on what state holds.
+
+    `family()` and not `standing()`: validity and occupancy are different
+    questions. `DesignState.validate` reports DUPLICATE_ID against the whole
+    entity table, so an invalidated or superseded id is still spent. Offering it
+    back as available would produce a collision that reads as the model's fault.
+
+    Families with nothing in them are omitted rather than carried as empty lists:
+    "no id is taken here" is what an absent family already says, and rendering a
+    page of empty families would bury the ones that matter.
+    """
+    out: Dict[str, List[str]] = {}
+    for family in sorted(creatable_families(responsibility_id, responsibility)):
+        ids = sorted(e["entity_id"] for e in state.family(family))
+        if ids:
+            out[family] = ids
+    return out
+
+
+# =====================================================================
 # Relevant instance selection
 # =====================================================================
 STANDING = "STANDING"
@@ -907,10 +977,10 @@ class ConsumerView:
     """
 
     __slots__ = ("stage_id", "run_id", "required", "entities", "traces",
-                 "assessment", "status", "omitted", "branch")
+                 "assessment", "status", "omitted", "branch", "occupancy")
 
     def __init__(self, stage_id, run_id, required, entities, traces, assessment,
-                 status, omitted, branch):
+                 status, omitted, branch, occupancy=None):
         self.stage_id = stage_id
         self.run_id = run_id
         self.required = required
@@ -920,6 +990,13 @@ class ConsumerView:
         self.status = status
         self.omitted = omitted
         self.branch = branch
+        #: IDENTITY-LEVEL OCCUPANCY, family -> occupied ids. Carried on the view
+        #: rather than fetched by whoever renders the prompt, so it travels the
+        #: same recorded, provenanced path as everything else the consumer is
+        #: given. Defaults to empty so a view built by a test or a tool that does
+        #: not supply it is still a valid view - an honest "nothing declared",
+        #: never a silent claim that no id is taken.
+        self.occupancy = dict(occupancy or {})
 
     # -- questions a reviewer asks -------------------------------------
     def why(self, entity_id: str) -> List[Dict[str, Any]]:
@@ -943,6 +1020,11 @@ class ConsumerView:
                 "required_minimum": self.required.as_dict(),
                 "assessment": list(self.assessment),
                 "counts": self.counts(), "omitted": list(self.omitted),
+                # Recorded on the view's own record, so what a stage was told was
+                # taken can be read back from the run afterwards rather than
+                # rebuilt from state that has since moved.
+                "namespace_occupancy": {k: list(v)
+                                        for k, v in sorted(self.occupancy.items())},
                 "entities": list(self.entities), "traces": list(self.traces)}
 
     def payload(self) -> Dict[str, List[Dict[str, Any]]]:
@@ -1081,7 +1163,8 @@ def build_consumer_view(stage_id: str, state, contracts, responsibility,
 
     view = ConsumerView(stage_id, getattr(state, "run_id", None), required,
                         list(selected.values()), traces, assessment, status,
-                        omitted, branch)
+                        omitted, branch,
+                        derive_namespace_occupancy(stage_id, state, responsibility))
 
     if budget_chars is not None:
         view = _apply_budget(view, budget_chars)
@@ -1116,9 +1199,15 @@ def _apply_budget(view: ConsumerView, budget_chars: int) -> ConsumerView:
          "rule": "contributory context reduced first", "reason": "budget"}
         for r in dropped]
 
+    # OCCUPANCY SURVIVES REDUCTION. Budget pressure may drop context; it may not
+    # make a taken id look available. Dropping a semantic record costs the model
+    # information it can declare missing, whereas dropping an id costs it a
+    # collision it cannot see coming and would be blamed for. It is also the
+    # cheapest thing in the view - a list of short strings - so there is no
+    # tension here to resolve.
     reduced = ConsumerView(view.stage_id, view.run_id, view.required, kept,
                            view.traces, view.assessment, view.status, omitted,
-                           view.branch)
+                           view.branch, view.occupancy)
     if len(render(reduced)) <= budget_chars:
         return reduced
 

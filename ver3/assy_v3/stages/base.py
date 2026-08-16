@@ -37,6 +37,37 @@ class StageError(Exception):
     """A programming error in the stage itself. Never a provider condition."""
 
 
+def render_namespace_occupancy(occupancy: Optional[Dict[str, Any]]) -> str:
+    """The ids already taken in the families this responsibility may create.
+
+    ONE renderer for every stage, appended by `build_prompt` below, so no stage's
+    prompt template mentions a family and no stage decides whether it needs this.
+    A rule written as `if the stage is s02, show the assumption ids` would be the
+    same defect in a new place: it would hold for exactly the collision that had
+    already happened and for no other.
+
+    Empty renders nothing. A first stage, or any stage whose creatable families
+    are still empty, gets the prompt it always got - which is also why adding
+    this changed no prompt that had nothing to be told.
+    """
+    if not occupancy:
+        return ""
+    lines = ["", "IDS ALREADY IN USE",
+             "These entities already exist in the design state. The ids are listed",
+             "so you do not reuse one: every id you emit must be new. This is an",
+             "identity list and nothing more - it says which ids are taken, not",
+             "what those entities say, and it is not something to reason from.",
+             "The example ids in the response schema show the FORMAT of an id.",
+             "They are not offers of an available id, and the first index is",
+             "commonly the one already taken."]
+    for family in sorted(occupancy):
+        ids = list(occupancy[family] or [])
+        if not ids:
+            continue
+        lines.append("  %s: %s" % (family, ", ".join(str(i) for i in ids)))
+    return "\n".join(lines) + "\n"
+
+
 def carry_invocation_premises(ops: List[Op], premises: List[str]) -> List[Op]:
     """Put the stage's declared invocation premises onto the values it authored.
 
@@ -134,6 +165,15 @@ class Stage:
     #: channel; `invoke` fills it and nothing else may.
     context_key = "consumer_view"
 
+    #: The input key carrying IDENTITY-LEVEL NAMESPACE OCCUPANCY, filled from the
+    #: same ConsumerView by the same `invoke`. A SECOND KEY rather than a second
+    #: entry in the payload above, because that payload is family -> entity
+    #: records and every stage's renderer walks it as such; an id list wearing a
+    #: family's place in it would be a different shape under the same contract.
+    #: Separate keys keep both readable and let a stage that renders neither stay
+    #: unchanged.
+    occupancy_key = "namespace_occupancy"
+
     @classmethod
     def responsibility_id(cls) -> str:
         return cls.pass_id or cls.stage_id
@@ -141,6 +181,22 @@ class Stage:
     # ------------------------------------------------------------ overridden
     def prompt(self, inputs: Dict[str, Any]) -> str:
         raise NotImplementedError
+
+    def build_prompt(self, inputs: Dict[str, Any]) -> str:
+        """THE prompt text actually sent. `prompt` plus what every stage is owed.
+
+        A stage writes the question it is asking. This adds what no stage should
+        have to remember: which ids are already spent in the families it is about
+        to author into. Applied here, once, for the same reason `invoke` enforces
+        view readiness here - a rule each stage has to opt into is a rule the next
+        stage will be written without.
+
+        `prompt` stays the stage's own, so a stage that wants the occupancy
+        somewhere other than the end can render it from `inputs` itself; this
+        appends what it was given and nothing else.
+        """
+        return self.prompt(inputs) + render_namespace_occupancy(
+            inputs.get(self.occupancy_key))
 
     def to_operations(self, parsed: Dict[str, Any],
                       inputs: Optional[Dict[str, Any]] = None) -> List[Op]:
@@ -254,6 +310,11 @@ class Stage:
                 consumer_view=record)
         payload = dict(inputs or {})
         payload[self.context_key] = view.payload()
+        # From the VIEW, not from state. Prompt code never queries DesignState:
+        # the view is what was recorded, what carries provenance and what a
+        # reviewer can read back, and a second path to the same facts would be a
+        # second answer to what the consumer was given.
+        payload[self.occupancy_key] = view.occupancy
         out = self.run(provider, payload, state, run_id, attempt)
         out.consumer_view = record
         return out
@@ -288,7 +349,7 @@ class Stage:
             attempt: int = 1) -> StageOutcome:
         req = GenerationRequest(
             purpose=self.purpose, stage_id=self.stage_id,
-            prompt_text=self.prompt(inputs), max_output_tokens=32000,
+            prompt_text=self.build_prompt(inputs), max_output_tokens=32000,
             deadline_s=120.0, temperature=0.0, seed=7,
             # The run and attempt are the caller's to state, and the provider's
             # record is required to carry both. Passing them here is what lets a

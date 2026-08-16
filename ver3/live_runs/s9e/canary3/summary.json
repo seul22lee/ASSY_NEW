@@ -1,0 +1,84 @@
+[
+ {
+  "case": "BM-001",
+  "corpus_root": "/home/ftk3187/github/ASSY_Ver3.0/ver3/assy_v3/fixtures/responses",
+  "counts": {
+   "Actor": 1,
+   "Ambiguity": 3,
+   "Assumption": 1,
+   "Freedom": 4,
+   "Requirement": 5,
+   "Scenario": 3,
+   "SourceClause": 5
+  },
+  "per_responsibility": {
+   "s01": {
+    "declared_incomplete": [],
+    "model_run_id": "s9e-BM-001|s01|sa1|a1",
+    "patch_applied": true,
+    "problems": [],
+    "raw_chars": 5851,
+    "rung": "ACCEPTED",
+    "status": "SUCCESS"
+   },
+   "s02": {
+    "declared_incomplete": [],
+    "model_run_id": "s9e-BM-001|s02|sa1|a1",
+    "patch_applied": false,
+    "problems": [
+     "DUPLICATE_ID: ASM-0001"
+    ],
+    "raw_chars": 17803,
+    "rung": "CONTRACT_FAILED",
+    "status": "SCHEMA_FAILURE"
+   }
+  },
+  "progression": {
+   "executions": [
+    {
+     "consumer_view_recorded": true,
+     "execution_status": "SUCCESS",
+     "patch_applied": true,
+     "problems": [],
+     "provider_id": "deepseek",
+     "response_source": "LIVE",
+     "responsibility_id": "s01",
+     "seeded": false,
+     "stage_id": "s01",
+     "view_status": "VIEW_READY"
+    },
+    {
+     "consumer_view_recorded": true,
+     "execution_status": "SCHEMA_FAILURE",
+     "patch_applied": false,
+     "problems": [
+      "DUPLICATE_ID: ASM-0001"
+     ],
+     "provider_id": "deepseek",
+     "response_source": "LIVE",
+     "responsibility_id": "s02",
+     "seeded": false,
+     "stage_id": "s02",
+     "view_status": "VIEW_READY"
+    }
+   ],
+   "failures": [
+    {
+     "detail": [
+      "DUPLICATE_ID: ASM-0001"
+     ],
+     "kind": "CONTRACT_CONDITION",
+     "stage": "s02",
+     "what": "contract validation"
+    }
+   ],
+   "response_sources": {
+    "s01": "LIVE",
+    "s02": "LIVE"
+   }
+  },
+  "run_id": "s9e-BM-001",
+  "seconds": 60.0,
+  "source_sha256": "a37a822a1f759dece5d1966c431be44281a68071628248fa69f76547141578d4"
+ }
+]

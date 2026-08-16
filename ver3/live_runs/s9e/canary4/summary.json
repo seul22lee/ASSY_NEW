@@ -1,0 +1,79 @@
+[
+ {
+  "case": "BM-001",
+  "corpus_root": "/home/ftk3187/github/ASSY_Ver3.0/ver3/assy_v3/fixtures/responses",
+  "counts": {
+   "Actor": 2,
+   "Ambiguity": 4,
+   "Assumption": 2,
+   "Freedom": 4,
+   "Requirement": 5,
+   "Scenario": 3,
+   "SourceClause": 5
+  },
+  "current_replay": {
+   "s01": {
+    "error": null,
+    "integrity": "ESTABLISHED",
+    "problems": [],
+    "status": "SUCCESS"
+   },
+   "s02": {
+    "error": "current-fixture integrity not established for s02: fixture declares no source_sha256; fixture declares no responsibility_id; fixture declares no raw_response_sha256; fixture declares no model_run_id; fixture declares no canonical_content_sha256; prompt pairing is STALE; fixture declares no model_run_id to resolve",
+    "integrity": "NOT_ESTABLISHED",
+    "problems": [
+     "fixture declares no source_sha256",
+     "fixture declares no responsibility_id",
+     "fixture declares no raw_response_sha256",
+     "fixture declares no model_run_id",
+     "fixture declares no canonical_content_sha256",
+     "prompt pairing is STALE",
+     "fixture declares no model_run_id to resolve"
+    ],
+    "status": "PROVIDER_UNAVAILABLE"
+   }
+  },
+  "per_responsibility": {
+   "s01": [
+    {
+     "attempt": 1,
+     "problems": [],
+     "raw_chars": 6971,
+     "rung": "ACCEPTED"
+    }
+   ],
+   "s02": [
+    {
+     "attempt": 1,
+     "problems": [
+      "DUPLICATE_ID: ASM-0001",
+      "DUPLICATE_ID: ASM-0002"
+     ],
+     "raw_chars": 19025,
+     "rung": "CONTRACT_FAILED"
+    },
+    {
+     "attempt": 2,
+     "problems": [
+      "DUPLICATE_ID: ASM-0001",
+      "DUPLICATE_ID: ASM-0002"
+     ],
+     "raw_chars": 12009,
+     "rung": "CONTRACT_FAILED"
+    },
+    {
+     "attempt": 3,
+     "problems": [
+      "DUPLICATE_ID: ASM-0001",
+      "DUPLICATE_ID: ASM-0002"
+     ],
+     "raw_chars": 10658,
+     "rung": "CONTRACT_FAILED"
+    }
+   ]
+  },
+  "run_id": "s9e-BM-001",
+  "seconds": 109.5,
+  "source_sha256": "a37a822a1f759dece5d1966c431be44281a68071628248fa69f76547141578d4"
+ }
+]

@@ -1,0 +1,403 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must be compact, which requires that its bounding volume is minimized subject to the required functions.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "A product's perceived compactness is determined by its overall dimensions; smaller dimensions are more compact."
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must include a latch that can be engaged and disengaged multiple times without degrading such that it can no longer function.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "A reusable mechanism can be operated repeatedly and remains functional over multiple cycles."
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The product must be openable and closable repeatedly, which requires that the latch mechanism and the closure permit repeated operation without failure.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "Repeated opening and closing requires a mechanism that allows repeated relative motion between the movable parts."
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The product must not open accidentally during normal handling, which requires that the latch remains engaged when subjected to forces and motions typical of handling.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If the latch is not positively retained, external forces or accelerations can overcome it and release the closure."
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must be easy to operate: the user must be able to release the latch with reasonable effort, which requires that the force needed to open the latch is within ergonomic limits.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "A latch that requires excessive force is not easy to operate; the force needed depends on the mechanism's mechanical advantage and friction."
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The product must remain latched during transport, which requires that the latch can withstand the loads and accelerations experienced in transport without unintentional disengagement.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "During transport, the product is subject to inertial forces; the latch must resist these to remain closed."
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The product must be suitable for low-cost manufacturing, which requires that the design is compatible with high-volume, low-cost production processes, and uses economical materials and manufacturing methods.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": false,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": "Low-cost manufacturing depends on production process, material choice, and part count; designs that are simple and use standard processes are cheaper."
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The product must be practical for desktop use, which requires that its operation and size are compatible with a typical desktop environment.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": false,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "A desktop product should not be excessively large or require excessive force; it should fit within a typical desktop workspace."
+    },
+    {
+      "id": "OBL-0009",
+      "statement": "The design must be mechanically plausible, which requires that the mechanism can achieve the required motions and forces with reasonable dimensions and materials.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": false,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "A design is mechanically plausible if its kinematic and force requirements can be met without violating known physical principles."
+    },
+    {
+      "id": "OBL-0010",
+      "statement": "The product must be easy to assemble, which requires that its components can be assembled without special tools, skill, or excessive force.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": false,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "SWEPT_INTERFERENCE",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "Assembly is easy if it requires few steps, simple insertions, and does not need specialized tooling or high force."
+    },
+    {
+      "id": "OBL-0011",
+      "statement": "Every candidate that uses a latch must provide a means to retain the latch in its engaged and disengaged positions where required.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "A latch that does not have a detent or lock might move unintentionally; a retention feature provides definite positions."
+    },
+    {
+      "id": "OBL-0012",
+      "statement": "The product must provide a containment volume for stored items, requiring a body that forms a closed enclosure when latched.",
+      "derived_from_requirements": ["REQ-0001"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "A storage box must have an interior to hold items; this requires at least a bottom and walls that are connected."
+    },
+    {
+      "id": "OBL-0013",
+      "statement": "The product must allow access to its interior when open, requiring that the lid or opening can be moved to permit entry.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "If the interior cannot be accessed, the box cannot be used for storage."
+    },
+    {
+      "id": "OBL-0014",
+      "statement": "The product must tolerate the forces applied by the user during normal operation, requiring that the structure and latch can carry these loads without failure.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0003"],
+      "mandatory": false,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "All physical objects deform under load; they must be strong enough to resist fracture or excessive deformation."
+    },
+    {
+      "id": "OBL-0015",
+      "statement": "The product must maintain alignment and position of its parts during operation, requiring that the hinge or pivot is adequately supported.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0005"],
+      "mandatory": false,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "If a moving joint is not adequately constrained, it could bind or misalign, preventing smooth motion."
+    },
+    {
+      "id": "OBL-0016",
+      "statement": "The product must be able to be manufactured with common plastic injection molding processes, requiring suitable draft angles and uniform wall thickness.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": false,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": "Injection molding requires features that allow part ejection and avoid sink marks or warpage."
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the lid or opening member",
+      "reacted_at_role": "the base or body",
+      "reacted_at_site": "RSR-0001",
+      "direction_class": "MOMENT",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the latch release actuator",
+      "reacted_at_role": "the body",
+      "reacted_at_site": "RSR-0002",
+      "direction_class": "AXIAL",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the product body",
+      "reacted_at_role": "the transport environment",
+      "reacted_at_site": "RSR-0003",
+      "direction_class": "TRANSVERSE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the latch",
+      "reacted_at_role": "the body",
+      "reacted_at_site": "RSR-0004",
+      "direction_class": "TRANSVERSE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "reaction_site_requirements": [
+    {
+      "id": "RSR-0001",
+      "scenario": "SCN-0001",
+      "boundary_side": "INTERNAL",
+      "at_role": "the hinge or pivot between lid and base",
+      "why": "The lid is opened by hand; the reaction to the applied moment is taken at the hinge."
+    },
+    {
+      "id": "RSR-0002",
+      "scenario": "SCN-0001",
+      "boundary_side": "INTERNAL",
+      "at_role": "the latch engagement point",
+      "why": "The force to release the latch is reacted by the latch mechanism itself."
+    },
+    {
+      "id": "RSR-0003",
+      "scenario": "SCN-0002",
+      "boundary_side": "EXTERNAL",
+      "at_role": "the supporting surface of the transport vehicle or packaging",
+      "why": "During transport, the box may be placed on a surface; external forces act on the box."
+    },
+    {
+      "id": "RSR-0004",
+      "scenario": "SCN-0002",
+      "boundary_side": "INTERNAL",
+      "at_role": "the latch and keeper",
+      "why": "The latch must resist inertial loads to prevent accidental opening."
+    }
+  ],
+  "physical_effect_obligations": [
+    {
+      "id": "PEO-0001",
+      "effect": "TRANSMIT_MOTION",
+      "between_roles": "the lid role and the base role",
+      "addresses_obligations": ["OBL-0013"],
+      "under_load_case": "LC-0001",
+      "persistence": "DURING_OPERATION"
+    },
+    {
+      "id": "PEO-0002",
+      "effect": "PREVENT_MOTION",
+      "between_roles": "the latch role and the keeper role",
+      "addresses_obligations": ["OBL-0004", "OBL-0006"],
+      "under_load_case": "LC-0004",
+      "persistence": "WHEN_LATCHED"
+    },
+    {
+      "id": "PEO-0003",
+      "effect": "PERMIT_MOTION",
+      "between_roles": "the latch release actuator and the latch mechanism",
+      "addresses_obligations": ["OBL-0005"],
+      "under_load_case": "LC-0002",
+      "persistence": "DURING_UNLATCHING"
+    },
+    {
+      "id": "PEO-0004",
+      "effect": "TRANSMIT_FORCE",
+      "between_roles": "the latch mechanism and the base role",
+      "addresses_obligations": ["OBL-0006"],
+      "under_load_case": "LC-0004",
+      "persistence": "WHEN_LATCHED"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A hinged lid with a spring-loaded latch and detent",
+      "family": "MECHANISM",
+      "principle": {
+        "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+        "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+        "RETAIN_BODY": "ROTATION_LOCK"
+      },
+      "addresses_obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0011", "OBL-0012", "OBL-0013"],
+      "obligations_created": ["OBL-0015"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Dynamic analysis can verify that the detent will hold under expected loads and that opening force is acceptable."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A sliding latch with a friction hold",
+      "family": "MECHANISM",
+      "principle": {
+        "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR",
+        "MAINTAIN_CONFIGURATION": "FRICTION_HOLD",
+        "RETAIN_BODY": "ELASTIC_CAPTURE"
+      },
+      "addresses_obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0011", "OBL-0012", "OBL-0013"],
+      "obligations_created": ["OBL-0015"],
+      "evidence_route_verdict": {
+        "route": "COMPLIANCE_REDUCED_ORDER",
+        "available": false,
+        "note": "Friction hold requires contact analysis to confirm it will not slip; such analysis is not available at this stage."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A lid with a quarter-turn latch and cam lock",
+      "family": "MECHANISM",
+      "principle": {
+        "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR",
+        "CONVERT_MOTION": "CAM_AND_FOLLOWER",
+        "MAINTAIN_CONFIGURATION": "OVER_CENTRE"
+      },
+      "addresses_obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0011", "OBL-0012", "OBL-0013"],
+      "obligations_created": ["OBL-0015"],
+      "evidence_route_verdict": {
+        "route": "RIGID_KINEMATIC_GEOMETRY",
+        "available": true,
+        "note": "Kinematic geometry can verify that the cam will provide the required motion and lock over center."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0011"],
+      "predicates": "The latch can be engaged and disengaged more than 1000 times without failure. The latch does not disengage under an applied acceleration of 3g in any direction. The force required to open is between 5 N and 20 N."
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0011"],
+      "predicates": "The latch can be engaged and disengaged more than 1000 times without failure. The latch does not disengage under an applied acceleration of 3g in any direction. The force required to open is between 5 N and 20 N."
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0002", "OBL-0003", "OBL-0004", "OBL-0005", "OBL-0006", "OBL-0011"],
+      "predicates": "The latch can be engaged and disengaged more than 1000 times without failure. The latch does not disengage under an applied acceleration of 3g in any direction. The force required to open is between 5 N and 20 N."
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which principle family for the latch mechanism should be selected?",
+      "why_open": "All proposed candidates satisfy the requirements at a principle level; further distinction requires quantitative analysis of forces and geometry.",
+      "alternatives": ["CND-0001", "CND-0002", "CND-0003"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["AMB-0002", "FRE-0001"],
+      "blocks": ["OBL-0011"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "The latch is considered reusable if it can be cycled 1000 times without failure.",
+      "why": "To provide a concrete threshold for testing; no quantitative requirement specified.",
+      "would_be_invalidated_by": "A specific cycle life requirement from the user."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The box is assumed to be used on a desktop and transported by hand.",
+      "why": "The scenario describes normal handling and transport; specific conditions not given.",
+      "would_be_invalidated_by": "Evidence of other use environments."
+    }
+  ]
+}

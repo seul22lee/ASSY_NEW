@@ -620,5 +620,133 @@ class TestPublicSurface(unittest.TestCase):
             importlib.import_module(module)
 
 
+class TestARefiningPassHasMoreThanOneExecution(unittest.TestCase):
+    """S9-C regression. A pass that refines runs twice, and both are evidence.
+
+    THE DEFECT THIS PINS. `by_responsibility` returned the FIRST execution of a
+    pass. A refining stage's first execution is the one that asked to be called
+    again - it committed a justified revision and withheld everything reasoned
+    from the replaced value - so its status is CONTRACT_INCOMPLETE by
+    construction. Every reader of a refining run was therefore told the pass had
+    failed to complete, when what actually happened is that it completed on its
+    second execution.
+
+    It went unnoticed because `response_sources` next door was already last-wins.
+    Each accessor was self-consistent, they disagreed with each other about the
+    same run, and nothing compared them. The runner's own report is what broke:
+    `run_s04` recorded s04b as CONTRACT_INCOMPLETE and reported no refinement at
+    all for a run in which two occurred.
+    """
+
+    def _progression(self):
+        """One pass that refined once and then settled."""
+        p = prog.Progression()
+        p.record(prog.StageExecution(
+            stage_id="s04", responsibility_id="s04b",
+            response_source=prog.LIVE, provider_id="t",
+            execution_status="CONTRACT_INCOMPLETE", refinement_only=True,
+            declared_incompleteness=("revised ENV-0A; everything else withheld",)))
+        p.record(prog.StageExecution(
+            stage_id="s04", responsibility_id="s04b",
+            response_source=prog.LIVE, provider_id="t",
+            execution_status="SUCCESS", patch_applied=True))
+        return p
+
+    def test_the_settled_execution_is_the_answer(self):
+        self.assertEqual("SUCCESS",
+                         self._progression().by_responsibility("s04b").execution_status)
+
+    def test_every_execution_is_still_reachable(self):
+        found = self._progression().all_by_responsibility("s04b")
+        self.assertEqual(["CONTRACT_INCOMPLETE", "SUCCESS"],
+                         [e.execution_status for e in found])
+
+    def test_the_two_accessors_agree_about_one_run(self):
+        """The property whose absence hid the defect."""
+        p = self._progression()
+        self.assertEqual(p.response_sources()["s04b"],
+                         p.by_responsibility("s04b").response_source)
+
+    def test_the_refinement_reason_survives(self):
+        refined = [e for e in self._progression().all_by_responsibility("s04b")
+                   if e.refinement_only]
+        self.assertEqual(1, len(refined))
+        self.assertTrue(refined[0].declared_incompleteness)
+
+    def test_a_pass_that_never_refined_is_unchanged(self):
+        p = prog.Progression()
+        p.record(prog.StageExecution(
+            stage_id="s01", responsibility_id="s01", response_source=prog.LIVE,
+            provider_id="t", execution_status="SUCCESS"))
+        self.assertEqual("SUCCESS", p.by_responsibility("s01").execution_status)
+        self.assertEqual(1, len(p.all_by_responsibility("s01")))
+
+    def test_an_absent_pass_is_still_none(self):
+        self.assertIsNone(prog.Progression().by_responsibility("s04b"))
+
+
+class TestQualificationChecksEveryExecution(unittest.TestCase):
+    """A refining pass must be live BOTH times, not on the execution we sampled.
+
+    Checking one execution of a pass that ran twice reopens the exact hole
+    `full_live_qualification` exists to close, one level down: a replayed
+    execution hides behind a live one. First-wins and last-wins each conceal the
+    opposite case, so neither is defensible and the rule is ALL.
+    """
+
+    def _mixed(self, first_source, second_source):
+        """Every pass live and single-execution, except s04b which refined once."""
+        p = prog.Progression()
+        for rid in prog.PRODUCING_RESPONSIBILITIES:
+            if rid == "s04b":
+                continue          # recorded below, twice, which is the point
+            p.record(prog.StageExecution(
+                stage_id=prog._owner_of(rid), responsibility_id=rid,
+                response_source=prog.LIVE, provider_id="t",
+                execution_status="SUCCESS"))
+        p.record(prog.StageExecution(
+            stage_id="s04", responsibility_id="s04b",
+            response_source=first_source, provider_id="t",
+            execution_status="CONTRACT_INCOMPLETE", refinement_only=True))
+        p.record(prog.StageExecution(
+            stage_id="s04", responsibility_id="s04b",
+            response_source=second_source, provider_id="t",
+            execution_status="SUCCESS"))
+        return p
+
+    def test_all_live_executions_qualify(self):
+        ok, reasons = prog.full_live_qualification(
+            self._mixed(prog.LIVE, prog.LIVE))
+        self.assertTrue(ok, reasons)
+
+    def test_a_replayed_refinement_cannot_hide_behind_a_live_settle(self):
+        ok, reasons = prog.full_live_qualification(
+            self._mixed(prog.REPLAY, prog.LIVE))
+        self.assertFalse(ok)
+        self.assertTrue(any("s04b" in r and "REPLAY" in r for r in reasons), reasons)
+
+    def test_a_live_refinement_cannot_carry_a_replayed_settle(self):
+        ok, reasons = prog.full_live_qualification(
+            self._mixed(prog.LIVE, prog.REPLAY))
+        self.assertFalse(ok)
+        self.assertTrue(any("s04b" in r and "REPLAY" in r for r in reasons), reasons)
+
+    def test_the_reason_names_which_execution(self):
+        _ok, reasons = prog.full_live_qualification(
+            self._mixed(prog.REPLAY, prog.LIVE))
+        self.assertTrue(any("execution 1 of 2" in r for r in reasons), reasons)
+
+    def test_a_single_execution_reason_does_not_grow_an_ordinal(self):
+        """The ordinary message is unchanged for a pass that ran once."""
+        p = prog.Progression()
+        for rid in prog.PRODUCING_RESPONSIBILITIES:
+            p.record(prog.StageExecution(
+                stage_id=prog._owner_of(rid), responsibility_id=rid,
+                response_source=prog.REPLAY if rid == "s01" else prog.LIVE,
+                provider_id="t", execution_status="SUCCESS"))
+        _ok, reasons = prog.full_live_qualification(p)
+        self.assertIn("s01 response source is REPLAY, not LIVE", reasons)
+
+
 if __name__ == "__main__":                                       # pragma: no cover
     unittest.main()

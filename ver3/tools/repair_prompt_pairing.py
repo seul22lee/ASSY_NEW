@@ -83,13 +83,19 @@ def check_case(root: str, case_id: str) -> List[Dict[str, Any]]:
         if not os.path.isfile(path):
             continue
         if inputs is None:
-            inputs = {"consumer_view":
-                      S02ObligationAndCandidates().consumer_view(state).payload()}
+            # BOTH KEYS `invoke` fills, from one view. Assembling only the
+            # semantic payload here would hash a prompt no run ever sends, and a
+            # re-stamping tool that computes the wrong hash is worse than none:
+            # it writes a confident pairing to a fixture that answers something
+            # else.
+            view = S02ObligationAndCandidates().consumer_view(state)
+            inputs = {"consumer_view": view.payload(),
+                      "namespace_occupancy": view.occupancy}
 
         with open(path) as fh:
             payload = json.load(fh)
 
-        new_hash = prompt_hash(stage.prompt(inputs))
+        new_hash = prompt_hash(stage.build_prompt(inputs))
         declared = (payload.get("_meta") or {}).get("answers_prompt_sha256")
 
         problems: List[str] = []

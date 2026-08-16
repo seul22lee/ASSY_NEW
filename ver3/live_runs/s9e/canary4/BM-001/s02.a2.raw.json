@@ -1,0 +1,310 @@
+{
+  "obligations": [
+    {
+      "id": "OBL-0001",
+      "statement": "The product must provide a reconfigurable closure that can be repeatedly opened and closed without loss of function.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "Reusability is a property of the mechanism, and a mechanism that jams or breaks cannot be reused."
+    },
+    {
+      "id": "OBL-0002",
+      "statement": "The product must resist accidental opening when subjected to external loads typical of normal handling and transport.",
+      "derived_from_requirements": ["REQ-0002", "REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": "If a latch does not resist external loads, it will open accidentally during handling."
+    },
+    {
+      "id": "OBL-0003",
+      "statement": "The latch must be operable by a user with reasonable manual effort.",
+      "derived_from_requirements": ["REQ-0003"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "RIGID_BODY_DYNAMICS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "A latch that requires excessive force cannot be easily operated by a user."
+    },
+    {
+      "id": "OBL-0004",
+      "statement": "The product must be manufacturable at low cost using materials and processes suitable for mass production.",
+      "derived_from_requirements": ["REQ-0004"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": "If a design cannot be manufactured with low-cost processes, the requirement is not met."
+    },
+    {
+      "id": "OBL-0005",
+      "statement": "The product must be practically sized for desktop use.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0004"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s04",
+      "evidence_route": "TOLERANCE_ANALYSIS",
+      "route_available": false,
+      "involves_actors": [],
+      "derivation_premises": "A product that is too large is not practical for desktop use."
+    },
+    {
+      "id": "OBL-0006",
+      "statement": "The product must be assemblable using straightforward methods and without special tooling.",
+      "derived_from_requirements": ["REQ-0005"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s04",
+      "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+      "route_available": false,
+      "involves_actors": ["ACT-0002"],
+      "derivation_premises": "A product that requires complex assembly is not easy to assemble."
+    },
+    {
+      "id": "OBL-0007",
+      "statement": "The latch must have a defined stable state when closed.",
+      "derived_from_requirements": ["REQ-0002"],
+      "mandatory": true,
+      "scope": "CANDIDATE_DISCRIMINATING",
+      "satisfiable_at": "s03",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": [],
+      "derivation_premises": "A latch without a stable closed state will not remain closed during handling."
+    },
+    {
+      "id": "OBL-0008",
+      "statement": "The box must have a movable closure that can be moved between open and closed positions.",
+      "derived_from_requirements": ["REQ-0001", "REQ-0002"],
+      "mandatory": true,
+      "scope": "UNIVERSAL",
+      "satisfiable_at": "s02",
+      "evidence_route": "MOBILITY_ANALYSIS",
+      "route_available": true,
+      "involves_actors": ["ACT-0001"],
+      "derivation_premises": "A box that cannot be opened cannot be used as a storage box."
+    }
+  ],
+  "load_cases": [
+    {
+      "id": "LC-0001",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the user's hand",
+      "reacted_at_role": "the box lid or side",
+      "reacted_at_site": "RSR-0001",
+      "direction_class": "NONE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0002",
+      "scenario": "SCN-0001",
+      "applied_to_role": "the user's hand",
+      "reacted_at_role": "the latch and box",
+      "reacted_at_site": "RSR-0001",
+      "direction_class": "NONE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0003",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the box's exterior",
+      "reacted_at_role": "the environment",
+      "reacted_at_site": "RSR-0002",
+      "direction_class": "NONE",
+      "kind": "REACTION",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0004",
+      "scenario": "SCN-0002",
+      "applied_to_role": "the box's exterior",
+      "reacted_at_role": "the environment",
+      "reacted_at_site": "RSR-0002",
+      "direction_class": "GRAVITY",
+      "kind": "GRAVITY",
+      "magnitude_or_status": "UNSUPPORTED"
+    },
+    {
+      "id": "LC-0005",
+      "scenario": "SCN-0003",
+      "applied_to_role": "the assembler's hands or tools",
+      "reacted_at_role": "the components being assembled",
+      "reacted_at_site": "RSR-0003",
+      "direction_class": "NONE",
+      "kind": "ACTOR_APPLIED",
+      "magnitude_or_status": "UNSUPPORTED"
+    }
+  ],
+  "reaction_site_requirements": [
+    {
+      "id": "RSR-0001",
+      "scenario": "SCN-0001",
+      "boundary_side": "EXTERNAL",
+      "at_role": "the user's hand and desktop",
+      "why": "Forces applied by the user are reacted externally."
+    },
+    {
+      "id": "RSR-0002",
+      "scenario": "SCN-0002",
+      "boundary_side": "EXTERNAL",
+      "at_role": "the environment during transport",
+      "why": "Forces from the environment are reacted externally."
+    },
+    {
+      "id": "RSR-0003",
+      "scenario": "SCN-0003",
+      "boundary_side": "EXTERNAL",
+      "at_role": "the assembler and any fixtures",
+      "why": "Assembly forces are reacted externally."
+    }
+  ],
+  "physical_effect_obligations": [
+    {
+      "id": "PEO-0001",
+      "effect": "TRANSMIT_MOTION",
+      "between_roles": "the user's hand and the latch",
+      "addresses_obligations": ["OBL-0003"],
+      "under_load_case": "LC-0001",
+      "persistence": "transient"
+    },
+    {
+      "id": "PEO-0002",
+      "effect": "PREVENT_MOTION",
+      "between_roles": "the latch and the box lid",
+      "addresses_obligations": ["OBL-0002", "OBL-0007"],
+      "under_load_case": "LC-0003",
+      "persistence": "persistent when closed"
+    },
+    {
+      "id": "PEO-0003",
+      "effect": "PERMIT_MOTION",
+      "between_roles": "the latch and the box lid",
+      "addresses_obligations": ["OBL-0008"],
+      "under_load_case": "LC-0001",
+      "persistence": "transient when opening"
+    },
+    {
+      "id": "PEO-0004",
+      "effect": "LOCATE",
+      "between_roles": "the latch and the box body",
+      "addresses_obligations": ["OBL-0007"],
+      "under_load_case": "LC-0002",
+      "persistence": "when closed"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "CND-0001",
+      "summary": "A box with a lid and a latch using an over-centre mechanism for secure closure.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": {
+        "MAINTAIN_CONFIGURATION": "OVER_CENTRE"
+      },
+      "addresses_obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0007", "OBL-0008"],
+      "obligations_created": ["OBL-0002", "OBL-0007"],
+      "evidence_route_verdict": {
+        "route": "RIGID_BODY_DYNAMICS",
+        "available": true,
+        "note": "Suitability of over-centre for secure closure can be assessed with ideal-joint models."
+      },
+      "self_locking": true
+    },
+    {
+      "id": "CND-0002",
+      "summary": "A box with a latch using a detent/snap mechanism for reusability and ease of operation.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": {
+        "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP"
+      },
+      "addresses_obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0007", "OBL-0008"],
+      "obligations_created": ["OBL-0002", "OBL-0007"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Detent/snap behavior relies on contact forces that need resolving analysis."
+      },
+      "self_locking": false
+    },
+    {
+      "id": "CND-0003",
+      "summary": "A box with a latch using a friction hold mechanism to keep the lid closed.",
+      "family": "MAINTAIN_CONFIGURATION",
+      "principle": {
+        "MAINTAIN_CONFIGURATION": "FRICTION_HOLD"
+      },
+      "addresses_obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0007", "OBL-0008"],
+      "obligations_created": ["OBL-0002", "OBL-0007"],
+      "evidence_route_verdict": {
+        "route": "CONTACT_RESOLVING_ANALYSIS",
+        "available": false,
+        "note": "Friction hold relies on contact forces needing resolving analysis."
+      },
+      "self_locking": true
+    }
+  ],
+  "acceptance_contracts": [
+    {
+      "id": "ACC-0001",
+      "candidate": "CND-0001",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0007", "OBL-0008"],
+      "predicates": "Over-centre mechanism must reliably maintain closed position under specified loads and be operable with reasonable effort."
+    },
+    {
+      "id": "ACC-0002",
+      "candidate": "CND-0002",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0007", "OBL-0008"],
+      "predicates": "Detent/snap mechanism must provide secure closure and easy operation through engagement/disengagement."
+    },
+    {
+      "id": "ACC-0003",
+      "candidate": "CND-0003",
+      "obligations": ["OBL-0001", "OBL-0002", "OBL-0003", "OBL-0007", "OBL-0008"],
+      "predicates": "Friction hold mechanism must maintain closure under handling but allow intentional opening."
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "UNR-0001",
+      "decision": "Which latch principle family (OVER_CENTRE, DETENT_OR_SNAP, FRICTION_HOLD) best meets the requirements of reusability, secure closure, ease of operation, and low cost?",
+      "why_open": "The requirements do not specify quantitative thresholds for security, ease, or cost, and the evidence routes needed to compare these are not available at this stage.",
+      "alternatives": ["OVER_CENTRE", "DETENT_OR_SNAP", "FRICTION_HOLD"],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["AMB-0001", "AMB-0002", "AMB-0003", "AMB-0004", "FRE-0002"],
+      "blocks": ["OBL-0002", "OBL-0003"]
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-0001",
+      "statement": "A compact desktop storage box is small enough to fit on a desk but large enough to hold typical office supplies.",
+      "why": "The requirement for compactness is not quantified (AMB-0002).",
+      "would_be_invalidated_by": "Specific dimensions being provided in a later requirement."
+    },
+    {
+      "id": "ASM-0002",
+      "statement": "The storage box is intended for light-duty use with items of moderate weight, not heavy industrial storage.",
+      "why": "The scenario of desktop use suggests a low to moderate load environment.",
+      "would_be_invalidated_by": "A specified load rating for the box."
+    },
+    {
+      "id": "ASM-0003",
+      "statement": "The product will be manufactured in moderate to high volumes using plastic injection molding or similar processes.",
+      "why": "Low-cost manufacturing suggests high-volume production with standard processes.",
+      "would_be_invalidated_by": "A requirement for a specific material or process that is not low-cost."
+    }
+  ]
+}

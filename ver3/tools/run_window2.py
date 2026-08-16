@@ -342,6 +342,16 @@ def run_s04(case_id: str, state, provider, trial: int,
         rec["%s_response" % key] = out.raw_response if out else None
         rec["%s_consumer_view" % key] = out.consumer_view if out else None
         rec["%s_response_source" % key] = execution.response_source if execution else None
+        # THE REFINEMENTS THIS PASS ASKED FOR, read back from the progression
+        # rather than counted by the loop that performed them. The refresh moved
+        # into the pipeline at S9-C and this record did not follow it, so a run in
+        # which s04b revised twice reported no refinement at all - the runner had
+        # stopped being able to say the thing the barrier exists to make visible.
+        refinements = [list(e.declared_incompleteness)
+                       for e in progression.all_by_responsibility(key)
+                       if e.refinement_only]
+        if refinements:
+            rec["%s_refinements" % key] = refinements
         if out is not None and out.patch is not None:
             rec["%s_families" % key] = sorted(
                 {op.entity_type for op in out.patch.operations})

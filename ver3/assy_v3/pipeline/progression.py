@@ -139,6 +139,16 @@ class StageExecution:
     #: True when committed state for this stage was placed without invoking it.
     #: A seeded stage is not a replayed stage: nothing was served at all.
     seeded: bool = False
+    #: THE STAGE ASKED TO BE CALLED AGAIN against refreshed premises. A lifecycle
+    #: event, not a failure - and evidence, which is why it is carried rather
+    #: than consumed by the loop that reacts to it. Without it a reader cannot
+    #: tell a pass that settled immediately from one that revised first, and the
+    #: runner had to report "no refinement happened" for a run in which two did.
+    refinement_only: bool = False
+    #: What this particular execution declared missing. On a refinement-only
+    #: outcome it is the REASON for the refresh, which is the only place that
+    #: reason survives.
+    declared_incompleteness: Tuple[str, ...] = ()
 
     def as_record(self) -> Dict[str, Any]:
         return {"stage_id": self.stage_id,
@@ -149,7 +159,10 @@ class StageExecution:
                 "view_status": self.view_status,
                 "consumer_view_recorded": self.consumer_view_recorded,
                 "patch_applied": self.patch_applied,
-                "seeded": self.seeded, "problems": list(self.problems)}
+                "seeded": self.seeded,
+                "refinement_only": self.refinement_only,
+                "declared_incompleteness": list(self.declared_incompleteness),
+                "problems": list(self.problems)}
 
 
 @dataclass
@@ -167,17 +180,36 @@ class Progression:
         self.failures.append({"kind": layer, "stage": stage, "what": what,
                               "detail": detail})
 
+    def all_by_responsibility(self, responsibility_id: str) -> List[StageExecution]:
+        """EVERY execution of one producing pass, in order.
+
+        A pass runs more than once whenever it reports refinement-only: it
+        committed a justified revision, withheld what it had reasoned from the
+        replaced value, and is asked again against a refreshed view. Both
+        invocations are real executions and both are evidence.
+        """
+        return [e for e in self.executions
+                if e.responsibility_id == responsibility_id]
+
     def by_responsibility(self, responsibility_id: str) -> Optional[StageExecution]:
-        """The execution of one PRODUCING PASS.
+        """The SETTLED execution of one PRODUCING PASS.
 
         Named for what it looks up. The previous `by_stage` took an owner, so
         `by_stage("s03b")` was always None and `by_stage("s03")` returned
         whichever of the two passes ran first.
+
+        THE LAST, and that is the correction. This returned the FIRST match,
+        which is wrong for any pass that refined: the first execution of a
+        refining pass is the one that asked to be called again, so a settled
+        SUCCESS was reported as the CONTRACT_INCOMPLETE that preceded it. The
+        answer for a responsibility is the execution it finished on.
+
+        `response_sources` next door was already last-wins, so the two disagreed
+        about the same run - which is how this survived: each was self-consistent
+        and nothing compared them.
         """
-        for e in self.executions:
-            if e.responsibility_id == responsibility_id:
-                return e
-        return None
+        found = self.all_by_responsibility(responsibility_id)
+        return found[-1] if found else None
 
     def owned_by(self, stage_id: str) -> List[StageExecution]:
         """Every pass an OWNER ran. Two for s03 and s04, one for s01 and s02."""
@@ -271,6 +303,8 @@ def execute_stage(stage, provider, state, progression: Progression, *,
         response_source=source, provider_id=pid,
         execution_status=status.value, view_status=view_status,
         consumer_view_recorded=bool(view), patch_applied=applied,
+        refinement_only=bool(outcome.refinement_only),
+        declared_incompleteness=tuple(outcome.declared_incompleteness or ()),
         problems=tuple(outcome.problems or ())))
     return outcome, execution
 
@@ -463,17 +497,29 @@ def full_live_qualification(progression: Progression,
 
     A replayed S01 cannot be hidden by a live S04. That is the failure mode this
     predicate exists to make impossible.
+
+    EVERY execution of each pass is checked, not one of them. A refining pass
+    runs twice, and asking only one of the two would let the other be replayed or
+    seeded without appearing here - the same hiding this predicate exists to
+    prevent, one level down. Picking the first or the last would each conceal the
+    opposite case, so neither is a defensible choice and the rule is ALL.
     """
     reasons: List[str] = []
     for responsibility_id in required:
-        execution = progression.by_responsibility(responsibility_id)
-        if execution is None:
+        executions = progression.all_by_responsibility(responsibility_id)
+        if not executions:
             reasons.append("%s did not execute" % responsibility_id)
             continue
-        if execution.seeded:
-            reasons.append("%s was seeded, not executed" % responsibility_id)
-            continue
-        if execution.response_source != LIVE:
-            reasons.append("%s response source is %s, not LIVE"
-                           % (responsibility_id, execution.response_source))
+        for n, execution in enumerate(executions, start=1):
+            # Named only when the pass ran more than once, so the ordinary
+            # single-execution reason reads exactly as it always did.
+            where = ("%s" % responsibility_id if len(executions) == 1
+                     else "%s execution %d of %d"
+                          % (responsibility_id, n, len(executions)))
+            if execution.seeded:
+                reasons.append("%s was seeded, not executed" % where)
+                continue
+            if execution.response_source != LIVE:
+                reasons.append("%s response source is %s, not LIVE"
+                               % (where, execution.response_source))
     return (not reasons), reasons

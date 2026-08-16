@@ -53,7 +53,17 @@ def consumer_view_for(responsibility_id: str, state,
                                responsibility_contract(), budget_chars,
                                invocation=invocation)
     if responsibility_id != "s01":
-        leaked = sorted(set(view.payload()) & set(SOURCE_TEXT_FAMILIES))
+        # BOTH CHANNELS, checked by one rule. The semantic payload is the one
+        # INV-002 was written for; namespace occupancy is a second thing this
+        # boundary now hands a consumer, and a rule that governs only the channel
+        # it was written for is the failure S9-D closed elsewhere. Occupancy
+        # carries ids and never content, so this cannot fire on today's contract -
+        # only s01 may create a SourceClause, so only s01's occupancy can mention
+        # one. It fires the day a contract edit changes that, which is the point:
+        # the invariant should be enforced where the reach is, not where the leak
+        # was first noticed.
+        leaked = sorted((set(view.payload()) | set(view.occupancy))
+                        & set(SOURCE_TEXT_FAMILIES))
         if leaked:
             raise AssertionError(
                 "INV-002: %s would see source text %s. A stage that can reach the "
