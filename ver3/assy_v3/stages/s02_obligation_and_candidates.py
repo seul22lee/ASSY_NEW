@@ -162,7 +162,9 @@ RESPONSE SCHEMA
 Return a single JSON object with exactly these {collections} keys, each holding a
 list. A
 list may be empty - an empty list is a value. Every field is required unless
-marked optional. Every id is a string in the format shown.
+marked optional. Every id is a string in the format shown, where NNNN stands for
+a zero-padded number you choose. NNNN is a FORMAT, not a value: write an actual
+number in its place, and never one that is listed below as already in use.
 
 {response_schema}
 
@@ -304,6 +306,27 @@ class S02ObligationAndCandidates(Stage):
          ("statement", "why", "would_be_invalidated_by"), ("inferred_by_stage",)),
     )
 
+    #: THE ORDINAL SHOWN IN THE SCHEMA EXAMPLE, and it is deliberately not a
+    #: number.
+    #:
+    #: S9-E, observed live. This block used to render `id "ASM-0001"` as the
+    #: example for the assumptions collection. In the same prompt the occupancy
+    #: section said ASM-0001 and ASM-0002 were already taken, and the model
+    #: emitted ASM-0001 anyway. Two cues about the same id, one of which was an
+    #: instantiable-looking value sitting at the first free-looking index.
+    #:
+    #: The occupancy list is the real mechanism and is unchanged; this removes
+    #: the competing cue rather than compensating for it. `NNNN` cannot be
+    #: mistaken for an available entity and still shows prefix and width, which
+    #: is all an example of an id FORMAT has to do.
+    #:
+    #: Applied to every collection rather than to the one family that collided:
+    #: which families are occupied depends on committed state, the renderer has
+    #: none, and a per-family exception would be the same anchoring waiting for a
+    #: different responsibility. `identity.entity_id.format` stays the authority
+    #: on what an id IS.
+    ID_EXAMPLE_DIGITS = "NNNN"
+
     #: How a field is shown to the model when its name alone is not enough.
     #: Presentation only - requiredness and meaning stay in the contract.
     FIELD_NOTES = {
@@ -329,7 +352,7 @@ class S02ObligationAndCandidates(Stage):
         lines = []
         for collection, family, prefix, fields, _supplied in cls.RESPONSE_ENVELOPE:
             required = set(contracts.families[family].get("required_fields") or [])
-            shown = ['id "%s0001"' % prefix]
+            shown = ['id "%s%s"' % (prefix, cls.ID_EXAMPLE_DIGITS)]
             for field in fields:
                 note = cls.FIELD_NOTES.get(field, "")
                 mark = "" if field in required else " (optional)"

@@ -157,6 +157,56 @@ class TestTheActualPromptCarriesIt(unittest.TestCase):
         beside it would still read as an offer."""
         self.assertIn("FORMAT of an id", self.prompt)
 
+    def test_the_schema_example_is_not_an_instantiable_id(self):
+        """S9-E, observed live: two cues about ASM-0001 in one prompt.
+
+        The occupancy section said it was taken; the schema example showed it as
+        the id to write. The model emitted it. The occupancy list is the real
+        mechanism and is untouched - this asserts the competing cue is gone.
+        """
+        schema = S02ObligationAndCandidates.render_response_schema()
+        for occupied in ("ASM-0001", "ASM-0002"):
+            with self.subTest(id=occupied):
+                self.assertNotIn(occupied, schema)
+
+    def test_no_schema_example_is_a_concrete_ordinal(self):
+        """The property, not the one family that collided.
+
+        Which families are occupied depends on committed state, and the schema
+        renderer has none - so a per-family exception would be the same
+        anchoring waiting for a different responsibility.
+        """
+        import re
+        schema = S02ObligationAndCandidates.render_response_schema()
+        concrete = re.findall(r'id "([A-Z][A-Z0-9]*-\d+)"', schema)
+        self.assertEqual([], concrete)
+
+    def test_the_id_format_is_still_communicated(self):
+        """Removing the example must not remove the shape it taught."""
+        stage = S02ObligationAndCandidates()
+        schema = stage.render_response_schema()
+        self.assertIn('id "ASM-NNNN"', schema)
+        self.assertIn('id "OBL-NNNN"', schema)
+        state = DesignState(run_id="fmt")
+        commit_live_s01(state)
+        view = stage.consumer_view(state)
+        prompt = stage.build_prompt({"consumer_view": view.payload(),
+                                     "namespace_occupancy": view.occupancy})
+        # The prompt must SAY that NNNN is a placeholder, or the format it shows
+        # is ambiguous in a new way.
+        self.assertIn("NNNN stands for", prompt)
+
+    def test_the_occupied_ids_are_still_the_only_concrete_asm_ids_shown(self):
+        """After the change, a concrete ASM id in the prompt means 'taken'."""
+        import re
+        state = DesignState(run_id="only")
+        commit_live_s01(state)
+        stage = S02ObligationAndCandidates()
+        view = stage.consumer_view(state)
+        prompt = stage.build_prompt({"consumer_view": view.payload(),
+                                     "namespace_occupancy": view.occupancy})
+        self.assertEqual({"ASM-0001", "ASM-0002"}, set(re.findall(r"ASM-\d+", prompt)))
+
     def test_a_stage_with_no_occupancy_gets_the_prompt_it_always_got(self):
         """s01 runs against empty state, so nothing is appended to its prompt."""
         empty = DesignState(run_id="empty")
