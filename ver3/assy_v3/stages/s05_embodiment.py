@@ -187,22 +187,37 @@ class S05Embodiment(Stage):
 
     # ------------------------------------------------------------ operations
     def to_operations(self, parsed: Dict[str, Any], inputs=None) -> List[Op]:
+        """Every output carries the premises it was derived FROM.
+
+        This is what puts s05 into the currentness graph rather than beside it.
+        `_propagate` walks `_premises`, so an entity that records none is an
+        entity no upstream change can ever stale - it would sit in state looking
+        authoritative after the decision it rests on had been withdrawn.
+
+        The premises are not invented: a Realization rests on the obligations it
+        discharges and the features that do the discharging, a Feature rests on
+        the body it is on, a statement rests on the body it builds, the results
+        it consumes and the parameters it reads. Each is already a declared
+        reference; recording it as a premise is saying that the dependency is
+        real in the direction currentness walks.
+        """
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
         ops: List[Op] = []
         prov = "s05:embodiment"
         for f in parsed.get("features", []):
             ops.append(Op("CREATE", "Feature", f["id"], {
                 "body": f["body"], "feature_kind": f["feature_kind"],
-                "geometry": f["geometry"]}, prov))
+                "geometry": f["geometry"]}, prov,
+                premise_refs=[f["body"]]))
         for r in parsed.get("realizations", []):
+            obligations = list(r.get("addresses_obligations") or [])
+            features = list(r.get("participating_features") or [])
             ops.append(Op("CREATE", "Realization", r["id"], {
-                "addresses_obligations": r.get("addresses_obligations", []),
-                "participating_features": r.get("participating_features", []),
-                "verification_predicate": r["verification_predicate"]}, prov))
+                "addresses_obligations": obligations,
+                "participating_features": features,
+                "verification_predicate": r["verification_predicate"]}, prov,
+                premise_refs=obligations + features))
         for p in parsed.get("parameters", []):
-            # `status` is stage-supplied and always DECLARED. s05 may not settle
-            # a value, so it may not claim a settled status either; s06 extends
-            # `value` and `solved_by` when it has actually solved.
             ops.append(Op("CREATE", "Parameter", p["id"], {
                 "symbol": p["symbol"], "unit": p["unit"],
                 "status": ir.DECLARED}, prov))
@@ -210,7 +225,8 @@ class S05Embodiment(Stage):
             ops.append(Op("CREATE", "Constraint", c["id"], {
                 "expression": c["expression"],
                 "parameters": c.get("parameters", []),
-                "kind": c["kind"]}, prov))
+                "kind": c["kind"]}, prov,
+                premise_refs=list(c.get("parameters") or [])))
         for s in parsed.get("construction_statements", []):
             fields = {"body": s["body"], "operation": s["operation"],
                       "operands": s.get("operands", []),
@@ -218,7 +234,26 @@ class S05Embodiment(Stage):
             for optional in ("axis", "feature"):
                 if s.get(optional):
                     fields[optional] = s[optional]
-            ops.append(Op("CREATE", "ConstructionStatement", s["id"], fields, prov))
+            # THE BODY, THE RESULTS IT CONSUMES, AND THE FEATURE IT REALIZES -
+            # and deliberately NOT the parameters it reads.
+            #
+            # A statement references a parameter SYMBOLICALLY; it does not rest
+            # on that parameter's value. Recording the parameter as a premise
+            # made every statement go STALE the moment s06 settled the dimension
+            # it names, because an extension by a stage outside the owner stales
+            # what was concluded from the record - so the program was stale
+            # before the compiler ever read it, in the ordinary successful flow.
+            #
+            # What DOES rest on the settled values is the geometry, and the
+            # GeometrySignature records them as premises for exactly that reason.
+            # NOT the feature either, and the direction is why. A statement
+            # REALIZES a feature; it does not rest on one. Recording the feature
+            # as a premise inverted that, and s07 writing
+            # `Feature.compiled_by_statement` then staled the very statement it
+            # had just compiled - the compiler's record of success invalidating
+            # its own input. `feature` stays as the traceability link it is.
+            ops.append(Op("CREATE", "ConstructionStatement", s["id"], fields, prov,
+                          premise_refs=[s["body"]] + list(s.get("operands") or [])))
         for u in parsed.get("unresolved", []):
             ops.append(Op("CREATE", "UnresolvedDecision", u["id"], {
                 "decision": u["decision"], "why_open": u["why_open"],

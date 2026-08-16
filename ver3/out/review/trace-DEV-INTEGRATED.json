@@ -1,0 +1,589 @@
+{
+ "benchmark_id": "DEV-INTEGRATED",
+ "compile_ok": true,
+ "exports": {
+  "native_brep_per_body": {
+   "BOD-0001": "/home/ftk3187/github/ASSY_Ver3.0/ver3/out/cad/DEV-INTEGRATED/BOD-0001.brep"
+  },
+  "step_per_body": {
+   "BOD-0001": "/home/ftk3187/github/ASSY_Ver3.0/ver3/out/cad/DEV-INTEGRATED/BOD-0001.step"
+  }
+ },
+ "final_counts": {
+  "Body": 1,
+  "Constraint": 3,
+  "ConstructionStatement": 4,
+  "Feature": 1,
+  "GeometrySignature": 1,
+  "Obligation": 1,
+  "Parameter": 3,
+  "Realization": 1
+ },
+ "final_state": {
+  "Body": [
+   "BOD-0001"
+  ],
+  "Constraint": [
+   "CON-0001",
+   "CON-0002",
+   "CON-0003"
+  ],
+  "ConstructionStatement": [
+   "CST-0001",
+   "CST-0002",
+   "CST-0003",
+   "CST-0004"
+  ],
+  "Feature": [
+   "FEA-0001"
+  ],
+  "GeometrySignature": [
+   "GSG-07da11eeb8e61e87"
+  ],
+  "Obligation": [
+   "OBL-0001"
+  ],
+  "Parameter": [
+   "PRM-0001",
+   "PRM-0002",
+   "PRM-0003"
+  ],
+  "Realization": [
+   "RLZ-0001"
+  ]
+ },
+ "is_benchmark_result": false,
+ "is_live": false,
+ "nodes": [
+  {
+   "construction_program": [
+    {
+     "body": "BOD-0001",
+     "feature": null,
+     "operands": [],
+     "operation": "BOX",
+     "statement": "CST-0001",
+     "validity": "STANDING"
+    },
+    {
+     "body": "BOD-0001",
+     "feature": "FEA-0001",
+     "operands": [],
+     "operation": "CYLINDER",
+     "statement": "CST-0002",
+     "validity": "STANDING"
+    },
+    {
+     "body": "BOD-0001",
+     "feature": null,
+     "operands": [
+      "CST-0002"
+     ],
+     "operation": "TRANSLATE",
+     "statement": "CST-0003",
+     "validity": "STANDING"
+    },
+    {
+     "body": "BOD-0001",
+     "feature": null,
+     "operands": [
+      "CST-0001",
+      "CST-0003"
+     ],
+     "operation": "CUT",
+     "statement": "CST-0004",
+     "validity": "STANDING"
+    }
+   ],
+   "contract": "ACCEPTED",
+   "declared_llm_role": "HIGH for feature proposal and program shape; NONE for completeness",
+   "feature_graph": [
+    {
+     "body": "BOD-0001",
+     "feature": "FEA-0001",
+     "feature_kind": "BORE",
+     "validity": "STANDING"
+    }
+   ],
+   "human_review": "NOT_REVIEWED",
+   "kind": "MODEL",
+   "parsed": {
+    "constraints": [
+     {
+      "expression": {
+       "lhs": {
+        "ref": "PRM-0001"
+       },
+       "relation": "==",
+       "rhs": {
+        "const": 4,
+        "unit": "mm"
+       }
+      },
+      "id": "CON-0001",
+      "kind": "DIMENSIONAL",
+      "parameters": [
+       "PRM-0001"
+      ]
+     },
+     {
+      "expression": {
+       "lhs": {
+        "ref": "PRM-0002"
+       },
+       "relation": "==",
+       "rhs": {
+        "const": 2,
+        "unit": "mm"
+       }
+      },
+      "id": "CON-0002",
+      "kind": "DIMENSIONAL",
+      "parameters": [
+       "PRM-0002"
+      ]
+     },
+     {
+      "expression": {
+       "lhs": {
+        "ref": "PRM-0003"
+       },
+       "relation": "==",
+       "rhs": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "ref": "PRM-0002"
+         }
+        ],
+        "op": "+"
+       }
+      },
+      "id": "CON-0003",
+      "kind": "ENVELOPE",
+      "parameters": [
+       "PRM-0001",
+       "PRM-0002",
+       "PRM-0003"
+      ]
+     }
+    ],
+    "construction_statements": [
+     {
+      "body": "BOD-0001",
+      "id": "CST-0001",
+      "operands": [],
+      "operation": "BOX",
+      "parameters": {
+       "dx": {
+        "const": 40,
+        "unit": "mm"
+       },
+       "dy": {
+        "const": 30,
+        "unit": "mm"
+       },
+       "dz": {
+        "const": 20,
+        "unit": "mm"
+       }
+      }
+     },
+     {
+      "body": "BOD-0001",
+      "feature": "FEA-0001",
+      "id": "CST-0002",
+      "operands": [],
+      "operation": "CYLINDER",
+      "parameters": {
+       "height": {
+        "const": 30,
+        "unit": "mm"
+       },
+       "radius": {
+        "ref": "PRM-0003"
+       }
+      }
+     },
+     {
+      "body": "BOD-0001",
+      "id": "CST-0003",
+      "operands": [
+       "CST-0002"
+      ],
+      "operation": "TRANSLATE",
+      "parameters": {
+       "dx": {
+        "const": 20,
+        "unit": "mm"
+       },
+       "dy": {
+        "const": 15,
+        "unit": "mm"
+       },
+       "dz": {
+        "const": -5,
+        "unit": "mm"
+       }
+      }
+     },
+     {
+      "body": "BOD-0001",
+      "id": "CST-0004",
+      "operands": [
+       "CST-0001",
+       "CST-0003"
+      ],
+      "operation": "CUT",
+      "parameters": {}
+     }
+    ],
+    "features": [
+     {
+      "body": "BOD-0001",
+      "feature_kind": "BORE",
+      "geometry": "axial bore",
+      "id": "FEA-0001"
+     }
+    ],
+    "parameters": [
+     {
+      "id": "PRM-0001",
+      "symbol": "pin_r",
+      "unit": "mm"
+     },
+     {
+      "id": "PRM-0002",
+      "symbol": "wall",
+      "unit": "mm"
+     },
+     {
+      "id": "PRM-0003",
+      "symbol": "boss_r",
+      "unit": "mm"
+     }
+    ],
+    "realizations": [
+     {
+      "addresses_obligations": [
+       "OBL-0001"
+      ],
+      "id": "RLZ-0001",
+      "participating_features": [
+       "FEA-0001"
+      ],
+      "verification_predicate": "the bore admits the retained member"
+     }
+    ]
+   },
+   "produced": {
+    "Constraint": [
+     "CON-0001",
+     "CON-0002",
+     "CON-0003"
+    ],
+    "ConstructionStatement": [
+     "CST-0001",
+     "CST-0002",
+     "CST-0003",
+     "CST-0004"
+    ],
+    "Feature": [
+     "FEA-0001"
+    ],
+    "Parameter": [
+     "PRM-0001",
+     "PRM-0002",
+     "PRM-0003"
+    ],
+    "Realization": [
+     "RLZ-0001"
+    ]
+   },
+   "provenance": "DEVELOPMENT/CONTRACT FIXTURE - not live, not a benchmark result",
+   "realization_graph": [
+    {
+     "addresses_obligations": [
+      "OBL-0001"
+     ],
+     "participating_features": [
+      "FEA-0001"
+     ],
+     "realization": "RLZ-0001",
+     "validity": "STANDING",
+     "verification_predicate": "the bore admits the retained member"
+    }
+   ],
+   "responsibility_id": "s05",
+   "stage_owner_id": "s05",
+   "state_after": {
+    "Body": [
+     "BOD-0001"
+    ],
+    "Constraint": [
+     "CON-0001",
+     "CON-0002",
+     "CON-0003"
+    ],
+    "ConstructionStatement": [
+     "CST-0001",
+     "CST-0002",
+     "CST-0003",
+     "CST-0004"
+    ],
+    "Feature": [
+     "FEA-0001"
+    ],
+    "Obligation": [
+     "OBL-0001"
+    ],
+    "Parameter": [
+     "PRM-0001",
+     "PRM-0002",
+     "PRM-0003"
+    ],
+    "Realization": [
+     "RLZ-0001"
+    ]
+   },
+   "state_before": {
+    "Body": [
+     "BOD-0001"
+    ],
+    "Obligation": [
+     "OBL-0001"
+    ]
+   },
+   "state_diff": {
+    "added": {
+     "Constraint": [
+      "CON-0001",
+      "CON-0002",
+      "CON-0003"
+     ],
+     "ConstructionStatement": [
+      "CST-0001",
+      "CST-0002",
+      "CST-0003",
+      "CST-0004"
+     ],
+     "Feature": [
+      "FEA-0001"
+     ],
+     "Parameter": [
+      "PRM-0001",
+      "PRM-0002",
+      "PRM-0003"
+     ],
+     "Realization": [
+      "RLZ-0001"
+     ]
+    },
+    "added_total": 12
+   },
+   "status": "REPLAY",
+   "title": "physical embodiment"
+  },
+  {
+   "constraint_settlement": {
+    "CON-0001": {
+     "margin": null,
+     "residual": 0.0,
+     "solved_by": "SLV-06c9520cf33c48e1",
+     "solver_status": "feasible"
+    },
+    "CON-0002": {
+     "margin": null,
+     "residual": 0.0,
+     "solved_by": "SLV-06c9520cf33c48e1",
+     "solver_status": "feasible"
+    },
+    "CON-0003": {
+     "margin": null,
+     "residual": 0.0,
+     "solved_by": "SLV-06c9520cf33c48e1",
+     "solver_status": "feasible"
+    }
+   },
+   "declared_llm_role": "NONE",
+   "deterministic_runs": [
+    {
+     "evidence_id": "SLV-06c9520cf33c48e1",
+     "input_digest": "06c9520cf33c48e1e48c25f7e83b90938559f9bb9898523bb4e269ad0403e3a6",
+     "kind": "DETERMINISTIC",
+     "outcome": "feasible",
+     "patch_applied": true,
+     "problems": [],
+     "responsibility_id": "s06",
+     "stage_id": "s06"
+    }
+   ],
+   "execution": {
+    "evidence_id": "SLV-06c9520cf33c48e1",
+    "input_digest": "06c9520cf33c48e1e48c25f7e83b90938559f9bb9898523bb4e269ad0403e3a6",
+    "kind": "DETERMINISTIC",
+    "outcome": "feasible",
+    "patch_applied": true,
+    "problems": [],
+    "responsibility_id": "s06",
+    "stage_id": "s06",
+    "validity_of_evidence": null
+   },
+   "human_review": "NOT_REVIEWED",
+   "kind": "DETERMINISTIC",
+   "responsibility_id": "s06",
+   "settled": {
+    "PRM-0001": {
+     "solved_by": "SLV-06c9520cf33c48e1",
+     "symbol": "pin_r",
+     "unit": "mm",
+     "validity": "STANDING",
+     "value": 4.0
+    },
+    "PRM-0002": {
+     "solved_by": "SLV-06c9520cf33c48e1",
+     "symbol": "wall",
+     "unit": "mm",
+     "validity": "STANDING",
+     "value": 2.0
+    },
+    "PRM-0003": {
+     "solved_by": "SLV-06c9520cf33c48e1",
+     "symbol": "boss_r",
+     "unit": "mm",
+     "validity": "STANDING",
+     "value": 6.0
+    }
+   },
+   "stage_owner_id": "s06",
+   "status": "EXECUTED",
+   "title": "parameter settlement (deterministic solver)"
+  },
+  {
+   "declared_llm_role": "NONE",
+   "deterministic_runs": [
+    {
+     "evidence_id": "GSG-07da11eeb8e61e87",
+     "input_digest": "38705a415b2715a6246d56e3f21cd7e8e88c057b381ee5991d9090b191973779",
+     "kind": "DETERMINISTIC",
+     "outcome": "compiled",
+     "patch_applied": true,
+     "problems": [],
+     "responsibility_id": "s07",
+     "stage_id": "s07"
+    }
+   ],
+   "execution": {
+    "evidence_id": "GSG-07da11eeb8e61e87",
+    "input_digest": "38705a415b2715a6246d56e3f21cd7e8e88c057b381ee5991d9090b191973779",
+    "kind": "DETERMINISTIC",
+    "outcome": "compiled",
+    "patch_applied": true,
+    "problems": [],
+    "responsibility_id": "s07",
+    "stage_id": "s07",
+    "validity_of_evidence": "STANDING"
+   },
+   "human_review": "NOT_REVIEWED",
+   "kind": "DETERMINISTIC",
+   "responsibility_id": "s07",
+   "signatures": [
+    {
+     "compiled_bodies": [
+      {
+       "bbox": [
+        -1e-07,
+        -1e-07,
+        -1e-07,
+        40.0000001,
+        30.0000001,
+        20.0000001
+       ],
+       "body_id": "BOD-0001",
+       "is_valid": true,
+       "single_connected_solid": true,
+       "solid_count": 1,
+       "statement_map": {
+        "CST-0002": "FEA-0001"
+       },
+       "volume": 21738.05328941535
+      }
+     ],
+     "entity_id": "GSG-07da11eeb8e61e87",
+     "feature_map": {
+      "CST-0002": "FEA-0001"
+     },
+     "per_body": {
+      "BOD-0001": {
+       "bbox": [
+        -1e-07,
+        -1e-07,
+        -1e-07,
+        40.0000001,
+        30.0000001,
+        20.0000001
+       ],
+       "solid_count": 1,
+       "volume": 21738.053289415
+      }
+     },
+     "signature_sha256": "07da11eeb8e61e8788fbe4dd0bc63f79404abe85e42b4d255f2be21ab826899b",
+     "validity": "STANDING"
+    }
+   ],
+   "stage_owner_id": "s07",
+   "status": "EXECUTED",
+   "title": "construction compilation (deterministic CAD)"
+  }
+ ],
+ "notes": {
+  "contract_is_not_mechanical": "Compilation success is a geometric fact, not a mechanical judgement.",
+  "replay_is_not_live": "This fixture is not a live run and claims no model provenance."
+ },
+ "progression": {
+  "deterministic": [
+   {
+    "evidence_id": "SLV-06c9520cf33c48e1",
+    "input_digest": "06c9520cf33c48e1e48c25f7e83b90938559f9bb9898523bb4e269ad0403e3a6",
+    "kind": "DETERMINISTIC",
+    "outcome": "feasible",
+    "patch_applied": true,
+    "problems": [],
+    "responsibility_id": "s06",
+    "stage_id": "s06"
+   },
+   {
+    "evidence_id": "GSG-07da11eeb8e61e87",
+    "input_digest": "38705a415b2715a6246d56e3f21cd7e8e88c057b381ee5991d9090b191973779",
+    "kind": "DETERMINISTIC",
+    "outcome": "compiled",
+    "patch_applied": true,
+    "problems": [],
+    "responsibility_id": "s07",
+    "stage_id": "s07"
+   }
+  ],
+  "executions": [],
+  "failures": [],
+  "response_sources": {}
+ },
+ "provenance": "DEVELOPMENT/CONTRACT FIXTURE - not live, not a benchmark result",
+ "reference_cad": {
+  "is_pipeline_output": false,
+  "references": []
+ },
+ "repo_commit": "b45ecc42687aa2297ec2535714e38e67cf460d2e",
+ "roundtrip": {
+  "brep": {
+   "BOD-0001": 3.637978807091713e-12
+  },
+  "step": {
+   "BOD-0001": 3.6818169819736536e-15
+  }
+ },
+ "run_id": "dev-integrated",
+ "source_text": "A development fixture exercising the canonical downstream seam. It is not a design request and answers no benchmark.",
+ "trace_schema_version": "1.0.0"
+}

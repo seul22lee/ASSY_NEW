@@ -57,6 +57,8 @@ from ver3.assy_v3.stages.feasibility import (                          # noqa: E
 from ver3.assy_v3.state.design_state import Contracts, DesignState      # noqa: E402
 from ver3.assy_v3.state.patch import Op, StagePatch                     # noqa: E402
 from ver3.tools import run_window2                                      # noqa: E402
+from .test_s5_branch_and_premise import (                      # noqa: E402
+    authorized_stage as _authorized_stage)
 from .test_s02_s03b_integration import S02, _Canned                     # noqa: E402
 from .test_s3_interface_readiness import _code_only                     # noqa: E402
 
@@ -351,10 +353,11 @@ class _Feas(_fixtures.StateBuilder, unittest.TestCase):
     def val(self, state, eid):
         return state.entities[eid].get("_validity")
 
-    def revise(self, state, op, stage="s04"):
+    def revise(self, state, op, stage=None):
         state.apply(StagePatch(
             patch_id="rev-%d" % len(state.applied_patches), run_id=state.run_id,
-            stage_id=stage, stage_attempt=9, parent_state_hash=state.state_hash(),
+            stage_id=stage or _authorized_stage(state, op), stage_attempt=9,
+            parent_state_hash=state.state_hash(),
             operations=[op], execution_status="SUCCESS",
             provenance={"provider": "t"}))
 

@@ -11,7 +11,7 @@ import os
 import tempfile
 import unittest
 
-from ver3.assy_v3.downstream import adapters, compiler, execution as ex, ir
+from ver3.assy_v3.downstream import canonical_io, compiler, execution as ex, ir
 from ver3.assy_v3.pipeline.progression import DeterministicExecution, Progression
 from ver3.assy_v3.state.design_state import DesignState
 from ver3.assy_v3.state.patch import Op, StagePatch
@@ -82,7 +82,7 @@ class TestSettlementWritesOnlyWhatItMay(unittest.TestCase):
     def test_the_evidence_id_is_derived_from_the_system(self):
         """Same system, same evidence - determinism visible in state."""
         a, _ = ex.execute_settlement(self.state, Progression())
-        self.assertEqual(adapters.evidence_identity(a),
+        self.assertEqual(canonical_io.evidence_identity(a),
                          self.state.entities["PRM-0003"]["solved_by"])
 
     def test_s07_may_not_write_a_parameter_value(self):
@@ -224,10 +224,10 @@ class TestBranchIsolation(unittest.TestCase):
     def test_a_branch_reads_only_its_own_parameters(self):
         self.assertEqual(["PRM-A1"],
                          [p.entity_id for p in
-                          adapters.read_parameters(self.state, "CND-A")])
+                          canonical_io.read_parameters(self.state, "CND-A")])
         self.assertEqual(["PRM-B1"],
                          [p.entity_id for p in
-                          adapters.read_parameters(self.state, "CND-B")])
+                          canonical_io.read_parameters(self.state, "CND-B")])
 
     def test_settling_one_branch_leaves_the_other_unsettled(self):
         report, _ = ex.execute_settlement(self.state, Progression(), branch="CND-A")
@@ -238,7 +238,7 @@ class TestBranchIsolation(unittest.TestCase):
     def test_the_compiler_is_given_only_its_branch_values(self):
         ex.execute_settlement(self.state, Progression(), branch="CND-A")
         self.assertEqual({"PRM-A1"},
-                         set(adapters.resolved_values(self.state, "CND-A")))
+                         set(canonical_io.resolved_values(self.state, "CND-A")))
 
 
 @unittest.skipUnless(KERNEL, "OpenCascade kernel absent")
@@ -283,13 +283,30 @@ class TestCompilationFromCanonicalState(unittest.TestCase):
                          signature["signature_sha256"])
 
     def test_geometry_traces_back_to_the_statement_and_feature(self):
-        """`Why does this CAD feature exist` has to be answerable."""
+        """`Why does this CAD feature exist` has to be answerable.
+
+        The mapping lives on the GeometrySignature rather than on the Feature.
+        s07 extends nothing: writing a compilation fact onto an upstream entity
+        staled everything premised on it, so a successful compile withdrew
+        standing from the statements it had just compiled.
+        """
+        p = Progression()
+        ex.execute_settlement(self.state, p)
+        _result, execution = ex.execute_compilation(self.state, p)
+        signature = self.state.entities[execution.evidence_id]
+        self.assertEqual("FEA-0001", signature["feature_map"]["CST-0002"])
+        compiled = {b["body_id"]: b for b in signature["compiled_bodies"]}
+        self.assertTrue(compiled["BOD-0001"]["is_valid"])
+
+    def test_a_successful_compile_stales_nothing_upstream(self):
+        """The defect that moved these facts onto the signature."""
         p = Progression()
         ex.execute_settlement(self.state, p)
         ex.execute_compilation(self.state, p)
-        self.assertEqual("CST-0002",
-                         self.state.entities["FEA-0001"]["compiled_by_statement"])
-        self.assertTrue(self.state.entities["BOD-0001"]["compiled"]["is_valid"])
+        for eid in ("BOD-0001", "FEA-0001", "CST-0002", "CST-0004"):
+            with self.subTest(entity=eid):
+                self.assertEqual("STANDING",
+                                 self.state.entities[eid].get("_validity", "STANDING"))
 
     def test_a_value_with_no_solver_evidence_never_reaches_the_kernel(self):
         """R-23 at the last door. The compiler compiles solved decisions only."""

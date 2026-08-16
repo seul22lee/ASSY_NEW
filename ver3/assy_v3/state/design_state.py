@@ -361,7 +361,7 @@ class DesignState:
                 if op.kind == "EXTEND":
                     problems.extend(self._extend_problems(patch, op))
                 else:
-                    problems.extend(self._revision_problems(op))
+                    problems.extend(self._revision_problems(patch, op))
             # U-4. A declared premise must resolve, or the dependency it claims
             # to record is fiction and FA-5 cannot be computed from it.
             for ref in op.premise_refs:
@@ -421,7 +421,30 @@ class DesignState:
                            "revision requires SUPERSEDE" % (eid, name))
         return out
 
-    def _revision_problems(self, op) -> List[str]:
+    def _revision_problems(self, patch, op) -> List[str]:
+        """SUPERSEDE and INVALIDATE, including WHO is entitled to do it.
+
+        THE GAP THIS CLOSES. This method used to take only `op`, so it could not
+        see `patch.stage_id` even in principle - and so a supersession was checked
+        for evidence (provenance, reason, a prior value) and never for authority.
+        Any stage could rewrite any field of any entity: s01 could change the
+        symbol of an s05-owned Parameter, and nothing objected.
+
+        EXTEND has always been gated by exactly the same question, which is what
+        makes the asymmetry a defect rather than a design. The contracts define
+        SUPERSEDE's effect and its evidence requirements and never say who may
+        perform one, so the rule is derived from the authority the runtime already
+        enforces elsewhere:
+
+            the family's OWNER may revise what it authored, and
+            a stage granted a field through `extendable_fields` may revise THAT
+            field - having been trusted to write it in the first place.
+
+        INVALIDATE names no field. It withdraws standing rather than replacing a
+        value, it is how lifecycle coordination retires an entity across
+        families, and gating it on family ownership would be a different rule
+        about a different operation. It is deliberately left alone here.
+        """
         out: List[str] = []
         if op.entity_id not in _STORAGE[self].entities:
             out.append("%s_UNKNOWN: %s" % (op.kind, op.entity_id))
@@ -433,10 +456,31 @@ class DesignState:
         if op.kind == "SUPERSEDE":
             if not op.fields:
                 out.append("SUPERSEDE_EMPTY: %s names no field" % op.entity_id)
+            fam = self.stored_family(op.entity_id)
+            owner = self.c.owner_of(fam)
+            extendable = self.c.extendable_fields(fam)
             for name in op.fields:
                 if name not in _STORAGE[self].entities[op.entity_id]:
                     out.append("SUPERSEDE_ABSENT: %s.%s has no prior value"
                                % (op.entity_id, name))
+                    continue
+                # A DELEGATED FIELD BELONGS TO ITS DELEGATE, NOT TO THE OWNER.
+                # Checked before ownership on purpose: `Parameter` is owned by
+                # s05, and if ownership were tested first s05 could supersede
+                # `value` - the one thing S05-C10 exists to prevent. Granting a
+                # field away is giving it away.
+                granted = extendable.get(name)
+                if granted is not None:
+                    if granted != patch.stage_id:
+                        out.append(
+                            "SUPERSEDE_WRONG_STAGE: %s.%s is writable by %s, not "
+                            "%s" % (fam, name, granted, patch.stage_id))
+                    continue
+                if owner != patch.stage_id:
+                    out.append(
+                        "SUPERSEDE_NOT_PERMITTED: %s.%s is owned by %s and is not "
+                        "extendable, so %s may not revise it"
+                        % (fam, name, owner, patch.stage_id))
         return out
 
     def _reference_problems(self, patch, seen: set) -> List[str]:

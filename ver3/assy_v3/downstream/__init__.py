@@ -15,7 +15,7 @@ from .ir import (ConstructionProgram, Expr, ParameterDecl, TypedConstraint,
 __all__ = ["ConstructionProgram", "Expr", "ParameterDecl", "TypedConstraint",
            "OPCODES", "SOLVER_STATUSES"]
 
-#: `adapters` and `execution` are imported by name rather than re-exported here:
+#: `canonical_io` and `execution` are imported by name rather than re-exported
 #: they touch DesignState, and a package __init__ that pulled them in would make
 #: `import ver3.assy_v3.downstream` drag the state layer into a module that only
 #: wanted the IR.

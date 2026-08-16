@@ -202,6 +202,107 @@ def run_stage(stage, provider_factory, state, progression, inputs=None,
     )
 
 
+
+#: The embodiment producer is MODEL-owned, and the trace must say so. It was
+#: previously rendered with kind DETERMINISTIC beside a declared llm_role of
+#: HIGH, which is a classification a reviewer would reasonably believe.
+MODEL_OWNED = "MODEL"
+DETERMINISTIC_SERVICE = "DETERMINISTIC"
+
+
+def validity_of(state, entity_id):
+    if entity_id is None or entity_id not in state.entities:
+        return None
+    return state.entities[entity_id].get("_validity", "STANDING")
+
+
+def downstream_nodes(state, progression):
+    """Real nodes for s05, s06 and s07 from what actually executed.
+
+    A responsibility that did not run is still a node, with its reason - a stage
+    missing from a review screen reads as a stage that passed.
+    """
+    out = []
+
+    # ---- s05: a producing responsibility, model-owned ----------------
+    produced = {fam: sorted(e["entity_id"] for e in state.family(fam))
+                for fam in ("Feature", "Realization", "Parameter", "Constraint",
+                            "ConstructionStatement")}
+    if any(produced.values()):
+        out.append(node("s05", "physical embodiment", MODEL_OWNED, REPLAYED,
+                        stage_owner_id="s05",
+                        declared_llm_role="HIGH for feature proposal and program "
+                                          "shape; NONE for completeness",
+                        produced=produced,
+                        realization_graph=[
+                            {"realization": r["entity_id"],
+                             "addresses_obligations": r.get("addresses_obligations") or [],
+                             "participating_features": r.get("participating_features") or [],
+                             "verification_predicate": r.get("verification_predicate"),
+                             "validity": validity_of(state, r["entity_id"])}
+                            for r in sorted(state.family("Realization"),
+                                            key=lambda x: x["entity_id"])],
+                        feature_graph=[
+                            {"feature": f["entity_id"], "body": f.get("body"),
+                             "feature_kind": f.get("feature_kind"),
+                             "validity": validity_of(state, f["entity_id"])}
+                            for f in sorted(state.family("Feature"),
+                                            key=lambda x: x["entity_id"])],
+                        construction_program=[
+                            {"statement": c["entity_id"], "body": c.get("body"),
+                             "operation": c.get("operation"),
+                             "operands": c.get("operands") or [],
+                             "feature": c.get("feature"),
+                             "validity": validity_of(state, c["entity_id"])}
+                            for c in sorted(state.family("ConstructionStatement"),
+                                            key=lambda x: x["entity_id"])]))
+    else:
+        out.append(node("s05", "physical embodiment", MODEL_OWNED, NOT_EXERCISED,
+                        reason="no embodiment has been authored for this case"))
+
+    # ---- s06 and s07: deterministic services -------------------------
+    for rid, title in (("s06", "parameter settlement (deterministic solver)"),
+                       ("s07", "construction compilation (deterministic CAD)")):
+        runs = progression.deterministic_by_responsibility(rid)
+        if not runs:
+            out.append(node(rid, title, DETERMINISTIC_SERVICE, NOT_EXERCISED,
+                            reason="no deterministic execution was recorded",
+                            declared_llm_role="NONE"))
+            continue
+        last = runs[-1]
+        record = dict(last.as_record())
+        record["validity_of_evidence"] = validity_of(state, last.evidence_id)
+        extra = {}
+        if rid == "s06":
+            extra["settled"] = {
+                p["entity_id"]: {"symbol": p.get("symbol"), "unit": p.get("unit"),
+                                 "value": p.get("value"),
+                                 "solved_by": p.get("solved_by"),
+                                 "validity": validity_of(state, p["entity_id"])}
+                for p in sorted(state.family("Parameter"), key=lambda x: x["entity_id"])}
+            extra["constraint_settlement"] = {
+                c["entity_id"]: c.get("settlement")
+                for c in sorted(state.family("Constraint"), key=lambda x: x["entity_id"])
+                if c.get("settlement")}
+        else:
+            signatures = sorted(state.family("GeometrySignature"),
+                                key=lambda x: x["entity_id"])
+            extra["signatures"] = [
+                {"entity_id": g["entity_id"],
+                 "signature_sha256": g.get("signature_sha256"),
+                 "per_body": g.get("per_body"),
+                 "feature_map": g.get("feature_map"),
+                 "compiled_bodies": g.get("compiled_bodies"),
+                 "validity": validity_of(state, g["entity_id"])}
+                for g in signatures]
+        out.append(node(rid, title, DETERMINISTIC_SERVICE,
+                        "EXECUTED" if last.patch_applied else "EXECUTED_NO_WRITE",
+                        stage_owner_id=rid, declared_llm_role="NONE",
+                        deterministic_runs=[r.as_record() for r in runs],
+                        execution=record, **extra))
+    return out
+
+
 def build_trace(case_id: str, corpus_root: str = FIXTURES) -> Dict[str, Any]:
     """A trace of the canonical chain, as far as the repository can actually run it.
 
@@ -247,35 +348,11 @@ def build_trace(case_id: str, corpus_root: str = FIXTURES) -> Dict[str, Any]:
 
     # SPECIFIED AND UNIMPLEMENTED, and the distinction is the point.
     #
-    # These three have full contracts under ver3/contracts/stages/ - engineering
-    # question, llm_role, owned decisions and numbered deterministic exit checks -
-    # and their families are fully typed in DESIGN_STATE_CONTRACT. What does not
-    # exist is code. Recording them as nodes rather than omitting them is what
-    # stops a review screen from reading as though the pipeline ended cleanly at
-    # s04b by design.
-    #
-    # Each contract also classifies itself OPERATIONAL and says no canonical
-    # responsibility exists for it, because the frozen architecture scopes the
-    # canonical set to s01-s04b plus the gate. So `NOT_IMPLEMENTED` here means
-    # "specified, deliberately out of frozen scope, and unbuilt" - not
-    # "undefined".
-    for rid, title, llm, families in (
-            ("s05", "embodiment: features, parameters, construction program",
-             "HIGH for feature proposal and program shape; NONE for completeness",
-             ["Constraint", "ConstructionStatement", "Feature", "Parameter",
-              "Realization"]),
-            ("s06", "parameter resolution (deterministic solver service)",
-             "NONE", []),
-            ("s07", "construction compiler and CAD build", "NONE",
-             ["GeometrySignature"])):
-        nodes.append(node(rid, title, "DETERMINISTIC", NOT_IMPLEMENTED,
-                          reason="specified by ver3/contracts/stages/%s_CONTRACT.yaml "
-                                 "with deterministic exit checks, and implemented "
-                                 "by no production code" % rid.upper(),
-                          declared_families=families,
-                          contract_path="ver3/contracts/stages/%s_CONTRACT.yaml"
-                                        % rid.upper(),
-                          declared_llm_role=llm))
+    # s05, s06 and s07 now EXIST, so the trace projects their real executions
+    # rather than a placeholder. `deterministic_nodes` builds the last two from
+    # DeterministicExecution records, which is why they carry no response source
+    # and no provider: they contacted none.
+    nodes.extend(downstream_nodes(state, progression))
 
     return {
         "trace_schema_version": TRACE_SCHEMA_VERSION,
@@ -337,14 +414,169 @@ def reference_cad(case_id: str) -> Dict[str, Any]:
     return out
 
 
+
+# ==========================================================================
+# The integrated canonical development chain
+#
+# A DEVELOPMENT / CONTRACT FIXTURE. Not live, not a benchmark result, and not an
+# S9-E promotion. It exists because the benchmark corpus cannot currently feed
+# s05 without paid regeneration, and a downstream that only ever runs from
+# hand-built solver input is a downstream nobody has seen work.
+#
+# It enters through the SAME public interfaces production uses: canonical
+# DesignState, the s05 stage's own `to_operations`, and the deterministic
+# execution path. Nothing here calls a solver or a compiler core directly.
+# ==========================================================================
+
+DEVELOPMENT_FIXTURE = "DEVELOPMENT/CONTRACT FIXTURE - not live, not a benchmark result"
+
+
+def _mm(v):
+    return {"const": v, "unit": "mm"}
+
+
+def _ref(i):
+    return {"ref": i}
+
+
+def development_embodiment():
+    """One body, one bore, one obligation discharged. Canonical shapes only.
+
+    Deliberately small and deliberately generic: no benchmark dimension, no
+    reference geometry, nothing that names a case. What it exercises is the
+    SEAM - obligation to realization to feature to statement to solid.
+    """
+    return {
+        "features": [{"id": "FEA-0001", "body": "BOD-0001",
+                      "feature_kind": "BORE", "geometry": "axial bore"}],
+        "realizations": [{"id": "RLZ-0001",
+                          "addresses_obligations": ["OBL-0001"],
+                          "participating_features": ["FEA-0001"],
+                          "verification_predicate":
+                              "the bore admits the retained member"}],
+        "parameters": [{"id": "PRM-0001", "symbol": "pin_r", "unit": "mm"},
+                       {"id": "PRM-0002", "symbol": "wall", "unit": "mm"},
+                       {"id": "PRM-0003", "symbol": "boss_r", "unit": "mm"}],
+        "constraints": [
+            {"id": "CON-0001", "kind": "DIMENSIONAL", "parameters": ["PRM-0001"],
+             "expression": {"relation": "==", "lhs": _ref("PRM-0001"), "rhs": _mm(4)}},
+            {"id": "CON-0002", "kind": "DIMENSIONAL", "parameters": ["PRM-0002"],
+             "expression": {"relation": "==", "lhs": _ref("PRM-0002"), "rhs": _mm(2)}},
+            # The envelope rule from S05_CONTRACT, as a coupled relation: a pin
+            # of radius r needing a wall w gives a boss radius r + w.
+            {"id": "CON-0003", "kind": "ENVELOPE",
+             "parameters": ["PRM-0001", "PRM-0002", "PRM-0003"],
+             "expression": {"relation": "==", "lhs": _ref("PRM-0003"),
+                            "rhs": {"op": "+", "args": [_ref("PRM-0001"),
+                                                        _ref("PRM-0002")]}}}],
+        "construction_statements": [
+            {"id": "CST-0001", "body": "BOD-0001", "operation": "BOX", "operands": [],
+             "parameters": {"dx": _mm(40), "dy": _mm(30), "dz": _mm(20)}},
+            {"id": "CST-0002", "body": "BOD-0001", "operation": "CYLINDER",
+             "operands": [], "feature": "FEA-0001",
+             "parameters": {"radius": _ref("PRM-0003"), "height": _mm(30)}},
+            {"id": "CST-0003", "body": "BOD-0001", "operation": "TRANSLATE",
+             "operands": ["CST-0002"],
+             "parameters": {"dx": _mm(20), "dy": _mm(15), "dz": _mm(-5)}},
+            {"id": "CST-0004", "body": "BOD-0001", "operation": "CUT",
+             "operands": ["CST-0001", "CST-0003"], "parameters": {}}],
+    }
+
+
+def build_development_trace(out_dir):
+    """Run the canonical chain end to end and return its trace."""
+    from ver3.assy_v3.downstream import execution as dex
+    from ver3.assy_v3.stages.s05_embodiment import S05Embodiment
+    from ver3.assy_v3.state.patch import Op, StagePatch
+
+    state = DesignState(run_id="dev-integrated")
+    progression = Progression()
+
+    def commit(stage, ops):
+        patch = StagePatch(
+            patch_id="%s-%d" % (stage, len(state.applied_patches)),
+            run_id=state.run_id, stage_id=stage, stage_attempt=1,
+            parent_state_hash=state.state_hash(), operations=list(ops),
+            execution_status="SUCCESS",
+            provenance={"purpose": "development fixture", "provider": None})
+        problems = state.validate(patch)
+        if problems:
+            raise AssertionError("development fixture rejected: %s" % problems)
+        state.apply(patch)
+
+    commit("s03", [Op("CREATE", "Body", "BOD-0001",
+                      {"instance_identity": "enclosure", "role": "shell",
+                       "created_by_stage": "s03"}, "s03:topology")])
+    commit("s02", [Op("CREATE", "Obligation", "OBL-0001",
+                      {"statement": "the retained member is located",
+                       "derived_from_requirements": [], "mandatory": True,
+                       "scope": "UNIVERSAL", "satisfiable_at": "s05",
+                       "evidence_route": "MOBILITY_ANALYSIS",
+                       "route_available": True}, "s02:derivation")])
+
+    embodiment = development_embodiment()
+    stage = S05Embodiment()
+    before = state_summary(state)
+    commit("s05", stage.to_operations(embodiment))
+    after = state_summary(state)
+
+    dex.execute_settlement(state, progression)
+    result, compile_execution = dex.execute_compilation(
+        state, progression, out_dir=out_dir)
+
+    # `downstream_nodes` builds all three from committed state; the s05 node is
+    # then enriched with what only this caller knows - the response it authored
+    # and the state either side of it - rather than being added a second time.
+    nodes = downstream_nodes(state, progression)
+    for n in nodes:
+        if n["responsibility_id"] == "s05":
+            n.update({"contract": "ACCEPTED", "state_before": before,
+                      "state_after": after,
+                      "state_diff": state_diff(before, after),
+                      "parsed": embodiment,
+                      "provenance": DEVELOPMENT_FIXTURE})
+    return {
+        "trace_schema_version": TRACE_SCHEMA_VERSION,
+        "run_id": state.run_id,
+        "benchmark_id": "DEV-INTEGRATED",
+        "provenance": DEVELOPMENT_FIXTURE,
+        "is_live": False,
+        "is_benchmark_result": False,
+        "repo_commit": repo_commit(),
+        "source_text": "A development fixture exercising the canonical downstream "
+                       "seam. It is not a design request and answers no benchmark.",
+        "nodes": nodes,
+        "final_state": state_summary(state),
+        "final_counts": state.counts(),
+        "compile_ok": result.ok,
+        "exports": result.exports,
+        "roundtrip": result.roundtrip,
+        "progression": progression.as_record(),
+        "reference_cad": {"is_pipeline_output": False, "references": []},
+        "notes": {
+            "replay_is_not_live": "This fixture is not a live run and claims no "
+                                  "model provenance.",
+            "contract_is_not_mechanical": "Compilation success is a geometric "
+                                          "fact, not a mechanical judgement.",
+        },
+    }
+
+
 def main() -> int:
     import argparse
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--case", default="BM-001")
     ap.add_argument("--out", default=os.path.join(VER3, "out", "review"))
+    ap.add_argument("--development", action="store_true",
+                    help="run the integrated canonical development chain")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
-    trace = build_trace(args.case)
+    if args.development:
+        cad = os.path.join(VER3, "out", "cad", "DEV-INTEGRATED")
+        trace = build_development_trace(cad)
+        args.case = "DEV-INTEGRATED"
+    else:
+        trace = build_trace(args.case)
     path = os.path.join(args.out, "trace-%s.json" % args.case)
     with open(path, "w") as fh:
         json.dump(trace, fh, indent=1, sort_keys=True, default=str)

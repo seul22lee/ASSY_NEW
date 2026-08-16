@@ -39,6 +39,7 @@ DEFAULT_OUT = os.path.join(VER3, "out", "review")
 
 STATUS_CLASS = {
     "LIVE_DEEPSEEK": "live", "REPLAY": "replay", "DETERMINISTIC": "det",
+  "EXECUTED": "det", "EXECUTED_NO_WRITE": "blocked",
     "NOT_EXERCISED": "none", "NOT_IMPLEMENTED": "absent",
     "BLOCKED_BY_UPSTREAM": "blocked",
 }
@@ -185,6 +186,61 @@ function show(i){
       ${badge('hr','human review: '+verdictOf(n))}
     </div>`;
 
+  if(n.kind==='DETERMINISTIC' && (n.status||'').startsWith('EXECUTED')){
+    const e=n.execution||{};
+    h += section('1 · Deterministic execution', kv({
+        'responsibility': e.responsibility_id, 'outcome': e.outcome,
+        'input digest': (e.input_digest||'').slice(0,32),
+        'wrote to state': e.patch_applied, 'evidence': e.evidence_id,
+        'evidence validity': e.validity_of_evidence,
+        'model provenance': 'none - this stage contacts no provider'}));
+    if(n.settled){
+      h += section('2 · Settlement', `<table><tr><th>parameter</th><th>symbol</th>
+        <th>unit</th><th>value</th><th>solved by</th><th>validity</th></tr>` +
+        Object.entries(n.settled).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${esc(v.symbol)}</td>
+        <td>${esc(v.unit)}</td><td>${v.value==null?'<span class="dim">unsettled</span>':esc(v.value)}</td>
+        <td>${esc(v.solved_by||'—')}</td><td>${esc(v.validity)}</td></tr>`).join('')+`</table>`);
+      if(n.constraint_settlement) h += `<details><summary>constraint settlement</summary>
+        <pre>${esc(JSON.stringify(n.constraint_settlement,null,1))}</pre></details>`;
+    }
+    if(n.signatures){
+      h += section('2 · Compiled geometry', n.signatures.map(g=>`
+        <div class="${g.validity==='STANDING'?'okbox':'warnbox'}">
+          <b>${esc(g.entity_id)}</b> — ${g.validity==='STANDING'
+            ? 'CURRENT for the present design state'
+            : 'STALE: its premises changed after it was compiled, so it is history rather than current geometry'}
+          <br>signature <code>${esc((g.signature_sha256||'').slice(0,32))}</code></div>
+        <table><tr><th>body</th><th>volume mm3</th><th>solids</th><th>single connected</th></tr>` +
+        (g.compiled_bodies||[]).map(b=>`<tr><td>${esc(b.body_id)}</td><td>${esc(b.volume)}</td>
+          <td>${esc(b.solid_count)}</td><td>${esc(b.single_connected_solid)}</td></tr>`).join('')+
+        `</table>
+        <table><tr><th>statement</th><th>realizes feature</th></tr>` +
+        Object.entries(g.feature_map||{}).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')+
+        `</table>`).join(''));
+    }
+    h += section('3 · Every recorded run', `<pre>${esc(JSON.stringify(n.deterministic_runs,null,1))}</pre>`);
+    $('#main').innerHTML = h + reviewPanel(n); wireReview(n); return;
+  }
+  if(n.kind==='MODEL' && n.realization_graph){
+    h += section('1 · Realization graph — why each feature exists', `<table>
+      <tr><th>realization</th><th>discharges obligation</th><th>via feature</th>
+      <th>verification predicate</th><th>validity</th></tr>` +
+      n.realization_graph.map(r=>`<tr><td>${esc(r.realization)}</td>
+      <td>${(r.addresses_obligations||[]).map(esc).join(', ')}</td>
+      <td>${(r.participating_features||[]).map(esc).join(', ')}</td>
+      <td>${esc(r.verification_predicate)}</td><td>${esc(r.validity)}</td></tr>`).join('')+`</table>`);
+    h += section('2 · Features', `<table><tr><th>feature</th><th>on body</th><th>kind</th><th>validity</th></tr>`+
+      n.feature_graph.map(f=>`<tr><td>${esc(f.feature)}</td><td>${esc(f.body)}</td>
+      <td>${esc(f.feature_kind)}</td><td>${esc(f.validity)}</td></tr>`).join('')+`</table>`);
+    h += section('3 · Construction program (each body in its own frame)', `<table>
+      <tr><th>statement</th><th>body</th><th>operation</th><th>operands</th><th>realizes</th><th>validity</th></tr>`+
+      n.construction_program.map(c=>`<tr><td>${esc(c.statement)}</td><td>${esc(c.body)}</td>
+      <td>${esc(c.operation)}</td><td>${(c.operands||[]).map(esc).join(', ')||'—'}</td>
+      <td>${esc(c.feature||'—')}</td><td>${esc(c.validity)}</td></tr>`).join('')+`</table>`);
+    if(n.state_diff) h += section('4 · State change', `<pre>${esc(JSON.stringify(n.state_diff,null,1))}</pre>`);
+    if(n.parsed) h += `<details><summary>authored response</summary><pre>${esc(JSON.stringify(n.parsed,null,1))}</pre></details>`;
+    $('#main').innerHTML = h + reviewPanel(n); wireReview(n); return;
+  }
   if(n.status==='NOT_IMPLEMENTED'){
     h += `<div class="warnbox"><b>This part of the pipeline does not exist.</b><br>
       ${esc(n.reason||'')}${n.declared_families&&n.declared_families.length?

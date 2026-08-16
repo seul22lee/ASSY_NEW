@@ -1,0 +1,284 @@
+"""Stale CAD may not masquerade as current.
+
+There is ONE currentness mechanism in this repository: `_propagate` walks the
+`_premises` graph and withdraws standing transitively. Nothing here adds a second
+one. What this file establishes is that s05, s06 and s07 are IN that graph -
+because an entity recording no premise can never go stale, and would sit in state
+looking authoritative after the decision it rests on had been withdrawn.
+
+THE THREE DEFECTS THIS FILE EXISTS TO KEEP FIXED
+
+Getting the premises wrong is not a missing feature; it produces a chain that is
+stale before anything changes, which is worse than one that never goes stale at
+all because it looks like the mechanism is working.
+
+    a statement premised on the parameters it reads    -> every statement stale
+                                                          the moment s06 settled
+    a statement premised on the feature it realizes    -> the dependency
+                                                          inverted, so s07's own
+                                                          record staled its input
+    s07 extending Body/Feature with compilation facts  -> a successful compile
+                                                          withdrew standing from
+                                                          everything premised on
+                                                          the body
+
+So `test_a_clean_chain_is_entirely_standing` is the most important test here. The
+propagation tests below are only meaningful if it passes.
+"""
+
+import os
+import unittest
+
+from ver3.assy_v3.downstream import compiler, execution as ex
+from ver3.assy_v3.pipeline.progression import Progression
+from ver3.assy_v3.stages.s05_embodiment import S05Embodiment
+from ver3.assy_v3.state.design_state import DesignState
+from ver3.assy_v3.state.patch import Op, StagePatch
+
+KERNEL = True
+try:
+    compiler.kernel()
+except compiler.KernelUnavailable:                               # pragma: no cover
+    KERNEL = False
+
+MM = lambda v: {"const": v, "unit": "mm"}                        # noqa: E731
+REF = lambda i: {"ref": i}                                       # noqa: E731
+
+
+def s05_response():
+    return {
+        "features": [{"id": "FEA-1", "body": "BOD-1", "feature_kind": "BORE",
+                      "geometry": "axial bore"}],
+        "realizations": [{"id": "RLZ-1", "addresses_obligations": ["OBL-1"],
+                          "participating_features": ["FEA-1"],
+                          "verification_predicate": "the bore admits the pin"}],
+        "parameters": [{"id": "PRM-R", "symbol": "r", "unit": "mm"}],
+        "constraints": [{"id": "CON-R", "kind": "DIMENSIONAL",
+                         "parameters": ["PRM-R"],
+                         "expression": {"relation": "==", "lhs": REF("PRM-R"),
+                                        "rhs": MM(6)}}],
+        "construction_statements": [
+            {"id": "CST-1", "body": "BOD-1", "operation": "BOX", "operands": [],
+             "parameters": {"dx": MM(40), "dy": MM(30), "dz": MM(20)}},
+            {"id": "CST-2", "body": "BOD-1", "operation": "CYLINDER",
+             "operands": [], "feature": "FEA-1",
+             "parameters": {"radius": REF("PRM-R"), "height": MM(30)}},
+            {"id": "CST-3", "body": "BOD-1", "operation": "TRANSLATE",
+             "operands": ["CST-2"],
+             "parameters": {"dx": MM(20), "dy": MM(15), "dz": MM(-5)}},
+            {"id": "CST-4", "body": "BOD-1", "operation": "CUT",
+             "operands": ["CST-1", "CST-3"], "parameters": {}}],
+    }
+
+
+@unittest.skipUnless(KERNEL, "OpenCascade kernel absent")
+class _Chain(unittest.TestCase):
+
+    def setUp(self):
+        self.state = DesignState(run_id="currentness")
+        self.assertEqual([], self.apply("s03", [
+            Op("CREATE", "Body", "BOD-1",
+               {"instance_identity": "shell", "role": "shell",
+                "created_by_stage": "s03"}, "s03:topology")]))
+        self.assertEqual([], self.apply("s02", [
+            Op("CREATE", "Obligation", "OBL-1",
+               {"statement": "the pin is retained",
+                "derived_from_requirements": [], "mandatory": True,
+                "scope": "UNIVERSAL", "satisfiable_at": "s05",
+                "evidence_route": "MOBILITY_ANALYSIS", "route_available": True},
+               "s02:derivation")]))
+        self.assertEqual([], self.apply(
+            "s05", S05Embodiment().to_operations(s05_response())))
+        progression = Progression()
+        ex.execute_settlement(self.state, progression)
+        _result, execution = ex.execute_compilation(self.state, progression)
+        self.signature = execution.evidence_id
+        self.assertIsNotNone(self.signature, "the chain did not compile")
+
+    def apply(self, stage, ops):
+        patch = StagePatch(
+            patch_id="%s-%d" % (stage, len(self.state.applied_patches)),
+            run_id=self.state.run_id, stage_id=stage, stage_attempt=1,
+            parent_state_hash=self.state.state_hash(), operations=list(ops),
+            execution_status="SUCCESS",
+            provenance={"purpose": "t", "provider": "t"})
+        problems = self.state.validate(patch)
+        if problems:
+            return problems
+        self.state.apply(patch)
+        return []
+
+    def validity(self, eid):
+        return self.state.entities[eid].get("_validity", "STANDING")
+
+
+class TestACleanChainIsCurrent(_Chain):
+    """If a successful run leaves things stale, every test below is meaningless."""
+
+    def test_a_clean_chain_is_entirely_standing(self):
+        for eid in ("BOD-1", "OBL-1", "FEA-1", "RLZ-1", "PRM-R", "CON-R",
+                    "CST-1", "CST-2", "CST-3", "CST-4", self.signature):
+            with self.subTest(entity=eid):
+                self.assertEqual("STANDING", self.validity(eid))
+
+    def test_the_settled_value_is_present_and_evidenced(self):
+        self.assertAlmostEqual(6.0, self.state.entities["PRM-R"]["value"])
+        self.assertTrue(self.state.entities["PRM-R"]["solved_by"])
+
+
+class TestUpstreamChangeStalesDownstream(_Chain):
+
+    def test_a_constraint_change_stales_the_value_and_the_geometry(self):
+        """s05 Constraint -> s06 settlement -> s07 geometry."""
+        self.assertEqual([], self.apply("s05", [
+            Op("SUPERSEDE", "Constraint", "CON-R",
+               {"expression": {"relation": "==", "lhs": REF("PRM-R"),
+                               "rhs": MM(9)}},
+               "s05:embodiment", reason="the bore is enlarged")]))
+        self.assertEqual("STALE", self.validity("PRM-R"))
+        self.assertEqual("STALE", self.validity(self.signature))
+
+    def test_a_re_solved_value_stales_the_geometry(self):
+        """s06 settlement -> s07 geometry."""
+        self.assertEqual([], self.apply("s06", [
+            Op("SUPERSEDE", "Parameter", "PRM-R", {"value": 9.0},
+               "s06:settlement", reason="re-solved after refinement")]))
+        self.assertEqual("STALE", self.validity(self.signature))
+
+    def test_an_upstream_body_change_stales_the_embodiment_and_the_geometry(self):
+        """s03 topology -> s05 feature and statements -> s07 geometry."""
+        self.assertEqual([], self.apply("s03", [
+            Op("SUPERSEDE", "Body", "BOD-1", {"role": "frame"},
+               "s03:topology", reason="the body's role changed")]))
+        self.assertEqual("STALE", self.validity("FEA-1"))
+        self.assertEqual("STALE", self.validity("CST-2"))
+        self.assertEqual("STALE", self.validity(self.signature))
+
+    def test_an_obligation_change_stales_the_realization(self):
+        """s02 obligation -> s05 realization."""
+        self.assertEqual([], self.apply("s02", [
+            Op("SUPERSEDE", "Obligation", "OBL-1",
+               {"statement": "the pin is retained under load"},
+               "s02:derivation", reason="the obligation was sharpened")]))
+        self.assertEqual("STALE", self.validity("RLZ-1"))
+
+    def test_a_statement_change_stales_the_geometry(self):
+        """ConstructionStatement -> compiled artifact."""
+        self.assertEqual([], self.apply("s05", [
+            Op("SUPERSEDE", "ConstructionStatement", "CST-2",
+               {"parameters": {"radius": REF("PRM-R"), "height": MM(45)}},
+               "s05:embodiment", reason="the bore is deeper")]))
+        self.assertEqual("STALE", self.validity(self.signature))
+
+    def test_staleness_is_dependency_local_not_global(self):
+        """A change must not withdraw standing from everything indiscriminately.
+
+        The obligation is upstream of the realization and of nothing else here,
+        so the geometry is untouched by it.
+        """
+        self.apply("s02", [
+            Op("SUPERSEDE", "Obligation", "OBL-1",
+               {"statement": "sharpened"}, "s02:derivation", reason="r")])
+        self.assertEqual("STALE", self.validity("RLZ-1"))
+        self.assertEqual("STANDING", self.validity("CST-2"))
+        self.assertEqual("STANDING", self.validity(self.signature))
+
+
+class TestArtifactAuthorityFollowsCurrentness(_Chain):
+    """A file on disk is not a claim about the current design."""
+
+    def test_the_signature_is_the_artifact_authority_and_it_goes_stale(self):
+        self.assertEqual("STANDING", self.validity(self.signature))
+        self.apply("s06", [Op("SUPERSEDE", "Parameter", "PRM-R", {"value": 9.0},
+                              "s06:settlement", reason="re-solved")])
+        self.assertEqual("STALE", self.validity(self.signature))
+
+    def test_a_stale_signature_is_retained_rather_than_deleted(self):
+        """FA-1: the record stays readable. What it loses is authority."""
+        self.apply("s06", [Op("SUPERSEDE", "Parameter", "PRM-R", {"value": 9.0},
+                              "s06:settlement", reason="re-solved")])
+        self.assertIn(self.signature, self.state.entities)
+        self.assertTrue(self.state.entities[self.signature]["signature_sha256"])
+
+    def test_a_stale_signature_is_not_in_the_standing_set(self):
+        """How a reader asks for current geometry rather than any geometry."""
+        self.apply("s06", [Op("SUPERSEDE", "Parameter", "PRM-R", {"value": 9.0},
+                              "s06:settlement", reason="re-solved")])
+        standing = {e["entity_id"] for e in self.state.standing("GeometrySignature")}
+        self.assertNotIn(self.signature, standing)
+
+
+if __name__ == "__main__":                                       # pragma: no cover
+    unittest.main()
+
+
+@unittest.skipUnless(KERNEL, "OpenCascade kernel absent")
+class TestIntegratedDevelopmentChain(unittest.TestCase):
+    """The canonical chain end to end, through the public interfaces.
+
+    A DEVELOPMENT / CONTRACT FIXTURE: not live, not a benchmark result, not an
+    S9-E promotion. It exists because a downstream that only ever runs from
+    hand-built solver input is a downstream nobody has seen work.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import tempfile
+        from ver3.tools import run_trace as rt
+        cls.dir = tempfile.mkdtemp(prefix="assy-dev-cad-")
+        cls.trace = rt.build_development_trace(cls.dir)
+        cls.by_id = {n["responsibility_id"]: n for n in cls.trace["nodes"]}
+
+    def test_it_declares_what_it_is(self):
+        self.assertFalse(self.trace["is_live"])
+        self.assertFalse(self.trace["is_benchmark_result"])
+        self.assertIn("not live", self.trace["provenance"])
+
+    def test_the_chain_compiled(self):
+        self.assertTrue(self.trace["compile_ok"])
+
+    def test_all_three_downstream_nodes_executed(self):
+        self.assertEqual("MODEL", self.by_id["s05"]["kind"])
+        self.assertEqual("ACCEPTED", self.by_id["s05"]["contract"])
+        for rid in ("s06", "s07"):
+            with self.subTest(node=rid):
+                self.assertTrue(self.by_id[rid]["status"].startswith("EXECUTED"))
+
+    def test_the_envelope_constraint_settled_coupled(self):
+        """boss_r = pin_r + wall, solved as a system rather than by substitution."""
+        settled = self.by_id["s06"]["settled"]
+        self.assertAlmostEqual(6.0, settled["PRM-0003"]["value"])
+        self.assertTrue(settled["PRM-0003"]["solved_by"])
+
+    def test_obligation_reaches_geometry_by_real_ids(self):
+        """The traceability chain, read from the trace rather than asserted."""
+        realization = self.by_id["s05"]["realization_graph"][0]
+        self.assertIn("OBL-0001", realization["addresses_obligations"])
+        self.assertIn("FEA-0001", realization["participating_features"])
+        signature = self.by_id["s07"]["signatures"][0]
+        self.assertEqual("FEA-0001", signature["feature_map"]["CST-0002"])
+        body = signature["compiled_bodies"][0]
+        self.assertTrue(body["single_connected_solid"])
+        self.assertGreater(body["volume"], 0)
+
+    def test_the_geometry_is_current(self):
+        self.assertEqual("STANDING", self.by_id["s07"]["signatures"][0]["validity"])
+
+    def test_the_deterministic_nodes_carry_no_model_provenance(self):
+        for rid in ("s06", "s07"):
+            record = self.by_id[rid]["execution"]
+            with self.subTest(node=rid):
+                self.assertNotIn("response_source", record)
+                self.assertNotIn("provider_id", record)
+
+    def test_artifacts_were_written_and_round_tripped(self):
+        for path in self.trace["exports"]["step_per_body"].values():
+            self.assertTrue(os.path.isfile(path))
+        for delta in self.trace["roundtrip"]["brep"].values():
+            self.assertLessEqual(delta, compiler.BREP_VOLUME_TOLERANCE)
+
+    def test_no_benchmark_identity_leaks_into_the_fixture(self):
+        blob = __import__("json").dumps(self.trace)
+        for banned in ("BM-001", "BM-002", "BM-003", "cad_validation"):
+            with self.subTest(term=banned):
+                self.assertNotIn(banned, blob)

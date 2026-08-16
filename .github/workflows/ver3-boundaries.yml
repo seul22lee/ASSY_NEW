@@ -96,3 +96,15 @@ jobs:
 
       - name: Typed IR, s06 solver and s07 compiler
         run: python -m unittest -v ver3.tests.meta.test_downstream_ir_solver_compiler
+
+      - name: s05, the canonical adapters, currentness and the integrated CAD chain
+        # These need the kernel too: the currentness tests compile real geometry
+        # to prove a stale artifact stops being current, and the integrated chain
+        # runs s05 -> s06 -> s07 end to end. Running them here rather than in the
+        # stdlib job is what stops them skipping in CI.
+        run: |
+          python -m unittest -v \
+            ver3.tests.meta.test_s05_embodiment \
+            ver3.tests.meta.test_supersede_authority \
+            ver3.tests.meta.test_downstream_integration \
+            ver3.tests.meta.test_downstream_currentness

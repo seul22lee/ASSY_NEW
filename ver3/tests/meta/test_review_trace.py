@@ -49,11 +49,24 @@ class TestTraceIsComplete(_Built):
                     self.assertTrue(node.get("reason"),
                                     "a node that did not run must say why")
 
-    def test_the_missing_embodiment_layer_is_visible_rather_than_absent(self):
-        """S9-E found s05 declared and unwritten. The UI must not omit it."""
+    def test_the_embodiment_layer_is_a_real_node_now(self):
+        """s05 exists. What it must never be is absent, or mis-typed.
+
+        It was previously NOT_IMPLEMENTED and, worse, rendered with kind
+        DETERMINISTIC beside a declared llm_role of HIGH - a classification a
+        reviewer would reasonably believe. It is model-owned and says so.
+        """
         s05 = self.by_id["s05"]
-        self.assertEqual(rt.NOT_IMPLEMENTED, s05["status"])
-        self.assertIn("Realization", s05["declared_families"])
+        self.assertEqual("MODEL", s05["kind"])
+        # BM-001 has no embodiment authored, so it is NOT_EXERCISED - which is a
+        # statement about this run, not about the implementation.
+        self.assertEqual(rt.NOT_EXERCISED, s05["status"])
+        self.assertTrue(s05.get("reason"))
+
+    def test_the_deterministic_services_are_not_typed_as_model_stages(self):
+        for rid in ("s06", "s07"):
+            with self.subTest(node=rid):
+                self.assertEqual("DETERMINISTIC", self.by_id[rid]["kind"])
 
     def test_identity_and_hashes_are_recorded(self):
         for key in ("run_id", "benchmark_id", "source_sha256", "repo_commit",
@@ -224,6 +237,8 @@ class TestTheUnimplementedStagesAreSpecifiedNotUndefined(_Built):
         cls.fams.update(state["assurance_families"])
 
     def test_every_declared_family_resolves_and_is_typed(self):
+        # No node declares families now that all three are implemented; the
+        # check stays because a future NOT_IMPLEMENTED node must still resolve.
         for n in self.trace["nodes"]:
             for family in (n.get("declared_families") or []):
                 with self.subTest(node=n["responsibility_id"], family=family):
@@ -241,16 +256,6 @@ class TestTheUnimplementedStagesAreSpecifiedNotUndefined(_Built):
         cs = self.fams["ConstructionStatement"]
         self.assertEqual(["entity_id", "operation", "operands", "parameters"],
                          cs["required_fields"])
-
-    def test_each_unimplemented_node_cites_its_contract(self):
-        for n in self.trace["nodes"]:
-            if n["status"] != rt.NOT_IMPLEMENTED:
-                continue
-            with self.subTest(node=n["responsibility_id"]):
-                path = n.get("contract_path")
-                self.assertTrue(path, "an unimplemented stage must cite its spec")
-                self.assertTrue(os.path.isfile(
-                    os.path.join(_paths.REPO_ROOT, path)))
 
     def test_the_solver_and_compiler_declare_no_model_role(self):
         """s06 and s07 are deterministic by contract. A paid call there is waste."""

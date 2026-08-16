@@ -111,6 +111,26 @@ def _s03b(sfx, relations=1, irrelevance=True):
     }
 
 
+def authorized_stage(state, op):
+    """The stage entitled to perform this revision, asked of the contracts.
+
+    Typed here rather than hardcoded because the tests below revise entities
+    across several owners, and a fixed stage id made them supersede under an
+    authority they do not have. That was invisible while SUPERSEDE was ungated;
+    it is a rejection now, and deriving the stage is what makes the fixture
+    honest rather than what makes the test pass.
+
+    A delegated field belongs to its delegate - `Joint.frame_origin` is s04's
+    even though the Joint is s03's - so the field grant is consulted first.
+    """
+    fam = state.stored_family(op.entity_id) or op.entity_type
+    extendable = state.c.extendable_fields(fam)
+    for name in (op.fields or {}):
+        if name in extendable:
+            return extendable[name]
+    return state.c.owner_of(fam)
+
+
 class _Chain(_fixtures.StateBuilder, unittest.TestCase):
     """One accumulated DesignState holding as many branches as a case wants."""
 
@@ -160,10 +180,11 @@ class _Chain(_fixtures.StateBuilder, unittest.TestCase):
     def validity(self, state, eid):
         return state.entities[eid].get("_validity")
 
-    def revise(self, state, op):
+    def revise(self, state, op, stage=None):
         state.apply(StagePatch(
             patch_id="rev-%d" % len(state.applied_patches), run_id=state.run_id,
-            stage_id="s03", stage_attempt=9, parent_state_hash=state.state_hash(),
+            stage_id=stage or authorized_stage(state, op), stage_attempt=9,
+            parent_state_hash=state.state_hash(),
             operations=[op], execution_status="SUCCESS",
             provenance={"provider": "t"}))
 

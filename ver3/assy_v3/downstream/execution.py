@@ -35,7 +35,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 from ..pipeline.progression import (CONTRACT_CONDITION, DeterministicExecution,
                                     Progression)
 from ..state.patch import StagePatch
-from . import adapters, ir
+from . import canonical_io, ir
 
 #: Declared before the loop runs, never tuned to make a case converge.
 DEFAULT_ROUND_BUDGET = 3
@@ -71,9 +71,9 @@ def execute_settlement(state, progression: Progression, *,
     and evidence does not become a value - which is the whole reason the loop
     exists rather than a fallback.
     """
-    report, params = adapters.solve_from_state(state, branch)
-    evidence = adapters.evidence_identity(report)
-    ops = adapters.settlement_operations(report, params, evidence)
+    report, params = canonical_io.solve_from_state(state, branch)
+    evidence = canonical_io.evidence_identity(report)
+    ops = canonical_io.settlement_operations(report, params, evidence)
     problems: List[str] = list(report.problems)
     applied = False
     if ops:
@@ -105,9 +105,13 @@ def execute_compilation(state, progression: Progression, *,
     half-written artifact reference, because an artifact that exists in state is
     read as current.
     """
-    result = adapters.compile_from_state(state, out_dir=out_dir, branch=branch)
-    signature = adapters.signature_identity(result) if result.ok else None
-    ops = adapters.compilation_operations(result, signature) if result.ok else []
+    result = canonical_io.compile_from_state(state, out_dir=out_dir, branch=branch)
+    signature = canonical_io.signature_identity(result) if result.ok else None
+    # The settled parameters the compiler actually consumed become premises of
+    # the signature, so a re-solve stales the geometry it produced.
+    ops = (canonical_io.compilation_operations(
+        result, signature, sorted(canonical_io.resolved_values(state, branch)))
+        if result.ok else [])
     problems = list(result.problems)
     applied = False
     if ops:
@@ -127,7 +131,7 @@ def execute_compilation(state, progression: Progression, *,
         responsibility_id="s07", stage_id="s07",
         outcome="compiled" if result.ok else "compile_failed",
         input_digest=_digest([s.entity_id for s in
-                              adapters.read_program(state, branch).statements]),
+                              canonical_io.read_program(state, branch).statements]),
         patch_applied=applied, problems=tuple(problems),
         evidence_id=signature if applied else None))
     return result, execution
