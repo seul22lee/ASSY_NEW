@@ -136,6 +136,22 @@ class Contracts:
     def required_fields(self, family: str) -> List[str]:
         return list((_CONTRACT_DOCS[self]["families"].get(family) or {}).get("required_fields", []))
 
+    def conditional_requirements(self, family: str) -> List[Dict[str, Any]]:
+        """Rules that apply only to SOME records of a family.
+
+        A family's `required_fields` are the ones every record must carry. Some
+        requirements are narrower than that: a Joint needs travel and actuation
+        only when it is COMPLIANT, and a ReferenceScale needs a structured
+        `absolute` only when its basis is ABSOLUTE. Declaring those as required
+        outright would reject every ordinary record of the family.
+
+        They were previously written as prose beside the family. Prose is not
+        consumed by the write boundary, so the rule existed and was not enforced
+        - which is worse than not having it, because the contract said it held.
+        """
+        return copy_out((_CONTRACT_DOCS[self]["families"].get(family) or {})
+                        .get("conditional_requirements", []))
+
     def field_semantics(self, family: str) -> Dict[str, Any]:
         """U-2B: reference targets, spatial frames and per-field authority."""
         return copy_out((_CONTRACT_DOCS[self]["families"].get(family) or {}).get("field_semantics", {}))
@@ -346,6 +362,7 @@ class DesignState:
                                 or op.fields[f] == "")]
                 if missing:
                     problems.append("MISSING_REQUIRED: %s %s -> %s" % (fam, eid, missing))
+                problems.extend(_conditional_problems(self.c, fam, eid, op.fields))
                 if not op.provenance_ref:
                     problems.append("NO_PROVENANCE: %s" % eid)
                 seen.add(eid)
@@ -861,6 +878,89 @@ def _supersede(entities, by_family, contracts, patch, op) -> None:
     _merge_premises(rec, op)
     _propagate(entities, op.entity_id, "SUPERSEDED", op.reason,
                skip=set(skip_ids(patch)))
+
+
+# ==========================================================================
+# CONDITIONAL CONTRACT REQUIREMENTS
+# ==========================================================================
+#
+# Deliberately a SMALL vocabulary, not a schema language. Each checker below
+# exists because a canonical rule needed it, and a rule that needs a construct
+# not listed here should get one added with the same justification - not be
+# expressed by making this general enough to say anything.
+#
+#   applies_when             {field, equals}      which records the rule governs
+#   additional_required_fields                    fields those records must carry
+#   required_shape           per field:
+#       mapping                                   must be a mapping
+#       required_keys                             keys it must contain
+#       non_empty_string                          keys whose value is real text
+#       positive_finite_number                    keys whose value is a usable
+#                                                 number - not a string, not a
+#                                                 range, not zero, not infinite
+
+def _is_number(value) -> bool:
+    # bool is an int in Python, and True is not a scale factor.
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _shape_problems(rule_name, family, eid, field, value, shape) -> List[str]:
+    out: List[str] = []
+    where = "%s %s.%s" % (family, eid, field)
+    if shape.get("mapping") and not isinstance(value, dict):
+        return ["CONDITIONAL_SHAPE (%s): %s must be a mapping, got %r"
+                % (rule_name, where, type(value).__name__)]
+    if not isinstance(value, dict):
+        return out
+    for key in shape.get("required_keys") or []:
+        if key not in value:
+            out.append("CONDITIONAL_SHAPE (%s): %s is missing %r"
+                       % (rule_name, where, key))
+    for key in shape.get("non_empty_string") or []:
+        got = value.get(key)
+        if key in value and not (isinstance(got, str) and got.strip()):
+            out.append("CONDITIONAL_SHAPE (%s): %s.%s must be a non-empty "
+                       "string, got %r" % (rule_name, where, key, got))
+    for key in shape.get("positive_finite_number") or []:
+        got = value.get(key)
+        if key not in value:
+            continue
+        if not _is_number(got):
+            out.append("CONDITIONAL_SHAPE (%s): %s.%s must be a number, got %r"
+                       % (rule_name, where, key, got))
+        elif got != got or got in (float("inf"), float("-inf")):
+            out.append("CONDITIONAL_SHAPE (%s): %s.%s must be finite, got %r"
+                       % (rule_name, where, key, got))
+        elif got <= 0:
+            out.append("CONDITIONAL_SHAPE (%s): %s.%s must be positive, got %r"
+                       % (rule_name, where, key, got))
+    return out
+
+
+def _conditional_problems(contracts, family, eid, fields) -> List[str]:
+    """Every declared conditional rule this record triggers, and what it broke."""
+    out: List[str] = []
+    for rule in contracts.conditional_requirements(family):
+        name = rule.get("name") or "unnamed"
+        when = rule.get("applies_when") or {}
+        field, expected = when.get("field"), when.get("equals")
+        if field is None:
+            continue
+        actual = fields.get(field)
+        if not (isinstance(actual, str) and isinstance(expected, str)
+                and actual.strip().upper() == expected.strip().upper()):
+            continue                     # the rule does not govern this record
+        for required in rule.get("additional_required_fields") or []:
+            value = fields.get(required)
+            if required not in fields or value is None or value == "":
+                out.append("CONDITIONAL_REQUIRED (%s): %s %s declares %s=%s and "
+                           "must carry %r"
+                           % (name, family, eid, field, actual, required))
+        for shaped, shape in (rule.get("required_shape") or {}).items():
+            if shaped in fields and fields[shaped] is not None:
+                out.extend(_shape_problems(name, family, eid, shaped,
+                                           fields[shaped], shape))
+    return out
 
 
 def _invalidate(entities, by_family, contracts, patch, op) -> None:

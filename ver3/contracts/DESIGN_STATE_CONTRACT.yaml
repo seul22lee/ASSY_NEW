@@ -176,6 +176,13 @@ semantic_role_vocabulary:
     The order and access by which the product goes together.
   candidate: >
     A mechanism family or arrangement under consideration.
+  candidate_acceptance: >
+    Which obligations ONE candidate must satisfy to be judged realized. The
+    design-wide obligation set says what the design owes; this says which of that
+    debt is THIS candidate's. Without it a stage embodying one alternative cannot
+    tell a universal obligation from another alternative's, and coverage over the
+    whole set would demand that the selected candidate discharge obligations
+    belonging to a candidate nobody chose.
   configuration_state: >
     A named state of the mechanism, distinguished by what differs in it.
   constraint_relation: >
@@ -500,6 +507,19 @@ entity_families:
         axis height was determined by a pin-boss radius that is an s05 feature
         dimension, and fixing it at s03 is CHG-01.
       - "The joint graph must be SIMULATION-COMPLETE: projectable into a multibody model without re-derivation."
+    # ENFORCED. `compliant_variant` below states the same rule in prose and has
+    # done since D-2; prose is not consumed by the write boundary, so a
+    # cross-body Joint labelled COMPLIANT with none of the variant fields was
+    # accepted and only discovered downstream, if at all.
+    conditional_requirements:
+      - name: compliant_joint_variant
+        applies_when: {field: joint_type, equals: COMPLIANT}
+        additional_required_fields: [mode, direction, required_travel, allowable_travel, actuation, compliant_element, root_interface, activation_window]
+        why: >-
+          Compliance is a joint_type of Joint between RigidGroups of ONE body.
+          A label alone is inert: without the travel, the actuation and the
+          element that deflects, nothing downstream can model it and nothing can
+          check it.
     compliant_variant:
       applies_when: "joint_type is compliant"
       additional_required_fields: [mode, direction, required_travel, allowable_travel, actuation, compliant_element, root_interface, activation_window]
@@ -1003,9 +1023,46 @@ entity_families:
     optional_fields: [volume, required_by_actors, reach_targets]
     required_fields: [entity_id, role, owning_bodies]
     authoritative_geometry_fields: [volume]
+    #: THE ROLE VOCABULARY, and what each role means for OCCUPANCY.
+    #:
+    #: Both were previously implicit: the vocabulary lived as a Python tuple in
+    #: s04, and the occupancy policy as two independently hard-coded tuples - one
+    #: in s04b, one in S05-C8. Two copies of a rule are two rules, and nothing
+    #: made them agree about the same box.
+    #:
+    #: `excludes_occupancy` is the question "is a body or feature being here a
+    #: defect?". It is not the same as "is this region important".
+    role_policy:
+      ACCESS:
+        excludes_occupancy: true
+        why: >-
+          A region the design promises can be reached into. A body sitting in it
+          is an access the design does not actually have.
+      APERTURE:
+        excludes_occupancy: true
+        why: >-
+          A region something passes through. Material in it is the passage being
+          blocked.
+      KEEP_OUT:
+        excludes_occupancy: true
+        why: >-
+          A region nothing may enter. A body entering it is the promise being
+          broken by the promiser.
+      SUPPORT:
+        excludes_occupancy: false
+        why: >-
+          A region where the product meets what carries it. Contact here is the
+          POINT of the region, so occupancy is expected and reporting it as an
+          intrusion would flag every design that actually rests on something.
+          The load-carrying question this region raises is real, but it is a
+          different question from occupancy and is not answered by a box test.
     rules:
       - "s03 declares the role. s04a gives it a metric volume. s04b proves occupancy across every state and path."
       - "No Feature may intrude into a FunctionalRegion; s05 re-runs the occupancy check."
+      - >
+        role_policy is the ONE authority on which roles exclude occupancy. s04b
+        and S05-C8 must both read it rather than each carrying a list, so the two
+        stages cannot reach different answers about the same region.
 
   AssemblyStep:
     semantic_roles: [spatial_commitment, assembly_order]
@@ -1108,6 +1165,27 @@ entity_families:
       - "An elimination with eliminated=true and no reason is an incomplete record, not a decision."
   ReferenceScale:
     semantic_roles: [spatial_commitment, spatial_frame]
+    # ENFORCED. The third rule below says a coordinate becomes comparable with a
+    # stated quantity ONLY when basis is ABSOLUTE and `absolute` gives both the
+    # unit and what one coordinate is worth. That was prose, so "80-100 mm" in
+    # the `absolute` field, or a bare number, or {} was written into state and
+    # every dimensional comparison downstream silently read a scale that says
+    # nothing. RELATIVE with absolute null stays legal and is not defaulted.
+    conditional_requirements:
+      - name: absolute_scale_is_structured
+        applies_when: {field: basis, equals: ABSOLUTE}
+        additional_required_fields: [absolute]
+        required_shape:
+          absolute:
+            mapping: true
+            required_keys: [unit, per_unit]
+            non_empty_string: [unit]
+            positive_finite_number: [per_unit]
+        why: >-
+          An ABSOLUTE basis is a promise that stored coordinates can be compared
+          with a stated quantity. Without a unit and a per_unit that is a real
+          positive number, the promise is unkeepable and the comparison it
+          licenses is meaningless.
     owned_by: s04
     authority_class: AUTHORITATIVE
     purpose: "The basis in which every s04 spatial value is expressed."
@@ -1477,6 +1555,7 @@ assurance_families:
       - "Failed alternatives are retained, never deleted. The package must be able to show them."
 
   AcceptanceContract:
+    semantic_roles: [candidate_acceptance]
     field_semantics:
       candidate:
         kind: reference

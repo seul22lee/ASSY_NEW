@@ -210,3 +210,59 @@ def settle(state, progression: Progression, *,
                               "may_not_change": list(MAY_NOT_CHANGE)})
             return outcome
     return outcome
+
+
+# ==========================================================================
+# PRODUCTION ENTRY - the deterministic downstream of the SELECTED candidate
+# ==========================================================================
+#
+# `execute_settlement` and `execute_compilation` take an optional branch, which
+# is right for a test or a diagnostic that is deliberately looking at one
+# alternative. It is wrong for production, twice over: `branch=None` reads every
+# candidate's records at once and settles a system no single design describes,
+# and a caller passing a branch string is a second place that decides which
+# design is being built.
+#
+# There is one authority for that, and it is the same one s05 embodies against:
+# a standing SelectionDecision. These entries resolve it themselves so no
+# orchestrator has to, and so no orchestrator can resolve it differently.
+
+class NoStandingSelection(RuntimeError):
+    """Asked to run the downstream of the selected design when none is selected.
+
+    Raised rather than defaulted. Falling back to "all branches" here would
+    settle A's constraints against B's parameters and produce a design neither
+    of them describes - silently, and with a GeometrySignature on the end of it.
+    """
+
+
+def current_selection(state) -> str:
+    """The candidate the design is committed to, or refuse to guess.
+
+    Delegates to the same `committed_branch` the ConsumerView uses. Branch
+    resolution is not reimplemented here: two implementations of "which design
+    are we building" is exactly one more than the architecture permits.
+    """
+    from ..state.design_state import Contracts
+    from ..view.consumer_view import committed_branch
+
+    branch = committed_branch(state, Contracts())
+    if not branch:
+        raise NoStandingSelection(
+            "no standing SelectionDecision names a candidate, so there is no "
+            "selected design to settle or compile")
+    return branch
+
+
+def settle_current_selection(state, progression: Progression, *,
+                             attempt: int = 1):
+    """s06 over the selected candidate's system, and nothing else."""
+    return execute_settlement(state, progression,
+                              branch=current_selection(state), attempt=attempt)
+
+
+def compile_current_selection(state, progression: Progression, *,
+                              out_dir: Optional[str] = None, attempt: int = 1):
+    """s07 over the selected candidate's construction program, and nothing else."""
+    return execute_compilation(state, progression, out_dir=out_dir,
+                               branch=current_selection(state), attempt=attempt)

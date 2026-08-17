@@ -36,6 +36,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from ..downstream import ir
 from ..state.patch import Op
+from ..view import Source, Sufficiency, ViewStatus
 from .base import Stage
 
 #: The feature vocabulary. Closed, because a feature kind the compiler cannot
@@ -155,6 +156,85 @@ class S05Embodiment(Stage):
     )
 
     ID_EXAMPLE_DIGITS = "NNNN"
+
+    # ------------------------------------------------------------------
+    # THE SELECTION THIS INVOCATION EMBODIES
+    # ------------------------------------------------------------------
+    def selected_candidate(self, view: Dict[str, Any]) -> Optional[str]:
+        """The committed candidate, read from the view s05 was actually given.
+
+        From the VIEW rather than from DesignState or from a caller argument.
+        The view is what was recorded and what a reviewer reads back, and a
+        second path to the same fact would be a second answer to which design
+        this geometry is for. `SelectionDecision.selected_candidate` is the one
+        authority; nothing here keeps a parallel `selected_branch`.
+        """
+        for row in _rows(view, "SelectionDecision"):
+            value = row.get("selected_candidate")
+            if isinstance(value, str) and value:
+                return value
+        return None
+
+    def selection_decision(self, view: Dict[str, Any]) -> Optional[str]:
+        for row in _rows(view, "SelectionDecision"):
+            if row.get("entity_id"):
+                return row["entity_id"]
+        return None
+
+    def invocation_premises(self, inputs: Dict[str, Any]) -> List[str]:
+        """Everything this invocation authors rests on the commitment that chose it.
+
+        Two entities, and they are different facts. The Candidate is the
+        mechanism being embodied - withdraw it and the geometry describes
+        nothing. The SelectionDecision is the COMMITMENT to that mechanism -
+        withdraw it and the geometry describes something real that the design is
+        no longer pursuing. Recording only the candidate would leave embodiment
+        standing through a reopened selection, which is exactly the state a
+        reviewer must be able to see is stale.
+
+        Local premises are not replaced. `carry_invocation_premises` unions and
+        dedups, so a Constraint still rests on its parameters and its governed
+        interface as well as on the selection.
+        """
+        view = (inputs or {}).get(self.context_key) or {}
+        return [e for e in (self.selected_candidate(view),
+                            self.selection_decision(view)) if e]
+
+    def consumer_view(self, state, invocation=None, budget_chars=None):
+        """The committed selection decides the branch. A caller may not overrule it.
+
+        `build_consumer_view` lets a caller name an invocation branch, which is
+        right for s03/s04 - they run once per alternative, before anything is
+        chosen. s05 runs AFTER selection, once, on the alternative that was
+        chosen. So an invocation naming a different candidate is not a scoping
+        choice; it is a request to embody a design nobody selected.
+
+        Refused by returning a view that is not READY rather than by raising:
+        `invoke` already declines to call a provider on an unready view and
+        records why, so the refusal arrives as evidence instead of a traceback.
+        """
+        view = super().consumer_view(state, invocation, budget_chars)
+        asked = getattr(invocation, "branch", None)
+        committed = self.selected_candidate(view.payload())
+        if asked and committed and asked != committed:
+            view.status = ViewStatus.UPSTREAM_INSUFFICIENCY
+            detail = ("this invocation asks s05 to embody %s, but the standing "
+                      "selection commits to %s; embodiment may not be routed to "
+                      "a candidate nobody chose" % (asked, committed))
+            # The SHAPE the rest of the system reads. `_unmet` formats an
+            # assessment by its `requirement` and `coverage` keys, so an entry
+            # invented with different keys would crash the very reporting path
+            # that exists to explain the refusal.
+            view.assessment = list(view.assessment) + [{
+                "requirement": "selection_commitment",
+                "source": Source.REASONING_PREMISE.value,
+                "verdict": Sufficiency.MISSING_UPSTREAM.value,
+                "coverage": [{"obligation": "selection_decision",
+                              "verdict": Sufficiency.MISSING_UPSTREAM.value,
+                              "expected_count": 1, "selected_count": 0}],
+                "families": ["SelectionDecision"], "selected": 0,
+                "detail": detail, "trace": {"contradiction": detail}}]
+        return view
 
     @classmethod
     def render_response_schema(cls) -> str:
@@ -343,17 +423,23 @@ JOINT_REQUIRED = ("joint_type", "parent_group", "child_group", "dof",
                   "axis_direction", "frame_ids")
 
 
-def compliant_joints_by_bodies(view) -> Dict[frozenset, List[Dict[str, Any]]]:
-    """Well-formed COMPLIANT joints, keyed by the body pair they connect.
+def internal_compliant_joints(view) -> Dict[str, List[Dict[str, Any]]]:
+    """Well-formed COMPLIANT joints, keyed by the ONE body they are internal to.
 
-    Well-formed is doing real work here. The Joint contract says "a joint_type
-    label alone is inert", so a record calling itself COMPLIANT while omitting an
-    axis or a frame is not the alternative S05-C1 permits - it is an incomplete
-    joint wearing a label, and admitting it would let any interface skip its
-    features by writing one word.
+    Keyed by body, not by body pair, and that is the correction. Compliance is
+    declared by DESIGN_STATE_CONTRACT as "a joint_type of Joint between
+    RigidGroups of one body (proposal D-2)" - an internal relation, where part
+    of a body flexes relative to the rest of it. Keying by pair presupposed
+    cross-body compliance, which the ontology does not model.
+
+    Well-formed is doing real work: the Joint contract says "a joint_type label
+    alone is inert", so a record calling itself COMPLIANT while omitting an axis
+    or a frame is an incomplete joint wearing a label. The write boundary now
+    also enforces the compliant variant fields, so a record reaching here has
+    them - this stays as the reading-side half of the same rule.
     """
     groups = _body_of_group(view)
-    out: Dict[frozenset, List[Dict[str, Any]]] = {}
+    out: Dict[str, List[Dict[str, Any]]] = {}
     for joint in _rows(view, "Joint"):
         if str(joint.get("joint_type", "")).upper() != "COMPLIANT":
             continue
@@ -361,45 +447,57 @@ def compliant_joints_by_bodies(view) -> Dict[frozenset, List[Dict[str, Any]]]:
             continue
         parent = groups.get(joint.get("parent_group"))
         child = groups.get(joint.get("child_group"))
-        if parent and child:
-            out.setdefault(frozenset((parent, child)), []).append(joint)
+        if parent and child and parent == child:
+            out.setdefault(parent, []).append(joint)
     return out
 
 
 def check_c1_interface_features(parsed, view) -> List[str]:
-    """S05-C1: every Interface has a Feature on EACH participant, OR a declared
-    compliant Joint.
+    """S05-C1: every Interface has a Feature on EACH participant. No exception.
 
-    The alternative is the contract's own wording and was previously missing:
-    the check demanded features on both sides unconditionally, so a legitimate
-    compliant realization - where one flexing member IS the interface - was
-    rejected for not having a second rigid face.
+    A previous version admitted an exception: an Interface between two bodies
+    could skip a feature on one side if some COMPLIANT joint connected the same
+    pair. That was wrong twice.
 
-    A compliant joint is admitted only when it is well formed AND actually
-    realized by geometry on at least one participant. Both halves matter: the
-    first stops a bare label from excusing an interface, and the second stops a
-    complete-looking joint record from standing in for the flexure nobody drew.
+    It contradicted the ontology. Compliance is INTERNAL - between RigidGroups
+    of one body - so a joint spanning the pair was not the thing the exception
+    described; it was a malformed record, and the exception admitted it as
+    justification for omitting geometry.
+
+    And it contradicted the Joint contract's own rule, which is unconditional:
+    "A joint_type label alone is inert. A realization on each side is required
+    (INV-008)." Two bodies that touch need two features. If one of them is a
+    flexure, the flexure is geometry on its own body and gets a feature like
+    anything else.
+
+    A malformed cross-body COMPLIANT joint is now reported rather than used, so
+    the record that used to excuse a missing feature is the thing that fails.
+
+    WHAT THIS CHECK DOES NOT PROVE: that the compliant element itself exists as
+    the geometry a reduced-order beam model would consume. `compliant_element`
+    is an untyped prose field naming that geometry, and nothing canonical ties
+    it to a Feature id. Inferring it from the text would be reading a model's
+    sentence as a structural fact. That claim is NOT automatically verified and
+    is not asserted anywhere below.
     """
     by_body = _features_by_body(parsed)
-    compliant = compliant_joints_by_bodies(view)
+    groups = _body_of_group(view)
     out = []
+
+    for joint in _rows(view, "Joint"):
+        if str(joint.get("joint_type", "")).upper() != "COMPLIANT":
+            continue
+        parent = groups.get(joint.get("parent_group"))
+        child = groups.get(joint.get("child_group"))
+        if parent and child and parent != child:
+            out.append("S05-C1: joint %s is COMPLIANT but connects groups on "
+                       "two different bodies (%s and %s); compliance is a "
+                       "relation between rigid groups of ONE body"
+                       % (joint.get("entity_id"), parent, child))
+
     for iface in _rows(view, "Interface"):
         bodies = [b for b in (iface.get("bodies") or []) if b]
-        missing = [b for b in bodies if not by_body.get(b)]
-        if not missing:
-            continue
-        joints = compliant.get(frozenset(bodies)) if len(bodies) == 2 else None
-        if joints:
-            # The compliant member's own geometry. A joint that flexes is a
-            # feature of a body; if no participant carries one, nothing was
-            # embodied and the joint is still a label.
-            if any(by_body.get(b) for b in bodies):
-                continue
-            out.append("S05-C1: interface %s is declared compliant by %s and no "
-                       "feature realizes the compliant member"
-                       % (iface.get("entity_id"), joints[0].get("entity_id")))
-            continue
-        for body in missing:
+        for body in [b for b in bodies if not by_body.get(b)]:
             out.append("S05-C1: interface %s involves body %s and no feature "
                        "realizes that side" % (iface.get("entity_id"), body))
     return out
@@ -481,11 +579,74 @@ def check_c3_limit_pairs(parsed, view) -> List[str]:
     return sorted(set(out))
 
 
+#: `Obligation.scope`, verbatim from DESIGN_STATE_CONTRACT. UNIVERSAL is an
+#: obligation EVERY candidate must satisfy; CANDIDATE_DISCRIMINATING is one
+#: whose satisfaction DIFFERS BY CANDIDATE, and therefore belongs to whichever
+#: candidates actually took it on.
+UNIVERSAL = "UNIVERSAL"
+CANDIDATE_DISCRIMINATING = "CANDIDATE_DISCRIMINATING"
+
+
+def applicable_obligations_for_embodiment(view: Dict[str, Any]) -> Set[str]:
+    """The obligations the SELECTED candidate must discharge. One rule, one place.
+
+    s05 sees the whole obligation set, and it should: coverage cannot be read
+    from a subset, and an embodiment reasoning about its own obligations in
+    ignorance of the rest is reasoning in a smaller design than the real one.
+    But seeing is not owing. The design-wide set includes obligations that exist
+    BECAUSE alternatives differ, and demanding that the chosen candidate
+    discharge a rejected candidate's obligations is demanding it be two designs.
+
+    The split is already in the data:
+
+      UNIVERSAL                 every candidate must satisfy it
+      CANDIDATE_DISCRIMINATING  satisfaction differs by candidate, so it applies
+                                to this one exactly when this candidate's
+                                AcceptanceContract took it on
+
+    `satisfiable_at` is deliberately NOT consulted. It names the EARLIEST stage
+    at which an obligation can be satisfied, so reading `satisfiable_at == s05`
+    as "s05 owns it" would silently drop every obligation that became satisfiable
+    at s03 or s04 and is still this candidate's to realize in geometry.
+
+    Used by C4 and by the tests, so the view's acceptance context and the check's
+    population cannot drift into two different answers.
+    """
+    accepted: Set[str] = set()
+    for contract in _rows(view, "AcceptanceContract"):
+        accepted.update(contract.get("obligations") or [])
+
+    out: Set[str] = set()
+    for row in _rows(view, "Obligation"):
+        oid = row.get("entity_id")
+        if not oid:
+            continue
+        scope = str(row.get("scope") or "").upper()
+        if scope == CANDIDATE_DISCRIMINATING:
+            # Only if THIS candidate took it on. The view is already scoped to
+            # the committed branch, so an AcceptanceContract reaching this point
+            # is the selected candidate's.
+            if oid in accepted:
+                out.add(oid)
+            continue
+        # UNIVERSAL, and anything whose scope is absent or unrecognised. Failing
+        # OPEN here is deliberate: an obligation whose scope nobody stated is an
+        # obligation nobody has excused, and quietly dropping it would turn a
+        # missing field into a discharged duty.
+        out.add(oid)
+    return out
+
+
 def check_c4_obligations_realized(parsed, view) -> List[str]:
-    """S05-C4: every Obligation is cited by some Realization with a predicate.
+    """S05-C4: every APPLICABLE Obligation is cited by a Realization with a predicate.
 
     INV-008. A realization that cites an obligation without a verification
     predicate discharges nothing, so an unpredicated citation does not count.
+
+    Applicable, not every obligation in the view: see
+    `applicable_obligations_for_embodiment`. Checking the design-wide set made
+    the selected candidate answerable for obligations that exist only because a
+    rejected alternative worked differently.
     """
     cited: Set[str] = set()
     out = []
@@ -495,9 +656,10 @@ def check_c4_obligations_realized(parsed, view) -> List[str]:
                        "it discharges nothing (INV-008)" % r.get("id"))
             continue
         cited.update(r.get("addresses_obligations") or [])
-    for oid in sorted(_ids(view, "Obligation")):
+    for oid in sorted(applicable_obligations_for_embodiment(view)):
         if oid not in cited:
-            out.append("S05-C4: obligation %s is cited by no realization" % oid)
+            out.append("S05-C4: obligation %s applies to the selected candidate "
+                       "and is cited by no realization" % oid)
     return out
 
 
@@ -581,10 +743,20 @@ def check_c8_region_intrusion(parsed, view) -> List[str]:
     INCOMPLETE rather than as clean: silence about occupancy is the failure mode
     this check exists to prevent.
     """
-    from .s04_envelope_and_motion import aabb, overlaps
+    from .s04_envelope_and_motion import (aabb, excludes_occupancy,
+                                          overlaps, unknown_region_role)
 
+    out_unknown: List[str] = []
     regions = []
     for r in _rows(view, "FunctionalRegion"):
+        if unknown_region_role(r.get("role")):
+            # Not silently skipped. An undeclared role has no occupancy policy,
+            # so treating it as harmless would be deciding the policy here.
+            out_unknown.append(
+                "S05-C8: region %s declares role %r, which is not in the "
+                "declared vocabulary, so whether a feature may occupy it is "
+                "undefined" % (r.get("entity_id"), r.get("role")))
+            continue
         volume = r.get("volume")
         if not isinstance(volume, dict):
             continue          # a region with no volume is s04's problem, not s05's
@@ -593,9 +765,9 @@ def check_c8_region_intrusion(parsed, view) -> List[str]:
             continue
         regions.append((r, aabb(centre, half)))
     if not regions:
-        return []
+        return out_unknown
 
-    out = []
+    out = list(out_unknown)
     for f in parsed.get("features") or []:
         envelope = f.get("envelope")
         centre = (envelope or {}).get("centre")
@@ -607,9 +779,12 @@ def check_c8_region_intrusion(parsed, view) -> List[str]:
             continue
         box = aabb(centre, half)
         for region, region_box in regions:
-            # A region the feature's own body reserved is the promise being
-            # broken by the promiser, which is exactly s04b's rule.
-            if region.get("role") not in ("ACCESS", "APERTURE", "KEEP_OUT"):
+            # WHICH ROLES EXCLUDE OCCUPANCY is the contract's to say, not this
+            # check's. `excludes_occupancy` reads FunctionalRegion.role_policy,
+            # and s04b's occupancy check reads the same function - so the two
+            # stages cannot reach different answers about the same region. This
+            # was previously a tuple written out here and again in s04.
+            if not excludes_occupancy(region.get("role")):
                 continue
             if overlaps(box, region_box):
                 out.append("S05-C8: feature %s intrudes into %s region %s"

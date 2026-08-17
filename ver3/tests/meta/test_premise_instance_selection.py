@@ -139,7 +139,18 @@ class TestDeclaredCorpus(_Base):
         # being unable to fail on any input. The premise is the repair rather
         # than a deleted check, because a stage cannot be asked to satisfy a
         # demand it was never shown.
-        self.assertEqual(60, len(rows), "the premise corpus changed size")
+        #
+        # 66 at the selection->embodiment closure: s05 declares six more, and
+        # they are all about WHICH design it is embodying. Two make the
+        # commitment visible - the standing SelectionDecision (DESIGN_WIDE,
+        # because the decision is not branch-local; it is what NAMES the branch)
+        # and the selected Candidate with its principle. One scopes obligation
+        # applicability to that candidate, so C4 stops demanding the selected
+        # candidate discharge another candidate's obligations. Three carry the
+        # branch's established configurations, motions and load routes, all
+        # MAY_BE_EMPTY: a static mechanism has no motion, and forcing it to
+        # author one to satisfy readiness would be inventing engineering.
+        self.assertEqual(66, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

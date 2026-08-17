@@ -68,6 +68,41 @@ def render_namespace_occupancy(occupancy: Optional[Dict[str, Any]]) -> str:
     return "\n".join(lines) + "\n"
 
 
+@dataclass(frozen=True)
+class GenerationSettings:
+    """What a CAMPAIGN asks of a provider, stated rather than defaulted.
+
+    These were literals inside `Stage.run`: temperature 0.0 and a 32000-token
+    request. Both are reasonable defaults for ordinary use and neither is what a
+    diagnostic campaign wants - and the second is the more dangerous, because a
+    provider CEILING of 65536 does not raise a request of 32000. A campaign that
+    set only the ceiling would believe it had a budget it never asked for.
+
+    `max_attempts` belongs here for the same reason: retrying changes what a
+    result MEANS. One attempt records what the model did; three records the best
+    of three, and reporting that as "the model produced this" overstates it.
+
+    Frozen and passed explicitly, so a run record can carry exactly what was
+    asked. Defaults reproduce the previous literals unchanged - existing callers
+    keep their behaviour, and a campaign says what it wants out loud.
+    """
+
+    temperature: float = 0.0
+    max_output_tokens: int = 32000
+    #: One attempt. A campaign wanting FIRST_CONFORMING semantics sets it
+    #: deliberately; nothing here retries on the caller's behalf.
+    max_attempts: int = 1
+    deadline_s: float = 120.0
+    seed: Optional[int] = 7
+
+    def as_record(self) -> Dict[str, Any]:
+        """What was ASKED. Recorded beside what the provider resolved."""
+        return {"temperature": self.temperature,
+                "max_output_tokens": self.max_output_tokens,
+                "max_attempts": self.max_attempts,
+                "deadline_s": self.deadline_s, "seed": self.seed}
+
+
 def carry_invocation_premises(ops: List[Op], premises: List[str]) -> List[Op]:
     """Put the stage's declared invocation premises onto the values it authored.
 
@@ -285,7 +320,8 @@ class Stage:
 
     def invoke(self, provider, state, run_id: str, inputs: Optional[Dict[str, Any]] = None,
                attempt: int = 1, invocation=None,
-               budget_chars: Optional[int] = None) -> StageOutcome:
+               budget_chars: Optional[int] = None,
+               settings: Optional["GenerationSettings"] = None) -> StageOutcome:
         """THE canonical consumer invocation boundary. Build, enforce, record, run.
 
         U-3: "No output is produced from a view known to be insufficient", and the
@@ -315,7 +351,7 @@ class Stage:
         # reviewer can read back, and a second path to the same facts would be a
         # second answer to what the consumer was given.
         payload[self.occupancy_key] = view.occupancy
-        out = self.run(provider, payload, state, run_id, attempt)
+        out = self.run(provider, payload, state, run_id, attempt, settings)
         out.consumer_view = record
         return out
 
@@ -346,11 +382,15 @@ class Stage:
 
     # ---------------------------------------------------------------- driver
     def run(self, provider, inputs: Dict[str, Any], state, run_id: str,
-            attempt: int = 1) -> StageOutcome:
+            attempt: int = 1, settings: Optional["GenerationSettings"] = None
+            ) -> StageOutcome:
+        settings = settings or GenerationSettings()
         req = GenerationRequest(
             purpose=self.purpose, stage_id=self.stage_id,
-            prompt_text=self.build_prompt(inputs), max_output_tokens=32000,
-            deadline_s=120.0, temperature=0.0, seed=7,
+            prompt_text=self.build_prompt(inputs),
+            max_output_tokens=settings.max_output_tokens,
+            deadline_s=settings.deadline_s, temperature=settings.temperature,
+            seed=settings.seed,
             # The run and attempt are the caller's to state, and the provider's
             # record is required to carry both. Passing them here is what lets a
             # model-run record be tied back to the run that produced it.

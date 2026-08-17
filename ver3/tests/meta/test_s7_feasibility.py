@@ -637,15 +637,40 @@ class TestHardRequirements(_Feas):
         self.assertIn("OVERALL_DIMENSION_EXCEEDED", codes)
 
     def test_B16_the_same_requirement_with_an_ambiguous_scale(self):
+        """The two ambiguities a canonical write can still produce.
+
+        A third case used to be here: an ABSOLUTE basis whose `absolute` gave a
+        unit and no per_unit, expecting SCALE_FACTOR_MISSING. That state is no
+        longer constructible - `ReferenceScale.conditional_requirements` rejects
+        it at the write boundary and `absolute` is not extendable, so there is no
+        canonical path to it. Asserting downstream behaviour for an unreachable
+        state would be asserting behaviour that cannot occur.
+
+        `test_B16c` below now makes the stronger claim in its place.
+        """
         for scale, code in (
                 (self.hinge(), "SCALE_NOT_ABSOLUTE"),
-                (self._absolute(unit="in"), "UNIT_AMBIGUOUS"),
-                (self._absolute(per_unit=None), "SCALE_FACTOR_MISSING")):
+                (self._absolute(unit="in"), "UNIT_AMBIGUOUS")):
             state = self.constraint(scale, "MAX_OVERALL_DIMENSION",
                                     axis="ANY", limit=10, unit="mm")
             status, codes, _used, why = self.status_of(self.assess(state))
             self.assertEqual(s07.NOT_YET_EVALUABLE, status, why)
             self.assertIn(code, codes)
+
+    def test_B16c_a_scale_with_no_factor_cannot_be_written_at_all(self):
+        """What replaced the SCALE_FACTOR_MISSING case, and why it is stronger.
+
+        Downstream reporting "I cannot evaluate this" was the second-best
+        outcome. The best is that the unusable scale never enters state, because
+        every consumer of it then reasons about a basis that can actually
+        convert something.
+        """
+        from ver3.assy_v3.state.design_state import ContractError
+        with self.assertRaises(ContractError) as raised:
+            self.constraint(self._absolute(per_unit=None),
+                            "MAX_OVERALL_DIMENSION", axis="ANY", limit=10,
+                            unit="mm")
+        self.assertIn("absolute_scale_is_structured", str(raised.exception))
 
     def test_B16b_a_design_that_states_no_hard_requirement_produces_none(self):
         out = self.assess(self.hinge())
@@ -1165,13 +1190,19 @@ class TestDimensionalCompleteness(_Feas):
                          self.dimensional(HINGE_BOXES, axis="Y", limit=30)[0])
 
     def test_B34c_an_ambiguous_or_relative_scale_decides_nothing(self):
+        """The reachable ambiguities. See `test_B16c` for the case that is now
+        refused at the write boundary instead of tolerated downstream."""
         for kwargs, code in (
                 ({"basis": "RELATIVE", "absolute": None}, "SCALE_NOT_ABSOLUTE"),
-                ({"absolute": {"unit": "in", "per_unit": 10.0}}, "UNIT_AMBIGUOUS"),
-                ({"absolute": {"unit": "mm"}}, "SCALE_FACTOR_MISSING")):
+                ({"absolute": {"unit": "in", "per_unit": 10.0}}, "UNIT_AMBIGUOUS")):
             status, codes, _u, why = self.dimensional(HINGE_BOXES, **kwargs)
             self.assertEqual(s07.NOT_YET_EVALUABLE, status, why)
             self.assertIn(code, codes)
+
+    def test_B34d_a_scale_with_no_factor_is_refused_before_it_can_decide(self):
+        from ver3.assy_v3.state.design_state import ContractError
+        with self.assertRaises(ContractError):
+            self.dimensional(HINGE_BOXES, absolute={"unit": "mm"})
 
 
 # =====================================================================

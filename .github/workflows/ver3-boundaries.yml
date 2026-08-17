@@ -126,3 +126,14 @@ jobs:
         # ver3.tests.meta.test_downstream_capability, which the boundaries job
         # runs on every push.
         run: python -m unittest -v ver3.tests.kernel.test_capability_geometry
+
+      - name: The selected candidate, and only that one, reaches geometry
+        # The production seam end to end: a standing SelectionDecision, the real
+        # S05 invocation path, s06, s07 and an OpenCascade solid - plus the
+        # lifecycle that makes it worth having, where reopening the choice
+        # withdraws the geometry transitively and revising an unrelated
+        # candidate does not.
+        run: |
+          python -m unittest -v \
+            ver3.tests.kernel.test_selected_branch_compilation \
+            ver3.tests.kernel.test_selected_seam_to_geometry

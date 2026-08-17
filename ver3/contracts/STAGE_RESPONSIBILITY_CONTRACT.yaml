@@ -1487,6 +1487,10 @@ stages:
     responsibility: Realize every declared relation as named geometry, and surface the constraints
       that geometry imposes back onto the layout.
     engineering_questions:
+    - Which candidate is the design committed to, and what principle must this embodiment
+      realize?
+    - Which of the design's obligations must THIS candidate discharge?
+    - What states, motions and load routes must the embodiment still permit?
     - What actual geometry on which body makes each declared relation real?
     - Which feature realizes each side of each interaction?
     - What does that geometry demand of the layout, as a constraint?
@@ -1559,6 +1563,109 @@ stages:
         the convergence block can only converge on constraints it was given.
       requires_semantics:
       - constraint_relation
+    - class: selection_commitment
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: >-
+          s05 embodies THE selected candidate. Without a recorded commitment
+          there is no such candidate, and a stage that proceeds anyway is
+          embodying whichever branch its caller happened to name. DESIGN_WIDE
+          because the decision is not branch-local - it is the thing that names
+          the branch, so scoping it to the branch it selects would be circular.
+      what: the standing human selection commitment
+      justified_by_question: >-
+        Which candidate is the design committed to, and what principle must this
+        embodiment realize?
+      why: >-
+        Selection is authoritative and human. s05 must read the commitment
+        rather than be told a branch, so that no caller can route embodiment to
+        a candidate nobody chose.
+      requires_semantics:
+      - selection_decision
+    - class: selected_principle
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: REQUIRED_NONEMPTY
+        existence_why: >-
+          The prompt tells s05 it is embodying an already-decided mechanism. If
+          the candidate and its principle are not in the view, that sentence is
+          an instruction to embody something the stage cannot see.
+      what: the selected candidate and the principle it embodies
+      justified_by_question: >-
+        Which candidate is the design committed to, and what principle must this
+        embodiment realize?
+      why: >-
+        Candidate.principle is the mechanism decision itself. Geometry that does
+        not realize it is geometry for a different design.
+      requires_semantics:
+      - candidate
+    - class: candidate_acceptance
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: >-
+          A design whose obligations are all UNIVERSAL has no candidate-specific
+          acceptance to state, and demanding one would force s02 to author an
+          empty contract to satisfy a downstream stage.
+      what: what the selected candidate must satisfy to be judged realized
+      justified_by_question: >-
+        Which of the design's obligations must THIS candidate discharge?
+      why: >-
+        S05-C4 checks that every APPLICABLE obligation is realized. Applicability
+        is candidate-scoped, and without this the check reads the design-wide set
+        and demands the selected candidate discharge another candidate's
+        obligations.
+      requires_semantics:
+      - candidate_acceptance
+    - class: realized_configuration_to_preserve
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a static mechanism has no distinguished configurations
+      what: the configurations this branch established
+      justified_by_question: >-
+        What states, motions and load routes must the embodiment still permit?
+      why: >-
+        Geometry that cannot occupy a configuration upstream established has
+        removed a state the design promised, silently.
+      requires_semantics:
+      - realized_configuration
+    - class: motion_to_preserve
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: >-
+          a static mechanism has no motion, and forcing one to author a
+          motion record it does not have would be inventing engineering
+      what: the motions and swept occupancy this branch established
+      justified_by_question: >-
+        What states, motions and load routes must the embodiment still permit?
+      why: >-
+        A feature placed into a path already proven clear turns a moving design
+        into one that binds, and s05 cannot avoid a sweep it was never shown.
+      requires_semantics:
+      - motion_path
+      - motion_occupancy
+    - class: load_route_to_carry
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a branch may have no load route established yet
+      what: the load routes this branch established
+      justified_by_question: >-
+        What states, motions and load routes must the embodiment still permit?
+      why: >-
+        Geometry is what carries a load. Embodying a route the stage cannot see
+        is how a member on the path gets sectioned away.
+      requires_semantics:
+      - load_route
     - class: limit_to_produce
       instance_selection:
         population: INVOCATION_BRANCH

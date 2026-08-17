@@ -268,10 +268,41 @@ class TestC8RegionIntrusion(unittest.TestCase):
         problems = s05.check_c8_region_intrusion(parsed, self.V)
         self.assertTrue(any("cannot be evaluated" in p for p in problems), problems)
 
-    def test_a_region_whose_role_reserves_nothing_raises_no_false_failure(self):
-        v = view(FunctionalRegion=[region("FRG-2", "GRIP", (0, 0, 0), (5, 5, 5))])
+    def test_a_support_region_permits_occupancy(self):
+        """SUPPORT is where the product meets what carries it. Contact there is
+        the POINT of the region, so reporting it would flag every design that
+        actually rests on something.
+
+        This used to use a role called GRIP, which the contract has never
+        declared - so the test was asserting a policy for a role with no
+        semantics, and the only thing it could prove was that an unknown role
+        was silently ignored.
+        """
+        v = view(FunctionalRegion=[region("FRG-2", "SUPPORT", (0, 0, 0), (5, 5, 5))])
         parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(0, 0, 0))]}
         self.assertEqual([], s05.check_c8_region_intrusion(parsed, v))
+
+    def test_an_undeclared_role_is_reported_rather_than_ignored(self):
+        """An undeclared role has no occupancy policy. Passing it would be
+        deciding the policy here, in a check, by omission."""
+        v = view(FunctionalRegion=[region("FRG-9", "GRIP", (0, 0, 0), (5, 5, 5))])
+        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(0, 0, 0))]}
+        problems = s05.check_c8_region_intrusion(parsed, v)
+        self.assertTrue(any("not in the declared vocabulary" in p
+                            for p in problems), problems)
+
+    def test_both_stages_read_the_same_occupancy_policy(self):
+        """s04b and S05-C8 each used to carry their own tuple of roles. Two
+        copies of a rule are two rules, and nothing made them agree."""
+        import inspect
+        from ver3.assy_v3.stages import s04_envelope_and_motion as s04
+        for module in (s04, s05):
+            with self.subTest(module=module.__name__):
+                source = inspect.getsource(module)
+                self.assertNotIn('("ACCESS", "APERTURE", "KEEP_OUT")', source,
+                                 "an occupancy role list is hard-coded again")
+        self.assertTrue(s04.excludes_occupancy("KEEP_OUT"))
+        self.assertFalse(s04.excludes_occupancy("SUPPORT"))
 
     def test_no_regions_declared_means_nothing_to_intrude(self):
         parsed = {"features": [feature("FEA-1", "BOD-1")]}
@@ -334,67 +365,140 @@ class TestC9ClearanceConstraints(unittest.TestCase):
         self.assertIn("IFC-1", ops[0].premise_refs)
 
 
-class TestC1CompliantJointAlternative(unittest.TestCase):
-    """S05-C1 admits `a declared compliant Joint` as the contract says it does."""
+class TestC1RequiresBothSidesAndCompliantJointsAreInternal(unittest.TestCase):
+    """S05-C1 has no compliant exception, and the reason is the ontology.
+
+    An earlier version let a two-body Interface skip a feature on one side when
+    some COMPLIANT joint connected the same pair. It read the contract's word
+    "compliant" as an alternative to realizing an interface. It is not: compliance
+    is declared as "a joint_type of Joint between RigidGroups of ONE body", an
+    INTERNAL relation where part of a body flexes relative to the rest of it. A
+    joint spanning two bodies is not that thing, so the exception was admitting a
+    malformed record as grounds for omitting geometry.
+
+    The Joint contract is also unconditional about it: "A joint_type label alone
+    is inert. A realization on each side is required (INV-008)."
+
+    So: two bodies that touch need two features, always. A flexure is geometry on
+    its own body and gets a feature like anything else.
+    """
 
     @staticmethod
-    def joint(jid, jtype="COMPLIANT", **over):
-        rec = {"entity_id": jid, "joint_type": jtype, "parent_group": "RGP-1",
-               "child_group": "RGP-2", "dof": ["RZ"], "axis_direction": "+Z",
+    def joint(jid, jtype="COMPLIANT", parent="RGP-1", child="RGP-2", **over):
+        rec = {"entity_id": jid, "joint_type": jtype, "parent_group": parent,
+               "child_group": child, "dof": ["RZ"], "axis_direction": "+Z",
                "frame_ids": ["FRM-1"]}
         rec.update(over)
         return rec
 
-    V_RIGID = view(Interface=[{"entity_id": "IFC-1", "bodies": ["BOD-1", "BOD-2"],
-                               "interaction_kind": "CONTACT"}])
+    #: An ordinary two-body interface.
+    TWO_BODY = view(Interface=[{"entity_id": "IFC-1",
+                                "bodies": ["BOD-1", "BOD-2"],
+                                "interaction_kind": "CONTACT"}])
 
-    def _compliant(self, **over):
+    def internal_compliant(self, **over):
+        """THE CANONICAL SHAPE: one body, two of ITS rigid groups.
+
+        The previous positive fixture put RGP-1 on BOD-1 and RGP-2 on BOD-2 and
+        called the result legitimate. That fixture described a joint the
+        ontology does not model, so nothing built on it could be evidence.
+        """
         return view(
             Interface=[{"entity_id": "IFC-1", "bodies": ["BOD-1", "BOD-2"],
-                        "interaction_kind": "COMPLIANT_INTERACTION"}],
+                        "interaction_kind": "CONTACT"}],
             RigidGroup=[{"entity_id": "RGP-1", "body": "BOD-1"},
-                        {"entity_id": "RGP-2", "body": "BOD-2"}],
+                        {"entity_id": "RGP-2", "body": "BOD-1"}],
             Joint=[self.joint("JNT-1", **over)])
 
-    def test_a_rigid_interface_still_needs_both_sides(self):
+    def test_a_two_body_interface_needs_both_sides(self):
         parsed = {"features": [feature("FEA-1", "BOD-1")]}
-        problems = s05.check_c1_interface_features(parsed, self.V_RIGID)
+        problems = s05.check_c1_interface_features(parsed, self.TWO_BODY)
         self.assertTrue(any("BOD-2" in p for p in problems), problems)
 
     def test_both_sides_featured_passes(self):
         parsed = {"features": [feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")]}
-        self.assertEqual([], s05.check_c1_interface_features(parsed, self.V_RIGID))
+        self.assertEqual([], s05.check_c1_interface_features(parsed, self.TWO_BODY))
 
-    def test_a_legitimate_compliant_joint_satisfies_one_side(self):
-        """The contract's own alternative, previously rejected outright."""
+    def test_an_internal_compliant_joint_does_not_excuse_the_other_body(self):
+        """The repair, stated directly. A flexure inside BOD-1 says nothing
+        about whether BOD-2 was given the face it touches."""
         parsed = {"features": [feature("FEA-1", "BOD-1", "SNAP_ARM")]}
-        self.assertEqual([], s05.check_c1_interface_features(parsed, self._compliant()))
+        problems = s05.check_c1_interface_features(parsed, self.internal_compliant())
+        self.assertTrue(any("BOD-2" in p for p in problems),
+                        "a compliant joint internal to BOD-1 was allowed to "
+                        "excuse the missing realization on BOD-2: %s" % problems)
 
-    def test_a_compliant_label_with_no_geometry_does_not_excuse_the_interface(self):
-        """`A joint_type label alone is inert.`"""
-        problems = s05.check_c1_interface_features({"features": []}, self._compliant())
-        self.assertTrue(any("compliant member" in p for p in problems), problems)
+    def test_an_internal_compliant_joint_is_not_itself_reported(self):
+        """It is canonical. Featuring both sides must leave it uncomplained-about."""
+        parsed = {"features": [feature("FEA-1", "BOD-1", "SNAP_ARM"),
+                               feature("FEA-2", "BOD-2")]}
+        self.assertEqual([], s05.check_c1_interface_features(
+            parsed, self.internal_compliant()))
 
-    def test_an_incomplete_joint_record_is_not_a_compliant_realization(self):
-        """A joint missing an axis is not the alternative; it is an incomplete joint."""
-        parsed = {"features": [feature("FEA-1", "BOD-1")]}
-        problems = s05.check_c1_interface_features(
-            parsed, self._compliant(axis_direction=""))
-        self.assertTrue(any("BOD-2" in p for p in problems), problems)
-
-    def test_a_non_compliant_joint_is_not_the_alternative(self):
-        parsed = {"features": [feature("FEA-1", "BOD-1")]}
-        problems = s05.check_c1_interface_features(
-            parsed, self._compliant(joint_type="REVOLUTE"))
-        self.assertTrue(any("BOD-2" in p for p in problems), problems)
-
-    def test_a_compliant_joint_between_other_bodies_does_not_apply(self):
-        v = self._compliant()
-        v["RigidGroup"] = [{"entity_id": "RGP-1", "body": "BOD-8"},
-                           {"entity_id": "RGP-2", "body": "BOD-9"}]
-        parsed = {"features": [feature("FEA-1", "BOD-1")]}
+    def test_a_cross_body_compliant_joint_is_reported_as_malformed(self):
+        """The record that used to excuse a missing feature is now the failure."""
+        v = self.internal_compliant()
+        v["RigidGroup"] = [{"entity_id": "RGP-1", "body": "BOD-1"},
+                           {"entity_id": "RGP-2", "body": "BOD-2"}]
+        parsed = {"features": [feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")]}
         problems = s05.check_c1_interface_features(parsed, v)
-        self.assertTrue(any("BOD-2" in p for p in problems), problems)
+        self.assertTrue(any("ONE body" in p for p in problems), problems)
+
+    def test_a_non_compliant_cross_body_joint_is_not_reported(self):
+        """A revolute joint between two bodies is ordinary. Only COMPLIANT
+        carries the intra-body requirement."""
+        v = self.internal_compliant(jtype="REVOLUTE")
+        v["RigidGroup"] = [{"entity_id": "RGP-1", "body": "BOD-1"},
+                           {"entity_id": "RGP-2", "body": "BOD-2"}]
+        parsed = {"features": [feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")]}
+        self.assertEqual([], s05.check_c1_interface_features(parsed, v))
+
+    def test_the_internal_helper_keys_by_body_not_by_pair(self):
+        joints = s05.internal_compliant_joints(self.internal_compliant())
+        self.assertEqual(["BOD-1"], sorted(joints))
+
+    def test_the_helper_ignores_an_incomplete_joint_record(self):
+        """`A joint_type label alone is inert.`"""
+        self.assertEqual({}, s05.internal_compliant_joints(
+            self.internal_compliant(axis_direction="")))
+
+
+class TestC1MakesNoClaimAboutCompliantElementGeometry(unittest.TestCase):
+    """§9.4: do not pretend to verify what canonical data cannot answer.
+
+    `compliant_element` names the geometry a reduced-order beam model would
+    consume, and it is an untyped prose field - no `field_semantics`, no
+    reference to a Feature. Whether that element was actually drawn cannot be
+    determined from typed state, so C1 must not claim it.
+    """
+
+    def test_compliant_element_is_still_untyped_in_the_contract(self):
+        """If it ever gains a typed reference, this test should fail and the
+        claim should be upgraded rather than left unmade."""
+        from . import _paths
+        contract = _paths.contract("DESIGN_STATE_CONTRACT.yaml")
+        families = dict(contract["entity_families"])
+        families.update(contract["assurance_families"])
+        semantics = families["Joint"].get("field_semantics") or {}
+        self.assertNotIn("compliant_element", semantics,
+                         "compliant_element is now typed; C1 can and should "
+                         "check that the compliant geometry exists")
+
+    def test_c1_does_not_read_compliant_element(self):
+        """The CODE, not the prose. The docstring names the field precisely to
+        record that it is not consulted, so a raw substring scan finds the
+        explanation and fails on it - which would make this test impossible to
+        pass rather than able to catch anything."""
+        import ast
+        import inspect
+        tree = ast.parse(inspect.getsource(s05.check_c1_interface_features))
+        fn = tree.body[0]
+        body = fn.body[1:] if ast.get_docstring(fn) else fn.body
+        literals = {n.value for stmt in body for n in ast.walk(stmt)
+                    if isinstance(n, ast.Constant) and isinstance(n.value, str)}
+        self.assertNotIn("compliant_element", literals,
+                         "C1 reads an untyped prose field; a claim derived from "
+                         "it would be reading a sentence as a structural fact")
 
 
 class TestC10SolverEvidence(unittest.TestCase):

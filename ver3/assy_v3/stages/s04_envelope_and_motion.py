@@ -66,7 +66,37 @@ def axis_index(axis: Any) -> Optional[int]:
 
 def axis_sign(axis: str) -> float:
     return -1.0 if str(axis).strip().startswith("-") else 1.0
-REGION_ROLES = ("ACCESS", "SUPPORT", "KEEP_OUT", "APERTURE")
+def _region_policy() -> Dict[str, Dict[str, Any]]:
+    """FunctionalRegion.role_policy, read from the canonical contract.
+
+    Read rather than restated. This tuple used to be written here and the
+    occupancy subset written twice more - once in s04b below, once in S05-C8 -
+    so "which roles exclude occupancy" had three answers that happened to agree.
+    """
+    from ..state.design_state import Contracts
+    families = Contracts().families
+    return dict((families.get("FunctionalRegion") or {}).get("role_policy") or {})
+
+
+#: The declared role vocabulary, in canonical order.
+REGION_ROLES = tuple(sorted(_region_policy()))
+
+
+def excludes_occupancy(role: Optional[str]) -> bool:
+    """Is a body or feature being inside a region of this role a defect?
+
+    THE one interpreter, used by s04b's occupancy check and by S05-C8, so the
+    two stages cannot come to different conclusions about the same box. A role
+    the contract does not declare returns False and is reported by the caller
+    as unrecognised rather than silently treated as keep-out.
+    """
+    policy = _region_policy().get(str(role or "").strip().upper()) or {}
+    return bool(policy.get("excludes_occupancy"))
+
+
+def unknown_region_role(role: Optional[str]) -> bool:
+    """A role outside the declared vocabulary. Never silently ignored."""
+    return str(role or "").strip().upper() not in _region_policy()
 
 #: Results a spatial check may produce. FAIL is deliberately absent for
 #: overlap-based conclusions; see the module docstring.
@@ -1038,7 +1068,7 @@ def region_occupancy_check(state) -> List[str]:
             continue
         box = aabb(c, h)
         for body in (r.get("owning_bodies") or []):
-            if body in boxes and r.get("role") in ("ACCESS", "APERTURE", "KEEP_OUT") \
+            if body in boxes and excludes_occupancy(r.get("role")) \
                     and overlaps(box, boxes[body]):
                 problems.append(
                     "REGION_OCCUPIED_BY_ITS_OWNER: %s (%s) overlaps %s"

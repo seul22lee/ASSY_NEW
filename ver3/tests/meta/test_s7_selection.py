@@ -551,15 +551,25 @@ class TestMetrics(_Selection):
         self.assertEqual(sel.NOT_AVAILABLE, m["availability"])
         self.assertEqual("SCALE_NOT_ABSOLUTE", m["reason_code"])
 
+    def test_C30b_a_scale_with_no_factor_never_reaches_a_metric(self):
+        """This used to assert that a metric reports SCALE_FACTOR_MISSING for an
+        ABSOLUTE basis carrying a unit and no per_unit.
+
+        That state is no longer constructible: `ReferenceScale` declares a
+        conditional requirement the write boundary enforces, and `absolute` is
+        not extendable, so no canonical path reaches it. The metric's defensive
+        branch remains, but the design can no longer arrive at it - and a scale
+        that cannot convert anything never becoming the basis of a comparison is
+        a better outcome than reporting it after the fact.
+        """
+        from ver3.assy_v3.state.design_state import ContractError
         state = self.seed()
         self.candidates(state, suffixes=("A",))
-        self.hinge(state, sfx="A", s04a=arrangement(
-            HINGE_BOXES, steps=["ASY-0A"], basis="ABSOLUTE",
-            absolute={"unit": "mm"}))                    # no per_unit
-        self.feasible(state, ["CND-A"])
-        out = self.compare(state, prefs(package_volume=(MINIMIZE, HIGH)))
-        self.assertEqual("SCALE_FACTOR_MISSING",
-                         self.metric(out, "package_volume", "CND-A")["reason_code"])
+        with self.assertRaises(ContractError) as raised:
+            self.hinge(state, sfx="A", s04a=arrangement(
+                HINGE_BOXES, steps=["ASY-0A"], basis="ABSOLUTE",
+                absolute={"unit": "mm"}))                # no per_unit
+        self.assertIn("absolute_scale_is_structured", str(raised.exception))
 
     def test_C31_a_metric_never_reads_another_candidates_evidence(self):
         """Branch membership comes from the canonical helper, so a count is over
