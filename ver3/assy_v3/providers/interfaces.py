@@ -100,6 +100,20 @@ class GenerationRequest:
     #: implementation living in the interface it describes.
     responsibility_id: Optional[str] = None
 
+    #: HOW MANY TRANSPORT ATTEMPTS this call is permitted, in total.
+    #:
+    #: On the REQUEST because it is a property of the call being made, not of
+    #: the client making it. A provider constructed once and reused across a run
+    #: carries one retry policy for every responsibility, so a campaign that
+    #: wants a single attempt could only get it by constructing a second client
+    #: - and `GenerationSettings.max_attempts` would meanwhile be recorded in the
+    #: run record while governing nothing, which is worse than absent: it reads
+    #: as evidence of a policy that was never applied.
+    #:
+    #: None means the provider's own default. A provider is free to bound this
+    #: further; it may never exceed it.
+    max_attempts: Optional[int] = None
+
 
 @dataclass(frozen=True)
 class GenerationResponse:

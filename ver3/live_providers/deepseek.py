@@ -51,7 +51,25 @@ from .env import require
 API_KEY_VAR = "DEEPSEEK_API_KEY"
 
 DEFAULT_BASE_URL = "https://api.deepseek.com"
-DEFAULT_MODEL = "deepseek-chat"
+
+#: The model the paid diagnostic will actually call.
+#:
+#: Was `deepseek-chat`, which the official API documentation no longer lists
+#: (checked 2026-08-17 against api-docs.deepseek.com). The documented model ids
+#: are `deepseek-v4-flash` and `deepseek-v4-pro`, both of which resolve to their
+#: current dated build - the docs state the calling method is unchanged and the
+#: bare name reaches the latest version, so pinning a dated id here would freeze
+#: the campaign to a build that moves on without it.
+#:
+#: PRO rather than FLASH. The diagnostic asks for multi-stage engineering
+#: reasoning - requirement interpretation through to a construction program - at
+#: a 65536-token output budget. Flash is the faster, cheaper tier; choosing it
+#: to save money on the run whose entire purpose is to find out whether natural
+#: model output can traverse the pipeline would make a capability answer that is
+#: really a tier answer.
+#:
+#: Overridable by DEEPSEEK_MODEL, so a later comparison needs no code change.
+DEFAULT_MODEL = "deepseek-v4-pro"
 
 #: The output ceiling this client will request. A request above it is clamped, and
 #: the clamp is recorded, because a silently reduced cap produces a truncation the
@@ -192,7 +210,19 @@ class DeepSeekProvider:
         condition; every attempt leaves its own record."""
         last: Optional[GenerationResult] = None
         waited = 0.0
-        for attempt in range(1, self.max_attempts + 1):
+        # THE REQUEST DECIDES, and the client is the fallback. A provider built
+        # once and reused across a run otherwise imposes one retry policy on
+        # every responsibility, and a diagnostic that means to make exactly one
+        # attempt cannot say so - it could only construct a second client, while
+        # the attempt budget it recorded governed nothing.
+        #
+        # Clamped to at least one: a request asking for zero attempts is asking
+        # for a result without a call, and returning None here would be a
+        # provider failure nobody caused.
+        attempts = self.max_attempts
+        if request.max_attempts is not None:
+            attempts = max(1, int(request.max_attempts))
+        for attempt in range(1, attempts + 1):
             result = self._attempt(request, attempt, waited)
             last = result
             if result.execution_status is ExecutionStatus.SUCCESS:
@@ -203,7 +233,7 @@ class DeepSeekProvider:
                                                ExecutionStatus.PROVIDER_UNAVAILABLE,
                                                ExecutionStatus.PROVIDER_TIMEOUT):
                 return result
-            if attempt < self.max_attempts:
+            if attempt < attempts:
                 wait = self.backoff_s * attempt
                 waited += wait
                 time.sleep(wait)

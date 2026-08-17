@@ -391,6 +391,10 @@ class Stage:
             max_output_tokens=settings.max_output_tokens,
             deadline_s=settings.deadline_s, temperature=settings.temperature,
             seed=settings.seed,
+            # The attempt budget travels WITH the call. Without this the value
+            # was recorded by `GenerationSettings.as_record` and read by nobody,
+            # so a campaign asking for one attempt got the provider's default.
+            max_attempts=settings.max_attempts,
             # The run and attempt are the caller's to state, and the provider's
             # record is required to carry both. Passing them here is what lets a
             # model-run record be tied back to the run that produced it.
