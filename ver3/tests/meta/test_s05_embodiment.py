@@ -291,6 +291,45 @@ class TestC8RegionIntrusion(unittest.TestCase):
         self.assertTrue(any("not in the declared vocabulary" in p
                             for p in problems), problems)
 
+    def test_no_canonical_prose_makes_a_blanket_exclusion_claim(self):
+        """The contract may not say something the role policy contradicts.
+
+        It said "No Feature may intrude into a FunctionalRegion" while
+        role_policy declares SUPPORT does not exclude occupancy - so the contract
+        asserted two things at once, and a reader could take either as
+        authoritative. Checked against the policy rather than against a fixed
+        sentence: if a role that excludes occupancy is ever added or removed,
+        this asks the question again instead of matching yesterday's wording.
+        """
+        import os
+        from . import _paths
+        permissive = [role for role, policy
+                      in (self.role_policy() or {}).items()
+                      if not policy.get("excludes_occupancy")]
+        self.assertTrue(permissive,
+                        "no role permits occupancy, so a blanket exclusion "
+                        "claim would be true and this guard is meaningless")
+        for name in ("DESIGN_STATE_CONTRACT.yaml",
+                     os.path.join("stages", "S05_CONTRACT.yaml")):
+            with self.subTest(contract=name):
+                with open(os.path.join(_paths.REPO_ROOT, "ver3", "contracts",
+                                       name)) as handle:
+                    body = handle.read()
+                for blanket in ("No Feature may intrude into a FunctionalRegion",
+                                "no Feature intrudes into a FunctionalRegion"):
+                    self.assertNotIn(
+                        blanket, body,
+                        "%s claims every FunctionalRegion excludes Features, "
+                        "which role_policy contradicts for %s"
+                        % (name, ", ".join(sorted(permissive))))
+
+    def role_policy(self):
+        from . import _paths
+        contract = _paths.contract("DESIGN_STATE_CONTRACT.yaml")
+        families = dict(contract["entity_families"])
+        families.update(contract["assurance_families"])
+        return families["FunctionalRegion"].get("role_policy") or {}
+
     def test_both_stages_read_the_same_occupancy_policy(self):
         """s04b and S05-C8 each used to carry their own tuple of roles. Two
         copies of a rule are two rules, and nothing made them agree."""
@@ -673,3 +712,62 @@ class TestNoCheckReadsAFamilyTheViewNeverGrants(unittest.TestCase):
         """The instance that was broken, pinned so it cannot silently return."""
         self.assertIn("MobilityExpectation", self._families_of("check_c3_limit_pairs"))
         self.assertIn("MobilityExpectation", self.granted)
+
+
+class TestTheStageIsJudgedOnWhatItWasAsked(unittest.TestCase):
+    """A check whose subject the prompt never raises is a trap, not a check.
+
+    S05-C4 was one: the prompt said "for every obligation below" while the
+    validator wanted a subset. S05-C3 was another and lasted longer - it asks
+    whether a feature pair PRODUCES a declared travel limit, and the prompt said
+    nothing about limits, blocked degrees of freedom, or stopping anything. A
+    model cannot satisfy a demand nobody made, and a run failing that way reads
+    as a model failure when it is a specification failure.
+
+    This maps each check to a word the instructions must contain. Deliberately
+    coarse - it asserts the SUBJECT was raised, never how it was worded - because
+    a test that pinned phrasing would fail on every honest rewrite.
+    """
+
+    #: check -> a term whose absence means the prompt never raised the subject.
+    SUBJECTS = {
+        "check_c1_interface_features": ("interaction", "feature"),
+        "check_c2_blocking_pairs": ("feature",),
+        "check_c3_limit_pairs": ("blocked_by", "limit"),
+        "check_c4_obligations_realized": ("obligation", "realization"),
+        "check_c5_program_totality": ("parameter", "construction program"),
+        "check_c6_units": ("unit",),
+        "check_c7_no_parameter_cycle": ("parameter",),
+        "check_c8_region_intrusion": ("functional region", "envelope"),
+        "check_c9_clearance_constraints": ("clearance", "governs_interface"),
+        "check_c10_no_unsolved_values": ("value",),
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        # The INSTRUCTIONS, not the rendered projection: the projection is the
+        # view dumped in, and finding a word there would only prove the data
+        # arrived, not that anything was asked of it.
+        cls.instructions = s05.PROMPT.split("DECIDED MECHANISM")[0].lower()
+
+    def test_the_instructions_were_actually_isolated(self):
+        """Otherwise every assertion below searches the whole prompt."""
+        self.assertIn("rules", self.instructions)
+        self.assertNotIn("{projection}", self.instructions)
+
+    def test_every_check_has_its_subject_raised_by_the_prompt(self):
+        for name, terms in sorted(self.SUBJECTS.items()):
+            with self.subTest(check=name):
+                self.assertTrue(
+                    any(t in self.instructions for t in terms),
+                    "%s judges something the prompt never asks for; none of %s "
+                    "appears in the instructions" % (name, list(terms)))
+
+    def test_every_check_in_the_module_is_covered_by_this_map(self):
+        """A new check must declare the subject it judges, or this fails."""
+        import inspect
+        checks = {n for n, _ in inspect.getmembers(s05, inspect.isfunction)
+                  if n.startswith("check_c")}
+        self.assertEqual(checks, set(self.SUBJECTS),
+                         "a check exists that this guard does not map to a "
+                         "prompt subject")

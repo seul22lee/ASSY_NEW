@@ -143,5 +143,86 @@ class TestC4UsesThatPopulation(_Population):
         self.assertEqual([], problems)
 
 
+
+class TestANonApplicableClaimIsRejected(_Population):
+    """§3.4. Coverage alone is not enough.
+
+    A realization that discharges everything required AND something else looked
+    correct: every applicable obligation was cited, so C4 passed. But that
+    something else is a claim about a mechanism nobody selected, and accepting
+    it writes into state that the chosen design satisfied an obligation belonging
+    to a rejected alternative.
+    """
+
+    def test_citing_only_applicable_obligations_passes(self):
+        self.assertEqual([], s05.check_c4_obligations_realized(
+            {"realizations": [realization("RLZ-1", ["OBL-U", "OBL-A"])]},
+            self.view()))
+
+    def test_citing_another_candidates_obligation_FAILS(self):
+        problems = s05.check_c4_obligations_realized(
+            {"realizations": [realization("RLZ-1", ["OBL-U", "OBL-A", "OBL-B"])]},
+            self.view())
+        self.assertTrue(problems, "a claim about an unselected mechanism was "
+                                  "accepted because coverage was complete")
+        self.assertIn("OBL-B", " ".join(problems))
+
+    def test_the_failure_names_the_exact_obligation(self):
+        problems = s05.check_c4_obligations_realized(
+            {"realizations": [realization("RLZ-1", ["OBL-U", "OBL-A", "OBL-B"])]},
+            self.view())
+        offending = [p for p in problems if "OBL-B" in p]
+        self.assertEqual(1, len(offending), problems)
+        self.assertIn("RLZ-1", offending[0])
+        self.assertNotIn("OBL-A", offending[0])
+
+    def test_citing_only_the_non_applicable_one_fails_twice_over(self):
+        """Once for the claim, once for each duty left undischarged."""
+        problems = s05.check_c4_obligations_realized(
+            {"realizations": [realization("RLZ-1", ["OBL-B"])]}, self.view())
+        joined = " ".join(problems)
+        self.assertIn("OBL-B", joined)
+        self.assertIn("OBL-U", joined)
+        self.assertIn("OBL-A", joined)
+
+    def test_an_obligation_outside_the_view_entirely_is_reported_as_such(self):
+        """A model naming an id it was never shown is a different mistake from
+        naming one it was shown but does not owe, and the message says which."""
+        problems = s05.check_c4_obligations_realized(
+            {"realizations": [realization("RLZ-1", ["OBL-U", "OBL-A", "OBL-ZZ"])]},
+            self.view())
+        offending = [p for p in problems if "OBL-ZZ" in p]
+        self.assertTrue(offending)
+        self.assertIn("not in this view at all", offending[0])
+
+
+class TestOneAuthorityForApplicability(unittest.TestCase):
+    """§3.2. The view and the validator must not be able to disagree."""
+
+    def test_the_stage_delegates_rather_than_reimplementing(self):
+        import inspect
+        from ver3.assy_v3.view import applicable_obligation_ids
+        source = inspect.getsource(s05.applicable_obligations_for_embodiment)
+        self.assertIn("applicable_obligation_ids", source,
+                      "s05 computes applicability itself; a second "
+                      "implementation can drift from the one that decides what "
+                      "the stage is shown")
+        self.assertNotIn("CANDIDATE_DISCRIMINATING", source,
+                         "the scope vocabulary is being interpreted in a second "
+                         "place")
+        self.assertTrue(callable(applicable_obligation_ids))
+
+    def test_the_view_rule_and_the_checker_agree_on_the_same_records(self):
+        from ver3.assy_v3.view import applicable_obligation_ids
+        view = {"Obligation": [obligation("OBL-U", "UNIVERSAL"),
+                               obligation("OBL-A", "CANDIDATE_DISCRIMINATING"),
+                               obligation("OBL-B", "CANDIDATE_DISCRIMINATING")],
+                "AcceptanceContract": [acceptance("ACC-A", "CND-A", ["OBL-A"])]}
+        self.assertEqual(
+            applicable_obligation_ids(view["Obligation"],
+                                      view["AcceptanceContract"]),
+            s05.applicable_obligations_for_embodiment(view))
+
+
 if __name__ == "__main__":                                       # pragma: no cover
     unittest.main()

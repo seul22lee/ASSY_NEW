@@ -36,7 +36,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from ..downstream import ir
 from ..state.patch import Op
-from ..view import Source, Sufficiency, ViewStatus
+from ..view import (Source, Sufficiency, ViewStatus,
+                    applicable_obligation_ids)
 from .base import Stage
 
 #: The feature vocabulary. Closed, because a feature kind the compiler cannot
@@ -64,10 +65,15 @@ RULES
    in the same frame as the functional regions below - so its occupancy can be
    checked against the regions the design reserved. A feature with no envelope
    cannot be checked and is reported as incomplete, not as passing.
-2. For every obligation below, emit a REALIZATION citing the obligation ids it
-   discharges, the features that do the discharging, and a verification
-   predicate - a sentence a later check could test. A realization with no
-   predicate discharges nothing.
+2. The obligations below are the ones THIS design must discharge - the ones
+   every candidate owes, plus the ones the selected candidate took on. For each
+   of them emit a REALIZATION citing the obligation ids it discharges, the
+   features that do the discharging, and a verification predicate - a sentence a
+   later check could test. A realization with no predicate discharges nothing.
+   Do not cite an obligation that is not listed below. Obligations belonging to
+   an alternative that was not selected are not shown and are not yours to
+   discharge; claiming one would be asserting something about a mechanism this
+   design does not use.
 3. Declare a PARAMETER for every dimension your geometry depends on. Give it a
    symbol and a UNIT. Never give it a value: dimensions are solved later from the
    constraints you write, and a number here would be a guess wearing a solved
@@ -89,7 +95,17 @@ RULES
      {{"op": "+"|"-"|"*"|"/", "args": [<expr>, <expr>, ...]}}
    Multiplying two lengths gives an AREA, not a length. A scale factor is written
    with unit "1".
-5. Write the CONSTRUCTION PROGRAM: an ordered list of statements that builds each
+5. Where a degree of freedom below is dispositioned BLOCKED_BY a constraint
+   relation, the geometry must PRODUCE that limit: a pair of features that
+   actually stops the motion, one on each side of the relation. A clearance
+   pocket on both sides satisfies "two features touch" and stops nothing.
+6. Do not remove what the design has already established. Where states,
+   motions, swept volumes or load routes appear below, they were proven against
+   the arrangement you are embodying: a feature placed into a path already shown
+   clear turns a moving design into one that binds, and material cut from a
+   member on a load route removes what carries the load. If your geometry cannot
+   respect one of them, say so in `unresolved` rather than quietly overriding it.
+7. Write the CONSTRUCTION PROGRAM: an ordered list of statements that builds each
    body IN ITS OWN FRAME. Never place a body in the world; assembly poses are
    derived elsewhere. Operations are exactly:
 {opcodes}
@@ -97,7 +113,7 @@ RULES
    EARLIER statements, for the combining and transforming operations only) and
    its parameters, each of which is an <expr> as above. Exactly one statement per
    body must be consumed by nothing: that final result IS the body.
-6. Never invent a dimension to make something buildable. If a value is unknown,
+8. Never invent a dimension to make something buildable. If a value is unknown,
    declare a parameter and constrain it.
 
 DECIDED MECHANISM AND SPATIAL CONTEXT
@@ -579,62 +595,19 @@ def check_c3_limit_pairs(parsed, view) -> List[str]:
     return sorted(set(out))
 
 
-#: `Obligation.scope`, verbatim from DESIGN_STATE_CONTRACT. UNIVERSAL is an
-#: obligation EVERY candidate must satisfy; CANDIDATE_DISCRIMINATING is one
-#: whose satisfaction DIFFERS BY CANDIDATE, and therefore belongs to whichever
-#: candidates actually took it on.
-UNIVERSAL = "UNIVERSAL"
-CANDIDATE_DISCRIMINATING = "CANDIDATE_DISCRIMINATING"
-
-
 def applicable_obligations_for_embodiment(view: Dict[str, Any]) -> Set[str]:
-    """The obligations the SELECTED candidate must discharge. One rule, one place.
+    """The obligations the SELECTED candidate must discharge.
 
-    s05 sees the whole obligation set, and it should: coverage cannot be read
-    from a subset, and an embodiment reasoning about its own obligations in
-    ignorance of the rest is reasoning in a smaller design than the real one.
-    But seeing is not owing. The design-wide set includes obligations that exist
-    BECAUSE alternatives differ, and demanding that the chosen candidate
-    discharge a rejected candidate's obligations is demanding it be two designs.
-
-    The split is already in the data:
-
-      UNIVERSAL                 every candidate must satisfy it
-      CANDIDATE_DISCRIMINATING  satisfaction differs by candidate, so it applies
-                                to this one exactly when this candidate's
-                                AcceptanceContract took it on
-
-    `satisfiable_at` is deliberately NOT consulted. It names the EARLIEST stage
-    at which an obligation can be satisfied, so reading `satisfiable_at == s05`
-    as "s05 owns it" would silently drop every obligation that became satisfiable
-    at s03 or s04 and is still this candidate's to realize in geometry.
-
-    Used by C4 and by the tests, so the view's acceptance context and the check's
-    population cannot drift into two different answers.
+    DELEGATES to `applicable_obligation_ids`, which is the one place the rule
+    lives. The ConsumerView applies the same function to standing state to
+    decide what s05 is SHOWN; this applies it to the recorded payload to decide
+    what s05 is JUDGED on. Two implementations would let the stage be asked to
+    realize one set and marked against another, which is the contradiction this
+    replaced - the prompt said "for every obligation below" while the view
+    carried the whole design's obligations and the validator wanted a subset.
     """
-    accepted: Set[str] = set()
-    for contract in _rows(view, "AcceptanceContract"):
-        accepted.update(contract.get("obligations") or [])
-
-    out: Set[str] = set()
-    for row in _rows(view, "Obligation"):
-        oid = row.get("entity_id")
-        if not oid:
-            continue
-        scope = str(row.get("scope") or "").upper()
-        if scope == CANDIDATE_DISCRIMINATING:
-            # Only if THIS candidate took it on. The view is already scoped to
-            # the committed branch, so an AcceptanceContract reaching this point
-            # is the selected candidate's.
-            if oid in accepted:
-                out.add(oid)
-            continue
-        # UNIVERSAL, and anything whose scope is absent or unrecognised. Failing
-        # OPEN here is deliberate: an obligation whose scope nobody stated is an
-        # obligation nobody has excused, and quietly dropping it would turn a
-        # missing field into a discharged duty.
-        out.add(oid)
-    return out
+    return applicable_obligation_ids(_rows(view, "Obligation"),
+                                     _rows(view, "AcceptanceContract"))
 
 
 def check_c4_obligations_realized(parsed, view) -> List[str]:
@@ -648,6 +621,9 @@ def check_c4_obligations_realized(parsed, view) -> List[str]:
     the selected candidate answerable for obligations that exist only because a
     rejected alternative worked differently.
     """
+    applicable = applicable_obligations_for_embodiment(view)
+    visible = _ids(view, "Obligation")
+
     cited: Set[str] = set()
     out = []
     for r in parsed.get("realizations") or []:
@@ -655,8 +631,19 @@ def check_c4_obligations_realized(parsed, view) -> List[str]:
             out.append("S05-C4: realization %s carries no verification predicate; "
                        "it discharges nothing (INV-008)" % r.get("id"))
             continue
-        cited.update(r.get("addresses_obligations") or [])
-    for oid in sorted(applicable_obligations_for_embodiment(view)):
+        claimed = list(r.get("addresses_obligations") or [])
+        cited.update(claimed)
+        # THE REVERSE ERROR. Coverage alone accepts a realization that discharges
+        # everything required AND something else - and that something else is a
+        # claim about a mechanism nobody selected, written into state as though
+        # the chosen design had satisfied it.
+        for oid in sorted(set(claimed) - applicable):
+            out.append(
+                "S05-C4: realization %s claims to discharge %s, which does not "
+                "apply to the selected candidate%s"
+                % (r.get("id"), oid,
+                   "" if oid in visible else " and is not in this view at all"))
+    for oid in sorted(applicable):
         if oid not in cited:
             out.append("S05-C4: obligation %s applies to the selected candidate "
                        "and is cited by no realization" % oid)

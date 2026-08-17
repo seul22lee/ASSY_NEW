@@ -152,6 +152,23 @@ class Contracts:
         return copy_out((_CONTRACT_DOCS[self]["families"].get(family) or {})
                         .get("conditional_requirements", []))
 
+    def relational_invariants(self, family: str) -> List[Dict[str, Any]]:
+        """Canonical rules about a record's RELATIONS, not its own fields.
+
+        `conditional_requirements` can say "a COMPLIANT joint must carry a
+        required_travel", because that is a fact about the record in hand. It
+        cannot say "the two groups it names must belong to the same body", or
+        "at most one of these may stand at a time" - both need other entities.
+
+        Declared by name and dispatched to `RELATIONAL_INVARIANTS`, the same
+        shape the ConsumerView uses for applicability rules. A name with no
+        implementation, or an implementation nothing declares, is a defect and
+        both are checked - so an invariant cannot exist as prose alone, which is
+        how the compliant-joint rule sat unenforced for as long as it did.
+        """
+        return copy_out((_CONTRACT_DOCS[self]["families"].get(family) or {})
+                        .get("relational_invariants", []))
+
     def field_semantics(self, family: str) -> Dict[str, Any]:
         """U-2B: reference targets, spatial frames and per-field authority."""
         return copy_out((_CONTRACT_DOCS[self]["families"].get(family) or {}).get("field_semantics", {}))
@@ -362,7 +379,12 @@ class DesignState:
                                 or op.fields[f] == "")]
                 if missing:
                     problems.append("MISSING_REQUIRED: %s %s -> %s" % (fam, eid, missing))
+                # A CREATE's prospective record IS its fields; the shared
+                # helper is used anyway so CREATE is not a special case in the
+                # architecture, only in what the record happens to be.
                 problems.extend(_conditional_problems(self.c, fam, eid, op.fields))
+                problems.extend(_relational_problems(self, fam, eid, op.fields,
+                                                     patch, op))
                 if not op.provenance_ref:
                     problems.append("NO_PROVENANCE: %s" % eid)
                 seen.add(eid)
@@ -376,9 +398,27 @@ class DesignState:
                     problems.append(mismatch)
                     continue
                 if op.kind == "EXTEND":
-                    problems.extend(self._extend_problems(patch, op))
+                    mutation = self._extend_problems(patch, op)
                 else:
-                    problems.extend(self._revision_problems(patch, op))
+                    mutation = self._revision_problems(patch, op)
+                problems.extend(mutation)
+                # AUTHORITY FIRST, then the invariant. An illegal mutation is
+                # rejected for being illegal and is never re-examined for shape:
+                # reporting "your unauthorised write would also be malformed"
+                # invites making it well-formed rather than authorised.
+                #
+                # INVALIDATE is deliberately excluded. It withdraws standing
+                # rather than changing engineering fields, so there is no new
+                # record to hold to an invariant - and revalidating the shape of
+                # something being withdrawn would make a record impossible to
+                # retire once the rules around it moved.
+                if not mutation and op.kind in ("EXTEND", "SUPERSEDE"):
+                    record = _prospective_record(self, op)
+                    stored_fam = self.stored_family(op.entity_id)
+                    problems.extend(_conditional_problems(
+                        self.c, stored_fam, op.entity_id, record))
+                    problems.extend(_relational_problems(
+                        self, stored_fam, op.entity_id, record, patch, op))
             # U-4. A declared premise must resolve, or the dependency it claims
             # to record is fiction and FA-5 cannot be computed from it.
             for ref in op.premise_refs:
@@ -934,6 +974,130 @@ def _shape_problems(rule_name, family, eid, field, value, shape) -> List[str]:
         elif got <= 0:
             out.append("CONDITIONAL_SHAPE (%s): %s.%s must be positive, got %r"
                        % (rule_name, where, key, got))
+    return out
+
+
+def _prospective_record(state, op) -> Dict[str, Any]:
+    """The record this operation would LEAVE BEHIND, not the operation's fields.
+
+    A canonical invariant is a property of the design's state, not of the event
+    that produced it. Validating `op.fields` alone answered "is this write
+    well-formed on its own", which for a mutation is the wrong question: an
+    EXTEND carrying one field is always well-formed on its own, and can still
+    leave a record that violates a rule about the whole of it.
+
+    Stored fields first, the operation's on top. Private bookkeeping keys are
+    left out - they are not engineering fields and no contract rule speaks about
+    them.
+    """
+    stored = _STORAGE[state].entities.get(op.entity_id) or {}
+    record = {k: v for k, v in stored.items() if not k.startswith("_")}
+    record.update(op.fields or {})
+    return record
+
+
+# ==========================================================================
+# RELATIONAL INVARIANTS
+# ==========================================================================
+#
+# Declared per family by NAME and dispatched here, the same shape the
+# ConsumerView uses for applicability rules. Deliberately a registry rather than
+# a rule language: each of these needs to read other entities, and a expression
+# syntax general enough to express "resolve two references and compare a field
+# of each" would be a query language nobody asked for.
+#
+# The meta guard in the test suite asserts the declaration and the registry
+# agree in both directions, so an invariant cannot exist as prose alone and an
+# implementation cannot sit unreferenced.
+
+def _same_body_rigid_groups(state, family, eid, record, patch, op, rule):
+    """A COMPLIANT Joint relates two RigidGroups of ONE Body.
+
+    DESIGN_STATE_CONTRACT states it directly: "Compliance is a joint_type of
+    Joint between RigidGroups of one body (proposal D-2)." It was prose, so a
+    cross-body joint wearing the label became standing state and was only
+    noticed - if at all - when S05-C1 read it much later and treated it as
+    grounds for omitting geometry.
+
+    Resolved through the declared typed references, never by comparing names.
+    """
+    trigger = rule.get("applies_when") or {}
+    actual = record.get(trigger.get("field"))
+    expected = trigger.get("equals")
+    if not (isinstance(actual, str) and isinstance(expected, str)
+            and actual.strip().upper() == expected.strip().upper()):
+        return []
+
+    entities = _STORAGE[state].entities
+    bodies, unresolved = {}, []
+    for field in rule.get("reference_fields") or []:
+        ref = record.get(field)
+        target = entities.get(ref) if isinstance(ref, str) else None
+        if target is None:
+            unresolved.append("%s=%r" % (field, ref))
+            continue
+        bodies[field] = target.get(rule.get("compare_field"))
+    if unresolved:
+        # Not this invariant's failure to report: an unresolvable reference is
+        # already a reference problem, and saying it twice helps nobody.
+        return []
+    distinct = {b for b in bodies.values() if b is not None}
+    if len(distinct) > 1:
+        return ["RELATIONAL (%s): %s %s declares %s=%s and relates groups on "
+                "different bodies (%s); this relation holds between groups of "
+                "ONE body"
+                % (rule.get("name"), family, eid, trigger.get("field"), actual,
+                   ", ".join("%s->%s" % (k, v) for k, v in sorted(bodies.items())))]
+    return []
+
+
+def _at_most_one_standing(state, family, eid, record, patch, op, rule):
+    """At most one record of this family may stand at a time.
+
+    For SelectionDecision this is what makes selection an AUTHORITY rather than
+    an opinion. Two standing decisions were reachable through ordinary writes,
+    and `committed_branch` then returned whichever the iteration reached first -
+    so the whole downstream silently followed one of two contradictory choices,
+    with nothing recording that the other existed.
+
+    Rejected at the boundary rather than resolved by consumers. Changing a
+    decision has a canonical path that keeps the history: SUPERSEDE the standing
+    one, or INVALIDATE it and record a new one. What is refused is a second
+    decision standing BESIDE the first.
+    """
+    if op.kind != "CREATE":
+        return []                     # revising the standing one is the path
+    others = [r["entity_id"] for r in state.standing(family)
+              if r["entity_id"] != eid]
+    if others:
+        return ["RELATIONAL (%s): %s %s would stand beside %s; at most one %s "
+                "may stand at a time. Supersede or invalidate the standing one "
+                "first - a second record does not replace it, it contradicts it"
+                % (rule.get("name"), family, eid, ", ".join(sorted(others)),
+                   family)]
+    return []
+
+
+RELATIONAL_INVARIANTS: Dict[str, Any] = {
+    "same_body_rigid_groups": _same_body_rigid_groups,
+    "at_most_one_standing": _at_most_one_standing,
+}
+
+
+def _relational_problems(state, family, eid, record, patch, op) -> List[str]:
+    """Every declared relational invariant this record must satisfy."""
+    out: List[str] = []
+    for rule in state.c.relational_invariants(family):
+        name = rule.get("rule")
+        fn = RELATIONAL_INVARIANTS.get(name)
+        if fn is None:
+            # Fails CLOSED. A declared invariant with no implementation is a
+            # rule the contract asserts and the runtime cannot keep, which is
+            # the exact drift this mechanism exists to prevent.
+            out.append("RELATIONAL_UNIMPLEMENTED: %s declares invariant %r and "
+                       "no implementation is registered" % (family, name))
+            continue
+        out.extend(fn(state, family, eid, record, patch, op, rule))
     return out
 
 

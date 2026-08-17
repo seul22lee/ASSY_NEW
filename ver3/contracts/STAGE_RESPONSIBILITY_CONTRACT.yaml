@@ -1541,10 +1541,16 @@ stages:
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
+        applicability: APPLICABLE_TO_COMMITTED_CANDIDATE
         existence: REQUIRED_NONEMPTY
-        existence_why: S05-C4 requires every obligation to be cited by some realization,
-          which cannot be checked against obligations the stage never saw
-      what: the full obligation set
+        existence_why: >-
+          S05-C4 requires every APPLICABLE obligation to be cited by some
+          realization, which cannot be checked against obligations the stage
+          never saw. DESIGN_WIDE with an applicability rule rather than a
+          branch-local population: the obligation corpus is not branch-local, it
+          is the design's, and which of it THIS candidate owes is a question
+          about scope and acceptance rather than about where the records live.
+      what: the obligations the selected candidate must discharge
       justified_by_question: What actual geometry on which body makes each declared relation
         real?
       why: A Realization must cite the obligation ids it discharges (INV-008), and coverage

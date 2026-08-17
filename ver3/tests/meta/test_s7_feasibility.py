@@ -775,7 +775,9 @@ class TestIsolationAndDependency(_Feas):
                 # expressed in it, and naming only the envelope would not carry
                 # it: `_propagate` stales the envelope and stops, leaving the
                 # verdict standing on a number that has lost its meaning.
-                ("ReferenceScale", "SCL-CND-A", {"basis": "ABSOLUTE"}),
+                ("ReferenceScale", "SCL-CND-A",
+                 {"basis": "ABSOLUTE",
+                  "absolute": {"unit": "mm", "per_unit": 1.0}}),
                 # The topology's own statement of which pairs must touch.
                 ("Interface", "IFC-0A", {"interaction_kind": "CLEARANCE"}),
                 ("RigidGroup", "RGP-G1A", {"members": []}),

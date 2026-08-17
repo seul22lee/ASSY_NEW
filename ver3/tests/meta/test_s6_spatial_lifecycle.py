@@ -172,9 +172,14 @@ class TestLifecycleFalsifiers(_Probe):
     def test_L5b_the_scale_reaches_everything_because_everything_is_in_it(self):
         """The one premise that IS universal, and it is universal for a reason
         the contract states: a coordinate has no meaning without its basis."""
+        # A COMPLETE absolute basis. Revising `basis` alone leaves a record
+        # promising comparability with no factor to convert by, which the
+        # prospective-record check now refuses - correctly, and for a reason
+        # this test is not about.
         state = self.mutate(Op("SUPERSEDE", "ReferenceScale", IDS["scale"],
-                               {"basis": "ABSOLUTE"}, "t",
-                               reason="the basis changed"))
+                               {"basis": "ABSOLUTE",
+                                "absolute": {"unit": "mm", "per_unit": 1.0}},
+                               "t", reason="the basis changed"))
         for eid in (IDS["state_a"], IDS["transition"], IDS["sweep"]):
             self.assertEqual("STALE", self.val(state, eid), eid)
 

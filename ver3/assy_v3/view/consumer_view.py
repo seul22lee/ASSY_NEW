@@ -274,6 +274,22 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
                 raise ValueError(
                     "%s.%s declares referent_population %r; the vocabulary is %s"
                     % (family, fld, population, sorted(_POPULATIONS)))
+            # WHICH of the population may be referenced, on the same principle
+            # as WHERE it comes from: the field says so.
+            #
+            # A family reached by two requirements is selected by their UNION, so
+            # narrowing a premise alone narrows nothing while any other path
+            # still admits the wider set. `obligation_to_discharge` was narrowed
+            # to the committed candidate's duties and the obligations arrived
+            # anyway, through `Realization.addresses_obligations` - the field a
+            # realization uses to cite them.
+            referent_applicability = (spec.get("referent_applicability")
+                                      or ALL_MEMBERS)
+            if referent_applicability not in APPLICABILITY_RULES:
+                raise ValueError(
+                    "%s.%s declares referent_applicability %r; the declared "
+                    "rules are %s" % (family, fld, referent_applicability,
+                                      sorted(APPLICABILITY_RULES)))
             for dep, why in deps:
                 if dep not in fams or dep in co_produced:
                     continue
@@ -300,7 +316,7 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
                         # sees by default.
                         "population": population, "coverage": AT_LEAST_ONE,
                         "existence": existence,
-                        "applicability": ALL_MEMBERS}}))
+                        "applicability": referent_applicability}}))
     return out
 
 
@@ -508,14 +524,41 @@ def _reference_graph(state, contracts) -> Tuple[Dict[str, Set[str]], Dict[str, S
     return fwd, rev
 
 
+class AmbiguousSelection(RuntimeError):
+    """More than one SelectionDecision stands. There is no committed branch.
+
+    The write boundary refuses to create a second standing decision, so reaching
+    this means state arrived by some path that invariant did not cover. Raised
+    rather than resolved: picking one of two contradictory commitments is a
+    selection, and selection is a human authority that no resolver may exercise
+    on the design's behalf.
+    """
+
+
 def committed_branch(state, contracts) -> Optional[str]:
     """The candidate the design has committed to, if it has.
 
     Read from canonical commitment state, not from a case convention: a standing
     SelectionDecision naming a candidate. Before selection there is no branch and
     alternatives are legitimately all in scope.
+
+    THREE outcomes, and the third used to be missing. This iterated the standing
+    decisions and returned the first one carrying a candidate reference - so two
+    contradictory commitments produced one silent answer, and s05, s06 and s07
+    all followed it while nothing recorded that another decision existed. The
+    invariant `one_standing_selection` now prevents that state; this fails
+    closed in case it is ever reached anyway, because a wrong branch here is not
+    an error anyone would see - it is a complete, plausible design for the wrong
+    alternative.
     """
-    for rec in state.standing("SelectionDecision"):
+    standing = list(state.standing("SelectionDecision"))
+    if len(standing) > 1:
+        raise AmbiguousSelection(
+            "%d SelectionDecisions stand (%s); exactly one may speak for the "
+            "design, and choosing between them is not a resolver's to make"
+            % (len(standing),
+               ", ".join(sorted(r.get("entity_id", "?") for r in standing))))
+    for rec in standing:
         for fld, spec in (contracts.field_semantics("SelectionDecision") or {}).items():
             if spec.get("kind") == "reference" and spec.get("target") == "Candidate":
                 val = rec.get(fld)
@@ -794,9 +837,88 @@ def _matches_invocation_anchors(ids, ctx):
     return keep
 
 
+#: `Obligation.scope`, verbatim from DESIGN_STATE_CONTRACT.
+UNIVERSAL_SCOPE = "UNIVERSAL"
+CANDIDATE_DISCRIMINATING_SCOPE = "CANDIDATE_DISCRIMINATING"
+
+
+def applicable_obligation_ids(obligations, acceptances) -> Set[str]:
+    """Which obligations THIS candidate owes. THE single semantic authority.
+
+    Record-based and pure, so the same rule can be applied to the two shapes
+    that need it: the ConsumerView narrows the population by reading standing
+    state, and S05-C4 validates against the recorded view payload. Those are
+    different data, and if each computed applicability its own way the stage
+    would be asked to realize one set and judged against another - which is
+    exactly the contradiction this replaced.
+
+    The split is already in the contract:
+
+      UNIVERSAL                 every candidate must satisfy it
+      CANDIDATE_DISCRIMINATING  satisfaction differs by candidate, so it applies
+                                to this one exactly when this candidate's
+                                AcceptanceContract took it on
+
+    `satisfiable_at` is deliberately not consulted: it names the EARLIEST stage
+    at which an obligation can be satisfied, so reading it as ownership would
+    drop every obligation that became satisfiable upstream and is still this
+    candidate's to realize in geometry.
+
+    Fails OPEN on an unstated scope. An obligation nobody classified is an
+    obligation nobody excused, and dropping it would turn a missing field into a
+    discharged duty.
+    """
+    accepted: Set[str] = set()
+    for contract in acceptances or ():
+        accepted.update(contract.get("obligations") or ())
+
+    out: Set[str] = set()
+    for record in obligations or ():
+        oid = record.get("entity_id")
+        if not oid:
+            continue
+        scope = str(record.get("scope") or "").strip().upper()
+        if scope == CANDIDATE_DISCRIMINATING_SCOPE and oid not in accepted:
+            continue
+        out.add(oid)
+    return out
+
+
+def _applicable_to_committed_candidate(ids, ctx):
+    """Narrow an obligation population to what the committed candidate owes.
+
+    Narrowing the VIEW rather than showing everything and asking the consumer to
+    ignore most of it. A stage shown a design-wide obligation set and told to
+    realize it will realize it - including obligations that exist only because a
+    rejected alternative worked differently - and the resulting claims about a
+    mechanism nobody chose would be accepted into state.
+
+    The acceptance contracts are read from the committed branch, which is the
+    same anchor `candidate_acceptance` populates from, so the view cannot narrow
+    against one candidate while presenting another's acceptance.
+    """
+    state, contracts = ctx["state"], ctx["contracts"]
+    obligations = [r for r in state.standing("Obligation")
+                   if r.get("entity_id") in ids]
+    if len(obligations) != len(ids):
+        # Some member is not an Obligation. This rule speaks only about
+        # obligations, so anything else passes through untouched rather than
+        # being silently dropped by a rule that does not understand it.
+        other = {i for i in ids if i not in {r.get("entity_id") for r in obligations}}
+    else:
+        other = set()
+    branch = ctx.get("branch") or committed_branch(state, contracts)
+    acceptances = [r for r in state.standing("AcceptanceContract")
+                   if not branch or r.get("candidate") == branch]
+    return applicable_obligation_ids(obligations, acceptances) | other
+
+
+APPLICABLE_TO_COMMITTED_CANDIDATE = "APPLICABLE_TO_COMMITTED_CANDIDATE"
+
 APPLICABILITY_RULES: Dict[str, Any] = {
     ALL_MEMBERS: lambda ids, _ctx: ids,
     MATCHES_INVOCATION_ANCHORS: _matches_invocation_anchors,
+    APPLICABLE_TO_COMMITTED_CANDIDATE: _applicable_to_committed_candidate,
 }
 
 

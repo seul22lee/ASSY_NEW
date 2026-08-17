@@ -511,6 +511,21 @@ entity_families:
     # done since D-2; prose is not consumed by the write boundary, so a
     # cross-body Joint labelled COMPLIANT with none of the variant fields was
     # accepted and only discovered downstream, if at all.
+    # ENFORCED at the write boundary. The compliant_variant note below has said
+    # this since D-2 - "Compliance is a joint_type of Joint between RigidGroups
+    # of one body" - and it was prose, so a cross-body joint wearing the label
+    # became standing state. S05-C1 could report it much later; by then it had
+    # already been read as grounds for omitting geometry.
+    relational_invariants:
+      - name: compliant_joint_is_internal_to_one_body
+        rule: same_body_rigid_groups
+        applies_when: {field: joint_type, equals: COMPLIANT}
+        reference_fields: [parent_group, child_group]
+        compare_field: body
+        why: >-
+          Compliance is part of a body flexing relative to the rest of it. Two
+          groups on different bodies is a different relation entirely, and
+          admitting it lets a malformed record stand for a flexure nobody drew.
     conditional_requirements:
       - name: compliant_joint_variant
         applies_when: {field: joint_type, equals: COMPLIANT}
@@ -638,6 +653,16 @@ entity_families:
         cardinality: many
         resolvable: false
         referent_population: DESIGN_WIDE
+        # WHICH of that design-wide population a realization may cite. The
+        # obligation corpus belongs to the design, so DESIGN_WIDE is right for
+        # WHERE; but a realization authored for the selected candidate may only
+        # discharge what that candidate owes, and citing another alternative's
+        # obligation is a claim about a mechanism this design does not use.
+        #
+        # Declared here as well as on the premise because a family reached by
+        # two requirements is selected by their UNION - narrowing one path
+        # alone narrows nothing, which is exactly what happened first.
+        referent_applicability: APPLICABLE_TO_COMMITTED_CANDIDATE
       participating_features:
         kind: reference
         target: Feature
@@ -1058,7 +1083,13 @@ entity_families:
           different question from occupancy and is not answered by a box test.
     rules:
       - "s03 declares the role. s04a gives it a metric volume. s04b proves occupancy across every state and path."
-      - "No Feature may intrude into a FunctionalRegion; s05 re-runs the occupancy check."
+      - >
+        Feature occupancy must satisfy role_policy. A Feature may not occupy a
+        region whose role declares excludes_occupancy true; s05 re-runs the
+        occupancy check against the new geometry. This was previously stated as
+        a blanket rule - "no Feature may intrude into a FunctionalRegion" - which
+        contradicts SUPPORT, where contact is the point of the region and
+        reporting it would flag every design that actually rests on something.
       - >
         role_policy is the ONE authority on which roles exclude occupancy. s04b
         and S05-C8 must both read it rather than each carrying a list, so the two
@@ -2579,6 +2610,23 @@ assurance_families:
 
   SelectionDecision:
     semantic_roles: [selection_decision]
+    # SELECTION IS AN AUTHORITY, so exactly one of these may speak for the
+    # design at a time. Two standing decisions were reachable through ordinary
+    # writes and `committed_branch` returned whichever came first, so the whole
+    # downstream followed one of two contradictory choices with nothing
+    # recording that the other existed.
+    #
+    # Changing a decision keeps its history: SUPERSEDE the standing one, or
+    # INVALIDATE it and record a new one. What is refused is a second decision
+    # standing BESIDE the first.
+    relational_invariants:
+      - name: one_standing_selection
+        rule: at_most_one_standing
+        why: >-
+          s05 embodies the selected candidate and s06/s07 settle and compile it.
+          If two decisions stand, those three stages can silently disagree about
+          which design they are working on, and every artifact downstream looks
+          equally authoritative.
     field_semantics:
       selected_candidate:
         kind: reference

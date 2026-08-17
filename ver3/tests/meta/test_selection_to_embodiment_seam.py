@@ -123,6 +123,17 @@ class SeamFixture(_fixtures.StateBuilder, unittest.TestCase):
                  statement="the retained member is located",
                  evidence_route="MOBILITY_ANALYSIS", route_available=True,
                  derived_from_requirements=[])
+        # An obligation that exists ONLY because the OTHER candidate works
+        # differently, plus the acceptance contract that says whose it is. A
+        # design with one candidate's obligations cannot show that anything was
+        # excluded from the embodiment duty set.
+        self.add(state, "s02", "Obligation", "OBL-0002",
+                 scope="CANDIDATE_DISCRIMINATING", satisfiable_at="s05",
+                 mandatory=True, statement="the groove retains the lid",
+                 evidence_route="MOBILITY_ANALYSIS", route_available=True,
+                 derived_from_requirements=[])
+        self.add(state, "s02", "AcceptanceContract", "ACC-0002",
+                 candidate="CND-B", obligations=["OBL-0002"], predicates=[])
         # The selected branch's decided mechanism.
         self.add(state, "s03", "Body", "BOD-0001", A, instance_identity="enclosure",
                  role="shell", created_by_stage="s03")
@@ -223,6 +234,30 @@ class TestTheViewCarriesTheDecidedMechanism(SeamFixture):
         self.assertEqual("ABSOLUTE", scales[0].get("basis"))
         self.assertEqual("mm", absolute.get("unit"))
         self.assertEqual(1.0, absolute.get("per_unit"))
+
+    def test_only_applicable_obligations_are_model_facing(self):
+        """The recorded payload, not the helper.
+
+        The prompt tells s05 to realize the obligations below. So what is BELOW
+        has to be exactly what it owes: the design-wide corpus contains an
+        obligation that exists only because the unselected alternative works
+        differently, and showing it under the heading "realize these" is asking
+        for a claim about a mechanism nobody chose.
+        """
+        visible = [r["entity_id"] for r in (self.payload.get("Obligation") or [])]
+        self.assertIn("OBL-0001", visible, "the universal duty must be shown")
+        self.assertNotIn("OBL-0002", visible,
+                         "an obligation belonging only to the unselected "
+                         "candidate is presented as a duty to discharge")
+
+    def test_the_prompt_and_the_validator_see_the_same_duty_set(self):
+        """The contradiction this closed: the view carried one population, the
+        prompt demanded all of it, the validator wanted a subset."""
+        from ver3.assy_v3.stages.s05_embodiment import (
+            applicable_obligations_for_embodiment)
+        visible = {r["entity_id"] for r in (self.payload.get("Obligation") or [])}
+        self.assertEqual(visible,
+                         applicable_obligations_for_embodiment(self.payload))
 
     def test_the_other_candidates_body_is_not_present(self):
         """Least privilege survives all of the above being added."""

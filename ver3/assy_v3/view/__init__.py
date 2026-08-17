@@ -2,13 +2,17 @@
 accumulated DesignState and a consuming stage."""
 from .consumer_view import (ConsumerView, InvocationContext, RequiredMinimum, Requirement, Source,
                             Sufficiency, ViewStatus, build_consumer_view,
-                            committed_branch, derive_required_minimum,
+                            AmbiguousSelection,
+                            applicable_obligation_ids, committed_branch,
+                            derive_required_minimum,
                             derive_source_a, derive_source_b, render,
                             select_instances)
 from .boundary import consumer_view_for, responsibility_contract
 
 __all__ = ["ConsumerView", "InvocationContext", "RequiredMinimum", "Requirement", "Source",
-           "Sufficiency", "ViewStatus", "build_consumer_view", "committed_branch",
+           "AmbiguousSelection", "Sufficiency", "ViewStatus",
+           "applicable_obligation_ids",
+           "build_consumer_view", "committed_branch",
            "derive_required_minimum", "derive_source_a", "derive_source_b",
            "render", "select_instances",
            "consumer_view_for", "responsibility_contract"]
