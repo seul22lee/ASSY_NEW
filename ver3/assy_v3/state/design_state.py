@@ -5,7 +5,7 @@ import hashlib
 import json
 import os
 import re
-from typing import Any, Dict, Iterable, List, Optional, Set
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import yaml
 from weakref import WeakKeyDictionary
@@ -360,6 +360,17 @@ class DesignState:
                 "STALE_PATCH: computed against %s, current state is %s"
                 % (patch.parent_state_hash[:12], self.state_hash()[:12]))
         seen: set = set()
+        #: EVERY entity this patch creates, computed BEFORE the loop.
+        #:
+        #: Premise resolution used to consult a `seen` set that grew as the loop
+        #: advanced, so whether a premise resolved depended on the ORDER the
+        #: operations happened to be listed in: `CREATE A` then `CREATE B
+        #: premised on A` passed, and the same two operations the other way
+        #: round failed. A patch is atomic everywhere else - the same sibling
+        #: visibility that ordinary typed references already have - so ordering
+        #: was encoding semantics that the architecture does not give it.
+        created_here: set = {op.entity_id for op in patch.operations
+                             if op.kind == "CREATE"}
         #: Entities whose mutation was refused for want of authority. Their
         #: prospective record is not examined - it describes a write that will
         #: not happen, and reporting its shape would coach an unauthorised
@@ -410,9 +421,10 @@ class DesignState:
             # U-4. A declared premise must resolve, or the dependency it claims
             # to record is fiction and FA-5 cannot be computed from it.
             for ref in op.premise_refs:
-                if ref not in _STORAGE[self].entities and ref not in seen:
+                if ref not in _STORAGE[self].entities and ref not in created_here:
                     problems.append("DANGLING_PREMISE: %s -> %s" % (eid, ref))
         problems.extend(self._reference_problems(patch, seen))
+        problems.extend(_field_conflicts(patch))
 
         # ---- THE PATCH RESULT ------------------------------------------
         #
@@ -429,6 +441,12 @@ class DesignState:
         # untouched records would make a contract change retroactively invalidate
         # history that no one is writing.
         prospective = _Prospective(self, patch)
+        if not prospective.usable:
+            # The patch could not be replayed at all - an operation targets
+            # something that is not there, which the legality checks above have
+            # already reported. Running invariants over a half-applied copy
+            # would answer questions about a state that will never exist.
+            return problems
         for eid in _touched_entities(patch, unauthorised):
             family = prospective.stored_family(eid)
             if family is None or family not in self.c.families:
@@ -989,6 +1007,46 @@ def _shape_problems(rule_name, family, eid, field, value, shape) -> List[str]:
     return out
 
 
+def _field_conflicts(patch) -> List[str]:
+    """One patch may author a canonical entity.field at most once.
+
+    A StagePatch is ONE reasoning result. Authoring the same engineering field
+    twice inside it creates an intra-patch history whose intermediate value is
+    never canonical state - the producer should emit the value it means, once.
+
+    What made this urgent is that the operations were each legal on their own.
+    Two EXTENDs of the same field both consulted pre-patch storage, both found
+    the field absent, and both were approved; application then ran them in order
+    and the second silently overwrote the first. That contradicts EXTEND's own
+    contract - "EXTEND adds an absent field; writing over an existing value
+    requires revision" - and it did so without a diagnostic, which is the part
+    that matters. Last-write-wins is not canonical semantics here, and nothing
+    in the frozen contracts asks for it.
+
+    Different fields of one entity remain independent, as do the same field name
+    on different entities. INVALIDATE authors no engineering field and is not
+    counted - it withdraws standing rather than writing a value.
+    """
+    authored: Dict[Tuple[str, str], List[Tuple[int, str]]] = {}
+    for index, op in enumerate(patch.operations):
+        if op.kind == "INVALIDATE":
+            continue
+        for name in (op.fields or {}):
+            if name.startswith("_") or name == "entity_id":
+                continue        # bookkeeping, not an authored engineering value
+            authored.setdefault((op.entity_id, name), []).append((index, op.kind))
+    out: List[str] = []
+    for (eid, name), writers in sorted(authored.items()):
+        if len(writers) > 1:
+            out.append(
+                "PATCH_FIELD_CONFLICT: %s.%s is authored %d times in one patch "
+                "(%s); a patch is one reasoning result and may state a field "
+                "once - emit the intended value rather than a sequence of them"
+                % (eid, name, len(writers),
+                   ", ".join("op %d %s" % (i, k) for i, k in writers)))
+    return out
+
+
 def _touched_entities(patch, unauthorised) -> List[str]:
     """Entities whose FIELDS this patch would change, in first-touch order.
 
@@ -1009,102 +1067,82 @@ def _touched_entities(patch, unauthorised) -> List[str]:
 
 
 class _Prospective:
-    """The state this patch WOULD produce, read-only.
+    """The state this patch WOULD produce. Built by the REAL mutators.
 
     A canonical invariant is a property of the design, not of the event that
-    produced it - and "the design" after a patch is the design the patch leaves
-    behind, not the design plus one operation considered alone. Those differ
-    whenever a patch is atomic in a way the operations are not:
+    produced it - and "the design after a patch" is what the patch leaves, not
+    the design plus one operation considered alone. Those differ whenever a
+    patch is atomic in a way its operations are not: two SelectionDecisions
+    created together each saw zero others, retire-old-plus-record-new was
+    refused because the old still stood, and a Joint created beside its own
+    RigidGroups found neither in storage - so the same-body rule compared
+    nothing and returned clean, which is the worst outcome, because a check
+    that cannot run is indistinguishable from one that ran and was satisfied.
 
-      two SelectionDecisions created together   each saw zero others and both
-                                                were accepted
-      invalidate-old + create-new together      the new one saw the old still
-                                                standing and was rejected
-      a Joint and the RigidGroups it relates    the groups were not in storage
-                                                yet, so the same-body invariant
-                                                found nothing to compare and
-                                                passed - the worst outcome,
-                                                because a check that cannot run
-                                                is indistinguishable from one
-                                                that ran and was satisfied
+    HOW IT IS BUILT is the whole point. An earlier version replayed the patch
+    with its own small interpreter - CREATE places fields, EXTEND merges,
+    INVALIDATE clears standing - and deliberately did NOT reproduce premise
+    propagation, calling that a conservative approximation. Two implementations
+    of patch application is the drift this architecture exists to prevent, and
+    an invariant reading an approximate lifecycle is an invariant reasoning
+    about a state that never happens.
 
-    Built ONCE per validation and handed to every invariant, so patch semantics
-    live here rather than being re-derived - badly, and differently - inside each
-    rule. Nothing here mutates the real store; the overlay is discarded whether
-    the patch is accepted or refused.
-
-    WHAT IT DOES NOT MODEL: premise propagation. Applying a patch can withdraw
-    standing from entities that depended on something invalidated, and that walk
-    is not repeated here. The omission is deliberate and safe in one direction
-    only - propagation can only ever REMOVE standing, so this view may show an
-    entity standing that application would stale, never the reverse. A
-    cardinality invariant reading it therefore over-counts rather than
-    under-counts, and errs toward refusing a patch instead of admitting one.
+    So nothing is reinterpreted here. The state is deep-copied and the patch is
+    applied to the copy by `_MUTATORS` - the same functions `apply` calls, in
+    the same order, calling the same `_propagate` with the same `skip` set. The
+    copy is discarded whether the patch is accepted or refused. Equivalence with
+    the applied result is therefore structural rather than asserted, and the
+    tests that compare them are checking that this stayed true rather than
+    establishing it.
     """
 
-    __slots__ = ("_state", "_records", "_families", "_invalidated")
+    __slots__ = ("_twin", "_ok")
 
     def __init__(self, state, patch):
-        self._state = state
-        self._records: Dict[str, Dict[str, Any]] = {}
-        self._families: Dict[str, str] = {}
-        self._invalidated: Set[str] = set()
+        import copy as _copy
+        self._twin = _copy.deepcopy(state)
+        self._ok = True
+        store = _STORAGE[self._twin]
         for op in patch.operations:
-            eid = op.entity_id
-            if op.kind == "CREATE":
-                self._records[eid] = dict(op.fields or {})
-                self._records[eid]["entity_id"] = eid
-                self._families[eid] = op.entity_type
-            elif op.kind in ("EXTEND", "SUPERSEDE"):
-                # Layered on whatever the entity already is, INCLUDING earlier
-                # operations of this same patch: two legal mutations of one
-                # entity produce one final record, and an invariant that saw
-                # only the last would judge a record that never exists.
-                base = self._records.get(eid)
-                if base is None:
-                    stored = _STORAGE[state].entities.get(eid) or {}
-                    base = {k: v for k, v in stored.items()
-                            if not k.startswith("_")}
-                    base["entity_id"] = eid
-                base.update(op.fields or {})
-                self._records[eid] = base
-            elif op.kind == "INVALIDATE":
-                # Standing is withdrawn; the record itself is preserved, exactly
-                # as application preserves it. History is not erased by being
-                # retired.
-                self._invalidated.add(eid)
+            mutator = _MUTATORS.get(op.kind)
+            if mutator is None:
+                self._ok = False
+                break
+            try:
+                mutator(store.entities, store.by_family, self._twin.c, patch, op)
+            except (KeyError, TypeError, AttributeError, ValueError):
+                # The patch is malformed in a way the legality checks report on
+                # their own. This view then describes nothing, and says so
+                # rather than offering a half-applied state for an invariant to
+                # draw conclusions from.
+                self._ok = False
+                break
 
-    # ---- read interface, matching DesignState's where it overlaps ----
+    @property
+    def usable(self) -> bool:
+        """False when the patch could not be replayed at all.
+
+        Callers must not read a partially built view: an invariant answering
+        from half a patch is answering about a state that will never exist.
+        """
+        return self._ok
+
+    # ---- reads, delegated to a real DesignState carrying the patch ----
     def get(self, entity_id: str) -> Optional[Dict[str, Any]]:
-        if entity_id in self._records:
-            return dict(self._records[entity_id])
-        stored = _STORAGE[self._state].entities.get(entity_id)
-        return copy_out(stored) if stored is not None else None
+        table = self._twin.entities
+        return table[entity_id] if entity_id in table else None
 
     def has_entity(self, entity_id: str) -> bool:
-        return (entity_id in self._records
-                or entity_id in _STORAGE[self._state].entities)
+        return self._twin.has_entity(entity_id)
 
     def stored_family(self, entity_id: str) -> Optional[str]:
-        if entity_id in self._families:
-            return self._families[entity_id]
-        return self._state.stored_family(entity_id)
+        return self._twin.stored_family(entity_id)
 
     def family(self, name: str) -> List[Dict[str, Any]]:
-        out = {r["entity_id"]: r for r in self._state.family(name)}
-        for eid, fam in self._families.items():
-            if fam == name:
-                out[eid] = dict(self._records[eid])
-        for eid in list(out):
-            if eid in self._records and eid not in self._families:
-                out[eid] = {**out[eid], **self._records[eid]}
-        return [out[k] for k in sorted(out)]
+        return self._twin.family(name)
 
     def standing(self, name: str) -> List[Dict[str, Any]]:
-        return [r for r in self.family(name)
-                if r["entity_id"] not in self._invalidated
-                and r.get("_validity", ValidityStatus.STANDING.value)
-                == ValidityStatus.STANDING.value]
+        return self._twin.standing(name)
 
     def record_after_patch(self, entity_id: str) -> Dict[str, Any]:
         """The engineering fields this entity ends the patch with."""

@@ -32,6 +32,21 @@ jobs:
       - name: Meta tests (boundaries and contracts)
         run: python -m unittest discover -s ver3/tests/meta -t . -v
 
+      - name: Canonical state tests (authority, currentness, patch semantics)
+        # A SEPARATE STEP, deliberately. This package was not run by CI at all -
+        # the job discovered ver3/tests/meta only - and two of its tests had been
+        # failing for three green runs, both broken by repairs to the very layer
+        # they cover: SUPERSEDE authority and the ReferenceScale conditional
+        # rule. A core suite outside CI is a suite that reports nothing until
+        # someone runs it by hand.
+        #
+        # Its own step rather than a widened discover, so a state failure is
+        # attributed to the state package instead of appearing inside a meta
+        # run. Stdlib-only like the rest of this job: the package needs no CAD
+        # kernel, and installing one here to make tests pass would defeat the
+        # separation the downstream job exists for.
+        run: python -m unittest discover -s ver3/tests/state -t . -v
+
       - name: assy_v3 imports cleanly with nothing else on the path
         # The RULE is unchanged and still valid; only its stated premise was
         # stale. It used to read "an empty boundary that imports nothing cannot
