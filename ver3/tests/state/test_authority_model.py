@@ -139,7 +139,9 @@ class TestAuthorityModel(unittest.TestCase):
         s = _with_scale(_state())
         with self.assertRaisesRegex(ContractError, "NO_REASON"):
             s.apply(_patch(s, "s04", [
-                Op("SUPERSEDE", "ReferenceScale", "SCL-0001", {"basis": "ABSOLUTE"}, "p")],
+                Op("SUPERSEDE", "ReferenceScale", "SCL-0001",
+                   {"basis": "ABSOLUTE",
+                    "absolute": {"unit": "mm", "per_unit": 1.0}}, "p")],
                 pid="p2"))
 
 
@@ -196,7 +198,13 @@ class TestAuthorityModel(unittest.TestCase):
             Op("EXTEND", "FunctionalRegion", "FRG-0001", {"volume": {"centre": [0, 0, 0]}},
                "p", premise_refs=["SCL-0001"])], pid="p2"))
         s.apply(_patch(s, "s04", [
-            Op("SUPERSEDE", "ReferenceScale", "SCL-0001", {"basis": "ABSOLUTE"}, "p",
+            # A COMPLETE absolute basis. Revising `basis` alone leaves a scale
+            # promising comparability with no factor to convert by, which the
+            # conditional rule refuses - correctly, and for a reason this test
+            # is not about.
+            Op("SUPERSEDE", "ReferenceScale", "SCL-0001",
+               {"basis": "ABSOLUTE",
+                "absolute": {"unit": "mm", "per_unit": 1.0}}, "p",
                reason="an absolute basis became available")], pid="p3"))
         assert s.family("FunctionalRegion")[0]["_validity"] == "STALE"
 

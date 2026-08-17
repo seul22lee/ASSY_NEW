@@ -5,7 +5,7 @@ import hashlib
 import json
 import os
 import re
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Set
 
 import yaml
 from weakref import WeakKeyDictionary
@@ -360,6 +360,11 @@ class DesignState:
                 "STALE_PATCH: computed against %s, current state is %s"
                 % (patch.parent_state_hash[:12], self.state_hash()[:12]))
         seen: set = set()
+        #: Entities whose mutation was refused for want of authority. Their
+        #: prospective record is not examined - it describes a write that will
+        #: not happen, and reporting its shape would coach an unauthorised
+        #: caller toward a well-formed unauthorised write.
+        unauthorised: set = set()
         for op in patch.operations:
             fam, eid = op.entity_type, op.entity_id
             if fam not in self.c.families:
@@ -379,12 +384,6 @@ class DesignState:
                                 or op.fields[f] == "")]
                 if missing:
                     problems.append("MISSING_REQUIRED: %s %s -> %s" % (fam, eid, missing))
-                # A CREATE's prospective record IS its fields; the shared
-                # helper is used anyway so CREATE is not a special case in the
-                # architecture, only in what the record happens to be.
-                problems.extend(_conditional_problems(self.c, fam, eid, op.fields))
-                problems.extend(_relational_problems(self, fam, eid, op.fields,
-                                                     patch, op))
                 if not op.provenance_ref:
                     problems.append("NO_PROVENANCE: %s" % eid)
                 seen.add(eid)
@@ -402,29 +401,42 @@ class DesignState:
                 else:
                     mutation = self._revision_problems(patch, op)
                 problems.extend(mutation)
-                # AUTHORITY FIRST, then the invariant. An illegal mutation is
-                # rejected for being illegal and is never re-examined for shape:
-                # reporting "your unauthorised write would also be malformed"
-                # invites making it well-formed rather than authorised.
-                #
-                # INVALIDATE is deliberately excluded. It withdraws standing
-                # rather than changing engineering fields, so there is no new
-                # record to hold to an invariant - and revalidating the shape of
-                # something being withdrawn would make a record impossible to
-                # retire once the rules around it moved.
-                if not mutation and op.kind in ("EXTEND", "SUPERSEDE"):
-                    record = _prospective_record(self, op)
-                    stored_fam = self.stored_family(op.entity_id)
-                    problems.extend(_conditional_problems(
-                        self.c, stored_fam, op.entity_id, record))
-                    problems.extend(_relational_problems(
-                        self, stored_fam, op.entity_id, record, patch, op))
+                if mutation:
+                    # AUTHORITY FIRST. An illegal mutation is rejected for being
+                    # illegal and is never re-examined for shape: reporting
+                    # "your unauthorised write would also be malformed" invites
+                    # making it well-formed rather than authorised.
+                    unauthorised.add(op.entity_id)
             # U-4. A declared premise must resolve, or the dependency it claims
             # to record is fiction and FA-5 cannot be computed from it.
             for ref in op.premise_refs:
                 if ref not in _STORAGE[self].entities and ref not in seen:
                     problems.append("DANGLING_PREMISE: %s -> %s" % (eid, ref))
         problems.extend(self._reference_problems(patch, seen))
+
+        # ---- THE PATCH RESULT ------------------------------------------
+        #
+        # Record and relational invariants run ONCE, over the state this patch
+        # would leave behind, rather than per operation against the state before
+        # it. Per-operation was wrong in both directions and silently: two
+        # SelectionDecisions created together each saw zero others and both were
+        # accepted, while invalidate-old-plus-create-new saw the old one still
+        # standing and was refused. A Joint created alongside the RigidGroups it
+        # relates found neither in storage, so the same-body invariant compared
+        # nothing and passed - a check that could not run, reporting success.
+        #
+        # Only entities this patch actually touches are examined. Re-validating
+        # untouched records would make a contract change retroactively invalidate
+        # history that no one is writing.
+        prospective = _Prospective(self, patch)
+        for eid in _touched_entities(patch, unauthorised):
+            family = prospective.stored_family(eid)
+            if family is None or family not in self.c.families:
+                continue                      # already reported as unknown
+            record = _prospective_record(prospective, eid)
+            problems.extend(_conditional_problems(self.c, family, eid, record))
+            problems.extend(_relational_problems(prospective, self.c, family,
+                                                 eid, record))
         return problems
 
     # ------------------------------------------------------- U-4 operations
@@ -977,23 +989,138 @@ def _shape_problems(rule_name, family, eid, field, value, shape) -> List[str]:
     return out
 
 
-def _prospective_record(state, op) -> Dict[str, Any]:
-    """The record this operation would LEAVE BEHIND, not the operation's fields.
+def _touched_entities(patch, unauthorised) -> List[str]:
+    """Entities whose FIELDS this patch would change, in first-touch order.
 
-    A canonical invariant is a property of the design's state, not of the event
-    that produced it. Validating `op.fields` alone answered "is this write
-    well-formed on its own", which for a mutation is the wrong question: an
-    EXTEND carrying one field is always well-formed on its own, and can still
-    leave a record that violates a rule about the whole of it.
-
-    Stored fields first, the operation's on top. Private bookkeeping keys are
-    left out - they are not engineering fields and no contract rule speaks about
-    them.
+    INVALIDATE is excluded on purpose. It withdraws standing rather than
+    changing engineering fields, so there is no new record to hold to a shape
+    rule - and revalidating what is being retired would make a record
+    impossible to withdraw once the contract around it moved. Its effect on
+    CARDINALITY is still seen, because the prospective view counts standing and
+    the invalidated entity no longer stands.
     """
-    stored = _STORAGE[state].entities.get(op.entity_id) or {}
-    record = {k: v for k, v in stored.items() if not k.startswith("_")}
-    record.update(op.fields or {})
-    return record
+    out: List[str] = []
+    for op in patch.operations:
+        if op.kind == "INVALIDATE" or op.entity_id in unauthorised:
+            continue
+        if op.entity_id not in out:
+            out.append(op.entity_id)
+    return out
+
+
+class _Prospective:
+    """The state this patch WOULD produce, read-only.
+
+    A canonical invariant is a property of the design, not of the event that
+    produced it - and "the design" after a patch is the design the patch leaves
+    behind, not the design plus one operation considered alone. Those differ
+    whenever a patch is atomic in a way the operations are not:
+
+      two SelectionDecisions created together   each saw zero others and both
+                                                were accepted
+      invalidate-old + create-new together      the new one saw the old still
+                                                standing and was rejected
+      a Joint and the RigidGroups it relates    the groups were not in storage
+                                                yet, so the same-body invariant
+                                                found nothing to compare and
+                                                passed - the worst outcome,
+                                                because a check that cannot run
+                                                is indistinguishable from one
+                                                that ran and was satisfied
+
+    Built ONCE per validation and handed to every invariant, so patch semantics
+    live here rather than being re-derived - badly, and differently - inside each
+    rule. Nothing here mutates the real store; the overlay is discarded whether
+    the patch is accepted or refused.
+
+    WHAT IT DOES NOT MODEL: premise propagation. Applying a patch can withdraw
+    standing from entities that depended on something invalidated, and that walk
+    is not repeated here. The omission is deliberate and safe in one direction
+    only - propagation can only ever REMOVE standing, so this view may show an
+    entity standing that application would stale, never the reverse. A
+    cardinality invariant reading it therefore over-counts rather than
+    under-counts, and errs toward refusing a patch instead of admitting one.
+    """
+
+    __slots__ = ("_state", "_records", "_families", "_invalidated")
+
+    def __init__(self, state, patch):
+        self._state = state
+        self._records: Dict[str, Dict[str, Any]] = {}
+        self._families: Dict[str, str] = {}
+        self._invalidated: Set[str] = set()
+        for op in patch.operations:
+            eid = op.entity_id
+            if op.kind == "CREATE":
+                self._records[eid] = dict(op.fields or {})
+                self._records[eid]["entity_id"] = eid
+                self._families[eid] = op.entity_type
+            elif op.kind in ("EXTEND", "SUPERSEDE"):
+                # Layered on whatever the entity already is, INCLUDING earlier
+                # operations of this same patch: two legal mutations of one
+                # entity produce one final record, and an invariant that saw
+                # only the last would judge a record that never exists.
+                base = self._records.get(eid)
+                if base is None:
+                    stored = _STORAGE[state].entities.get(eid) or {}
+                    base = {k: v for k, v in stored.items()
+                            if not k.startswith("_")}
+                    base["entity_id"] = eid
+                base.update(op.fields or {})
+                self._records[eid] = base
+            elif op.kind == "INVALIDATE":
+                # Standing is withdrawn; the record itself is preserved, exactly
+                # as application preserves it. History is not erased by being
+                # retired.
+                self._invalidated.add(eid)
+
+    # ---- read interface, matching DesignState's where it overlaps ----
+    def get(self, entity_id: str) -> Optional[Dict[str, Any]]:
+        if entity_id in self._records:
+            return dict(self._records[entity_id])
+        stored = _STORAGE[self._state].entities.get(entity_id)
+        return copy_out(stored) if stored is not None else None
+
+    def has_entity(self, entity_id: str) -> bool:
+        return (entity_id in self._records
+                or entity_id in _STORAGE[self._state].entities)
+
+    def stored_family(self, entity_id: str) -> Optional[str]:
+        if entity_id in self._families:
+            return self._families[entity_id]
+        return self._state.stored_family(entity_id)
+
+    def family(self, name: str) -> List[Dict[str, Any]]:
+        out = {r["entity_id"]: r for r in self._state.family(name)}
+        for eid, fam in self._families.items():
+            if fam == name:
+                out[eid] = dict(self._records[eid])
+        for eid in list(out):
+            if eid in self._records and eid not in self._families:
+                out[eid] = {**out[eid], **self._records[eid]}
+        return [out[k] for k in sorted(out)]
+
+    def standing(self, name: str) -> List[Dict[str, Any]]:
+        return [r for r in self.family(name)
+                if r["entity_id"] not in self._invalidated
+                and r.get("_validity", ValidityStatus.STANDING.value)
+                == ValidityStatus.STANDING.value]
+
+    def record_after_patch(self, entity_id: str) -> Dict[str, Any]:
+        """The engineering fields this entity ends the patch with."""
+        record = self.get(entity_id) or {}
+        return {k: v for k, v in record.items() if not k.startswith("_")}
+
+
+def _prospective_record(prospective, entity_id: str) -> Dict[str, Any]:
+    """The record this entity ends the PATCH with.
+
+    There is one meaning of "prospective" and this is it. An earlier version
+    took the stored record plus ONE operation's fields, which is a different
+    thing whenever a patch touches the same entity twice: the invariant then
+    judged a record that no state ever holds.
+    """
+    return prospective.record_after_patch(entity_id)
 
 
 # ==========================================================================
@@ -1010,7 +1137,7 @@ def _prospective_record(state, op) -> Dict[str, Any]:
 # agree in both directions, so an invariant cannot exist as prose alone and an
 # implementation cannot sit unreferenced.
 
-def _same_body_rigid_groups(state, family, eid, record, patch, op, rule):
+def _same_body_rigid_groups(prospective, contracts, family, eid, record, rule):
     """A COMPLIANT Joint relates two RigidGroups of ONE Body.
 
     DESIGN_STATE_CONTRACT states it directly: "Compliance is a joint_type of
@@ -1028,18 +1155,25 @@ def _same_body_rigid_groups(state, family, eid, record, patch, op, rule):
             and actual.strip().upper() == expected.strip().upper()):
         return []
 
-    entities = _STORAGE[state].entities
+    # Through the PROSPECTIVE view, so a Joint and the RigidGroups it relates
+    # can be created in one patch. Reading raw storage meant sibling-created
+    # groups resolved to nothing, the comparison had nothing to compare, and the
+    # invariant returned clean - so a cross-body compliant joint was accepted by
+    # a check that had not run.
     bodies, unresolved = {}, []
     for field in rule.get("reference_fields") or []:
         ref = record.get(field)
-        target = entities.get(ref) if isinstance(ref, str) else None
+        target = prospective.get(ref) if isinstance(ref, str) else None
         if target is None:
             unresolved.append("%s=%r" % (field, ref))
             continue
         bodies[field] = target.get(rule.get("compare_field"))
     if unresolved:
-        # Not this invariant's failure to report: an unresolvable reference is
-        # already a reference problem, and saying it twice helps nobody.
+        # An id that resolves against neither current state nor this patch is a
+        # DANGLING REFERENCE, which the reference validator already reports;
+        # saying it twice helps nobody. What this must never again mean is "the
+        # validator was looking at the wrong state", which is why the lookup
+        # above goes through the prospective view rather than storage.
         return []
     distinct = {b for b in bodies.values() if b is not None}
     if len(distinct) > 1:
@@ -1051,7 +1185,7 @@ def _same_body_rigid_groups(state, family, eid, record, patch, op, rule):
     return []
 
 
-def _at_most_one_standing(state, family, eid, record, patch, op, rule):
+def _at_most_one_standing(prospective, contracts, family, eid, record, rule):
     """At most one record of this family may stand at a time.
 
     For SelectionDecision this is what makes selection an AUTHORITY rather than
@@ -1065,16 +1199,18 @@ def _at_most_one_standing(state, family, eid, record, patch, op, rule):
     one, or INVALIDATE it and record a new one. What is refused is a second
     decision standing BESIDE the first.
     """
-    if op.kind != "CREATE":
-        return []                     # revising the standing one is the path
-    others = [r["entity_id"] for r in state.standing(family)
-              if r["entity_id"] != eid]
-    if others:
-        return ["RELATIONAL (%s): %s %s would stand beside %s; at most one %s "
-                "may stand at a time. Supersede or invalidate the standing one "
-                "first - a second record does not replace it, it contradicts it"
-                % (rule.get("name"), family, eid, ", ".join(sorted(others)),
-                   family)]
+    # THE RESULTING SET, not "does one already exist". Counting pre-patch state
+    # per operation was wrong in both directions: two decisions created in one
+    # patch each saw zero others and both were admitted, while retiring the old
+    # one and recording a new one in a single atomic patch was refused because
+    # the old was still standing when the new was judged.
+    standing = sorted(r["entity_id"] for r in prospective.standing(family))
+    if len(standing) > 1:
+        return ["RELATIONAL (%s): the patch would leave %d standing %s records "
+                "(%s); at most one may stand at a time. Supersede or invalidate "
+                "the others - a second record does not replace the first, it "
+                "contradicts it"
+                % (rule.get("name"), len(standing), family, ", ".join(standing))]
     return []
 
 
@@ -1084,10 +1220,15 @@ RELATIONAL_INVARIANTS: Dict[str, Any] = {
 }
 
 
-def _relational_problems(state, family, eid, record, patch, op) -> List[str]:
-    """Every declared relational invariant this record must satisfy."""
+def _relational_problems(prospective, contracts, family, eid, record) -> List[str]:
+    """Every declared relational invariant the PATCH RESULT must satisfy.
+
+    Rules receive the prospective view and never the live store, so none of them
+    can accidentally depend on whether an entity happened to be created by an
+    earlier patch.
+    """
     out: List[str] = []
-    for rule in state.c.relational_invariants(family):
+    for rule in contracts.relational_invariants(family):
         name = rule.get("rule")
         fn = RELATIONAL_INVARIANTS.get(name)
         if fn is None:
@@ -1097,7 +1238,7 @@ def _relational_problems(state, family, eid, record, patch, op) -> List[str]:
             out.append("RELATIONAL_UNIMPLEMENTED: %s declares invariant %r and "
                        "no implementation is registered" % (family, name))
             continue
-        out.extend(fn(state, family, eid, record, patch, op, rule))
+        out.extend(fn(prospective, contracts, family, eid, record, rule))
     return out
 
 

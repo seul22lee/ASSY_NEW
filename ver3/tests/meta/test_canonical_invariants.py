@@ -107,15 +107,14 @@ class TestDeclarationAndRuntimeAgree(unittest.TestCase):
         """
         from ver3.assy_v3.state import design_state as ds
 
-        class _StateWithABrokenDeclaration:
-            class c:                                        # noqa: N801
-                @staticmethod
-                def relational_invariants(_family):
-                    return [{"name": "invented", "rule": "no_such_rule",
-                             "why": "declared and never implemented"}]
+        class _ContractsWithABrokenDeclaration:
+            @staticmethod
+            def relational_invariants(_family):
+                return [{"name": "invented", "rule": "no_such_rule",
+                         "why": "declared and never implemented"}]
 
         problems = ds._relational_problems(                 # noqa: SLF001
-            _StateWithABrokenDeclaration(), "Body", "BOD-1", {}, None, None)
+            None, _ContractsWithABrokenDeclaration(), "Body", "BOD-1", {})
         self.assertTrue(any("RELATIONAL_UNIMPLEMENTED" in p for p in problems),
                         problems)
 

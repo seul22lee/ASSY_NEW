@@ -486,11 +486,16 @@ class TestReadWrapperDoesNotHoldLiveStorage(_Base):
     def test_LEAK_A_the_snapshot_is_detached_and_stable(self):
         s = _seeded()
         table = s.entities
-        s.apply(_patch(s, "s04", [
+        # s03 OWNS FunctionalRegion, and `role` is not extendable - so s04
+        # revising it is refused for authority, which is a different subject
+        # from whether a snapshot is detached. KEEP_OUT rather than "KEEPOUT"
+        # because the former is in the declared role vocabulary and the latter
+        # was never a role at all.
+        s.apply(_patch(s, "s03", [
             Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
-               {"role": "KEEPOUT"}, "p", reason="r")], pid="pS"))
-        self.assertEqual("ACCESS", table["FRG-0001"]["role"])      # a snapshot
-        self.assertEqual("KEEPOUT", s.entities["FRG-0001"]["role"])  # a fresh read
+               {"role": "KEEP_OUT"}, "p", reason="r")], pid="pS"))
+        self.assertEqual("ACCESS", table["FRG-0001"]["role"])       # a snapshot
+        self.assertEqual("KEEP_OUT", s.entities["FRG-0001"]["role"])  # a fresh read
 
 
 class TestNoSecondMutationEntryPoint(_Base):
