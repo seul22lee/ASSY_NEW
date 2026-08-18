@@ -455,6 +455,7 @@ class DesignState:
                 if ref not in _STORAGE[self].entities and ref not in created_here:
                     problems.append("DANGLING_PREMISE: %s -> %s" % (eid, ref))
         problems.extend(self._reference_problems(patch, seen))
+        problems.extend(self._branch_problems(patch))
         problems.extend(_field_conflicts(patch))
 
         # ---- THE PATCH RESULT ------------------------------------------
@@ -657,6 +658,70 @@ class DesignState:
                     out += self._record_list(patch, seen, known, rows, val,
                                              op.entity_id, key)
             out += self._conditional_references(patch, seen, known, family, op)
+        return out
+
+    def _branch_problems(self, patch) -> List[str]:
+        """A branch-local reference may not name another branch's entity.
+
+        Every candidate's topology lives in ONE DesignState, so `IFC-0009` of
+        another branch RESOLVES: right format, right family, present. Reference
+        integrity was intact and the write was still wrong - a load path routed
+        through an interface belonging to a mechanism this candidate does not
+        have. Nothing was checking, because the question is not "does this id
+        exist" but "whose is it".
+
+        WHICH REFERENCES ARE BRANCH-LOCAL IS DECLARED, not inferred here.
+        `referent_population: INVOCATION_BRANCH` has always said it, and the
+        consumer boundary has always read it to decide what a stage may SEE; this
+        reads the same declaration to decide what it may WRITE. Only fields that
+        declare it EXPLICITLY are governed: the consumer default is branch-local,
+        but defaulting a write rule would silently govern every reference in the
+        contract, including families whose authors never considered the question.
+
+        WHOSE AN ENTITY IS, is which Candidate it rests on. An entity resting on
+        no candidate is design-wide material and is nobody's; an entity created
+        in this same patch shares the patch's premises. A reference to the branch
+        candidate ITSELF is the invocation naming what it embodies, which is the
+        one case where pointing at a Candidate is not pointing into a branch.
+
+        Silent on operations that declare no single candidate premise: this rule
+        can only speak where the writer said whose work it is, and inventing a
+        branch for an operation that claims none would be the same defect in the
+        other direction.
+        """
+        out: List[str] = []
+        entities = _STORAGE[self].entities
+        by_id = {op.entity_id: op for op in patch.operations}
+
+        def candidates_of(ids) -> set:
+            return {i for i in ids
+                    if (by_id[i].entity_type if i in by_id and by_id[i].kind == "CREATE"
+                        else self.stored_family(i)) == "Candidate"}
+
+        for op in patch.operations:
+            branches = candidates_of(op.premise_refs)
+            if len(branches) != 1:
+                continue
+            branch = next(iter(branches))
+            for field, val in sorted((op.fields or {}).items()):
+                spec = self.c.reference_spec(op.entity_type, field)
+                if spec is None or spec.get("referent_population") != "INVOCATION_BRANCH":
+                    continue
+                for ref in (val if isinstance(val, list) else [val]):
+                    if not isinstance(ref, str) or not ref.strip() or ref == branch:
+                        continue
+                    sibling = by_id.get(ref)
+                    premises = (list(sibling.premise_refs) if sibling is not None
+                                else list((entities.get(ref) or {}).get("_premises") or []))
+                    foreign = candidates_of(premises) - {branch}
+                    if foreign:
+                        out.append(
+                            "FOREIGN_BRANCH: %s.%s names %s, which rests on %s, "
+                            "while this operation rests on %s; %s is drawn from "
+                            "the invocation branch and an id that merely exists "
+                            "in the design is another candidate's"
+                            % (op.entity_id, field, ref, ", ".join(sorted(foreign)),
+                               branch, "%s.%s" % (op.entity_type, field)))
         return out
 
     def _conditional_references(self, patch, seen, known, family, op) -> List[str]:

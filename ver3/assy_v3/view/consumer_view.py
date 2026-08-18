@@ -1169,6 +1169,37 @@ class ConsumerView:
         return out
 
 
+def role_populations(view: "ConsumerView") -> Dict[str, List[str]]:
+    """Semantic role -> the ids in this view that carry it.
+
+    WHAT A READINESS REPORT SHOULD COUNT. A report that counts "topology
+    relations" from a family list written into the report is answering from its
+    own table: one such list said Joint and Interface were not relations at all
+    and printed zero for every branch, while the contract has always declared
+    `topology_relation: [Interface, Joint]`.
+
+    Read from the view's OWN required minimum, so the roles reported are exactly
+    the ones this responsibility declared it needs - not every role in the
+    vocabulary, and not a subset someone remembered. REASONING_PREMISE is the
+    right half: those are the `required_reasoning_premise_classes`, each naming
+    the semantic roles that satisfy it, and `Requirement.atoms` already carries
+    the role -> families map that a family lookup here would duplicate.
+
+    A required role with nothing in it is reported as empty rather than omitted:
+    "this view carries no configuration state" is a finding, and a missing key
+    reads as a question nobody asked.
+    """
+    payload = view.payload()
+    out: Dict[str, List[str]] = {}
+    for requirement in view.required.of(Source.REASONING_PREMISE):
+        for role, families in requirement.atoms():
+            ids = out.setdefault(role, [])
+            for family in families:
+                ids.extend(rec.get("entity_id") for rec in payload.get(family) or []
+                           if isinstance(rec, dict))
+    return {role: sorted(set(ids)) for role, ids in sorted(out.items())}
+
+
 #: Worst-wins ordering when aggregating atomic obligations.
 _SEVERITY = {Sufficiency.SATISFIED.value: 0, Sufficiency.UNRESOLVED.value: 1,
              Sufficiency.MISSING_UPSTREAM.value: 2,

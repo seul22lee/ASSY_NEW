@@ -1082,11 +1082,17 @@ entity_families:
         cardinality: one
         resolvable: false
         referent_population: DESIGN_WIDE
+      # THE INVOCATION'S OWN CANDIDATE, and no other. Declared branch-local so
+      # naming a different candidate is refused where it is written: the pass is
+      # run once per candidate and its premise is that candidate, so a path
+      # attributed to another branch is not a second opinion, it is a write into
+      # someone else's design.
       candidate:
         kind: reference
         target: Candidate
         cardinality: one
         resolvable: false
+        referent_population: INVOCATION_BRANCH
       # S-4. The hops were untyped, so a path could be a list of prose and no
       # closure was checkable. This family's own rule already said what a hop is:
       # "Each hop names the Interface that carries it."
@@ -1209,6 +1215,7 @@ entity_families:
         target: Body
         cardinality: one
         resolvable: false
+        referent_population: INVOCATION_BRANCH
       path_kind:
         kind: enum
       activates:
@@ -1216,11 +1223,13 @@ entity_families:
         target: Interface
         cardinality: many
         resolvable: false
+        referent_population: INVOCATION_BRANCH
       depends_on:
         kind: reference
         target: AssemblyStep
         cardinality: many
         resolvable: false
+        referent_population: INVOCATION_BRANCH
       insertion_direction:
         kind: spatial
         frame: ReferenceScale
@@ -1372,8 +1381,8 @@ entity_families:
   ConstraintRelation:
     semantic_roles: [constraint_relation]
     field_semantics:
-      retained_group: {kind: reference, target: RigidGroup, cardinality: one, resolvable: false}
-      provider_body: {kind: reference, target: Body, cardinality: one, resolvable: false}
+      retained_group: {kind: reference, target: RigidGroup, cardinality: one, resolvable: false, referent_population: INVOCATION_BRANCH}
+      provider_body: {kind: reference, target: Body, cardinality: one, resolvable: false, referent_population: INVOCATION_BRANCH}
       # S-4. The plan says the provider is a "body or external reaction site", and
       # Body alone could not say the second. A load reacted outside the product is
       # provided by the declared site, not by a body of the product - modelling
@@ -1383,9 +1392,9 @@ entity_families:
       # `provider_site` stays what it was: the candidate-local Interface at which
       # the constraint acts. Who provides and where it acts are different facts.
       provider_reaction_site: {kind: reference, target: ReactionSiteRequirement, cardinality: one, resolvable: false, referent_population: DESIGN_WIDE}
-      provider_site: {kind: reference, target: Interface, cardinality: one, resolvable: false}
-      configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false}
-      maintaining_interaction: {kind: reference, target: PhysicalInteraction, cardinality: one, resolvable: false}
+      provider_site: {kind: reference, target: Interface, cardinality: one, resolvable: false, referent_population: INVOCATION_BRANCH}
+      configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false, referent_population: INVOCATION_BRANCH}
+      maintaining_interaction: {kind: reference, target: PhysicalInteraction, cardinality: one, resolvable: false, referent_population: INVOCATION_BRANCH}
       # Symbolic direction token, same correction as Joint.axis_direction. This
       # family declares no frame of its own, and the relation it blocks is named
       # by `retained_group`; the token is a direction class, not a placed vector.
@@ -1447,9 +1456,9 @@ entity_families:
   PhysicalInteraction:
     semantic_roles: [physical_interaction]
     field_semantics:
-      groups: {kind: reference, target: RigidGroup, cardinality: many, resolvable: false}
-      at_interface: {kind: reference, target: Interface, cardinality: one, resolvable: false}
-      configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false}
+      groups: {kind: reference, target: RigidGroup, cardinality: many, resolvable: false, referent_population: INVOCATION_BRANCH}
+      at_interface: {kind: reference, target: Interface, cardinality: one, resolvable: false, referent_population: INVOCATION_BRANCH}
+      configurations: {kind: reference, target: Configuration, cardinality: many, resolvable: false, referent_population: INVOCATION_BRANCH}
       discharges_effect: {kind: reference, target: PhysicalEffectObligation, cardinality: one, resolvable: false, referent_population: DESIGN_WIDE}
     owned_by: s03
     authority_class: AUTHORITATIVE
@@ -1776,6 +1785,7 @@ assurance_families:
         target: Configuration
         cardinality: one
         resolvable: false
+        referent_population: INVOCATION_BRANCH
       # S-5 correction. `authorship_split.disposition` declared premise_required
       # and premise_target in PROSE, and the premise itself was a bare string
       # inside a list of records - a shape no boundary could see. The write

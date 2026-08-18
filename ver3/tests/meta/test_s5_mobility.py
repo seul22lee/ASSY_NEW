@@ -260,10 +260,28 @@ class TestMobilityCompleteness(unittest.TestCase):
     def setUpClass(cls):
         cls.stage = S03BMobilityAndAssembly()
 
+    #: THE DOMAIN THE EVIDENCE MUST REACH. The grid is groups x configurations x
+    #: DOF, so whether a claim reaches a cell is decided against the groups and
+    #: configurations this invocation was GIVEN. These tests used to pass an
+    #: empty view, which made every claim below name something the consumer did
+    #: not have - the check now says so, and saying so is the point of the check.
+    VIEW = {"consumer_view": {"RigidGroup": [{"entity_id": "RGP-A"}],
+                              "Configuration": [{"entity_id": "CFG-A"}],
+                              "Scenario": [{"entity_id": "SCN-1"}]}}
+
     def problems(self, relations=(RELATION,), irrelevance=()):
         return self.stage._s5_mobility_problems(
             {"constraint_relations": list(relations),
-             "irrelevance": list(irrelevance)}, {"consumer_view": {}})
+             "irrelevance": list(irrelevance)}, self.VIEW)
+
+    def test_evidence_about_a_group_this_consumer_was_not_given_is_reported(self):
+        """An id that resolves somewhere in the design is not this branch's."""
+        found = self.problems(relations=[dict(RELATION, retained_group="RGP-ELSEWHERE")])
+        self.assertTrue(any("RGP-ELSEWHERE" in p for p in found), found)
+
+    def test_a_relation_blocking_a_dof_that_does_not_exist_is_reported(self):
+        found = self.problems(relations=[dict(RELATION, blocked_dofs=["ROLL"])])
+        self.assertTrue(any("ROLL" in p for p in found), found)
 
     def test_sufficient_evidence_is_not_a_problem(self):
         self.assertEqual([], self.problems(

@@ -305,15 +305,16 @@ class _Evidence:
         """(joints that carry this cell, joints whose axis cannot be read).
 
         The address is (rigid_group, dof) and BOTH components select. Compatible
-        means the joint's own class and axis leave that DOF free, asked of
-        `free_dof` so the answer is s03's. An unreadable axis is separated out
-        rather than passed to `free_dof`, which would answer from its Z default.
+        means the joint's own DECLARED dof carries that cell, asked of
+        `joint_free_dof` so the answer is the canonical one s03 wrote rather than
+        a second inference from the class. An unreadable axis is still separated
+        out: a joint whose axis names no coordinate addresses no cell here.
         """
         drivers, unreadable = [], []
         for j in self.joints_of(group):
             if s04.axis_index(j.get("axis_direction")) is None:
                 unreadable.append(j)
-            elif dof in s03.free_dof(j.get("joint_type"), j.get("axis_direction")):
+            elif dof in s03.joint_free_dof(j):
                 drivers.append(j)
         return drivers, unreadable
 
@@ -585,12 +586,14 @@ def _required_motion_cells(ev: _Evidence):
                     % (tid, jid)))
                 used += [tid, jid]
                 continue
-            # `free_dof` DEFAULTS AN UNREADABLE AXIS TO Z. That default is S-5's
-            # and stays so, but a feasibility verdict must not rest on it: an
-            # axis this pipeline cannot read is a cell nobody actually declared,
-            # so the requirement is unresolvable rather than silently assumed to
-            # be about Z. `spatial_realization` already refuses the same axis;
-            # this refuses it for the cell address it would otherwise fabricate.
+            # AN AXIS THIS PIPELINE CANNOT READ IS A CELL NOBODY DECLARED. The
+            # free DOF now comes from the joint's own field, but the cell ADDRESS
+            # this transition needs is still (group, configuration, dof) about a
+            # coordinate, and a joint whose axis names none has not said which
+            # one moves. The requirement is unresolvable rather than silently
+            # assumed to be about Z, which is what `free_dof` would have answered.
+            # `spatial_realization` already refuses the same axis; this refuses it
+            # for the cell address it would otherwise fabricate.
             if s04.axis_index(joint.get("axis_direction")) is None:
                 ambiguous.append((
                     "REQUIRED_MOTION_AXIS_UNREADABLE",
@@ -598,7 +601,7 @@ def _required_motion_cells(ev: _Evidence):
                     % (tid, jid, joint.get("axis_direction"))))
                 used += [tid, jid]
                 continue
-            free = s03.free_dof(joint.get("joint_type"), joint.get("axis_direction"))
+            free = s03.joint_free_dof(joint)
             group = joint.get("child_group")
             if len(free) == 1 and group:
                 for cfg in [c for c in configs if c]:
@@ -620,8 +623,11 @@ def _required_motion_cells(ev: _Evidence):
 def _disposition_support(ev: _Evidence, d, group: str, dof: str):
     """Whether the joint an INTENDED cell cites really leaves that cell free.
 
-    Reads `free_dof`, so the question "does this joint class free this DOF" has
-    the one answer s03's derivation used to author the claim.
+    Reads `joint_free_dof`, so the question "does this joint free this DOF" has
+    the one answer s03's derivation used to author the claim. Asking the CLASS
+    here contradicted the grid it was checking: the cell says RY because the
+    joint declares RY, and the class rule for COMPLIANT says TY, so every flexure
+    was reported as not freeing what it frees.
     """
     joint = ev.by_id.get(d.get("by_joint"))
     if not isinstance(joint, dict) or joint.get("_family") != "Joint":
@@ -633,19 +639,17 @@ def _disposition_support(ev: _Evidence, d, group: str, dof: str):
                  "%s/%s cites %s, whose child is %s"
                  % (group, dof, joint["entity_id"], joint.get("child_group")))]
     if s04.axis_index(joint.get("axis_direction")) is None:
-        # `free_dof` would answer from its Z default here, and an answer from a
-        # default cannot confirm or refute anything.
+        # An unreadable axis leaves the cell address unestablished, and a
+        # verdict about a cell nobody addressed can neither confirm nor refute.
         return [("DISPOSITION_JOINT_AXIS_UNREADABLE",
                  "%s/%s cites %s, whose axis %r names no coordinate"
                  % (group, dof, joint["entity_id"], joint.get("axis_direction")))]
-    if dof not in s03.free_dof(joint.get("joint_type"), joint.get("axis_direction")):
+    if dof not in s03.joint_free_dof(joint):
         return [("DISPOSITION_JOINT_DOES_NOT_FREE_IT",
-                 "%s/%s cites %s, a %s about %s, which leaves %s free"
+                 "%s/%s cites %s, a %s about %s, which declares %s free"
                  % (group, dof, joint["entity_id"], joint.get("joint_type"),
                     joint.get("axis_direction"),
-                    ", ".join(sorted(s03.free_dof(joint.get("joint_type"),
-                                                  joint.get("axis_direction"))))
-                    or "nothing"))]
+                    ", ".join(sorted(s03.joint_free_dof(joint))) or "nothing"))]
     return []
 
 

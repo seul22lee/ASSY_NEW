@@ -47,6 +47,34 @@ def _family(name: str) -> Dict[str, Any]:
     return families[name]
 
 
+#: THE LOADED CONTRACT, once. Cached because `Contracts` is immutable by
+#: construction - every accessor hands back a detached copy and assignment raises
+#: - so there is nothing a later reader could change for an earlier one, and a
+#: per-call YAML read inside a completeness method is a cost with no answer
+#: attached to it.
+_CONTRACTS_ONCE = None
+
+
+def _contracts():
+    global _CONTRACTS_ONCE
+    if _CONTRACTS_ONCE is None:
+        from ..state.design_state import Contracts
+        _CONTRACTS_ONCE = Contracts()
+    return _CONTRACTS_ONCE
+
+
+def _branch_population() -> str:
+    """The population name meaning "drawn from the branch this invocation embodies".
+
+    Read from the consumer boundary that owns the vocabulary rather than spelled
+    out again here. A second copy of a vocabulary is two authorities that drift,
+    which is the failure this module has already been on the wrong side of twice.
+    Imported inside the function because the view imports stages back.
+    """
+    from ..view.consumer_view import INVOCATION_BRANCH
+    return INVOCATION_BRANCH
+
+
 #: The six rigid-body degrees of freedom. The domain of the totality.
 DOF_NAMES = ("TX", "TY", "TZ", "RX", "RY", "RZ")
 
@@ -78,6 +106,12 @@ INTERACTION_KINDS = ("CONTACT", "CLEARANCE", "INTERFERENCE_FIT", "COMPLIANT_INTE
 #: Second instance of this shape in one window (see AXIS_DIRECTIONS): every
 #: closed value set needs a member meaning "legitimately none".
 TERMINATION_STRATEGIES = ("LATER_BODY_COVER", "ROTATION", "ELASTICITY", "NONE")
+
+#: The strategies that RETAIN. NONE is a permitted value of the field and is
+#: not one of them: it says this body is not retained by a termination of its
+#: own, which is a real answer for a part nothing holds and no answer at all
+#: for a part the design says is held.
+RETAINING_STRATEGIES = tuple(t for t in TERMINATION_STRATEGIES if t != "NONE")
 
 PATH_KINDS = ("RIGID", "DEFORMATION_RESOLVED")
 
@@ -112,8 +146,88 @@ def free_dof(joint_type: str, axis: str) -> Set[str]:
     if jt == "PLANAR":
         return {"T" + others[0], "T" + others[1], "R" + a}
     if jt == "COMPLIANT":
+        # WHAT THE AXIS RULE WOULD SAY, and it is not the authority for this
+        # class. A flexure names the axis it bends ABOUT, and every compliant
+        # joint in the accepted corpus declares a rotation there, so inferring a
+        # translation along the axis overruled the joint's own statement. Kept
+        # because `joint_dof_consistency_check` needs to be able to ask what the
+        # ordinary rule would give; `joint_free_dof` is what decides.
         return {"T" + a}
     return set()                                    # FIXED, and anything unknown
+
+
+#: The joint classes whose type and axis determine their free DOF completely.
+#: COMPLIANT is deliberately absent: compliance couples an axis to a deflection
+#: through a geometry this stage has not decided, so the class implies no unique
+#: answer and the declared one is all there is.
+DETERMINED_BY_TYPE_AND_AXIS = ("REVOLUTE", "PRISMATIC", "HELICAL", "CYLINDRICAL",
+                               "SPHERICAL", "PLANAR", "FIXED")
+
+
+def joint_free_dof(joint: Dict[str, Any]) -> Set[str]:
+    """THE free DOF of a joint. One authority, and it is the joint's own field.
+
+    `Joint.dof` is canonical, required, and written by the pass that decided the
+    mechanism. The derivation used to ignore it and re-infer freedom from
+    joint_type and axis_direction - which for every COMPLIANT joint in the
+    accepted corpus produced a TRANSLATION along the axis while the joint
+    declared a ROTATION about it. Two answers to one question, with the
+    unwritten one winning.
+
+    Whether the declared value AGREES with what an ordinary class implies is a
+    different question, asked by `joint_dof_consistency_check`. Silence about
+    that agreement is not a licence to overwrite the declaration.
+
+    A joint that declares nothing at all falls back to the class rule, because a
+    record with no `dof` key predates the field rather than asserting emptiness -
+    and an empty list, which IS an assertion, is honoured as one.
+    """
+    declared = joint.get("dof")
+    if declared is None:
+        return free_dof(joint.get("joint_type"), joint.get("axis_direction"))
+    return {d for d in declared if d in DOF_NAMES}
+
+
+def joint_dof_consistency_check(state) -> List[str]:
+    """S03-C10. The declared DOF and the joint class say the same thing.
+
+    Not a second opinion about kinematics: for the ordinary classes the type and
+    the axis DETERMINE the free DOF, so a REVOLUTE about +Z declaring TZ is a
+    mistake, and the only way to notice is to compare the two. The canonical
+    value still wins everywhere it is read - this reports the disagreement rather
+    than resolving it silently.
+
+    COMPLIANT is checked differently and for a reason stated in
+    `DETERMINED_BY_TYPE_AND_AXIS`: its class implies no unique DOF, so the
+    requirement is that it DECLARES one, from the canonical vocabulary. A
+    compliant joint declaring nothing free is a compliant member that does not
+    comply.
+    """
+    problems: List[str] = []
+    for j in state.family("Joint"):
+        jt = str(j.get("joint_type") or "").upper()
+        declared = j.get("dof")
+        if declared is None:
+            problems.append("JOINT_DOF_ABSENT: %s declares no dof; the field is "
+                            "canonical and required" % j["entity_id"])
+            continue
+        unknown = [d for d in declared if d not in DOF_NAMES]
+        if unknown:
+            problems.append("JOINT_DOF_NOT_CANONICAL: %s declares %s, which is "
+                            "not %s" % (j["entity_id"], unknown, list(DOF_NAMES)))
+            continue
+        if jt in DETERMINED_BY_TYPE_AND_AXIS:
+            implied = free_dof(jt, j.get("axis_direction"))
+            if set(declared) != implied:
+                problems.append(
+                    "JOINT_DOF_CONTRADICTS_CLASS: %s is a %s about %s, which "
+                    "leaves %s free, and declares %s"
+                    % (j["entity_id"], jt, j.get("axis_direction"),
+                       sorted(implied) or "nothing", sorted(declared) or "nothing"))
+        elif jt == "COMPLIANT" and not declared:
+            problems.append("COMPLIANT_JOINT_FREES_NOTHING: %s declares no free "
+                            "DOF, so nothing about it complies" % j["entity_id"])
+    return problems
 
 REGION_ROLES = ("ACCESS", "SUPPORT", "KEEP_OUT", "APERTURE")
 
@@ -285,7 +399,7 @@ def derive_mobility(groups: List[str], configurations: List[str],
     premise that is present, typed and referenceable:
 
       covered by a ConstraintRelation       -> BLOCKED_BY, citing the relation
-      free by an authored joint's class     -> INTENDED, citing the joint
+      free by an authored joint's OWN dof   -> INTENDED, citing the joint
       authored irrelevant in a scenario     -> IRRELEVANT_BECAUSE, citing it
       none of those                         -> UNDISPOSITIONED, naming what is
                                                missing
@@ -326,6 +440,14 @@ def derive_mobility(groups: List[str], configurations: List[str],
     unconditioned by construction and its freedom holds wherever the topology
     does. Silence about a field that exists is not the same fact as a field that
     does not exist.
+
+    WHICH DOF a joint frees is read from the joint, through `joint_free_dof`.
+    This function used to re-infer it from joint_type and axis_direction, which
+    for a COMPLIANT joint meant a translation ALONG the axis while every such
+    joint in the accepted corpus declares a rotation ABOUT it - the grid then
+    contradicted the canonical record it was derived from, and freed a DOF no
+    joint had claimed. Agreement between the declaration and the class is a
+    separate question with its own check.
     """
     by_child: Dict[str, List[Dict[str, Any]]] = {}
     for j in joints:
@@ -350,7 +472,7 @@ def derive_mobility(groups: List[str], configurations: List[str],
         free: Set[str] = set()
         source: Dict[str, str] = {}
         for j in by_child.get(group, []):
-            for dof in free_dof(j.get("joint_type"), j.get("axis_direction")):
+            for dof in joint_free_dof(j):
                 free.add(dof)
                 source[dof] = j.get("entity_id") or j.get("id")
         for cfg in configurations:
@@ -890,6 +1012,16 @@ def retention_check(state) -> List[str]:
     A rigid part installed by one straight translation always leaves the reverse
     direction open, so retention is never free: it is covered by a later body,
     or reached by rotation, or held elastically.
+
+    NONE IS THE FOURTH VALUE AND IT IS NOT A STRATEGY. It is the honest answer
+    for a body nothing holds - a part that is meant to come back out, or one
+    whose retention no configuration depends on - and the permitted-value set
+    needs it, because the alternative is a model choosing between inventing a
+    strategy and dropping a required field. What it may not do is answer THIS
+    question. This check used to test the field for truthiness, so "NONE" - a
+    non-empty string - satisfied the very check that exists to ask how a retained
+    body is held, and a design could declare that nothing retains a part it also
+    declares is retained.
     """
     problems = []
     for s in state.family("AssemblyStep"):
@@ -907,10 +1039,22 @@ def retention_check(state) -> List[str]:
                 retained.add(d.get("rigid_group"))
     group_body = {g["entity_id"]: g.get("body") for g in state.family("RigidGroup")}
     declared = {s.get("body"): s.get("termination_strategy") for s in state.family("AssemblyStep")}
-    for g in retained:
+    for g in sorted(retained):
         body = group_body.get(g)
-        if body and body in declared and not declared[body]:
-            problems.append("RETAINED_BODY_WITHOUT_TERMINATION: %s" % body)
+        if not body:
+            continue
+        if body not in declared:
+            problems.append(
+                "RETAINED_BODY_WITHOUT_ASSEMBLY_STEP: %s is held in place by a "
+                "constraint relation and no assembly step installs it, so the "
+                "design never says how it is retained" % body)
+            continue
+        if str(declared[body] or "").strip().upper() in ("", "NONE"):
+            problems.append(
+                "RETAINED_BODY_WITHOUT_TERMINATION: %s is held in place by a "
+                "constraint relation and declares termination_strategy=%r; NONE "
+                "and absence are the same answer here, and neither says what "
+                "holds it" % (body, declared[body]))
     return problems
 
 
@@ -1085,7 +1229,11 @@ something is missing, say so in unresolved.
 4. ASSEMBLY ORDER. Which body, from which access side, what it depends on, and
    what retains it once placed. A rigid part pushed straight in leaves the
    reverse direction open, so a body that must stay put needs LATER_BODY_COVER,
-   ROTATION or ELASTICITY.
+   ROTATION or ELASTICITY. NONE is the fourth value and it is not a strategy: it
+   says nothing retains this body, which is the right answer for a part that is
+   meant to come back out or that no constraint relation holds, and is not an
+   answer for a body you have just declared a constraint_relation retains. Every
+   body whose group appears as a `retained_group` above needs one of the three.
 
 RESPONSE SCHEMA
 Return one JSON object. Emit every key. Use exactly these key names.
@@ -1105,8 +1253,11 @@ Return one JSON object. Emit every key. Use exactly these key names.
                         AT LEAST ONE of provider_body / provider_reaction_site
                         must identify what provides the constraint.
                         provider_site is where it acts and does not answer that.
-  load_paths[]          id "LDP-0001", load_case, candidate, ordered_hops[],
+  load_paths[]          id "LDP-0001", load_case, ordered_hops[],
                         terminates_at (optional)
+                        The candidate is NOT yours to state: this pass is run
+                        once per candidate and the one you are embodying is
+                        named above, so the path is written against it.
   assembly_steps[]      id "ASY-0001", order_index, body, access_side,
                         activates[], termination_strategy, path_kind, depends_on[]
   unresolved[]          id "S3U-1001", decision, why_open, alternatives[],
@@ -1240,13 +1391,41 @@ class S03BMobilityAndAssembly(Stage):
         out: List[str] = []
 
         # -- U5-1 -----------------------------------------------------
-        discharged = {i.get("discharges_effect")
-                      for i in parsed.get("physical_interactions") or []}
+        # DISCHARGE IS A CLAIM ABOUT THE EFFECT, not about the citation. This
+        # collected the cited ids and asked nothing else, so an interaction
+        # claiming TRANSMIT_FORCE discharged an obligation requiring PERMIT_MOTION
+        # by naming it - and the mismatch was found a layer later, by
+        # `physical_relation_closure`, which has compared the two all along. The
+        # producer now asks the same question the assurance property asks, in the
+        # same vocabulary, so the two cannot disagree about what discharge means.
+        effects: Dict[str, Set[str]] = {}
+        for i in parsed.get("physical_interactions") or []:
+            if not isinstance(i, dict):
+                continue
+            effect, target = i.get("effect"), i.get("discharges_effect")
+            if effect not in _EFFECT_KINDS:
+                out.append("U5-1 %s produces %r, which is not an effect this "
+                           "pipeline has (%s)"
+                           % (i.get("id"), effect, ", ".join(_EFFECT_KINDS)))
+            if isinstance(target, str):
+                effects.setdefault(target, set()).add(effect)
         for demand in view.get("PhysicalEffectObligation") or []:
             eid = demand.get("entity_id")
-            if eid not in discharged and eid not in open_items:
+            if eid in open_items:
+                continue
+            produced = effects.get(eid)
+            if not produced:
                 out.append("U5-1 %s is neither discharged by an interaction nor "
                            "recorded open" % eid)
+            elif demand.get("effect") not in produced:
+                out.append("U5-1 %s requires %r and the interaction(s) citing it "
+                           "produce %s; citing an obligation is not discharging "
+                           "it" % (eid, demand.get("effect"), sorted(produced)))
+        given = {d.get("entity_id") for d in view.get("PhysicalEffectObligation") or []}
+        for target in sorted(effects):
+            if target not in given:
+                out.append("U5-1 an interaction discharges %s, which is no effect "
+                           "obligation this consumer was given" % target)
 
         # -- U5-2 -----------------------------------------------------
         for relation in parsed.get("constraint_relations") or []:
@@ -1326,15 +1505,51 @@ class S03BMobilityAndAssembly(Stage):
         is for. What IS an error is evidence that silently reaches no cell: a
         relation naming no configuration, an irrelevance claim naming no scenario
         or no DOF. Those look like engineering and dispose nothing.
+
+        REACHING A CELL IS DECIDABLE WITHOUT DERIVING THE GRID, because the grid's
+        domain is groups x configurations x DOF and all three are known from the
+        view. So this asks membership directly rather than expanding the grid and
+        looking - which is the same reason the premise rule moved to the write
+        boundary: a check that re-derives what it is checking is in the same class
+        as the defect it looks for. The cases it now catches were each silent: a
+        relation blocking a DOF this pipeline does not have, a relation holding in
+        another candidate's configuration, an irrelevance claim about a group that
+        does not exist. Every one of them looked complete and disposed nothing.
         """
+        view = inputs.get(self.context_key) or {}
+        groups = {g.get("entity_id") for g in view.get("RigidGroup") or []}
+        configs = {c.get("entity_id") for c in view.get("Configuration") or []}
+        scenarios = {s.get("entity_id") for s in view.get("Scenario") or []}
         out: List[str] = []
         for relation in parsed.get("constraint_relations") or []:
-            configs = [c for c in (relation.get("configurations") or [])
-                       if isinstance(c, str) and c.strip()]
-            if not configs:
+            rid = relation.get("id")
+            named = [c for c in (relation.get("configurations") or [])
+                     if isinstance(c, str) and c.strip()]
+            if not named:
                 out.append("%s names no configuration, so it removes a DOF "
                            "nowhere; a relation holds where it says it holds"
-                           % relation.get("id"))
+                           % rid)
+            # THE DOMAIN IS THE VIEW'S. Membership is decided against the groups
+            # and configurations this invocation was given, which is what makes
+            # the answer branch-local without a second notion of a branch: a
+            # configuration of another candidate resolves as an id and addresses
+            # no cell of this grid.
+            elsewhere = [c for c in named if c not in configs]
+            if elsewhere:
+                out.append("%s holds in %s, which is no configuration of this "
+                           "mechanism; it removes a DOF nowhere here"
+                           % (rid, ", ".join(sorted(elsewhere))))
+            group = relation.get("retained_group")
+            if group and group not in groups:
+                out.append("%s retains %s, which is no rigid group of this "
+                           "mechanism" % (rid, group))
+            unknown = [d for d in (relation.get("blocked_dofs") or [])
+                       if d not in DOF_NAMES]
+            if unknown:
+                out.append("%s blocks %s, which is not a degree of freedom this "
+                           "pipeline has (%s); it removes nothing"
+                           % (rid, ", ".join(str(u) for u in unknown),
+                              ", ".join(DOF_NAMES)))
         for i, claim in enumerate(parsed.get("irrelevance") or []):
             if not isinstance(claim, dict):
                 out.append("irrelevance claim %d is not a record" % i)
@@ -1346,6 +1561,23 @@ class S03BMobilityAndAssembly(Stage):
             if absent:
                 out.append("an irrelevance claim names no %s, so it makes no DOF "
                            "irrelevant anywhere" % ", ".join(absent))
+                continue
+            # NAMING SOMETHING IS NOT REACHING IT. An irrelevance claim is not
+            # canonical state - it exists only to dispose a cell - so a claim
+            # about a group, configuration or scenario that is not in this view
+            # is not caught by any reference rule and disposes nothing at all.
+            for field, universe, what in (("rigid_group", groups, "rigid group"),
+                                          ("configuration", configs, "configuration"),
+                                          ("scenario", scenarios, "scenario")):
+                value = claim.get(field)
+                if value not in universe:
+                    out.append("an irrelevance claim names %s %s, which is no %s "
+                               "this consumer was given; it makes no DOF "
+                               "irrelevant anywhere" % (field, value, what))
+            bad = [d for d in (claim.get("dof") or []) if d not in DOF_NAMES]
+            if bad:
+                out.append("an irrelevance claim names %s, which is not a degree "
+                           "of freedom this pipeline has" % ", ".join(str(b) for b in bad))
         return out
 
     def derived_operations(self, parsed, inputs, state):
@@ -1427,15 +1659,30 @@ class S03BMobilityAndAssembly(Stage):
                       "blocked_dofs": r.get("blocked_dofs", []),
                       "configurations": r.get("configurations", []),
                       "driver": r["driver"]}
+            # `release_transition` is NOT forwarded, and the field audit is why:
+            # no line of S03B_PROMPT asks for it, no consumer reads it, and the
+            # contract types it as nothing - so the only way it could arrive is a
+            # response nobody asked for, and it would enter canonical state
+            # untyped, where prose and a dangling id are equally acceptable. It
+            # stays DECLARED for an author who has a premise for it; what is
+            # removed is a producer forwarding a field that no question produced.
             for optional in ("blocked_direction", "provider_body",
                              "provider_reaction_site", "provider_site",
-                             "maintaining_interaction", "defeat_specification",
-                             "release_transition"):
+                             "maintaining_interaction", "defeat_specification"):
                 if r.get(optional):
                     fields[optional] = r[optional]
             ops.append(Op("CREATE", "ConstraintRelation", r["id"], fields, prov))
+        # WHOSE LOAD PATH THIS IS, from the invocation. The candidate was taken
+        # from the RESPONSE, though the invocation already determines it: the
+        # pass is run once per candidate and its premise is that candidate. A
+        # model restating it can only agree or be wrong, and being wrong wrote a
+        # path into another branch's design. Disagreement is reported by
+        # `completeness` rather than silently overwritten - what is not written
+        # here is a value this invocation did not determine.
+        branch = (self.invocation_premises(inputs or {}) or [None])[0]
         for p in parsed.get("load_paths", []):
-            fields = {"load_case": p["load_case"], "candidate": p["candidate"],
+            fields = {"load_case": p["load_case"],
+                      "candidate": branch or p.get("candidate"),
                       "ordered_hops": p.get("ordered_hops", []),
                       "maturity": "HYPOTHESIS"}
             # Where the path closes. Written only when the model says so: an
@@ -1459,11 +1706,84 @@ class S03BMobilityAndAssembly(Stage):
                 "blocks": u.get("blocks", [])}, prov))
         return ops
 
+    def _branch_local_problems(self, parsed, inputs) -> List[str]:
+        """No output of this invocation may point into another candidate.
+
+        Every candidate's topology lives in ONE DesignState, so `IFC-0009` of
+        another branch RESOLVES - right format, right family, present - and the
+        write boundary has no reason to refuse it. Reference integrity was intact
+        and the design was still wrong: a load path routed through an interface
+        that belongs to a mechanism this candidate does not have.
+
+        WHICH REFERENCES ARE BRANCH-LOCAL IS THE CONTRACT'S ANSWER, not a list
+        kept here. `referent_population` already says it per field. So LoadCase,
+        the effect obligations and the reaction sites stay design-wide because
+        they declare themselves so, and nothing had to be narrowed to make this
+        work.
+
+        The CONSUMER default applies here - a field declaring no population is
+        branch-local - because the universe this checks against is the VIEW, and
+        what a consumer may see is exactly the question that default answers. The
+        write boundary governs only fields that declare the population EXPLICITLY,
+        which is a different reach for a different reason: defaulting a write rule
+        would silently bind every reference in the contract. So this reports a
+        wider set than canonical validation refuses, and both are deliberate.
+
+        The universe is the VIEW, which is precisely this invocation's branch
+        plus the design-wide material it was given - so "in the branch" needs no
+        second definition and no graph walk. Ids minted by this same response
+        count: a step that depends on a step in the same patch is not foreign.
+
+        Reads the operations rather than the response keys, because the operations
+        are where the family and the field name are known. That runs the
+        translator a second time, which is deliberate: one translator read twice
+        cannot disagree with itself, and a table here mapping response keys to
+        families would be a second producer definition.
+        """
+        view = inputs.get(self.context_key) or {}
+        visible = {rec.get("entity_id") for rows in view.values()
+                   if isinstance(rows, list) for rec in rows
+                   if isinstance(rec, dict)}
+        ops = self.to_operations(parsed, inputs)
+        minted = {op.entity_id for op in ops}
+        contracts = _contracts()
+        out: List[str] = []
+        for op in ops:
+            for field, value in sorted((op.fields or {}).items()):
+                spec = contracts.reference_spec(op.entity_type, field)
+                if spec is None:
+                    continue
+                branch_local = _branch_population()
+                population = spec.get("referent_population") or branch_local
+                if population != branch_local:
+                    continue
+                named = value if isinstance(value, list) else [value]
+                for ref in named:
+                    if not isinstance(ref, str) or not ref.strip():
+                        continue
+                    if ref in visible or ref in minted:
+                        continue
+                    out.append(
+                        "%s.%s names %s, which is not in this invocation's "
+                        "mechanism; %s is drawn from the %s and an id that "
+                        "merely exists somewhere in the design is another "
+                        "candidate's" % (op.entity_id, field, ref,
+                                         "%s.%s" % (op.entity_type, field),
+                                         population))
+        stated = {p.get("candidate") for p in parsed.get("load_paths") or []
+                  if isinstance(p, dict) and p.get("candidate")}
+        branch = (self.invocation_premises(inputs or {}) or [None])[0]
+        for other in sorted(x for x in stated if branch and x != branch):
+            out.append("a load path states candidate %s; this invocation embodies "
+                       "%s, which is what was written" % (other, branch))
+        return out
+
     def completeness(self, parsed, inputs):
         # S-4 canonical physical truth first, then the legacy mobility checks.
         # The two are different questions and are kept apart deliberately.
         out = self._s4_physical_problems(parsed, inputs)
         out.extend(self._s5_mobility_problems(parsed, inputs))
+        out.extend(self._branch_local_problems(parsed, inputs))
         relations = parsed.get("constraint_relations") or []
         if not relations:
             out.append("nothing in this mechanism is held: no constraint relation")

@@ -132,18 +132,43 @@ class _Base(_fixtures.StateBuilder, unittest.TestCase):
 # =====================================================================
 class TestReferentPopulationContract(_Base):
 
+    #: An s03b OUTPUT reference that still declares no population, so the default
+    #: is exercised where it decides something. This used to be
+    #: `PhysicalInteraction.groups`, which now declares INVOCATION_BRANCH
+    #: explicitly: the write boundary governs only fields that say so, because
+    #: applying the consumer default to WRITES would silently bind every
+    #: reference in the contract, including families whose authors never
+    #: considered the question. Declaring the s03b ones is what made the rule
+    #: enforceable; the default is still what an undeclared field means.
+    UNDECLARED_OUTPUT = "MobilityExpectation.dispositions.by_joint"
+
     def test_RP_01_an_undeclared_reference_stays_branch_local(self):
         undeclared = [(f, k) for f, k, d in self.refs()
                       if "referent_population" not in d]
         self.assertTrue(undeclared,
                         "every reference declares one, so the default is untested")
-        self.assertIn(("PhysicalInteraction", "groups"), undeclared)
         req = [r for r in cv.derive_source_a("s03b", self.c, self.resp)
-               if r.trace.get("output_field") == "PhysicalInteraction.groups"]
-        self.assertTrue(req)
+               if r.trace.get("output_field") == self.UNDECLARED_OUTPUT]
+        self.assertTrue(req, "%s now declares a population; this test needs an "
+                             "output reference that does not"
+                             % self.UNDECLARED_OUTPUT)
         rule = req[0].selection_for(req[0].atoms()[0][0])
         self.assertEqual(cv.INVOCATION_BRANCH, rule["population"],
                          "an unclassified reference widened what a consumer sees")
+
+    def test_RP_01B_the_declared_branch_local_fields_are_governed_when_written(self):
+        """The consumer default and the write rule are different reaches, and the
+        difference is deliberate: a consumer defaults to the branch, a writer is
+        bound only where the contract says so."""
+        for family, field in (("PhysicalInteraction", "groups"),
+                              ("ConstraintRelation", "retained_group"),
+                              ("LoadPath", "candidate"),
+                              ("AssemblyStep", "body"),
+                              ("MobilityExpectation", "configuration")):
+            with self.subTest(family=family, field=field):
+                spec = self.c.reference_spec(family, field)
+                self.assertEqual(cv.INVOCATION_BRANCH,
+                                 spec.get("referent_population"))
 
     def test_RP_02_03_the_two_cross_scope_fields_derive_design_wide(self):
         got = {}

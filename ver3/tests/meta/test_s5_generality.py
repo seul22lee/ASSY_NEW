@@ -40,6 +40,16 @@ IRRELEVANCE = {"rigid_group": "RGP-P", "configuration": "CFG-2",
 GROUPS = ["RGP-P", "RGP-Q"]
 CONFIGS = ["CFG-1", "CFG-2"]
 
+#: THE DOMAIN THE EVIDENCE ABOVE MUST REACH. Whether a claim disposes anything is
+#: decided against the groups, configurations and scenarios the invocation was
+#: GIVEN, so a check reading an empty view would report every claim here as
+#: reaching nothing - which is true of an invocation given nothing, and not the
+#: question these tests ask.
+VIEW = {"consumer_view": {
+    "RigidGroup": [{"entity_id": g} for g in GROUPS],
+    "Configuration": [{"entity_id": c} for c in CONFIGS],
+    "Scenario": [{"entity_id": "SCN-IDLE"}, {"entity_id": "SCN-LOAD"}]}}
+
 
 def rows(joints=(JOINT,), constraints=(RELATION,), irrelevance=(IRRELEVANCE,),
          groups=GROUPS, configurations=CONFIGS):
@@ -347,9 +357,16 @@ class TestIrrelevancePremise(_fixtures.StateBuilder, unittest.TestCase):
     def test_GEN_IRR_04_a_claim_that_reaches_no_cell_is_reported(self):
         found = S03BMobilityAndAssembly()._s5_mobility_problems(
             {"constraint_relations": [RELATION],
-             "irrelevance": [dict(IRRELEVANCE, scenario="")]},
-            {"consumer_view": {}})
+             "irrelevance": [dict(IRRELEVANCE, scenario="")]}, VIEW)
         self.assertTrue(found and "scenario" in found[0], found)
+
+    def test_GEN_IRR_05_a_claim_about_a_group_outside_this_view_reaches_nothing(self):
+        """Naming something is not reaching it. An id that resolves elsewhere in
+        the design addresses no cell of THIS grid, and used to be silent."""
+        found = S03BMobilityAndAssembly()._s5_mobility_problems(
+            {"constraint_relations": [RELATION],
+             "irrelevance": [dict(IRRELEVANCE, rigid_group="RGP-ELSEWHERE")]}, VIEW)
+        self.assertTrue(any("RGP-ELSEWHERE" in p for p in found), found)
 
 
 # =====================================================================
@@ -556,8 +573,9 @@ class TestCanonicalProbe(_fixtures.StateBuilder, unittest.TestCase):
         """What the probe reports is recorded, not arranged."""
         s, outs = self.chain()
         out, inv = outs["A"]
+        view = S03BMobilityAndAssembly().consumer_view(s, inv)
         self.assertEqual([], S03BMobilityAndAssembly()._s5_mobility_problems(
-            json.loads(out.raw_response), {"consumer_view": {}}))
+            json.loads(out.raw_response), {"consumer_view": view.payload()}))
         self.assertEqual("SUCCESS", out.execution_status.value,
                          out.declared_incompleteness)
         report = s03.disposition_completeness(self.cells(s))

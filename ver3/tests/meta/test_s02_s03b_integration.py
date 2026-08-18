@@ -437,7 +437,11 @@ class TestU5ExitCriteria(_fixtures.StateBuilder, unittest.TestCase):
         cls.c = Contracts()
 
     VIEW = {
-        "PhysicalEffectObligation": [{"entity_id": "PEO-0001"}],
+        # THE OBLIGATION CARRIES ITS EFFECT, because the contract requires it and
+        # because discharge is a claim ABOUT the effect. The fixture used to omit
+        # it, so U5-1 could only ever ask whether the id was cited.
+        "PhysicalEffectObligation": [{"entity_id": "PEO-0001",
+                                      "effect": "TRANSMIT_FORCE"}],
         "LoadCase": [{"entity_id": "LC-0001", "reacted_at_site": "RSR-0001"}],
         "ReactionSiteRequirement": [
             {"entity_id": "RSR-0001", "boundary_side": "EXTERNAL"},
@@ -473,6 +477,23 @@ class TestU5ExitCriteria(_fixtures.StateBuilder, unittest.TestCase):
         return [p for p in problems if p.startswith(prefix)]
 
     # -- U5-1 ---------------------------------------------------------
+    def test_U5_PEO_01_an_interaction_producing_another_effect_does_not_discharge(self):
+        """Citing an obligation is not discharging it.
+
+        The obligation requires TRANSMIT_FORCE; an interaction claiming CONTAIN
+        and naming it used to satisfy U5-1, and the disagreement surfaced one
+        layer later in `physical_relation_closure`, which has compared the two
+        all along.
+        """
+        parsed = {"physical_interactions": [{"id": "PHI-A", "groups": ["RGP-A"],
+                                             "effect": "CONTAIN",
+                                             "discharges_effect": "PEO-0001"}],
+                  "constraint_relations": [], "load_paths": [], "unresolved": []}
+        found = S03BMobilityAndAssembly()._s4_physical_problems(
+            parsed, {"consumer_view": self.VIEW})
+        self.assertTrue(any(p.startswith("U5-1") and "PEO-0001" in p
+                            for p in found), found)
+
     def test_U5_PEO_01_discharged_is_complete(self):
         self.assertEqual([], self.only(self.problems(), "U5-1"))
 

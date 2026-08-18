@@ -43,7 +43,7 @@ from ver3.assy_v3.stages.s03_topology_and_mobility import (                 # no
     disposition_completeness,
     legacy_shapes_in_recording,
     compliance_check, dof_totality_check, functional_region_check,
-    interface_classification_check, load_path_check,
+    interface_classification_check, joint_dof_consistency_check, load_path_check,
     no_magnitude_check, no_selection_check_s03, obligation_ownership_check,
     retention_check, simulation_completeness_check)
 from ver3.assy_v3.stages.s04_envelope_and_motion import (                   # noqa: E402
@@ -87,6 +87,7 @@ S03_CHECKS = (
     ("obligation_ownership", obligation_ownership_check),
     ("functional_region", functional_region_check),
     ("compliance", compliance_check),
+    ("joint_dof_consistency", joint_dof_consistency_check),
     ("simulation_completeness", simulation_completeness_check),
     ("no_selection", no_selection_check_s03),
 )
