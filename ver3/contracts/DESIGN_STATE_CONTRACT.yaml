@@ -553,13 +553,17 @@ entity_families:
           admitting it lets a malformed record stand for a flexure nobody drew.
     conditional_requirements:
       - name: axis_needs_a_named_frame
-        applies_when: {field: axis_direction, present: true}
+        # PRESENT AND NOT NONE. `AXIS_DIRECTIONS` declares NONE as the legitimate
+        # no-axis value - a FIXED joint constrains everything and points nowhere -
+        # and demanding a frame for it would require naming the frame of a
+        # direction that does not exist.
+        applies_when: {field: axis_direction, present: true, not_equals: NONE}
         required_shape:
           frame_ids:
             non_empty_list: true
         why: >-
-          `axis_direction` is declared spatial in frame `Joint.frame_ids`, and
-          the rule above says it "is a unit vector in a NAMED frame". An empty
+          A REAL `axis_direction` is declared spatial in frame `Joint.frame_ids`,
+          and the rule above says it "is a unit vector in a NAMED frame". An empty
           frame list therefore leaves the direction expressed in nothing: +Z
           relative to what is unanswerable, and s04b has no frame to locate.
           s03 names the frame symbolically - it is `SELF_DECLARING`, so the id
@@ -879,8 +883,53 @@ entity_families:
         cardinality: many
         resolvable: false
         referent_population: DESIGN_WIDE
+      # WHAT THIS OPENNESS PREVENTS FROM BEING SETTLED.
+      #
+      # `target: ANY` is a DECISION, not an omission. What an open decision
+      # blocks is genuinely polymorphic and the evidence says so: two live
+      # readers treat these as PhysicalEffectObligation ids - s03b's physical
+      # completeness excuses an undischarged demand that is "recorded open", and
+      # the assurance closure check reports the same - while the recorded corpus
+      # holds 29 Obligation ids and one UnresolvedDecision id, and an s04 exit
+      # fixture blocks a LoadPath.
+      #
+      # An enumerated union was tried and was wrong twice over. It rejected the
+      # LoadPath, which is a legitimate thing for an open decision to block; and
+      # naming Obligation made this a representational dependency that pulled
+      # the DESIGN-WIDE obligation set back into every view creating an
+      # UnresolvedDecision - re-widening the s05 embodiment duty set that
+      # `APPLICABLE_TO_COMMITTED_CANDIDATE` exists to narrow. Enumerating
+      # families here would be guessing at a list the design keeps extending.
+      #
+      # What IS enforced is the part that makes the field machine-readable: the
+      # members are entity ids and they resolve. A consumer can dereference them
+      # and ask each referent what it is.
+      blocks:
+        kind: reference
+        target: ANY
+        cardinality: many
+        resolvable: false
     required_fields: [entity_id, decision, why_open, alternatives, alternatives_kind, blocks, kept_open_by]
     alternatives_kind: [ENTITY_REFS, PRINCIPLE_FAMILIES, FREE_TEXT]
+    # `alternatives_kind` already types the list; this makes the typing
+    # ENFORCEABLE. When it says ENTITY_REFS the members must be entity ids that
+    # resolve - the corpus holds 36 Candidate ids under that kind - and when it
+    # says FREE_TEXT or PRINCIPLE_FAMILIES nothing dereferences them, because no
+    # reference is declared at all.
+    #
+    # NO TARGET FAMILY. What a decision is between is the decision's business:
+    # today they are candidates, and constraining the family would refuse a
+    # legitimate future alternative for no canonical reason.
+    conditional_references:
+      - name: entity_ref_alternatives_are_ids
+        applies_when: {field: alternatives_kind, equals: ENTITY_REFS}
+        field: alternatives
+        cardinality: many
+        resolvable: false
+        why: >-
+          A consumer told the list is dereferenceable will dereference it. Prose
+          under an ENTITY_REFS kind is a promise the producer did not keep, and
+          nothing downstream could tell the difference until it followed one.
     rules:
       - "Recording openness is always permitted. Resolving it silently is never permitted."
       - >

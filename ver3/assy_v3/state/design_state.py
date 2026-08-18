@@ -211,6 +211,20 @@ class Contracts:
             return copy_out(spec)
         return None
 
+    def conditional_references(self, family: str) -> List[Dict[str, Any]]:
+        """Fields that ARE references only for some records of a family.
+
+        `UnresolvedDecision.alternatives` is the case: `alternatives_kind`
+        already declares whether the list is dereferenceable, and until now that
+        declaration was unenforceable - a consumer told ENTITY_REFS would follow
+        the ids, and prose under that kind was a promise nobody could check
+        without following one.
+        """
+        if not family:
+            return None if False else []
+        return copy_out((_CONTRACT_DOCS[self]["families"].get(family) or {})
+                        .get("conditional_references", []))
+
     def record_list_spec(self, family: Optional[str],
                          field: str) -> Optional[Dict[str, Any]]:
         """A plain list of records whose subfields are typed.
@@ -642,6 +656,28 @@ class DesignState:
                 if rows is not None:
                     out += self._record_list(patch, seen, known, rows, val,
                                              op.entity_id, key)
+            out += self._conditional_references(patch, seen, known, family, op)
+        return out
+
+    def _conditional_references(self, patch, seen, known, family, op) -> List[str]:
+        """A field that is a reference only when another field says it is."""
+        out: List[str] = []
+        for rule in self.c.conditional_references(family):
+            when = rule.get("applies_when") or {}
+            actual = op.fields.get(when.get("field"))
+            expected = when.get("equals")
+            if not (isinstance(actual, str) and isinstance(expected, str)
+                    and actual.strip().upper() == expected.strip().upper()):
+                continue
+            field = rule.get("field")
+            if field not in op.fields or op.fields[field] is None:
+                continue
+            spec = {"target": rule.get("target"),
+                    "cardinality": rule.get("cardinality", "many"),
+                    "resolvable": rule.get("resolvable", False)}
+            out += self._one_reference(patch, seen, known, spec,
+                                       op.fields[field],
+                                       "%s.%s" % (op.entity_id, field))
         return out
 
     def _record_list(self, patch, seen, known, spec, val, eid, key) -> List[str]:
@@ -703,6 +739,10 @@ class DesignState:
             # Ambiguity or by a Freedom, and both are correct. A single-target
             # declaration could only have expressed one of them, so the field was
             # left untyped and accepted anything.
+            # ANY is an explicit "no family constraint" - the members must be
+            # ids and must resolve, and what they name is the referent's to say.
+            if target == "ANY":
+                continue
             allowed = target if isinstance(target, (list, tuple)) else [target]
             if target and actual and actual not in allowed:
                 out.append("REFERENCE_FAMILY: %s declares %s and names %s, a %s"
@@ -1350,11 +1390,17 @@ def _conditional_problems(contracts, family, eid, fields) -> List[str]:
             continue
         actual = fields.get(field)
         if when.get("present"):
-            # A rule that governs every record DECLARING the field, whatever its
-            # value - "if you state an axis direction, you must name the frame it
-            # is expressed in". Distinct from an equals trigger, which selects
-            # one variant of a family.
+            # A rule that governs every record DECLARING the field - "if you
+            # state an axis direction, name the frame it is expressed in".
+            # Distinct from an equals trigger, which selects one variant.
             if actual in (None, "", [], {}):
+                continue
+            # `not_equals` excuses the declared no-value member of a closed set.
+            # AXIS_DIRECTIONS declares NONE for a joint that points nowhere, and
+            # a frame for a direction that does not exist is unanswerable.
+            excluded = when.get("not_equals")
+            if (isinstance(excluded, str) and isinstance(actual, str)
+                    and actual.strip().upper() == excluded.strip().upper()):
                 continue
         elif not (isinstance(actual, str) and isinstance(expected, str)
                   and actual.strip().upper() == expected.strip().upper()):

@@ -102,8 +102,10 @@ def derive_representational_dependencies(fams, family, field):
     deps = set()
     if kind == "reference":
         # A target may name several legitimate families; each is a dependency.
+        # ANY names none, so it creates no dependency at all.
         target = spec["target"]
-        deps.update(target if isinstance(target, list) else [target])
+        if target != "ANY":
+            deps.update(target if isinstance(target, list) else [target])
     elif kind == "spatial":
         frame = spec.get("frame")
         if frame and frame != "SELF_DECLARING":
@@ -176,6 +178,8 @@ class TestSourceA(_Base):
                 if spec.get("kind") != "reference":
                     continue
                 target = spec.get("target")
+                if target == "ANY":
+                    continue          # explicitly unconstrained; names no family
                 for one in (target if isinstance(target, list) else [target]):
                     if one not in self.fams:
                         problems.append("%s.%s -> %s" % (fam, fld, one))

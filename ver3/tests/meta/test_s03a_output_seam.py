@@ -424,5 +424,136 @@ class TestTheSeamAgreesWithItself(unittest.TestCase):
                 self.assertIn(family, produced)
 
 
+
+
+class TestTheComplianceCheckerReadsTheCanonicalShape(_Seam):
+    """S03-C9 held its own copy of the variant and went stale.
+
+    It read the retired nested `compliance` object and `allowable_travel_status`,
+    so it would have reported COMPLIANT_JOINT_WITHOUT_COMPLIANCE_BLOCK for every
+    correctly-authored joint - a check failing on exactly the shape it exists to
+    require. It now derives its field set from `compliant_joint_variant`, which
+    is the same declaration the producer and the write boundary read.
+    """
+
+    def checked(self, joints):
+        from ver3.assy_v3.stages.s03_topology_and_mobility import compliance_check
+        state = self.upstream("c9-%d" % len(joints))
+        problems = self.commit(state, self.author(state, response(joints)))
+        self.assertEqual([], problems, "the fixture did not commit: %s" % problems)
+        return compliance_check(state)
+
+    def test_a_valid_flat_compliant_joint_passes_the_checker(self):
+        self.assertEqual([], self.checked(
+            [joint("JNT-1"), joint("JNT-2", "COMPLIANT", **COMPLIANT_OK)]))
+
+    def test_an_ordinary_joint_is_not_examined(self):
+        self.assertEqual([], self.checked([joint("JNT-1")]))
+
+    def test_the_checker_derives_its_fields_from_the_contract(self):
+        """The CODE, not the comment. The comment names the retired field to
+        record that it was retired, so a raw substring scan fails on the
+        explanation instead of on a violation."""
+        import ast
+        import inspect
+        from ver3.assy_v3.stages.s03_topology_and_mobility import compliance_check
+        tree = ast.parse(inspect.getsource(compliance_check))
+        fn = tree.body[0]
+        body = fn.body[1:] if ast.get_docstring(fn) else fn.body
+        literals = {n.value for stmt in body for n in ast.walk(stmt)
+                    if isinstance(n, ast.Constant) and isinstance(n.value, str)}
+        names = {n.id for stmt in body for n in ast.walk(stmt)
+                 if isinstance(n, ast.Name)}
+        self.assertIn("COMPLIANT_FIELDS", names,
+                      "the checker keeps its own field list again")
+        self.assertNotIn("allowable_travel_status", literals,
+                         "the checker still reads the retired field name")
+
+    def test_each_missing_variant_field_is_reported(self):
+        from ver3.assy_v3.stages.s03_topology_and_mobility import compliance_check
+        for omitted in COMPLIANT_FIELDS:
+            with self.subTest(omitted=omitted):
+                variant = {k: v for k, v in COMPLIANT_OK.items() if k != omitted}
+                state = self.upstream("c9-miss-" + omitted)
+                # Written straight to state: the write boundary refuses this
+                # shape, which is the point - the checker is the SECOND reader
+                # and must not depend on the first having let it through.
+                ops = self.author(state, response(
+                    [joint("JNT-2", "COMPLIANT", **variant)]))
+                for op in ops:
+                    if op.entity_type == "Joint":
+                        op.fields.setdefault("mode", None)
+                problems = compliance_check(_StateWith(state, ops))
+                self.assertTrue(any(omitted in p and "COMPLIANCE_INCOMPLETE" in p
+                                    for p in problems), problems)
+
+    def test_a_nested_compliance_object_is_reported(self):
+        from ver3.assy_v3.stages.s03_topology_and_mobility import compliance_check
+        state = self.upstream("c9-nested")
+        ops = self.author(state, response([joint("JNT-2", "COMPLIANT",
+                                                 **COMPLIANT_OK)]))
+        for op in ops:
+            if op.entity_type == "Joint":
+                op.fields["compliance"] = {"mode": "BENDING"}
+        problems = compliance_check(_StateWith(state, ops))
+        self.assertTrue(any("COMPLIANCE_NESTED_BLOCK" in p for p in problems),
+                        problems)
+
+    def test_an_actuation_that_is_not_prescribed_is_reported(self):
+        from ver3.assy_v3.stages.s03_topology_and_mobility import compliance_check
+        state = self.upstream("c9-act")
+        variant = dict(COMPLIANT_OK, actuation="FORCE_DRIVEN")
+        ops = self.author(state, response([joint("JNT-2", "COMPLIANT", **variant)]))
+        problems = compliance_check(_StateWith(state, ops))
+        self.assertTrue(any("ACTUATION_NOT_DECLARED_PRESCRIBED" in p
+                            for p in problems), problems)
+
+
+class _StateWith:
+    """A read-only stand-in exposing operations as if they were committed.
+
+    S03-C9 runs over state, and several cases here describe records the WRITE
+    BOUNDARY refuses - which is correct, and is exactly why the checker must be
+    exercised independently of it. A checker that can only be reached through a
+    boundary that already rejects the input is a checker nobody can test.
+    """
+
+    def __init__(self, state, ops):
+        self._rows = {}
+        for op in ops:
+            self._rows.setdefault(op.entity_type, []).append(
+                dict(op.fields, entity_id=op.entity_id))
+
+    def family(self, name):
+        return list(self._rows.get(name) or [])
+
+
+class TestAxisNoneNeedsNoFrame(_Seam):
+    """AXIS_DIRECTIONS declares NONE for a joint that points nowhere."""
+
+    def test_a_fixed_joint_with_axis_none_commits_without_a_frame(self):
+        state = self.upstream("axis-none")
+        self.assertEqual([], self.commit(state, self.author(state, response(
+            [joint("JNT-1", "FIXED", frame=(), axis_direction="NONE", dof=[])]))))
+
+    def test_a_real_axis_still_requires_a_frame(self):
+        state = self.upstream("axis-real")
+        problems = self.commit(state, self.author(state, response(
+            [joint("JNT-1", "REVOLUTE", frame=())])))
+        self.assertTrue(any("axis_needs_a_named_frame" in p for p in problems),
+                        problems)
+
+    def test_axis_none_with_a_frame_is_also_fine(self):
+        state = self.upstream("axis-none-frame")
+        self.assertEqual([], self.commit(state, self.author(state, response(
+            [joint("JNT-1", "FIXED", axis_direction="NONE", dof=[])]))))
+
+    def test_the_prompt_states_the_none_exemption(self):
+        """The prompt used to say frame_ids is "never empty", which contradicts
+        the NONE axis it also permits. A stage told two things picks one."""
+        self.assertIn("axis_direction is NONE", PROMPT)
+        self.assertNotIn("never empty", PROMPT)
+
+
 if __name__ == "__main__":                                       # pragma: no cover
     unittest.main()

@@ -163,6 +163,11 @@ class TestReferenceClosure(_Corpus):
                 target = spec.get("target")
                 if not target:
                     continue
+                # ANY is an EXPLICIT "no family constraint" for a field whose
+                # referent family is genuinely open. It names no family, so
+                # there is none to check for retirement or definition.
+                if target == "ANY":
+                    continue
                 # A target may name SEVERAL legitimate families - kept_open_by is
                 # kept open by an Ambiguity OR a Freedom - so each named family
                 # is checked, and a list is not itself a family name.

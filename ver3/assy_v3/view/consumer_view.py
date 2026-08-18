@@ -243,9 +243,14 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
                 # representational dependency, so each becomes its own
                 # requirement rather than one requirement over a union.
                 target = spec["target"]
-                for one in (target if isinstance(target, (list, tuple))
-                            else [target]):
-                    deps.append((one, "reference target"))
+                # ANY names no family, so it creates no representational
+                # dependency: there is nothing determinate to require. Treating
+                # it as one would have pulled a whole family into every view
+                # that happens to reference something.
+                if target != "ANY":
+                    for one in (target if isinstance(target, (list, tuple))
+                                else [target]):
+                        deps.append((one, "reference target"))
             elif spec.get("kind") == "spatial":
                 frame = spec.get("frame")
                 if frame and frame != "SELF_DECLARING":

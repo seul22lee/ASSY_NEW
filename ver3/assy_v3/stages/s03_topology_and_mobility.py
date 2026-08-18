@@ -181,10 +181,14 @@ empty. Every field is required unless marked optional. No required field is null
   joints[]             id "JNT-0001", joint_type, parent_group, child_group,
                        dof[], axis_direction, frame_ids[]
                        frame_ids NAMES THE FRAME the axis_direction is expressed
-                       in - a symbolic name you coin here, e.g. ["FRM-JNT-0001"],
-                       never empty. "+Z" relative to nothing is unanswerable. You
-                       are naming the frame, not locating it: WHERE it sits is
-                       decided later from feature sizes that do not exist yet.
+                       in - a symbolic name you coin here, e.g. ["FRM-JNT-0001"].
+                       "+Z" relative to nothing is unanswerable, so a joint that
+                       states a real direction must name one. You are naming the
+                       frame, not locating it: WHERE it sits is decided later
+                       from feature sizes that do not exist yet.
+                       A joint whose axis_direction is NONE - a FIXED joint
+                       constrains everything and points nowhere - needs no frame,
+                       and [] is the right answer there.
                        For a COMPLIANT joint, and only then, add these EIGHT
                        fields DIRECTLY ON THE JOINT - not nested inside another
                        object:
@@ -979,22 +983,28 @@ def compliance_check(state) -> List[str]:
     is a material fact this pipeline has no route to establish, so it carries a
     status instead of a value. One number for both would assert the material fact.
     """
-    required = ("mode", "direction", "required_travel", "allowable_travel_status",
-                "actuation", "compliant_element", "root_interface", "activation_window")
+    # THE FIELD SET COMES FROM THE CONTRACT, not from a list kept here. This
+    # checker held its own copy and went stale: it read a nested `compliance`
+    # object and `allowable_travel_status`, both of which the seam retired, so
+    # it would have reported COMPLIANT_JOINT_WITHOUT_COMPLIANCE_BLOCK for every
+    # correctly-authored joint - a check failing on exactly the shape it exists
+    # to require. A third hand-written spelling of one variant is what the
+    # producer stopped keeping, and this stops keeping it too.
     problems = []
     for j in state.family("Joint"):
         if j.get("joint_type") != "COMPLIANT":
             continue
-        c = j.get("compliance")
-        if not isinstance(c, dict):
-            problems.append("COMPLIANT_JOINT_WITHOUT_COMPLIANCE_BLOCK: %s" % j["entity_id"])
-            continue
-        for field in required:
-            if not str(c.get(field) or "").strip():
-                problems.append("COMPLIANCE_INCOMPLETE: %s missing %s" % (j["entity_id"], field))
-        if c.get("actuation") and c["actuation"] != "PRESCRIBED_KINEMATIC":
+        if j.get("compliance") is not None:
+            problems.append(
+                "COMPLIANCE_NESTED_BLOCK: %s carries a `compliance` object; the "
+                "canonical variant is flat fields on the joint" % j["entity_id"])
+        for field in COMPLIANT_FIELDS:
+            if not str(j.get(field) or "").strip():
+                problems.append("COMPLIANCE_INCOMPLETE: %s missing %s"
+                                % (j["entity_id"], field))
+        if j.get("actuation") and j["actuation"] != "PRESCRIBED_KINEMATIC":
             problems.append("COMPLIANCE_ACTUATION_NOT_DECLARED_PRESCRIBED: %s -> %r"
-                            % (j["entity_id"], c["actuation"]))
+                            % (j["entity_id"], j["actuation"]))
     return problems
 
 
