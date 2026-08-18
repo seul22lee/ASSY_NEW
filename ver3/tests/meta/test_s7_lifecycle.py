@@ -325,7 +325,10 @@ class TestPropagation(_Lifecycle):
         self.revise(state, Op("CREATE", "Joint", "JNT-PROBE",
                               {"joint_type": "REVOLUTE", "parent_group": "RGP-G0A",
                                "child_group": "RGP-G1A", "dof": "RZ",
-                               "axis_direction": "+Z", "frame_ids": []}, "t"),
+                               # NAMES the frame the axis is expressed in; [] was a
+                               # unit vector in no frame.
+                               "axis_direction": "+Z",
+                               "frame_ids": ["FRM-JNT-PROBE"]}, "t"),
                     stage="s03")
         self.revise(state, Op("CREATE", "FeasibilityDomainAssessment",
                               "FDA-OUTSIDE",
@@ -349,7 +352,10 @@ class TestPropagation(_Lifecycle):
         self.revise(state, Op("CREATE", "Joint", "JNT-PROBE2",
                               {"joint_type": "REVOLUTE", "parent_group": "RGP-G0A",
                                "child_group": "RGP-G1A", "dof": "RZ",
-                               "axis_direction": "+Z", "frame_ids": []}, "t"),
+                               # NAMES the frame the axis is expressed in; [] was a
+                               # unit vector in no frame.
+                               "axis_direction": "+Z",
+                               "frame_ids": ["FRM-JNT-PROBE"]}, "t"),
                     stage="s03")
         self.revise(state, Op("CREATE", "FeasibilityDomainAssessment", "FDA-FIRST",
                               {"candidate": "CND-A", "domain": "a probe",

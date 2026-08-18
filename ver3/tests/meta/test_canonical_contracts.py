@@ -163,10 +163,14 @@ class TestReferenceClosure(_Corpus):
                 target = spec.get("target")
                 if not target:
                     continue
-                if target in RETIRED_FAMILIES:
-                    problems.append("%s.%s targets RETIRED %s" % (fam, fld, target))
-                elif target not in self.fams:
-                    problems.append("%s.%s targets undefined %s" % (fam, fld, target))
+                # A target may name SEVERAL legitimate families - kept_open_by is
+                # kept open by an Ambiguity OR a Freedom - so each named family
+                # is checked, and a list is not itself a family name.
+                for one in (target if isinstance(target, list) else [target]):
+                    if one in RETIRED_FAMILIES:
+                        problems.append("%s.%s targets RETIRED %s" % (fam, fld, one))
+                    elif one not in self.fams:
+                        problems.append("%s.%s targets undefined %s" % (fam, fld, one))
         self.assertEqual([], problems)
 
     def test_CON_05_every_addressable_relation_has_an_identity(self):

@@ -150,7 +150,16 @@ class TestDeclaredCorpus(_Base):
         # branch's established configurations, motions and load routes, all
         # MAY_BE_EMPTY: a static mechanism has no motion, and forcing it to
         # author one to satisfy readiness would be inventing engineering.
-        self.assertEqual(66, len(rows), "the premise corpus changed size")
+        #
+        # 67 at the S03a seam closure: s03a declares `open_question_to_cite`.
+        # Its prompt already demanded that `UnresolvedDecision.kept_open_by` cite
+        # the Ambiguity or Freedom entities keeping a decision open, by id, while
+        # the view carried neither family - so the stage was asked to reference
+        # entities it could not see, and the only ways to comply were to invent
+        # an id or to leave the field empty. MAY_BE_EMPTY: a fully determinate
+        # source leaves no open question, and demanding one would make s01 invent
+        # an ambiguity.
+        self.assertEqual(67, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

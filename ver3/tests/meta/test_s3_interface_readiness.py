@@ -101,7 +101,9 @@ def derive_representational_dependencies(fams, family, field):
     kind = spec.get("kind")
     deps = set()
     if kind == "reference":
-        deps.add(spec["target"])
+        # A target may name several legitimate families; each is a dependency.
+        target = spec["target"]
+        deps.update(target if isinstance(target, list) else [target])
     elif kind == "spatial":
         frame = spec.get("frame")
         if frame and frame != "SELF_DECLARING":
@@ -173,8 +175,10 @@ class TestSourceA(_Base):
             for fld, spec in ((v or {}).get("field_semantics") or {}).items():
                 if spec.get("kind") != "reference":
                     continue
-                if spec.get("target") not in self.fams:
-                    problems.append("%s.%s -> %s" % (fam, fld, spec.get("target")))
+                target = spec.get("target")
+                for one in (target if isinstance(target, list) else [target]):
+                    if one not in self.fams:
+                        problems.append("%s.%s -> %s" % (fam, fld, one))
         self.assertEqual([], problems)
 
     def test_READINESS_A03_every_spatial_dependency_resolves_to_a_frame(self):
@@ -411,7 +415,13 @@ class TestSourceB(_Base):
         #
         # 35 at S7-C: `selection` gained the design-wide hard requirements and
         # the topology its counting metrics count.
-        self.assertEqual(35, total)
+        #
+        # 36 at the S03a seam closure: s03a gained `open_question_to_cite`. Its
+        # prompt demanded that UnresolvedDecision.kept_open_by cite the Ambiguity
+        # or Freedom entities keeping a decision open, while the view carried
+        # neither family - so the stage was asked to reference entities it could
+        # not see.
+        self.assertEqual(36, total)
         pending = [pc for s in self.resp["stages"].values()
                    for pc in (s.get("premise_classes_pending_step") or [])]
         self.assertEqual([], pending, "a pending class survived S7-A")
@@ -477,9 +487,13 @@ class TestSourcesStayIndependent(_Base):
         self.assertNotIn("field_semantics", self.resp)
         # A reference is not automatically a premise: at least one referenced
         # family is not bound as a premise anywhere, and vice versa.
-        referenced = {s["target"] for v in self.fams.values()
-                      for s in ((v or {}).get("field_semantics") or {}).values()
-                      if s.get("kind") == "reference"}
+        referenced = set()
+        for v in self.fams.values():
+            for spec in ((v or {}).get("field_semantics") or {}).values():
+                if spec.get("kind") != "reference":
+                    continue
+                target = spec["target"]
+                referenced.update(target if isinstance(target, list) else [target])
         premised = set()
         for sid in S01_S04:
             for pc in self.resp["stages"][sid]["required_reasoning_premise_classes"]:

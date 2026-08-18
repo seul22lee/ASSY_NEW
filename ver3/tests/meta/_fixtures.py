@@ -29,6 +29,24 @@ class StateBuilder:
                 out[f] = []
             else:
                 out[f] = self._referent(s, contracts, stage, spec.get("target"), fam)
+        # CONDITIONAL SHAPES, derived rather than hand-listed. A rule may demand
+        # that a field name at least one thing - `Joint.frame_ids` must, because
+        # `axis_direction` is expressed in the frame it names - and a builder
+        # filling every required field with "x" produces a record the boundary
+        # rightly refuses. Read from the contract so a rule added later needs no
+        # edit here.
+        for rule in contracts.conditional_requirements(fam):
+            when = rule.get("applies_when") or {}
+            field, equals = when.get("field"), when.get("equals")
+            value = out.get(field)
+            governs = (when.get("present") and value not in (None, "", [], {})) or (
+                isinstance(value, str) and isinstance(equals, str)
+                and value.strip().upper() == equals.strip().upper())
+            if not governs:
+                continue
+            for name, shape in (rule.get("required_shape") or {}).items():
+                if shape.get("non_empty_list") and name not in over:
+                    out[name] = ["%s-AUTO" % name.upper()[:3]]
         out.update(over)
         return out
 

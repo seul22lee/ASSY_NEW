@@ -87,15 +87,20 @@ class TestEveryDeclaredConditionalRuleIsActuallyEnforced(unittest.TestCase):
                 owner = self.c.owner_of(family)
                 stage = owner if isinstance(owner, str) and owner != "any" else "s03"
                 fields = self._base_fields(family, rule)
-                fields[when["field"]] = when["equals"]
+                # TWO trigger shapes. `equals` selects one variant of a family;
+                # `present` governs every record that declares the field at all -
+                # "if you state an axis direction, name the frame it is in".
+                fields[when["field"]] = when.get("equals", "SOMETHING")
                 # Break it: strip every field the rule adds, and any field it
                 # constrains the shape of.
                 for name in rule.get("additional_required_fields") or []:
                     fields.pop(name, None)
                 for name in rule.get("required_shape") or {}:
                     fields.pop(name, None)
+                mine = [p for p in conditional_problems(family, fields, stage)
+                        if rule.get("name") in p]
                 self.assertTrue(
-                    conditional_problems(family, fields, stage),
+                    mine,
                     "%s declares conditional rule %r and the write boundary "
                     "accepted a record that triggers and violates it; the "
                     "declaration is not being consumed"
@@ -109,12 +114,24 @@ class TestEveryDeclaredConditionalRuleIsActuallyEnforced(unittest.TestCase):
                 when = rule["applies_when"]
                 owner = self.c.owner_of(family)
                 stage = owner if isinstance(owner, str) and owner != "any" else "s03"
-                fields = self._base_fields(family, rule)
-                fields[when["field"]] = "SOMETHING_ELSE_ENTIRELY"
+                if when.get("present"):
+                    # A present-trigger governs every record carrying the field,
+                    # so "does not trigger" means the field is ABSENT.
+                    fields = self._base_fields(family, rule)
+                    fields.pop(when["field"], None)
+                else:
+                    fields = self._base_fields(family, rule)
+                    fields[when["field"]] = "SOMETHING_ELSE_ENTIRELY"
                 for name in rule.get("additional_required_fields") or []:
                     fields.pop(name, None)
+                # ONLY this rule. A base record can legitimately trip another
+                # family rule - a Joint carrying an axis_direction owes a frame
+                # whatever its joint_type is - and counting that here would make
+                # each rule answerable for every other.
+                mine = [p for p in conditional_problems(family, fields, stage)
+                        if rule.get("name") in p]
                 self.assertEqual(
-                    [], conditional_problems(family, fields, stage),
+                    [], mine,
                     "%s rule %r fired on a record it does not govern"
                     % (family, rule.get("name")))
 
@@ -131,7 +148,12 @@ class TestEveryDeclaredConditionalRuleIsActuallyEnforced(unittest.TestCase):
             with self.subTest(family=family, rule=rule.get("name")):
                 when = rule.get("applies_when") or {}
                 self.assertIn("field", when)
-                self.assertIn("equals", when)
+                # Either trigger shape the runtime implements: `equals` selects
+                # one variant of a family, `present` governs every record that
+                # declares the field at all.
+                self.assertTrue("equals" in when or when.get("present"),
+                                "rule %r declares a trigger the runtime cannot "
+                                "evaluate: %s" % (rule.get("name"), when))
 
 
 class TestAbsoluteScaleMustBeUsable(unittest.TestCase):
@@ -200,9 +222,11 @@ class TestAbsoluteScaleMustBeUsable(unittest.TestCase):
 class TestCompliantJointMustCarryItsVariant(unittest.TestCase):
     """§9.3. A joint_type label alone is inert, enforced where it is written."""
 
+    # frame_ids NAMES the frame `axis_direction` is expressed in. It was [] here,
+    # which the contract now refuses: a unit vector in no frame.
     BASE = {"joint_type": "REVOLUTE", "parent_group": "RGP-1",
             "child_group": "RGP-2", "dof": "1", "axis_direction": "x",
-            "frame_ids": []}
+            "frame_ids": ["FRM-JNT-1"]}
     VARIANT = {"mode": "BENDING", "direction": "z", "required_travel": 1.0,
                "allowable_travel": 2.0, "actuation": "PRESCRIBED_KINEMATIC",
                "compliant_element": "the cantilever arm",

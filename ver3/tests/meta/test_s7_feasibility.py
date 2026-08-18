@@ -1412,16 +1412,25 @@ class TestExactReferences(_Feas):
                "parent_group": _group(0, "A"), "child_group": _group(1, "A"),
                "dof": ["RZ"], "axis_direction": "+Z", "frame_ids": ["F1"]}]
 
-    def test_B40_an_absent_named_sibling_is_not_rescued(self):
-        """CFG-C1A exists and differs. The basis names CFG-GONE. Comparing
-        against the one that happens to be there is answering a reference to an
-        entity the design does not have."""
-        state = self.basis_probe(["CFG-GONE"], coords={
-            "CFG-C0A": {"JNT-0A": 0}, "CFG-C1A": {"JNT-0A": 90}})
-        v = self.domain(self.assess(state), "required_configurations")
-        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
-        self.assertIn("DISTINCTNESS_SIBLING_NOT_REALIZED", v.reason_codes)
-        self.assertNotIn("DECLARED_DISTINCTNESS_NOT_REALIZED", v.reason_codes)
+    def test_B40_an_absent_named_sibling_cannot_be_written_at_all(self):
+        """A basis naming a configuration the design does not have.
+
+        This used to assert what FEASIBILITY concluded about such a state:
+        NOT_ESTABLISHED, because comparing against the sibling that happens to be
+        there answers a reference to an entity that does not exist.
+
+        The state is no longer constructible. `distinguishing_basis` is a record
+        list whose `rigid_group` and `differs_from` members are now typed, so a
+        dangling sibling is refused by the write boundary - earlier, and for the
+        same reason. The domain branch that reported it remains as defence in
+        depth; nothing can reach it through a canonical write.
+        """
+        from ver3.assy_v3.state.design_state import ContractError
+        with self.assertRaises(ContractError) as raised:
+            self.basis_probe(["CFG-GONE"], coords={
+                "CFG-C0A": {"JNT-0A": 0}, "CFG-C1A": {"JNT-0A": 90}})
+        self.assertIn("DANGLING_REF", str(raised.exception))
+        self.assertIn("differs_from", str(raised.exception))
 
     def test_B41_a_named_sibling_that_is_equal_fails(self):
         state = self.basis_probe(["CFG-C1A"], coords={

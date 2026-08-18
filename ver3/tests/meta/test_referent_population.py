@@ -171,10 +171,14 @@ class TestReferentPopulationContract(_Base):
                           "FunctionalRegion", "Candidate", "PhysicalInteraction",
                           "AssemblyStep", "Feature", "Envelope", "State", "Transition"}
         for fam, field, decl in self.refs():
-            if decl.get("target") in branch_bearing:
-                self.assertNotEqual(cv.DESIGN_WIDE, decl.get("referent_population"),
-                                    "%s.%s -> %s is design-wide"
-                                    % (fam, field, decl.get("target")))
+            target = decl.get("target")
+            # A target may name several legitimate families; each one is checked,
+            # because a list is not itself a family name.
+            for one in (target if isinstance(target, list) else [target]):
+                if one in branch_bearing:
+                    self.assertNotEqual(
+                        cv.DESIGN_WIDE, decl.get("referent_population"),
+                        "%s.%s -> %s is design-wide" % (fam, field, one))
 
     def test_RP_08_population_and_existence_are_independent(self):
         seen = set()

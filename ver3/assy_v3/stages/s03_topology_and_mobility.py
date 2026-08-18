@@ -179,16 +179,30 @@ empty. Every field is required unless marked optional. No required field is null
                        is the reason for; [] if none)
   rigid_groups[]       id "RGP-0001", body, members[], is_default (boolean)
   joints[]             id "JNT-0001", joint_type, parent_group, child_group,
-                       dof[], axis_direction,
-                       compliance {{mode, direction, required_travel,
-                       allowable_travel_status, actuation, compliant_element,
-                       root_interface, activation_window}} (only for COMPLIANT;
+                       dof[], axis_direction, frame_ids[]
+                       frame_ids NAMES THE FRAME the axis_direction is expressed
+                       in - a symbolic name you coin here, e.g. ["FRM-JNT-0001"],
+                       never empty. "+Z" relative to nothing is unanswerable. You
+                       are naming the frame, not locating it: WHERE it sits is
+                       decided later from feature sizes that do not exist yet.
+                       For a COMPLIANT joint, and only then, add these EIGHT
+                       fields DIRECTLY ON THE JOINT - not nested inside another
+                       object:
+                         mode, direction, required_travel, allowable_travel,
+                         actuation, compliant_element, root_interface,
+                         activation_window
                        actuation is always PRESCRIBED_KINEMATIC - in the real
                        mechanism a contact drives the deflection, but in this
                        model the coordinate is imposed, and the field says so
                        precisely so the structure cannot be read as evidence
-                       that the mechanism deflects itself)
-  interfaces[]         id "IFC-0001", bodies[], interaction_kind, nominal_status,
+                       that the mechanism deflects itself.
+                       required_travel is KINEMATIC and is yours to state.
+                       allowable_travel is a MATERIAL fact and you do not have
+                       the material: report its status as UNSUPPORTED. Do not
+                       write a number, and do not write a verdict such as
+                       WITHIN_ELASTIC_LIMIT - that would assert a strain result
+                       nothing here computed.
+  interfaces[]         id "IFC-0001", bodies[], interaction_kind, nominal,
                        addresses_obligations[]
   configurations[]     id "CFG-0001", name, kind, bodies_present[],
                        distinguishing_basis[] {{rigid_group, dof, differs_from[]}}
@@ -201,7 +215,13 @@ empty. Every field is required unless marked optional. No required field is null
   functional_regions[] id "FRG-0001", role, owning_bodies[],
                        required_by_actors[] (actor ids from the input; [] for
                        SUPPORT and KEEP_OUT regions no actor uses),
-                       reach_targets[] (what those actors must reach through it)
+                       reach_targets[] (OTHER functional region ids THIS region
+                       gives reach through to - an APERTURE's targets are the
+                       ACCESS regions reached through it. Region ids only, from
+                       the ones you emit here; [] when this region is itself the
+                       destination. It is NOT a description of what an actor
+                       wants: that demand is already typed upstream on
+                       Actor.must_reach and is not restated here)
   unresolved[]         id "S3U-0001", decision, why_open, alternatives[],
                        alternatives_kind, kept_open_by[], blocks[]
 
@@ -225,7 +245,17 @@ REFERENCES BETWEEN ITEMS
   interfaces[].bodies            body ids you emit
   configurations[].bodies_present body ids you emit
   functional_regions[].owning_bodies body ids you emit
-  unresolved[].kept_open_by      Ambiguity or Freedom ids from the input
+  functional_regions[].reach_targets functional region ids you emit
+  functional_regions[].required_by_actors actor ids from the input
+  joints[].frame_ids             frame names you coin here
+  bodies[].addresses_obligations obligation ids from the input
+  interfaces[].addresses_obligations obligation ids from the input
+  configurations[].distinguishing_basis[].rigid_group  a rigid group id you emit
+  configurations[].distinguishing_basis[].differs_from configuration ids you emit
+  unresolved[].kept_open_by      Ambiguity or Freedom ids from the input, and
+                                 nothing else - not a requirement, not a body
+  unresolved[].alternatives      when alternatives_kind is ENTITY_REFS these are
+                                 entity ids; otherwise they are not ids at all
 
 THE CANDIDATE YOU ARE EMBODYING
 {candidate}
@@ -504,6 +534,21 @@ def current_mobility_cells(state) -> List[Dict[str, Any]]:
 _EFFECT_KINDS = tuple(_family("PhysicalEffectObligation")["effect"])
 
 
+#: The COMPLIANT variant, exactly as DESIGN_STATE_CONTRACT declares it - flat,
+#: and `allowable_travel` rather than `allowable_travel_status`. Read from the
+#: contract at import so the prompt, the producer and the write boundary cannot
+#: drift into three spellings of one variant again.
+def _compliant_fields() -> Tuple[str, ...]:
+    from ..state.design_state import Contracts
+    for rule in Contracts().conditional_requirements("Joint"):
+        if rule.get("name") == "compliant_joint_variant":
+            return tuple(rule.get("additional_required_fields") or ())
+    return ()
+
+
+COMPLIANT_FIELDS = _compliant_fields()
+
+
 def _candidate_premise(candidate) -> List[str]:
     """The candidate id an s03 invocation was given, however it was handed over.
 
@@ -564,17 +609,45 @@ class S03TopologyAndMobility(Stage):
                 "body": g["body"], "members": g.get("members", []),
                 "is_default": g.get("is_default", True)}, prov))
         for j in parsed.get("joints", []):
+            # `frame_ids` is REQUIRED and no longer defaulted. It used to fall
+            # back to [], which produced a joint whose axis_direction was
+            # declared spatial "in frame Joint.frame_ids" while naming no frame -
+            # a unit vector expressed in nothing. An omitted frame now fails at
+            # the write boundary instead of being synthesised here.
             fields = {"joint_type": j["joint_type"], "parent_group": j["parent_group"],
                       "child_group": j["child_group"], "dof": j.get("dof", []),
                       "axis_direction": j["axis_direction"],
-                      "frame_ids": j.get("frame_ids", [])}
-            if j.get("compliance"):
-                fields["compliance"] = j["compliance"]
+                      "frame_ids": j.get("frame_ids")}
+            # THE COMPLIANT VARIANT IS FLAT, because that is what the contract
+            # declares. The prompt asked for a nested `compliance {...}` object
+            # and this passed it straight through, so every COMPLIANT joint the
+            # model produced was rejected for eight missing fields that were
+            # present all along, one level down. `allowable_travel_status` was
+            # the second half of the same divergence: the contract's field is
+            # `allowable_travel`, and it holds a STATUS - the contract says it
+            # "is a material fact whose status is UNSUPPORTED until a compliance
+            # route exists", so the honest value is that status, never a number
+            # invented to look settled.
+            for name in COMPLIANT_FIELDS:
+                if j.get(name) is not None:
+                    fields[name] = j[name]
             ops.append(Op("CREATE", "Joint", j["id"], fields, prov))
         for i in parsed.get("interfaces", []):
             ops.append(Op("CREATE", "Interface", i["id"], {
                 "bodies": i.get("bodies", []),
                 "interaction_kind": i["interaction_kind"],
+                # The canonical field is `nominal`; the prompt now spells it the
+                # same way, and `nominal_status` is still read so the recorded
+                # corpus keeps replaying.
+                #
+                # THE DEFAULT IS DELIBERATELY LEFT IN PLACE. It is a genuine
+                # hidden default - a parser asserting the interface is at nominal
+                # condition whenever the model says nothing - and removing it was
+                # tried here: it invalidated every recorded s03a response in the
+                # corpus, none of which carries the field, and those recordings
+                # are historical evidence rather than something to be rewritten
+                # to suit a new rule. It caused none of the live failures this
+                # seam closure was opened for, so it is REPORTED and not changed.
                 "nominal": i.get("nominal_status", i.get("nominal", "NOMINAL")),
                 "addresses_obligations": i.get("addresses_obligations", [])}, prov))
         for c in parsed.get("configurations", []):

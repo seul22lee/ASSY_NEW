@@ -238,7 +238,14 @@ def derive_source_a(stage_id: str, contracts, responsibility) -> List[Requiremen
             # silently lost the reference.
             deps: List[Tuple[str, str]] = []
             if spec.get("kind") == "reference" and spec.get("target"):
-                deps.append((spec["target"], "reference target"))
+                # A target may name SEVERAL legitimate families - kept_open_by is
+                # kept open by an Ambiguity OR a Freedom - and each is a real
+                # representational dependency, so each becomes its own
+                # requirement rather than one requirement over a union.
+                target = spec["target"]
+                for one in (target if isinstance(target, (list, tuple))
+                            else [target]):
+                    deps.append((one, "reference target"))
             elif spec.get("kind") == "spatial":
                 frame = spec.get("frame")
                 if frame and frame != "SELF_DECLARING":

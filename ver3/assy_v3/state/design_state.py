@@ -211,6 +211,23 @@ class Contracts:
             return copy_out(spec)
         return None
 
+    def record_list_spec(self, family: Optional[str],
+                         field: str) -> Optional[Dict[str, Any]]:
+        """A plain list of records whose subfields are typed.
+
+        `premise_record_spec` covers a list whose rows carry EVIDENCE and are
+        told apart by a discriminator. Some lists are neither: every row of
+        `Configuration.distinguishing_basis` has the same shape, and its
+        id-bearing members were simply unreachable by any boundary. Declaring a
+        discriminator to reach the existing walker would have been inventing
+        structure, so this is the smaller shape - typed subfields, no kinds.
+        """
+        if not family:
+            return None
+        fam = (_CONTRACT_DOCS[self]["families"].get(family) or {})
+        spec = (fam.get("field_semantics") or {}).get(field) or {}
+        return copy_out(spec) if spec.get("kind") == "record_list" else None
+
     def premise_record_spec(self, family: Optional[str],
                             field: str) -> Optional[Dict[str, Any]]:
         """The declaration that makes a field a list of premise-bearing records.
@@ -620,6 +637,37 @@ class DesignState:
                 if record is not None:
                     out += self._premise_records(patch, seen, known, record, val,
                                                  op.entity_id, key)
+                    continue
+                rows = self.c.record_list_spec(family, key)
+                if rows is not None:
+                    out += self._record_list(patch, seen, known, rows, val,
+                                             op.entity_id, key)
+        return out
+
+    def _record_list(self, patch, seen, known, spec, val, eid, key) -> List[str]:
+        """Typed subfields of a plain record list, one level down.
+
+        Reuses `_one_reference` rather than repeating the rule: two copies of
+        "does a reference resolve" is exactly the divergence that made
+        `reference_spec` the single authority in the first place.
+        """
+        out: List[str] = []
+        if val is None:
+            return out
+        if not isinstance(val, list):
+            return ["RECORD_LIST: %s.%s must be a list of records, got %s"
+                    % (eid, key, type(val).__name__)]
+        specs = spec.get("record_field_semantics") or {}
+        for index, row in enumerate(val):
+            if not isinstance(row, dict):
+                out.append("RECORD_LIST: %s.%s[%d] must be a record, got %s"
+                           % (eid, key, index, type(row).__name__))
+                continue
+            for name, sub in specs.items():
+                if name in row and row[name] is not None:
+                    out += self._one_reference(
+                        patch, seen, known, sub, row[name],
+                        "%s.%s[%d].%s" % (eid, key, index, name))
         return out
 
     def _one_reference(self, patch, seen, known, spec, val, label) -> List[str]:
@@ -650,9 +698,15 @@ class DesignState:
             actual = (_created_family(patch, ref) if ref in seen
                       and ref not in _STORAGE[self].entities
                       else self.stored_family(ref))
-            if target and actual and actual != target:
+            # `target` may name SEVERAL legitimate families. UnresolvedDecision
+            # .kept_open_by is the case: an open decision is kept open by an
+            # Ambiguity or by a Freedom, and both are correct. A single-target
+            # declaration could only have expressed one of them, so the field was
+            # left untyped and accepted anything.
+            allowed = target if isinstance(target, (list, tuple)) else [target]
+            if target and actual and actual not in allowed:
                 out.append("REFERENCE_FAMILY: %s declares %s and names %s, a %s"
-                           % (label, target, ref, actual))
+                           % (label, " or ".join(allowed), ref, actual))
         return out
 
     def _premise_records(self, patch, seen, known, record, val, eid, key) -> List[str]:
@@ -977,6 +1031,11 @@ def _is_number(value) -> bool:
 def _shape_problems(rule_name, family, eid, field, value, shape) -> List[str]:
     out: List[str] = []
     where = "%s %s.%s" % (family, eid, field)
+    if shape.get("non_empty_list"):
+        if not isinstance(value, (list, tuple)) or not value:
+            return ["CONDITIONAL_SHAPE (%s): %s must be a non-empty list, got %r"
+                    % (rule_name, where, value)]
+        return out
     if shape.get("mapping") and not isinstance(value, dict):
         return ["CONDITIONAL_SHAPE (%s): %s must be a mapping, got %r"
                 % (rule_name, where, type(value).__name__)]
@@ -1290,8 +1349,15 @@ def _conditional_problems(contracts, family, eid, fields) -> List[str]:
         if field is None:
             continue
         actual = fields.get(field)
-        if not (isinstance(actual, str) and isinstance(expected, str)
-                and actual.strip().upper() == expected.strip().upper()):
+        if when.get("present"):
+            # A rule that governs every record DECLARING the field, whatever its
+            # value - "if you state an axis direction, you must name the frame it
+            # is expressed in". Distinct from an equals trigger, which selects
+            # one variant of a family.
+            if actual in (None, "", [], {}):
+                continue
+        elif not (isinstance(actual, str) and isinstance(expected, str)
+                  and actual.strip().upper() == expected.strip().upper()):
             continue                     # the rule does not govern this record
         for required in rule.get("additional_required_fields") or []:
             value = fields.get(required)
@@ -1300,6 +1366,13 @@ def _conditional_problems(contracts, family, eid, fields) -> List[str]:
                            "must carry %r"
                            % (name, family, eid, field, actual, required))
         for shaped, shape in (rule.get("required_shape") or {}).items():
+            if shape.get("non_empty_list") and not fields.get(shaped):
+                # Absent and empty are the same failure for a list that must name
+                # something; skipping absence would let the rule be satisfied by
+                # omitting the field entirely.
+                out.append("CONDITIONAL_SHAPE (%s): %s %s must name at least one "
+                           "%s" % (name, family, eid, shaped))
+                continue
             if shaped in fields and fields[shaped] is not None:
                 out.extend(_shape_problems(name, family, eid, shaped,
                                            fields[shaped], shape))

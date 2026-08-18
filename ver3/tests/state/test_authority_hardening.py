@@ -89,7 +89,10 @@ def _joint(state):
         Op("CREATE", "Joint", "JNT-0001",
            {"joint_type": "REVOLUTE", "parent_group": "RGP-0001",
             "child_group": "RGP-0002", "dof": ["RZ"],
-            "axis_direction": [0, 0, 1], "frame_ids": []}, "prov:s03")], pid="pj"))
+            "axis_direction": [0, 0, 1],
+            # NAMES the frame the axis is expressed in; [] was a unit
+            # vector in no frame, which the contract refuses.
+            "frame_ids": ["FRM-JNT-0001"]}, "prov:s03")], pid="pj"))
     return state
 
 

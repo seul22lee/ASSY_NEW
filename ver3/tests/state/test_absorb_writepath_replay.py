@@ -65,7 +65,10 @@ def _seed(substrate):
         ops.append(Op("CREATE", "Joint", jid,
                       {"joint_type": "REVOLUTE", "parent_group": "RGP-0001",
                        "child_group": "RGP-0002", "dof": ["RZ"],
-                       "axis_direction": [0, 0, 1], "frame_ids": []}, "replay:s03"))
+                       "axis_direction": [0, 0, 1],
+                       # NAMES the frame the axis is expressed in; [] was a
+                       # unit vector in no frame, which the contract refuses.
+                       "frame_ids": ["FRM-JNT-0001"]}, "replay:s03"))
     # The actor the s04a reach results name. s01 owns it, so it arrives in its
     # owner's patch - a typed reference must denote an entity, and ownership is
     # checked at the same boundary.

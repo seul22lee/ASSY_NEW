@@ -285,6 +285,7 @@ stages:
     - What joins what, of what type, leaving which DOF?
     - What configurations exist and what distinguishes them?
     - Which sites must be distinct for a mechanical relationship to exist?
+    - Which upstream open questions keep a decision at this stage open?
     required_reasoning_premise_classes:
     - class: physical_effect_obligation
       instance_selection:
@@ -320,6 +321,26 @@ stages:
       why: The principle constrains which topologies are even admissible.
       requires_semantics:
       - candidate
+    - class: open_question_to_cite
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: >-
+          a design whose source was fully determinate leaves no ambiguity and no
+          freedom, and demanding one would force s01 to invent an open question
+      what: the ambiguities and freedoms upstream recorded as still open
+      justified_by_question: Which upstream open questions keep a decision at this
+        stage open?
+      why: >-
+        `UnresolvedDecision.kept_open_by` must CITE the Ambiguity or Freedom
+        entities that keep the decision open, by id - restating them as prose is
+        consumer reconstruction of a fact upstream already typed. The prompt
+        demanded those ids while the view carried neither family, so the stage
+        was asked to reference entities it could not see: the only ways to
+        comply were to invent an id or to leave the field empty.
+      requires_semantics:
+      - open_question
     - class: topology_constraining_quantity
       instance_selection:
         population: DESIGN_WIDE

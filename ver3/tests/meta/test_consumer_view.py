@@ -496,7 +496,11 @@ class TestCoreCorrections(_Base):
         for fam, v in self.c.families.items():
             for _f, spec in ((v or {}).get("field_semantics") or {}).items():
                 if spec.get("kind") == "reference":
-                    edges.setdefault(fam, set()).add(spec["target"])
+                    # A target may name several legitimate families; each is its
+                    # own edge in the reference graph.
+                    target = spec["target"]
+                    edges.setdefault(fam, set()).update(
+                        target if isinstance(target, list) else [target])
 
         def reaches(fam, seen=None):
             seen = seen or set()

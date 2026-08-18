@@ -441,9 +441,25 @@ entity_families:
 
   Body:
     semantic_roles: [topology_element]
+    field_semantics:
+      addresses_obligations:
+        kind: reference
+        target: Obligation
+        cardinality: many
+        resolvable: false
+        referent_population: DESIGN_WIDE
+    # DECLARED, because the s03 prompt already demanded it: "list the obligation
+    # ids it is the reason for - the design decision has to be traceable to the
+    # obligation that forced it, or nothing downstream can tell a load-bearing
+    # choice from an arbitrary one". The producer wrote the field and no family
+    # declared it, so it entered state untyped: prose would have been accepted,
+    # a dangling id would have been accepted, and no consumer could dereference
+    # it. That is the same defect this contract records for reach_targets at
+    # U-2B - a field whose only semantic definition was a prompt.
     owned_by: s03
     extendable_by: [s05, s06, s07]
     purpose: "A rigid part of the product."
+    optional_fields: [addresses_obligations]
     required_fields: [entity_id, instance_identity, role, created_by_stage]
     authoritative_geometry_fields: [pose, extent, swept_volume]
     annotation_fields: [region_label, canonical_role]
@@ -496,7 +512,16 @@ entity_families:
     purpose: "A kinematic relation between two rigid groups."
     required_fields: [entity_id, joint_type, parent_group, child_group, dof, axis_direction, frame_ids]
     # U-2B (S-2): declared as a field, not only as an extension target.
-    optional_fields: [frame_origin]
+    #
+    # The eight COMPLIANT variant fields are declared HERE as well as in
+    # `conditional_requirements`. They are optional unconditionally - an ordinary
+    # revolute joint carries none of them - and required the moment joint_type is
+    # COMPLIANT. Listing them only as conditional left them undeclared as fields:
+    # a field the contract can REQUIRE but does not DECLARE has no home, and the
+    # producer audit rightly reported writing them as writing something unknown.
+    optional_fields: [frame_origin, mode, direction, required_travel,
+                      allowable_travel, actuation, compliant_element,
+                      root_interface, activation_window]
     fields_owned_by_s04b: [located_frame]
     rules:
       - "A joint_type label alone is inert. A realization on each side is required (INV-008)."
@@ -527,6 +552,19 @@ entity_families:
           groups on different bodies is a different relation entirely, and
           admitting it lets a malformed record stand for a flexure nobody drew.
     conditional_requirements:
+      - name: axis_needs_a_named_frame
+        applies_when: {field: axis_direction, present: true}
+        required_shape:
+          frame_ids:
+            non_empty_list: true
+        why: >-
+          `axis_direction` is declared spatial in frame `Joint.frame_ids`, and
+          the rule above says it "is a unit vector in a NAMED frame". An empty
+          frame list therefore leaves the direction expressed in nothing: +Z
+          relative to what is unanswerable, and s04b has no frame to locate.
+          s03 names the frame symbolically - it is `SELF_DECLARING`, so the id
+          is a name this stage coins rather than a reference to something that
+          must already exist. WHERE that frame sits is s04b's, and stays s04b's.
       - name: compliant_joint_variant
         applies_when: {field: joint_type, equals: COMPLIANT}
         additional_required_fields: [mode, direction, required_travel, allowable_travel, actuation, compliant_element, root_interface, activation_window]
@@ -553,6 +591,12 @@ entity_families:
   Interface:
     semantic_roles: [topology_relation]
     field_semantics:
+      addresses_obligations:
+        kind: reference
+        target: Obligation
+        cardinality: many
+        resolvable: false
+        referent_population: DESIGN_WIDE
       bodies:
         kind: reference
         target: Body
@@ -574,6 +618,7 @@ entity_families:
         orbits out of. Named as an s05 input before the U-2B correction, and
         produced by nothing then or now.
     purpose: "A region where two bodies meet, with its declared kind."
+    optional_fields: [addresses_obligations]
     required_fields: [entity_id, bodies, interaction_kind, nominal]
     # S7-B CORRECTION - CONTRACT TRUTH. This list read
     # [DECLARED_CONTACT, DECLARED_CLEARANCE, DECLARED_INTERFERENCE_FIT,
@@ -822,6 +867,18 @@ entity_families:
     purpose: >
       A recorded openness. Subsumes Ver2's UnresolvedLayoutChoice and
       LayoutConflict (RETIREMENT_MATRIX undecided U-03, resolved here).
+    field_semantics:
+      # TWO legitimate families, which is why `target` is a list. The rule below
+      # already said it - "kept_open_by CITES the Ambiguity or Freedom entities
+      # that keep this decision open, by ID" - and `field_semantics` was empty,
+      # so the rule was prose and the field was untyped: prose, a dangling id, or
+      # a Body id were all accepted.
+      kept_open_by:
+        kind: reference
+        target: [Ambiguity, Freedom]
+        cardinality: many
+        resolvable: false
+        referent_population: DESIGN_WIDE
     required_fields: [entity_id, decision, why_open, alternatives, alternatives_kind, blocks, kept_open_by]
     alternatives_kind: [ENTITY_REFS, PRINCIPLE_FAMILIES, FREE_TEXT]
     rules:
@@ -1614,6 +1671,28 @@ assurance_families:
         target: Body
         cardinality: many
         resolvable: false
+      # THE NESTED REFERENCES, typed. `distinguishing_basis` is a list of
+      # {rigid_group, dof, differs_from[]} and both id-bearing members were
+      # unreachable by any boundary: a group id that named nothing, or named a
+      # Body, was accepted, and the s04b check that realizes this basis in
+      # coordinates would then be comparing against a record it cannot resolve.
+      #
+      # A plain record list, not a premise-record list: every row has the same
+      # shape and there is no discriminator, so declaring one would be inventing
+      # structure to reach the existing walker.
+      distinguishing_basis:
+        kind: record_list
+        record_field_semantics:
+          rigid_group:
+            kind: reference
+            target: RigidGroup
+            cardinality: one
+            resolvable: false
+          differs_from:
+            kind: reference
+            target: Configuration
+            cardinality: many
+            resolvable: false
     semantic_roles: [configuration_state]
     owned_by: s03
     purpose: "A named assembly configuration, e.g. partially assembled, closed."
@@ -1624,7 +1703,7 @@ assurance_families:
     # statement, and s04b must realize it: without it, two configurations differ
     # only by having different ids, and a realization that gives them identical
     # coordinates cannot be told from one that does not.
-    optional_fields: [distinguishing_basis]
+    optional_fields: [distinguishing_basis, kind]
     rules:
       - >
         distinguishing_basis is a list of {rigid_group, dof, differs_from}. It is
