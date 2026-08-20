@@ -1315,13 +1315,6 @@ TYPED INPUT
 """
 
 
-#: FAMILIES THIS PASS AUTHORS, from the responsibility contract's own list, minus
-#: what the PIPELINE authors rather than the model. MobilityExpectation is a
-#: declared s03b output and is derived by `derived_operations` from the relations
-#: the model writes, so asking the model about its references would be asking for
-#: a value it does not supply.
-PIPELINE_AUTHORED_FAMILIES = ("MobilityExpectation",)
-
 #: Reference-valued fields the PIPELINE fills in, so the model is not asked for
 #: them. `LoadPath.candidate` is the invocation's own candidate: this pass runs
 #: once per candidate, so a model restating it can only agree or be wrong.
@@ -1329,6 +1322,23 @@ PIPELINE_AUTHORED_FAMILIES = ("MobilityExpectation",)
 #: about the producer, and the standing test requires every contract-declared
 #: reference to be either PROMPTED or named here.
 PIPELINE_SUPPLIED_REFERENCES = (("LoadPath", "candidate"),)
+
+
+#: Which response key carries which family, for every family this responsibility
+#: is permitted to output. The prompt speaks in response keys and the contract
+#: speaks in families, so one of the two has to say how they correspond.
+#:
+#: `None` means THE MODEL IS NOT ASKED: MobilityExpectation is a declared s03b
+#: output that `derived_operations` computes from the relations the model writes,
+#: so asking about its references would be asking for a value the model does not
+#: supply. It is listed rather than omitted because a declared output family that
+#: appears nowhere here raises instead of being silently dropped from the prompt,
+#: which is the failure the whole section exists to end.
+RESPONSE_KEY_OF = {"PhysicalInteraction": "physical_interactions",
+                   "ConstraintRelation": "constraint_relations",
+                   "LoadPath": "load_paths", "AssemblyStep": "assembly_steps",
+                   "UnresolvedDecision": "unresolved",
+                   "MobilityExpectation": None}
 
 
 def _output_families(responsibility_id: str = "s03b") -> Tuple[str, ...]:
@@ -1341,7 +1351,13 @@ def _output_families(responsibility_id: str = "s03b") -> Tuple[str, ...]:
         doc = _yaml.safe_load(fh)
     declared = (doc["stages"][responsibility_id].get("permitted_output_semantics")
                 or [])
-    return tuple(f for f in declared if f not in PIPELINE_AUTHORED_FAMILIES)
+    missing = [f for f in declared if f not in RESPONSE_KEY_OF]
+    if missing:
+        raise KeyError(
+            "%s declares output families %s and RESPONSE_KEY_OF does not say "
+            "which response key carries them, or that the pipeline authors them"
+            % (responsibility_id, missing))
+    return tuple(f for f in declared if RESPONSE_KEY_OF[f])
 
 
 def reference_rules(responsibility_id: str = "s03b") -> List[Dict[str, Any]]:
@@ -1401,16 +1417,6 @@ def reference_rules(responsibility_id: str = "s03b") -> List[Dict[str, Any]]:
                 "population": rule.get("referent_population") or _branch_population(),
                 "when": dict(rule.get("applies_when") or {})})
     return sorted(rows, key=lambda r: (r["family"], r["field"]))
-
-
-#: Which response key carries which family. The prompt speaks in response keys
-#: and the contract speaks in families, so one of the two has to say how they
-#: correspond; saying it here keeps it in one place and lets a test check it
-#: against what the producer actually emits.
-RESPONSE_KEY_OF = {"PhysicalInteraction": "physical_interactions",
-                   "ConstraintRelation": "constraint_relations",
-                   "LoadPath": "load_paths", "AssemblyStep": "assembly_steps",
-                   "UnresolvedDecision": "unresolved"}
 
 
 def render_reference_rules(rows: Optional[List[Dict[str, Any]]] = None) -> str:

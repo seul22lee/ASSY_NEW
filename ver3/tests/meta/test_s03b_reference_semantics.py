@@ -122,9 +122,8 @@ class TestTheEnumerationComesFromTheContract(_Rules):
 
     def test_every_contract_reference_is_prompted_or_declared_pipeline_supplied(self):
         supplied = set(PIPELINE_SUPPLIED_REFERENCES)
-        pipeline_families = {"MobilityExpectation"}
         for (family, field) in sorted(self.contract):
-            if family in pipeline_families or (family, field) in supplied:
+            if RESPONSE_KEY_OF.get(family) is None or (family, field) in supplied:
                 continue
             with self.subTest(family=family, field=field):
                 self.assertIn((family, field), self.by_key,
@@ -205,12 +204,32 @@ class TestTheEnumerationComesFromTheContract(_Rules):
                 self.assertIn(field, prompted)
 
     def test_the_families_are_the_ones_the_responsibility_declares(self):
-        self.assertEqual({f for f in self.declared if f != "MobilityExpectation"},
+        self.assertEqual({f for f in self.declared if RESPONSE_KEY_OF.get(f)},
                          {r["family"] for r in self.rules})
 
-    def test_the_response_key_map_covers_every_authored_family(self):
-        for r in self.rules:
-            self.assertIn(r["family"], RESPONSE_KEY_OF)
+    def test_every_declared_output_family_is_accounted_for(self):
+        """Either it has a response key, or it is marked as one the pipeline
+        derives. A family in neither state would vanish from the prompt with
+        nothing said, which is the failure this section exists to end."""
+        for family in self.declared:
+            with self.subTest(family=family):
+                self.assertIn(family, RESPONSE_KEY_OF)
+
+    def test_an_unaccounted_output_family_raises_rather_than_disappearing(self):
+        import ver3.assy_v3.stages.s03_topology_and_mobility as s03
+        original = dict(s03.RESPONSE_KEY_OF)
+        try:
+            s03.RESPONSE_KEY_OF.pop("AssemblyStep")
+            with self.assertRaises(KeyError):
+                s03.reference_rules()
+        finally:
+            s03.RESPONSE_KEY_OF.clear()
+            s03.RESPONSE_KEY_OF.update(original)
+
+    def test_the_pipeline_derived_family_is_marked_and_not_prompted(self):
+        self.assertIsNone(RESPONSE_KEY_OF.get("MobilityExpectation"))
+        self.assertNotIn("MobilityExpectation",
+                         {r["family"] for r in self.rules})
 
     def test_a_pipeline_supplied_reference_is_not_asked_for(self):
         for family, field in PIPELINE_SUPPLIED_REFERENCES:
