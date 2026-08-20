@@ -784,24 +784,21 @@ class S04BPlacementAndMotion(Stage):
                            "a commitment is superseded with a reason or extended"
                            % r.get("envelope"))
 
-        # PROPAGATION. s04b proves motion clear against the blocking relations
-        # s03 declared. Where those relations carry no defeat specification, the
-        # clearance result rests on a claim nobody specified, and s04b may not
-        # report SUCCESS on it. Upstream incompleteness is inherited, not reset.
-        unspecified = []
-        for mex in inputs["consumer_view"].get("MobilityExpectation", []):
-            for d in (mex.get("dispositions") or []):
-                if not isinstance(d, dict) or d.get("disposition") != "BLOCKED_BY":
-                    continue
-                if not str(d.get("defeat_specification") or "").strip():
-                    unspecified.append("%s/%s/%s" % (d.get("rigid_group"),
-                                                     d.get("configuration"), d.get("dof")))
-        if unspecified:
-            out.append("inherited from s03: %d blocked DOF have no defeat "
-                       "specification, so the motion results below rest on "
-                       "constraints nobody specified (%s%s)"
-                       % (len(unspecified), ", ".join(unspecified[:5]),
-                          ", ..." if len(unspecified) > 5 else ""))
+        # NO PROPAGATION FROM MobilityExpectation. A block here used to inherit
+        # s03's incompleteness by reading `MobilityExpectation.dispositions` for
+        # BLOCKED_BY cells carrying no defeat specification - and it could never
+        # fire, because `mobility_disposition` is not among this responsibility's
+        # required premise classes, so the family is never in this view. A live
+        # run showed it: hundreds of blocked DOF carried no defeat specification
+        # and every response reported SUCCESS with nothing declared.
+        #
+        # The right repair is removal, not adding the family to the contract. A
+        # completeness method reads THE VIEW IT WAS GIVEN; reaching for a premise
+        # class the responsibility does not declare is a second input channel,
+        # and widening the contract to feed a check would give s04b a premise it
+        # has no engineering question for. Whether a candidate's evidence is good
+        # enough to keep is judged AFTER this pass, by feasibility, which does
+        # declare the classes it needs.
         return out
 
 
@@ -981,6 +978,65 @@ def _view_boxes(view) -> Dict[str, Tuple[List[float], List[float]]]:
         if box:
             out[e.get("body")] = box
     return out
+
+
+#: A record still carrying unqualified authority, decided the way DesignState
+#: decides it. The payload helpers below are pure, so they cannot ask the state.
+_STANDING = "STANDING"
+
+
+def _standing_rows(rows) -> List[Dict[str, Any]]:
+    return [r for r in (rows or [])
+            if isinstance(r, dict) and r.get("_validity", _STANDING) == _STANDING]
+
+
+def _payload_boxes(payload) -> Dict[str, Tuple[List[float], List[float]]]:
+    """body -> box, from a family->records payload. Same rule as `_boxes`."""
+    out = {}
+    for e in _standing_rows(payload.get("Envelope")):
+        ext = e.get("extent") or {}
+        c, h = ext.get("centre"), ext.get("half_extent")
+        if isinstance(c, list) and isinstance(h, list) and len(c) == 3 and len(h) == 3:
+            out[e.get("body")] = aabb(c, h)
+    return out
+
+
+def branch_payloads(state, families: Sequence[str]) -> List[Dict[str, List[Dict[str, Any]]]]:
+    """One payload per candidate branch: the entities that rest on it.
+
+    A GEOMETRIC DIAGNOSTIC THAT MIXES BRANCHES ANSWERS ABOUT NO MECHANISM.
+    Candidates coexist in one DesignState, so `state.family("Envelope")` is every
+    alternative's arrangement at once, and a diagnostic reading it produces a body
+    sweeping into another CANDIDATE's body and an assembly step obstructed by a
+    part from a mechanism it will never be built with. Neither finding is about
+    any design that exists.
+
+    Scoped by the entity's OWN PREMISES rather than by a candidate-id filter
+    written into each check: an entity resting on a candidate is that branch's,
+    and that is the same fact the consumer boundary reads. Nothing here consults
+    a ConsumerView - these are diagnostics over committed state and must not
+    depend on a downstream consumer to know what they are looking at.
+
+    An entity resting on NO candidate belongs to every branch, and a state with
+    no candidate premises at all is ONE implicit branch - which is what every
+    single-mechanism fixture is, so their behaviour is unchanged.
+    """
+    candidates = {c["entity_id"] for c in state.family("Candidate")}
+    unscoped: Dict[str, List[Dict[str, Any]]] = {}
+    per: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
+    for family in families:
+        for record in state.family(family):
+            mine = {p for p in (record.get("_premises") or []) if p in candidates}
+            if mine:
+                for branch in mine:
+                    per.setdefault(branch, {}).setdefault(family, []).append(record)
+            else:
+                unscoped.setdefault(family, []).append(record)
+    if not per:
+        return [{f: list(unscoped.get(f) or []) for f in families}]
+    return [{f: list(unscoped.get(f) or []) + list((per[b].get(f) or []))
+             for f in families}
+            for b in sorted(per)]
 
 
 def _boxes(state) -> Dict[str, Tuple[List[float], List[float]]]:
@@ -1217,29 +1273,52 @@ def swept_clearance_check(state) -> List[str]:
     direction, and the state coordinates - never from anything the model
     asserted about clearance. A group that sweeps into a KEEP_OUT region or into
     a body it has no declared interface with is reported.
+
+    ONE BRANCH AT A TIME. The state holds every candidate's arrangement, and a
+    sweep tested against another candidate's bodies is a collision between two
+    mechanisms that will never exist together.
     """
-    boxes, gb = _boxes(state), _group_body(state)
-    joints = {j["entity_id"]: j for j in state.family("Joint")}
-    states = {s["entity_id"]: s for s in state.family("State")}
+    # The families this computation reads, written where it is called rather
+    # than as a module constant: a standing table of families is how a hand-kept
+    # "what may this see" whitelist grows back, and the list belongs beside the
+    # call it scopes, where a reader checks it against the function below.
+    return [p for payload in branch_payloads(
+                state, ("Envelope", "RigidGroup", "Joint", "State", "Transition",
+                        "Interface", "FunctionalRegion"))
+            for p in swept_clearance_findings(payload)]
+
+
+def swept_clearance_findings(payload) -> List[str]:
+    """The same computation over ONE branch's payload. Pure, and the only copy.
+
+    Taking a payload rather than the state is what makes the scope decidable:
+    the caller says which mechanism this is about, and nothing in here can widen
+    it. `swept_clearance_check` is the state-level entry point and does exactly
+    that partitioning.
+    """
+    boxes = _payload_boxes(payload)
+    gb = {g["entity_id"]: g.get("body") for g in (payload.get("RigidGroup") or [])}
+    joints = {j["entity_id"]: j for j in (payload.get("Joint") or [])}
+    states = {s["entity_id"]: s for s in (payload.get("State") or [])}
     placements = {}
-    for j in state.family("Joint"):
+    for j in (payload.get("Joint") or []):
         o = j.get("frame_origin")
         if isinstance(o, list) and len(o) == 3:
             placements[j["entity_id"]] = o
     declared = set()
-    for i in state.family("Interface"):
+    for i in (payload.get("Interface") or []):
         b = [x for x in (i.get("bodies") or []) if isinstance(x, str)]
         if len(b) >= 2:
             declared.add(frozenset(b[:2]))
     keepouts = []
-    for r in state.family("FunctionalRegion"):
+    for r in (payload.get("FunctionalRegion") or []):
         v = r.get("volume")
         if r.get("role") == "KEEP_OUT" and isinstance(v, dict) \
                 and isinstance(v.get("centre"), list):
             keepouts.append((r["entity_id"], aabb(v["centre"], v["half_extent"])))
 
     problems: List[str] = []
-    for t in state.standing("Transition"):
+    for t in _standing_rows(payload.get("Transition")):
         a, b = states.get(t.get("from_state")), states.get(t.get("to_state"))
         if not (a and b):
             problems.append("TRANSITION_ENDPOINT_MISSING: %s" % t["entity_id"])
@@ -1290,9 +1369,24 @@ def assembly_path_check(state) -> List[str]:
     Against the preceding configuration, not the finished product: a part that
     fits into the empty shell and not into the half-built one is the failure
     this catches, and checking against the final assembly would miss it.
+
+    ONE BRANCH AT A TIME, because `order_index` is a sequence within ONE
+    mechanism and means nothing across two.
     """
-    boxes = _boxes(state)
-    steps = sorted(state.family("AssemblyStep"),
+    return [p for payload in branch_payloads(state, ("Envelope", "AssemblyStep"))
+            for p in assembly_path_findings(payload)]
+
+
+def assembly_path_findings(payload) -> List[str]:
+    """The same computation over ONE branch's payload. Pure, and the only copy.
+
+    Order index is a sequence WITHIN a mechanism. Sorting every candidate's steps
+    together makes each branch's first body "already placed" before every other
+    branch's second, and every obstruction that follows is between parts of two
+    designs that are alternatives to each other.
+    """
+    boxes = _payload_boxes(payload)
+    steps = sorted((payload.get("AssemblyStep") or []),
                    key=lambda s: s.get("order_index") or 0)
     directions = {}
     for s in steps:
