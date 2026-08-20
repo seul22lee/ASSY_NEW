@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import os
 import re
-from typing import Any, Dict, Iterable, List, Set, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from ..state.patch import Op
 from .base import Stage, carry_invocation_premises
@@ -1300,8 +1300,9 @@ occur, between which roles. You say HOW THIS CANDIDATE does it.
   out - an open path is a real answer and saying so is better than closing it
   with something you did not establish.
 
-Every reference above is an ID. A description is not an id, and an interaction
-you describe instead of emitting does not exist.
+{references}
+
+An interaction you describe instead of emitting does not exist.
 
 Ids you emit are new. Never reuse an id from the input.
 
@@ -1312,6 +1313,153 @@ TYPED INPUT
 -----------
 {mechanism}
 """
+
+
+#: FAMILIES THIS PASS AUTHORS, from the responsibility contract's own list, minus
+#: what the PIPELINE authors rather than the model. MobilityExpectation is a
+#: declared s03b output and is derived by `derived_operations` from the relations
+#: the model writes, so asking the model about its references would be asking for
+#: a value it does not supply.
+PIPELINE_AUTHORED_FAMILIES = ("MobilityExpectation",)
+
+#: Reference-valued fields the PIPELINE fills in, so the model is not asked for
+#: them. `LoadPath.candidate` is the invocation's own candidate: this pass runs
+#: once per candidate, so a model restating it can only agree or be wrong.
+#: Listed rather than inferred, because "the producer supplies this" is a fact
+#: about the producer, and the standing test requires every contract-declared
+#: reference to be either PROMPTED or named here.
+PIPELINE_SUPPLIED_REFERENCES = (("LoadPath", "candidate"),)
+
+
+def _output_families(responsibility_id: str = "s03b") -> Tuple[str, ...]:
+    """The families this responsibility may author, read from the contract."""
+    import yaml as _yaml
+    here = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(here, "..", "..", "contracts",
+                        "STAGE_RESPONSIBILITY_CONTRACT.yaml")
+    with open(os.path.abspath(path)) as fh:
+        doc = _yaml.safe_load(fh)
+    declared = (doc["stages"][responsibility_id].get("permitted_output_semantics")
+                or [])
+    return tuple(f for f in declared if f not in PIPELINE_AUTHORED_FAMILIES)
+
+
+def reference_rules(responsibility_id: str = "s03b") -> List[Dict[str, Any]]:
+    """Every reference-valued field of every family this pass authors.
+
+    THE ONE ENUMERATION. Read from the contract, so a field added there appears
+    here without anyone remembering; a field that changes target, cardinality or
+    conditionality changes here for the same reason.
+
+    Three kinds of declaration are carried, because the contract has three and
+    the difference is what a model needs to be told:
+
+      reference    `field_semantics` says the field IS a reference and to what.
+                   `target` may be one family, a list of families, or ANY - and
+                   ANY is not "anything", it is "any entity this design has",
+                   which still forbids prose.
+      conditional  `conditional_references` says the field is a reference only
+                   when a sibling field says so - `alternatives` holds ids when
+                   `alternatives_kind` is ENTITY_REFS and holds no ids otherwise.
+                   A model told the field is "a list" writes prose into it, which
+                   is exactly what the live sweep recorded.
+      supplied     the pipeline fills it, so it is not asked for at all.
+
+    Sorted, so the rendered block is stable and a diff means a contract change.
+    """
+    contracts = _contracts()
+    families = _output_families(responsibility_id)
+    supplied = set(PIPELINE_SUPPLIED_REFERENCES)
+    rows: List[Dict[str, Any]] = []
+    for family in families:
+        spec = contracts.families.get(family) or {}
+        for field, decl in sorted((spec.get("field_semantics") or {}).items()):
+            if not isinstance(decl, dict) or decl.get("kind") != "reference":
+                continue
+            if (family, field) in supplied:
+                continue
+            target = decl.get("target")
+            rows.append({
+                "family": family, "field": field, "kind": "reference",
+                "targets": ("ANY" if target == "ANY" else
+                            list(target) if isinstance(target, list) else [target]),
+                "cardinality": decl.get("cardinality", "one"),
+                "resolvable": bool(decl.get("resolvable", False)),
+                "population": decl.get("referent_population") or _branch_population(),
+                "when": None})
+        for rule in contracts.conditional_references(family):
+            field = rule.get("field")
+            if (family, field) in supplied:
+                continue
+            target = rule.get("target")
+            rows.append({
+                "family": family, "field": field, "kind": "conditional",
+                "targets": ("ANY" if target in (None, "ANY") else
+                            list(target) if isinstance(target, list) else [target]),
+                "cardinality": rule.get("cardinality", "many"),
+                "resolvable": bool(rule.get("resolvable", False)),
+                "population": rule.get("referent_population") or _branch_population(),
+                "when": dict(rule.get("applies_when") or {})})
+    return sorted(rows, key=lambda r: (r["family"], r["field"]))
+
+
+#: Which response key carries which family. The prompt speaks in response keys
+#: and the contract speaks in families, so one of the two has to say how they
+#: correspond; saying it here keeps it in one place and lets a test check it
+#: against what the producer actually emits.
+RESPONSE_KEY_OF = {"PhysicalInteraction": "physical_interactions",
+                   "ConstraintRelation": "constraint_relations",
+                   "LoadPath": "load_paths", "AssemblyStep": "assembly_steps",
+                   "UnresolvedDecision": "unresolved"}
+
+
+def render_reference_rules(rows: Optional[List[Dict[str, Any]]] = None) -> str:
+    """The prompt's reference section, generated from `reference_rules`.
+
+    WRITTEN BY THE CONTRACT, not by hand. The live s03b sweep failed 6/6 on
+    reference typing alone: `depends_on` named bodies, `activates` named joints,
+    `maintaining_interaction` named an interface because the name reads like one,
+    and `kept_open_by`, `blocks` and `alternatives` held prose. The prompt named
+    each of those fields exactly once, in the schema line, and never said what it
+    points at - so nothing the model could read told it. s03a carries the same
+    section and its sweep was accepted 6/6.
+
+    Generated rather than written so a field added to the contract cannot be
+    silently missing from it, which is the failure this section exists to end.
+    """
+    rows = reference_rules() if rows is None else rows
+    out = ["REFERENCES BETWEEN ITEMS",
+           "Every field below holds ENTITY IDS and nothing else. A description is",
+           "not an id: prose in one of these fields names no entity and is refused.",
+           "An id is either one from the TYPED INPUT below or one you create in this",
+           "same response, and it must be of the family named here - a body id where",
+           "a step is required denotes the wrong thing, however sensible it reads.",
+           ""]
+    import textwrap as _tw
+    for r in rows:
+        key = RESPONSE_KEY_OF.get(r["family"], r["family"])
+        name = "%s[].%s" % (key, r["field"])
+        if r["targets"] == "ANY":
+            what = ("any entity id this design has - the field is deliberately "
+                    "not restricted to one family, and prose is still refused")
+        else:
+            plural = "s" if r["cardinality"] == "many" else ""
+            what = "%s id%s" % (" or ".join(r["targets"]), plural)
+            if len(r["targets"]) > 1:
+                what += " - either family, and nothing else"
+        if r["cardinality"] == "many" and r["targets"] != "ANY":
+            what += "; [] when there are none"
+        if r["when"]:
+            when = r["when"]
+            what = ("ONLY when %s is %s: %s. Otherwise this field holds no ids at "
+                    "all and nothing here applies to it"
+                    % (when.get("field"), when.get("equals"), what))
+        # THE FIELD ON ITS OWN LINE. A two-column layout with names this long
+        # leaves a 25-character description column, and ragged text is the part
+        # a reader skips.
+        out.append("  " + name)
+        out.extend("      " + line for line in _tw.wrap(what, width=74) or [""])
+    return "\n".join(out)
 
 
 def legacy_shapes_in_recording(parsed) -> Dict[str, int]:
@@ -1348,6 +1496,10 @@ class S03BMobilityAndAssembly(Stage):
             effects=" | ".join(_EFFECT_KINDS),
             terminations=" | ".join(TERMINATION_STRATEGIES),
             path_kinds=" | ".join(PATH_KINDS),
+            # THE CONTRACT'S OWN ANSWER about every reference this pass writes,
+            # rendered at prompt time so a contract change reaches the model
+            # without anyone editing prose.
+            references=render_reference_rules(),
             candidate=_render(inputs.get("candidate") or {}),
             mechanism=_render(inputs["consumer_view"]))
 
