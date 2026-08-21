@@ -1354,6 +1354,28 @@ restrains that joint-relative DOF. Do not produce one by matching
 ordering, or from body or configuration names: which side of a joint a held
 group happens to be is not what the relation says.
 
+IT ADDS TO `blocked_dofs`; IT DOES NOT REPLACE IT. The two answer different
+questions and a relation that restrains anything needs both:
+
+  blocked_dofs                 which DOF of the RETAINED GROUP this relation
+                               removes, in the configurations it names. This is
+                               what the mobility of each configuration is
+                               expanded from, so a relation that leaves it empty
+                               removes nothing anywhere and disposes no cell.
+  blocked_relative_motions     which relative JOINT motion that same restraint
+                               corresponds to, where you know the correspondence.
+                               Additional information about the same relation,
+                               and never a substitute for the line above.
+
+Fill in `blocked_dofs` for every relation that restrains group mobility, exactly
+as before. Add `blocked_relative_motions` on top of it when you can say which
+joint-relative motion it is. Neither is computed from the other, by you or by
+anything downstream.
+
+`configurations` is the complete list of where a relation holds. An empty list
+means it holds NOWHERE - it is not shorthand for "everywhere" - so a relation you
+mean to be active must name the configurations it is active in.
+
 {references}
 
 An interaction you describe instead of emitting does not exist.
@@ -1580,6 +1602,25 @@ def _motions(entries) -> Set[Tuple[str, str]]:
     return out
 
 
+def _configurations(relation) -> Set[str]:
+    return {c for c in (relation.get("configurations") or []) if isinstance(c, str)}
+
+
+def _active_in(relation, configuration: str) -> bool:
+    """Whether a restraint holds in ONE configuration. The contract's own rule.
+
+    A relation "holds where it says it holds": `configurations` is the complete
+    list, so an EMPTY list means it holds NOWHERE - the same reading `s03b`
+    already reports as evidence that disposes nothing, and the same one
+    `derive_mobility` applies when it expands a relation over the configurations
+    it declares. Treating empty as "everywhere" would turn an author's silence
+    into the widest possible claim, which is the defect that reading exists to
+    prevent, and it would make a relation that restrains nothing block every
+    transition in the design.
+    """
+    return configuration in _configurations(relation)
+
+
 def transition_consistency(requirements, relations, joints) -> List[str]:
     """What the authored state machine says about itself, and where it disagrees.
 
@@ -1626,15 +1667,26 @@ def transition_consistency(requirements, relations, joints) -> List[str]:
             if relation is None:
                 continue
             # B. a release only means something where the restraint is active
-            configs = [c for c in (relation.get("configurations") or [])
-                       if isinstance(c, str)]
-            if source and configs and source not in configs:
+            if source and not _active_in(relation, source):
                 out.append("RELEASE_NOT_ACTIVE_AT_SOURCE: %s releases %s, which "
                            "holds in %s and not in %s"
-                           % (rid, name, ", ".join(sorted(configs)), source))
-            # C. and only where it restrains something the transition needs
+                           % (rid, name,
+                              ", ".join(sorted(_configurations(relation)))
+                              or "no configuration", source))
+            # C. and only where it restrains something the transition needs.
+            #    ABSENT AND DISJOINT ARE DIFFERENT ANSWERS. A relation that has
+            #    not said which relative motion it removes has not said why
+            #    releasing it matters - which is incompleteness, and reading it
+            #    as "restrains nothing relevant" would be inventing the answer.
+            #    One that HAS said, and named something else, is a mismatch
+            #    between two statements that were both made.
             restrained = _motions(relation.get("blocked_relative_motions"))
-            if restrained and not (restrained & required):
+            if not restrained:
+                out.append("RELEASE_RELATIVE_MOTION_NOT_ESTABLISHED: %s releases "
+                           "%s, and that relation does not say which relative "
+                           "joint motion it restrains, so why the release "
+                           "matters is not established" % (rid, name))
+            elif not (restrained & required):
                 out.append("RELEASE_RELATION_NOT_APPLICABLE: %s releases %s, "
                            "which restrains %s and the transition requires %s"
                            % (rid, name,
@@ -1650,9 +1702,7 @@ def transition_consistency(requirements, relations, joints) -> List[str]:
         for name, relation in sorted(by_relation.items()):
             if name in released:
                 continue
-            configs = [c for c in (relation.get("configurations") or [])
-                       if isinstance(c, str)]
-            if source and configs and source not in configs:
+            if source and not _active_in(relation, source):
                 continue
             blocking = _motions(relation.get("blocked_relative_motions")) & required
             if blocking:

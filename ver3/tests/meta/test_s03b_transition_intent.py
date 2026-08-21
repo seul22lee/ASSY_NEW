@@ -114,6 +114,67 @@ class TestTransitionConsistency(unittest.TestCase):
         self.assertTrue(found, "a transition required a DOF the joint lacks")
         self.assertIn("TX", found[0])
 
+    def test_an_empty_configuration_list_means_nowhere_not_everywhere(self):
+        """`configurations` is the complete list of where a relation holds, so
+        an empty one holds NOWHERE. Reading it as "everywhere" would turn an
+        author's silence into the widest possible claim and let a relation that
+        restrains nothing block every transition in the design."""
+        released = findings([requirement(released=["CRL-1"])],
+                            [relation(configs=())], [joint()])
+        self.assertTrue([f for f in released
+                         if f.startswith("RELEASE_NOT_ACTIVE_AT_SOURCE")], released)
+
+    def test_an_empty_configuration_list_blocks_nothing(self):
+        self.assertEqual([], findings([requirement()], [relation(configs=())],
+                                      [joint()], "UNRELEASED_REQUIRED_MOTION"))
+
+    def test_a_relation_active_elsewhere_blocks_nothing_here(self):
+        self.assertEqual([], findings([requirement()],
+                                      [relation(configs=("CFG-9",))], [joint()],
+                                      "UNRELEASED_REQUIRED_MOTION"))
+
+    def test_a_release_naming_no_relative_motion_is_incompleteness(self):
+        """The relation was named as one that must be released and has not said
+        which motion it removes. Distinct from naming a different motion: absent
+        is not disjoint, and reading it as 'restrains nothing relevant' would be
+        inventing the answer."""
+        out = findings([requirement(released=["CRL-1"])],
+                       [relation(blocks=())], [joint()])
+        codes = {f.split(":")[0] for f in out}
+        self.assertIn("RELEASE_RELATIVE_MOTION_NOT_ESTABLISHED", codes)
+        self.assertNotIn("RELEASE_RELATION_NOT_APPLICABLE", codes)
+        self.assertNotIn("UNRELEASED_REQUIRED_MOTION", codes)
+
+    def test_an_absent_field_is_the_same_answer_as_an_empty_one(self):
+        for blocks in (None, ()):
+            with self.subTest(blocks=blocks):
+                out = findings([requirement(released=["CRL-1"])],
+                               [relation(blocks=blocks)], [joint()],
+                               "RELEASE_RELATIVE_MOTION_NOT_ESTABLISHED")
+                self.assertTrue(out, out)
+
+    def test_a_release_naming_a_different_motion_is_a_mismatch_not_a_silence(self):
+        out = findings([requirement(released=["CRL-1"])],
+                       [relation(blocks=(("JNT-9", "TZ"),))],
+                       [joint(), joint("JNT-9", dof=("TZ",))])
+        codes = {f.split(":")[0] for f in out}
+        self.assertIn("RELEASE_RELATION_NOT_APPLICABLE", codes)
+        self.assertNotIn("RELEASE_RELATIVE_MOTION_NOT_ESTABLISHED", codes)
+
+    def test_an_intersecting_release_establishes_applicability(self):
+        out = findings([requirement(released=["CRL-1"])], [relation()], [joint()])
+        codes = {f.split(":")[0] for f in out}
+        self.assertNotIn("RELEASE_RELATION_NOT_APPLICABLE", codes)
+        self.assertNotIn("RELEASE_RELATIVE_MOTION_NOT_ESTABLISHED", codes)
+
+    def test_activity_is_read_from_configurations_and_nothing_else(self):
+        from .test_s3_interface_readiness import _code_only
+        from ver3.assy_v3.stages.s03_topology_and_mobility import _active_in
+        code = _code_only(_active_in)
+        for token in ("retained_group", "child_group", "parent_group",
+                      "blocked_dofs", "name"):
+            self.assertNotIn(token, code)
+
     def test_a_release_that_is_not_active_at_the_source_is_reported(self):
         found = findings([requirement(released=["CRL-1"])],
                          [relation(configs=("CFG-2",))], [joint()],
@@ -132,7 +193,8 @@ class TestTransitionConsistency(unittest.TestCase):
         same capability, and every rule above matches on (joint, dof)."""
         for case in ([requirement()], [requirement(released=["CRL-1"])],
                      [requirement(motions=(("JNT-1", "TX"),))]):
-            for relations in ([relation()], [relation(configs=("CFG-2",))]):
+            for relations in ([relation()], [relation(configs=("CFG-2",))],
+                              [relation(configs=())], [relation(blocks=())]):
                 with self.subTest(case=case[0]["id"], relations=relations[0]["id"]):
                     forward = transition_consistency(case, relations, [joint()])
                     reversed_ = transition_consistency(
@@ -375,6 +437,17 @@ class TestThePromptCarriesTheSemantics(unittest.TestCase):
         for token in ("retained_group", "parent", "child"):
             self.assertIn(token, self.prompt)
         self.assertIn("Do not produce one by matching", self.prompt)
+
+    def test_the_prompt_says_the_new_field_is_additive(self):
+        """One saved response filled `blocked_relative_motions` and left
+        `blocked_dofs` empty, so the relation restrained nothing anywhere. The
+        prompt now says which question each answers and that neither is computed
+        from the other."""
+        self.assertIn("IT ADDS TO `blocked_dofs`; IT DOES NOT REPLACE IT",
+                      self.prompt)
+        self.assertIn("Fill in `blocked_dofs` for every relation that restrains",
+                      self.prompt)
+        self.assertIn("means it holds NOWHERE", self.prompt)
 
     def test_it_asks_for_no_realization(self):
         """Capability only: no force, energy, trigger, angle or trajectory."""
