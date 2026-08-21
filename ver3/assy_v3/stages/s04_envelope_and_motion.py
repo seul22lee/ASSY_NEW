@@ -1020,17 +1020,20 @@ def branch_payloads(state, families: Sequence[str]) -> List[Dict[str, List[Dict[
     ontology and a strictly narrower one: it put every indirectly-owned entity in
     no branch and every genuinely unscoped one in ALL of them.
 
-    Two absences that are not the same fact, and the canonical rule tells them
-    apart because it needs both:
+    Two absences that are not the same fact, and only the FIRST licenses running
+    over everything:
 
-      NOTHING HAS BRANCHED. No candidate stands, or none of these families is
-      built on one. "Before the work branches, this branch is the design" -
-      `branch_membership`'s own words - so the diagnostic runs once over
-      everything, which is what every single-mechanism fixture is.
+      NOTHING HAS BRANCHED. No Candidate stands at all. "Before the work
+      branches, this branch is the design" - `branch_membership`'s own words - so
+      the diagnostic runs once over everything, which is what every
+      single-mechanism fixture is.
 
-      THIS ENTITY IS UNSCOPED. Branches exist and no candidate reaches this
-      record. It belongs to no mechanism, so it appears in no payload; injecting
-      it into every branch would let an orphan obstruct six assemblies at once.
+      NOTHING IS OWNED. Candidates stand and no branch reaches these records.
+      They are UNSCOPED, they belong to no mechanism, and there is nothing to
+      check: returning them as one implicit mechanism would assemble a machine
+      out of parts the design says belong to none, and report its collisions as
+      if they were somebody's. An unscoped record appears in no payload, whether
+      it is one of many or all there is.
 
     The RESOLVER is asked, never a ConsumerView. `branch_membership` is a pure
     function of state and contracts; a view is built for a particular consumer,
@@ -1041,14 +1044,11 @@ def branch_payloads(state, families: Sequence[str]) -> List[Dict[str, List[Dict[
 
     records = [(family, record) for family in families
                for record in state.family(family)]
-    everything = [{f: list(state.family(f)) for f in families}]
     if not state.standing("Candidate"):
-        return everything
+        return [{f: list(state.family(f)) for f in families}]
     membership = branch_membership(state, state.c,
                                    [r["entity_id"] for _f, r in records])
     branches = sorted({b for owned in membership.values() for b in owned})
-    if not branches:
-        return everything
     out: List[Dict[str, List[Dict[str, Any]]]] = []
     for branch in branches:
         payload: Dict[str, List[Dict[str, Any]]] = {f: [] for f in families}

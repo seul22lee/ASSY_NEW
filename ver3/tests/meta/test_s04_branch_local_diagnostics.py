@@ -314,6 +314,111 @@ class TestCanonicalOwnershipIsTransitiveAndScoped(_TwoBranches):
             self.assertNotIn("BOD-B", f, "it was tested against the other branch")
 
 
+class TestNothingOwnedIsNotNothingBranched(_fixtures.StateBuilder, unittest.TestCase):
+    """Candidates stand and no branch reaches these records. There is nothing
+    to check, and "everything" is not the answer.
+
+    The two absences look alike from inside the resolver - both give an empty
+    membership - and the fallback that treated them alike would take records the
+    design says belong to no mechanism, assemble them into one, and report its
+    collisions as if they were somebody's.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.c = Contracts()
+
+    def orphans_beside_two_candidates(self):
+        s = DesignState(run_id="s04-unowned")
+        self.add(s, "s02", "Candidate", "CND-A", principle={"h": "f"})
+        self.add(s, "s02", "Candidate", "CND-B", principle={"h": "f"})
+        # Every diagnostic record below premises nothing and names nothing that
+        # any candidate reaches: canonically UNSCOPED, and deliberately placed on
+        # top of one another so a mechanism assembled out of them would collide.
+        ops = [
+            Op("CREATE", "Body", "BOD-X1",
+               {"instance_identity": "one", "role": "stray",
+                "created_by_stage": "s03"}, "s03:topology"),
+            Op("CREATE", "Body", "BOD-X2",
+               {"instance_identity": "one", "role": "stray",
+                "created_by_stage": "s03"}, "s03:topology"),
+            Op("CREATE", "AssemblyStep", "ASY-X1",
+               {"order_index": 1, "body": "BOD-X1", "access_side": "+Z",
+                "activates": [], "termination_strategy": "NONE",
+                "path_kind": "RIGID", "depends_on": [],
+                "insertion_direction": [0.0, 0.0, 1.0]}, "s03b:relations"),
+            Op("CREATE", "AssemblyStep", "ASY-X2",
+               {"order_index": 2, "body": "BOD-X2", "access_side": "+Z",
+                "activates": [], "termination_strategy": "NONE",
+                "path_kind": "RIGID", "depends_on": [],
+                "insertion_direction": [0.0, 0.0, 1.0]}, "s03b:relations"),
+        ]
+        spatial = [
+            Op("CREATE", "Envelope", "ENV-X1",
+               {"body": "BOD-X1", "extent": box((0.0, 0.0, 0.0)), "frame": "world",
+                "maturity": "PROVISIONAL"}, "s04a:arrangement"),
+            Op("CREATE", "Envelope", "ENV-X2",
+               {"body": "BOD-X2", "extent": box((0.0, 0.0, 0.0)), "frame": "world",
+                "maturity": "PROVISIONAL"}, "s04a:arrangement"),
+        ]
+        for stage_id, chosen in (("s03", ops), ("s04", spatial)):
+            patch = StagePatch(patch_id="unowned-%s" % stage_id, run_id=s.run_id,
+                               stage_id=stage_id, stage_attempt=1,
+                               parent_state_hash=s.state_hash(), operations=chosen,
+                               execution_status="SUCCESS",
+                               provenance={"purpose": "unowned records"})
+            problems = s.validate(patch)
+            self.assertEqual([], problems, problems[:4])
+            s.apply(patch)
+        return s
+
+    def test_the_premise_of_this_test(self):
+        """Candidates stand, the records exist, and none of them is owned."""
+        state = self.orphans_beside_two_candidates()
+        self.assertEqual(2, len(state.standing("Candidate")))
+        self.assertEqual(2, len(state.family("Envelope")))
+        self.assertEqual(2, len(state.family("AssemblyStep")))
+
+    def test_no_payload_is_produced_for_records_no_branch_owns(self):
+        state = self.orphans_beside_two_candidates()
+        self.assertEqual([], branch_payloads(state, ASSEMBLY_PATH_FAMILIES))
+        self.assertEqual([], branch_payloads(state, SWEPT_CLEARANCE_FAMILIES))
+
+    def test_the_checks_invent_no_mechanism_from_them(self):
+        """The two envelopes are coincident, so a mechanism assembled out of them
+        WOULD report an obstruction. None is reported, because there is no such
+        mechanism."""
+        state = self.orphans_beside_two_candidates()
+        self.assertEqual([], assembly_path_check(state))
+        self.assertEqual([], swept_clearance_check(state))
+
+    def test_a_state_with_no_candidate_still_checks_the_same_records(self):
+        """The other absence, unchanged: before the work branches, this branch is
+        the design - and the identical records DO produce the obstruction."""
+        state = self.orphans_beside_two_candidates()
+        unbranched = DesignState(run_id="s04-unbranched")
+        for stage_id, families in (("s03", ("Body", "AssemblyStep")),
+                                   ("s04", ("Envelope",))):
+            ops = [Op("CREATE", fam, r["entity_id"],
+                      {k: v for k, v in r.items() if not k.startswith("_")},
+                      "s03:topology" if stage_id == "s03" else "s04a:arrangement")
+                   for fam in families for r in state.family(fam)]
+            patch = StagePatch(patch_id="unbranched-%s" % stage_id,
+                               run_id=unbranched.run_id, stage_id=stage_id,
+                               stage_attempt=1,
+                               parent_state_hash=unbranched.state_hash(),
+                               operations=ops, execution_status="SUCCESS",
+                               provenance={"purpose": "no candidate at all"})
+            problems = unbranched.validate(patch)
+            self.assertEqual([], problems, problems[:4])
+            unbranched.apply(patch)
+        self.assertEqual([], unbranched.standing("Candidate"))
+        self.assertEqual(1, len(branch_payloads(unbranched, ASSEMBLY_PATH_FAMILIES)))
+        self.assertTrue([f for f in assembly_path_check(unbranched)
+                         if f.startswith("ASSEMBLY_PATH_OBSTRUCTED")],
+                        "the single-mechanism reading stopped finding anything")
+
+
 # ======================================================================
 # Cross-branch findings disappear; same-branch findings remain
 # ======================================================================
