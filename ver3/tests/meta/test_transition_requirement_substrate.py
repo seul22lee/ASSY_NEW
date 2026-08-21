@@ -334,6 +334,8 @@ class TestTheSubstrateChangesNothingYet(_Substrate):
                                           "provider_body": "BOD-1"}))
 
     def test_no_responsibility_requires_it_as_a_premise(self):
+        """Producing it is not requiring it. Unit 2 gave s03b the question; no
+        consumer has been pointed at the answer yet."""
         with open(os.path.join(_paths.REPO_ROOT, "ver3", "contracts",
                                "STAGE_RESPONSIBILITY_CONTRACT.yaml")) as fh:
             responsibility = yaml.safe_load(fh)
@@ -351,12 +353,18 @@ class TestTheSubstrateChangesNothingYet(_Substrate):
                 self.assertNotEqual({"TransitionRequirement"}, satisfying,
                                     "%s already requires it as a premise" % name)
 
-    def test_no_producer_writes_one_in_this_unit(self):
+    def test_only_s03b_writes_one(self):
+        """Unit 1 asserted that NOBODY wrote one, which was true of the unit that
+        defined the vocabulary. Unit 2 gave it a producer, so the property worth
+        holding is the narrower one: s03 authors it and s04 does not touch it.
+        The write boundary enforces the same thing through ownership; this says
+        it about the code, so a stage that started emitting one would be visible
+        here as well as refused there."""
+        import inspect
         import ver3.assy_v3.stages.s03_topology_and_mobility as s03
         import ver3.assy_v3.stages.s04_envelope_and_motion as s04
-        import inspect
-        for module in (s03, s04):
-            self.assertNotIn('"TransitionRequirement"', inspect.getsource(module))
+        self.assertIn('"TransitionRequirement"', inspect.getsource(s03))
+        self.assertNotIn('"TransitionRequirement"', inspect.getsource(s04))
 
 
 # ======================================================================

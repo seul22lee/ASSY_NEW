@@ -735,8 +735,9 @@ class TestEveryS03bFieldAgreesAcrossTheSeam(_Seam):
                                                    "CREATE", "HYPOTHESIS"):
                 continue
             if name in ("PhysicalInteraction", "ConstraintRelation", "LoadPath",
-                        "AssemblyStep", "UnresolvedDecision", "maturity",
-                        "candidate", "irrelevance"):
+                        "AssemblyStep", "UnresolvedDecision",
+                        "TransitionRequirement", "maturity", "candidate",
+                        "irrelevance"):
                 continue
             with self.subTest(field=name):
                 self.assertIn(name, S03B_PROMPT,

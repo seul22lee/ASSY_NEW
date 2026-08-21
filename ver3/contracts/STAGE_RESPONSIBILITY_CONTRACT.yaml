@@ -373,6 +373,16 @@ stages:
       a test defeat it?
     - How does each load reach an external site?
     - In what order does it assemble, and what retains each part?
+    # S-10 UNIT 2. The state machine the mechanism has to be able to walk.
+    # Everything above describes ONE configuration at a time - what holds a
+    # body there, what transmits through it, how it was put there. None of
+    # them asks whether the thing can CHANGE state, and a mechanism whose
+    # configurations are each well held and none reachable from another is a
+    # solid object.
+    - >
+      Which directed configuration changes must be possible, which relative
+      joint motions do they require, and which active restraints must be
+      released for those changes?
     required_reasoning_premise_classes:
     - class: topology
       instance_selection:
@@ -445,6 +455,8 @@ stages:
     - LoadPath
     - AssemblyStep
     - UnresolvedDecision
+    # S-10 UNIT 2. The directed state changes this pass now authors.
+    - TransitionRequirement
     prohibited_decisions:
     - Position, dimension or axis placement
     - Selecting a candidate

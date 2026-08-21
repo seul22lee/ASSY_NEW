@@ -77,8 +77,23 @@ def contract_references():
     for family in declared:
         spec = families.get(family) or {}
         for field, decl in (spec.get("field_semantics") or {}).items():
-            if isinstance(decl, dict) and decl.get("kind") == "reference":
+            if not isinstance(decl, dict):
+                continue
+            if decl.get("kind") == "reference":
                 out[(family, field)] = dict(decl, _conditional=False)
+                continue
+            # NESTED ROWS COUNT. A `{joint, dof}` row carries an id the boundary
+            # resolves and a value it checks against a closed set; a model told
+            # only that the field is "a list of entries" has been told neither,
+            # so the completeness guarantee has to reach one level down too.
+            if decl.get("kind") != "record_list":
+                continue
+            for name, sub in (decl.get("record_field_semantics") or {}).items():
+                if not isinstance(sub, dict):
+                    continue
+                if sub.get("kind") == "reference" or sub.get("values"):
+                    out[(family, "%s[].%s" % (field, name))] = dict(
+                        sub, _conditional=False)
         for rule in (spec.get("conditional_references") or []):
             out[(family, rule.get("field"))] = dict(rule, _conditional=True)
     return out, families, declared
@@ -153,6 +168,12 @@ class TestTheEnumerationComesFromTheContract(_Rules):
             declared = self.contract[(r["family"], r["field"])]
             target = declared.get("target")
             with self.subTest(field=name):
+                if declared.get("kind") == "enum" or r.get("kind") == "vocabulary":
+                    for value in declared.get("values") or []:
+                        self.assertIn(value, said,
+                                      "%s accepts %s and the prompt does not say "
+                                      "so" % (name, value))
+                    continue
                 if target == "ANY" or target is None:
                     self.assertIn("any entity id", said,
                                   "%s is ANY and the prompt narrows it" % name)

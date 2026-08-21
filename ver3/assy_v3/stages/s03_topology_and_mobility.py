@@ -1242,9 +1242,17 @@ Return one JSON object. Emit every key. Use exactly these key names.
   physical_interactions[]
                         id "PHI-0001", groups[], effect, discharges_effect,
                         at_interface (optional), configurations[] (optional)
+  transition_requirements[]
+                        id "TRQ-0001", from_configuration, to_configuration,
+                        required_relative_motions[] {{joint, dof}},
+                        released_constraints[]
+                        WHAT STATE CHANGE MUST BE POSSIBLE. See THE STATE MACHINE
+                        below. [] is a real answer for a mechanism with one
+                        configuration and nowhere to go.
   constraint_relations[]
                         id "CRL-0001", retained_group, blocked_dofs[],
                         configurations[], driver, blocked_direction (optional),
+                        blocked_relative_motions[] {{joint, dof}} (optional),
                         provider_body (optional),
                         provider_reaction_site (optional),
                         provider_site (optional),
@@ -1300,6 +1308,52 @@ occur, between which roles. You say HOW THIS CANDIDATE does it.
   out - an open path is a real answer and saying so is better than closing it
   with something you did not establish.
 
+THE STATE MACHINE
+A mechanism whose configurations are each well held and none reachable from any
+other is a solid object. Say which changes of state the design must be CAPABLE
+of, and what each one needs.
+
+  DIRECTED. A -> B is not B -> A. A lid that closes and cannot be reopened
+  satisfies one and fails the other, so write each direction you require and do
+  not add the reverse because you wrote the forward.
+
+  NOT A COMPLETE GRAPH. Write the transitions the design actually requires.
+  Every pair of configurations connected in both directions is a claim about the
+  product that nothing asked for.
+
+  ADJACENCY IS NOT IN distinguishing_basis. That field says two configurations
+  DIFFER in some (rigid group, DOF) value. It does not say either can be reached
+  from the other, and it does not say that DOF is free in either of them - a
+  latched lid and an open one differ in a hinge coordinate that is restrained in
+  both, which is what makes them states rather than positions.
+
+  RELATIVE MOTION. `required_relative_motions` names a JOINT and one of its
+  degrees of freedom: the two sides of that joint move relative to each other.
+  It does not say which body travels in the world, and nothing here should be
+  read as naming a moving part.
+
+  A LOCKED SOURCE IS NORMAL. A configuration whose DOF are BLOCKED_BY is a stable
+  state, and leaving it is what a latch, a detent or a catch is for. If leaving
+  the source requires defeating a restraint, name that relation in
+  `released_constraints` - that is the whole point of the field, not an admission
+  of contradiction.
+
+  THE DESTINATION MAY RE-LOCK. Arriving in a state that re-establishes a
+  restraint is normal and is not a contradiction with the transition you just
+  wrote.
+
+  A relation you name in `released_constraints` must say WHICH relative motion it
+  restrains, through its own `blocked_relative_motions`. Otherwise nothing
+  downstream can tell why releasing it matters.
+
+WHEN A RESTRAINT NAMES THE MOTION IT REMOVES
+`constraint_relations[].blocked_relative_motions` is optional and is a
+STATEMENT, not a derivation. Write an entry only where the relation explicitly
+restrains that joint-relative DOF. Do not produce one by matching
+`retained_group` against a joint's parent or child group, by parent/child
+ordering, or from body or configuration names: which side of a joint a held
+group happens to be is not what the relation says.
+
 {references}
 
 An interaction you describe instead of emitting does not exist.
@@ -1338,6 +1392,7 @@ RESPONSE_KEY_OF = {"PhysicalInteraction": "physical_interactions",
                    "ConstraintRelation": "constraint_relations",
                    "LoadPath": "load_paths", "AssemblyStep": "assembly_steps",
                    "UnresolvedDecision": "unresolved",
+                   "TransitionRequirement": "transition_requirements",
                    "MobilityExpectation": None}
 
 
@@ -1403,6 +1458,39 @@ def reference_rules(responsibility_id: str = "s03b") -> List[Dict[str, Any]]:
                 "resolvable": bool(decl.get("resolvable", False)),
                 "population": decl.get("referent_population") or _branch_population(),
                 "when": None})
+        # NESTED REFERENCES ARE REFERENCES. A row of `{joint, dof}` inside a
+        # record list carries an id the write boundary resolves and a value it
+        # checks against a closed set, and a model told only that the field is
+        # "a list of entries" has been told neither. Same descent the canonical
+        # graph makes, for the same reason.
+        for field, decl in sorted((spec.get("field_semantics") or {}).items()):
+            if not isinstance(decl, dict) or decl.get("kind") != "record_list":
+                continue
+            if (family, field) in supplied:
+                continue
+            for name, sub in sorted((decl.get("record_field_semantics") or {}).items()):
+                if not isinstance(sub, dict):
+                    continue
+                if sub.get("kind") == "reference":
+                    target = sub.get("target")
+                    rows.append({
+                        "family": family, "field": "%s[].%s" % (field, name),
+                        "kind": "reference",
+                        "targets": ("ANY" if target == "ANY" else
+                                    list(target) if isinstance(target, list)
+                                    else [target]),
+                        "cardinality": sub.get("cardinality", "one"),
+                        "resolvable": bool(sub.get("resolvable", False)),
+                        "population": (sub.get("referent_population")
+                                       or _branch_population()),
+                        "when": None})
+                elif sub.get("values"):
+                    rows.append({
+                        "family": family, "field": "%s[].%s" % (field, name),
+                        "kind": "vocabulary", "targets": [],
+                        "values": list(sub["values"]), "cardinality": "one",
+                        "resolvable": False,
+                        "population": _branch_population(), "when": None})
         for rule in contracts.conditional_references(family):
             field = rule.get("field")
             if (family, field) in supplied:
@@ -1445,7 +1533,10 @@ def render_reference_rules(rows: Optional[List[Dict[str, Any]]] = None) -> str:
     for r in rows:
         key = RESPONSE_KEY_OF.get(r["family"], r["family"])
         name = "%s[].%s" % (key, r["field"])
-        if r["targets"] == "ANY":
+        if r.get("kind") == "vocabulary":
+            what = ("exactly one of %s, and nothing else"
+                    % " | ".join(r.get("values") or []))
+        elif r["targets"] == "ANY":
             what = ("any entity id this design has - the field is deliberately "
                     "not restricted to one family, and prose is still refused")
         else:
@@ -1453,7 +1544,8 @@ def render_reference_rules(rows: Optional[List[Dict[str, Any]]] = None) -> str:
             what = "%s id%s" % (" or ".join(r["targets"]), plural)
             if len(r["targets"]) > 1:
                 what += " - either family, and nothing else"
-        if r["cardinality"] == "many" and r["targets"] != "ANY":
+        if (r.get("kind") != "vocabulary" and r["cardinality"] == "many"
+                and r["targets"] != "ANY"):
             what += "; [] when there are none"
         if r["when"]:
             when = r["when"]
@@ -1466,6 +1558,109 @@ def render_reference_rules(rows: Optional[List[Dict[str, Any]]] = None) -> str:
         out.append("  " + name)
         out.extend("      " + line for line in _tw.wrap(what, width=74) or [""])
     return "\n".join(out)
+
+
+def _motions(entries) -> Set[Tuple[str, str]]:
+    """(joint, dof) pairs from a typed motion list. The ONE matching key.
+
+    Every rule below compares a required motion against a restrained one through
+    these pairs, and through nothing else. Matching by `retained_group` against a
+    joint's parent or child would read a relative orientation as an absolute one:
+    which side of a joint the held group happens to be says nothing about which
+    relative motion the relation removes, so reversing a joint's parent and child
+    must not change any answer here.
+    """
+    out: Set[Tuple[str, str]] = set()
+    for row in (entries or []):
+        if not isinstance(row, dict):
+            continue
+        joint, dof = row.get("joint"), row.get("dof")
+        if isinstance(joint, str) and joint and dof in DOF_NAMES:
+            out.add((joint, dof))
+    return out
+
+
+def transition_consistency(requirements, relations, joints) -> List[str]:
+    """What the authored state machine says about itself, and where it disagrees.
+
+    TYPED ENTITIES ONLY. Requirements, relations and joints as they were written;
+    no group naming, no parent/child ordering, no configuration names, and no
+    inference from `distinguishing_basis`.
+
+    THE FINDINGS ARE NOT ONE KIND. A required motion the joint does not have, and
+    a required motion an active restraint removes that nothing releases, are
+    CONTRADICTIONS: the design says two things that cannot both hold. A release
+    whose relation states no defeat specification is INCOMPLETENESS: the design
+    may well be right and has not said how the release is achieved. Reported
+    separately because deciding what they cost a candidate is feasibility's
+    question, not this pass's - which is also why nothing here deletes or
+    rewrites a requirement that produces one.
+    """
+    by_joint = {j.get("entity_id"): j for j in (joints or [])
+                if isinstance(j, dict)}
+    by_relation = {r.get("id") or r.get("entity_id"): r for r in (relations or [])
+                   if isinstance(r, dict)}
+    out: List[str] = []
+    for req in (requirements or []):
+        if not isinstance(req, dict):
+            continue
+        rid = req.get("id") or req.get("entity_id")
+        source = req.get("from_configuration")
+        required = _motions(req.get("required_relative_motions"))
+        released = [r for r in (req.get("released_constraints") or [])
+                    if isinstance(r, str)]
+
+        # A. the joint has to have the freedom the transition needs
+        for joint, dof in sorted(required):
+            declared = by_joint.get(joint)
+            if declared is None:
+                continue                      # a reference the boundary refuses
+            if dof not in set(declared.get("dof") or []):
+                out.append("TRANSITION_DOF_NOT_SUPPORTED: %s requires %s/%s and "
+                           "that joint declares %s"
+                           % (rid, joint, dof,
+                              sorted(declared.get("dof") or []) or "no free DOF"))
+
+        for name in released:
+            relation = by_relation.get(name)
+            if relation is None:
+                continue
+            # B. a release only means something where the restraint is active
+            configs = [c for c in (relation.get("configurations") or [])
+                       if isinstance(c, str)]
+            if source and configs and source not in configs:
+                out.append("RELEASE_NOT_ACTIVE_AT_SOURCE: %s releases %s, which "
+                           "holds in %s and not in %s"
+                           % (rid, name, ", ".join(sorted(configs)), source))
+            # C. and only where it restrains something the transition needs
+            restrained = _motions(relation.get("blocked_relative_motions"))
+            if restrained and not (restrained & required):
+                out.append("RELEASE_RELATION_NOT_APPLICABLE: %s releases %s, "
+                           "which restrains %s and the transition requires %s"
+                           % (rid, name,
+                              ", ".join("%s/%s" % m for m in sorted(restrained)),
+                              ", ".join("%s/%s" % m for m in sorted(required))))
+            # E. released, and nothing says how the release is achieved
+            if not str(relation.get("defeat_specification") or "").strip():
+                out.append("RELEASE_EVIDENCE_NOT_ESTABLISHED: %s releases %s, "
+                           "which states no defeat specification, so how the "
+                           "release is achieved is not established" % (rid, name))
+
+        # D. an active restraint on a required motion that nothing releases
+        for name, relation in sorted(by_relation.items()):
+            if name in released:
+                continue
+            configs = [c for c in (relation.get("configurations") or [])
+                       if isinstance(c, str)]
+            if source and configs and source not in configs:
+                continue
+            blocking = _motions(relation.get("blocked_relative_motions")) & required
+            if blocking:
+                out.append("UNRELEASED_REQUIRED_MOTION: %s requires %s in %s and "
+                           "%s restrains it there without being released"
+                           % (rid, ", ".join("%s/%s" % m for m in sorted(blocking)),
+                              source, name))
+    return out
 
 
 def legacy_shapes_in_recording(parsed) -> Dict[str, int]:
@@ -1826,7 +2021,11 @@ class S03BMobilityAndAssembly(Stage):
             # removed is a producer forwarding a field that no question produced.
             for optional in ("blocked_direction", "provider_body",
                              "provider_reaction_site", "provider_site",
-                             "maintaining_interaction", "defeat_specification"):
+                             "maintaining_interaction", "defeat_specification",
+                             # FORWARDED UNCHANGED. Which relative motion a
+                             # restraint removes is the model's statement; this
+                             # pass neither derives it nor repairs it.
+                             "blocked_relative_motions"):
                 if r.get(optional):
                     fields[optional] = r[optional]
             ops.append(Op("CREATE", "ConstraintRelation", r["id"], fields, prov))
@@ -1855,6 +2054,16 @@ class S03BMobilityAndAssembly(Stage):
                 "access_side": a["access_side"], "activates": a.get("activates", []),
                 "termination_strategy": a.get("termination_strategy"),
                 "path_kind": a["path_kind"], "depends_on": a.get("depends_on", [])}, prov))
+        # WHAT STATE CHANGE MUST BE POSSIBLE, forwarded exactly as authored. A
+        # requirement that exposes a contradiction is evidence: a producer that
+        # dropped or repaired it would be answering an eligibility question that
+        # belongs to feasibility, and answering it invisibly.
+        for t in parsed.get("transition_requirements", []):
+            ops.append(Op("CREATE", "TransitionRequirement", t["id"], {
+                "from_configuration": t["from_configuration"],
+                "to_configuration": t["to_configuration"],
+                "required_relative_motions": t.get("required_relative_motions", []),
+                "released_constraints": t.get("released_constraints", [])}, prov))
         for u in parsed.get("unresolved", []):
             ops.append(Op("CREATE", "UnresolvedDecision", u["id"], {
                 "decision": u["decision"], "why_open": u["why_open"],
@@ -1942,6 +2151,13 @@ class S03BMobilityAndAssembly(Stage):
         out = self._s4_physical_problems(parsed, inputs)
         out.extend(self._s5_mobility_problems(parsed, inputs))
         out.extend(self._branch_local_problems(parsed, inputs))
+        # THE STATE MACHINE, checked against itself. Reported, never repaired:
+        # the findings are engineering facts about what this candidate says, and
+        # what they cost it is decided downstream.
+        out.extend(transition_consistency(
+            parsed.get("transition_requirements") or [],
+            parsed.get("constraint_relations") or [],
+            (inputs.get(self.context_key) or {}).get("Joint") or []))
         relations = parsed.get("constraint_relations") or []
         if not relations:
             out.append("nothing in this mechanism is held: no constraint relation")
