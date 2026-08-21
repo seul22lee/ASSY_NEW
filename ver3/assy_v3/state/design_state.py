@@ -765,10 +765,22 @@ class DesignState:
                            % (eid, key, index, type(row).__name__))
                 continue
             for name, sub in specs.items():
-                if name in row and row[name] is not None:
-                    out += self._one_reference(
-                        patch, seen, known, sub, row[name],
-                        "%s.%s[%d].%s" % (eid, key, index, name))
+                if name not in row or row[name] is None:
+                    continue
+                label = "%s.%s[%d].%s" % (eid, key, index, name)
+                if sub.get("kind") == "reference":
+                    out += self._one_reference(patch, seen, known, sub, row[name],
+                                               label)
+                    continue
+                # A CLOSED VOCABULARY, where one is declared. Generic: any record
+                # subfield may name the values it accepts, and a row outside them
+                # is refused here rather than by whichever consumer happens to
+                # read it first. A subfield declaring no `values` is unconstrained,
+                # which is what every existing declaration says.
+                permitted = sub.get("values")
+                if permitted and row[name] not in permitted:
+                    out.append("RECORD_VALUE: %s holds %r, which is not one of %s"
+                               % (label, row[name], list(permitted)))
         return out
 
     def _one_reference(self, patch, seen, known, spec, val, label) -> List[str]:

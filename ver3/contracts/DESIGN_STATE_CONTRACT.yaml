@@ -230,7 +230,15 @@ semantic_role_vocabulary:
   motion_path: >
     A path between two realized configurations, and which coordinates it
     changes. How a design says a motion HAPPENS, distinct from the states it
-    happens between.
+    happens between. A REALIZED path: what must be possible is a different
+    question and carries a different role, because a consumer asking for
+    evidence that a motion happens must not be handed a requirement that it
+    should.
+  transition_requirement: >
+    A directed requirement that the mechanism be CAPABLE of changing from one
+    configuration to another, and what relative joint motion that needs. It is a
+    demand, not evidence: nothing about how far, how fast, along what path or
+    against what force is in it, and no consumer may read it as a realization.
   motion_occupancy: >
     The space a moving group occupies along a motion, and at what evidence level
     that occupancy was computed. What makes "does this sweep into something"
@@ -469,6 +477,21 @@ entity_families:
 
   Joint:
     semantic_roles: [topology_relation, kinematic_axis]
+    # WHAT parent_group AND child_group MEAN, and what they do not.
+    #
+    # They ORIENT A RELATIVE KINEMATIC RELATION. The joint's coordinate is read
+    # as the motion of the child side relative to the parent side, and the sign
+    # of that coordinate depends on which is which. That is the whole of it.
+    #
+    # THEY DO NOT SAY WHICH BODY MOVES IN THE WORLD. `parent_group` is not "the
+    # fixed one" and `child_group` is not "the one that travels": a hinge between
+    # a lid and a base is the same joint whichever way it is written, and which
+    # side moves depends on what else holds each of them - which is a fact about
+    # the whole mechanism and about the configuration, not about this record. No
+    # consumer may derive absolute moving-body ownership from `child_group`, and
+    # no consumer may decide which relative motion a restraint removes by
+    # matching a group id against either field: `ConstraintRelation.
+    # blocked_relative_motions` exists to be told that instead of guessing it.
     field_semantics:
       parent_group:
         kind: reference
@@ -1399,6 +1422,33 @@ entity_families:
       # family declares no frame of its own, and the relation it blocks is named
       # by `retained_group`; the token is a direction class, not a placed vector.
       blocked_direction: {kind: enum}
+      # WHICH RELATIVE JOINT MOTION THIS RESTRAINS, said rather than inferred.
+      #
+      # `retained_group` and `blocked_dofs` say a group is held in some DOF of the
+      # frame; they do not say WHICH RELATIVE motion is thereby restrained, and a
+      # consumer that wants that has had to guess it - typically by matching
+      # `retained_group` against a joint's `child_group`. That guess reads a
+      # relative kinematic orientation as an absolute one (see the note on
+      # Joint.parent_group) and is wrong wherever the held group is the joint's
+      # other side, or where several joints reach the same group.
+      #
+      # The linkage is therefore DECLARED. Optional, because a relation that has
+      # not said it has not said it: a consumer may report the absence and may
+      # not fill it in. Nothing may derive an entry here from group naming,
+      # parent/child ordering, or any correspondence between blocked_dofs and a
+      # joint's own dof.
+      blocked_relative_motions:
+        kind: record_list
+        record_field_semantics:
+          joint:
+            kind: reference
+            target: Joint
+            cardinality: one
+            resolvable: false
+            referent_population: INVOCATION_BRANCH
+          dof:
+            kind: enum
+            values: [TX, TY, TZ, RX, RY, RZ]
     owned_by: s03
     authority_class: AUTHORITATIVE
     addressable: true
@@ -1407,8 +1457,14 @@ entity_families:
       provided by what, and how a test would defeat it. Replaces the
       non-addressable blocked_by relation.
     required_fields: [entity_id, retained_group, blocked_dofs, configurations, driver]
+    # `release_transition` was RETIRED here. It pointed an s03 relation at an s04
+    # Transition - upstream semantics naming a downstream realization - and it had
+    # no writer, no reader and no standing instance: the producer stopped
+    # forwarding it when the field audit found no prompt asked for it. What it was
+    # reaching for is a transition saying which restraints it releases, which is
+    # TransitionRequirement.released_constraints, pointing the other way.
     optional_fields: [blocked_direction, provider_body, provider_reaction_site, provider_site,
-                      maintaining_interaction, defeat_specification, release_transition]
+                      maintaining_interaction, defeat_specification, blocked_relative_motions]
     driver: [LOAD, KINEMATIC_NECESSITY, DECLARED_SCENARIO]
     rules:
       - "It has an id, so a mobility disposition can cite it and the citation resolves."
@@ -1421,6 +1477,81 @@ entity_families:
         naming what provides it, and saying only where would leave the constraint
         standing on nothing.
       - "S-2 defines it. S-4/U-5 is where s03 begins producing it."
+
+  # =====================================================================
+  # WHAT STATE CHANGE MUST BE POSSIBLE - symbolic, and not its realization
+  # =====================================================================
+  TransitionRequirement:
+    # ITS OWN ROLE, deliberately not `motion_path`. That role is carried by
+    # Transition and is required by feasibility's `realized_motion` premise, so
+    # sharing it would put a REQUIREMENT into a view asking for EVIDENCE that a
+    # motion happens - and a demand that looks like its own discharge is the
+    # exact confusion this family exists to end.
+    semantic_roles: [transition_requirement]
+    field_semantics:
+      from_configuration: {kind: reference, target: Configuration, cardinality: one, resolvable: false, referent_population: INVOCATION_BRANCH}
+      to_configuration: {kind: reference, target: Configuration, cardinality: one, resolvable: false, referent_population: INVOCATION_BRANCH}
+      # THE RELATIVE MOTION THE TRANSITION NEEDS. A joint and one of its degrees
+      # of freedom - which is a statement about two groups moving relative to
+      # each other, and says nothing about which of them moves in the world.
+      required_relative_motions:
+        kind: record_list
+        record_field_semantics:
+          joint:
+            kind: reference
+            target: Joint
+            cardinality: one
+            resolvable: false
+            referent_population: INVOCATION_BRANCH
+          dof:
+            kind: enum
+            values: [TX, TY, TZ, RX, RY, RZ]
+      released_constraints: {kind: reference, target: ConstraintRelation, cardinality: many, resolvable: false, referent_population: INVOCATION_BRANCH}
+    owned_by: s03
+    authority_class: AUTHORITATIVE
+    addressable: true
+    purpose: >
+      A directed requirement that the mechanism be CAPABLE of moving from one
+      configuration to another: which relative joint motions that needs, and which
+      restraints must be released for it. It says what must be possible. It does
+      not say how far, how fast, in what pose, through what path or against what
+      force - those are realizations, and s04 owns them.
+    required_fields: [entity_id, from_configuration, to_configuration, required_relative_motions]
+    optional_fields: [released_constraints]
+    conditional_requirements:
+      # A transition requirement that names no motion requires nothing, and a
+      # requirement that requires nothing is not one. Expressed as a shape rule so
+      # the write boundary enforces it, rather than as prose a producer may miss.
+      - name: transition_requires_motion
+        why: >
+          A transition requirement that names no relative motion demands nothing.
+          It would read as a requirement, be counted as one, and be satisfiable by
+          a mechanism that cannot move at all - so the empty list is refused where
+          it is written rather than reported by whichever consumer notices the
+          demand is vacuous.
+        applies_when: {field: from_configuration, present: true}
+        required_shape:
+          required_relative_motions: {non_empty_list: true}
+    rules:
+      - >
+        DIRECTED. A -> B is not B -> A. A mechanism that can be closed and cannot
+        be reopened satisfies one of them and fails the other, and a single
+        undirected record could not tell those two designs apart.
+      - >
+        RELATIVE, NOT ABSOLUTE. `required_relative_motions` names a Joint and a
+        DOF. Which body moves in the world is not stated and may not be inferred
+        from a joint's parent/child orientation.
+      - >
+        NO REALIZATION. No angle, displacement, coordinate, pose, path or swept
+        volume appears here. Those are s04's, computed from placements this family
+        does not carry, and putting one here would make a requirement look like
+        evidence that it was met.
+      - >
+        `released_constraints` names the restraints this transition must release.
+        The relation does not name the transition: an s03 restraint pointing at an
+        s04 realization was the shape `ConstraintRelation.release_transition` had,
+        and it is retired.
+      - "S-10 UNIT 1 defines it. No stage requires it as a premise yet."
 
   PhysicalEffectObligation:
     semantic_roles: [physical_effect_obligation]
@@ -1738,6 +1869,17 @@ assurance_families:
       # A plain record list, not a premise-record list: every row has the same
       # shape and there is no discriminator, so declaring one would be inventing
       # structure to reach the existing walker.
+      # WHAT IT ANSWERS: which (rigid group, DOF) VALUES differ between this
+      # configuration and the siblings it names. It is a statement about how two
+      # stable states are told apart.
+      #
+      # WHAT IT DOES NOT SAY: that the DOF is FREE while this configuration
+      # holds. A latched lid is distinguished from an open one by a hinge
+      # coordinate that is different in each, and in both of them that coordinate
+      # is restrained - which is what makes them stable states rather than
+      # positions the mechanism drifts through. Reading this field as a mobility
+      # requirement turns "these two states differ here" into "this must be free
+      # here", and the two are not the same claim.
       distinguishing_basis:
         kind: record_list
         record_field_semantics:
@@ -1912,6 +2054,18 @@ assurance_families:
     # The LIVE vocabulary. UNDISPOSITIONED was vocabulary only at S-2; the
     # behaviour arrived at S-5 / U-6.
     disposition_values: [INTENDED, BLOCKED_BY, IRRELEVANT_BECAUSE, UNDISPOSITIONED]
+    # A DISPOSITION IS CONFIGURATION-LOCAL. Every cell is addressed by (rigid
+    # group, configuration, DOF), and it says what the design asserts about that
+    # DOF WHILE THAT CONFIGURATION HOLDS.
+    #
+    # BLOCKED_BY therefore means: a restraint is active in this stable state.
+    # It does NOT mean that no transition can leave the state. A latch that holds
+    # a lid shut is exactly a restraint that is active while shut and released to
+    # open - the restraint is what makes "shut" a state rather than a position -
+    # so reading BLOCKED_BY as "this mechanism cannot move" would make every
+    # mechanism that holds its own configurations look immobile. What a
+    # transition needs, and which restraints it releases, is TransitionRequirement.
+    disposition_scope: CONFIGURATION_LOCAL
     retired_disposition_values:
       MAINTAINED_BY_CLASS:
         retired_by: "S-5 / U-6 correction"

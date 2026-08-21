@@ -496,15 +496,44 @@ STANDING = "STANDING"
 
 
 def _refs_of(entity: Dict[str, Any], family: str, contracts) -> List[Tuple[str, str]]:
-    """(field, referenced id) for every declared reference this entity carries."""
+    """(field, referenced id) for every declared reference this entity carries.
+
+    NESTED REFERENCES COUNT. A reference declared one level down - inside a
+    `record_list` or a `premise_record_list` - is as much a dependency as a
+    top-level one: the write boundary already resolves it, and an entity whose
+    only link to a joint is a row of `{joint, dof}` still needs that joint to
+    mean anything. Reading only top-level fields made those edges invisible to
+    everything that rides this graph, so an entity could be branch-scoped by a
+    reference the branch resolver could not see.
+
+    The label carries the path, so a caller reporting an edge says where it came
+    from rather than naming a field that holds no id.
+    """
     out = []
-    for fld, spec in (contracts.field_semantics(family) or {}).items():
-        if spec.get("kind") != "reference":
+    semantics = contracts.field_semantics(family) or {}
+    for fld, spec in semantics.items():
+        if not isinstance(spec, dict):
             continue
         val = entity.get(fld)
-        for ref in (val if isinstance(val, list) else [val]):
-            if isinstance(ref, str) and ref:
-                out.append((fld, ref))
+        kind = spec.get("kind")
+        if kind == "reference":
+            for ref in (val if isinstance(val, list) else [val]):
+                if isinstance(ref, str) and ref:
+                    out.append((fld, ref))
+            continue
+        if kind not in ("record_list", "premise_record_list"):
+            continue
+        nested = spec.get("record_field_semantics") or {}
+        for row in (val if isinstance(val, list) else []):
+            if not isinstance(row, dict):
+                continue
+            for name, sub in nested.items():
+                if not isinstance(sub, dict) or sub.get("kind") != "reference":
+                    continue
+                inner = row.get(name)
+                for ref in (inner if isinstance(inner, list) else [inner]):
+                    if isinstance(ref, str) and ref:
+                        out.append(("%s.%s" % (fld, name), ref))
     return out
 
 

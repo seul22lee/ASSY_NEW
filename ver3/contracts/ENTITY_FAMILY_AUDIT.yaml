@@ -6,7 +6,7 @@ references:
 - ver3/contracts/STAGE_OWNERSHIP_MATRIX.yaml
 - ver3/contracts/GENERATED_ASSURANCE_PACKAGE_CONTRACT.yaml
 audit_scope:
-  families_audited: 57
+  families_audited: 58
   re_run_note: 'The family set grew from 32 to 37 by CONTRACT CHANGE (five families added to DESIGN_STATE_CONTRACT
     under docs/PIPELINE_IMPLEMENTATION_PROPOSAL.md rev 2: RigidGroup, LoadCase, LoadPath, FunctionalRegion,
     AssemblyStep). This audit was RE-RUN over the new set and asks the same consumer question of each.
@@ -56,7 +56,7 @@ summary:
   # review - and S7-E answered it: shown before the submission, considered after
   # the commitment, a premise of neither.
   CORE: 43
-  PROVISIONAL: 11
+  PROVISIONAL: 12
   MERGE_CANDIDATE: 3
   UNSUPPORTED: 0
   note_on_zero_unsupported: 'No family is unproducible or unconsumable, so none is UNSUPPORTED. Two EXPRESSIVENESS
@@ -299,6 +299,47 @@ families:
     package_items:
     - PKG-13
     status: CORE
+  TransitionRequirement:
+    owning_stage: s03
+    first_downstream_consumer: s04
+    consumer_note: >
+      NOT YET CONSUMED. Unit 1 defines the vocabulary only: no responsibility
+      requires it as a premise, no producer writes one, and a state containing
+      none is complete. s04 is named because realizing a demanded state change -
+      placing the joints and computing the motion - is what will first read it,
+      and naming the stage that will read it is how this audit records a family
+      defined ahead of its consumer.
+    unique_responsibility: >
+      WHAT STATE CHANGE MUST BE POSSIBLE, directed and symbolic: which relative
+      joint motions a transition from one configuration to another needs, and
+      which restraints it must release.
+    duplicates: none
+    duplicates_note: >
+      Transition RECORDS a realized change between two States and carries the
+      coordinates it moves. This DEMANDS that a change be possible and carries no
+      realization at all. MobilityExpectation is configuration-local and says
+      what holds WITHIN a state, not what must be possible between two.
+      Configuration.distinguishing_basis says how two states are told apart,
+      which is not a requirement that either can be reached from the other.
+    required_for_assurance_package: false
+    status: PROVISIONAL
+    open_question: >
+      Whether `required_relative_motions` and `released_constraints` are
+      sufficient to state a demanded state change, or whether a producer writing
+      them finds it needs something this unit deliberately left out - a trigger,
+      an actuation route, or a condition under which the transition is required
+      rather than merely possible. The vocabulary was kept minimal on purpose, so
+      the answer comes from a producer trying to use it and not from guessing
+      ahead of one.
+    decision_required_before: >
+      the s03b producer migration, which is the unit that first writes one: a
+      family whose shape is still open must not acquire recorded instances, and a
+      consumer must not be pointed at it until its shape is settled.
+    s10_note: >
+      Added at S-10 Unit 1 as semantic substrate. PROVISIONAL because nothing
+      produces or consumes it yet; the migration that gives it a producer is a
+      later unit.
+
   Transition:
     owning_stage: s04
     first_downstream_consumer: s08

@@ -178,17 +178,57 @@ class TestRecordListGrammar(_Grammar):
                                       "nothing is an untyped list with a longer "
                                       "declaration")
 
-    def test_every_subfield_is_a_well_formed_reference(self):
+    def test_every_subfield_is_a_reference_or_a_closed_vocabulary(self):
+        """TWO KINDS ARE WALKED ONE LEVEL DOWN, and nothing else is.
+
+        A reference is resolved to its declared family. An enum declaring
+        `values` is checked against them. A subfield that is neither is a value
+        the boundary cannot check, declared as though it could be - which is the
+        untyped row this grammar exists to refuse, wearing a type name.
+        """
         for family, field, spec in self.declarations("record_list"):
             for name, sub in (spec.get("record_field_semantics") or {}).items():
                 with self.subTest(family=family, field=field, subfield=name):
-                    self.assertEqual("reference", sub.get("kind"),
-                                     "only references are walked one level down")
+                    kind = sub.get("kind")
+                    self.assertIn(kind, ("reference", "enum"),
+                                  "only references and closed vocabularies are "
+                                  "walked one level down")
+                    if kind == "enum":
+                        values = sub.get("values")
+                        self.assertTrue(values, "an enum subfield declaring no "
+                                                "values constrains nothing")
+                        self.assertTrue(all(isinstance(v, str) and v for v in values))
+                        continue
                     target = sub.get("target")
                     self.assertTrue(target)
                     for one in (target if isinstance(target, list) else [target]):
                         self.assertIn(one, self.fams)
                     self.assertIn(sub.get("cardinality"), ("one", "many"))
+
+    def test_a_subfield_vocabulary_is_enforced_at_the_write_boundary(self):
+        """The declaration is only worth making if the boundary reads it."""
+        from ver3.assy_v3.state.design_state import DesignState
+        from ver3.assy_v3.state.patch import Op, StagePatch
+        declared = [(f, fld, name, sub)
+                    for f, fld, spec in self.declarations("record_list")
+                    for name, sub in (spec.get("record_field_semantics") or {}).items()
+                    if sub.get("kind") == "enum"]
+        self.assertTrue(declared, "no subfield vocabulary is declared, so this "
+                                  "guard passes over nothing")
+        for family, field, name, sub in declared:
+            with self.subTest(family=family, field=field, subfield=name):
+                state = DesignState(run_id="vocab")
+                patch = StagePatch(
+                    patch_id="vocab", run_id="vocab", stage_id="s03",
+                    stage_attempt=1, parent_state_hash=state.state_hash(),
+                    operations=[Op("CREATE", family, "X-1",
+                                   {field: [{name: "NOT_IN_THE_VOCABULARY"}]},
+                                   "test")],
+                    execution_status="SUCCESS", provenance={"purpose": "vocab"})
+                self.assertTrue(
+                    any("RECORD_VALUE" in p for p in state.validate(patch)),
+                    "%s.%s[].%s accepted a value outside %s"
+                    % (family, field, name, sub.get("values")))
 
     def test_a_record_list_is_not_also_a_premise_record_list(self):
         """Two walkers over one field would be two answers about it."""

@@ -214,7 +214,8 @@ owned_decisions:
   # the difference is stated in `current_producer` below rather than hidden by
   # trimming this list.
   creates: [AssemblyStep, Body, Configuration, ConstraintRelation, FunctionalRegion,
-            Interface, Joint, LoadPath, MobilityExpectation, PhysicalInteraction, RigidGroup]
+            Interface, Joint, LoadPath, MobilityExpectation, PhysicalInteraction,
+            RigidGroup, TransitionRequirement]
   note: "This stage owns the MECHANISM."
 
 dof_disposition_rule:
@@ -285,9 +286,13 @@ constraint_relation_rule:
     AT LEAST ONE of provider_body (a body of this mechanism) or
     provider_reaction_site (a declared EXTERNAL site) must identify what provides
     the constraint. provider_site says where it acts and does not answer that.
+  # `release_transition` was RETIRED: an s03 restraint pointing at an s04
+  # Transition is upstream semantics naming a downstream realization, and it
+  # had no writer, no reader and no standing instance. What it reached for is
+  # TransitionRequirement.released_constraints, which points the other way.
   optional_fields: [blocked_direction, provider_body, provider_reaction_site,
                     provider_site, maintaining_interaction, defeat_specification,
-                    release_transition]
+                    blocked_relative_motions]
   driver: [LOAD, KINEMATIC_NECESSITY, DECLARED_SCENARIO]
   driver_rationale: >
     A constraint may be required because a load must be reacted, OR because the
