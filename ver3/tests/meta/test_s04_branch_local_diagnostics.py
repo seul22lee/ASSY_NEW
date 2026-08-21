@@ -187,21 +187,131 @@ class TestBranchPayloads(_TwoBranches):
         for payload in branch_payloads(state, ASSEMBLY_PATH_FAMILIES):
             self.assertEqual(set(ASSEMBLY_PATH_FAMILIES), set(payload))
 
-    def test_it_reads_no_consumer_view(self):
-        """These are diagnostics over committed state. A diagnostic that needed a
-        downstream consumer to know what it was looking at would be answerable
-        only after the stage it is meant to inform.
+    def test_it_builds_no_consumer_view_and_names_no_downstream_consumer(self):
+        """A diagnostic that needed a downstream consumer's VIEW to know what it
+        was looking at would be answerable only after the stage it informs.
 
-        THE CODE, not the prose: the docstring explains that no ConsumerView is
-        consulted and so must name one, and a scan that read it would find its
-        own explanation.
+        Importing the canonical branch RESOLVER is a different thing and is
+        required: `branch_membership` is a pure function of state and contracts,
+        not a view built for some consumer. What must be absent is view
+        CONSTRUCTION and any downstream responsibility.
+
+        THE CODE, not the prose: a docstring explaining what is not consulted has
+        to name it, and a scan that read prose would find its own explanation.
         """
         from .test_s3_interface_readiness import _code_only
         code = _code_only(branch_payloads, swept_clearance_findings,
                           assembly_path_findings)
-        for token in ("consumer_view", "ConsumerView", "build_consumer_view",
-                      "feasibility"):
+        for token in ("consumer_view_for", "build_consumer_view", "ConsumerView",
+                      "feasibility", "selection", "ViewStatus", ".payload("):
             self.assertNotIn(token, code)
+
+    def test_it_delegates_branch_ownership_and_traverses_nothing_itself(self):
+        """The repository owns branch semantics once. A second traversal here
+        would be a second branch ontology - and the narrower one it replaced
+        answered "which branch" from a DIRECT premise, which is not the canonical
+        definition: ownership is transitive over the depends-on graph."""
+        from .test_s3_interface_readiness import _code_only
+        code = _code_only(branch_payloads)
+        self.assertIn("branch_membership", code)
+        for token in ("_closure", "_reference_graph", "branches_built_on",
+                      "_premises", "while "):
+            self.assertNotIn(token, code,
+                             "branch_payloads traverses or re-derives ownership "
+                             "instead of asking the resolver")
+
+
+class TestCanonicalOwnershipIsTransitiveAndScoped(_TwoBranches):
+    """The two facts the direct-premise reading got wrong, in both directions."""
+
+    def extra(self, state, ops):
+        s04_families = {"Envelope", "State", "Transition"}
+        for stage_id, chosen in (("s03", [o for o in ops
+                                          if o.entity_type not in s04_families]),
+                                 ("s04", [o for o in ops
+                                          if o.entity_type in s04_families])):
+            if not chosen:
+                continue
+            patch = StagePatch(patch_id="extra-%s-%d" % (stage_id,
+                                                         len(state.applied_patches)),
+                               run_id=state.run_id, stage_id=stage_id,
+                               stage_attempt=1, parent_state_hash=state.state_hash(),
+                               operations=chosen, execution_status="SUCCESS",
+                               provenance={"purpose": "ownership test"})
+            problems = state.validate(patch)
+            self.assertEqual([], problems, problems[:4])
+            state.apply(patch)
+
+    def bodies_in(self, payload):
+        return {e.get("body") for e in payload["Envelope"]}
+
+    def test_an_entity_with_no_candidate_premise_belongs_to_the_branch_it_rests_on(self):
+        """`ENV-A3` premises nothing and names a body that was authored from
+        CND-A. Ownership is transitive over the depends-on graph, so it is
+        CND-A's - which the direct-premise reading put in no branch at all."""
+        state = self.build()
+        self.extra(state, [
+            Op("CREATE", "Body", "BOD-A3",
+               {"instance_identity": "one", "role": "shim",
+                "created_by_stage": "s03"}, "s03:topology", premise_refs=["CND-A"]),
+            Op("CREATE", "Envelope", "ENV-A3",
+               {"body": "BOD-A3", "extent": box((0.0, 0.0, 0.0)), "frame": "world",
+                "maturity": "PROVISIONAL"}, "s04a:arrangement")])
+        payloads = branch_payloads(state, SWEPT_CLEARANCE_FAMILIES)
+        owning = [p for p in payloads if "BOD-A3" in self.bodies_in(p)]
+        self.assertEqual(1, len(owning), "the transitively owned envelope is in %d "
+                                         "payloads" % len(owning))
+        self.assertTrue(self.bodies_in(owning[0]) <= {"BOD-A1", "BOD-A2", "BOD-A3"},
+                        "it landed in the wrong branch: %s"
+                        % self.bodies_in(owning[0]))
+
+    def test_a_genuinely_unscoped_record_is_in_no_branch(self):
+        """No candidate reaches it, so it belongs to no mechanism. Putting it in
+        every branch would let one orphan obstruct every assembly at once."""
+        state = self.build()
+        self.extra(state, [
+            Op("CREATE", "Body", "BOD-ORPHAN",
+               {"instance_identity": "one", "role": "stray",
+                "created_by_stage": "s03"}, "s03:topology"),
+            Op("CREATE", "Envelope", "ENV-ORPHAN",
+               {"body": "BOD-ORPHAN", "extent": box((0.0, 0.0, 0.0)),
+                "frame": "world", "maturity": "PROVISIONAL"}, "s04a:arrangement")])
+        for payload in branch_payloads(state, SWEPT_CLEARANCE_FAMILIES):
+            self.assertNotIn("BOD-ORPHAN", self.bodies_in(payload))
+
+    def test_an_orphan_obstructs_no_assembly_and_is_swept_into_by_nothing(self):
+        state = self.build()
+        self.extra(state, [
+            Op("CREATE", "Body", "BOD-ORPHAN",
+               {"instance_identity": "one", "role": "stray",
+                "created_by_stage": "s03"}, "s03:topology"),
+            Op("CREATE", "Envelope", "ENV-ORPHAN",
+               {"body": "BOD-ORPHAN", "extent": box((0.0, 0.0, 0.0)),
+                "frame": "world", "maturity": "PROVISIONAL"}, "s04a:arrangement")])
+        for finding in swept_clearance_check(state) + assembly_path_check(state):
+            self.assertNotIn("BOD-ORPHAN", finding)
+
+    def test_the_transitively_owned_body_still_participates_in_its_own_branch(self):
+        """Scoping correctly is not scoping away: placed on top of CND-A's parts,
+        it must be found obstructing them."""
+        state = self.build()
+        self.extra(state, [
+            Op("CREATE", "Body", "BOD-A3",
+               {"instance_identity": "one", "role": "shim",
+                "created_by_stage": "s03"}, "s03:topology", premise_refs=["CND-A"]),
+            Op("CREATE", "Envelope", "ENV-A3",
+               {"body": "BOD-A3", "extent": box((0.0, 0.0, 0.0)), "frame": "world",
+                "maturity": "PROVISIONAL"}, "s04a:arrangement"),
+            Op("CREATE", "AssemblyStep", "ASY-A3",
+               {"order_index": 3, "body": "BOD-A3", "access_side": "+Z",
+                "activates": [], "termination_strategy": "NONE",
+                "path_kind": "RIGID", "depends_on": [],
+                "insertion_direction": [0.0, 0.0, 1.0]},
+               "s03b:relations", premise_refs=["CND-A"])])
+        found = [f for f in assembly_path_check(state) if "BOD-A3" in f]
+        self.assertTrue(found, "the transitively owned body obstructed nothing")
+        for f in found:
+            self.assertNotIn("BOD-B", f, "it was tested against the other branch")
 
 
 # ======================================================================

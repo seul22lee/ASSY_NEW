@@ -1002,7 +1002,7 @@ def _payload_boxes(payload) -> Dict[str, Tuple[List[float], List[float]]]:
 
 
 def branch_payloads(state, families: Sequence[str]) -> List[Dict[str, List[Dict[str, Any]]]]:
-    """One payload per candidate branch: the entities that rest on it.
+    """One payload per candidate branch, using the CANONICAL branch resolver.
 
     A GEOMETRIC DIAGNOSTIC THAT MIXES BRANCHES ANSWERS ABOUT NO MECHANISM.
     Candidates coexist in one DesignState, so `state.family("Envelope")` is every
@@ -1011,32 +1011,52 @@ def branch_payloads(state, families: Sequence[str]) -> List[Dict[str, List[Dict[
     part from a mechanism it will never be built with. Neither finding is about
     any design that exists.
 
-    Scoped by the entity's OWN PREMISES rather than by a candidate-id filter
-    written into each check: an entity resting on a candidate is that branch's,
-    and that is the same fact the consumer boundary reads. Nothing here consults
-    a ConsumerView - these are diagnostics over committed state and must not
-    depend on a downstream consumer to know what they are looking at.
+    WHICH BRANCH AN ENTITY BELONGS TO IS NOT THIS MODULE'S QUESTION TO ANSWER.
+    `branch_membership` already owns it, over the declared depends-on graph -
+    typed references and recorded premises alike - so membership is TRANSITIVE:
+    an envelope naming a body that was authored from a candidate belongs to that
+    candidate's branch without premising it directly. An earlier version of this
+    function read `_premises` for a Candidate id, which is a second branch
+    ontology and a strictly narrower one: it put every indirectly-owned entity in
+    no branch and every genuinely unscoped one in ALL of them.
 
-    An entity resting on NO candidate belongs to every branch, and a state with
-    no candidate premises at all is ONE implicit branch - which is what every
-    single-mechanism fixture is, so their behaviour is unchanged.
+    Two absences that are not the same fact, and the canonical rule tells them
+    apart because it needs both:
+
+      NOTHING HAS BRANCHED. No candidate stands, or none of these families is
+      built on one. "Before the work branches, this branch is the design" -
+      `branch_membership`'s own words - so the diagnostic runs once over
+      everything, which is what every single-mechanism fixture is.
+
+      THIS ENTITY IS UNSCOPED. Branches exist and no candidate reaches this
+      record. It belongs to no mechanism, so it appears in no payload; injecting
+      it into every branch would let an orphan obstruct six assemblies at once.
+
+    The RESOLVER is asked, never a ConsumerView. `branch_membership` is a pure
+    function of state and contracts; a view is built for a particular consumer,
+    and a diagnostic that needed one would be answerable only after the stage it
+    exists to inform.
     """
-    candidates = {c["entity_id"] for c in state.family("Candidate")}
-    unscoped: Dict[str, List[Dict[str, Any]]] = {}
-    per: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
-    for family in families:
-        for record in state.family(family):
-            mine = {p for p in (record.get("_premises") or []) if p in candidates}
-            if mine:
-                for branch in mine:
-                    per.setdefault(branch, {}).setdefault(family, []).append(record)
-            else:
-                unscoped.setdefault(family, []).append(record)
-    if not per:
-        return [{f: list(unscoped.get(f) or []) for f in families}]
-    return [{f: list(unscoped.get(f) or []) + list((per[b].get(f) or []))
-             for f in families}
-            for b in sorted(per)]
+    from ..view.consumer_view import branch_membership
+
+    records = [(family, record) for family in families
+               for record in state.family(family)]
+    everything = [{f: list(state.family(f)) for f in families}]
+    if not state.standing("Candidate"):
+        return everything
+    membership = branch_membership(state, state.c,
+                                   [r["entity_id"] for _f, r in records])
+    branches = sorted({b for owned in membership.values() for b in owned})
+    if not branches:
+        return everything
+    out: List[Dict[str, List[Dict[str, Any]]]] = []
+    for branch in branches:
+        payload: Dict[str, List[Dict[str, Any]]] = {f: [] for f in families}
+        for family, record in records:
+            if branch in membership.get(record["entity_id"], ()):
+                payload[family].append(record)
+        out.append(payload)
+    return out
 
 
 def _boxes(state) -> Dict[str, Tuple[List[float], List[float]]]:
