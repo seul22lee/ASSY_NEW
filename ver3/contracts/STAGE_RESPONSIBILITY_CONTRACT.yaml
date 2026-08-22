@@ -590,13 +590,6 @@ stages:
           existence: REQUIRED_NONEMPTY
           existence_why: bodies with nothing between them are not an arrangement
           why: s03a authors them while embodying one candidate
-        - role: mobility_disposition
-          population: INVOCATION_BRANCH
-          coverage: ALL_APPLICABLE
-          existence: REQUIRED_NONEMPTY
-          existence_why: the DOF grid is derived for every candidate, so its
-            absence is a producer failure rather than a design fact
-          why: s03b derives it from this candidate's own topology
         - role: spatial_commitment
           population: INVOCATION_BRANCH
           coverage: ALL_APPLICABLE
@@ -644,10 +637,19 @@ stages:
         candidate-specific in a way its load case is not: two candidates carry
         the same load through different interfaces, so the route belongs to the
         branch and the demand does not.
+      # `mobility_disposition` LEFT THIS CLASS when `transition_reachability`
+      # replaced `mobility_disposition` as a domain. The six-DOF grid was the
+      # evidence the retired domain read; no domain reads MobilityExpectation
+      # now, and a responsibility that declares a premise nothing consumes is
+      # the same dishonesty as a check that reads a family it was not granted,
+      # in reverse - the contract claims an input the reasoning does not use.
+      #
+      # The FAMILY is untouched and so is every other consumer of it: s05 still
+      # declares `limit_to_produce` against the same role, and the grid is still
+      # what says what is known about a stable state.
       requires_semantics:
       - physical_interaction
       - constraint_relation
-      - mobility_disposition
       - spatial_commitment
       - topology_element
       - topology_relation

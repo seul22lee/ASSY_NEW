@@ -279,12 +279,21 @@ class TestFeasibilityInputSufficiency(_Base):
                       [a["requirement"] for a in view.assessment
                        if a["verdict"] != "SATISFIED"])
         payload = view.payload()
+        # MobilityExpectation LEFT THIS LIST and TransitionRequirement took its
+        # place. The list is families that DECIDE a declared domain, and that is
+        # what changed: `transition_reachability` replaced
+        # `mobility_disposition`, so the six-DOF grid decides nothing here any
+        # more and the demanded state change decides everything the reachability
+        # question asks. Keeping the grid listed would assert a view a
+        # responsibility needs for reasoning it does not do.
         for family in ("State", "Transition", "SweptVolume", "Joint",
-                       "Configuration", "Envelope", "MobilityExpectation",
+                       "Configuration", "Envelope", "TransitionRequirement",
                        "ConstraintRelation", "PhysicalInteraction"):
             self.assertIn(family, payload,
                           "%s decides a declared domain and is not in the view"
                           % family)
+        self.assertNotIn("MobilityExpectation", payload,
+                         "no domain reads the grid, so no premise should carry it")
 
     def test_A2_no_blanket_s04_dump(self):
         """A Witness is s04-owned and carries no semantic role at all, so it has

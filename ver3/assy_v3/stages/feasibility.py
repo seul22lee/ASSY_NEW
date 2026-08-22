@@ -302,35 +302,6 @@ class _Evidence:
     #: detector beside a lookup that ignores it is worse than neither.
     _RETIRED_DUPLICATED = "replaced by extent_status/boxes quarantine"
 
-    def joints_of(self, group: str) -> List[Dict[str, Any]]:
-        """EVERY joint whose coordinate moves this group, not the first one.
-
-        `driving_joint` returned `next(j for j in Joint if child_group == group)`,
-        so which joint answered a question was decided by insertion order. On a
-        group carrying a PRISMATIC and a REVOLUTE joint, a basis about RZ was
-        answered by the slider - and answered FAIL, because two configurations
-        that differ in rotation share a translation. An arbitrary choice
-        producing a positive contradiction is the worst form this defect takes.
-        """
-        return [j for j in self.fam("Joint") if j.get("child_group") == group]
-
-    def drivers_for(self, group: str, dof: str):
-        """(joints that carry this cell, joints whose axis cannot be read).
-
-        The address is (rigid_group, dof) and BOTH components select. Compatible
-        means the joint's own DECLARED dof carries that cell, asked of
-        `joint_free_dof` so the answer is the canonical one s03 wrote rather than
-        a second inference from the class. An unreadable axis is still separated
-        out: a joint whose axis names no coordinate addresses no cell here.
-        """
-        drivers, unreadable = [], []
-        for j in self.joints_of(group):
-            if s04.axis_index(j.get("axis_direction")) is None:
-                unreadable.append(j)
-            elif dof in s03.joint_free_dof(j):
-                drivers.append(j)
-        return drivers, unreadable
-
     def states_for(self, configuration: str) -> List[Dict[str, Any]]:
         """EVERY state realizing this configuration. Two is not one."""
         return [st for st in self.fam("State")
@@ -813,41 +784,15 @@ def _transition_reachability(ev: _Evidence) -> Verdict:
                    [u for u in used if u], "; ".join(notes[:5]))
 
 
-def _resolve_driver(ev: _Evidence, group: str, dof: str):
-    """(joint, code, note, premises) for the joint that carries (group, dof).
-
-    ONE COMPATIBLE JOINT OR NO ANSWER. Zero is a requirement the topology does
-    not support; more than one is a requirement the topology does not resolve.
-    Neither is a licence to pick, and picking is what made a slider answer for a
-    hinge. When ambiguity is the finding, the competing joints ARE the positive
-    facts that establish it, so they are the premises.
-    """
-    drivers, unreadable = ev.drivers_for(group, dof)
-    if len(drivers) == 1:
-        return drivers[0], None, None, [drivers[0]["entity_id"]]
-    if len(drivers) > 1:
-        names = sorted(j["entity_id"] for j in drivers)
-        return (None, "DISTINCTNESS_DRIVER_AMBIGUOUS",
-                "%s/%s could be carried by %s and the design does not say which"
-                % (group, dof, " or ".join(names)), names)
-    if unreadable:
-        names = sorted(j["entity_id"] for j in unreadable)
-        return (None, "DISTINCTNESS_DRIVER_AXIS_UNREADABLE",
-                "%s/%s: %s declare axes that name no coordinate"
-                % (group, dof, ", ".join(names)), names)
-    return (None, "DISTINCTNESS_DRIVER_UNKNOWN",
-            "no joint of this candidate leaves %s free at %s" % (dof, group), [])
-
-
 def _required_configurations(ev: _Evidence) -> Verdict:
     """Each configuration is realized, and declared distinctness is real.
 
-    A NAMED REFERENCE IS AN ADDRESS, NOT A SUGGESTION. `differs_from` names the
-    siblings this configuration must differ from; each is evaluated exactly, and
-    one that is absent or unrealized makes the comparison unestablished. The
-    fallback that compared against "some other realized configuration" turned a
-    reference to an entity the design does not have into a PASS earned by an
-    entity nobody named.
+    THE FIRST HALF IS THIS DOMAIN'S OWN: a configuration with no state is not
+    realized, and one realized twice has two answers to what it is set to.
+
+    THE SECOND HALF IS THE SHARED RULE. Whether the numbers make declared
+    distinctness real is `s04.distinctness_findings`, asked here and by the pass
+    that writes the coordinates. What a finding COSTS is decided here.
     """
     configs = ev.fam("Configuration")
     if not configs:
@@ -874,57 +819,40 @@ def _required_configurations(ev: _Evidence) -> Verdict:
             continue
         realized[cid] = states[0]
         used += [cid, states[0].get("entity_id")]
-    for cfg in configs:
-        cid = cfg.get("entity_id")
-        mine = realized.get(cid)
-        for item in (cfg.get("distinguishing_basis") or []):
-            if not isinstance(item, dict):
-                continue
-            group, dof = item.get("rigid_group"), item.get("dof")
-            named = [o for o in (item.get("differs_from") or [])
-                     if isinstance(o, str) and o]
-            used.append(cid)
-            if not named:
-                # "different" with nothing to be different from. Comparing
-                # against everything else was this code inventing the sibling.
-                codes.append("DISTINCTNESS_NAMES_NO_SIBLING")
-                notes.append("%s declares a basis on %s/%s and names no sibling"
-                             % (cid, group, dof))
-                status = _weaken(status, NOT_ESTABLISHED)
-                continue
-            if mine is None:
-                codes.append("DISTINCTNESS_NOT_REALIZED_HERE")
-                status = _weaken(status, NOT_ESTABLISHED)
-                continue
-            joint, code, note, premises = _resolve_driver(ev, group, dof)
-            used += premises
-            if joint is None:
-                codes.append(code)
-                notes.append(note)
-                status = _weaken(status, NOT_ESTABLISHED)
-                continue
-            jid = joint["entity_id"]
-            q = (mine.get("joint_coordinates") or {}).get(jid)
-            for other in named:
-                sibling = realized.get(other)
-                if sibling is None:
-                    codes.append("DISTINCTNESS_SIBLING_NOT_REALIZED")
-                    notes.append("%s must differ from %s, which this candidate "
-                                 "does not realize" % (cid, other))
-                    status = _weaken(status, NOT_ESTABLISHED)
-                    continue
-                p = (sibling.get("joint_coordinates") or {}).get(jid)
-                used.append(sibling.get("entity_id"))
-                if q is None or p is None:
-                    codes.append("DISTINCTNESS_COORDINATE_MISSING")
-                    notes.append("%s and %s do not both state a coordinate for %s"
-                                 % (cid, other, jid))
-                    status = _weaken(status, NOT_ESTABLISHED)
-                elif q == p:
-                    codes.append("DECLARED_DISTINCTNESS_NOT_REALIZED")
-                    notes.append("%s and %s both realize %s at %r"
-                                 % (cid, other, jid, q))
-                    status = FAIL
+    # DECLARED DISTINCTNESS, BY THE SHARED RULE. The formula lived here and the
+    # pass that writes the coordinates had none, so a response stating two
+    # configurations at one coordinate was accepted by the producer and
+    # convicted by the evaluator - one question with two answers, the second
+    # arriving too late to be acted on. `s04.distinctness_findings` is the one
+    # implementation; what a finding COSTS is decided here and nowhere else.
+    #
+    # WHAT IT IS NOT. Two states differing is not a statement that either is
+    # reachable from the other. That demand is a TransitionRequirement and
+    # `transition_reachability` answers it; nothing below is read there, and
+    # nothing there is read here.
+    coordinates = {cid: (st.get("joint_coordinates") or {})
+                   for cid, st in realized.items()}
+    findings, consulted = s04.distinctness_findings(
+        configs, coordinates, ev.fam("Joint"))
+    # EVERYTHING THE COMPARISON READ, whether or not it complained. The driver
+    # joint decides which coordinate is compared, so it is a premise of a PASS
+    # exactly as it is of a FAIL.
+    for ref in consulted:
+        used.append(ref)
+        if ref in realized:
+            used.append(realized[ref].get("entity_id"))
+    for code, note, refs in findings:
+        codes.append(code)
+        notes.append(note)
+        # A CONFIGURATION NAMED IS ALSO THE STATE THAT REALIZES IT: the numbers
+        # compared came off the state, so withdrawing either costs this verdict
+        # its standing.
+        for ref in refs:
+            used.append(ref)
+            if ref in realized:
+                used.append(realized[ref].get("entity_id"))
+        status = (FAIL if code == "DECLARED_DISTINCTNESS_NOT_REALIZED"
+                  else _weaken(status, NOT_ESTABLISHED))
     # The coordinates compared above are spatial values, so the basis they are
     # expressed in is a premise of the comparison exactly as it is of them.
     if used:
@@ -1048,35 +976,63 @@ def _spatial_realization(ev: _Evidence) -> Verdict:
                          % (pb, cb))
             status = FAIL
             used += [envelope_of.get(pb), envelope_of.get(cb)]
-    moving = {g for t in ev.fam("Transition")
-              for g in ((t.get("path") or {}).get("moving_groups") or [])}
-    for group in sorted(moving):
-        drivers = ev.joints_of(group)
-        if not drivers:
-            codes.append("MOVING_GROUP_HAS_NO_JOINT")
-            status = _weaken(status, NOT_ESTABLISHED)
-            continue
-        if len(drivers) > 1:
-            # EVERY joint on the group must be usable, because which one carries
-            # the motion is not stated. Checking the first left the others
-            # unexamined and let insertion order decide what was inspected.
-            codes.append("MOVING_GROUP_DRIVER_AMBIGUOUS")
-            notes.append("%s is moved and %s could carry it" % (group, ", ".join(
-                sorted(j["entity_id"] for j in drivers))))
-            status = _weaken(status, NOT_ESTABLISHED)
-        for joint in drivers:
-            if s04.axis_index(joint.get("axis_direction")) is None:
-                codes.append("JOINT_AXIS_UNUSABLE")
-                notes.append("%s declares axis %r" % (joint["entity_id"],
-                                                      joint.get("axis_direction")))
+    joints = ev.fam("Joint")
+    # WHICH JOINTS MOVE A MOVING GROUP, asked of the transition that moves it.
+    #
+    # INCIDENCE IS PARENT OR CHILD. This read `child_group` alone, so a group
+    # named on the PARENT side of the only joint it touches had no joint at all,
+    # and the same mechanism described the other way round got a different
+    # verdict. A joint states a RELATIVE relation; which side travels in the
+    # world is not what its parent/child ordering says.
+    #
+    # AND THE TRANSITION SAYS WHICH ONE CARRIES IT. `changed_coordinates` names
+    # the joints whose coordinate this path moves, so the joints that carry THIS
+    # motion are the incident ones among them. Reading incidence alone would
+    # make every closed loop ambiguous - each bar of a four-bar touches two
+    # joints - and would demand a placement for a joint this path does not turn.
+    # The ambiguity finding stays for what it was for: two joints of this group
+    # moving, with nothing saying which produced the motion.
+    for t in sorted(ev.fam("Transition"), key=lambda x: str(x.get("entity_id"))):
+        changed = {c for c in (t.get("changed_coordinates") or [])
+                   if isinstance(c, str)}
+        for group in sorted((t.get("path") or {}).get("moving_groups") or []):
+            incident = s04.incident_joints(joints, group)
+            if not incident:
+                codes.append("MOVING_GROUP_HAS_NO_JOINT")
+                notes.append("%s is moved by %s and no joint relates it to "
+                             "anything" % (group, t.get("entity_id")))
                 status = _weaken(status, NOT_ESTABLISHED)
                 continue
-            origin = joint.get("frame_origin")
-            if not (isinstance(origin, list) and len(origin) == 3):
-                codes.append("JOINT_NOT_PLACED")
+            drivers = [j for j in incident if j.get("entity_id") in changed]
+            if not drivers:
+                codes.append("MOVING_GROUP_HAS_NO_JOINT")
+                notes.append("%s is moved by %s and none of the coordinates it "
+                             "changes is a joint of that group"
+                             % (group, t.get("entity_id")))
                 status = _weaken(status, NOT_ESTABLISHED)
                 continue
-            used.append(joint["entity_id"])
+            if len(drivers) > 1:
+                # EVERY joint that moves must be usable, because which one
+                # produced the motion is not stated. Checking the first left the
+                # others unexamined and let insertion order decide.
+                codes.append("MOVING_GROUP_DRIVER_AMBIGUOUS")
+                notes.append("%s is moved and %s could carry it" % (group, ", ".join(
+                    sorted(j["entity_id"] for j in drivers))))
+                status = _weaken(status, NOT_ESTABLISHED)
+            for joint in drivers:
+                if s04.axis_index(joint.get("axis_direction")) is None:
+                    codes.append("JOINT_AXIS_UNUSABLE")
+                    notes.append("%s declares axis %r"
+                                 % (joint["entity_id"],
+                                    joint.get("axis_direction")))
+                    status = _weaken(status, NOT_ESTABLISHED)
+                    continue
+                origin = joint.get("frame_origin")
+                if not (isinstance(origin, list) and len(origin) == 3):
+                    codes.append("JOINT_NOT_PLACED")
+                    status = _weaken(status, NOT_ESTABLISHED)
+                    continue
+                used.append(joint["entity_id"])
     swept = {v.get("transition") for v in ev.fam("SweptVolume")}
     for t in ev.fam("Transition"):
         if ((t.get("path") or {}).get("moving_groups") or []) \

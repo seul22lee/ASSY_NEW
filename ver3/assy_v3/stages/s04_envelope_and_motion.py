@@ -510,6 +510,135 @@ THE MECHANISM AND ITS ARRANGEMENT
 
 
 
+
+def incident_joints(joints, group):
+    """Every joint that relates this group to another. EITHER SIDE OF IT.
+
+    A joint states a RELATIVE relation between two groups, and which of them is
+    written as the parent is not a statement about either. Matching only on
+    `child_group` asked "which joints hang off this group" and called the answer
+    "which joints move it" - so the same mechanism described the other way round
+    got a different verdict, and a group that is only ever a parent had no joint
+    at all.
+    """
+    return [j for j in joints
+            if group in (j.get("parent_group"), j.get("child_group"))]
+
+
+def distinctness_driver(joints, group, dof):
+    """(joint, code, note, refs) for the joint that carries (group, dof).
+
+    ONE COMPATIBLE JOINT OR NO ANSWER. Zero is a distinction the topology does
+    not support; more than one is a distinction the topology does not resolve.
+    Neither is a licence to pick, and picking is what let a slider answer for a
+    hinge - an arbitrary choice that then reported a positive contradiction,
+    because two configurations differing in rotation share a translation.
+    """
+    drivers, unreadable = [], []
+    for j in incident_joints(joints, group):
+        if axis_index(j.get("axis_direction")) is None:
+            unreadable.append(j)
+        elif dof in joint_free_dof(j):
+            drivers.append(j)
+    if len(drivers) == 1:
+        return drivers[0], None, None, [drivers[0].get("entity_id")]
+    if len(drivers) > 1:
+        names = sorted(str(j.get("entity_id")) for j in drivers)
+        return (None, "DISTINCTNESS_DRIVER_AMBIGUOUS",
+                "%s/%s could be carried by %s and the design does not say which"
+                % (group, dof, " or ".join(names)), names)
+    if unreadable:
+        names = sorted(str(j.get("entity_id")) for j in unreadable)
+        return (None, "DISTINCTNESS_DRIVER_AXIS_UNREADABLE",
+                "%s/%s: %s declare axes that name no coordinate"
+                % (group, dof, ", ".join(names)), names)
+    return (None, "DISTINCTNESS_DRIVER_UNKNOWN",
+            "no joint of this candidate leaves %s free at %s" % (dof, group), [])
+
+
+def distinctness_findings(configurations, coordinates, joints):
+    """(findings, read) for whether DECLARED distinctness is numerically real.
+
+    ONE IMPLEMENTATION, TWO READERS, exactly as the requirement/realization rules
+    are: the pass that writes the coordinates asks it of the response it is about
+    to write, and feasibility asks it of the records that were written. A
+    producer that accepts numbers an evaluator then convicts is one question with
+    two answers, the second arriving too late to act on, so the formula is here
+    and there is only one.
+
+    WHAT THIS IS NOT. `distinguishing_basis` says two named states are not the
+    same state, and this checks that the numbers agree. It is NOT a statement
+    that either state is reachable from the other - that demand is a
+    TransitionRequirement and `transition_reachability` answers it. Nothing here
+    is read there and nothing there is read here; mixing them is what made two
+    states differing into a demand that either be reachable.
+
+    A NAMED REFERENCE IS AN ADDRESS. `differs_from` names the siblings this
+    configuration must differ from; each is evaluated exactly, and one that is
+    absent or has no coordinates leaves the comparison unestablished rather than
+    passed by whatever else happens to be realized.
+
+    A finding is (code, note, refs). `read` is every entity consulted INCLUDING
+    on the paths that found nothing: the joint whose coordinate decided that two
+    states really do differ is what a PASS was computed from, so withdrawing it
+    must cost that PASS its standing. Naming facts only when they convict would
+    make provenance a record of complaints rather than of what was read.
+
+    `coordinates` is {configuration id: {joint id: number}} - whatever the caller
+    can see.
+    """
+    out: List[Tuple[str, str, List[str]]] = []
+    read: List[str] = []
+    for cfg in (configurations or []):
+        if not isinstance(cfg, dict):
+            continue
+        cid = cfg.get("entity_id") or cfg.get("id")
+        for item in (cfg.get("distinguishing_basis") or []):
+            if not isinstance(item, dict):
+                continue
+            group, dof = item.get("rigid_group"), item.get("dof")
+            named = [o for o in (item.get("differs_from") or [])
+                     if isinstance(o, str) and o]
+            read.append(cid)
+            if not named:
+                # "different" with nothing to be different from. Comparing
+                # against everything else would be inventing the sibling.
+                out.append(("DISTINCTNESS_NAMES_NO_SIBLING",
+                            "%s declares a basis on %s/%s and names no sibling"
+                            % (cid, group, dof), [cid]))
+                continue
+            if cid not in coordinates:
+                out.append(("DISTINCTNESS_NOT_REALIZED_HERE",
+                            "%s declares a basis and no coordinates are stated "
+                            "for it" % cid, [cid]))
+                continue
+            joint, code, note, refs = distinctness_driver(joints, group, dof)
+            read += list(refs)
+            if joint is None:
+                out.append((code, note, [cid] + list(refs)))
+                continue
+            jid = joint.get("entity_id")
+            q = (coordinates.get(cid) or {}).get(jid)
+            for other in named:
+                read.append(other)
+                if other not in coordinates:
+                    out.append(("DISTINCTNESS_SIBLING_NOT_REALIZED",
+                                "%s must differ from %s, for which no coordinates "
+                                "are stated" % (cid, other), [cid, other, jid]))
+                    continue
+                p = (coordinates.get(other) or {}).get(jid)
+                if q is None or p is None:
+                    out.append(("DISTINCTNESS_COORDINATE_MISSING",
+                                "%s and %s do not both state a coordinate for %s"
+                                % (cid, other, jid), [cid, other, jid]))
+                    continue
+                if q == p:
+                    out.append(("DECLARED_DISTINCTNESS_NOT_REALIZED",
+                                "%s and %s both realize %s at %r"
+                                % (cid, other, jid, q), [cid, other, jid]))
+    return out, sorted({r for r in read if isinstance(r, str) and r})
+
+
 def realization_findings(requirement, realizations, coordinates, joints):
     """(code, note) for ONE demanded state change and what claims to realize it.
 
@@ -685,7 +814,21 @@ class S04BPlacementAndMotion(Stage):
         ops: List[Op] = []
         prov = "s04b:placement"
         view = (inputs or {}).get(self.context_key) or {}
-        for st in parsed.get("state_coordinates", []):
+        # NO REALIZATION IS WRITTEN FROM NUMBERS THAT CONTRADICT THE DESIGN.
+        #
+        # EVERY state, not the contradicted pair. The coordinates are ONE answer:
+        # the model chose them together to realize a mechanism, and keeping the
+        # subset that happens not to collide would commit a realization nobody
+        # produced. Withholding them cascades correctly - a transition whose
+        # endpoint states were not written is skipped below, and the sweep that
+        # would have been computed from them is skipped in `derived_operations`.
+        #
+        # The joint PLACEMENTS still commit. Where a joint sits is a separate
+        # fact that these coordinates do not contradict, and this is the shape
+        # the refinement barrier already uses: commit what stands, withhold the
+        # realization, and let the caller ask again.
+        refused = self._contradicted_distinctness(parsed, inputs)
+        for st in ([] if refused else parsed.get("state_coordinates", [])):
             coords = st.get("coordinates", {})
             ops.append(Op("CREATE", "State", "STA-%s" % st["configuration"], {
                 "name": st["configuration"],
@@ -705,8 +848,8 @@ class S04BPlacementAndMotion(Stage):
                     for r in (view.get("TransitionRequirement") or [])
                     if isinstance(r, dict)}
         realized = {st.get("configuration") for st in
-                    parsed.get("state_coordinates", [])}
-        for t in parsed.get("transitions", []):
+                    ([] if refused else parsed.get("state_coordinates", []))}
+        for t in ([] if refused else parsed.get("transitions", [])):
             required = demanded.get(t.get("realizes_requirement"))
             if required is None:
                 continue
@@ -920,6 +1063,13 @@ class S04BPlacementAndMotion(Stage):
         reports it rather than this code filling it in.
         """
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
+        # NOTHING IS COMPUTED FROM A REALIZATION THAT WAS NOT WRITTEN. The same
+        # gate `to_operations` applies: an occupancy swept between endpoint
+        # states no patch created would reference records that do not exist, and
+        # a hull computed from numbers the design contradicts is evidence for a
+        # mechanism nobody realized.
+        if self._contradicted_distinctness(parsed, inputs):
+            return carry_invocation_premises([], self.invocation_premises(inputs))
         view = inputs.get(self.context_key) or {}
         boxes, gb = _view_boxes(view), {g["entity_id"]: g.get("body")
                                         for g in (view.get("RigidGroup") or [])}
@@ -944,12 +1094,26 @@ class S04BPlacementAndMotion(Stage):
                 continue
             ca = coords.get(frm) or {}
             cb = coords.get(to) or {}
+            changed = {c for c in (t.get("changed_coordinates") or [])
+                       if isinstance(c, str)}
             for group in (t.get("moving_groups") or []):
                 body = gb.get(group)
-                drive = next((j for j in joints.values()
-                              if j.get("child_group") == group), None)
-                if body not in boxes or drive is None:
+                # WHICH JOINT MOVES THIS GROUP - the same question the evaluator
+                # asks, answered the same way. This matched `child_group` alone
+                # and took the first hit, so a group named on the PARENT side of
+                # the joint that moves it got no hull at all, and the mechanism
+                # described the other way round produced different evidence.
+                # Incidence is either side; which of the incident joints carries
+                # THIS motion is what the transition already says it changes.
+                carrying = [j for j in incident_joints(joints.values(), group)
+                            if j.get("entity_id") in changed]
+                if body not in boxes or len(carrying) != 1:
+                    # More than one is a motion the design does not attribute,
+                    # and picking would be the arbitrary choice being removed.
+                    # `spatial_realization` reports both the ambiguity and the
+                    # occupancy this did not compute.
                     continue
+                drive = carrying[0]
                 jid = drive["entity_id"]
                 swept = sweep_hull(boxes[body], drive, origins.get(jid),
                                    float(ca.get(jid, 0) or 0),
@@ -977,6 +1141,30 @@ class S04BPlacementAndMotion(Stage):
         # candidate costs it standing. `run` passes only `to_operations` through
         # this, so a derived value has to say it itself.
         return carry_invocation_premises(ops, self.invocation_premises(inputs))
+
+    def _contradicted_distinctness(self, parsed, inputs) -> List[str]:
+        """The declared distinctions THESE NUMBERS POSITIVELY CONTRADICT.
+
+        Realizing `Configuration.distinguishing_basis` numerically is this pass's
+        responsibility, not a preference. A response giving two configurations
+        the design says are different states one coordinate has not realized
+        them, and admitting it would turn an invalid realization into evidence
+        about the MECHANISM - the candidate convicted, a stage later, of a
+        contradiction its author introduced.
+
+        ONLY THE CONTRADICTION GATES. A driver the topology does not resolve, a
+        sibling with no coordinates, a basis naming nobody are questions the
+        evidence leaves open; they are reported and they do not withhold
+        anything. What is refused is the positive statement that two distinct
+        states are one.
+        """
+        findings, _read = distinctness_findings(
+            (inputs.get(self.context_key) or {}).get("Configuration") or [],
+            {st.get("configuration"): (st.get("coordinates") or {})
+             for st in (parsed.get("state_coordinates") or [])},
+            (inputs.get(self.context_key) or {}).get("Joint") or [])
+        return [note for code, note, _refs in findings
+                if code == "DECLARED_DISTINCTNESS_NOT_REALIZED"]
 
     def _realization_problems(self, parsed, inputs) -> List[str]:
         """Whether every demanded state change was actually carried out here.
@@ -1048,6 +1236,23 @@ class S04BPlacementAndMotion(Stage):
         for missing in sorted(configs - stated):
             out.append("configuration %s has no joint coordinates" % missing)
         out.extend(self._realization_problems(parsed, inputs))
+        # DECLARED DISTINCTNESS, CHECKED BEFORE THESE COORDINATES ARE ACCEPTED.
+        # Two configurations the design says are not the same state, given one
+        # coordinate, are numbers that contradict the mechanism they claim to
+        # realize. This pass used to have no rule about it at all: the formula
+        # lived only in feasibility, so the contradiction was authored here,
+        # committed, and convicted a stage later - by which time the response
+        # that could have been asked again was already state.
+        #
+        # THE SAME RULE, not a second one. `distinctness_findings` is shared
+        # with the evaluator so a response this pass accepts cannot be one the
+        # evaluator rejects for a reason this pass could have given.
+        distinct, _read = distinctness_findings(
+            inputs["consumer_view"].get("Configuration") or [],
+            {st.get("configuration"): (st.get("coordinates") or {})
+             for st in (parsed.get("state_coordinates") or [])},
+            inputs["consumer_view"].get("Joint") or [])
+        out.extend(note for _code, note, _refs in distinct)
         # An axis this pass cannot use is not this pass's to invent. Reported
         # where the placement is claimed, so the run records that the motion was
         # never computable rather than that it was computed.

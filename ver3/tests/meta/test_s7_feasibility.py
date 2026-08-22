@@ -305,6 +305,11 @@ class _Feas(_fixtures.StateBuilder, unittest.TestCase):
                 attempt=2, invocation=inv)
             self.assertIsNotNone(ob.patch, ob.problems)
             state.apply(ob.patch)
+            # KEPT SO THE PRODUCER CAN BE ASKED WHAT IT SAID. Some properties
+            # are about the pass that wrote the numbers rather than about the
+            # state they became, and reading them off the state cannot tell a
+            # response that declared a problem from one that did not.
+            self.last_s04b = ob
         return state
 
     # -- the two probes ------------------------------------------------
@@ -419,12 +424,22 @@ class TestDomainPolicy(_Feas):
     def test_B4_a_declared_distinctness_that_is_not_realized_is_infeasible(self):
         """Two configurations declared to differ, realized at the same
         coordinate. A positive contradiction: the design says the mechanism is
-        in two states and the numbers say it is in one."""
+        in two states and the numbers say it is in one.
+
+        THE CONTRADICTION IS PUT INTO STATE BY A REVISION, because s04b refuses
+        to author one: realizing declared distinctness is that pass's
+        responsibility and a response contradicting it writes no realization at
+        all. The evaluator's rule still holds and still has to be tested - a
+        coordinate superseded afterwards, or evidence older than that gate, can
+        present exactly this - and what must NOT happen is a producer admitting
+        it and the mechanism being convicted for its author's mistake.
+        """
         basis = {"CFG-C0A": [{"rigid_group": _group(1, "A"), "dof": "RZ",
                               "differs_from": ["CFG-C1A"]}]}
-        state = self.hinge(s03a=topology("A", 2, [(0, 1)], basis=basis),
-                           s04b=motion("A", "JNT-0A", _group(1, "A"),
-                                       coords=(60, 60)))
+        state = self.hinge(s03a=topology("A", 2, [(0, 1)], basis=basis))
+        self.revise(state, Op("SUPERSEDE", "State", "STA-CFG-C1A",
+                              {"joint_coordinates": {"JNT-0A": 0}}, "t",
+                              reason="the coordinate was revised to the other's"))
         out = self.assess(state)
         self.assertEqual(s07.FAIL, self.domain(out, "required_configurations").status)
         self.assertIn("DECLARED_DISTINCTNESS_NOT_REALIZED",
@@ -1465,8 +1480,13 @@ class TestExactReferences(_Feas):
         self.assertIn("differs_from", str(raised.exception))
 
     def test_B41_a_named_sibling_that_is_equal_fails(self):
+        """The named sibling, equal. Written into state by a revision for the
+        reason B4 gives: the producer no longer authors this."""
         state = self.basis_probe(["CFG-C1A"], coords={
-            "CFG-C0A": {"JNT-0A": 60}, "CFG-C1A": {"JNT-0A": 60}})
+            "CFG-C0A": {"JNT-0A": 60}, "CFG-C1A": {"JNT-0A": 90}})
+        self.revise(state, Op("SUPERSEDE", "State", "STA-CFG-C1A",
+                              {"joint_coordinates": {"JNT-0A": 60}}, "t",
+                              reason="the coordinate was revised to the other's"))
         v = self.domain(self.assess(state), "required_configurations")
         self.assertEqual(s07.FAIL, v.status)
         self.assertIn("DECLARED_DISTINCTNESS_NOT_REALIZED", v.reason_codes)
@@ -2247,13 +2267,28 @@ class TestClosureSweep(unittest.TestCase):
         substitution that existed compared a configuration against "some other
         realized one" when the sibling it named was absent."""
         self.assertNotIn("or [k for k in realized", self.code)
-        for marker in ("DISTINCTNESS_SIBLING_NOT_REALIZED",
-                       "DISTINCTNESS_NAMES_NO_SIBLING",
-                       "TERMINAL_SITE_NOT_GIVEN",
+        for marker in ("TERMINAL_SITE_NOT_GIVEN",
                        "ENDPOINT_MISMATCH",
                        "JOINT_ABSENT",
                        "HOP_NOT_AN_INTERFACE"):
             self.assertIn(marker, self.src, marker)
+        # THE SAME RULE WHERE THE RULE NOW LIVES. Declared distinctness is
+        # checked by the pass that writes the coordinates and by the
+        # responsibility that judges them, so the formula - and the refusal to
+        # answer a named sibling with a different one - is asserted in the shared
+        # module rather than dropped from the sweep.
+        import inspect
+        shared = inspect.getsource(s04.distinctness_findings)
+        for marker in ("DISTINCTNESS_SIBLING_NOT_REALIZED",
+                       "DISTINCTNESS_NAMES_NO_SIBLING"):
+            self.assertIn(marker, shared, marker)
+        # A named sibling is answered by THAT sibling or by nothing: the only
+        # lookup keyed on the name, and no fallback beside it.
+        self.assertIn('if other not in coordinates:', shared)
+        self.assertIn('p = (coordinates.get(other) or {}).get(jid)', shared)
+        for fallback in ("or [k for k in", "for k in coordinates if k !=",
+                         "any(", "next("):
+            self.assertNotIn(fallback, shared, fallback)
 
     def test_SWEEP_12_every_single_valued_index_is_guarded(self):
         """`d[k] = v` over a semantic key keeps the last writer. Each index that
@@ -2283,11 +2318,9 @@ class TestClosureSweep(unittest.TestCase):
         test, and each is named here so a new one has to be justified."""
         self.assertNotIn("next(", self.code)
         self.assertNotIn("driving_joint", self.code)
-        for expression in ('drivers[0]', 'states[0]',
-                           'sorted(e)[0]', 'scales[0]'):
+        for expression in ('states[0]', 'sorted(e)[0]', 'scales[0]'):
             self.assertIn(expression, self.src, expression)
-        for guard in ("len(drivers) == 1", "len(states) > 1",
-                      "len(e) == 1", "len(scales) > 1"):
+        for guard in ("len(states) > 1", "len(e) == 1", "len(scales) > 1"):
             self.assertIn(guard, self.code, guard)
         # THE SAME RULE WHERE THE RULE NOW LIVES. Choosing among the records
         # that claim to realize one demanded change is shared with the pass that
@@ -2296,16 +2329,28 @@ class TestClosureSweep(unittest.TestCase):
         shared = inspect.getsource(s04.realization_findings)
         self.assertIn("realizations[0]", shared)
         self.assertIn("len(realizations) > 1", shared)
+        # And choosing the joint that carries a declared distinction, which
+        # moved out with the same rule.
+        driver = inspect.getsource(s04.distinctness_driver)
+        self.assertIn("drivers[0]", driver)
+        self.assertIn("len(drivers) == 1", driver)
 
     def test_SWEEP_14_the_address_of_a_driver_is_group_and_dof(self):
-        """Resolution runs through one function, and it takes both components."""
+        """Resolution runs through one function, and it takes both components.
+
+        That function moved. It was `_Evidence.drivers_for` plus a private
+        `_resolve_driver` here, and the pass that WRITES the coordinates had no
+        resolution at all - so a response naming two configurations at one
+        coordinate was accepted by the producer and convicted by the evaluator.
+        The rule is `s04.distinctness_driver` now, asked by both, and this
+        module keeps neither a copy nor a wrapper."""
         import inspect
-        self.assertEqual(["group", "dof"],
-                         [p for p in inspect.signature(s07._Evidence.drivers_for)
-                          .parameters if p != "self"])
-        self.assertIn("dof", inspect.signature(s07._resolve_driver).parameters)
+        self.assertEqual(["joints", "group", "dof"],
+                         list(inspect.signature(s04.distinctness_driver).parameters))
+        for gone in ("_resolve_driver", "drivers_for", "joints_of"):
+            self.assertNotIn(gone, self.src, gone)
         body = self.src.split("def _required_configurations(")[1].split("\ndef ")[0]
-        self.assertIn("_resolve_driver(ev, group, dof)", body)
+        self.assertIn("s04.distinctness_findings(", body)
 
     def test_SWEEP_15_no_hard_demand_is_lost_between_s01_and_feasibility(self):
         """The two ingestion channels exist, neither depends on the other, and

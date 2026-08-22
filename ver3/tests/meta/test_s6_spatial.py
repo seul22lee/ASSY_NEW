@@ -330,14 +330,35 @@ class TestRealization(_S04Chain):
                           "differs_from": ["CFG-C1A"]}]}
 
     def test_G6_declared_distinctness_that_realization_violates_is_a_finding(self):
+        """The independent capability still finds it in state.
+
+        THE CONTRADICTION ARRIVES BY REVISION. s04b refuses to author one -
+        realizing declared distinctness is that pass's responsibility, and a
+        response contradicting it writes no realization - so the way this state
+        comes about is a coordinate superseded afterwards. The check is not
+        thereby pointless: it reads what state says, whoever put it there, and a
+        revision is one of the ways a design contradicts itself later.
+        """
         ok, _ = self.spatial(basis=self.BASIS)
         self.assertEqual([], _assurance(ok, "required_distinctness_non_degeneracy"))
-        same = s04b_response("JNT-A", ["CFG-C0A", "CFG-C1A"], "RGP-G0A",
-                             coords=(30, 30), changed=[])
-        bad, _ = self.spatial(s04b=same, basis=self.BASIS)
+        bad, _ = self.spatial(basis=self.BASIS)
+        self.revise(bad, Op("SUPERSEDE", "State", "STA-CFG-C1A",
+                            {"joint_coordinates": {"JNT-A": 0}}, "t",
+                            reason="revised to the other configuration's value"))
         found = _assurance(bad, "required_distinctness_non_degeneracy")
         self.assertTrue(any("DECLARED_DISTINCTNESS_NOT_REALIZED" in p for p in found),
                         found)
+
+    def test_G6c_the_producer_never_authors_that_state_in_the_first_place(self):
+        """The other half, and the reason G6 needs a revision at all: a response
+        whose numbers contradict a declared distinction writes no realization,
+        so the finding above cannot arrive straight from a producer."""
+        same = s04b_response("JNT-A", ["CFG-C0A", "CFG-C1A"], "RGP-G0A",
+                             coords=(30, 30), changed=[])
+        refused, _ = self.spatial(s04b=same, basis=self.BASIS)
+        self.assertEqual([], refused.family("State"))
+        self.assertEqual([], _assurance(refused,
+                                        "required_distinctness_non_degeneracy"))
 
     def test_G6b_without_a_declared_basis_nothing_is_demanded(self):
         """Conditional on the premise, never 'all configurations must differ'."""
