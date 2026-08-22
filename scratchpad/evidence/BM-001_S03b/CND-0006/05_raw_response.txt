@@ -1,0 +1,168 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0001",
+      "groups": ["RGP-0017", "RGP-0018"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "configurations": ["CFG-0010", "CFG-0012"]
+    },
+    {
+      "id": "PHI-0002",
+      "groups": ["RGP-0017", "RGP-0018"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "configurations": ["CFG-0011"]
+    },
+    {
+      "id": "PHI-0003",
+      "groups": ["RGP-0019", "RGP-0020"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "at_interface": "IFC-0022",
+      "configurations": ["CFG-0012"]
+    },
+    {
+      "id": "PHI-0004",
+      "groups": ["RGP-0017", "RGP-0018"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "configurations": ["CFG-0011"]
+    },
+    {
+      "id": "PHI-0005",
+      "groups": ["RGP-0017", "RGP-0018"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "configurations": ["CFG-0011"]
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0001",
+      "retained_group": "RGP-0019",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0014"
+    },
+    {
+      "id": "CRL-0002",
+      "retained_group": "RGP-0020",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0015"
+    },
+    {
+      "id": "CRL-0003",
+      "retained_group": "RGP-0020",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0014"
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0022", "IFC-0024"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "ordered_hops": [],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0020", "IFC-0022", "IFC-0024"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0020", "IFC-0022", "IFC-0024"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0025"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0014",
+      "access_side": "TOP",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0015",
+      "access_side": "FRONT",
+      "activates": ["JNT-0015"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["BOD-0014"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0016",
+      "access_side": "FRONT",
+      "activates": ["JNT-0016", "JNT-0017"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["BOD-0014", "BOD-0015"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-1001",
+      "decision": "Compliant hinge load path lacks an interface",
+      "why_open": "Load transfer between RGP-0018 (lid) and RGP-0017 (base) occurs through a continuous flexure within BOD-0014, but no Interface entity exists for this internal load path; load_paths cannot name an interface hop for this transfer.",
+      "alternatives": [
+        "Add an interface representing the internal flexure region",
+        "Model load transfer as internal body stress without interface hop"
+      ],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": ["BOD-0014"],
+      "blocks": ["LDP-0002"]
+    },
+    {
+      "id": "S3U-1002",
+      "decision": "Base-to-world retention is external",
+      "why_open": "The base body BOD-0014 is not retained by any mechanism feature; it rests on the reaction site. A constraint_relation would require an assembly termination_strategy that is not available for a first part.",
+      "alternatives": [
+        "Treat base as fixed frame and exclude from retained groups",
+        "Add a later body cover or adhesive to retain base"
+      ],
+      "alternatives_kind": "PRINCIPLE_FAMILIES",
+      "kept_open_by": ["RSR-0001"],
+      "blocks": ["CRL for RGP-0017"]
+    },
+    {
+      "id": "S3U-1003",
+      "decision": "Load case application point and direction under-specified",
+      "why_open": "LC-0003, LC-0004 and LC-0005 do not specify which surface or interface receives the load, so the chosen load paths are assumptions.",
+      "alternatives": [
+        "Clarify load application point per load case"
+      ],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["LC-0003", "LC-0004", "LC-0005"],
+      "blocks": ["LDP-0003", "LDP-0004", "LDP-0005"]
+    }
+  ]
+}

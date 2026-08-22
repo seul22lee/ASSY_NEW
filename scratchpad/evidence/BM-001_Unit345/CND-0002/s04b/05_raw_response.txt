@@ -1,0 +1,28 @@
+{
+  "joint_placements": [
+    {"joint": "JNT-0004", "origin": [-5, 0, 3]},
+    {"joint": "JNT-0005", "origin": [5, 0, 3.5]},
+    {"joint": "JNT-0006", "origin": [-5, 0, 2.5]},
+    {"joint": "JNT-0007", "origin": [-5, 0, 3.5]},
+    {"joint": "JNT-0008", "origin": [5, 0, 4.0]}
+  ],
+  "state_coordinates": [
+    {"configuration": "CFG-0003", "coordinates": {"JNT-0004": -60, "JNT-0005": 5}},
+    {"configuration": "CFG-0004", "coordinates": {"JNT-0004": 0, "JNT-0005": 0}}
+  ],
+  "transitions": [
+    {
+      "id": "TRN-0003",
+      "realizes_requirement": "TRQ-0003",
+      "moving_groups": ["RGP-0007", "RGP-0008", "RGP-0009", "RGP-0010"],
+      "changed_coordinates": ["JNT-0004", "JNT-0005"]
+    },
+    {
+      "id": "TRN-0004",
+      "realizes_requirement": "TRQ-0004",
+      "moving_groups": ["RGP-0007", "RGP-0008", "RGP-0009", "RGP-0010"],
+      "changed_coordinates": ["JNT-0004", "JNT-0005"]
+    }
+  ],
+  "notes": "Fixed joints JNT-0006, JNT-0007, and JNT-0008 are placed at their attachment interfaces. Only compliant joints JNT-0004 and JNT-0005 have state coordinates."
+}

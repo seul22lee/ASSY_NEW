@@ -240,7 +240,11 @@ class Contracts:
             return None
         fam = (_CONTRACT_DOCS[self]["families"].get(family) or {})
         spec = (fam.get("field_semantics") or {}).get(field) or {}
-        return copy_out(spec) if spec.get("kind") == "record_list" else None
+        # A SINGLE RECORD IS A ONE-ROW RECORD LIST to every reader. `kind:
+        # record` declares one typed sub-record rather than a list of them, and
+        # its members are validated by the same walker - one rule about
+        # "does this nested reference resolve", not two.
+        return copy_out(spec) if spec.get("kind") in ("record_list", "record") else None
 
     def premise_record_spec(self, family: Optional[str],
                             field: str) -> Optional[Dict[str, Any]]:
@@ -693,6 +697,8 @@ class DesignState:
                     continue
                 rows = self.c.record_list_spec(family, key)
                 if rows is not None:
+                    if rows.get("kind") == "record" and isinstance(val, dict):
+                        val = [val]
                     out += self._record_list(patch, seen, known, rows, val,
                                              op.entity_id, key)
             out += self._conditional_references(patch, seen, known, family, op)

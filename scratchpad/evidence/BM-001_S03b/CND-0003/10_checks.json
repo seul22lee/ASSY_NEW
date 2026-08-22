@@ -1,0 +1,998 @@
+{
+ "assembly": {
+  "retained_bodies": [
+   "BOD-0008",
+   "BOD-0009",
+   "BOD-0010",
+   "BOD-0011"
+  ],
+  "retained_bodies_without_a_real_strategy": [],
+  "rows": [
+   {
+    "access_side": "+Z",
+    "activates": [],
+    "body": "BOD-0008",
+    "body_is_retained": true,
+    "depends_on": [],
+    "order_index": 1,
+    "path_kind": "RIGID",
+    "retention_status": "RETAINED_BY_LATER_BODY_COVER",
+    "step": "ASY-0001",
+    "termination_strategy": "LATER_BODY_COVER"
+   },
+   {
+    "access_side": "+Z",
+    "activates": [
+     "JNT-0009"
+    ],
+    "body": "BOD-0009",
+    "body_is_retained": true,
+    "depends_on": [
+     "BOD-0008"
+    ],
+    "order_index": 2,
+    "path_kind": "RIGID",
+    "retention_status": "RETAINED_BY_ROTATION",
+    "step": "ASY-0002",
+    "termination_strategy": "ROTATION"
+   },
+   {
+    "access_side": "+Y",
+    "activates": [
+     "JNT-0010"
+    ],
+    "body": "BOD-0010",
+    "body_is_retained": true,
+    "depends_on": [
+     "BOD-0009"
+    ],
+    "order_index": 3,
+    "path_kind": "RIGID",
+    "retention_status": "RETAINED_BY_LATER_BODY_COVER",
+    "step": "ASY-0003",
+    "termination_strategy": "LATER_BODY_COVER"
+   },
+   {
+    "access_side": "+Y",
+    "activates": [
+     "JNT-0011",
+     "JNT-0012"
+    ],
+    "body": "BOD-0011",
+    "body_is_retained": true,
+    "depends_on": [
+     "BOD-0010",
+     "BOD-0008"
+    ],
+    "order_index": 4,
+    "path_kind": "RIGID",
+    "retention_status": "RETAINED_BY_ROTATION",
+    "step": "ASY-0004",
+    "termination_strategy": "ROTATION"
+   }
+  ]
+ },
+ "candidate": "CND-0003",
+ "constraints": {
+  "every_relation_reaches_a_cell": false,
+  "rows": [
+   {
+    "blocked_direction": null,
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "cells_reached": [
+     "RGP-0011/CFG-0005/TX",
+     "RGP-0011/CFG-0005/TY",
+     "RGP-0011/CFG-0005/TZ",
+     "RGP-0011/CFG-0005/RX",
+     "RGP-0011/CFG-0005/RY",
+     "RGP-0011/CFG-0005/RZ",
+     "RGP-0011/CFG-0006/TX",
+     "RGP-0011/CFG-0006/TY",
+     "RGP-0011/CFG-0006/TZ",
+     "RGP-0011/CFG-0006/RX",
+     "RGP-0011/CFG-0006/RY",
+     "RGP-0011/CFG-0006/RZ",
+     "RGP-0011/CFG-0007/TX",
+     "RGP-0011/CFG-0007/TY",
+     "RGP-0011/CFG-0007/TZ",
+     "RGP-0011/CFG-0007/RX",
+     "RGP-0011/CFG-0007/RY",
+     "RGP-0011/CFG-0007/RZ"
+    ],
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "defeat_specification": null,
+    "driver": "LOAD",
+    "maintaining_interaction": null,
+    "provider_body": null,
+    "provider_reaction_site": "RSR-0001",
+    "provider_site": null,
+    "reaches_a_cell": true,
+    "relation": "CRL-0001",
+    "retained_group": "RGP-0011"
+   },
+   {
+    "blocked_direction": null,
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "cells_reached": [
+     "RGP-0012/CFG-0005/TX",
+     "RGP-0012/CFG-0005/TY",
+     "RGP-0012/CFG-0005/TZ",
+     "RGP-0012/CFG-0005/RX",
+     "RGP-0012/CFG-0005/RZ",
+     "RGP-0012/CFG-0006/TX",
+     "RGP-0012/CFG-0006/TY",
+     "RGP-0012/CFG-0006/TZ",
+     "RGP-0012/CFG-0006/RX",
+     "RGP-0012/CFG-0006/RZ",
+     "RGP-0012/CFG-0007/TX",
+     "RGP-0012/CFG-0007/TY",
+     "RGP-0012/CFG-0007/TZ",
+     "RGP-0012/CFG-0007/RX",
+     "RGP-0012/CFG-0007/RZ"
+    ],
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "defeat_specification": null,
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": null,
+    "provider_body": "BOD-0008",
+    "provider_reaction_site": null,
+    "provider_site": "IFC-0010",
+    "reaches_a_cell": true,
+    "relation": "CRL-0002",
+    "retained_group": "RGP-0012"
+   },
+   {
+    "blocked_direction": null,
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "cells_reached": [
+     "RGP-0013/CFG-0005/TX",
+     "RGP-0013/CFG-0005/TY",
+     "RGP-0013/CFG-0005/TZ",
+     "RGP-0013/CFG-0005/RX",
+     "RGP-0013/CFG-0005/RZ",
+     "RGP-0013/CFG-0006/TX",
+     "RGP-0013/CFG-0006/TY",
+     "RGP-0013/CFG-0006/TZ",
+     "RGP-0013/CFG-0006/RX",
+     "RGP-0013/CFG-0006/RZ",
+     "RGP-0013/CFG-0007/TX",
+     "RGP-0013/CFG-0007/TY",
+     "RGP-0013/CFG-0007/TZ",
+     "RGP-0013/CFG-0007/RX",
+     "RGP-0013/CFG-0007/RZ"
+    ],
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "defeat_specification": null,
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": null,
+    "provider_body": "BOD-0009",
+    "provider_reaction_site": null,
+    "provider_site": "IFC-0012",
+    "reaches_a_cell": true,
+    "relation": "CRL-0003",
+    "retained_group": "RGP-0013"
+   },
+   {
+    "blocked_direction": null,
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "cells_reached": [],
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "defeat_specification": null,
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": null,
+    "provider_body": "BOD-0010",
+    "provider_reaction_site": null,
+    "provider_site": "IFC-0013",
+    "reaches_a_cell": false,
+    "relation": "CRL-0004",
+    "retained_group": "RGP-0014"
+   },
+   {
+    "blocked_direction": null,
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "cells_reached": [
+     "RGP-0014/CFG-0005/TX",
+     "RGP-0014/CFG-0005/TY",
+     "RGP-0014/CFG-0005/TZ",
+     "RGP-0014/CFG-0005/RX",
+     "RGP-0014/CFG-0005/RZ",
+     "RGP-0014/CFG-0006/TX",
+     "RGP-0014/CFG-0006/TY",
+     "RGP-0014/CFG-0006/TZ",
+     "RGP-0014/CFG-0006/RX",
+     "RGP-0014/CFG-0006/RZ",
+     "RGP-0014/CFG-0007/TX",
+     "RGP-0014/CFG-0007/TY",
+     "RGP-0014/CFG-0007/TZ",
+     "RGP-0014/CFG-0007/RX",
+     "RGP-0014/CFG-0007/RZ"
+    ],
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "defeat_specification": null,
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": null,
+    "provider_body": "BOD-0008",
+    "provider_reaction_site": null,
+    "provider_site": "IFC-0011",
+    "reaches_a_cell": true,
+    "relation": "CRL-0005",
+    "retained_group": "RGP-0014"
+   },
+   {
+    "blocked_direction": null,
+    "blocked_dofs": [
+     "RY"
+    ],
+    "cells_reached": [
+     "RGP-0012/CFG-0007/RY"
+    ],
+    "configurations": [
+     "CFG-0007"
+    ],
+    "defeat_specification": null,
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": null,
+    "provider_body": "BOD-0010",
+    "provider_reaction_site": null,
+    "provider_site": "IFC-0014",
+    "reaches_a_cell": true,
+    "relation": "CRL-0006",
+    "retained_group": "RGP-0012"
+   }
+  ]
+ },
+ "load_paths": {
+  "all_candidates_are_the_invocation": true,
+  "all_hops_branch_local": true,
+  "load_cases_without_a_path": [],
+  "rows": [
+   {
+    "candidate": "CND-0003",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0001",
+    "load_case_reacted_at": "RSR-0001",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0013",
+     "IFC-0011"
+    ],
+    "path": "LDP-0001",
+    "terminates_at": "RSR-0001",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0003",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0002",
+    "load_case_reacted_at": "RSR-0001",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0010"
+    ],
+    "path": "LDP-0002",
+    "terminates_at": "RSR-0001",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0003",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0003",
+    "load_case_reacted_at": "RSR-0002",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0015"
+    ],
+    "path": "LDP-0003",
+    "terminates_at": "RSR-0002",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0003",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0004",
+    "load_case_reacted_at": "RSR-0002",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0010"
+    ],
+    "path": "LDP-0004",
+    "terminates_at": "RSR-0002",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0003",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0005",
+    "load_case_reacted_at": "RSR-0003",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0011"
+    ],
+    "path": "LDP-0005",
+    "terminates_at": "RSR-0003",
+    "terminus_matches_load_case": true
+   }
+  ]
+ },
+ "mobility": {
+  "by_disposition": {
+   "BLOCKED_BY": 64,
+   "INTENDED": 8
+  },
+  "cells": 72,
+  "compliant_preserved": true,
+  "grid": {
+   "CFG-0005": {
+    "RGP-0011": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0012": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": "JNT-0009",
+      "constraint_relation": null,
+      "disposition": "INTENDED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0013": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": "JNT-0010",
+      "constraint_relation": null,
+      "disposition": "INTENDED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0014": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": "JNT-0012",
+      "constraint_relation": null,
+      "disposition": "INTENDED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    }
+   },
+   "CFG-0006": {
+    "RGP-0011": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0012": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": "JNT-0009",
+      "constraint_relation": null,
+      "disposition": "INTENDED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0013": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": "JNT-0010",
+      "constraint_relation": null,
+      "disposition": "INTENDED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0014": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": "JNT-0012",
+      "constraint_relation": null,
+      "disposition": "INTENDED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    }
+   },
+   "CFG-0007": {
+    "RGP-0011": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0012": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0006",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0013": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": "JNT-0010",
+      "constraint_relation": null,
+      "disposition": "INTENDED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0014": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": "JNT-0012",
+      "constraint_relation": null,
+      "disposition": "INTENDED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0005",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    }
+   }
+  },
+  "joints": [
+   {
+    "axis_direction": "+Y",
+    "child_group": "RGP-0012",
+    "compliant": false,
+    "declared_dof": [
+     "RY"
+    ],
+    "derived_free_dof": [
+     "RY"
+    ],
+    "exactly_preserved": true,
+    "joint": "JNT-0009",
+    "joint_type": "REVOLUTE",
+    "preserved": true
+   },
+   {
+    "axis_direction": "+Y",
+    "child_group": "RGP-0013",
+    "compliant": false,
+    "declared_dof": [
+     "RY"
+    ],
+    "derived_free_dof": [
+     "RY"
+    ],
+    "exactly_preserved": true,
+    "joint": "JNT-0010",
+    "joint_type": "REVOLUTE",
+    "preserved": true
+   },
+   {
+    "axis_direction": "+Y",
+    "child_group": "RGP-0014",
+    "compliant": false,
+    "declared_dof": [
+     "RY"
+    ],
+    "derived_free_dof": [],
+    "exactly_preserved": false,
+    "joint": "JNT-0011",
+    "joint_type": "REVOLUTE",
+    "preserved": true
+   },
+   {
+    "axis_direction": "+Y",
+    "child_group": "RGP-0014",
+    "compliant": false,
+    "declared_dof": [
+     "RY"
+    ],
+    "derived_free_dof": [
+     "RY"
+    ],
+    "exactly_preserved": true,
+    "joint": "JNT-0012",
+    "joint_type": "REVOLUTE",
+    "preserved": true
+   }
+  ]
+ },
+ "physical_effect": {
+  "all_matched": true,
+  "obligations": [
+   {
+    "discharged": true,
+    "effect": "PERMIT_MOTION",
+    "peo": "PEO-0001"
+   },
+   {
+    "discharged": true,
+    "effect": "PREVENT_MOTION",
+    "peo": "PEO-0002"
+   },
+   {
+    "discharged": true,
+    "effect": "TRANSMIT_FORCE",
+    "peo": "PEO-0003"
+   },
+   {
+    "discharged": true,
+    "effect": "LOCATE",
+    "peo": "PEO-0004"
+   },
+   {
+    "discharged": true,
+    "effect": "CONTAIN",
+    "peo": "PEO-0005"
+   }
+  ],
+  "rows": [
+   {
+    "discharges_effect": "PEO-0001",
+    "effect": "PERMIT_MOTION",
+    "groups": [
+     "RGP-0011",
+     "RGP-0012"
+    ],
+    "interaction": "PHI-0001",
+    "required_effect": "PERMIT_MOTION",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0002",
+    "effect": "PREVENT_MOTION",
+    "groups": [
+     "RGP-0011",
+     "RGP-0012"
+    ],
+    "interaction": "PHI-0002",
+    "required_effect": "PREVENT_MOTION",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0003",
+    "effect": "TRANSMIT_FORCE",
+    "groups": [
+     "RGP-0013",
+     "RGP-0014",
+     "RGP-0011"
+    ],
+    "interaction": "PHI-0003",
+    "required_effect": "TRANSMIT_FORCE",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0004",
+    "effect": "LOCATE",
+    "groups": [
+     "RGP-0011",
+     "RGP-0012"
+    ],
+    "interaction": "PHI-0004",
+    "required_effect": "LOCATE",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0005",
+    "effect": "CONTAIN",
+    "groups": [
+     "RGP-0011",
+     "RGP-0012"
+    ],
+    "interaction": "PHI-0005",
+    "required_effect": "CONTAIN",
+    "verdict": "MATCH"
+   }
+  ],
+  "undischarged": []
+ },
+ "production_checks": {
+  "new_since_baseline": null,
+  "skipped": "patch not applied"
+ }
+}

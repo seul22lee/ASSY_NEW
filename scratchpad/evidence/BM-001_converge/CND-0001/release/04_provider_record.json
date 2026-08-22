@@ -1,0 +1,172 @@
+{
+ "client_max_attempts": 1,
+ "generation_result": {
+  "error_detail": null,
+  "execution_status": "SUCCESS",
+  "from_cache": false,
+  "latency_s": 105.633
+ },
+ "model_requested": "deepseek-v4-pro",
+ "model_run_records": [
+  {
+   "attempt_index": 1,
+   "determinism": {
+    "seed": null,
+    "seed_honoured": "NOT_SUPPORTED",
+    "seed_requested_by_stage": null,
+    "temperature": 1.0,
+    "temperature_actually_sent": 1.0,
+    "temperature_requested_by_stage": 1.0,
+    "top_p": null
+   },
+   "error_detail": null,
+   "execution_status": "SUCCESS",
+   "model_id": "deepseek-v4-pro",
+   "model_id_requested": "deepseek-v4-pro",
+   "model_id_served": "deepseek-v4-pro",
+   "model_run_id": "bm001-review|s03|sa1|a1",
+   "model_substitution": null,
+   "model_version_string": "deepseek-v4-pro",
+   "provider_id": "deepseek",
+   "purpose": "complete blocked_relative_motions and defeat_specification on released CRL-0005",
+   "request": {
+    "deadline_s": 600.0,
+    "experiment_overrides": {
+     "deadline_s": null,
+     "model": "deepseek-v4-pro",
+     "response_format": "json_object",
+     "temperature": null,
+     "top_p": null
+    },
+    "max_output_tokens": 65536,
+    "max_output_tokens_clamped_from": null,
+    "parameter_resolution": {
+     "deadline_s": {
+      "channel": "transport",
+      "effective": 600.0,
+      "note": "applied to the connection, not sent to the model",
+      "override": null,
+      "requested": 600.0,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "max_output_tokens": {
+      "channel": "payload",
+      "effective": 65536,
+      "note": "",
+      "override": null,
+      "requested": 65536,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "model": {
+      "channel": "payload",
+      "effective": "deepseek-v4-pro",
+      "note": "the stage states no model; selecting one is an experiment decision",
+      "override": "deepseek-v4-pro",
+      "requested": null,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "response_format": {
+      "channel": "payload",
+      "effective": "json_object",
+      "note": "format mode is a transport capability; the shape itself is the parser's",
+      "override": "json_object",
+      "requested": null,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "response_schema": {
+      "channel": "none",
+      "effective": null,
+      "note": "",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_NOT_REQUESTED"
+     },
+     "seed": {
+      "channel": "none",
+      "effective": null,
+      "note": "the provider accepts no seed parameter; the requested value is retained and no determinism is claimed",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_UNSUPPORTED"
+     },
+     "temperature": {
+      "channel": "payload",
+      "effective": 1.0,
+      "note": "the stage asks for a reproducible answer; the repeated-trial protocol asks for sampling, and the experiment says which run this is",
+      "override": null,
+      "requested": 1.0,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "top_p": {
+      "channel": "none",
+      "effective": null,
+      "note": "accepted on the request and no longer discarded without trace",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_NOT_REQUESTED"
+     }
+    },
+    "parameters": {
+     "response_format": "json_object",
+     "temperature": 1.0,
+     "top_p": null
+    },
+    "prompt_chars": 3304,
+    "prompt_sha256": "ec677c04f8e2ef2073f2484d28f6b1a03b47433e601529a6d98006b76090f155",
+    "prompt_text": "You are completing two statements about restraints in an existing mechanism.\nYou are NOT designing anything.\n\nTHE MECHANISM ALREADY EXISTS. Its joints, its configurations, its restraints and\nthe state changes it is required to perform are fixed and listed below. You may\nnot add, remove or rename any of them, and nothing you write here can.\n\nWHAT IS BEING COMPLETED\nEach state change below RELEASES one or more restraints: the change cannot happen\nwhile the restraint holds, so the change defeats it. For each released restraint\nyou state two things it has not yet said:\n\n  blocked_relative_motions   which relative JOINT motion this restraint removes,\n                             as {joint, dof} rows - the joint and the degree of\n                             freedom of THAT joint. Only where the restraint\n                             genuinely restrains that motion. Keep rows it already\n                             has; add what is missing.\n\n  defeat_specification       ONE SENTENCE of physical mechanism: how the restraint\n                             is overcome during the change. The user presses the\n                             latch arm aside. The handle carries the toggle past\n                             centre. The detent rides over its ramp. State the\n                             qualitative principle and NOTHING quantitative: no\n                             force, torque, spring rate, stress or dimension. How\n                             much it takes is a later question and a number here\n                             would be one nobody has computed.\n\nRESPONSE SCHEMA\nReturn a single JSON object with one key.\n\n  completions[]   relation, blocked_relative_motions[] {joint, dof},\n                  defeat_specification\n\n  relation   a restraint id from the list below that a state change releases\n  joint      a joint id from the list below\n  dof        one of TX TY TZ RX RY RZ, and one that joint declares\n\nOne row per released restraint listed. Do not add rows for restraints not listed.\n\nRULES\n  DO NOT INVENT A MECHANISM. The restraint's driver, its provider and the\n  interaction that maintains it are shown. The principle you state must be how\n  THAT restraint, as described, is overcome - not a redesign of it.\n  DO NOT NAME A JOINT THAT IS NOT LISTED, and do not name a DOF the joint does not\n  declare.\n  If the restraint as described genuinely cannot be overcome by any physical\n  principle consistent with the mechanism, say so in defeat_specification in one\n  sentence beginning \"NOT OVERCOMABLE:\" - that is a true statement about this\n  design and a later step will report it.\n\nTHE JOINTS OF THIS CANDIDATE\n  JNT-0001  FIXED        RGP-0002 -> RGP-0001  dof=[]  axis=NONE\n  JNT-0002  REVOLUTE     RGP-0003 -> RGP-0002  dof=['RY']  axis=+Y\n  JNT-0003  COMPLIANT    RGP-0004 -> RGP-0003  dof=['RY']  axis=+Y\n\nTHE STATE CHANGES THAT RELEASE A RESTRAINT\n  TRQ-0001  CFG-0001 -> CFG-0002  requires JNT-0002/RY, JNT-0003/RY  releases CRL-0005\n\nTHE RESTRAINTS TO COMPLETE\n  CRL-0005\n      holds in: CFG-0001\n      retained group: RGP-0003   blocked group DOF: ['RY']\n      driver: KINEMATIC_NECESSITY   provider: BOD-0001   acts at: IFC-0004   maintained by: PHI-0002\n      blocked_relative_motions so far: [('JNT-0002', 'RY')]\n      defeat_specification so far: None\n"
+   },
+   "response": {
+    "finish_reason": "stop",
+    "raw_text": "{\n  \"completions\": [\n    {\n      \"relation\": \"CRL-0005\",\n      \"blocked_relative_motions\": [\n        {\n          \"joint\": \"JNT-0002\",\n          \"dof\": \"RY\"\n        }\n      ],\n      \"defeat_specification\": \"The imposed JNT-0002/RY rotation moves the retained group RGP-0003 out of the held configuration, disengaging the physical interaction at IFC-0004 so that the restraint no longer blocks the joint.\"\n    }\n  ]\n}",
+    "reasoning_content_present": true,
+    "reasoning_content_stored": false,
+    "response_chars": 415,
+    "response_sha256": "4b562c4c4984e9f9a693e77615825d0980fdf889444a58af75383987f0b3fb67",
+    "truncated": false
+   },
+   "run_id": "bm001-review",
+   "stage_attempt": 1,
+   "stage_id": "s03",
+   "timing": {
+    "duration_s": 105.633,
+    "ended_at": 1787407346.73609,
+    "retry_wait_s": 0.0,
+    "started_at": 1787407241.1034467
+   },
+   "usage": {
+    "cached_input_tokens": 896,
+    "input_tokens": 920,
+    "output_tokens": 6218
+   }
+  }
+ ],
+ "provider_generate_calls_this_candidate": 1,
+ "raise_from_client": null,
+ "request_as_sent": {
+  "max_attempts": null,
+  "max_output_tokens": 65536,
+  "prompt_chars": 3304,
+  "responsibility_id": null,
+  "stage_id": "s03",
+  "temperature": 1.0
+ },
+ "response": {
+  "cached_input_tokens": 896,
+  "finish_reason": "stop",
+  "input_tokens": 920,
+  "output_tokens": 6218,
+  "raw_text_chars": 415,
+  "served_model_id": "deepseek-v4-pro",
+  "truncated": false
+ },
+ "transport_attempts_this_candidate": 1,
+ "wall_clock_s": 105.634
+}

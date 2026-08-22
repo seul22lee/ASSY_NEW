@@ -1,0 +1,43 @@
+{
+  "joint_placements": [
+    {
+      "joint": "JNT-0001",
+      "origin": [-48, 0, 20]
+    },
+    {
+      "joint": "JNT-0002",
+      "origin": [-48, 0, 20]
+    },
+    {
+      "joint": "JNT-0003",
+      "origin": [40, 0, 25]
+    }
+  ],
+  "state_coordinates": [
+    {
+      "configuration": "CFG-0001",
+      "coordinates": {
+        "JNT-0002": 0,
+        "JNT-0003": -15
+      }
+    },
+    {
+      "configuration": "CFG-0002",
+      "coordinates": {
+        "JNT-0002": -90,
+        "JNT-0003": 0
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "id": "TRN-0001",
+      "from_configuration": "CFG-0001",
+      "to_configuration": "CFG-0002",
+      "moving_groups": ["RGP-0003", "RGP-0004"],
+      "changed_coordinates": ["JNT-0002", "JNT-0003"]
+    }
+  ],
+  "envelope_revisions": [],
+  "notes": "Hinge axis placed along Y at pin centre; compliant joint at snap tab root. Fixed joint origin coincident with hinge. Closed configuration uses hinge 0 deg and tab -15 deg deflection; open uses hinge -90 deg and tab 0 deg."
+}

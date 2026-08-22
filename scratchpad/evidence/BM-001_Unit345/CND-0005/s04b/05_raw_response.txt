@@ -1,0 +1,38 @@
+{
+  "joint_placements": [
+    { "joint": "JNT-0101", "origin": [-25, 0, 40] },
+    { "joint": "JNT-0102", "origin": [0, 15, 45] }
+  ],
+  "state_coordinates": [
+    { "configuration": "CFG-0101", "coordinates": { "JNT-0101": -90, "JNT-0102": 90 } },
+    { "configuration": "CFG-0102", "coordinates": { "JNT-0101": 0, "JNT-0102": 90 } },
+    { "configuration": "CFG-0103", "coordinates": { "JNT-0101": 0, "JNT-0102": 0 } }
+  ],
+  "transitions": [
+    {
+      "id": "TRN-0201",
+      "realizes_requirement": "TRQ-0201",
+      "moving_groups": ["RGP-0102", "RGP-0103"],
+      "changed_coordinates": ["JNT-0102"]
+    },
+    {
+      "id": "TRN-0202",
+      "realizes_requirement": "TRQ-0202",
+      "moving_groups": ["RGP-0101", "RGP-0102"],
+      "changed_coordinates": ["JNT-0101"]
+    },
+    {
+      "id": "TRN-0203",
+      "realizes_requirement": "TRQ-0203",
+      "moving_groups": ["RGP-0101", "RGP-0102"],
+      "changed_coordinates": ["JNT-0101"]
+    },
+    {
+      "id": "TRN-0204",
+      "realizes_requirement": "TRQ-0204",
+      "moving_groups": ["RGP-0102", "RGP-0103"],
+      "changed_coordinates": ["JNT-0102"]
+    }
+  ],
+  "notes": ""
+}

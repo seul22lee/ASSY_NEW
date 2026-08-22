@@ -1,0 +1,122 @@
+{
+ "authored_by_family": {
+  "Joint": 1,
+  "State": 2,
+  "Transition": 2
+ },
+ "authored_operations": [
+  {
+   "entity_id": "STA-CFG-0008",
+   "family": "State",
+   "fields": {
+    "configuration": "CFG-0008",
+    "joint_coordinates": {
+     "JNT-0013": 0.0
+    },
+    "name": "CFG-0008"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CFG-0008",
+    "JNT-0013",
+    "SCL-CND-0004",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "STA-CFG-0009",
+   "family": "State",
+   "fields": {
+    "configuration": "CFG-0009",
+    "joint_coordinates": {
+     "JNT-0013": 2.0
+    },
+    "name": "CFG-0009"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CFG-0009",
+    "JNT-0013",
+    "SCL-CND-0004",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "TRN-0105",
+   "family": "Transition",
+   "fields": {
+    "changed_coordinates": [
+     "JNT-0013"
+    ],
+    "from_state": "STA-CFG-0008",
+    "path": {
+     "moving_groups": [
+      "RGP-0015",
+      "RGP-0016"
+     ]
+    },
+    "realizes_requirement": "TRQ-0105",
+    "to_state": "STA-CFG-0009"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "JNT-0013",
+    "RGP-0015",
+    "RGP-0016",
+    "SCL-CND-0004",
+    "STA-CFG-0008",
+    "STA-CFG-0009",
+    "TRQ-0105",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "TRN-0106",
+   "family": "Transition",
+   "fields": {
+    "changed_coordinates": [
+     "JNT-0013"
+    ],
+    "from_state": "STA-CFG-0009",
+    "path": {
+     "moving_groups": [
+      "RGP-0015",
+      "RGP-0016"
+     ]
+    },
+    "realizes_requirement": "TRQ-0106",
+    "to_state": "STA-CFG-0008"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "JNT-0013",
+    "RGP-0015",
+    "RGP-0016",
+    "SCL-CND-0004",
+    "STA-CFG-0008",
+    "STA-CFG-0009",
+    "TRQ-0106",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "JNT-0013",
+   "family": "Joint",
+   "fields": {
+    "frame_origin": [
+     0.5,
+     0.0,
+     0.0
+    ]
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0004"
+   ]
+  }
+ ],
+ "candidate": "CND-0004",
+ "declared_incompleteness": [],
+ "execution_status": "SUCCESS",
+ "stage_problems": []
+}

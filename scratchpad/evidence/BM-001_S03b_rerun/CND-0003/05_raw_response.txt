@@ -1,0 +1,219 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0011",
+      "groups": ["RGP-0012", "RGP-0011"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "at_interface": "IFC-0010",
+      "configurations": ["CFG-0005", "CFG-0006"]
+    },
+    {
+      "id": "PHI-0012",
+      "groups": ["RGP-0012", "RGP-0011"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "configurations": ["CFG-0007"]
+    },
+    {
+      "id": "PHI-0013",
+      "groups": ["RGP-0013", "RGP-0014"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "at_interface": "IFC-0013",
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"]
+    },
+    {
+      "id": "PHI-0014",
+      "groups": ["RGP-0012", "RGP-0011"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "at_interface": "IFC-0015",
+      "configurations": ["CFG-0006", "CFG-0007"]
+    },
+    {
+      "id": "PHI-0015",
+      "groups": ["RGP-0012", "RGP-0011"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "at_interface": "IFC-0015",
+      "configurations": ["CFG-0006", "CFG-0007"]
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0016",
+      "retained_group": "RGP-0011",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "LOAD",
+      "provider_reaction_site": "RSR-0001"
+    },
+    {
+      "id": "CRL-0017",
+      "retained_group": "RGP-0011",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0007"],
+      "driver": "LOAD",
+      "provider_reaction_site": "RSR-0002"
+    },
+    {
+      "id": "CRL-0018",
+      "retained_group": "RGP-0012",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_site": "IFC-0010"
+    },
+    {
+      "id": "CRL-0019",
+      "retained_group": "RGP-0013",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_site": "IFC-0012"
+    },
+    {
+      "id": "CRL-0020",
+      "retained_group": "RGP-0014",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0010",
+      "provider_site": "IFC-0013"
+    },
+    {
+      "id": "CRL-0021",
+      "retained_group": "RGP-0014",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_site": "IFC-0011"
+    },
+    {
+      "id": "CRL-0022",
+      "retained_group": "RGP-0012",
+      "blocked_dofs": ["RY"],
+      "configurations": ["CFG-0007"],
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": "BOD-0008",
+      "provider_site": "IFC-0014"
+    },
+    {
+      "id": "CRL-0023",
+      "retained_group": "RGP-0013",
+      "blocked_dofs": ["RY"],
+      "configurations": ["CFG-0007"],
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": "BOD-0008",
+      "provider_site": "IFC-0014"
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0011",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0013", "IFC-0011"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0012",
+      "load_case": "LC-0002",
+      "ordered_hops": ["IFC-0010"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0013",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0015"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0014",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0014"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0015",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0010"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0008",
+      "order_index": 1,
+      "body": "BOD-0008",
+      "access_side": "+Z",
+      "activates": [],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0009",
+      "order_index": 2,
+      "body": "BOD-0009",
+      "access_side": "+Y",
+      "activates": ["IFC-0010"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0008"]
+    },
+    {
+      "id": "ASY-0010",
+      "order_index": 3,
+      "body": "BOD-0011",
+      "access_side": "+Y",
+      "activates": ["IFC-0011"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0008"]
+    },
+    {
+      "id": "ASY-0011",
+      "order_index": 4,
+      "body": "BOD-0010",
+      "access_side": "+Y",
+      "activates": ["IFC-0012", "IFC-0013", "IFC-0014"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0009", "ASY-0010"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-1004",
+      "decision": "Base assembly termination strategy",
+      "why_open": "Base is retained by external support and no later body covers it, but allowed termination_strategy values require LATER_BODY_COVER, ROTATION, or ELASTICITY. Using LATER_BODY_COVER is a placeholder.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0007"],
+      "blocks": ["RSR-0001", "RSR-0002"]
+    },
+    {
+      "id": "S3U-1005",
+      "decision": "CONTAIN physical interaction lacks dedicated environment/storage groups",
+      "why_open": "PEO-0005 requires effect between storage volume role and external environment role, but no dedicated RigidGroup exists for storage volume or environment. Used base and lid as proxy.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": [],
+      "blocks": ["PEO-0005"]
+    },
+    {
+      "id": "S3U-1006",
+      "decision": "LC-0005 load path through assembly insertion interface underspecified",
+      "why_open": "Load case applied to 'insertion interface role' without naming a specific interface; assumed hinge insertion interface IFC-0010.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0003"],
+      "blocks": ["LC-0005"]
+    }
+  ]
+}

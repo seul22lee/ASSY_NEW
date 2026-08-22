@@ -1,0 +1,487 @@
+{
+ "authored_by_family": {
+  "AssemblyStep": 2,
+  "ConstraintRelation": 4,
+  "LoadPath": 5,
+  "PhysicalInteraction": 5,
+  "TransitionRequirement": 2,
+  "UnresolvedDecision": 4
+ },
+ "authored_operations": [
+  {
+   "entity_id": "PHI-0011",
+   "family": "PhysicalInteraction",
+   "fields": {
+    "at_interface": "IFC-0016",
+    "configurations": [
+     "CFG-0008",
+     "CFG-0009"
+    ],
+    "discharges_effect": "PEO-0001",
+    "effect": "PERMIT_MOTION",
+    "groups": [
+     "RGP-0015",
+     "RGP-0016"
+    ]
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "PHI-0012",
+   "family": "PhysicalInteraction",
+   "fields": {
+    "at_interface": "IFC-0017",
+    "configurations": [
+     "CFG-0008"
+    ],
+    "discharges_effect": "PEO-0002",
+    "effect": "PREVENT_MOTION",
+    "groups": [
+     "RGP-0015",
+     "RGP-0016"
+    ]
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "PHI-0013",
+   "family": "PhysicalInteraction",
+   "fields": {
+    "at_interface": "IFC-0017",
+    "configurations": [
+     "CFG-0008"
+    ],
+    "discharges_effect": "PEO-0003",
+    "effect": "TRANSMIT_FORCE",
+    "groups": [
+     "RGP-0015",
+     "RGP-0016"
+    ]
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "PHI-0014",
+   "family": "PhysicalInteraction",
+   "fields": {
+    "at_interface": "IFC-0018",
+    "configurations": [
+     "CFG-0008"
+    ],
+    "discharges_effect": "PEO-0004",
+    "effect": "LOCATE",
+    "groups": [
+     "RGP-0015",
+     "RGP-0016"
+    ]
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "PHI-0015",
+   "family": "PhysicalInteraction",
+   "fields": {
+    "configurations": [
+     "CFG-0008",
+     "CFG-0009"
+    ],
+    "discharges_effect": "PEO-0005",
+    "effect": "CONTAIN",
+    "groups": [
+     "RGP-0016"
+    ]
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "CRL-0108",
+   "family": "ConstraintRelation",
+   "fields": {
+    "blocked_direction": "NONE",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0008",
+     "CFG-0009"
+    ],
+    "driver": "LOAD",
+    "provider_reaction_site": "RSR-0001",
+    "retained_group": "RGP-0015"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "CRL-0109",
+   "family": "ConstraintRelation",
+   "fields": {
+    "blocked_dofs": [
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "blocked_relative_motions": [
+     {
+      "dof": "TY",
+      "joint": "JNT-0013"
+     },
+     {
+      "dof": "TZ",
+      "joint": "JNT-0013"
+     },
+     {
+      "dof": "RX",
+      "joint": "JNT-0013"
+     },
+     {
+      "dof": "RY",
+      "joint": "JNT-0013"
+     },
+     {
+      "dof": "RZ",
+      "joint": "JNT-0013"
+     }
+    ],
+    "configurations": [
+     "CFG-0008",
+     "CFG-0009"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": "PHI-0011",
+    "provider_body": "BOD-0012",
+    "provider_site": "IFC-0016",
+    "retained_group": "RGP-0016"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "CRL-0110",
+   "family": "ConstraintRelation",
+   "fields": {
+    "blocked_direction": "NONE",
+    "blocked_dofs": [
+     "TX"
+    ],
+    "blocked_relative_motions": [
+     {
+      "dof": "TX",
+      "joint": "JNT-0013"
+     }
+    ],
+    "configurations": [
+     "CFG-0008"
+    ],
+    "driver": "LOAD",
+    "maintaining_interaction": "PHI-0012",
+    "provider_body": "BOD-0012",
+    "provider_site": "IFC-0017",
+    "retained_group": "RGP-0016"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "CRL-0111",
+   "family": "ConstraintRelation",
+   "fields": {
+    "blocked_direction": "+X",
+    "blocked_dofs": [
+     "TX"
+    ],
+    "configurations": [
+     "CFG-0009"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "provider_body": "BOD-0012",
+    "provider_site": "IFC-0018",
+    "retained_group": "RGP-0016"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "LDP-0106",
+   "family": "LoadPath",
+   "fields": {
+    "candidate": "CND-0004",
+    "load_case": "LC-0001",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0017"
+    ],
+    "terminates_at": "RSR-0001"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "LDP-0107",
+   "family": "LoadPath",
+   "fields": {
+    "candidate": "CND-0004",
+    "load_case": "LC-0002",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0016"
+    ],
+    "terminates_at": "RSR-0001"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "LDP-0108",
+   "family": "LoadPath",
+   "fields": {
+    "candidate": "CND-0004",
+    "load_case": "LC-0003",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0017"
+    ],
+    "terminates_at": "RSR-0002"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "LDP-0109",
+   "family": "LoadPath",
+   "fields": {
+    "candidate": "CND-0004",
+    "load_case": "LC-0004",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0018"
+    ],
+    "terminates_at": "RSR-0002"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "LDP-0110",
+   "family": "LoadPath",
+   "fields": {
+    "candidate": "CND-0004",
+    "load_case": "LC-0005",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0016"
+    ],
+    "terminates_at": "RSR-0003"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "ASY-0105",
+   "family": "AssemblyStep",
+   "fields": {
+    "access_side": "+Z",
+    "activates": [],
+    "body": "BOD-0012",
+    "depends_on": [],
+    "order_index": 1,
+    "path_kind": "RIGID",
+    "termination_strategy": "NONE"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "ASY-0106",
+   "family": "AssemblyStep",
+   "fields": {
+    "access_side": "-X",
+    "activates": [
+     "IFC-0016",
+     "IFC-0017",
+     "IFC-0018",
+     "IFC-0019"
+    ],
+    "body": "BOD-0013",
+    "depends_on": [
+     "ASY-0105"
+    ],
+    "order_index": 2,
+    "path_kind": "RIGID",
+    "termination_strategy": "NONE"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "TRQ-0105",
+   "family": "TransitionRequirement",
+   "fields": {
+    "from_configuration": "CFG-0008",
+    "released_constraints": [
+     "CRL-0110"
+    ],
+    "required_relative_motions": [
+     {
+      "dof": "TX",
+      "joint": "JNT-0013"
+     }
+    ],
+    "to_configuration": "CFG-0009"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "TRQ-0106",
+   "family": "TransitionRequirement",
+   "fields": {
+    "from_configuration": "CFG-0009",
+    "released_constraints": [],
+    "required_relative_motions": [
+     {
+      "dof": "TX",
+      "joint": "JNT-0013"
+     }
+    ],
+    "to_configuration": "CFG-0008"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "S3U-1002",
+   "family": "UnresolvedDecision",
+   "fields": {
+    "alternatives": [],
+    "alternatives_kind": "FREE_TEXT",
+    "blocks": [
+     "OBL-0016",
+     "IFC-0017"
+    ],
+    "decision": "Friction hold retention parameters",
+    "kept_open_by": [
+     "FRE-0002"
+    ],
+    "why_open": "Friction coefficient and normal force between drawer and housing are unspecified; the candidate's evidence route is unavailable."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "S3U-1003",
+   "family": "UnresolvedDecision",
+   "fields": {
+    "alternatives": [],
+    "alternatives_kind": "PRINCIPLE_FAMILIES",
+    "blocks": [
+     "BOD-0012"
+    ],
+    "decision": "Assembly retention strategy for housing",
+    "kept_open_by": [],
+    "why_open": "Base housing is retained by external reaction site RSR-0001, not by a product-internal LATER_BODY_COVER, ROTATION, or ELASTICITY strategy."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "S3U-1004",
+   "family": "UnresolvedDecision",
+   "fields": {
+    "alternatives": [],
+    "alternatives_kind": "PRINCIPLE_FAMILIES",
+    "blocks": [
+     "BOD-0013",
+     "CRL-0110"
+    ],
+    "decision": "Drawer axial retention beyond friction",
+    "kept_open_by": [],
+    "why_open": "Straight insertion leaves the reverse direction open; friction hold is not a positive lock and not one of the allowed termination strategies."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "S3U-1005",
+   "family": "UnresolvedDecision",
+   "fields": {
+    "alternatives": [],
+    "alternatives_kind": "FREE_TEXT",
+    "blocks": [
+     "LC-0001",
+     "IFC-0017"
+    ],
+    "decision": "User-drawer actuation interface",
+    "kept_open_by": [
+     "FRE-0001"
+    ],
+    "why_open": "No Interface entity exists between the user's hand and the drawer front for applying actuation loads; load paths start at the first product interface."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  }
+ ],
+ "candidate": "CND-0004",
+ "declared_incompleteness": [
+  "RELEASE_EVIDENCE_NOT_ESTABLISHED: TRQ-0105 releases CRL-0110, which states no defeat specification, so how the release is achieved is not established"
+ ],
+ "every_authored_op_premised_on_candidate": true,
+ "execution_status": "CONTRACT_INCOMPLETE",
+ "stage_problems": []
+}

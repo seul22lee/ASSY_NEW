@@ -1,0 +1,247 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0301",
+      "groups": ["RGP-0017", "RGP-0018"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "configurations": ["CFG-0010", "CFG-0012"]
+    },
+    {
+      "id": "PHI-0302",
+      "groups": ["RGP-0017", "RGP-0018"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "configurations": ["CFG-0011"]
+    },
+    {
+      "id": "PHI-0303",
+      "groups": ["RGP-0019", "RGP-0020"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "configurations": ["CFG-0010", "CFG-0012"]
+    },
+    {
+      "id": "PHI-0304",
+      "groups": ["RGP-0017", "RGP-0018"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "configurations": ["CFG-0011"]
+    },
+    {
+      "id": "PHI-0305",
+      "groups": ["RGP-0017", "RGP-0018"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "configurations": ["CFG-0011"]
+    }
+  ],
+  "transition_requirements": [
+    {
+      "id": "TRQ-0301",
+      "from_configuration": "CFG-0010",
+      "to_configuration": "CFG-0012",
+      "required_relative_motions": [
+        {"joint": "JNT-0014", "dof": "RY"},
+        {"joint": "JNT-0015", "dof": "RY"},
+        {"joint": "JNT-0016", "dof": "RY"},
+        {"joint": "JNT-0017", "dof": "RY"}
+      ],
+      "released_constraints": []
+    },
+    {
+      "id": "TRQ-0302",
+      "from_configuration": "CFG-0012",
+      "to_configuration": "CFG-0011",
+      "required_relative_motions": [
+        {"joint": "JNT-0014", "dof": "RY"},
+        {"joint": "JNT-0015", "dof": "RY"},
+        {"joint": "JNT-0016", "dof": "RY"},
+        {"joint": "JNT-0017", "dof": "RY"}
+      ],
+      "released_constraints": []
+    },
+    {
+      "id": "TRQ-0303",
+      "from_configuration": "CFG-0011",
+      "to_configuration": "CFG-0012",
+      "required_relative_motions": [
+        {"joint": "JNT-0014", "dof": "RY"},
+        {"joint": "JNT-0015", "dof": "RY"},
+        {"joint": "JNT-0016", "dof": "RY"},
+        {"joint": "JNT-0017", "dof": "RY"}
+      ],
+      "released_constraints": ["CRL-0305"]
+    },
+    {
+      "id": "TRQ-0304",
+      "from_configuration": "CFG-0012",
+      "to_configuration": "CFG-0010",
+      "required_relative_motions": [
+        {"joint": "JNT-0014", "dof": "RY"},
+        {"joint": "JNT-0015", "dof": "RY"},
+        {"joint": "JNT-0016", "dof": "RY"},
+        {"joint": "JNT-0017", "dof": "RY"}
+      ],
+      "released_constraints": []
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0301",
+      "retained_group": "RGP-0018",
+      "blocked_dofs": [],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0014",
+      "blocked_relative_motions": [
+        {"joint": "JNT-0014", "dof": "TX"},
+        {"joint": "JNT-0014", "dof": "TY"},
+        {"joint": "JNT-0014", "dof": "TZ"},
+        {"joint": "JNT-0014", "dof": "RX"},
+        {"joint": "JNT-0014", "dof": "RZ"}
+      ]
+    },
+    {
+      "id": "CRL-0302",
+      "retained_group": "RGP-0019",
+      "blocked_dofs": [],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0014",
+      "blocked_relative_motions": [
+        {"joint": "JNT-0015", "dof": "TX"},
+        {"joint": "JNT-0015", "dof": "TY"},
+        {"joint": "JNT-0015", "dof": "TZ"},
+        {"joint": "JNT-0015", "dof": "RX"},
+        {"joint": "JNT-0015", "dof": "RZ"}
+      ]
+    },
+    {
+      "id": "CRL-0303",
+      "retained_group": "RGP-0020",
+      "blocked_dofs": [],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0015",
+      "blocked_relative_motions": [
+        {"joint": "JNT-0016", "dof": "TX"},
+        {"joint": "JNT-0016", "dof": "TY"},
+        {"joint": "JNT-0016", "dof": "TZ"},
+        {"joint": "JNT-0016", "dof": "RX"},
+        {"joint": "JNT-0016", "dof": "RZ"}
+      ]
+    },
+    {
+      "id": "CRL-0304",
+      "retained_group": "RGP-0017",
+      "blocked_dofs": [],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0016",
+      "blocked_relative_motions": [
+        {"joint": "JNT-0017", "dof": "TX"},
+        {"joint": "JNT-0017", "dof": "TY"},
+        {"joint": "JNT-0017", "dof": "TZ"},
+        {"joint": "JNT-0017", "dof": "RX"},
+        {"joint": "JNT-0017", "dof": "RZ"}
+      ]
+    },
+    {
+      "id": "CRL-0305",
+      "retained_group": "RGP-0018",
+      "blocked_dofs": [],
+      "configurations": ["CFG-0011"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0016",
+      "blocked_relative_motions": [
+        {"joint": "JNT-0014", "dof": "RY"}
+      ]
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0301",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0022", "IFC-0024"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0302",
+      "load_case": "LC-0002",
+      "ordered_hops": [],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0303",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0020", "IFC-0022", "IFC-0024"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0304",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0020", "IFC-0022", "IFC-0024"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0305",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0021", "IFC-0023", "IFC-0025"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0301",
+      "order_index": 1,
+      "body": "BOD-0014",
+      "access_side": "+Y",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0302",
+      "order_index": 2,
+      "body": "BOD-0016",
+      "access_side": "+Y",
+      "activates": ["IFC-0024", "IFC-0025"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0301"]
+    },
+    {
+      "id": "ASY-0303",
+      "order_index": 3,
+      "body": "BOD-0015",
+      "access_side": "+Y",
+      "activates": ["IFC-0020", "IFC-0021", "IFC-0022", "IFC-0023"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0301", "ASY-0302"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-3001",
+      "decision": "Assembly retention of main body BOD-0014",
+      "why_open": "The main body is a single molded part and serves as the base of the assembly. No product-relative retention strategy applies during assembly beyond the external fixture, which is not listed among the allowed termination strategies (LATER_BODY_COVER, ROTATION, ELASTICITY).",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0003"],
+      "blocks": []
+    },
+    {
+      "id": "S3U-3002",
+      "decision": "Load path for gravity on lid through living hinge",
+      "why_open": "No interface entity exists for the internal flexure region between rigid groups RGP-0017 and RGP-0018. Load case LC-0002 applies gravity to the moving closing role and reacts at RSR-0001, but the transfer through the living hinge cannot be represented as an interface hop in ordered_hops.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0001"],
+      "blocks": []
+    }
+  ]
+}

@@ -1,0 +1,2536 @@
+{
+ "candidates": {
+  "CND-0001": {
+   "branch_isolation_held": true,
+   "candidates_visible": [
+    "CND-0001"
+   ],
+   "exactly_this_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Body": 3,
+    "Candidate": 1,
+    "FunctionalRegion": 4,
+    "Interface": 4,
+    "Joint": 3,
+    "Obligation": 14,
+    "Requirement": 10,
+    "RigidGroup": 4
+   },
+   "foreign_branch_entities": {},
+   "reasons": [
+    "S03b was not accepted for this branch",
+    "the s04a consumer view is UPSTREAM_INSUFFICIENCY",
+    "unmet: {\"requirement\": \"topology_and_interaction\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"physical_interaction\", \"families\": [\"PhysicalInteraction\"], \"standing_instances\": {\"PhysicalInteraction\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}, {\"obligation\": \"topology_element\", \"families\": [\"Body\", \"RigidGroup\"], \"standing_instances\": {\"Body\": 19, \"RigidGroup\": 23}, \"verdict\": \"SATISFIED\", \"why\": \"7 of 7 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"BOD-0001\", \"BOD-0002\", \"BOD-0003\", \"RGP-0001\", \"RGP-0002\", \"RGP-0003\", \"RGP-0004\"], \"expected_count\": 7, \"selected\": [\"BOD-0001\", \"BOD-0002\", \"BOD-0003\", \"RGP-0001\", \"RGP-0002\", \"RGP-0003\", \"RGP-0004\"], \"selected_count\": 7}, {\"obligation\": \"topology_relation\", \"families\": [\"Interface\", \"Joint\"], \"standing_instances\": {\"Interface\": 30, \"Joint\": 19}, \"verdict\": \"SATISFIED\", \"why\": \"7 of 7 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"IFC-0001\", \"IFC-0002\", \"IFC-0003\", \"IFC-0004\", \"JNT-0001\", \"JNT-0002\", \"JNT-0003\"], \"expected_count\": 7, \"selected\": [\"IFC-0001\", \"IFC-0002\", \"IFC-0003\", \"IFC-0004\", \"JNT-0001\", \"JNT-0002\", \"JNT-0003\"], \"selected_count\": 7}], \"families\": [\"Body\", \"Interface\", \"Joint\", \"PhysicalInteraction\", \"RigidGroup\"], \"selected\": 14, \"trace\": {\"engineering_question\": \"Can this candidate fit at all?\", \"why\": \"Extents attach to bodies and their connections.\", \"requires_semantics\": [\"topology_element\", \"topology_relation\", \"physical_interaction\"], \"qualifying_by_role\": {\"topology_element\": [\"Body\", \"RigidGroup\"], \"topology_relation\": [\"Interface\", \"Joint\"], \"physical_interaction\": [\"PhysicalInteraction\"]}, \"instance_selection\": {\"topology_element\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"topology_relation\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"physical_interaction\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}",
+    "unmet: {\"requirement\": \"assembly_order_constraint\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"assembly_order\", \"families\": [\"AssemblyStep\"], \"standing_instances\": {\"AssemblyStep\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}], \"families\": [\"AssemblyStep\"], \"selected\": 0, \"trace\": {\"engineering_question\": \"Can it be assembled?\", \"why\": \"Assemblability is an ordering property, not only a geometric one.\", \"requires_semantics\": [\"assembly_order\"], \"qualifying_by_role\": {\"assembly_order\": [\"AssemblyStep\"]}, \"instance_selection\": {\"assembly_order\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}"
+   ],
+   "required_premise_classes": [
+    {
+     "class": "topology_and_interaction",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "roles": [
+      "physical_interaction",
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "physical_interaction": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "extent_bounding_quantity",
+     "families": [
+      "Parameter",
+      "Requirement"
+     ],
+     "roles": [
+      "quantity_constraint"
+     ],
+     "selection": {
+      "quantity_constraint": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "reach_requirement",
+     "families": [
+      "Actor",
+      "FunctionalRegion"
+     ],
+     "roles": [
+      "actor_role",
+      "functional_region"
+     ],
+     "selection": {
+      "actor_role": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      },
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "region_and_envelope_constraint",
+     "families": [
+      "AssemblyStep",
+      "Envelope",
+      "FunctionalRegion",
+      "ReferenceScale"
+     ],
+     "roles": [
+      "functional_region",
+      "spatial_commitment"
+     ],
+     "selection": {
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "spatial_commitment": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "assembly_order_constraint",
+     "families": [
+      "AssemblyStep"
+     ],
+     "roles": [
+      "assembly_order"
+     ],
+     "selection": {
+      "assembly_order": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03b_accepted": false,
+   "semantic_role_members": {
+    "actor_role": [
+     "ACT-0001"
+    ],
+    "assembly_order": [],
+    "functional_region": [
+     "FRG-0001",
+     "FRG-0002",
+     "FRG-0003",
+     "FRG-0004"
+    ],
+    "physical_interaction": [],
+    "quantity_constraint": [
+     "REQ-0001",
+     "REQ-0002",
+     "REQ-0003",
+     "REQ-0004",
+     "REQ-0005",
+     "REQ-0006",
+     "REQ-0007",
+     "REQ-0008",
+     "REQ-0009",
+     "REQ-0010"
+    ],
+    "spatial_commitment": [
+     "FRG-0001",
+     "FRG-0002",
+     "FRG-0003",
+     "FRG-0004"
+    ],
+    "topology_element": [
+     "BOD-0001",
+     "BOD-0002",
+     "BOD-0003",
+     "RGP-0001",
+     "RGP-0002",
+     "RGP-0003",
+     "RGP-0004"
+    ],
+    "topology_relation": [
+     "IFC-0001",
+     "IFC-0002",
+     "IFC-0003",
+     "IFC-0004",
+     "JNT-0001",
+     "JNT-0002",
+     "JNT-0003"
+    ]
+   },
+   "semantic_role_populations": {
+    "actor_role": 1,
+    "assembly_order": 0,
+    "functional_region": 4,
+    "physical_interaction": 0,
+    "quantity_constraint": 10,
+    "spatial_commitment": 4,
+    "topology_element": 7,
+    "topology_relation": 7
+   },
+   "unmet_premise_classes": [
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "PhysicalInteraction"
+       ],
+       "obligation": "physical_interaction",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "PhysicalInteraction": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "BOD-0001",
+        "BOD-0002",
+        "BOD-0003",
+        "RGP-0001",
+        "RGP-0002",
+        "RGP-0003",
+        "RGP-0004"
+       ],
+       "expected_count": 7,
+       "families": [
+        "Body",
+        "RigidGroup"
+       ],
+       "obligation": "topology_element",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "BOD-0001",
+        "BOD-0002",
+        "BOD-0003",
+        "RGP-0001",
+        "RGP-0002",
+        "RGP-0003",
+        "RGP-0004"
+       ],
+       "selected_count": 7,
+       "standing_instances": {
+        "Body": 19,
+        "RigidGroup": 23
+       },
+       "verdict": "SATISFIED",
+       "why": "7 of 7 applicable instances selected"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "IFC-0001",
+        "IFC-0002",
+        "IFC-0003",
+        "IFC-0004",
+        "JNT-0001",
+        "JNT-0002",
+        "JNT-0003"
+       ],
+       "expected_count": 7,
+       "families": [
+        "Interface",
+        "Joint"
+       ],
+       "obligation": "topology_relation",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "IFC-0001",
+        "IFC-0002",
+        "IFC-0003",
+        "IFC-0004",
+        "JNT-0001",
+        "JNT-0002",
+        "JNT-0003"
+       ],
+       "selected_count": 7,
+       "standing_instances": {
+        "Interface": 30,
+        "Joint": 19
+       },
+       "verdict": "SATISFIED",
+       "why": "7 of 7 applicable instances selected"
+      }
+     ],
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "requirement": "topology_and_interaction",
+     "selected": 14,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can this candidate fit at all?",
+      "instance_selection": {
+       "physical_interaction": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_element": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_relation": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "physical_interaction": [
+        "PhysicalInteraction"
+       ],
+       "topology_element": [
+        "Body",
+        "RigidGroup"
+       ],
+       "topology_relation": [
+        "Interface",
+        "Joint"
+       ]
+      },
+      "requires_semantics": [
+       "topology_element",
+       "topology_relation",
+       "physical_interaction"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Extents attach to bodies and their connections."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    },
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "AssemblyStep"
+       ],
+       "obligation": "assembly_order",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "AssemblyStep": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      }
+     ],
+     "families": [
+      "AssemblyStep"
+     ],
+     "requirement": "assembly_order_constraint",
+     "selected": 0,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can it be assembled?",
+      "instance_selection": {
+       "assembly_order": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "assembly_order": [
+        "AssemblyStep"
+       ]
+      },
+      "requires_semantics": [
+       "assembly_order"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Assemblability is an ordering property, not only a geometric one."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    }
+   ],
+   "verdict": "NOT_READY_FOR_S04A",
+   "view_ready": false,
+   "view_status": "UPSTREAM_INSUFFICIENCY"
+  },
+  "CND-0002": {
+   "branch_isolation_held": true,
+   "candidates_visible": [
+    "CND-0002"
+   ],
+   "exactly_this_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Body": 4,
+    "Candidate": 1,
+    "FunctionalRegion": 5,
+    "Interface": 5,
+    "Joint": 5,
+    "Obligation": 14,
+    "Requirement": 10,
+    "RigidGroup": 6
+   },
+   "foreign_branch_entities": {},
+   "reasons": [
+    "S03b was not accepted for this branch",
+    "the s04a consumer view is UPSTREAM_INSUFFICIENCY",
+    "unmet: {\"requirement\": \"topology_and_interaction\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"physical_interaction\", \"families\": [\"PhysicalInteraction\"], \"standing_instances\": {\"PhysicalInteraction\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}, {\"obligation\": \"topology_element\", \"families\": [\"Body\", \"RigidGroup\"], \"standing_instances\": {\"Body\": 19, \"RigidGroup\": 23}, \"verdict\": \"SATISFIED\", \"why\": \"10 of 10 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"BOD-0004\", \"BOD-0005\", \"BOD-0006\", \"BOD-0007\", \"RGP-0005\", \"RGP-0006\", \"RGP-0007\", \"RGP-0008\", \"RGP-0009\", \"RGP-0010\"], \"expected_count\": 10, \"selected\": [\"BOD-0004\", \"BOD-0005\", \"BOD-0006\", \"BOD-0007\", \"RGP-0005\", \"RGP-0006\", \"RGP-0007\", \"RGP-0008\", \"RGP-0009\", \"RGP-0010\"], \"selected_count\": 10}, {\"obligation\": \"topology_relation\", \"families\": [\"Interface\", \"Joint\"], \"standing_instances\": {\"Interface\": 30, \"Joint\": 19}, \"verdict\": \"SATISFIED\", \"why\": \"10 of 10 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"IFC-0005\", \"IFC-0006\", \"IFC-0007\", \"IFC-0008\", \"IFC-0009\", \"JNT-0004\", \"JNT-0005\", \"JNT-0006\", \"JNT-0007\", \"JNT-0008\"], \"expected_count\": 10, \"selected\": [\"IFC-0005\", \"IFC-0006\", \"IFC-0007\", \"IFC-0008\", \"IFC-0009\", \"JNT-0004\", \"JNT-0005\", \"JNT-0006\", \"JNT-0007\", \"JNT-0008\"], \"selected_count\": 10}], \"families\": [\"Body\", \"Interface\", \"Joint\", \"PhysicalInteraction\", \"RigidGroup\"], \"selected\": 20, \"trace\": {\"engineering_question\": \"Can this candidate fit at all?\", \"why\": \"Extents attach to bodies and their connections.\", \"requires_semantics\": [\"topology_element\", \"topology_relation\", \"physical_interaction\"], \"qualifying_by_role\": {\"topology_element\": [\"Body\", \"RigidGroup\"], \"topology_relation\": [\"Interface\", \"Joint\"], \"physical_interaction\": [\"PhysicalInteraction\"]}, \"instance_selection\": {\"topology_element\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"topology_relation\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"physical_interaction\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}",
+    "unmet: {\"requirement\": \"assembly_order_constraint\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"assembly_order\", \"families\": [\"AssemblyStep\"], \"standing_instances\": {\"AssemblyStep\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}], \"families\": [\"AssemblyStep\"], \"selected\": 0, \"trace\": {\"engineering_question\": \"Can it be assembled?\", \"why\": \"Assemblability is an ordering property, not only a geometric one.\", \"requires_semantics\": [\"assembly_order\"], \"qualifying_by_role\": {\"assembly_order\": [\"AssemblyStep\"]}, \"instance_selection\": {\"assembly_order\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}"
+   ],
+   "required_premise_classes": [
+    {
+     "class": "topology_and_interaction",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "roles": [
+      "physical_interaction",
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "physical_interaction": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "extent_bounding_quantity",
+     "families": [
+      "Parameter",
+      "Requirement"
+     ],
+     "roles": [
+      "quantity_constraint"
+     ],
+     "selection": {
+      "quantity_constraint": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "reach_requirement",
+     "families": [
+      "Actor",
+      "FunctionalRegion"
+     ],
+     "roles": [
+      "actor_role",
+      "functional_region"
+     ],
+     "selection": {
+      "actor_role": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      },
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "region_and_envelope_constraint",
+     "families": [
+      "AssemblyStep",
+      "Envelope",
+      "FunctionalRegion",
+      "ReferenceScale"
+     ],
+     "roles": [
+      "functional_region",
+      "spatial_commitment"
+     ],
+     "selection": {
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "spatial_commitment": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "assembly_order_constraint",
+     "families": [
+      "AssemblyStep"
+     ],
+     "roles": [
+      "assembly_order"
+     ],
+     "selection": {
+      "assembly_order": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03b_accepted": false,
+   "semantic_role_members": {
+    "actor_role": [
+     "ACT-0001"
+    ],
+    "assembly_order": [],
+    "functional_region": [
+     "FRG-0005",
+     "FRG-0006",
+     "FRG-0007",
+     "FRG-0008",
+     "FRG-0009"
+    ],
+    "physical_interaction": [],
+    "quantity_constraint": [
+     "REQ-0001",
+     "REQ-0002",
+     "REQ-0003",
+     "REQ-0004",
+     "REQ-0005",
+     "REQ-0006",
+     "REQ-0007",
+     "REQ-0008",
+     "REQ-0009",
+     "REQ-0010"
+    ],
+    "spatial_commitment": [
+     "FRG-0005",
+     "FRG-0006",
+     "FRG-0007",
+     "FRG-0008",
+     "FRG-0009"
+    ],
+    "topology_element": [
+     "BOD-0004",
+     "BOD-0005",
+     "BOD-0006",
+     "BOD-0007",
+     "RGP-0005",
+     "RGP-0006",
+     "RGP-0007",
+     "RGP-0008",
+     "RGP-0009",
+     "RGP-0010"
+    ],
+    "topology_relation": [
+     "IFC-0005",
+     "IFC-0006",
+     "IFC-0007",
+     "IFC-0008",
+     "IFC-0009",
+     "JNT-0004",
+     "JNT-0005",
+     "JNT-0006",
+     "JNT-0007",
+     "JNT-0008"
+    ]
+   },
+   "semantic_role_populations": {
+    "actor_role": 1,
+    "assembly_order": 0,
+    "functional_region": 5,
+    "physical_interaction": 0,
+    "quantity_constraint": 10,
+    "spatial_commitment": 5,
+    "topology_element": 10,
+    "topology_relation": 10
+   },
+   "unmet_premise_classes": [
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "PhysicalInteraction"
+       ],
+       "obligation": "physical_interaction",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "PhysicalInteraction": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "BOD-0004",
+        "BOD-0005",
+        "BOD-0006",
+        "BOD-0007",
+        "RGP-0005",
+        "RGP-0006",
+        "RGP-0007",
+        "RGP-0008",
+        "RGP-0009",
+        "RGP-0010"
+       ],
+       "expected_count": 10,
+       "families": [
+        "Body",
+        "RigidGroup"
+       ],
+       "obligation": "topology_element",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "BOD-0004",
+        "BOD-0005",
+        "BOD-0006",
+        "BOD-0007",
+        "RGP-0005",
+        "RGP-0006",
+        "RGP-0007",
+        "RGP-0008",
+        "RGP-0009",
+        "RGP-0010"
+       ],
+       "selected_count": 10,
+       "standing_instances": {
+        "Body": 19,
+        "RigidGroup": 23
+       },
+       "verdict": "SATISFIED",
+       "why": "10 of 10 applicable instances selected"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "IFC-0005",
+        "IFC-0006",
+        "IFC-0007",
+        "IFC-0008",
+        "IFC-0009",
+        "JNT-0004",
+        "JNT-0005",
+        "JNT-0006",
+        "JNT-0007",
+        "JNT-0008"
+       ],
+       "expected_count": 10,
+       "families": [
+        "Interface",
+        "Joint"
+       ],
+       "obligation": "topology_relation",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "IFC-0005",
+        "IFC-0006",
+        "IFC-0007",
+        "IFC-0008",
+        "IFC-0009",
+        "JNT-0004",
+        "JNT-0005",
+        "JNT-0006",
+        "JNT-0007",
+        "JNT-0008"
+       ],
+       "selected_count": 10,
+       "standing_instances": {
+        "Interface": 30,
+        "Joint": 19
+       },
+       "verdict": "SATISFIED",
+       "why": "10 of 10 applicable instances selected"
+      }
+     ],
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "requirement": "topology_and_interaction",
+     "selected": 20,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can this candidate fit at all?",
+      "instance_selection": {
+       "physical_interaction": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_element": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_relation": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "physical_interaction": [
+        "PhysicalInteraction"
+       ],
+       "topology_element": [
+        "Body",
+        "RigidGroup"
+       ],
+       "topology_relation": [
+        "Interface",
+        "Joint"
+       ]
+      },
+      "requires_semantics": [
+       "topology_element",
+       "topology_relation",
+       "physical_interaction"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Extents attach to bodies and their connections."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    },
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "AssemblyStep"
+       ],
+       "obligation": "assembly_order",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "AssemblyStep": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      }
+     ],
+     "families": [
+      "AssemblyStep"
+     ],
+     "requirement": "assembly_order_constraint",
+     "selected": 0,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can it be assembled?",
+      "instance_selection": {
+       "assembly_order": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "assembly_order": [
+        "AssemblyStep"
+       ]
+      },
+      "requires_semantics": [
+       "assembly_order"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Assemblability is an ordering property, not only a geometric one."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    }
+   ],
+   "verdict": "NOT_READY_FOR_S04A",
+   "view_ready": false,
+   "view_status": "UPSTREAM_INSUFFICIENCY"
+  },
+  "CND-0003": {
+   "branch_isolation_held": true,
+   "candidates_visible": [
+    "CND-0003"
+   ],
+   "exactly_this_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Body": 4,
+    "Candidate": 1,
+    "FunctionalRegion": 3,
+    "Interface": 6,
+    "Joint": 4,
+    "Obligation": 14,
+    "Requirement": 10,
+    "RigidGroup": 4
+   },
+   "foreign_branch_entities": {},
+   "reasons": [
+    "S03b was not accepted for this branch",
+    "the s04a consumer view is UPSTREAM_INSUFFICIENCY",
+    "unmet: {\"requirement\": \"topology_and_interaction\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"physical_interaction\", \"families\": [\"PhysicalInteraction\"], \"standing_instances\": {\"PhysicalInteraction\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}, {\"obligation\": \"topology_element\", \"families\": [\"Body\", \"RigidGroup\"], \"standing_instances\": {\"Body\": 19, \"RigidGroup\": 23}, \"verdict\": \"SATISFIED\", \"why\": \"8 of 8 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"BOD-0008\", \"BOD-0009\", \"BOD-0010\", \"BOD-0011\", \"RGP-0011\", \"RGP-0012\", \"RGP-0013\", \"RGP-0014\"], \"expected_count\": 8, \"selected\": [\"BOD-0008\", \"BOD-0009\", \"BOD-0010\", \"BOD-0011\", \"RGP-0011\", \"RGP-0012\", \"RGP-0013\", \"RGP-0014\"], \"selected_count\": 8}, {\"obligation\": \"topology_relation\", \"families\": [\"Interface\", \"Joint\"], \"standing_instances\": {\"Interface\": 30, \"Joint\": 19}, \"verdict\": \"SATISFIED\", \"why\": \"10 of 10 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"IFC-0010\", \"IFC-0011\", \"IFC-0012\", \"IFC-0013\", \"IFC-0014\", \"IFC-0015\", \"JNT-0009\", \"JNT-0010\", \"JNT-0011\", \"JNT-0012\"], \"expected_count\": 10, \"selected\": [\"IFC-0010\", \"IFC-0011\", \"IFC-0012\", \"IFC-0013\", \"IFC-0014\", \"IFC-0015\", \"JNT-0009\", \"JNT-0010\", \"JNT-0011\", \"JNT-0012\"], \"selected_count\": 10}], \"families\": [\"Body\", \"Interface\", \"Joint\", \"PhysicalInteraction\", \"RigidGroup\"], \"selected\": 18, \"trace\": {\"engineering_question\": \"Can this candidate fit at all?\", \"why\": \"Extents attach to bodies and their connections.\", \"requires_semantics\": [\"topology_element\", \"topology_relation\", \"physical_interaction\"], \"qualifying_by_role\": {\"topology_element\": [\"Body\", \"RigidGroup\"], \"topology_relation\": [\"Interface\", \"Joint\"], \"physical_interaction\": [\"PhysicalInteraction\"]}, \"instance_selection\": {\"topology_element\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"topology_relation\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"physical_interaction\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}",
+    "unmet: {\"requirement\": \"assembly_order_constraint\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"assembly_order\", \"families\": [\"AssemblyStep\"], \"standing_instances\": {\"AssemblyStep\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}], \"families\": [\"AssemblyStep\"], \"selected\": 0, \"trace\": {\"engineering_question\": \"Can it be assembled?\", \"why\": \"Assemblability is an ordering property, not only a geometric one.\", \"requires_semantics\": [\"assembly_order\"], \"qualifying_by_role\": {\"assembly_order\": [\"AssemblyStep\"]}, \"instance_selection\": {\"assembly_order\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}"
+   ],
+   "required_premise_classes": [
+    {
+     "class": "topology_and_interaction",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "roles": [
+      "physical_interaction",
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "physical_interaction": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "extent_bounding_quantity",
+     "families": [
+      "Parameter",
+      "Requirement"
+     ],
+     "roles": [
+      "quantity_constraint"
+     ],
+     "selection": {
+      "quantity_constraint": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "reach_requirement",
+     "families": [
+      "Actor",
+      "FunctionalRegion"
+     ],
+     "roles": [
+      "actor_role",
+      "functional_region"
+     ],
+     "selection": {
+      "actor_role": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      },
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "region_and_envelope_constraint",
+     "families": [
+      "AssemblyStep",
+      "Envelope",
+      "FunctionalRegion",
+      "ReferenceScale"
+     ],
+     "roles": [
+      "functional_region",
+      "spatial_commitment"
+     ],
+     "selection": {
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "spatial_commitment": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "assembly_order_constraint",
+     "families": [
+      "AssemblyStep"
+     ],
+     "roles": [
+      "assembly_order"
+     ],
+     "selection": {
+      "assembly_order": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03b_accepted": false,
+   "semantic_role_members": {
+    "actor_role": [
+     "ACT-0001"
+    ],
+    "assembly_order": [],
+    "functional_region": [
+     "FRG-0010",
+     "FRG-0011",
+     "FRG-0012"
+    ],
+    "physical_interaction": [],
+    "quantity_constraint": [
+     "REQ-0001",
+     "REQ-0002",
+     "REQ-0003",
+     "REQ-0004",
+     "REQ-0005",
+     "REQ-0006",
+     "REQ-0007",
+     "REQ-0008",
+     "REQ-0009",
+     "REQ-0010"
+    ],
+    "spatial_commitment": [
+     "FRG-0010",
+     "FRG-0011",
+     "FRG-0012"
+    ],
+    "topology_element": [
+     "BOD-0008",
+     "BOD-0009",
+     "BOD-0010",
+     "BOD-0011",
+     "RGP-0011",
+     "RGP-0012",
+     "RGP-0013",
+     "RGP-0014"
+    ],
+    "topology_relation": [
+     "IFC-0010",
+     "IFC-0011",
+     "IFC-0012",
+     "IFC-0013",
+     "IFC-0014",
+     "IFC-0015",
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012"
+    ]
+   },
+   "semantic_role_populations": {
+    "actor_role": 1,
+    "assembly_order": 0,
+    "functional_region": 3,
+    "physical_interaction": 0,
+    "quantity_constraint": 10,
+    "spatial_commitment": 3,
+    "topology_element": 8,
+    "topology_relation": 10
+   },
+   "unmet_premise_classes": [
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "PhysicalInteraction"
+       ],
+       "obligation": "physical_interaction",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "PhysicalInteraction": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "BOD-0008",
+        "BOD-0009",
+        "BOD-0010",
+        "BOD-0011",
+        "RGP-0011",
+        "RGP-0012",
+        "RGP-0013",
+        "RGP-0014"
+       ],
+       "expected_count": 8,
+       "families": [
+        "Body",
+        "RigidGroup"
+       ],
+       "obligation": "topology_element",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "BOD-0008",
+        "BOD-0009",
+        "BOD-0010",
+        "BOD-0011",
+        "RGP-0011",
+        "RGP-0012",
+        "RGP-0013",
+        "RGP-0014"
+       ],
+       "selected_count": 8,
+       "standing_instances": {
+        "Body": 19,
+        "RigidGroup": 23
+       },
+       "verdict": "SATISFIED",
+       "why": "8 of 8 applicable instances selected"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "IFC-0010",
+        "IFC-0011",
+        "IFC-0012",
+        "IFC-0013",
+        "IFC-0014",
+        "IFC-0015",
+        "JNT-0009",
+        "JNT-0010",
+        "JNT-0011",
+        "JNT-0012"
+       ],
+       "expected_count": 10,
+       "families": [
+        "Interface",
+        "Joint"
+       ],
+       "obligation": "topology_relation",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "IFC-0010",
+        "IFC-0011",
+        "IFC-0012",
+        "IFC-0013",
+        "IFC-0014",
+        "IFC-0015",
+        "JNT-0009",
+        "JNT-0010",
+        "JNT-0011",
+        "JNT-0012"
+       ],
+       "selected_count": 10,
+       "standing_instances": {
+        "Interface": 30,
+        "Joint": 19
+       },
+       "verdict": "SATISFIED",
+       "why": "10 of 10 applicable instances selected"
+      }
+     ],
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "requirement": "topology_and_interaction",
+     "selected": 18,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can this candidate fit at all?",
+      "instance_selection": {
+       "physical_interaction": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_element": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_relation": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "physical_interaction": [
+        "PhysicalInteraction"
+       ],
+       "topology_element": [
+        "Body",
+        "RigidGroup"
+       ],
+       "topology_relation": [
+        "Interface",
+        "Joint"
+       ]
+      },
+      "requires_semantics": [
+       "topology_element",
+       "topology_relation",
+       "physical_interaction"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Extents attach to bodies and their connections."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    },
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "AssemblyStep"
+       ],
+       "obligation": "assembly_order",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "AssemblyStep": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      }
+     ],
+     "families": [
+      "AssemblyStep"
+     ],
+     "requirement": "assembly_order_constraint",
+     "selected": 0,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can it be assembled?",
+      "instance_selection": {
+       "assembly_order": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "assembly_order": [
+        "AssemblyStep"
+       ]
+      },
+      "requires_semantics": [
+       "assembly_order"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Assemblability is an ordering property, not only a geometric one."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    }
+   ],
+   "verdict": "NOT_READY_FOR_S04A",
+   "view_ready": false,
+   "view_status": "UPSTREAM_INSUFFICIENCY"
+  },
+  "CND-0004": {
+   "branch_isolation_held": true,
+   "candidates_visible": [
+    "CND-0004"
+   ],
+   "exactly_this_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Body": 2,
+    "Candidate": 1,
+    "FunctionalRegion": 6,
+    "Interface": 4,
+    "Joint": 1,
+    "Obligation": 14,
+    "Requirement": 10,
+    "RigidGroup": 2
+   },
+   "foreign_branch_entities": {},
+   "reasons": [
+    "S03b was not accepted for this branch",
+    "the s04a consumer view is UPSTREAM_INSUFFICIENCY",
+    "unmet: {\"requirement\": \"topology_and_interaction\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"physical_interaction\", \"families\": [\"PhysicalInteraction\"], \"standing_instances\": {\"PhysicalInteraction\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}, {\"obligation\": \"topology_element\", \"families\": [\"Body\", \"RigidGroup\"], \"standing_instances\": {\"Body\": 19, \"RigidGroup\": 23}, \"verdict\": \"SATISFIED\", \"why\": \"4 of 4 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"BOD-0012\", \"BOD-0013\", \"RGP-0015\", \"RGP-0016\"], \"expected_count\": 4, \"selected\": [\"BOD-0012\", \"BOD-0013\", \"RGP-0015\", \"RGP-0016\"], \"selected_count\": 4}, {\"obligation\": \"topology_relation\", \"families\": [\"Interface\", \"Joint\"], \"standing_instances\": {\"Interface\": 30, \"Joint\": 19}, \"verdict\": \"SATISFIED\", \"why\": \"5 of 5 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"IFC-0016\", \"IFC-0017\", \"IFC-0018\", \"IFC-0019\", \"JNT-0013\"], \"expected_count\": 5, \"selected\": [\"IFC-0016\", \"IFC-0017\", \"IFC-0018\", \"IFC-0019\", \"JNT-0013\"], \"selected_count\": 5}], \"families\": [\"Body\", \"Interface\", \"Joint\", \"PhysicalInteraction\", \"RigidGroup\"], \"selected\": 9, \"trace\": {\"engineering_question\": \"Can this candidate fit at all?\", \"why\": \"Extents attach to bodies and their connections.\", \"requires_semantics\": [\"topology_element\", \"topology_relation\", \"physical_interaction\"], \"qualifying_by_role\": {\"topology_element\": [\"Body\", \"RigidGroup\"], \"topology_relation\": [\"Interface\", \"Joint\"], \"physical_interaction\": [\"PhysicalInteraction\"]}, \"instance_selection\": {\"topology_element\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"topology_relation\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"physical_interaction\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}",
+    "unmet: {\"requirement\": \"assembly_order_constraint\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"assembly_order\", \"families\": [\"AssemblyStep\"], \"standing_instances\": {\"AssemblyStep\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}], \"families\": [\"AssemblyStep\"], \"selected\": 0, \"trace\": {\"engineering_question\": \"Can it be assembled?\", \"why\": \"Assemblability is an ordering property, not only a geometric one.\", \"requires_semantics\": [\"assembly_order\"], \"qualifying_by_role\": {\"assembly_order\": [\"AssemblyStep\"]}, \"instance_selection\": {\"assembly_order\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}"
+   ],
+   "required_premise_classes": [
+    {
+     "class": "topology_and_interaction",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "roles": [
+      "physical_interaction",
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "physical_interaction": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "extent_bounding_quantity",
+     "families": [
+      "Parameter",
+      "Requirement"
+     ],
+     "roles": [
+      "quantity_constraint"
+     ],
+     "selection": {
+      "quantity_constraint": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "reach_requirement",
+     "families": [
+      "Actor",
+      "FunctionalRegion"
+     ],
+     "roles": [
+      "actor_role",
+      "functional_region"
+     ],
+     "selection": {
+      "actor_role": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      },
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "region_and_envelope_constraint",
+     "families": [
+      "AssemblyStep",
+      "Envelope",
+      "FunctionalRegion",
+      "ReferenceScale"
+     ],
+     "roles": [
+      "functional_region",
+      "spatial_commitment"
+     ],
+     "selection": {
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "spatial_commitment": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "assembly_order_constraint",
+     "families": [
+      "AssemblyStep"
+     ],
+     "roles": [
+      "assembly_order"
+     ],
+     "selection": {
+      "assembly_order": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03b_accepted": false,
+   "semantic_role_members": {
+    "actor_role": [
+     "ACT-0001"
+    ],
+    "assembly_order": [],
+    "functional_region": [
+     "FRG-0013",
+     "FRG-0014",
+     "FRG-0015",
+     "FRG-0016",
+     "FRG-0017",
+     "FRG-0018"
+    ],
+    "physical_interaction": [],
+    "quantity_constraint": [
+     "REQ-0001",
+     "REQ-0002",
+     "REQ-0003",
+     "REQ-0004",
+     "REQ-0005",
+     "REQ-0006",
+     "REQ-0007",
+     "REQ-0008",
+     "REQ-0009",
+     "REQ-0010"
+    ],
+    "spatial_commitment": [
+     "FRG-0013",
+     "FRG-0014",
+     "FRG-0015",
+     "FRG-0016",
+     "FRG-0017",
+     "FRG-0018"
+    ],
+    "topology_element": [
+     "BOD-0012",
+     "BOD-0013",
+     "RGP-0015",
+     "RGP-0016"
+    ],
+    "topology_relation": [
+     "IFC-0016",
+     "IFC-0017",
+     "IFC-0018",
+     "IFC-0019",
+     "JNT-0013"
+    ]
+   },
+   "semantic_role_populations": {
+    "actor_role": 1,
+    "assembly_order": 0,
+    "functional_region": 6,
+    "physical_interaction": 0,
+    "quantity_constraint": 10,
+    "spatial_commitment": 6,
+    "topology_element": 4,
+    "topology_relation": 5
+   },
+   "unmet_premise_classes": [
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "PhysicalInteraction"
+       ],
+       "obligation": "physical_interaction",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "PhysicalInteraction": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "BOD-0012",
+        "BOD-0013",
+        "RGP-0015",
+        "RGP-0016"
+       ],
+       "expected_count": 4,
+       "families": [
+        "Body",
+        "RigidGroup"
+       ],
+       "obligation": "topology_element",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "BOD-0012",
+        "BOD-0013",
+        "RGP-0015",
+        "RGP-0016"
+       ],
+       "selected_count": 4,
+       "standing_instances": {
+        "Body": 19,
+        "RigidGroup": 23
+       },
+       "verdict": "SATISFIED",
+       "why": "4 of 4 applicable instances selected"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "IFC-0016",
+        "IFC-0017",
+        "IFC-0018",
+        "IFC-0019",
+        "JNT-0013"
+       ],
+       "expected_count": 5,
+       "families": [
+        "Interface",
+        "Joint"
+       ],
+       "obligation": "topology_relation",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "IFC-0016",
+        "IFC-0017",
+        "IFC-0018",
+        "IFC-0019",
+        "JNT-0013"
+       ],
+       "selected_count": 5,
+       "standing_instances": {
+        "Interface": 30,
+        "Joint": 19
+       },
+       "verdict": "SATISFIED",
+       "why": "5 of 5 applicable instances selected"
+      }
+     ],
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "requirement": "topology_and_interaction",
+     "selected": 9,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can this candidate fit at all?",
+      "instance_selection": {
+       "physical_interaction": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_element": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_relation": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "physical_interaction": [
+        "PhysicalInteraction"
+       ],
+       "topology_element": [
+        "Body",
+        "RigidGroup"
+       ],
+       "topology_relation": [
+        "Interface",
+        "Joint"
+       ]
+      },
+      "requires_semantics": [
+       "topology_element",
+       "topology_relation",
+       "physical_interaction"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Extents attach to bodies and their connections."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    },
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "AssemblyStep"
+       ],
+       "obligation": "assembly_order",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "AssemblyStep": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      }
+     ],
+     "families": [
+      "AssemblyStep"
+     ],
+     "requirement": "assembly_order_constraint",
+     "selected": 0,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can it be assembled?",
+      "instance_selection": {
+       "assembly_order": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "assembly_order": [
+        "AssemblyStep"
+       ]
+      },
+      "requires_semantics": [
+       "assembly_order"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Assemblability is an ordering property, not only a geometric one."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    }
+   ],
+   "verdict": "NOT_READY_FOR_S04A",
+   "view_ready": false,
+   "view_status": "UPSTREAM_INSUFFICIENCY"
+  },
+  "CND-0005": {
+   "branch_isolation_held": true,
+   "candidates_visible": [
+    "CND-0005"
+   ],
+   "exactly_this_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Body": 3,
+    "Candidate": 1,
+    "FunctionalRegion": 4,
+    "Interface": 5,
+    "Joint": 2,
+    "Obligation": 14,
+    "Requirement": 10,
+    "RigidGroup": 3
+   },
+   "foreign_branch_entities": {},
+   "reasons": [
+    "S03b was not accepted for this branch",
+    "the s04a consumer view is UPSTREAM_INSUFFICIENCY",
+    "unmet: {\"requirement\": \"topology_and_interaction\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"physical_interaction\", \"families\": [\"PhysicalInteraction\"], \"standing_instances\": {\"PhysicalInteraction\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}, {\"obligation\": \"topology_element\", \"families\": [\"Body\", \"RigidGroup\"], \"standing_instances\": {\"Body\": 19, \"RigidGroup\": 23}, \"verdict\": \"SATISFIED\", \"why\": \"6 of 6 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"BOD-0101\", \"BOD-0102\", \"BOD-0103\", \"RGP-0101\", \"RGP-0102\", \"RGP-0103\"], \"expected_count\": 6, \"selected\": [\"BOD-0101\", \"BOD-0102\", \"BOD-0103\", \"RGP-0101\", \"RGP-0102\", \"RGP-0103\"], \"selected_count\": 6}, {\"obligation\": \"topology_relation\", \"families\": [\"Interface\", \"Joint\"], \"standing_instances\": {\"Interface\": 30, \"Joint\": 19}, \"verdict\": \"SATISFIED\", \"why\": \"7 of 7 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"IFC-0101\", \"IFC-0102\", \"IFC-0103\", \"IFC-0104\", \"IFC-0105\", \"JNT-0101\", \"JNT-0102\"], \"expected_count\": 7, \"selected\": [\"IFC-0101\", \"IFC-0102\", \"IFC-0103\", \"IFC-0104\", \"IFC-0105\", \"JNT-0101\", \"JNT-0102\"], \"selected_count\": 7}], \"families\": [\"Body\", \"Interface\", \"Joint\", \"PhysicalInteraction\", \"RigidGroup\"], \"selected\": 13, \"trace\": {\"engineering_question\": \"Can this candidate fit at all?\", \"why\": \"Extents attach to bodies and their connections.\", \"requires_semantics\": [\"topology_element\", \"topology_relation\", \"physical_interaction\"], \"qualifying_by_role\": {\"topology_element\": [\"Body\", \"RigidGroup\"], \"topology_relation\": [\"Interface\", \"Joint\"], \"physical_interaction\": [\"PhysicalInteraction\"]}, \"instance_selection\": {\"topology_element\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"topology_relation\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"physical_interaction\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}",
+    "unmet: {\"requirement\": \"assembly_order_constraint\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"assembly_order\", \"families\": [\"AssemblyStep\"], \"standing_instances\": {\"AssemblyStep\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}], \"families\": [\"AssemblyStep\"], \"selected\": 0, \"trace\": {\"engineering_question\": \"Can it be assembled?\", \"why\": \"Assemblability is an ordering property, not only a geometric one.\", \"requires_semantics\": [\"assembly_order\"], \"qualifying_by_role\": {\"assembly_order\": [\"AssemblyStep\"]}, \"instance_selection\": {\"assembly_order\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}"
+   ],
+   "required_premise_classes": [
+    {
+     "class": "topology_and_interaction",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "roles": [
+      "physical_interaction",
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "physical_interaction": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "extent_bounding_quantity",
+     "families": [
+      "Parameter",
+      "Requirement"
+     ],
+     "roles": [
+      "quantity_constraint"
+     ],
+     "selection": {
+      "quantity_constraint": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "reach_requirement",
+     "families": [
+      "Actor",
+      "FunctionalRegion"
+     ],
+     "roles": [
+      "actor_role",
+      "functional_region"
+     ],
+     "selection": {
+      "actor_role": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      },
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "region_and_envelope_constraint",
+     "families": [
+      "AssemblyStep",
+      "Envelope",
+      "FunctionalRegion",
+      "ReferenceScale"
+     ],
+     "roles": [
+      "functional_region",
+      "spatial_commitment"
+     ],
+     "selection": {
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "spatial_commitment": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "assembly_order_constraint",
+     "families": [
+      "AssemblyStep"
+     ],
+     "roles": [
+      "assembly_order"
+     ],
+     "selection": {
+      "assembly_order": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03b_accepted": false,
+   "semantic_role_members": {
+    "actor_role": [
+     "ACT-0001"
+    ],
+    "assembly_order": [],
+    "functional_region": [
+     "FRG-0101",
+     "FRG-0102",
+     "FRG-0103",
+     "FRG-0104"
+    ],
+    "physical_interaction": [],
+    "quantity_constraint": [
+     "REQ-0001",
+     "REQ-0002",
+     "REQ-0003",
+     "REQ-0004",
+     "REQ-0005",
+     "REQ-0006",
+     "REQ-0007",
+     "REQ-0008",
+     "REQ-0009",
+     "REQ-0010"
+    ],
+    "spatial_commitment": [
+     "FRG-0101",
+     "FRG-0102",
+     "FRG-0103",
+     "FRG-0104"
+    ],
+    "topology_element": [
+     "BOD-0101",
+     "BOD-0102",
+     "BOD-0103",
+     "RGP-0101",
+     "RGP-0102",
+     "RGP-0103"
+    ],
+    "topology_relation": [
+     "IFC-0101",
+     "IFC-0102",
+     "IFC-0103",
+     "IFC-0104",
+     "IFC-0105",
+     "JNT-0101",
+     "JNT-0102"
+    ]
+   },
+   "semantic_role_populations": {
+    "actor_role": 1,
+    "assembly_order": 0,
+    "functional_region": 4,
+    "physical_interaction": 0,
+    "quantity_constraint": 10,
+    "spatial_commitment": 4,
+    "topology_element": 6,
+    "topology_relation": 7
+   },
+   "unmet_premise_classes": [
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "PhysicalInteraction"
+       ],
+       "obligation": "physical_interaction",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "PhysicalInteraction": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "BOD-0101",
+        "BOD-0102",
+        "BOD-0103",
+        "RGP-0101",
+        "RGP-0102",
+        "RGP-0103"
+       ],
+       "expected_count": 6,
+       "families": [
+        "Body",
+        "RigidGroup"
+       ],
+       "obligation": "topology_element",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "BOD-0101",
+        "BOD-0102",
+        "BOD-0103",
+        "RGP-0101",
+        "RGP-0102",
+        "RGP-0103"
+       ],
+       "selected_count": 6,
+       "standing_instances": {
+        "Body": 19,
+        "RigidGroup": 23
+       },
+       "verdict": "SATISFIED",
+       "why": "6 of 6 applicable instances selected"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "IFC-0101",
+        "IFC-0102",
+        "IFC-0103",
+        "IFC-0104",
+        "IFC-0105",
+        "JNT-0101",
+        "JNT-0102"
+       ],
+       "expected_count": 7,
+       "families": [
+        "Interface",
+        "Joint"
+       ],
+       "obligation": "topology_relation",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "IFC-0101",
+        "IFC-0102",
+        "IFC-0103",
+        "IFC-0104",
+        "IFC-0105",
+        "JNT-0101",
+        "JNT-0102"
+       ],
+       "selected_count": 7,
+       "standing_instances": {
+        "Interface": 30,
+        "Joint": 19
+       },
+       "verdict": "SATISFIED",
+       "why": "7 of 7 applicable instances selected"
+      }
+     ],
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "requirement": "topology_and_interaction",
+     "selected": 13,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can this candidate fit at all?",
+      "instance_selection": {
+       "physical_interaction": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_element": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_relation": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "physical_interaction": [
+        "PhysicalInteraction"
+       ],
+       "topology_element": [
+        "Body",
+        "RigidGroup"
+       ],
+       "topology_relation": [
+        "Interface",
+        "Joint"
+       ]
+      },
+      "requires_semantics": [
+       "topology_element",
+       "topology_relation",
+       "physical_interaction"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Extents attach to bodies and their connections."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    },
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "AssemblyStep"
+       ],
+       "obligation": "assembly_order",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "AssemblyStep": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      }
+     ],
+     "families": [
+      "AssemblyStep"
+     ],
+     "requirement": "assembly_order_constraint",
+     "selected": 0,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can it be assembled?",
+      "instance_selection": {
+       "assembly_order": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "assembly_order": [
+        "AssemblyStep"
+       ]
+      },
+      "requires_semantics": [
+       "assembly_order"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Assemblability is an ordering property, not only a geometric one."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    }
+   ],
+   "verdict": "NOT_READY_FOR_S04A",
+   "view_ready": false,
+   "view_status": "UPSTREAM_INSUFFICIENCY"
+  },
+  "CND-0006": {
+   "branch_isolation_held": true,
+   "candidates_visible": [
+    "CND-0006"
+   ],
+   "exactly_this_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Body": 3,
+    "Candidate": 1,
+    "FunctionalRegion": 4,
+    "Interface": 6,
+    "Joint": 4,
+    "Obligation": 14,
+    "Requirement": 10,
+    "RigidGroup": 4
+   },
+   "foreign_branch_entities": {},
+   "reasons": [
+    "S03b was not accepted for this branch",
+    "the s04a consumer view is UPSTREAM_INSUFFICIENCY",
+    "unmet: {\"requirement\": \"topology_and_interaction\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"physical_interaction\", \"families\": [\"PhysicalInteraction\"], \"standing_instances\": {\"PhysicalInteraction\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}, {\"obligation\": \"topology_element\", \"families\": [\"Body\", \"RigidGroup\"], \"standing_instances\": {\"Body\": 19, \"RigidGroup\": 23}, \"verdict\": \"SATISFIED\", \"why\": \"7 of 7 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"BOD-0014\", \"BOD-0015\", \"BOD-0016\", \"RGP-0017\", \"RGP-0018\", \"RGP-0019\", \"RGP-0020\"], \"expected_count\": 7, \"selected\": [\"BOD-0014\", \"BOD-0015\", \"BOD-0016\", \"RGP-0017\", \"RGP-0018\", \"RGP-0019\", \"RGP-0020\"], \"selected_count\": 7}, {\"obligation\": \"topology_relation\", \"families\": [\"Interface\", \"Joint\"], \"standing_instances\": {\"Interface\": 30, \"Joint\": 19}, \"verdict\": \"SATISFIED\", \"why\": \"10 of 10 applicable instances selected\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [\"IFC-0020\", \"IFC-0021\", \"IFC-0022\", \"IFC-0023\", \"IFC-0024\", \"IFC-0025\", \"JNT-0014\", \"JNT-0015\", \"JNT-0016\", \"JNT-0017\"], \"expected_count\": 10, \"selected\": [\"IFC-0020\", \"IFC-0021\", \"IFC-0022\", \"IFC-0023\", \"IFC-0024\", \"IFC-0025\", \"JNT-0014\", \"JNT-0015\", \"JNT-0016\", \"JNT-0017\"], \"selected_count\": 10}], \"families\": [\"Body\", \"Interface\", \"Joint\", \"PhysicalInteraction\", \"RigidGroup\"], \"selected\": 17, \"trace\": {\"engineering_question\": \"Can this candidate fit at all?\", \"why\": \"Extents attach to bodies and their connections.\", \"requires_semantics\": [\"topology_element\", \"topology_relation\", \"physical_interaction\"], \"qualifying_by_role\": {\"topology_element\": [\"Body\", \"RigidGroup\"], \"topology_relation\": [\"Interface\", \"Joint\"], \"physical_interaction\": [\"PhysicalInteraction\"]}, \"instance_selection\": {\"topology_element\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"topology_relation\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}, \"physical_interaction\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}",
+    "unmet: {\"requirement\": \"assembly_order_constraint\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"assembly_order\", \"families\": [\"AssemblyStep\"], \"standing_instances\": {\"AssemblyStep\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one\", \"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}], \"families\": [\"AssemblyStep\"], \"selected\": 0, \"trace\": {\"engineering_question\": \"Can it be assembled?\", \"why\": \"Assemblability is an ordering property, not only a geometric one.\", \"requires_semantics\": [\"assembly_order\"], \"qualifying_by_role\": {\"assembly_order\": [\"AssemblyStep\"]}, \"instance_selection\": {\"assembly_order\": {\"population\": \"INVOCATION_BRANCH\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}"
+   ],
+   "required_premise_classes": [
+    {
+     "class": "topology_and_interaction",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "roles": [
+      "physical_interaction",
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "physical_interaction": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "extent_bounding_quantity",
+     "families": [
+      "Parameter",
+      "Requirement"
+     ],
+     "roles": [
+      "quantity_constraint"
+     ],
+     "selection": {
+      "quantity_constraint": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "reach_requirement",
+     "families": [
+      "Actor",
+      "FunctionalRegion"
+     ],
+     "roles": [
+      "actor_role",
+      "functional_region"
+     ],
+     "selection": {
+      "actor_role": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      },
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "region_and_envelope_constraint",
+     "families": [
+      "AssemblyStep",
+      "Envelope",
+      "FunctionalRegion",
+      "ReferenceScale"
+     ],
+     "roles": [
+      "functional_region",
+      "spatial_commitment"
+     ],
+     "selection": {
+      "functional_region": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "spatial_commitment": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "assembly_order_constraint",
+     "families": [
+      "AssemblyStep"
+     ],
+     "roles": [
+      "assembly_order"
+     ],
+     "selection": {
+      "assembly_order": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03b_accepted": false,
+   "semantic_role_members": {
+    "actor_role": [
+     "ACT-0001"
+    ],
+    "assembly_order": [],
+    "functional_region": [
+     "FRG-0019",
+     "FRG-0020",
+     "FRG-0021",
+     "FRG-0022"
+    ],
+    "physical_interaction": [],
+    "quantity_constraint": [
+     "REQ-0001",
+     "REQ-0002",
+     "REQ-0003",
+     "REQ-0004",
+     "REQ-0005",
+     "REQ-0006",
+     "REQ-0007",
+     "REQ-0008",
+     "REQ-0009",
+     "REQ-0010"
+    ],
+    "spatial_commitment": [
+     "FRG-0019",
+     "FRG-0020",
+     "FRG-0021",
+     "FRG-0022"
+    ],
+    "topology_element": [
+     "BOD-0014",
+     "BOD-0015",
+     "BOD-0016",
+     "RGP-0017",
+     "RGP-0018",
+     "RGP-0019",
+     "RGP-0020"
+    ],
+    "topology_relation": [
+     "IFC-0020",
+     "IFC-0021",
+     "IFC-0022",
+     "IFC-0023",
+     "IFC-0024",
+     "IFC-0025",
+     "JNT-0014",
+     "JNT-0015",
+     "JNT-0016",
+     "JNT-0017"
+    ]
+   },
+   "semantic_role_populations": {
+    "actor_role": 1,
+    "assembly_order": 0,
+    "functional_region": 4,
+    "physical_interaction": 0,
+    "quantity_constraint": 10,
+    "spatial_commitment": 4,
+    "topology_element": 7,
+    "topology_relation": 10
+   },
+   "unmet_premise_classes": [
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "PhysicalInteraction"
+       ],
+       "obligation": "physical_interaction",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "PhysicalInteraction": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "BOD-0014",
+        "BOD-0015",
+        "BOD-0016",
+        "RGP-0017",
+        "RGP-0018",
+        "RGP-0019",
+        "RGP-0020"
+       ],
+       "expected_count": 7,
+       "families": [
+        "Body",
+        "RigidGroup"
+       ],
+       "obligation": "topology_element",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "BOD-0014",
+        "BOD-0015",
+        "BOD-0016",
+        "RGP-0017",
+        "RGP-0018",
+        "RGP-0019",
+        "RGP-0020"
+       ],
+       "selected_count": 7,
+       "standing_instances": {
+        "Body": 19,
+        "RigidGroup": 23
+       },
+       "verdict": "SATISFIED",
+       "why": "7 of 7 applicable instances selected"
+      },
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [
+        "IFC-0020",
+        "IFC-0021",
+        "IFC-0022",
+        "IFC-0023",
+        "IFC-0024",
+        "IFC-0025",
+        "JNT-0014",
+        "JNT-0015",
+        "JNT-0016",
+        "JNT-0017"
+       ],
+       "expected_count": 10,
+       "families": [
+        "Interface",
+        "Joint"
+       ],
+       "obligation": "topology_relation",
+       "population": "INVOCATION_BRANCH",
+       "selected": [
+        "IFC-0020",
+        "IFC-0021",
+        "IFC-0022",
+        "IFC-0023",
+        "IFC-0024",
+        "IFC-0025",
+        "JNT-0014",
+        "JNT-0015",
+        "JNT-0016",
+        "JNT-0017"
+       ],
+       "selected_count": 10,
+       "standing_instances": {
+        "Interface": 30,
+        "Joint": 19
+       },
+       "verdict": "SATISFIED",
+       "why": "10 of 10 applicable instances selected"
+      }
+     ],
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "PhysicalInteraction",
+      "RigidGroup"
+     ],
+     "requirement": "topology_and_interaction",
+     "selected": 17,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can this candidate fit at all?",
+      "instance_selection": {
+       "physical_interaction": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_element": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       },
+       "topology_relation": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "physical_interaction": [
+        "PhysicalInteraction"
+       ],
+       "topology_element": [
+        "Body",
+        "RigidGroup"
+       ],
+       "topology_relation": [
+        "Interface",
+        "Joint"
+       ]
+      },
+      "requires_semantics": [
+       "topology_element",
+       "topology_relation",
+       "physical_interaction"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Extents attach to bodies and their connections."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    },
+    {
+     "coverage": [
+      {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "expected": [],
+       "expected_count": 0,
+       "families": [
+        "AssemblyStep"
+       ],
+       "obligation": "assembly_order",
+       "population": "INVOCATION_BRANCH",
+       "selected": [],
+       "selected_count": 0,
+       "standing_instances": {
+        "AssemblyStep": 0
+       },
+       "verdict": "MISSING_UPSTREAM",
+       "why": "no applicable instance exists in the INVOCATION_BRANCH population, and this premise requires at least one"
+      }
+     ],
+     "families": [
+      "AssemblyStep"
+     ],
+     "requirement": "assembly_order_constraint",
+     "selected": 0,
+     "source": "REASONING_PREMISE",
+     "trace": {
+      "engineering_question": "Can it be assembled?",
+      "instance_selection": {
+       "assembly_order": {
+        "applicability": "ALL_MEMBERS",
+        "coverage": "ALL_APPLICABLE",
+        "existence": "REQUIRED_NONEMPTY",
+        "population": "INVOCATION_BRANCH"
+       }
+      },
+      "qualifying_by_role": {
+       "assembly_order": [
+        "AssemblyStep"
+       ]
+      },
+      "requires_semantics": [
+       "assembly_order"
+      ],
+      "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+      "why": "Assemblability is an ordering property, not only a geometric one."
+     },
+     "verdict": "MISSING_UPSTREAM"
+    }
+   ],
+   "verdict": "NOT_READY_FOR_S04A",
+   "view_ready": false,
+   "view_status": "UPSTREAM_INSUFFICIENCY"
+  }
+ },
+ "model_called": false,
+ "not_ready": [
+  "CND-0001",
+  "CND-0002",
+  "CND-0003",
+  "CND-0004",
+  "CND-0005",
+  "CND-0006"
+ ],
+ "ready": [],
+ "responsibility": "s04a"
+}

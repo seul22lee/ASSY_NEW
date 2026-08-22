@@ -1,0 +1,1808 @@
+You are placing a mechanism in space and describing how it moves,
+so that a later step can test whether the motion is actually clear.
+
+You receive the mechanism, its provisional arrangement, and the state changes it
+is required to be able to perform. You do not receive the original request.
+
+WHAT YOU ARE DECIDING
+1. Where each JOINT sits - its frame origin, as a position in the same
+   coordinates as the arrangement you were given, and the axis it turns or slides
+   about. The direction is already fixed by the topology; you are placing it.
+2. For every configuration, the COORDINATE of every joint in that configuration -
+   an angle in degrees for a revolute or compliant joint, a distance for a
+   prismatic one, in the same relative units.
+3. How each state change the mechanism is REQUIRED to perform is carried out in
+   numbers: which joints move, by how much, and which groups move relative to
+   each other. You are not deciding WHICH state changes are required or which
+   two states each one runs between - those were decided when the mechanism was
+   described, and they are in the input as transition requirements.
+
+Do not state that anything is clear, interferes, or sweeps through anything. You
+cannot see that and are not being asked: it is computed from your numbers.
+
+RESPONSE SCHEMA
+Return a single JSON object with these keys.
+
+  joint_placements[]   joint, origin [x,y,z]
+  state_coordinates[]  configuration, coordinates {<joint id>: number}
+  transitions[]        id "TRN-0001", realizes_requirement, moving_groups[],
+                       changed_coordinates[] (the joint ids whose coordinate this
+                       transition changes - it is checked against your own
+                       endpoint coordinates, so declare exactly the ones that
+                       differ between them)
+                       ONE PER TRANSITION REQUIREMENT in the input, and the
+                       endpoints are NOT yours to state: the requirement already
+                       says which configuration it goes from and to, and
+                       restating them would be a second answer to a question that
+                       has one. Name the requirement in realizes_requirement and
+                       give the coordinates that carry it out.
+  envelope_revisions[] envelope, half_extent [x,y,z], centre [x,y,z],
+                       geometric_reason - ONLY where placing the mechanism shows
+                       the arrangement you were given cannot hold. The
+                       arrangement is a COMMITMENT: you extend it by default, and
+                       changing one is a supersession that needs a geometric
+                       reason. Both values are kept and everything resting on the
+                       old one loses standing, so this is a real act and not a
+                       correction. Omit it when you are extending, which is
+                       almost always.
+  notes                string, may be ""
+
+WHERE EACH JOINT'S AXIS COMES FROM
+The topology already fixed each joint's axis DIRECTION. You are placing the
+origin on that axis, not choosing a new one. A joint whose axis the topology did
+not fix cannot be given one here: say so in notes rather than picking a
+direction, because a placement on an invented axis produces motion evidence for a
+mechanism that does not exist.
+
+REFERENCES
+  joint_placements[].joint           a joint id from the input
+  state_coordinates[].configuration  a configuration id from the input
+  transitions[].realizes_requirement a transition requirement id from the input
+  transitions[].moving_groups        rigid group ids from the input - the groups
+                                     that move relative to each other. For each
+                                     joint whose coordinate changes, name at
+                                     least one of the two groups that joint
+                                     connects; either side may be the one that
+                                     travels, and both may.
+  transitions[].changed_coordinates  joint ids from the input
+  envelope_revisions[].envelope      an envelope id from the input
+
+THE MECHANISM AND ITS ARRANGEMENT
+{
+ "Actor": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Actor",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "ACT-0001",
+   "must_reach": [
+    "latch"
+   ],
+   "name": "User"
+  }
+ ],
+ "AssemblyStep": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_extensions": [
+    {
+     "fields": [
+      "insertion_direction"
+     ],
+     "premises": [
+      "SCL-CND-0005"
+     ],
+     "provenance": "s04a:arrangement",
+     "stage": "s04"
+    }
+   ],
+   "_family": "AssemblyStep",
+   "_premises": [
+    "CND-0005",
+    "SCL-CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "access_side": "+Z",
+   "activates": [],
+   "body": "BOD-0101",
+   "depends_on": [],
+   "entity_id": "ASY-0201",
+   "insertion_direction": [
+    0,
+    0,
+    1
+   ],
+   "order_index": 1,
+   "path_kind": "RIGID",
+   "termination_strategy": "NONE"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_extensions": [
+    {
+     "fields": [
+      "insertion_direction"
+     ],
+     "premises": [
+      "SCL-CND-0005"
+     ],
+     "provenance": "s04a:arrangement",
+     "stage": "s04"
+    }
+   ],
+   "_family": "AssemblyStep",
+   "_premises": [
+    "CND-0005",
+    "SCL-CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "access_side": "+Z",
+   "activates": [
+    "IFC-0101",
+    "IFC-0104",
+    "IFC-0105"
+   ],
+   "body": "BOD-0102",
+   "depends_on": [
+    "ASY-0201"
+   ],
+   "entity_id": "ASY-0202",
+   "insertion_direction": [
+    0,
+    0,
+    1
+   ],
+   "order_index": 2,
+   "path_kind": "RIGID",
+   "termination_strategy": "LATER_BODY_COVER"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_extensions": [
+    {
+     "fields": [
+      "insertion_direction"
+     ],
+     "premises": [
+      "SCL-CND-0005"
+     ],
+     "provenance": "s04a:arrangement",
+     "stage": "s04"
+    }
+   ],
+   "_family": "AssemblyStep",
+   "_premises": [
+    "CND-0005",
+    "SCL-CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "access_side": "+X",
+   "activates": [
+    "IFC-0102",
+    "IFC-0103"
+   ],
+   "body": "BOD-0103",
+   "depends_on": [
+    "ASY-0201",
+    "ASY-0202"
+   ],
+   "entity_id": "ASY-0203",
+   "insertion_direction": [
+    1,
+    0,
+    0
+   ],
+   "order_index": 3,
+   "path_kind": "RIGID",
+   "termination_strategy": "ROTATION"
+  }
+ ],
+ "Body": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Body",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0001",
+    "OBL-0008",
+    "OBL-0009",
+    "OBL-0011",
+    "OBL-0007"
+   ],
+   "created_by_stage": "s03",
+   "entity_id": "BOD-0101",
+   "instance_identity": "single",
+   "role": "Stationary box base body"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Body",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0006",
+    "OBL-0011",
+    "OBL-0001"
+   ],
+   "created_by_stage": "s03",
+   "entity_id": "BOD-0102",
+   "instance_identity": "single",
+   "role": "Moving closing body (lid)"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Body",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0017",
+    "OBL-0004",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0018"
+   ],
+   "created_by_stage": "s03",
+   "entity_id": "BOD-0103",
+   "instance_identity": "single",
+   "role": "Separate retaining member (hasp)"
+  }
+ ],
+ "Configuration": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Configuration",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "bodies_present": [
+    "BOD-0101",
+    "BOD-0102",
+    "BOD-0103"
+   ],
+   "distinguishing_basis": [
+    {
+     "differs_from": [
+      "CFG-0102",
+      "CFG-0103"
+     ],
+     "dof": "RY",
+     "joint": "JNT-0101"
+    },
+    {
+     "differs_from": [
+      "CFG-0102",
+      "CFG-0103"
+     ],
+     "dof": "RX",
+     "joint": "JNT-0102"
+    }
+   ],
+   "entity_id": "CFG-0101",
+   "expected_mobility": [],
+   "kind": "OPERATION",
+   "name": "OPEN"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Configuration",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "bodies_present": [
+    "BOD-0101",
+    "BOD-0102",
+    "BOD-0103"
+   ],
+   "distinguishing_basis": [
+    {
+     "differs_from": [
+      "CFG-0101"
+     ],
+     "dof": "RY",
+     "joint": "JNT-0101"
+    },
+    {
+     "differs_from": [
+      "CFG-0101",
+      "CFG-0103"
+     ],
+     "dof": "RX",
+     "joint": "JNT-0102"
+    }
+   ],
+   "entity_id": "CFG-0102",
+   "expected_mobility": [],
+   "kind": "OPERATION",
+   "name": "CLOSED_UNLATCHED"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Configuration",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "bodies_present": [
+    "BOD-0101",
+    "BOD-0102",
+    "BOD-0103"
+   ],
+   "distinguishing_basis": [
+    {
+     "differs_from": [
+      "CFG-0101",
+      "CFG-0102"
+     ],
+     "dof": "RX",
+     "joint": "JNT-0102"
+    }
+   ],
+   "entity_id": "CFG-0103",
+   "expected_mobility": [],
+   "kind": "OPERATION",
+   "name": "CLOSED_LATCHED"
+  }
+ ],
+ "ConstraintRelation": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "ConstraintRelation",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RX",
+    "RZ"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "TX",
+     "joint": "JNT-0101"
+    },
+    {
+     "dof": "TY",
+     "joint": "JNT-0101"
+    },
+    {
+     "dof": "TZ",
+     "joint": "JNT-0101"
+    },
+    {
+     "dof": "RX",
+     "joint": "JNT-0101"
+    },
+    {
+     "dof": "RZ",
+     "joint": "JNT-0101"
+    }
+   ],
+   "configurations": [
+    "CFG-0101",
+    "CFG-0102",
+    "CFG-0103"
+   ],
+   "driver": "KINEMATIC_NECESSITY",
+   "entity_id": "CRL-0201",
+   "provider_body": "BOD-0101",
+   "provider_site": "IFC-0101",
+   "retained_group": "RGP-0102"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "ConstraintRelation",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RY",
+    "RZ"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "TX",
+     "joint": "JNT-0102"
+    },
+    {
+     "dof": "TY",
+     "joint": "JNT-0102"
+    },
+    {
+     "dof": "TZ",
+     "joint": "JNT-0102"
+    },
+    {
+     "dof": "RY",
+     "joint": "JNT-0102"
+    },
+    {
+     "dof": "RZ",
+     "joint": "JNT-0102"
+    }
+   ],
+   "configurations": [
+    "CFG-0101",
+    "CFG-0102",
+    "CFG-0103"
+   ],
+   "driver": "KINEMATIC_NECESSITY",
+   "entity_id": "CRL-0202",
+   "provider_body": "BOD-0102",
+   "provider_site": "IFC-0102",
+   "retained_group": "RGP-0103"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "ConstraintRelation",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "blocked_dofs": [
+    "RY"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "RY",
+     "joint": "JNT-0101"
+    }
+   ],
+   "configurations": [
+    "CFG-0103"
+   ],
+   "driver": "DECLARED_SCENARIO",
+   "entity_id": "CRL-0203",
+   "maintaining_interaction": "PHI-0202",
+   "provider_body": "BOD-0103",
+   "provider_site": "IFC-0103",
+   "retained_group": "RGP-0102"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "ConstraintRelation",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "blocked_dofs": [
+    "RX"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "RX",
+     "joint": "JNT-0102"
+    }
+   ],
+   "configurations": [
+    "CFG-0103"
+   ],
+   "driver": "DECLARED_SCENARIO",
+   "entity_id": "CRL-0204",
+   "maintaining_interaction": "PHI-0202",
+   "provider_body": "BOD-0101",
+   "provider_site": "IFC-0103",
+   "retained_group": "RGP-0103"
+  }
+ ],
+ "Envelope": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s04",
+   "_family": "Envelope",
+   "_premises": [
+    "SCL-CND-0005",
+    "CND-0005"
+   ],
+   "_provenance": "s04a:arrangement",
+   "_validity": "STANDING",
+   "body": "BOD-0101",
+   "commitment_class": "COMPARABLE",
+   "entity_id": "ENV-0101",
+   "extent": {
+    "centre": [
+     0,
+     0,
+     20
+    ],
+    "half_extent": [
+     25,
+     15,
+     20
+    ]
+   },
+   "frame": "world",
+   "maturity": "PROVISIONAL",
+   "scale_basis": "RELATIVE"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s04",
+   "_family": "Envelope",
+   "_premises": [
+    "SCL-CND-0005",
+    "CND-0005"
+   ],
+   "_provenance": "s04a:arrangement",
+   "_validity": "STANDING",
+   "body": "BOD-0102",
+   "commitment_class": "COMPARABLE",
+   "entity_id": "ENV-0102",
+   "extent": {
+    "centre": [
+     0,
+     0,
+     45
+    ],
+    "half_extent": [
+     25,
+     15,
+     5
+    ]
+   },
+   "frame": "world",
+   "maturity": "PROVISIONAL",
+   "scale_basis": "RELATIVE"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s04",
+   "_family": "Envelope",
+   "_premises": [
+    "SCL-CND-0005",
+    "CND-0005"
+   ],
+   "_provenance": "s04a:arrangement",
+   "_validity": "STANDING",
+   "body": "BOD-0103",
+   "commitment_class": "COMPARABLE",
+   "entity_id": "ENV-0103",
+   "extent": {
+    "centre": [
+     0,
+     15,
+     45
+    ],
+    "half_extent": [
+     8,
+     2,
+     8
+    ]
+   },
+   "frame": "world",
+   "maturity": "PROVISIONAL",
+   "scale_basis": "RELATIVE"
+  }
+ ],
+ "FunctionalRegion": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_extensions": [
+    {
+     "fields": [
+      "volume"
+     ],
+     "premises": [
+      "SCL-CND-0005"
+     ],
+     "provenance": "s04a:arrangement",
+     "stage": "s04"
+    }
+   ],
+   "_family": "FunctionalRegion",
+   "_premises": [
+    "CND-0005",
+    "SCL-CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "entity_id": "FRG-0101",
+   "owning_bodies": [
+    "BOD-0103"
+   ],
+   "reach_targets": [],
+   "required_by_actors": [
+    "ACT-0001"
+   ],
+   "role": "ACCESS",
+   "volume": {
+    "centre": [
+     0,
+     18,
+     45
+    ],
+    "half_extent": [
+     5,
+     1,
+     5
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_extensions": [
+    {
+     "fields": [
+      "volume"
+     ],
+     "premises": [
+      "SCL-CND-0005"
+     ],
+     "provenance": "s04a:arrangement",
+     "stage": "s04"
+    }
+   ],
+   "_family": "FunctionalRegion",
+   "_premises": [
+    "CND-0005",
+    "SCL-CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "entity_id": "FRG-0102",
+   "owning_bodies": [
+    "BOD-0101",
+    "BOD-0102"
+   ],
+   "reach_targets": [],
+   "required_by_actors": [
+    "ACT-0001"
+   ],
+   "role": "ACCESS",
+   "volume": {
+    "centre": [
+     0,
+     0,
+     25
+    ],
+    "half_extent": [
+     20,
+     10,
+     15
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_extensions": [
+    {
+     "fields": [
+      "volume"
+     ],
+     "premises": [
+      "SCL-CND-0005"
+     ],
+     "provenance": "s04a:arrangement",
+     "stage": "s04"
+    }
+   ],
+   "_family": "FunctionalRegion",
+   "_premises": [
+    "CND-0005",
+    "SCL-CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "entity_id": "FRG-0103",
+   "owning_bodies": [
+    "BOD-0101",
+    "BOD-0102"
+   ],
+   "reach_targets": [
+    "FRG-0102"
+   ],
+   "required_by_actors": [],
+   "role": "APERTURE",
+   "volume": {
+    "centre": [
+     0,
+     0,
+     40
+    ],
+    "half_extent": [
+     22,
+     12,
+     1
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_extensions": [
+    {
+     "fields": [
+      "volume"
+     ],
+     "premises": [
+      "SCL-CND-0005"
+     ],
+     "provenance": "s04a:arrangement",
+     "stage": "s04"
+    }
+   ],
+   "_family": "FunctionalRegion",
+   "_premises": [
+    "CND-0005",
+    "SCL-CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "entity_id": "FRG-0104",
+   "owning_bodies": [
+    "BOD-0101"
+   ],
+   "reach_targets": [],
+   "required_by_actors": [],
+   "role": "SUPPORT",
+   "volume": {
+    "centre": [
+     0,
+     0,
+     0
+    ],
+    "half_extent": [
+     25,
+     15,
+     1
+    ]
+   }
+  }
+ ],
+ "Interface": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Interface",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0011",
+    "OBL-0003",
+    "OBL-0009"
+   ],
+   "bodies": [
+    "BOD-0101",
+    "BOD-0102"
+   ],
+   "entity_id": "IFC-0101",
+   "interaction_kind": "CONTACT",
+   "nominal": "Hinge radial bearing contact"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Interface",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0017",
+    "OBL-0005"
+   ],
+   "bodies": [
+    "BOD-0102",
+    "BOD-0103"
+   ],
+   "entity_id": "IFC-0102",
+   "interaction_kind": "CONTACT",
+   "nominal": "Hasp pivot radial bearing contact"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Interface",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0004",
+    "OBL-0006",
+    "OBL-0017"
+   ],
+   "bodies": [
+    "BOD-0101",
+    "BOD-0103"
+   ],
+   "entity_id": "IFC-0103",
+   "interaction_kind": "CONTACT",
+   "nominal": "Hasp catch engagement surfaces"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Interface",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0001",
+    "OBL-0004",
+    "OBL-0008"
+   ],
+   "bodies": [
+    "BOD-0101",
+    "BOD-0102"
+   ],
+   "entity_id": "IFC-0104",
+   "interaction_kind": "CONTACT",
+   "nominal": "Lid-to-base seating contact when closed"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "Interface",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0011"
+   ],
+   "bodies": [
+    "BOD-0101",
+    "BOD-0102"
+   ],
+   "entity_id": "IFC-0105",
+   "interaction_kind": "CONTACT",
+   "nominal": "Hinge axial thrust face contact"
+  }
+ ],
+ "Joint": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_extensions": [
+    {
+     "fields": [
+      "frame_origin"
+     ],
+     "premises": [
+      "SCL-CND-0005"
+     ],
+     "provenance": "s04b:placement",
+     "stage": "s04"
+    }
+   ],
+   "_family": "Joint",
+   "_premises": [
+    "CND-0005",
+    "SCL-CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "axis_direction": "+Y",
+   "child_group": "RGP-0102",
+   "dof": [
+    "RY"
+   ],
+   "entity_id": "JNT-0101",
+   "frame_ids": [
+    "FRM-HINGE-0101"
+   ],
+   "frame_origin": [
+    -25,
+    0,
+    40
+   ],
+   "joint_type": "REVOLUTE",
+   "parent_group": "RGP-0101"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_extensions": [
+    {
+     "fields": [
+      "frame_origin"
+     ],
+     "premises": [
+      "SCL-CND-0005"
+     ],
+     "provenance": "s04b:placement",
+     "stage": "s04"
+    }
+   ],
+   "_family": "Joint",
+   "_premises": [
+    "CND-0005",
+    "SCL-CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "axis_direction": "+X",
+   "child_group": "RGP-0103",
+   "dof": [
+    "RX"
+   ],
+   "entity_id": "JNT-0102",
+   "frame_ids": [
+    "FRM-HASP-0101"
+   ],
+   "frame_origin": [
+    0,
+    15,
+    45
+   ],
+   "joint_type": "REVOLUTE",
+   "parent_group": "RGP-0102"
+  }
+ ],
+ "LoadCase": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "LoadCase",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "applied_to_role": "the moving closing role",
+   "direction_class": "GRAVITY",
+   "entity_id": "LC-0002",
+   "kind": "GRAVITY",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the surface the product stands on",
+   "reacted_at_site": "RSR-0001",
+   "scenario": "SCN-0001"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "LoadCase",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "applied_to_role": "the closed storage assembly role",
+   "direction_class": "AXIAL",
+   "entity_id": "LC-0003",
+   "kind": "REACTION",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the transport support surface role",
+   "reacted_at_site": "RSR-0002",
+   "scenario": "SCN-0002"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "LoadCase",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "applied_to_role": "the latch actuation role",
+   "direction_class": "AXIAL",
+   "entity_id": "LC-0001",
+   "kind": "ACTOR_APPLIED",
+   "magnitude_or_status": "UNSUPPORTED",
+   "reacted_at_role": "the surface the product stands on",
+   "reacted_at_site": "RSR-0001",
+   "scenario": "SCN-0001"
+  }
+ ],
+ "Obligation": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "A product that occupies excessive volume cannot be placed on a desktop as compact storage.",
+   "derived_from_requirements": [
+    "REQ-0001",
+    "REQ-0008"
+   ],
+   "entity_id": "OBL-0001",
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "involves_actors": [],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The product must occupy a compact spatial envelope suitable for placement on a desktop."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "A product that topples or damages the desktop is not practical.",
+   "derived_from_requirements": [
+    "REQ-0008"
+   ],
+   "entity_id": "OBL-0008",
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "involves_actors": [],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The product must be stable and safe on a desktop, not requiring excessive space or causing damage."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "Conflicting constraints make a mechanism impossible.",
+   "derived_from_requirements": [
+    "REQ-0009"
+   ],
+   "entity_id": "OBL-0009",
+   "evidence_route": "MOBILITY_ANALYSIS",
+   "involves_actors": [],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "UNIVERSAL",
+   "statement": "The product must have a kinematically plausible arrangement with appropriate degrees of freedom."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "A revolute pair constrains all but one rotational DOF.",
+   "derived_from_requirements": [],
+   "entity_id": "OBL-0011",
+   "evidence_route": "MOBILITY_ANALYSIS",
+   "involves_actors": [],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "For any revolute hinge, relative rotation between closing and body roles must be permitted about one axis while other relative motions are prevented; axial retention and radial support must be provided."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "Manufacturing process choice determines cost.",
+   "derived_from_requirements": [
+    "REQ-0007"
+   ],
+   "entity_id": "OBL-0007",
+   "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+   "involves_actors": [],
+   "mandatory": true,
+   "route_available": false,
+   "satisfiable_at": "s04",
+   "scope": "UNIVERSAL",
+   "statement": "The product must be suitable for low-cost manufacturing."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "A latch that cannot be re-engaged is not reusable.",
+   "derived_from_requirements": [
+    "REQ-0002",
+    "REQ-0003"
+   ],
+   "entity_id": "OBL-0002",
+   "evidence_route": "MOBILITY_ANALYSIS",
+   "involves_actors": [],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "UNIVERSAL",
+   "statement": "The product must provide a latching function that can be engaged and disengaged multiple times without replacement."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "Opening and closing requires relative motion.",
+   "derived_from_requirements": [
+    "REQ-0003"
+   ],
+   "entity_id": "OBL-0003",
+   "evidence_route": "MOBILITY_ANALYSIS",
+   "involves_actors": [],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s02",
+   "scope": "UNIVERSAL",
+   "statement": "The product must permit relative motion between a closing role and a body role sufficient to open and close."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "Accidental opening would occur if the latch cannot resist normal handling loads.",
+   "derived_from_requirements": [
+    "REQ-0004"
+   ],
+   "entity_id": "OBL-0004",
+   "evidence_route": "RIGID_BODY_DYNAMICS",
+   "involves_actors": [],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The latch must maintain closure under normal handling loads unless the user intentionally actuates it."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "Transport loads could separate the latch if not retained.",
+   "derived_from_requirements": [
+    "REQ-0006"
+   ],
+   "entity_id": "OBL-0006",
+   "evidence_route": "RIGID_BODY_DYNAMICS",
+   "involves_actors": [],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The latch must remain closed under transport vibration and shock."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "A separate part must be captured and moved.",
+   "derived_from_requirements": [],
+   "entity_id": "OBL-0017",
+   "evidence_route": "SWEPT_INTERFERENCE",
+   "involves_actors": [],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "For any separate retaining member, an additional part must be retained with the product and manually manipulated to engage or disengage closure."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "A latch that cannot be reached or requires excessive force is not easy to operate.",
+   "derived_from_requirements": [
+    "REQ-0005"
+   ],
+   "entity_id": "OBL-0005",
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "CANDIDATE_DISCRIMINATING",
+   "statement": "The user must be able to reach and actuate the latch with low effort and without special tools."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "Obligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "derivation_premises": "Direct manual actuation requires physical access.",
+   "derived_from_requirements": [
+    "REQ-0005"
+   ],
+   "entity_id": "OBL-0018",
+   "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+   "involves_actors": [
+    "ACT-0001"
+   ],
+   "mandatory": true,
+   "route_available": true,
+   "satisfiable_at": "s03",
+   "scope": "UNIVERSAL",
+   "statement": "The latch actuation role must be accessible to the user's fingers and allow sufficient travel and force input for direct manual actuation."
+  }
+ ],
+ "PhysicalEffectObligation": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "PhysicalEffectObligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0009"
+   ],
+   "between_roles": "the moving closing role and the stationary body role",
+   "effect": "PERMIT_MOTION",
+   "entity_id": "PEO-0001",
+   "persistence": "during opening and closing",
+   "under_load_case": "LC-0002"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "PhysicalEffectObligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0004",
+    "OBL-0006"
+   ],
+   "between_roles": "the moving closing role and the stationary body role",
+   "effect": "PREVENT_MOTION",
+   "entity_id": "PEO-0002",
+   "persistence": "when closed during transport",
+   "under_load_case": "LC-0003"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "PhysicalEffectObligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0005",
+    "OBL-0018"
+   ],
+   "between_roles": "the latch actuation role and the latch retention role",
+   "effect": "TRANSMIT_FORCE",
+   "entity_id": "PEO-0003",
+   "under_load_case": "LC-0001"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "PhysicalEffectObligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0001",
+    "OBL-0008"
+   ],
+   "between_roles": "the moving closing role and the stationary body role",
+   "effect": "LOCATE",
+   "entity_id": "PEO-0004",
+   "persistence": "when closed",
+   "under_load_case": "LC-0002"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "PhysicalEffectObligation",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "addresses_obligations": [
+    "OBL-0001",
+    "OBL-0008"
+   ],
+   "between_roles": "the storage volume role and the external environment role",
+   "effect": "CONTAIN",
+   "entity_id": "PEO-0005"
+  }
+ ],
+ "PhysicalInteraction": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "PhysicalInteraction",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "at_interface": "IFC-0101",
+   "configurations": [
+    "CFG-0101",
+    "CFG-0102",
+    "CFG-0103"
+   ],
+   "discharges_effect": "PEO-0001",
+   "effect": "PERMIT_MOTION",
+   "entity_id": "PHI-0201",
+   "groups": [
+    "RGP-0102",
+    "RGP-0101"
+   ]
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "PhysicalInteraction",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "at_interface": "IFC-0103",
+   "configurations": [
+    "CFG-0103"
+   ],
+   "discharges_effect": "PEO-0002",
+   "effect": "PREVENT_MOTION",
+   "entity_id": "PHI-0202",
+   "groups": [
+    "RGP-0102",
+    "RGP-0103",
+    "RGP-0101"
+   ]
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "PhysicalInteraction",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "at_interface": "IFC-0102",
+   "discharges_effect": "PEO-0003",
+   "effect": "TRANSMIT_FORCE",
+   "entity_id": "PHI-0203",
+   "groups": [
+    "RGP-0103",
+    "RGP-0102",
+    "RGP-0101"
+   ]
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "PhysicalInteraction",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "at_interface": "IFC-0104",
+   "configurations": [
+    "CFG-0102",
+    "CFG-0103"
+   ],
+   "discharges_effect": "PEO-0004",
+   "effect": "LOCATE",
+   "entity_id": "PHI-0204",
+   "groups": [
+    "RGP-0102",
+    "RGP-0101"
+   ]
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "PhysicalInteraction",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "configurations": [
+    "CFG-0102",
+    "CFG-0103"
+   ],
+   "discharges_effect": "PEO-0005",
+   "effect": "CONTAIN",
+   "entity_id": "PHI-0205",
+   "groups": [
+    "RGP-0102",
+    "RGP-0101"
+   ]
+  }
+ ],
+ "ReactionSiteRequirement": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "ReactionSiteRequirement",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "at_role": "the surface the product stands on",
+   "boundary_side": "EXTERNAL",
+   "entity_id": "RSR-0001",
+   "scenario": "SCN-0001",
+   "why": "Loads from operation and gravity are reacted to the desktop."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s02",
+   "_family": "ReactionSiteRequirement",
+   "_provenance": "s02:derivation",
+   "_validity": "STANDING",
+   "at_role": "the transport support surface role",
+   "boundary_side": "EXTERNAL",
+   "entity_id": "RSR-0002",
+   "scenario": "SCN-0002",
+   "why": "Transport loads are reacted to supporting surfaces or hands outside the boundary."
+  }
+ ],
+ "ReferenceScale": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s04",
+   "_family": "ReferenceScale",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s04a:arrangement",
+   "_validity": "STANDING",
+   "absolute": null,
+   "basis": "RELATIVE",
+   "commitment_class": "COMPARABLE",
+   "entity_id": "SCL-CND-0005",
+   "note": "No absolute dimension given; all units are arbitrary relative units."
+  }
+ ],
+ "Requirement": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Requirement",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "REQ-0001",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "compact desktop storage box",
+   "quantity_class": "NONE",
+   "source_locator": "SRC-0001",
+   "statement_verbatim": "Design a compact desktop storage box",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Requirement",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "REQ-0002",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "reusable latch",
+   "quantity_class": "NONE",
+   "source_locator": "SRC-0001",
+   "statement_verbatim": "with a reusable latch",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Requirement",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "REQ-0003",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "open and close repeatedly",
+   "quantity_class": "NONE",
+   "source_locator": "SRC-0002",
+   "statement_verbatim": "The box should open and close repeatedly",
+   "verification_kind": "KINEMATIC"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Requirement",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "REQ-0004",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "without accidental opening during normal handling",
+   "quantity_class": "NONE",
+   "source_locator": "SRC-0002",
+   "statement_verbatim": "without accidental opening during normal handling",
+   "verification_kind": "KINEMATIC"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Requirement",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "REQ-0005",
+   "kind": "USABILITY",
+   "observable_verbatim": "easy for a user to operate",
+   "quantity_class": "NONE",
+   "source_locator": "SRC-0003",
+   "statement_verbatim": "The latch should be easy for a user to operate",
+   "verification_kind": "KINEMATIC"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Requirement",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "REQ-0006",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "remaining secure during transport",
+   "quantity_class": "NONE",
+   "source_locator": "SRC-0003",
+   "statement_verbatim": "while remaining secure during transport",
+   "verification_kind": "KINEMATIC"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Requirement",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "REQ-0007",
+   "kind": "PROCESS",
+   "observable_verbatim": "suitable for low-cost manufacturing",
+   "quantity_class": "NONE",
+   "source_locator": "SRC-0004",
+   "statement_verbatim": "The product should be suitable for low-cost manufacturing",
+   "verification_kind": "QUANTITATIVE"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Requirement",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "REQ-0008",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "practical for desktop use",
+   "quantity_class": "NONE",
+   "source_locator": "SRC-0004",
+   "statement_verbatim": "should be practical for desktop use",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Requirement",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "REQ-0009",
+   "kind": "FUNCTIONAL",
+   "observable_verbatim": "mechanically plausible",
+   "quantity_class": "NONE",
+   "source_locator": "SRC-0005",
+   "statement_verbatim": "The design should be mechanically plausible",
+   "verification_kind": "STRUCTURAL"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Requirement",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "entity_id": "REQ-0010",
+   "kind": "PROCESS",
+   "observable_verbatim": "easy to assemble",
+   "quantity_class": "NONE",
+   "source_locator": "SRC-0005",
+   "statement_verbatim": "easy to assemble",
+   "verification_kind": "KINEMATIC"
+  }
+ ],
+ "RigidGroup": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "RigidGroup",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "body": "BOD-0101",
+   "entity_id": "RGP-0101",
+   "is_default": true,
+   "members": [
+    "base structural body"
+   ]
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "RigidGroup",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "body": "BOD-0102",
+   "entity_id": "RGP-0102",
+   "is_default": false,
+   "members": [
+    "lid panel"
+   ]
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "RigidGroup",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03:topology",
+   "_validity": "STANDING",
+   "body": "BOD-0103",
+   "entity_id": "RGP-0103",
+   "is_default": false,
+   "members": [
+    "hasp plate"
+   ]
+  }
+ ],
+ "Scenario": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Scenario",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "actors": [
+    "ACT-0001"
+   ],
+   "entity_id": "SCN-0001",
+   "environment": "Normal handling conditions as mentioned in SRC-0002.",
+   "kind": "OPERATION",
+   "name": "Repeated opening and closing during normal handling",
+   "system_boundary": "Inside: the storage box and its latch; Outside: the user operating the box and the desktop environment."
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s01",
+   "_family": "Scenario",
+   "_provenance": "s01:extraction",
+   "_validity": "STANDING",
+   "actors": [],
+   "entity_id": "SCN-0002",
+   "environment": "Transport conditions unspecified in the request.",
+   "kind": "TRANSPORT",
+   "name": "Transport of the closed box",
+   "system_boundary": "Inside: the closed storage box with latch engaged; Outside: the transport environment and any surfaces or hands supporting it."
+  }
+ ],
+ "TransitionRequirement": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "TransitionRequirement",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "entity_id": "TRQ-0201",
+   "from_configuration": "CFG-0103",
+   "released_constraints": [
+    "CRL-0203",
+    "CRL-0204"
+   ],
+   "required_relative_motions": [
+    {
+     "dof": "RX",
+     "joint": "JNT-0102"
+    }
+   ],
+   "to_configuration": "CFG-0102"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "TransitionRequirement",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "entity_id": "TRQ-0202",
+   "from_configuration": "CFG-0102",
+   "released_constraints": [],
+   "required_relative_motions": [
+    {
+     "dof": "RY",
+     "joint": "JNT-0101"
+    }
+   ],
+   "to_configuration": "CFG-0101"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "TransitionRequirement",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "entity_id": "TRQ-0203",
+   "from_configuration": "CFG-0101",
+   "released_constraints": [],
+   "required_relative_motions": [
+    {
+     "dof": "RY",
+     "joint": "JNT-0101"
+    }
+   ],
+   "to_configuration": "CFG-0102"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s03",
+   "_family": "TransitionRequirement",
+   "_premises": [
+    "CND-0005"
+   ],
+   "_provenance": "s03b:relations",
+   "_validity": "STANDING",
+   "entity_id": "TRQ-0204",
+   "from_configuration": "CFG-0102",
+   "released_constraints": [],
+   "required_relative_motions": [
+    {
+     "dof": "RX",
+     "joint": "JNT-0102"
+    }
+   ],
+   "to_configuration": "CFG-0103"
+  }
+ ]
+}

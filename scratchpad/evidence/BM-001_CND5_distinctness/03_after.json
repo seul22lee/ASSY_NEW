@@ -1,0 +1,414 @@
+{
+ "aggregate_status": "INFEASIBLE",
+ "assessment_problems": [],
+ "branch_isolation": {
+  "State": [
+   "STA-CFG-0101",
+   "STA-CFG-0102",
+   "STA-CFG-0103"
+  ],
+  "SweptVolume": [
+   "SWV-TRN-0401-RGP-0102",
+   "SWV-TRN-0401-RGP-0103",
+   "SWV-TRN-0402-RGP-0101",
+   "SWV-TRN-0402-RGP-0102",
+   "SWV-TRN-0403-RGP-0101",
+   "SWV-TRN-0403-RGP-0102",
+   "SWV-TRN-0404-RGP-0102",
+   "SWV-TRN-0404-RGP-0103"
+  ],
+  "Transition": [
+   "TRN-0401",
+   "TRN-0402",
+   "TRN-0403",
+   "TRN-0404"
+  ]
+ },
+ "candidate": "CND-0005",
+ "counts": {
+  "State": 3,
+  "SweptVolume": 8,
+  "Transition": 4
+ },
+ "domain_statuses": {
+  "assemblability": "NOT_ESTABLISHED",
+  "gross_interference": "PASS",
+  "load_reaction_closure": "PASS",
+  "motion_and_transitions": "PASS",
+  "physical_realization": "PASS",
+  "reach": "NOT_ESTABLISHED",
+  "required_configurations": "FAIL",
+  "spatial_realization": "PASS",
+  "transition_reachability": "NOT_ESTABLISHED"
+ },
+ "domains": {
+  "assemblability": {
+   "premises": [
+    "ASY-0201",
+    "ASY-0202",
+    "ASY-0203",
+    "ENV-0101",
+    "ENV-0102",
+    "ENV-0103",
+    "SCL-CND-0005"
+   ],
+   "reason_codes": [
+    "INSERTION_PATH_NOT_CLEAR"
+   ],
+   "status": "NOT_ESTABLISHED",
+   "summary": "BOD-0102 entering meets BOD-0101; BOD-0103 entering meets BOD-0101; BOD-0103 entering meets BOD-0102"
+  },
+  "gross_interference": {
+   "premises": [
+    "BOD-0101",
+    "BOD-0102",
+    "BOD-0103",
+    "ENV-0101",
+    "ENV-0102",
+    "ENV-0103",
+    "IFC-0101",
+    "IFC-0102",
+    "IFC-0103",
+    "IFC-0104",
+    "IFC-0105",
+    "SCL-CND-0005",
+    "SWV-TRN-0401-RGP-0102",
+    "SWV-TRN-0401-RGP-0103",
+    "SWV-TRN-0402-RGP-0101",
+    "SWV-TRN-0402-RGP-0102",
+    "SWV-TRN-0403-RGP-0101",
+    "SWV-TRN-0403-RGP-0102",
+    "SWV-TRN-0404-RGP-0102",
+    "SWV-TRN-0404-RGP-0103"
+   ],
+   "reason_codes": [
+    "NO_CONSERVATIVE_OVERLAP"
+   ],
+   "status": "PASS",
+   "summary": ""
+  },
+  "load_reaction_closure": {
+   "premises": [
+    "ENV-0101",
+    "ENV-0102",
+    "ENV-0103",
+    "IFC-0101",
+    "IFC-0102",
+    "IFC-0104",
+    "LC-0001",
+    "LC-0002",
+    "LC-0003",
+    "LC-0004",
+    "LC-0005",
+    "LDP-0201",
+    "LDP-0202",
+    "LDP-0203",
+    "LDP-0204",
+    "LDP-0205",
+    "RSR-0001",
+    "RSR-0002",
+    "RSR-0003",
+    "SCL-CND-0005"
+   ],
+   "reason_codes": [
+    "EVERY_LOAD_CLOSES_EXTERNALLY"
+   ],
+   "status": "PASS",
+   "summary": ""
+  },
+  "motion_and_transitions": {
+   "premises": [
+    "SCL-CND-0005",
+    "STA-CFG-0101",
+    "STA-CFG-0102",
+    "STA-CFG-0103",
+    "TRN-0401",
+    "TRN-0402",
+    "TRN-0403",
+    "TRN-0404"
+   ],
+   "reason_codes": [
+    "EVERY_TRANSITION_MOVES_WHAT_IT_DECLARES"
+   ],
+   "status": "PASS",
+   "summary": ""
+  },
+  "physical_realization": {
+   "premises": [
+    "PEO-0001",
+    "PEO-0002",
+    "PEO-0003",
+    "PEO-0004",
+    "PEO-0005",
+    "PHI-0201",
+    "PHI-0202",
+    "PHI-0203",
+    "PHI-0204",
+    "PHI-0205"
+   ],
+   "reason_codes": [
+    "ALL_EFFECTS_DISCHARGED"
+   ],
+   "status": "PASS",
+   "summary": ""
+  },
+  "reach": {
+   "premises": [
+    "ACT-0001"
+   ],
+   "reason_codes": [
+    "MODEL_LOCAL_POSITIVE",
+    "REACH_BASIS_NOT_ESTABLISHED"
+   ],
+   "status": "NOT_ESTABLISHED",
+   "summary": "3 reach requirement(s); no deterministic reach basis exists, so a ReachResult is recorded as a model-local finding and decides nothing"
+  },
+  "required_configurations": {
+   "premises": [
+    "CFG-0101",
+    "CFG-0102",
+    "CFG-0103",
+    "JNT-0101",
+    "JNT-0102",
+    "SCL-CND-0005",
+    "STA-CFG-0101",
+    "STA-CFG-0102",
+    "STA-CFG-0103"
+   ],
+   "reason_codes": [
+    "DECLARED_DISTINCTNESS_NOT_REALIZED"
+   ],
+   "status": "FAIL",
+   "summary": "CFG-0101 and CFG-0102 both realize JNT-0102 at 0; CFG-0102 and CFG-0101 both realize JNT-0102 at 0"
+  },
+  "spatial_realization": {
+   "premises": [
+    "BOD-0101",
+    "BOD-0102",
+    "BOD-0103",
+    "ENV-0101",
+    "ENV-0102",
+    "ENV-0103",
+    "IFC-0101",
+    "IFC-0102",
+    "IFC-0103",
+    "IFC-0104",
+    "IFC-0105",
+    "JNT-0101",
+    "JNT-0102",
+    "RGP-0101",
+    "RGP-0102",
+    "RGP-0103",
+    "SCL-CND-0005",
+    "SWV-TRN-0401-RGP-0102",
+    "SWV-TRN-0401-RGP-0103",
+    "SWV-TRN-0402-RGP-0101",
+    "SWV-TRN-0402-RGP-0102",
+    "SWV-TRN-0403-RGP-0101",
+    "SWV-TRN-0403-RGP-0102",
+    "SWV-TRN-0404-RGP-0102",
+    "SWV-TRN-0404-RGP-0103"
+   ],
+   "reason_codes": [
+    "ARRANGEMENT_COMPLETE_AND_CONNECTED"
+   ],
+   "status": "PASS",
+   "summary": ""
+  },
+  "transition_reachability": {
+   "premises": [
+    "CRL-0203",
+    "CRL-0204",
+    "JNT-0101",
+    "JNT-0102",
+    "STA-CFG-0101",
+    "STA-CFG-0102",
+    "STA-CFG-0103",
+    "TRN-0401",
+    "TRN-0402",
+    "TRN-0403",
+    "TRN-0404",
+    "TRQ-0201",
+    "TRQ-0202",
+    "TRQ-0203",
+    "TRQ-0204"
+   ],
+   "reason_codes": [
+    "RELEASE_EVIDENCE_NOT_ESTABLISHED",
+    "RELEASE_RELATION_NOT_APPLICABLE"
+   ],
+   "status": "NOT_ESTABLISHED",
+   "summary": "TRQ-0201 releases CRL-0204, which states no defeat specification, so how the release is achieved is not established; TRQ-0201 releases CRL-0203, which restrains JNT-0101/RY and the transition requires JNT-0102/RX"
+  }
+ },
+ "realization_map": {
+  "TRN-0401": "TRQ-0201",
+  "TRN-0402": "TRQ-0202",
+  "TRN-0403": "TRQ-0203",
+  "TRN-0404": "TRQ-0204"
+ },
+ "source_blockers": [
+  {
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RX",
+    "RZ"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "TX",
+     "joint": "JNT-0101"
+    },
+    {
+     "dof": "TY",
+     "joint": "JNT-0101"
+    },
+    {
+     "dof": "TZ",
+     "joint": "JNT-0101"
+    },
+    {
+     "dof": "RX",
+     "joint": "JNT-0101"
+    },
+    {
+     "dof": "RZ",
+     "joint": "JNT-0101"
+    }
+   ],
+   "configurations": [
+    "CFG-0101",
+    "CFG-0102",
+    "CFG-0103"
+   ],
+   "defeat_specification": null,
+   "id": "CRL-0201"
+  },
+  {
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RY",
+    "RZ"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "TX",
+     "joint": "JNT-0102"
+    },
+    {
+     "dof": "TY",
+     "joint": "JNT-0102"
+    },
+    {
+     "dof": "TZ",
+     "joint": "JNT-0102"
+    },
+    {
+     "dof": "RY",
+     "joint": "JNT-0102"
+    },
+    {
+     "dof": "RZ",
+     "joint": "JNT-0102"
+    }
+   ],
+   "configurations": [
+    "CFG-0101",
+    "CFG-0102",
+    "CFG-0103"
+   ],
+   "defeat_specification": null,
+   "id": "CRL-0202"
+  },
+  {
+   "blocked_dofs": [
+    "RY"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "RY",
+     "joint": "JNT-0101"
+    }
+   ],
+   "configurations": [
+    "CFG-0103"
+   ],
+   "defeat_specification": null,
+   "id": "CRL-0203"
+  },
+  {
+   "blocked_dofs": [
+    "RX"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "RX",
+     "joint": "JNT-0102"
+    }
+   ],
+   "configurations": [
+    "CFG-0103"
+   ],
+   "defeat_specification": null,
+   "id": "CRL-0204"
+  }
+ ],
+ "transition_requirement_count": 4,
+ "transition_requirements": [
+  {
+   "from": "CFG-0103",
+   "id": "TRQ-0201",
+   "released_constraints": [
+    "CRL-0203",
+    "CRL-0204"
+   ],
+   "required_relative_motions": [
+    {
+     "dof": "RX",
+     "joint": "JNT-0102"
+    }
+   ],
+   "to": "CFG-0102"
+  },
+  {
+   "from": "CFG-0102",
+   "id": "TRQ-0202",
+   "released_constraints": [],
+   "required_relative_motions": [
+    {
+     "dof": "RY",
+     "joint": "JNT-0101"
+    }
+   ],
+   "to": "CFG-0101"
+  },
+  {
+   "from": "CFG-0101",
+   "id": "TRQ-0203",
+   "released_constraints": [],
+   "required_relative_motions": [
+    {
+     "dof": "RY",
+     "joint": "JNT-0101"
+    }
+   ],
+   "to": "CFG-0102"
+  },
+  {
+   "from": "CFG-0102",
+   "id": "TRQ-0204",
+   "released_constraints": [],
+   "required_relative_motions": [
+    {
+     "dof": "RX",
+     "joint": "JNT-0102"
+    }
+   ],
+   "to": "CFG-0103"
+  }
+ ]
+}

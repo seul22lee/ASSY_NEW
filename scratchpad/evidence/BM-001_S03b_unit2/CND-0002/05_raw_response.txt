@@ -1,0 +1,248 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0006",
+      "groups": ["RGP-0006", "RGP-0005"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "configurations": ["CFG-0003", "CFG-0004"]
+    },
+    {
+      "id": "PHI-0007",
+      "groups": ["RGP-0006", "RGP-0005"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "at_interface": "IFC-0009",
+      "configurations": ["CFG-0004"]
+    },
+    {
+      "id": "PHI-0008",
+      "groups": ["RGP-0010", "RGP-0005"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "at_interface": "IFC-0009",
+      "configurations": ["CFG-0004"]
+    },
+    {
+      "id": "PHI-0009",
+      "groups": ["RGP-0006", "RGP-0005"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "at_interface": "IFC-0005",
+      "configurations": ["CFG-0004"]
+    },
+    {
+      "id": "PHI-0010",
+      "groups": ["RGP-0005", "RGP-0006"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "at_interface": "IFC-0005",
+      "configurations": ["CFG-0004"]
+    }
+  ],
+  "transition_requirements": [
+    {
+      "id": "TRQ-0003",
+      "from_configuration": "CFG-0003",
+      "to_configuration": "CFG-0004",
+      "required_relative_motions": [
+        {"joint": "JNT-0004", "dof": "RY"},
+        {"joint": "JNT-0005", "dof": "RZ"}
+      ],
+      "released_constraints": []
+    },
+    {
+      "id": "TRQ-0004",
+      "from_configuration": "CFG-0004",
+      "to_configuration": "CFG-0003",
+      "required_relative_motions": [
+        {"joint": "JNT-0005", "dof": "RZ"},
+        {"joint": "JNT-0004", "dof": "RY"}
+      ],
+      "released_constraints": ["CRL-0013", "CRL-0018"]
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0010",
+      "retained_group": "RGP-0005",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "DECLARED_SCENARIO",
+      "provider_reaction_site": "RSR-0001"
+    },
+    {
+      "id": "CRL-0011",
+      "retained_group": "RGP-0005",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0004"],
+      "driver": "LOAD",
+      "provider_reaction_site": "RSR-0002"
+    },
+    {
+      "id": "CRL-0012",
+      "retained_group": "RGP-0006",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0006",
+      "provider_site": "IFC-0007"
+    },
+    {
+      "id": "CRL-0013",
+      "retained_group": "RGP-0006",
+      "blocked_dofs": ["RY"],
+      "configurations": ["CFG-0004"],
+      "driver": "LOAD",
+      "provider_body": "BOD-0007",
+      "provider_site": "IFC-0009",
+      "defeat_specification": "User presses latch to deflect and disengage",
+      "blocked_relative_motions": [
+        {"joint": "JNT-0004", "dof": "RY"}
+      ]
+    },
+    {
+      "id": "CRL-0014",
+      "retained_group": "RGP-0007",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0004",
+      "provider_site": "IFC-0006"
+    },
+    {
+      "id": "CRL-0015",
+      "retained_group": "RGP-0008",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0005",
+      "provider_site": "IFC-0007"
+    },
+    {
+      "id": "CRL-0016",
+      "retained_group": "RGP-0009",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0005",
+      "provider_site": "IFC-0008"
+    },
+    {
+      "id": "CRL-0017",
+      "retained_group": "RGP-0010",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0007"
+    },
+    {
+      "id": "CRL-0018",
+      "retained_group": "RGP-0010",
+      "blocked_dofs": ["RZ"],
+      "configurations": ["CFG-0004"],
+      "driver": "LOAD",
+      "provider_body": "BOD-0004",
+      "provider_site": "IFC-0009",
+      "defeat_specification": "User applies force to deflect latch arm",
+      "blocked_relative_motions": [
+        {"joint": "JNT-0005", "dof": "RZ"}
+      ]
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0006",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0009"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0007",
+      "load_case": "LC-0002",
+      "ordered_hops": ["IFC-0007", "IFC-0006"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0008",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0005"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0009",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0009"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0010",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0006"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0004",
+      "order_index": 1,
+      "body": "BOD-0004",
+      "access_side": "+Z",
+      "activates": [],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0005",
+      "order_index": 2,
+      "body": "BOD-0006",
+      "access_side": "+Z",
+      "activates": ["IFC-0006"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0004"]
+    },
+    {
+      "id": "ASY-0006",
+      "order_index": 3,
+      "body": "BOD-0005",
+      "access_side": "+Z",
+      "activates": ["IFC-0007", "IFC-0005"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0005"]
+    },
+    {
+      "id": "ASY-0007",
+      "order_index": 4,
+      "body": "BOD-0007",
+      "access_side": "+Z",
+      "activates": ["IFC-0008", "IFC-0009"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0006"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-1101",
+      "decision": "Verify flexure hinge fatigue life under repeated bending",
+      "why_open": "Material property analysis route unavailable; requires material data and cycle count.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0002"],
+      "blocks": ["OBL-0012"]
+    },
+    {
+      "id": "S3U-1102",
+      "decision": "Verify detent retention force under normal handling and transport loads",
+      "why_open": "Contact resolving analysis route unavailable; requires geometry and material properties.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0002", "AMB-0004"],
+      "blocks": ["OBL-0014"]
+    }
+  ]
+}

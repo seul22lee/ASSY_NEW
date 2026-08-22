@@ -209,6 +209,14 @@ RULES
 6. If this topology CANNOT be given a consistent arrangement at all, say so and
    name the geometric reason. That is a real and useful result: it eliminates a
    candidate cheaply, which is what this pass is for.
+7. For every interface that is a NESTED MATING FEATURE - a pin in a bore, a
+   shaft in a bearing, a dowel in a hole, a slider in a guide - the analytical
+   geometry of the mating: which body is the inner feature and which the outer,
+   the kind of each, the two diameters, the engaged length, and the joint whose
+   axis it turns or slides on. Boxes of such a pair OVERLAP ON PURPOSE - the pin
+   is inside the knuckle - and the box overlap proves nothing either way; the
+   diameters are what decide whether it clears, and that is computed from your
+   numbers, not stated by you.
 
 Do not state that anything interferes or is clear. You are not being asked to
 judge overlaps and you cannot see them: that is computed from your numbers.
@@ -225,6 +233,17 @@ Return a single JSON object with these keys, each a list unless marked.
   reach_results[]       actor, target, reachable (boolean), approach_side,
                         why
   assembly_directions[] assembly_step, direction [x,y,z]
+  mating_geometry[]     interface, inner_body, outer_body,
+                        inner_feature SHAFT|PIN|DOWEL,
+                        outer_feature BORE|HOLE|BEARING|GUIDE,
+                        inner_diameter, outer_diameter, engagement_length,
+                        axis_joint - ONLY for interfaces that are nested mating
+                        features; [] when the mechanism has none. The sizes are
+                        in the same units as your envelopes. Name the joint
+                        whose axis the mating turns or slides on; when no joint
+                        relates the two bodies (a fixed dowel), give
+                        axis_direction as one of +X -X +Y -Y +Z -Z instead, and
+                        never both.
   elimination           object {{eliminated (boolean), reason}} - reason is a
                         GEOMETRIC statement, or null when not eliminated
 
@@ -233,6 +252,11 @@ REFERENCES
   region_volumes[].functional_region  a functional region id from the input
   reach_results[].actor           an actor id from the input
   assembly_directions[].assembly_step an assembly step id from the input
+  mating_geometry[].interface     an interface id from the input, between the
+                                  two bodies you name
+  mating_geometry[].inner_body / outer_body  the interface's own two bodies
+  mating_geometry[].axis_joint    a joint id from the input relating those two
+                                  bodies' groups, not FIXED
 
 THE MECHANISM
 {mechanism}
@@ -294,6 +318,7 @@ class S04AEnvelopeAndReach(Stage):
         prov = "s04a:arrangement"
         scale = parsed.get("scale") or {}
         premises: List[str] = []
+        view = (inputs or {}).get(self.context_key) or {}
         # THE BASIS FIRST. Every coordinate below is expressed in it, so it is
         # their premise: withdraw the basis and the numbers mean nothing, which
         # FA-5 then says about every value that cited it.
@@ -313,6 +338,24 @@ class S04AEnvelopeAndReach(Stage):
                 "commitment_class": self.COMMITMENT_CLASS,
                 "scale_basis": scale.get("basis", "RELATIVE")},
                 prov, premise_refs=list(premises)))
+        # THE NARROW PHASE, on the interface it refines. An EXTEND: s03a said
+        # the pair is intended and of what kind; this adds the geometry that
+        # decides whether it fits, and contradicts nothing the interface said.
+        interfaces = {i.get("entity_id"): i for i in (view.get("Interface") or [])}
+        for m in parsed.get("mating_geometry") or []:
+            if not isinstance(m, dict) or m.get("interface") not in interfaces:
+                continue
+            geometry = {k: m.get(k) for k in (
+                "inner_feature", "outer_feature", "inner_body", "outer_body",
+                "inner_diameter", "outer_diameter", "engagement_length",
+                "axis_joint", "axis_direction") if m.get(k) is not None}
+            ops.append(Op("EXTEND", "Interface", m["interface"],
+                          {"mating_geometry": geometry}, prov,
+                          premise_refs=list(premises) + [
+                              b for b in (geometry.get("inner_body"),
+                                          geometry.get("outer_body")) if b]
+                          + ([geometry["axis_joint"]] if geometry.get("axis_joint")
+                             else [])))
         for i, r in enumerate(parsed.get("reach_results") or [], start=1):
             ops.append(Op("CREATE", "ReachResult", "RCH-%s-%04d" % (branch, i), {
                 "actor": r.get("actor"), "target": r.get("target"),
@@ -381,6 +424,25 @@ class S04AEnvelopeAndReach(Stage):
                 if not (isinstance(v, list) and len(v) == 3
                         and all(isinstance(x, (int, float)) for x in v)):
                     out.append("envelope %s has a malformed %s" % (e.get("id"), field))
+        # MATING GEOMETRY IS COMPLETE OR IT IS DECLARED INCOMPLETE. A geometry
+        # naming a pair that is not its interface's, a feature pair this
+        # pipeline cannot measure, an axis stated twice or not at all, or a
+        # size that is not a number refines nothing - and is said so here, by
+        # the shared rule, rather than committed for a later reader to trip on.
+        interfaces = {i["entity_id"]: i for i in inputs["consumer_view"].get("Interface", [])}
+        joints = {j["entity_id"]: j for j in inputs["consumer_view"].get("Joint", [])}
+        for m in parsed.get("mating_geometry") or []:
+            if not isinstance(m, dict):
+                continue
+            iface = interfaces.get(m.get("interface"))
+            if iface is None:
+                out.append("mating geometry names %s, which is no interface of "
+                           "this candidate" % m.get("interface"))
+                continue
+            status, code, note, _refs = mating_fit(iface, m, joints, {})
+            if status == FIT_NOT_ESTABLISHED:
+                out.append("mating geometry for %s establishes nothing: %s"
+                           % (m.get("interface"), note))
         # A pair the topology connects, placed apart, is an arrangement that
         # contradicts its own producer. s04a has not supplied the evidence its
         # output claims, so this is incompleteness rather than a finding beside
@@ -639,6 +701,186 @@ def distinctness_findings(configurations, coordinates, joints):
                                 "%s and %s both realize %s at %r"
                                 % (cid, other, jid, q), [cid, other, jid]))
     return out, sorted({r for r in read if isinstance(r, str) and r})
+
+
+
+# =====================================================================
+# Narrow-phase mating geometry. S-11.
+# =====================================================================
+#: The feature pairs the fit rule knows how to read. An inner feature goes into
+#: an outer one; a pair not listed is a geometry this reader does not understand
+#: and says so, rather than measuring it as if it were a pin in a bore.
+MATING_PAIRS = {("SHAFT", "BORE"), ("SHAFT", "BEARING"), ("PIN", "HOLE"),
+                ("PIN", "BORE"), ("DOWEL", "HOLE"), ("SHAFT", "GUIDE"),
+                ("PIN", "GUIDE")}
+
+#: THE VERDICT VOCABULARY OF THE FIT RULE. Shared by every reader so the same
+#: numbers mean the same thing to feasibility and to assurance.
+FIT_ESTABLISHED, FIT_CONTRADICTED, FIT_NOT_ESTABLISHED = (
+    "ESTABLISHED", "CONTRADICTED", "NOT_ESTABLISHED")
+
+
+def mating_axis(geometry, joints):
+    """(axis word, origin, refs) for one mating geometry, from ONE source.
+
+    The axis is the joint's where a joint is named - its `axis_direction` and
+    `frame_origin` are canonical and this record must not restate them - and the
+    record's own `axis_direction` only where no joint relates the pair. Naming
+    both is two authors of one fact, and is refused rather than reconciled.
+    """
+    jid, stated = geometry.get("axis_joint"), geometry.get("axis_direction")
+    if jid and stated:
+        return None, None, ["AXIS_STATED_TWICE"]
+    if jid:
+        joint = joints.get(jid)
+        if not isinstance(joint, dict):
+            return None, None, ["AXIS_JOINT_NOT_VISIBLE"]
+        if str(joint.get("joint_type", "")).upper() == "FIXED":
+            return None, None, ["AXIS_JOINT_FIXED"]
+        return joint.get("axis_direction"), joint.get("frame_origin"), [jid]
+    if stated:
+        return stated, None, []
+    return None, None, ["AXIS_ABSENT"]
+
+
+def mating_fit(interface, geometry, joints, boxes):
+    """(status, code, note, refs) - does the inner feature fit the outer one?
+
+    ONE RULE, READ BY EVERYONE. Feasibility asks it of `gross_interference` and
+    of the insertion corridor; assurance asks it of committed state. A second
+    formula in any of them is how a pin came to be clear in one domain and
+    unestablished in another.
+
+    WHAT IS DECIDED, and from what:
+
+      The pair is the interface's own. `inner_body` and `outer_body` must be
+      the interface's two bodies, one each - a geometry about some other pair
+      refines nothing here.
+
+      The feature kinds are a pair this reader understands (`MATING_PAIRS`).
+
+      The axis comes from one source (`mating_axis`) and names a coordinate.
+
+      FOR A CLEARANCE INTERFACE the inner diameter is STRICTLY less than the
+      outer: equal is a line-to-line fit, not a clearance, and greater is an
+      interference the design said it does not want. That last is the one
+      positive contradiction this tier can produce - numbers the author wrote
+      that cannot both be true of a pin that is meant to turn freely.
+
+      FOR A TOUCHES INTERFACE (contact, interference fit) the inner diameter
+      is at least the outer: a press fit that is smaller than its hole is not
+      a press fit. Equal is allowed; the design said the parts meet.
+
+      The engagement, where stated, is positive and no longer than the inner
+      body's extent along the axis - a pin cannot be engaged over more length
+      than it has.
+
+    WHAT IS NOT DECIDED. Tolerances, fit classes, surface finish, stress in the
+    press fit, wear - embodiment's questions. This tier establishes that the
+    nominal sizes the design gave are compatible with the kind of interface it
+    declared, and nothing finer.
+    """
+    refs = [interface.get("entity_id")]
+    bodies = set((interface.get("bodies") or [])[:2])
+    if not isinstance(geometry, dict):
+        return (FIT_NOT_ESTABLISHED, "MATING_GEOMETRY_NOT_ESTABLISHED",
+                "%s has no mating geometry" % interface.get("entity_id"), refs)
+    inner, outer = geometry.get("inner_body"), geometry.get("outer_body")
+    if {inner, outer} != bodies or inner == outer:
+        return (FIT_NOT_ESTABLISHED, "MATING_GEOMETRY_NOT_ESTABLISHED",
+                "%s names %s and %s, which are not its two bodies"
+                % (interface.get("entity_id"), inner, outer), refs)
+    refs += [inner, outer]
+    kinds = (geometry.get("inner_feature"), geometry.get("outer_feature"))
+    if kinds not in MATING_PAIRS:
+        return (FIT_NOT_ESTABLISHED, "UNSUPPORTED_MATING_GEOMETRY",
+                "%s: %s into %s is not a feature pair this reader measures"
+                % (interface.get("entity_id"), kinds[0], kinds[1]), refs)
+    axis, origin, axis_refs = mating_axis(geometry, joints)
+    if axis is None or axis_index(axis) is None:
+        return (FIT_NOT_ESTABLISHED, "MATING_AXIS_NOT_ESTABLISHED",
+                "%s: the mating axis is not established (%s)"
+                % (interface.get("entity_id"),
+                   ", ".join(axis_refs) if axis is None else "axis %r names no "
+                   "coordinate" % axis), refs + [r for r in axis_refs
+                                                  if r.startswith("JNT")])
+    refs += [r for r in axis_refs if r.startswith("JNT")]
+    try:
+        d_in = float(geometry.get("inner_diameter"))
+        d_out = float(geometry.get("outer_diameter"))
+    except (TypeError, ValueError):
+        return (FIT_NOT_ESTABLISHED, "MATING_GEOMETRY_NOT_ESTABLISHED",
+                "%s: diameters are not both numbers" % interface.get("entity_id"),
+                refs)
+    if d_in <= 0 or d_out <= 0:
+        return (FIT_NOT_ESTABLISHED, "MATING_GEOMETRY_NOT_ESTABLISHED",
+                "%s: a diameter is not positive" % interface.get("entity_id"), refs)
+    expectation = interface_expectation(interface)
+    if expectation == CLEAR and d_in >= d_out:
+        return (FIT_CONTRADICTED, "REQUIRED_CLEARANCE_NOT_REALIZED",
+                "%s is declared CLEARANCE and its %s of diameter %s does not clear "
+                "its %s of diameter %s" % (interface.get("entity_id"), kinds[0],
+                                           d_in, kinds[1], d_out), refs)
+    if expectation == TOUCHES and d_in < d_out:
+        return (FIT_CONTRADICTED, "REQUIRED_CONTACT_NOT_REALIZED",
+                "%s is declared to meet and its %s of diameter %s is smaller than "
+                "its %s of diameter %s" % (interface.get("entity_id"), kinds[0],
+                                           d_in, kinds[1], d_out), refs)
+    if expectation == UNDECLARED:
+        return (FIT_NOT_ESTABLISHED, "MATING_GEOMETRY_NOT_ESTABLISHED",
+                "%s declares no spatial expectation to measure the fit against"
+                % interface.get("entity_id"), refs)
+    engagement = geometry.get("engagement_length")
+    if engagement is not None:
+        try:
+            engagement = float(engagement)
+        except (TypeError, ValueError):
+            return (FIT_NOT_ESTABLISHED, "MATING_GEOMETRY_NOT_ESTABLISHED",
+                    "%s: engagement_length is not a number"
+                    % interface.get("entity_id"), refs)
+        if engagement <= 0:
+            return (FIT_CONTRADICTED, "REQUIRED_ENGAGEMENT_NOT_REALIZED",
+                    "%s states an engagement of %s, which engages nothing"
+                    % (interface.get("entity_id"), engagement), refs)
+        box = boxes.get(inner)
+        if box is not None:
+            span = box[1][axis_index(axis)] - box[0][axis_index(axis)]
+            if engagement > span + 1e-9:
+                return (FIT_CONTRADICTED, "REQUIRED_ENGAGEMENT_NOT_REALIZED",
+                        "%s engages over %s and %s is only %s long along %s"
+                        % (interface.get("entity_id"), engagement, inner, span,
+                           axis), refs)
+    return (FIT_ESTABLISHED, "ANALYTICAL_FIT_ESTABLISHED",
+            "%s: %s of diameter %s in %s of diameter %s along %s"
+            % (interface.get("entity_id"), kinds[0], d_in, kinds[1], d_out, axis),
+            refs)
+
+
+def insertion_fit(interface, geometry, joints, boxes, direction):
+    """(status, code, note, refs) - can the inner feature ARRIVE along `direction`?
+
+    The cross-section is `mating_fit`; what this adds is that the insertion
+    direction a step declares is along the mating axis, either way. A pin is
+    put into a bore along the bore; a step that drives it in sideways is a step
+    the geometry cannot satisfy, whatever the diameters say.
+    """
+    status, code, note, refs = mating_fit(interface, geometry, joints, boxes)
+    if status != FIT_ESTABLISHED:
+        return status, code, note, refs
+    axis, _origin, _refs = mating_axis(geometry, joints)
+    idx = axis_index(axis)
+    if not (isinstance(direction, list) and len(direction) == 3):
+        return (FIT_NOT_ESTABLISHED, "INSERTION_DIRECTION_MISSING",
+                "%s: the step declares no insertion direction"
+                % interface.get("entity_id"), refs)
+    norm = math.sqrt(sum(float(x) * float(x) for x in direction)) or 1.0
+    along = abs(float(direction[idx])) / norm
+    if along < 0.999:
+        return (FIT_CONTRADICTED, "INSERTION_NOT_ALONG_MATING_AXIS",
+                "%s is inserted along %s and its mating axis is %s"
+                % (interface.get("entity_id"),
+                   [round(float(x) / norm, 3) for x in direction], axis), refs)
+    return (FIT_ESTABLISHED, "ANALYTICAL_INSERTION_ESTABLISHED", note, refs)
 
 
 def realization_findings(requirement, realizations, coordinates, joints):
@@ -1606,6 +1848,7 @@ def configuration_interference_check(state) -> List[str]:
         b = [x for x in (i.get("bodies") or []) if isinstance(x, str)]
         if len(b) >= 2:
             declared[frozenset(b[:2])] = i
+    joints = {j["entity_id"]: _thaw(j) for j in state.family("Joint")}
     problems = []
     for cfg in state.family("Configuration"):
         present = [b for b in (cfg.get("bodies_present") or []) if b in boxes]
@@ -1616,6 +1859,18 @@ def configuration_interference_check(state) -> List[str]:
                     continue
                 iface = declared.get(pair)
                 if interface_expectation(iface) == CLEAR:
+                    # THE SAME NARROW PHASE FEASIBILITY READS. A CLEARANCE pair
+                    # that carries mating geometry is measured by `mating_fit`
+                    # here as there, so this check cannot say "unverified" of
+                    # a pin the evaluator has established - or clear of one it
+                    # has convicted.
+                    fit, code, note, _refs = mating_fit(
+                        _thaw(iface), iface.get("mating_geometry"), joints, boxes)
+                    if fit == FIT_ESTABLISHED:
+                        continue
+                    if fit == FIT_CONTRADICTED:
+                        problems.append("%s in %s: %s" % (code, cfg["entity_id"], note))
+                        continue
                     problems.append(
                         "CLEARANCE_NOT_VERIFIED: %s and %s overlap as boxes in %s; "
                         "s03 declared CLEARANCE. Boxes overlapping is not proof of "

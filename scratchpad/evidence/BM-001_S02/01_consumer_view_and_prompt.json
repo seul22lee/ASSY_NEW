@@ -1,0 +1,884 @@
+{
+ "base_url": "https://api.deepseek.com",
+ "benchmark": "BM-001",
+ "campaign_settings": {
+  "deadline_s": 120.0,
+  "max_attempts": 1,
+  "max_output_tokens": 65536,
+  "seed": 7,
+  "temperature": 1.0
+ },
+ "client_max_attempts": 1,
+ "consumer_view_assessment": [
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "AT_LEAST_ONE",
+     "existence": "MAY_BE_EMPTY",
+     "expected": [
+      "REQ-0001",
+      "REQ-0002",
+      "REQ-0003",
+      "REQ-0004",
+      "REQ-0005",
+      "REQ-0006",
+      "REQ-0007",
+      "REQ-0008",
+      "REQ-0009",
+      "REQ-0010"
+     ],
+     "expected_count": 10,
+     "families": [
+      "Requirement"
+     ],
+     "obligation": "Obligation.derived_from_requirements -[reference]-> Requirement",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "REQ-0001",
+      "REQ-0002",
+      "REQ-0003",
+      "REQ-0004",
+      "REQ-0005",
+      "REQ-0006",
+      "REQ-0007",
+      "REQ-0008",
+      "REQ-0009",
+      "REQ-0010"
+     ],
+     "selected_count": 10,
+     "standing_instances": {
+      "Requirement": 10
+     },
+     "verdict": "SATISFIED",
+     "why": "10 of 10 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Requirement"
+   ],
+   "requirement": "Obligation.derived_from_requirements -[reference]-> Requirement",
+   "selected": 10,
+   "source": "REPRESENTATIONAL_DEPENDENCY",
+   "trace": {
+    "declaration": "reference target",
+    "output_field": "Obligation.derived_from_requirements",
+    "output_semantic": "Obligation",
+    "requires": "Requirement",
+    "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "AT_LEAST_ONE",
+     "existence": "MAY_BE_EMPTY",
+     "expected": [
+      "ACT-0001"
+     ],
+     "expected_count": 1,
+     "families": [
+      "Actor"
+     ],
+     "obligation": "Obligation.involves_actors -[reference]-> Actor",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "ACT-0001"
+     ],
+     "selected_count": 1,
+     "standing_instances": {
+      "Actor": 1
+     },
+     "verdict": "SATISFIED",
+     "why": "1 of 1 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Actor"
+   ],
+   "requirement": "Obligation.involves_actors -[reference]-> Actor",
+   "selected": 1,
+   "source": "REPRESENTATIONAL_DEPENDENCY",
+   "trace": {
+    "declaration": "reference target",
+    "output_field": "Obligation.involves_actors",
+    "output_semantic": "Obligation",
+    "requires": "Actor",
+    "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "AT_LEAST_ONE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "SCN-0001",
+      "SCN-0002",
+      "SCN-0003"
+     ],
+     "expected_count": 3,
+     "families": [
+      "Scenario"
+     ],
+     "obligation": "LoadCase.scenario -[reference]-> Scenario",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "SCN-0001",
+      "SCN-0002",
+      "SCN-0003"
+     ],
+     "selected_count": 3,
+     "standing_instances": {
+      "Scenario": 3
+     },
+     "verdict": "SATISFIED",
+     "why": "3 of 3 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Scenario"
+   ],
+   "requirement": "LoadCase.scenario -[reference]-> Scenario",
+   "selected": 3,
+   "source": "REPRESENTATIONAL_DEPENDENCY",
+   "trace": {
+    "declaration": "reference target",
+    "output_field": "LoadCase.scenario",
+    "output_semantic": "LoadCase",
+    "requires": "Scenario",
+    "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "AT_LEAST_ONE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "SCN-0001",
+      "SCN-0002",
+      "SCN-0003"
+     ],
+     "expected_count": 3,
+     "families": [
+      "Scenario"
+     ],
+     "obligation": "ReactionSiteRequirement.scenario -[reference]-> Scenario",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "SCN-0001",
+      "SCN-0002",
+      "SCN-0003"
+     ],
+     "selected_count": 3,
+     "standing_instances": {
+      "Scenario": 3
+     },
+     "verdict": "SATISFIED",
+     "why": "3 of 3 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Scenario"
+   ],
+   "requirement": "ReactionSiteRequirement.scenario -[reference]-> Scenario",
+   "selected": 3,
+   "source": "REPRESENTATIONAL_DEPENDENCY",
+   "trace": {
+    "declaration": "reference target",
+    "output_field": "ReactionSiteRequirement.scenario",
+    "output_semantic": "ReactionSiteRequirement",
+    "requires": "Scenario",
+    "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "REQ-0001",
+      "REQ-0002",
+      "REQ-0003",
+      "REQ-0004",
+      "REQ-0005",
+      "REQ-0006",
+      "REQ-0007",
+      "REQ-0008",
+      "REQ-0009",
+      "REQ-0010"
+     ],
+     "expected_count": 10,
+     "families": [
+      "Requirement"
+     ],
+     "obligation": "source_requirement",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "REQ-0001",
+      "REQ-0002",
+      "REQ-0003",
+      "REQ-0004",
+      "REQ-0005",
+      "REQ-0006",
+      "REQ-0007",
+      "REQ-0008",
+      "REQ-0009",
+      "REQ-0010"
+     ],
+     "selected_count": 10,
+     "standing_instances": {
+      "Requirement": 10
+     },
+     "verdict": "SATISFIED",
+     "why": "10 of 10 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Requirement"
+   ],
+   "requirement": "requirement_set",
+   "selected": 10,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "What must hold regardless of mechanism?",
+    "instance_selection": {
+     "source_requirement": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    },
+    "qualifying_by_role": {
+     "source_requirement": [
+      "Requirement"
+     ]
+    },
+    "requires_semantics": [
+     "source_requirement"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "An obligation set derived from part of the requirements is unsound; coverage cannot be read from a subset."
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "MAY_BE_EMPTY",
+     "expected": [
+      "AMB-0001",
+      "AMB-0002",
+      "AMB-0003",
+      "AMB-0004",
+      "AMB-0005",
+      "AMB-0006",
+      "AMB-0007",
+      "FRE-0001",
+      "FRE-0002",
+      "FRE-0003",
+      "FRE-0004",
+      "FRE-0005",
+      "FRE-0006",
+      "FRE-0007"
+     ],
+     "expected_count": 14,
+     "families": [
+      "Ambiguity",
+      "Freedom"
+     ],
+     "obligation": "open_question",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "AMB-0001",
+      "AMB-0002",
+      "AMB-0003",
+      "AMB-0004",
+      "AMB-0005",
+      "AMB-0006",
+      "AMB-0007",
+      "FRE-0001",
+      "FRE-0002",
+      "FRE-0003",
+      "FRE-0004",
+      "FRE-0005",
+      "FRE-0006",
+      "FRE-0007"
+     ],
+     "selected_count": 14,
+     "standing_instances": {
+      "Ambiguity": 7,
+      "Freedom": 7
+     },
+     "verdict": "SATISFIED",
+     "why": "14 of 14 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Ambiguity",
+    "Freedom"
+   ],
+   "requirement": "recorded_ambiguity",
+   "selected": 14,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "What must hold regardless of mechanism?",
+    "instance_selection": {
+     "open_question": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    },
+    "qualifying_by_role": {
+     "open_question": [
+      "Ambiguity",
+      "Freedom"
+     ]
+    },
+    "requires_semantics": [
+     "open_question"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "An obligation resting on a silently resolved ambiguity is an unrecorded commitment."
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "SCN-0001",
+      "SCN-0002",
+      "SCN-0003"
+     ],
+     "expected_count": 3,
+     "families": [
+      "Scenario"
+     ],
+     "obligation": "scenario_context",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "SCN-0001",
+      "SCN-0002",
+      "SCN-0003"
+     ],
+     "selected_count": 3,
+     "standing_instances": {
+      "Scenario": 3
+     },
+     "verdict": "SATISFIED",
+     "why": "3 of 3 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Scenario"
+   ],
+   "requirement": "scenario_boundary",
+   "selected": 3,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "What loads act, and where may each be reacted?",
+    "instance_selection": {
+     "scenario_context": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    },
+    "qualifying_by_role": {
+     "scenario_context": [
+      "Scenario"
+     ]
+    },
+    "requires_semantics": [
+     "scenario_context"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "A reaction site cannot be typed external without a boundary that says what is outside."
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "ACT-0001"
+     ],
+     "expected_count": 1,
+     "families": [
+      "Actor"
+     ],
+     "obligation": "actor_role",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "ACT-0001"
+     ],
+     "selected_count": 1,
+     "standing_instances": {
+      "Actor": 1
+     },
+     "verdict": "SATISFIED",
+     "why": "1 of 1 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Actor"
+   ],
+   "requirement": "actor_and_reach_intent",
+   "selected": 1,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "What physical effects must occur between which roles?",
+    "instance_selection": {
+     "actor_role": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    },
+    "qualifying_by_role": {
+     "actor_role": [
+      "Actor"
+     ]
+    },
+    "requires_semantics": [
+     "actor_role"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "An effect between roles needs the roles to exist."
+   },
+   "verdict": "SATISFIED"
+  }
+ ],
+ "consumer_view_branch": null,
+ "consumer_view_families": {
+  "Actor": [
+   "ACT-0001"
+  ],
+  "Ambiguity": [
+   "AMB-0001",
+   "AMB-0002",
+   "AMB-0003",
+   "AMB-0004",
+   "AMB-0005",
+   "AMB-0006",
+   "AMB-0007"
+  ],
+  "Freedom": [
+   "FRE-0001",
+   "FRE-0002",
+   "FRE-0003",
+   "FRE-0004",
+   "FRE-0005",
+   "FRE-0006",
+   "FRE-0007"
+  ],
+  "Requirement": [
+   "REQ-0001",
+   "REQ-0002",
+   "REQ-0003",
+   "REQ-0004",
+   "REQ-0005",
+   "REQ-0006",
+   "REQ-0007",
+   "REQ-0008",
+   "REQ-0009",
+   "REQ-0010"
+  ],
+  "Scenario": [
+   "SCN-0001",
+   "SCN-0002",
+   "SCN-0003"
+  ]
+ },
+ "consumer_view_payload": {
+  "Actor": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Actor",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "ACT-0001",
+    "must_reach": [
+     "latch"
+    ],
+    "name": "User"
+   }
+  ],
+  "Ambiguity": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Ambiguity",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "block_scopes": [],
+    "conflicting_clauses": [],
+    "entity_id": "AMB-0001",
+    "resolvable_when": "When a target dimension or volume is specified.",
+    "statement": "compact"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Ambiguity",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "block_scopes": [],
+    "conflicting_clauses": [],
+    "entity_id": "AMB-0002",
+    "resolvable_when": "When objective metrics such as force, displacement, or time are defined.",
+    "statement": "easy for a user to operate"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Ambiguity",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "block_scopes": [],
+    "conflicting_clauses": [],
+    "entity_id": "AMB-0003",
+    "resolvable_when": "When a minimum cycle count is specified.",
+    "statement": "repeatedly"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Ambiguity",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "block_scopes": [],
+    "conflicting_clauses": [],
+    "entity_id": "AMB-0004",
+    "resolvable_when": "When the loads and motions of normal handling are defined.",
+    "statement": "normal handling"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Ambiguity",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "block_scopes": [],
+    "conflicting_clauses": [],
+    "entity_id": "AMB-0005",
+    "resolvable_when": "When transport vibration, shock, and orientation conditions are specified.",
+    "statement": "secure during transport"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Ambiguity",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "block_scopes": [],
+    "conflicting_clauses": [],
+    "entity_id": "AMB-0006",
+    "resolvable_when": "When a cost target and production volume are specified.",
+    "statement": "low-cost manufacturing"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Ambiguity",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "block_scopes": [],
+    "conflicting_clauses": [],
+    "entity_id": "AMB-0007",
+    "resolvable_when": "When assembly time, tooling, or step count are specified.",
+    "statement": "easy to assemble"
+   }
+  ],
+  "Freedom": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Freedom",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "decision": "The specific mechanism of the reusable latch.",
+    "entity_id": "FRE-0001",
+    "why_free": "The text requires a reusable latch but does not specify its type (e.g., snap, hook, magnet, slide, etc.)."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Freedom",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "decision": "The materials for the box and latch.",
+    "entity_id": "FRE-0002",
+    "why_free": "The text does not mention any material."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Freedom",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "decision": "The overall dimensions and geometry of the box.",
+    "entity_id": "FRE-0003",
+    "why_free": "The text only says 'compact' without dimensions; exact size is free."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Freedom",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "decision": "The manufacturing process.",
+    "entity_id": "FRE-0004",
+    "why_free": "The text requires suitability for low-cost manufacturing but does not specify which process."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Freedom",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "decision": "The target cost.",
+    "entity_id": "FRE-0005",
+    "why_free": "The text says low-cost but gives no number."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Freedom",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "decision": "The number of open/close cycles the latch must withstand.",
+    "entity_id": "FRE-0006",
+    "why_free": "The text says 'repeatedly' but no cycle count is given."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Freedom",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "decision": "The appearance and aesthetics of the product.",
+    "entity_id": "FRE-0007",
+    "why_free": "Not mentioned in the request."
+   }
+  ],
+  "Requirement": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0001",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "compact desktop storage box",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0001",
+    "statement_verbatim": "Design a compact desktop storage box",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0002",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "reusable latch",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0001",
+    "statement_verbatim": "with a reusable latch",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0003",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "open and close repeatedly",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0002",
+    "statement_verbatim": "The box should open and close repeatedly",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0004",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "without accidental opening during normal handling",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0002",
+    "statement_verbatim": "without accidental opening during normal handling",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0005",
+    "kind": "USABILITY",
+    "observable_verbatim": "easy for a user to operate",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0003",
+    "statement_verbatim": "The latch should be easy for a user to operate",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0006",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "remaining secure during transport",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0003",
+    "statement_verbatim": "while remaining secure during transport",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0007",
+    "kind": "PROCESS",
+    "observable_verbatim": "suitable for low-cost manufacturing",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0004",
+    "statement_verbatim": "The product should be suitable for low-cost manufacturing",
+    "verification_kind": "QUANTITATIVE"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0008",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "practical for desktop use",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0004",
+    "statement_verbatim": "should be practical for desktop use",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0009",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "mechanically plausible",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0005",
+    "statement_verbatim": "The design should be mechanically plausible",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0010",
+    "kind": "PROCESS",
+    "observable_verbatim": "easy to assemble",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0005",
+    "statement_verbatim": "easy to assemble",
+    "verification_kind": "KINEMATIC"
+   }
+  ],
+  "Scenario": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Scenario",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "actors": [
+     "ACT-0001"
+    ],
+    "entity_id": "SCN-0001",
+    "environment": "Normal handling conditions as mentioned in SRC-0002.",
+    "kind": "OPERATION",
+    "name": "Repeated opening and closing during normal handling",
+    "system_boundary": "Inside: the storage box and its latch; Outside: the user operating the box and the desktop environment."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Scenario",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "actors": [],
+    "entity_id": "SCN-0002",
+    "environment": "Transport conditions unspecified in the request.",
+    "kind": "TRANSPORT",
+    "name": "Transport of the closed box",
+    "system_boundary": "Inside: the closed storage box with latch engaged; Outside: the transport environment and any surfaces or hands supporting it."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Scenario",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "actors": [],
+    "entity_id": "SCN-0003",
+    "environment": "Assembly environment unspecified in the request.",
+    "kind": "ASSEMBLY",
+    "name": "Assembly of the box and latch",
+    "system_boundary": "Inside: the components of the box and latch; Outside: the assembler and the assembly environment."
+   }
+  ]
+ },
+ "consumer_view_status": "VIEW_READY",
+ "live": true,
+ "model_configured": "deepseek-v4-pro",
+ "namespace_occupancy": {},
+ "prompt_chars": 21023,
+ "prompt_text": "You are deciding what must physically be true of a product, what\nloads act on it, and which families of mechanism could satisfy both.\n\nYou receive TYPED REQUIREMENTS AND CONTEXT. You do not receive the original\nrequest and you must not try to reconstruct it. Work only from what is below.\n\nRULES\n1. Derive OBLIGATIONS. EVERY requirement must be cited by at least one\n   obligation - including the ones nothing here can evidence. Each obligation\n   carries:\n     - scope: UNIVERSAL if every candidate must satisfy it, or\n       CANDIDATE_DISCRIMINATING if how it is satisfied differs by candidate;\n     - evidence_route and route_available, taken from the routes listed below.\n       A requirement whose route does not exist is ADDRESSED AND\n       UN-EVIDENCEABLE, which is a different thing from a requirement nobody\n       derived an obligation from. Make it visible.\n     - involves_actors, citing the Actor ids, whenever the obligation is about\n       something an actor must reach or operate.\n     - derivation_premises: the physical premise that makes the requirement\n       imply this obligation. A premise is a claim about the world that could\n       turn out to be FALSE - \"contents that cannot be reached are not stored\",\n       \"a load that is not reacted accelerates the body\". Not a restatement of\n       the requirement and not a noun phrase. Without it, a later stage that\n       finds this obligation unsatisfiable cannot tell whether the obligation\n       was wrong or the requirement was.\n     - satisfiable_at: a candidate here is a PRINCIPLE FAMILY, not a mechanism.\n       There are no elements, no contacts, no dimensions and no geometry yet, so\n       an obligation about any of those is NOT satisfiable at s02 and must name\n       the earliest stage that could settle it. Marking such an obligation s02\n       makes work look done that nobody has done.\n   Across the whole set: if every obligation is UNIVERSAL then nothing here\n   distinguishes one candidate from another, and the stage that has to choose\n   between them will have no grounds. Obligations whose SATISFACTION DIFFERS by\n   principle family are CANDIDATE_DISCRIMINATING; say so.\n\n   THIS LIST IS WRITTEN FIRST AND CANNOT BE ADDED TO LATER. Everything after it\n   can only refer back to it. So finish choosing your candidate families BEFORE\n   you write this list, and include here every obligation those families bring\n   with them - the supports, retentions, bounds, clearances and access each\n   principle family REQUIRES in order to work at all. Those are obligations in\n   exactly the same sense as the ones derived from requirements, and they are\n   the ones you will list in obligations_created under rule 4. An obligation you\n   only discover while writing the candidates has nowhere left to go: its id\n   will point at nothing, and nobody downstream can ever check it.\n2. Derive LOAD CASES. A load case says what the WORLD does to the product: which\n   scenario, on which body ROLE, reacted at which ROLE, in which direction class\n   (AXIAL, TRANSVERSE, RADIAL, MOMENT, GRAVITY, NONE), of which kind (GRAVITY,\n   PAYLOAD, ACTOR_APPLIED, REACTION), with a magnitude ONLY if the requirements\n   supply one, otherwise magnitude_or_status = \"UNSUPPORTED\".\n   A load case must NOT name a specific part and must NOT say which element\n   carries what. That depends on the mechanism, which does not exist yet.\n   applied_to_role and reacted_at_role are ROLES, written as the phrase that\n   says what the thing DOES - \"the surface the product stands on\", \"the body the\n   product grips\", \"the moving closing role\". A single noun or an identifier is\n   a part, not a role: `base`, `housing`, `PLATFORM`, `box_body` all name things\n   that do not exist yet. Every load terminates somewhere OUTSIDE the product,\n   at a site the scenario's system boundary puts outside it; a load reacted\n   against the product itself has not been reacted.\n   If the requirements state a magnitude with a qualifier, the qualifier travels\n   with the number: \"approximately 1 kg\" does not become \"1 kg\" here.\n3. Form CANDIDATES from the principle families offered below. A candidate names\n   the FUNCTION CLASSES it must perform and the PRINCIPLE FAMILY it uses for\n   each. Two candidates are only genuinely different if they differ in a\n   principle family, not in wording.\n   `principle` is a MAPPING from function class to principle family:\n       \"principle\": {\"<function class>\": \"<principle family>\", ...}\n   A candidate that does one thing is a ONE-ENTRY MAPPING, never a bare string.\n   A candidate performs several function classes, and only a mapping can say\n   which principle serves which.\n4. For every candidate record addresses_obligations AND obligations_created. A\n   candidate that needs a support has CREATED a support obligation. Omitting\n   this makes an incomplete candidate look cheaper than a complete one.\n   obligations_created holds the IDS of obligations you already wrote in the\n   obligations list under rule 1 - it is a reference list, not a place to\n   introduce something new. If you find yourself needing an id that is not\n   already in that list, the omission happened back at rule 1, and the answer is\n   to have put it there, not to invent an id here.\n5. For every candidate record its evidence_route_verdict from the routes below:\n   which route its primary function would need, and whether that route exists.\n   If the route does not exist, say so - do not avoid the candidate for it.\n6. NEVER select a winner. NEVER score. If several candidates remain plausible\n   and nothing distinguishes them, emit an UnresolvedDecision naming the\n   evidence that WOULD distinguish them. Every UnresolvedDecision must CITE, by\n   id, the Ambiguity or Freedom entities that keep it open (kept_open_by) and\n   must type its alternatives list (alternatives_kind: ENTITY_REFS,\n   PRINCIPLE_FAMILIES or FREE_TEXT). Do not restate an ambiguity in prose that\n   the input already gave you as an entity.\n7. For every place a load must ultimately be reacted, record a REACTION SITE\n   REQUIREMENT: which scenario declares it, whether the scenario's system\n   boundary puts it OUTSIDE the product (EXTERNAL) or inside it (INTERNAL), and\n   at which role. Then name that id in the load case's reacted_at_site. The\n   world is not a body; it is a site outside the product, and a load that has\n   nowhere declared to be reacted has nowhere to go.\n8. For every physical demand the obligations imply, record a PHYSICAL EFFECT\n   OBLIGATION: what effect must occur, between which ROLES, and under which load\n   case. The effect is one of TRANSMIT_FORCE | TRANSMIT_MOTION | CONVERT_MOTION | PERMIT_MOTION | PREVENT_MOTION | LOCATE | CONTAIN | METER. Say the effect, never the mechanism:\n   \"rotation must be permitted between the handle role and the body role\" is an\n   effect; \"use a ball bearing\" is a mechanism and belongs to no stage yet.\n   Name ROLES, never bodies - there are no bodies at this stage to name. A role\n   is a name, not an id: \"the actuation role\" is an answer, and an Actor id is\n   a different thing entirely.\n9. Every id you write in a reference field must be an id. A reference field is\n   never a description. If a candidate creates an obligation, write that\n   obligation in the obligations list, give it an id, and put THAT ID in\n   obligations_created. Describing it instead leaves nothing downstream can\n   address, and the obligation you meant does not exist.\n10. Never name a dimension or a position.\n\nPRINCIPLE FAMILIES AVAILABLE (by function class)\n  PERMIT_RELATIVE_MOTION: REVOLUTE_PAIR, PRISMATIC_PAIR, HELICAL_PAIR, PLANAR_PAIR, SPHERICAL_PAIR, COMPLIANT_FLEXURE\n  CONVERT_MOTION: CRANK_SLIDER, SCREW_AND_NUT, RACK_AND_PINION, CAM_AND_FOLLOWER, LEVER_LINKAGE, FLEXIBLE_ELEMENT_DRIVE, WEDGE_OR_INCLINE\n  MAINTAIN_CONFIGURATION: KINEMATIC_BLOCK, OVER_CENTRE, DETENT_OR_SNAP, FRICTION_HOLD, GRAVITY_SEATED, SEPARATE_RETAINING_MEMBER\n  BOUND_MOTION: HARD_STOP, JOINT_LIMIT_BY_GEOMETRY\n  RETAIN_BODY: LATER_BODY_COVER, ROTATION_LOCK, ELASTIC_CAPTURE, GEOMETRIC_UNDERCUT\n  GUIDE_MOTION: PRISMATIC_GUIDE, JOURNAL_SUPPORT, MULTI_POINT_CONSTRAINT\n  TRANSMIT_LOAD: DIRECT_BEARING, SHEAR_MEMBER, TENSION_MEMBER\n  PERMIT_ASSEMBLY: STRAIGHT_INSERTION, INSERT_AND_TURN, ELASTIC_INSERTION\n  ACTUATE: DIRECT_MANUAL, STORED_ENERGY, EXTERNAL_POWER\n  METER_DISCRETE_QUANTITY: ESCAPEMENT, SINGLE_ITEM_POCKET, INDEXING_ROTOR, GATED_PAIR, METERED_APERTURE\n\nEVIDENCE ROUTES AVAILABLE\n  COMPLIANCE_REDUCED_ORDER: deflection force, allowable travel, snap insertion force (available: False)\n  CONTACT_RESOLVING_ANALYSIS: friction retention, jamming, binding, engagement force (available: False)\n  MANUFACTURING_PROCESS_ANALYSIS: mouldability, process suitability, cost (available: False)\n  MATERIAL_PROPERTY_ANALYSIS: strength, stiffness, wear, fatigue, lifetime (available: False)\n  MOBILITY_ANALYSIS: degree-of-freedom availability, absence of a motion path (available: True)\n  RIGID_BODY_DYNAMICS: ideal-joint torque, back-drive under ideal joints, quasi-static balance (available: True)\n  RIGID_KINEMATIC_GEOMETRY: configuration existence, pose, reachability (available: True)\n  SWEPT_INTERFERENCE: path clearance, swept occupancy, assembly insertion, kinematic blocking (available: True)\n  TOLERANCE_ANALYSIS: fit under variation, stack-up (available: False)\n\nTYPED INPUT\n-----------\n{\n \"Actor\": [\n  {\n   \"entity_id\": \"ACT-0001\",\n   \"must_reach\": [\n    \"latch\"\n   ],\n   \"name\": \"User\"\n  }\n ],\n \"Ambiguity\": [\n  {\n   \"block_scopes\": [],\n   \"conflicting_clauses\": [],\n   \"entity_id\": \"AMB-0001\",\n   \"resolvable_when\": \"When a target dimension or volume is specified.\",\n   \"statement\": \"compact\"\n  },\n  {\n   \"block_scopes\": [],\n   \"conflicting_clauses\": [],\n   \"entity_id\": \"AMB-0002\",\n   \"resolvable_when\": \"When objective metrics such as force, displacement, or time are defined.\",\n   \"statement\": \"easy for a user to operate\"\n  },\n  {\n   \"block_scopes\": [],\n   \"conflicting_clauses\": [],\n   \"entity_id\": \"AMB-0003\",\n   \"resolvable_when\": \"When a minimum cycle count is specified.\",\n   \"statement\": \"repeatedly\"\n  },\n  {\n   \"block_scopes\": [],\n   \"conflicting_clauses\": [],\n   \"entity_id\": \"AMB-0004\",\n   \"resolvable_when\": \"When the loads and motions of normal handling are defined.\",\n   \"statement\": \"normal handling\"\n  },\n  {\n   \"block_scopes\": [],\n   \"conflicting_clauses\": [],\n   \"entity_id\": \"AMB-0005\",\n   \"resolvable_when\": \"When transport vibration, shock, and orientation conditions are specified.\",\n   \"statement\": \"secure during transport\"\n  },\n  {\n   \"block_scopes\": [],\n   \"conflicting_clauses\": [],\n   \"entity_id\": \"AMB-0006\",\n   \"resolvable_when\": \"When a cost target and production volume are specified.\",\n   \"statement\": \"low-cost manufacturing\"\n  },\n  {\n   \"block_scopes\": [],\n   \"conflicting_clauses\": [],\n   \"entity_id\": \"AMB-0007\",\n   \"resolvable_when\": \"When assembly time, tooling, or step count are specified.\",\n   \"statement\": \"easy to assemble\"\n  }\n ],\n \"Freedom\": [\n  {\n   \"decision\": \"The specific mechanism of the reusable latch.\",\n   \"entity_id\": \"FRE-0001\",\n   \"why_free\": \"The text requires a reusable latch but does not specify its type (e.g., snap, hook, magnet, slide, etc.).\"\n  },\n  {\n   \"decision\": \"The materials for the box and latch.\",\n   \"entity_id\": \"FRE-0002\",\n   \"why_free\": \"The text does not mention any material.\"\n  },\n  {\n   \"decision\": \"The overall dimensions and geometry of the box.\",\n   \"entity_id\": \"FRE-0003\",\n   \"why_free\": \"The text only says 'compact' without dimensions; exact size is free.\"\n  },\n  {\n   \"decision\": \"The manufacturing process.\",\n   \"entity_id\": \"FRE-0004\",\n   \"why_free\": \"The text requires suitability for low-cost manufacturing but does not specify which process.\"\n  },\n  {\n   \"decision\": \"The target cost.\",\n   \"entity_id\": \"FRE-0005\",\n   \"why_free\": \"The text says low-cost but gives no number.\"\n  },\n  {\n   \"decision\": \"The number of open/close cycles the latch must withstand.\",\n   \"entity_id\": \"FRE-0006\",\n   \"why_free\": \"The text says 'repeatedly' but no cycle count is given.\"\n  },\n  {\n   \"decision\": \"The appearance and aesthetics of the product.\",\n   \"entity_id\": \"FRE-0007\",\n   \"why_free\": \"Not mentioned in the request.\"\n  }\n ],\n \"Requirement\": [\n  {\n   \"entity_id\": \"REQ-0001\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"compact desktop storage box\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0001\",\n   \"statement_verbatim\": \"Design a compact desktop storage box\",\n   \"verification_kind\": \"STRUCTURAL\"\n  },\n  {\n   \"entity_id\": \"REQ-0002\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"reusable latch\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0001\",\n   \"statement_verbatim\": \"with a reusable latch\",\n   \"verification_kind\": \"STRUCTURAL\"\n  },\n  {\n   \"entity_id\": \"REQ-0003\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"open and close repeatedly\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0002\",\n   \"statement_verbatim\": \"The box should open and close repeatedly\",\n   \"verification_kind\": \"KINEMATIC\"\n  },\n  {\n   \"entity_id\": \"REQ-0004\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"without accidental opening during normal handling\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0002\",\n   \"statement_verbatim\": \"without accidental opening during normal handling\",\n   \"verification_kind\": \"KINEMATIC\"\n  },\n  {\n   \"entity_id\": \"REQ-0005\",\n   \"kind\": \"USABILITY\",\n   \"observable_verbatim\": \"easy for a user to operate\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0003\",\n   \"statement_verbatim\": \"The latch should be easy for a user to operate\",\n   \"verification_kind\": \"KINEMATIC\"\n  },\n  {\n   \"entity_id\": \"REQ-0006\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"remaining secure during transport\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0003\",\n   \"statement_verbatim\": \"while remaining secure during transport\",\n   \"verification_kind\": \"KINEMATIC\"\n  },\n  {\n   \"entity_id\": \"REQ-0007\",\n   \"kind\": \"PROCESS\",\n   \"observable_verbatim\": \"suitable for low-cost manufacturing\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0004\",\n   \"statement_verbatim\": \"The product should be suitable for low-cost manufacturing\",\n   \"verification_kind\": \"QUANTITATIVE\"\n  },\n  {\n   \"entity_id\": \"REQ-0008\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"practical for desktop use\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0004\",\n   \"statement_verbatim\": \"should be practical for desktop use\",\n   \"verification_kind\": \"STRUCTURAL\"\n  },\n  {\n   \"entity_id\": \"REQ-0009\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"mechanically plausible\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0005\",\n   \"statement_verbatim\": \"The design should be mechanically plausible\",\n   \"verification_kind\": \"STRUCTURAL\"\n  },\n  {\n   \"entity_id\": \"REQ-0010\",\n   \"kind\": \"PROCESS\",\n   \"observable_verbatim\": \"easy to assemble\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0005\",\n   \"statement_verbatim\": \"easy to assemble\",\n   \"verification_kind\": \"KINEMATIC\"\n  }\n ],\n \"Scenario\": [\n  {\n   \"actors\": [\n    \"ACT-0001\"\n   ],\n   \"entity_id\": \"SCN-0001\",\n   \"environment\": \"Normal handling conditions as mentioned in SRC-0002.\",\n   \"kind\": \"OPERATION\",\n   \"name\": \"Repeated opening and closing during normal handling\",\n   \"system_boundary\": \"Inside: the storage box and its latch; Outside: the user operating the box and the desktop environment.\"\n  },\n  {\n   \"actors\": [],\n   \"entity_id\": \"SCN-0002\",\n   \"environment\": \"Transport conditions unspecified in the request.\",\n   \"kind\": \"TRANSPORT\",\n   \"name\": \"Transport of the closed box\",\n   \"system_boundary\": \"Inside: the closed storage box with latch engaged; Outside: the transport environment and any surfaces or hands supporting it.\"\n  },\n  {\n   \"actors\": [],\n   \"entity_id\": \"SCN-0003\",\n   \"environment\": \"Assembly environment unspecified in the request.\",\n   \"kind\": \"ASSEMBLY\",\n   \"name\": \"Assembly of the box and latch\",\n   \"system_boundary\": \"Inside: the components of the box and latch; Outside: the assembler and the assembly environment.\"\n  }\n ]\n}\n\nRESPONSE SCHEMA\nReturn a single JSON object with exactly these 8 keys, each holding a\nlist. A\nlist may be empty - an empty list is a value. Every field is required unless\nmarked optional. Every id is a string in the format shown, where NNNN stands for\na zero-padded number you choose. NNNN is a FORMAT, not a value: write an actual\nnumber in its place, and never one that is listed below as already in use.\n\n  obligations[]          id \"OBL-NNNN\", statement, derived_from_requirements,\n                         mandatory (boolean), scope, satisfiable_at,\n                         evidence_route, route_available (boolean),\n                         involves_actors (optional), derivation_premises\n                         (optional)\n  load_cases[]           id \"LC-NNNN\", scenario, applied_to_role,\n                         reacted_at_role, reacted_at_site, direction_class,\n                         kind, magnitude_or_status\n  reaction_site_requirements[]\n                         id \"RSR-NNNN\", scenario, boundary_side, at_role, why\n                         (optional)\n  physical_effect_obligations[]\n                         id \"PEO-NNNN\", effect, between_roles,\n                         addresses_obligations, under_load_case (optional),\n                         persistence (optional)\n  candidates[]           id \"CND-NNNN\", summary, family, principle\n                         {function_class: principle_family},\n                         addresses_obligations, obligations_created,\n                         evidence_route_verdict {route, available (boolean),\n                         note}, self_locking (optional)\n  acceptance_contracts[] id \"ACC-NNNN\", candidate, obligations, predicates\n  unresolved[]           id \"UNR-NNNN\", decision, why_open, alternatives,\n                         alternatives_kind, kept_open_by, blocks\n  assumptions[]          id \"ASM-NNNN\", statement, why,\n                         would_be_invalidated_by\n\nNo required field may be null. Where the answer is \"there are none\", use an\nempty list for a list field. A null is not an answer; an empty list is.\n\nREFERENCES BETWEEN ITEMS\nEach field below holds ids of the kind named. Ids beginning REQ-, SCN-, ACT-,\nFRE- and AMB- come from the TYPED INPUT you were given; ids beginning OBL-,\nCND- and LC- are ones you emit here. A reference to an id that appears in\nneither place is an error.\n\n  obligations[].derived_from_requirements  requirement ids from the input\n  obligations[].involves_actors            actor ids from the input\n  load_cases[].scenario                    a scenario id from the input\n  load_cases[].reacted_at_site                        a reaction site id you emit\n  reaction_site_requirements[].scenario               a scenario id from the input\n  physical_effect_obligations[].addresses_obligations obligation ids you emit here\n  physical_effect_obligations[].under_load_case       a load case id you emit here\n  candidates[].addresses_obligations       obligation ids you emit here\n  candidates[].obligations_created         obligation ids you emit here\n  acceptance_contracts[].candidate         a candidate id you emit here\n  acceptance_contracts[].obligations       obligation ids you emit here\n  unresolved[].kept_open_by                ambiguity and freedom ids from the\n                                           input - never a restatement in prose\n  unresolved[].blocks                      obligation ids you emit here\n  unresolved[].alternatives                typed by alternatives_kind: candidate\n                                           ids for ENTITY_REFS, family names for\n                                           PRINCIPLE_FAMILIES, prose for FREE_TEXT\n\nPERMITTED VALUES\n  scope             UNIVERSAL | CANDIDATE_DISCRIMINATING\n  satisfiable_at    s02 | s03 | s04 | s05 - the EARLIEST stage at which this\n                    obligation can be addressed at all. A candidate here is a\n                    principle family and not yet a mechanism, so an obligation\n                    about elements, contacts or dimensions is not satisfiable\n                    at s02 and must say so rather than appear unaddressed.\n  direction_class   AXIAL | TRANSVERSE | RADIAL | MOMENT | GRAVITY | NONE\n  load case kind    GRAVITY | PAYLOAD | ACTOR_APPLIED | REACTION\n  alternatives_kind ENTITY_REFS | PRINCIPLE_FAMILIES | FREE_TEXT\n  family            one of the FUNCTION CLASSES listed above\n  principle         a MAPPING function_class -> principle_family. Each KEY is one\n                    of the FUNCTION CLASSES listed above and each VALUE is one of\n                    the PRINCIPLE FAMILIES permitted for that function class. A\n                    candidate performing one function class is a one-entry\n                    mapping, never a bare string.\n  evidence_route    one of the EVIDENCE ROUTES listed above\n  scenario          the id of a Scenario given to you in the typed input\n",
+ "responsibility": "s02",
+ "stage_id": "s02"
+}

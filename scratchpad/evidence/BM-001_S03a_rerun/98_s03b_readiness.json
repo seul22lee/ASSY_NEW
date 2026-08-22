@@ -1,0 +1,1256 @@
+{
+ "candidates": {
+  "CND-0001": {
+   "branch_isolation_held": true,
+   "exactly_one_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Ambiguity": 7,
+    "Body": 3,
+    "Candidate": 1,
+    "Configuration": 2,
+    "Freedom": 7,
+    "Interface": 4,
+    "Joint": 3,
+    "LoadCase": 5,
+    "Obligation": 20,
+    "PhysicalEffectObligation": 5,
+    "ReactionSiteRequirement": 3,
+    "Requirement": 10,
+    "RigidGroup": 4,
+    "Scenario": 3
+   },
+   "foreign_branch_entities": {},
+   "previous_counts": {
+    "configuration_count": null,
+    "load_case_count": null,
+    "obligation_count": null,
+    "physical_effect_obligation_count": null,
+    "retention_obligation_count": null,
+    "topology_element_count": null,
+    "topology_relation_count": null
+   },
+   "reasons": [],
+   "required_premise_classes": [
+    {
+     "class": "topology",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "RigidGroup"
+     ],
+     "roles": [
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "load_case",
+     "families": [
+      "LoadCase"
+     ],
+     "roles": [
+      "load_case"
+     ],
+     "selection": {
+      "load_case": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "physical_effect_obligation",
+     "families": [
+      "PhysicalEffectObligation"
+     ],
+     "roles": [
+      "physical_effect_obligation"
+     ],
+     "selection": {
+      "physical_effect_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "retention_obligation",
+     "families": [
+      "Obligation"
+     ],
+     "roles": [
+      "physical_obligation"
+     ],
+     "selection": {
+      "physical_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "configuration_basis",
+     "families": [
+      "Configuration"
+     ],
+     "roles": [
+      "configuration_state"
+     ],
+     "selection": {
+      "configuration_state": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03a_accepted": true,
+   "semantic_role_members": {
+    "configuration_state": [
+     "CFG-0001",
+     "CFG-0002"
+    ],
+    "load_case": [
+     "LC-0001",
+     "LC-0002",
+     "LC-0003",
+     "LC-0004",
+     "LC-0005"
+    ],
+    "physical_effect_obligation": [
+     "PEO-0001",
+     "PEO-0002",
+     "PEO-0003",
+     "PEO-0004",
+     "PEO-0005"
+    ],
+    "physical_obligation": [
+     "OBL-0001",
+     "OBL-0002",
+     "OBL-0003",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0007",
+     "OBL-0008",
+     "OBL-0009",
+     "OBL-0010",
+     "OBL-0011",
+     "OBL-0012",
+     "OBL-0013",
+     "OBL-0014",
+     "OBL-0015",
+     "OBL-0016",
+     "OBL-0017",
+     "OBL-0018",
+     "OBL-0019",
+     "OBL-0020"
+    ],
+    "topology_element": [
+     "BOD-0001",
+     "BOD-0002",
+     "BOD-0003",
+     "RGP-0001",
+     "RGP-0002",
+     "RGP-0003",
+     "RGP-0004"
+    ],
+    "topology_relation": [
+     "IFC-0001",
+     "IFC-0002",
+     "IFC-0003",
+     "IFC-0004",
+     "JNT-0001",
+     "JNT-0002",
+     "JNT-0003"
+    ]
+   },
+   "semantic_role_populations": {
+    "configuration_state": 2,
+    "load_case": 5,
+    "physical_effect_obligation": 5,
+    "physical_obligation": 20,
+    "topology_element": 7,
+    "topology_relation": 7
+   },
+   "target_candidate": [
+    "CND-0001"
+   ],
+   "unmet_premise_classes": [],
+   "verdict": "READY_FOR_S03B",
+   "view_ready": true,
+   "view_status": "VIEW_READY"
+  },
+  "CND-0002": {
+   "branch_isolation_held": true,
+   "exactly_one_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Ambiguity": 7,
+    "Body": 4,
+    "Candidate": 1,
+    "Configuration": 2,
+    "Freedom": 7,
+    "Interface": 5,
+    "Joint": 5,
+    "LoadCase": 5,
+    "Obligation": 20,
+    "PhysicalEffectObligation": 5,
+    "ReactionSiteRequirement": 3,
+    "Requirement": 10,
+    "RigidGroup": 6,
+    "Scenario": 3
+   },
+   "foreign_branch_entities": {},
+   "previous_counts": {
+    "configuration_count": null,
+    "load_case_count": null,
+    "obligation_count": null,
+    "physical_effect_obligation_count": null,
+    "retention_obligation_count": null,
+    "topology_element_count": null,
+    "topology_relation_count": null
+   },
+   "reasons": [],
+   "required_premise_classes": [
+    {
+     "class": "topology",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "RigidGroup"
+     ],
+     "roles": [
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "load_case",
+     "families": [
+      "LoadCase"
+     ],
+     "roles": [
+      "load_case"
+     ],
+     "selection": {
+      "load_case": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "physical_effect_obligation",
+     "families": [
+      "PhysicalEffectObligation"
+     ],
+     "roles": [
+      "physical_effect_obligation"
+     ],
+     "selection": {
+      "physical_effect_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "retention_obligation",
+     "families": [
+      "Obligation"
+     ],
+     "roles": [
+      "physical_obligation"
+     ],
+     "selection": {
+      "physical_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "configuration_basis",
+     "families": [
+      "Configuration"
+     ],
+     "roles": [
+      "configuration_state"
+     ],
+     "selection": {
+      "configuration_state": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03a_accepted": true,
+   "semantic_role_members": {
+    "configuration_state": [
+     "CFG-0003",
+     "CFG-0004"
+    ],
+    "load_case": [
+     "LC-0001",
+     "LC-0002",
+     "LC-0003",
+     "LC-0004",
+     "LC-0005"
+    ],
+    "physical_effect_obligation": [
+     "PEO-0001",
+     "PEO-0002",
+     "PEO-0003",
+     "PEO-0004",
+     "PEO-0005"
+    ],
+    "physical_obligation": [
+     "OBL-0001",
+     "OBL-0002",
+     "OBL-0003",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0007",
+     "OBL-0008",
+     "OBL-0009",
+     "OBL-0010",
+     "OBL-0011",
+     "OBL-0012",
+     "OBL-0013",
+     "OBL-0014",
+     "OBL-0015",
+     "OBL-0016",
+     "OBL-0017",
+     "OBL-0018",
+     "OBL-0019",
+     "OBL-0020"
+    ],
+    "topology_element": [
+     "BOD-0004",
+     "BOD-0005",
+     "BOD-0006",
+     "BOD-0007",
+     "RGP-0005",
+     "RGP-0006",
+     "RGP-0007",
+     "RGP-0008",
+     "RGP-0009",
+     "RGP-0010"
+    ],
+    "topology_relation": [
+     "IFC-0005",
+     "IFC-0006",
+     "IFC-0007",
+     "IFC-0008",
+     "IFC-0009",
+     "JNT-0004",
+     "JNT-0005",
+     "JNT-0006",
+     "JNT-0007",
+     "JNT-0008"
+    ]
+   },
+   "semantic_role_populations": {
+    "configuration_state": 2,
+    "load_case": 5,
+    "physical_effect_obligation": 5,
+    "physical_obligation": 20,
+    "topology_element": 10,
+    "topology_relation": 10
+   },
+   "target_candidate": [
+    "CND-0002"
+   ],
+   "unmet_premise_classes": [],
+   "verdict": "READY_FOR_S03B",
+   "view_ready": true,
+   "view_status": "VIEW_READY"
+  },
+  "CND-0003": {
+   "branch_isolation_held": true,
+   "exactly_one_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Ambiguity": 7,
+    "Body": 4,
+    "Candidate": 1,
+    "Configuration": 3,
+    "Freedom": 7,
+    "Interface": 6,
+    "Joint": 4,
+    "LoadCase": 5,
+    "Obligation": 20,
+    "PhysicalEffectObligation": 5,
+    "ReactionSiteRequirement": 3,
+    "Requirement": 10,
+    "RigidGroup": 4,
+    "Scenario": 3
+   },
+   "foreign_branch_entities": {},
+   "previous_counts": {
+    "configuration_count": null,
+    "load_case_count": null,
+    "obligation_count": null,
+    "physical_effect_obligation_count": null,
+    "retention_obligation_count": null,
+    "topology_element_count": null,
+    "topology_relation_count": null
+   },
+   "reasons": [],
+   "required_premise_classes": [
+    {
+     "class": "topology",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "RigidGroup"
+     ],
+     "roles": [
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "load_case",
+     "families": [
+      "LoadCase"
+     ],
+     "roles": [
+      "load_case"
+     ],
+     "selection": {
+      "load_case": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "physical_effect_obligation",
+     "families": [
+      "PhysicalEffectObligation"
+     ],
+     "roles": [
+      "physical_effect_obligation"
+     ],
+     "selection": {
+      "physical_effect_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "retention_obligation",
+     "families": [
+      "Obligation"
+     ],
+     "roles": [
+      "physical_obligation"
+     ],
+     "selection": {
+      "physical_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "configuration_basis",
+     "families": [
+      "Configuration"
+     ],
+     "roles": [
+      "configuration_state"
+     ],
+     "selection": {
+      "configuration_state": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03a_accepted": true,
+   "semantic_role_members": {
+    "configuration_state": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "load_case": [
+     "LC-0001",
+     "LC-0002",
+     "LC-0003",
+     "LC-0004",
+     "LC-0005"
+    ],
+    "physical_effect_obligation": [
+     "PEO-0001",
+     "PEO-0002",
+     "PEO-0003",
+     "PEO-0004",
+     "PEO-0005"
+    ],
+    "physical_obligation": [
+     "OBL-0001",
+     "OBL-0002",
+     "OBL-0003",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0007",
+     "OBL-0008",
+     "OBL-0009",
+     "OBL-0010",
+     "OBL-0011",
+     "OBL-0012",
+     "OBL-0013",
+     "OBL-0014",
+     "OBL-0015",
+     "OBL-0016",
+     "OBL-0017",
+     "OBL-0018",
+     "OBL-0019",
+     "OBL-0020"
+    ],
+    "topology_element": [
+     "BOD-0008",
+     "BOD-0009",
+     "BOD-0010",
+     "BOD-0011",
+     "RGP-0011",
+     "RGP-0012",
+     "RGP-0013",
+     "RGP-0014"
+    ],
+    "topology_relation": [
+     "IFC-0010",
+     "IFC-0011",
+     "IFC-0012",
+     "IFC-0013",
+     "IFC-0014",
+     "IFC-0015",
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012"
+    ]
+   },
+   "semantic_role_populations": {
+    "configuration_state": 3,
+    "load_case": 5,
+    "physical_effect_obligation": 5,
+    "physical_obligation": 20,
+    "topology_element": 8,
+    "topology_relation": 10
+   },
+   "target_candidate": [
+    "CND-0003"
+   ],
+   "unmet_premise_classes": [],
+   "verdict": "READY_FOR_S03B",
+   "view_ready": true,
+   "view_status": "VIEW_READY"
+  },
+  "CND-0004": {
+   "branch_isolation_held": true,
+   "exactly_one_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Ambiguity": 7,
+    "Body": 2,
+    "Candidate": 1,
+    "Configuration": 2,
+    "Freedom": 7,
+    "Interface": 4,
+    "Joint": 1,
+    "LoadCase": 5,
+    "Obligation": 20,
+    "PhysicalEffectObligation": 5,
+    "ReactionSiteRequirement": 3,
+    "Requirement": 10,
+    "RigidGroup": 2,
+    "Scenario": 3
+   },
+   "foreign_branch_entities": {},
+   "previous_counts": {
+    "configuration_count": null,
+    "load_case_count": null,
+    "obligation_count": null,
+    "physical_effect_obligation_count": null,
+    "retention_obligation_count": null,
+    "topology_element_count": null,
+    "topology_relation_count": null
+   },
+   "reasons": [],
+   "required_premise_classes": [
+    {
+     "class": "topology",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "RigidGroup"
+     ],
+     "roles": [
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "load_case",
+     "families": [
+      "LoadCase"
+     ],
+     "roles": [
+      "load_case"
+     ],
+     "selection": {
+      "load_case": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "physical_effect_obligation",
+     "families": [
+      "PhysicalEffectObligation"
+     ],
+     "roles": [
+      "physical_effect_obligation"
+     ],
+     "selection": {
+      "physical_effect_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "retention_obligation",
+     "families": [
+      "Obligation"
+     ],
+     "roles": [
+      "physical_obligation"
+     ],
+     "selection": {
+      "physical_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "configuration_basis",
+     "families": [
+      "Configuration"
+     ],
+     "roles": [
+      "configuration_state"
+     ],
+     "selection": {
+      "configuration_state": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03a_accepted": true,
+   "semantic_role_members": {
+    "configuration_state": [
+     "CFG-0008",
+     "CFG-0009"
+    ],
+    "load_case": [
+     "LC-0001",
+     "LC-0002",
+     "LC-0003",
+     "LC-0004",
+     "LC-0005"
+    ],
+    "physical_effect_obligation": [
+     "PEO-0001",
+     "PEO-0002",
+     "PEO-0003",
+     "PEO-0004",
+     "PEO-0005"
+    ],
+    "physical_obligation": [
+     "OBL-0001",
+     "OBL-0002",
+     "OBL-0003",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0007",
+     "OBL-0008",
+     "OBL-0009",
+     "OBL-0010",
+     "OBL-0011",
+     "OBL-0012",
+     "OBL-0013",
+     "OBL-0014",
+     "OBL-0015",
+     "OBL-0016",
+     "OBL-0017",
+     "OBL-0018",
+     "OBL-0019",
+     "OBL-0020"
+    ],
+    "topology_element": [
+     "BOD-0012",
+     "BOD-0013",
+     "RGP-0015",
+     "RGP-0016"
+    ],
+    "topology_relation": [
+     "IFC-0016",
+     "IFC-0017",
+     "IFC-0018",
+     "IFC-0019",
+     "JNT-0013"
+    ]
+   },
+   "semantic_role_populations": {
+    "configuration_state": 2,
+    "load_case": 5,
+    "physical_effect_obligation": 5,
+    "physical_obligation": 20,
+    "topology_element": 4,
+    "topology_relation": 5
+   },
+   "target_candidate": [
+    "CND-0004"
+   ],
+   "unmet_premise_classes": [],
+   "verdict": "READY_FOR_S03B",
+   "view_ready": true,
+   "view_status": "VIEW_READY"
+  },
+  "CND-0005": {
+   "branch_isolation_held": true,
+   "exactly_one_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Ambiguity": 7,
+    "Body": 3,
+    "Candidate": 1,
+    "Configuration": 3,
+    "Freedom": 7,
+    "Interface": 5,
+    "Joint": 2,
+    "LoadCase": 5,
+    "Obligation": 20,
+    "PhysicalEffectObligation": 5,
+    "ReactionSiteRequirement": 3,
+    "Requirement": 10,
+    "RigidGroup": 3,
+    "Scenario": 3
+   },
+   "foreign_branch_entities": {},
+   "previous_counts": {
+    "configuration_count": null,
+    "load_case_count": null,
+    "obligation_count": null,
+    "physical_effect_obligation_count": null,
+    "retention_obligation_count": null,
+    "topology_element_count": null,
+    "topology_relation_count": null
+   },
+   "reasons": [],
+   "required_premise_classes": [
+    {
+     "class": "topology",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "RigidGroup"
+     ],
+     "roles": [
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "load_case",
+     "families": [
+      "LoadCase"
+     ],
+     "roles": [
+      "load_case"
+     ],
+     "selection": {
+      "load_case": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "physical_effect_obligation",
+     "families": [
+      "PhysicalEffectObligation"
+     ],
+     "roles": [
+      "physical_effect_obligation"
+     ],
+     "selection": {
+      "physical_effect_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "retention_obligation",
+     "families": [
+      "Obligation"
+     ],
+     "roles": [
+      "physical_obligation"
+     ],
+     "selection": {
+      "physical_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "configuration_basis",
+     "families": [
+      "Configuration"
+     ],
+     "roles": [
+      "configuration_state"
+     ],
+     "selection": {
+      "configuration_state": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03a_accepted": true,
+   "semantic_role_members": {
+    "configuration_state": [
+     "CFG-0101",
+     "CFG-0102",
+     "CFG-0103"
+    ],
+    "load_case": [
+     "LC-0001",
+     "LC-0002",
+     "LC-0003",
+     "LC-0004",
+     "LC-0005"
+    ],
+    "physical_effect_obligation": [
+     "PEO-0001",
+     "PEO-0002",
+     "PEO-0003",
+     "PEO-0004",
+     "PEO-0005"
+    ],
+    "physical_obligation": [
+     "OBL-0001",
+     "OBL-0002",
+     "OBL-0003",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0007",
+     "OBL-0008",
+     "OBL-0009",
+     "OBL-0010",
+     "OBL-0011",
+     "OBL-0012",
+     "OBL-0013",
+     "OBL-0014",
+     "OBL-0015",
+     "OBL-0016",
+     "OBL-0017",
+     "OBL-0018",
+     "OBL-0019",
+     "OBL-0020"
+    ],
+    "topology_element": [
+     "BOD-0101",
+     "BOD-0102",
+     "BOD-0103",
+     "RGP-0101",
+     "RGP-0102",
+     "RGP-0103"
+    ],
+    "topology_relation": [
+     "IFC-0101",
+     "IFC-0102",
+     "IFC-0103",
+     "IFC-0104",
+     "IFC-0105",
+     "JNT-0101",
+     "JNT-0102"
+    ]
+   },
+   "semantic_role_populations": {
+    "configuration_state": 3,
+    "load_case": 5,
+    "physical_effect_obligation": 5,
+    "physical_obligation": 20,
+    "topology_element": 6,
+    "topology_relation": 7
+   },
+   "target_candidate": [
+    "CND-0005"
+   ],
+   "unmet_premise_classes": [],
+   "verdict": "READY_FOR_S03B",
+   "view_ready": true,
+   "view_status": "VIEW_READY"
+  },
+  "CND-0006": {
+   "branch_isolation_held": true,
+   "exactly_one_candidate": true,
+   "family_counts": {
+    "Actor": 1,
+    "Ambiguity": 7,
+    "Body": 3,
+    "Candidate": 1,
+    "Configuration": 3,
+    "Freedom": 7,
+    "Interface": 6,
+    "Joint": 4,
+    "LoadCase": 5,
+    "Obligation": 20,
+    "PhysicalEffectObligation": 5,
+    "ReactionSiteRequirement": 3,
+    "Requirement": 10,
+    "RigidGroup": 4,
+    "Scenario": 3
+   },
+   "foreign_branch_entities": {},
+   "previous_counts": {
+    "configuration_count": null,
+    "load_case_count": null,
+    "obligation_count": null,
+    "physical_effect_obligation_count": null,
+    "retention_obligation_count": null,
+    "topology_element_count": null,
+    "topology_relation_count": null
+   },
+   "reasons": [],
+   "required_premise_classes": [
+    {
+     "class": "topology",
+     "families": [
+      "Body",
+      "Interface",
+      "Joint",
+      "RigidGroup"
+     ],
+     "roles": [
+      "topology_element",
+      "topology_relation"
+     ],
+     "selection": {
+      "topology_element": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      },
+      "topology_relation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    },
+    {
+     "class": "load_case",
+     "families": [
+      "LoadCase"
+     ],
+     "roles": [
+      "load_case"
+     ],
+     "selection": {
+      "load_case": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "physical_effect_obligation",
+     "families": [
+      "PhysicalEffectObligation"
+     ],
+     "roles": [
+      "physical_effect_obligation"
+     ],
+     "selection": {
+      "physical_effect_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "retention_obligation",
+     "families": [
+      "Obligation"
+     ],
+     "roles": [
+      "physical_obligation"
+     ],
+     "selection": {
+      "physical_obligation": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "MAY_BE_EMPTY",
+       "population": "DESIGN_WIDE"
+      }
+     }
+    },
+    {
+     "class": "configuration_basis",
+     "families": [
+      "Configuration"
+     ],
+     "roles": [
+      "configuration_state"
+     ],
+     "selection": {
+      "configuration_state": {
+       "applicability": "ALL_MEMBERS",
+       "coverage": "ALL_APPLICABLE",
+       "existence": "REQUIRED_NONEMPTY",
+       "population": "INVOCATION_BRANCH"
+      }
+     }
+    }
+   ],
+   "s03a_accepted": true,
+   "semantic_role_members": {
+    "configuration_state": [
+     "CFG-0010",
+     "CFG-0011",
+     "CFG-0012"
+    ],
+    "load_case": [
+     "LC-0001",
+     "LC-0002",
+     "LC-0003",
+     "LC-0004",
+     "LC-0005"
+    ],
+    "physical_effect_obligation": [
+     "PEO-0001",
+     "PEO-0002",
+     "PEO-0003",
+     "PEO-0004",
+     "PEO-0005"
+    ],
+    "physical_obligation": [
+     "OBL-0001",
+     "OBL-0002",
+     "OBL-0003",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0007",
+     "OBL-0008",
+     "OBL-0009",
+     "OBL-0010",
+     "OBL-0011",
+     "OBL-0012",
+     "OBL-0013",
+     "OBL-0014",
+     "OBL-0015",
+     "OBL-0016",
+     "OBL-0017",
+     "OBL-0018",
+     "OBL-0019",
+     "OBL-0020"
+    ],
+    "topology_element": [
+     "BOD-0014",
+     "BOD-0015",
+     "BOD-0016",
+     "RGP-0017",
+     "RGP-0018",
+     "RGP-0019",
+     "RGP-0020"
+    ],
+    "topology_relation": [
+     "IFC-0020",
+     "IFC-0021",
+     "IFC-0022",
+     "IFC-0023",
+     "IFC-0024",
+     "IFC-0025",
+     "JNT-0014",
+     "JNT-0015",
+     "JNT-0016",
+     "JNT-0017"
+    ]
+   },
+   "semantic_role_populations": {
+    "configuration_state": 3,
+    "load_case": 5,
+    "physical_effect_obligation": 5,
+    "physical_obligation": 20,
+    "topology_element": 7,
+    "topology_relation": 10
+   },
+   "target_candidate": [
+    "CND-0006"
+   ],
+   "unmet_premise_classes": [],
+   "verdict": "READY_FOR_S03B",
+   "view_ready": true,
+   "view_status": "VIEW_READY"
+  }
+ },
+ "counted_by": "semantic roles required by the s03b responsibility, read from the view's own required minimum",
+ "not_ready": [],
+ "ready": [
+  "CND-0001",
+  "CND-0002",
+  "CND-0003",
+  "CND-0004",
+  "CND-0005",
+  "CND-0006"
+ ],
+ "responsibility": "s03b",
+ "superseded": "the family lists this harness previously used, which reported zero topology relations for every branch"
+}

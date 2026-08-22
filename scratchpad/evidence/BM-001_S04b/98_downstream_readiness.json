@@ -1,0 +1,2912 @@
+{
+ "model_called": false,
+ "responsibilities": {
+  "feasibility": {
+   "candidates": {
+    "CND-0001": {
+     "branch_isolation_held": true,
+     "candidates_visible": [
+      "CND-0001"
+     ],
+     "exactly_this_candidate": true,
+     "family_counts": {
+      "Actor": 1,
+      "Ambiguity": 7,
+      "AssemblyStep": 3,
+      "Body": 3,
+      "Candidate": 1,
+      "Configuration": 2,
+      "ConstraintRelation": 6,
+      "EliminationRecord": 1,
+      "Envelope": 3,
+      "Freedom": 7,
+      "FunctionalRegion": 4,
+      "Interface": 4,
+      "Joint": 3,
+      "LoadCase": 5,
+      "LoadPath": 5,
+      "MobilityExpectation": 2,
+      "Obligation": 14,
+      "PhysicalEffectObligation": 5,
+      "PhysicalInteraction": 5,
+      "ReachResult": 4,
+      "ReactionSiteRequirement": 3,
+      "ReferenceScale": 1,
+      "Requirement": 10,
+      "RigidGroup": 4,
+      "Scenario": 3,
+      "State": 2,
+      "SweptVolume": 1,
+      "Transition": 1
+     },
+     "foreign_branch_entities": {},
+     "reasons": [],
+     "required_premise_classes": [
+      {
+       "class": "candidate_engineering_evidence",
+       "families": [
+        "AssemblyStep",
+        "Body",
+        "ConstraintRelation",
+        "Envelope",
+        "FunctionalRegion",
+        "Interface",
+        "Joint",
+        "LoadPath",
+        "MobilityExpectation",
+        "PhysicalInteraction",
+        "ReferenceScale",
+        "RigidGroup"
+       ],
+       "roles": [
+        "constraint_relation",
+        "load_route",
+        "mobility_disposition",
+        "physical_interaction",
+        "spatial_commitment",
+        "topology_element",
+        "topology_relation"
+       ],
+       "selection": {
+        "constraint_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "load_route": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "mobility_disposition": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "physical_interaction": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "spatial_commitment": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_element": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "realized_motion",
+       "families": [
+        "Joint",
+        "State",
+        "SweptVolume",
+        "Transition"
+       ],
+       "roles": [
+        "kinematic_axis",
+        "motion_occupancy",
+        "motion_path",
+        "realized_configuration"
+       ],
+       "selection": {
+        "kinematic_axis": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_occupancy": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_path": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "realized_configuration": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "candidate_local_geometric_finding",
+       "families": [
+        "AssemblyStep",
+        "EliminationRecord",
+        "ReachResult"
+       ],
+       "roles": [
+        "assembly_order",
+        "elimination_evidence",
+        "reach_evidence"
+       ],
+       "selection": {
+        "assembly_order": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "elimination_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "reach_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "declared_physical_demand",
+       "families": [
+        "Actor",
+        "LoadCase",
+        "PhysicalEffectObligation",
+        "ReactionSiteRequirement"
+       ],
+       "roles": [
+        "actor_role",
+        "load_case",
+        "physical_effect_obligation",
+        "reaction_site"
+       ],
+       "selection": {
+        "actor_role": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "load_case": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "physical_effect_obligation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "reaction_site": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      },
+      {
+       "class": "hard_design_constraint",
+       "families": [
+        "DesignConstraint"
+       ],
+       "roles": [
+        "design_constraint"
+       ],
+       "selection": {
+        "design_constraint": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      }
+     ],
+     "s04b_accepted": true,
+     "semantic_role_members": {
+      "actor_role": [
+       "ACT-0001"
+      ],
+      "assembly_order": [
+       "ASY-0001",
+       "ASY-0002",
+       "ASY-0003"
+      ],
+      "constraint_relation": [
+       "CRL-0001",
+       "CRL-0002",
+       "CRL-0003",
+       "CRL-0004",
+       "CRL-0005",
+       "CRL-0006"
+      ],
+      "design_constraint": [],
+      "elimination_evidence": [
+       "ELM-CND-0001"
+      ],
+      "kinematic_axis": [
+       "JNT-0001",
+       "JNT-0002",
+       "JNT-0003"
+      ],
+      "load_case": [
+       "LC-0001",
+       "LC-0002",
+       "LC-0003",
+       "LC-0004",
+       "LC-0005"
+      ],
+      "load_route": [
+       "LDP-0001",
+       "LDP-0002",
+       "LDP-0003",
+       "LDP-0004",
+       "LDP-0005"
+      ],
+      "mobility_disposition": [
+       "MEX-CFG-0001",
+       "MEX-CFG-0002"
+      ],
+      "motion_occupancy": [
+       "SWV-TRN-0001-RGP-0003"
+      ],
+      "motion_path": [
+       "TRN-0001"
+      ],
+      "physical_effect_obligation": [
+       "PEO-0001",
+       "PEO-0002",
+       "PEO-0003",
+       "PEO-0004",
+       "PEO-0005"
+      ],
+      "physical_interaction": [
+       "PHI-0001",
+       "PHI-0002",
+       "PHI-0003",
+       "PHI-0004",
+       "PHI-0005"
+      ],
+      "reach_evidence": [
+       "RCH-CND-0001-0001",
+       "RCH-CND-0001-0002",
+       "RCH-CND-0001-0003",
+       "RCH-CND-0001-0004"
+      ],
+      "reaction_site": [
+       "RSR-0001",
+       "RSR-0002",
+       "RSR-0003"
+      ],
+      "realized_configuration": [
+       "STA-CFG-0001",
+       "STA-CFG-0002"
+      ],
+      "spatial_commitment": [
+       "ASY-0001",
+       "ASY-0002",
+       "ASY-0003",
+       "ENV-0001",
+       "ENV-0002",
+       "ENV-0003",
+       "FRG-0001",
+       "FRG-0002",
+       "FRG-0003",
+       "FRG-0004",
+       "SCL-CND-0001"
+      ],
+      "topology_element": [
+       "BOD-0001",
+       "BOD-0002",
+       "BOD-0003",
+       "RGP-0001",
+       "RGP-0002",
+       "RGP-0003",
+       "RGP-0004"
+      ],
+      "topology_relation": [
+       "IFC-0001",
+       "IFC-0002",
+       "IFC-0003",
+       "IFC-0004",
+       "JNT-0001",
+       "JNT-0002",
+       "JNT-0003"
+      ]
+     },
+     "semantic_role_populations": {
+      "actor_role": 1,
+      "assembly_order": 3,
+      "constraint_relation": 6,
+      "design_constraint": 0,
+      "elimination_evidence": 1,
+      "kinematic_axis": 3,
+      "load_case": 5,
+      "load_route": 5,
+      "mobility_disposition": 2,
+      "motion_occupancy": 1,
+      "motion_path": 1,
+      "physical_effect_obligation": 5,
+      "physical_interaction": 5,
+      "reach_evidence": 4,
+      "reaction_site": 3,
+      "realized_configuration": 2,
+      "spatial_commitment": 11,
+      "topology_element": 7,
+      "topology_relation": 7
+     },
+     "unmet_premise_classes": [],
+     "verdict": "READY",
+     "view_ready": true,
+     "view_status": "VIEW_READY"
+    },
+    "CND-0002": {
+     "branch_isolation_held": true,
+     "candidates_visible": [
+      "CND-0002"
+     ],
+     "exactly_this_candidate": true,
+     "family_counts": {
+      "Actor": 1,
+      "Ambiguity": 7,
+      "AssemblyStep": 4,
+      "Body": 4,
+      "Candidate": 1,
+      "Configuration": 2,
+      "ConstraintRelation": 9,
+      "EliminationRecord": 1,
+      "Envelope": 4,
+      "Freedom": 7,
+      "FunctionalRegion": 5,
+      "Interface": 5,
+      "Joint": 5,
+      "LoadCase": 5,
+      "LoadPath": 5,
+      "MobilityExpectation": 2,
+      "Obligation": 14,
+      "PhysicalEffectObligation": 5,
+      "PhysicalInteraction": 5,
+      "ReachResult": 1,
+      "ReactionSiteRequirement": 3,
+      "ReferenceScale": 1,
+      "Requirement": 10,
+      "RigidGroup": 6,
+      "Scenario": 3,
+      "State": 2,
+      "SweptVolume": 4,
+      "Transition": 2
+     },
+     "foreign_branch_entities": {},
+     "reasons": [],
+     "required_premise_classes": [
+      {
+       "class": "candidate_engineering_evidence",
+       "families": [
+        "AssemblyStep",
+        "Body",
+        "ConstraintRelation",
+        "Envelope",
+        "FunctionalRegion",
+        "Interface",
+        "Joint",
+        "LoadPath",
+        "MobilityExpectation",
+        "PhysicalInteraction",
+        "ReferenceScale",
+        "RigidGroup"
+       ],
+       "roles": [
+        "constraint_relation",
+        "load_route",
+        "mobility_disposition",
+        "physical_interaction",
+        "spatial_commitment",
+        "topology_element",
+        "topology_relation"
+       ],
+       "selection": {
+        "constraint_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "load_route": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "mobility_disposition": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "physical_interaction": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "spatial_commitment": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_element": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "realized_motion",
+       "families": [
+        "Joint",
+        "State",
+        "SweptVolume",
+        "Transition"
+       ],
+       "roles": [
+        "kinematic_axis",
+        "motion_occupancy",
+        "motion_path",
+        "realized_configuration"
+       ],
+       "selection": {
+        "kinematic_axis": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_occupancy": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_path": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "realized_configuration": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "candidate_local_geometric_finding",
+       "families": [
+        "AssemblyStep",
+        "EliminationRecord",
+        "ReachResult"
+       ],
+       "roles": [
+        "assembly_order",
+        "elimination_evidence",
+        "reach_evidence"
+       ],
+       "selection": {
+        "assembly_order": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "elimination_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "reach_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "declared_physical_demand",
+       "families": [
+        "Actor",
+        "LoadCase",
+        "PhysicalEffectObligation",
+        "ReactionSiteRequirement"
+       ],
+       "roles": [
+        "actor_role",
+        "load_case",
+        "physical_effect_obligation",
+        "reaction_site"
+       ],
+       "selection": {
+        "actor_role": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "load_case": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "physical_effect_obligation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "reaction_site": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      },
+      {
+       "class": "hard_design_constraint",
+       "families": [
+        "DesignConstraint"
+       ],
+       "roles": [
+        "design_constraint"
+       ],
+       "selection": {
+        "design_constraint": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      }
+     ],
+     "s04b_accepted": true,
+     "semantic_role_members": {
+      "actor_role": [
+       "ACT-0001"
+      ],
+      "assembly_order": [
+       "ASY-0004",
+       "ASY-0005",
+       "ASY-0006",
+       "ASY-0007"
+      ],
+      "constraint_relation": [
+       "CRL-0007",
+       "CRL-0008",
+       "CRL-0009",
+       "CRL-0010",
+       "CRL-0011",
+       "CRL-0012",
+       "CRL-0013",
+       "CRL-0014",
+       "CRL-0015"
+      ],
+      "design_constraint": [],
+      "elimination_evidence": [
+       "ELM-CND-0002"
+      ],
+      "kinematic_axis": [
+       "JNT-0004",
+       "JNT-0005",
+       "JNT-0006",
+       "JNT-0007",
+       "JNT-0008"
+      ],
+      "load_case": [
+       "LC-0001",
+       "LC-0002",
+       "LC-0003",
+       "LC-0004",
+       "LC-0005"
+      ],
+      "load_route": [
+       "LDP-0006",
+       "LDP-0007",
+       "LDP-0008",
+       "LDP-0009",
+       "LDP-0010"
+      ],
+      "mobility_disposition": [
+       "MEX-CFG-0003",
+       "MEX-CFG-0004"
+      ],
+      "motion_occupancy": [
+       "SWV-TRN-0002-RGP-0008",
+       "SWV-TRN-0002-RGP-0010",
+       "SWV-TRN-0003-RGP-0008",
+       "SWV-TRN-0003-RGP-0010"
+      ],
+      "motion_path": [
+       "TRN-0002",
+       "TRN-0003"
+      ],
+      "physical_effect_obligation": [
+       "PEO-0001",
+       "PEO-0002",
+       "PEO-0003",
+       "PEO-0004",
+       "PEO-0005"
+      ],
+      "physical_interaction": [
+       "PHI-0006",
+       "PHI-0007",
+       "PHI-0008",
+       "PHI-0009",
+       "PHI-0010"
+      ],
+      "reach_evidence": [
+       "RCH-CND-0002-0001"
+      ],
+      "reaction_site": [
+       "RSR-0001",
+       "RSR-0002",
+       "RSR-0003"
+      ],
+      "realized_configuration": [
+       "STA-CFG-0003",
+       "STA-CFG-0004"
+      ],
+      "spatial_commitment": [
+       "ASY-0004",
+       "ASY-0005",
+       "ASY-0006",
+       "ASY-0007",
+       "ENV-0004",
+       "ENV-0005",
+       "ENV-0006",
+       "ENV-0007",
+       "FRG-0005",
+       "FRG-0006",
+       "FRG-0007",
+       "FRG-0008",
+       "FRG-0009",
+       "SCL-CND-0002"
+      ],
+      "topology_element": [
+       "BOD-0004",
+       "BOD-0005",
+       "BOD-0006",
+       "BOD-0007",
+       "RGP-0005",
+       "RGP-0006",
+       "RGP-0007",
+       "RGP-0008",
+       "RGP-0009",
+       "RGP-0010"
+      ],
+      "topology_relation": [
+       "IFC-0005",
+       "IFC-0006",
+       "IFC-0007",
+       "IFC-0008",
+       "IFC-0009",
+       "JNT-0004",
+       "JNT-0005",
+       "JNT-0006",
+       "JNT-0007",
+       "JNT-0008"
+      ]
+     },
+     "semantic_role_populations": {
+      "actor_role": 1,
+      "assembly_order": 4,
+      "constraint_relation": 9,
+      "design_constraint": 0,
+      "elimination_evidence": 1,
+      "kinematic_axis": 5,
+      "load_case": 5,
+      "load_route": 5,
+      "mobility_disposition": 2,
+      "motion_occupancy": 4,
+      "motion_path": 2,
+      "physical_effect_obligation": 5,
+      "physical_interaction": 5,
+      "reach_evidence": 1,
+      "reaction_site": 3,
+      "realized_configuration": 2,
+      "spatial_commitment": 14,
+      "topology_element": 10,
+      "topology_relation": 10
+     },
+     "unmet_premise_classes": [],
+     "verdict": "READY",
+     "view_ready": true,
+     "view_status": "VIEW_READY"
+    },
+    "CND-0003": {
+     "branch_isolation_held": true,
+     "candidates_visible": [
+      "CND-0003"
+     ],
+     "exactly_this_candidate": true,
+     "family_counts": {
+      "Actor": 1,
+      "Ambiguity": 7,
+      "AssemblyStep": 4,
+      "Body": 4,
+      "Candidate": 1,
+      "Configuration": 3,
+      "ConstraintRelation": 8,
+      "EliminationRecord": 1,
+      "Envelope": 4,
+      "Freedom": 7,
+      "FunctionalRegion": 3,
+      "Interface": 6,
+      "Joint": 4,
+      "LoadCase": 5,
+      "LoadPath": 5,
+      "MobilityExpectation": 3,
+      "Obligation": 14,
+      "PhysicalEffectObligation": 5,
+      "PhysicalInteraction": 5,
+      "ReachResult": 1,
+      "ReactionSiteRequirement": 3,
+      "ReferenceScale": 1,
+      "Requirement": 10,
+      "RigidGroup": 4,
+      "Scenario": 3,
+      "State": 3,
+      "SweptVolume": 10,
+      "Transition": 4
+     },
+     "foreign_branch_entities": {},
+     "reasons": [],
+     "required_premise_classes": [
+      {
+       "class": "candidate_engineering_evidence",
+       "families": [
+        "AssemblyStep",
+        "Body",
+        "ConstraintRelation",
+        "Envelope",
+        "FunctionalRegion",
+        "Interface",
+        "Joint",
+        "LoadPath",
+        "MobilityExpectation",
+        "PhysicalInteraction",
+        "ReferenceScale",
+        "RigidGroup"
+       ],
+       "roles": [
+        "constraint_relation",
+        "load_route",
+        "mobility_disposition",
+        "physical_interaction",
+        "spatial_commitment",
+        "topology_element",
+        "topology_relation"
+       ],
+       "selection": {
+        "constraint_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "load_route": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "mobility_disposition": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "physical_interaction": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "spatial_commitment": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_element": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "realized_motion",
+       "families": [
+        "Joint",
+        "State",
+        "SweptVolume",
+        "Transition"
+       ],
+       "roles": [
+        "kinematic_axis",
+        "motion_occupancy",
+        "motion_path",
+        "realized_configuration"
+       ],
+       "selection": {
+        "kinematic_axis": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_occupancy": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_path": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "realized_configuration": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "candidate_local_geometric_finding",
+       "families": [
+        "AssemblyStep",
+        "EliminationRecord",
+        "ReachResult"
+       ],
+       "roles": [
+        "assembly_order",
+        "elimination_evidence",
+        "reach_evidence"
+       ],
+       "selection": {
+        "assembly_order": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "elimination_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "reach_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "declared_physical_demand",
+       "families": [
+        "Actor",
+        "LoadCase",
+        "PhysicalEffectObligation",
+        "ReactionSiteRequirement"
+       ],
+       "roles": [
+        "actor_role",
+        "load_case",
+        "physical_effect_obligation",
+        "reaction_site"
+       ],
+       "selection": {
+        "actor_role": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "load_case": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "physical_effect_obligation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "reaction_site": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      },
+      {
+       "class": "hard_design_constraint",
+       "families": [
+        "DesignConstraint"
+       ],
+       "roles": [
+        "design_constraint"
+       ],
+       "selection": {
+        "design_constraint": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      }
+     ],
+     "s04b_accepted": true,
+     "semantic_role_members": {
+      "actor_role": [
+       "ACT-0001"
+      ],
+      "assembly_order": [
+       "ASY-0008",
+       "ASY-0009",
+       "ASY-0010",
+       "ASY-0011"
+      ],
+      "constraint_relation": [
+       "CRL-0016",
+       "CRL-0017",
+       "CRL-0018",
+       "CRL-0019",
+       "CRL-0020",
+       "CRL-0021",
+       "CRL-0022",
+       "CRL-0023"
+      ],
+      "design_constraint": [],
+      "elimination_evidence": [
+       "ELM-CND-0003"
+      ],
+      "kinematic_axis": [
+       "JNT-0009",
+       "JNT-0010",
+       "JNT-0011",
+       "JNT-0012"
+      ],
+      "load_case": [
+       "LC-0001",
+       "LC-0002",
+       "LC-0003",
+       "LC-0004",
+       "LC-0005"
+      ],
+      "load_route": [
+       "LDP-0011",
+       "LDP-0012",
+       "LDP-0013",
+       "LDP-0014",
+       "LDP-0015"
+      ],
+      "mobility_disposition": [
+       "MEX-CFG-0005",
+       "MEX-CFG-0006",
+       "MEX-CFG-0007"
+      ],
+      "motion_occupancy": [
+       "SWV-TRN-0004-RGP-0012",
+       "SWV-TRN-0004-RGP-0013",
+       "SWV-TRN-0004-RGP-0014",
+       "SWV-TRN-0005-RGP-0013",
+       "SWV-TRN-0005-RGP-0014",
+       "SWV-TRN-0006-RGP-0013",
+       "SWV-TRN-0006-RGP-0014",
+       "SWV-TRN-0007-RGP-0012",
+       "SWV-TRN-0007-RGP-0013",
+       "SWV-TRN-0007-RGP-0014"
+      ],
+      "motion_path": [
+       "TRN-0004",
+       "TRN-0005",
+       "TRN-0006",
+       "TRN-0007"
+      ],
+      "physical_effect_obligation": [
+       "PEO-0001",
+       "PEO-0002",
+       "PEO-0003",
+       "PEO-0004",
+       "PEO-0005"
+      ],
+      "physical_interaction": [
+       "PHI-0011",
+       "PHI-0012",
+       "PHI-0013",
+       "PHI-0014",
+       "PHI-0015"
+      ],
+      "reach_evidence": [
+       "RCH-CND-0003-0001"
+      ],
+      "reaction_site": [
+       "RSR-0001",
+       "RSR-0002",
+       "RSR-0003"
+      ],
+      "realized_configuration": [
+       "STA-CFG-0005",
+       "STA-CFG-0006",
+       "STA-CFG-0007"
+      ],
+      "spatial_commitment": [
+       "ASY-0008",
+       "ASY-0009",
+       "ASY-0010",
+       "ASY-0011",
+       "ENV-0008",
+       "ENV-0009",
+       "ENV-0010",
+       "ENV-0011",
+       "FRG-0010",
+       "FRG-0011",
+       "FRG-0012",
+       "SCL-CND-0003"
+      ],
+      "topology_element": [
+       "BOD-0008",
+       "BOD-0009",
+       "BOD-0010",
+       "BOD-0011",
+       "RGP-0011",
+       "RGP-0012",
+       "RGP-0013",
+       "RGP-0014"
+      ],
+      "topology_relation": [
+       "IFC-0010",
+       "IFC-0011",
+       "IFC-0012",
+       "IFC-0013",
+       "IFC-0014",
+       "IFC-0015",
+       "JNT-0009",
+       "JNT-0010",
+       "JNT-0011",
+       "JNT-0012"
+      ]
+     },
+     "semantic_role_populations": {
+      "actor_role": 1,
+      "assembly_order": 4,
+      "constraint_relation": 8,
+      "design_constraint": 0,
+      "elimination_evidence": 1,
+      "kinematic_axis": 4,
+      "load_case": 5,
+      "load_route": 5,
+      "mobility_disposition": 3,
+      "motion_occupancy": 10,
+      "motion_path": 4,
+      "physical_effect_obligation": 5,
+      "physical_interaction": 5,
+      "reach_evidence": 1,
+      "reaction_site": 3,
+      "realized_configuration": 3,
+      "spatial_commitment": 12,
+      "topology_element": 8,
+      "topology_relation": 10
+     },
+     "unmet_premise_classes": [],
+     "verdict": "READY",
+     "view_ready": true,
+     "view_status": "VIEW_READY"
+    },
+    "CND-0004": {
+     "branch_isolation_held": true,
+     "candidates_visible": [
+      "CND-0004"
+     ],
+     "exactly_this_candidate": true,
+     "family_counts": {
+      "Actor": 1,
+      "Ambiguity": 7,
+      "AssemblyStep": 2,
+      "Body": 2,
+      "Candidate": 1,
+      "Configuration": 2,
+      "ConstraintRelation": 4,
+      "EliminationRecord": 1,
+      "Envelope": 2,
+      "Freedom": 7,
+      "FunctionalRegion": 6,
+      "Interface": 4,
+      "Joint": 1,
+      "LoadCase": 5,
+      "LoadPath": 5,
+      "MobilityExpectation": 2,
+      "Obligation": 14,
+      "PhysicalEffectObligation": 5,
+      "PhysicalInteraction": 5,
+      "ReachResult": 1,
+      "ReactionSiteRequirement": 3,
+      "ReferenceScale": 1,
+      "Requirement": 10,
+      "RigidGroup": 2,
+      "Scenario": 3,
+      "State": 2,
+      "SweptVolume": 2,
+      "Transition": 2
+     },
+     "foreign_branch_entities": {},
+     "reasons": [],
+     "required_premise_classes": [
+      {
+       "class": "candidate_engineering_evidence",
+       "families": [
+        "AssemblyStep",
+        "Body",
+        "ConstraintRelation",
+        "Envelope",
+        "FunctionalRegion",
+        "Interface",
+        "Joint",
+        "LoadPath",
+        "MobilityExpectation",
+        "PhysicalInteraction",
+        "ReferenceScale",
+        "RigidGroup"
+       ],
+       "roles": [
+        "constraint_relation",
+        "load_route",
+        "mobility_disposition",
+        "physical_interaction",
+        "spatial_commitment",
+        "topology_element",
+        "topology_relation"
+       ],
+       "selection": {
+        "constraint_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "load_route": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "mobility_disposition": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "physical_interaction": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "spatial_commitment": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_element": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "realized_motion",
+       "families": [
+        "Joint",
+        "State",
+        "SweptVolume",
+        "Transition"
+       ],
+       "roles": [
+        "kinematic_axis",
+        "motion_occupancy",
+        "motion_path",
+        "realized_configuration"
+       ],
+       "selection": {
+        "kinematic_axis": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_occupancy": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_path": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "realized_configuration": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "candidate_local_geometric_finding",
+       "families": [
+        "AssemblyStep",
+        "EliminationRecord",
+        "ReachResult"
+       ],
+       "roles": [
+        "assembly_order",
+        "elimination_evidence",
+        "reach_evidence"
+       ],
+       "selection": {
+        "assembly_order": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "elimination_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "reach_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "declared_physical_demand",
+       "families": [
+        "Actor",
+        "LoadCase",
+        "PhysicalEffectObligation",
+        "ReactionSiteRequirement"
+       ],
+       "roles": [
+        "actor_role",
+        "load_case",
+        "physical_effect_obligation",
+        "reaction_site"
+       ],
+       "selection": {
+        "actor_role": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "load_case": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "physical_effect_obligation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "reaction_site": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      },
+      {
+       "class": "hard_design_constraint",
+       "families": [
+        "DesignConstraint"
+       ],
+       "roles": [
+        "design_constraint"
+       ],
+       "selection": {
+        "design_constraint": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      }
+     ],
+     "s04b_accepted": true,
+     "semantic_role_members": {
+      "actor_role": [
+       "ACT-0001"
+      ],
+      "assembly_order": [
+       "ASY-0012",
+       "ASY-0013"
+      ],
+      "constraint_relation": [
+       "CRL-0024",
+       "CRL-0025",
+       "CRL-0026",
+       "CRL-0027"
+      ],
+      "design_constraint": [],
+      "elimination_evidence": [
+       "ELM-CND-0004"
+      ],
+      "kinematic_axis": [
+       "JNT-0013"
+      ],
+      "load_case": [
+       "LC-0001",
+       "LC-0002",
+       "LC-0003",
+       "LC-0004",
+       "LC-0005"
+      ],
+      "load_route": [
+       "LDP-0016",
+       "LDP-0017",
+       "LDP-0018",
+       "LDP-0019",
+       "LDP-0020"
+      ],
+      "mobility_disposition": [
+       "MEX-CFG-0008",
+       "MEX-CFG-0009"
+      ],
+      "motion_occupancy": [
+       "SWV-TRN-0008-RGP-0016",
+       "SWV-TRN-0009-RGP-0016"
+      ],
+      "motion_path": [
+       "TRN-0008",
+       "TRN-0009"
+      ],
+      "physical_effect_obligation": [
+       "PEO-0001",
+       "PEO-0002",
+       "PEO-0003",
+       "PEO-0004",
+       "PEO-0005"
+      ],
+      "physical_interaction": [
+       "PHI-0016",
+       "PHI-0017",
+       "PHI-0018",
+       "PHI-0019",
+       "PHI-0020"
+      ],
+      "reach_evidence": [
+       "RCH-CND-0004-0001"
+      ],
+      "reaction_site": [
+       "RSR-0001",
+       "RSR-0002",
+       "RSR-0003"
+      ],
+      "realized_configuration": [
+       "STA-CFG-0008",
+       "STA-CFG-0009"
+      ],
+      "spatial_commitment": [
+       "ASY-0012",
+       "ASY-0013",
+       "ENV-0012",
+       "ENV-0013",
+       "FRG-0013",
+       "FRG-0014",
+       "FRG-0015",
+       "FRG-0016",
+       "FRG-0017",
+       "FRG-0018",
+       "SCL-CND-0004"
+      ],
+      "topology_element": [
+       "BOD-0012",
+       "BOD-0013",
+       "RGP-0015",
+       "RGP-0016"
+      ],
+      "topology_relation": [
+       "IFC-0016",
+       "IFC-0017",
+       "IFC-0018",
+       "IFC-0019",
+       "JNT-0013"
+      ]
+     },
+     "semantic_role_populations": {
+      "actor_role": 1,
+      "assembly_order": 2,
+      "constraint_relation": 4,
+      "design_constraint": 0,
+      "elimination_evidence": 1,
+      "kinematic_axis": 1,
+      "load_case": 5,
+      "load_route": 5,
+      "mobility_disposition": 2,
+      "motion_occupancy": 2,
+      "motion_path": 2,
+      "physical_effect_obligation": 5,
+      "physical_interaction": 5,
+      "reach_evidence": 1,
+      "reaction_site": 3,
+      "realized_configuration": 2,
+      "spatial_commitment": 11,
+      "topology_element": 4,
+      "topology_relation": 5
+     },
+     "unmet_premise_classes": [],
+     "verdict": "READY",
+     "view_ready": true,
+     "view_status": "VIEW_READY"
+    },
+    "CND-0005": {
+     "branch_isolation_held": true,
+     "candidates_visible": [
+      "CND-0005"
+     ],
+     "exactly_this_candidate": true,
+     "family_counts": {
+      "Actor": 1,
+      "Ambiguity": 7,
+      "AssemblyStep": 3,
+      "Body": 3,
+      "Candidate": 1,
+      "Configuration": 3,
+      "ConstraintRelation": 4,
+      "EliminationRecord": 1,
+      "Envelope": 3,
+      "Freedom": 7,
+      "FunctionalRegion": 4,
+      "Interface": 5,
+      "Joint": 2,
+      "LoadCase": 5,
+      "LoadPath": 5,
+      "MobilityExpectation": 3,
+      "Obligation": 14,
+      "PhysicalEffectObligation": 5,
+      "PhysicalInteraction": 5,
+      "ReachResult": 2,
+      "ReactionSiteRequirement": 3,
+      "ReferenceScale": 1,
+      "Requirement": 10,
+      "RigidGroup": 3,
+      "Scenario": 3,
+      "State": 3,
+      "SweptVolume": 6,
+      "Transition": 4
+     },
+     "foreign_branch_entities": {},
+     "reasons": [],
+     "required_premise_classes": [
+      {
+       "class": "candidate_engineering_evidence",
+       "families": [
+        "AssemblyStep",
+        "Body",
+        "ConstraintRelation",
+        "Envelope",
+        "FunctionalRegion",
+        "Interface",
+        "Joint",
+        "LoadPath",
+        "MobilityExpectation",
+        "PhysicalInteraction",
+        "ReferenceScale",
+        "RigidGroup"
+       ],
+       "roles": [
+        "constraint_relation",
+        "load_route",
+        "mobility_disposition",
+        "physical_interaction",
+        "spatial_commitment",
+        "topology_element",
+        "topology_relation"
+       ],
+       "selection": {
+        "constraint_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "load_route": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "mobility_disposition": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "physical_interaction": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "spatial_commitment": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_element": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "realized_motion",
+       "families": [
+        "Joint",
+        "State",
+        "SweptVolume",
+        "Transition"
+       ],
+       "roles": [
+        "kinematic_axis",
+        "motion_occupancy",
+        "motion_path",
+        "realized_configuration"
+       ],
+       "selection": {
+        "kinematic_axis": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_occupancy": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_path": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "realized_configuration": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "candidate_local_geometric_finding",
+       "families": [
+        "AssemblyStep",
+        "EliminationRecord",
+        "ReachResult"
+       ],
+       "roles": [
+        "assembly_order",
+        "elimination_evidence",
+        "reach_evidence"
+       ],
+       "selection": {
+        "assembly_order": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "elimination_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "reach_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "declared_physical_demand",
+       "families": [
+        "Actor",
+        "LoadCase",
+        "PhysicalEffectObligation",
+        "ReactionSiteRequirement"
+       ],
+       "roles": [
+        "actor_role",
+        "load_case",
+        "physical_effect_obligation",
+        "reaction_site"
+       ],
+       "selection": {
+        "actor_role": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "load_case": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "physical_effect_obligation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "reaction_site": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      },
+      {
+       "class": "hard_design_constraint",
+       "families": [
+        "DesignConstraint"
+       ],
+       "roles": [
+        "design_constraint"
+       ],
+       "selection": {
+        "design_constraint": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      }
+     ],
+     "s04b_accepted": true,
+     "semantic_role_members": {
+      "actor_role": [
+       "ACT-0001"
+      ],
+      "assembly_order": [
+       "ASY-0014",
+       "ASY-0015",
+       "ASY-0016"
+      ],
+      "constraint_relation": [
+       "CRL-0028",
+       "CRL-0029",
+       "CRL-0030",
+       "CRL-0031"
+      ],
+      "design_constraint": [],
+      "elimination_evidence": [
+       "ELM-CND-0005"
+      ],
+      "kinematic_axis": [
+       "JNT-0101",
+       "JNT-0102"
+      ],
+      "load_case": [
+       "LC-0001",
+       "LC-0002",
+       "LC-0003",
+       "LC-0004",
+       "LC-0005"
+      ],
+      "load_route": [
+       "LDP-0021",
+       "LDP-0022",
+       "LDP-0023",
+       "LDP-0024",
+       "LDP-0025"
+      ],
+      "mobility_disposition": [
+       "MEX-CFG-0101",
+       "MEX-CFG-0102",
+       "MEX-CFG-0103"
+      ],
+      "motion_occupancy": [
+       "SWV-TRN-0010-RGP-0102",
+       "SWV-TRN-0010-RGP-0103",
+       "SWV-TRN-0011-RGP-0102",
+       "SWV-TRN-0011-RGP-0103",
+       "SWV-TRN-0012-RGP-0103",
+       "SWV-TRN-0013-RGP-0103"
+      ],
+      "motion_path": [
+       "TRN-0010",
+       "TRN-0011",
+       "TRN-0012",
+       "TRN-0013"
+      ],
+      "physical_effect_obligation": [
+       "PEO-0001",
+       "PEO-0002",
+       "PEO-0003",
+       "PEO-0004",
+       "PEO-0005"
+      ],
+      "physical_interaction": [
+       "PHI-0021",
+       "PHI-0022",
+       "PHI-0023",
+       "PHI-0024",
+       "PHI-0025"
+      ],
+      "reach_evidence": [
+       "RCH-CND-0005-0001",
+       "RCH-CND-0005-0002"
+      ],
+      "reaction_site": [
+       "RSR-0001",
+       "RSR-0002",
+       "RSR-0003"
+      ],
+      "realized_configuration": [
+       "STA-CFG-0101",
+       "STA-CFG-0102",
+       "STA-CFG-0103"
+      ],
+      "spatial_commitment": [
+       "ASY-0014",
+       "ASY-0015",
+       "ASY-0016",
+       "ENV-0014",
+       "ENV-0015",
+       "ENV-0016",
+       "FRG-0101",
+       "FRG-0102",
+       "FRG-0103",
+       "FRG-0104",
+       "SCL-CND-0005"
+      ],
+      "topology_element": [
+       "BOD-0101",
+       "BOD-0102",
+       "BOD-0103",
+       "RGP-0101",
+       "RGP-0102",
+       "RGP-0103"
+      ],
+      "topology_relation": [
+       "IFC-0101",
+       "IFC-0102",
+       "IFC-0103",
+       "IFC-0104",
+       "IFC-0105",
+       "JNT-0101",
+       "JNT-0102"
+      ]
+     },
+     "semantic_role_populations": {
+      "actor_role": 1,
+      "assembly_order": 3,
+      "constraint_relation": 4,
+      "design_constraint": 0,
+      "elimination_evidence": 1,
+      "kinematic_axis": 2,
+      "load_case": 5,
+      "load_route": 5,
+      "mobility_disposition": 3,
+      "motion_occupancy": 6,
+      "motion_path": 4,
+      "physical_effect_obligation": 5,
+      "physical_interaction": 5,
+      "reach_evidence": 2,
+      "reaction_site": 3,
+      "realized_configuration": 3,
+      "spatial_commitment": 11,
+      "topology_element": 6,
+      "topology_relation": 7
+     },
+     "unmet_premise_classes": [],
+     "verdict": "READY",
+     "view_ready": true,
+     "view_status": "VIEW_READY"
+    },
+    "CND-0006": {
+     "branch_isolation_held": true,
+     "candidates_visible": [
+      "CND-0006"
+     ],
+     "exactly_this_candidate": true,
+     "family_counts": {
+      "Actor": 1,
+      "Ambiguity": 7,
+      "AssemblyStep": 3,
+      "Body": 3,
+      "Candidate": 1,
+      "Configuration": 3,
+      "ConstraintRelation": 10,
+      "EliminationRecord": 1,
+      "Envelope": 3,
+      "Freedom": 7,
+      "FunctionalRegion": 4,
+      "Interface": 6,
+      "Joint": 4,
+      "LoadCase": 5,
+      "LoadPath": 5,
+      "MobilityExpectation": 3,
+      "Obligation": 14,
+      "PhysicalEffectObligation": 5,
+      "PhysicalInteraction": 5,
+      "ReachResult": 2,
+      "ReactionSiteRequirement": 3,
+      "ReferenceScale": 1,
+      "Requirement": 10,
+      "RigidGroup": 4,
+      "Scenario": 3,
+      "State": 3,
+      "SweptVolume": 12,
+      "Transition": 4
+     },
+     "foreign_branch_entities": {},
+     "reasons": [],
+     "required_premise_classes": [
+      {
+       "class": "candidate_engineering_evidence",
+       "families": [
+        "AssemblyStep",
+        "Body",
+        "ConstraintRelation",
+        "Envelope",
+        "FunctionalRegion",
+        "Interface",
+        "Joint",
+        "LoadPath",
+        "MobilityExpectation",
+        "PhysicalInteraction",
+        "ReferenceScale",
+        "RigidGroup"
+       ],
+       "roles": [
+        "constraint_relation",
+        "load_route",
+        "mobility_disposition",
+        "physical_interaction",
+        "spatial_commitment",
+        "topology_element",
+        "topology_relation"
+       ],
+       "selection": {
+        "constraint_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "load_route": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "mobility_disposition": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "physical_interaction": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "spatial_commitment": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_element": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "topology_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "realized_motion",
+       "families": [
+        "Joint",
+        "State",
+        "SweptVolume",
+        "Transition"
+       ],
+       "roles": [
+        "kinematic_axis",
+        "motion_occupancy",
+        "motion_path",
+        "realized_configuration"
+       ],
+       "selection": {
+        "kinematic_axis": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_occupancy": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "motion_path": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "realized_configuration": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "candidate_local_geometric_finding",
+       "families": [
+        "AssemblyStep",
+        "EliminationRecord",
+        "ReachResult"
+       ],
+       "roles": [
+        "assembly_order",
+        "elimination_evidence",
+        "reach_evidence"
+       ],
+       "selection": {
+        "assembly_order": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "elimination_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        },
+        "reach_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "INVOCATION_BRANCH"
+        }
+       }
+      },
+      {
+       "class": "declared_physical_demand",
+       "families": [
+        "Actor",
+        "LoadCase",
+        "PhysicalEffectObligation",
+        "ReactionSiteRequirement"
+       ],
+       "roles": [
+        "actor_role",
+        "load_case",
+        "physical_effect_obligation",
+        "reaction_site"
+       ],
+       "selection": {
+        "actor_role": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "load_case": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "physical_effect_obligation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        },
+        "reaction_site": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      },
+      {
+       "class": "hard_design_constraint",
+       "families": [
+        "DesignConstraint"
+       ],
+       "roles": [
+        "design_constraint"
+       ],
+       "selection": {
+        "design_constraint": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      }
+     ],
+     "s04b_accepted": true,
+     "semantic_role_members": {
+      "actor_role": [
+       "ACT-0001"
+      ],
+      "assembly_order": [
+       "ASY-0101",
+       "ASY-0102",
+       "ASY-0103"
+      ],
+      "constraint_relation": [
+       "CRL-0101",
+       "CRL-0102",
+       "CRL-0103",
+       "CRL-0104",
+       "CRL-0105",
+       "CRL-0106",
+       "CRL-0107",
+       "CRL-0108",
+       "CRL-0109",
+       "CRL-0110"
+      ],
+      "design_constraint": [],
+      "elimination_evidence": [
+       "ELM-CND-0006"
+      ],
+      "kinematic_axis": [
+       "JNT-0014",
+       "JNT-0015",
+       "JNT-0016",
+       "JNT-0017"
+      ],
+      "load_case": [
+       "LC-0001",
+       "LC-0002",
+       "LC-0003",
+       "LC-0004",
+       "LC-0005"
+      ],
+      "load_route": [
+       "LDP-0101",
+       "LDP-0102",
+       "LDP-0103",
+       "LDP-0104",
+       "LDP-0105"
+      ],
+      "mobility_disposition": [
+       "MEX-CFG-0010",
+       "MEX-CFG-0011",
+       "MEX-CFG-0012"
+      ],
+      "motion_occupancy": [
+       "SWV-TRN-0101-RGP-0018",
+       "SWV-TRN-0101-RGP-0019",
+       "SWV-TRN-0101-RGP-0020",
+       "SWV-TRN-0102-RGP-0018",
+       "SWV-TRN-0102-RGP-0019",
+       "SWV-TRN-0102-RGP-0020",
+       "SWV-TRN-0103-RGP-0018",
+       "SWV-TRN-0103-RGP-0019",
+       "SWV-TRN-0103-RGP-0020",
+       "SWV-TRN-0104-RGP-0018",
+       "SWV-TRN-0104-RGP-0019",
+       "SWV-TRN-0104-RGP-0020"
+      ],
+      "motion_path": [
+       "TRN-0101",
+       "TRN-0102",
+       "TRN-0103",
+       "TRN-0104"
+      ],
+      "physical_effect_obligation": [
+       "PEO-0001",
+       "PEO-0002",
+       "PEO-0003",
+       "PEO-0004",
+       "PEO-0005"
+      ],
+      "physical_interaction": [
+       "PHI-0101",
+       "PHI-0102",
+       "PHI-0103",
+       "PHI-0104",
+       "PHI-0105"
+      ],
+      "reach_evidence": [
+       "RCH-CND-0006-0001",
+       "RCH-CND-0006-0002"
+      ],
+      "reaction_site": [
+       "RSR-0001",
+       "RSR-0002",
+       "RSR-0003"
+      ],
+      "realized_configuration": [
+       "STA-CFG-0010",
+       "STA-CFG-0011",
+       "STA-CFG-0012"
+      ],
+      "spatial_commitment": [
+       "ASY-0101",
+       "ASY-0102",
+       "ASY-0103",
+       "ENV-0017",
+       "ENV-0018",
+       "ENV-0019",
+       "FRG-0019",
+       "FRG-0020",
+       "FRG-0021",
+       "FRG-0022",
+       "SCL-CND-0006"
+      ],
+      "topology_element": [
+       "BOD-0014",
+       "BOD-0015",
+       "BOD-0016",
+       "RGP-0017",
+       "RGP-0018",
+       "RGP-0019",
+       "RGP-0020"
+      ],
+      "topology_relation": [
+       "IFC-0020",
+       "IFC-0021",
+       "IFC-0022",
+       "IFC-0023",
+       "IFC-0024",
+       "IFC-0025",
+       "JNT-0014",
+       "JNT-0015",
+       "JNT-0016",
+       "JNT-0017"
+      ]
+     },
+     "semantic_role_populations": {
+      "actor_role": 1,
+      "assembly_order": 3,
+      "constraint_relation": 10,
+      "design_constraint": 0,
+      "elimination_evidence": 1,
+      "kinematic_axis": 4,
+      "load_case": 5,
+      "load_route": 5,
+      "mobility_disposition": 3,
+      "motion_occupancy": 12,
+      "motion_path": 4,
+      "physical_effect_obligation": 5,
+      "physical_interaction": 5,
+      "reach_evidence": 2,
+      "reaction_site": 3,
+      "realized_configuration": 3,
+      "spatial_commitment": 11,
+      "topology_element": 7,
+      "topology_relation": 10
+     },
+     "unmet_premise_classes": [],
+     "verdict": "READY",
+     "view_ready": true,
+     "view_status": "VIEW_READY"
+    }
+   },
+   "not_ready": [],
+   "per_branch": true,
+   "ready": [
+    "CND-0001",
+    "CND-0002",
+    "CND-0003",
+    "CND-0004",
+    "CND-0005",
+    "CND-0006"
+   ]
+  },
+  "selection": {
+   "candidates": {
+    "DESIGN_WIDE": {
+     "branch_isolation_held": true,
+     "candidates_visible": [
+      "CND-0001",
+      "CND-0002",
+      "CND-0003",
+      "CND-0004",
+      "CND-0005",
+      "CND-0006"
+     ],
+     "exactly_this_candidate": false,
+     "family_counts": {
+      "Actor": 1,
+      "Ambiguity": 7,
+      "AssemblyStep": 19,
+      "Body": 19,
+      "Candidate": 6,
+      "EliminationRecord": 6,
+      "Envelope": 19,
+      "Freedom": 7,
+      "FunctionalRegion": 26,
+      "Interface": 30,
+      "Joint": 19,
+      "LoadCase": 2,
+      "Obligation": 20,
+      "PhysicalEffectObligation": 1,
+      "ReachResult": 11,
+      "ReactionSiteRequirement": 3,
+      "ReferenceScale": 6,
+      "Requirement": 10,
+      "RigidGroup": 23,
+      "Scenario": 3,
+      "UnresolvedDecision": 55
+     },
+     "foreign_branch_entities": {},
+     "reasons": [
+      "the selection consumer view is UPSTREAM_INSUFFICIENCY",
+      "unmet premise class: {\"requirement\": \"eligibility_evidence\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"eligibility_evidence\", \"families\": [\"FeasibilityDomainAssessment\", \"HardRequirementCompliance\", \"MechanicalFeasibilityAssessment\"], \"standing_instances\": {\"FeasibilityDomainAssessment\": 0, \"HardRequirementCompliance\": 0, \"MechanicalFeasibilityAssessment\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the ALL_RETAINED_BRANCHES population, and this premise requires at least one\", \"population\": \"ALL_RETAINED_BRANCHES\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}], \"families\": [\"FeasibilityDomainAssessment\", \"HardRequirementCompliance\", \"MechanicalFeasibilityAssessment\"], \"selected\": 0, \"trace\": {\"engineering_question\": \"Which candidates are eligible, and on what established evidence?\", \"why\": \"Eligibility is the population this responsibility may act on, and it is decided elsewhere.\", \"requires_semantics\": [\"eligibility_evidence\"], \"qualifying_by_role\": {\"eligibility_evidence\": [\"FeasibilityDomainAssessment\", \"HardRequirementCompliance\", \"MechanicalFeasibilityAssessment\"]}, \"instance_selection\": {\"eligibility_evidence\": {\"population\": \"ALL_RETAINED_BRANCHES\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}",
+      "unmet premise class: {\"requirement\": \"selection_preference\", \"source\": \"REASONING_PREMISE\", \"verdict\": \"MISSING_UPSTREAM\", \"coverage\": [{\"obligation\": \"selection_preference\", \"families\": [\"SelectionProfile\"], \"standing_instances\": {\"SelectionProfile\": 0}, \"verdict\": \"MISSING_UPSTREAM\", \"why\": \"no applicable instance exists in the DESIGN_WIDE population, and this premise requires at least one\", \"population\": \"DESIGN_WIDE\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\", \"expected\": [], \"expected_count\": 0, \"selected\": [], \"selected_count\": 0}], \"families\": [\"SelectionProfile\"], \"selected\": 0, \"trace\": {\"engineering_question\": \"What does the user prefer, and does one candidate dominate under it?\", \"why\": \"This is the ONLY responsibility that may see one, and the first point at which the question \\\"which working design do we want\\\" can be asked at all.\", \"requires_semantics\": [\"selection_preference\"], \"qualifying_by_role\": {\"selection_preference\": [\"SelectionProfile\"]}, \"instance_selection\": {\"selection_preference\": {\"population\": \"DESIGN_WIDE\", \"coverage\": \"ALL_APPLICABLE\", \"existence\": \"REQUIRED_NONEMPTY\", \"applicability\": \"ALL_MEMBERS\"}}, \"source_contract\": \"STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes\"}}"
+     ],
+     "required_premise_classes": [
+      {
+       "class": "eligibility_evidence",
+       "families": [
+        "FeasibilityDomainAssessment",
+        "HardRequirementCompliance",
+        "MechanicalFeasibilityAssessment"
+       ],
+       "roles": [
+        "eligibility_evidence"
+       ],
+       "selection": {
+        "eligibility_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "ALL_RETAINED_BRANCHES"
+        }
+       }
+      },
+      {
+       "class": "candidate_spatial_evidence",
+       "families": [
+        "AssemblyStep",
+        "EliminationRecord",
+        "Envelope",
+        "FunctionalRegion",
+        "ReachResult",
+        "ReferenceScale"
+       ],
+       "roles": [
+        "elimination_evidence",
+        "reach_evidence",
+        "spatial_commitment"
+       ],
+       "selection": {
+        "elimination_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "ALL_RETAINED_BRANCHES"
+        },
+        "reach_evidence": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "ALL_RETAINED_BRANCHES"
+        },
+        "spatial_commitment": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "ALL_RETAINED_BRANCHES"
+        }
+       }
+      },
+      {
+       "class": "candidate_topology_evidence",
+       "families": [
+        "Body",
+        "Interface",
+        "Joint",
+        "RigidGroup"
+       ],
+       "roles": [
+        "topology_element",
+        "topology_relation"
+       ],
+       "selection": {
+        "topology_element": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "ALL_RETAINED_BRANCHES"
+        },
+        "topology_relation": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "ALL_RETAINED_BRANCHES"
+        }
+       }
+      },
+      {
+       "class": "hard_design_constraint",
+       "families": [
+        "DesignConstraint"
+       ],
+       "roles": [
+        "design_constraint"
+       ],
+       "selection": {
+        "design_constraint": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      },
+      {
+       "class": "selection_preference",
+       "families": [
+        "SelectionProfile"
+       ],
+       "roles": [
+        "selection_preference"
+       ],
+       "selection": {
+        "selection_preference": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      },
+      {
+       "class": "unresolved_blocking_scope",
+       "families": [
+        "UnresolvedDecision"
+       ],
+       "roles": [
+        "open_item"
+       ],
+       "selection": {
+        "open_item": {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "MAY_BE_EMPTY",
+         "population": "DESIGN_WIDE"
+        }
+       }
+      }
+     ],
+     "s04b_accepted": true,
+     "semantic_role_members": {
+      "design_constraint": [],
+      "eligibility_evidence": [],
+      "elimination_evidence": [
+       "ELM-CND-0001",
+       "ELM-CND-0002",
+       "ELM-CND-0003",
+       "ELM-CND-0004",
+       "ELM-CND-0005",
+       "ELM-CND-0006"
+      ],
+      "open_item": [
+       "S3U-0001",
+       "S3U-0002",
+       "S3U-0003",
+       "S3U-0004",
+       "S3U-0005",
+       "S3U-0006",
+       "S3U-0007",
+       "S3U-0008",
+       "S3U-0009",
+       "S3U-0010",
+       "S3U-0011",
+       "S3U-0012",
+       "S3U-0013",
+       "S3U-0014",
+       "S3U-0015",
+       "S3U-0016",
+       "S3U-0017",
+       "S3U-0018",
+       "S3U-0019",
+       "S3U-0020",
+       "S3U-0021",
+       "S3U-0022",
+       "S3U-0023",
+       "S3U-0024",
+       "S3U-0025",
+       "S3U-0026",
+       "S3U-0027",
+       "S3U-0028",
+       "S3U-0029",
+       "S3U-0030",
+       "S3U-0031",
+       "S3U-0032",
+       "S3U-0033",
+       "S3U-0101",
+       "S3U-0102",
+       "S3U-0103",
+       "S3U-0104",
+       "S3U-0105",
+       "S3U-0106",
+       "S3U-0107",
+       "S3U-0301",
+       "S3U-0302",
+       "S3U-0303",
+       "S3U-1001",
+       "S3U-1002",
+       "S3U-1003",
+       "S3U-1004",
+       "S3U-1005",
+       "S3U-1006",
+       "S3U-1100",
+       "S3U-1101",
+       "S3U-2000",
+       "S3U-2001",
+       "S3U-2002",
+       "UNR-0001"
+      ],
+      "reach_evidence": [
+       "RCH-CND-0001-0001",
+       "RCH-CND-0001-0002",
+       "RCH-CND-0001-0003",
+       "RCH-CND-0001-0004",
+       "RCH-CND-0002-0001",
+       "RCH-CND-0003-0001",
+       "RCH-CND-0004-0001",
+       "RCH-CND-0005-0001",
+       "RCH-CND-0005-0002",
+       "RCH-CND-0006-0001",
+       "RCH-CND-0006-0002"
+      ],
+      "selection_preference": [],
+      "spatial_commitment": [
+       "ASY-0001",
+       "ASY-0002",
+       "ASY-0003",
+       "ASY-0004",
+       "ASY-0005",
+       "ASY-0006",
+       "ASY-0007",
+       "ASY-0008",
+       "ASY-0009",
+       "ASY-0010",
+       "ASY-0011",
+       "ASY-0012",
+       "ASY-0013",
+       "ASY-0014",
+       "ASY-0015",
+       "ASY-0016",
+       "ASY-0101",
+       "ASY-0102",
+       "ASY-0103",
+       "ENV-0001",
+       "ENV-0002",
+       "ENV-0003",
+       "ENV-0004",
+       "ENV-0005",
+       "ENV-0006",
+       "ENV-0007",
+       "ENV-0008",
+       "ENV-0009",
+       "ENV-0010",
+       "ENV-0011",
+       "ENV-0012",
+       "ENV-0013",
+       "ENV-0014",
+       "ENV-0015",
+       "ENV-0016",
+       "ENV-0017",
+       "ENV-0018",
+       "ENV-0019",
+       "FRG-0001",
+       "FRG-0002",
+       "FRG-0003",
+       "FRG-0004",
+       "FRG-0005",
+       "FRG-0006",
+       "FRG-0007",
+       "FRG-0008",
+       "FRG-0009",
+       "FRG-0010",
+       "FRG-0011",
+       "FRG-0012",
+       "FRG-0013",
+       "FRG-0014",
+       "FRG-0015",
+       "FRG-0016",
+       "FRG-0017",
+       "FRG-0018",
+       "FRG-0019",
+       "FRG-0020",
+       "FRG-0021",
+       "FRG-0022",
+       "FRG-0101",
+       "FRG-0102",
+       "FRG-0103",
+       "FRG-0104",
+       "SCL-CND-0001",
+       "SCL-CND-0002",
+       "SCL-CND-0003",
+       "SCL-CND-0004",
+       "SCL-CND-0005",
+       "SCL-CND-0006"
+      ],
+      "topology_element": [
+       "BOD-0001",
+       "BOD-0002",
+       "BOD-0003",
+       "BOD-0004",
+       "BOD-0005",
+       "BOD-0006",
+       "BOD-0007",
+       "BOD-0008",
+       "BOD-0009",
+       "BOD-0010",
+       "BOD-0011",
+       "BOD-0012",
+       "BOD-0013",
+       "BOD-0014",
+       "BOD-0015",
+       "BOD-0016",
+       "BOD-0101",
+       "BOD-0102",
+       "BOD-0103",
+       "RGP-0001",
+       "RGP-0002",
+       "RGP-0003",
+       "RGP-0004",
+       "RGP-0005",
+       "RGP-0006",
+       "RGP-0007",
+       "RGP-0008",
+       "RGP-0009",
+       "RGP-0010",
+       "RGP-0011",
+       "RGP-0012",
+       "RGP-0013",
+       "RGP-0014",
+       "RGP-0015",
+       "RGP-0016",
+       "RGP-0017",
+       "RGP-0018",
+       "RGP-0019",
+       "RGP-0020",
+       "RGP-0101",
+       "RGP-0102",
+       "RGP-0103"
+      ],
+      "topology_relation": [
+       "IFC-0001",
+       "IFC-0002",
+       "IFC-0003",
+       "IFC-0004",
+       "IFC-0005",
+       "IFC-0006",
+       "IFC-0007",
+       "IFC-0008",
+       "IFC-0009",
+       "IFC-0010",
+       "IFC-0011",
+       "IFC-0012",
+       "IFC-0013",
+       "IFC-0014",
+       "IFC-0015",
+       "IFC-0016",
+       "IFC-0017",
+       "IFC-0018",
+       "IFC-0019",
+       "IFC-0020",
+       "IFC-0021",
+       "IFC-0022",
+       "IFC-0023",
+       "IFC-0024",
+       "IFC-0025",
+       "IFC-0101",
+       "IFC-0102",
+       "IFC-0103",
+       "IFC-0104",
+       "IFC-0105",
+       "JNT-0001",
+       "JNT-0002",
+       "JNT-0003",
+       "JNT-0004",
+       "JNT-0005",
+       "JNT-0006",
+       "JNT-0007",
+       "JNT-0008",
+       "JNT-0009",
+       "JNT-0010",
+       "JNT-0011",
+       "JNT-0012",
+       "JNT-0013",
+       "JNT-0014",
+       "JNT-0015",
+       "JNT-0016",
+       "JNT-0017",
+       "JNT-0101",
+       "JNT-0102"
+      ]
+     },
+     "semantic_role_populations": {
+      "design_constraint": 0,
+      "eligibility_evidence": 0,
+      "elimination_evidence": 6,
+      "open_item": 55,
+      "reach_evidence": 11,
+      "selection_preference": 0,
+      "spatial_commitment": 70,
+      "topology_element": 42,
+      "topology_relation": 49
+     },
+     "unmet_premise_classes": [
+      {
+       "coverage": [
+        {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "expected": [],
+         "expected_count": 0,
+         "families": [
+          "FeasibilityDomainAssessment",
+          "HardRequirementCompliance",
+          "MechanicalFeasibilityAssessment"
+         ],
+         "obligation": "eligibility_evidence",
+         "population": "ALL_RETAINED_BRANCHES",
+         "selected": [],
+         "selected_count": 0,
+         "standing_instances": {
+          "FeasibilityDomainAssessment": 0,
+          "HardRequirementCompliance": 0,
+          "MechanicalFeasibilityAssessment": 0
+         },
+         "verdict": "MISSING_UPSTREAM",
+         "why": "no applicable instance exists in the ALL_RETAINED_BRANCHES population, and this premise requires at least one"
+        }
+       ],
+       "families": [
+        "FeasibilityDomainAssessment",
+        "HardRequirementCompliance",
+        "MechanicalFeasibilityAssessment"
+       ],
+       "requirement": "eligibility_evidence",
+       "selected": 0,
+       "source": "REASONING_PREMISE",
+       "trace": {
+        "engineering_question": "Which candidates are eligible, and on what established evidence?",
+        "instance_selection": {
+         "eligibility_evidence": {
+          "applicability": "ALL_MEMBERS",
+          "coverage": "ALL_APPLICABLE",
+          "existence": "REQUIRED_NONEMPTY",
+          "population": "ALL_RETAINED_BRANCHES"
+         }
+        },
+        "qualifying_by_role": {
+         "eligibility_evidence": [
+          "FeasibilityDomainAssessment",
+          "HardRequirementCompliance",
+          "MechanicalFeasibilityAssessment"
+         ]
+        },
+        "requires_semantics": [
+         "eligibility_evidence"
+        ],
+        "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+        "why": "Eligibility is the population this responsibility may act on, and it is decided elsewhere."
+       },
+       "verdict": "MISSING_UPSTREAM"
+      },
+      {
+       "coverage": [
+        {
+         "applicability": "ALL_MEMBERS",
+         "coverage": "ALL_APPLICABLE",
+         "existence": "REQUIRED_NONEMPTY",
+         "expected": [],
+         "expected_count": 0,
+         "families": [
+          "SelectionProfile"
+         ],
+         "obligation": "selection_preference",
+         "population": "DESIGN_WIDE",
+         "selected": [],
+         "selected_count": 0,
+         "standing_instances": {
+          "SelectionProfile": 0
+         },
+         "verdict": "MISSING_UPSTREAM",
+         "why": "no applicable instance exists in the DESIGN_WIDE population, and this premise requires at least one"
+        }
+       ],
+       "families": [
+        "SelectionProfile"
+       ],
+       "requirement": "selection_preference",
+       "selected": 0,
+       "source": "REASONING_PREMISE",
+       "trace": {
+        "engineering_question": "What does the user prefer, and does one candidate dominate under it?",
+        "instance_selection": {
+         "selection_preference": {
+          "applicability": "ALL_MEMBERS",
+          "coverage": "ALL_APPLICABLE",
+          "existence": "REQUIRED_NONEMPTY",
+          "population": "DESIGN_WIDE"
+         }
+        },
+        "qualifying_by_role": {
+         "selection_preference": [
+          "SelectionProfile"
+         ]
+        },
+        "requires_semantics": [
+         "selection_preference"
+        ],
+        "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+        "why": "This is the ONLY responsibility that may see one, and the first point at which the question \"which working design do we want\" can be asked at all."
+       },
+       "verdict": "MISSING_UPSTREAM"
+      }
+     ],
+     "verdict": "NOT_READY",
+     "view_ready": false,
+     "view_status": "UPSTREAM_INSUFFICIENCY"
+    }
+   },
+   "not_ready": [
+    "DESIGN_WIDE"
+   ],
+   "per_branch": false,
+   "ready": []
+  }
+ }
+}

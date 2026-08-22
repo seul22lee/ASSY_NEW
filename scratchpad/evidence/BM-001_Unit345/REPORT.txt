@@ -1,0 +1,274 @@
+BM-001 - MOTION SEMANTICS MIGRATION, END TO END
+==============================================================================
+
+RECONSTRUCTION
+  s01, s02 and six s03a replayed from saved evidence.
+  s03b replayed  : CND-0001, CND-0002, CND-0003, CND-0004, CND-0005
+  s03b fresh     : CND-0006
+  the Unit-2B CND-0006 response was NOT transplanted:
+    it authored TRQ-0001, TRQ-0002, TRQ-0003, TRQ-0004
+    already owned here: TRQ-0001, TRQ-0002, TRQ-0003, TRQ-0004
+    the Unit-2B rerun allocated in a one-candidate namespace; ids it authored are already owned by other branches here, and renaming model-authored ids by hand is authoring evidence
+
+------------------------------------------------------------------------------
+CND-0001
+------------------------------------------------------------------------------
+  s03b source          : replay
+  TransitionRequirement: 2
+    TRQ-0001  CFG-0001 -> CFG-0002
+        requires : JNT-0002/RY, JNT-0003/RY
+        releases : CRL-0005
+    TRQ-0002  CFG-0002 -> CFG-0001
+        requires : JNT-0002/RY, JNT-0003/RY
+        releases : nothing
+  restraints naming a relative motion: 3 of 6
+    CRL-0003 active in CFG-0001, CFG-0002 : JNT-0002/TX, JNT-0002/TY, JNT-0002/TZ, JNT-0002/RX, JNT-0002/RZ  (no defeat specification)
+    CRL-0004 active in CFG-0001, CFG-0002 : JNT-0003/TX, JNT-0003/TY, JNT-0003/TZ, JNT-0003/RX, JNT-0003/RZ  (no defeat specification)
+    CRL-0005 active in CFG-0001 : JNT-0002/RY  (no defeat specification)
+  s04a                 : REPLAY - every premise of the saved patch is present and current, and it is accepted at the write boundary unchanged
+  s04b                 : parse=None accepted=True status=SUCCESS
+  Transition -> requirement:
+      TRN-0001 -> TRQ-0001
+      TRN-0002 -> TRQ-0002
+  States=2 Transitions=2 SweptVolumes=4
+  s03b symbolic checker: 1
+      RELEASE_EVIDENCE_NOT_ESTABLISHED: TRQ-0001 releases CRL-0005, which states no defeat specification, so how the release is achieved is not established
+
+  transition_reachability: NOT_ESTABLISHED  RELEASE_EVIDENCE_NOT_ESTABLISHED
+      TRQ-0001 releases CRL-0005, which states no defeat specification, so how the release is achieved is not established
+  nine domains:
+      physical_realization     PASS             ALL_EFFECTS_DISCHARGED
+      load_reaction_closure    PASS             EVERY_LOAD_CLOSES_EXTERNALLY
+      transition_reachability  NOT_ESTABLISHED  RELEASE_EVIDENCE_NOT_ESTABLISHED
+      required_configurations  PASS             EVERY_CONFIGURATION_REALIZED
+      motion_and_transitions   PASS             EVERY_TRANSITION_MOVES_WHAT_IT_DECLARES
+      spatial_realization      NOT_ESTABLISHED  MOVING_GROUP_HAS_NO_JOINT
+      reach                    NOT_ESTABLISHED  MODEL_LOCAL_POSITIVE, REACH_BASIS_NOT_ESTABLISHED
+      assemblability           NOT_ESTABLISHED  DEFORMATION_RESOLVED_PATH, INSERTION_PATH_NOT_CLEAR
+      gross_interference       NOT_ESTABLISHED  CLEARANCE_PAIR_OVERLAPS, SWEEP_MEETS_CLEARANCE_PAIR
+  AGGREGATE            : NOT_ESTABLISHED
+  branch isolation     : State=2; SweptVolume=4; Transition=2
+
+------------------------------------------------------------------------------
+CND-0002
+------------------------------------------------------------------------------
+  s03b source          : replay
+  TransitionRequirement: 2
+    TRQ-0003  CFG-0003 -> CFG-0004
+        requires : JNT-0004/RY, JNT-0005/RZ
+        releases : nothing
+    TRQ-0004  CFG-0004 -> CFG-0003
+        requires : JNT-0005/RZ, JNT-0004/RY
+        releases : CRL-0013, CRL-0018
+  restraints naming a relative motion: 2 of 9
+    CRL-0013 active in CFG-0004 : JNT-0004/RY
+    CRL-0018 active in CFG-0004 : JNT-0005/RZ
+  s04a                 : REPLAY - every premise of the saved patch is present and current, and it is accepted at the write boundary unchanged
+  s04b                 : parse=OK accepted=True status=SUCCESS
+  Transition -> requirement:
+      TRN-0003 -> TRQ-0003
+      TRN-0004 -> TRQ-0004
+  States=2 Transitions=2 SweptVolumes=4
+  s03b symbolic checker: clean
+
+  transition_reachability: PASS  EVERY_DEMANDED_CHANGE_REACHABLE
+  nine domains:
+      physical_realization     PASS             ALL_EFFECTS_DISCHARGED
+      load_reaction_closure    PASS             EVERY_LOAD_CLOSES_EXTERNALLY
+      transition_reachability  PASS             EVERY_DEMANDED_CHANGE_REACHABLE
+      required_configurations  NOT_ESTABLISHED  DISTINCTNESS_DRIVER_AXIS_UNREADABLE
+      motion_and_transitions   PASS             EVERY_TRANSITION_MOVES_WHAT_IT_DECLARES
+      spatial_realization      NOT_ESTABLISHED  MOVING_GROUP_HAS_NO_JOINT
+      reach                    NOT_ESTABLISHED  MODEL_LOCAL_POSITIVE, REACH_BASIS_NOT_ESTABLISHED
+      assemblability           NOT_ESTABLISHED  INSERTION_PATH_NOT_CLEAR
+      gross_interference       NOT_ESTABLISHED  SWEEP_MEETS_KEEP_OUT
+  AGGREGATE            : NOT_ESTABLISHED
+  branch isolation     : State=2; SweptVolume=4; Transition=2
+
+------------------------------------------------------------------------------
+CND-0003
+------------------------------------------------------------------------------
+  s03b source          : replay
+  TransitionRequirement: 4
+    TRQ-0101  CFG-0005 -> CFG-0006
+        requires : JNT-0009/RY
+        releases : nothing
+    TRQ-0102  CFG-0006 -> CFG-0007
+        requires : JNT-0010/RY, JNT-0011/RY, JNT-0012/RY
+        releases : nothing
+    TRQ-0103  CFG-0007 -> CFG-0006
+        requires : JNT-0010/RY, JNT-0011/RY, JNT-0012/RY
+        releases : CRL-0107
+    TRQ-0104  CFG-0006 -> CFG-0005
+        requires : JNT-0009/RY
+        releases : nothing
+  restraints naming a relative motion: 0 of 7
+  s04a                 : RERUN - premises absent: []; premises not current: []; boundary: ["EXTEND_UNKNOWN: ASY-0008", "EXTEND_UNKNOWN: ASY-0009", "EXTEND_UNKNOWN: ASY-0010", "EXTEND_UNKNOWN: ASY-0011"]
+  s04b                 : parse=OK accepted=True status=SUCCESS
+  Transition -> requirement:
+      TRN-0101 -> TRQ-0101
+      TRN-0102 -> TRQ-0102
+      TRN-0103 -> TRQ-0103
+      TRN-0104 -> TRQ-0104
+  States=3 Transitions=4 SweptVolumes=12
+  s03b symbolic checker: 2
+      RELEASE_RELATIVE_MOTION_NOT_ESTABLISHED: TRQ-0103 releases CRL-0107, and that relation does not say which relative joint motion it restrains, so why the release matters is not established
+      RELEASE_EVIDENCE_NOT_ESTABLISHED: TRQ-0103 releases CRL-0107, which states no defeat specification, so how the release is achieved is not established
+
+  transition_reachability: NOT_ESTABLISHED  RELEASE_RELATIVE_MOTION_NOT_ESTABLISHED
+      TRQ-0103 releases CRL-0107, and that relation does not say which relative joint motion it restrains
+  nine domains:
+      physical_realization     PASS             ALL_EFFECTS_DISCHARGED
+      load_reaction_closure    PASS             EVERY_LOAD_CLOSES_EXTERNALLY
+      transition_reachability  NOT_ESTABLISHED  RELEASE_RELATIVE_MOTION_NOT_ESTABLISHED
+      required_configurations  PASS             EVERY_CONFIGURATION_REALIZED
+      motion_and_transitions   PASS             EVERY_TRANSITION_MOVES_WHAT_IT_DECLARES
+      spatial_realization      NOT_ESTABLISHED  INTERFACE_EXPECTATION_CONFLICT, MOVING_GROUP_DRIVER_AMBIGUOUS, MOVING_GROUP_HAS_
+      reach                    NOT_ESTABLISHED  MODEL_LOCAL_POSITIVE, REACH_BASIS_NOT_ESTABLISHED
+      assemblability           NOT_ESTABLISHED  INSERTION_PATH_NOT_CLEAR
+      gross_interference       NOT_ESTABLISHED  CLEARANCE_PAIR_OVERLAPS, INTERFACE_EXPECTATION_CONFLICT, SWEEP_MEETS_CLEARANCE_P
+  AGGREGATE            : NOT_ESTABLISHED
+  branch isolation     : State=3; SweptVolume=12; Transition=4
+
+------------------------------------------------------------------------------
+CND-0004
+------------------------------------------------------------------------------
+  s03b source          : replay
+  TransitionRequirement: 2
+    TRQ-0105  CFG-0008 -> CFG-0009
+        requires : JNT-0013/TX
+        releases : CRL-0110
+    TRQ-0106  CFG-0009 -> CFG-0008
+        requires : JNT-0013/TX
+        releases : nothing
+  restraints naming a relative motion: 2 of 4
+    CRL-0109 active in CFG-0008, CFG-0009 : JNT-0013/TY, JNT-0013/TZ, JNT-0013/RX, JNT-0013/RY, JNT-0013/RZ  (no defeat specification)
+    CRL-0110 active in CFG-0008 : JNT-0013/TX  (no defeat specification)
+  s04a                 : RERUN - premises absent: []; premises not current: []; boundary: ["EXTEND_UNKNOWN: ASY-0012", "EXTEND_UNKNOWN: ASY-0013"]
+  s04b                 : parse=OK accepted=True status=SUCCESS
+  Transition -> requirement:
+      TRN-0105 -> TRQ-0105
+      TRN-0106 -> TRQ-0106
+  States=2 Transitions=2 SweptVolumes=2
+  s03b symbolic checker: 1
+      RELEASE_EVIDENCE_NOT_ESTABLISHED: TRQ-0105 releases CRL-0110, which states no defeat specification, so how the release is achieved is not established
+
+  transition_reachability: NOT_ESTABLISHED  RELEASE_EVIDENCE_NOT_ESTABLISHED
+      TRQ-0105 releases CRL-0110, which states no defeat specification, so how the release is achieved is not established
+  nine domains:
+      physical_realization     PASS             ALL_EFFECTS_DISCHARGED
+      load_reaction_closure    PASS             EVERY_LOAD_CLOSES_EXTERNALLY
+      transition_reachability  NOT_ESTABLISHED  RELEASE_EVIDENCE_NOT_ESTABLISHED
+      required_configurations  PASS             EVERY_CONFIGURATION_REALIZED
+      motion_and_transitions   PASS             EVERY_TRANSITION_MOVES_WHAT_IT_DECLARES
+      spatial_realization      NOT_ESTABLISHED  MOVING_GROUP_HAS_NO_JOINT
+      reach                    NOT_ESTABLISHED  MODEL_LOCAL_POSITIVE, REACH_BASIS_NOT_ESTABLISHED
+      assemblability           NOT_ESTABLISHED  INSERTION_PATH_NOT_CLEAR
+      gross_interference       PASS             NO_CONSERVATIVE_OVERLAP
+  AGGREGATE            : NOT_ESTABLISHED
+  branch isolation     : State=2; SweptVolume=2; Transition=2
+
+------------------------------------------------------------------------------
+CND-0005
+------------------------------------------------------------------------------
+  s03b source          : replay
+  TransitionRequirement: 4
+    TRQ-0201  CFG-0103 -> CFG-0102
+        requires : JNT-0102/RX
+        releases : CRL-0203, CRL-0204
+    TRQ-0202  CFG-0102 -> CFG-0101
+        requires : JNT-0101/RY
+        releases : nothing
+    TRQ-0203  CFG-0101 -> CFG-0102
+        requires : JNT-0101/RY
+        releases : nothing
+    TRQ-0204  CFG-0102 -> CFG-0103
+        requires : JNT-0102/RX
+        releases : nothing
+  restraints naming a relative motion: 4 of 4
+    CRL-0201 active in CFG-0101, CFG-0102, CFG-0103 : JNT-0101/TX, JNT-0101/TY, JNT-0101/TZ, JNT-0101/RX, JNT-0101/RZ  (no defeat specification)
+    CRL-0202 active in CFG-0101, CFG-0102, CFG-0103 : JNT-0102/TX, JNT-0102/TY, JNT-0102/TZ, JNT-0102/RY, JNT-0102/RZ  (no defeat specification)
+    CRL-0203 active in CFG-0103 : JNT-0101/RY  (no defeat specification)
+    CRL-0204 active in CFG-0103 : JNT-0102/RX  (no defeat specification)
+  s04a                 : RERUN - premises absent: []; premises not current: []; boundary: ["EXTEND_UNKNOWN: ASY-0014", "EXTEND_UNKNOWN: ASY-0015", "EXTEND_UNKNOWN: ASY-0016"]
+  s04b                 : parse=OK accepted=True status=SUCCESS
+  Transition -> requirement:
+      TRN-0201 -> TRQ-0201
+      TRN-0202 -> TRQ-0202
+      TRN-0203 -> TRQ-0203
+      TRN-0204 -> TRQ-0204
+  States=3 Transitions=4 SweptVolumes=6
+  s03b symbolic checker: 3
+      RELEASE_RELATION_NOT_APPLICABLE: TRQ-0201 releases CRL-0203, which restrains JNT-0101/RY and the transition requires JNT-0102/RX
+      RELEASE_EVIDENCE_NOT_ESTABLISHED: TRQ-0201 releases CRL-0203, which states no defeat specification, so how the release is achieved is not established
+      RELEASE_EVIDENCE_NOT_ESTABLISHED: TRQ-0201 releases CRL-0204, which states no defeat specification, so how the release is achieved is not established
+
+  transition_reachability: NOT_ESTABLISHED  RELEASE_EVIDENCE_NOT_ESTABLISHED, RELEASE_RELATION_NOT_APPLICABLE
+      TRQ-0201 releases CRL-0204, which states no defeat specification, so how the release is achieved is not established; TRQ-0201 releases CRL-0203, which restrains JNT-0101/RY and the transition requires JNT-0102/RX
+  nine domains:
+      physical_realization     PASS             ALL_EFFECTS_DISCHARGED
+      load_reaction_closure    PASS             EVERY_LOAD_CLOSES_EXTERNALLY
+      transition_reachability  NOT_ESTABLISHED  RELEASE_EVIDENCE_NOT_ESTABLISHED, RELEASE_RELATION_NOT_APPLICABLE
+      required_configurations  FAIL             DECLARED_DISTINCTNESS_NOT_REALIZED
+      motion_and_transitions   PASS             EVERY_TRANSITION_MOVES_WHAT_IT_DECLARES
+      spatial_realization      NOT_ESTABLISHED  MOVING_GROUP_HAS_NO_JOINT
+      reach                    NOT_ESTABLISHED  MODEL_LOCAL_POSITIVE, REACH_BASIS_NOT_ESTABLISHED
+      assemblability           NOT_ESTABLISHED  INSERTION_PATH_NOT_CLEAR
+      gross_interference       PASS             NO_CONSERVATIVE_OVERLAP
+  AGGREGATE            : INFEASIBLE
+  branch isolation     : State=3; SweptVolume=6; Transition=4
+
+------------------------------------------------------------------------------
+CND-0006
+------------------------------------------------------------------------------
+  s03b source          : fresh, replayed from this run's own evidence
+  TransitionRequirement: 4
+    TRQ-1001  CFG-0010 -> CFG-0012
+        requires : JNT-0014/RY, JNT-0015/RY, JNT-0016/RY, JNT-0017/RY
+        releases : nothing
+    TRQ-1002  CFG-0012 -> CFG-0011
+        requires : JNT-0014/RY, JNT-0015/RY, JNT-0016/RY, JNT-0017/RY
+        releases : nothing
+    TRQ-1003  CFG-0011 -> CFG-0012
+        requires : JNT-0014/RY, JNT-0015/RY, JNT-0016/RY, JNT-0017/RY
+        releases : CRL-1005
+    TRQ-1004  CFG-0012 -> CFG-0010
+        requires : JNT-0014/RY, JNT-0015/RY, JNT-0016/RY, JNT-0017/RY
+        releases : nothing
+  restraints naming a relative motion: 1 of 5
+    CRL-1005 active in CFG-0011 : JNT-0016/RY
+  s04a                 : RERUN - premises absent: []; premises not current: []; boundary: ["EXTEND_OVER_EXISTING: ASY-0101.insertion_direction already has a value; revision requires SUPERSEDE", "EXTEND_OVER_EXISTING: ASY-0102.insertion_direction already has a value; revision requires SUPERSEDE", "EXTEND_OVER_EXISTING: ASY-0103.insertion_direction already has a value; revision requires SUPERSEDE"]
+  s04b                 : parse=OK accepted=True status=SUCCESS
+  Transition -> requirement:
+      TRN-0301 -> TRQ-1001
+      TRN-0302 -> TRQ-1002
+      TRN-0303 -> TRQ-1003
+      TRN-0304 -> TRQ-1004
+  States=3 Transitions=4 SweptVolumes=12
+  s03b symbolic checker: clean
+
+  transition_reachability: PASS  EVERY_DEMANDED_CHANGE_REACHABLE
+  nine domains:
+      physical_realization     PASS             ALL_EFFECTS_DISCHARGED
+      load_reaction_closure    PASS             EVERY_LOAD_CLOSES_EXTERNALLY
+      transition_reachability  PASS             EVERY_DEMANDED_CHANGE_REACHABLE
+      required_configurations  PASS             EVERY_CONFIGURATION_REALIZED
+      motion_and_transitions   PASS             EVERY_TRANSITION_MOVES_WHAT_IT_DECLARES
+      spatial_realization      NOT_ESTABLISHED  INTERFACE_EXPECTATION_CONFLICT
+      reach                    NOT_ESTABLISHED  MODEL_LOCAL_POSITIVE, REACH_BASIS_NOT_ESTABLISHED
+      assemblability           NOT_ESTABLISHED  DEFORMATION_RESOLVED_PATH
+      gross_interference       NOT_ESTABLISHED  INTERFACE_EXPECTATION_CONFLICT, SWEEP_MEETS_UNDECLARED_BODY, UNDECLARED_PAIR_OVE
+  AGGREGATE            : NOT_ESTABLISHED
+  branch isolation     : State=3; SweptVolume=12; Transition=4
+
+==============================================================================
+MODEL CALL ACCOUNTING
+  calls by stage   : {"s04b": 5}
+  calls total      : 5
+  transport attempts: 5
+  gemini calls     : 0
+  input tokens     : 77402
+  output tokens    : 98740
+  cached tokens    : 4096
+  latency (s)      : 1453.1
+  final state hash : eca01cfc2d5d79a0572c41011947ea8ccc73c8429e2aa99907e095da8d88fab0

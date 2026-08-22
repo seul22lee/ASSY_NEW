@@ -1,0 +1,220 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0006",
+      "groups": ["RGP-0006", "RGP-0005"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "configurations": ["CFG-0003", "CFG-0004"]
+    },
+    {
+      "id": "PHI-0007",
+      "groups": ["RGP-0006", "RGP-0005"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "at_interface": "IFC-0009",
+      "configurations": ["CFG-0004"]
+    },
+    {
+      "id": "PHI-0008",
+      "groups": ["RGP-0010", "RGP-0005"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "at_interface": "IFC-0009",
+      "configurations": ["CFG-0004"]
+    },
+    {
+      "id": "PHI-0009",
+      "groups": ["RGP-0006", "RGP-0005"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "at_interface": "IFC-0005",
+      "configurations": ["CFG-0004"]
+    },
+    {
+      "id": "PHI-0010",
+      "groups": ["RGP-0006", "RGP-0005"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "at_interface": "IFC-0005",
+      "configurations": ["CFG-0004"]
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0007",
+      "retained_group": "RGP-0005",
+      "blocked_dofs": ["TY"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "LOAD",
+      "blocked_direction": "-Y",
+      "provider_reaction_site": "RSR-0001"
+    },
+    {
+      "id": "CRL-0008",
+      "retained_group": "RGP-0005",
+      "blocked_dofs": ["TX", "TY", "TZ"],
+      "configurations": ["CFG-0004"],
+      "driver": "LOAD",
+      "blocked_direction": "NONE",
+      "provider_reaction_site": "RSR-0002"
+    },
+    {
+      "id": "CRL-0009",
+      "retained_group": "RGP-0005",
+      "blocked_dofs": ["TY"],
+      "configurations": ["CFG-0003"],
+      "driver": "LOAD",
+      "blocked_direction": "-Y",
+      "provider_reaction_site": "RSR-0003"
+    },
+    {
+      "id": "CRL-0010",
+      "retained_group": "RGP-0006",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0006",
+      "provider_site": "IFC-0007"
+    },
+    {
+      "id": "CRL-0011",
+      "retained_group": "RGP-0006",
+      "blocked_dofs": ["RY"],
+      "configurations": ["CFG-0004"],
+      "driver": "LOAD",
+      "provider_body": "BOD-0004",
+      "provider_site": "IFC-0009"
+    },
+    {
+      "id": "CRL-0012",
+      "retained_group": "RGP-0007",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0004",
+      "provider_site": "IFC-0006"
+    },
+    {
+      "id": "CRL-0013",
+      "retained_group": "RGP-0008",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0005",
+      "provider_site": "IFC-0007"
+    },
+    {
+      "id": "CRL-0014",
+      "retained_group": "RGP-0009",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0005",
+      "provider_site": "IFC-0008"
+    },
+    {
+      "id": "CRL-0015",
+      "retained_group": "RGP-0010",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY"],
+      "configurations": ["CFG-0003", "CFG-0004"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0007"
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0006",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0008", "IFC-0007", "IFC-0006"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0007",
+      "load_case": "LC-0002",
+      "ordered_hops": ["IFC-0007", "IFC-0006"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0008",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0005"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0009",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0005"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0010",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0006"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0004",
+      "order_index": 1,
+      "body": "BOD-0004",
+      "access_side": "+Y",
+      "activates": [],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0005",
+      "order_index": 2,
+      "body": "BOD-0006",
+      "access_side": "+Y",
+      "activates": ["IFC-0006"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0004"]
+    },
+    {
+      "id": "ASY-0006",
+      "order_index": 3,
+      "body": "BOD-0005",
+      "access_side": "+Y",
+      "activates": ["IFC-0007", "IFC-0005"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0005"]
+    },
+    {
+      "id": "ASY-0007",
+      "order_index": 4,
+      "body": "BOD-0007",
+      "access_side": "+X",
+      "activates": ["IFC-0008", "IFC-0009"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0006"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-1100",
+      "decision": "Material selection for compliant flexure fatigue life",
+      "why_open": "OBL-0012 requires repeated elastic bending without yielding or fatigue failure; material property analysis is unavailable.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0002"],
+      "blocks": ["OBL-0012"]
+    },
+    {
+      "id": "S3U-1101",
+      "decision": "Lateral retention of base on support surface",
+      "why_open": "Transverse load cases require horizontal reaction; friction coefficient and support features are unspecified.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0005"],
+      "blocks": ["LC-0004"]
+    }
+  ]
+}

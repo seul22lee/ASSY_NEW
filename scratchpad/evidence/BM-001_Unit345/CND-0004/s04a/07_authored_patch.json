@@ -1,0 +1,326 @@
+{
+ "authored_by_family": {
+  "AssemblyStep": 2,
+  "EliminationRecord": 1,
+  "Envelope": 2,
+  "FunctionalRegion": 6,
+  "ReachResult": 4,
+  "ReferenceScale": 1
+ },
+ "authored_operations": [
+  {
+   "entity_id": "SCL-CND-0004",
+   "family": "ReferenceScale",
+   "fields": {
+    "absolute": null,
+    "basis": "RELATIVE",
+    "commitment_class": "COMPARABLE",
+    "note": "No absolute dimensions given; all units are arbitrary but consistent."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "ENV-0012",
+   "family": "Envelope",
+   "fields": {
+    "body": "BOD-0012",
+    "commitment_class": "COMPARABLE",
+    "extent": {
+     "centre": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "half_extent": [
+      3.0,
+      2.0,
+      2.0
+     ]
+    },
+    "frame": "world",
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0004",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "ENV-0013",
+   "family": "Envelope",
+   "fields": {
+    "body": "BOD-0013",
+    "commitment_class": "COMPARABLE",
+    "extent": {
+     "centre": [
+      0.5,
+      0.0,
+      0.0
+     ],
+     "half_extent": [
+      2.5,
+      1.5,
+      1.5
+     ]
+    },
+    "frame": "world",
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0004",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "RCH-CND-0004-0001",
+   "family": "ReachResult",
+   "fields": {
+    "actor": "ACT-0001",
+    "approach_side": "-X",
+    "reachable": true,
+    "target": "latch",
+    "why": "Latch is on the drawer front face at x=-2, accessible through the aperture on the -X side of the housing."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0004",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "RCH-CND-0004-0002",
+   "family": "ReachResult",
+   "fields": {
+    "actor": "ACT-0001",
+    "approach_side": "-X",
+    "reachable": true,
+    "target": "FRG-0013",
+    "why": "Access region on drawer front face, aligned with aperture on -X face of housing."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0004",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "RCH-CND-0004-0003",
+   "family": "ReachResult",
+   "fields": {
+    "actor": "ACT-0001",
+    "approach_side": "-X",
+    "reachable": true,
+    "target": "FRG-0014",
+    "why": "Aperture is the entry point on the -X side; hand can pass through to reach latch."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0004",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "RCH-CND-0004-0004",
+   "family": "ReachResult",
+   "fields": {
+    "actor": "ACT-0001",
+    "approach_side": "-X",
+    "reachable": true,
+    "target": "FRG-0015",
+    "why": "Second access region on drawer front face, also accessible through the -X side aperture."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0004",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "ELM-CND-0004",
+   "family": "EliminationRecord",
+   "fields": {
+    "candidate": "CND-0004",
+    "eliminated": false,
+    "reason": null
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0004",
+    "CND-0004"
+   ]
+  },
+  {
+   "entity_id": "FRG-0013",
+   "family": "FunctionalRegion",
+   "fields": {
+    "volume": {
+     "centre": [
+      -2.0,
+      0.0,
+      0.0
+     ],
+     "half_extent": [
+      0.2,
+      0.4,
+      0.3
+     ]
+    }
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0004"
+   ]
+  },
+  {
+   "entity_id": "FRG-0014",
+   "family": "FunctionalRegion",
+   "fields": {
+    "volume": {
+     "centre": [
+      -3.0,
+      0.0,
+      0.0
+     ],
+     "half_extent": [
+      0.1,
+      0.5,
+      0.4
+     ]
+    }
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0004"
+   ]
+  },
+  {
+   "entity_id": "FRG-0015",
+   "family": "FunctionalRegion",
+   "fields": {
+    "volume": {
+     "centre": [
+      -2.0,
+      -0.6,
+      0.0
+     ],
+     "half_extent": [
+      0.2,
+      0.3,
+      0.2
+     ]
+    }
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0004"
+   ]
+  },
+  {
+   "entity_id": "FRG-0016",
+   "family": "FunctionalRegion",
+   "fields": {
+    "volume": {
+     "centre": [
+      0.0,
+      0.0,
+      -2.0
+     ],
+     "half_extent": [
+      2.5,
+      1.5,
+      0.1
+     ]
+    }
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0004"
+   ]
+  },
+  {
+   "entity_id": "FRG-0017",
+   "family": "FunctionalRegion",
+   "fields": {
+    "volume": {
+     "centre": [
+      0.0,
+      0.0,
+      -1.75
+     ],
+     "half_extent": [
+      2.0,
+      1.0,
+      0.15
+     ]
+    }
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0004"
+   ]
+  },
+  {
+   "entity_id": "FRG-0018",
+   "family": "FunctionalRegion",
+   "fields": {
+    "volume": {
+     "centre": [
+      -3.0,
+      0.0,
+      0.0
+     ],
+     "half_extent": [
+      0.1,
+      1.8,
+      1.8
+     ]
+    }
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0004"
+   ]
+  },
+  {
+   "entity_id": "ASY-0105",
+   "family": "AssemblyStep",
+   "fields": {
+    "insertion_direction": [
+     0.0,
+     0.0,
+     -1.0
+    ]
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0004"
+   ]
+  },
+  {
+   "entity_id": "ASY-0106",
+   "family": "AssemblyStep",
+   "fields": {
+    "insertion_direction": [
+     1.0,
+     0.0,
+     0.0
+    ]
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0004"
+   ]
+  }
+ ],
+ "candidate": "CND-0004",
+ "declared_incompleteness": [],
+ "execution_status": "SUCCESS",
+ "stage_problems": []
+}

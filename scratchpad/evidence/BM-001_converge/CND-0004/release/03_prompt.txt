@@ -1,0 +1,63 @@
+You are completing two statements about restraints in an existing mechanism.
+You are NOT designing anything.
+
+THE MECHANISM ALREADY EXISTS. Its joints, its configurations, its restraints and
+the state changes it is required to perform are fixed and listed below. You may
+not add, remove or rename any of them, and nothing you write here can.
+
+WHAT IS BEING COMPLETED
+Each state change below RELEASES one or more restraints: the change cannot happen
+while the restraint holds, so the change defeats it. For each released restraint
+you state two things it has not yet said:
+
+  blocked_relative_motions   which relative JOINT motion this restraint removes,
+                             as {joint, dof} rows - the joint and the degree of
+                             freedom of THAT joint. Only where the restraint
+                             genuinely restrains that motion. Keep rows it already
+                             has; add what is missing.
+
+  defeat_specification       ONE SENTENCE of physical mechanism: how the restraint
+                             is overcome during the change. The user presses the
+                             latch arm aside. The handle carries the toggle past
+                             centre. The detent rides over its ramp. State the
+                             qualitative principle and NOTHING quantitative: no
+                             force, torque, spring rate, stress or dimension. How
+                             much it takes is a later question and a number here
+                             would be one nobody has computed.
+
+RESPONSE SCHEMA
+Return a single JSON object with one key.
+
+  completions[]   relation, blocked_relative_motions[] {joint, dof},
+                  defeat_specification
+
+  relation   a restraint id from the list below that a state change releases
+  joint      a joint id from the list below
+  dof        one of TX TY TZ RX RY RZ, and one that joint declares
+
+One row per released restraint listed. Do not add rows for restraints not listed.
+
+RULES
+  DO NOT INVENT A MECHANISM. The restraint's driver, its provider and the
+  interaction that maintains it are shown. The principle you state must be how
+  THAT restraint, as described, is overcome - not a redesign of it.
+  DO NOT NAME A JOINT THAT IS NOT LISTED, and do not name a DOF the joint does not
+  declare.
+  If the restraint as described genuinely cannot be overcome by any physical
+  principle consistent with the mechanism, say so in defeat_specification in one
+  sentence beginning "NOT OVERCOMABLE:" - that is a true statement about this
+  design and a later step will report it.
+
+THE JOINTS OF THIS CANDIDATE
+  JNT-0013  PRISMATIC    RGP-0015 -> RGP-0016  dof=['TX']  axis=+X
+
+THE STATE CHANGES THAT RELEASE A RESTRAINT
+  TRQ-0105  CFG-0008 -> CFG-0009  requires JNT-0013/TX  releases CRL-0110
+
+THE RESTRAINTS TO COMPLETE
+  CRL-0110
+      holds in: CFG-0008
+      retained group: RGP-0016   blocked group DOF: ['TX']
+      driver: LOAD   provider: BOD-0012   acts at: IFC-0017   maintained by: PHI-0012
+      blocked_relative_motions so far: [('JNT-0013', 'TX')]
+      defeat_specification so far: None

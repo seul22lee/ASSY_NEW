@@ -1,0 +1,256 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0101",
+      "groups": ["RGP-0011", "RGP-0012"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "at_interface": "IFC-0010",
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"]
+    },
+    {
+      "id": "PHI-0102",
+      "groups": ["RGP-0011", "RGP-0012", "RGP-0013", "RGP-0014"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "at_interface": "IFC-0014",
+      "configurations": ["CFG-0007"]
+    },
+    {
+      "id": "PHI-0103",
+      "groups": ["RGP-0013", "RGP-0014", "RGP-0011"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "at_interface": "IFC-0013",
+      "configurations": []
+    },
+    {
+      "id": "PHI-0104",
+      "groups": ["RGP-0011", "RGP-0012"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "at_interface": "IFC-0015",
+      "configurations": ["CFG-0006", "CFG-0007"]
+    },
+    {
+      "id": "PHI-0105",
+      "groups": ["RGP-0011", "RGP-0012"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "at_interface": "IFC-0015",
+      "configurations": ["CFG-0006", "CFG-0007"]
+    }
+  ],
+  "transition_requirements": [
+    {
+      "id": "TRQ-0101",
+      "from_configuration": "CFG-0005",
+      "to_configuration": "CFG-0006",
+      "required_relative_motions": [
+        {
+          "joint": "JNT-0009",
+          "dof": "RY"
+        }
+      ],
+      "released_constraints": []
+    },
+    {
+      "id": "TRQ-0102",
+      "from_configuration": "CFG-0006",
+      "to_configuration": "CFG-0007",
+      "required_relative_motions": [
+        {
+          "joint": "JNT-0010",
+          "dof": "RY"
+        },
+        {
+          "joint": "JNT-0011",
+          "dof": "RY"
+        },
+        {
+          "joint": "JNT-0012",
+          "dof": "RY"
+        }
+      ],
+      "released_constraints": []
+    },
+    {
+      "id": "TRQ-0103",
+      "from_configuration": "CFG-0007",
+      "to_configuration": "CFG-0006",
+      "required_relative_motions": [
+        {
+          "joint": "JNT-0010",
+          "dof": "RY"
+        },
+        {
+          "joint": "JNT-0011",
+          "dof": "RY"
+        },
+        {
+          "joint": "JNT-0012",
+          "dof": "RY"
+        }
+      ],
+      "released_constraints": ["CRL-0107"]
+    },
+    {
+      "id": "TRQ-0104",
+      "from_configuration": "CFG-0006",
+      "to_configuration": "CFG-0005",
+      "required_relative_motions": [
+        {
+          "joint": "JNT-0009",
+          "dof": "RY"
+        }
+      ],
+      "released_constraints": []
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0101",
+      "retained_group": "RGP-0011",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "DECLARED_SCENARIO",
+      "provider_reaction_site": "RSR-0001"
+    },
+    {
+      "id": "CRL-0102",
+      "retained_group": "RGP-0011",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0007"],
+      "driver": "LOAD",
+      "provider_reaction_site": "RSR-0002"
+    },
+    {
+      "id": "CRL-0103",
+      "retained_group": "RGP-0012",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_site": "IFC-0010"
+    },
+    {
+      "id": "CRL-0104",
+      "retained_group": "RGP-0013",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009"
+    },
+    {
+      "id": "CRL-0105",
+      "retained_group": "RGP-0014",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0010"
+    },
+    {
+      "id": "CRL-0106",
+      "retained_group": "RGP-0014",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008"
+    },
+    {
+      "id": "CRL-0107",
+      "retained_group": "RGP-0013",
+      "blocked_dofs": ["RY"],
+      "configurations": ["CFG-0007"],
+      "driver": "LOAD",
+      "provider_body": "BOD-0008",
+      "provider_site": "IFC-0014"
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0101",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0013", "IFC-0011"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0102",
+      "load_case": "LC-0002",
+      "ordered_hops": ["IFC-0010"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0103",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0015"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0104",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0012", "IFC-0013", "IFC-0011"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0105",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0011"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0101",
+      "order_index": 1,
+      "body": "BOD-0008",
+      "access_side": "+Z",
+      "activates": [],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0102",
+      "order_index": 2,
+      "body": "BOD-0009",
+      "access_side": "+Y",
+      "activates": ["IFC-0010"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0101"]
+    },
+    {
+      "id": "ASY-0103",
+      "order_index": 3,
+      "body": "BOD-0011",
+      "access_side": "+Y",
+      "activates": ["IFC-0011"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0101"]
+    },
+    {
+      "id": "ASY-0104",
+      "order_index": 4,
+      "body": "BOD-0010",
+      "access_side": "+Y",
+      "activates": ["IFC-0012", "IFC-0013"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0102", "ASY-0103"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-2001",
+      "decision": "External environment role for CONTAIN effect PEO-0005 is not represented as a rigid group; the physical interaction uses base and lid as the enclosing volume, but the external side has no entity id in this design.",
+      "why_open": "The design state contains no external environment body or rigid group to serve as the counterpart for the CONTAIN effect.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": [],
+      "blocks": []
+    }
+  ]
+}

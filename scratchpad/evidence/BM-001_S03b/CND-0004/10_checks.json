@@ -1,0 +1,454 @@
+{
+ "assembly": {
+  "retained_bodies": [
+   "BOD-0013"
+  ],
+  "retained_bodies_without_a_real_strategy": [],
+  "rows": [
+   {
+    "access_side": "N/A",
+    "activates": [],
+    "body": "BOD-0012",
+    "body_is_retained": false,
+    "depends_on": [],
+    "order_index": 1,
+    "path_kind": "RIGID",
+    "retention_status": "NOT_RETAINED_NONE_IS_LEGITIMATE",
+    "step": "ASY-0001",
+    "termination_strategy": "NONE"
+   },
+   {
+    "access_side": "+X",
+    "activates": [
+     "CRL-0001",
+     "CRL-0002"
+    ],
+    "body": "BOD-0013",
+    "body_is_retained": true,
+    "depends_on": [
+     "BOD-0012"
+    ],
+    "order_index": 2,
+    "path_kind": "RIGID",
+    "retention_status": "RETAINED_BY_LATER_BODY_COVER",
+    "step": "ASY-0002",
+    "termination_strategy": "LATER_BODY_COVER"
+   }
+  ]
+ },
+ "candidate": "CND-0004",
+ "constraints": {
+  "every_relation_reaches_a_cell": true,
+  "rows": [
+   {
+    "blocked_direction": null,
+    "blocked_dofs": [
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "cells_reached": [
+     "RGP-0016/CFG-0008/TY",
+     "RGP-0016/CFG-0008/TZ",
+     "RGP-0016/CFG-0008/RX",
+     "RGP-0016/CFG-0008/RY",
+     "RGP-0016/CFG-0008/RZ",
+     "RGP-0016/CFG-0009/TY",
+     "RGP-0016/CFG-0009/TZ",
+     "RGP-0016/CFG-0009/RX",
+     "RGP-0016/CFG-0009/RY",
+     "RGP-0016/CFG-0009/RZ"
+    ],
+    "configurations": [
+     "CFG-0008",
+     "CFG-0009"
+    ],
+    "defeat_specification": "If guide surfaces are worn or misaligned, lateral movement may occur.",
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": null,
+    "provider_body": "BOD-0012",
+    "provider_reaction_site": null,
+    "provider_site": "IFC-0016",
+    "reaches_a_cell": true,
+    "relation": "CRL-0001",
+    "retained_group": "RGP-0016"
+   },
+   {
+    "blocked_direction": null,
+    "blocked_dofs": [
+     "TX"
+    ],
+    "cells_reached": [
+     "RGP-0016/CFG-0008/TX"
+    ],
+    "configurations": [
+     "CFG-0008"
+    ],
+    "defeat_specification": "If friction coefficient is too low or surfaces are lubricated, the drawer may slide open under load.",
+    "driver": "LOAD",
+    "maintaining_interaction": null,
+    "provider_body": "BOD-0012",
+    "provider_reaction_site": null,
+    "provider_site": "IFC-0017",
+    "reaches_a_cell": true,
+    "relation": "CRL-0002",
+    "retained_group": "RGP-0016"
+   }
+  ]
+ },
+ "load_paths": {
+  "all_candidates_are_the_invocation": true,
+  "all_hops_branch_local": true,
+  "load_cases_without_a_path": [],
+  "rows": [
+   {
+    "candidate": "CND-0004",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0001",
+    "load_case_reacted_at": "RSR-0001",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0017"
+    ],
+    "path": "LDP-0001",
+    "terminates_at": "RSR-0001",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0004",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0002",
+    "load_case_reacted_at": "RSR-0001",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0016"
+    ],
+    "path": "LDP-0002",
+    "terminates_at": "RSR-0001",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0004",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0003",
+    "load_case_reacted_at": "RSR-0002",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0017"
+    ],
+    "path": "LDP-0003",
+    "terminates_at": "RSR-0002",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0004",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0004",
+    "load_case_reacted_at": "RSR-0002",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0018"
+    ],
+    "path": "LDP-0004",
+    "terminates_at": "RSR-0002",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0004",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0005",
+    "load_case_reacted_at": "RSR-0003",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0017"
+    ],
+    "path": "LDP-0005",
+    "terminates_at": "RSR-0003",
+    "terminus_matches_load_case": true
+   }
+  ]
+ },
+ "mobility": {
+  "by_disposition": {
+   "BLOCKED_BY": 11,
+   "INTENDED": 1,
+   "UNDISPOSITIONED": 12
+  },
+  "cells": 24,
+  "compliant_preserved": true,
+  "grid": {
+   "CFG-0008": {
+    "RGP-0015": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     }
+    },
+    "RGP-0016": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    }
+   },
+   "CFG-0009": {
+    "RGP-0015": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     }
+    },
+    "RGP-0016": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": "JNT-0013",
+      "constraint_relation": null,
+      "disposition": "INTENDED",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    }
+   }
+  },
+  "joints": [
+   {
+    "axis_direction": "+X",
+    "child_group": "RGP-0016",
+    "compliant": false,
+    "declared_dof": [
+     "TX"
+    ],
+    "derived_free_dof": [
+     "TX"
+    ],
+    "exactly_preserved": true,
+    "joint": "JNT-0013",
+    "joint_type": "PRISMATIC",
+    "preserved": true
+   }
+  ]
+ },
+ "physical_effect": {
+  "all_matched": true,
+  "obligations": [
+   {
+    "discharged": true,
+    "effect": "PERMIT_MOTION",
+    "peo": "PEO-0001"
+   },
+   {
+    "discharged": true,
+    "effect": "PREVENT_MOTION",
+    "peo": "PEO-0002"
+   },
+   {
+    "discharged": true,
+    "effect": "TRANSMIT_FORCE",
+    "peo": "PEO-0003"
+   },
+   {
+    "discharged": true,
+    "effect": "LOCATE",
+    "peo": "PEO-0004"
+   },
+   {
+    "discharged": true,
+    "effect": "CONTAIN",
+    "peo": "PEO-0005"
+   }
+  ],
+  "rows": [
+   {
+    "discharges_effect": "PEO-0001",
+    "effect": "PERMIT_MOTION",
+    "groups": [
+     "RGP-0016",
+     "RGP-0015"
+    ],
+    "interaction": "PHI-0001",
+    "required_effect": "PERMIT_MOTION",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0002",
+    "effect": "PREVENT_MOTION",
+    "groups": [
+     "RGP-0016",
+     "RGP-0015"
+    ],
+    "interaction": "PHI-0002",
+    "required_effect": "PREVENT_MOTION",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0003",
+    "effect": "TRANSMIT_FORCE",
+    "groups": [
+     "RGP-0016",
+     "RGP-0015"
+    ],
+    "interaction": "PHI-0003",
+    "required_effect": "TRANSMIT_FORCE",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0004",
+    "effect": "LOCATE",
+    "groups": [
+     "RGP-0016",
+     "RGP-0015"
+    ],
+    "interaction": "PHI-0004",
+    "required_effect": "LOCATE",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0005",
+    "effect": "CONTAIN",
+    "groups": [
+     "RGP-0016",
+     "RGP-0015"
+    ],
+    "interaction": "PHI-0005",
+    "required_effect": "CONTAIN",
+    "verdict": "MATCH"
+   }
+  ],
+  "undischarged": []
+ },
+ "production_checks": {
+  "new_since_baseline": null,
+  "skipped": "patch not applied"
+ }
+}

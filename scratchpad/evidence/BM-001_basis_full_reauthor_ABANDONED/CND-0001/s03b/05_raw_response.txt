@@ -1,0 +1,197 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0301",
+      "groups": ["RGP-0002", "RGP-0004"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "at_interface": "IFC-0002",
+      "configurations": ["CFG-0002", "CFG-0003"]
+    },
+    {
+      "id": "PHI-0302",
+      "groups": ["RGP-0002", "RGP-0001"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "at_interface": "IFC-0004",
+      "configurations": ["CFG-0001"]
+    },
+    {
+      "id": "PHI-0303",
+      "groups": ["RGP-0003", "RGP-0001"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "at_interface": "IFC-0004",
+      "configurations": ["CFG-0003"]
+    },
+    {
+      "id": "PHI-0304",
+      "groups": ["RGP-0002", "RGP-0001"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "at_interface": "IFC-0003",
+      "configurations": ["CFG-0001"]
+    },
+    {
+      "id": "PHI-0305",
+      "groups": ["RGP-0001", "RGP-0002"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "at_interface": "IFC-0003",
+      "configurations": ["CFG-0001"]
+    }
+  ],
+  "transition_requirements": [
+    {
+      "id": "TRQ-0301",
+      "from_configuration": "CFG-0001",
+      "to_configuration": "CFG-0003",
+      "required_relative_motions": [
+        {
+          "joint": "JNT-0003",
+          "dof": "RY"
+        }
+      ],
+      "released_constraints": ["CRL-0304"]
+    },
+    {
+      "id": "TRQ-0302",
+      "from_configuration": "CFG-0003",
+      "to_configuration": "CFG-0002",
+      "required_relative_motions": [
+        {
+          "joint": "JNT-0002",
+          "dof": "RY"
+        }
+      ],
+      "released_constraints": []
+    },
+    {
+      "id": "TRQ-0303",
+      "from_configuration": "CFG-0002",
+      "to_configuration": "CFG-0001",
+      "required_relative_motions": [
+        {
+          "joint": "JNT-0002",
+          "dof": "RY"
+        },
+        {
+          "joint": "JNT-0003",
+          "dof": "RY"
+        }
+      ],
+      "released_constraints": []
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0301",
+      "retained_group": "RGP-0004",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0001",
+      "provider_site": "IFC-0001"
+    },
+    {
+      "id": "CRL-0302",
+      "retained_group": "RGP-0002",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0003",
+      "provider_site": "IFC-0002"
+    },
+    {
+      "id": "CRL-0303",
+      "retained_group": "RGP-0003",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0001", "CFG-0002", "CFG-0003"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0002"
+    },
+    {
+      "id": "CRL-0304",
+      "retained_group": "RGP-0002",
+      "blocked_dofs": ["RY"],
+      "configurations": ["CFG-0001"],
+      "driver": "LOAD",
+      "provider_body": "BOD-0001",
+      "provider_site": "IFC-0004",
+      "blocked_relative_motions": [
+        {
+          "joint": "JNT-0002",
+          "dof": "RY"
+        }
+      ],
+      "maintaining_interaction": "PHI-0302",
+      "defeat_specification": "User depresses latch arm to disengage detent from base recess."
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0301",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0004"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0302",
+      "load_case": "LC-0002",
+      "ordered_hops": ["IFC-0002", "IFC-0001"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0303",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0004", "IFC-0003"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0304",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0004", "IFC-0003"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0305",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0001"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0301",
+      "order_index": 1,
+      "body": "BOD-0001",
+      "access_side": "+Z",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0302",
+      "order_index": 2,
+      "body": "BOD-0002",
+      "access_side": "+Z",
+      "activates": ["IFC-0003"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0301"]
+    },
+    {
+      "id": "ASY-0303",
+      "order_index": 3,
+      "body": "BOD-0003",
+      "access_side": "+Y",
+      "activates": ["IFC-0001", "IFC-0002"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0301", "ASY-0302"]
+    }
+  ],
+  "unresolved": []
+}

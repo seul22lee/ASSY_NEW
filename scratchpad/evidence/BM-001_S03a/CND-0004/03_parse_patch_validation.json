@@ -1,0 +1,462 @@
+{
+ "candidate": "CND-0004",
+ "canonical_validation": {
+  "accepted": false,
+  "problem_count": 3,
+  "problems": [
+   "REFERENCE_NOT_AN_ID: FRG-0001.reach_targets holds 'latch', which is not an entity id (R-20)",
+   "REFERENCE_NOT_AN_ID: FRG-0005.reach_targets holds 'drawer insertion path', which is not an entity id (R-20)",
+   "REFERENCE_NOT_AN_ID: FRG-0006.reach_targets holds 'storage contents', which is not an entity id (R-20)"
+  ]
+ },
+ "counts_after": null,
+ "counts_before": {
+  "AcceptanceContract": 6,
+  "Actor": 1,
+  "Ambiguity": 7,
+  "Assumption": 3,
+  "Candidate": 6,
+  "Freedom": 7,
+  "LoadCase": 5,
+  "Obligation": 20,
+  "PhysicalEffectObligation": 5,
+  "ReactionSiteRequirement": 3,
+  "Requirement": 10,
+  "Scenario": 3,
+  "SourceClause": 5,
+  "UnresolvedDecision": 1
+ },
+ "every_create_premised_on_candidate": true,
+ "outcome": {
+  "declared_incompleteness": [],
+  "execution_status": "SCHEMA_FAILURE",
+  "problems": [
+   "REFERENCE_NOT_AN_ID: FRG-0001.reach_targets holds 'latch', which is not an entity id (R-20)",
+   "REFERENCE_NOT_AN_ID: FRG-0005.reach_targets holds 'drawer insertion path', which is not an entity id (R-20)",
+   "REFERENCE_NOT_AN_ID: FRG-0006.reach_targets holds 'storage contents', which is not an entity id (R-20)"
+  ],
+  "raw_response_chars": 6014
+ },
+ "parse_result": "PARSED",
+ "patch": {
+  "by_family": {
+   "Body": 2,
+   "Configuration": 2,
+   "FunctionalRegion": 6,
+   "Interface": 6,
+   "Joint": 1,
+   "RigidGroup": 2,
+   "UnresolvedDecision": 1
+  },
+  "operation_count": 20,
+  "operations": [
+   {
+    "entity_id": "BOD-0001",
+    "family": "Body",
+    "fields": {
+     "addresses_obligations": [
+      "OBL-0001",
+      "OBL-0003",
+      "OBL-0007",
+      "OBL-0008",
+      "OBL-0009",
+      "OBL-0010",
+      "OBL-0013",
+      "OBL-0019"
+     ],
+     "created_by_stage": "s03",
+     "instance_identity": "single body that remains stationary during operation, provides guide surfaces, end stops, friction hold surface, insertion aperture, and support interface to desktop",
+     "role": "stationary base / housing"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "BOD-0002",
+    "family": "Body",
+    "fields": {
+     "addresses_obligations": [
+      "OBL-0001",
+      "OBL-0002",
+      "OBL-0003",
+      "OBL-0004",
+      "OBL-0005",
+      "OBL-0006",
+      "OBL-0007",
+      "OBL-0008",
+      "OBL-0009",
+      "OBL-0010",
+      "OBL-0013",
+      "OBL-0016",
+      "OBL-0018",
+      "OBL-0019"
+     ],
+     "created_by_stage": "s03",
+     "instance_identity": "single body that slides in prismatic pair, contains storage volume, provides latch actuation surface and friction hold surface",
+     "role": "sliding drawer / closing element"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "RGP-0001",
+    "family": "RigidGroup",
+    "fields": {
+     "body": "BOD-0001",
+     "is_default": true,
+     "members": [
+      "all material of the base"
+     ]
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "RGP-0002",
+    "family": "RigidGroup",
+    "fields": {
+     "body": "BOD-0002",
+     "is_default": true,
+     "members": [
+      "all material of the drawer"
+     ]
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "JNT-0001",
+    "family": "Joint",
+    "fields": {
+     "axis_direction": "+X",
+     "child_group": "RGP-0002",
+     "dof": [
+      "TX"
+     ],
+     "frame_ids": [],
+     "joint_type": "PRISMATIC",
+     "parent_group": "RGP-0001"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "IFC-0001",
+    "family": "Interface",
+    "fields": {
+     "addresses_obligations": [
+      "OBL-0009",
+      "OBL-0013",
+      "OBL-0003"
+     ],
+     "bodies": [
+      "BOD-0001",
+      "BOD-0002"
+     ],
+     "interaction_kind": "CONTACT",
+     "nominal": "sliding contact, lateral guide surface one"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "IFC-0002",
+    "family": "Interface",
+    "fields": {
+     "addresses_obligations": [
+      "OBL-0009",
+      "OBL-0013",
+      "OBL-0003"
+     ],
+     "bodies": [
+      "BOD-0001",
+      "BOD-0002"
+     ],
+     "interaction_kind": "CONTACT",
+     "nominal": "sliding contact, parallel lateral guide surface two"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "IFC-0003",
+    "family": "Interface",
+    "fields": {
+     "addresses_obligations": [
+      "OBL-0013",
+      "OBL-0002",
+      "OBL-0004"
+     ],
+     "bodies": [
+      "BOD-0001",
+      "BOD-0002"
+     ],
+     "interaction_kind": "CONTACT",
+     "nominal": "closed end stop contact limiting travel"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "IFC-0004",
+    "family": "Interface",
+    "fields": {
+     "addresses_obligations": [
+      "OBL-0013"
+     ],
+     "bodies": [
+      "BOD-0001",
+      "BOD-0002"
+     ],
+     "interaction_kind": "CONTACT",
+     "nominal": "open end stop contact limiting travel"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "IFC-0005",
+    "family": "Interface",
+    "fields": {
+     "addresses_obligations": [
+      "OBL-0016",
+      "OBL-0004",
+      "OBL-0006"
+     ],
+     "bodies": [
+      "BOD-0001",
+      "BOD-0002"
+     ],
+     "interaction_kind": "INTERFERENCE_FIT",
+     "nominal": "interference between drawer and base surfaces providing normal force for friction hold"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "IFC-0006",
+    "family": "Interface",
+    "fields": {
+     "addresses_obligations": [
+      "OBL-0019",
+      "OBL-0010"
+     ],
+     "bodies": [
+      "BOD-0001",
+      "BOD-0002"
+     ],
+     "interaction_kind": "CLEARANCE",
+     "nominal": "clearance during straight insertion until final seated position"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "CFG-0001",
+    "family": "Configuration",
+    "fields": {
+     "bodies_present": [
+      "BOD-0001",
+      "BOD-0002"
+     ],
+     "distinguishing_basis": [
+      {
+       "differs_from": [
+        "CFG-0002"
+       ],
+       "dof": "TX",
+       "rigid_group": "RGP-0002"
+      }
+     ],
+     "expected_mobility": [],
+     "kind": "OPERATION",
+     "name": "Closed"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "CFG-0002",
+    "family": "Configuration",
+    "fields": {
+     "bodies_present": [
+      "BOD-0001",
+      "BOD-0002"
+     ],
+     "distinguishing_basis": [
+      {
+       "differs_from": [
+        "CFG-0001"
+       ],
+       "dof": "TX",
+       "rigid_group": "RGP-0002"
+      }
+     ],
+     "expected_mobility": [],
+     "kind": "OPERATION",
+     "name": "Open"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "FRG-0001",
+    "family": "FunctionalRegion",
+    "fields": {
+     "owning_bodies": [
+      "BOD-0002"
+     ],
+     "reach_targets": [
+      "latch"
+     ],
+     "required_by_actors": [
+      "ACT-0001"
+     ],
+     "role": "ACCESS"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "FRG-0002",
+    "family": "FunctionalRegion",
+    "fields": {
+     "owning_bodies": [
+      "BOD-0002"
+     ],
+     "reach_targets": [],
+     "required_by_actors": [],
+     "role": "KEEP_OUT"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "FRG-0003",
+    "family": "FunctionalRegion",
+    "fields": {
+     "owning_bodies": [
+      "BOD-0001"
+     ],
+     "reach_targets": [],
+     "required_by_actors": [],
+     "role": "SUPPORT"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "FRG-0004",
+    "family": "FunctionalRegion",
+    "fields": {
+     "owning_bodies": [
+      "BOD-0001",
+      "BOD-0002"
+     ],
+     "reach_targets": [],
+     "required_by_actors": [],
+     "role": "SUPPORT"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "FRG-0005",
+    "family": "FunctionalRegion",
+    "fields": {
+     "owning_bodies": [
+      "BOD-0001"
+     ],
+     "reach_targets": [
+      "drawer insertion path"
+     ],
+     "required_by_actors": [],
+     "role": "APERTURE"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "FRG-0006",
+    "family": "FunctionalRegion",
+    "fields": {
+     "owning_bodies": [
+      "BOD-0002"
+     ],
+     "reach_targets": [
+      "storage contents"
+     ],
+     "required_by_actors": [],
+     "role": "APERTURE"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   },
+   {
+    "entity_id": "S3U-0001",
+    "family": "UnresolvedDecision",
+    "fields": {
+     "alternatives": [
+      "Surface texture and interference magnitude combination",
+      "Separate friction element",
+      "No friction hold (rejected by candidate)"
+     ],
+     "alternatives_kind": "FREE_TEXT",
+     "blocks": [
+      "OBL-0016",
+      "OBL-0004",
+      "OBL-0006"
+     ],
+     "decision": "Friction hold interface parameters",
+     "kept_open_by": [],
+     "why_open": "Friction coefficient and contact normal force not determined; friction analysis unavailable at this stage"
+    },
+    "kind": "CREATE",
+    "premise_refs": [
+     "CND-0004"
+    ]
+   }
+  ],
+  "patch_id": "live-bm001-s03-a1",
+  "stage_id": "s03"
+ },
+ "provider_generate_calls": 1
+}

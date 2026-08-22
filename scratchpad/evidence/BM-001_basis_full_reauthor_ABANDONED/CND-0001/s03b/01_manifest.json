@@ -1,0 +1,245 @@
+{
+ "candidate_id": "CND-0001",
+ "checks_at_call_time": {
+  "branch_isolation_held": true,
+  "candidates_visible": [
+   "CND-0001"
+  ],
+  "exactly_this_candidate": true,
+  "family_counts": {
+   "Actor": 1,
+   "Ambiguity": 7,
+   "Body": 3,
+   "Candidate": 1,
+   "Configuration": 3,
+   "Freedom": 7,
+   "Interface": 4,
+   "Joint": 3,
+   "LoadCase": 5,
+   "Obligation": 20,
+   "PhysicalEffectObligation": 5,
+   "ReactionSiteRequirement": 3,
+   "Requirement": 10,
+   "RigidGroup": 4,
+   "Scenario": 3
+  },
+  "foreign_branch_entities": {},
+  "required_premise_classes": [
+   {
+    "class": "topology",
+    "families": [
+     "Body",
+     "Interface",
+     "Joint",
+     "RigidGroup"
+    ],
+    "roles": [
+     "topology_element",
+     "topology_relation"
+    ],
+    "selection": {
+     "topology_element": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     },
+     "topology_relation": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    }
+   },
+   {
+    "class": "load_case",
+    "families": [
+     "LoadCase"
+    ],
+    "roles": [
+     "load_case"
+    ],
+    "selection": {
+     "load_case": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    }
+   },
+   {
+    "class": "physical_effect_obligation",
+    "families": [
+     "PhysicalEffectObligation"
+    ],
+    "roles": [
+     "physical_effect_obligation"
+    ],
+    "selection": {
+     "physical_effect_obligation": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    }
+   },
+   {
+    "class": "retention_obligation",
+    "families": [
+     "Obligation"
+    ],
+    "roles": [
+     "physical_obligation"
+    ],
+    "selection": {
+     "physical_obligation": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    }
+   },
+   {
+    "class": "configuration_basis",
+    "families": [
+     "Configuration"
+    ],
+    "roles": [
+     "configuration_state"
+    ],
+    "selection": {
+     "configuration_state": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    }
+   }
+  ],
+  "semantic_role_members": {
+   "configuration_state": [
+    "CFG-0001",
+    "CFG-0002",
+    "CFG-0003"
+   ],
+   "load_case": [
+    "LC-0001",
+    "LC-0002",
+    "LC-0003",
+    "LC-0004",
+    "LC-0005"
+   ],
+   "physical_effect_obligation": [
+    "PEO-0001",
+    "PEO-0002",
+    "PEO-0003",
+    "PEO-0004",
+    "PEO-0005"
+   ],
+   "physical_obligation": [
+    "OBL-0001",
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0007",
+    "OBL-0008",
+    "OBL-0009",
+    "OBL-0010",
+    "OBL-0011",
+    "OBL-0012",
+    "OBL-0013",
+    "OBL-0014",
+    "OBL-0015",
+    "OBL-0016",
+    "OBL-0017",
+    "OBL-0018",
+    "OBL-0019",
+    "OBL-0020"
+   ],
+   "topology_element": [
+    "BOD-0001",
+    "BOD-0002",
+    "BOD-0003",
+    "RGP-0001",
+    "RGP-0002",
+    "RGP-0003",
+    "RGP-0004"
+   ],
+   "topology_relation": [
+    "IFC-0001",
+    "IFC-0002",
+    "IFC-0003",
+    "IFC-0004",
+    "JNT-0001",
+    "JNT-0002",
+    "JNT-0003"
+   ]
+  },
+  "semantic_role_populations": {
+   "configuration_state": 3,
+   "load_case": 5,
+   "physical_effect_obligation": 5,
+   "physical_obligation": 20,
+   "topology_element": 7,
+   "topology_relation": 7
+  },
+  "unmet_premise_classes": [],
+  "view_ready": true,
+  "view_status": "VIEW_READY"
+ },
+ "counts_before": {
+  "AcceptanceContract": 6,
+  "Actor": 1,
+  "Ambiguity": 7,
+  "AssemblyStep": 5,
+  "Assumption": 3,
+  "Body": 8,
+  "Candidate": 6,
+  "Configuration": 8,
+  "ConstraintRelation": 8,
+  "EliminationRecord": 2,
+  "Envelope": 5,
+  "Freedom": 7,
+  "FunctionalRegion": 15,
+  "Interface": 13,
+  "Joint": 6,
+  "LoadCase": 5,
+  "LoadPath": 10,
+  "MobilityExpectation": 5,
+  "Obligation": 20,
+  "PhysicalEffectObligation": 5,
+  "PhysicalInteraction": 10,
+  "ReachResult": 5,
+  "ReactionSiteRequirement": 3,
+  "ReferenceScale": 2,
+  "Requirement": 10,
+  "RigidGroup": 9,
+  "Scenario": 3,
+  "SourceClause": 5,
+  "State": 5,
+  "SweptVolume": 8,
+  "Transition": 6,
+  "TransitionRequirement": 6,
+  "UnresolvedDecision": 30
+ },
+ "invocation_branch": "CND-0001",
+ "live": true,
+ "pass": "s03b",
+ "provider_settings": {
+  "deadline_s": 120.0,
+  "max_attempts": 1,
+  "max_output_tokens": 65536,
+  "model": "deepseek-v4-pro",
+  "provider": "deepseek",
+  "seed": 7,
+  "temperature": 1.0
+ },
+ "state_hash_before": "4d447140e492359bf2c5bf394b08eb92c6e82d35b439bbb65345df8914c2f7e6"
+}

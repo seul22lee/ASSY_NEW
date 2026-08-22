@@ -1,0 +1,68 @@
+{
+ "candidate": "CND-0003",
+ "configurations_shown": [
+  "CFG-0005",
+  "CFG-0006",
+  "CFG-0007"
+ ],
+ "joints_shown": [
+  "JNT-0009",
+  "JNT-0010",
+  "JNT-0011",
+  "JNT-0012"
+ ],
+ "previous_basis": {
+  "CFG-0005": [
+   {
+    "differs_from": [
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "dof": "RY",
+    "rigid_group": "RGP-0012"
+   }
+  ],
+  "CFG-0006": [
+   {
+    "differs_from": [
+     "CFG-0005"
+    ],
+    "dof": "RY",
+    "rigid_group": "RGP-0012"
+   },
+   {
+    "differs_from": [
+     "CFG-0007"
+    ],
+    "dof": "RY",
+    "rigid_group": "RGP-0013"
+   }
+  ],
+  "CFG-0007": [
+   {
+    "differs_from": [
+     "CFG-0005"
+    ],
+    "dof": "RY",
+    "rigid_group": "RGP-0012"
+   },
+   {
+    "differs_from": [
+     "CFG-0006"
+    ],
+    "dof": "RY",
+    "rigid_group": "RGP-0013"
+   }
+  ]
+ },
+ "provider_settings": {
+  "deadline_s": 120.0,
+  "max_attempts": 1,
+  "max_output_tokens": 65536,
+  "model": "deepseek-v4-pro",
+  "provider": "deepseek",
+  "seed": 7,
+  "temperature": 1.0
+ },
+ "purpose": "restate distinguishing_basis as a named joint coordinate; topology held fixed"
+}

@@ -1,0 +1,172 @@
+{
+ "client_max_attempts": 1,
+ "generation_result": {
+  "error_detail": null,
+  "execution_status": "SUCCESS",
+  "from_cache": false,
+  "latency_s": 105.084
+ },
+ "model_requested": "deepseek-v4-pro",
+ "model_run_records": [
+  {
+   "attempt_index": 1,
+   "determinism": {
+    "seed": null,
+    "seed_honoured": "NOT_SUPPORTED",
+    "seed_requested_by_stage": null,
+    "temperature": 1.0,
+    "temperature_actually_sent": 1.0,
+    "temperature_requested_by_stage": 1.0,
+    "top_p": null
+   },
+   "error_detail": null,
+   "execution_status": "SUCCESS",
+   "model_id": "deepseek-v4-pro",
+   "model_id_requested": "deepseek-v4-pro",
+   "model_id_served": "deepseek-v4-pro",
+   "model_run_id": "bm001-basis|s03|sa1|a1",
+   "model_substitution": null,
+   "model_version_string": "deepseek-v4-pro",
+   "provider_id": "deepseek",
+   "purpose": "restate distinguishing_basis as the named joint coordinate",
+   "request": {
+    "deadline_s": 600.0,
+    "experiment_overrides": {
+     "deadline_s": null,
+     "model": "deepseek-v4-pro",
+     "response_format": "json_object",
+     "temperature": null,
+     "top_p": null
+    },
+    "max_output_tokens": 65536,
+    "max_output_tokens_clamped_from": null,
+    "parameter_resolution": {
+     "deadline_s": {
+      "channel": "transport",
+      "effective": 600.0,
+      "note": "applied to the connection, not sent to the model",
+      "override": null,
+      "requested": 600.0,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "max_output_tokens": {
+      "channel": "payload",
+      "effective": 65536,
+      "note": "",
+      "override": null,
+      "requested": 65536,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "model": {
+      "channel": "payload",
+      "effective": "deepseek-v4-pro",
+      "note": "the stage states no model; selecting one is an experiment decision",
+      "override": "deepseek-v4-pro",
+      "requested": null,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "response_format": {
+      "channel": "payload",
+      "effective": "json_object",
+      "note": "format mode is a transport capability; the shape itself is the parser's",
+      "override": "json_object",
+      "requested": null,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "response_schema": {
+      "channel": "none",
+      "effective": null,
+      "note": "",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_NOT_REQUESTED"
+     },
+     "seed": {
+      "channel": "none",
+      "effective": null,
+      "note": "the provider accepts no seed parameter; the requested value is retained and no determinism is claimed",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_UNSUPPORTED"
+     },
+     "temperature": {
+      "channel": "payload",
+      "effective": 1.0,
+      "note": "the stage asks for a reproducible answer; the repeated-trial protocol asks for sampling, and the experiment says which run this is",
+      "override": null,
+      "requested": 1.0,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "top_p": {
+      "channel": "none",
+      "effective": null,
+      "note": "accepted on the request and no longer discarded without trace",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_NOT_REQUESTED"
+     }
+    },
+    "parameters": {
+     "response_format": "json_object",
+     "temperature": 1.0,
+     "top_p": null
+    },
+    "prompt_chars": 3358,
+    "prompt_sha256": "0f3487a11289b56e99ae83027531138404f214848cff433848db6f084b5724d3",
+    "prompt_text": "You are restating one declaration about an existing mechanism in the\nform that names what it is actually about. You are NOT designing anything.\n\nTHE MECHANISM ALREADY EXISTS. Its bodies, rigid groups, joints, interfaces and\nconfigurations are fixed and are listed below. You may not add, remove, rename or\nchange any of them, and nothing you write here can.\n\nWHAT IS BEING RESTATED\nEach configuration may declare what makes it a DIFFERENT state from named\nsibling configurations. That declaration used to name a RIGID GROUP and a degree\nof freedom. A rigid group has no coordinate - a JOINT does - so every reader had\nto work out which joint expressed it, and on a chain G1-[J1]-G2-[J2]-G3 the\nmiddle link touches two joints with no way to tell which was meant.\n\nSay which JOINT'S coordinate differs.\n\nRESPONSE SCHEMA\nReturn a single JSON object with one key.\n\n  basis[]   configuration, joint, dof, differs_from[]\n\n  configuration  a configuration id from the list below\n  joint          a JOINT ID FROM THE LIST BELOW - never a rigid group, never an\n                 id you invent\n  dof            one of TX TY TZ RX RY RZ\n  differs_from   configuration ids from the list below\n\nOne row per (configuration, distinction). Omit a configuration entirely if it\ndeclared no distinction.\n\nRULES\n  PRESERVE THE ENGINEERING MEANING. The previously declared distinction for each\n  configuration is shown. Name the joint whose coordinate is the one it was\n  about. You are choosing among joints that exist, not deciding what the\n  mechanism should be.\n\n  DO NOT INVENT A JOINT, and do not name a joint that is not listed. If no listed\n  joint has a coordinate that could differ for a distinction, still name the joint\n  that distinction concerns and the degree of freedom as it was declared. A later\n  step reports that the topology does not provide that coordinate, which is a\n  true statement about this design. Naming some other joint so the declaration\n  passes would be reporting a mechanism that does not exist.\n\n  KEEP EVERY DECLARED DISTINCTION. Dropping one would delete a requirement the\n  design made.\n\nTHE JOINTS OF THIS CANDIDATE\n  JNT-0014  COMPLIANT    RGP-0017 -> RGP-0018  dof=['RY']  axis=+Y\n  JNT-0015  REVOLUTE     RGP-0018 -> RGP-0019  dof=['RY']  axis=+Y\n  JNT-0016  REVOLUTE     RGP-0019 -> RGP-0020  dof=['RY']  axis=+Y\n  JNT-0017  REVOLUTE     RGP-0020 -> RGP-0017  dof=['RY']  axis=+Y\n\nTHE CONFIGURATIONS, AND WHAT EACH PREVIOUSLY DECLARED\n  CFG-0010  name='OPEN'\n      previously declared: rigid group RGP-0018 must differ in RY from CFG-0011, CFG-0012\n      previously declared: rigid group RGP-0019 must differ in RY from CFG-0011, CFG-0012\n      previously declared: rigid group RGP-0020 must differ in RY from CFG-0011, CFG-0012\n  CFG-0011  name='CLOSED_LATCHED'\n      previously declared: rigid group RGP-0018 must differ in RY from CFG-0010, CFG-0012\n      previously declared: rigid group RGP-0019 must differ in RY from CFG-0010, CFG-0012\n      previously declared: rigid group RGP-0020 must differ in RY from CFG-0010, CFG-0012\n  CFG-0012  name='LATCH_TOGGLE'\n      previously declared: rigid group RGP-0018 must differ in RY from CFG-0010, CFG-0011\n      previously declared: rigid group RGP-0019 must differ in RY from CFG-0010, CFG-0011\n      previously declared: rigid group RGP-0020 must differ in RY from CFG-0010, CFG-0011\n"
+   },
+   "response": {
+    "finish_reason": "stop",
+    "raw_text": "{\n  \"basis\": [\n    {\n      \"configuration\": \"CFG-0010\",\n      \"joint\": \"JNT-0014\",\n      \"dof\": \"RY\",\n      \"differs_from\": [\"CFG-0011\", \"CFG-0012\"]\n    },\n    {\n      \"configuration\": \"CFG-0010\",\n      \"joint\": \"JNT-0015\",\n      \"dof\": \"RY\",\n      \"differs_from\": [\"CFG-0011\", \"CFG-0012\"]\n    },\n    {\n      \"configuration\": \"CFG-0010\",\n      \"joint\": \"JNT-0016\",\n      \"dof\": \"RY\",\n      \"differs_from\": [\"CFG-0011\", \"CFG-0012\"]\n    },\n    {\n      \"configuration\": \"CFG-0011\",\n      \"joint\": \"JNT-0014\",\n      \"dof\": \"RY\",\n      \"differs_from\": [\"CFG-0010\", \"CFG-0012\"]\n    },\n    {\n      \"configuration\": \"CFG-0011\",\n      \"joint\": \"JNT-0015\",\n      \"dof\": \"RY\",\n      \"differs_from\": [\"CFG-0010\", \"CFG-0012\"]\n    },\n    {\n      \"configuration\": \"CFG-0011\",\n      \"joint\": \"JNT-0016\",\n      \"dof\": \"RY\",\n      \"differs_from\": [\"CFG-0010\", \"CFG-0012\"]\n    },\n    {\n      \"configuration\": \"CFG-0012\",\n      \"joint\": \"JNT-0014\",\n      \"dof\": \"RY\",\n      \"differs_from\": [\"CFG-0010\", \"CFG-0011\"]\n    },\n    {\n      \"configuration\": \"CFG-0012\",\n      \"joint\": \"JNT-0015\",\n      \"dof\": \"RY\",\n      \"differs_from\": [\"CFG-0010\", \"CFG-0011\"]\n    },\n    {\n      \"configuration\": \"CFG-0012\",\n      \"joint\": \"JNT-0016\",\n      \"dof\": \"RY\",\n      \"differs_from\": [\"CFG-0010\", \"CFG-0011\"]\n    }\n  ]\n}",
+    "reasoning_content_present": true,
+    "reasoning_content_stored": false,
+    "response_chars": 1288,
+    "response_sha256": "44f412580f1145be522326d416e9a82b5cb79ff01aa3d9d5d18ecd858bff4ade",
+    "truncated": false
+   },
+   "run_id": "bm001-basis",
+   "stage_attempt": 1,
+   "stage_id": "s03",
+   "timing": {
+    "duration_s": 105.084,
+    "ended_at": 1787375620.5753763,
+    "retry_wait_s": 0.0,
+    "started_at": 1787375515.4909735
+   },
+   "usage": {
+    "cached_input_tokens": 512,
+    "input_tokens": 1062,
+    "output_tokens": 8167
+   }
+  }
+ ],
+ "provider_generate_calls_this_candidate": 1,
+ "raise_from_client": null,
+ "request_as_sent": {
+  "max_attempts": null,
+  "max_output_tokens": 65536,
+  "prompt_chars": 3358,
+  "responsibility_id": null,
+  "stage_id": "s03",
+  "temperature": 1.0
+ },
+ "response": {
+  "cached_input_tokens": 512,
+  "finish_reason": "stop",
+  "input_tokens": 1062,
+  "output_tokens": 8167,
+  "raw_text_chars": 1288,
+  "served_model_id": "deepseek-v4-pro",
+  "truncated": false
+ },
+ "transport_attempts_this_candidate": 1,
+ "wall_clock_s": 105.085
+}

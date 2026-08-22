@@ -1,0 +1,164 @@
+{
+ "authored_by_family": {
+  "Joint": 3,
+  "State": 2,
+  "Transition": 2
+ },
+ "authored_operations": [
+  {
+   "entity_id": "STA-CFG-0001",
+   "family": "State",
+   "fields": {
+    "configuration": "CFG-0001",
+    "joint_coordinates": {
+     "JNT-0002": 0,
+     "JNT-0003": 5
+    },
+    "name": "CFG-0001"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CFG-0001",
+    "JNT-0002",
+    "JNT-0003",
+    "SCL-CND-0001",
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "STA-CFG-0002",
+   "family": "State",
+   "fields": {
+    "configuration": "CFG-0002",
+    "joint_coordinates": {
+     "JNT-0002": -90,
+     "JNT-0003": 0
+    },
+    "name": "CFG-0002"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CFG-0002",
+    "JNT-0002",
+    "JNT-0003",
+    "SCL-CND-0001",
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "TRN-0001",
+   "family": "Transition",
+   "fields": {
+    "changed_coordinates": [
+     "JNT-0002",
+     "JNT-0003"
+    ],
+    "from_state": "STA-CFG-0001",
+    "path": {
+     "moving_groups": [
+      "RGP-0002",
+      "RGP-0003",
+      "RGP-0004"
+     ]
+    },
+    "realizes_requirement": "TRQ-0001",
+    "to_state": "STA-CFG-0002"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "JNT-0002",
+    "JNT-0003",
+    "RGP-0002",
+    "RGP-0003",
+    "RGP-0004",
+    "SCL-CND-0001",
+    "STA-CFG-0001",
+    "STA-CFG-0002",
+    "TRQ-0001",
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "TRN-0002",
+   "family": "Transition",
+   "fields": {
+    "changed_coordinates": [
+     "JNT-0002",
+     "JNT-0003"
+    ],
+    "from_state": "STA-CFG-0002",
+    "path": {
+     "moving_groups": [
+      "RGP-0002",
+      "RGP-0003",
+      "RGP-0004"
+     ]
+    },
+    "realizes_requirement": "TRQ-0002",
+    "to_state": "STA-CFG-0001"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "JNT-0002",
+    "JNT-0003",
+    "RGP-0002",
+    "RGP-0003",
+    "RGP-0004",
+    "SCL-CND-0001",
+    "STA-CFG-0001",
+    "STA-CFG-0002",
+    "TRQ-0002",
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "JNT-0001",
+   "family": "Joint",
+   "fields": {
+    "frame_origin": [
+     -48,
+     0,
+     20
+    ]
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0001"
+   ]
+  },
+  {
+   "entity_id": "JNT-0002",
+   "family": "Joint",
+   "fields": {
+    "frame_origin": [
+     -48,
+     0,
+     20
+    ]
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0001"
+   ]
+  },
+  {
+   "entity_id": "JNT-0003",
+   "family": "Joint",
+   "fields": {
+    "frame_origin": [
+     40,
+     0,
+     30
+    ]
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0001"
+   ]
+  }
+ ],
+ "candidate": "CND-0001",
+ "declared_incompleteness": [],
+ "execution_status": "SUCCESS",
+ "stage_problems": []
+}

@@ -1,0 +1,76 @@
+{
+  "joint_placements": [
+    {
+      "joint": "JNT-0009",
+      "origin": [-2.0, 0.0, 1.0]
+    },
+    {
+      "joint": "JNT-0010",
+      "origin": [2.0, 0.0, 1.0]
+    },
+    {
+      "joint": "JNT-0011",
+      "origin": [2.75, 0.0, 1.2]
+    },
+    {
+      "joint": "JNT-0012",
+      "origin": [0.25, 0.0, 1.0]
+    }
+  ],
+  "state_coordinates": [
+    {
+      "configuration": "CFG-0005",
+      "coordinates": {
+        "JNT-0009": 50.0,
+        "JNT-0010": -108.55,
+        "JNT-0011": 131.73,
+        "JNT-0012": 73.18
+      }
+    },
+    {
+      "configuration": "CFG-0006",
+      "coordinates": {
+        "JNT-0009": 0.0,
+        "JNT-0010": -14.87,
+        "JNT-0011": 10.32,
+        "JNT-0012": -4.55
+      }
+    },
+    {
+      "configuration": "CFG-0007",
+      "coordinates": {
+        "JNT-0009": 0.0,
+        "JNT-0010": 14.87,
+        "JNT-0011": -10.32,
+        "JNT-0012": 4.55
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "id": "TRN-0101",
+      "realizes_requirement": "TRQ-0101",
+      "moving_groups": ["RGP-0011", "RGP-0012", "RGP-0013", "RGP-0014"],
+      "changed_coordinates": ["JNT-0009", "JNT-0010", "JNT-0011", "JNT-0012"]
+    },
+    {
+      "id": "TRN-0102",
+      "realizes_requirement": "TRQ-0102",
+      "moving_groups": ["RGP-0011", "RGP-0012", "RGP-0013", "RGP-0014"],
+      "changed_coordinates": ["JNT-0010", "JNT-0011", "JNT-0012"]
+    },
+    {
+      "id": "TRN-0103",
+      "realizes_requirement": "TRQ-0103",
+      "moving_groups": ["RGP-0011", "RGP-0012", "RGP-0013", "RGP-0014"],
+      "changed_coordinates": ["JNT-0010", "JNT-0011", "JNT-0012"]
+    },
+    {
+      "id": "TRN-0104",
+      "realizes_requirement": "TRQ-0104",
+      "moving_groups": ["RGP-0011", "RGP-0012", "RGP-0013", "RGP-0014"],
+      "changed_coordinates": ["JNT-0009", "JNT-0010", "JNT-0011", "JNT-0012"]
+    }
+  ],
+  "notes": "Joint axes are all +Y as fixed by topology. Coordinates are relative angles in degrees about +Y. Open configuration chosen with lid angle 50 degrees."
+}

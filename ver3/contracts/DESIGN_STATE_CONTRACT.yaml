@@ -629,8 +629,74 @@ entity_families:
         target: Body
         cardinality: many
         resolvable: false
+      # NARROW-PHASE MATING GEOMETRY. S-11. The metric refinement of an
+      # interface whose boxes overlap and whose meaning says that is intended:
+      # a pin in a bore, a shaft in a bearing, a dowel in a hole. The Envelope
+      # is broad-phase - no-overlap is a proof, overlap proves nothing - and for
+      # every such interface the boxes DO overlap, so without a second tier the
+      # ordinary machine element was permanently unestablished.
+      #
+      # TYPED AND NUMERIC, and nothing here is a verdict. Two features, their
+      # kinds, two sizes, an engagement length, and THE JOINT WHOSE AXIS THIS
+      # IS - referenced, never restated: a revolute or prismatic joint between
+      # the two bodies already carries the canonical axis direction and frame
+      # origin, and a second copy here would be a second author of one fact.
+      # Where no joint relates the pair (a fixed dowel), the axis is stated as
+      # an axis word in the world frame, the same vocabulary the joint uses.
+      # Whether the pin FITS is decided by one shared reader from these
+      # numbers; the record says what the geometry is, not what it means.
+      #
+      # EXTENDED BY s04a. s03a says the pair is intended and what kind of
+      # interface it is; s04a realizes the geometry that decides fit, reach
+      # and assemblability. That is the division the stage contract already
+      # draws, and `engagement_site_status` below recorded this exact slot as
+      # wanted and unproduced.
+      mating_geometry:
+        kind: record
+        record_field_semantics:
+          inner_feature:
+            kind: enum
+            values: [SHAFT, PIN, DOWEL]
+            required: true
+          outer_feature:
+            kind: enum
+            values: [BORE, HOLE, BEARING, GUIDE]
+            required: true
+          inner_body:
+            kind: reference
+            target: Body
+            cardinality: one
+            resolvable: false
+            referent_population: INVOCATION_BRANCH
+            required: true
+          outer_body:
+            kind: reference
+            target: Body
+            cardinality: one
+            resolvable: false
+            referent_population: INVOCATION_BRANCH
+            required: true
+          axis_joint:
+            kind: reference
+            target: Joint
+            cardinality: one
+            resolvable: false
+            referent_population: INVOCATION_BRANCH
+          axis_direction:
+            kind: enum
+            values: ["+X", "-X", "+Y", "-Y", "+Z", "-Z"]
+          inner_diameter:
+            kind: number
+            required: true
+          outer_diameter:
+            kind: number
+            required: true
+          engagement_length:
+            kind: number
     owned_by: s03
     extendable_by: [s04, s05]
+    extendable_fields:
+      mating_geometry: s04
     # LATER-OWNED, not current. `fields_owned_by_s04b: [engagement_site]` claimed
     # s04b owns a field it produces nothing for, and S04_CONTRACT already records
     # it under `not_owned_here` - two files disagreeing about the same ownership.
@@ -645,8 +711,13 @@ entity_families:
         orbits out of. Named as an s05 input before the U-2B correction, and
         produced by nothing then or now.
     purpose: "A region where two bodies meet, with its declared kind."
-    optional_fields: [addresses_obligations]
+    optional_fields: [addresses_obligations, mating_geometry]
     required_fields: [entity_id, bodies, interaction_kind, nominal]
+    mating_geometry_rules:
+      - "inner_body and outer_body are the interface's own two bodies, one each. A geometry about some other pair refines nothing here."
+      - "axis_joint names a non-FIXED joint relating the same two bodies, and its axis_direction and frame_origin ARE the mating axis. axis_direction is stated only when no such joint exists. Stating both is two authors of one fact and is refused by the reader."
+      - "Diameters and engagement are in the ReferenceScale basis every Envelope is expressed in."
+      - "This record establishes no clearance. `s04.mating_fit` reads it, and it alone decides what the numbers mean for the interface's declared kind."
     # S7-B CORRECTION - CONTRACT TRUTH. This list read
     # [DECLARED_CONTACT, DECLARED_CLEARANCE, DECLARED_INTERFERENCE_FIT,
     #  DECLARED_COMPLIANT_INTERACTION, NOT_INTENDED_TO_INTERACT]

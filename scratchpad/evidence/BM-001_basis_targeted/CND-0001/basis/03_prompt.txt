@@ -1,0 +1,56 @@
+You are restating one declaration about an existing mechanism in the
+form that names what it is actually about. You are NOT designing anything.
+
+THE MECHANISM ALREADY EXISTS. Its bodies, rigid groups, joints, interfaces and
+configurations are fixed and are listed below. You may not add, remove, rename or
+change any of them, and nothing you write here can.
+
+WHAT IS BEING RESTATED
+Each configuration may declare what makes it a DIFFERENT state from named
+sibling configurations. That declaration used to name a RIGID GROUP and a degree
+of freedom. A rigid group has no coordinate - a JOINT does - so every reader had
+to work out which joint expressed it, and on a chain G1-[J1]-G2-[J2]-G3 the
+middle link touches two joints with no way to tell which was meant.
+
+Say which JOINT'S coordinate differs.
+
+RESPONSE SCHEMA
+Return a single JSON object with one key.
+
+  basis[]   configuration, joint, dof, differs_from[]
+
+  configuration  a configuration id from the list below
+  joint          a JOINT ID FROM THE LIST BELOW - never a rigid group, never an
+                 id you invent
+  dof            one of TX TY TZ RX RY RZ
+  differs_from   configuration ids from the list below
+
+One row per (configuration, distinction). Omit a configuration entirely if it
+declared no distinction.
+
+RULES
+  PRESERVE THE ENGINEERING MEANING. The previously declared distinction for each
+  configuration is shown. Name the joint whose coordinate is the one it was
+  about. You are choosing among joints that exist, not deciding what the
+  mechanism should be.
+
+  DO NOT INVENT A JOINT, and do not name a joint that is not listed. If no listed
+  joint has a coordinate that could differ for a distinction, still name the joint
+  that distinction concerns and the degree of freedom as it was declared. A later
+  step reports that the topology does not provide that coordinate, which is a
+  true statement about this design. Naming some other joint so the declaration
+  passes would be reporting a mechanism that does not exist.
+
+  KEEP EVERY DECLARED DISTINCTION. Dropping one would delete a requirement the
+  design made.
+
+THE JOINTS OF THIS CANDIDATE
+  JNT-0001  FIXED        RGP-0002 -> RGP-0001  dof=[]  axis=NONE
+  JNT-0002  REVOLUTE     RGP-0003 -> RGP-0002  dof=['RY']  axis=+Y
+  JNT-0003  COMPLIANT    RGP-0004 -> RGP-0003  dof=['RY']  axis=+Y
+
+THE CONFIGURATIONS, AND WHAT EACH PREVIOUSLY DECLARED
+  CFG-0001  name='Closed'
+      previously declared: rigid group RGP-0003 must differ in RY from CFG-0002
+  CFG-0002  name='Open'
+      previously declared: rigid group RGP-0003 must differ in RY from CFG-0001

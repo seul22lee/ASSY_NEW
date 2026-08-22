@@ -299,6 +299,7 @@ class _Feas(_fixtures.StateBuilder, unittest.TestCase):
             attempt=1, invocation=inv)
         self.assertIsNotNone(oa.patch, oa.problems)
         state.apply(oa.patch)
+        self.last_s04a = oa
         if apply_b:
             ob = S04BPlacementAndMotion().invoke(
                 provider, state, state.run_id, {"candidate": "CND-%s" % sfx},

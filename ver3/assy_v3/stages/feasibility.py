@@ -311,6 +311,37 @@ class _Evidence:
                                  else sorted(kinds)[0])
         return expectation, conflicted
 
+    def mating_for(self, pair):
+        """The interface on this pair that carries mating geometry, if any.
+
+        At most one: two interfaces on one pair each carrying a geometry is two
+        narrow-phase statements about one fit, and is reported as such rather
+        than resolved by order.
+        """
+        found = [i for i in self.fam("Interface")
+                 if set((i.get("bodies") or [])[:2]) == set(pair)
+                 and isinstance(i.get("mating_geometry"), dict)]
+        return found
+
+    def narrow_phase(self, pair, boxes):
+        """(status, code, note, refs) for an overlapping pair, by the one rule.
+
+        Asked only where the broad phase is inconclusive. A pair with no
+        geometry is what it always was - unestablished - and a pair with two
+        geometries is a question the design has answered twice.
+        """
+        carrying = self.mating_for(pair)
+        if not carrying:
+            return (s04.FIT_NOT_ESTABLISHED, None, None, [])
+        if len(carrying) > 1:
+            return (s04.FIT_NOT_ESTABLISHED, "MATING_GEOMETRY_STATED_TWICE",
+                    "%s carry mating geometry for one pair"
+                    % ", ".join(sorted(i["entity_id"] for i in carrying)),
+                    [i["entity_id"] for i in carrying])
+        interface = carrying[0]
+        joints = {j["entity_id"]: j for j in self.fam("Joint")}
+        return s04.mating_fit(interface, interface["mating_geometry"], joints, boxes)
+
     def envelopes_of(self, body: str) -> List[str]:
         """Every envelope id currently claiming this body. What an ambiguity is
         made of, and therefore what a finding about it rests on."""
@@ -1294,12 +1325,40 @@ def _assemblability(ev: _Evidence) -> Verdict:
         for prior in placed:
             if prior not in boxes or not s04.overlaps(hull, boxes[prior]):
                 continue
-            if frozenset((body, prior)) in meets:
+            pair = frozenset((body, prior))
+            if pair in meets:
                 # Arriving where it is declared to meet this body. The
                 # interface that declares it is what the corridor rests on.
                 used += [i.get("entity_id") for i in ev.fam("Interface")
                          if set((i.get("bodies") or [])[:2]) == {body, prior}]
                 continue
+            if expectation.get(pair) == s04.CLEAR:
+                # A CLEARANCE PAIR ON THE PATH IS NOT EXEMPT - it is the case
+                # the narrow phase exists for. A pin arriving in its bore
+                # enters the bore's box along the whole corridor, and whether
+                # that is the intended insertion or an obstruction is decided
+                # by the mating geometry: the cross-section fits, and the step
+                # drives the pin along the mating axis. Without the geometry
+                # the corridor is what it always was, unestablished.
+                carrying = ev.mating_for(pair)
+                if len(carrying) == 1:
+                    joints = {j["entity_id"]: j for j in ev.fam("Joint")}
+                    fit, code, note, refs = s04.insertion_fit(
+                        carrying[0], carrying[0]["mating_geometry"], joints,
+                        boxes, direction)
+                    used += refs
+                    if fit == s04.FIT_ESTABLISHED:
+                        codes.append(code)
+                        continue
+                    if fit == s04.FIT_CONTRADICTED:
+                        codes.append(code)
+                        notes.append(note)
+                        status = FAIL
+                        continue
+                    codes.append(code)
+                    notes.append(note)
+                    status = _weaken(status, NOT_ESTABLISHED)
+                    continue
             # A box overlap is not a collision - the real bodies are smaller
             # than their boxes - so it is what the design has not shown to be
             # clear, never a proof that it is not.
@@ -1388,6 +1447,41 @@ def _gross_interference(ev: _Evidence) -> Verdict:
         notes.append(note)
         used += premises
         status = _weaken(status, NOT_ESTABLISHED)
+    names = sorted(boxes)
+    # THE PAIRS THE NARROW PHASE ESTABLISHED. A sweep that enters one of them
+    # is the pin turning in its bore, which is what the geometry says happens.
+    analytically_clear = set()
+    for x in range(len(names)):
+        for y in range(x + 1, len(names)):
+            pair = frozenset((names[x], names[y]))
+            if pair in exempt or not s04.overlaps(boxes[names[x]], boxes[names[y]]):
+                continue
+            used += [envelope_of.get(names[x]), envelope_of.get(names[y])]
+            if expectation.get(pair) == s04.CLEAR:
+                # BROAD PHASE INCONCLUSIVE, NARROW PHASE ASKED. Two boxes of a
+                # CLEARANCE pair overlap - which for a pin in a bore they
+                # always do. The mating geometry, where the design realized
+                # one, says whether the pin clears; where it did not, the
+                # overlap is what it always was, the promise unverified.
+                fit, code, note, refs = ev.narrow_phase(pair, boxes)
+                used += refs
+                if fit == s04.FIT_ESTABLISHED:
+                    codes.append(code)
+                    analytically_clear.add(pair)
+                    continue
+                if fit == s04.FIT_CONTRADICTED:
+                    codes.append(code)
+                    notes.append(note)
+                    status = FAIL
+                    continue
+                codes.append(code or "CLEARANCE_PAIR_OVERLAPS")
+                notes.append(note or "%s and %s are declared CLEARANCE and their "
+                                     "boxes overlap" % (names[x], names[y]))
+            else:
+                codes.append("UNDECLARED_PAIR_OVERLAPS")
+                notes.append("%s and %s overlap and no interface declares the pair"
+                             % (names[x], names[y]))
+            status = _weaken(status, NOT_ESTABLISHED)
     for volume in ev.fam("SweptVolume"):
         occupancy = (volume.get("occupancy") or {}).get("aabb")
         if not occupancy:
@@ -1403,7 +1497,7 @@ def _gross_interference(ev: _Evidence) -> Verdict:
                 used.append(rid)
         for other, obox in boxes.items():
             pair = frozenset((body, other))
-            if other == body or pair in exempt:
+            if other == body or pair in exempt or pair in analytically_clear:
                 continue
             if s04.overlaps(hull, obox):
                 codes.append("SWEEP_MEETS_CLEARANCE_PAIR"
@@ -1412,22 +1506,6 @@ def _gross_interference(ev: _Evidence) -> Verdict:
                 notes.append("%s sweeps into %s" % (body, other))
                 status = _weaken(status, NOT_ESTABLISHED)
                 used.append(envelope_of.get(other))
-    names = sorted(boxes)
-    for x in range(len(names)):
-        for y in range(x + 1, len(names)):
-            pair = frozenset((names[x], names[y]))
-            if pair in exempt or not s04.overlaps(boxes[names[x]], boxes[names[y]]):
-                continue
-            if expectation.get(pair) == s04.CLEAR:
-                codes.append("CLEARANCE_PAIR_OVERLAPS")
-                notes.append("%s and %s are declared CLEARANCE and their boxes "
-                             "overlap" % (names[x], names[y]))
-            else:
-                codes.append("UNDECLARED_PAIR_OVERLAPS")
-                notes.append("%s and %s overlap and no interface declares the pair"
-                             % (names[x], names[y]))
-            status = _weaken(status, NOT_ESTABLISHED)
-            used += [envelope_of.get(names[x]), envelope_of.get(names[y])]
     if status == PASS:
         codes.append("NO_CONSERVATIVE_OVERLAP")
     return Verdict("gross_interference", status, codes, used, "; ".join(notes[:5]))

@@ -1,0 +1,349 @@
+{
+ "candidate": "CND-0002",
+ "json_parse": "OK",
+ "parsed": {
+  "assembly_steps": [
+   {
+    "access_side": "+Z",
+    "activates": [],
+    "body": "BOD-0004",
+    "depends_on": [],
+    "id": "ASY-0001",
+    "order_index": 1,
+    "path_kind": "RIGID",
+    "termination_strategy": "NONE"
+   },
+   {
+    "access_side": "+Z",
+    "activates": [
+     "IFC-0006"
+    ],
+    "body": "BOD-0006",
+    "depends_on": [
+     "BOD-0004"
+    ],
+    "id": "ASY-0002",
+    "order_index": 2,
+    "path_kind": "DEFORMATION_RESOLVED",
+    "termination_strategy": "ELASTICITY"
+   },
+   {
+    "access_side": "+Z",
+    "activates": [
+     "IFC-0007",
+     "IFC-0005"
+    ],
+    "body": "BOD-0005",
+    "depends_on": [
+     "BOD-0004",
+     "BOD-0006"
+    ],
+    "id": "ASY-0003",
+    "order_index": 3,
+    "path_kind": "DEFORMATION_RESOLVED",
+    "termination_strategy": "ELASTICITY"
+   },
+   {
+    "access_side": "+Z",
+    "activates": [
+     "IFC-0008",
+     "IFC-0009"
+    ],
+    "body": "BOD-0007",
+    "depends_on": [
+     "BOD-0004",
+     "BOD-0005",
+     "BOD-0006"
+    ],
+    "id": "ASY-0004",
+    "order_index": 4,
+    "path_kind": "DEFORMATION_RESOLVED",
+    "termination_strategy": "ELASTICITY"
+   }
+  ],
+  "constraint_relations": [
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0003",
+     "CFG-0004"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "id": "CRL-0001",
+    "provider_body": "BOD-0004",
+    "provider_site": "IFC-0006",
+    "retained_group": "RGP-0007"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0003",
+     "CFG-0004"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "id": "CRL-0002",
+    "provider_body": "BOD-0005",
+    "provider_site": "IFC-0007",
+    "retained_group": "RGP-0008"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0003",
+     "CFG-0004"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "id": "CRL-0003",
+    "provider_body": "BOD-0005",
+    "provider_site": "IFC-0008",
+    "retained_group": "RGP-0009"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0003",
+     "CFG-0004"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "id": "CRL-0004",
+    "provider_body": "BOD-0006",
+    "provider_site": "IFC-0006",
+    "retained_group": "RGP-0008"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY"
+    ],
+    "configurations": [
+     "CFG-0003",
+     "CFG-0004"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "id": "CRL-0005",
+    "provider_body": "BOD-0007",
+    "provider_site": "IFC-0008",
+    "retained_group": "RGP-0010"
+   },
+   {
+    "blocked_direction": "+Z",
+    "blocked_dofs": [
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0004"
+    ],
+    "driver": "LOAD",
+    "id": "CRL-0006",
+    "provider_body": "BOD-0004",
+    "provider_site": "IFC-0009",
+    "retained_group": "RGP-0010"
+   },
+   {
+    "blocked_direction": "-Z",
+    "blocked_dofs": [
+     "TZ"
+    ],
+    "configurations": [
+     "CFG-0004"
+    ],
+    "driver": "LOAD",
+    "id": "CRL-0007",
+    "provider_body": "BOD-0004",
+    "provider_site": "IFC-0005",
+    "retained_group": "RGP-0006"
+   },
+   {
+    "blocked_dofs": [
+     "RY"
+    ],
+    "configurations": [
+     "CFG-0004"
+    ],
+    "driver": "LOAD",
+    "id": "CRL-0008",
+    "provider_body": "BOD-0007",
+    "provider_site": "IFC-0009",
+    "retained_group": "RGP-0006"
+   }
+  ],
+  "irrelevance": [],
+  "load_paths": [
+   {
+    "id": "LDP-0001",
+    "load_case": "LC-0001",
+    "ordered_hops": [
+     "IFC-0009"
+    ],
+    "terminates_at": "RSR-0001"
+   },
+   {
+    "id": "LDP-0002",
+    "load_case": "LC-0002",
+    "ordered_hops": [
+     "IFC-0007",
+     "IFC-0006"
+    ],
+    "terminates_at": "RSR-0001"
+   },
+   {
+    "id": "LDP-0003",
+    "load_case": "LC-0003",
+    "ordered_hops": [
+     "IFC-0005"
+    ],
+    "terminates_at": "RSR-0002"
+   },
+   {
+    "id": "LDP-0004",
+    "load_case": "LC-0004",
+    "ordered_hops": [
+     "IFC-0009"
+    ],
+    "terminates_at": "RSR-0002"
+   },
+   {
+    "id": "LDP-0005",
+    "load_case": "LC-0005",
+    "ordered_hops": [
+     "IFC-0006"
+    ],
+    "terminates_at": "RSR-0003"
+   }
+  ],
+  "physical_interactions": [
+   {
+    "at_interface": "IFC-0006",
+    "configurations": [
+     "CFG-0003",
+     "CFG-0004"
+    ],
+    "discharges_effect": "PEO-0001",
+    "effect": "PERMIT_MOTION",
+    "groups": [
+     "RGP-0006",
+     "RGP-0005"
+    ],
+    "id": "PHI-0001"
+   },
+   {
+    "at_interface": "IFC-0009",
+    "configurations": [
+     "CFG-0004"
+    ],
+    "discharges_effect": "PEO-0002",
+    "effect": "PREVENT_MOTION",
+    "groups": [
+     "RGP-0006",
+     "RGP-0005"
+    ],
+    "id": "PHI-0002"
+   },
+   {
+    "at_interface": "IFC-0009",
+    "configurations": [
+     "CFG-0004"
+    ],
+    "discharges_effect": "PEO-0003",
+    "effect": "TRANSMIT_FORCE",
+    "groups": [
+     "RGP-0010",
+     "RGP-0005"
+    ],
+    "id": "PHI-0003"
+   },
+   {
+    "at_interface": "IFC-0005",
+    "configurations": [
+     "CFG-0004"
+    ],
+    "discharges_effect": "PEO-0004",
+    "effect": "LOCATE",
+    "groups": [
+     "RGP-0006",
+     "RGP-0005"
+    ],
+    "id": "PHI-0004"
+   },
+   {
+    "at_interface": "IFC-0005",
+    "configurations": [
+     "CFG-0004"
+    ],
+    "discharges_effect": "PEO-0005",
+    "effect": "CONTAIN",
+    "groups": [
+     "RGP-0005",
+     "RGP-0006"
+    ],
+    "id": "PHI-0005"
+   }
+  ],
+  "unresolved": [
+   {
+    "alternatives": [
+     "Polypropylene",
+     "POM",
+     "Nylon"
+    ],
+    "alternatives_kind": "FREE_TEXT",
+    "blocks": [
+     "s04"
+    ],
+    "decision": "Select flexure material and verify fatigue life for repeated bending.",
+    "id": "S3U-1001",
+    "kept_open_by": [
+     "OBL-0012"
+    ],
+    "why_open": "Material property analysis unavailable; no material or cycle count specified."
+   },
+   {
+    "alternatives": [
+     "Use standard desktop handling loads",
+     "Use MIL-STD-810 transport loads"
+    ],
+    "alternatives_kind": "FREE_TEXT",
+    "blocks": [
+     "s03"
+    ],
+    "decision": "Define quantitative load magnitudes for handling, transport, and actuation.",
+    "id": "S3U-1002",
+    "kept_open_by": [
+     "OBL-0004",
+     "OBL-0006"
+    ],
+    "why_open": "Load cases have magnitude_or_status UNSUPPORTED; normal handling and transport loads are not quantified."
+   }
+  ]
+ }
+}

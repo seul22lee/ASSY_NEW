@@ -1,0 +1,58 @@
+You are adding one piece of geometry to a mechanism that is already placed.
+You are NOT designing or re-placing anything.
+
+THE ARRANGEMENT ALREADY EXISTS. Every body has its extent below, every joint has
+its axis and origin, and every interface is declared. You may not move, resize,
+add or remove any of them, and nothing you write here can.
+
+WHAT IS BEING ADDED
+The interfaces listed are NESTED MATING FEATURES whose boxes overlap on purpose -
+a pin inside a knuckle, a shaft in a bearing. A box overlap proves nothing either
+way; the DIAMETERS decide whether the inner feature clears or grips the outer,
+and that is computed from your numbers, not stated by you.
+
+For each listed interface give the analytical geometry of the mating.
+
+RESPONSE SCHEMA
+Return a single JSON object with one key.
+
+  mating_geometry[]   interface, inner_body, outer_body,
+                      inner_feature SHAFT|PIN|DOWEL,
+                      outer_feature BORE|HOLE|BEARING|GUIDE,
+                      inner_diameter, outer_diameter, engagement_length,
+                      axis_joint
+
+  interface       an interface id from the list below
+  inner_body      the interface's body that goes INTO the other
+  outer_body      the interface's body that receives it
+  inner_diameter  of the inner feature, in the same units as the extents below
+  outer_diameter  of the opening it goes into, same units
+  engagement_length  how much of the inner feature's length is engaged
+  axis_joint      the joint from the list below whose axis the mating turns or
+                  slides on - name the joint, do not restate its axis. Only when
+                  NO joint relates the two bodies give axis_direction as one of
+                  +X -X +Y -Y +Z -Z instead, and never both.
+
+RULES
+  THE EXTENTS ARE FIXED. The diameters you give must be consistent with the
+  boxes below: a pin is no wider than its box across the axis, and a bore is no
+  wider than the body that holds it. Read the sizes off the arrangement.
+  DO NOT STATE A VERDICT. Not "clears", not "fits", not "interferes".
+  DO NOT CHOOSE SIZES TO MAKE ANYTHING PASS. If the interface is declared
+  CLEARANCE the pin must genuinely be smaller than the bore in the design as
+  placed; if it is not, say the sizes as they are and a later step reports it.
+  If a listed interface is NOT actually a nested mating feature of a kind above,
+  omit it. Omission is a true answer; a guessed geometry is not.
+
+THE BODIES AND THEIR EXTENTS (centre, half-extent, world frame)
+  BOD-0001  centre=[0, 0, 0]  half_extent=[50, 30, 20]  (Stationary box base providing storage volume, support surfac)
+  BOD-0002  centre=[0, 0, 25]  half_extent=[50, 30, 5]  (Moving lid providing closure, hinge knuckle, and integrated )
+  BOD-0003  centre=[-48, 0, 20]  half_extent=[2, 30, 2]  (Hinge pin connecting base and lid, providing axial retention)
+
+THE JOINTS
+  JNT-0001  FIXED      RGP-0002 -> RGP-0001  axis=NONE  origin=[-48, 0, 20]
+  JNT-0002  REVOLUTE   RGP-0003 -> RGP-0002  axis=+Y  origin=[-48, 0, 20]
+  JNT-0003  COMPLIANT  RGP-0004 -> RGP-0003  axis=+Y  origin=[40, 0, 30]
+
+THE INTERFACES TO REFINE
+  IFC-0002  bodies=['BOD-0002', 'BOD-0003']  kind=CLEARANCE  nominal=True

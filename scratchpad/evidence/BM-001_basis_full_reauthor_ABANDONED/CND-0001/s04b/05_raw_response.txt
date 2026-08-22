@@ -1,0 +1,61 @@
+{
+  "joint_placements": [
+    {
+      "joint": "JNT-0001",
+      "origin": [-5, 0, 2.5]
+    },
+    {
+      "joint": "JNT-0002",
+      "origin": [-5, 0, 2.5]
+    },
+    {
+      "joint": "JNT-0003",
+      "origin": [4.5, 0, 3.0]
+    }
+  ],
+  "state_coordinates": [
+    {
+      "configuration": "CFG-0001",
+      "coordinates": {
+        "JNT-0002": 0,
+        "JNT-0003": 0
+      }
+    },
+    {
+      "configuration": "CFG-0002",
+      "coordinates": {
+        "JNT-0002": 90,
+        "JNT-0003": 15
+      }
+    },
+    {
+      "configuration": "CFG-0003",
+      "coordinates": {
+        "JNT-0002": 0,
+        "JNT-0003": 15
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "id": "TRN-0001",
+      "realizes_requirement": "TRQ-0301",
+      "moving_groups": ["RGP-0002", "RGP-0003"],
+      "changed_coordinates": ["JNT-0003"]
+    },
+    {
+      "id": "TRN-0002",
+      "realizes_requirement": "TRQ-0302",
+      "moving_groups": ["RGP-0002", "RGP-0004"],
+      "changed_coordinates": ["JNT-0002"]
+    },
+    {
+      "id": "TRN-0003",
+      "realizes_requirement": "TRQ-0303",
+      "moving_groups": ["RGP-0002", "RGP-0003", "RGP-0004"],
+      "changed_coordinates": ["JNT-0002", "JNT-0003"]
+    }
+  ],
+  "envelope_revisions": [],
+  "notes": ""
+}

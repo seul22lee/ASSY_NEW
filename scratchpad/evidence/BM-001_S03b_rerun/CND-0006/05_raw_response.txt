@@ -1,0 +1,232 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0101",
+      "groups": ["RGP-0018", "RGP-0017"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "configurations": ["CFG-0010", "CFG-0012"]
+    },
+    {
+      "id": "PHI-0102",
+      "groups": ["RGP-0018", "RGP-0017"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "configurations": ["CFG-0011"]
+    },
+    {
+      "id": "PHI-0103",
+      "groups": ["RGP-0019", "RGP-0020"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "at_interface": "IFC-0022",
+      "configurations": ["CFG-0010", "CFG-0012"]
+    },
+    {
+      "id": "PHI-0104",
+      "groups": ["RGP-0018", "RGP-0017"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "configurations": ["CFG-0011"]
+    },
+    {
+      "id": "PHI-0105",
+      "groups": ["RGP-0017", "RGP-0018"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "configurations": ["CFG-0011"]
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0101",
+      "retained_group": "RGP-0018",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "provider_body": "BOD-0014",
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE"
+    },
+    {
+      "id": "CRL-0102",
+      "retained_group": "RGP-0019",
+      "blocked_dofs": ["TX", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "provider_body": "BOD-0014",
+      "provider_site": "IFC-0020",
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE"
+    },
+    {
+      "id": "CRL-0103",
+      "retained_group": "RGP-0019",
+      "blocked_dofs": ["TY"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "provider_body": "BOD-0014",
+      "provider_site": "IFC-0021",
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE"
+    },
+    {
+      "id": "CRL-0104",
+      "retained_group": "RGP-0020",
+      "blocked_dofs": ["TX", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "provider_body": "BOD-0015",
+      "provider_site": "IFC-0022",
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE"
+    },
+    {
+      "id": "CRL-0105",
+      "retained_group": "RGP-0020",
+      "blocked_dofs": ["TY"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "provider_body": "BOD-0015",
+      "provider_site": "IFC-0023",
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE"
+    },
+    {
+      "id": "CRL-0106",
+      "retained_group": "RGP-0017",
+      "blocked_dofs": ["TX", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "provider_body": "BOD-0016",
+      "provider_site": "IFC-0024",
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE"
+    },
+    {
+      "id": "CRL-0107",
+      "retained_group": "RGP-0017",
+      "blocked_dofs": ["TY"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "provider_body": "BOD-0016",
+      "provider_site": "IFC-0025",
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE"
+    },
+    {
+      "id": "CRL-0108",
+      "retained_group": "RGP-0017",
+      "blocked_dofs": ["TX", "TY", "TZ"],
+      "configurations": ["CFG-0010", "CFG-0011", "CFG-0012"],
+      "provider_reaction_site": "RSR-0001",
+      "driver": "LOAD",
+      "blocked_direction": "NONE"
+    },
+    {
+      "id": "CRL-0109",
+      "retained_group": "RGP-0017",
+      "blocked_dofs": ["TX", "TY", "TZ"],
+      "configurations": ["CFG-0011"],
+      "provider_reaction_site": "RSR-0002",
+      "driver": "LOAD",
+      "blocked_direction": "NONE"
+    },
+    {
+      "id": "CRL-0110",
+      "retained_group": "RGP-0018",
+      "blocked_dofs": ["RY"],
+      "configurations": ["CFG-0011"],
+      "provider_body": "BOD-0016",
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE"
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0101",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0022", "IFC-0024"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0102",
+      "load_case": "LC-0002",
+      "ordered_hops": ["IFC-0020", "IFC-0022", "IFC-0024"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0103",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0020", "IFC-0022", "IFC-0024"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0104",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0020", "IFC-0022", "IFC-0024"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0105",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0025"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0101",
+      "order_index": 1,
+      "body": "BOD-0014",
+      "access_side": "+Z",
+      "activates": [],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0102",
+      "order_index": 2,
+      "body": "BOD-0015",
+      "access_side": "+Z",
+      "activates": ["IFC-0020", "IFC-0021"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0101"]
+    },
+    {
+      "id": "ASY-0103",
+      "order_index": 3,
+      "body": "BOD-0016",
+      "access_side": "+Z",
+      "activates": ["IFC-0022", "IFC-0023", "IFC-0024", "IFC-0025"],
+      "termination_strategy": "ELASTICITY",
+      "path_kind": "DEFORMATION_RESOLVED",
+      "depends_on": ["ASY-0101", "ASY-0102"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-0301",
+      "decision": "Material selection for compliant flexure and snap features",
+      "why_open": "Material affects flexure fatigue life, snap retention force, and compliance for elastic insertion; no material specified.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["FRE-0002"],
+      "blocks": ["OBL-0012", "OBL-0007"]
+    },
+    {
+      "id": "S3U-0302",
+      "decision": "Exact dimensions and tolerances for over-centre latch geometry",
+      "why_open": "The over-centre toggle and snap fits require precise dimensions and tolerances to ensure latching and assembly; only 'compact' is given.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0001", "FRE-0003"],
+      "blocks": ["OBL-0001", "OBL-0008", "OBL-0009"]
+    },
+    {
+      "id": "S3U-0303",
+      "decision": "Magnitudes of handling and transport loads",
+      "why_open": "Normal handling and transport vibration/shock loads are not quantified, affecting required retention force and latch robustness.",
+      "alternatives": [],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": ["AMB-0004", "AMB-0005"],
+      "blocks": ["OBL-0004", "OBL-0006"]
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0001",
+      "groups": ["RGP-0016", "RGP-0015"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "configurations": ["CFG-0008", "CFG-0009"],
+      "at_interface": "IFC-0016"
+    },
+    {
+      "id": "PHI-0002",
+      "groups": ["RGP-0016", "RGP-0015"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "configurations": ["CFG-0008"],
+      "at_interface": "IFC-0017"
+    },
+    {
+      "id": "PHI-0003",
+      "groups": ["RGP-0016", "RGP-0015"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "configurations": ["CFG-0008", "CFG-0009"],
+      "at_interface": "IFC-0017"
+    },
+    {
+      "id": "PHI-0004",
+      "groups": ["RGP-0016", "RGP-0015"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "configurations": ["CFG-0008"],
+      "at_interface": "IFC-0019"
+    },
+    {
+      "id": "PHI-0005",
+      "groups": ["RGP-0016", "RGP-0015"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "configurations": ["CFG-0008"]
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0001",
+      "retained_group": "RGP-0016",
+      "blocked_dofs": ["TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0008", "CFG-0009"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0012",
+      "provider_site": "IFC-0016",
+      "defeat_specification": "If guide surfaces are worn or misaligned, lateral movement may occur."
+    },
+    {
+      "id": "CRL-0002",
+      "retained_group": "RGP-0016",
+      "blocked_dofs": ["TX"],
+      "configurations": ["CFG-0008"],
+      "driver": "LOAD",
+      "provider_body": "BOD-0012",
+      "provider_site": "IFC-0017",
+      "defeat_specification": "If friction coefficient is too low or surfaces are lubricated, the drawer may slide open under load."
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0017"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "ordered_hops": ["IFC-0016"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0017"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0018"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0017"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0012",
+      "access_side": "N/A",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0013",
+      "access_side": "+X",
+      "activates": ["CRL-0001", "CRL-0002"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0012"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-0108",
+      "decision": "Friction hold sufficiency for maintaining drawer closed under load cases LC-0003/LC-0004 and normal handling",
+      "why_open": "Friction coefficient and normal force not specified; evidence route unavailable per CND-0004.",
+      "alternatives": [
+        "Use positive detent/snap latch",
+        "Specify high-friction material",
+        "Add spring preload"
+      ],
+      "alternatives_kind": "FREE_TEXT",
+      "kept_open_by": [],
+      "blocks": ["OBL-0016"]
+    }
+  ]
+}

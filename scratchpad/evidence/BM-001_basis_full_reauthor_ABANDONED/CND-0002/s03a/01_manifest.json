@@ -1,0 +1,217 @@
+{
+ "candidate_id": "CND-0002",
+ "checks_at_call_time": {
+  "branch_isolation_held": true,
+  "candidates_visible": [
+   "CND-0002"
+  ],
+  "exactly_this_candidate": true,
+  "family_counts": {
+   "Actor": 1,
+   "Ambiguity": 7,
+   "Candidate": 1,
+   "Freedom": 7,
+   "LoadCase": 5,
+   "Obligation": 20,
+   "PhysicalEffectObligation": 5,
+   "ReactionSiteRequirement": 3,
+   "Requirement": 10,
+   "Scenario": 3
+  },
+  "foreign_branch_entities": {},
+  "required_premise_classes": [
+   {
+    "class": "physical_effect_obligation",
+    "families": [
+     "PhysicalEffectObligation"
+    ],
+    "roles": [
+     "physical_effect_obligation"
+    ],
+    "selection": {
+     "physical_effect_obligation": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    }
+   },
+   {
+    "class": "load_case",
+    "families": [
+     "LoadCase"
+    ],
+    "roles": [
+     "load_case"
+    ],
+    "selection": {
+     "load_case": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    }
+   },
+   {
+    "class": "candidate_principle",
+    "families": [
+     "Candidate"
+    ],
+    "roles": [
+     "candidate"
+    ],
+    "selection": {
+     "candidate": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    }
+   },
+   {
+    "class": "open_question_to_cite",
+    "families": [
+     "Ambiguity",
+     "Freedom"
+    ],
+    "roles": [
+     "open_question"
+    ],
+    "selection": {
+     "open_question": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    }
+   },
+   {
+    "class": "topology_constraining_quantity",
+    "families": [
+     "Parameter",
+     "Requirement"
+    ],
+    "roles": [
+     "quantity_constraint"
+    ],
+    "selection": {
+     "quantity_constraint": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    }
+   }
+  ],
+  "semantic_role_members": {
+   "candidate": [
+    "CND-0002"
+   ],
+   "load_case": [
+    "LC-0001",
+    "LC-0002",
+    "LC-0003",
+    "LC-0004",
+    "LC-0005"
+   ],
+   "open_question": [
+    "AMB-0001",
+    "AMB-0002",
+    "AMB-0003",
+    "AMB-0004",
+    "AMB-0005",
+    "AMB-0006",
+    "AMB-0007",
+    "FRE-0001",
+    "FRE-0002",
+    "FRE-0003",
+    "FRE-0004",
+    "FRE-0005",
+    "FRE-0006",
+    "FRE-0007"
+   ],
+   "physical_effect_obligation": [
+    "PEO-0001",
+    "PEO-0002",
+    "PEO-0003",
+    "PEO-0004",
+    "PEO-0005"
+   ],
+   "quantity_constraint": [
+    "REQ-0001",
+    "REQ-0002",
+    "REQ-0003",
+    "REQ-0004",
+    "REQ-0005",
+    "REQ-0006",
+    "REQ-0007",
+    "REQ-0008",
+    "REQ-0009",
+    "REQ-0010"
+   ]
+  },
+  "semantic_role_populations": {
+   "candidate": 1,
+   "load_case": 5,
+   "open_question": 14,
+   "physical_effect_obligation": 5,
+   "quantity_constraint": 10
+  },
+  "unmet_premise_classes": [],
+  "view_ready": true,
+  "view_status": "VIEW_READY"
+ },
+ "counts_before": {
+  "AcceptanceContract": 6,
+  "Actor": 1,
+  "Ambiguity": 7,
+  "AssemblyStep": 8,
+  "Assumption": 3,
+  "Body": 8,
+  "Candidate": 6,
+  "Configuration": 8,
+  "ConstraintRelation": 12,
+  "EliminationRecord": 3,
+  "Envelope": 8,
+  "Freedom": 7,
+  "FunctionalRegion": 15,
+  "Interface": 13,
+  "Joint": 6,
+  "LoadCase": 5,
+  "LoadPath": 15,
+  "MobilityExpectation": 8,
+  "Obligation": 20,
+  "PhysicalEffectObligation": 5,
+  "PhysicalInteraction": 15,
+  "ReachResult": 6,
+  "ReactionSiteRequirement": 3,
+  "ReferenceScale": 3,
+  "Requirement": 10,
+  "RigidGroup": 9,
+  "Scenario": 3,
+  "SourceClause": 5,
+  "State": 5,
+  "SweptVolume": 8,
+  "Transition": 6,
+  "TransitionRequirement": 9,
+  "UnresolvedDecision": 30
+ },
+ "invocation_branch": "CND-0002",
+ "live": true,
+ "pass": "s03a",
+ "provider_settings": {
+  "deadline_s": 120.0,
+  "max_attempts": 1,
+  "max_output_tokens": 65536,
+  "model": "deepseek-v4-pro",
+  "provider": "deepseek",
+  "seed": 7,
+  "temperature": 1.0
+ },
+ "state_hash_before": "535abbdb67d03922b47bd858c5b02eb8b0737d0d13c6263789348d4811a3f956"
+}

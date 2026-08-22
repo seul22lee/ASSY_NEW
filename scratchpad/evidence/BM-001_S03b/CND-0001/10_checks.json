@@ -1,0 +1,723 @@
+{
+ "assembly": {
+  "retained_bodies": [
+   "BOD-0002",
+   "BOD-0003"
+  ],
+  "retained_bodies_without_a_real_strategy": [],
+  "rows": [
+   {
+    "access_side": "+Z",
+    "activates": [],
+    "body": "BOD-0001",
+    "body_is_retained": false,
+    "depends_on": [],
+    "order_index": 1,
+    "path_kind": "RIGID",
+    "retention_status": "NOT_RETAINED_NONE_IS_LEGITIMATE",
+    "step": "ASY-0001",
+    "termination_strategy": "NONE"
+   },
+   {
+    "access_side": "+Z",
+    "activates": [],
+    "body": "BOD-0002",
+    "body_is_retained": true,
+    "depends_on": [
+     "BOD-0001"
+    ],
+    "order_index": 2,
+    "path_kind": "RIGID",
+    "retention_status": "RETAINED_BY_LATER_BODY_COVER",
+    "step": "ASY-0002",
+    "termination_strategy": "LATER_BODY_COVER"
+   },
+   {
+    "access_side": "+Y",
+    "activates": [
+     "JNT-0001",
+     "JNT-0002",
+     "IFC-0001",
+     "IFC-0002"
+    ],
+    "body": "BOD-0003",
+    "body_is_retained": true,
+    "depends_on": [
+     "BOD-0001",
+     "BOD-0002"
+    ],
+    "order_index": 3,
+    "path_kind": "DEFORMATION_RESOLVED",
+    "retention_status": "RETAINED_BY_ELASTICITY",
+    "step": "ASY-0003",
+    "termination_strategy": "ELASTICITY"
+   }
+  ]
+ },
+ "candidate": "CND-0001",
+ "constraints": {
+  "every_relation_reaches_a_cell": true,
+  "rows": [
+   {
+    "blocked_direction": "NONE",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "cells_reached": [
+     "RGP-0002/CFG-0001/TX",
+     "RGP-0002/CFG-0001/TY",
+     "RGP-0002/CFG-0001/TZ",
+     "RGP-0002/CFG-0001/RX",
+     "RGP-0002/CFG-0001/RY",
+     "RGP-0002/CFG-0001/RZ",
+     "RGP-0002/CFG-0002/TX",
+     "RGP-0002/CFG-0002/TY",
+     "RGP-0002/CFG-0002/TZ",
+     "RGP-0002/CFG-0002/RX",
+     "RGP-0002/CFG-0002/RY",
+     "RGP-0002/CFG-0002/RZ"
+    ],
+    "configurations": [
+     "CFG-0001",
+     "CFG-0002"
+    ],
+    "defeat_specification": "Pull pin out of base bore with sufficient axial force to overcome interference fit.",
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": "IFC-0001",
+    "provider_body": "BOD-0001",
+    "provider_reaction_site": null,
+    "provider_site": "IFC-0001",
+    "reaches_a_cell": true,
+    "relation": "CRL-0001",
+    "retained_group": "RGP-0002"
+   },
+   {
+    "blocked_direction": "NONE",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "cells_reached": [
+     "RGP-0003/CFG-0001/TX",
+     "RGP-0003/CFG-0001/TY",
+     "RGP-0003/CFG-0001/TZ",
+     "RGP-0003/CFG-0001/RX",
+     "RGP-0003/CFG-0001/RZ",
+     "RGP-0003/CFG-0002/TX",
+     "RGP-0003/CFG-0002/TY",
+     "RGP-0003/CFG-0002/TZ",
+     "RGP-0003/CFG-0002/RX",
+     "RGP-0003/CFG-0002/RZ"
+    ],
+    "configurations": [
+     "CFG-0001",
+     "CFG-0002"
+    ],
+    "defeat_specification": "Remove pin from lid knuckle to free the revolute joint.",
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": "IFC-0002",
+    "provider_body": "BOD-0003",
+    "provider_reaction_site": null,
+    "provider_site": "IFC-0002",
+    "reaches_a_cell": true,
+    "relation": "CRL-0002",
+    "retained_group": "RGP-0003"
+   },
+   {
+    "blocked_direction": "NONE",
+    "blocked_dofs": [
+     "RY"
+    ],
+    "cells_reached": [
+     "RGP-0003/CFG-0001/RY"
+    ],
+    "configurations": [
+     "CFG-0001"
+    ],
+    "defeat_specification": "Apply enough force to snap tab to deflect it out of the base recess.",
+    "driver": "LOAD",
+    "maintaining_interaction": "IFC-0004",
+    "provider_body": "BOD-0001",
+    "provider_reaction_site": null,
+    "provider_site": "IFC-0004",
+    "reaches_a_cell": true,
+    "relation": "CRL-0003",
+    "retained_group": "RGP-0003"
+   },
+   {
+    "blocked_direction": "NONE",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "cells_reached": [
+     "RGP-0004/CFG-0001/TX",
+     "RGP-0004/CFG-0001/TY",
+     "RGP-0004/CFG-0001/TZ",
+     "RGP-0004/CFG-0001/RX",
+     "RGP-0004/CFG-0001/RZ",
+     "RGP-0004/CFG-0002/TX",
+     "RGP-0004/CFG-0002/TY",
+     "RGP-0004/CFG-0002/TZ",
+     "RGP-0004/CFG-0002/RX",
+     "RGP-0004/CFG-0002/RZ"
+    ],
+    "configurations": [
+     "CFG-0001",
+     "CFG-0002"
+    ],
+    "defeat_specification": "Cut the material root between snap tab and lid main.",
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": null,
+    "provider_body": "BOD-0002",
+    "provider_reaction_site": null,
+    "provider_site": null,
+    "reaches_a_cell": true,
+    "relation": "CRL-0004",
+    "retained_group": "RGP-0004"
+   }
+  ]
+ },
+ "load_paths": {
+  "all_candidates_are_the_invocation": true,
+  "all_hops_branch_local": true,
+  "load_cases_without_a_path": [],
+  "rows": [
+   {
+    "candidate": "CND-0001",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0001",
+    "load_case_reacted_at": "RSR-0001",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0004"
+    ],
+    "path": "LDP-0001",
+    "terminates_at": "RSR-0001",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0001",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0002",
+    "load_case_reacted_at": "RSR-0001",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0002",
+     "IFC-0001"
+    ],
+    "path": "LDP-0002",
+    "terminates_at": "RSR-0001",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0001",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0003",
+    "load_case_reacted_at": "RSR-0002",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0003"
+    ],
+    "path": "LDP-0003",
+    "terminates_at": "RSR-0002",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0001",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0004",
+    "load_case_reacted_at": "RSR-0002",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0002",
+     "IFC-0001"
+    ],
+    "path": "LDP-0004",
+    "terminates_at": "RSR-0002",
+    "terminus_matches_load_case": true
+   },
+   {
+    "candidate": "CND-0001",
+    "candidate_is_invocation": true,
+    "hops_are_branch_local": true,
+    "load_case": "LC-0005",
+    "load_case_reacted_at": "RSR-0003",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0001"
+    ],
+    "path": "LDP-0005",
+    "terminates_at": "RSR-0003",
+    "terminus_matches_load_case": true
+   }
+  ]
+ },
+ "mobility": {
+  "by_disposition": {
+   "BLOCKED_BY": 33,
+   "INTENDED": 1,
+   "UNDISPOSITIONED": 14
+  },
+  "cells": 48,
+  "compliant_preserved": true,
+  "grid": {
+   "CFG-0001": {
+    "RGP-0001": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     }
+    },
+    "RGP-0002": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0003": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0003",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0004": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0004",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0004",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0004",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0004",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0004",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    }
+   },
+   "CFG-0002": {
+    "RGP-0001": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     }
+    },
+    "RGP-0002": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0001",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0003": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": "JNT-0003",
+      "constraint_relation": null,
+      "disposition": "INTENDED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0002",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    },
+    "RGP-0004": {
+     "RX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0004",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "RY": {
+      "by_joint": null,
+      "constraint_relation": null,
+      "disposition": "UNDISPOSITIONED",
+      "scenario": null
+     },
+     "RZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0004",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TX": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0004",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TY": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0004",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     },
+     "TZ": {
+      "by_joint": null,
+      "constraint_relation": "CRL-0004",
+      "disposition": "BLOCKED_BY",
+      "scenario": null
+     }
+    }
+   }
+  },
+  "joints": [
+   {
+    "axis_direction": "NONE",
+    "child_group": "RGP-0001",
+    "compliant": false,
+    "declared_dof": [],
+    "derived_free_dof": [],
+    "exactly_preserved": true,
+    "joint": "JNT-0001",
+    "joint_type": "FIXED",
+    "preserved": true
+   },
+   {
+    "axis_direction": "+Y",
+    "child_group": "RGP-0002",
+    "compliant": false,
+    "declared_dof": [
+     "RY"
+    ],
+    "derived_free_dof": [],
+    "exactly_preserved": false,
+    "joint": "JNT-0002",
+    "joint_type": "REVOLUTE",
+    "preserved": true
+   },
+   {
+    "axis_direction": "+Y",
+    "child_group": "RGP-0003",
+    "compliant": true,
+    "declared_dof": [
+     "RY"
+    ],
+    "derived_free_dof": [
+     "RY"
+    ],
+    "exactly_preserved": true,
+    "joint": "JNT-0003",
+    "joint_type": "COMPLIANT",
+    "preserved": true
+   }
+  ]
+ },
+ "physical_effect": {
+  "all_matched": true,
+  "obligations": [
+   {
+    "discharged": true,
+    "effect": "PERMIT_MOTION",
+    "peo": "PEO-0001"
+   },
+   {
+    "discharged": true,
+    "effect": "PREVENT_MOTION",
+    "peo": "PEO-0002"
+   },
+   {
+    "discharged": true,
+    "effect": "TRANSMIT_FORCE",
+    "peo": "PEO-0003"
+   },
+   {
+    "discharged": true,
+    "effect": "LOCATE",
+    "peo": "PEO-0004"
+   },
+   {
+    "discharged": true,
+    "effect": "CONTAIN",
+    "peo": "PEO-0005"
+   }
+  ],
+  "rows": [
+   {
+    "discharges_effect": "PEO-0001",
+    "effect": "PERMIT_MOTION",
+    "groups": [
+     "RGP-0002",
+     "RGP-0003"
+    ],
+    "interaction": "PHI-0001",
+    "required_effect": "PERMIT_MOTION",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0002",
+    "effect": "PREVENT_MOTION",
+    "groups": [
+     "RGP-0001",
+     "RGP-0004"
+    ],
+    "interaction": "PHI-0002",
+    "required_effect": "PREVENT_MOTION",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0003",
+    "effect": "TRANSMIT_FORCE",
+    "groups": [
+     "RGP-0004",
+     "RGP-0001"
+    ],
+    "interaction": "PHI-0003",
+    "required_effect": "TRANSMIT_FORCE",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0004",
+    "effect": "LOCATE",
+    "groups": [
+     "RGP-0001",
+     "RGP-0003"
+    ],
+    "interaction": "PHI-0004",
+    "required_effect": "LOCATE",
+    "verdict": "MATCH"
+   },
+   {
+    "discharges_effect": "PEO-0005",
+    "effect": "CONTAIN",
+    "groups": [
+     "RGP-0001",
+     "RGP-0003"
+    ],
+    "interaction": "PHI-0005",
+    "required_effect": "CONTAIN",
+    "verdict": "MATCH"
+   }
+  ],
+  "undischarged": []
+ },
+ "production_checks": {
+  "new_since_baseline": null,
+  "skipped": "patch not applied"
+ }
+}

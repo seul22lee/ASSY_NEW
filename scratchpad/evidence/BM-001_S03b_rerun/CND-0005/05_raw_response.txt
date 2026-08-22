@@ -1,0 +1,162 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0021",
+      "groups": ["RGP-0101", "RGP-0102"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "at_interface": "IFC-0101",
+      "configurations": ["CFG-0101", "CFG-0102", "CFG-0103"]
+    },
+    {
+      "id": "PHI-0022",
+      "groups": ["RGP-0101", "RGP-0102", "RGP-0103"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "at_interface": "IFC-0103",
+      "configurations": ["CFG-0103"]
+    },
+    {
+      "id": "PHI-0023",
+      "groups": ["RGP-0101", "RGP-0103"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "at_interface": "IFC-0103",
+      "configurations": ["CFG-0103"]
+    },
+    {
+      "id": "PHI-0024",
+      "groups": ["RGP-0101", "RGP-0102"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "at_interface": "IFC-0104",
+      "configurations": ["CFG-0102", "CFG-0103"]
+    },
+    {
+      "id": "PHI-0025",
+      "groups": ["RGP-0101", "RGP-0102"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "at_interface": "IFC-0104",
+      "configurations": ["CFG-0102", "CFG-0103"]
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0028",
+      "retained_group": "RGP-0102",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0101", "CFG-0102", "CFG-0103"],
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE",
+      "provider_body": "BOD-0101",
+      "provider_site": "IFC-0101"
+    },
+    {
+      "id": "CRL-0029",
+      "retained_group": "RGP-0102",
+      "blocked_dofs": ["RY"],
+      "configurations": ["CFG-0103"],
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE",
+      "provider_body": "BOD-0103",
+      "provider_site": "IFC-0103"
+    },
+    {
+      "id": "CRL-0030",
+      "retained_group": "RGP-0103",
+      "blocked_dofs": ["TX", "TY", "TZ", "RY", "RZ"],
+      "configurations": ["CFG-0101", "CFG-0102", "CFG-0103"],
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE",
+      "provider_body": "BOD-0102",
+      "provider_site": "IFC-0102"
+    },
+    {
+      "id": "CRL-0031",
+      "retained_group": "RGP-0103",
+      "blocked_dofs": ["RX"],
+      "configurations": ["CFG-0103"],
+      "driver": "KINEMATIC_NECESSITY",
+      "blocked_direction": "NONE",
+      "provider_body": "BOD-0101",
+      "provider_site": "IFC-0103"
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0021",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0102", "IFC-0101"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0022",
+      "load_case": "LC-0002",
+      "ordered_hops": ["IFC-0101"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0023",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0104"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0024",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0101"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0025",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0102", "IFC-0101"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0014",
+      "order_index": 1,
+      "body": "BOD-0101",
+      "access_side": "+Y",
+      "activates": [],
+      "termination_strategy": "NONE",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0015",
+      "order_index": 2,
+      "body": "BOD-0102",
+      "access_side": "+Y",
+      "activates": ["IFC-0101", "IFC-0105"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0014"]
+    },
+    {
+      "id": "ASY-0016",
+      "order_index": 3,
+      "body": "BOD-0103",
+      "access_side": "+X",
+      "activates": ["IFC-0102", "IFC-0103"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["ASY-0015"]
+    }
+  ],
+  "unresolved": [
+    {
+      "id": "S3U-2002",
+      "decision": "No interface defined for manual actuation of the hasp by the user",
+      "why_open": "Load case LC-0001 requires force to be applied to the latch actuation role, but no Interface exists between the user and the hasp or between the hasp and the user's fingers.",
+      "alternatives": ["IFC-0102", "IFC-0103"],
+      "alternatives_kind": "ENTITY_REFS",
+      "kept_open_by": [],
+      "blocks": []
+    }
+  ]
+}

@@ -521,10 +521,12 @@ def _refs_of(entity: Dict[str, Any], family: str, contracts) -> List[Tuple[str, 
                 if isinstance(ref, str) and ref:
                     out.append((fld, ref))
             continue
-        if kind not in ("record_list", "premise_record_list"):
+        if kind not in ("record_list", "premise_record_list", "record"):
             continue
         nested = spec.get("record_field_semantics") or {}
-        for row in (val if isinstance(val, list) else []):
+        rows = val if isinstance(val, list) else ([val] if kind == "record"
+                                                  and isinstance(val, dict) else [])
+        for row in rows:
             if not isinstance(row, dict):
                 continue
             for name, sub in nested.items():

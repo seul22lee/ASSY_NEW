@@ -1,0 +1,3272 @@
+{
+ "candidate": "CND-0001",
+ "directions": {
+  "every_step_directed": true,
+  "rows": [
+   {
+    "access_side": "TOP",
+    "body": "BOD-0001",
+    "insertion_direction": [
+     0,
+     0,
+     -1
+    ],
+    "order_index": 1,
+    "step": "ASY-0001",
+    "termination_strategy": "NONE"
+   },
+   {
+    "access_side": "TOP",
+    "body": "BOD-0002",
+    "insertion_direction": [
+     0,
+     0,
+     -1
+    ],
+    "order_index": 2,
+    "step": "ASY-0002",
+    "termination_strategy": "LATER_BODY_COVER"
+   },
+   {
+    "access_side": "AXIAL",
+    "body": "BOD-0003",
+    "insertion_direction": [
+     0,
+     1,
+     0
+    ],
+    "order_index": 3,
+    "step": "ASY-0003",
+    "termination_strategy": "ELASTICITY"
+   }
+  ],
+  "steps_without_a_direction": []
+ },
+ "envelopes": {
+  "bodies_without_an_envelope": [],
+  "contacts_placed_apart": [],
+  "every_body_placed": true,
+  "required_contacts": [
+   {
+    "bodies": [
+     "BOD-0001",
+     "BOD-0002"
+    ],
+    "gap": 0.0,
+    "touching": true
+   },
+   {
+    "bodies": [
+     "BOD-0001",
+     "BOD-0003"
+    ],
+    "gap": -2.0,
+    "touching": true
+   },
+   {
+    "bodies": [
+     "BOD-0002",
+     "BOD-0003"
+    ],
+    "gap": -2.0,
+    "touching": true
+   }
+  ],
+  "rows": [
+   {
+    "body": "BOD-0001",
+    "body_role": "Stationary box base providing storage volume, support surface, hinge knuckles, and latch recess",
+    "centre": [
+     0,
+     0,
+     0
+    ],
+    "commitment_class": "COMPARABLE",
+    "envelope": "ENV-0001",
+    "half_extent": [
+     50,
+     30,
+     20
+    ],
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE",
+    "well_formed": true
+   },
+   {
+    "body": "BOD-0002",
+    "body_role": "Moving lid providing closure, hinge knuckle, and integrated snap tab",
+    "centre": [
+     0,
+     0,
+     25
+    ],
+    "commitment_class": "COMPARABLE",
+    "envelope": "ENV-0002",
+    "half_extent": [
+     50,
+     30,
+     5
+    ],
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE",
+    "well_formed": true
+   },
+   {
+    "body": "BOD-0003",
+    "body_role": "Hinge pin connecting base and lid, providing axial retention and radial support",
+    "centre": [
+     -48,
+     0,
+     20
+    ],
+    "commitment_class": "COMPARABLE",
+    "envelope": "ENV-0003",
+    "half_extent": [
+     2,
+     30,
+     2
+    ],
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE",
+    "well_formed": true
+   }
+  ]
+ },
+ "production_checks": {
+  "assurance": {
+   "commitment_validity": {
+    "findings": [],
+    "status": {}
+   },
+   "consumer_sufficiency": {
+    "findings": [
+     {
+      "detail": "UPSTREAM_INSUFFICIENCY: realized_motion was never established upstream",
+      "outcome": "NOT_VERIFIED",
+      "property": "consumer_sufficiency:feasibility",
+      "refs": []
+     },
+     {
+      "detail": "UPSTREAM_INSUFFICIENCY: selected_principle, selection_commitment was never established upstream",
+      "outcome": "NOT_VERIFIED",
+      "property": "consumer_sufficiency:s05",
+      "refs": []
+     },
+     {
+      "detail": "UPSTREAM_INSUFFICIENCY: eligibility_evidence, selection_preference was never established upstream",
+      "outcome": "NOT_VERIFIED",
+      "property": "consumer_sufficiency:selection",
+      "refs": []
+     },
+     {
+      "detail": "UPSTREAM_INSUFFICIENCY: SelectionAdvisory.comparison -[reference]-> CandidateComparison, deterministic_comparison, eligibility_evidence, selection_preference was never established upstream",
+      "outcome": "NOT_VERIFIED",
+      "property": "consumer_sufficiency:selection_advisory",
+      "refs": []
+     },
+     {
+      "detail": "UPSTREAM_INSUFFICIENCY: SelectionDecision.comparison -[reference]-> CandidateComparison, SelectionDecision.human_decision -[reference]-> HumanDecisionInput, SelectionDecision.selection_profile -[reference]-> SelectionProfile, deterministic_comparison, eligibility_evidence, human_decision, selection_preference was never established upstream",
+      "outcome": "NOT_VERIFIED",
+      "property": "consumer_sufficiency:selection_decision",
+      "refs": []
+     },
+     {
+      "detail": "UPSTREAM_INSUFFICIENCY: HumanDecisionInput.comparison -[reference]-> CandidateComparison, HumanDecisionInput.profile -[reference]-> SelectionProfile, deterministic_comparison, eligibility_evidence, selection_preference was never established upstream",
+      "outcome": "NOT_VERIFIED",
+      "property": "consumer_sufficiency:selection_human_review",
+      "refs": []
+     }
+    ],
+    "status": {
+     "NOT_VERIFIED": 6,
+     "PASS": 6
+    }
+   },
+   "mobility_cross_premise_consistency": {
+    "findings": [],
+    "status": {}
+   },
+   "mobility_disposition_completeness": {
+    "findings": [
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0001/CFG-0001/TY",
+      "refs": [
+       "CRL-0006"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0001/TX",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0001/TY",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0001/TZ",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0001/RX",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0001/RY",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0001/RZ",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0001/TX",
+      "refs": [
+       "CRL-0003"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0001/TY",
+      "refs": [
+       "CRL-0003"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0001/TZ",
+      "refs": [
+       "CRL-0003"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0001/RX",
+      "refs": [
+       "CRL-0003"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0001/RY",
+      "refs": [
+       "CRL-0005"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0001/RZ",
+      "refs": [
+       "CRL-0003"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0004/CFG-0001/TX",
+      "refs": [
+       "CRL-0004"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0004/CFG-0001/TY",
+      "refs": [
+       "CRL-0004"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0004/CFG-0001/TZ",
+      "refs": [
+       "CRL-0004"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0004/CFG-0001/RX",
+      "refs": [
+       "CRL-0004"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0004/CFG-0001/RZ",
+      "refs": [
+       "CRL-0004"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0001/CFG-0002/TY",
+      "refs": [
+       "CRL-0001"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0002/TX",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0002/TY",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0002/TZ",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0002/RX",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0002/RY",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0002/CFG-0002/RZ",
+      "refs": [
+       "CRL-0002"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0002/TX",
+      "refs": [
+       "CRL-0003"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0002/TY",
+      "refs": [
+       "CRL-0003"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0002/TZ",
+      "refs": [
+       "CRL-0003"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0002/RX",
+      "refs": [
+       "CRL-0003"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0003/CFG-0002/RZ",
+      "refs": [
+       "CRL-0003"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0004/CFG-0002/TX",
+      "refs": [
+       "CRL-0004"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0004/CFG-0002/TY",
+      "refs": [
+       "CRL-0004"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0004/CFG-0002/TZ",
+      "refs": [
+       "CRL-0004"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0004/CFG-0002/RX",
+      "refs": [
+       "CRL-0004"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0004/CFG-0002/RZ",
+      "refs": [
+       "CRL-0004"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0005/CFG-0003/TY",
+      "refs": [
+       "CRL-0009"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0003/TX",
+      "refs": [
+       "CRL-0010"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0003/TY",
+      "refs": [
+       "CRL-0010"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0003/TZ",
+      "refs": [
+       "CRL-0010"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0003/RX",
+      "refs": [
+       "CRL-0010"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0003/RZ",
+      "refs": [
+       "CRL-0010"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0003/TX",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0003/TY",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0003/TZ",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0003/RX",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0003/RY",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0003/RZ",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0003/TX",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0003/TY",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0003/TZ",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0003/RX",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0003/RY",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0003/RZ",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0003/TX",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0003/TY",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0003/TZ",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0003/RX",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0003/RY",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0003/RZ",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0010/CFG-0003/TX",
+      "refs": [
+       "CRL-0015"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0010/CFG-0003/TY",
+      "refs": [
+       "CRL-0015"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0010/CFG-0003/TZ",
+      "refs": [
+       "CRL-0015"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0010/CFG-0003/RX",
+      "refs": [
+       "CRL-0015"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0010/CFG-0003/RY",
+      "refs": [
+       "CRL-0015"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0005/CFG-0004/TX",
+      "refs": [
+       "CRL-0008"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0005/CFG-0004/TY",
+      "refs": [
+       "CRL-0008"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0005/CFG-0004/TZ",
+      "refs": [
+       "CRL-0008"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0004/TX",
+      "refs": [
+       "CRL-0010"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0004/TY",
+      "refs": [
+       "CRL-0010"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0004/TZ",
+      "refs": [
+       "CRL-0010"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0004/RX",
+      "refs": [
+       "CRL-0010"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0004/RY",
+      "refs": [
+       "CRL-0011"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0006/CFG-0004/RZ",
+      "refs": [
+       "CRL-0010"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0004/TX",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0004/TY",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0004/TZ",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0004/RX",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0004/RY",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0007/CFG-0004/RZ",
+      "refs": [
+       "CRL-0012"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0004/TX",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0004/TY",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0004/TZ",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0004/RX",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0004/RY",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0008/CFG-0004/RZ",
+      "refs": [
+       "CRL-0013"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0004/TX",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0004/TY",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0004/TZ",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0004/RX",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0004/RY",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0009/CFG-0004/RZ",
+      "refs": [
+       "CRL-0014"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0010/CFG-0004/TX",
+      "refs": [
+       "CRL-0015"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0010/CFG-0004/TY",
+      "refs": [
+       "CRL-0015"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0010/CFG-0004/TZ",
+      "refs": [
+       "CRL-0015"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0010/CFG-0004/RX",
+      "refs": [
+       "CRL-0015"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0010/CFG-0004/RY",
+      "refs": [
+       "CRL-0015"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0005/TX",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0005/TY",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0005/TZ",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0005/RX",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0005/RY",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0005/RZ",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0005/TX",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0005/TY",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0005/TZ",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0005/RX",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0005/RZ",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0005/TX",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0005/TY",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0005/TZ",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0005/RX",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0005/RZ",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0005/TX",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0005/TY",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0005/TZ",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0005/RX",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0005/RZ",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0006/TX",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0006/TY",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0006/TZ",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0006/RX",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0006/RY",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0006/RZ",
+      "refs": [
+       "CRL-0016"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0006/TX",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0006/TY",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0006/TZ",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0006/RX",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0006/RZ",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0006/TX",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0006/TY",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0006/TZ",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0006/RX",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0006/RZ",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0006/TX",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0006/TY",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0006/TZ",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0006/RX",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0006/RZ",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0007/TX",
+      "refs": [
+       "CRL-0017"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0007/TY",
+      "refs": [
+       "CRL-0017"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0007/TZ",
+      "refs": [
+       "CRL-0017"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0007/RX",
+      "refs": [
+       "CRL-0017"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0007/RY",
+      "refs": [
+       "CRL-0017"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0011/CFG-0007/RZ",
+      "refs": [
+       "CRL-0017"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0007/TX",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0007/TY",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0007/TZ",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0007/RX",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0007/RY",
+      "refs": [
+       "CRL-0022"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0012/CFG-0007/RZ",
+      "refs": [
+       "CRL-0018"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0007/TX",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0007/TY",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0007/TZ",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0007/RX",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0007/RY",
+      "refs": [
+       "CRL-0023"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0013/CFG-0007/RZ",
+      "refs": [
+       "CRL-0019"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0007/TX",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0007/TY",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0007/TZ",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0007/RX",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0014/CFG-0007/RZ",
+      "refs": [
+       "CRL-0021"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0008/TX",
+      "refs": [
+       "CRL-0025"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0008/TY",
+      "refs": [
+       "CRL-0025"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0008/TZ",
+      "refs": [
+       "CRL-0025"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0008/RX",
+      "refs": [
+       "CRL-0025"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0008/RY",
+      "refs": [
+       "CRL-0025"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0008/RZ",
+      "refs": [
+       "CRL-0025"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0008/TX",
+      "refs": [
+       "CRL-0027"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0008/TY",
+      "refs": [
+       "CRL-0026"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0008/TZ",
+      "refs": [
+       "CRL-0026"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0008/RX",
+      "refs": [
+       "CRL-0026"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0008/RY",
+      "refs": [
+       "CRL-0026"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0008/RZ",
+      "refs": [
+       "CRL-0026"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0009/TX",
+      "refs": [
+       "CRL-0024"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0009/TY",
+      "refs": [
+       "CRL-0024"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0009/TZ",
+      "refs": [
+       "CRL-0024"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0009/RX",
+      "refs": [
+       "CRL-0024"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0009/RY",
+      "refs": [
+       "CRL-0024"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0015/CFG-0009/RZ",
+      "refs": [
+       "CRL-0024"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0009/TY",
+      "refs": [
+       "CRL-0026"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0009/TZ",
+      "refs": [
+       "CRL-0026"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0009/RX",
+      "refs": [
+       "CRL-0026"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0009/RY",
+      "refs": [
+       "CRL-0026"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing blocked_direction, defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0016/CFG-0009/RZ",
+      "refs": [
+       "CRL-0026"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0101/TX",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0101/TY",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0101/TZ",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0101/RX",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0101/RZ",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0101/TX",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0101/TY",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0101/TZ",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0101/RY",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0101/RZ",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0102/TX",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0102/TY",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0102/TZ",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0102/RX",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0102/RZ",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0102/TX",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0102/TY",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0102/TZ",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0102/RY",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0102/RZ",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0103/TX",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0103/TY",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0103/TZ",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0103/RX",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0103/RY",
+      "refs": [
+       "CRL-0029"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0102/CFG-0103/RZ",
+      "refs": [
+       "CRL-0028"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0103/TX",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0103/TY",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0103/TZ",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0103/RX",
+      "refs": [
+       "CRL-0031"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0103/RY",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0103/CFG-0103/RZ",
+      "refs": [
+       "CRL-0030"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0010/TX",
+      "refs": [
+       "CRL-0108"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0010/TY",
+      "refs": [
+       "CRL-0108"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0010/TZ",
+      "refs": [
+       "CRL-0108"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0010/RX",
+      "refs": [
+       "CRL-0106"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0010/RZ",
+      "refs": [
+       "CRL-0106"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0010/TX",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0010/TY",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0010/TZ",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0010/RX",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0010/RZ",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0010/TX",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0010/TY",
+      "refs": [
+       "CRL-0103"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0010/TZ",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0010/RX",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0010/RZ",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0010/TX",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0010/TY",
+      "refs": [
+       "CRL-0105"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0010/TZ",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0010/RX",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0010/RZ",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0011/TX",
+      "refs": [
+       "CRL-0109"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0011/TY",
+      "refs": [
+       "CRL-0109"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0011/TZ",
+      "refs": [
+       "CRL-0109"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0011/RX",
+      "refs": [
+       "CRL-0106"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0011/RZ",
+      "refs": [
+       "CRL-0106"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0011/TX",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0011/TY",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0011/TZ",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0011/RX",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0011/RY",
+      "refs": [
+       "CRL-0110"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0011/RZ",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0011/TX",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0011/TY",
+      "refs": [
+       "CRL-0103"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0011/TZ",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0011/RX",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0011/RZ",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0011/TX",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0011/TY",
+      "refs": [
+       "CRL-0105"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0011/TZ",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0011/RX",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0011/RZ",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0012/TX",
+      "refs": [
+       "CRL-0108"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0012/TY",
+      "refs": [
+       "CRL-0108"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0012/TZ",
+      "refs": [
+       "CRL-0108"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0012/RX",
+      "refs": [
+       "CRL-0106"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0017/CFG-0012/RZ",
+      "refs": [
+       "CRL-0106"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0012/TX",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0012/TY",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0012/TZ",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0012/RX",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0018/CFG-0012/RZ",
+      "refs": [
+       "CRL-0101"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0012/TX",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0012/TY",
+      "refs": [
+       "CRL-0103"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0012/TZ",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0012/RX",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0019/CFG-0012/RZ",
+      "refs": [
+       "CRL-0102"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0012/TX",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0012/TY",
+      "refs": [
+       "CRL-0105"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0012/TZ",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0012/RX",
+      "refs": [
+       "CRL-0104"
+      ]
+     },
+     {
+      "detail": "BLOCKING_INCOMPLETE: missing defeat_specification",
+      "outcome": "FAIL",
+      "property": "mobility_disposition_completeness:RGP-0020/CFG-0012/RZ",
+      "refs": [
+       "CRL-0104"
+      ]
+     }
+    ],
+    "status": {
+     "FAIL": 277
+    }
+   },
+   "physical_relation_closure": {
+    "findings": [],
+    "status": {
+     "PASS": 5
+    }
+   },
+   "quantitative_continuity": {
+    "findings": [
+     {
+      "detail": "no magnitude is stated, so none was carried",
+      "outcome": "NOT_VERIFIED",
+      "property": "quantitative_continuity:LC-0001",
+      "refs": [
+       "LC-0001"
+      ]
+     },
+     {
+      "detail": "no magnitude is stated, so none was carried",
+      "outcome": "NOT_VERIFIED",
+      "property": "quantitative_continuity:LC-0002",
+      "refs": [
+       "LC-0002"
+      ]
+     },
+     {
+      "detail": "no magnitude is stated, so none was carried",
+      "outcome": "NOT_VERIFIED",
+      "property": "quantitative_continuity:LC-0003",
+      "refs": [
+       "LC-0003"
+      ]
+     },
+     {
+      "detail": "no magnitude is stated, so none was carried",
+      "outcome": "NOT_VERIFIED",
+      "property": "quantitative_continuity:LC-0004",
+      "refs": [
+       "LC-0004"
+      ]
+     },
+     {
+      "detail": "no magnitude is stated, so none was carried",
+      "outcome": "NOT_VERIFIED",
+      "property": "quantitative_continuity:LC-0005",
+      "refs": [
+       "LC-0005"
+      ]
+     }
+    ],
+    "status": {
+     "NOT_VERIFIED": 5
+    }
+   },
+   "reach_demand_realization": {
+    "findings": [],
+    "status": {
+     "PASS": 1
+    }
+   },
+   "reference_integrity": {
+    "findings": [],
+    "status": {
+     "PASS": 412
+    }
+   },
+   "required_distinctness_non_degeneracy": {
+    "findings": [
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0001|RGP-0003|RY",
+      "refs": [
+       "CFG-0001"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0002|RGP-0003|RY",
+      "refs": [
+       "CFG-0002"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0003|RGP-0006|RY",
+      "refs": [
+       "CFG-0003"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0003|RGP-0010|RZ",
+      "refs": [
+       "CFG-0003"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0004|RGP-0006|RY",
+      "refs": [
+       "CFG-0004"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0004|RGP-0010|RZ",
+      "refs": [
+       "CFG-0004"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0005|RGP-0012|RY",
+      "refs": [
+       "CFG-0005"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0006|RGP-0012|RY",
+      "refs": [
+       "CFG-0006"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0006|RGP-0013|RY",
+      "refs": [
+       "CFG-0006"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0007|RGP-0012|RY",
+      "refs": [
+       "CFG-0007"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0007|RGP-0013|RY",
+      "refs": [
+       "CFG-0007"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0008|RGP-0016|TX",
+      "refs": [
+       "CFG-0008"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0009|RGP-0016|TX",
+      "refs": [
+       "CFG-0009"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0010|RGP-0018|RY",
+      "refs": [
+       "CFG-0010"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0010|RGP-0019|RY",
+      "refs": [
+       "CFG-0010"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0010|RGP-0020|RY",
+      "refs": [
+       "CFG-0010"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0011|RGP-0018|RY",
+      "refs": [
+       "CFG-0011"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0011|RGP-0019|RY",
+      "refs": [
+       "CFG-0011"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0011|RGP-0020|RY",
+      "refs": [
+       "CFG-0011"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0012|RGP-0018|RY",
+      "refs": [
+       "CFG-0012"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0012|RGP-0019|RY",
+      "refs": [
+       "CFG-0012"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0012|RGP-0020|RY",
+      "refs": [
+       "CFG-0012"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0101|RGP-0102|RY",
+      "refs": [
+       "CFG-0101"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0101|RGP-0103|RX",
+      "refs": [
+       "CFG-0101"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0102|RGP-0102|RY",
+      "refs": [
+       "CFG-0102"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0102|RGP-0103|RX",
+      "refs": [
+       "CFG-0102"
+      ]
+     },
+     {
+      "detail": "the configuration has no realized state",
+      "outcome": "NOT_VERIFIED",
+      "property": "required_distinctness:CFG-0103|RGP-0103|RX",
+      "refs": [
+       "CFG-0103"
+      ]
+     }
+    ],
+    "status": {
+     "NOT_VERIFIED": 27
+    }
+   },
+   "state_configuration_realization": {
+    "findings": [
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0001",
+      "refs": [
+       "CFG-0001"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0002",
+      "refs": [
+       "CFG-0002"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0003",
+      "refs": [
+       "CFG-0003"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0004",
+      "refs": [
+       "CFG-0004"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0005",
+      "refs": [
+       "CFG-0005"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0006",
+      "refs": [
+       "CFG-0006"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0007",
+      "refs": [
+       "CFG-0007"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0008",
+      "refs": [
+       "CFG-0008"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0009",
+      "refs": [
+       "CFG-0009"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0010",
+      "refs": [
+       "CFG-0010"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0011",
+      "refs": [
+       "CFG-0011"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0012",
+      "refs": [
+       "CFG-0012"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0101",
+      "refs": [
+       "CFG-0101"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0102",
+      "refs": [
+       "CFG-0102"
+      ]
+     },
+     {
+      "detail": "CONFIGURATION_NOT_REALIZED: it declares a distinguishing basis and has no realized state",
+      "outcome": "FAIL",
+      "property": "state_configuration_realization:CFG-0103",
+      "refs": [
+       "CFG-0103"
+      ]
+     }
+    ],
+    "status": {
+     "FAIL": 15
+    }
+   },
+   "topology_to_spatial_fidelity": {
+    "findings": [
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0004|BOD-0005",
+      "refs": [
+       "BOD-0004",
+       "BOD-0005"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0004|BOD-0006",
+      "refs": [
+       "BOD-0004",
+       "BOD-0006"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0004|BOD-0007",
+      "refs": [
+       "BOD-0004",
+       "BOD-0007"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0005|BOD-0006",
+      "refs": [
+       "BOD-0005",
+       "BOD-0006"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0005|BOD-0007",
+      "refs": [
+       "BOD-0005",
+       "BOD-0007"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0008|BOD-0009",
+      "refs": [
+       "BOD-0008",
+       "BOD-0009"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0008|BOD-0010",
+      "refs": [
+       "BOD-0008",
+       "BOD-0010"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0008|BOD-0011",
+      "refs": [
+       "BOD-0008",
+       "BOD-0011"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0009|BOD-0010",
+      "refs": [
+       "BOD-0009",
+       "BOD-0010"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0010|BOD-0011",
+      "refs": [
+       "BOD-0010",
+       "BOD-0011"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0012|BOD-0013",
+      "refs": [
+       "BOD-0012",
+       "BOD-0013"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0014|BOD-0015",
+      "refs": [
+       "BOD-0014",
+       "BOD-0015"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0014|BOD-0016",
+      "refs": [
+       "BOD-0014",
+       "BOD-0016"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0015|BOD-0016",
+      "refs": [
+       "BOD-0015",
+       "BOD-0016"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0101|BOD-0102",
+      "refs": [
+       "BOD-0101",
+       "BOD-0102"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0101|BOD-0103",
+      "refs": [
+       "BOD-0101",
+       "BOD-0103"
+      ]
+     },
+     {
+      "detail": "one of the bodies has no extent, so the incidence cannot be measured",
+      "outcome": "NOT_VERIFIED",
+      "property": "topology_to_spatial_fidelity:BOD-0102|BOD-0103",
+      "refs": [
+       "BOD-0102",
+       "BOD-0103"
+      ]
+     }
+    ],
+    "status": {
+     "NOT_VERIFIED": 17,
+     "PASS": 3
+    }
+   }
+  },
+  "new_since_baseline": {
+   "assurance": {},
+   "clean": false,
+   "s03_checks": {
+    "assembly_path": [
+     "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+     "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0002, which is already placed (NOT_VERIFIED: box overlap is not proof)"
+    ],
+    "configuration_interference": [
+     "CLEARANCE_NOT_VERIFIED: BOD-0002 and BOD-0003 overlap as boxes in CFG-0001; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+     "CLEARANCE_NOT_VERIFIED: BOD-0002 and BOD-0003 overlap as boxes in CFG-0002; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure"
+    ],
+    "region_occupancy": [
+     "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0001 (ACCESS) overlaps BOD-0002",
+     "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0003 (APERTURE) overlaps BOD-0001",
+     "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0004 (ACCESS) overlaps BOD-0001"
+    ]
+   }
+  },
+  "s03_checks": {
+   "assembly_acyclic": [],
+   "assembly_path": [
+    "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0001, which is already placed (NOT_VERIFIED: box overlap is not proof)",
+    "ASSEMBLY_PATH_OBSTRUCTED: BOD-0003 entering along [0, 1, 0] meets BOD-0002, which is already placed (NOT_VERIFIED: box overlap is not proof)"
+   ],
+   "compliance": [],
+   "configuration_interference": [
+    "CLEARANCE_NOT_VERIFIED: BOD-0002 and BOD-0003 overlap as boxes in CFG-0001; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure",
+    "CLEARANCE_NOT_VERIFIED: BOD-0002 and BOD-0003 overlap as boxes in CFG-0002; s03 declared CLEARANCE. Boxes overlapping is not proof of collision, so this is NOT_VERIFIED, not a failure"
+   ],
+   "dof_totality": [],
+   "envelope_coverage": [
+    "BODY_WITHOUT_ENVELOPE: BOD-0004",
+    "BODY_WITHOUT_ENVELOPE: BOD-0005",
+    "BODY_WITHOUT_ENVELOPE: BOD-0006",
+    "BODY_WITHOUT_ENVELOPE: BOD-0007",
+    "BODY_WITHOUT_ENVELOPE: BOD-0008",
+    "BODY_WITHOUT_ENVELOPE: BOD-0009",
+    "BODY_WITHOUT_ENVELOPE: BOD-0010",
+    "BODY_WITHOUT_ENVELOPE: BOD-0011",
+    "BODY_WITHOUT_ENVELOPE: BOD-0012",
+    "BODY_WITHOUT_ENVELOPE: BOD-0013",
+    "BODY_WITHOUT_ENVELOPE: BOD-0014",
+    "BODY_WITHOUT_ENVELOPE: BOD-0015",
+    "BODY_WITHOUT_ENVELOPE: BOD-0016",
+    "BODY_WITHOUT_ENVELOPE: BOD-0101",
+    "BODY_WITHOUT_ENVELOPE: BOD-0102",
+    "BODY_WITHOUT_ENVELOPE: BOD-0103"
+   ],
+   "functional_region": [
+    "REGION_WITHOUT_OWNER: FRG-0009"
+   ],
+   "interface_classification": [],
+   "joint_dof_consistency": [],
+   "joint_frame": [
+    "JOINT_NOT_PLACED: JNT-0002 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0003 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0004 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0005 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0009 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0010 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0011 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0012 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0013 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0101 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0102 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0014 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0015 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0016 has an axis and no frame origin",
+    "JOINT_NOT_PLACED: JNT-0017 has an axis and no frame origin"
+   ],
+   "load_path": [
+    "LOADPATH_TOO_SHORT: LDP-0001 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0003 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0005 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0008 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0009 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0010 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0012 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0013 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0014 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0015 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0016 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0017 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0018 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0019 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0020 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0022 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0023 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0024 has 1 hop(s); a path needs an application point and a reaction",
+    "LOADPATH_TOO_SHORT: LDP-0105 has 1 hop(s); a path needs an application point and a reaction"
+   ],
+   "load_path_reaction": [],
+   "motion_evidence": [],
+   "no_magnitude": [
+    "MAGNITUDE_AT_S03: JNT-0004 -> '60 DEG'",
+    "MAGNITUDE_AT_S03: JNT-0005 -> '5 DEG'"
+   ],
+   "no_selection": [],
+   "obligation_ownership": [],
+   "region_occupancy": [
+    "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0001 (ACCESS) overlaps BOD-0002",
+    "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0003 (APERTURE) overlaps BOD-0001",
+    "REGION_OCCUPIED_BY_ITS_OWNER: FRG-0004 (ACCESS) overlaps BOD-0001",
+    "REGION_WITHOUT_VOLUME: FRG-0005",
+    "REGION_WITHOUT_VOLUME: FRG-0006",
+    "REGION_WITHOUT_VOLUME: FRG-0007",
+    "REGION_WITHOUT_VOLUME: FRG-0008",
+    "REGION_WITHOUT_VOLUME: FRG-0009",
+    "REGION_WITHOUT_VOLUME: FRG-0010",
+    "REGION_WITHOUT_VOLUME: FRG-0011",
+    "REGION_WITHOUT_VOLUME: FRG-0012",
+    "REGION_WITHOUT_VOLUME: FRG-0013",
+    "REGION_WITHOUT_VOLUME: FRG-0014",
+    "REGION_WITHOUT_VOLUME: FRG-0015",
+    "REGION_WITHOUT_VOLUME: FRG-0016",
+    "REGION_WITHOUT_VOLUME: FRG-0017",
+    "REGION_WITHOUT_VOLUME: FRG-0018",
+    "REGION_WITHOUT_VOLUME: FRG-0101",
+    "REGION_WITHOUT_VOLUME: FRG-0102",
+    "REGION_WITHOUT_VOLUME: FRG-0103",
+    "REGION_WITHOUT_VOLUME: FRG-0104",
+    "REGION_WITHOUT_VOLUME: FRG-0019",
+    "REGION_WITHOUT_VOLUME: FRG-0020",
+    "REGION_WITHOUT_VOLUME: FRG-0021",
+    "REGION_WITHOUT_VOLUME: FRG-0022"
+   ],
+   "retention": [
+    "RETAINED_BODY_WITHOUT_TERMINATION: BOD-0001 is held in place by a constraint relation and declares termination_strategy='NONE'; NONE and absence are the same answer here, and neither says what holds it",
+    "RETAINED_BODY_WITHOUT_TERMINATION: BOD-0012 is held in place by a constraint relation and declares termination_strategy='NONE'; NONE and absence are the same answer here, and neither says what holds it"
+   ],
+   "simulation_completeness": [
+    "JOINT_GRAPH_DISCONNECTED: RGP-0005, RGP-0006, RGP-0007, RGP-0008, RGP-0009, RGP-0010 not reachable"
+   ],
+   "spatial_commitment": [],
+   "swept_clearance": []
+  }
+ },
+ "reach": {
+  "demands": [
+   "ACT-0001 -> latch"
+  ],
+  "every_demand_answered": true,
+  "rows": [
+   {
+    "actor": "ACT-0001",
+    "actor_known": true,
+    "approach_side": "TOP",
+    "reachable": true,
+    "result": "RCH-CND-0001-0001",
+    "target": "latch",
+    "target_is_a_visible_region": false,
+    "why": "Latch tab is on top surface of lid at front (z\u224830), accessible from above."
+   },
+   {
+    "actor": "ACT-0001",
+    "actor_known": true,
+    "approach_side": "TOP",
+    "reachable": true,
+    "result": "RCH-CND-0001-0002",
+    "target": "FRG-0001",
+    "target_is_a_visible_region": true,
+    "why": "Access region on lid top, accessible from above."
+   },
+   {
+    "actor": "ACT-0001",
+    "actor_known": true,
+    "approach_side": "TOP",
+    "reachable": true,
+    "result": "RCH-CND-0001-0003",
+    "target": "FRG-0003",
+    "target_is_a_visible_region": true,
+    "why": "Aperture opening at top of base, accessible from above when lid open."
+   },
+   {
+    "actor": "ACT-0001",
+    "actor_known": true,
+    "approach_side": "TOP",
+    "reachable": true,
+    "result": "RCH-CND-0001-0004",
+    "target": "FRG-0004",
+    "target_is_a_visible_region": true,
+    "why": "Interior access region inside base, accessible through top aperture when lid open."
+   }
+  ],
+  "unanswered_demands": [],
+  "unreachable": []
+ },
+ "regions": {
+  "every_region_volumed": true,
+  "regions_without_a_volume": [],
+  "rows": [
+   {
+    "centre": [
+     40,
+     0,
+     31
+    ],
+    "half_extent": [
+     5,
+     5,
+     2
+    ],
+    "owning_bodies": [
+     "BOD-0002"
+    ],
+    "region": "FRG-0001",
+    "role": "ACCESS",
+    "well_formed": true
+   },
+   {
+    "centre": [
+     0,
+     0,
+     -21
+    ],
+    "half_extent": [
+     50,
+     30,
+     1
+    ],
+    "owning_bodies": [
+     "BOD-0001"
+    ],
+    "region": "FRG-0002",
+    "role": "SUPPORT",
+    "well_formed": true
+   },
+   {
+    "centre": [
+     0,
+     0,
+     20
+    ],
+    "half_extent": [
+     40,
+     20,
+     0.5
+    ],
+    "owning_bodies": [
+     "BOD-0001"
+    ],
+    "region": "FRG-0003",
+    "role": "APERTURE",
+    "well_formed": true
+   },
+   {
+    "centre": [
+     0,
+     0,
+     5
+    ],
+    "half_extent": [
+     35,
+     15,
+     15
+    ],
+    "owning_bodies": [
+     "BOD-0001"
+    ],
+    "region": "FRG-0004",
+    "role": "ACCESS",
+    "well_formed": true
+   }
+  ]
+ },
+ "scale_and_elimination": {
+  "eliminated": false,
+  "elimination": {
+   "candidate": "CND-0001",
+   "eliminated": false,
+   "id": "ELM-CND-0001",
+   "reason": null
+  },
+  "quantity_requirements_in_view": 10,
+  "scale": {
+   "absolute": null,
+   "basis": "RELATIVE",
+   "commitment_class": "COMPARABLE",
+   "id": "SCL-CND-0001",
+   "note": "No absolute quantity stated; relative units used."
+  }
+ }
+}

@@ -1,0 +1,74 @@
+{
+  "joint_placements": [
+    {
+      "joint": "JNT-0004",
+      "origin": [-5, 0, 3]
+    },
+    {
+      "joint": "JNT-0005",
+      "origin": [5, 0, 3.5]
+    },
+    {
+      "joint": "JNT-0006",
+      "origin": [-5, 0, 3]
+    },
+    {
+      "joint": "JNT-0007",
+      "origin": [-5, 0, 3]
+    },
+    {
+      "joint": "JNT-0008",
+      "origin": [5, 0, 3.5]
+    }
+  ],
+  "state_coordinates": [
+    {
+      "configuration": "CFG-0003",
+      "coordinates": {
+        "JNT-0004": 60,
+        "JNT-0005": 0
+      }
+    },
+    {
+      "configuration": "CFG-0004",
+      "coordinates": {
+        "JNT-0004": 0,
+        "JNT-0005": 5
+      }
+    }
+  ],
+  "transitions": [
+    {
+      "id": "TRN-0002",
+      "from_configuration": "CFG-0003",
+      "to_configuration": "CFG-0004",
+      "moving_groups": [
+        "RGP-0008",
+        "RGP-0006",
+        "RGP-0009",
+        "RGP-0010"
+      ],
+      "changed_coordinates": [
+        "JNT-0004",
+        "JNT-0005"
+      ]
+    },
+    {
+      "id": "TRN-0003",
+      "from_configuration": "CFG-0004",
+      "to_configuration": "CFG-0003",
+      "moving_groups": [
+        "RGP-0008",
+        "RGP-0006",
+        "RGP-0009",
+        "RGP-0010"
+      ],
+      "changed_coordinates": [
+        "JNT-0004",
+        "JNT-0005"
+      ]
+    }
+  ],
+  "envelope_revisions": [],
+  "notes": "Fixed joints have no axis direction in the topology; their origins are placed at the corresponding interface locations. Only the compliant joints JNT-0004 and JNT-0005 carry coordinates."
+}

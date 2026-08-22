@@ -1,0 +1,293 @@
+{
+ "authored_by_family": {
+  "AssemblyStep": 3,
+  "EliminationRecord": 1,
+  "Envelope": 3,
+  "FunctionalRegion": 4,
+  "ReachResult": 2,
+  "ReferenceScale": 1
+ },
+ "authored_operations": [
+  {
+   "entity_id": "SCL-CND-0006",
+   "family": "ReferenceScale",
+   "fields": {
+    "absolute": null,
+    "basis": "RELATIVE",
+    "commitment_class": "COMPARABLE",
+    "note": "No absolute quantities in input; using relative units (1 unit = 1 arbitrary length)."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0006"
+   ]
+  },
+  {
+   "entity_id": "ENV-0201",
+   "family": "Envelope",
+   "fields": {
+    "body": "BOD-0014",
+    "commitment_class": "COMPARABLE",
+    "extent": {
+     "centre": [
+      -15,
+      0,
+      25
+     ],
+     "half_extent": [
+      45,
+      25,
+      25
+     ]
+    },
+    "frame": "world",
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0006",
+    "CND-0006"
+   ]
+  },
+  {
+   "entity_id": "ENV-0202",
+   "family": "Envelope",
+   "fields": {
+    "body": "BOD-0015",
+    "commitment_class": "COMPARABLE",
+    "extent": {
+     "centre": [
+      -70,
+      0,
+      40
+     ],
+     "half_extent": [
+      10,
+      8,
+      7
+     ]
+    },
+    "frame": "world",
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0006",
+    "CND-0006"
+   ]
+  },
+  {
+   "entity_id": "ENV-0203",
+   "family": "Envelope",
+   "fields": {
+    "body": "BOD-0016",
+    "commitment_class": "COMPARABLE",
+    "extent": {
+     "centre": [
+      -15,
+      0,
+      25
+     ],
+     "half_extent": [
+      45,
+      5,
+      15
+     ]
+    },
+    "frame": "world",
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0006",
+    "CND-0006"
+   ]
+  },
+  {
+   "entity_id": "RCH-CND-0006-0001",
+   "family": "ReachResult",
+   "fields": {
+    "actor": "ACT-0001",
+    "approach_side": "-X",
+    "reachable": true,
+    "target": "FRG-0019",
+    "why": "Handle grip surface is exposed on the -X face of BOD-0015, outside the main body envelope; user can approach from -X direction."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0006",
+    "CND-0006"
+   ]
+  },
+  {
+   "entity_id": "RCH-CND-0006-0002",
+   "family": "ReachResult",
+   "fields": {
+    "actor": "ACT-0001",
+    "approach_side": "+Z",
+    "reachable": true,
+    "target": "FRG-0021",
+    "why": "Storage interior is accessible from above through the open aperture FRG-0020 in this open arrangement; no lid obstruction."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0006",
+    "CND-0006"
+   ]
+  },
+  {
+   "entity_id": "ELM-CND-0006",
+   "family": "EliminationRecord",
+   "fields": {
+    "candidate": "CND-0006",
+    "eliminated": false,
+    "reason": null
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "SCL-CND-0006",
+    "CND-0006"
+   ]
+  },
+  {
+   "entity_id": "FRG-0019",
+   "family": "FunctionalRegion",
+   "fields": {
+    "volume": {
+     "centre": [
+      -75,
+      0,
+      40
+     ],
+     "half_extent": [
+      4,
+      5,
+      4
+     ]
+    }
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0006"
+   ]
+  },
+  {
+   "entity_id": "FRG-0020",
+   "family": "FunctionalRegion",
+   "fields": {
+    "volume": {
+     "centre": [
+      0,
+      0,
+      30
+     ],
+     "half_extent": [
+      30,
+      25,
+      10
+     ]
+    }
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0006"
+   ]
+  },
+  {
+   "entity_id": "FRG-0021",
+   "family": "FunctionalRegion",
+   "fields": {
+    "volume": {
+     "centre": [
+      0,
+      0,
+      10
+     ],
+     "half_extent": [
+      25,
+      20,
+      8
+     ]
+    }
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0006"
+   ]
+  },
+  {
+   "entity_id": "FRG-0022",
+   "family": "FunctionalRegion",
+   "fields": {
+    "volume": {
+     "centre": [
+      0,
+      0,
+      0.5
+     ],
+     "half_extent": [
+      30,
+      25,
+      0.5
+     ]
+    }
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0006"
+   ]
+  },
+  {
+   "entity_id": "ASY-1001",
+   "family": "AssemblyStep",
+   "fields": {
+    "insertion_direction": [
+     0,
+     0,
+     1
+    ]
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0006"
+   ]
+  },
+  {
+   "entity_id": "ASY-1002",
+   "family": "AssemblyStep",
+   "fields": {
+    "insertion_direction": [
+     0,
+     1,
+     0
+    ]
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0006"
+   ]
+  },
+  {
+   "entity_id": "ASY-1003",
+   "family": "AssemblyStep",
+   "fields": {
+    "insertion_direction": [
+     0,
+     1,
+     0
+    ]
+   },
+   "kind": "EXTEND",
+   "premise_refs": [
+    "SCL-CND-0006"
+   ]
+  }
+ ],
+ "candidate": "CND-0006",
+ "declared_incompleteness": [],
+ "execution_status": "SUCCESS",
+ "stage_problems": []
+}

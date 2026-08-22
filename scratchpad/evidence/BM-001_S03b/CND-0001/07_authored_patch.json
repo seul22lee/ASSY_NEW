@@ -1,0 +1,467 @@
+{
+ "authored_by_family": {
+  "AssemblyStep": 3,
+  "ConstraintRelation": 4,
+  "LoadPath": 5,
+  "PhysicalInteraction": 5,
+  "UnresolvedDecision": 3
+ },
+ "authored_operations": [
+  {
+   "entity_id": "PHI-0001",
+   "family": "PhysicalInteraction",
+   "fields": {
+    "at_interface": "IFC-0002",
+    "configurations": [
+     "CFG-0001",
+     "CFG-0002"
+    ],
+    "discharges_effect": "PEO-0001",
+    "effect": "PERMIT_MOTION",
+    "groups": [
+     "RGP-0002",
+     "RGP-0003"
+    ]
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "PHI-0002",
+   "family": "PhysicalInteraction",
+   "fields": {
+    "at_interface": "IFC-0004",
+    "configurations": [
+     "CFG-0001"
+    ],
+    "discharges_effect": "PEO-0002",
+    "effect": "PREVENT_MOTION",
+    "groups": [
+     "RGP-0001",
+     "RGP-0004"
+    ]
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "PHI-0003",
+   "family": "PhysicalInteraction",
+   "fields": {
+    "at_interface": "IFC-0004",
+    "configurations": [
+     "CFG-0001"
+    ],
+    "discharges_effect": "PEO-0003",
+    "effect": "TRANSMIT_FORCE",
+    "groups": [
+     "RGP-0004",
+     "RGP-0001"
+    ]
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "PHI-0004",
+   "family": "PhysicalInteraction",
+   "fields": {
+    "at_interface": "IFC-0003",
+    "configurations": [
+     "CFG-0001"
+    ],
+    "discharges_effect": "PEO-0004",
+    "effect": "LOCATE",
+    "groups": [
+     "RGP-0001",
+     "RGP-0003"
+    ]
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "PHI-0005",
+   "family": "PhysicalInteraction",
+   "fields": {
+    "configurations": [
+     "CFG-0001"
+    ],
+    "discharges_effect": "PEO-0005",
+    "effect": "CONTAIN",
+    "groups": [
+     "RGP-0001",
+     "RGP-0003"
+    ]
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "CRL-0001",
+   "family": "ConstraintRelation",
+   "fields": {
+    "blocked_direction": "NONE",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0001",
+     "CFG-0002"
+    ],
+    "defeat_specification": "Pull pin out of base bore with sufficient axial force to overcome interference fit.",
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": "IFC-0001",
+    "provider_body": "BOD-0001",
+    "provider_site": "IFC-0001",
+    "retained_group": "RGP-0002"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "CRL-0002",
+   "family": "ConstraintRelation",
+   "fields": {
+    "blocked_direction": "NONE",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0001",
+     "CFG-0002"
+    ],
+    "defeat_specification": "Remove pin from lid knuckle to free the revolute joint.",
+    "driver": "KINEMATIC_NECESSITY",
+    "maintaining_interaction": "IFC-0002",
+    "provider_body": "BOD-0003",
+    "provider_site": "IFC-0002",
+    "retained_group": "RGP-0003"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "CRL-0003",
+   "family": "ConstraintRelation",
+   "fields": {
+    "blocked_direction": "NONE",
+    "blocked_dofs": [
+     "RY"
+    ],
+    "configurations": [
+     "CFG-0001"
+    ],
+    "defeat_specification": "Apply enough force to snap tab to deflect it out of the base recess.",
+    "driver": "LOAD",
+    "maintaining_interaction": "IFC-0004",
+    "provider_body": "BOD-0001",
+    "provider_site": "IFC-0004",
+    "retained_group": "RGP-0003"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "CRL-0004",
+   "family": "ConstraintRelation",
+   "fields": {
+    "blocked_direction": "NONE",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0001",
+     "CFG-0002"
+    ],
+    "defeat_specification": "Cut the material root between snap tab and lid main.",
+    "driver": "KINEMATIC_NECESSITY",
+    "provider_body": "BOD-0002",
+    "retained_group": "RGP-0004"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "LDP-0001",
+   "family": "LoadPath",
+   "fields": {
+    "candidate": "CND-0001",
+    "load_case": "LC-0001",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0004"
+    ],
+    "terminates_at": "RSR-0001"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "LDP-0002",
+   "family": "LoadPath",
+   "fields": {
+    "candidate": "CND-0001",
+    "load_case": "LC-0002",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0002",
+     "IFC-0001"
+    ],
+    "terminates_at": "RSR-0001"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "LDP-0003",
+   "family": "LoadPath",
+   "fields": {
+    "candidate": "CND-0001",
+    "load_case": "LC-0003",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0003"
+    ],
+    "terminates_at": "RSR-0002"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "LDP-0004",
+   "family": "LoadPath",
+   "fields": {
+    "candidate": "CND-0001",
+    "load_case": "LC-0004",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0002",
+     "IFC-0001"
+    ],
+    "terminates_at": "RSR-0002"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "LDP-0005",
+   "family": "LoadPath",
+   "fields": {
+    "candidate": "CND-0001",
+    "load_case": "LC-0005",
+    "maturity": "HYPOTHESIS",
+    "ordered_hops": [
+     "IFC-0001"
+    ],
+    "terminates_at": "RSR-0003"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "ASY-0001",
+   "family": "AssemblyStep",
+   "fields": {
+    "access_side": "+Z",
+    "activates": [],
+    "body": "BOD-0001",
+    "depends_on": [],
+    "order_index": 1,
+    "path_kind": "RIGID",
+    "termination_strategy": "NONE"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "ASY-0002",
+   "family": "AssemblyStep",
+   "fields": {
+    "access_side": "+Z",
+    "activates": [],
+    "body": "BOD-0002",
+    "depends_on": [
+     "BOD-0001"
+    ],
+    "order_index": 2,
+    "path_kind": "RIGID",
+    "termination_strategy": "LATER_BODY_COVER"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "ASY-0003",
+   "family": "AssemblyStep",
+   "fields": {
+    "access_side": "+Y",
+    "activates": [
+     "JNT-0001",
+     "JNT-0002",
+     "IFC-0001",
+     "IFC-0002"
+    ],
+    "body": "BOD-0003",
+    "depends_on": [
+     "BOD-0001",
+     "BOD-0002"
+    ],
+    "order_index": 3,
+    "path_kind": "DEFORMATION_RESOLVED",
+    "termination_strategy": "ELASTICITY"
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "S3U-1001",
+   "family": "UnresolvedDecision",
+   "fields": {
+    "alternatives": [
+     "Add ground body",
+     "Treat base as fixed boundary condition",
+     "Use reaction site as constraint provider"
+    ],
+    "alternatives_kind": "ENTITY_REFS",
+    "blocks": [
+     "constraint_relations for base",
+     "assembly retention for base"
+    ],
+    "decision": "How the base is fixed to the external world during operation, transport, and assembly",
+    "kept_open_by": [
+     "BOD-0001"
+    ],
+    "why_open": "No body or interface represents the desktop, transport support, or assembly work surface; reaction sites are external and not part of the mechanism."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "S3U-1002",
+   "family": "UnresolvedDecision",
+   "fields": {
+    "alternatives": [
+     "Assume hinge carries all",
+     "Assume latch carries all",
+     "Share via stiffness ratio"
+    ],
+    "alternatives_kind": "PRINCIPLE_FAMILIES",
+    "blocks": [
+     "load_paths for LC-0004"
+    ],
+    "decision": "Distribution of transverse load between latch and hinge for LC-0004",
+    "kept_open_by": [
+     "LC-0004"
+    ],
+    "why_open": "No stiffness or contact analysis available to determine load sharing between the snap latch and hinge pin."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  },
+  {
+   "entity_id": "S3U-1003",
+   "family": "UnresolvedDecision",
+   "fields": {
+    "alternatives": [
+     "Assume sufficient retention",
+     "Perform contact FEA",
+     "Change latch type to positive lock"
+    ],
+    "alternatives_kind": "PRINCIPLE_FAMILIES",
+    "blocks": [
+     "constraint_relations for latch in closed configuration"
+    ],
+    "decision": "Retention force of snap latch engagement",
+    "kept_open_by": [
+     "OBL-0014"
+    ],
+    "why_open": "Contact analysis route unavailable as per candidate evidence_route_verdict."
+   },
+   "kind": "CREATE",
+   "premise_refs": [
+    "CND-0001"
+   ]
+  }
+ ],
+ "candidate": "CND-0001",
+ "declared_incompleteness": [
+  "S3U-1001.blocks names constraint_relations for base, which is not in this invocation's mechanism; UnresolvedDecision.blocks is drawn from the INVOCATION_BRANCH and an id that merely exists somewhere in the design is another candidate's",
+  "S3U-1001.blocks names assembly retention for base, which is not in this invocation's mechanism; UnresolvedDecision.blocks is drawn from the INVOCATION_BRANCH and an id that merely exists somewhere in the design is another candidate's",
+  "S3U-1002.blocks names load_paths for LC-0004, which is not in this invocation's mechanism; UnresolvedDecision.blocks is drawn from the INVOCATION_BRANCH and an id that merely exists somewhere in the design is another candidate's",
+  "S3U-1003.blocks names constraint_relations for latch in closed configuration, which is not in this invocation's mechanism; UnresolvedDecision.blocks is drawn from the INVOCATION_BRANCH and an id that merely exists somewhere in the design is another candidate's"
+ ],
+ "every_authored_op_premised_on_candidate": true,
+ "execution_status": "SCHEMA_FAILURE",
+ "stage_problems": [
+  "REFERENCE_FAMILY: CRL-0001.maintaining_interaction declares PhysicalInteraction and names IFC-0001, a Interface",
+  "REFERENCE_FAMILY: CRL-0002.maintaining_interaction declares PhysicalInteraction and names IFC-0002, a Interface",
+  "REFERENCE_FAMILY: CRL-0003.maintaining_interaction declares PhysicalInteraction and names IFC-0004, a Interface",
+  "REFERENCE_FAMILY: ASY-0002.depends_on declares AssemblyStep and names BOD-0001, a Body",
+  "REFERENCE_FAMILY: ASY-0003.activates declares Interface and names JNT-0001, a Joint",
+  "REFERENCE_FAMILY: ASY-0003.activates declares Interface and names JNT-0002, a Joint",
+  "REFERENCE_FAMILY: ASY-0003.depends_on declares AssemblyStep and names BOD-0001, a Body",
+  "REFERENCE_FAMILY: ASY-0003.depends_on declares AssemblyStep and names BOD-0002, a Body",
+  "REFERENCE_FAMILY: S3U-1001.kept_open_by declares Ambiguity or Freedom and names BOD-0001, a Body",
+  "REFERENCE_NOT_AN_ID: S3U-1001.blocks holds 'constraint_relations for base', which is not an entity id (R-20)",
+  "REFERENCE_NOT_AN_ID: S3U-1001.blocks holds 'assembly retention for base', which is not an entity id (R-20)",
+  "REFERENCE_NOT_AN_ID: S3U-1001.alternatives holds 'Add ground body', which is not an entity id (R-20)",
+  "REFERENCE_NOT_AN_ID: S3U-1001.alternatives holds 'Treat base as fixed boundary condition', which is not an entity id (R-20)",
+  "REFERENCE_NOT_AN_ID: S3U-1001.alternatives holds 'Use reaction site as constraint provider', which is not an entity id (R-20)",
+  "REFERENCE_FAMILY: S3U-1002.kept_open_by declares Ambiguity or Freedom and names LC-0004, a LoadCase",
+  "REFERENCE_NOT_AN_ID: S3U-1002.blocks holds 'load_paths for LC-0004', which is not an entity id (R-20)",
+  "REFERENCE_FAMILY: S3U-1003.kept_open_by declares Ambiguity or Freedom and names OBL-0014, a Obligation",
+  "REFERENCE_NOT_AN_ID: S3U-1003.blocks holds 'constraint_relations for latch in closed configuration', which is not an entity id (R-20)"
+ ]
+}

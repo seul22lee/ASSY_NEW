@@ -1,0 +1,1158 @@
+{
+ "campaign_settings": {
+  "deadline_s": 120.0,
+  "max_attempts": 1,
+  "max_output_tokens": 65536,
+  "seed": 7,
+  "temperature": 1.0
+ },
+ "candidate_id": "CND-0003",
+ "candidate_record": {
+  "_authority": "AUTHORITATIVE",
+  "_created_by": "s02",
+  "_family": "Candidate",
+  "_provenance": "s02:derivation",
+  "_validity": "STANDING",
+  "addresses_obligations": [
+   "OBL-0001",
+   "OBL-0002",
+   "OBL-0003",
+   "OBL-0004",
+   "OBL-0005",
+   "OBL-0006",
+   "OBL-0007",
+   "OBL-0008",
+   "OBL-0009",
+   "OBL-0010",
+   "OBL-0011",
+   "OBL-0015",
+   "OBL-0018",
+   "OBL-0019"
+  ],
+  "entity_id": "CND-0003",
+  "evidence_route_verdict": {
+   "available": true,
+   "note": "Over-centre toggle can be evaluated via ideal joint torque and balance.",
+   "route": "RIGID_BODY_DYNAMICS"
+  },
+  "family": "MAINTAIN_CONFIGURATION",
+  "obligations_created": [
+   "OBL-0011",
+   "OBL-0015",
+   "OBL-0018",
+   "OBL-0019"
+  ],
+  "principle": {
+   "ACTUATE": "DIRECT_MANUAL",
+   "MAINTAIN_CONFIGURATION": "OVER_CENTRE",
+   "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+   "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR"
+  },
+  "self_locking": null,
+  "summary": "Revolute hinge with over-centre latch"
+ },
+ "checks": {
+  "branch_isolation_held": true,
+  "candidates_visible": [
+   "CND-0003"
+  ],
+  "foreign_branch_topology_in_view": {},
+  "other_candidates_visible": [],
+  "s02_context_counts": {
+   "AcceptanceContract": 0,
+   "Actor": 1,
+   "LoadCase": 5,
+   "Obligation": 14,
+   "PhysicalEffectObligation": 5,
+   "ReactionSiteRequirement": 3,
+   "Requirement": 10,
+   "Scenario": 3
+  },
+  "target_candidate_present": true,
+  "view_branch": "CND-0003",
+  "view_status": "VIEW_READY"
+ },
+ "client_max_attempts": 1,
+ "consumer_view_assessment": [
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "AT_LEAST_ONE",
+     "existence": "MAY_BE_EMPTY",
+     "expected": [
+      "ACT-0001"
+     ],
+     "expected_count": 1,
+     "families": [
+      "Actor"
+     ],
+     "obligation": "FunctionalRegion.required_by_actors -[reference]-> Actor",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "ACT-0001"
+     ],
+     "selected_count": 1,
+     "standing_instances": {
+      "Actor": 1
+     },
+     "verdict": "SATISFIED",
+     "why": "1 of 1 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Actor"
+   ],
+   "requirement": "FunctionalRegion.required_by_actors -[reference]-> Actor",
+   "selected": 1,
+   "source": "REPRESENTATIONAL_DEPENDENCY",
+   "trace": {
+    "declaration": "reference target",
+    "output_field": "FunctionalRegion.required_by_actors",
+    "output_semantic": "FunctionalRegion",
+    "requires": "Actor",
+    "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "PEO-0001",
+      "PEO-0002",
+      "PEO-0003",
+      "PEO-0004",
+      "PEO-0005"
+     ],
+     "expected_count": 5,
+     "families": [
+      "PhysicalEffectObligation"
+     ],
+     "obligation": "physical_effect_obligation",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "PEO-0001",
+      "PEO-0002",
+      "PEO-0003",
+      "PEO-0004",
+      "PEO-0005"
+     ],
+     "selected_count": 5,
+     "standing_instances": {
+      "PhysicalEffectObligation": 5
+     },
+     "verdict": "SATISFIED",
+     "why": "5 of 5 applicable instances selected"
+    }
+   ],
+   "families": [
+    "PhysicalEffectObligation"
+   ],
+   "requirement": "physical_effect_obligation",
+   "selected": 5,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "What bodies and rigid groups exist?",
+    "instance_selection": {
+     "physical_effect_obligation": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    },
+    "qualifying_by_role": {
+     "physical_effect_obligation": [
+      "PhysicalEffectObligation"
+     ]
+    },
+    "requires_semantics": [
+     "physical_effect_obligation"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "A topology synthesised without knowing what must be transmitted is invented rather than derived."
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "LC-0001",
+      "LC-0002",
+      "LC-0003",
+      "LC-0004",
+      "LC-0005"
+     ],
+     "expected_count": 5,
+     "families": [
+      "LoadCase"
+     ],
+     "obligation": "load_case",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "LC-0001",
+      "LC-0002",
+      "LC-0003",
+      "LC-0004",
+      "LC-0005"
+     ],
+     "selected_count": 5,
+     "standing_instances": {
+      "LoadCase": 5
+     },
+     "verdict": "SATISFIED",
+     "why": "5 of 5 applicable instances selected"
+    }
+   ],
+   "families": [
+    "LoadCase"
+   ],
+   "requirement": "load_case",
+   "selected": 5,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "What joins what, of what type, leaving which DOF?",
+    "instance_selection": {
+     "load_case": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    },
+    "qualifying_by_role": {
+     "load_case": [
+      "LoadCase"
+     ]
+    },
+    "requires_semantics": [
+     "load_case"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "They determine which connections must carry force."
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "CND-0003"
+     ],
+     "expected_count": 1,
+     "families": [
+      "Candidate"
+     ],
+     "obligation": "candidate",
+     "population": "INVOCATION_BRANCH",
+     "selected": [
+      "CND-0003"
+     ],
+     "selected_count": 1,
+     "standing_instances": {
+      "Candidate": 6
+     },
+     "verdict": "SATISFIED",
+     "why": "1 of 1 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Candidate"
+   ],
+   "requirement": "candidate_principle",
+   "selected": 1,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "What bodies and rigid groups exist?",
+    "instance_selection": {
+     "candidate": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    },
+    "qualifying_by_role": {
+     "candidate": [
+      "Candidate"
+     ]
+    },
+    "requires_semantics": [
+     "candidate"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "The principle constrains which topologies are even admissible."
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "MAY_BE_EMPTY",
+     "expected": [
+      "REQ-0001",
+      "REQ-0002",
+      "REQ-0003",
+      "REQ-0004",
+      "REQ-0005",
+      "REQ-0006",
+      "REQ-0007",
+      "REQ-0008",
+      "REQ-0009",
+      "REQ-0010"
+     ],
+     "expected_count": 10,
+     "families": [
+      "Parameter",
+      "Requirement"
+     ],
+     "obligation": "quantity_constraint",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "REQ-0001",
+      "REQ-0002",
+      "REQ-0003",
+      "REQ-0004",
+      "REQ-0005",
+      "REQ-0006",
+      "REQ-0007",
+      "REQ-0008",
+      "REQ-0009",
+      "REQ-0010"
+     ],
+     "selected_count": 10,
+     "standing_instances": {
+      "Parameter": 0,
+      "Requirement": 10
+     },
+     "verdict": "SATISFIED",
+     "why": "10 of 10 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Parameter",
+    "Requirement"
+   ],
+   "requirement": "topology_constraining_quantity",
+   "selected": 10,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "Which sites must be distinct for a mechanical relationship to exist?",
+    "instance_selection": {
+     "quantity_constraint": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    },
+    "qualifying_by_role": {
+     "quantity_constraint": [
+      "Parameter",
+      "Requirement"
+     ]
+    },
+    "requires_semantics": [
+     "quantity_constraint"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "Required distinctness follows from what the mechanism must achieve."
+   },
+   "verdict": "SATISFIED"
+  }
+ ],
+ "consumer_view_families": {
+  "Actor": [
+   "ACT-0001"
+  ],
+  "Candidate": [
+   "CND-0003"
+  ],
+  "LoadCase": [
+   "LC-0001",
+   "LC-0002",
+   "LC-0003",
+   "LC-0004",
+   "LC-0005"
+  ],
+  "Obligation": [
+   "OBL-0002",
+   "OBL-0003",
+   "OBL-0009",
+   "OBL-0004",
+   "OBL-0006",
+   "OBL-0005",
+   "OBL-0018",
+   "OBL-0001",
+   "OBL-0008",
+   "OBL-0007",
+   "OBL-0010",
+   "OBL-0011",
+   "OBL-0015",
+   "OBL-0019"
+  ],
+  "PhysicalEffectObligation": [
+   "PEO-0001",
+   "PEO-0002",
+   "PEO-0003",
+   "PEO-0004",
+   "PEO-0005"
+  ],
+  "ReactionSiteRequirement": [
+   "RSR-0001",
+   "RSR-0002",
+   "RSR-0003"
+  ],
+  "Requirement": [
+   "REQ-0001",
+   "REQ-0002",
+   "REQ-0003",
+   "REQ-0004",
+   "REQ-0005",
+   "REQ-0006",
+   "REQ-0007",
+   "REQ-0008",
+   "REQ-0009",
+   "REQ-0010"
+  ],
+  "Scenario": [
+   "SCN-0001",
+   "SCN-0002",
+   "SCN-0003"
+  ]
+ },
+ "consumer_view_payload": {
+  "Actor": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Actor",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "ACT-0001",
+    "must_reach": [
+     "latch"
+    ],
+    "name": "User"
+   }
+  ],
+  "Candidate": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Candidate",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0002",
+     "OBL-0003",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0007",
+     "OBL-0008",
+     "OBL-0009",
+     "OBL-0010",
+     "OBL-0011",
+     "OBL-0015",
+     "OBL-0018",
+     "OBL-0019"
+    ],
+    "entity_id": "CND-0003",
+    "evidence_route_verdict": {
+     "available": true,
+     "note": "Over-centre toggle can be evaluated via ideal joint torque and balance.",
+     "route": "RIGID_BODY_DYNAMICS"
+    },
+    "family": "MAINTAIN_CONFIGURATION",
+    "obligations_created": [
+     "OBL-0011",
+     "OBL-0015",
+     "OBL-0018",
+     "OBL-0019"
+    ],
+    "principle": {
+     "ACTUATE": "DIRECT_MANUAL",
+     "MAINTAIN_CONFIGURATION": "OVER_CENTRE",
+     "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+     "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR"
+    },
+    "self_locking": null,
+    "summary": "Revolute hinge with over-centre latch"
+   }
+  ],
+  "LoadCase": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "LoadCase",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "applied_to_role": "the latch actuation role",
+    "direction_class": "AXIAL",
+    "entity_id": "LC-0001",
+    "kind": "ACTOR_APPLIED",
+    "magnitude_or_status": "UNSUPPORTED",
+    "reacted_at_role": "the surface the product stands on",
+    "reacted_at_site": "RSR-0001",
+    "scenario": "SCN-0001"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "LoadCase",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "applied_to_role": "the moving closing role",
+    "direction_class": "GRAVITY",
+    "entity_id": "LC-0002",
+    "kind": "GRAVITY",
+    "magnitude_or_status": "UNSUPPORTED",
+    "reacted_at_role": "the surface the product stands on",
+    "reacted_at_site": "RSR-0001",
+    "scenario": "SCN-0001"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "LoadCase",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "applied_to_role": "the closed storage assembly role",
+    "direction_class": "AXIAL",
+    "entity_id": "LC-0003",
+    "kind": "REACTION",
+    "magnitude_or_status": "UNSUPPORTED",
+    "reacted_at_role": "the transport support surface role",
+    "reacted_at_site": "RSR-0002",
+    "scenario": "SCN-0002"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "LoadCase",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "applied_to_role": "the closed storage assembly role",
+    "direction_class": "TRANSVERSE",
+    "entity_id": "LC-0004",
+    "kind": "REACTION",
+    "magnitude_or_status": "UNSUPPORTED",
+    "reacted_at_role": "the transport support surface role",
+    "reacted_at_site": "RSR-0002",
+    "scenario": "SCN-0002"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "LoadCase",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "applied_to_role": "the insertion interface role",
+    "direction_class": "AXIAL",
+    "entity_id": "LC-0005",
+    "kind": "ACTOR_APPLIED",
+    "magnitude_or_status": "UNSUPPORTED",
+    "reacted_at_role": "the assembly work surface role",
+    "reacted_at_site": "RSR-0003",
+    "scenario": "SCN-0003"
+   }
+  ],
+  "Obligation": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "A latch that cannot be re-engaged is not reusable.",
+    "derived_from_requirements": [
+     "REQ-0002",
+     "REQ-0003"
+    ],
+    "entity_id": "OBL-0002",
+    "evidence_route": "MOBILITY_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s02",
+    "scope": "UNIVERSAL",
+    "statement": "The product must provide a latching function that can be engaged and disengaged multiple times without replacement."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Opening and closing requires relative motion.",
+    "derived_from_requirements": [
+     "REQ-0003"
+    ],
+    "entity_id": "OBL-0003",
+    "evidence_route": "MOBILITY_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s02",
+    "scope": "UNIVERSAL",
+    "statement": "The product must permit relative motion between a closing role and a body role sufficient to open and close."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Conflicting constraints make a mechanism impossible.",
+    "derived_from_requirements": [
+     "REQ-0009"
+    ],
+    "entity_id": "OBL-0009",
+    "evidence_route": "MOBILITY_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s02",
+    "scope": "UNIVERSAL",
+    "statement": "The product must have a kinematically plausible arrangement with appropriate degrees of freedom."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Accidental opening would occur if the latch cannot resist normal handling loads.",
+    "derived_from_requirements": [
+     "REQ-0004"
+    ],
+    "entity_id": "OBL-0004",
+    "evidence_route": "RIGID_BODY_DYNAMICS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "The latch must maintain closure under normal handling loads unless the user intentionally actuates it."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Transport loads could separate the latch if not retained.",
+    "derived_from_requirements": [
+     "REQ-0006"
+    ],
+    "entity_id": "OBL-0006",
+    "evidence_route": "RIGID_BODY_DYNAMICS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "The latch must remain closed under transport vibration and shock."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "A latch that cannot be reached or requires excessive force is not easy to operate.",
+    "derived_from_requirements": [
+     "REQ-0005"
+    ],
+    "entity_id": "OBL-0005",
+    "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+    "involves_actors": [
+     "ACT-0001"
+    ],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "The user must be able to reach and actuate the latch with low effort and without special tools."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Direct manual actuation requires physical access.",
+    "derived_from_requirements": [
+     "REQ-0005"
+    ],
+    "entity_id": "OBL-0018",
+    "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+    "involves_actors": [
+     "ACT-0001"
+    ],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "UNIVERSAL",
+    "statement": "The latch actuation role must be accessible to the user's fingers and allow sufficient travel and force input for direct manual actuation."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "A product that occupies excessive volume cannot be placed on a desktop as compact storage.",
+    "derived_from_requirements": [
+     "REQ-0001",
+     "REQ-0008"
+    ],
+    "entity_id": "OBL-0001",
+    "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "UNIVERSAL",
+    "statement": "The product must occupy a compact spatial envelope suitable for placement on a desktop."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "A product that topples or damages the desktop is not practical.",
+    "derived_from_requirements": [
+     "REQ-0008"
+    ],
+    "entity_id": "OBL-0008",
+    "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "UNIVERSAL",
+    "statement": "The product must be stable and safe on a desktop, not requiring excessive space or causing damage."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Manufacturing process choice determines cost.",
+    "derived_from_requirements": [
+     "REQ-0007"
+    ],
+    "entity_id": "OBL-0007",
+    "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": false,
+    "satisfiable_at": "s04",
+    "scope": "UNIVERSAL",
+    "statement": "The product must be suitable for low-cost manufacturing."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "If components cannot be inserted or joined, assembly is not easy.",
+    "derived_from_requirements": [
+     "REQ-0010"
+    ],
+    "entity_id": "OBL-0010",
+    "evidence_route": "SWEPT_INTERFERENCE",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "The product must be assemblable by an operator without excessive difficulty."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "A revolute pair constrains all but one rotational DOF.",
+    "derived_from_requirements": [],
+    "entity_id": "OBL-0011",
+    "evidence_route": "MOBILITY_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "For any revolute hinge, relative rotation between closing and body roles must be permitted about one axis while other relative motions are prevented; axial retention and radial support must be provided."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Over-centre requires a kinematic toggle.",
+    "derived_from_requirements": [],
+    "entity_id": "OBL-0015",
+    "evidence_route": "RIGID_BODY_DYNAMICS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "For any over-centre latch, a linkage must pass through a toggle position that holds closure until the user moves it back."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Straight insertion requires a clear linear path.",
+    "derived_from_requirements": [
+     "REQ-0010"
+    ],
+    "entity_id": "OBL-0019",
+    "evidence_route": "SWEPT_INTERFERENCE",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "For straight insertion assembly, components must be aligned along a single axis and inserted without interference."
+   }
+  ],
+  "PhysicalEffectObligation": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "PhysicalEffectObligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0002",
+     "OBL-0003",
+     "OBL-0009"
+    ],
+    "between_roles": "the moving closing role and the stationary body role",
+    "effect": "PERMIT_MOTION",
+    "entity_id": "PEO-0001",
+    "persistence": "during opening and closing",
+    "under_load_case": "LC-0002"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "PhysicalEffectObligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0004",
+     "OBL-0006"
+    ],
+    "between_roles": "the moving closing role and the stationary body role",
+    "effect": "PREVENT_MOTION",
+    "entity_id": "PEO-0002",
+    "persistence": "when closed during transport",
+    "under_load_case": "LC-0003"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "PhysicalEffectObligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0005",
+     "OBL-0018"
+    ],
+    "between_roles": "the latch actuation role and the latch retention role",
+    "effect": "TRANSMIT_FORCE",
+    "entity_id": "PEO-0003",
+    "under_load_case": "LC-0001"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "PhysicalEffectObligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0008"
+    ],
+    "between_roles": "the moving closing role and the stationary body role",
+    "effect": "LOCATE",
+    "entity_id": "PEO-0004",
+    "persistence": "when closed",
+    "under_load_case": "LC-0002"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "PhysicalEffectObligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0008"
+    ],
+    "between_roles": "the storage volume role and the external environment role",
+    "effect": "CONTAIN",
+    "entity_id": "PEO-0005"
+   }
+  ],
+  "ReactionSiteRequirement": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "ReactionSiteRequirement",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "at_role": "the surface the product stands on",
+    "boundary_side": "EXTERNAL",
+    "entity_id": "RSR-0001",
+    "scenario": "SCN-0001",
+    "why": "Loads from operation and gravity are reacted to the desktop."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "ReactionSiteRequirement",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "at_role": "the transport support surface role",
+    "boundary_side": "EXTERNAL",
+    "entity_id": "RSR-0002",
+    "scenario": "SCN-0002",
+    "why": "Transport loads are reacted to supporting surfaces or hands outside the boundary."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "ReactionSiteRequirement",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "at_role": "the assembly work surface role",
+    "boundary_side": "EXTERNAL",
+    "entity_id": "RSR-0003",
+    "scenario": "SCN-0003",
+    "why": "Assembly forces are reacted to the assembly fixture or work surface."
+   }
+  ],
+  "Requirement": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0001",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "compact desktop storage box",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0001",
+    "statement_verbatim": "Design a compact desktop storage box",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0002",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "reusable latch",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0001",
+    "statement_verbatim": "with a reusable latch",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0003",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "open and close repeatedly",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0002",
+    "statement_verbatim": "The box should open and close repeatedly",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0004",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "without accidental opening during normal handling",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0002",
+    "statement_verbatim": "without accidental opening during normal handling",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0005",
+    "kind": "USABILITY",
+    "observable_verbatim": "easy for a user to operate",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0003",
+    "statement_verbatim": "The latch should be easy for a user to operate",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0006",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "remaining secure during transport",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0003",
+    "statement_verbatim": "while remaining secure during transport",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0007",
+    "kind": "PROCESS",
+    "observable_verbatim": "suitable for low-cost manufacturing",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0004",
+    "statement_verbatim": "The product should be suitable for low-cost manufacturing",
+    "verification_kind": "QUANTITATIVE"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0008",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "practical for desktop use",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0004",
+    "statement_verbatim": "should be practical for desktop use",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0009",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "mechanically plausible",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0005",
+    "statement_verbatim": "The design should be mechanically plausible",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0010",
+    "kind": "PROCESS",
+    "observable_verbatim": "easy to assemble",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0005",
+    "statement_verbatim": "easy to assemble",
+    "verification_kind": "KINEMATIC"
+   }
+  ],
+  "Scenario": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Scenario",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "actors": [
+     "ACT-0001"
+    ],
+    "entity_id": "SCN-0001",
+    "environment": "Normal handling conditions as mentioned in SRC-0002.",
+    "kind": "OPERATION",
+    "name": "Repeated opening and closing during normal handling",
+    "system_boundary": "Inside: the storage box and its latch; Outside: the user operating the box and the desktop environment."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Scenario",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "actors": [],
+    "entity_id": "SCN-0002",
+    "environment": "Transport conditions unspecified in the request.",
+    "kind": "TRANSPORT",
+    "name": "Transport of the closed box",
+    "system_boundary": "Inside: the closed storage box with latch engaged; Outside: the transport environment and any surfaces or hands supporting it."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Scenario",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "actors": [],
+    "entity_id": "SCN-0003",
+    "environment": "Assembly environment unspecified in the request.",
+    "kind": "ASSEMBLY",
+    "name": "Assembly of the box and latch",
+    "system_boundary": "Inside: the components of the box and latch; Outside: the assembler and the assembly environment."
+   }
+  ]
+ },
+ "live": true,
+ "model_configured": "deepseek-v4-pro",
+ "namespace_occupancy": {
+  "UnresolvedDecision": [
+   "UNR-0001"
+  ]
+ },
+ "prompt_chars": 29254,
+ "prompt_text": "You are defining the MECHANISM for one candidate: what bodies exist,\nhow they are connected, what may move, what must not, how loads reach the world,\nand in what order the thing goes together.\n\nYou receive the typed design state. You do not receive the original request.\n\nWHAT EXISTS HERE AND WHAT DOES NOT\nGeometry appears at this stage, but only as TOPOLOGY and DIRECTION: which bodies\ntouch, which joint connects which groups, which way an axis points, which side a\npart is inserted from. There are no magnitudes, no dimensions, no positions and\nno axis PLACEMENTS - where an axis sits depends on feature sizes that do not\nexist yet. Saying \"the axis points +Z\" is this stage's work. Saying \"the axis is\n40 mm from the base\" is not, and is wrong here even if it later turns out true.\n\nRULES\n1. Name the BODIES. A body is a thing that gets made or bought. Give each a\n   ROLE - what it does - not a shape. Where a body must flex to do its job, give\n   it more than one RIGID GROUP and a COMPLIANT joint between them: ONE group\n   and ONE compliant joint PER COMPLIANT MEMBER. Four independent tabs are four\n   groups and four joints, not one region.\n2. Name every JOINT: its type, the two groups it connects, its degrees of\n   freedom, and its axis DIRECTION.\n3. Name every INTERFACE - every region where two bodies meet - and classify HOW\n   THEY MEET: CONTACT, CLEARANCE, INTERFERENCE_FIT or COMPLIANT_INTERACTION.\n   This is not a joint type: FIXED, REVOLUTE and the rest say how two groups are\n   CONSTRAINED, and belong on joints. A body pair that meets and is left\n   unclassified is a hole in the design. On each body and interface, list the\n   obligation ids it is the reason for - the design decision has to be traceable\n   to the obligation that forced it, or nothing downstream can tell a load-\n   bearing choice from an arbitrary one.\n4. Name the CONFIGURATIONS the product has - the distinct states its mechanism\n   can be in that matter to its function.\n5. Every degree of freedom of every rigid group in every configuration becomes a\n   line the pipeline enumerates from what you declare here, so make the groups\n   and configurations complete and final. A group you leave out has no lines at\n   all, and a line that does not exist cannot be reported as unexplained.\n6. A later step traces the load paths and the assembly order. Give it what it\n   needs: every body a load could pass through, and every interface it could\n   cross.\n9. Do not select between candidates and do not score anything.\n\nRESPONSE SCHEMA\nReturn a single JSON object with exactly these keys, each a list. A list may be\nempty. Every field is required unless marked optional. No required field is null.\n\n  bodies[]             id \"BOD-0001\", role, instance_identity,\n                       addresses_obligations[] (obligation ids this body\n                       is the reason for; [] if none)\n  rigid_groups[]       id \"RGP-0001\", body, members[], is_default (boolean)\n  joints[]             id \"JNT-0001\", joint_type, parent_group, child_group,\n                       dof[], axis_direction,\n                       compliance {mode, direction, required_travel,\n                       allowable_travel_status, actuation, compliant_element,\n                       root_interface, activation_window} (only for COMPLIANT;\n                       actuation is always PRESCRIBED_KINEMATIC - in the real\n                       mechanism a contact drives the deflection, but in this\n                       model the coordinate is imposed, and the field says so\n                       precisely so the structure cannot be read as evidence\n                       that the mechanism deflects itself)\n  interfaces[]         id \"IFC-0001\", bodies[], interaction_kind, nominal_status,\n                       addresses_obligations[]\n  configurations[]     id \"CFG-0001\", name, kind, bodies_present[],\n                       distinguishing_basis[] {rigid_group, dof, differs_from[]}\n                       - what makes this configuration a DIFFERENT one: the\n                       (rigid group, DOF) pairs whose value differs from the\n                       named sibling configurations. [] when nothing is required\n                       to differ. A later step realizes this in coordinates and\n                       is checked against it, so a name is never what\n                       distinguishes two states\n  functional_regions[] id \"FRG-0001\", role, owning_bodies[],\n                       required_by_actors[] (actor ids from the input; [] for\n                       SUPPORT and KEEP_OUT regions no actor uses),\n                       reach_targets[] (what those actors must reach through it)\n  unresolved[]         id \"S3U-0001\", decision, why_open, alternatives[],\n                       alternatives_kind, kept_open_by[], blocks[]\n\nPERMITTED VALUES\n  joint_type          REVOLUTE | PRISMATIC | HELICAL | SPHERICAL | PLANAR | CYLINDRICAL | FIXED | COMPLIANT\n  dof                 TX | TY | TZ | RX | RY | RZ\n  axis_direction      +X | -X | +Y | -Y | +Z | -Z | NONE\n  interaction_kind    CONTACT | CLEARANCE | INTERFERENCE_FIT | COMPLIANT_INTERACTION\n  functional region role ACCESS | SUPPORT | KEEP_OUT | APERTURE\n  alternatives_kind   ENTITY_REFS | PRINCIPLE_FAMILIES | FREE_TEXT\n\nIDS YOU EMIT ARE NEW\nEvery id in your response is one you are creating now. The typed input already\ncontains ids of its own, and reusing one of them does not extend that entity, it\ncollides with it. Use exactly the prefixes shown above and never an id that\nalready appears in the input.\n\nREFERENCES BETWEEN ITEMS\n  rigid_groups[].body            a body id you emit\n  joints[].parent_group/child_group  rigid group ids you emit\n  interfaces[].bodies            body ids you emit\n  configurations[].bodies_present body ids you emit\n  functional_regions[].owning_bodies body ids you emit\n  unresolved[].kept_open_by      Ambiguity or Freedom ids from the input\n\nTHE CANDIDATE YOU ARE EMBODYING\n{\n \"_authority\": \"AUTHORITATIVE\",\n \"_created_by\": \"s02\",\n \"_family\": \"Candidate\",\n \"_provenance\": \"s02:derivation\",\n \"_validity\": \"STANDING\",\n \"addresses_obligations\": [\n  \"OBL-0001\",\n  \"OBL-0002\",\n  \"OBL-0003\",\n  \"OBL-0004\",\n  \"OBL-0005\",\n  \"OBL-0006\",\n  \"OBL-0007\",\n  \"OBL-0008\",\n  \"OBL-0009\",\n  \"OBL-0010\",\n  \"OBL-0011\",\n  \"OBL-0015\",\n  \"OBL-0018\",\n  \"OBL-0019\"\n ],\n \"entity_id\": \"CND-0003\",\n \"evidence_route_verdict\": {\n  \"available\": true,\n  \"note\": \"Over-centre toggle can be evaluated via ideal joint torque and balance.\",\n  \"route\": \"RIGID_BODY_DYNAMICS\"\n },\n \"family\": \"MAINTAIN_CONFIGURATION\",\n \"obligations_created\": [\n  \"OBL-0011\",\n  \"OBL-0015\",\n  \"OBL-0018\",\n  \"OBL-0019\"\n ],\n \"principle\": {\n  \"ACTUATE\": \"DIRECT_MANUAL\",\n  \"MAINTAIN_CONFIGURATION\": \"OVER_CENTRE\",\n  \"PERMIT_ASSEMBLY\": \"STRAIGHT_INSERTION\",\n  \"PERMIT_RELATIVE_MOTION\": \"REVOLUTE_PAIR\"\n },\n \"self_locking\": null,\n \"summary\": \"Revolute hinge with over-centre latch\"\n}\n\nTYPED INPUT\n-----------\n{\n \"Actor\": [\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Actor\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"ACT-0001\",\n   \"must_reach\": [\n    \"latch\"\n   ],\n   \"name\": \"User\"\n  }\n ],\n \"Candidate\": [\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Candidate\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"addresses_obligations\": [\n    \"OBL-0001\",\n    \"OBL-0002\",\n    \"OBL-0003\",\n    \"OBL-0004\",\n    \"OBL-0005\",\n    \"OBL-0006\",\n    \"OBL-0007\",\n    \"OBL-0008\",\n    \"OBL-0009\",\n    \"OBL-0010\",\n    \"OBL-0011\",\n    \"OBL-0015\",\n    \"OBL-0018\",\n    \"OBL-0019\"\n   ],\n   \"entity_id\": \"CND-0003\",\n   \"evidence_route_verdict\": {\n    \"available\": true,\n    \"note\": \"Over-centre toggle can be evaluated via ideal joint torque and balance.\",\n    \"route\": \"RIGID_BODY_DYNAMICS\"\n   },\n   \"family\": \"MAINTAIN_CONFIGURATION\",\n   \"obligations_created\": [\n    \"OBL-0011\",\n    \"OBL-0015\",\n    \"OBL-0018\",\n    \"OBL-0019\"\n   ],\n   \"principle\": {\n    \"ACTUATE\": \"DIRECT_MANUAL\",\n    \"MAINTAIN_CONFIGURATION\": \"OVER_CENTRE\",\n    \"PERMIT_ASSEMBLY\": \"STRAIGHT_INSERTION\",\n    \"PERMIT_RELATIVE_MOTION\": \"REVOLUTE_PAIR\"\n   },\n   \"self_locking\": null,\n   \"summary\": \"Revolute hinge with over-centre latch\"\n  }\n ],\n \"LoadCase\": [\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"LoadCase\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"applied_to_role\": \"the latch actuation role\",\n   \"direction_class\": \"AXIAL\",\n   \"entity_id\": \"LC-0001\",\n   \"kind\": \"ACTOR_APPLIED\",\n   \"magnitude_or_status\": \"UNSUPPORTED\",\n   \"reacted_at_role\": \"the surface the product stands on\",\n   \"reacted_at_site\": \"RSR-0001\",\n   \"scenario\": \"SCN-0001\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"LoadCase\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"applied_to_role\": \"the moving closing role\",\n   \"direction_class\": \"GRAVITY\",\n   \"entity_id\": \"LC-0002\",\n   \"kind\": \"GRAVITY\",\n   \"magnitude_or_status\": \"UNSUPPORTED\",\n   \"reacted_at_role\": \"the surface the product stands on\",\n   \"reacted_at_site\": \"RSR-0001\",\n   \"scenario\": \"SCN-0001\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"LoadCase\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"applied_to_role\": \"the closed storage assembly role\",\n   \"direction_class\": \"AXIAL\",\n   \"entity_id\": \"LC-0003\",\n   \"kind\": \"REACTION\",\n   \"magnitude_or_status\": \"UNSUPPORTED\",\n   \"reacted_at_role\": \"the transport support surface role\",\n   \"reacted_at_site\": \"RSR-0002\",\n   \"scenario\": \"SCN-0002\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"LoadCase\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"applied_to_role\": \"the closed storage assembly role\",\n   \"direction_class\": \"TRANSVERSE\",\n   \"entity_id\": \"LC-0004\",\n   \"kind\": \"REACTION\",\n   \"magnitude_or_status\": \"UNSUPPORTED\",\n   \"reacted_at_role\": \"the transport support surface role\",\n   \"reacted_at_site\": \"RSR-0002\",\n   \"scenario\": \"SCN-0002\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"LoadCase\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"applied_to_role\": \"the insertion interface role\",\n   \"direction_class\": \"AXIAL\",\n   \"entity_id\": \"LC-0005\",\n   \"kind\": \"ACTOR_APPLIED\",\n   \"magnitude_or_status\": \"UNSUPPORTED\",\n   \"reacted_at_role\": \"the assembly work surface role\",\n   \"reacted_at_site\": \"RSR-0003\",\n   \"scenario\": \"SCN-0003\"\n  }\n ],\n \"Obligation\": [\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"A latch that cannot be re-engaged is not reusable.\",\n   \"derived_from_requirements\": [\n    \"REQ-0002\",\n    \"REQ-0003\"\n   ],\n   \"entity_id\": \"OBL-0002\",\n   \"evidence_route\": \"MOBILITY_ANALYSIS\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s02\",\n   \"scope\": \"UNIVERSAL\",\n   \"statement\": \"The product must provide a latching function that can be engaged and disengaged multiple times without replacement.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"Opening and closing requires relative motion.\",\n   \"derived_from_requirements\": [\n    \"REQ-0003\"\n   ],\n   \"entity_id\": \"OBL-0003\",\n   \"evidence_route\": \"MOBILITY_ANALYSIS\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s02\",\n   \"scope\": \"UNIVERSAL\",\n   \"statement\": \"The product must permit relative motion between a closing role and a body role sufficient to open and close.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"Conflicting constraints make a mechanism impossible.\",\n   \"derived_from_requirements\": [\n    \"REQ-0009\"\n   ],\n   \"entity_id\": \"OBL-0009\",\n   \"evidence_route\": \"MOBILITY_ANALYSIS\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s02\",\n   \"scope\": \"UNIVERSAL\",\n   \"statement\": \"The product must have a kinematically plausible arrangement with appropriate degrees of freedom.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"Accidental opening would occur if the latch cannot resist normal handling loads.\",\n   \"derived_from_requirements\": [\n    \"REQ-0004\"\n   ],\n   \"entity_id\": \"OBL-0004\",\n   \"evidence_route\": \"RIGID_BODY_DYNAMICS\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s03\",\n   \"scope\": \"CANDIDATE_DISCRIMINATING\",\n   \"statement\": \"The latch must maintain closure under normal handling loads unless the user intentionally actuates it.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"Transport loads could separate the latch if not retained.\",\n   \"derived_from_requirements\": [\n    \"REQ-0006\"\n   ],\n   \"entity_id\": \"OBL-0006\",\n   \"evidence_route\": \"RIGID_BODY_DYNAMICS\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s03\",\n   \"scope\": \"CANDIDATE_DISCRIMINATING\",\n   \"statement\": \"The latch must remain closed under transport vibration and shock.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"A latch that cannot be reached or requires excessive force is not easy to operate.\",\n   \"derived_from_requirements\": [\n    \"REQ-0005\"\n   ],\n   \"entity_id\": \"OBL-0005\",\n   \"evidence_route\": \"RIGID_KINEMATIC_GEOMETRY\",\n   \"involves_actors\": [\n    \"ACT-0001\"\n   ],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s03\",\n   \"scope\": \"CANDIDATE_DISCRIMINATING\",\n   \"statement\": \"The user must be able to reach and actuate the latch with low effort and without special tools.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"Direct manual actuation requires physical access.\",\n   \"derived_from_requirements\": [\n    \"REQ-0005\"\n   ],\n   \"entity_id\": \"OBL-0018\",\n   \"evidence_route\": \"RIGID_KINEMATIC_GEOMETRY\",\n   \"involves_actors\": [\n    \"ACT-0001\"\n   ],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s03\",\n   \"scope\": \"UNIVERSAL\",\n   \"statement\": \"The latch actuation role must be accessible to the user's fingers and allow sufficient travel and force input for direct manual actuation.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"A product that occupies excessive volume cannot be placed on a desktop as compact storage.\",\n   \"derived_from_requirements\": [\n    \"REQ-0001\",\n    \"REQ-0008\"\n   ],\n   \"entity_id\": \"OBL-0001\",\n   \"evidence_route\": \"RIGID_KINEMATIC_GEOMETRY\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s03\",\n   \"scope\": \"UNIVERSAL\",\n   \"statement\": \"The product must occupy a compact spatial envelope suitable for placement on a desktop.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"A product that topples or damages the desktop is not practical.\",\n   \"derived_from_requirements\": [\n    \"REQ-0008\"\n   ],\n   \"entity_id\": \"OBL-0008\",\n   \"evidence_route\": \"RIGID_KINEMATIC_GEOMETRY\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s03\",\n   \"scope\": \"UNIVERSAL\",\n   \"statement\": \"The product must be stable and safe on a desktop, not requiring excessive space or causing damage.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"Manufacturing process choice determines cost.\",\n   \"derived_from_requirements\": [\n    \"REQ-0007\"\n   ],\n   \"entity_id\": \"OBL-0007\",\n   \"evidence_route\": \"MANUFACTURING_PROCESS_ANALYSIS\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": false,\n   \"satisfiable_at\": \"s04\",\n   \"scope\": \"UNIVERSAL\",\n   \"statement\": \"The product must be suitable for low-cost manufacturing.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"If components cannot be inserted or joined, assembly is not easy.\",\n   \"derived_from_requirements\": [\n    \"REQ-0010\"\n   ],\n   \"entity_id\": \"OBL-0010\",\n   \"evidence_route\": \"SWEPT_INTERFERENCE\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s03\",\n   \"scope\": \"CANDIDATE_DISCRIMINATING\",\n   \"statement\": \"The product must be assemblable by an operator without excessive difficulty.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"A revolute pair constrains all but one rotational DOF.\",\n   \"derived_from_requirements\": [],\n   \"entity_id\": \"OBL-0011\",\n   \"evidence_route\": \"MOBILITY_ANALYSIS\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s03\",\n   \"scope\": \"CANDIDATE_DISCRIMINATING\",\n   \"statement\": \"For any revolute hinge, relative rotation between closing and body roles must be permitted about one axis while other relative motions are prevented; axial retention and radial support must be provided.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"Over-centre requires a kinematic toggle.\",\n   \"derived_from_requirements\": [],\n   \"entity_id\": \"OBL-0015\",\n   \"evidence_route\": \"RIGID_BODY_DYNAMICS\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s03\",\n   \"scope\": \"CANDIDATE_DISCRIMINATING\",\n   \"statement\": \"For any over-centre latch, a linkage must pass through a toggle position that holds closure until the user moves it back.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"Obligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"derivation_premises\": \"Straight insertion requires a clear linear path.\",\n   \"derived_from_requirements\": [\n    \"REQ-0010\"\n   ],\n   \"entity_id\": \"OBL-0019\",\n   \"evidence_route\": \"SWEPT_INTERFERENCE\",\n   \"involves_actors\": [],\n   \"mandatory\": true,\n   \"route_available\": true,\n   \"satisfiable_at\": \"s03\",\n   \"scope\": \"CANDIDATE_DISCRIMINATING\",\n   \"statement\": \"For straight insertion assembly, components must be aligned along a single axis and inserted without interference.\"\n  }\n ],\n \"PhysicalEffectObligation\": [\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"PhysicalEffectObligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"addresses_obligations\": [\n    \"OBL-0002\",\n    \"OBL-0003\",\n    \"OBL-0009\"\n   ],\n   \"between_roles\": \"the moving closing role and the stationary body role\",\n   \"effect\": \"PERMIT_MOTION\",\n   \"entity_id\": \"PEO-0001\",\n   \"persistence\": \"during opening and closing\",\n   \"under_load_case\": \"LC-0002\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"PhysicalEffectObligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"addresses_obligations\": [\n    \"OBL-0004\",\n    \"OBL-0006\"\n   ],\n   \"between_roles\": \"the moving closing role and the stationary body role\",\n   \"effect\": \"PREVENT_MOTION\",\n   \"entity_id\": \"PEO-0002\",\n   \"persistence\": \"when closed during transport\",\n   \"under_load_case\": \"LC-0003\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"PhysicalEffectObligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"addresses_obligations\": [\n    \"OBL-0005\",\n    \"OBL-0018\"\n   ],\n   \"between_roles\": \"the latch actuation role and the latch retention role\",\n   \"effect\": \"TRANSMIT_FORCE\",\n   \"entity_id\": \"PEO-0003\",\n   \"under_load_case\": \"LC-0001\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"PhysicalEffectObligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"addresses_obligations\": [\n    \"OBL-0001\",\n    \"OBL-0008\"\n   ],\n   \"between_roles\": \"the moving closing role and the stationary body role\",\n   \"effect\": \"LOCATE\",\n   \"entity_id\": \"PEO-0004\",\n   \"persistence\": \"when closed\",\n   \"under_load_case\": \"LC-0002\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"PhysicalEffectObligation\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"addresses_obligations\": [\n    \"OBL-0001\",\n    \"OBL-0008\"\n   ],\n   \"between_roles\": \"the storage volume role and the external environment role\",\n   \"effect\": \"CONTAIN\",\n   \"entity_id\": \"PEO-0005\"\n  }\n ],\n \"ReactionSiteRequirement\": [\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"ReactionSiteRequirement\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"at_role\": \"the surface the product stands on\",\n   \"boundary_side\": \"EXTERNAL\",\n   \"entity_id\": \"RSR-0001\",\n   \"scenario\": \"SCN-0001\",\n   \"why\": \"Loads from operation and gravity are reacted to the desktop.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"ReactionSiteRequirement\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"at_role\": \"the transport support surface role\",\n   \"boundary_side\": \"EXTERNAL\",\n   \"entity_id\": \"RSR-0002\",\n   \"scenario\": \"SCN-0002\",\n   \"why\": \"Transport loads are reacted to supporting surfaces or hands outside the boundary.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s02\",\n   \"_family\": \"ReactionSiteRequirement\",\n   \"_provenance\": \"s02:derivation\",\n   \"_validity\": \"STANDING\",\n   \"at_role\": \"the assembly work surface role\",\n   \"boundary_side\": \"EXTERNAL\",\n   \"entity_id\": \"RSR-0003\",\n   \"scenario\": \"SCN-0003\",\n   \"why\": \"Assembly forces are reacted to the assembly fixture or work surface.\"\n  }\n ],\n \"Requirement\": [\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Requirement\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"REQ-0001\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"compact desktop storage box\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0001\",\n   \"statement_verbatim\": \"Design a compact desktop storage box\",\n   \"verification_kind\": \"STRUCTURAL\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Requirement\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"REQ-0002\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"reusable latch\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0001\",\n   \"statement_verbatim\": \"with a reusable latch\",\n   \"verification_kind\": \"STRUCTURAL\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Requirement\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"REQ-0003\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"open and close repeatedly\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0002\",\n   \"statement_verbatim\": \"The box should open and close repeatedly\",\n   \"verification_kind\": \"KINEMATIC\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Requirement\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"REQ-0004\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"without accidental opening during normal handling\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0002\",\n   \"statement_verbatim\": \"without accidental opening during normal handling\",\n   \"verification_kind\": \"KINEMATIC\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Requirement\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"REQ-0005\",\n   \"kind\": \"USABILITY\",\n   \"observable_verbatim\": \"easy for a user to operate\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0003\",\n   \"statement_verbatim\": \"The latch should be easy for a user to operate\",\n   \"verification_kind\": \"KINEMATIC\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Requirement\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"REQ-0006\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"remaining secure during transport\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0003\",\n   \"statement_verbatim\": \"while remaining secure during transport\",\n   \"verification_kind\": \"KINEMATIC\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Requirement\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"REQ-0007\",\n   \"kind\": \"PROCESS\",\n   \"observable_verbatim\": \"suitable for low-cost manufacturing\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0004\",\n   \"statement_verbatim\": \"The product should be suitable for low-cost manufacturing\",\n   \"verification_kind\": \"QUANTITATIVE\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Requirement\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"REQ-0008\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"practical for desktop use\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0004\",\n   \"statement_verbatim\": \"should be practical for desktop use\",\n   \"verification_kind\": \"STRUCTURAL\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Requirement\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"REQ-0009\",\n   \"kind\": \"FUNCTIONAL\",\n   \"observable_verbatim\": \"mechanically plausible\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0005\",\n   \"statement_verbatim\": \"The design should be mechanically plausible\",\n   \"verification_kind\": \"STRUCTURAL\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Requirement\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"entity_id\": \"REQ-0010\",\n   \"kind\": \"PROCESS\",\n   \"observable_verbatim\": \"easy to assemble\",\n   \"quantity_class\": \"NONE\",\n   \"source_locator\": \"SRC-0005\",\n   \"statement_verbatim\": \"easy to assemble\",\n   \"verification_kind\": \"KINEMATIC\"\n  }\n ],\n \"Scenario\": [\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Scenario\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"actors\": [\n    \"ACT-0001\"\n   ],\n   \"entity_id\": \"SCN-0001\",\n   \"environment\": \"Normal handling conditions as mentioned in SRC-0002.\",\n   \"kind\": \"OPERATION\",\n   \"name\": \"Repeated opening and closing during normal handling\",\n   \"system_boundary\": \"Inside: the storage box and its latch; Outside: the user operating the box and the desktop environment.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Scenario\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"actors\": [],\n   \"entity_id\": \"SCN-0002\",\n   \"environment\": \"Transport conditions unspecified in the request.\",\n   \"kind\": \"TRANSPORT\",\n   \"name\": \"Transport of the closed box\",\n   \"system_boundary\": \"Inside: the closed storage box with latch engaged; Outside: the transport environment and any surfaces or hands supporting it.\"\n  },\n  {\n   \"_authority\": \"AUTHORITATIVE\",\n   \"_created_by\": \"s01\",\n   \"_family\": \"Scenario\",\n   \"_provenance\": \"s01:extraction\",\n   \"_validity\": \"STANDING\",\n   \"actors\": [],\n   \"entity_id\": \"SCN-0003\",\n   \"environment\": \"Assembly environment unspecified in the request.\",\n   \"kind\": \"ASSEMBLY\",\n   \"name\": \"Assembly of the box and latch\",\n   \"system_boundary\": \"Inside: the components of the box and latch; Outside: the assembler and the assembly environment.\"\n  }\n ]\n}\n\nIDS ALREADY IN USE\nThese entities already exist in the design state. The ids are listed\nso you do not reuse one: every id you emit must be new. This is an\nidentity list and nothing more - it says which ids are taken, not\nwhat those entities say, and it is not something to reason from.\nThe example ids in the response schema show the FORMAT of an id.\nThey are not offers of an available id, and the first index is\ncommonly the one already taken.\n  UnresolvedDecision: UNR-0001\n"
+}

@@ -1,0 +1,307 @@
+{
+ "candidate_id": "CND-0004",
+ "checks_at_call_time": {
+  "branch_isolation_held": true,
+  "candidates_visible": [],
+  "exactly_this_candidate": false,
+  "family_counts": {
+   "Actor": 1,
+   "AssemblyStep": 2,
+   "Body": 2,
+   "Configuration": 2,
+   "ConstraintRelation": 4,
+   "Envelope": 2,
+   "FunctionalRegion": 6,
+   "Interface": 4,
+   "Joint": 1,
+   "LoadCase": 3,
+   "Obligation": 14,
+   "PhysicalEffectObligation": 5,
+   "PhysicalInteraction": 5,
+   "ReactionSiteRequirement": 2,
+   "ReferenceScale": 1,
+   "Requirement": 10,
+   "RigidGroup": 2,
+   "Scenario": 2,
+   "TransitionRequirement": 2
+  },
+  "foreign_branch_entities": {},
+  "required_premise_classes": [
+   {
+    "class": "demanded_state_change",
+    "families": [
+     "TransitionRequirement"
+    ],
+    "roles": [
+     "transition_requirement"
+    ],
+    "selection": {
+     "transition_requirement": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    }
+   },
+   {
+    "class": "prior_spatial_commitment",
+    "families": [
+     "AssemblyStep",
+     "Envelope",
+     "FunctionalRegion",
+     "ReferenceScale"
+    ],
+    "roles": [
+     "spatial_commitment"
+    ],
+    "selection": {
+     "spatial_commitment": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    }
+   },
+   {
+    "class": "topology_with_axes",
+    "families": [
+     "Body",
+     "Interface",
+     "Joint",
+     "RigidGroup"
+    ],
+    "roles": [
+     "kinematic_axis",
+     "topology_element",
+     "topology_relation"
+    ],
+    "selection": {
+     "kinematic_axis": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     },
+     "topology_element": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     },
+     "topology_relation": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    }
+   },
+   {
+    "class": "required_distinctness",
+    "families": [
+     "Interface",
+     "Joint"
+    ],
+    "roles": [
+     "topology_relation"
+    ],
+    "selection": {
+     "topology_relation": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    }
+   },
+   {
+    "class": "configuration_basis",
+    "families": [
+     "Configuration"
+    ],
+    "roles": [
+     "configuration_state"
+    ],
+    "selection": {
+     "configuration_state": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    }
+   },
+   {
+    "class": "constraint_relation",
+    "families": [
+     "ConstraintRelation",
+     "PhysicalInteraction"
+    ],
+    "roles": [
+     "constraint_relation",
+     "physical_interaction"
+    ],
+    "selection": {
+     "constraint_relation": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "INVOCATION_BRANCH"
+     },
+     "physical_interaction": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    }
+   },
+   {
+    "class": "travel_bounding_quantity",
+    "families": [
+     "Parameter",
+     "Requirement"
+    ],
+    "roles": [
+     "quantity_constraint"
+    ],
+    "selection": {
+     "quantity_constraint": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    }
+   }
+  ],
+  "semantic_role_members": {
+   "configuration_state": [
+    "CFG-0008",
+    "CFG-0009"
+   ],
+   "constraint_relation": [
+    "CRL-0108",
+    "CRL-0109",
+    "CRL-0110",
+    "CRL-0111"
+   ],
+   "kinematic_axis": [
+    "JNT-0013"
+   ],
+   "physical_interaction": [
+    "PHI-0011",
+    "PHI-0012",
+    "PHI-0013",
+    "PHI-0014",
+    "PHI-0015"
+   ],
+   "quantity_constraint": [
+    "REQ-0001",
+    "REQ-0002",
+    "REQ-0003",
+    "REQ-0004",
+    "REQ-0005",
+    "REQ-0006",
+    "REQ-0007",
+    "REQ-0008",
+    "REQ-0009",
+    "REQ-0010"
+   ],
+   "spatial_commitment": [
+    "ASY-0105",
+    "ASY-0106",
+    "ENV-0012",
+    "ENV-0013",
+    "FRG-0013",
+    "FRG-0014",
+    "FRG-0015",
+    "FRG-0016",
+    "FRG-0017",
+    "FRG-0018",
+    "SCL-CND-0004"
+   ],
+   "topology_element": [
+    "BOD-0012",
+    "BOD-0013",
+    "RGP-0015",
+    "RGP-0016"
+   ],
+   "topology_relation": [
+    "IFC-0016",
+    "IFC-0017",
+    "IFC-0018",
+    "IFC-0019",
+    "JNT-0013"
+   ],
+   "transition_requirement": [
+    "TRQ-0105",
+    "TRQ-0106"
+   ]
+  },
+  "semantic_role_populations": {
+   "configuration_state": 2,
+   "constraint_relation": 4,
+   "kinematic_axis": 1,
+   "physical_interaction": 5,
+   "quantity_constraint": 10,
+   "spatial_commitment": 11,
+   "topology_element": 4,
+   "topology_relation": 5,
+   "transition_requirement": 2
+  },
+  "unmet_premise_classes": [],
+  "view_ready": true,
+  "view_status": "VIEW_READY"
+ },
+ "counts_before": {
+  "AcceptanceContract": 6,
+  "Actor": 1,
+  "Ambiguity": 7,
+  "AssemblyStep": 19,
+  "Assumption": 3,
+  "Body": 19,
+  "Candidate": 6,
+  "Configuration": 15,
+  "ConstraintRelation": 35,
+  "EliminationRecord": 6,
+  "Envelope": 19,
+  "Freedom": 7,
+  "FunctionalRegion": 26,
+  "Interface": 30,
+  "Joint": 19,
+  "LoadCase": 5,
+  "LoadPath": 30,
+  "MobilityExpectation": 15,
+  "Obligation": 20,
+  "PhysicalEffectObligation": 5,
+  "PhysicalInteraction": 30,
+  "ReachResult": 13,
+  "ReactionSiteRequirement": 3,
+  "ReferenceScale": 6,
+  "Requirement": 10,
+  "RigidGroup": 23,
+  "Scenario": 3,
+  "SourceClause": 5,
+  "State": 7,
+  "SweptVolume": 20,
+  "Transition": 8,
+  "TransitionRequirement": 18,
+  "UnresolvedDecision": 54
+ },
+ "invocation_branch": "CND-0004",
+ "live": true,
+ "pass": "s04b",
+ "provider_settings": {
+  "deadline_s": 120.0,
+  "max_attempts": 1,
+  "max_output_tokens": 65536,
+  "model": "deepseek-v4-pro",
+  "provider": "deepseek",
+  "seed": 7,
+  "temperature": 1.0
+ },
+ "state_hash_before": "b0cf8688a913679307552d670f9bf5854fee28e73e217427a0423f90edea2319"
+}

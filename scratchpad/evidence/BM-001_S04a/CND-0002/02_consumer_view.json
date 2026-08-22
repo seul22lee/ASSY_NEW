@@ -1,0 +1,2209 @@
+{
+ "assessment": [
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "AT_LEAST_ONE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "BOD-0004",
+      "BOD-0005",
+      "BOD-0006",
+      "BOD-0007"
+     ],
+     "expected_count": 4,
+     "families": [
+      "Body"
+     ],
+     "obligation": "Envelope.body -[reference]-> Body",
+     "population": "INVOCATION_BRANCH",
+     "selected": [
+      "BOD-0004",
+      "BOD-0005",
+      "BOD-0006",
+      "BOD-0007"
+     ],
+     "selected_count": 4,
+     "standing_instances": {
+      "Body": 19
+     },
+     "verdict": "SATISFIED",
+     "why": "4 of 4 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Body"
+   ],
+   "requirement": "Envelope.body -[reference]-> Body",
+   "selected": 4,
+   "source": "REPRESENTATIONAL_DEPENDENCY",
+   "trace": {
+    "declaration": "reference target",
+    "output_field": "Envelope.body",
+    "output_semantic": "Envelope",
+    "requires": "Body",
+    "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "AT_LEAST_ONE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "ACT-0001"
+     ],
+     "expected_count": 1,
+     "families": [
+      "Actor"
+     ],
+     "obligation": "ReachResult.actor -[reference]-> Actor",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "ACT-0001"
+     ],
+     "selected_count": 1,
+     "standing_instances": {
+      "Actor": 1
+     },
+     "verdict": "SATISFIED",
+     "why": "1 of 1 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Actor"
+   ],
+   "requirement": "ReachResult.actor -[reference]-> Actor",
+   "selected": 1,
+   "source": "REPRESENTATIONAL_DEPENDENCY",
+   "trace": {
+    "declaration": "reference target",
+    "output_field": "ReachResult.actor",
+    "output_semantic": "ReachResult",
+    "requires": "Actor",
+    "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "AT_LEAST_ONE",
+     "existence": "MAY_BE_EMPTY",
+     "expected": [
+      "CND-0002"
+     ],
+     "expected_count": 1,
+     "families": [
+      "Candidate"
+     ],
+     "obligation": "EliminationRecord.candidate -[reference]-> Candidate",
+     "population": "INVOCATION_BRANCH",
+     "selected": [
+      "CND-0002"
+     ],
+     "selected_count": 1,
+     "standing_instances": {
+      "Candidate": 6
+     },
+     "verdict": "SATISFIED",
+     "why": "1 of 1 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Candidate"
+   ],
+   "requirement": "EliminationRecord.candidate -[reference]-> Candidate",
+   "selected": 1,
+   "source": "REPRESENTATIONAL_DEPENDENCY",
+   "trace": {
+    "declaration": "reference target",
+    "output_field": "EliminationRecord.candidate",
+    "output_semantic": "EliminationRecord",
+    "requires": "Candidate",
+    "source_contract": "DESIGN_STATE_CONTRACT.field_semantics"
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "PHI-0006",
+      "PHI-0007",
+      "PHI-0008",
+      "PHI-0009",
+      "PHI-0010"
+     ],
+     "expected_count": 5,
+     "families": [
+      "PhysicalInteraction"
+     ],
+     "obligation": "physical_interaction",
+     "population": "INVOCATION_BRANCH",
+     "selected": [
+      "PHI-0006",
+      "PHI-0007",
+      "PHI-0008",
+      "PHI-0009",
+      "PHI-0010"
+     ],
+     "selected_count": 5,
+     "standing_instances": {
+      "PhysicalInteraction": 30
+     },
+     "verdict": "SATISFIED",
+     "why": "5 of 5 applicable instances selected"
+    },
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "BOD-0004",
+      "BOD-0005",
+      "BOD-0006",
+      "BOD-0007",
+      "RGP-0005",
+      "RGP-0006",
+      "RGP-0007",
+      "RGP-0008",
+      "RGP-0009",
+      "RGP-0010"
+     ],
+     "expected_count": 10,
+     "families": [
+      "Body",
+      "RigidGroup"
+     ],
+     "obligation": "topology_element",
+     "population": "INVOCATION_BRANCH",
+     "selected": [
+      "BOD-0004",
+      "BOD-0005",
+      "BOD-0006",
+      "BOD-0007",
+      "RGP-0005",
+      "RGP-0006",
+      "RGP-0007",
+      "RGP-0008",
+      "RGP-0009",
+      "RGP-0010"
+     ],
+     "selected_count": 10,
+     "standing_instances": {
+      "Body": 19,
+      "RigidGroup": 23
+     },
+     "verdict": "SATISFIED",
+     "why": "10 of 10 applicable instances selected"
+    },
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "IFC-0005",
+      "IFC-0006",
+      "IFC-0007",
+      "IFC-0008",
+      "IFC-0009",
+      "JNT-0004",
+      "JNT-0005",
+      "JNT-0006",
+      "JNT-0007",
+      "JNT-0008"
+     ],
+     "expected_count": 10,
+     "families": [
+      "Interface",
+      "Joint"
+     ],
+     "obligation": "topology_relation",
+     "population": "INVOCATION_BRANCH",
+     "selected": [
+      "IFC-0005",
+      "IFC-0006",
+      "IFC-0007",
+      "IFC-0008",
+      "IFC-0009",
+      "JNT-0004",
+      "JNT-0005",
+      "JNT-0006",
+      "JNT-0007",
+      "JNT-0008"
+     ],
+     "selected_count": 10,
+     "standing_instances": {
+      "Interface": 30,
+      "Joint": 19
+     },
+     "verdict": "SATISFIED",
+     "why": "10 of 10 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Body",
+    "Interface",
+    "Joint",
+    "PhysicalInteraction",
+    "RigidGroup"
+   ],
+   "requirement": "topology_and_interaction",
+   "selected": 25,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "Can this candidate fit at all?",
+    "instance_selection": {
+     "physical_interaction": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     },
+     "topology_element": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     },
+     "topology_relation": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    },
+    "qualifying_by_role": {
+     "physical_interaction": [
+      "PhysicalInteraction"
+     ],
+     "topology_element": [
+      "Body",
+      "RigidGroup"
+     ],
+     "topology_relation": [
+      "Interface",
+      "Joint"
+     ]
+    },
+    "requires_semantics": [
+     "topology_element",
+     "topology_relation",
+     "physical_interaction"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "Extents attach to bodies and their connections."
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "REQ-0001",
+      "REQ-0002",
+      "REQ-0003",
+      "REQ-0004",
+      "REQ-0005",
+      "REQ-0006",
+      "REQ-0007",
+      "REQ-0008",
+      "REQ-0009",
+      "REQ-0010"
+     ],
+     "expected_count": 10,
+     "families": [
+      "Parameter",
+      "Requirement"
+     ],
+     "obligation": "quantity_constraint",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "REQ-0001",
+      "REQ-0002",
+      "REQ-0003",
+      "REQ-0004",
+      "REQ-0005",
+      "REQ-0006",
+      "REQ-0007",
+      "REQ-0008",
+      "REQ-0009",
+      "REQ-0010"
+     ],
+     "selected_count": 10,
+     "standing_instances": {
+      "Parameter": 0,
+      "Requirement": 10
+     },
+     "verdict": "SATISFIED",
+     "why": "10 of 10 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Parameter",
+    "Requirement"
+   ],
+   "requirement": "extent_bounding_quantity",
+   "selected": 10,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "Can this candidate fit at all?",
+    "instance_selection": {
+     "quantity_constraint": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "DESIGN_WIDE"
+     }
+    },
+    "qualifying_by_role": {
+     "quantity_constraint": [
+      "Parameter",
+      "Requirement"
+     ]
+    },
+    "requires_semantics": [
+     "quantity_constraint"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "A scale-dependent judgement without the scale is not a judgement."
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "MAY_BE_EMPTY",
+     "expected": [
+      "ACT-0001"
+     ],
+     "expected_count": 1,
+     "families": [
+      "Actor"
+     ],
+     "obligation": "actor_role",
+     "population": "DESIGN_WIDE",
+     "selected": [
+      "ACT-0001"
+     ],
+     "selected_count": 1,
+     "standing_instances": {
+      "Actor": 1
+     },
+     "verdict": "SATISFIED",
+     "why": "1 of 1 applicable instances selected"
+    },
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "MAY_BE_EMPTY",
+     "expected": [
+      "FRG-0005",
+      "FRG-0006",
+      "FRG-0007",
+      "FRG-0008",
+      "FRG-0009"
+     ],
+     "expected_count": 5,
+     "families": [
+      "FunctionalRegion"
+     ],
+     "obligation": "functional_region",
+     "population": "INVOCATION_BRANCH",
+     "selected": [
+      "FRG-0005",
+      "FRG-0006",
+      "FRG-0007",
+      "FRG-0008",
+      "FRG-0009"
+     ],
+     "selected_count": 5,
+     "standing_instances": {
+      "FunctionalRegion": 26
+     },
+     "verdict": "SATISFIED",
+     "why": "5 of 5 applicable instances selected"
+    }
+   ],
+   "families": [
+    "Actor",
+    "FunctionalRegion"
+   ],
+   "requirement": "reach_requirement",
+   "selected": 6,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "Can each actor reach what it must?",
+    "instance_selection": {
+     "actor_role": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "DESIGN_WIDE"
+     },
+     "functional_region": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    },
+    "qualifying_by_role": {
+     "actor_role": [
+      "Actor"
+     ],
+     "functional_region": [
+      "FunctionalRegion"
+     ]
+    },
+    "requires_semantics": [
+     "actor_role",
+     "functional_region"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "Reach cannot be evaluated without a target."
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "MAY_BE_EMPTY",
+     "expected": [
+      "FRG-0005",
+      "FRG-0006",
+      "FRG-0007",
+      "FRG-0008",
+      "FRG-0009"
+     ],
+     "expected_count": 5,
+     "families": [
+      "FunctionalRegion"
+     ],
+     "obligation": "functional_region",
+     "population": "INVOCATION_BRANCH",
+     "selected": [
+      "FRG-0005",
+      "FRG-0006",
+      "FRG-0007",
+      "FRG-0008",
+      "FRG-0009"
+     ],
+     "selected_count": 5,
+     "standing_instances": {
+      "FunctionalRegion": 26
+     },
+     "verdict": "SATISFIED",
+     "why": "5 of 5 applicable instances selected"
+    },
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "MAY_BE_EMPTY",
+     "expected": [
+      "ASY-0004",
+      "ASY-0005",
+      "ASY-0006",
+      "ASY-0007",
+      "FRG-0005",
+      "FRG-0006",
+      "FRG-0007",
+      "FRG-0008",
+      "FRG-0009"
+     ],
+     "expected_count": 9,
+     "families": [
+      "AssemblyStep",
+      "Envelope",
+      "FunctionalRegion",
+      "ReferenceScale"
+     ],
+     "obligation": "spatial_commitment",
+     "population": "INVOCATION_BRANCH",
+     "selected": [
+      "ASY-0004",
+      "ASY-0005",
+      "ASY-0006",
+      "ASY-0007",
+      "FRG-0005",
+      "FRG-0006",
+      "FRG-0007",
+      "FRG-0008",
+      "FRG-0009"
+     ],
+     "selected_count": 9,
+     "standing_instances": {
+      "AssemblyStep": 19,
+      "Envelope": 3,
+      "FunctionalRegion": 26,
+      "ReferenceScale": 1
+     },
+     "verdict": "SATISFIED",
+     "why": "9 of 9 applicable instances selected"
+    }
+   ],
+   "families": [
+    "AssemblyStep",
+    "Envelope",
+    "FunctionalRegion",
+    "ReferenceScale"
+   ],
+   "requirement": "region_and_envelope_constraint",
+   "selected": 9,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "Can this candidate fit at all?",
+    "instance_selection": {
+     "functional_region": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "INVOCATION_BRANCH"
+     },
+     "spatial_commitment": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "MAY_BE_EMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    },
+    "qualifying_by_role": {
+     "functional_region": [
+      "FunctionalRegion"
+     ],
+     "spatial_commitment": [
+      "AssemblyStep",
+      "Envelope",
+      "FunctionalRegion",
+      "ReferenceScale"
+     ]
+    },
+    "requires_semantics": [
+     "functional_region",
+     "spatial_commitment"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "Fit is relative to a declared allowance."
+   },
+   "verdict": "SATISFIED"
+  },
+  {
+   "coverage": [
+    {
+     "applicability": "ALL_MEMBERS",
+     "coverage": "ALL_APPLICABLE",
+     "existence": "REQUIRED_NONEMPTY",
+     "expected": [
+      "ASY-0004",
+      "ASY-0005",
+      "ASY-0006",
+      "ASY-0007"
+     ],
+     "expected_count": 4,
+     "families": [
+      "AssemblyStep"
+     ],
+     "obligation": "assembly_order",
+     "population": "INVOCATION_BRANCH",
+     "selected": [
+      "ASY-0004",
+      "ASY-0005",
+      "ASY-0006",
+      "ASY-0007"
+     ],
+     "selected_count": 4,
+     "standing_instances": {
+      "AssemblyStep": 19
+     },
+     "verdict": "SATISFIED",
+     "why": "4 of 4 applicable instances selected"
+    }
+   ],
+   "families": [
+    "AssemblyStep"
+   ],
+   "requirement": "assembly_order_constraint",
+   "selected": 4,
+   "source": "REASONING_PREMISE",
+   "trace": {
+    "engineering_question": "Can it be assembled?",
+    "instance_selection": {
+     "assembly_order": {
+      "applicability": "ALL_MEMBERS",
+      "coverage": "ALL_APPLICABLE",
+      "existence": "REQUIRED_NONEMPTY",
+      "population": "INVOCATION_BRANCH"
+     }
+    },
+    "qualifying_by_role": {
+     "assembly_order": [
+      "AssemblyStep"
+     ]
+    },
+    "requires_semantics": [
+     "assembly_order"
+    ],
+    "source_contract": "STAGE_RESPONSIBILITY_CONTRACT.required_reasoning_premise_classes",
+    "why": "Assemblability is an ordering property, not only a geometric one."
+   },
+   "verdict": "SATISFIED"
+  }
+ ],
+ "candidate_id": "CND-0002",
+ "families": {
+  "Actor": [
+   "ACT-0001"
+  ],
+  "AssemblyStep": [
+   "ASY-0004",
+   "ASY-0005",
+   "ASY-0006",
+   "ASY-0007"
+  ],
+  "Body": [
+   "BOD-0004",
+   "BOD-0005",
+   "BOD-0006",
+   "BOD-0007"
+  ],
+  "Candidate": [
+   "CND-0002"
+  ],
+  "Configuration": [
+   "CFG-0003",
+   "CFG-0004"
+  ],
+  "FunctionalRegion": [
+   "FRG-0005",
+   "FRG-0006",
+   "FRG-0007",
+   "FRG-0008",
+   "FRG-0009"
+  ],
+  "Interface": [
+   "IFC-0005",
+   "IFC-0006",
+   "IFC-0007",
+   "IFC-0008",
+   "IFC-0009"
+  ],
+  "Joint": [
+   "JNT-0004",
+   "JNT-0005",
+   "JNT-0006",
+   "JNT-0007",
+   "JNT-0008"
+  ],
+  "LoadCase": [
+   "LC-0002",
+   "LC-0003",
+   "LC-0001"
+  ],
+  "Obligation": [
+   "OBL-0001",
+   "OBL-0004",
+   "OBL-0006",
+   "OBL-0008",
+   "OBL-0009",
+   "OBL-0003",
+   "OBL-0005",
+   "OBL-0018",
+   "OBL-0012",
+   "OBL-0020",
+   "OBL-0002",
+   "OBL-0014",
+   "OBL-0007",
+   "OBL-0010"
+  ],
+  "PhysicalEffectObligation": [
+   "PEO-0001",
+   "PEO-0002",
+   "PEO-0003",
+   "PEO-0004",
+   "PEO-0005"
+  ],
+  "PhysicalInteraction": [
+   "PHI-0006",
+   "PHI-0007",
+   "PHI-0008",
+   "PHI-0009",
+   "PHI-0010"
+  ],
+  "ReactionSiteRequirement": [
+   "RSR-0001",
+   "RSR-0002"
+  ],
+  "Requirement": [
+   "REQ-0001",
+   "REQ-0002",
+   "REQ-0003",
+   "REQ-0004",
+   "REQ-0005",
+   "REQ-0006",
+   "REQ-0007",
+   "REQ-0008",
+   "REQ-0009",
+   "REQ-0010"
+  ],
+  "RigidGroup": [
+   "RGP-0005",
+   "RGP-0006",
+   "RGP-0007",
+   "RGP-0008",
+   "RGP-0009",
+   "RGP-0010"
+  ],
+  "Scenario": [
+   "SCN-0001",
+   "SCN-0002"
+  ]
+ },
+ "namespace_occupancy": {
+  "EliminationRecord": [
+   "ELM-CND-0001"
+  ],
+  "Envelope": [
+   "ENV-0001",
+   "ENV-0002",
+   "ENV-0003"
+  ],
+  "ReachResult": [
+   "RCH-CND-0001-0001",
+   "RCH-CND-0001-0002",
+   "RCH-CND-0001-0003",
+   "RCH-CND-0001-0004"
+  ],
+  "ReferenceScale": [
+   "SCL-CND-0001"
+  ]
+ },
+ "payload": {
+  "Actor": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Actor",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "ACT-0001",
+    "must_reach": [
+     "latch"
+    ],
+    "name": "User"
+   }
+  ],
+  "AssemblyStep": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "AssemblyStep",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "access_side": "+Y",
+    "activates": [],
+    "body": "BOD-0004",
+    "depends_on": [],
+    "entity_id": "ASY-0004",
+    "order_index": 1,
+    "path_kind": "RIGID",
+    "termination_strategy": "ELASTICITY"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "AssemblyStep",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "access_side": "+Y",
+    "activates": [
+     "IFC-0006"
+    ],
+    "body": "BOD-0006",
+    "depends_on": [
+     "ASY-0004"
+    ],
+    "entity_id": "ASY-0005",
+    "order_index": 2,
+    "path_kind": "DEFORMATION_RESOLVED",
+    "termination_strategy": "ELASTICITY"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "AssemblyStep",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "access_side": "+Y",
+    "activates": [
+     "IFC-0007",
+     "IFC-0005"
+    ],
+    "body": "BOD-0005",
+    "depends_on": [
+     "ASY-0005"
+    ],
+    "entity_id": "ASY-0006",
+    "order_index": 3,
+    "path_kind": "DEFORMATION_RESOLVED",
+    "termination_strategy": "ELASTICITY"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "AssemblyStep",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "access_side": "+X",
+    "activates": [
+     "IFC-0008",
+     "IFC-0009"
+    ],
+    "body": "BOD-0007",
+    "depends_on": [
+     "ASY-0006"
+    ],
+    "entity_id": "ASY-0007",
+    "order_index": 4,
+    "path_kind": "DEFORMATION_RESOLVED",
+    "termination_strategy": "ELASTICITY"
+   }
+  ],
+  "Body": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Body",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0004",
+     "OBL-0006",
+     "OBL-0008",
+     "OBL-0009"
+    ],
+    "created_by_stage": "s03",
+    "entity_id": "BOD-0004",
+    "instance_identity": "single injection-molded part",
+    "role": "Box base, stationary container half providing storage volume and latch recess"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Body",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0003",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0018"
+    ],
+    "created_by_stage": "s03",
+    "entity_id": "BOD-0005",
+    "instance_identity": "single injection-molded part",
+    "role": "Lid, moving closing half providing closure and actuation mounting"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Body",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0003",
+     "OBL-0009",
+     "OBL-0012",
+     "OBL-0020"
+    ],
+    "created_by_stage": "s03",
+    "entity_id": "BOD-0006",
+    "instance_identity": "separate flexible component inserted during assembly",
+    "role": "Compliant flexure hinge connecting lid to base while permitting rotation"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Body",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0002",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0014",
+     "OBL-0018",
+     "OBL-0020"
+    ],
+    "created_by_stage": "s03",
+    "entity_id": "BOD-0007",
+    "instance_identity": "separate flexible component inserted into lid during assembly",
+    "role": "Latch clip providing detent/snap engagement and user actuation surface"
+   }
+  ],
+  "Candidate": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Candidate",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0002",
+     "OBL-0003",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0007",
+     "OBL-0008",
+     "OBL-0009",
+     "OBL-0010",
+     "OBL-0012",
+     "OBL-0014",
+     "OBL-0018",
+     "OBL-0020"
+    ],
+    "entity_id": "CND-0002",
+    "evidence_route_verdict": {
+     "available": false,
+     "note": "Flexure fatigue life requires material analysis; unavailable.",
+     "route": "MATERIAL_PROPERTY_ANALYSIS"
+    },
+    "family": "MAINTAIN_CONFIGURATION",
+    "obligations_created": [
+     "OBL-0012",
+     "OBL-0014",
+     "OBL-0018",
+     "OBL-0020"
+    ],
+    "principle": {
+     "ACTUATE": "DIRECT_MANUAL",
+     "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+     "PERMIT_ASSEMBLY": "ELASTIC_INSERTION",
+     "PERMIT_RELATIVE_MOTION": "COMPLIANT_FLEXURE"
+    },
+    "self_locking": null,
+    "summary": "Compliant flexure hinge with detent/snap latch"
+   }
+  ],
+  "Configuration": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Configuration",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "bodies_present": [
+     "BOD-0004",
+     "BOD-0005",
+     "BOD-0006",
+     "BOD-0007"
+    ],
+    "distinguishing_basis": [
+     {
+      "differs_from": [
+       "CFG-0004"
+      ],
+      "dof": "RY",
+      "rigid_group": "RGP-0006"
+     },
+     {
+      "differs_from": [
+       "CFG-0004"
+      ],
+      "dof": "RZ",
+      "rigid_group": "RGP-0010"
+     }
+    ],
+    "entity_id": "CFG-0003",
+    "expected_mobility": [],
+    "kind": "OPERATIONAL",
+    "name": "OPEN"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Configuration",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "bodies_present": [
+     "BOD-0004",
+     "BOD-0005",
+     "BOD-0006",
+     "BOD-0007"
+    ],
+    "distinguishing_basis": [
+     {
+      "differs_from": [
+       "CFG-0003"
+      ],
+      "dof": "RY",
+      "rigid_group": "RGP-0006"
+     },
+     {
+      "differs_from": [
+       "CFG-0003"
+      ],
+      "dof": "RZ",
+      "rigid_group": "RGP-0010"
+     }
+    ],
+    "entity_id": "CFG-0004",
+    "expected_mobility": [],
+    "kind": "OPERATIONAL",
+    "name": "CLOSED"
+   }
+  ],
+  "FunctionalRegion": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "FunctionalRegion",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "entity_id": "FRG-0005",
+    "owning_bodies": [
+     "BOD-0004",
+     "BOD-0005"
+    ],
+    "reach_targets": [],
+    "required_by_actors": [],
+    "role": "ACCESS"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "FunctionalRegion",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "entity_id": "FRG-0006",
+    "owning_bodies": [
+     "BOD-0007"
+    ],
+    "reach_targets": [],
+    "required_by_actors": [
+     "ACT-0001"
+    ],
+    "role": "ACCESS"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "FunctionalRegion",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "entity_id": "FRG-0007",
+    "owning_bodies": [
+     "BOD-0004"
+    ],
+    "reach_targets": [],
+    "required_by_actors": [],
+    "role": "SUPPORT"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "FunctionalRegion",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "entity_id": "FRG-0008",
+    "owning_bodies": [
+     "BOD-0005"
+    ],
+    "reach_targets": [
+     "FRG-0005"
+    ],
+    "required_by_actors": [
+     "ACT-0001"
+    ],
+    "role": "APERTURE"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "FunctionalRegion",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "entity_id": "FRG-0009",
+    "owning_bodies": [],
+    "reach_targets": [],
+    "required_by_actors": [],
+    "role": "KEEP_OUT"
+   }
+  ],
+  "Interface": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0003",
+     "OBL-0004",
+     "OBL-0006",
+     "OBL-0008"
+    ],
+    "bodies": [
+     "BOD-0004",
+     "BOD-0005"
+    ],
+    "entity_id": "IFC-0005",
+    "interaction_kind": "CONTACT",
+    "nominal": true
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0010",
+     "OBL-0020"
+    ],
+    "bodies": [
+     "BOD-0004",
+     "BOD-0006"
+    ],
+    "entity_id": "IFC-0006",
+    "interaction_kind": "INTERFERENCE_FIT",
+    "nominal": true
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0010",
+     "OBL-0020"
+    ],
+    "bodies": [
+     "BOD-0005",
+     "BOD-0006"
+    ],
+    "entity_id": "IFC-0007",
+    "interaction_kind": "INTERFERENCE_FIT",
+    "nominal": true
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0010",
+     "OBL-0020"
+    ],
+    "bodies": [
+     "BOD-0005",
+     "BOD-0007"
+    ],
+    "entity_id": "IFC-0008",
+    "interaction_kind": "COMPLIANT_INTERACTION",
+    "nominal": true
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0002",
+     "OBL-0004",
+     "OBL-0006",
+     "OBL-0014"
+    ],
+    "bodies": [
+     "BOD-0004",
+     "BOD-0007"
+    ],
+    "entity_id": "IFC-0009",
+    "interaction_kind": "COMPLIANT_INTERACTION",
+    "nominal": true
+   }
+  ],
+  "Joint": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Joint",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "activation_window": "During opening and closing when user force is applied",
+    "actuation": "PRESCRIBED_KINEMATIC",
+    "allowable_travel": "UNSUPPORTED",
+    "axis_direction": "+Y",
+    "child_group": "RGP-0008",
+    "compliant_element": "Thin flexure web between the two hinge ends",
+    "direction": "RY",
+    "dof": [
+     "RY"
+    ],
+    "entity_id": "JNT-0004",
+    "frame_ids": [
+     "FRM-JNT-0004"
+    ],
+    "joint_type": "COMPLIANT",
+    "mode": "BENDING",
+    "parent_group": "RGP-0007",
+    "required_travel": "60 DEG",
+    "root_interface": "IFC-0006"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Joint",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "activation_window": "During latch engagement and user disengagement",
+    "actuation": "PRESCRIBED_KINEMATIC",
+    "allowable_travel": "UNSUPPORTED",
+    "axis_direction": "+Z",
+    "child_group": "RGP-0010",
+    "compliant_element": "Thin cantilever arm of latch clip",
+    "direction": "RZ",
+    "dof": [
+     "RZ"
+    ],
+    "entity_id": "JNT-0005",
+    "frame_ids": [
+     "FRM-JNT-0005"
+    ],
+    "joint_type": "COMPLIANT",
+    "mode": "BENDING",
+    "parent_group": "RGP-0009",
+    "required_travel": "5 DEG",
+    "root_interface": "IFC-0008"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Joint",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "axis_direction": "NONE",
+    "child_group": "RGP-0005",
+    "dof": [],
+    "entity_id": "JNT-0006",
+    "frame_ids": [],
+    "joint_type": "FIXED",
+    "parent_group": "RGP-0007"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Joint",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "axis_direction": "NONE",
+    "child_group": "RGP-0006",
+    "dof": [],
+    "entity_id": "JNT-0007",
+    "frame_ids": [],
+    "joint_type": "FIXED",
+    "parent_group": "RGP-0008"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Joint",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "axis_direction": "NONE",
+    "child_group": "RGP-0006",
+    "dof": [],
+    "entity_id": "JNT-0008",
+    "frame_ids": [],
+    "joint_type": "FIXED",
+    "parent_group": "RGP-0009"
+   }
+  ],
+  "LoadCase": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "LoadCase",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "applied_to_role": "the moving closing role",
+    "direction_class": "GRAVITY",
+    "entity_id": "LC-0002",
+    "kind": "GRAVITY",
+    "magnitude_or_status": "UNSUPPORTED",
+    "reacted_at_role": "the surface the product stands on",
+    "reacted_at_site": "RSR-0001",
+    "scenario": "SCN-0001"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "LoadCase",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "applied_to_role": "the closed storage assembly role",
+    "direction_class": "AXIAL",
+    "entity_id": "LC-0003",
+    "kind": "REACTION",
+    "magnitude_or_status": "UNSUPPORTED",
+    "reacted_at_role": "the transport support surface role",
+    "reacted_at_site": "RSR-0002",
+    "scenario": "SCN-0002"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "LoadCase",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "applied_to_role": "the latch actuation role",
+    "direction_class": "AXIAL",
+    "entity_id": "LC-0001",
+    "kind": "ACTOR_APPLIED",
+    "magnitude_or_status": "UNSUPPORTED",
+    "reacted_at_role": "the surface the product stands on",
+    "reacted_at_site": "RSR-0001",
+    "scenario": "SCN-0001"
+   }
+  ],
+  "Obligation": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "A product that occupies excessive volume cannot be placed on a desktop as compact storage.",
+    "derived_from_requirements": [
+     "REQ-0001",
+     "REQ-0008"
+    ],
+    "entity_id": "OBL-0001",
+    "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "UNIVERSAL",
+    "statement": "The product must occupy a compact spatial envelope suitable for placement on a desktop."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Accidental opening would occur if the latch cannot resist normal handling loads.",
+    "derived_from_requirements": [
+     "REQ-0004"
+    ],
+    "entity_id": "OBL-0004",
+    "evidence_route": "RIGID_BODY_DYNAMICS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "The latch must maintain closure under normal handling loads unless the user intentionally actuates it."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Transport loads could separate the latch if not retained.",
+    "derived_from_requirements": [
+     "REQ-0006"
+    ],
+    "entity_id": "OBL-0006",
+    "evidence_route": "RIGID_BODY_DYNAMICS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "The latch must remain closed under transport vibration and shock."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "A product that topples or damages the desktop is not practical.",
+    "derived_from_requirements": [
+     "REQ-0008"
+    ],
+    "entity_id": "OBL-0008",
+    "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "UNIVERSAL",
+    "statement": "The product must be stable and safe on a desktop, not requiring excessive space or causing damage."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Conflicting constraints make a mechanism impossible.",
+    "derived_from_requirements": [
+     "REQ-0009"
+    ],
+    "entity_id": "OBL-0009",
+    "evidence_route": "MOBILITY_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s02",
+    "scope": "UNIVERSAL",
+    "statement": "The product must have a kinematically plausible arrangement with appropriate degrees of freedom."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Opening and closing requires relative motion.",
+    "derived_from_requirements": [
+     "REQ-0003"
+    ],
+    "entity_id": "OBL-0003",
+    "evidence_route": "MOBILITY_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s02",
+    "scope": "UNIVERSAL",
+    "statement": "The product must permit relative motion between a closing role and a body role sufficient to open and close."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "A latch that cannot be reached or requires excessive force is not easy to operate.",
+    "derived_from_requirements": [
+     "REQ-0005"
+    ],
+    "entity_id": "OBL-0005",
+    "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+    "involves_actors": [
+     "ACT-0001"
+    ],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "The user must be able to reach and actuate the latch with low effort and without special tools."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Direct manual actuation requires physical access.",
+    "derived_from_requirements": [
+     "REQ-0005"
+    ],
+    "entity_id": "OBL-0018",
+    "evidence_route": "RIGID_KINEMATIC_GEOMETRY",
+    "involves_actors": [
+     "ACT-0001"
+    ],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "UNIVERSAL",
+    "statement": "The latch actuation role must be accessible to the user's fingers and allow sufficient travel and force input for direct manual actuation."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Flexure relies on elastic strain and fatigue life.",
+    "derived_from_requirements": [],
+    "entity_id": "OBL-0012",
+    "evidence_route": "MATERIAL_PROPERTY_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": false,
+    "satisfiable_at": "s04",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "For any compliant flexure hinge, a flexible region must permit repeated elastic bending without yielding or fatigue failure and must maintain material continuity."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Elastic insertion requires temporary deflection.",
+    "derived_from_requirements": [
+     "REQ-0010"
+    ],
+    "entity_id": "OBL-0020",
+    "evidence_route": "COMPLIANCE_REDUCED_ORDER",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": false,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "For elastic insertion assembly, a component must elastically deform during assembly and recover."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "A latch that cannot be re-engaged is not reusable.",
+    "derived_from_requirements": [
+     "REQ-0002",
+     "REQ-0003"
+    ],
+    "entity_id": "OBL-0002",
+    "evidence_route": "MOBILITY_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s02",
+    "scope": "UNIVERSAL",
+    "statement": "The product must provide a latching function that can be engaged and disengaged multiple times without replacement."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Snap engagement relies on deflection and contact.",
+    "derived_from_requirements": [],
+    "entity_id": "OBL-0014",
+    "evidence_route": "CONTACT_RESOLVING_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": false,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "For any detent/snap latch, a deflectable member must engage a recess with sufficient retention force to resist opening loads and must allow user disengagement."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "Manufacturing process choice determines cost.",
+    "derived_from_requirements": [
+     "REQ-0007"
+    ],
+    "entity_id": "OBL-0007",
+    "evidence_route": "MANUFACTURING_PROCESS_ANALYSIS",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": false,
+    "satisfiable_at": "s04",
+    "scope": "UNIVERSAL",
+    "statement": "The product must be suitable for low-cost manufacturing."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "Obligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "derivation_premises": "If components cannot be inserted or joined, assembly is not easy.",
+    "derived_from_requirements": [
+     "REQ-0010"
+    ],
+    "entity_id": "OBL-0010",
+    "evidence_route": "SWEPT_INTERFERENCE",
+    "involves_actors": [],
+    "mandatory": true,
+    "route_available": true,
+    "satisfiable_at": "s03",
+    "scope": "CANDIDATE_DISCRIMINATING",
+    "statement": "The product must be assemblable by an operator without excessive difficulty."
+   }
+  ],
+  "PhysicalEffectObligation": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "PhysicalEffectObligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0002",
+     "OBL-0003",
+     "OBL-0009"
+    ],
+    "between_roles": "the moving closing role and the stationary body role",
+    "effect": "PERMIT_MOTION",
+    "entity_id": "PEO-0001",
+    "persistence": "during opening and closing",
+    "under_load_case": "LC-0002"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "PhysicalEffectObligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0004",
+     "OBL-0006"
+    ],
+    "between_roles": "the moving closing role and the stationary body role",
+    "effect": "PREVENT_MOTION",
+    "entity_id": "PEO-0002",
+    "persistence": "when closed during transport",
+    "under_load_case": "LC-0003"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "PhysicalEffectObligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0005",
+     "OBL-0018"
+    ],
+    "between_roles": "the latch actuation role and the latch retention role",
+    "effect": "TRANSMIT_FORCE",
+    "entity_id": "PEO-0003",
+    "under_load_case": "LC-0001"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "PhysicalEffectObligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0008"
+    ],
+    "between_roles": "the moving closing role and the stationary body role",
+    "effect": "LOCATE",
+    "entity_id": "PEO-0004",
+    "persistence": "when closed",
+    "under_load_case": "LC-0002"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "PhysicalEffectObligation",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0008"
+    ],
+    "between_roles": "the storage volume role and the external environment role",
+    "effect": "CONTAIN",
+    "entity_id": "PEO-0005"
+   }
+  ],
+  "PhysicalInteraction": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "PhysicalInteraction",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "configurations": [
+     "CFG-0003",
+     "CFG-0004"
+    ],
+    "discharges_effect": "PEO-0001",
+    "effect": "PERMIT_MOTION",
+    "entity_id": "PHI-0006",
+    "groups": [
+     "RGP-0006",
+     "RGP-0005"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "PhysicalInteraction",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "at_interface": "IFC-0009",
+    "configurations": [
+     "CFG-0004"
+    ],
+    "discharges_effect": "PEO-0002",
+    "effect": "PREVENT_MOTION",
+    "entity_id": "PHI-0007",
+    "groups": [
+     "RGP-0006",
+     "RGP-0005"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "PhysicalInteraction",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "at_interface": "IFC-0009",
+    "configurations": [
+     "CFG-0004"
+    ],
+    "discharges_effect": "PEO-0003",
+    "effect": "TRANSMIT_FORCE",
+    "entity_id": "PHI-0008",
+    "groups": [
+     "RGP-0010",
+     "RGP-0005"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "PhysicalInteraction",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "at_interface": "IFC-0005",
+    "configurations": [
+     "CFG-0004"
+    ],
+    "discharges_effect": "PEO-0004",
+    "effect": "LOCATE",
+    "entity_id": "PHI-0009",
+    "groups": [
+     "RGP-0006",
+     "RGP-0005"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "PhysicalInteraction",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "at_interface": "IFC-0005",
+    "configurations": [
+     "CFG-0004"
+    ],
+    "discharges_effect": "PEO-0005",
+    "effect": "CONTAIN",
+    "entity_id": "PHI-0010",
+    "groups": [
+     "RGP-0006",
+     "RGP-0005"
+    ]
+   }
+  ],
+  "ReactionSiteRequirement": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "ReactionSiteRequirement",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "at_role": "the surface the product stands on",
+    "boundary_side": "EXTERNAL",
+    "entity_id": "RSR-0001",
+    "scenario": "SCN-0001",
+    "why": "Loads from operation and gravity are reacted to the desktop."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s02",
+    "_family": "ReactionSiteRequirement",
+    "_provenance": "s02:derivation",
+    "_validity": "STANDING",
+    "at_role": "the transport support surface role",
+    "boundary_side": "EXTERNAL",
+    "entity_id": "RSR-0002",
+    "scenario": "SCN-0002",
+    "why": "Transport loads are reacted to supporting surfaces or hands outside the boundary."
+   }
+  ],
+  "Requirement": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0001",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "compact desktop storage box",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0001",
+    "statement_verbatim": "Design a compact desktop storage box",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0002",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "reusable latch",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0001",
+    "statement_verbatim": "with a reusable latch",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0003",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "open and close repeatedly",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0002",
+    "statement_verbatim": "The box should open and close repeatedly",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0004",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "without accidental opening during normal handling",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0002",
+    "statement_verbatim": "without accidental opening during normal handling",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0005",
+    "kind": "USABILITY",
+    "observable_verbatim": "easy for a user to operate",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0003",
+    "statement_verbatim": "The latch should be easy for a user to operate",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0006",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "remaining secure during transport",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0003",
+    "statement_verbatim": "while remaining secure during transport",
+    "verification_kind": "KINEMATIC"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0007",
+    "kind": "PROCESS",
+    "observable_verbatim": "suitable for low-cost manufacturing",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0004",
+    "statement_verbatim": "The product should be suitable for low-cost manufacturing",
+    "verification_kind": "QUANTITATIVE"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0008",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "practical for desktop use",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0004",
+    "statement_verbatim": "should be practical for desktop use",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0009",
+    "kind": "FUNCTIONAL",
+    "observable_verbatim": "mechanically plausible",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0005",
+    "statement_verbatim": "The design should be mechanically plausible",
+    "verification_kind": "STRUCTURAL"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Requirement",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "entity_id": "REQ-0010",
+    "kind": "PROCESS",
+    "observable_verbatim": "easy to assemble",
+    "quantity_class": "NONE",
+    "source_locator": "SRC-0005",
+    "statement_verbatim": "easy to assemble",
+    "verification_kind": "KINEMATIC"
+   }
+  ],
+  "RigidGroup": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "RigidGroup",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "body": "BOD-0004",
+    "entity_id": "RGP-0005",
+    "is_default": true,
+    "members": []
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "RigidGroup",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "body": "BOD-0005",
+    "entity_id": "RGP-0006",
+    "is_default": true,
+    "members": []
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "RigidGroup",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "body": "BOD-0006",
+    "entity_id": "RGP-0007",
+    "is_default": false,
+    "members": []
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "RigidGroup",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "body": "BOD-0006",
+    "entity_id": "RGP-0008",
+    "is_default": false,
+    "members": []
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "RigidGroup",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "body": "BOD-0007",
+    "entity_id": "RGP-0009",
+    "is_default": true,
+    "members": []
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "RigidGroup",
+    "_premises": [
+     "CND-0002"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "body": "BOD-0007",
+    "entity_id": "RGP-0010",
+    "is_default": false,
+    "members": []
+   }
+  ],
+  "Scenario": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Scenario",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "actors": [
+     "ACT-0001"
+    ],
+    "entity_id": "SCN-0001",
+    "environment": "Normal handling conditions as mentioned in SRC-0002.",
+    "kind": "OPERATION",
+    "name": "Repeated opening and closing during normal handling",
+    "system_boundary": "Inside: the storage box and its latch; Outside: the user operating the box and the desktop environment."
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s01",
+    "_family": "Scenario",
+    "_provenance": "s01:extraction",
+    "_validity": "STANDING",
+    "actors": [],
+    "entity_id": "SCN-0002",
+    "environment": "Transport conditions unspecified in the request.",
+    "kind": "TRANSPORT",
+    "name": "Transport of the closed box",
+    "system_boundary": "Inside: the closed storage box with latch engaged; Outside: the transport environment and any surfaces or hands supporting it."
+   }
+  ]
+ }
+}

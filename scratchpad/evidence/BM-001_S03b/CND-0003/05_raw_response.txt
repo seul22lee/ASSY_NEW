@@ -1,0 +1,173 @@
+{
+  "irrelevance": [],
+  "physical_interactions": [
+    {
+      "id": "PHI-0001",
+      "groups": ["RGP-0011", "RGP-0012"],
+      "effect": "PERMIT_MOTION",
+      "discharges_effect": "PEO-0001",
+      "at_interface": "IFC-0010",
+      "configurations": ["CFG-0005", "CFG-0006"]
+    },
+    {
+      "id": "PHI-0002",
+      "groups": ["RGP-0011", "RGP-0012"],
+      "effect": "PREVENT_MOTION",
+      "discharges_effect": "PEO-0002",
+      "at_interface": "IFC-0015",
+      "configurations": ["CFG-0007"]
+    },
+    {
+      "id": "PHI-0003",
+      "groups": ["RGP-0013", "RGP-0014", "RGP-0011"],
+      "effect": "TRANSMIT_FORCE",
+      "discharges_effect": "PEO-0003",
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"]
+    },
+    {
+      "id": "PHI-0004",
+      "groups": ["RGP-0011", "RGP-0012"],
+      "effect": "LOCATE",
+      "discharges_effect": "PEO-0004",
+      "at_interface": "IFC-0015",
+      "configurations": ["CFG-0006", "CFG-0007"]
+    },
+    {
+      "id": "PHI-0005",
+      "groups": ["RGP-0011", "RGP-0012"],
+      "effect": "CONTAIN",
+      "discharges_effect": "PEO-0005",
+      "configurations": ["CFG-0006", "CFG-0007"]
+    }
+  ],
+  "constraint_relations": [
+    {
+      "id": "CRL-0001",
+      "retained_group": "RGP-0011",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RY", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "LOAD",
+      "provider_reaction_site": "RSR-0001"
+    },
+    {
+      "id": "CRL-0002",
+      "retained_group": "RGP-0012",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_site": "IFC-0010"
+    },
+    {
+      "id": "CRL-0003",
+      "retained_group": "RGP-0013",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_site": "IFC-0012"
+    },
+    {
+      "id": "CRL-0004",
+      "retained_group": "RGP-0014",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0010",
+      "provider_site": "IFC-0013"
+    },
+    {
+      "id": "CRL-0005",
+      "retained_group": "RGP-0014",
+      "blocked_dofs": ["TX", "TY", "TZ", "RX", "RZ"],
+      "configurations": ["CFG-0005", "CFG-0006", "CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_site": "IFC-0011"
+    },
+    {
+      "id": "CRL-0006",
+      "retained_group": "RGP-0012",
+      "blocked_dofs": ["RY"],
+      "configurations": ["CFG-0007"],
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0010",
+      "provider_site": "IFC-0014"
+    }
+  ],
+  "load_paths": [
+    {
+      "id": "LDP-0001",
+      "load_case": "LC-0001",
+      "ordered_hops": ["IFC-0013", "IFC-0011"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0002",
+      "load_case": "LC-0002",
+      "ordered_hops": ["IFC-0010"],
+      "terminates_at": "RSR-0001"
+    },
+    {
+      "id": "LDP-0003",
+      "load_case": "LC-0003",
+      "ordered_hops": ["IFC-0015"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0004",
+      "load_case": "LC-0004",
+      "ordered_hops": ["IFC-0010"],
+      "terminates_at": "RSR-0002"
+    },
+    {
+      "id": "LDP-0005",
+      "load_case": "LC-0005",
+      "ordered_hops": ["IFC-0011"],
+      "terminates_at": "RSR-0003"
+    }
+  ],
+  "assembly_steps": [
+    {
+      "id": "ASY-0001",
+      "order_index": 1,
+      "body": "BOD-0008",
+      "access_side": "+Z",
+      "activates": [],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": []
+    },
+    {
+      "id": "ASY-0002",
+      "order_index": 2,
+      "body": "BOD-0009",
+      "access_side": "+Z",
+      "activates": ["JNT-0009"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0008"]
+    },
+    {
+      "id": "ASY-0003",
+      "order_index": 3,
+      "body": "BOD-0010",
+      "access_side": "+Y",
+      "activates": ["JNT-0010"],
+      "termination_strategy": "LATER_BODY_COVER",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0009"]
+    },
+    {
+      "id": "ASY-0004",
+      "order_index": 4,
+      "body": "BOD-0011",
+      "access_side": "+Y",
+      "activates": ["JNT-0011", "JNT-0012"],
+      "termination_strategy": "ROTATION",
+      "path_kind": "RIGID",
+      "depends_on": ["BOD-0010", "BOD-0008"]
+    }
+  ],
+  "unresolved": []
+}

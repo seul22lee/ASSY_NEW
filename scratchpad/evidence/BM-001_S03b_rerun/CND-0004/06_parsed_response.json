@@ -1,0 +1,240 @@
+{
+ "candidate": "CND-0004",
+ "json_parse": "OK",
+ "parsed": {
+  "assembly_steps": [
+   {
+    "access_side": "+Z",
+    "activates": [],
+    "body": "BOD-0012",
+    "depends_on": [],
+    "id": "ASY-0012",
+    "order_index": 1,
+    "path_kind": "RIGID",
+    "termination_strategy": "NONE"
+   },
+   {
+    "access_side": "+X",
+    "activates": [
+     "IFC-0016",
+     "IFC-0017",
+     "IFC-0018",
+     "IFC-0019"
+    ],
+    "body": "BOD-0013",
+    "depends_on": [
+     "ASY-0012"
+    ],
+    "id": "ASY-0013",
+    "order_index": 2,
+    "path_kind": "RIGID",
+    "termination_strategy": "LATER_BODY_COVER"
+   }
+  ],
+  "constraint_relations": [
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0008",
+     "CFG-0009"
+    ],
+    "driver": "LOAD",
+    "id": "CRL-0024",
+    "provider_reaction_site": "RSR-0001",
+    "retained_group": "RGP-0015"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0008"
+    ],
+    "driver": "DECLARED_SCENARIO",
+    "id": "CRL-0025",
+    "provider_reaction_site": "RSR-0002",
+    "retained_group": "RGP-0015"
+   },
+   {
+    "blocked_dofs": [
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0008",
+     "CFG-0009"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "id": "CRL-0026",
+    "provider_body": "BOD-0012",
+    "provider_site": "IFC-0016",
+    "retained_group": "RGP-0016"
+   },
+   {
+    "blocked_dofs": [
+     "TX"
+    ],
+    "configurations": [
+     "CFG-0008"
+    ],
+    "defeat_specification": "User applied force exceeding friction threshold causes slip and transition to OPEN configuration.",
+    "driver": "LOAD",
+    "id": "CRL-0027",
+    "maintaining_interaction": "PHI-0017",
+    "provider_body": "BOD-0012",
+    "provider_site": "IFC-0017",
+    "retained_group": "RGP-0016"
+   }
+  ],
+  "irrelevance": [],
+  "load_paths": [
+   {
+    "id": "LDP-0016",
+    "load_case": "LC-0001",
+    "ordered_hops": [
+     "IFC-0017"
+    ],
+    "terminates_at": "RSR-0001"
+   },
+   {
+    "id": "LDP-0017",
+    "load_case": "LC-0002",
+    "ordered_hops": [
+     "IFC-0016"
+    ],
+    "terminates_at": "RSR-0001"
+   },
+   {
+    "id": "LDP-0018",
+    "load_case": "LC-0003",
+    "ordered_hops": [
+     "IFC-0017"
+    ],
+    "terminates_at": "RSR-0002"
+   },
+   {
+    "id": "LDP-0019",
+    "load_case": "LC-0004",
+    "ordered_hops": [
+     "IFC-0018"
+    ],
+    "terminates_at": "RSR-0002"
+   },
+   {
+    "id": "LDP-0020",
+    "load_case": "LC-0005",
+    "ordered_hops": [
+     "IFC-0016"
+    ],
+    "terminates_at": "RSR-0003"
+   }
+  ],
+  "physical_interactions": [
+   {
+    "at_interface": "IFC-0016",
+    "configurations": [
+     "CFG-0008",
+     "CFG-0009"
+    ],
+    "discharges_effect": "PEO-0001",
+    "effect": "PERMIT_MOTION",
+    "groups": [
+     "RGP-0015",
+     "RGP-0016"
+    ],
+    "id": "PHI-0016"
+   },
+   {
+    "at_interface": "IFC-0017",
+    "configurations": [
+     "CFG-0008"
+    ],
+    "discharges_effect": "PEO-0002",
+    "effect": "PREVENT_MOTION",
+    "groups": [
+     "RGP-0015",
+     "RGP-0016"
+    ],
+    "id": "PHI-0017"
+   },
+   {
+    "at_interface": "IFC-0017",
+    "configurations": [
+     "CFG-0008",
+     "CFG-0009"
+    ],
+    "discharges_effect": "PEO-0003",
+    "effect": "TRANSMIT_FORCE",
+    "groups": [
+     "RGP-0015",
+     "RGP-0016"
+    ],
+    "id": "PHI-0018"
+   },
+   {
+    "at_interface": "IFC-0018",
+    "configurations": [
+     "CFG-0008"
+    ],
+    "discharges_effect": "PEO-0004",
+    "effect": "LOCATE",
+    "groups": [
+     "RGP-0015",
+     "RGP-0016"
+    ],
+    "id": "PHI-0019"
+   },
+   {
+    "configurations": [
+     "CFG-0008"
+    ],
+    "discharges_effect": "PEO-0005",
+    "effect": "CONTAIN",
+    "groups": [
+     "RGP-0015",
+     "RGP-0016"
+    ],
+    "id": "PHI-0020"
+   }
+  ],
+  "unresolved": [
+   {
+    "alternatives": [
+     "FRE-0002"
+    ],
+    "alternatives_kind": "ENTITY_REFS",
+    "blocks": [],
+    "decision": "Friction hold retention force and coefficient",
+    "id": "S3U-2000",
+    "kept_open_by": [
+     "FRE-0002"
+    ],
+    "why_open": "Friction hold requires friction analysis; evidence route unavailable. Normal force and coefficient not specified, so retention under transport loads cannot be verified."
+   },
+   {
+    "alternatives": [],
+    "alternatives_kind": "FREE_TEXT",
+    "blocks": [],
+    "decision": "End stops to limit drawer travel",
+    "id": "S3U-2001",
+    "kept_open_by": [],
+    "why_open": "Obligation OBL-0013 requires end stops; no dedicated interface or body defines travel limits."
+   }
+  ]
+ }
+}

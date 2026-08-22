@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BM-001 S01 review</title>
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--line:#252a34;--fg:#d8dde6;--dim:#8b93a3;
+--ok:#3fa86b;--warn:#c8973f;--accent:#4a7fd4;--mark:#3a3320;--code:#0b0d11}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 22px 80px}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:17px;margin:34px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+h3{font-size:14px;margin:20px 0 9px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+.sub{color:var(--dim);font-size:12px;margin-top:3px}
+.banner{background:#12241a;border:1px solid #24503a;border-radius:7px;padding:12px 14px;margin:14px 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;margin:12px 0}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:10px 12px}
+.stat .k{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.stat .v{font-size:17px;margin-top:3px;font-family:ui-monospace,Menlo,monospace}
+pre{background:var(--code);border:1px solid var(--line);border-radius:7px;padding:12px;
+overflow:auto;max-height:460px;font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+details{background:var(--panel);border:1px solid var(--line);border-radius:7px;
+padding:10px 13px;margin:10px 0}
+summary{cursor:pointer;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--panel);color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+td.num{text-align:right;font-family:ui-monospace,Menlo,monospace}
+td.add{color:var(--ok)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:11px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:11px 13px}
+.card:target{border-color:var(--accent);box-shadow:0 0 0 2px rgba(74,127,212,.25)}
+.cid{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);margin-bottom:6px;
+display:flex;justify-content:space-between;gap:8px}
+.jump{color:var(--dim);text-decoration:none;font-size:11px}
+.jump:hover{color:var(--accent)}
+.verbatim{margin:2px 0 8px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12.5px}
+dt{color:var(--dim)}
+dd{margin:0}
+.eid{color:var(--accent);text-decoration:none;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eid:hover{text-decoration:underline}
+.tag{background:#1e2430;border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:11.5px}
+.kind{font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+.none{color:var(--dim);font-style:italic}
+mark.clause{background:var(--mark);color:var(--fg);padding:1px 2px;border-radius:3px}
+mark.clause:target{background:#4a3f14;outline:2px solid var(--accent)}
+mark sup{color:var(--accent);font-size:10px;margin-left:2px;font-family:ui-monospace,Menlo,monospace}
+.source{background:var(--code);border:1px solid var(--line);border-radius:7px;padding:15px 17px;
+font-size:15px;line-height:1.9}
+.qcard{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--warn);
+border-radius:7px;padding:12px 14px;margin:10px 0}
+.qh{font-weight:600;margin-bottom:5px}
+.qcard p{margin:0 0 8px;color:#c3cad6}
+.where{font-size:12px;color:var(--dim);font-family:ui-monospace,Menlo,monospace}
+.verdict{margin-top:9px;font-size:12px;color:var(--dim)}
+.pending{background:#2a2313;border:1px solid #4d431f;color:#c8973f;border-radius:4px;padding:1px 7px}
+.warnbox{background:#241c12;border:1px solid #4d3d1f;border-radius:7px;padding:12px 14px;margin:14px 0}
+</style></head><body><div class="wrap">
+
+<h1>BM-001 &middot; S01 requirement capture</h1>
+<div class="sub">First bounded live DeepSeek diagnostic &middot; one call, one transport attempt
+&middot; evidence rendered from disk, no provider contacted to build this page</div>
+
+<div class="banner"><b>Contract ACCEPTED &mdash; and that is not a claim the extraction is good.</b><br>
+It means the response parsed, every reference resolved, write authority held and canonical
+validation raised no problem. Whether the requirements are the right requirements is the
+judgement below, and it starts at NOT REVIEWED.</div>
+
+<div class="grid">
+ <div class="stat"><div class="k">served model</div><div class="v">deepseek-v4-pro</div></div>
+ <div class="stat"><div class="k">temperature</div><div class="v">1.0</div></div>
+ <div class="stat"><div class="k">max output tokens</div><div class="v">65536</div></div>
+ <div class="stat"><div class="k">transport attempts</div><div class="v">1</div></div>
+ <div class="stat"><div class="k">input tokens</div><div class="v">1632</div></div>
+ <div class="stat"><div class="k">output tokens</div><div class="v">8047</div></div>
+ <div class="stat"><div class="k">latency</div><div class="v">83.344 s</div></div>
+ <div class="stat"><div class="k">finish reason</div><div class="v">stop</div></div>
+</div>
+
+<h2>1 &middot; Source request</h2>
+<p class="sub">The production BM-001 input, unmodified. Highlighted spans are what S01 captured as
+SourceClauses; <b>unhighlighted text is text no clause captured</b> &mdash; that is where a missed
+requirement would be.</p>
+<div class="source"><mark id="src-SRC-0001" class="clause">Design a compact desktop storage box with a reusable latch.<sup>SRC-0001</sup></mark> <mark id="src-SRC-0002" class="clause">The box should open and close repeatedly without accidental opening during normal handling.<sup>SRC-0002</sup></mark> <mark id="src-SRC-0003" class="clause">The latch should be easy for a user to operate while remaining secure during transport.<sup>SRC-0003</sup></mark> <mark id="src-SRC-0004" class="clause">The product should be suitable for low-cost manufacturing and should be practical for desktop use.<sup>SRC-0004</sup></mark> <mark id="src-SRC-0005" class="clause">The design should be mechanically plausible and easy to assemble.<sup>SRC-0005</sup></mark>
+</div>
+
+<h2>2 &middot; Exact prompt sent</h2>
+<details><summary>S01 prompt &mdash; 6619 characters, verbatim</summary>
+<pre>You are performing requirement capture on a product request.
+
+Read the request below and convert it into typed statements. You are the only
+stage that will ever see this text; every later stage reads only what you emit.
+
+RULES
+1. Never invent a requirement the text does not state.
+2. Never sharpen a qualifier. &quot;approximately 80-100 mm&quot; stays approximate and is
+   a BAND, not a magnitude.
+3. Never resolve an ambiguity. Record it.
+4. Never name a mechanism, a material, a part or a dimension. If the text does
+   not say how, you do not say how.
+5. For every requirement record its quantity_class: MAGNITUDE (a number),
+   BAND (a range or an approximate value), COMPARATIVE (more/less than
+   something) or NONE (no quantity at all). NONE is a fact and must be recorded
+   as one.
+6. Record every scenario with a kind: OPERATION, SERVICE, ASSEMBLY or TRANSPORT.
+   Service is a different activity from operation and the distinction matters.
+   For each scenario state its SYSTEM BOUNDARY as what is inside it and what is
+   outside it. Naming the product is not a boundary. The later stage has to know
+   where a load may be reacted, and it can only react a load against something
+   the boundary places outside the product - a surface it stands on, a structure
+   it is fixed to, a body it grips. A boundary that omits the outside leaves
+   every load with nowhere to go.
+7. Record every actor and what it must reach or operate.
+8. Record what the text deliberately leaves free, and what is genuinely
+   ambiguous.
+9. Record every HARD REQUIREMENT the text explicitly states - something that
+   bounds what may be BUILT AT ALL, such as a material class, a maximum
+   dimension, a prohibited energy source or a load the design must carry. Each
+   one names the requirement it comes from and carries only the values the text
+   actually states.
+
+   A PREFERENCE IS NOT ONE. &quot;Prefer fewer parts&quot;, &quot;ideally compact&quot;, &quot;minimise
+   cost&quot; say which buildable thing is WANTED, and a design is not forbidden for
+   ignoring them. If the text does not forbid something, there is no hard
+   requirement to record, and an empty list is the answer.
+
+   Never supply a number, a unit or an axis the text does not state. If the text
+   says &quot;reasonably compact&quot;, that is a requirement with no quantity - record the
+   requirement and no hard constraint.
+
+RESPONSE SCHEMA
+Return a single JSON object with exactly these eight keys, each holding a list.
+A list may be empty - an empty list is a value, and means &quot;there are none of
+these&quot;, which is a different statement from omitting the key. Every field is
+required unless marked optional. Every id is a string in the format shown.
+
+  source_clauses[]  id &quot;SRC-0001&quot;, verbatim, locator, quantity_kinds[],
+                    directionality
+  requirements[]    id &quot;REQ-0001&quot;, statement_verbatim, kind, verification_kind,
+                    observable_verbatim, source_locator, quantity_class
+  scenarios[]       id &quot;SCN-0001&quot;, name, kind, system_boundary, actors[],
+                    environment
+  actors[]          id &quot;ACT-0001&quot;, name, must_reach[]
+  freedoms[]        id &quot;FRE-0001&quot;, decision, why_free
+  ambiguities[]     id &quot;AMB-0001&quot;, statement, conflicting_clauses[],
+                    resolvable_when, block_scopes[] (optional)
+  assumptions[]     id &quot;ASM-0001&quot;, statement, why, would_be_invalidated_by
+  hard_constraints[] requirement (one of your requirement ids), kind,
+                    statement_verbatim, parameters (an object, or null if the
+                    text states no values)
+
+PERMITTED HARD CONSTRAINT KINDS
+A kind not on this list cannot be recorded. That is deliberate: it is what stops
+a wish becoming a constraint, and there is no kind here meaning &quot;less of
+something would be nicer&quot;.
+
+  MATERIAL_CLASS_ONLY       parameters {material_class}
+  PROHIBITED_ENERGY_SOURCE  parameters {source}
+  MAX_OVERALL_DIMENSION     parameters {axis, limit, unit} - axis is X, Y, Z
+                            or ANY, and only where the text says which
+  LOAD_CAPACITY             parameters {magnitude, unit}
+
+A dimensional or load constraint is recorded ONLY where the requirement it comes
+from has quantity_class MAGNITUDE. An approximate or comparative quantity is a
+requirement, not a limit anything can be checked against.
+
+No required field may be null. Where the answer is &quot;there are none&quot;, use an
+empty list for a list field and the string &quot;none&quot; for a text field. A null is
+not an answer; an empty list is.
+
+REFERENCES BETWEEN ITEMS
+Every field below holds ids of items YOU emit in this same response, in the
+exact id format shown above. A reference to an id you did not emit, or to an
+item of the wrong kind, is an error.
+
+  requirements[].source_locator      the `locator` of one of your source_clauses
+  scenarios[].actors                 actor ids, &quot;ACT-0001&quot;
+  hard_constraints[].requirement     a requirement id, &quot;REQ-0001&quot;
+  ambiguities[].conflicting_clauses  source clause ids, &quot;SRC-0001&quot; - the CLAUSES
+                                     whose wording conflicts, never requirement
+                                     ids; [] if the ambiguity comes from silence
+                                     rather than from two clauses disagreeing
+
+PERMITTED VALUES
+Three different fields are called `kind`. They do not share a vocabulary, and a
+value from one is never valid in another.
+  requirement kind        FUNCTIONAL | USABILITY | PROCESS
+  verification_kind       STRUCTURAL | KINEMATIC | QUANTITATIVE
+  quantity_class          MAGNITUDE | BAND | COMPARATIVE | NONE
+  scenario kind           OPERATION | SERVICE | ASSEMBLY | TRANSPORT
+  system_boundary         a sentence naming what is inside and what is outside
+  quantity_kinds          the kinds of quantity the clause mentions, such as
+                          length, mass, count, force, time; [] if it states none
+  directionality          the direction the clause states, such as vertical,
+                          lateral, downward, bidirectional; &quot;none&quot; if it states
+                          no direction
+  source_locator          the `locator` of one of the source_clauses you emit
+  statement_verbatim      wording taken from the request, not paraphrased
+
+REQUEST
+-------
+Design a compact desktop storage box with a reusable latch. The box should open and close repeatedly without accidental opening during normal handling. The latch should be easy for a user to operate while remaining secure during transport. The product should be suitable for low-cost manufacturing and should be practical for desktop use. The design should be mechanically plausible and easy to assemble.
+
+</pre></details>
+
+<h2>3 &middot; Raw DeepSeek response</h2>
+<details><summary>Raw response body &mdash; 8137 characters, exactly as returned</summary>
+<pre>{
+  &quot;source_clauses&quot;: [
+    {
+      &quot;id&quot;: &quot;SRC-0001&quot;,
+      &quot;verbatim&quot;: &quot;Design a compact desktop storage box with a reusable latch.&quot;,
+      &quot;locator&quot;: &quot;SRC-0001&quot;,
+      &quot;quantity_kinds&quot;: [&quot;length&quot;],
+      &quot;directionality&quot;: &quot;none&quot;
+    },
+    {
+      &quot;id&quot;: &quot;SRC-0002&quot;,
+      &quot;verbatim&quot;: &quot;The box should open and close repeatedly without accidental opening during normal handling.&quot;,
+      &quot;locator&quot;: &quot;SRC-0002&quot;,
+      &quot;quantity_kinds&quot;: [&quot;count&quot;],
+      &quot;directionality&quot;: &quot;none&quot;
+    },
+    {
+      &quot;id&quot;: &quot;SRC-0003&quot;,
+      &quot;verbatim&quot;: &quot;The latch should be easy for a user to operate while remaining secure during transport.&quot;,
+      &quot;locator&quot;: &quot;SRC-0003&quot;,
+      &quot;quantity_kinds&quot;: [],
+      &quot;directionality&quot;: &quot;none&quot;
+    },
+    {
+      &quot;id&quot;: &quot;SRC-0004&quot;,
+      &quot;verbatim&quot;: &quot;The product should be suitable for low-cost manufacturing and should be practical for desktop use.&quot;,
+      &quot;locator&quot;: &quot;SRC-0004&quot;,
+      &quot;quantity_kinds&quot;: [&quot;cost&quot;],
+      &quot;directionality&quot;: &quot;none&quot;
+    },
+    {
+      &quot;id&quot;: &quot;SRC-0005&quot;,
+      &quot;verbatim&quot;: &quot;The design should be mechanically plausible and easy to assemble.&quot;,
+      &quot;locator&quot;: &quot;SRC-0005&quot;,
+      &quot;quantity_kinds&quot;: [],
+      &quot;directionality&quot;: &quot;none&quot;
+    }
+  ],
+  &quot;requirements&quot;: [
+    {
+      &quot;id&quot;: &quot;REQ-0001&quot;,
+      &quot;statement_verbatim&quot;: &quot;Design a compact desktop storage box&quot;,
+      &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+      &quot;verification_kind&quot;: &quot;STRUCTURAL&quot;,
+      &quot;observable_verbatim&quot;: &quot;compact desktop storage box&quot;,
+      &quot;source_locator&quot;: &quot;SRC-0001&quot;,
+      &quot;quantity_class&quot;: &quot;NONE&quot;
+    },
+    {
+      &quot;id&quot;: &quot;REQ-0002&quot;,
+      &quot;statement_verbatim&quot;: &quot;with a reusable latch&quot;,
+      &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+      &quot;verification_kind&quot;: &quot;STRUCTURAL&quot;,
+      &quot;observable_verbatim&quot;: &quot;reusable latch&quot;,
+      &quot;source_locator&quot;: &quot;SRC-0001&quot;,
+      &quot;quantity_class&quot;: &quot;NONE&quot;
+    },
+    {
+      &quot;id&quot;: &quot;REQ-0003&quot;,
+      &quot;statement_verbatim&quot;: &quot;The box should open and close repeatedly&quot;,
+      &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+      &quot;verification_kind&quot;: &quot;KINEMATIC&quot;,
+      &quot;observable_verbatim&quot;: &quot;open and close repeatedly&quot;,
+      &quot;source_locator&quot;: &quot;SRC-0002&quot;,
+      &quot;quantity_class&quot;: &quot;NONE&quot;
+    },
+    {
+      &quot;id&quot;: &quot;REQ-0004&quot;,
+      &quot;statement_verbatim&quot;: &quot;without accidental opening during normal handling&quot;,
+      &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+      &quot;verification_kind&quot;: &quot;KINEMATIC&quot;,
+      &quot;observable_verbatim&quot;: &quot;without accidental opening during normal handling&quot;,
+      &quot;source_locator&quot;: &quot;SRC-0002&quot;,
+      &quot;quantity_class&quot;: &quot;NONE&quot;
+    },
+    {
+      &quot;id&quot;: &quot;REQ-0005&quot;,
+      &quot;statement_verbatim&quot;: &quot;The latch should be easy for a user to operate&quot;,
+      &quot;kind&quot;: &quot;USABILITY&quot;,
+      &quot;verification_kind&quot;: &quot;KINEMATIC&quot;,
+      &quot;observable_verbatim&quot;: &quot;easy for a user to operate&quot;,
+      &quot;source_locator&quot;: &quot;SRC-0003&quot;,
+      &quot;quantity_class&quot;: &quot;NONE&quot;
+    },
+    {
+      &quot;id&quot;: &quot;REQ-0006&quot;,
+      &quot;statement_verbatim&quot;: &quot;while remaining secure during transport&quot;,
+      &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+      &quot;verification_kind&quot;: &quot;KINEMATIC&quot;,
+      &quot;observable_verbatim&quot;: &quot;remaining secure during transport&quot;,
+      &quot;source_locator&quot;: &quot;SRC-0003&quot;,
+      &quot;quantity_class&quot;: &quot;NONE&quot;
+    },
+    {
+      &quot;id&quot;: &quot;REQ-0007&quot;,
+      &quot;statement_verbatim&quot;: &quot;The product should be suitable for low-cost manufacturing&quot;,
+      &quot;kind&quot;: &quot;PROCESS&quot;,
+      &quot;verification_kind&quot;: &quot;QUANTITATIVE&quot;,
+      &quot;observable_verbatim&quot;: &quot;suitable for low-cost manufacturing&quot;,
+      &quot;source_locator&quot;: &quot;SRC-0004&quot;,
+      &quot;quantity_class&quot;: &quot;NONE&quot;
+    },
+    {
+      &quot;id&quot;: &quot;REQ-0008&quot;,
+      &quot;statement_verbatim&quot;: &quot;should be practical for desktop use&quot;,
+      &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+      &quot;verification_kind&quot;: &quot;STRUCTURAL&quot;,
+      &quot;observable_verbatim&quot;: &quot;practical for desktop use&quot;,
+      &quot;source_locator&quot;: &quot;SRC-0004&quot;,
+      &quot;quantity_class&quot;: &quot;NONE&quot;
+    },
+    {
+      &quot;id&quot;: &quot;REQ-0009&quot;,
+      &quot;statement_verbatim&quot;: &quot;The design should be mechanically plausible&quot;,
+      &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+      &quot;verification_kind&quot;: &quot;STRUCTURAL&quot;,
+      &quot;observable_verbatim&quot;: &quot;mechanically plausible&quot;,
+      &quot;source_locator&quot;: &quot;SRC-0005&quot;,
+      &quot;quantity_class&quot;: &quot;NONE&quot;
+    },
+    {
+      &quot;id&quot;: &quot;REQ-0010&quot;,
+      &quot;statement_verbatim&quot;: &quot;easy to assemble&quot;,
+      &quot;kind&quot;: &quot;PROCESS&quot;,
+      &quot;verification_kind&quot;: &quot;KINEMATIC&quot;,
+      &quot;observable_verbatim&quot;: &quot;easy to assemble&quot;,
+      &quot;source_locator&quot;: &quot;SRC-0005&quot;,
+      &quot;quantity_class&quot;: &quot;NONE&quot;
+    }
+  ],
+  &quot;scenarios&quot;: [
+    {
+      &quot;id&quot;: &quot;SCN-0001&quot;,
+      &quot;name&quot;: &quot;Repeated opening and closing during normal handling&quot;,
+      &quot;kind&quot;: &quot;OPERATION&quot;,
+      &quot;system_boundary&quot;: &quot;Inside: the storage box and its latch; Outside: the user operating the box and the desktop environment.&quot;,
+      &quot;actors&quot;: [&quot;ACT-0001&quot;],
+      &quot;environment&quot;: &quot;Normal handling conditions as mentioned in SRC-0002.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;SCN-0002&quot;,
+      &quot;name&quot;: &quot;Transport of the closed box&quot;,
+      &quot;kind&quot;: &quot;TRANSPORT&quot;,
+      &quot;system_boundary&quot;: &quot;Inside: the closed storage box with latch engaged; Outside: the transport environment and any surfaces or hands supporting it.&quot;,
+      &quot;actors&quot;: [],
+      &quot;environment&quot;: &quot;Transport conditions unspecified in the request.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;SCN-0003&quot;,
+      &quot;name&quot;: &quot;Assembly of the box and latch&quot;,
+      &quot;kind&quot;: &quot;ASSEMBLY&quot;,
+      &quot;system_boundary&quot;: &quot;Inside: the components of the box and latch; Outside: the assembler and the assembly environment.&quot;,
+      &quot;actors&quot;: [],
+      &quot;environment&quot;: &quot;Assembly environment unspecified in the request.&quot;
+    }
+  ],
+  &quot;actors&quot;: [
+    {
+      &quot;id&quot;: &quot;ACT-0001&quot;,
+      &quot;name&quot;: &quot;User&quot;,
+      &quot;must_reach&quot;: [&quot;latch&quot;]
+    }
+  ],
+  &quot;freedoms&quot;: [
+    {
+      &quot;id&quot;: &quot;FRE-0001&quot;,
+      &quot;decision&quot;: &quot;The specific mechanism of the reusable latch.&quot;,
+      &quot;why_free&quot;: &quot;The text requires a reusable latch but does not specify its type (e.g., snap, hook, magnet, slide, etc.).&quot;
+    },
+    {
+      &quot;id&quot;: &quot;FRE-0002&quot;,
+      &quot;decision&quot;: &quot;The materials for the box and latch.&quot;,
+      &quot;why_free&quot;: &quot;The text does not mention any material.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;FRE-0003&quot;,
+      &quot;decision&quot;: &quot;The overall dimensions and geometry of the box.&quot;,
+      &quot;why_free&quot;: &quot;The text only says &#x27;compact&#x27; without dimensions; exact size is free.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;FRE-0004&quot;,
+      &quot;decision&quot;: &quot;The manufacturing process.&quot;,
+      &quot;why_free&quot;: &quot;The text requires suitability for low-cost manufacturing but does not specify which process.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;FRE-0005&quot;,
+      &quot;decision&quot;: &quot;The target cost.&quot;,
+      &quot;why_free&quot;: &quot;The text says low-cost but gives no number.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;FRE-0006&quot;,
+      &quot;decision&quot;: &quot;The number of open/close cycles the latch must withstand.&quot;,
+      &quot;why_free&quot;: &quot;The text says &#x27;repeatedly&#x27; but no cycle count is given.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;FRE-0007&quot;,
+      &quot;decision&quot;: &quot;The appearance and aesthetics of the product.&quot;,
+      &quot;why_free&quot;: &quot;Not mentioned in the request.&quot;
+    }
+  ],
+  &quot;ambiguities&quot;: [
+    {
+      &quot;id&quot;: &quot;AMB-0001&quot;,
+      &quot;statement&quot;: &quot;compact&quot;,
+      &quot;conflicting_clauses&quot;: [],
+      &quot;resolvable_when&quot;: &quot;When a target dimension or volume is specified.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;AMB-0002&quot;,
+      &quot;statement&quot;: &quot;easy for a user to operate&quot;,
+      &quot;conflicting_clauses&quot;: [],
+      &quot;resolvable_when&quot;: &quot;When objective metrics such as force, displacement, or time are defined.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;AMB-0003&quot;,
+      &quot;statement&quot;: &quot;repeatedly&quot;,
+      &quot;conflicting_clauses&quot;: [],
+      &quot;resolvable_when&quot;: &quot;When a minimum cycle count is specified.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;AMB-0004&quot;,
+      &quot;statement&quot;: &quot;normal handling&quot;,
+      &quot;conflicting_clauses&quot;: [],
+      &quot;resolvable_when&quot;: &quot;When the loads and motions of normal handling are defined.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;AMB-0005&quot;,
+      &quot;statement&quot;: &quot;secure during transport&quot;,
+      &quot;conflicting_clauses&quot;: [],
+      &quot;resolvable_when&quot;: &quot;When transport vibration, shock, and orientation conditions are specified.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;AMB-0006&quot;,
+      &quot;statement&quot;: &quot;low-cost manufacturing&quot;,
+      &quot;conflicting_clauses&quot;: [],
+      &quot;resolvable_when&quot;: &quot;When a cost target and production volume are specified.&quot;
+    },
+    {
+      &quot;id&quot;: &quot;AMB-0007&quot;,
+      &quot;statement&quot;: &quot;easy to assemble&quot;,
+      &quot;conflicting_clauses&quot;: [],
+      &quot;resolvable_when&quot;: &quot;When assembly time, tooling, or step count are specified.&quot;
+    }
+  ],
+  &quot;assumptions&quot;: [],
+  &quot;hard_constraints&quot;: []
+}</pre></details>
+<details><summary>Request settings and provider record</summary><pre>{
+ &quot;base_url&quot;: &quot;https://api.deepseek.com&quot;,
+ &quot;campaign_settings&quot;: {
+  &quot;deadline_s&quot;: 120.0,
+  &quot;max_attempts&quot;: 1,
+  &quot;max_output_tokens&quot;: 65536,
+  &quot;seed&quot;: 7,
+  &quot;temperature&quot;: 1.0
+ },
+ &quot;client_max_attempts&quot;: 1,
+ &quot;generation_result&quot;: {
+  &quot;attempt_index&quot;: 1,
+  &quot;ended_at&quot;: 1786976007.1213279,
+  &quot;error_detail&quot;: null,
+  &quot;execution_status&quot;: &quot;SUCCESS&quot;,
+  &quot;from_cache&quot;: false,
+  &quot;latency_s&quot;: 83.344,
+  &quot;started_at&quot;: 1786975923.776959
+ },
+ &quot;model_configured&quot;: &quot;deepseek-v4-pro&quot;,
+ &quot;model_run_records&quot;: [
+  {
+   &quot;attempt_index&quot;: 1,
+   &quot;determinism&quot;: {
+    &quot;seed&quot;: null,
+    &quot;seed_honoured&quot;: &quot;NOT_SUPPORTED&quot;,
+    &quot;seed_requested_by_stage&quot;: 7,
+    &quot;temperature&quot;: 1.0,
+    &quot;temperature_actually_sent&quot;: 1.0,
+    &quot;temperature_requested_by_stage&quot;: 1.0,
+    &quot;top_p&quot;: null
+   },
+   &quot;error_detail&quot;: null,
+   &quot;execution_status&quot;: &quot;SUCCESS&quot;,
+   &quot;model_id&quot;: &quot;deepseek-v4-pro&quot;,
+   &quot;model_id_requested&quot;: &quot;deepseek-v4-pro&quot;,
+   &quot;model_id_served&quot;: &quot;deepseek-v4-pro&quot;,
+   &quot;model_run_id&quot;: &quot;live-bm001-s01|s01|sa1|a1&quot;,
+   &quot;model_substitution&quot;: null,
+   &quot;model_version_string&quot;: &quot;deepseek-v4-pro&quot;,
+   &quot;provider_id&quot;: &quot;deepseek&quot;,
+   &quot;purpose&quot;: &quot;convert a raw product request into typed requirements and context&quot;,
+   &quot;request&quot;: {
+    &quot;deadline_s&quot;: 120.0,
+    &quot;experiment_overrides&quot;: {
+     &quot;deadline_s&quot;: null,
+     &quot;model&quot;: &quot;deepseek-v4-pro&quot;,
+     &quot;response_format&quot;: &quot;json_object&quot;,
+     &quot;temperature&quot;: null,
+     &quot;top_p&quot;: null
+    },
+    &quot;max_output_tokens&quot;: 65536,
+    &quot;max_output_tokens_clamped_from&quot;: null,
+    &quot;parameter_resolution&quot;: {
+     &quot;deadline_s&quot;: {
+      &quot;channel&quot;: &quot;transport&quot;,
+      &quot;effective&quot;: 120.0,
+      &quot;note&quot;: &quot;applied to the connection, not sent to the model&quot;,
+      &quot;override&quot;: null,
+      &quot;requested&quot;: 120.0,
+      &quot;sent&quot;: true,
+      &quot;status&quot;: &quot;SENT_AS_REQUESTED&quot;
+     },
+     &quot;max_output_tokens&quot;: {
+      &quot;channel&quot;: &quot;payload&quot;,
+      &quot;effective&quot;: 65536,
+      &quot;note&quot;: &quot;&quot;,
+      &quot;override&quot;: null,
+      &quot;requested&quot;: 65536,
+      &quot;sent&quot;: true,
+      &quot;status&quot;: &quot;SENT_AS_REQUESTED&quot;
+     },
+     &quot;model&quot;: {
+      &quot;channel&quot;: &quot;payload&quot;,
+      &quot;effective&quot;: &quot;deepseek-v4-pro&quot;,
+      &quot;note&quot;: &quot;the stage states no model; selecting one is an experiment decision&quot;,
+      &quot;override&quot;: &quot;deepseek-v4-pro&quot;,
+      &quot;requested&quot;: null,
+      &quot;sent&quot;: true,
+      &quot;status&quot;: &quot;SENT_AS_OVERRIDDEN&quot;
+     },
+     &quot;response_format&quot;: {
+      &quot;channel&quot;: &quot;payload&quot;,
+      &quot;effective&quot;: &quot;json_object&quot;,
+      &quot;note&quot;: &quot;format mode is a transport capability; the shape itself is the parser&#x27;s&quot;,
+      &quot;override&quot;: &quot;json_object&quot;,
+      &quot;requested&quot;: null,
+      &quot;sent&quot;: true,
+      &quot;status&quot;: &quot;SENT_AS_OVERRIDDEN&quot;
+     },
+     &quot;response_schema&quot;: {
+      &quot;channel&quot;: &quot;none&quot;,
+      &quot;effective&quot;: null,
+      &quot;note&quot;: &quot;&quot;,
+      &quot;override&quot;: null,
+      &quot;requested&quot;: null,
+      &quot;sent&quot;: false,
+      &quot;status&quot;: &quot;NOT_SENT_NOT_REQUESTED&quot;
+     },
+     &quot;seed&quot;: {
+      &quot;channel&quot;: &quot;none&quot;,
+      &quot;effective&quot;: null,
+      &quot;note&quot;: &quot;the provider accepts no seed parameter; the requested value is retained and no determinism is claimed&quot;,
+      &quot;override&quot;: null,
+      &quot;requested&quot;: 7,
+      &quot;sent&quot;: false,
+      &quot;status&quot;: &quot;NOT_SENT_UNSUPPORTED&quot;
+     },
+     &quot;temperature&quot;: {
+      &quot;channel&quot;: &quot;payload&quot;,
+      &quot;effective&quot;: 1.0,
+      &quot;note&quot;: &quot;the stage asks for a reproducible answer; the repeated-trial protocol asks for sampling, and the experiment says which run this is&quot;,
+      &quot;override&quot;: null,
+      &quot;requested&quot;: 1.0,
+      &quot;sent&quot;: true,
+      &quot;status&quot;: &quot;SENT_AS_REQUESTED&quot;
+     },
+     &quot;top_p&quot;: {
+      &quot;channel&quot;: &quot;none&quot;,
+      &quot;effective&quot;: null,
+      &quot;note&quot;: &quot;accepted on the request and no longer discarded without trace&quot;,
+      &quot;override&quot;: null,
+      &quot;requested&quot;: null,
+      &quot;sent&quot;: false,
+      &quot;status&quot;: &quot;NOT_SENT_NOT_REQUESTED&quot;
+     }
+    },
+    &quot;parameters&quot;: {
+     &quot;response_format&quot;: &quot;json_object&quot;,
+     &quot;temperature&quot;: 1.0,
+     &quot;top_p&quot;: null
+    },
+    &quot;prompt_chars&quot;: 6619,
+    &quot;prompt_sha256&quot;: &quot;c73e5fe9f416eda83a64cde332e37c4c6f908e36c924c286b2d05034823f10b1&quot;,
+    &quot;prompt_text&quot;: &quot;You are performing requirement capture on a product request.\n\nRead the request below and convert it into typed statements. You are the only\nstage that will ever see this text; every later stage reads only what you emit.\n\nRULES\n1. Never invent a requirement the text does not state.\n2. Never sharpen a qualifier. \&quot;approximately 80-100 mm\&quot; stays approximate and is\n   a BAND, not a magnitude.\n3. Never resolve an ambiguity. Record it.\n4. Never name a mechanism, a material, a part or a dimension. If the text does\n   not say how, you do not say how.\n5. For every requirement record its quantity_class: MAGNITUDE (a number),\n   BAND (a range or an approximate value), COMPARATIVE (more/less than\n   something) or NONE (no quantity at all). NONE is a fact and must be recorded\n   as one.\n6. Record every scenario with a kind: OPERATION, SERVICE, ASSEMBLY or TRANSPORT.\n   Service is a different activity from operation and the distinction matters.\n   For each scenario state its SYSTEM BOUNDARY as what is inside it and what is\n   outside it. Naming the product is not a boundary. The later stage has to know\n   where a load may be reacted, and it can only react a load against something\n   the boundary places outside the product - a surface it stands on, a structure\n   it is fixed to, a body it grips. A boundary that omits the outside leaves\n   every load with nowhere to go.\n7. Record every actor and what it must reach or operate.\n8. Record what the text deliberately leaves free, and what is genuinely\n   ambiguous.\n9. Record every HARD REQUIREMENT the text explicitly states - something that\n   bounds what may be BUILT AT ALL, such as a material class, a maximum\n   dimension, a prohibited energy source or a load the design must carry. Each\n   one names the requirement it comes from and carries only the values the text\n   actually states.\n\n   A PREFERENCE IS NOT ONE. \&quot;Prefer fewer parts\&quot;, \&quot;ideally compact\&quot;, \&quot;minimise\n   cost\&quot; say which buildable thing is WANTED, and a design is not forbidden for\n   ignoring them. If the text does not forbid something, there is no hard\n   requirement to record, and an empty list is the answer.\n\n   Never supply a number, a unit or an axis the text does not state. If the text\n   says \&quot;reasonably compact\&quot;, that is a requirement with no quantity - record the\n   requirement and no hard constraint.\n\nRESPONSE SCHEMA\nReturn a single JSON object with exactly these eight keys, each holding a list.\nA list may be empty - an empty list is a value, and means \&quot;there are none of\nthese\&quot;, which is a different statement from omitting the key. Every field is\nrequired unless marked optional. Every id is a string in the format shown.\n\n  source_clauses[]  id \&quot;SRC-0001\&quot;, verbatim, locator, quantity_kinds[],\n                    directionality\n  requirements[]    id \&quot;REQ-0001\&quot;, statement_verbatim, kind, verification_kind,\n                    observable_verbatim, source_locator, quantity_class\n  scenarios[]       id \&quot;SCN-0001\&quot;, name, kind, system_boundary, actors[],\n                    environment\n  actors[]          id \&quot;ACT-0001\&quot;, name, must_reach[]\n  freedoms[]        id \&quot;FRE-0001\&quot;, decision, why_free\n  ambiguities[]     id \&quot;AMB-0001\&quot;, statement, conflicting_clauses[],\n                    resolvable_when, block_scopes[] (optional)\n  assumptions[]     id \&quot;ASM-0001\&quot;, statement, why, would_be_invalidated_by\n  hard_constraints[] requirement (one of your requirement ids), kind,\n                    statement_verbatim, parameters (an object, or null if the\n                    text states no values)\n\nPERMITTED HARD CONSTRAINT KINDS\nA kind not on this list cannot be recorded. That is deliberate: it is what stops\na wish becoming a constraint, and there is no kind here meaning \&quot;less of\nsomething would be nicer\&quot;.\n\n  MATERIAL_CLASS_ONLY       parameters {material_class}\n  PROHIBITED_ENERGY_SOURCE  parameters {source}\n  MAX_OVERALL_DIMENSION     parameters {axis, limit, unit} - axis is X, Y, Z\n                            or ANY, and only where the text says which\n  LOAD_CAPACITY             parameters {magnitude, unit}\n\nA dimensional or load constraint is recorded ONLY where the requirement it comes\nfrom has quantity_class MAGNITUDE. An approximate or comparative quantity is a\nrequirement, not a limit anything can be checked against.\n\nNo required field may be null. Where the answer is \&quot;there are none\&quot;, use an\nempty list for a list field and the string \&quot;none\&quot; for a text field. A null is\nnot an answer; an empty list is.\n\nREFERENCES BETWEEN ITEMS\nEvery field below holds ids of items YOU emit in this same response, in the\nexact id format shown above. A reference to an id you did not emit, or to an\nitem of the wrong kind, is an error.\n\n  requirements[].source_locator      the `locator` of one of your source_clauses\n  scenarios[].actors                 actor ids, \&quot;ACT-0001\&quot;\n  hard_constraints[].requirement     a requirement id, \&quot;REQ-0001\&quot;\n  ambiguities[].conflicting_clauses  source clause ids, \&quot;SRC-0001\&quot; - the CLAUSES\n                                     whose wording conflicts, never requirement\n                                     ids; [] if the ambiguity comes from silence\n                                     rather than from two clauses disagreeing\n\nPERMITTED VALUES\nThree different fields are called `kind`. They do not share a vocabulary, and a\nvalue from one is never valid in another.\n  requirement kind        FUNCTIONAL | USABILITY | PROCESS\n  verification_kind       STRUCTURAL | KINEMATIC | QUANTITATIVE\n  quantity_class          MAGNITUDE | BAND | COMPARATIVE | NONE\n  scenario kind           OPERATION | SERVICE | ASSEMBLY | TRANSPORT\n  system_boundary         a sentence naming what is inside and what is outside\n  quantity_kinds          the kinds of quantity the clause mentions, such as\n                          length, mass, count, force, time; [] if it states none\n  directionality          the direction the clause states, such as vertical,\n                          lateral, downward, bidirectional; \&quot;none\&quot; if it states\n                          no direction\n  source_locator          the `locator` of one of the source_clauses you emit\n  statement_verbatim      wording taken from the request, not paraphrased\n\nREQUEST\n-------\nDesign a compact desktop storage box with a reusable latch. The box should open and close repeatedly without accidental opening during normal handling. The latch should be easy for a user to operate while remaining secure during transport. The product should be suitable for low-cost manufacturing and should be practical for desktop use. The design should be mechanically plausible and easy to assemble.\n\n&quot;
+   },
+   &quot;response&quot;: {
+    &quot;finish_reason&quot;: &quot;stop&quot;,
+    &quot;raw_text&quot;: &quot;{\n  \&quot;source_clauses\&quot;: [\n    {\n      \&quot;id\&quot;: \&quot;SRC-0001\&quot;,\n      \&quot;verbatim\&quot;: \&quot;Design a compact desktop storage box with a reusable latch.\&quot;,\n      \&quot;locator\&quot;: \&quot;SRC-0001\&quot;,\n      \&quot;quantity_kinds\&quot;: [\&quot;length\&quot;],\n      \&quot;directionality\&quot;: \&quot;none\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;SRC-0002\&quot;,\n      \&quot;verbatim\&quot;: \&quot;The box should open and close repeatedly without accidental opening during normal handling.\&quot;,\n      \&quot;locator\&quot;: \&quot;SRC-0002\&quot;,\n      \&quot;quantity_kinds\&quot;: [\&quot;count\&quot;],\n      \&quot;directionality\&quot;: \&quot;none\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;SRC-0003\&quot;,\n      \&quot;verbatim\&quot;: \&quot;The latch should be easy for a user to operate while remaining secure during transport.\&quot;,\n      \&quot;locator\&quot;: \&quot;SRC-0003\&quot;,\n      \&quot;quantity_kinds\&quot;: [],\n      \&quot;directionality\&quot;: \&quot;none\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;SRC-0004\&quot;,\n      \&quot;verbatim\&quot;: \&quot;The product should be suitable for low-cost manufacturing and should be practical for desktop use.\&quot;,\n      \&quot;locator\&quot;: \&quot;SRC-0004\&quot;,\n      \&quot;quantity_kinds\&quot;: [\&quot;cost\&quot;],\n      \&quot;directionality\&quot;: \&quot;none\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;SRC-0005\&quot;,\n      \&quot;verbatim\&quot;: \&quot;The design should be mechanically plausible and easy to assemble.\&quot;,\n      \&quot;locator\&quot;: \&quot;SRC-0005\&quot;,\n      \&quot;quantity_kinds\&quot;: [],\n      \&quot;directionality\&quot;: \&quot;none\&quot;\n    }\n  ],\n  \&quot;requirements\&quot;: [\n    {\n      \&quot;id\&quot;: \&quot;REQ-0001\&quot;,\n      \&quot;statement_verbatim\&quot;: \&quot;Design a compact desktop storage box\&quot;,\n      \&quot;kind\&quot;: \&quot;FUNCTIONAL\&quot;,\n      \&quot;verification_kind\&quot;: \&quot;STRUCTURAL\&quot;,\n      \&quot;observable_verbatim\&quot;: \&quot;compact desktop storage box\&quot;,\n      \&quot;source_locator\&quot;: \&quot;SRC-0001\&quot;,\n      \&quot;quantity_class\&quot;: \&quot;NONE\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;REQ-0002\&quot;,\n      \&quot;statement_verbatim\&quot;: \&quot;with a reusable latch\&quot;,\n      \&quot;kind\&quot;: \&quot;FUNCTIONAL\&quot;,\n      \&quot;verification_kind\&quot;: \&quot;STRUCTURAL\&quot;,\n      \&quot;observable_verbatim\&quot;: \&quot;reusable latch\&quot;,\n      \&quot;source_locator\&quot;: \&quot;SRC-0001\&quot;,\n      \&quot;quantity_class\&quot;: \&quot;NONE\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;REQ-0003\&quot;,\n      \&quot;statement_verbatim\&quot;: \&quot;The box should open and close repeatedly\&quot;,\n      \&quot;kind\&quot;: \&quot;FUNCTIONAL\&quot;,\n      \&quot;verification_kind\&quot;: \&quot;KINEMATIC\&quot;,\n      \&quot;observable_verbatim\&quot;: \&quot;open and close repeatedly\&quot;,\n      \&quot;source_locator\&quot;: \&quot;SRC-0002\&quot;,\n      \&quot;quantity_class\&quot;: \&quot;NONE\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;REQ-0004\&quot;,\n      \&quot;statement_verbatim\&quot;: \&quot;without accidental opening during normal handling\&quot;,\n      \&quot;kind\&quot;: \&quot;FUNCTIONAL\&quot;,\n      \&quot;verification_kind\&quot;: \&quot;KINEMATIC\&quot;,\n      \&quot;observable_verbatim\&quot;: \&quot;without accidental opening during normal handling\&quot;,\n      \&quot;source_locator\&quot;: \&quot;SRC-0002\&quot;,\n      \&quot;quantity_class\&quot;: \&quot;NONE\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;REQ-0005\&quot;,\n      \&quot;statement_verbatim\&quot;: \&quot;The latch should be easy for a user to operate\&quot;,\n      \&quot;kind\&quot;: \&quot;USABILITY\&quot;,\n      \&quot;verification_kind\&quot;: \&quot;KINEMATIC\&quot;,\n      \&quot;observable_verbatim\&quot;: \&quot;easy for a user to operate\&quot;,\n      \&quot;source_locator\&quot;: \&quot;SRC-0003\&quot;,\n      \&quot;quantity_class\&quot;: \&quot;NONE\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;REQ-0006\&quot;,\n      \&quot;statement_verbatim\&quot;: \&quot;while remaining secure during transport\&quot;,\n      \&quot;kind\&quot;: \&quot;FUNCTIONAL\&quot;,\n      \&quot;verification_kind\&quot;: \&quot;KINEMATIC\&quot;,\n      \&quot;observable_verbatim\&quot;: \&quot;remaining secure during transport\&quot;,\n      \&quot;source_locator\&quot;: \&quot;SRC-0003\&quot;,\n      \&quot;quantity_class\&quot;: \&quot;NONE\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;REQ-0007\&quot;,\n      \&quot;statement_verbatim\&quot;: \&quot;The product should be suitable for low-cost manufacturing\&quot;,\n      \&quot;kind\&quot;: \&quot;PROCESS\&quot;,\n      \&quot;verification_kind\&quot;: \&quot;QUANTITATIVE\&quot;,\n      \&quot;observable_verbatim\&quot;: \&quot;suitable for low-cost manufacturing\&quot;,\n      \&quot;source_locator\&quot;: \&quot;SRC-0004\&quot;,\n      \&quot;quantity_class\&quot;: \&quot;NONE\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;REQ-0008\&quot;,\n      \&quot;statement_verbatim\&quot;: \&quot;should be practical for desktop use\&quot;,\n      \&quot;kind\&quot;: \&quot;FUNCTIONAL\&quot;,\n      \&quot;verification_kind\&quot;: \&quot;STRUCTURAL\&quot;,\n      \&quot;observable_verbatim\&quot;: \&quot;practical for desktop use\&quot;,\n      \&quot;source_locator\&quot;: \&quot;SRC-0004\&quot;,\n      \&quot;quantity_class\&quot;: \&quot;NONE\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;REQ-0009\&quot;,\n      \&quot;statement_verbatim\&quot;: \&quot;The design should be mechanically plausible\&quot;,\n      \&quot;kind\&quot;: \&quot;FUNCTIONAL\&quot;,\n      \&quot;verification_kind\&quot;: \&quot;STRUCTURAL\&quot;,\n      \&quot;observable_verbatim\&quot;: \&quot;mechanically plausible\&quot;,\n      \&quot;source_locator\&quot;: \&quot;SRC-0005\&quot;,\n      \&quot;quantity_class\&quot;: \&quot;NONE\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;REQ-0010\&quot;,\n      \&quot;statement_verbatim\&quot;: \&quot;easy to assemble\&quot;,\n      \&quot;kind\&quot;: \&quot;PROCESS\&quot;,\n      \&quot;verification_kind\&quot;: \&quot;KINEMATIC\&quot;,\n      \&quot;observable_verbatim\&quot;: \&quot;easy to assemble\&quot;,\n      \&quot;source_locator\&quot;: \&quot;SRC-0005\&quot;,\n      \&quot;quantity_class\&quot;: \&quot;NONE\&quot;\n    }\n  ],\n  \&quot;scenarios\&quot;: [\n    {\n      \&quot;id\&quot;: \&quot;SCN-0001\&quot;,\n      \&quot;name\&quot;: \&quot;Repeated opening and closing during normal handling\&quot;,\n      \&quot;kind\&quot;: \&quot;OPERATION\&quot;,\n      \&quot;system_boundary\&quot;: \&quot;Inside: the storage box and its latch; Outside: the user operating the box and the desktop environment.\&quot;,\n      \&quot;actors\&quot;: [\&quot;ACT-0001\&quot;],\n      \&quot;environment\&quot;: \&quot;Normal handling conditions as mentioned in SRC-0002.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;SCN-0002\&quot;,\n      \&quot;name\&quot;: \&quot;Transport of the closed box\&quot;,\n      \&quot;kind\&quot;: \&quot;TRANSPORT\&quot;,\n      \&quot;system_boundary\&quot;: \&quot;Inside: the closed storage box with latch engaged; Outside: the transport environment and any surfaces or hands supporting it.\&quot;,\n      \&quot;actors\&quot;: [],\n      \&quot;environment\&quot;: \&quot;Transport conditions unspecified in the request.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;SCN-0003\&quot;,\n      \&quot;name\&quot;: \&quot;Assembly of the box and latch\&quot;,\n      \&quot;kind\&quot;: \&quot;ASSEMBLY\&quot;,\n      \&quot;system_boundary\&quot;: \&quot;Inside: the components of the box and latch; Outside: the assembler and the assembly environment.\&quot;,\n      \&quot;actors\&quot;: [],\n      \&quot;environment\&quot;: \&quot;Assembly environment unspecified in the request.\&quot;\n    }\n  ],\n  \&quot;actors\&quot;: [\n    {\n      \&quot;id\&quot;: \&quot;ACT-0001\&quot;,\n      \&quot;name\&quot;: \&quot;User\&quot;,\n      \&quot;must_reach\&quot;: [\&quot;latch\&quot;]\n    }\n  ],\n  \&quot;freedoms\&quot;: [\n    {\n      \&quot;id\&quot;: \&quot;FRE-0001\&quot;,\n      \&quot;decision\&quot;: \&quot;The specific mechanism of the reusable latch.\&quot;,\n      \&quot;why_free\&quot;: \&quot;The text requires a reusable latch but does not specify its type (e.g., snap, hook, magnet, slide, etc.).\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;FRE-0002\&quot;,\n      \&quot;decision\&quot;: \&quot;The materials for the box and latch.\&quot;,\n      \&quot;why_free\&quot;: \&quot;The text does not mention any material.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;FRE-0003\&quot;,\n      \&quot;decision\&quot;: \&quot;The overall dimensions and geometry of the box.\&quot;,\n      \&quot;why_free\&quot;: \&quot;The text only says &#x27;compact&#x27; without dimensions; exact size is free.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;FRE-0004\&quot;,\n      \&quot;decision\&quot;: \&quot;The manufacturing process.\&quot;,\n      \&quot;why_free\&quot;: \&quot;The text requires suitability for low-cost manufacturing but does not specify which process.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;FRE-0005\&quot;,\n      \&quot;decision\&quot;: \&quot;The target cost.\&quot;,\n      \&quot;why_free\&quot;: \&quot;The text says low-cost but gives no number.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;FRE-0006\&quot;,\n      \&quot;decision\&quot;: \&quot;The number of open/close cycles the latch must withstand.\&quot;,\n      \&quot;why_free\&quot;: \&quot;The text says &#x27;repeatedly&#x27; but no cycle count is given.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;FRE-0007\&quot;,\n      \&quot;decision\&quot;: \&quot;The appearance and aesthetics of the product.\&quot;,\n      \&quot;why_free\&quot;: \&quot;Not mentioned in the request.\&quot;\n    }\n  ],\n  \&quot;ambiguities\&quot;: [\n    {\n      \&quot;id\&quot;: \&quot;AMB-0001\&quot;,\n      \&quot;statement\&quot;: \&quot;compact\&quot;,\n      \&quot;conflicting_clauses\&quot;: [],\n      \&quot;resolvable_when\&quot;: \&quot;When a target dimension or volume is specified.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;AMB-0002\&quot;,\n      \&quot;statement\&quot;: \&quot;easy for a user to operate\&quot;,\n      \&quot;conflicting_clauses\&quot;: [],\n      \&quot;resolvable_when\&quot;: \&quot;When objective metrics such as force, displacement, or time are defined.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;AMB-0003\&quot;,\n      \&quot;statement\&quot;: \&quot;repeatedly\&quot;,\n      \&quot;conflicting_clauses\&quot;: [],\n      \&quot;resolvable_when\&quot;: \&quot;When a minimum cycle count is specified.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;AMB-0004\&quot;,\n      \&quot;statement\&quot;: \&quot;normal handling\&quot;,\n      \&quot;conflicting_clauses\&quot;: [],\n      \&quot;resolvable_when\&quot;: \&quot;When the loads and motions of normal handling are defined.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;AMB-0005\&quot;,\n      \&quot;statement\&quot;: \&quot;secure during transport\&quot;,\n      \&quot;conflicting_clauses\&quot;: [],\n      \&quot;resolvable_when\&quot;: \&quot;When transport vibration, shock, and orientation conditions are specified.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;AMB-0006\&quot;,\n      \&quot;statement\&quot;: \&quot;low-cost manufacturing\&quot;,\n      \&quot;conflicting_clauses\&quot;: [],\n      \&quot;resolvable_when\&quot;: \&quot;When a cost target and production volume are specified.\&quot;\n    },\n    {\n      \&quot;id\&quot;: \&quot;AMB-0007\&quot;,\n      \&quot;statement\&quot;: \&quot;easy to assemble\&quot;,\n      \&quot;conflicting_clauses\&quot;: [],\n      \&quot;resolvable_when\&quot;: \&quot;When assembly time, tooling, or step count are specified.\&quot;\n    }\n  ],\n  \&quot;assumptions\&quot;: [],\n  \&quot;hard_constraints\&quot;: []\n}&quot;,
+    &quot;reasoning_content_present&quot;: true,
+    &quot;reasoning_content_stored&quot;: false,
+    &quot;response_chars&quot;: 8137,
+    &quot;response_sha256&quot;: &quot;0b699de953a98b0fce472faaf29852f870a89c7b1aefb741d07a475dc601fac8&quot;,
+    &quot;truncated&quot;: false
+   },
+   &quot;run_id&quot;: &quot;live-bm001-s01&quot;,
+   &quot;stage_attempt&quot;: 1,
+   &quot;stage_id&quot;: &quot;s01&quot;,
+   &quot;timing&quot;: {
+    &quot;duration_s&quot;: 83.344,
+    &quot;ended_at&quot;: 1786976007.1213279,
+    &quot;retry_wait_s&quot;: 0.0,
+    &quot;started_at&quot;: 1786975923.776959
+   },
+   &quot;usage&quot;: {
+    &quot;cached_input_tokens&quot;: 1536,
+    &quot;input_tokens&quot;: 1632,
+    &quot;output_tokens&quot;: 8047
+   }
+  }
+ ]
+}</pre></details>
+
+<h2>4 &middot; Parse and validation</h2>
+<table><tr><th>step</th><th>result</th></tr>
+<tr><td>consumer view</td><td>VIEW_READY</td></tr>
+<tr><td>execution status</td><td>SUCCESS</td></tr>
+<tr><td>response parse</td><td>PARSED</td></tr>
+<tr><td>operations authored</td><td>33</td></tr>
+<tr><td>canonical validation</td><td>ACCEPTED &mdash; 0 problem(s)</td></tr>
+<tr><td>declared incompleteness</td><td>none declared</td></tr>
+</table>
+<details><summary>Full parsed response (the object the stage read)</summary><pre>{
+ &quot;actors&quot;: [
+  {
+   &quot;id&quot;: &quot;ACT-0001&quot;,
+   &quot;must_reach&quot;: [
+    &quot;latch&quot;
+   ],
+   &quot;name&quot;: &quot;User&quot;
+  }
+ ],
+ &quot;ambiguities&quot;: [
+  {
+   &quot;conflicting_clauses&quot;: [],
+   &quot;id&quot;: &quot;AMB-0001&quot;,
+   &quot;resolvable_when&quot;: &quot;When a target dimension or volume is specified.&quot;,
+   &quot;statement&quot;: &quot;compact&quot;
+  },
+  {
+   &quot;conflicting_clauses&quot;: [],
+   &quot;id&quot;: &quot;AMB-0002&quot;,
+   &quot;resolvable_when&quot;: &quot;When objective metrics such as force, displacement, or time are defined.&quot;,
+   &quot;statement&quot;: &quot;easy for a user to operate&quot;
+  },
+  {
+   &quot;conflicting_clauses&quot;: [],
+   &quot;id&quot;: &quot;AMB-0003&quot;,
+   &quot;resolvable_when&quot;: &quot;When a minimum cycle count is specified.&quot;,
+   &quot;statement&quot;: &quot;repeatedly&quot;
+  },
+  {
+   &quot;conflicting_clauses&quot;: [],
+   &quot;id&quot;: &quot;AMB-0004&quot;,
+   &quot;resolvable_when&quot;: &quot;When the loads and motions of normal handling are defined.&quot;,
+   &quot;statement&quot;: &quot;normal handling&quot;
+  },
+  {
+   &quot;conflicting_clauses&quot;: [],
+   &quot;id&quot;: &quot;AMB-0005&quot;,
+   &quot;resolvable_when&quot;: &quot;When transport vibration, shock, and orientation conditions are specified.&quot;,
+   &quot;statement&quot;: &quot;secure during transport&quot;
+  },
+  {
+   &quot;conflicting_clauses&quot;: [],
+   &quot;id&quot;: &quot;AMB-0006&quot;,
+   &quot;resolvable_when&quot;: &quot;When a cost target and production volume are specified.&quot;,
+   &quot;statement&quot;: &quot;low-cost manufacturing&quot;
+  },
+  {
+   &quot;conflicting_clauses&quot;: [],
+   &quot;id&quot;: &quot;AMB-0007&quot;,
+   &quot;resolvable_when&quot;: &quot;When assembly time, tooling, or step count are specified.&quot;,
+   &quot;statement&quot;: &quot;easy to assemble&quot;
+  }
+ ],
+ &quot;assumptions&quot;: [],
+ &quot;freedoms&quot;: [
+  {
+   &quot;decision&quot;: &quot;The specific mechanism of the reusable latch.&quot;,
+   &quot;id&quot;: &quot;FRE-0001&quot;,
+   &quot;why_free&quot;: &quot;The text requires a reusable latch but does not specify its type (e.g., snap, hook, magnet, slide, etc.).&quot;
+  },
+  {
+   &quot;decision&quot;: &quot;The materials for the box and latch.&quot;,
+   &quot;id&quot;: &quot;FRE-0002&quot;,
+   &quot;why_free&quot;: &quot;The text does not mention any material.&quot;
+  },
+  {
+   &quot;decision&quot;: &quot;The overall dimensions and geometry of the box.&quot;,
+   &quot;id&quot;: &quot;FRE-0003&quot;,
+   &quot;why_free&quot;: &quot;The text only says &#x27;compact&#x27; without dimensions; exact size is free.&quot;
+  },
+  {
+   &quot;decision&quot;: &quot;The manufacturing process.&quot;,
+   &quot;id&quot;: &quot;FRE-0004&quot;,
+   &quot;why_free&quot;: &quot;The text requires suitability for low-cost manufacturing but does not specify which process.&quot;
+  },
+  {
+   &quot;decision&quot;: &quot;The target cost.&quot;,
+   &quot;id&quot;: &quot;FRE-0005&quot;,
+   &quot;why_free&quot;: &quot;The text says low-cost but gives no number.&quot;
+  },
+  {
+   &quot;decision&quot;: &quot;The number of open/close cycles the latch must withstand.&quot;,
+   &quot;id&quot;: &quot;FRE-0006&quot;,
+   &quot;why_free&quot;: &quot;The text says &#x27;repeatedly&#x27; but no cycle count is given.&quot;
+  },
+  {
+   &quot;decision&quot;: &quot;The appearance and aesthetics of the product.&quot;,
+   &quot;id&quot;: &quot;FRE-0007&quot;,
+   &quot;why_free&quot;: &quot;Not mentioned in the request.&quot;
+  }
+ ],
+ &quot;hard_constraints&quot;: [],
+ &quot;requirements&quot;: [
+  {
+   &quot;id&quot;: &quot;REQ-0001&quot;,
+   &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+   &quot;observable_verbatim&quot;: &quot;compact desktop storage box&quot;,
+   &quot;quantity_class&quot;: &quot;NONE&quot;,
+   &quot;source_locator&quot;: &quot;SRC-0001&quot;,
+   &quot;statement_verbatim&quot;: &quot;Design a compact desktop storage box&quot;,
+   &quot;verification_kind&quot;: &quot;STRUCTURAL&quot;
+  },
+  {
+   &quot;id&quot;: &quot;REQ-0002&quot;,
+   &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+   &quot;observable_verbatim&quot;: &quot;reusable latch&quot;,
+   &quot;quantity_class&quot;: &quot;NONE&quot;,
+   &quot;source_locator&quot;: &quot;SRC-0001&quot;,
+   &quot;statement_verbatim&quot;: &quot;with a reusable latch&quot;,
+   &quot;verification_kind&quot;: &quot;STRUCTURAL&quot;
+  },
+  {
+   &quot;id&quot;: &quot;REQ-0003&quot;,
+   &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+   &quot;observable_verbatim&quot;: &quot;open and close repeatedly&quot;,
+   &quot;quantity_class&quot;: &quot;NONE&quot;,
+   &quot;source_locator&quot;: &quot;SRC-0002&quot;,
+   &quot;statement_verbatim&quot;: &quot;The box should open and close repeatedly&quot;,
+   &quot;verification_kind&quot;: &quot;KINEMATIC&quot;
+  },
+  {
+   &quot;id&quot;: &quot;REQ-0004&quot;,
+   &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+   &quot;observable_verbatim&quot;: &quot;without accidental opening during normal handling&quot;,
+   &quot;quantity_class&quot;: &quot;NONE&quot;,
+   &quot;source_locator&quot;: &quot;SRC-0002&quot;,
+   &quot;statement_verbatim&quot;: &quot;without accidental opening during normal handling&quot;,
+   &quot;verification_kind&quot;: &quot;KINEMATIC&quot;
+  },
+  {
+   &quot;id&quot;: &quot;REQ-0005&quot;,
+   &quot;kind&quot;: &quot;USABILITY&quot;,
+   &quot;observable_verbatim&quot;: &quot;easy for a user to operate&quot;,
+   &quot;quantity_class&quot;: &quot;NONE&quot;,
+   &quot;source_locator&quot;: &quot;SRC-0003&quot;,
+   &quot;statement_verbatim&quot;: &quot;The latch should be easy for a user to operate&quot;,
+   &quot;verification_kind&quot;: &quot;KINEMATIC&quot;
+  },
+  {
+   &quot;id&quot;: &quot;REQ-0006&quot;,
+   &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+   &quot;observable_verbatim&quot;: &quot;remaining secure during transport&quot;,
+   &quot;quantity_class&quot;: &quot;NONE&quot;,
+   &quot;source_locator&quot;: &quot;SRC-0003&quot;,
+   &quot;statement_verbatim&quot;: &quot;while remaining secure during transport&quot;,
+   &quot;verification_kind&quot;: &quot;KINEMATIC&quot;
+  },
+  {
+   &quot;id&quot;: &quot;REQ-0007&quot;,
+   &quot;kind&quot;: &quot;PROCESS&quot;,
+   &quot;observable_verbatim&quot;: &quot;suitable for low-cost manufacturing&quot;,
+   &quot;quantity_class&quot;: &quot;NONE&quot;,
+   &quot;source_locator&quot;: &quot;SRC-0004&quot;,
+   &quot;statement_verbatim&quot;: &quot;The product should be suitable for low-cost manufacturing&quot;,
+   &quot;verification_kind&quot;: &quot;QUANTITATIVE&quot;
+  },
+  {
+   &quot;id&quot;: &quot;REQ-0008&quot;,
+   &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+   &quot;observable_verbatim&quot;: &quot;practical for desktop use&quot;,
+   &quot;quantity_class&quot;: &quot;NONE&quot;,
+   &quot;source_locator&quot;: &quot;SRC-0004&quot;,
+   &quot;statement_verbatim&quot;: &quot;should be practical for desktop use&quot;,
+   &quot;verification_kind&quot;: &quot;STRUCTURAL&quot;
+  },
+  {
+   &quot;id&quot;: &quot;REQ-0009&quot;,
+   &quot;kind&quot;: &quot;FUNCTIONAL&quot;,
+   &quot;observable_verbatim&quot;: &quot;mechanically plausible&quot;,
+   &quot;quantity_class&quot;: &quot;NONE&quot;,
+   &quot;source_locator&quot;: &quot;SRC-0005&quot;,
+   &quot;statement_verbatim&quot;: &quot;The design should be mechanically plausible&quot;,
+   &quot;verification_kind&quot;: &quot;STRUCTURAL&quot;
+  },
+  {
+   &quot;id&quot;: &quot;REQ-0010&quot;,
+   &quot;kind&quot;: &quot;PROCESS&quot;,
+   &quot;observable_verbatim&quot;: &quot;easy to assemble&quot;,
+   &quot;quantity_class&quot;: &quot;NONE&quot;,
+   &quot;source_locator&quot;: &quot;SRC-0005&quot;,
+   &quot;statement_verbatim&quot;: &quot;easy to assemble&quot;,
+   &quot;verification_kind&quot;: &quot;KINEMATIC&quot;
+  }
+ ],
+ &quot;scenarios&quot;: [
+  {
+   &quot;actors&quot;: [
+    &quot;ACT-0001&quot;
+   ],
+   &quot;environment&quot;: &quot;Normal handling conditions as mentioned in SRC-0002.&quot;,
+   &quot;id&quot;: &quot;SCN-0001&quot;,
+   &quot;kind&quot;: &quot;OPERATION&quot;,
+   &quot;name&quot;: &quot;Repeated opening and closing during normal handling&quot;,
+   &quot;system_boundary&quot;: &quot;Inside: the storage box and its latch; Outside: the user operating the box and the desktop environment.&quot;
+  },
+  {
+   &quot;actors&quot;: [],
+   &quot;environment&quot;: &quot;Transport conditions unspecified in the request.&quot;,
+   &quot;id&quot;: &quot;SCN-0002&quot;,
+   &quot;kind&quot;: &quot;TRANSPORT&quot;,
+   &quot;name&quot;: &quot;Transport of the closed box&quot;,
+   &quot;system_boundary&quot;: &quot;Inside: the closed storage box with latch engaged; Outside: the transport environment and any surfaces or hands supporting it.&quot;
+  },
+  {
+   &quot;actors&quot;: [],
+   &quot;environment&quot;: &quot;Assembly environment unspecified in the request.&quot;,
+   &quot;id&quot;: &quot;SCN-0003&quot;,
+   &quot;kind&quot;: &quot;ASSEMBLY&quot;,
+   &quot;name&quot;: &quot;Assembly of the box and latch&quot;,
+   &quot;system_boundary&quot;: &quot;Inside: the components of the box and latch; Outside: the assembler and the assembly environment.&quot;
+  }
+ ],
+ &quot;source_clauses&quot;: [
+  {
+   &quot;directionality&quot;: &quot;none&quot;,
+   &quot;id&quot;: &quot;SRC-0001&quot;,
+   &quot;locator&quot;: &quot;SRC-0001&quot;,
+   &quot;quantity_kinds&quot;: [
+    &quot;length&quot;
+   ],
+   &quot;verbatim&quot;: &quot;Design a compact desktop storage box with a reusable latch.&quot;
+  },
+  {
+   &quot;directionality&quot;: &quot;none&quot;,
+   &quot;id&quot;: &quot;SRC-0002&quot;,
+   &quot;locator&quot;: &quot;SRC-0002&quot;,
+   &quot;quantity_kinds&quot;: [
+    &quot;count&quot;
+   ],
+   &quot;verbatim&quot;: &quot;The box should open and close repeatedly without accidental opening during normal handling.&quot;
+  },
+  {
+   &quot;directionality&quot;: &quot;none&quot;,
+   &quot;id&quot;: &quot;SRC-0003&quot;,
+   &quot;locator&quot;: &quot;SRC-0003&quot;,
+   &quot;quantity_kinds&quot;: [],
+   &quot;verbatim&quot;: &quot;The latch should be easy for a user to operate while remaining secure during transport.&quot;
+  },
+  {
+   &quot;directionality&quot;: &quot;none&quot;,
+   &quot;id&quot;: &quot;SRC-0004&quot;,
+   &quot;locator&quot;: &quot;SRC-0004&quot;,
+   &quot;quantity_kinds&quot;: [
+    &quot;cost&quot;
+   ],
+   &quot;verbatim&quot;: &quot;The product should be suitable for low-cost manufacturing and should be practical for desktop use.&quot;
+  },
+  {
+   &quot;directionality&quot;: &quot;none&quot;,
+   &quot;id&quot;: &quot;SRC-0005&quot;,
+   &quot;locator&quot;: &quot;SRC-0005&quot;,
+   &quot;quantity_kinds&quot;: [],
+   &quot;verbatim&quot;: &quot;The design should be mechanically plausible and easy to assemble.&quot;
+  }
+ ]
+}</pre></details>
+
+<h2>5 &middot; DesignState diff</h2>
+<p class="sub">The run began from an empty DesignState, so every entity below is new.</p>
+<table><tr><th>family</th><th>before</th><th>after</th><th>added</th><th>entities</th></tr>
+<tr><td>Actor</td><td class='num'>0</td><td class='num'>1</td><td class='num add'>+1</td><td><a class="eid" href="#ACT-0001">ACT-0001</a></td></tr>
+<tr><td>Ambiguity</td><td class='num'>0</td><td class='num'>7</td><td class='num add'>+7</td><td><a class="eid" href="#AMB-0001">AMB-0001</a> <a class="eid" href="#AMB-0002">AMB-0002</a> <a class="eid" href="#AMB-0003">AMB-0003</a> <a class="eid" href="#AMB-0004">AMB-0004</a> <a class="eid" href="#AMB-0005">AMB-0005</a> <a class="eid" href="#AMB-0006">AMB-0006</a> <a class="eid" href="#AMB-0007">AMB-0007</a></td></tr>
+<tr><td>Freedom</td><td class='num'>0</td><td class='num'>7</td><td class='num add'>+7</td><td><a class="eid" href="#FRE-0001">FRE-0001</a> <a class="eid" href="#FRE-0002">FRE-0002</a> <a class="eid" href="#FRE-0003">FRE-0003</a> <a class="eid" href="#FRE-0004">FRE-0004</a> <a class="eid" href="#FRE-0005">FRE-0005</a> <a class="eid" href="#FRE-0006">FRE-0006</a> <a class="eid" href="#FRE-0007">FRE-0007</a></td></tr>
+<tr><td>Requirement</td><td class='num'>0</td><td class='num'>10</td><td class='num add'>+10</td><td><a class="eid" href="#REQ-0001">REQ-0001</a> <a class="eid" href="#REQ-0002">REQ-0002</a> <a class="eid" href="#REQ-0003">REQ-0003</a> <a class="eid" href="#REQ-0004">REQ-0004</a> <a class="eid" href="#REQ-0005">REQ-0005</a> <a class="eid" href="#REQ-0006">REQ-0006</a> <a class="eid" href="#REQ-0007">REQ-0007</a> <a class="eid" href="#REQ-0008">REQ-0008</a> <a class="eid" href="#REQ-0009">REQ-0009</a> <a class="eid" href="#REQ-0010">REQ-0010</a></td></tr>
+<tr><td>Scenario</td><td class='num'>0</td><td class='num'>3</td><td class='num add'>+3</td><td><a class="eid" href="#SCN-0001">SCN-0001</a> <a class="eid" href="#SCN-0002">SCN-0002</a> <a class="eid" href="#SCN-0003">SCN-0003</a></td></tr>
+<tr><td>SourceClause</td><td class='num'>0</td><td class='num'>5</td><td class='num add'>+5</td><td><a class="eid" href="#SRC-0001">SRC-0001</a> <a class="eid" href="#SRC-0002">SRC-0002</a> <a class="eid" href="#SRC-0003">SRC-0003</a> <a class="eid" href="#SRC-0004">SRC-0004</a> <a class="eid" href="#SRC-0005">SRC-0005</a></td></tr></table>
+
+<h2>6 &middot; Requirement &rarr; SourceClause traceability</h2>
+<p class="sub">Every requirement with the clause it cites. Click any id to jump to it.</p>
+<table><tr><th>id</th><th>statement_verbatim</th><th>kind</th><th>quantity class</th>
+<th>verification</th><th>observable</th><th>cites</th></tr>
+<tr id='REQ-0001'><td><a class="eid" href="#REQ-0001">REQ-0001</a></td><td>Design a compact desktop storage box</td><td><span class='kind'>FUNCTIONAL</span></td><td><span class='kind'>NONE</span></td><td><span class='kind'>STRUCTURAL</span></td><td>compact desktop storage box</td><td><a class="eid" href="#SRC-0001">SRC-0001</a><div class='sub'>Design a compact desktop storage box with a reusable latch.</div></td></tr>
+<tr id='REQ-0002'><td><a class="eid" href="#REQ-0002">REQ-0002</a></td><td>with a reusable latch</td><td><span class='kind'>FUNCTIONAL</span></td><td><span class='kind'>NONE</span></td><td><span class='kind'>STRUCTURAL</span></td><td>reusable latch</td><td><a class="eid" href="#SRC-0001">SRC-0001</a><div class='sub'>Design a compact desktop storage box with a reusable latch.</div></td></tr>
+<tr id='REQ-0003'><td><a class="eid" href="#REQ-0003">REQ-0003</a></td><td>The box should open and close repeatedly</td><td><span class='kind'>FUNCTIONAL</span></td><td><span class='kind'>NONE</span></td><td><span class='kind'>KINEMATIC</span></td><td>open and close repeatedly</td><td><a class="eid" href="#SRC-0002">SRC-0002</a><div class='sub'>The box should open and close repeatedly without accidental opening during normal handling.</div></td></tr>
+<tr id='REQ-0004'><td><a class="eid" href="#REQ-0004">REQ-0004</a></td><td>without accidental opening during normal handling</td><td><span class='kind'>FUNCTIONAL</span></td><td><span class='kind'>NONE</span></td><td><span class='kind'>KINEMATIC</span></td><td>without accidental opening during normal handling</td><td><a class="eid" href="#SRC-0002">SRC-0002</a><div class='sub'>The box should open and close repeatedly without accidental opening during normal handling.</div></td></tr>
+<tr id='REQ-0005'><td><a class="eid" href="#REQ-0005">REQ-0005</a></td><td>The latch should be easy for a user to operate</td><td><span class='kind'>USABILITY</span></td><td><span class='kind'>NONE</span></td><td><span class='kind'>KINEMATIC</span></td><td>easy for a user to operate</td><td><a class="eid" href="#SRC-0003">SRC-0003</a><div class='sub'>The latch should be easy for a user to operate while remaining secure during transport.</div></td></tr>
+<tr id='REQ-0006'><td><a class="eid" href="#REQ-0006">REQ-0006</a></td><td>while remaining secure during transport</td><td><span class='kind'>FUNCTIONAL</span></td><td><span class='kind'>NONE</span></td><td><span class='kind'>KINEMATIC</span></td><td>remaining secure during transport</td><td><a class="eid" href="#SRC-0003">SRC-0003</a><div class='sub'>The latch should be easy for a user to operate while remaining secure during transport.</div></td></tr>
+<tr id='REQ-0007'><td><a class="eid" href="#REQ-0007">REQ-0007</a></td><td>The product should be suitable for low-cost manufacturing</td><td><span class='kind'>PROCESS</span></td><td><span class='kind'>NONE</span></td><td><span class='kind'>QUANTITATIVE</span></td><td>suitable for low-cost manufacturing</td><td><a class="eid" href="#SRC-0004">SRC-0004</a><div class='sub'>The product should be suitable for low-cost manufacturing and should be practical for desktop use.</div></td></tr>
+<tr id='REQ-0008'><td><a class="eid" href="#REQ-0008">REQ-0008</a></td><td>should be practical for desktop use</td><td><span class='kind'>FUNCTIONAL</span></td><td><span class='kind'>NONE</span></td><td><span class='kind'>STRUCTURAL</span></td><td>practical for desktop use</td><td><a class="eid" href="#SRC-0004">SRC-0004</a><div class='sub'>The product should be suitable for low-cost manufacturing and should be practical for desktop use.</div></td></tr>
+<tr id='REQ-0009'><td><a class="eid" href="#REQ-0009">REQ-0009</a></td><td>The design should be mechanically plausible</td><td><span class='kind'>FUNCTIONAL</span></td><td><span class='kind'>NONE</span></td><td><span class='kind'>STRUCTURAL</span></td><td>mechanically plausible</td><td><a class="eid" href="#SRC-0005">SRC-0005</a><div class='sub'>The design should be mechanically plausible and easy to assemble.</div></td></tr>
+<tr id='REQ-0010'><td><a class="eid" href="#REQ-0010">REQ-0010</a></td><td>easy to assemble</td><td><span class='kind'>PROCESS</span></td><td><span class='kind'>NONE</span></td><td><span class='kind'>KINEMATIC</span></td><td>easy to assemble</td><td><a class="eid" href="#SRC-0005">SRC-0005</a><div class='sub'>The design should be mechanically plausible and easy to assemble.</div></td></tr></table>
+
+<h2>7 &middot; SourceClause (5)</h2>
+<div class="cards"><div class="card" id="SRC-0001">
+        <div class="cid">SRC-0001 <a class="jump" href="#src-SRC-0001">jump to source &#8599;</a></div>
+        <div class="verbatim">Design a compact desktop storage box with a reusable latch.</div>
+        <dl><dt>locator</dt><dd>SRC-0001</dd>
+            <dt>quantity_kinds</dt><dd><span class="tag">length</span></dd>
+            <dt>directionality</dt><dd>none</dd>
+            <dt>cited by</dt><dd><a class="eid" href="#REQ-0001">REQ-0001</a> <a class="eid" href="#REQ-0002">REQ-0002</a></dd></dl></div>
+<div class="card" id="SRC-0002">
+        <div class="cid">SRC-0002 <a class="jump" href="#src-SRC-0002">jump to source &#8599;</a></div>
+        <div class="verbatim">The box should open and close repeatedly without accidental opening during normal handling.</div>
+        <dl><dt>locator</dt><dd>SRC-0002</dd>
+            <dt>quantity_kinds</dt><dd><span class="tag">count</span></dd>
+            <dt>directionality</dt><dd>none</dd>
+            <dt>cited by</dt><dd><a class="eid" href="#REQ-0003">REQ-0003</a> <a class="eid" href="#REQ-0004">REQ-0004</a></dd></dl></div>
+<div class="card" id="SRC-0003">
+        <div class="cid">SRC-0003 <a class="jump" href="#src-SRC-0003">jump to source &#8599;</a></div>
+        <div class="verbatim">The latch should be easy for a user to operate while remaining secure during transport.</div>
+        <dl><dt>locator</dt><dd>SRC-0003</dd>
+            <dt>quantity_kinds</dt><dd><span class="none">none</span></dd>
+            <dt>directionality</dt><dd>none</dd>
+            <dt>cited by</dt><dd><a class="eid" href="#REQ-0005">REQ-0005</a> <a class="eid" href="#REQ-0006">REQ-0006</a></dd></dl></div>
+<div class="card" id="SRC-0004">
+        <div class="cid">SRC-0004 <a class="jump" href="#src-SRC-0004">jump to source &#8599;</a></div>
+        <div class="verbatim">The product should be suitable for low-cost manufacturing and should be practical for desktop use.</div>
+        <dl><dt>locator</dt><dd>SRC-0004</dd>
+            <dt>quantity_kinds</dt><dd><span class="tag">cost</span></dd>
+            <dt>directionality</dt><dd>none</dd>
+            <dt>cited by</dt><dd><a class="eid" href="#REQ-0007">REQ-0007</a> <a class="eid" href="#REQ-0008">REQ-0008</a></dd></dl></div>
+<div class="card" id="SRC-0005">
+        <div class="cid">SRC-0005 <a class="jump" href="#src-SRC-0005">jump to source &#8599;</a></div>
+        <div class="verbatim">The design should be mechanically plausible and easy to assemble.</div>
+        <dl><dt>locator</dt><dd>SRC-0005</dd>
+            <dt>quantity_kinds</dt><dd><span class="none">none</span></dd>
+            <dt>directionality</dt><dd>none</dd>
+            <dt>cited by</dt><dd><a class="eid" href="#REQ-0009">REQ-0009</a> <a class="eid" href="#REQ-0010">REQ-0010</a></dd></dl></div></div>
+
+<h2>8 &middot; Actor (1)</h2>
+<div class="cards"><div class="card" id="ACT-0001"><div class="cid">ACT-0001</div>
+        <dl><dt>name</dt><dd>User</dd><dt>must_reach</dt><dd><span class="tag">latch</span></dd></dl></div></div>
+
+<h2>9 &middot; Scenario (3)</h2>
+<div class="cards"><div class="card" id="SCN-0001"><div class="cid">SCN-0001</div>
+        <div class="verbatim">Repeated opening and closing during normal handling</div>
+        <dl><dt>kind</dt><dd><span class="kind">OPERATION</span></dd>
+            <dt>system_boundary</dt><dd>Inside: the storage box and its latch; Outside: the user operating the box and the desktop environment.</dd>
+            <dt>actors</dt><dd><a class="eid" href="#ACT-0001">ACT-0001</a></dd>
+            <dt>environment</dt><dd>Normal handling conditions as mentioned in SRC-0002.</dd></dl></div>
+<div class="card" id="SCN-0002"><div class="cid">SCN-0002</div>
+        <div class="verbatim">Transport of the closed box</div>
+        <dl><dt>kind</dt><dd><span class="kind">TRANSPORT</span></dd>
+            <dt>system_boundary</dt><dd>Inside: the closed storage box with latch engaged; Outside: the transport environment and any surfaces or hands supporting it.</dd>
+            <dt>actors</dt><dd><span class="none">none</span></dd>
+            <dt>environment</dt><dd>Transport conditions unspecified in the request.</dd></dl></div>
+<div class="card" id="SCN-0003"><div class="cid">SCN-0003</div>
+        <div class="verbatim">Assembly of the box and latch</div>
+        <dl><dt>kind</dt><dd><span class="kind">ASSEMBLY</span></dd>
+            <dt>system_boundary</dt><dd>Inside: the components of the box and latch; Outside: the assembler and the assembly environment.</dd>
+            <dt>actors</dt><dd><span class="none">none</span></dd>
+            <dt>environment</dt><dd>Assembly environment unspecified in the request.</dd></dl></div></div>
+
+<h2>10 &middot; Freedom (7)</h2>
+<p class="sub">A Freedom records that the source did not decide something. It must not itself
+decide anything.</p>
+<div class="cards"><div class="card" id="FRE-0001"><div class="cid">FRE-0001</div>
+        <div class="verbatim">The specific mechanism of the reusable latch.</div>
+        <dl><dt>why free</dt><dd>The text requires a reusable latch but does not specify its type (e.g., snap, hook, magnet, slide, etc.).</dd></dl></div>
+<div class="card" id="FRE-0002"><div class="cid">FRE-0002</div>
+        <div class="verbatim">The materials for the box and latch.</div>
+        <dl><dt>why free</dt><dd>The text does not mention any material.</dd></dl></div>
+<div class="card" id="FRE-0003"><div class="cid">FRE-0003</div>
+        <div class="verbatim">The overall dimensions and geometry of the box.</div>
+        <dl><dt>why free</dt><dd>The text only says &#x27;compact&#x27; without dimensions; exact size is free.</dd></dl></div>
+<div class="card" id="FRE-0004"><div class="cid">FRE-0004</div>
+        <div class="verbatim">The manufacturing process.</div>
+        <dl><dt>why free</dt><dd>The text requires suitability for low-cost manufacturing but does not specify which process.</dd></dl></div>
+<div class="card" id="FRE-0005"><div class="cid">FRE-0005</div>
+        <div class="verbatim">The target cost.</div>
+        <dl><dt>why free</dt><dd>The text says low-cost but gives no number.</dd></dl></div>
+<div class="card" id="FRE-0006"><div class="cid">FRE-0006</div>
+        <div class="verbatim">The number of open/close cycles the latch must withstand.</div>
+        <dl><dt>why free</dt><dd>The text says &#x27;repeatedly&#x27; but no cycle count is given.</dd></dl></div>
+<div class="card" id="FRE-0007"><div class="cid">FRE-0007</div>
+        <div class="verbatim">The appearance and aesthetics of the product.</div>
+        <dl><dt>why free</dt><dd>Not mentioned in the request.</dd></dl></div></div>
+
+<h2>11 &middot; Ambiguity (7)</h2>
+<p class="sub">An unquantified term the source leaves open, with the condition that would resolve it.</p>
+<div class="cards"><div class="card" id="AMB-0001"><div class="cid">AMB-0001</div>
+        <div class="verbatim">&ldquo;compact&rdquo;</div>
+        <dl><dt>resolvable when</dt><dd>When a target dimension or volume is specified.</dd>
+            <dt>conflicting clauses</dt><dd><span class="none">none</span></dd>
+            <dt>block scopes</dt><dd><span class="none">none</span></dd></dl></div>
+<div class="card" id="AMB-0002"><div class="cid">AMB-0002</div>
+        <div class="verbatim">&ldquo;easy for a user to operate&rdquo;</div>
+        <dl><dt>resolvable when</dt><dd>When objective metrics such as force, displacement, or time are defined.</dd>
+            <dt>conflicting clauses</dt><dd><span class="none">none</span></dd>
+            <dt>block scopes</dt><dd><span class="none">none</span></dd></dl></div>
+<div class="card" id="AMB-0003"><div class="cid">AMB-0003</div>
+        <div class="verbatim">&ldquo;repeatedly&rdquo;</div>
+        <dl><dt>resolvable when</dt><dd>When a minimum cycle count is specified.</dd>
+            <dt>conflicting clauses</dt><dd><span class="none">none</span></dd>
+            <dt>block scopes</dt><dd><span class="none">none</span></dd></dl></div>
+<div class="card" id="AMB-0004"><div class="cid">AMB-0004</div>
+        <div class="verbatim">&ldquo;normal handling&rdquo;</div>
+        <dl><dt>resolvable when</dt><dd>When the loads and motions of normal handling are defined.</dd>
+            <dt>conflicting clauses</dt><dd><span class="none">none</span></dd>
+            <dt>block scopes</dt><dd><span class="none">none</span></dd></dl></div>
+<div class="card" id="AMB-0005"><div class="cid">AMB-0005</div>
+        <div class="verbatim">&ldquo;secure during transport&rdquo;</div>
+        <dl><dt>resolvable when</dt><dd>When transport vibration, shock, and orientation conditions are specified.</dd>
+            <dt>conflicting clauses</dt><dd><span class="none">none</span></dd>
+            <dt>block scopes</dt><dd><span class="none">none</span></dd></dl></div>
+<div class="card" id="AMB-0006"><div class="cid">AMB-0006</div>
+        <div class="verbatim">&ldquo;low-cost manufacturing&rdquo;</div>
+        <dl><dt>resolvable when</dt><dd>When a cost target and production volume are specified.</dd>
+            <dt>conflicting clauses</dt><dd><span class="none">none</span></dd>
+            <dt>block scopes</dt><dd><span class="none">none</span></dd></dl></div>
+<div class="card" id="AMB-0007"><div class="cid">AMB-0007</div>
+        <div class="verbatim">&ldquo;easy to assemble&rdquo;</div>
+        <dl><dt>resolvable when</dt><dd>When assembly time, tooling, or step count are specified.</dd>
+            <dt>conflicting clauses</dt><dd><span class="none">none</span></dd>
+            <dt>block scopes</dt><dd><span class="none">none</span></dd></dl></div></div>
+
+<h2>12 &middot; Human review</h2>
+<div class="warnbox">Nothing on this page is a quality judgement. The six questions below are the
+ones the automatic checks cannot answer, and no verdict is recorded for any of them.</div>
+<div class="qcard"><div class="qh">1 &middot; Requirement splitting</div><p>Ten requirements came from five clauses. Is clause-level splitting right here - is &ldquo;Design a compact desktop storage box&rdquo; a separate requirement from &ldquo;with a reusable latch&rdquo;, or one? Compare the traceability table against the marked source above.</p>
+       <div class="where">where to look: REQ-0001 / REQ-0002 both cite SRC-0001</div>
+       <div class="verdict">reviewer verdict: <span class="pending">NOT REVIEWED</span></div></div>
+<div class="qcard"><div class="qh">2 &middot; Meaning distorted or added</div><p>Read each <code>statement_verbatim</code> beside the clause it cites. Does any requirement say more than its source? An <code>observable_verbatim</code> is a restatement, not a new commitment.</p>
+       <div class="where">where to look: check every row of the traceability table</div>
+       <div class="verdict">reviewer verdict: <span class="pending">NOT REVIEWED</span></div></div>
+<div class="qcard"><div class="qh">3 &middot; Anything missed</div><p>Read the request top to bottom. Every unmarked span below is text no SourceClause captured - decide whether it carried an obligation.</p>
+       <div class="where">where to look: unmarked text in the source section</div>
+       <div class="verdict">reviewer verdict: <span class="pending">NOT REVIEWED</span></div></div>
+<div class="qcard"><div class="qh">4 &middot; Freedoms solution-neutral</div><p>A Freedom records that the source did not decide something. Does any of the seven name a mechanism, or otherwise pre-commit the design?</p>
+       <div class="where">where to look: 7 Freedom records</div>
+       <div class="verdict">reviewer verdict: <span class="pending">NOT REVIEWED</span></div></div>
+<div class="qcard"><div class="qh">5 &middot; Ambiguities justified</div><p>Each should be an unquantified term the source genuinely leaves open, with a resolution condition that is checkable. Is any of them actually clear in context, or a duplicate of another?</p>
+       <div class="where">where to look: 7 Ambiguity records</div>
+       <div class="verdict">reviewer verdict: <span class="pending">NOT REVIEWED</span></div></div>
+<div class="qcard"><div class="qh">6 &middot; Invented values or facts</div><p>No requirement carries a quantity class other than NONE, which matches a source that states no numbers. Scan the raw response for any dimension, material, tolerance or count the request never gave.</p>
+       <div class="where">where to look: quantity_class is NONE on all 10 requirements</div>
+       <div class="verdict">reviewer verdict: <span class="pending">NOT REVIEWED</span></div></div>
+
+<h2>13 &middot; Raw evidence files</h2>
+<p class="sub">Nothing here is summarised away; these are the files this page was rendered from.</p>
+<table><tr><th>file</th><th>contents</th></tr>
+<tr><td><code>01_request_manifest.json</code></td><td>source text, exact prompt, settings, provider configuration &mdash; written BEFORE the call</td></tr>
+<tr><td><code>02_raw_response.json</code></td><td>provider records, GenerationResult, raw response, served model, usage, latency &mdash; written the moment generate() returned, before any parsing</td></tr>
+<tr><td><code>03_parse_patch_validation.json</code></td><td>parse result, all 33 operations with full field values, canonical validation, state diff</td></tr>
+</table>
+
+</div></body></html>

@@ -1,0 +1,172 @@
+{
+ "client_max_attempts": 1,
+ "generation_result": {
+  "error_detail": null,
+  "execution_status": "SUCCESS",
+  "from_cache": false,
+  "latency_s": 250.795
+ },
+ "model_requested": "deepseek-v4-pro",
+ "model_run_records": [
+  {
+   "attempt_index": 1,
+   "determinism": {
+    "seed": null,
+    "seed_honoured": "NOT_SUPPORTED",
+    "seed_requested_by_stage": null,
+    "temperature": 1.0,
+    "temperature_actually_sent": 1.0,
+    "temperature_requested_by_stage": 1.0,
+    "top_p": null
+   },
+   "error_detail": null,
+   "execution_status": "SUCCESS",
+   "model_id": "deepseek-v4-pro",
+   "model_id_requested": "deepseek-v4-pro",
+   "model_id_served": "deepseek-v4-pro",
+   "model_run_id": "bm001-review|s04|sa1|a1",
+   "model_substitution": null,
+   "model_version_string": "deepseek-v4-pro",
+   "provider_id": "deepseek",
+   "purpose": "author mating geometry on declared interfaces",
+   "request": {
+    "deadline_s": 600.0,
+    "experiment_overrides": {
+     "deadline_s": null,
+     "model": "deepseek-v4-pro",
+     "response_format": "json_object",
+     "temperature": null,
+     "top_p": null
+    },
+    "max_output_tokens": 65536,
+    "max_output_tokens_clamped_from": null,
+    "parameter_resolution": {
+     "deadline_s": {
+      "channel": "transport",
+      "effective": 600.0,
+      "note": "applied to the connection, not sent to the model",
+      "override": null,
+      "requested": 600.0,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "max_output_tokens": {
+      "channel": "payload",
+      "effective": 65536,
+      "note": "",
+      "override": null,
+      "requested": 65536,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "model": {
+      "channel": "payload",
+      "effective": "deepseek-v4-pro",
+      "note": "the stage states no model; selecting one is an experiment decision",
+      "override": "deepseek-v4-pro",
+      "requested": null,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "response_format": {
+      "channel": "payload",
+      "effective": "json_object",
+      "note": "format mode is a transport capability; the shape itself is the parser's",
+      "override": "json_object",
+      "requested": null,
+      "sent": true,
+      "status": "SENT_AS_OVERRIDDEN"
+     },
+     "response_schema": {
+      "channel": "none",
+      "effective": null,
+      "note": "",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_NOT_REQUESTED"
+     },
+     "seed": {
+      "channel": "none",
+      "effective": null,
+      "note": "the provider accepts no seed parameter; the requested value is retained and no determinism is claimed",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_UNSUPPORTED"
+     },
+     "temperature": {
+      "channel": "payload",
+      "effective": 1.0,
+      "note": "the stage asks for a reproducible answer; the repeated-trial protocol asks for sampling, and the experiment says which run this is",
+      "override": null,
+      "requested": 1.0,
+      "sent": true,
+      "status": "SENT_AS_REQUESTED"
+     },
+     "top_p": {
+      "channel": "none",
+      "effective": null,
+      "note": "accepted on the request and no longer discarded without trace",
+      "override": null,
+      "requested": null,
+      "sent": false,
+      "status": "NOT_SENT_NOT_REQUESTED"
+     }
+    },
+    "parameters": {
+     "response_format": "json_object",
+     "temperature": 1.0,
+     "top_p": null
+    },
+    "prompt_chars": 3198,
+    "prompt_sha256": "9eccacccaefa13bf58ac7fb376a4cbb936dd1e93c6b26fd1de7b343a8fe6e7c0",
+    "prompt_text": "You are adding one piece of geometry to a mechanism that is already placed.\nYou are NOT designing or re-placing anything.\n\nTHE ARRANGEMENT ALREADY EXISTS. Every body has its extent below, every joint has\nits axis and origin, and every interface is declared. You may not move, resize,\nadd or remove any of them, and nothing you write here can.\n\nWHAT IS BEING ADDED\nThe interfaces listed are NESTED MATING FEATURES whose boxes overlap on purpose -\na pin inside a knuckle, a shaft in a bearing. A box overlap proves nothing either\nway; the DIAMETERS decide whether the inner feature clears or grips the outer,\nand that is computed from your numbers, not stated by you.\n\nFor each listed interface give the analytical geometry of the mating.\n\nRESPONSE SCHEMA\nReturn a single JSON object with one key.\n\n  mating_geometry[]   interface, inner_body, outer_body,\n                      inner_feature SHAFT|PIN|DOWEL,\n                      outer_feature BORE|HOLE|BEARING|GUIDE,\n                      inner_diameter, outer_diameter, engagement_length,\n                      axis_joint\n\n  interface       an interface id from the list below\n  inner_body      the interface's body that goes INTO the other\n  outer_body      the interface's body that receives it\n  inner_diameter  of the inner feature, in the same units as the extents below\n  outer_diameter  of the opening it goes into, same units\n  engagement_length  how much of the inner feature's length is engaged\n  axis_joint      the joint from the list below whose axis the mating turns or\n                  slides on - name the joint, do not restate its axis. Only when\n                  NO joint relates the two bodies give axis_direction as one of\n                  +X -X +Y -Y +Z -Z instead, and never both.\n\nRULES\n  THE EXTENTS ARE FIXED. The diameters you give must be consistent with the\n  boxes below: a pin is no wider than its box across the axis, and a bore is no\n  wider than the body that holds it. Read the sizes off the arrangement.\n  DO NOT STATE A VERDICT. Not \"clears\", not \"fits\", not \"interferes\".\n  DO NOT CHOOSE SIZES TO MAKE ANYTHING PASS. If the interface is declared\n  CLEARANCE the pin must genuinely be smaller than the bore in the design as\n  placed; if it is not, say the sizes as they are and a later step reports it.\n  If a listed interface is NOT actually a nested mating feature of a kind above,\n  omit it. Omission is a true answer; a guessed geometry is not.\n\nTHE BODIES AND THEIR EXTENTS (centre, half-extent, world frame)\n  BOD-0001  centre=[0, 0, 0]  half_extent=[50, 30, 20]  (Stationary box base providing storage volume, support surfac)\n  BOD-0002  centre=[0, 0, 25]  half_extent=[50, 30, 5]  (Moving lid providing closure, hinge knuckle, and integrated )\n  BOD-0003  centre=[-48, 0, 20]  half_extent=[2, 30, 2]  (Hinge pin connecting base and lid, providing axial retention)\n\nTHE JOINTS\n  JNT-0001  FIXED      RGP-0002 -> RGP-0001  axis=NONE  origin=[-48, 0, 20]\n  JNT-0002  REVOLUTE   RGP-0003 -> RGP-0002  axis=+Y  origin=[-48, 0, 20]\n  JNT-0003  COMPLIANT  RGP-0004 -> RGP-0003  axis=+Y  origin=[40, 0, 30]\n\nTHE INTERFACES TO REFINE\n  IFC-0002  bodies=['BOD-0002', 'BOD-0003']  kind=CLEARANCE  nominal=True\n"
+   },
+   "response": {
+    "finish_reason": "stop",
+    "raw_text": "{\"mating_geometry\":[{\"interface\":\"IFC-0002\",\"inner_body\":\"BOD-0003\",\"outer_body\":\"BOD-0002\",\"inner_feature\":\"PIN\",\"outer_feature\":\"BORE\",\"inner_diameter\":4.0,\"outer_diameter\":4.0,\"engagement_length\":60.0,\"axis_joint\":\"JNT-0002\"}]}",
+    "reasoning_content_present": true,
+    "reasoning_content_stored": false,
+    "response_chars": 230,
+    "response_sha256": "a1862d3a466bbb82392fee4350f3bf1defea26656d9eff5916f454064ea25881",
+    "truncated": false
+   },
+   "run_id": "bm001-review",
+   "stage_attempt": 1,
+   "stage_id": "s04",
+   "timing": {
+    "duration_s": 250.795,
+    "ended_at": 1787420087.8195984,
+    "retry_wait_s": 0.0,
+    "started_at": 1787419837.0244465
+   },
+   "usage": {
+    "cached_input_tokens": 896,
+    "input_tokens": 993,
+    "output_tokens": 15196
+   }
+  }
+ ],
+ "provider_generate_calls_this_candidate": 1,
+ "raise_from_client": null,
+ "request_as_sent": {
+  "max_attempts": null,
+  "max_output_tokens": 65536,
+  "prompt_chars": 3198,
+  "responsibility_id": null,
+  "stage_id": "s04",
+  "temperature": 1.0
+ },
+ "response": {
+  "cached_input_tokens": 896,
+  "finish_reason": "stop",
+  "input_tokens": 993,
+  "output_tokens": 15196,
+  "raw_text_chars": 230,
+  "served_model_id": "deepseek-v4-pro",
+  "truncated": false
+ },
+ "transport_attempts_this_candidate": 1,
+ "wall_clock_s": 250.796
+}
