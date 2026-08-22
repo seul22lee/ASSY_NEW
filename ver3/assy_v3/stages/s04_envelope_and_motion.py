@@ -525,53 +525,29 @@ def incident_joints(joints, group):
             if group in (j.get("parent_group"), j.get("child_group"))]
 
 
-def distinctness_driver(joints, group, dof):
-    """(joint, code, note, refs) for the joint that carries (group, dof).
-
-    ONE COMPATIBLE JOINT OR NO ANSWER. Zero is a distinction the topology does
-    not support; more than one is a distinction the topology does not resolve.
-    Neither is a licence to pick, and picking is what let a slider answer for a
-    hinge - an arbitrary choice that then reported a positive contradiction,
-    because two configurations differing in rotation share a translation.
-    """
-    drivers, unreadable = [], []
-    for j in incident_joints(joints, group):
-        if axis_index(j.get("axis_direction")) is None:
-            unreadable.append(j)
-        elif dof in joint_free_dof(j):
-            drivers.append(j)
-    if len(drivers) == 1:
-        return drivers[0], None, None, [drivers[0].get("entity_id")]
-    if len(drivers) > 1:
-        names = sorted(str(j.get("entity_id")) for j in drivers)
-        return (None, "DISTINCTNESS_DRIVER_AMBIGUOUS",
-                "%s/%s could be carried by %s and the design does not say which"
-                % (group, dof, " or ".join(names)), names)
-    if unreadable:
-        names = sorted(str(j.get("entity_id")) for j in unreadable)
-        return (None, "DISTINCTNESS_DRIVER_AXIS_UNREADABLE",
-                "%s/%s: %s declare axes that name no coordinate"
-                % (group, dof, ", ".join(names)), names)
-    return (None, "DISTINCTNESS_DRIVER_UNKNOWN",
-            "no joint of this candidate leaves %s free at %s" % (dof, group), [])
-
-
 def distinctness_findings(configurations, coordinates, joints):
     """(findings, read) for whether DECLARED distinctness is numerically real.
 
-    ONE IMPLEMENTATION, TWO READERS, exactly as the requirement/realization rules
-    are: the pass that writes the coordinates asks it of the response it is about
-    to write, and feasibility asks it of the records that were written. A
-    producer that accepts numbers an evaluator then convicts is one question with
-    two answers, the second arriving too late to act on, so the formula is here
-    and there is only one.
+    ONE IMPLEMENTATION, TWO READERS: the pass that writes the coordinates asks it
+    of the response it is about to write, and feasibility asks it of the records
+    that were written. A producer that accepts numbers an evaluator then convicts
+    is one question with two answers, the second arriving too late to act on.
 
-    WHAT THIS IS NOT. `distinguishing_basis` says two named states are not the
-    same state, and this checks that the numbers agree. It is NOT a statement
-    that either state is reachable from the other - that demand is a
-    TransitionRequirement and `transition_reachability` answers it. Nothing here
-    is read there and nothing there is read here; mixing them is what made two
-    states differing into a demand that either be reachable.
+    THE BASIS NAMES ITS OWN JOINT. It used to name a rigid group, and no rigid
+    group has a coordinate - so every consumer had to decide WHICH joint
+    expressed that group's named DOF, and every way of deciding was a convention
+    rather than a fact. Taking the joint whose CHILD is the group read a relative
+    relation as a statement about which side moves; taking any incident joint
+    made the middle link of G1-[J1]-G2-[J2]-G3 ambiguous because it touches two.
+    The producer names the joint, this reads it, and a name that resolves to
+    nothing is reported rather than replaced by a guess.
+
+    WHAT THIS IS NOT. `distinguishing_basis` says two named states hold different
+    values of one named coordinate, and this checks that the numbers agree. It is
+    NOT a statement that either state is reachable from the other - that demand is
+    a TransitionRequirement and `transition_reachability` answers it - and it
+    identifies no moving body, so a joint's parent and child may be written
+    either way round without changing any verdict here.
 
     A NAMED REFERENCE IS AN ADDRESS. `differs_from` names the siblings this
     configuration must differ from; each is evaluated exactly, and one that is
@@ -581,12 +557,12 @@ def distinctness_findings(configurations, coordinates, joints):
     A finding is (code, note, refs). `read` is every entity consulted INCLUDING
     on the paths that found nothing: the joint whose coordinate decided that two
     states really do differ is what a PASS was computed from, so withdrawing it
-    must cost that PASS its standing. Naming facts only when they convict would
-    make provenance a record of complaints rather than of what was read.
+    must cost that PASS its standing.
 
     `coordinates` is {configuration id: {joint id: number}} - whatever the caller
     can see.
     """
+    by_id = {j.get("entity_id"): j for j in (joints or []) if isinstance(j, dict)}
     out: List[Tuple[str, str, List[str]]] = []
     read: List[str] = []
     for cfg in (configurations or []):
@@ -596,7 +572,7 @@ def distinctness_findings(configurations, coordinates, joints):
         for item in (cfg.get("distinguishing_basis") or []):
             if not isinstance(item, dict):
                 continue
-            group, dof = item.get("rigid_group"), item.get("dof")
+            jid, dof = item.get("joint"), item.get("dof")
             named = [o for o in (item.get("differs_from") or [])
                      if isinstance(o, str) and o]
             read.append(cid)
@@ -605,19 +581,45 @@ def distinctness_findings(configurations, coordinates, joints):
                 # against everything else would be inventing the sibling.
                 out.append(("DISTINCTNESS_NAMES_NO_SIBLING",
                             "%s declares a basis on %s/%s and names no sibling"
-                            % (cid, group, dof), [cid]))
+                            % (cid, jid, dof), [cid]))
+                continue
+            joint = by_id.get(jid)
+            if not isinstance(joint, dict):
+                out.append(("DISTINCTNESS_JOINT_NOT_VISIBLE",
+                            "%s declares a basis on %s, which is no joint of "
+                            "this candidate" % (cid, jid), [cid]))
+                continue
+            read.append(jid)
+            free = joint_free_dof(joint)
+            if dof not in free:
+                # A joint that does not free this degree of freedom has no
+                # coordinate in it, so there is no value for the comparison to
+                # read. Substituting one it DOES free would answer a different
+                # question from the one the design asked.
+                out.append(("DISTINCTNESS_DOF_NOT_SUPPORTED",
+                            "%s declares a basis on %s/%s and that joint "
+                            "declares %s"
+                            % (cid, jid, dof, ", ".join(sorted(free)) or "no free DOF"),
+                            [cid, jid]))
+                continue
+            if len(free) > 1:
+                # MULTI-DOF HONESTY. `State.joint_coordinates` holds ONE scalar
+                # per joint, so on a joint freeing several it cannot say which
+                # of them a value is about. Reading the scalar as the named DOF
+                # would manufacture evidence for exactly the degree of freedom
+                # under question.
+                out.append(("DISTINCTNESS_COORDINATE_NOT_RESOLVABLE",
+                            "%s declares a basis on %s/%s and that joint frees "
+                            "%s; one coordinate per joint cannot say which of "
+                            "them a value is about"
+                            % (cid, jid, dof, ", ".join(sorted(free))),
+                            [cid, jid]))
                 continue
             if cid not in coordinates:
                 out.append(("DISTINCTNESS_NOT_REALIZED_HERE",
                             "%s declares a basis and no coordinates are stated "
                             "for it" % cid, [cid]))
                 continue
-            joint, code, note, refs = distinctness_driver(joints, group, dof)
-            read += list(refs)
-            if joint is None:
-                out.append((code, note, [cid] + list(refs)))
-                continue
-            jid = joint.get("entity_id")
             q = (coordinates.get(cid) or {}).get(jid)
             for other in named:
                 read.append(other)
@@ -1767,14 +1769,6 @@ def joint_frame_check(state) -> List[str]:
             problems.append("JOINT_NOT_PLACED: %s has an axis and no frame origin"
                             % j["entity_id"])
     return problems
-
-
-def _driving_joint(state, group: str) -> Optional[Dict[str, Any]]:
-    """The joint whose coordinate moves this rigid group. One reader."""
-    for j in state.standing("Joint"):
-        if j.get("child_group") == group:
-            return j
-    return None
 
 
 def swept_clearance_check(state) -> List[str]:

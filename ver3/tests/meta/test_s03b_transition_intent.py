@@ -221,9 +221,9 @@ class TestTransitionConsistency(unittest.TestCase):
         stage = S03BMobilityAndAssembly()
         view = {"Configuration": [
             {"entity_id": "CFG-1", "distinguishing_basis": [
-                {"rigid_group": "RGP-2", "dof": "RY", "differs_from": ["CFG-2"]}]},
+                {"joint": "JNT-1", "dof": "RY", "differs_from": ["CFG-2"]}]},
             {"entity_id": "CFG-2", "distinguishing_basis": [
-                {"rigid_group": "RGP-2", "dof": "RY", "differs_from": ["CFG-1"]}]}],
+                {"joint": "JNT-1", "dof": "RY", "differs_from": ["CFG-1"]}]}],
             "Joint": [joint()]}
         ops = stage.to_operations({"constraint_relations": [], "load_paths": [],
                                    "assembly_steps": [], "unresolved": [],

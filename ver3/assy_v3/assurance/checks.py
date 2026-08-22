@@ -352,57 +352,49 @@ def required_distinctness_non_degeneracy(state) -> List[Finding]:
     """Declared distinctness survives realization.
 
     CONDITIONAL ON A DECLARED PREMISE, never "all joint pairs must differ".
-    S03 says which configurations must differ and on what basis; S04 authors the
-    coordinates. A blanket non-degeneracy rule would invent a requirement the
+    S03 says which configurations must differ and on what coordinate; S04 authors
+    the coordinates. A blanket non-degeneracy rule would invent a requirement the
     design never stated, which is the same defect as ignoring one it did.
+
+    THE RULE IS THE SHARED ONE. This capability had its own copy, and the copy
+    had both defects the shared rule exists to prevent: it inferred a driving
+    joint from the basis's rigid group - the inference the schema change removed
+    - and when `differs_from` named no realized sibling it fell back to "every
+    other realized configuration", answering a named reference with an entity
+    nobody named. Independence is about WHO ASKS, not about keeping a second
+    formula: this reads committed state, by a reader that did not write it, and
+    asks the one question there is.
     """
     by_config = {}
     for st in state.standing("State"):
         by_config[st.get("configuration") or st.get("name")] = st
-    out: List[Finding] = []
-    for cfg in sorted(state.standing("Configuration"), key=lambda c: c["entity_id"]):
+    configurations = sorted(state.standing("Configuration"),
+                            key=lambda c: c["entity_id"])
+    coordinates = {cid: (st.get("joint_coordinates") or {})
+                   for cid, st in by_config.items()}
+    findings, _read = _s04.distinctness_findings(
+        configurations, coordinates, state.standing("Joint"))
+    reported, out = set(), []
+    for code, note, refs in findings:
+        cid = refs[0] if refs else "?"
+        prop = "required_distinctness:%s|%s" % (cid, code)
+        reported.add(cid)
+        if code == "DECLARED_DISTINCTNESS_NOT_REALIZED":
+            out.append(_fail(prop, "DECLARED_DISTINCTNESS_NOT_REALIZED: %s" % note,
+                             list(refs)))
+        else:
+            out.append(_unknown(prop, note, list(refs)))
+    for cfg in configurations:
         basis = cfg.get("distinguishing_basis")
         if not isinstance(basis, list) or not basis:
             continue
-        mine = by_config.get(cfg["entity_id"])
-        for item in basis:
-            if not isinstance(item, dict):
-                continue
-            group, dof = item.get("rigid_group"), item.get("dof")
-            prop = "required_distinctness:%s|%s|%s" % (cfg["entity_id"], group, dof)
-            if mine is None:
-                out.append(_unknown(prop, "the configuration has no realized "
-                                          "state", [cfg["entity_id"]]))
-                continue
-            others = [o for o in (item.get("differs_from") or []) if o in by_config] \
-                or [k for k in by_config if k != cfg["entity_id"]]
-            drive = _s04._driving_joint(state, group)
-            if drive is None:
-                out.append(_unknown(prop, "no joint drives %s, so the declared "
-                                          "distinction cannot be measured"
-                                    % group, [cfg["entity_id"]]))
-                continue
-            jid = drive["entity_id"]
-            mine_q = (mine.get("joint_coordinates") or {}).get(jid)
-            degenerate, unknown = [], []
-            for other in others:
-                theirs = (by_config[other].get("joint_coordinates") or {}).get(jid)
-                if mine_q is None or theirs is None:
-                    unknown.append(other)
-                elif mine_q == theirs:
-                    degenerate.append(other)
-            if degenerate:
-                out.append(_fail(prop, "DECLARED_DISTINCTNESS_NOT_REALIZED: %s "
-                                       "realize %s at %r as well"
-                                 % (", ".join(sorted(degenerate)), jid, mine_q),
-                                 [cfg["entity_id"], jid] + degenerate))
-            elif unknown:
-                out.append(_unknown(prop, "%s do not state a coordinate for %s"
-                                    % (", ".join(sorted(unknown)), jid),
-                                    [cfg["entity_id"], jid]))
-            else:
-                out.append(_pass(prop, "the declared distinction is realized",
-                                 [cfg["entity_id"], jid]))
+        if cfg["entity_id"] in reported:
+            continue
+        out.append(_pass("required_distinctness:%s" % cfg["entity_id"],
+                         "every declared distinction is realized",
+                         [cfg["entity_id"]]
+                         + sorted({r.get("joint") for r in basis
+                                   if isinstance(r, dict) and r.get("joint")})))
     return out
 
 

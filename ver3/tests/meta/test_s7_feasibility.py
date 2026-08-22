@@ -434,7 +434,7 @@ class TestDomainPolicy(_Feas):
         present exactly this - and what must NOT happen is a producer admitting
         it and the mechanism being convicted for its author's mistake.
         """
-        basis = {"CFG-C0A": [{"rigid_group": _group(1, "A"), "dof": "RZ",
+        basis = {"CFG-C0A": [{"joint": "JNT-0A", "dof": "RZ",
                               "differs_from": ["CFG-C1A"]}]}
         state = self.hinge(s03a=topology("A", 2, [(0, 1)], basis=basis))
         self.revise(state, Op("SUPERSEDE", "State", "STA-CFG-C1A",
@@ -458,7 +458,7 @@ class TestDomainPolicy(_Feas):
         """NOT_APPLICABLE would be the wrong answer and the dangerous one: the
         design declares that a state change is required, so the question is
         asked and unanswered rather than not asked."""
-        basis = {"CFG-C0A": [{"rigid_group": _group(1, "A"), "dof": "RZ",
+        basis = {"CFG-C0A": [{"joint": "JNT-0A", "dof": "RZ",
                               "differs_from": ["CFG-C1A"]}]}
         state = self.hinge(s03a=topology("A", 2, [(0, 1)], basis=basis),
                            s04b=motion("A", "JNT-0A", _group(1, "A"),
@@ -1430,10 +1430,15 @@ class TestSourceCapture(_Feas):
 class TestExactReferences(_Feas):
 
     def basis_probe(self, differs_from, configs=2, joints=None, coords=None,
-                    basis_on="CFG-C0A", group=None, dof="RZ"):
-        """A hinge whose CFG basis names exactly the siblings given."""
-        group = group or _group(1, "A")
-        basis = {basis_on: [{"rigid_group": group, "dof": dof,
+                    basis_on="CFG-C0A", joint="JNT-0A", dof="RZ"):
+        """A hinge whose CFG basis names exactly the siblings given.
+
+        THE BASIS NAMES ITS JOINT. It named a rigid group and left every reader
+        to work out which joint expressed that group's DOF; `joint` is the
+        subject of the declaration now, and `joints` is still the topology's
+        joint list where a probe needs to replace it.
+        """
+        basis = {basis_on: [{"joint": joint, "dof": dof,
                              "differs_from": list(differs_from)}]}
         top = topology("A", 2, [(0, 1)], basis=basis, configs=configs)
         if joints is not None:
@@ -1467,9 +1472,9 @@ class TestExactReferences(_Feas):
         there answers a reference to an entity that does not exist.
 
         The state is no longer constructible. `distinguishing_basis` is a record
-        list whose `rigid_group` and `differs_from` members are now typed, so a
-        dangling sibling is refused by the write boundary - earlier, and for the
-        same reason. The domain branch that reported it remains as defence in
+        list whose `joint` and `differs_from` members are typed, so a dangling
+        sibling is refused by the write boundary - earlier, and for the same
+        reason. The domain branch that reported it remains as defence in
         depth; nothing can reach it through a canonical write.
         """
         from ver3.assy_v3.state.design_state import ContractError
@@ -1502,13 +1507,18 @@ class TestExactReferences(_Feas):
         self.assertEqual(s07.PASS, v.status, v.summary)
         self.assertNotIn("DECLARED_DISTINCTNESS_NOT_REALIZED", v.reason_codes)
 
-    def test_B43_the_driver_is_chosen_by_the_dof_not_by_the_order(self):
-        """A slider and a hinge on one group. The basis is about RZ, and the
-        slider holds the same value in both configurations - so choosing it
-        produced FAIL: an arbitrary pick manufacturing a contradiction."""
+    def test_B43_the_basis_names_its_own_joint_and_nothing_else_is_read(self):
+        """A slider and a hinge on one group, and a basis about the hinge.
+
+        This used to be about RESOLUTION: the basis named a group, two joints
+        touched it, and the code had to choose - which it did by taking the one
+        whose child was the group, so an arbitrary pick could land on the slider
+        and report FAIL because a translation is equal in both configurations.
+        The declaration names the joint now. Nothing is chosen, the other joint
+        is not read, and the order the joints arrive in cannot matter."""
         for order in (self.JOINTS, list(reversed(self.JOINTS))):
             state = self.basis_probe(
-                ["CFG-C1A"], joints=[dict(j) for j in order],
+                ["CFG-C1A"], joint="JNT-RA", joints=[dict(j) for j in order],
                 coords={"CFG-C0A": {"JNT-PA": 0, "JNT-RA": 0},
                         "CFG-C1A": {"JNT-PA": 0, "JNT-RA": 90}})
             v = self.domain(self.assess(state), "required_configurations")
@@ -1516,46 +1526,53 @@ class TestExactReferences(_Feas):
                              "order %s: %s" % ([j["id"] for j in order], v.summary))
             self.assertIn("JNT-RA", v.premises)
             self.assertNotIn("JNT-PA", v.premises,
-                             "a joint that carries no part of the requirement")
+                             "a joint the declaration does not name")
 
-    def test_B44_two_compatible_drivers_are_ambiguous(self):
+    def test_B44_two_joints_on_one_group_no_longer_make_it_ambiguous(self):
+        """The case the old address could not resolve: two compatible joints on
+        one group. There is nothing to resolve - the basis says which."""
         joints = [dict(j, id="JNT-R%dA" % n, joint_type="REVOLUTE",
                        axis_direction="+Z", dof=["RZ"])
                   for n, j in enumerate(self.JOINTS)]
         state = self.basis_probe(
-            ["CFG-C1A"], joints=joints,
+            ["CFG-C1A"], joint="JNT-R1A", joints=joints,
             coords={"CFG-C0A": {"JNT-R0A": 0, "JNT-R1A": 0},
-                    "CFG-C1A": {"JNT-R0A": 90, "JNT-R1A": 90}})
+                    "CFG-C1A": {"JNT-R0A": 0, "JNT-R1A": 90}})
         v = self.domain(self.assess(state), "required_configurations")
-        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
-        self.assertIn("DISTINCTNESS_DRIVER_AMBIGUOUS", v.reason_codes)
-        for jid in ("JNT-R0A", "JNT-R1A"):
-            self.assertIn(jid, v.premises,
-                          "the competing joints are what establish the ambiguity")
+        self.assertEqual(s07.PASS, v.status, v.summary)
+        self.assertNotIn("DISTINCTNESS_DRIVER_AMBIGUOUS", v.reason_codes)
+        self.assertIn("JNT-R1A", v.premises)
+        self.assertNotIn("JNT-R0A", v.premises)
 
-    def test_B45_no_compatible_driver_is_not_established(self):
-        joints = [dict(self.JOINTS[0])]          # PRISMATIC X only; basis wants RZ
-        state = self.basis_probe(["CFG-C1A"], joints=joints,
+    def test_B45_a_joint_that_does_not_free_the_named_dof(self):
+        """PRISMATIC along X, and a basis about RZ. The joint has no coordinate
+        in that degree of freedom, so there is no value to compare - and
+        substituting the one it DOES free would answer a different question."""
+        joints = [dict(self.JOINTS[0])]
+        state = self.basis_probe(["CFG-C1A"], joint="JNT-PA", joints=joints,
                                  coords={"CFG-C0A": {"JNT-PA": 0},
                                          "CFG-C1A": {"JNT-PA": 1}})
         v = self.domain(self.assess(state), "required_configurations")
         self.assertEqual(s07.NOT_ESTABLISHED, v.status)
-        self.assertIn("DISTINCTNESS_DRIVER_UNKNOWN", v.reason_codes)
+        self.assertIn("DISTINCTNESS_DOF_NOT_SUPPORTED", v.reason_codes)
 
-    def test_B45b_an_unreadable_axis_is_not_a_driver(self):
-        joints = [dict(self.JOINTS[1], axis_direction="DIAGONAL")]
-        state = self.basis_probe(["CFG-C1A"], joints=joints,
-                                 coords={"CFG-C0A": {"JNT-RA": 0},
-                                         "CFG-C1A": {"JNT-RA": 90}})
-        v = self.domain(self.assess(state), "required_configurations")
-        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
-        self.assertIn("DISTINCTNESS_DRIVER_AXIS_UNREADABLE", v.reason_codes)
+    def test_B45b_a_joint_this_candidate_does_not_have_cannot_be_written(self):
+        """A named reference is an address. `joint` is a typed reference now, so
+        one that resolves to nothing is refused by the write boundary - earlier
+        than any verdict, and for the same reason a dangling sibling is."""
+        from ver3.assy_v3.state.design_state import ContractError
+        with self.assertRaises(ContractError) as raised:
+            self.basis_probe(["CFG-C1A"], joint="JNT-NOWHERE",
+                             coords={"CFG-C0A": {"JNT-0A": 0},
+                                     "CFG-C1A": {"JNT-0A": 90}})
+        self.assertIn("DANGLING_REF", str(raised.exception))
+        self.assertIn("joint", str(raised.exception))
 
     def test_B50_configuration_order_cannot_change_the_answer(self):
         """The whole assessment, entity for entity, under a permuted view."""
         def run(reverse):
             top = topology("A", 2, [(0, 1)], configs=3, basis={
-                "CFG-C0A": [{"rigid_group": _group(1, "A"), "dof": "RZ",
+                "CFG-C0A": [{"joint": "JNT-0A", "dof": "RZ",
                              "differs_from": ["CFG-C1A"]}]})
             if reverse:
                 top["configurations"] = list(reversed(top["configurations"]))
@@ -1574,7 +1591,7 @@ class TestExactReferences(_Feas):
     def test_B51_joint_order_cannot_change_the_answer(self):
         def run(order):
             state = self.basis_probe(
-                ["CFG-C1A"], joints=[dict(j) for j in order],
+                ["CFG-C1A"], joint="JNT-RA", joints=[dict(j) for j in order],
                 coords={"CFG-C0A": {"JNT-PA": 0, "JNT-RA": 0},
                         "CFG-C1A": {"JNT-PA": 0, "JNT-RA": 90}})
             v = self.domain(self.assess(state, apply_patch=False),
@@ -2329,28 +2346,33 @@ class TestClosureSweep(unittest.TestCase):
         shared = inspect.getsource(s04.realization_findings)
         self.assertIn("realizations[0]", shared)
         self.assertIn("len(realizations) > 1", shared)
-        # And choosing the joint that carries a declared distinction, which
-        # moved out with the same rule.
-        driver = inspect.getsource(s04.distinctness_driver)
-        self.assertIn("drivers[0]", driver)
-        self.assertIn("len(drivers) == 1", driver)
+        # Choosing the joint that carries a declared distinction is GONE, not
+        # moved: the declaration names it, so there is no set to pick from.
+        self.assertFalse(hasattr(s04, "distinctness_driver"))
 
-    def test_SWEEP_14_the_address_of_a_driver_is_group_and_dof(self):
-        """Resolution runs through one function, and it takes both components.
+    def test_SWEEP_14_a_distinction_names_its_own_coordinate(self):
+        """THERE IS NO DRIVER TO RESOLVE ANY MORE.
 
-        That function moved. It was `_Evidence.drivers_for` plus a private
-        `_resolve_driver` here, and the pass that WRITES the coordinates had no
-        resolution at all - so a response naming two configurations at one
-        coordinate was accepted by the producer and convicted by the evaluator.
-        The rule is `s04.distinctness_driver` now, asked by both, and this
-        module keeps neither a copy nor a wrapper."""
+        The address was (rigid_group, dof), and no rigid group has a coordinate -
+        so every consumer had to decide which joint expressed it, and every way
+        of deciding was a convention: the child-side joint read a relative
+        relation as a statement about which side moves, and any-incident-joint
+        made the middle link of a chain ambiguous. The declaration names the
+        joint. Nothing here resolves one, and nothing here may."""
         import inspect
-        self.assertEqual(["joints", "group", "dof"],
-                         list(inspect.signature(s04.distinctness_driver).parameters))
-        for gone in ("_resolve_driver", "drivers_for", "joints_of"):
+        self.assertFalse(hasattr(s04, "distinctness_driver"))
+        for gone in ("_resolve_driver", "drivers_for", "joints_of",
+                     "DISTINCTNESS_DRIVER_AMBIGUOUS", "DISTINCTNESS_DRIVER_UNKNOWN",
+                     "DISTINCTNESS_DRIVER_AXIS_UNREADABLE"):
             self.assertNotIn(gone, self.src, gone)
         body = self.src.split("def _required_configurations(")[1].split("\ndef ")[0]
         self.assertIn("s04.distinctness_findings(", body)
+        # And the shared rule reads the named joint rather than searching for one.
+        shared = inspect.getsource(s04.distinctness_findings)
+        self.assertIn('jid, dof = item.get("joint"), item.get("dof")', shared)
+        for inference in ("incident_joints", "child_group", "parent_group",
+                          "rigid_group"):
+            self.assertNotIn(inference, shared, inference)
 
     def test_SWEEP_15_no_hard_demand_is_lost_between_s01_and_feasibility(self):
         """The two ingestion channels exist, neither depends on the other, and

@@ -258,7 +258,7 @@ class TestRealization(_Reach):
         """Two states declared to differ is verified by `required_configurations`
         and demands no motion. It was the replaced domain's main source of
         required cells and it is not a demand."""
-        basis = {"CFG-C0A": [{"rigid_group": _group(1, "A"), "dof": "RZ",
+        basis = {"CFG-C0A": [{"joint": "JNT-0A", "dof": "RZ",
                               "differs_from": ["CFG-C1A"]}]}
         state = self.probe(s03a=topology("A", 2, [(0, 1)], basis=basis),
                            s03b=evidence(demand=False),

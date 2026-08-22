@@ -130,11 +130,17 @@ NEW_CAPABILITIES = ("consumer_sufficiency", "reference_integrity",
 #: shared pure computation. Two of these are constants and seven are callables;
 #: the test derives the set from the AST and compares, so the record cannot drift
 #: from the import.
+#:
+#: `_s04._driving_joint` LEFT with the rigid-group basis. It answered "which
+#: joint moves this group" with the first joint whose CHILD was the group, and
+#: the one caller asked it in order to measure a declared distinction - a
+#: question that names its own joint now, so there is nothing to drive and no
+#: convention left to apply.
 SHARED_PURE_COMPUTATION = (
     "_s03.CONSTRAINT_DRIVERS", "_s03.QUALIFIER_WORDS",
-    "_s03.current_mobility_cells", "_s04._boxes", "_s04._driving_joint",
+    "_s03.current_mobility_cells", "_s04._boxes",
     "_s04._thaw", "_s04.box_gap", "_s04.coordinate_change_disagreement",
-    "_s04.required_contacts",
+    "_s04.distinctness_findings", "_s04.required_contacts",
 )
 
 _REPO = os.path.dirname(os.path.dirname(os.path.dirname(

@@ -203,7 +203,7 @@ def response(joints, **over):
                             "bodies_present": ["BOD-1", "BOD-2"],
                             "expected_mobility": [],
                             "distinguishing_basis": [
-                                {"rigid_group": "RGP-1", "dof": "RZ",
+                                {"joint": "JNT-1", "dof": "RZ",
                                  "differs_from": ["CFG-2"]}]},
                            {"id": "CFG-2", "name": "open", "kind": "OPERATIONAL",
                             "bodies_present": ["BOD-1", "BOD-2"],
@@ -322,9 +322,21 @@ class TestEachGuardStillFailsWhenItShould(_Seam):
     def test_a_distinguishing_basis_naming_the_wrong_family_is_rejected(self):
         """The nested references were unreachable by any boundary before."""
         resp = response([joint("JNT-1")])
-        resp["configurations"][0]["distinguishing_basis"][0]["rigid_group"] = "BOD-1"
+        resp["configurations"][0]["distinguishing_basis"][0]["joint"] = "BOD-1"
         problems = self.reject(self.upstream("basisfam"), resp)
         self.assertTrue(any("REFERENCE_FAMILY" in p for p in problems), problems)
+
+    def test_a_distinguishing_basis_naming_no_joint_is_rejected(self):
+        """The pair IS the coordinate. A row naming a rigid group and a DOF -
+        the shape this field used to have - names no coordinate at all, and is
+        refused here rather than carried forward for a consumer to guess at."""
+        resp = response([joint("JNT-1")])
+        row = resp["configurations"][0]["distinguishing_basis"][0]
+        row.pop("joint")
+        row["rigid_group"] = "RGP-1"
+        problems = self.reject(self.upstream("basisold"), resp)
+        self.assertTrue(any("RECORD_REQUIRED" in p and "joint" in p
+                            for p in problems), problems)
 
     def test_a_distinguishing_basis_naming_a_missing_configuration_is_rejected(self):
         resp = response([joint("JNT-1")])

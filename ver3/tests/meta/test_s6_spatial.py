@@ -326,7 +326,7 @@ class TestJointFrameAndAxis(_S04Chain):
 # =====================================================================
 class TestRealization(_S04Chain):
 
-    BASIS = {"CFG-C0A": [{"rigid_group": "RGP-G0A", "dof": "RZ",
+    BASIS = {"CFG-C0A": [{"joint": "JNT-A", "dof": "RZ",
                           "differs_from": ["CFG-C1A"]}]}
 
     def test_G6_declared_distinctness_that_realization_violates_is_a_finding(self):

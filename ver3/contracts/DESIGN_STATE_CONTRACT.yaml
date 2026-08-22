@@ -1882,34 +1882,55 @@ assurance_families:
         target: Body
         cardinality: many
         resolvable: false
-      # THE NESTED REFERENCES, typed. `distinguishing_basis` is a list of
-      # {rigid_group, dof, differs_from[]} and both id-bearing members were
-      # unreachable by any boundary: a group id that named nothing, or named a
-      # Body, was accepted, and the s04b check that realizes this basis in
-      # coordinates would then be comparing against a record it cannot resolve.
+      # WHAT IT ANSWERS: which GENERALIZED JOINT COORDINATE has a different value
+      # in this configuration than in each sibling it names. A configuration is
+      # identified by the coordinates that tell it apart from the others, and
+      # this names them exactly: a joint, a degree of freedom of that joint, and
+      # the siblings the value must differ from.
+      #
+      # THE JOINT IS NAMED, NOT INFERRED. This was `{rigid_group, dof}`, and no
+      # rigid group has a coordinate - a joint does. Every consumer therefore had
+      # to work out WHICH joint expressed the named group's named DOF, and every
+      # answer to that was a convention rather than a fact: taking the joint whose
+      # CHILD is the group read a relative relation as a statement about which
+      # side moves, and taking any incident joint made a serial chain ambiguous
+      # because the middle link of G1-[J1]-G2-[J2]-G3 touches two. Neither is
+      # something the design said. The producer names the joint now, and a
+      # consumer that cannot resolve the name reports that instead of guessing.
+      #
+      # WHAT IT DOES NOT SAY. Not that the DOF is FREE while this configuration
+      # holds: a latched lid is distinguished from an open one by a hinge
+      # coordinate different in each, and in both of them that coordinate is
+      # restrained - which is what makes them stable states rather than positions
+      # the mechanism drifts through. Not that either state is REACHABLE from the
+      # other: that demand is a TransitionRequirement, and nothing derives one
+      # from this. Not which body moves in the world: a joint's parent/child
+      # ordering is not that statement, so reversing it cannot change what this
+      # field means or what any consumer concludes from it.
       #
       # A plain record list, not a premise-record list: every row has the same
       # shape and there is no discriminator, so declaring one would be inventing
       # structure to reach the existing walker.
-      # WHAT IT ANSWERS: which (rigid group, DOF) VALUES differ between this
-      # configuration and the siblings it names. It is a statement about how two
-      # stable states are told apart.
-      #
-      # WHAT IT DOES NOT SAY: that the DOF is FREE while this configuration
-      # holds. A latched lid is distinguished from an open one by a hinge
-      # coordinate that is different in each, and in both of them that coordinate
-      # is restrained - which is what makes them stable states rather than
-      # positions the mechanism drifts through. Reading this field as a mobility
-      # requirement turns "these two states differ here" into "this must be free
-      # here", and the two are not the same claim.
       distinguishing_basis:
         kind: record_list
         record_field_semantics:
-          rigid_group:
+          # REQUIRED, both of them. A row is a generalized coordinate and the
+          # pair IS the coordinate: without the joint there is no coordinate to
+          # read, and without the DOF there is nothing to read of it. A row
+          # missing either says nothing, and a row written under the earlier
+          # `{rigid_group, dof}` shape is refused here rather than carried
+          # forward to be guessed at - which is what makes those outputs stale
+          # rather than quietly convertible.
+          joint:
             kind: reference
-            target: RigidGroup
+            target: Joint
             cardinality: one
             resolvable: false
+            required: true
+          dof:
+            kind: enum
+            values: [TX, TY, TZ, RX, RY, RZ]
+            required: true
           differs_from:
             kind: reference
             target: Configuration
@@ -1919,20 +1940,39 @@ assurance_families:
     owned_by: s03
     purpose: "A named assembly configuration, e.g. partially assembled, closed."
     required_fields: [entity_id, name, bodies_present, expected_mobility]
-    # S-6 / U-7. WHAT MAKES THIS CONFIGURATION A DIFFERENT ONE - the (rigid
-    # group, DOF) pairs whose values distinguish it from its named siblings.
-    # s03 authors it, because it is a mobility statement and not a geometry
-    # statement, and s04b must realize it: without it, two configurations differ
-    # only by having different ids, and a realization that gives them identical
-    # coordinates cannot be told from one that does not.
+    # S-6 / U-7. WHAT MAKES THIS CONFIGURATION A DIFFERENT ONE - the (joint, DOF)
+    # coordinates whose values distinguish it from its named siblings. s03a
+    # authors it, because which coordinate tells two states apart is a statement
+    # about the mechanism rather than about its geometry, and s04b must realize
+    # it: without it two configurations differ only by having different ids, and
+    # a realization giving them identical coordinates cannot be told from one
+    # that does not.
+    #
+    # THE NAMED JOINT MUST BE THIS CANDIDATE'S AND MUST SUPPORT THE NAMED DOF.
+    # A basis naming a joint that does not declare the degree of freedom it is
+    # about identifies no coordinate, and the value comparison then has nothing
+    # to read.
     optional_fields: [distinguishing_basis, kind]
     rules:
       - >
-        distinguishing_basis is a list of {rigid_group, dof, differs_from}. It is
+        distinguishing_basis is a list of {joint, dof, differs_from}. It is
         OPTIONAL: a mechanism may declare no required distinctness, and the check
         that realizes it is conditional on the declaration. It is never "all
         joint pairs must differ", which would be a rule about products rather
         than about this design.
+      - >
+        The joint a basis names must belong to this candidate and must declare
+        the DOF the basis is about. A basis naming a joint that does not free
+        that degree of freedom identifies no generalized coordinate, so the
+        values it asks to be compared do not exist.
+      - >
+        CONFIGURATION IDENTITY, NOT MOBILITY. A basis says two named states hold
+        different values of one named coordinate. It does not assert that the
+        coordinate is free in either state, it does not demand that either state
+        be reachable from the other - a TransitionRequirement is the only thing
+        that demands a state change - and it names no moving body: the joint's
+        parent and child may be written either way round without changing what
+        the basis means or what any consumer concludes from it.
 
   MobilityExpectation:
     # Role declared at S-7 / U-8: the family carried none, so a responsibility

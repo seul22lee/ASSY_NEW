@@ -402,7 +402,7 @@ class TestCapabilities(_Assurance):
         self.revise(state, Op("CREATE", "Configuration", "CFG-UNREALIZED",
                               dict(template, name="an unrealized state",
                                    distinguishing_basis=[
-                                       {"rigid_group": "RGP-G0A", "dof": "RZ"}]),
+                                       {"joint": "JNT-0A", "dof": "RZ"}]),
                               "t"), stage="s03")
         snapshot = run_assurance(state)
         failures = [f for f in snapshot.findings(model.FAIL)

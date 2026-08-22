@@ -293,7 +293,7 @@ class TestScopeAndLifecycle(_S04B):
         """Two configurations declared to differ is a statement that they are
         not the same state. It is not a statement that either is reachable from
         the other, and reading it as one was the inference being removed."""
-        basis = {"CFG-C0A": [{"rigid_group": "RGP-G0A", "dof": "RZ",
+        basis = {"CFG-C0A": [{"joint": "JNT-A", "dof": "RZ",
                               "differs_from": ["CFG-C1A"]}]}
         state, _ = self.build([("A", 2, 2)], basis=basis)   # and no demand
         self.assertTrue(any(c.get("distinguishing_basis")

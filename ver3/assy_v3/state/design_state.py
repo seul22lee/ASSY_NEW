@@ -765,9 +765,18 @@ class DesignState:
                            % (eid, key, index, type(row).__name__))
                 continue
             for name, sub in specs.items():
-                if name not in row or row[name] is None:
-                    continue
                 label = "%s.%s[%d].%s" % (eid, key, index, name)
+                if name not in row or row[name] is None:
+                    # A SUBFIELD THE RECORD CANNOT MEAN ANYTHING WITHOUT. Generic,
+                    # like the closed vocabulary below: a declaration says which
+                    # of its members are required and a row missing one is
+                    # refused here rather than reported by whichever consumer
+                    # reads it first. Declared nowhere by default, which is what
+                    # every optional member says by saying nothing.
+                    if sub.get("required"):
+                        out.append("RECORD_REQUIRED: %s is missing, and the "
+                                   "record means nothing without it" % label)
+                    continue
                 if sub.get("kind") == "reference":
                     out += self._one_reference(patch, seen, known, sub, row[name],
                                                label)

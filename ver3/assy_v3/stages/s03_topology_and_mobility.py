@@ -323,13 +323,20 @@ empty. Every field is required unless marked optional. No required field is null
   interfaces[]         id "IFC-0001", bodies[], interaction_kind, nominal,
                        addresses_obligations[]
   configurations[]     id "CFG-0001", name, kind, bodies_present[],
-                       distinguishing_basis[] {{rigid_group, dof, differs_from[]}}
+                       distinguishing_basis[] {{joint, dof, differs_from[]}}
                        - what makes this configuration a DIFFERENT one: the
-                       (rigid group, DOF) pairs whose value differs from the
-                       named sibling configurations. [] when nothing is required
-                       to differ. A later step realizes this in coordinates and
-                       is checked against it, so a name is never what
-                       distinguishes two states
+                       JOINT COORDINATES whose value differs from the named
+                       sibling configurations. [] when nothing is required to
+                       differ. A later step realizes this in coordinates and is
+                       checked against it, so a name is never what distinguishes
+                       two states.
+                       NAME THE JOINT YOURSELF. A rigid group has no coordinate;
+                       a joint does. Say WHICH joint's coordinate differs and in
+                       WHICH of its degrees of freedom - nothing downstream will
+                       work it out from the group, because on a chain
+                       G1-[J1]-G2-[J2]-G3 the middle link touches two joints and
+                       neither of them is the obvious one. The joint you name
+                       must be one you emit and must declare that DOF
   functional_regions[] id "FRG-0001", role, owning_bodies[],
                        required_by_actors[] (actor ids from the input; [] for
                        SUPPORT and KEEP_OUT regions no actor uses),
@@ -368,7 +375,8 @@ REFERENCES BETWEEN ITEMS
   joints[].frame_ids             frame names you coin here
   bodies[].addresses_obligations obligation ids from the input
   interfaces[].addresses_obligations obligation ids from the input
-  configurations[].distinguishing_basis[].rigid_group  a rigid group id you emit
+  configurations[].distinguishing_basis[].joint        a joint id you emit, which
+                                 must declare the dof named beside it
   configurations[].distinguishing_basis[].differs_from configuration ids you emit
   unresolved[].kept_open_by      Ambiguity or Freedom ids from the input, and
                                  nothing else - not a requirement, not a body
@@ -1322,7 +1330,7 @@ of, and what each one needs.
   product that nothing asked for.
 
   ADJACENCY IS NOT IN distinguishing_basis. That field says two configurations
-  DIFFER in some (rigid group, DOF) value. It does not say either can be reached
+  DIFFER in some named joint coordinate. It does not say either can be reached
   from the other, and it does not say that DOF is free in either of them - a
   latched lid and an open one differ in a hinge coordinate that is restrained in
   both, which is what makes them states rather than positions.
