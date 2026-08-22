@@ -431,10 +431,10 @@ class TestFeasibilityReconciliation(_Lifecycle):
         self.reconcile(state)
         spatial = records.current_domain_assessment(state, "CND-A",
                                                     "spatial_realization")
-        mobility = records.current_domain_assessment(state, "CND-A",
-                                                     "mobility_disposition")
+        reachability = records.current_domain_assessment(
+            state, "CND-A", "transition_reachability")
         self.assertEqual("NOT_ESTABLISHED", spatial["status"])
-        self.assertEqual("PASS", mobility["status"])
+        self.assertEqual("PASS", reachability["status"])
         self.author_envelope(state, fields)
         self.reconcile(state)
         self.assertEqual("PASS", records.current_domain_assessment(
@@ -536,14 +536,14 @@ class TestFeasibilityReconciliation(_Lifecycle):
         self.assertIsNone(out.patch)
 
         domain = records.current_domain_assessment(state, "CND-B",
-                                                   "mobility_disposition")
+                                                   "transition_reachability")
         fields = {k: v for k, v in domain.items()
                   if not k.startswith("_") and k != "entity_id"}
         self.revise(state, Op("CREATE", "FeasibilityDomainAssessment",
                               "FDA-CND-B-SECOND", fields, "t",
                               premise_refs=["CND-B"]), stage="feasibility")
         self.assertIsNone(records.current_domain_assessment(
-            state, "CND-B", "mobility_disposition"))
+            state, "CND-B", "transition_reachability"))
         self.assertTrue(records.multiplicity(state, "CND-B"))
 
     def test_F17b_one_current_compliance_record_per_requirement(self):
@@ -931,7 +931,7 @@ class TestPrecision(_Lifecycle):
         self.assertTrue(stale, "the change reached no verdict at all")
         self.assertEqual(STANDING, self.validity(
             state, records.current_domain_assessment(
-                state, "CND-A", "mobility_disposition")["entity_id"]))
+                state, "CND-A", "transition_reachability")["entity_id"]))
 
     def test_F52_a_design_wide_answer_does_move(self):
         state = self.chain()

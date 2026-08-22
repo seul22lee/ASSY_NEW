@@ -159,7 +159,18 @@ class TestDeclaredCorpus(_Base):
         # an id or to leave the field empty. MAY_BE_EMPTY: a fully determinate
         # source leaves no open question, and demanding one would make s01 invent
         # an ambiguity.
-        self.assertEqual(67, len(rows), "the premise corpus changed size")
+        #
+        # 69 at the motion-semantics migration: `demanded_state_change` is
+        # declared twice, by the pass that REALIZES a required state change and
+        # by the responsibility that judges whether it is reachable. Both were
+        # deciding for themselves whether one was required - s04b by inventing
+        # which two configurations a transition connects, feasibility by reading
+        # a configuration's `distinguishing_basis` as a demand - because the
+        # family that states it was in neither view. MAY_BE_EMPTY on both: a
+        # mechanism asked for no state change is an ordinary mechanism, and
+        # demanding a requirement before the question may be asked would make
+        # every static candidate unready.
+        self.assertEqual(69, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

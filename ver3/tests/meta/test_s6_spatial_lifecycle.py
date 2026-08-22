@@ -59,7 +59,8 @@ class _Probe(_S04Chain):
 BRANCH = "CND-A"
 
 IDS = {"state_a": "STA-CFG-C0A", "state_b": "STA-CFG-C1A",
-       "transition": "TRN-A", "sweep": "SWV-TRN-A-RGP-G0A",
+       "transition": "TRN-A", "requirement": "TRQ-A",
+       "sweep": "SWV-TRN-A-RGP-G0A",
        "joint": "JNT-A", "group": "RGP-G0A", "envelope": "ENV-0A",
        "other_envelope": "ENV-1A", "config": "CFG-C0A", "scale": "SCL-CND-A"}
 
@@ -77,10 +78,12 @@ class TestDependencyGraph(_Probe):
             "State: the configuration it realizes, the joints its coordinates "
             "are of, and the basis they are in")
         self.assertEqual(
-            {IDS["state_a"], IDS["state_b"], IDS["group"], IDS["joint"],
-             IDS["scale"], BRANCH},
+            {IDS["requirement"], IDS["state_a"], IDS["state_b"], IDS["group"],
+             IDS["joint"], IDS["scale"], BRANCH},
             self.prem(state, IDS["transition"]),
-            "Transition: both endpoints, what moves, which coordinate changes")
+            "Transition: the requirement that decides its endpoints and the "
+            "motion it has to carry out, both endpoints, what moves, which "
+            "coordinate changes")
         self.assertEqual(
             {IDS["transition"], IDS["group"], IDS["state_a"], IDS["state_b"],
              IDS["joint"], IDS["envelope"], IDS["scale"], BRANCH},

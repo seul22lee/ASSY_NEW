@@ -80,7 +80,7 @@ def _s03a(sfx, ngroups, nconfigs, basis=None):
     }
 
 
-def _s03b(sfx, relations=1, irrelevance=True):
+def _s03b(sfx, relations=1, irrelevance=True, demand=False):
     rels = [{"id": "CRL-%d%s" % (k, sfx), "retained_group": "RGP-G0%s" % sfx,
              "blocked_dofs": [("TZ", "TX", "TY")[k]],
              "configurations": ["CFG-C0%s" % sfx], "driver": "LOAD",
@@ -89,6 +89,15 @@ def _s03b(sfx, relations=1, irrelevance=True):
              "provider_site": "IFG-%s" % sfx,
              "maintaining_interaction": "PHI-%s" % sfx} for k in range(relations)]
     return {
+        # A DEMANDED STATE CHANGE ONLY WHERE ONE IS WANTED. Most cases here are
+        # about branch scope and premises and ask the mechanism for no state
+        # change; the ones that go on to author a path say so.
+        "transition_requirements": ([
+            {"id": "TRQ-%s" % sfx,
+             "from_configuration": "CFG-C0%s" % sfx,
+             "to_configuration": "CFG-C1%s" % sfx,
+             "required_relative_motions": [{"joint": "JNT-%s" % sfx,
+                                            "dof": "RZ"}]}] if demand else []),
         "physical_interactions": [
             {"id": "PHI-%s" % sfx, "groups": ["RGP-G0%s" % sfx],
              "effect": "TRANSMIT_FORCE", "discharges_effect": "PEO-0001",
@@ -138,7 +147,8 @@ class _Chain(_fixtures.StateBuilder, unittest.TestCase):
     def setUpClass(cls):
         cls.c = Contracts()
 
-    def build(self, shapes, relations=1, irrelevance=True, basis=None):
+    def build(self, shapes, relations=1, irrelevance=True, basis=None,
+              demand=False):
         """`shapes` is [(suffix, n_groups, n_configurations), ...]."""
         s = DesignState(run_id="branch")
         self.add(s, "s01", "Requirement", "REQ-0001", quantity_class="BAND")
@@ -148,7 +158,8 @@ class _Chain(_fixtures.StateBuilder, unittest.TestCase):
         payloads = [_s02([sfx for sfx, _g, _c in shapes])]
         for sfx, ng, nc in shapes:
             payloads += [_s03a(sfx, ng, nc, basis),
-                         _s03b(sfx, relations, irrelevance)]
+                         _s03b(sfx, relations, irrelevance,
+                               demand=demand and nc > 1)]
         provider = _Canned(*payloads)
         s.apply(S02ObligationAndCandidates().invoke(provider, s, s.run_id).patch)
         outs = {}

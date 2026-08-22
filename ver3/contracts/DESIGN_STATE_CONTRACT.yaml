@@ -804,9 +804,31 @@ entity_families:
         target: Joint
         cardinality: many
         resolvable: false
+      # WHICH DEMANDED STATE CHANGE THIS REALIZES. S-10 UNIT 3.
+      #
+      # TransitionRequirement is the symbolic intent - directed, relative, and
+      # carrying no coordinate. Transition is its NUMERICAL realization. Naming
+      # the requirement is what makes the pair checkable: a consumer asking "was
+      # the demanded change realized?" would otherwise have to guess which record
+      # meant which demand, and guessing by endpoint would credit a requirement
+      # with a transition authored for something else.
+      #
+      # OPTIONAL AT THE BOUNDARY, REQUIRED BY THE PRODUCER. The field is younger
+      # than the family: recorded Transitions predate it, and invalidating them
+      # would rewrite history to suit a new rule. Absence therefore means exactly
+      # "no realization of a requirement is established here", which is what
+      # feasibility reads, while s04b's own completeness requires it of
+      # everything it writes now.
+      realizes_requirement:
+        kind: reference
+        target: TransitionRequirement
+        cardinality: one
+        resolvable: false
+        referent_population: INVOCATION_BRANCH
     owned_by: s04
     purpose: "A path between two states."
     required_fields: [entity_id, from_state, to_state, path, changed_coordinates]
+    optional_fields: [realizes_requirement]
     authoritative_geometry_fields: [path, swept_volume]
     # S-6 / U-7. `sampling_declaration` LEFT this family. It was written here by
     # the parser from a module constant before any sweep had run, and a check
@@ -2451,7 +2473,7 @@ assurance_families:
     domain:
       - physical_realization
       - load_reaction_closure
-      - mobility_disposition
+      - transition_reachability
       - required_configurations
       - motion_and_transitions
       - spatial_realization
@@ -2508,7 +2530,7 @@ assurance_families:
     evaluated_domains:
       - physical_realization
       - load_reaction_closure
-      - mobility_disposition
+      - transition_reachability
       - required_configurations
       - motion_and_transitions
       - spatial_realization

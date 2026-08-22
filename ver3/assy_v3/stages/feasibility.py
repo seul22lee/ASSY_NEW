@@ -52,7 +52,7 @@ NO SECOND FORMULA
 from __future__ import annotations
 
 import math
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
 
 from ..lifecycle.records import (CURRENT_MULTIPLICITY,             # noqa: F401
                                  address_operations,
@@ -68,7 +68,20 @@ from . import s04_envelope_and_motion as s04
 RESPONSIBILITY = "feasibility"
 
 #: The nine domains, in the order the contract declares them.
-DOMAINS = ("physical_realization", "load_reaction_closure", "mobility_disposition",
+#:
+#: `transition_reachability` replaced `mobility_disposition`, in place and not
+#: beside it. The domain it replaced asked whether the six-DOF grid dispositioned
+#: as free every cell some other fact implied had to move, and it derived those
+#: cells from a configuration's `distinguishing_basis`, from a joint's
+#: `child_group`, and from a rule that the coordinate be free in BOTH endpoints -
+#: three inferences the representation does not support. Two states differing is
+#: not a demand that either be reachable; which side of a joint is its child is
+#: not a statement about what travels; and a mechanism blocked in its stable
+#: states and released during the change is an ordinary mechanism, not a
+#: contradiction. What is asked now is the narrower question the typed evidence
+#: can answer: whether the state change something ACTUALLY DEMANDED is supported
+#: by the topology, by the release semantics, and by a realization.
+DOMAINS = ("physical_realization", "load_reaction_closure", "transition_reachability",
            "required_configurations", "motion_and_transitions",
            "spatial_realization", "reach", "assemblability", "gross_interference")
 
@@ -536,210 +549,268 @@ def _load_reaction_closure(ev: _Evidence) -> Verdict:
     return Verdict("load_reaction_closure", status, codes, used, "; ".join(notes[:5]))
 
 
-def _required_motion_cells(ev: _Evidence):
-    """(group, configuration, dof) cells the design REQUIRES to move.
+#: HOW MUCH A REALIZATION FINDING COSTS THE REACHABILITY QUESTION.
+#:
+#: The rules that produce these codes live once, in the pass that writes a
+#: realization, so a producer and an evaluator cannot disagree about whether a
+#: demand was carried out. What a finding MEANS for eligibility is this table and
+#: nothing else, and the split it encodes is between a design that has said
+#: something contradictory and one that has not said enough:
+#:
+#:   FAIL             a positive contradiction. The numbers, or the topology, or
+#:                    the realization's own claim, say the demanded change did
+#:                    not happen - not that nobody has shown that it did.
+#:
+#:   NOT_ESTABLISHED  a fact the evidence does not carry. Absence never becomes
+#:                    impossibility here: a missing coordinate, a missing
+#:                    realization, a joint whose freedoms one scalar cannot tell
+#:                    apart, and a claim about what moves that was never made are
+#:                    all questions left open.
+_REALIZATION_COST = {
+    "JOINT_ABSENT": NOT_ESTABLISHED,
+    "DOF_NOT_SUPPORTED": FAIL,
+    "NO_REALIZATION": NOT_ESTABLISHED,
+    "REALIZED_MORE_THAN_ONCE": NOT_ESTABLISHED,
+    "ENDPOINT_STATE_ABSENT": NOT_ESTABLISHED,
+    "ENDPOINT_MISMATCH": FAIL,
+    "ENDPOINT_COORDINATES_ABSENT": NOT_ESTABLISHED,
+    "REQUIRED_COORDINATE_ABSENT": NOT_ESTABLISHED,
+    "REQUIRED_COORDINATE_NOT_A_NUMBER": NOT_ESTABLISHED,
+    "REQUIRED_MOTION_NOT_REALIZED": FAIL,
+    "REQUIRED_MOTION_NOT_DECLARED": NOT_ESTABLISHED,
+    "MOVING_SIDE_ABSENT": NOT_ESTABLISHED,
+    "MOVING_SIDE_UNRELATED": FAIL,
+    "REQUIRED_DOF_NOT_RESOLVABLE": NOT_ESTABLISHED,
+    "DECLARED_CHANGE_NOT_REALIZED": FAIL,
+}
 
-    THE ADDRESS IS ALL THREE COMPONENTS, because that is what a mobility cell is.
-    Dropping the configuration and matching on (group, dof) asked "is this DOF
-    ever blocked anywhere", which is a different question with a different
-    answer: a latch free when open and held when closed is a correct mechanism,
-    and the collapsed lookup read its closed cell as a contradiction of a motion
-    only its open cell is required to perform.
+#: The names the domain reports for the two of those the unit vocabulary renames.
+#: A code is read by code and by a person, and these two say what happened in the
+#: reachability question's own words rather than the producer's.
+_REACHABILITY_CODE = {
+    "NO_REALIZATION": "REQUIRED_TRANSITION_NOT_REALIZED",
+    "REALIZED_MORE_THAN_ONCE": "TRANSITION_REQUIREMENT_REALIZED_MULTIPLE_TIMES",
+    "REQUIRED_MOTION_NOT_REALIZED": "REQUIRED_RELATIVE_MOTION_NOT_REALIZED",
+}
 
-    From declared motion requirements only - a distinguishing basis, or a
-    transition whose changed joint has exactly one free DOF. NOT the 6-DOF
-    bookkeeping grid: totality is what the enumerator guarantees, and reading a
-    feasibility verdict off it would be reading it off this code.
 
-    A distinguishing basis is a statement about the configuration that CARRIES
-    it - "what makes this one a different one" - so it requires that
-    configuration's cell alone. A transition happens BETWEEN two configurations,
-    so it requires the cell in each endpoint: a coordinate that changes from one
-    to the other must be free at both ends of the change.
+def _relative_motions(entries) -> Set[Tuple[Any, Any]]:
+    """The (joint, dof) pairs a record explicitly states. Nothing derived."""
+    return {(e.get("joint"), e.get("dof")) for e in (entries or [])
+            if isinstance(e, dict) and e.get("joint") and e.get("dof")}
+
+
+def _active_at(relation, configuration) -> bool:
+    """Whether a restraint holds in one configuration, BY ITS OWN LIST.
+
+    An empty list is a statement that it holds NOWHERE - it is not shorthand for
+    everywhere, and reading it as one would make every relation a blocker of
+    every transition.
     """
-    cells, ambiguous, used = [], [], []
-    for cfg in ev.fam("Configuration"):
-        for item in (cfg.get("distinguishing_basis") or []):
-            if not isinstance(item, dict):
-                continue
-            group, dof = item.get("rigid_group"), item.get("dof")
-            if group and dof:
-                cells.append((group, cfg.get("entity_id"), dof))
-                used.append(cfg.get("entity_id"))
+    return configuration in {c for c in (relation.get("configurations") or [])
+                             if isinstance(c, str)}
+
+
+def _release_findings(ev: _Evidence, req, required):
+    """(status, code, note, premises) for what the source restraints do to a demand.
+
+    EXPLICIT MATCHES ONLY. A restraint blocks a required relative motion when its
+    own `blocked_relative_motions` names the same (joint, dof), and never because
+    its `retained_group` happens to be a side of that joint, because its
+    `blocked_dofs` happens to contain the letters, or because of what anything is
+    called. The unreleased explicit blocker is the ONE fact that makes a demanded
+    motion contradicted; everything else about a release declaration is a
+    question the evidence leaves open.
+
+    THE DESTINATION IS NOT ASKED. Blocked at the source, released during the
+    change, blocked again on arrival is an ordinary mechanism - a latch is one -
+    so nothing here requires the demanded freedom to survive into the state the
+    transition ends in.
+    """
+    out = []
+    source = req.get("from_configuration")
+    released = [r for r in (req.get("released_constraints") or [])
+                if isinstance(r, str)]
+    # KEYED ON ENTITY ID, which the write boundary makes unique, so naming a
+    # relation resolves to that relation or to nothing. Searching the family for
+    # the first match would be picking among same-family entities.
+    relations = {r.get("entity_id"): r for r in ev.fam("ConstraintRelation")}
+    for name, relation in sorted(relations.items()):
+        blocking = _relative_motions(relation.get("blocked_relative_motions")) & required
+        if not source or not _active_at(relation, source):
+            continue
+        if not blocking:
+            continue
+        if name not in released:
+            # G. THE CONTRADICTION. The demand says this relative motion has to
+            # happen where this restraint says it does not, and nothing claims
+            # to defeat the restraint.
+            out.append((FAIL, "UNRELEASED_REQUIRED_MOTION",
+                        "%s requires %s in %s and %s restrains it there without "
+                        "being released"
+                        % (req.get("entity_id"),
+                           ", ".join("%s/%s" % m for m in sorted(blocking)),
+                           source, name),
+                        [name]))
+            continue
+        # H. RELEASED. Being blocked in the stable source state is then legal and
+        # costs nothing; what remains open is how the release is achieved.
+        if not str(relation.get("defeat_specification") or "").strip():
+            out.append((NOT_ESTABLISHED, "RELEASE_EVIDENCE_NOT_ESTABLISHED",
+                        "%s releases %s, which states no defeat specification, "
+                        "so how the release is achieved is not established"
+                        % (req.get("entity_id"), name),
+                        [name]))
+        else:
+            out.append((PASS, None, None, [name]))
+    # J. A RELEASE DECLARATION THAT ANSWERS NOTHING. Naming a relation that is
+    # not active at the source, or that states no blocked relative motion, or
+    # whose blocked motions are disjoint from what is required, leaves the
+    # reachability question open - it does not prove the motion impossible, and
+    # manufacturing a FAIL from an irrelevant link would be inventing physics
+    # from a bookkeeping mistake. s03b's own checker calls out the authored
+    # inconsistency; this domain answers only the narrower eligibility question.
+    for name in released:
+        relation = relations.get(name)
+        if relation is None:
+            continue
+        if not _active_at(relation, source):
+            out.append((NOT_ESTABLISHED, "RELEASE_NOT_ACTIVE_AT_SOURCE",
+                        "%s releases %s, which holds in %s and not in %s"
+                        % (req.get("entity_id"), name,
+                           ", ".join(sorted(c for c in
+                                            (relation.get("configurations") or [])
+                                            if isinstance(c, str)))
+                           or "no configuration", source),
+                        [name]))
+            continue
+        restrained = _relative_motions(relation.get("blocked_relative_motions"))
+        if not restrained:
+            out.append((NOT_ESTABLISHED, "RELEASE_RELATIVE_MOTION_NOT_ESTABLISHED",
+                        "%s releases %s, and that relation does not say which "
+                        "relative joint motion it restrains"
+                        % (req.get("entity_id"), name), [name]))
+        elif not (restrained & required):
+            out.append((NOT_ESTABLISHED, "RELEASE_RELATION_NOT_APPLICABLE",
+                        "%s releases %s, which restrains %s and the transition "
+                        "requires %s"
+                        % (req.get("entity_id"), name,
+                           ", ".join("%s/%s" % m for m in sorted(restrained)),
+                           ", ".join("%s/%s" % m for m in sorted(required))),
+                        [name]))
+    return out
+
+
+def _realizations_of(ev: _Evidence, req) -> List[Dict[str, Any]]:
+    """The written Transitions that claim to realize one demand, AS WRITTEN.
+
+    Endpoint configurations are read from the endpoint States rather than from
+    the requirement, because whether the realization runs between the two states
+    that were demanded is exactly what the caller has to be able to ask.
+    """
     states = {st.get("entity_id"): st for st in ev.fam("State")}
+    out = []
     for t in ev.fam("Transition"):
-        tid = t.get("entity_id")
-        endpoints = [states.get(t.get(f)) for f in ("from_state", "to_state")]
-        configs = [(st or {}).get("configuration") for st in endpoints]
-        for jid in (t.get("changed_coordinates") or []):
-            joint = ev.by_id.get(jid)
-            # THE REFERENT MUST BE A VISIBLE JOINT. A changed coordinate that
-            # resolves to no joint in the view - or to an entity of some other
-            # family - produced no requirement at all under the old `continue`:
-            # the motion the transition declared simply vanished instead of being
-            # questioned, which is the demand-hidden-by-absence defect one level
-            # down.
-            if not isinstance(joint, dict) or joint.get("_family") != "Joint":
-                ambiguous.append((
-                    "CHANGED_COORDINATE_NOT_A_JOINT",
-                    "%s declares %s changes and it names no visible joint"
-                    % (tid, jid)))
-                used += [tid, jid]
-                continue
-            # AN AXIS THIS PIPELINE CANNOT READ IS A CELL NOBODY DECLARED. The
-            # free DOF now comes from the joint's own field, but the cell ADDRESS
-            # this transition needs is still (group, configuration, dof) about a
-            # coordinate, and a joint whose axis names none has not said which
-            # one moves. The requirement is unresolvable rather than silently
-            # assumed to be about Z, which is what `free_dof` would have answered.
-            # `spatial_realization` already refuses the same axis; this refuses it
-            # for the cell address it would otherwise fabricate.
-            if s04.axis_index(joint.get("axis_direction")) is None:
-                ambiguous.append((
-                    "REQUIRED_MOTION_AXIS_UNREADABLE",
-                    "%s changes %s whose axis %r names no coordinate"
-                    % (tid, jid, joint.get("axis_direction"))))
-                used += [tid, jid]
-                continue
-            free = s03.joint_free_dof(joint)
-            group = joint.get("child_group")
-            if len(free) == 1 and group:
-                for cfg in [c for c in configs if c]:
-                    cells.append((group, cfg, sorted(free)[0]))
-                used += [tid, jid] + [
-                    st.get("entity_id") for st in endpoints if st]
-            elif group:
-                # A multi-DOF class: the representation does not say WHICH
-                # coordinate this transition moves, and guessing would invent the
-                # requirement the verdict is about.
-                ambiguous.append((
-                    "MULTI_DOF_JOINT_NOT_RESOLVABLE",
-                    "%s leaves more than one DOF free at %s and the "
-                    "representation does not say which one moves" % (jid, group)))
-                used += [tid, jid]
-    return sorted(set(cells)), ambiguous, used
+        if t.get("realizes_requirement") != req.get("entity_id"):
+            continue
+        a = states.get(t.get("from_state")) or {}
+        b = states.get(t.get("to_state")) or {}
+        out.append({"id": t.get("entity_id"),
+                    "from_configuration": a.get("configuration"),
+                    "to_configuration": b.get("configuration"),
+                    "moving_groups": (t.get("path") or {}).get("moving_groups"),
+                    "changed_coordinates": t.get("changed_coordinates"),
+                    "_states": [st for st in (a, b) if st]})
+    # SORTED BY ID, so which record answers a demand realized more than once is
+    # not decided by the order the family happens to come back in. That it was
+    # realized more than once is itself the finding; picking deterministically
+    # is what makes the finding reproducible rather than a lottery.
+    return sorted(out, key=lambda t: str(t["id"]))
 
 
-def _disposition_support(ev: _Evidence, d, group: str, dof: str):
-    """Whether the joint an INTENDED cell cites really leaves that cell free.
+def _transition_reachability(ev: _Evidence) -> Verdict:
+    """Is the state change this design DEMANDS actually supported?
 
-    Reads `joint_free_dof`, so the question "does this joint free this DOF" has
-    the one answer s03's derivation used to author the claim. Asking the CLASS
-    here contradicted the grid it was checking: the cell says RY because the
-    joint declares RY, and the class rule for COMPLIANT says TY, so every flexure
-    was reported as not freeing what it frees.
+    THE DEMAND IS A TYPED RECORD. A TransitionRequirement says which two states,
+    which joints have to move relative to each other and in which degree of
+    freedom, and which restraints the change defeats. Nothing else creates the
+    question: two configurations declared to differ are two states that differ,
+    and `required_configurations` verifies exactly that - it is not a statement
+    that either is reachable from the other, and the domain this replaced read it
+    as one.
+
+    Three facts have to hold, and they fail in different ways. The TOPOLOGY has
+    to have the freedom (a joint that cannot turn about the axis the demand names
+    is a contradiction). A REALIZATION has to exist, connect the demanded pair,
+    and move the demanded coordinate (numbers that do not move are a
+    contradiction; numbers nobody wrote are a question). And the RESTRAINTS
+    active where the change begins have to be released, explicitly, by this
+    demand (an active explicit blocker nobody released is a contradiction; a
+    release nobody explained is a question).
     """
-    joint = ev.by_id.get(d.get("by_joint"))
-    if not isinstance(joint, dict) or joint.get("_family") != "Joint":
-        return [("DISPOSITION_PREMISE_NOT_A_JOINT",
-                 "%s/%s cites %s, which is no joint of this candidate"
-                 % (group, dof, d.get("by_joint")))]
-    if joint.get("child_group") != group:
-        return [("DISPOSITION_JOINT_DRIVES_ANOTHER_GROUP",
-                 "%s/%s cites %s, whose child is %s"
-                 % (group, dof, joint["entity_id"], joint.get("child_group")))]
-    if s04.axis_index(joint.get("axis_direction")) is None:
-        # An unreadable axis leaves the cell address unestablished, and a
-        # verdict about a cell nobody addressed can neither confirm nor refute.
-        return [("DISPOSITION_JOINT_AXIS_UNREADABLE",
-                 "%s/%s cites %s, whose axis %r names no coordinate"
-                 % (group, dof, joint["entity_id"], joint.get("axis_direction")))]
-    if dof not in s03.joint_free_dof(joint):
-        return [("DISPOSITION_JOINT_DOES_NOT_FREE_IT",
-                 "%s/%s cites %s, a %s about %s, which declares %s free"
-                 % (group, dof, joint["entity_id"], joint.get("joint_type"),
-                    joint.get("axis_direction"),
-                    ", ".join(sorted(s03.joint_free_dof(joint))) or "nothing"))]
-    return []
-
-
-def _mobility_disposition(ev: _Evidence) -> Verdict:
-    """Every DOF the design requires to move is dispositioned as free."""
-    cells, ambiguous, used = _required_motion_cells(ev)
+    requirements = ev.fam("TransitionRequirement")
     demanded = ev.motion_demands()
-    if not cells and not ambiguous:
+    if not requirements:
         if demanded:
             # THE DEMAND IS THE APPLICABILITY TEST. An effect obligation that
             # requires movement is a motion question whether or not anything has
-            # been built to answer it, and reporting NOT_APPLICABLE here would
-            # excuse the candidate for having produced nothing to judge.
-            return Verdict("mobility_disposition", NOT_ESTABLISHED,
-                           ["MOTION_DEMANDED_WITHOUT_REALIZATION"],
+            # been authored to answer it, and NOT_APPLICABLE would excuse the
+            # candidate for having produced nothing to judge.
+            return Verdict("transition_reachability", NOT_ESTABLISHED,
+                           ["MOTION_DEMANDED_WITHOUT_TRANSITION_REQUIREMENT"],
                            [p.get("entity_id") for p in demanded],
                            "%d effect obligation(s) require movement and no "
-                           "configuration or transition declares which DOF moves"
+                           "transition requirement states which state change"
                            % len(demanded))
-        return Verdict("mobility_disposition", NOT_APPLICABLE, ["NO_REQUIRED_MOTION"])
-    # EVERY DISPOSITION OF A CELL, not the last one indexed. Two records
-    # dispositioning one cell is two answers to what is known about it, and
-    # assignment kept whichever came last - so which MobilityExpectation a
-    # verdict rested on, and whether that verdict was INTENDED or BLOCKED_BY,
-    # could turn on insertion order.
-    disposed: Dict[Any, List[Tuple[str, Dict[str, Any]]]] = {}
-    for mex in ev.fam("MobilityExpectation"):
-        for d in (mex.get("dispositions") or []):
-            if isinstance(d, dict):
-                disposed.setdefault((d.get("rigid_group"), d.get("configuration"),
-                                     d.get("dof")), []).append(
-                                         (mex.get("entity_id"), d))
-    codes, notes = [], []
+        return Verdict("transition_reachability", NOT_APPLICABLE,
+                       ["NO_REQUIRED_MOTION"])
+
+    joints = {j.get("entity_id"): j for j in ev.fam("Joint")}
+    codes, notes, used = [], [], []
     status = PASS
-    for code, note in ambiguous:
-        # EACH UNRESOLVABLE REQUIREMENT REPORTS ITS OWN REASON. A multi-DOF
-        # class, an unreadable axis and a coordinate that names no joint are
-        # three different ways the design has not said which cell must move, and
-        # one code standing for all three would describe two of them wrongly.
-        codes.append(code)
-        notes.append(note)
-        status = _weaken(status, NOT_ESTABLISHED)
-    for cell in cells:
-        group, configuration, dof = cell
-        rows = disposed.get(cell) or []
-        if not rows:
-            codes.append("REQUIRED_CELL_NOT_DISPOSITIONED")
-            notes.append("%s/%s/%s has no disposition" % cell)
-            status = _weaken(status, NOT_ESTABLISHED)
-            continue
-        if len(rows) > 1:
-            codes.append("CELL_DISPOSITIONED_TWICE")
-            notes.append("%s/%s/%s is dispositioned by %s" % (
-                cell + (", ".join(sorted(m for m, _d in rows)),)))
-            status = _weaken(status, NOT_ESTABLISHED)
-            used += sorted(m for m, _d in rows)
-            continue
-        mid, d = rows[0]
-        verdict = d.get("disposition")
-        if verdict == "INTENDED" and d.get("by_joint"):
-            used += [mid, d["by_joint"]]
-            # THE CITED JOINT MUST ACTUALLY FREE THIS CELL. `by_joint` is a
-            # reference, and the write boundary checks that it resolves to a
-            # Joint - not that the joint's own class and axis leave this DOF of
-            # this group free. Taking the citation on trust let a disposition
-            # assert mobility its own evidence does not provide, which is the
-            # typed-relation-accepted-by-id defect the effect discharge had.
-            #
-            # NOT_ESTABLISHED rather than FAIL: a miscited premise fails to
-            # support the motion, where a FAIL would claim the design has shown
-            # the motion cannot happen.
-            for code, note in _disposition_support(ev, d, group, dof):
-                codes.append(code)
-                notes.append(note)
-                status = _weaken(status, NOT_ESTABLISHED)
-        elif verdict in ("BLOCKED_BY", "IRRELEVANT_BECAUSE"):
-            codes.append("REQUIRED_MOTION_CONTRADICTED")
-            notes.append("%s must move in %s and is %s"
-                         % (group + "/" + dof, configuration, verdict))
-            status = FAIL
-            used += [mid] + [d[f] for f in ("constraint_relation", "scenario")
-                             if d.get(f)]
-        else:
-            codes.append("REQUIRED_CELL_UNDISPOSITIONED")
-            notes.append("%s/%s/%s is %s" % (group, configuration, dof, verdict))
-            status = _weaken(status, NOT_ESTABLISHED)
-            used.append(mid)
+    for req in requirements:
+        used.append(req.get("entity_id"))
+        required = _relative_motions(req.get("required_relative_motions"))
+        realizations = _realizations_of(ev, req)
+        # EXACTLY THE ENDPOINT STATES THE REALIZATION USED, and not every state
+        # that happens to realize the same configuration: what this verdict was
+        # computed from is the coordinates the transition's own endpoints hold.
+        # Whether a configuration is realized twice is a different question, and
+        # `required_configurations` is the domain that asks it.
+        # THE COORDINATES OF THE REALIZATION BEING JUDGED, and of no other. When
+        # two records claim one demand the shared rules judge the first and
+        # report the duplication; merging every claimant's endpoints into one map
+        # would check one record's declaration against another record's numbers
+        # and could manufacture a contradiction out of the ambiguity.
+        coordinates = {}
+        for t in realizations:
+            states = t.pop("_states")
+            used += [st.get("entity_id") for st in states]
+            used.append(t["id"])
+            if t is not realizations[0]:
+                continue
+            for st in states:
+                coordinates[st.get("configuration")] = st.get("joint_coordinates") or {}
+        for code, note in s04.realization_findings(
+                req, realizations, coordinates, joints):
+            codes.append(_REACHABILITY_CODE.get(code, code))
+            notes.append(note)
+            status = (FAIL if _REALIZATION_COST[code] == FAIL
+                      else _weaken(status, NOT_ESTABLISHED))
+        for verdict, code, note, premises in _release_findings(ev, req, required):
+            used += premises
+            if code is None:
+                continue
+            codes.append(code)
+            notes.append(note)
+            status = FAIL if verdict == FAIL else _weaken(status, NOT_ESTABLISHED)
+    used += [j for j in joints
+             if any(j == m[0] for req in requirements
+                    for m in _relative_motions(req.get("required_relative_motions")))]
     if status == PASS:
-        codes.append("EVERY_REQUIRED_CELL_INTENDED")
-    return Verdict("mobility_disposition", status, codes, used, "; ".join(notes[:5]))
+        codes.append("EVERY_DEMANDED_CHANGE_REACHABLE")
+    return Verdict("transition_reachability", status, codes,
+                   [u for u in used if u], "; ".join(notes[:5]))
 
 
 def _resolve_driver(ev: _Evidence, group: str, dof: str):
@@ -864,24 +935,38 @@ def _required_configurations(ev: _Evidence) -> Verdict:
 
 
 def _motion_and_transitions(ev: _Evidence) -> Verdict:
-    """A transition moves exactly the coordinates it says it moves."""
+    """A transition moves exactly the coordinates it says it moves.
+
+    REALIZATION INTEGRITY, AND NOT STABLE-STATE MOBILITY. Whether the demanded
+    change is SUPPORTED - by the topology, by the restraints active where it
+    starts, by a realization that carries it out - is
+    `transition_reachability`'s question. Whether the records that were written
+    are coherent with themselves and with each other is this one's, and the two
+    are kept apart so a single defect is not counted twice under two names.
+
+    THE DEMAND IS A TransitionRequirement. It used to be a configuration's
+    `distinguishing_basis` as well: two states declared to differ made a
+    transition required, which read a statement that they are not the same state
+    as a statement that one is reachable from the other. That difference is
+    verified where it belongs - `required_configurations` checks that named
+    stable states really do differ numerically - and it demands no motion.
+    """
     transitions = ev.fam("Transition")
-    declaring = [cfg for cfg in ev.fam("Configuration")
-                 if cfg.get("distinguishing_basis")]
+    required = ev.fam("TransitionRequirement")
     demanded = ev.motion_demands()
     if not transitions:
         # A STATE CHANGE IS REQUIRED AND NOTHING DESCRIBES IT. Absent, not
         # inapplicable - that difference is the whole point of the domain, and
-        # the demand may come from either direction: a configuration declaring
-        # what makes it different, or an effect obligation that cannot be
-        # discharged without movement.
-        if declaring or demanded:
+        # the demand may come from either direction: a requirement stating the
+        # change, or an effect obligation that cannot be discharged without
+        # movement.
+        if required or demanded:
             return Verdict(
                 "motion_and_transitions", NOT_ESTABLISHED,
                 ["REQUIRED_TRANSITION_MISSING"],
-                [e.get("entity_id") for e in declaring + demanded],
+                [e.get("entity_id") for e in list(required) + demanded],
                 "%d motion demand(s) and no transition realizes any of them"
-                % len(declaring + demanded))
+                % len(list(required) + demanded))
         return Verdict("motion_and_transitions", NOT_APPLICABLE, ["NO_REQUIRED_MOTION"])
     codes, notes, used = [], [], []
     status = PASS
@@ -1275,7 +1360,7 @@ def _gross_interference(ev: _Evidence) -> Verdict:
 DOMAIN_EVALUATORS: Dict[str, Callable[[_Evidence], Verdict]] = {
     "physical_realization": _physical_realization,
     "load_reaction_closure": _load_reaction_closure,
-    "mobility_disposition": _mobility_disposition,
+    "transition_reachability": _transition_reachability,
     "required_configurations": _required_configurations,
     "motion_and_transitions": _motion_and_transitions,
     "spatial_realization": _spatial_realization,

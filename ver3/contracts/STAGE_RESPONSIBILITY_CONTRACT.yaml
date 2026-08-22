@@ -709,6 +709,32 @@ stages:
       - motion_path
       - motion_occupancy
       - kinematic_axis
+    - class: demanded_state_change
+      # THE AUTHORITY FOR WHETHER A STATE CHANGE IS REQUIRED. The domain that
+      # asks it used to derive the demand from a configuration's
+      # `distinguishing_basis` - two states declared to differ read as one being
+      # reachable from the other - and from a joint's `child_group`. Neither is
+      # a statement the representation makes, and the family that does make it
+      # was not in this view, so the domain could not have read it.
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a mechanism asked for no state change demands none, and
+          that is an answer rather than a gap - demanding a requirement before
+          the question may be asked would make every static candidate unready
+        why: a demanded state change is stated while embodying one candidate
+      what: the state changes this candidate is required to be able to perform
+      justified_by_question: Does the established evidence contain anything that stops this candidate
+        working?
+      why: >
+        `transition_reachability` decides whether the demanded directed change is
+        supported by the topology, by the restraints active where it begins, and
+        by a realization. All three are read against the DEMAND, so a view
+        without it can only answer by inferring one - which is the defect the
+        domain was replaced to remove.
+      requires_semantics:
+      - transition_requirement
     - class: candidate_local_geometric_finding
       instance_selection:
         population: INVOCATION_BRANCH
@@ -1429,6 +1455,25 @@ stages:
         choice exists. No provisional decision is invented and no candidate is
         selected in order to run it.
     required_reasoning_premise_classes:
+    # S-10 UNIT 3. WHAT MUST BE POSSIBLE, which this pass realizes. Without it
+    # s04b was asked to invent which configurations a transition connects, so
+    # endpoint topology had two authors and nothing compared them.
+    - class: demanded_state_change
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: >
+          a mechanism with one configuration demands no state change, and a
+          candidate that has not been asked for one is not thereby defective
+      what: the directed state changes this candidate must be capable of
+      justified_by_question: Which coordinates change in each transition, and along
+        what path?
+      why: >
+        A realization names the requirement it realizes, so the requirement has
+        to be visible to the pass that realizes it.
+      requires_semantics:
+      - transition_requirement
     - class: prior_spatial_commitment
       instance_selection:
         population: INVOCATION_BRANCH

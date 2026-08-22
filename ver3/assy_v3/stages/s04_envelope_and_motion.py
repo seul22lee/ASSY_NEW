@@ -42,6 +42,10 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 from ..state.authority import thaw as _thaw
 from ..state.patch import Op
 from .base import Stage, carry_invocation_premises
+#: The canonical DOF vocabulary and the one answer to what a joint frees, read
+#: from the pass that owns them rather than restated - two spellings of one
+#: closed set is how they drift apart.
+from .s03_topology_and_mobility import DOF_NAMES, joint_free_dof
 
 AXIS_INDEX = {"X": 0, "Y": 1, "Z": 2}
 
@@ -434,8 +438,8 @@ class S04AEnvelopeAndReach(Stage):
 S04B_PROMPT = """You are placing a mechanism in space and describing how it moves,
 so that a later step can test whether the motion is actually clear.
 
-You receive the mechanism and its provisional arrangement. You do not receive the
-original request.
+You receive the mechanism, its provisional arrangement, and the state changes it
+is required to be able to perform. You do not receive the original request.
 
 WHAT YOU ARE DECIDING
 1. Where each JOINT sits - its frame origin, as a position in the same
@@ -444,7 +448,11 @@ WHAT YOU ARE DECIDING
 2. For every configuration, the COORDINATE of every joint in that configuration -
    an angle in degrees for a revolute or compliant joint, a distance for a
    prismatic one, in the same relative units.
-3. Which configuration each transition goes from and to.
+3. How each state change the mechanism is REQUIRED to perform is carried out in
+   numbers: which joints move, by how much, and which groups move relative to
+   each other. You are not deciding WHICH state changes are required or which
+   two states each one runs between - those were decided when the mechanism was
+   described, and they are in the input as transition requirements.
 
 Do not state that anything is clear, interferes, or sweeps through anything. You
 cannot see that and are not being asked: it is computed from your numbers.
@@ -454,11 +462,17 @@ Return a single JSON object with these keys.
 
   joint_placements[]   joint, origin [x,y,z]
   state_coordinates[]  configuration, coordinates {{<joint id>: number}}
-  transitions[]        id "TRN-0001", from_configuration, to_configuration,
-                       moving_groups[], changed_coordinates[] (the joint ids
-                       whose coordinate this transition changes - it is checked
-                       against your own endpoint coordinates, so declare exactly
-                       the ones that differ between them)
+  transitions[]        id "TRN-0001", realizes_requirement, moving_groups[],
+                       changed_coordinates[] (the joint ids whose coordinate this
+                       transition changes - it is checked against your own
+                       endpoint coordinates, so declare exactly the ones that
+                       differ between them)
+                       ONE PER TRANSITION REQUIREMENT in the input, and the
+                       endpoints are NOT yours to state: the requirement already
+                       says which configuration it goes from and to, and
+                       restating them would be a second answer to a question that
+                       has one. Name the requirement in realizes_requirement and
+                       give the coordinates that carry it out.
   envelope_revisions[] envelope, half_extent [x,y,z], centre [x,y,z],
                        geometric_reason - ONLY where placing the mechanism shows
                        the arrangement you were given cannot hold. The
@@ -480,14 +494,169 @@ mechanism that does not exist.
 REFERENCES
   joint_placements[].joint           a joint id from the input
   state_coordinates[].configuration  a configuration id from the input
-  transitions[].from_configuration / to_configuration  configuration ids
-  transitions[].moving_groups        rigid group ids from the input
+  transitions[].realizes_requirement a transition requirement id from the input
+  transitions[].moving_groups        rigid group ids from the input - the groups
+                                     that move relative to each other. For each
+                                     joint whose coordinate changes, name at
+                                     least one of the two groups that joint
+                                     connects; either side may be the one that
+                                     travels, and both may.
   transitions[].changed_coordinates  joint ids from the input
   envelope_revisions[].envelope      an envelope id from the input
 
 THE MECHANISM AND ITS ARRANGEMENT
 {mechanism}
 """
+
+
+
+def realization_findings(requirement, realizations, coordinates, joints):
+    """(code, note) for ONE demanded state change and what claims to realize it.
+
+    ONE IMPLEMENTATION, TWO READERS. The pass that writes a realization asks this
+    of the response it is about to write; feasibility asks it of the records that
+    were written. Two rules about one question is how a producer comes to accept
+    what an evaluator then rejects for a reason the producer could have given, so
+    the matching lives here once and each caller decides only what a finding
+    COSTS - incompleteness on one side, a domain status on the other.
+
+    WHAT IS NOT READ. Not `distinguishing_basis`: two states differing is not a
+    demand that either be reachable. Not which side of a joint is its child: a
+    joint states a RELATIVE relation, so either incident group moving establishes
+    the motion and reversing parent and child changes no finding. Not names, not
+    ordering, not counts - only the fields the demand and the realization state.
+
+    `realizations` are dicts of id, from_configuration, to_configuration (None
+    where the endpoint record is absent), moving_groups and changed_coordinates.
+    `coordinates` is {configuration: {joint id: number}} and `joints` is
+    {joint id: joint}, both as the caller can see them.
+    """
+    rid = requirement.get("entity_id") or requirement.get("id")
+    frm = requirement.get("from_configuration")
+    to = requirement.get("to_configuration")
+    required = [m for m in (requirement.get("required_relative_motions") or [])
+                if isinstance(m, dict)]
+    out: List[Tuple[str, str]] = []
+
+    # A. THE TOPOLOGY HAS TO HAVE THE FREEDOM THE DEMAND NEEDS. Asked of the
+    # joint's own declared DOF through the one reader of that field, so this
+    # agrees with every other consumer of it by construction.
+    for motion in required:
+        jid, dof = motion.get("joint"), motion.get("dof")
+        joint = joints.get(jid)
+        if not isinstance(joint, dict):
+            out.append(("JOINT_ABSENT",
+                        "%s requires %s to move and no such joint is visible"
+                        % (rid, jid)))
+            continue
+        free = joint_free_dof(joint)
+        if dof not in free:
+            out.append(("DOF_NOT_SUPPORTED",
+                        "%s requires %s/%s and that joint declares %s"
+                        % (rid, jid, dof, ", ".join(sorted(free)) or "no free DOF")))
+
+    # B. exactly one realization
+    if not realizations:
+        out.append(("NO_REALIZATION",
+                    "%s demands a change from %s to %s and nothing realizes it"
+                    % (rid, frm, to)))
+        return out
+    if len(realizations) > 1:
+        out.append(("REALIZED_MORE_THAN_ONCE",
+                    "%s is realized %d times (%s); a demand realized more than "
+                    "once has no single answer"
+                    % (rid, len(realizations),
+                       ", ".join(sorted(str(r.get("id")) for r in realizations)))))
+    t = realizations[0]
+    tid = t.get("id")
+
+    # C. and it has to run between the two states the demand names
+    if t.get("from_configuration") is None or t.get("to_configuration") is None:
+        out.append(("ENDPOINT_STATE_ABSENT",
+                    "%s has an endpoint that resolves to no state, so what it "
+                    "connects is not established" % tid))
+        return out
+    if (t.get("from_configuration"), t.get("to_configuration")) != (frm, to):
+        out.append(("ENDPOINT_MISMATCH",
+                    "%s demands %s -> %s and %s connects %s -> %s"
+                    % (rid, frm, to, tid, t.get("from_configuration"),
+                       t.get("to_configuration"))))
+        return out
+    for cfg in (frm, to):
+        if cfg not in coordinates:
+            out.append(("ENDPOINT_COORDINATES_ABSENT",
+                        "%s ends at configuration %s and no coordinates are "
+                        "stated for it" % (rid, cfg)))
+    if frm not in coordinates or to not in coordinates:
+        return out
+
+    changed = [c for c in (t.get("changed_coordinates") or []) if isinstance(c, str)]
+    moving = [g for g in (t.get("moving_groups") or []) if isinstance(g, str)]
+    for motion in required:
+        jid, dof = motion.get("joint"), motion.get("dof")
+        joint = joints.get(jid) or {}
+        a, b = coordinates[frm].get(jid), coordinates[to].get(jid)
+        if a is None or b is None:
+            out.append(("REQUIRED_COORDINATE_ABSENT",
+                        "%s requires %s to move and %s has no coordinate for it "
+                        "in %s" % (rid, jid, tid, frm if a is None else to)))
+            continue
+        try:
+            unchanged = float(a) == float(b)
+        except (TypeError, ValueError):
+            out.append(("REQUIRED_COORDINATE_NOT_A_NUMBER",
+                        "%s requires %s to move and its endpoint coordinates are "
+                        "not numbers" % (rid, jid)))
+            continue
+        if unchanged:
+            out.append(("REQUIRED_MOTION_NOT_REALIZED",
+                        "%s requires %s to move and its coordinate is %s at both "
+                        "ends" % (rid, jid, a)))
+        if jid not in changed:
+            out.append(("REQUIRED_MOTION_NOT_DECLARED",
+                        "%s requires %s to move and %s does not list it among "
+                        "the coordinates it changes" % (rid, jid, tid)))
+        # E. EITHER INCIDENT GROUP. The joint relates two groups and says nothing
+        # about which of them travels; requiring the child would be reading a
+        # relative orientation as an absolute one. Naming nothing and naming
+        # something unrelated are different answers: one has not said what moves,
+        # the other has said something that does not answer the demand.
+        incident = {joint.get("parent_group"), joint.get("child_group")}
+        incident.discard(None)
+        if not moving:
+            out.append(("MOVING_SIDE_ABSENT",
+                        "%s requires %s to move and %s names nothing that moves"
+                        % (rid, jid, tid)))
+        elif incident and not (incident & set(moving)):
+            out.append(("MOVING_SIDE_UNRELATED",
+                        "%s requires %s to move and %s names no group of that "
+                        "joint among what moves (%s)"
+                        % (rid, jid, tid, ", ".join(sorted(moving)))))
+        # MULTI-DOF HONESTY. One scalar per joint cannot say WHICH degree of
+        # freedom of a multi-DOF joint it moved, and guessing would manufacture
+        # evidence for the required one.
+        free = sorted(d for d in joint_free_dof(joint) if d in DOF_NAMES)
+        if len(free) > 1:
+            out.append(("REQUIRED_DOF_NOT_RESOLVABLE",
+                        "%s requires %s/%s and that joint declares %s; one "
+                        "coordinate per joint cannot say which of them moved, so "
+                        "the required motion is not established by these numbers"
+                        % (rid, jid, dof, ", ".join(free))))
+    # THE OTHER DIRECTION. A coordinate claimed to change whose endpoints are
+    # equal is a positive contradiction of the realization's own claim, and is
+    # checked here so neither a silent omission nor a silent addition passes.
+    for jid in changed:
+        a, b = coordinates[frm].get(jid), coordinates[to].get(jid)
+        if a is None or b is None:
+            continue
+        try:
+            if float(a) == float(b):
+                out.append(("DECLARED_CHANGE_NOT_REALIZED",
+                            "%s lists %s among the coordinates it changes and "
+                            "its endpoints are both %s" % (tid, jid, a)))
+        except (TypeError, ValueError):
+            pass
+    return out
 
 
 class S04BPlacementAndMotion(Stage):
@@ -524,10 +693,35 @@ class S04BPlacementAndMotion(Stage):
                 "joint_coordinates": coords},
                 prov, premise_refs=self._state_premises(
                     view, st["configuration"], coords)))
+        # THE ENDPOINTS COME FROM THE REQUIREMENT, and from nowhere else. The
+        # model used to state them, which made s03b and s04b two authors of the
+        # same fact with nothing comparing them; a transition that named the
+        # wrong pair was a realization of nothing, indistinguishable from one
+        # that named the right pair. Resolving them here gives the topology one
+        # owner. A requirement this consumer was not given resolves to nothing
+        # and is REPORTED by `completeness` - the operation is not written,
+        # because inventing the endpoints is the defect being removed.
+        demanded = {r.get("entity_id"): r
+                    for r in (view.get("TransitionRequirement") or [])
+                    if isinstance(r, dict)}
+        realized = {st.get("configuration") for st in
+                    parsed.get("state_coordinates", [])}
         for t in parsed.get("transitions", []):
+            required = demanded.get(t.get("realizes_requirement"))
+            if required is None:
+                continue
+            # AND THE ENDPOINT STATES HAVE TO EXIST. A demand can name a
+            # configuration this response stated no coordinates for; the
+            # endpoint is then a state nothing wrote, and a path to it would be
+            # a reference to a record that does not exist. `completeness`
+            # reports the missing coordinates - the path is simply not written.
+            if not {required.get("from_configuration"),
+                    required.get("to_configuration")} <= realized:
+                continue
             ops.append(Op("CREATE", "Transition", t["id"], {
-                "from_state": "STA-%s" % t["from_configuration"],
-                "to_state": "STA-%s" % t["to_configuration"],
+                "from_state": "STA-%s" % required.get("from_configuration"),
+                "to_state": "STA-%s" % required.get("to_configuration"),
+                "realizes_requirement": t["realizes_requirement"],
                 "path": {"moving_groups": t.get("moving_groups", [])},
                 "changed_coordinates": t.get("changed_coordinates", [])},
                 prov, premise_refs=self._transition_premises(view, t)))
@@ -571,13 +765,36 @@ class S04BPlacementAndMotion(Stage):
         out |= {j for j in (coordinates or {}) if isinstance(j, str)}
         return sorted(out | set(self._scale_premise(view)))
 
+    @staticmethod
+    def _endpoints(view, t) -> Tuple[Optional[str], Optional[str]]:
+        """The configurations a transition connects, READ FROM ITS REQUIREMENT.
+
+        One owner for endpoint topology. Everything in this pass that needs to
+        know where a transition starts and ends asks here, so the premise list,
+        the swept motion and the written operation cannot disagree about it -
+        which they could when each read a field the model restated.
+        """
+        for r in (view.get("TransitionRequirement") or []):
+            if isinstance(r, dict) and r.get("entity_id") == t.get("realizes_requirement"):
+                return r.get("from_configuration"), r.get("to_configuration")
+        return None, None
+
     def _transition_premises(self, view, t) -> List[str]:
-        """Its endpoints, what moves, and which coordinates it says change."""
-        out = {"STA-%s" % t.get("from_configuration"),
-               "STA-%s" % t.get("to_configuration")}
+        """Its requirement, its endpoints, what moves, and what it says changes.
+
+        THE REQUIREMENT IS A PREMISE. It decides the endpoints and the motion
+        this realization has to carry out, so withdrawing or revising it costs
+        the realization its standing - which is what a premise means, and what
+        the transitive walk then applies to everything computed from it.
+        """
+        frm, to = self._endpoints(view, t)
+        out = {"STA-%s" % frm if frm else None,
+               "STA-%s" % to if to else None,
+               t.get("realizes_requirement")}
         out |= {g for g in (t.get("moving_groups") or []) if isinstance(g, str)}
         out |= {j for j in (t.get("changed_coordinates") or []) if isinstance(j, str)}
-        return sorted(out | set(self._scale_premise(view)))
+        return sorted({x for x in out if isinstance(x, str) and x}
+                      | set(self._scale_premise(view)))
 
     def _sweep_premises(self, view, t, group, joint_id, envelope_id) -> List[str]:
         """Exactly what `sweep_hull` read to produce this occupancy.
@@ -588,9 +805,10 @@ class S04BPlacementAndMotion(Stage):
         swept. Change any of them and this hull is wrong; change any other
         envelope and it is not.
         """
+        frm, to = self._endpoints(view, t)
         out = {t.get("id"), group, joint_id, envelope_id,
-               "STA-%s" % t.get("from_configuration"),
-               "STA-%s" % t.get("to_configuration")}
+               "STA-%s" % frm if frm else None,
+               "STA-%s" % to if to else None}
         return sorted({x for x in out if isinstance(x, str) and x}
                       | set(self._scale_premise(view)))
 
@@ -714,8 +932,18 @@ class S04BPlacementAndMotion(Stage):
                   for st in (parsed.get("state_coordinates") or [])}
         ops: List[Op] = []
         for t in parsed.get("transitions") or []:
-            ca = coords.get(t.get("from_configuration")) or {}
-            cb = coords.get(t.get("to_configuration")) or {}
+            frm, to = self._endpoints(view, t)
+            # NO SWEEP FOR A TRANSITION THAT WAS NOT WRITTEN. `to_operations`
+            # skips a transition whose requirement this consumer was not given,
+            # or whose endpoint states this response stated no coordinates for -
+            # inventing either is the defect being removed - and a hull computed
+            # for it would reference records no patch creates. The two skips are
+            # the same condition read from the same two places, so the sweep can
+            # never outlive the path it is the occupancy of.
+            if frm is None or to is None or frm not in coords or to not in coords:
+                continue
+            ca = coords.get(frm) or {}
+            cb = coords.get(to) or {}
             for group in (t.get("moving_groups") or []):
                 body = gb.get(group)
                 drive = next((j for j in joints.values()
@@ -750,6 +978,65 @@ class S04BPlacementAndMotion(Stage):
         # this, so a derived value has to say it itself.
         return carry_invocation_premises(ops, self.invocation_premises(inputs))
 
+    def _realization_problems(self, parsed, inputs) -> List[str]:
+        """Whether every demanded state change was actually carried out here.
+
+        THE REQUIREMENT IS THE SUBJECT. s04b does not decide which transitions a
+        mechanism needs - s03b already did, directed and symbolic - so this asks
+        only whether each demand got exactly one realization and whether the
+        numbers in that realization do what the demand asked for.
+
+        THE RULES ARE `realization_findings`, and the two things this adds are
+        the two only a producer can say: a transition that named no requirement
+        at all, and one that named a requirement this consumer was not given.
+        Both are refusals to write the record rather than judgements about a
+        record, which is why they are here and the rest is shared.
+        """
+        view = inputs.get(self.context_key) or {}
+        required = [r for r in (view.get("TransitionRequirement") or [])
+                    if isinstance(r, dict)]
+        joints = {j["entity_id"]: j for j in (view.get("Joint") or [])}
+        coordinates = {st.get("configuration"): (st.get("coordinates") or {})
+                       for st in (parsed.get("state_coordinates") or [])}
+        out: List[str] = []
+
+        known = {r.get("entity_id") for r in required}
+        by_requirement: Dict[str, List[Dict[str, Any]]] = {}
+        for t in (parsed.get("transitions") or []):
+            if not isinstance(t, dict):
+                continue
+            name = t.get("realizes_requirement")
+            if not isinstance(name, str) or not name:
+                out.append("transition %s realizes no requirement; a transition "
+                           "this pass writes is the realization of a demanded "
+                           "state change and says which" % t.get("id"))
+                continue
+            if name not in known:
+                out.append("transition %s realizes %s, which this consumer was "
+                           "not given; the endpoints of a transition come from "
+                           "its requirement, so nothing was written for it"
+                           % (t.get("id"), name))
+                continue
+            by_requirement.setdefault(name, []).append(t)
+
+        for demand in required:
+            rid = demand.get("entity_id")
+            # THE ENDPOINTS ARE THE DEMAND'S. This pass resolves them from the
+            # requirement when it writes the record, so a realization here
+            # cannot connect a different pair - the mismatch the shared rules
+            # look for is a question about written records, and it is asked of
+            # them by the evaluator that reads them.
+            realizations = [
+                {"id": t.get("id"),
+                 "from_configuration": demand.get("from_configuration"),
+                 "to_configuration": demand.get("to_configuration"),
+                 "moving_groups": t.get("moving_groups"),
+                 "changed_coordinates": t.get("changed_coordinates")}
+                for t in (by_requirement.get(rid) or [])]
+            out += [note for _code, note in realization_findings(
+                demand, realizations, coordinates, joints)]
+        return out
+
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
         out: List[str] = []
         joints = {j["entity_id"] for j in inputs["consumer_view"].get("Joint", [])}
@@ -760,8 +1047,7 @@ class S04BPlacementAndMotion(Stage):
         stated = {s.get("configuration") for s in parsed.get("state_coordinates", [])}
         for missing in sorted(configs - stated):
             out.append("configuration %s has no joint coordinates" % missing)
-        if len(configs) > 1 and not parsed.get("transitions"):
-            out.append("more than one configuration and no transition between them")
+        out.extend(self._realization_problems(parsed, inputs))
         # An axis this pass cannot use is not this pass's to invent. Reported
         # where the placement is claimed, so the run records that the motion was
         # never computable rather than that it was computed.

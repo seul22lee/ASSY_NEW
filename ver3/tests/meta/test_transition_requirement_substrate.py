@@ -333,38 +333,56 @@ class TestTheSubstrateChangesNothingYet(_Substrate):
                                           "driver": "LOAD",
                                           "provider_body": "BOD-1"}))
 
-    def test_no_responsibility_requires_it_as_a_premise(self):
-        """Producing it is not requiring it. Unit 2 gave s03b the question; no
-        consumer has been pointed at the answer yet."""
+    def test_exactly_the_two_consumers_that_need_it_require_it(self):
+        """Unit 1 asserted that NOBODY required it, which was true of the unit
+        that defined the vocabulary; Unit 2 gave it a producer and no consumer.
+        It has two now, and only two: the pass that REALIZES a demanded state
+        change in numbers, and the responsibility that judges whether the
+        demanded change is reachable. Pinned as an equality, because a family
+        required by a pass with no question for it is a second input channel -
+        and one required by nobody was the state in which two passes decided for
+        themselves what the design demands."""
         with open(os.path.join(_paths.REPO_ROOT, "ver3", "contracts",
                                "STAGE_RESPONSIBILITY_CONTRACT.yaml")) as fh:
             responsibility = yaml.safe_load(fh)
         roles = set(self.families["TransitionRequirement"]["semantic_roles"])
+        requiring = set()
         for name, stage in responsibility["stages"].items():
             for premise in stage.get("required_reasoning_premise_classes") or []:
                 needed = set(premise.get("requires_semantics") or [])
                 if not (needed & roles):
                     continue
-                # A role this family shares with another may legitimately be
-                # required; what must not exist yet is a premise satisfied ONLY
-                # by this family.
+                # A role this family shares with another does not make the
+                # premise about this family; what counts is a premise ONLY this
+                # family can satisfy.
                 satisfying = {f for f, spec in self.families.items()
                               if set(spec.get("semantic_roles") or []) & needed}
-                self.assertNotEqual({"TransitionRequirement"}, satisfying,
-                                    "%s already requires it as a premise" % name)
+                if satisfying == {"TransitionRequirement"}:
+                    requiring.add(name)
+        self.assertEqual({"s04b", "feasibility"}, requiring)
 
-    def test_only_s03b_writes_one(self):
-        """Unit 1 asserted that NOBODY wrote one, which was true of the unit that
-        defined the vocabulary. Unit 2 gave it a producer, so the property worth
-        holding is the narrower one: s03 authors it and s04 does not touch it.
-        The write boundary enforces the same thing through ownership; this says
-        it about the code, so a stage that started emitting one would be visible
-        here as well as refused there."""
+    def test_only_s03_writes_one_and_s04_only_points_at_it(self):
+        """Unit 1 asserted that NOBODY wrote one; Unit 2 gave it a producer. The
+        property worth holding now is the ownership split: s03 AUTHORS the
+        requirement and s04 never does - it writes a Transition that NAMES one.
+        The write boundary enforces the ownership; this says it about the code,
+        so a stage that started emitting one would be visible here as well as
+        refused there."""
         import inspect
         import ver3.assy_v3.stages.s03_topology_and_mobility as s03
         import ver3.assy_v3.stages.s04_envelope_and_motion as s04
         self.assertIn('"TransitionRequirement"', inspect.getsource(s03))
-        self.assertNotIn('"TransitionRequirement"', inspect.getsource(s04))
+        src = inspect.getsource(s04)
+        # s04 READS the family and REFERENCES it; it authors no operation of it.
+        self.assertIn('"TransitionRequirement"', src)
+        for authoring in ('"CREATE", "TransitionRequirement"',
+                          '"EXTEND", "TransitionRequirement"',
+                          '"SUPERSEDE", "TransitionRequirement"',
+                          '"INVALIDATE", "TransitionRequirement"'):
+            self.assertNotIn(authoring, src, authoring)
+        self.assertEqual(
+            "s03", self.families["TransitionRequirement"]["owned_by"],
+            "the family's owner is what the write boundary enforces")
 
 
 # ======================================================================

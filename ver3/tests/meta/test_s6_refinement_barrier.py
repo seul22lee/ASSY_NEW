@@ -40,7 +40,11 @@ class _Barrier(_S04Chain):
     """s01..s04a through the real chain, then s04b under the caller's control."""
 
     def upto_s04a(self, shapes=(("A", 2, 2),)):
-        state, _ = self.build(list(shapes))
+        # WITH A DEMANDED STATE CHANGE, because every realization below authors
+        # a transition and a transition is the realization of a demand. Which
+        # two states it connects comes from the requirement, so a mechanism
+        # asked for no change has no path for this suite to withhold.
+        state, _ = self.build(list(shapes), demand=True)
         invs = {}
         for sfx, ng, _nc in shapes:
             inv = cv.InvocationContext(branch="CND-%s" % sfx)
@@ -214,7 +218,7 @@ class TestRefinementBarrier(_Barrier):
                        self.realization(revisions=[revision("ENV-0A")]))
         self.call_s04b(manual, invs["A"], self.realization())
 
-        runner, _ = self.build([("A", 2, 2)])
+        runner, _ = self.build([("A", 2, 2)], demand=True)
         inv = cv.InvocationContext(branch="CND-A")
         provider = _Canned(s04a_response(["BOD-G0A", "BOD-G1A"], step="ASY-A",
                                          actor="ACT-0001"),
@@ -235,7 +239,7 @@ class TestRefinementBarrier(_Barrier):
 
     def test_R9b_the_runner_bounds_the_refresh(self):
         """A stage that keeps revising is reported, not looped on."""
-        runner, _ = self.build([("A", 2, 2)])
+        runner, _ = self.build([("A", 2, 2)], demand=True)
         inv = cv.InvocationContext(branch="CND-A")
         forever = self.realization(revisions=[revision("ENV-0A")])
         provider = _Canned(s04a_response(["BOD-G0A", "BOD-G1A"], step="ASY-A",

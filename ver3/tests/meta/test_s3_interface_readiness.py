@@ -425,7 +425,15 @@ class TestSourceB(_Base):
         # or Freedom entities keeping a decision open, while the view carried
         # neither family - so the stage was asked to reference entities it could
         # not see.
-        self.assertEqual(36, total)
+        #
+        # 38 at the motion-semantics migration: `demanded_state_change`, declared
+        # by s04b and by feasibility. It resolves through the
+        # `transition_requirement` role to the TransitionRequirement family - the
+        # one place the design says which state change is required. Both passes
+        # were deciding that for themselves before it existed, from a
+        # configuration's `distinguishing_basis` and from which side of a joint
+        # is written as its child.
+        self.assertEqual(38, total)
         pending = [pc for s in self.resp["stages"].values()
                    for pc in (s.get("premise_classes_pending_step") or [])]
         self.assertEqual([], pending, "a pending class survived S7-A")
@@ -468,9 +476,19 @@ class TestSourceB(_Base):
                     self.resp["stages"]["s04b"]["required_reasoning_premise_classes"]}
         pending = {pc["class"] for pc in
                    self.resp["stages"]["s04b"].get("retired_premise_classes") or []}
+        # `demanded_state_change` JOINED at the motion-semantics migration, and
+        # it is not the resolution the frozen proposal was pinned against: the
+        # plan's claim was that the six-DOF MOBILITY GRID is an s04b premise, and
+        # the assertion at the end of this test - that no s04b premise asks for
+        # the `mobility_disposition` role - still holds. What was added is the
+        # DEMAND: which state changes the mechanism must be able to perform. This
+        # pass authors the realization of one and names the requirement it
+        # realizes, so without it s04b was inventing which two configurations a
+        # transition connects, and endpoint topology had two authors.
         self.assertEqual(
             {"prior_spatial_commitment", "topology_with_axes", "required_distinctness",
-             "configuration_basis", "constraint_relation", "travel_bounding_quantity"},
+             "configuration_basis", "constraint_relation", "travel_bounding_quantity",
+             "demanded_state_change"},
             declared)
         # The seventh is not resolved in the contract's direction and not lost:
         # S7-A RETIRED it, because activating it would have made the order

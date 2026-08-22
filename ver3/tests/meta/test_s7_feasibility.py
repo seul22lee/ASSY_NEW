@@ -140,7 +140,7 @@ def topology(sfx, links, pairs, configs=2, basis=None, joint_type="REVOLUTE",
 
 
 def realization(sfx, hops=(0, 0), steps=(0,), terminates="RSR-0001",
-                blocked=None, depends=None, path_kind="RIGID"):
+                blocked=None, depends=None, path_kind="RIGID", demand=0):
     """s03b for the same mechanism: what discharges the effect, how the load is
     routed through the declared interfaces, and how it goes together."""
     rels = []
@@ -162,7 +162,18 @@ def realization(sfx, hops=(0, 0), steps=(0,), terminates="RSR-0001",
             "ordered_hops": ["IFC-%d%s" % (h, sfx) for h in hops]}
     if terminates:
         path["terminates_at"] = terminates
+    # THE DEMANDED STATE CHANGE, symbolically. `demand` is the index of the
+    # joint that has to turn for the mechanism to get from its first
+    # configuration to its second; `None` is a mechanism asked for no state
+    # change at all, which is an ordinary mechanism and not an omission.
+    demanded = [] if demand is None else [
+        {"id": "TRQ-0%s" % sfx,
+         "from_configuration": "CFG-C0%s" % sfx,
+         "to_configuration": "CFG-C1%s" % sfx,
+         "required_relative_motions": [{"joint": "JNT-%d%s" % (demand, sfx),
+                                        "dof": "RZ"}]}]
     return {
+        "transition_requirements": demanded,
         "physical_interactions": [
             {"id": "PHI-%s" % sfx, "groups": [_group(0, sfx)],
              "effect": "TRANSMIT_FORCE", "discharges_effect": "PEO-0001",
@@ -202,7 +213,7 @@ def arrangement(boxes, steps=(), region=None, actor=None, eliminated=False,
 
 
 def motion(sfx, joint, moving, coords=(0, 90), configs=("C0", "C1"),
-           changed=None, transition=True):
+           changed=None, transition=True, realizes=None):
     """s04b: the coordinates that realize each configuration, and the path."""
     a, b = ["CFG-%s%s" % (c, sfx) for c in configs]
     out = {
@@ -214,8 +225,12 @@ def motion(sfx, joint, moving, coords=(0, 90), configs=("C0", "C1"),
         "envelope_revisions": [], "notes": "",
     }
     if transition:
-        out["transitions"] = [{"id": "TRN-%s" % sfx, "from_configuration": a,
-                               "to_configuration": b, "moving_groups": [moving],
+        # NO ENDPOINTS HERE. Which two states a path runs between is the
+        # requirement's statement, and this consumer names the requirement.
+        out["transitions"] = [{"id": "TRN-%s" % sfx,
+                               "realizes_requirement": (realizes if realizes
+                                                        else "TRQ-0%s" % sfx),
+                               "moving_groups": [moving],
                                "changed_coordinates": ([joint] if changed is None
                                                        else list(changed))}]
     return out
@@ -313,7 +328,7 @@ class _Feas(_fixtures.StateBuilder, unittest.TestCase):
         pairs = [(0, 1), (1, 2), (2, 3), (3, 0)]
         return self.branch(
             state, sfx, topology(sfx, 4, pairs),
-            realization(sfx, hops=(0, 1), steps=(0,)),
+            realization(sfx, hops=(0, 1), steps=(0,), demand=3),
             s04a if s04a is not None else
             arrangement({k.replace("B", sfx): v for k, v in FOURBAR_BOXES.items()},
                         steps=["ASY-0%s" % sfx]),
@@ -498,9 +513,21 @@ class TestDomainPolicy(_Feas):
         self.assertEqual(s07.FAIL, self.domain(out, "spatial_realization").status,
                          "the topology connects them and they are apart")
 
-    def test_B9_an_undispositioned_required_cell_is_not_established(self):
-        """The cell is required to move and the design says nothing about it."""
+    #: THE RETIRED AUTHORITY. `mobility_disposition` decided whether a demanded
+    #: motion was possible by reading the six-DOF grid, and `transition_
+    #: reachability` replaced it. The three probes it had here are kept as their
+    #: own inversions: what USED to decide the verdict, proving it no longer
+    #: does. The new domain's own behaviour is in
+    #: `test_s7_transition_reachability`.
+
+    def test_B9_a_withdrawn_disposition_no_longer_decides_reachability(self):
+        """MobilityExpectation is still valid evidence about a stable state and
+        is no longer the authority on whether a change can happen. It says what
+        is known about a cell of a grid; the demand says which relative joint
+        motion has to occur, and only the second is what a transition needs."""
         state = self.hinge()
+        before = self.domain(self.assess(state, apply_patch=False),
+                             "transition_reachability")
         mex = [m for m in state.family("MobilityExpectation")][0]
         kept = [dict(d, disposition="UNDISPOSITIONED",
                      missing="withdrawn for this probe", by_joint=None)
@@ -509,29 +536,35 @@ class TestDomainPolicy(_Feas):
         self.revise(state, Op("SUPERSEDE", "MobilityExpectation", mex["entity_id"],
                               {"dispositions": kept}, "t",
                               reason="withdraw the disposition"), stage="s03")
-        out = self.assess(state)
-        v = self.domain(out, "mobility_disposition")
-        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
-        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
+        after = self.domain(self.assess(state), "transition_reachability")
+        self.assertEqual(s07.PASS, before.status, before.summary)
+        self.assertEqual((before.status, tuple(before.reason_codes)),
+                         (after.status, tuple(after.reason_codes)))
 
-    def test_B10_a_cell_required_to_move_and_blocked_is_infeasible(self):
-        """A ConstraintRelation blocking the DOF a transition turns. Two current
-        typed facts that cannot both be honoured."""
+    def test_B10_a_group_dof_block_is_not_a_relative_motion_block(self):
+        """A ConstraintRelation whose `blocked_dofs` names the DOF the demanded
+        joint turns, and which says nothing about relative joint motion.
+
+        This was INFEASIBLE. `blocked_dofs` is about a GROUP's mobility and
+        `blocked_relative_motions` is about a JOINT's relative motion; they are
+        separate statements, and convicting on the first was matching a held
+        group against a joint it happens to touch. A relation that has not said
+        which relative motion it removes has not contradicted one."""
         state = self.hinge(s03b=realization(
             "A", blocked=[(_group(1, "A"), ["RZ"], "CFG-C0A")]))
         out = self.assess(state)
-        v = self.domain(out, "mobility_disposition")
-        self.assertEqual(s07.FAIL, v.status)
-        self.assertIn("REQUIRED_MOTION_CONTRADICTED", v.reason_codes)
-        self.assertEqual(s07.INFEASIBLE, out.status)
+        v = self.domain(out, "transition_reachability")
+        self.assertEqual(s07.PASS, v.status, v.summary)
+        self.assertNotEqual(s07.INFEASIBLE, out.status)
 
     def test_B11_a_static_candidate_is_not_a_context_failure(self):
-        """No transition and no declared distinctness: the design poses no
+        """No transition and no demanded state change: the design poses no
         motion question, and NOT_APPLICABLE is the whole answer."""
-        state = self.hinge(s04b=motion("A", "JNT-0A", _group(1, "A"),
+        state = self.hinge(s03b=realization("A", demand=None),
+                           s04b=motion("A", "JNT-0A", _group(1, "A"),
                                        transition=False))
         out = self.assess(state)
-        for name in ("motion_and_transitions", "mobility_disposition"):
+        for name in ("motion_and_transitions", "transition_reachability"):
             self.assertEqual(s07.NOT_APPLICABLE, self.domain(out, name).status, name)
         self.assertNotEqual(s07.INFEASIBLE, out.status)
         self.assertEqual([], out.problems)
@@ -816,9 +849,16 @@ class TestIsolationAndDependency(_Feas):
         # domain evaluations actually read - no more, and no fewer.
         domains = {"FDA-CND-A-%s" % d.upper().replace("_", "-") for d in s07.DOMAINS}
         self.assertEqual(
+            # THE TWO MobilityExpectations LEFT THIS SET when
+            # `transition_reachability` replaced `mobility_disposition`. The
+            # grid is still in the view and still valid evidence about what is
+            # known of a stable state; it is no longer read by any domain, so it
+            # is no longer a premise of any verdict - which is the same rule
+            # applied honestly, not a gap. TRQ-0A took its place: the demand is
+            # what the reachability question is asked against.
             domains | {"CND-A", "ASY-0A", "BOD-G0A", "BOD-G1A", "CFG-C0A",
                        "CFG-C1A", "ENV-G0A", "ENV-G1A", "IFC-0A", "JNT-0A",
-                       "LC-0001", "LDP-A", "MEX-CFG-C0A", "MEX-CFG-C1A",
+                       "LC-0001", "LDP-A", "TRQ-0A",
                        "PEO-0001", "PHI-A", "RGP-G0A", "RGP-G1A", "RSR-0001",
                        "SCL-CND-A", "STA-CFG-C0A", "STA-CFG-C1A",
                        "SWV-TRN-A-RGP-G1A", "TRN-A"},
@@ -853,29 +893,32 @@ class TestIsolationAndDependency(_Feas):
     def test_B22c_an_absence_does_not_get_a_fabricated_premise(self):
         """THE DEMAND IS NAMED; THE MISSING ANSWER IS NOT.
 
-        A configuration declaring a distinguishing basis is a present fact and
-        the reason the domain is unsatisfied, so withdrawing it must cost this
-        verdict its authority. The transition that would have realized it does
-        not exist and gets no id: inventing one would make a missing fact look
-        like a present one."""
-        basis = {"CFG-C0A": [{"rigid_group": _group(1, "A"), "dof": "RZ",
-                              "differs_from": ["CFG-C1A"]}]}
-        state = self.hinge(s03a=topology("A", 2, [(0, 1)], basis=basis),
-                           s04b=motion("A", "JNT-0A", _group(1, "A"),
+        A TransitionRequirement is a present fact and the reason the domain is
+        unsatisfied, so withdrawing it must cost this verdict its authority. The
+        transition that would have realized it does not exist and gets no id:
+        inventing one would make a missing fact look like a present one.
+
+        The demand used to be a configuration's `distinguishing_basis`. Two
+        states declared to differ are two states that differ - which
+        `required_configurations` verifies - and not a statement that one is
+        reachable from the other."""
+        state = self.hinge(s04b=motion("A", "JNT-0A", _group(1, "A"),
                                        transition=False))
         out = self.assess(state)
         v = self.domain(out, "motion_and_transitions")
         self.assertEqual(s07.NOT_ESTABLISHED, v.status)
         self.assertIn("REQUIRED_TRANSITION_MISSING", v.reason_codes)
-        self.assertEqual(["CFG-C0A"], v.premises)
+        self.assertEqual(["TRQ-0A"], v.premises)
         op = next(o for o in out.patch.operations
                   if o.entity_id == "FDA-CND-A-MOTION-AND-TRANSITIONS")
-        self.assertEqual(["CFG-C0A", "CND-A"], op.premise_refs)
+        self.assertEqual(["CND-A", "TRQ-0A"], sorted(op.premise_refs))
         # The withdrawn demand costs the verdict its standing, which is what
         # naming it was for.
-        self.revise(state, Op("SUPERSEDE", "Configuration", "CFG-C0A",
-                              {"distinguishing_basis": []}, "t",
-                              reason="the distinction was withdrawn"), stage="s03")
+        self.revise(state, Op("SUPERSEDE", "TransitionRequirement", "TRQ-0A",
+                              {"required_relative_motions": [
+                                  {"joint": "JNT-0A", "dof": "TX"}]}, "t",
+                              reason="the change asked for was withdrawn"),
+                    stage="s03")
         self.assertEqual("STALE",
                          self.val(state, "FDA-CND-A-MOTION-AND-TRANSITIONS"))
 
@@ -980,55 +1023,39 @@ class TestConstraintIngress(_Feas):
 # =====================================================================
 class TestDemandDrivenApplicability(_Feas):
 
-    def test_B28_a_required_motion_uses_its_own_configurations_cell(self):
-        """SAME GROUP, SAME DOF, TWO CONFIGURATIONS, OPPOSITE DISPOSITIONS.
+    def test_B28_a_restraint_holding_elsewhere_blocks_no_source(self):
+        """SAME GROUP, SAME DOF, TWO CONFIGURATIONS, ONE RESTRAINT.
 
-        The distinguishing basis is a statement about the configuration that
-        carries it, so the required cell is that one's. Matching on (group, dof)
-        found the other configuration's BLOCKED_BY and reported a contradiction
-        of a motion only this configuration is required to perform."""
-        basis = {"CFG-C1A": [{"rigid_group": _group(1, "A"), "dof": "RZ",
-                              "differs_from": ["CFG-C0A"]}]}
-        state = self.hinge(
-            s03a=topology("A", 2, [(0, 1)], basis=basis),
-            s03b=realization("A", blocked=[(_group(1, "A"), ["RZ"], "CFG-C0A")]),
-            s04b=motion("A", "JNT-0A", _group(1, "A"), transition=False))
-        cells = {(d["rigid_group"], d["configuration"], d["dof"]): d["disposition"]
-                 for m in state.family("MobilityExpectation")
-                 for d in m["dispositions"]
-                 if d["rigid_group"] == "RGP-G1A" and d["dof"] == "RZ"}
-        self.assertEqual({("RGP-G1A", "CFG-C0A", "RZ"): "BLOCKED_BY",
-                          ("RGP-G1A", "CFG-C1A", "RZ"): "INTENDED"}, cells,
-                         "the probe is not probing")
+        The relation holds in the state the change does NOT start from. A
+        restraint is compared against the source of the change it is claimed to
+        obstruct, so one active somewhere else obstructs nothing here - and the
+        record it is active in is not a premise of this verdict, so revising it
+        changes nothing.
+
+        The rule this replaced compared cells of a grid and required the demanded
+        DOF to be free in BOTH endpoints, which convicted every mechanism that is
+        held in its stable states and released during the change between them.
+        """
+        state = self.hinge(s03b=realization(
+            "A", blocked=[(_group(1, "A"), ["RZ"], "CFG-C1A")]))
         out = self.assess(state)
-        v = self.domain(out, "mobility_disposition")
+        v = self.domain(out, "transition_reachability")
         self.assertEqual(s07.PASS, v.status, v.summary)
-        self.assertIn("MEX-CFG-C1A", v.premises)
-        self.assertNotIn("MEX-CFG-C0A", v.premises,
-                         "the other configuration's cell was consulted")
+        self.assertIn("TRQ-0A", v.premises)
         self.assertNotIn("CRL-0A", v.premises)
-        # And the other configuration is not a premise, so changing it changes
-        # nothing here.
-        self.revise(state, Op("SUPERSEDE", "MobilityExpectation", "MEX-CFG-C0A",
-                              {"dispositions": []}, "t", reason="probe"),
+        self.revise(state, Op("SUPERSEDE", "ConstraintRelation", "CRL-0A",
+                              {"blocked_dofs": ["TX"]}, "t", reason="probe"),
                     stage="s03")
         self.assertEqual("STANDING",
-                         self.val(state, "FDA-CND-A-MOBILITY-DISPOSITION"))
-        self.revise(state, Op("SUPERSEDE", "MobilityExpectation", "MEX-CFG-C1A",
-                              {"dispositions": []}, "t", reason="probe"),
-                    stage="s03")
+                         self.val(state, "FDA-CND-A-TRANSITION-REACHABILITY"))
+        # The demand IS a premise, and withdrawing what it asks for costs the
+        # verdict its standing.
+        self.revise(state, Op("SUPERSEDE", "TransitionRequirement", "TRQ-0A",
+                              {"required_relative_motions": [
+                                  {"joint": "JNT-0A", "dof": "TX"}]}, "t",
+                              reason="the motion asked for changed"), stage="s03")
         self.assertEqual("STALE",
-                         self.val(state, "FDA-CND-A-MOBILITY-DISPOSITION"))
-
-    def test_B28b_a_transition_requires_the_cell_at_both_of_its_ends(self):
-        """The other half of the same rule: a coordinate that changes between
-        two configurations must be free at both ends of the change, so a block
-        in either endpoint is a real contradiction."""
-        state = self.hinge(s03b=realization(
-            "A", blocked=[(_group(1, "A"), ["RZ"], "CFG-C0A")]))
-        v = self.domain(self.assess(state), "mobility_disposition")
-        self.assertEqual(s07.FAIL, v.status)
-        self.assertIn("MEX-CFG-C0A", v.premises)
+                         self.val(state, "FDA-CND-A-TRANSITION-REACHABILITY"))
 
     def test_B29_a_reach_demand_with_no_realization_is_not_established(self):
         """The actor must reach something and this candidate declares no access
@@ -1055,15 +1082,15 @@ class TestDemandDrivenApplicability(_Feas):
         s02["physical_effect_obligations"][0]["effect"] = "TRANSMIT_MOTION"
         state = self.seed()
         self.candidates(state, payload=s02)
-        r = realization("A")
+        r = realization("A", demand=None)
         r["physical_interactions"][0]["effect"] = "TRANSMIT_MOTION"
         self.hinge(state=state, s03b=r,
                    s04b=motion("A", "JNT-0A", _group(1, "A"), transition=False))
         self.assertEqual([], state.family("Transition"), "the probe is not probing")
         out = self.assess(state)
         for name, code in (("motion_and_transitions", "REQUIRED_TRANSITION_MISSING"),
-                           ("mobility_disposition",
-                            "MOTION_DEMANDED_WITHOUT_REALIZATION")):
+                           ("transition_reachability",
+                            "MOTION_DEMANDED_WITHOUT_TRANSITION_REQUIREMENT")):
             v = self.domain(out, name)
             self.assertEqual(s07.NOT_ESTABLISHED, v.status, name)
             self.assertIn(code, v.reason_codes)
@@ -1078,7 +1105,7 @@ class TestDemandDrivenApplicability(_Feas):
             s02["physical_effect_obligations"][0]["effect"] = effect
             state = self.seed()
             self.candidates(state, payload=s02)
-            r = realization("A")
+            r = realization("A", demand=None)
             r["physical_interactions"][0]["effect"] = effect
             self.hinge(state=state, s03b=r,
                        s04b=motion("A", "JNT-0A", _group(1, "A"), transition=False))
@@ -1403,7 +1430,12 @@ class TestExactReferences(_Feas):
                     {"configuration": c, "coordinates": dict(v)}
                     for c, v in (coords or {}).items()],
                 "transitions": [], "envelope_revisions": [], "notes": ""}
-        return self.hinge(s03a=top, s04b=s04b)
+        # NO DEMANDED STATE CHANGE. These probes replace the joint list, so a
+        # demand naming the default hinge joint would name a joint this
+        # mechanism does not have; and what they are probing is which existing
+        # joint answers a described difference, not what was asked for.
+        return self.hinge(s03a=top, s03b=realization("A", demand=None),
+                          s04b=s04b)
 
     JOINTS = [{"id": "JNT-PA", "joint_type": "PRISMATIC",
                "parent_group": _group(0, "A"), "child_group": _group(1, "A"),
@@ -2076,28 +2108,43 @@ class TestClosureSweep(unittest.TestCase):
             self.assertNotIn("AXES", str(name).upper(),
                              "line %d defaults a vocabulary lookup" % node.lineno)
 
-    def test_SWEEP_02_the_mobility_address_keeps_all_three_components(self):
-        """A cell is (rigid_group, configuration, dof). Every lookup that drops
-        one asks a different question, and the collapsed form read a closed
-        configuration's block as contradicting an open one's motion."""
-        cells, _amb, _used = s07._required_motion_cells(
-            _EV({"Configuration": [{"entity_id": "CFG-1", "_family": "Configuration",
-                                    "distinguishing_basis": [
-                                        {"rigid_group": "RGP-1", "dof": "RZ"}]}]}))
-        self.assertEqual([("RGP-1", "CFG-1", "RZ")], cells)
-        for cell in cells:
-            self.assertEqual(3, len(cell))
+    def test_SWEEP_02_a_required_motion_keeps_both_of_its_components(self):
+        """A required relative motion is (joint, dof), and a restraint blocks it
+        only when it names the SAME pair. Matching on the joint alone would let a
+        relation that removes a translation convict a demanded rotation of it;
+        matching on the DOF alone would let any relation anywhere convict any
+        joint. Both components select, and neither is dropped.
+
+        This replaced a three-component address - (rigid_group, configuration,
+        dof) - because the cell it addressed is no longer what the question is
+        about. The configuration went with it: a restraint is compared against
+        the source of the change it is claimed to obstruct, not against a grid.
+        """
+        self.assertEqual({("JNT-1", "RZ")}, s07._relative_motions(
+            [{"joint": "JNT-1", "dof": "RZ"}]))
+        for partial in ([{"joint": "JNT-1"}], [{"dof": "RZ"}], [{}], None):
+            self.assertEqual(set(), s07._relative_motions(partial), partial)
+        for pair in s07._relative_motions([{"joint": "JNT-1", "dof": "RZ"}]):
+            self.assertEqual(2, len(pair))
 
     def test_SWEEP_03_a_typed_relation_is_never_accepted_on_the_id_alone(self):
         """Three references decide a verdict here, and each one's TYPE is
         checked as well as its resolution: the effect an interaction produces,
         the family a changed coordinate names, and whether a cited joint frees
         the cell citing it."""
-        for marker in ('joint.get("_family") != "Joint"',
-                       'i.get("effect") == effect',
-                       'joint.get("_family") != "Joint"'):
-            self.assertIn(marker, self.src, marker)
-        self.assertIn("_disposition_support", self.src)
+        self.assertIn('i.get("effect") == effect', self.src)
+        # A REQUIRED MOTION'S JOINT IS LOOKED UP IN THE JOINT FAMILY, so a
+        # reference that names an entity of some other family finds nothing and
+        # is reported. The check used to be a rejection after an id lookup -
+        # `joint.get("_family") != "Joint"` beside a `by_id` read - and doing it
+        # by construction is the same rule with no way to forget it.
+        self.assertIn('joints = {j.get("entity_id"): j for j in ev.fam("Joint")}',
+                      self.code)
+        self.assertIn("JOINT_ABSENT", self.src)
+        # And a restraint answers a demanded motion only where it explicitly
+        # names the same relative motion, never because it was pointed at.
+        self.assertIn('_relative_motions(relation.get("blocked_relative_motions"))',
+                      self.code)
 
     def test_SWEEP_04_interface_existence_is_never_a_blanket_exemption(self):
         """The exemption set is built from `interface_expectation`, so it cannot
@@ -2127,7 +2174,7 @@ class TestClosureSweep(unittest.TestCase):
         self.assertIn("reach_demands", self.code)
         self.assertIn("motion_demands", self.code)
         for domain, reader in (("_reach", "reach_demands"),
-                               ("_mobility_disposition", "motion_demands"),
+                               ("_transition_reachability", "motion_demands"),
                                ("_motion_and_transitions", "motion_demands")):
             body = self.src.split("def %s(" % domain)[1].split("\ndef ")[0]
             self.assertIn(reader, body, domain)
@@ -2203,8 +2250,8 @@ class TestClosureSweep(unittest.TestCase):
         for marker in ("DISTINCTNESS_SIBLING_NOT_REALIZED",
                        "DISTINCTNESS_NAMES_NO_SIBLING",
                        "TERMINAL_SITE_NOT_GIVEN",
-                       "CHANGED_COORDINATE_NOT_A_JOINT",
-                       "DISPOSITION_PREMISE_NOT_A_JOINT",
+                       "ENDPOINT_MISMATCH",
+                       "JOINT_ABSENT",
                        "HOP_NOT_AN_INTERFACE"):
             self.assertIn(marker, self.src, marker)
 
@@ -2214,16 +2261,20 @@ class TestClosureSweep(unittest.TestCase):
         makes unique - or reports the duplicate instead of resolving it."""
         for guard in ("def extent_status",
                       "CONFIGURATION_REALIZED_TWICE",
-                      "CELL_DISPOSITIONED_TWICE",
+                      "REALIZED_MORE_THAN_ONCE",
                       "INTERFACE_EXPECTATION_CONFLICT",
                       "SCALE_AMBIGUOUS",
                       "ASSEMBLY_ORDER_NOT_TOTAL"):
             self.assertIn(guard, self.src, guard)
         # And the multiplicity that is genuinely allowed is accumulated, never
-        # assigned: two paths for one load case, two interactions for one demand.
+        # assigned: two paths for one load case, two interactions for one demand,
+        # two records claiming to realize one demanded change.
         for accumulate in ("by_case.setdefault", "by_demand.setdefault",
-                           "disposed.setdefault"):
+                           "out.append({\"id\": t.get(\"entity_id\")"):
             self.assertIn(accumulate, self.code, accumulate)
+        # The one index built by name is keyed on entity_id, which the write
+        # boundary makes unique - so it resolves exactly or not at all.
+        self.assertIn('relations = {r.get("entity_id"): r', self.code)
 
     def test_SWEEP_13_no_expression_picks_among_same_family_entities(self):
         """`next(...)` is the shape that cannot be guarded by a length test, so
@@ -2232,12 +2283,19 @@ class TestClosureSweep(unittest.TestCase):
         test, and each is named here so a new one has to be justified."""
         self.assertNotIn("next(", self.code)
         self.assertNotIn("driving_joint", self.code)
-        for expression in ('sorted(free)[0]', 'drivers[0]', 'states[0]',
-                           'sorted(e)[0]', 'scales[0]', 'rows[0]'):
+        for expression in ('drivers[0]', 'states[0]',
+                           'sorted(e)[0]', 'scales[0]'):
             self.assertIn(expression, self.src, expression)
-        for guard in ("len(free) == 1", "len(drivers) == 1", "len(states) > 1",
-                      "len(e) == 1", "len(scales) > 1", "len(rows) > 1"):
+        for guard in ("len(drivers) == 1", "len(states) > 1",
+                      "len(e) == 1", "len(scales) > 1"):
             self.assertIn(guard, self.code, guard)
+        # THE SAME RULE WHERE THE RULE NOW LIVES. Choosing among the records
+        # that claim to realize one demanded change is shared with the pass that
+        # writes them, so the guard is asserted there rather than dropped here.
+        import inspect
+        shared = inspect.getsource(s04.realization_findings)
+        self.assertIn("realizations[0]", shared)
+        self.assertIn("len(realizations) > 1", shared)
 
     def test_SWEEP_14_the_address_of_a_driver_is_group_and_dof(self):
         """Resolution runs through one function, and it takes both components."""

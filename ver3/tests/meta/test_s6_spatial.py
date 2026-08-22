@@ -63,15 +63,19 @@ def s04a_response(bodies, sep=1.5, region=None, step=None, actor=None):
 
 
 def s04b_response(joint, configs, group, coords=(0, 90), changed=None,
-                  revisions=None):
+                  revisions=None, realizes=None):
     a, b = configs[0], configs[1]
     return {
         "joint_placements": [{"joint": joint, "origin": [0, 0, 0]}],
         "state_coordinates": [
             {"configuration": a, "coordinates": {joint: coords[0]}},
             {"configuration": b, "coordinates": {joint: coords[1]}}],
-        "transitions": [{"id": "TRN-%s" % joint.split("-")[-1], "from_configuration": a,
-                         "to_configuration": b, "moving_groups": [group],
+        # THE PATH NAMES WHAT IT REALIZES. Which two states it runs between is
+        # the requirement's statement and is not repeated here.
+        "transitions": [{"id": "TRN-%s" % joint.split("-")[-1],
+                         "realizes_requirement": (
+                             realizes or "TRQ-%s" % joint.split("-")[-1]),
+                         "moving_groups": [group],
                          "changed_coordinates": (
                              [joint] if changed is None else changed)}],
         "envelope_revisions": list(revisions or []),
@@ -99,7 +103,7 @@ class _S04Chain(_Chain):
         # The basis is s03's to author - it is a mobility statement, not a
         # geometry one - so it arrives through the topology response rather than
         # being written onto the configuration afterwards.
-        state, outs = self.build(list(shapes), basis=basis)
+        state, outs = self.build(list(shapes), basis=basis, demand=True)
         results = {}
         for sfx, _g, _c in shapes:
             inv = cv.InvocationContext(branch="CND-%s" % sfx)
@@ -135,7 +139,7 @@ class TestCanonicalOwnership(_S04Chain):
         """The runner adds nothing. It used to add three entities and two
         extensions that only it knew about."""
         direct, res = self.spatial()
-        runner, _ = self.build([("A", 2, 2)])
+        runner, _ = self.build([("A", 2, 2)], demand=True)
         inv = cv.InvocationContext(branch="CND-A")
         provider = _Canned(s04a_response(["BOD-G0A", "BOD-G1A"], step="ASY-A",
                                          actor="ACT-0001"),
