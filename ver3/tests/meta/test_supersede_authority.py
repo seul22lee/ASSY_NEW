@@ -124,8 +124,30 @@ class TestAuthorizedSupersessionStillWorks(_Base):
         self.assertTrue(any("NO_REASON" in p for p in
                             self.state.validate(patch(self.state, "s05", [silent]))))
 
-    def test_a_field_with_no_prior_value_is_still_refused(self):
+    def test_the_owner_may_complete_an_optional_field_it_left_out(self):
+        """THIS REVERSED. `lower` is declared optional on Parameter and owned by
+        s05; PRM-1 was created without it. Before, SUPERSEDE needed a prior
+        value and EXTEND is delegation to s06, so s05 had no write path to add
+        a bound to its own parameter short of re-authoring it. Completing an
+        absence is a revision - owner and reason still required - but it is not
+        a revision OF anything."""
         problems = self.supersede("s05", {"lower": 1.0})
+        self.assertEqual([], problems)
+
+    def test_but_another_stage_may_not_complete_it(self):
+        problems = self.supersede("s01", {"lower": 1.0})
+        self.assertTrue(any("SUPERSEDE_NOT_PERMITTED" in p for p in problems),
+                        problems)
+
+    def test_and_a_delegated_field_still_goes_through_its_delegate(self):
+        """`value` is optional AND extendable by s06. The owner completing it
+        would bypass the delegation - s06 EXTENDs it, exactly as before."""
+        problems = self.supersede("s05", {"value": 2.0})
+        self.assertTrue(any("SUPERSEDE_WRONG_STAGE" in p and "s06" in p
+                            for p in problems), problems)
+
+    def test_an_undeclared_field_with_no_prior_value_is_still_refused(self):
+        problems = self.supersede("s05", {"never_declared": 1.0})
         self.assertTrue(any("SUPERSEDE_ABSENT" in p for p in problems), problems)
 
 

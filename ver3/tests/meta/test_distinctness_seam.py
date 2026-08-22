@@ -218,11 +218,36 @@ class TestTheWriteGate(_Feas):
         self.assertEqual([], state.family("State"),
                          "an uncontradicted configuration was committed anyway")
 
-    def test_D16_the_placement_still_commits(self):
-        """Where a joint sits is a separate fact these coordinates do not
-        contradict. Withholding the realization and committing what stands is
-        the shape the refinement barrier already uses."""
+    def test_D16_a_refused_realization_places_nothing_either(self):
+        """THIS REVERSED. It asserted the placements still commit, on the
+        reasoning that where a joint sits is a fact the coordinates do not
+        contradict. True - and keeping them broke the next attempt: the
+        `frame_origin` EXTEND from a refused response was already stored when a
+        later, VALID realization placed the same joint, and the valid one was
+        refused for EXTEND_OVER_EXISTING. A response the gate refuses did not
+        happen; the next one is asked against an unchanged state."""
         state = self.contradicted()
+        joint = next(j for j in state.family("Joint") if j["entity_id"] == "JNT-0A")
+        self.assertIsNone(joint.get("frame_origin"))
+        self.assertEqual({"Joint": 0},
+                         {"Joint": sum(1 for op in self.last_s04b.patch.operations
+                                       if op.entity_type == "Joint")})
+
+    def test_D16b_and_a_valid_realization_after_a_refused_one_lands(self):
+        """The case that found it. Refused first, then valid: the second
+        places its joints and writes its states."""
+        state = self.contradicted()
+        self.assertEqual([], state.family("State"))
+        good = motion("A", "JNT-0A", _group(1, "A"))
+        import ver3.assy_v3.view.consumer_view as cv
+        from ver3.assy_v3.stages.s04_envelope_and_motion import S04BPlacementAndMotion
+        from .test_s02_s03b_integration import _Canned
+        out = S04BPlacementAndMotion().invoke(
+            _Canned(good), state, state.run_id, {"candidate": "CND-A"},
+            attempt=3, invocation=cv.InvocationContext(branch="CND-A"))
+        self.assertEqual([], state.validate(out.patch), out.problems)
+        state.apply(out.patch)
+        self.assertEqual(2, len(state.family("State")))
         joint = next(j for j in state.family("Joint") if j["entity_id"] == "JNT-0A")
         self.assertEqual([0, 0, 0], joint.get("frame_origin"))
 
@@ -307,12 +332,12 @@ class TestParentChildNeutral(_Feas):
         v = self.domain(self.assess(state, apply_patch=False), "spatial_realization")
         self.assertIn("MOVING_GROUP_HAS_NO_JOINT", v.reason_codes)
 
-    def test_D10_two_incident_joints_that_both_move_are_ambiguous(self):
-        """The ambiguity semantics are preserved where they mean something: two
-        joints of one group whose coordinates BOTH change, with nothing saying
-        which produced the motion. Being incident to two joints is not itself
-        ambiguous - every bar of a four-bar is - so what selects is the
-        transition's own `changed_coordinates`."""
+    def test_D10_two_incident_joints_that_both_move_are_a_chain_not_an_ambiguity(self):
+        """THIS REVERSED. It asserted MOVING_GROUP_DRIVER_AMBIGUOUS for a group
+        whose two incident joints both change - and that is the middle link of
+        a serial chain, moved by both, with the transition saying so in full
+        through `changed_coordinates`. There was never a single driver to
+        find. What is still asked is that every carrying joint be usable."""
         top = topology("A", 3, [(0, 1), (1, 2)],
                        basis=basis_on("CFG-C0A"))
         boxes = {"BOD-G0A": ([0, 0, 0], [1, 1, 1]),
@@ -326,7 +351,9 @@ class TestParentChildNeutral(_Feas):
         state = self.hinge(s03a=top, s03b=realization("A", hops=(0, 0)),
                            s04a=arrangement(boxes, steps=["ASY-0A"]), s04b=s04b)
         v = self.domain(self.assess(state, apply_patch=False), "spatial_realization")
-        self.assertIn("MOVING_GROUP_DRIVER_AMBIGUOUS", v.reason_codes)
+        self.assertNotIn("MOVING_GROUP_DRIVER_AMBIGUOUS", v.reason_codes)
+        self.assertIn("JNT-0A", v.premises)
+        self.assertIn("JNT-1A", v.premises)
 
     def test_D11_a_serial_chain_with_two_incident_joints_is_deterministic(self):
         """THE CASE THE OLD ADDRESS COULD NOT ANSWER.

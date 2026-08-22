@@ -1354,6 +1354,15 @@ of, and what each one needs.
   restrains, through its own `blocked_relative_motions`. Otherwise nothing
   downstream can tell why releasing it matters.
 
+  AND IT MUST SAY HOW IT IS OVERCOME. A released relation states a
+  `defeat_specification`: the qualitative physical principle by which the
+  restraint is released during the change - the user presses the latch arm
+  aside, the handle carries the toggle past centre, the detent rides over its
+  ramp. One sentence of mechanism, and no quantity of any kind: how much it
+  takes is embodiment's question, and a number here would be one nobody has
+  computed. A relation released with no stated principle is a state change the
+  design demands and has not said how to make.
+
 WHEN A RESTRAINT NAMES THE MOTION IT REMOVES
 `constraint_relations[].blocked_relative_motions` is optional and is a
 STATEMENT, not a derivation. Write an entry only where the relation explicitly

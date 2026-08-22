@@ -276,14 +276,40 @@ class _Evidence:
         the topology REQUIRES to touch, and a pair the design describes two ways
         requires nothing it can be held to.
         """
-        stated: Dict[Any, set] = {}
+        # KEYED BY FEATURE, NOT BY PAIR ALONE. Two interfaces on one body pair
+        # are two FEATURES when each names what it is - a rotating journal and a
+        # snap retainer on one hinge pair are how a real hinge is built, and one
+        # runs clear while the other is an interference fit. Collapsing them to
+        # the pair read the design as contradicting itself. Feature identity is
+        # the interface's own `nominal` when it is a name; an interface whose
+        # `nominal` is a bare flag names no feature, so two unnamed interfaces on
+        # a pair are one feature described twice - and if they disagree, that
+        # is the conflict this reader exists to find, exactly as before.
+        features: Dict[Any, Dict[Any, set]] = {}
         for i in self.fam("Interface"):
             bodies_of = (i.get("bodies") or [])[:2]
-            if len(bodies_of) >= 2:
-                stated.setdefault(frozenset(bodies_of), set()).add(
-                    s04.interface_expectation(i))
-        return ({p: sorted(e)[0] for p, e in stated.items() if len(e) == 1},
-                {p for p, e in stated.items() if len(e) > 1})
+            if len(bodies_of) < 2:
+                continue
+            nominal = i.get("nominal")
+            feature = nominal if isinstance(nominal, str) and nominal.strip() else None
+            features.setdefault(frozenset(bodies_of), {}).setdefault(
+                feature, set()).add(s04.interface_expectation(i))
+        expectation, conflicted = {}, set()
+        for pair, by_feature in features.items():
+            # A feature described two incompatible ways is a conflict.
+            if any(len(e) > 1 for e in by_feature.values()):
+                conflicted.add(pair)
+                continue
+            kinds = {sorted(e)[0] for e in by_feature.values()}
+            # DISTINCT FEATURES MAY DIFFER. What the pair as a whole is held
+            # to: if any feature on it is meant to touch, the pair is declared
+            # to meet - a journal that runs clear does not make the bodies
+            # strangers when a retainer on the same pair grips. CLEAR only when
+            # every feature is clear; UNDECLARED only when every feature is.
+            expectation[pair] = (s04.TOUCHES if s04.TOUCHES in kinds
+                                 else s04.CLEAR if kinds == {s04.CLEAR}
+                                 else sorted(kinds)[0])
+        return expectation, conflicted
 
     def envelopes_of(self, body: str) -> List[str]:
         """Every envelope id currently claiming this body. What an ambiguity is
@@ -985,13 +1011,16 @@ def _spatial_realization(ev: _Evidence) -> Verdict:
     # verdict. A joint states a RELATIVE relation; which side travels in the
     # world is not what its parent/child ordering says.
     #
-    # AND THE TRANSITION SAYS WHICH ONE CARRIES IT. `changed_coordinates` names
-    # the joints whose coordinate this path moves, so the joints that carry THIS
-    # motion are the incident ones among them. Reading incidence alone would
-    # make every closed loop ambiguous - each bar of a four-bar touches two
-    # joints - and would demand a placement for a joint this path does not turn.
-    # The ambiguity finding stays for what it was for: two joints of this group
-    # moving, with nothing saying which produced the motion.
+    # AND THE TRANSITION SAYS WHICH ONES CARRY IT. `changed_coordinates` names
+    # the joints whose coordinate this path moves, and it is complete: every
+    # incident joint among them moves this group. ONE IS NOT THE ONLY RIGHT
+    # NUMBER. The middle link of a serial chain G1-[J1]-G2-[J2]-G3 is moved by
+    # both joints whenever both turn - that is what a chain is - and asking
+    # "which single joint drives it" was a question with no answer, reported as
+    # ambiguity about a motion the design had fully attributed. What is asked of
+    # each carrying joint is that it be usable: a readable axis and a placed
+    # origin. A group none of the changed joints touches is still unestablished
+    # - the transition says it moves and says nothing that moves it.
     for t in sorted(ev.fam("Transition"), key=lambda x: str(x.get("entity_id"))):
         changed = {c for c in (t.get("changed_coordinates") or [])
                    if isinstance(c, str)}
@@ -1011,14 +1040,6 @@ def _spatial_realization(ev: _Evidence) -> Verdict:
                              % (group, t.get("entity_id")))
                 status = _weaken(status, NOT_ESTABLISHED)
                 continue
-            if len(drivers) > 1:
-                # EVERY joint that moves must be usable, because which one
-                # produced the motion is not stated. Checking the first left the
-                # others unexamined and let insertion order decide.
-                codes.append("MOVING_GROUP_DRIVER_AMBIGUOUS")
-                notes.append("%s is moved and %s could carry it" % (group, ", ".join(
-                    sorted(j["entity_id"] for j in drivers))))
-                status = _weaken(status, NOT_ESTABLISHED)
             for joint in drivers:
                 if s04.axis_index(joint.get("axis_direction")) is None:
                     codes.append("JOINT_AXIS_UNUSABLE")
@@ -1057,41 +1078,94 @@ def _spatial_realization(ev: _Evidence) -> Verdict:
 
 
 def _reach(ev: _Evidence) -> Verdict:
-    """Whether an actor can get to what it must - which nothing here can decide.
+    """Whether each actor can reach what it must, ON THE EVIDENCE THIS STAGE HAS.
 
-    A ReachResult is s04a's conclusion ABOUT its own arrangement, not a
-    deterministic computation over one. Until a reach basis exists - a hand
-    envelope, an access trajectory, a clearance corridor - a reach requirement is
-    NOT_ESTABLISHED, and the ReachResult contributes a reason code saying which
-    way the model leaned. Reporting the model's answer as this pipeline's would
-    make a deterministic wrapper the author of an unfalsifiable claim.
+    THE PRE-SELECTION REACH BASIS. s04a's contract is an arrangement "sufficient
+    to decide fit, reach and assemblability", and a ReachResult is that
+    decision: the contract calls it "an engineering conclusion of s04a",
+    AUTHORITATIVE, authored from the arrangement it produced. This domain used to
+    discard it - every reach demand came back NOT_ESTABLISHED because "no
+    deterministic reach basis exists" - and nothing anywhere was contracted to
+    produce one, so the domain could not PASS on any input. A domain no candidate
+    can satisfy is not a standard; it is a refusal to look.
+
+    What establishes reach here, and what does not:
+
+      An actor's demand is answered by an ACCESS or APERTURE region the design
+      declares that actor requires, AND a branch-local ReachResult for that
+      actor that concludes it is reachable. Both, for every demanding actor.
+
+      A negative conclusion is a positive finding and FAILS: s04a looked at its
+      own arrangement and said the actor cannot get there.
+
+      A demand with no region, or a region with no conclusion, or a target the
+      conclusion does not name, is NOT_ESTABLISHED - the question is asked and
+      nothing answers it.
+
+    THE EVIDENCE LEVEL IS RECORDED, NOT HIDDEN. MODEL_LOCAL_POSITIVE stays on
+    the verdict beside the PASS so a reader knows this reach rests on s04a's
+    conclusion about boxes and sides, not on a hand envelope swept through a
+    solid. That is the contracted evidence level before selection; a later
+    stage that computes more says so in its own record.
     """
-    # THE DEMAND IS THE ACTOR'S, and it exists before any candidate answers it.
-    # Reading applicability off the FunctionalRegion asked the candidate whether
-    # it wished to be examined: declare no access region and the reach question
-    # disappeared, which is exactly how a design that ignores an actor came out
-    # indistinguishable from one that has no actor.
     demands = ev.reach_demands()
     regions = [r for r in ev.fam("FunctionalRegion")
                if r.get("role") in ("ACCESS", "APERTURE")
                and (r.get("required_by_actors") or r.get("reach_targets"))]
     if not demands and not regions:
         return Verdict("reach", NOT_APPLICABLE, ["NO_REACH_REQUIREMENT"])
-    codes, used = [], [a.get("entity_id") for a in demands]
+    codes, notes, used = [], [], [a.get("entity_id") for a in demands]
+    status = PASS
     if demands and not regions:
-        codes.append("REACH_REALIZATION_ABSENT")
-        why = ("%d actor(s) must reach something and this candidate declares no "
-               "access or aperture region that answers it" % len(demands))
-    else:
-        codes.append("REACH_BASIS_NOT_ESTABLISHED")
-        why = ("%d reach requirement(s); no deterministic reach basis exists, so "
-               "a ReachResult is recorded as a model-local finding and decides "
-               "nothing" % max(len(demands), len(regions)))
+        return Verdict("reach", NOT_ESTABLISHED, ["REACH_REALIZATION_ABSENT"], used,
+                       "%d actor(s) must reach something and this candidate "
+                       "declares no access or aperture region that answers it"
+                       % len(demands))
     results = ev.fam("ReachResult")
+    region_ids = {r.get("entity_id") for r in regions}
+    for actor in demands:
+        aid = actor.get("entity_id")
+        # THE REGION THIS ACTOR IS DECLARED TO NEED. A region nobody required
+        # answers nobody; reach for an actor is established through a region
+        # the design says is that actor's.
+        mine = [r for r in regions if aid in (r.get("required_by_actors") or [])]
+        if not mine:
+            codes.append("REACH_REGION_NOT_DECLARED_FOR_ACTOR")
+            notes.append("%s must reach something and no access or aperture "
+                         "region is declared as required by it" % aid)
+            status = _weaken(status, NOT_ESTABLISHED)
+            continue
+        used += [r.get("entity_id") for r in mine]
+        # THE CONCLUSION ABOUT THIS ACTOR, about a target that is one of its
+        # regions or one of the things it must reach. A conclusion about
+        # something else is not a conclusion about this demand.
+        targets = set(actor.get("must_reach") or []) | {
+            r.get("entity_id") for r in mine}
+        about = [x for x in results if x.get("actor") == aid
+                 and x.get("target") in targets]
+        if not about:
+            codes.append("REACH_CONCLUSION_ABSENT")
+            notes.append("%s has a declared region and s04a recorded no reach "
+                         "conclusion about it" % aid)
+            status = _weaken(status, NOT_ESTABLISHED)
+            continue
+        used += [x.get("entity_id") for x in about]
+        negative = [x for x in about if not x.get("reachable")]
+        if negative:
+            # s04a LOOKED AND SAID NO. A negative conclusion about the
+            # arrangement it authored is positive evidence, not an absence.
+            codes.append("REACH_CONCLUDED_UNREACHABLE")
+            notes.append("%s cannot reach %s on s04a's own arrangement"
+                         % (aid, ", ".join(sorted(str(x.get("target"))
+                                                  for x in negative))))
+            status = FAIL
     if results:
         codes.append(MODEL_LOCAL_POSITIVE if all(r.get("reachable") for r in results)
                      else MODEL_LOCAL_NEGATIVE)
-    return Verdict("reach", NOT_ESTABLISHED, codes, used, why)
+    if status == PASS:
+        codes.append("EVERY_ACTOR_REACHES_ITS_REGION")
+    used += ev.basis() if used else []
+    return Verdict("reach", status, codes, used, "; ".join(notes[:5]))
 
 
 def _assemblability(ev: _Evidence) -> Verdict:
@@ -1151,13 +1225,54 @@ def _assemblability(ev: _Evidence) -> Verdict:
         used += sorted(steps)
     ordered = sorted(steps.values(),
                      key=lambda s: (s.get("order_index") or 0, s["entity_id"]))
+    # THE PAIRS THE DESIGN DECLARES TO MEET. An arriving part's conservative
+    # corridor passes through the box of the part it is going to sit against,
+    # nest inside or snap onto - that is what arriving at a mating position IS -
+    # so a pair declared TOUCHES is not an obstruction on the way there. The same
+    # reader `gross_interference` uses, so the two domains cannot disagree about
+    # which pairs the topology says meet. A pair declared CLEAR, UNDECLARED, or
+    # described two ways is exempt from nothing: the corridor through it is
+    # exactly what the design has not shown to be clear.
+    expectation, _conflicted = ev.pair_expectation()
+    meets = {p for p, e in expectation.items() if e == s04.TOUCHES}
     placed: List[str] = []
     for step in ordered:
         sid, body = step["entity_id"], step.get("body")
         used.append(sid)
         if str(step.get("path_kind")) == "DEFORMATION_RESOLVED":
-            codes.append("DEFORMATION_RESOLVED_PATH")
-            status = _weaken(status, NOT_ESTABLISHED)
+            # A PATH THE PART DEFLECTS THROUGH. Rigid boxes cannot see the
+            # deflection, so the corridor test below is the wrong instrument -
+            # but that is not the same as the design having said nothing. The
+            # QUALITATIVE principle of a snap-fit is stated by the step itself:
+            # retention by ELASTICITY, into an activated interface that is an
+            # INTERFERENCE_FIT or COMPLIANT_INTERACTION. That is what there is
+            # to establish before selection. Whether the flexure survives the
+            # deflection - its stress, its force, its limit to produce - is
+            # embodiment: s05 declares `limit_to_produce` as its own premise
+            # class, and requiring it here would pull sizing in front of the
+            # choice of principle.
+            #
+            # A label with no principle behind it is still unestablished: a
+            # step that says DEFORMATION_RESOLVED and names no elastic retention
+            # and no fit has described a path nothing holds.
+            fits = [i for i in ev.fam("Interface")
+                    if i.get("entity_id") in (step.get("activates") or [])
+                    and i.get("interaction_kind") in ("INTERFERENCE_FIT",
+                                                      "COMPLIANT_INTERACTION")]
+            if step.get("termination_strategy") == "ELASTICITY" and fits:
+                codes.append("DEFORMATION_RESOLVED_BY_ELASTIC_FIT")
+                codes.append("SIZING_DEFERRED_TO_EMBODIMENT")
+                notes.append("%s snaps %s into %s; deflection and limit to "
+                             "produce are an embodiment obligation"
+                             % (sid, body, ", ".join(sorted(
+                                 i["entity_id"] for i in fits))))
+                used += [i["entity_id"] for i in fits]
+            else:
+                codes.append("DEFORMATION_RESOLVED_PATH_UNSUPPORTED")
+                notes.append("%s declares a deformation-resolved path for %s and "
+                             "states no elastic retention into a fit"
+                             % (sid, body))
+                status = _weaken(status, NOT_ESTABLISHED)
             placed.append(body)
             continue
         direction = step.get("insertion_direction")
@@ -1177,13 +1292,20 @@ def _assemblability(ev: _Evidence) -> Verdict:
         # them and on the basis they are measured in.
         used += [e for e in (envelope_of.get(b) for b in boxes) if e] + ev.basis()
         for prior in placed:
-            if prior in boxes and s04.overlaps(hull, boxes[prior]):
-                # A box overlap is not a collision - the real bodies are smaller
-                # than their boxes - so it is what the design has not shown to be
-                # clear, never a proof that it is not.
-                codes.append("INSERTION_PATH_NOT_CLEAR")
-                notes.append("%s entering meets %s" % (body, prior))
-                status = _weaken(status, NOT_ESTABLISHED)
+            if prior not in boxes or not s04.overlaps(hull, boxes[prior]):
+                continue
+            if frozenset((body, prior)) in meets:
+                # Arriving where it is declared to meet this body. The
+                # interface that declares it is what the corridor rests on.
+                used += [i.get("entity_id") for i in ev.fam("Interface")
+                         if set((i.get("bodies") or [])[:2]) == {body, prior}]
+                continue
+            # A box overlap is not a collision - the real bodies are smaller
+            # than their boxes - so it is what the design has not shown to be
+            # clear, never a proof that it is not.
+            codes.append("INSERTION_PATH_NOT_CLEAR")
+            notes.append("%s entering meets %s" % (body, prior))
+            status = _weaken(status, NOT_ESTABLISHED)
         placed.append(body)
     if status == PASS:
         codes.append("ORDER_CONSISTENT_AND_PATHS_CLEAR")

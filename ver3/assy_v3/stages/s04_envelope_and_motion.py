@@ -825,10 +825,14 @@ class S04BPlacementAndMotion(Stage):
         # endpoint states were not written is skipped below, and the sweep that
         # would have been computed from them is skipped in `derived_operations`.
         #
-        # The joint PLACEMENTS still commit. Where a joint sits is a separate
-        # fact that these coordinates do not contradict, and this is the shape
-        # the refinement barrier already uses: commit what stands, withhold the
-        # realization, and let the caller ask again.
+        # AND NOTHING ELSE OF THE RESPONSE COMMITS EITHER - see
+        # `refinement_operations`. The placements used to be kept on the
+        # reasoning that where a joint sits is a separate fact these
+        # coordinates do not contradict. It is, and keeping it still broke the
+        # next attempt: an EXTEND of `frame_origin` from a refused response was
+        # already stored when a later, valid realization placed the same joint,
+        # and the valid one was refused for EXTEND_OVER_EXISTING. A response
+        # the gate refuses is a response that did not happen.
         refused = self._contradicted_distinctness(parsed, inputs)
         for st in ([] if refused else parsed.get("state_coordinates", [])):
             coords = st.get("coordinates", {})
@@ -986,6 +990,14 @@ class S04BPlacementAndMotion(Stage):
         make impossible.
         """
         parsed = {k: v for k, v in parsed.items() if not k.startswith("_")}
+        # A REFUSED REALIZATION PLACES NOTHING. The distinctness gate in
+        # `to_operations` withholds every State, Transition and sweep of a
+        # response whose coordinates contradict a declared distinction; the
+        # placements were still committed, and a later valid realization then
+        # could not place the same joints. What the gate refuses, it refuses
+        # whole - the caller asks again against an unchanged state.
+        if self._contradicted_distinctness(parsed, inputs):
+            return []
         view = inputs.get(self.context_key) or {}
         known = {e.get("entity_id") for fam in view.values() if isinstance(fam, list)
                  for e in fam if isinstance(e, dict)}

@@ -580,6 +580,44 @@ class DesignState:
             extendable = self.c.extendable_fields(fam)
             for name in op.fields:
                 if name not in _STORAGE[self].entities[op.entity_id]:
+                    # AN OPTIONAL FIELD THE OWNER LEFT OUT MAY BE FILLED IN BY
+                    # THE OWNER. Before this, it could not be: SUPERSEDE needed
+                    # a prior value, and EXTEND is delegation to another stage,
+                    # so a relation authored without its `defeat_specification`
+                    # had no write path by which its own author could complete
+                    # it short of re-authoring the whole record. Completing an
+                    # absence is still a revision - it needs the owner, and it
+                    # needs a reason, both checked below - but it is not a
+                    # revision OF anything, so the prior-value rule does not
+                    # apply. A REQUIRED field can never be absent from a stored
+                    # record, so this reaches only fields the contract made
+                    # optional.
+                    #
+                    # ABSENT MEANS THE KEY IS NOT STORED, AND NOTHING ELSE. A
+                    # field stored as None, as [] or as "" is a value the author
+                    # wrote - "no absolute scale", "holds nowhere", "no note" -
+                    # and replacing it is an ordinary SUPERSEDE: the prior value
+                    # is retained in the record's history and the replacement is
+                    # established, exactly as for any other value. Collapsing
+                    # "the author said nothing" into "the author said empty"
+                    # would erase a distinction the data makes.
+                    optional = self.c.families.get(fam, {}).get("optional_fields") or []
+                    granted = extendable.get(name)
+                    if name in optional and granted is not None:
+                        # Delegated: the delegate EXTENDs it. Said in the same
+                        # words whether or not a value is stored, so one
+                        # situation has one code.
+                        out.append(
+                            "SUPERSEDE_WRONG_STAGE: %s.%s is writable by %s, not "
+                            "%s" % (fam, name, granted, patch.stage_id))
+                        continue
+                    if name in optional:
+                        if owner != patch.stage_id:
+                            out.append(
+                                "SUPERSEDE_NOT_PERMITTED: %s.%s is owned by %s "
+                                "and is not extendable by %s"
+                                % (fam, name, owner, patch.stage_id))
+                        continue
                     out.append("SUPERSEDE_ABSENT: %s.%s has no prior value"
                                % (op.entity_id, name))
                     continue

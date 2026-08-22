@@ -146,11 +146,91 @@ class TestAuthorityModel(unittest.TestCase):
 
 
     def test_D_supersede_of_a_field_with_no_prior_value_is_refused(self):
+        """`never_set` is not a field the contract declares, so there is
+        nothing it could be completing."""
         s = _with_scale(_state())
         with self.assertRaisesRegex(ContractError, "SUPERSEDE_ABSENT"):
             s.apply(_patch(s, "s04", [
                 Op("SUPERSEDE", "ReferenceScale", "SCL-0001", {"never_set": 1}, "p",
                    reason="r")], pid="p2"))
+
+    def test_D_the_owner_may_complete_an_optional_field_it_left_out(self):
+        """A region created with no `reach_targets` - optional, omitted. Its
+        owner fills it in later. Before this there was no write path by which
+        an author could complete an optional field it had omitted: SUPERSEDE
+        needed a prior value and EXTEND is delegation to another stage, so the
+        only way to add a sentence to a record was to re-author the record.
+        Completing an absence is still a revision - owner and reason are still
+        required - but it is not a revision OF anything."""
+        s = _with_region(_with_region(_state()), rid="FRG-0002")
+        s.apply(_patch(s, "s03", [
+            Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
+               {"reach_targets": ["FRG-0002"]}, "prov:complete",
+               reason="the region it gives reach through to was left unstated")],
+            pid="p2"))
+        rec = next(r for r in s.family("FunctionalRegion")
+                   if r["entity_id"] == "FRG-0001")
+        assert rec["reach_targets"] == ["FRG-0002"]
+        assert rec["_superseded"][0]["prior_value"] is None
+
+    def test_D_but_not_another_stage(self):
+        s = _with_region(_with_region(_state()), rid="FRG-0002")
+        with self.assertRaisesRegex(ContractError, "SUPERSEDE_NOT_PERMITTED"):
+            s.apply(_patch(s, "s04", [
+                Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
+                   {"reach_targets": ["FRG-0002"]}, "p", reason="r")], pid="p2"))
+
+    def test_D_and_not_silently(self):
+        s = _with_region(_with_region(_state()), rid="FRG-0002")
+        with self.assertRaisesRegex(ContractError, "NO_REASON"):
+            s.apply(_patch(s, "s03", [
+                Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
+                   {"reach_targets": ["FRG-0002"]}, "p")], pid="p2"))
+
+    def test_D_a_stored_empty_value_is_a_value_and_takes_the_ordinary_path(self):
+        """`absent` means the key is not stored. A field stored as None, [] or
+        "" is something the author wrote, and replacing it is an ordinary
+        SUPERSEDE: the prior value - the empty one - is retained in history and
+        the replacement is established. The completion path above is for a key
+        that was never written, and must not swallow these."""
+        # None: ReferenceScale.absolute is created as None by the fixture.
+        s = _with_scale(_state())
+        s.apply(_patch(s, "s04", [
+            Op("SUPERSEDE", "ReferenceScale", "SCL-0001",
+               {"absolute": {"unit": "mm", "per_unit": 1.0}}, "prov:refine",
+               reason="the basis became absolute")], pid="p2"))
+        rec = s.family("ReferenceScale")[0]
+        assert rec["absolute"] == {"unit": "mm", "per_unit": 1.0}
+        assert rec["_superseded"][0]["prior_value"] is None    # retained, not erased
+        # []: a region created with reach_targets stored as an empty list.
+        s = _with_region(_state())
+        s.apply(_patch(s, "s03", [
+            Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
+               {"reach_targets": []}, "prov:complete",
+               reason="declared to reach through to nothing")], pid="p2"))
+        s.apply(_patch(s, "s03", [
+            Op("CREATE", "FunctionalRegion", "FRG-0002",
+               {"role": "ACCESS", "owning_bodies": ["BOD-0001"]}, "prov:test")],
+            pid="p3"))
+        s.apply(_patch(s, "s03", [
+            Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
+               {"reach_targets": ["FRG-0002"]}, "prov:revise",
+               reason="it reaches through to FRG-0002 after all")], pid="p4"))
+        rec = next(r for r in s.family("FunctionalRegion")
+                   if r["entity_id"] == "FRG-0001")
+        assert rec["reach_targets"] == ["FRG-0002"]
+        priors = [h["prior_value"] for h in rec["_superseded"]]
+        assert None in priors and [] in priors                  # both steps kept
+
+    def test_D_a_delegated_field_still_goes_through_its_delegate(self):
+        """`volume` is optional on FunctionalRegion AND extendable by s04. The
+        owner completing it would bypass the delegation; EXTEND by s04 is the
+        path, exactly as before."""
+        s = _with_region(_state())
+        with self.assertRaisesRegex(ContractError, "SUPERSEDE_WRONG_STAGE.*s04"):
+            s.apply(_patch(s, "s03", [
+                Op("SUPERSEDE", "FunctionalRegion", "FRG-0001",
+                   {"volume": {"centre": [0, 0, 0]}}, "p", reason="r")], pid="p2"))
 
 
     # ------------------------------------------------------------ E. INVALIDATE

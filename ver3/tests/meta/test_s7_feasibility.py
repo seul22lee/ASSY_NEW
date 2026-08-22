@@ -590,24 +590,47 @@ class TestDomainPolicy(_Feas):
 # =====================================================================
 class TestModelLocalFindings(_Feas):
 
-    def test_B12_a_reach_result_alone_cannot_pass_or_fail_the_domain(self):
-        state = self.hinge(
+    def concluding_about(self, region):
+        """s04a's conclusion about the REGION the actor needs. The harness's
+        default conclusion is about a body, and a conclusion about some body is
+        not a conclusion about this actor's demand."""
+        arr = arrangement({k: v for k, v in HINGE_BOXES.items()},
+                          steps=["ASY-0A"], region=region, actor="ACT-0001")
+        for r in arr["reach_results"]:
+            r["target"] = region
+        return arr
+
+    def test_B12_a_reach_result_is_the_contracted_pre_selection_basis(self):
+        """THIS REVERSED. It used to assert that a ReachResult could neither
+        pass nor fail the domain, and that s04a's conclusion must not even be a
+        premise of the verdict - and the domain then could not PASS on any
+        input, because nothing anywhere is contracted to produce the
+        "deterministic reach basis" it waited for. s04a's contract is an
+        arrangement "sufficient to decide reach", and the ReachResult is that
+        decision, AUTHORITATIVE. Before selection it is the basis; the evidence
+        level is written on the verdict beside the PASS, not hidden under a
+        NOT_ESTABLISHED that meant "we never looked".
+
+        The harness's actor reaches for nothing, so the demand is seeded.
+        """
+        state = self.seed(must_reach=["the latch"])
+        self.candidates(state)
+        self.hinge(
+            state=state,
             s03a=dict(topology("A", 2, [(0, 1)]),
                       functional_regions=[{"id": "FRG-A", "role": "ACCESS",
                                            "owning_bodies": ["BOD-G0A"],
                                            "required_by_actors": ["ACT-0001"]}]),
-            s04a=arrangement({k: v for k, v in HINGE_BOXES.items()},
-                             steps=["ASY-0A"], region="FRG-A", actor="ACT-0001"))
+            s04a=self.concluding_about("FRG-A"))
         self.assertTrue(state.family("ReachResult"), "the probe is not probing")
         out = self.assess(state)
         v = self.domain(out, "reach")
-        self.assertEqual(s07.NOT_ESTABLISHED, v.status)
-        self.assertIn("REACH_BASIS_NOT_ESTABLISHED", v.reason_codes)
-        self.assertIn(s07.MODEL_LOCAL_POSITIVE, v.reason_codes)
+        self.assertEqual(s07.PASS, v.status, v.summary)
+        self.assertIn(s07.MODEL_LOCAL_POSITIVE, v.reason_codes,
+                      "the evidence level is part of the record")
         for r in state.family("ReachResult"):
-            self.assertNotIn(r["entity_id"], v.premises,
-                             "a model's conclusion was recorded as a premise of "
-                             "the verdict, which would make it evidence for itself")
+            self.assertIn(r["entity_id"], v.premises,
+                          "the conclusion the verdict rests on is its premise")
 
     def test_B13_an_elimination_record_alone_cannot_make_it_infeasible(self):
         state = self.hinge(s04a=arrangement(HINGE_BOXES, steps=["ASY-0A"],
@@ -2217,15 +2240,26 @@ class TestClosureSweep(unittest.TestCase):
             self.assertIn(reader, body, domain)
             self.assertIn("NOT_APPLICABLE", body, domain)
 
-    def test_SWEEP_07_no_model_local_finding_reaches_a_deterministic_verdict(self):
-        """A ReachResult and an EliminationRecord may weaken and may not decide.
-        Read structurally: neither family is ever compared to PASS or FAIL."""
-        for family in ("ReachResult", "EliminationRecord"):
-            after = self.src.split('fam("%s")' % family)[1]
-            branch = "\n".join(after.splitlines()[:6])
-            self.assertNotIn("status = PASS", branch, family)
-            self.assertNotIn("status = FAIL", branch, family)
-            self.assertIn("MODEL_LOCAL", branch, family)
+    def test_SWEEP_07_an_elimination_record_never_decides_and_a_reach_result_is_labelled(self):
+        """An EliminationRecord may weaken and may not decide: s04a saying "this
+        arrangement cannot exist" is a geometric finding by a model, not a
+        contradiction. Read structurally: never compared to PASS or FAIL.
+
+        A ReachResult is DIFFERENT, and deliberately so since the pre-selection
+        basis was defined: it is the contracted conclusion on reach at this
+        stage, so it may decide - and every verdict that rests on one carries
+        the MODEL_LOCAL evidence level beside its status, which is what keeps a
+        conclusion about boxes and sides from being mistaken for a sweep
+        through a solid."""
+        after = self.src.split('fam("EliminationRecord")')[1]
+        branch = "\n".join(after.splitlines()[:6])
+        self.assertNotIn("status = PASS", branch)
+        self.assertNotIn("status = FAIL", branch)
+        self.assertIn("MODEL_LOCAL", branch)
+        reach = self.src.split("def _reach(")[1].split("\ndef ")[0]
+        self.assertIn("MODEL_LOCAL_POSITIVE", reach)
+        self.assertIn("MODEL_LOCAL_NEGATIVE", reach)
+        self.assertIn("REACH_CONCLUDED_UNREACHABLE", reach)
 
     def test_SWEEP_08_no_absence_produces_pass_or_fail(self):
         """Every branch that reports something MISSING weakens to
@@ -2337,7 +2371,11 @@ class TestClosureSweep(unittest.TestCase):
         self.assertNotIn("driving_joint", self.code)
         for expression in ('states[0]', 'sorted(e)[0]', 'scales[0]'):
             self.assertIn(expression, self.src, expression)
-        for guard in ("len(states) > 1", "len(e) == 1", "len(scales) > 1"):
+        # `sorted(e)[0]` over a feature's expectations is guarded by the
+        # conflict test one line above it: a feature with more than one
+        # expectation is conflicted and never indexed.
+        for guard in ("len(states) > 1", "len(e) > 1 for e in by_feature",
+                      "len(scales) > 1"):
             self.assertIn(guard, self.code, guard)
         # THE SAME RULE WHERE THE RULE NOW LIVES. Choosing among the records
         # that claim to realize one demanded change is shared with the pass that
