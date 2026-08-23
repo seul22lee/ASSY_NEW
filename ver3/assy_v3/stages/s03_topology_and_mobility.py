@@ -321,7 +321,14 @@ empty. Every field is required unless marked optional. No required field is null
                        WITHIN_ELASTIC_LIMIT - that would assert a strain result
                        nothing here computed.
   interfaces[]         id "IFC-0001", bodies[], interaction_kind, nominal,
-                       addresses_obligations[]
+                       addresses_obligations[],
+                       feature (a short name for WHICH feature of the pair this
+                       interface is - "JOURNAL", "STOP_FACE", "SNAP_RETAINER".
+                       REQUIRED whenever two interfaces share a body pair: a
+                       journal that runs clear and a retainer that grips are
+                       two features, and two interfaces on one pair that name
+                       none are one feature described twice. Omit it when the
+                       pair has one interface)
   configurations[]     id "CFG-0001", name, kind, bodies_present[],
                        distinguishing_basis[] {{joint, dof, differs_from[]}}
                        - what makes this configuration a DIFFERENT one: the
@@ -337,7 +344,10 @@ empty. Every field is required unless marked optional. No required field is null
                        G1-[J1]-G2-[J2]-G3 the middle link touches two joints and
                        neither of them is the obvious one. The joint you name
                        must be one you emit and must declare that DOF
-  functional_regions[] id "FRG-0001", role, owning_bodies[],
+  functional_regions[] id "FRG-0001", role, owning_bodies[] (AT LEAST ONE
+                       body id you emit: the body whose surface bounds the
+                       region. A region no body owns has no position, and a
+                       KEEP_OUT nothing owns is a wall in the air),
                        required_by_actors[] (actor ids from the input; [] for
                        SUPPORT and KEEP_OUT regions no actor uses),
                        reach_targets[] (OTHER functional region ids THIS region
@@ -783,7 +793,9 @@ class S03TopologyAndMobility(Stage):
                 # to suit a new rule. It caused none of the live failures this
                 # seam closure was opened for, so it is REPORTED and not changed.
                 "nominal": i.get("nominal_status", i.get("nominal", "NOMINAL")),
-                "addresses_obligations": i.get("addresses_obligations", [])}, prov))
+                "addresses_obligations": i.get("addresses_obligations", []),
+                **({"feature": i["feature"]} if isinstance(i.get("feature"), str)
+                   and i["feature"].strip() else {})}, prov))
         for c in parsed.get("configurations", []):
             fields = {"name": c["name"], "kind": c.get("kind", "OPERATIONAL"),
                       "bodies_present": c.get("bodies_present", []),
@@ -851,6 +863,49 @@ class S03TopologyAndMobility(Stage):
         for i in parsed.get("interfaces", []):
             if i.get("interaction_kind") not in INTERACTION_KINDS:
                 out.append("interface %s is unclassified" % i.get("id"))
+        # TWO INTERFACES ON ONE PAIR NAME THEIR FEATURES. Without the names
+        # they are one feature described twice, and where their kinds disagree
+        # the pair is held to nothing downstream - which is the right reading
+        # of a contradiction and the wrong reading of a hinge.
+        by_pair: Dict[Any, List[Dict[str, Any]]] = {}
+        for i in parsed.get("interfaces", []):
+            bodies_of = [b for b in (i.get("bodies") or [])[:2] if isinstance(b, str)]
+            if len(bodies_of) == 2:
+                by_pair.setdefault(frozenset(bodies_of), []).append(i)
+        for pair, rows in sorted(by_pair.items(), key=lambda kv: sorted(kv[0])):
+            if len(rows) < 2:
+                continue
+            names = [str(i.get("feature") or "").strip() for i in rows]
+            unnamed = [i.get("id") for i, n in zip(rows, names) if not n]
+            if unnamed:
+                out.append("interfaces %s share the pair %s and %s name no feature, "
+                           "so which feature each one is cannot be told"
+                           % (", ".join(str(i.get("id")) for i in rows),
+                              "/".join(sorted(pair)), ", ".join(map(str, unnamed))))
+            elif len(set(names)) < len(names):
+                out.append("interfaces %s share the pair %s and name the same "
+                           "feature more than once" % (
+                               ", ".join(str(i.get("id")) for i in rows),
+                               "/".join(sorted(pair))))
+        # S03-C12, AT THE PRODUCER. `functional_region_check` has asked this of
+        # the written state since the window runner, and nothing asked it of
+        # the response, so a region with no owning body was committed, given a
+        # volume by s04a where the model pictured it, and then read by every
+        # occupancy rule as a box nothing may enter - an obstacle the design
+        # never attached to a part. A region is a property OF a body; one with
+        # no owner is not yet a statement about the design.
+        bodies = {b.get("id") for b in parsed.get("bodies", [])}
+        for f in parsed.get("functional_regions", []):
+            if f.get("role") not in REGION_ROLES:
+                out.append("functional region %s has an unknown role %r"
+                           % (f.get("id"), f.get("role")))
+            owners = [b for b in (f.get("owning_bodies") or []) if isinstance(b, str)]
+            if not owners:
+                out.append("functional region %s names no owning body" % f.get("id"))
+            for b in owners:
+                if b not in bodies:
+                    out.append("functional region %s is owned by %s, which is not "
+                               "a body you emitted" % (f.get("id"), b))
         return out
 
 
@@ -1039,6 +1094,12 @@ def retention_check(state) -> List[str]:
         strategy = s.get("termination_strategy")
         if strategy and strategy not in TERMINATION_STRATEGIES:
             problems.append("RETENTION_UNKNOWN_STRATEGY: %s -> %r" % (s["entity_id"], strategy))
+        # THE SIDE A PART ARRIVES FROM is an axis word. It was a required field
+        # with no vocabulary and no reader, so anything satisfied it and nothing
+        # downstream could build an approach from it.
+        if s.get("access_side") not in AXIS_DIRECTIONS or s.get("access_side") == "NONE":
+            problems.append("ASSEMBLY_ACCESS_SIDE_UNREADABLE: %s -> %r names no side"
+                            % (s["entity_id"], s.get("access_side")))
     # A body whose removal is blocked somewhere must say how it is retained.
     retained: Set[str] = set()
     for mex in state.family("MobilityExpectation"):
@@ -1274,7 +1335,11 @@ Return one JSON object. Emit every key. Use exactly these key names.
                         The candidate is NOT yours to state: this pass is run
                         once per candidate and the one you are embodying is
                         named above, so the path is written against it.
-  assembly_steps[]      id "ASY-0001", order_index, body, access_side,
+  assembly_steps[]      id "ASY-0001", order_index, body,
+                        access_side (the SIDE the body arrives from: one of
+                        {axis_directions} other than NONE - "+Z" means it comes
+                        down from above; a later pass builds its approach
+                        from this, so it is the one statement of arrival),
                         activates[], termination_strategy, path_kind, depends_on[]
   unresolved[]          id "S3U-1001", decision, why_open, alternatives[],
                         alternatives_kind, kept_open_by[], blocks[]
@@ -2248,4 +2313,14 @@ class S03BMobilityAndAssembly(Stage):
                 break
         if not parsed.get("assembly_steps"):
             out.append("no assembly order")
+        # THE SIDE EACH PART ARRIVES FROM, at the producer. `access_side` was a
+        # required field with no vocabulary: anything satisfied the boundary,
+        # and s04a derives the insertion vector from it, so a side that names
+        # no axis is a step whose arrival cannot be built. `retention_check`
+        # asks the same of the written state for the window runner.
+        for step in parsed.get("assembly_steps") or []:
+            side = step.get("access_side")
+            if side not in AXIS_DIRECTIONS or side == "NONE":
+                out.append("assembly step %s arrives from %r, which names no side"
+                           % (step.get("id"), side))
         return out

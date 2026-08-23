@@ -25,6 +25,7 @@ if REPO not in sys.path:
     sys.path.insert(0, REPO)
 
 from ver3.assy_v3.state.authority import AuthorityViolation                  # noqa: E402
+import ver3.assy_v3.stages.s04_envelope_and_motion as s04                    # noqa: E402
 from ver3.assy_v3.state.design_state import DesignState                      # noqa: E402
 from ver3.assy_v3.state.patch import Op, StagePatch                          # noqa: E402
 
@@ -202,9 +203,15 @@ class TestAbsorbWritePathReplay(unittest.TestCase):
         for r in self.substrate["s04a"]["region_volumes"]:
             assert regions[r["functional_region"]]["volume"]["centre"] == r["centre"]
 
+        # THE FACT IS THE DIRECTION, NOT THE TRANSCRIPTION. The recording holds
+        # the vectors the model answered when s04a still asked for them; s04a
+        # now derives the vector from the side s03 stated for each step, so the
+        # engineering fact that must reach the state is "every step the model
+        # was shown has its direction, and it is the motion from its side".
         steps = {e["entity_id"]: e for e in state.family("AssemblyStep")}
         for a in self.substrate["s04a"]["assembly_directions"]:
-            assert steps[a["assembly_step"]]["insertion_direction"] == a["direction"]
+            step = steps[a["assembly_step"]]
+            assert step["insertion_direction"] == s04.motion_from_side(step["access_side"])
 
         joints = {e["entity_id"]: e for e in state.family("Joint")}
         for p in self.substrate["s04b"]["joint_placements"]:

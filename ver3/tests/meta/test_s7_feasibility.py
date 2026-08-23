@@ -191,6 +191,15 @@ def realization(sfx, hops=(0, 0), steps=(0,), terminates="RSR-0001",
     }
 
 
+def side_of(direction):
+    """The `access_side` a step must state for its body to MOVE along
+    `direction`: the axis word on the opposite side. s04a derives the insertion
+    vector from the side s03 states, so a fixture that wants a part to travel
+    along +X has its step arrive from -X."""
+    (i, v), = [(i, v) for i, v in enumerate(direction) if v]
+    return ("-" if v > 0 else "+") + "XYZ"[i]
+
+
 def arrangement(boxes, steps=(), region=None, actor=None, eliminated=False,
                 basis="RELATIVE", absolute=None):
     """s04a: where each body is. `boxes` is {body: (centre, half_extent)}."""
@@ -205,8 +214,9 @@ def arrangement(boxes, steps=(), region=None, actor=None, eliminated=False,
         "reach_results": ([{"actor": actor, "target": sorted(boxes)[0],
                             "reachable": True, "approach_side": "+Z",
                             "why": "open"}] if actor else []),
-        "assembly_directions": [{"assembly_step": s, "direction": [0, 0, -1]}
-                                for s in steps],
+        # No `assembly_directions`: the insertion vector is DERIVED by s04a
+        # from each step's `access_side`, not asked of the model. A fixture
+        # that wants a body to travel some way states the side it arrives from.
         "elimination": {"eliminated": eliminated,
                         "reason": "no consistent arrangement" if eliminated else None},
     }

@@ -204,8 +204,9 @@ RULES
    enter, an APERTURE where something passes through.
 4. For every actor and everything it must reach, say whether the reach is
    possible in this arrangement, and from which side.
-5. For every assembly step, say which direction the body arrives from, as a
-   vector in the same coordinates.
+5. The side each body arrives from is already stated by the assembly step
+   you were given (its access_side); do not restate it. Place every body so
+   that arriving from that side is possible.
 6. If this topology CANNOT be given a consistent arrangement at all, say so and
    name the geometric reason. That is a real and useful result: it eliminates a
    candidate cheaply, which is what this pass is for.
@@ -232,7 +233,6 @@ Return a single JSON object with these keys, each a list unless marked.
   region_volumes[]      functional_region, half_extent [x,y,z], centre [x,y,z]
   reach_results[]       actor, target, reachable (boolean), approach_side,
                         why
-  assembly_directions[] assembly_step, direction [x,y,z]
   mating_geometry[]     interface, inner_body, outer_body,
                         inner_feature SHAFT|PIN|DOWEL,
                         outer_feature BORE|HOLE|BEARING|GUIDE,
@@ -251,7 +251,6 @@ REFERENCES
   envelopes[].body                a body id from the input
   region_volumes[].functional_region  a functional region id from the input
   reach_results[].actor           an actor id from the input
-  assembly_directions[].assembly_step an assembly step id from the input
   mating_geometry[].interface     an interface id from the input, between the
                                   two bodies you name
   mating_geometry[].inner_body / outer_body  the interface's own two bodies
@@ -404,12 +403,24 @@ class S04AEnvelopeAndReach(Stage):
                               {"volume": {"half_extent": r.get("half_extent"),
                                           "centre": r.get("centre")}},
                               prov, premise_refs=list(premises)))
-        for a in parsed.get("assembly_directions") or []:
-            target = a.get("assembly_step")
-            if target in known and state.has_entity(target):
-                ops.append(Op("EXTEND", state.stored_family(target), target,
-                              {"insertion_direction": a.get("direction")},
-                              prov, premise_refs=list(premises)))
+        # THE INSERTION DIRECTION IS DERIVED, NOT ASKED. s03 owns the side a
+        # part arrives from (`access_side`); this pass used to ask the model
+        # for the same fact a second time as a vector, with the opposite sign
+        # in the prompt to the one the corridor read, and the two statements of
+        # one arrival disagreed on most steps and nothing compared them. The
+        # vector is now the one function of the side, written once for every
+        # step of this branch that lacks it, so it cannot disagree.
+        for step in view.get("AssemblyStep") or []:
+            target = step.get("entity_id")
+            if (target not in known or not state.has_entity(target)
+                    or step.get("insertion_direction") is not None):
+                continue
+            motion = motion_from_side(step.get("access_side"))
+            if motion is None:
+                continue                    # reported by `completeness`
+            ops.append(Op("EXTEND", state.stored_family(target), target,
+                          {"insertion_direction": motion},
+                          prov, premise_refs=list(premises)))
         return ops
 
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
@@ -486,11 +497,12 @@ class S04AEnvelopeAndReach(Stage):
                 out.append("region volume names %s, which this consumer was not "
                            "given, so it was not committed"
                            % r.get("functional_region"))
-        for a in parsed.get("assembly_directions") or []:
-            if a.get("assembly_step") not in known:
-                out.append("assembly direction names %s, which this consumer was "
-                           "not given, so it was not committed"
-                           % a.get("assembly_step"))
+        for step in inputs["consumer_view"].get("AssemblyStep") or []:
+            if (step.get("insertion_direction") is None
+                    and motion_from_side(step.get("access_side")) is None):
+                out.append("assembly step %s arrives from %r, which names no side, "
+                           "so no insertion direction was derived for it"
+                           % (step.get("entity_id"), step.get("access_side")))
         return out
 
 
@@ -1616,6 +1628,103 @@ def sweep_hull(box, joint: Dict[str, Any], origin: Sequence[float],
     }
 
 
+#: The unit vector pointing OUT of the arrangement towards each named side.
+AXIS_VECTORS = {"+X": (1.0, 0.0, 0.0), "-X": (-1.0, 0.0, 0.0),
+                "+Y": (0.0, 1.0, 0.0), "-Y": (0.0, -1.0, 0.0),
+                "+Z": (0.0, 0.0, 1.0), "-Z": (0.0, 0.0, -1.0)}
+
+
+def motion_from_side(access_side):
+    """The unit vector a part MOVES along to arrive from `access_side`, or None
+    where the side names no axis. A part arriving from +Z moves along -Z."""
+    out = AXIS_VECTORS.get(access_side)
+    return None if out is None else [-c for c in out]
+
+
+def approach_direction(step):
+    """(motion, code, note) - the direction ONE assembly step's body travels.
+
+    ONE READING, for the s04 path check and for feasibility. `access_side` is
+    the statement of arrival - s03's, a side - and `insertion_direction` is the
+    vector s04a derives from it. Both evaluators read the vector, because its
+    presence is what says s04a has spoken for this step; they read it AGAINST
+    the side, because a vector that contradicts the side it was derived from
+    is a record contradicting itself, and a corridor built from either half
+    would be a corridor the design did not state. Three outcomes:
+
+      motion, None, None            - the vector, and it agrees with the side
+      None, "..._MISSING", note     - s04a has not committed a direction
+      None, "..._CONTRADICTS_...", note
+                                    - the vector and the side disagree
+      None, "..._UNREADABLE", note  - the side names no axis
+
+    THE CONTRADICTION IS NOT RESOLVED HERE by preferring either statement. It
+    was authored before the field had a meaning - the prompt asked for the
+    side and the corridor read a motion - and the cure is to re-derive the
+    vector, which the producer now does, not to guess which half was meant.
+    """
+    sid = step.get("entity_id")
+    side = step.get("access_side")
+    expected = motion_from_side(side)
+    if expected is None:
+        return (None, "ACCESS_SIDE_UNREADABLE",
+                "%s arrives from %r, which names no side" % (sid, side))
+    stated = step.get("insertion_direction")
+    if not (isinstance(stated, list) and len(stated) == 3
+            and all(isinstance(x, (int, float)) for x in stated)):
+        return (None, "INSERTION_DIRECTION_MISSING",
+                "%s: the step declares no insertion direction" % sid)
+    norm = math.sqrt(sum(float(x) * float(x) for x in stated))
+    if norm <= 0.0:
+        return (None, "INSERTION_DIRECTION_MISSING",
+                "%s: the step's insertion direction has no length" % sid)
+    unit = [float(x) / norm for x in stated]
+    if sum(u * e for u, e in zip(unit, expected)) < 1.0 - 1e-6:
+        return (None, "INSERTION_DIRECTION_CONTRADICTS_ACCESS_SIDE",
+                "%s arrives from %s and its insertion direction %s is not the "
+                "motion from that side, %s" % (sid, side, [round(u, 3) for u in unit],
+                                             [round(e, 1) for e in expected]))
+    return unit, None, None
+
+
+def insertion_hull(boxes, body, direction, samples: int = SAMPLES):
+    """The volume a body sweeps ARRIVING along `direction` at its final box.
+
+    ONE CONSTRUCTION, read by the s04 path check and by feasibility, so the two
+    cannot describe different insertions.
+
+    HOW FAR BACK THE CORRIDOR REACHES. It used to reach twice the largest
+    extent of ANY body in the arrangement, whatever the arriving body's own
+    size or position - so a 1-unit clip snapped onto the +X face of a 10-unit
+    box was swept 20 units backwards, through the whole interior of the box it
+    was being fitted to and out the far side, where it "met" a hinge on the
+    opposite wall. That is not a path the part takes; it is a path no part
+    could take. A part arrives from OUTSIDE the arrangement: the corridor runs
+    from the body's final position back to the arrangement's bounding face on
+    the side it approaches from, and no further. Everything already placed
+    lies inside that bound, so nothing reachable is missed.
+    """
+    norm = math.sqrt(sum(float(x) * float(x) for x in direction)) or 1.0
+    unit = [float(x) / norm for x in direction]
+    lo = [min(b[0][i] for b in boxes.values()) for i in range(3)]
+    hi = [max(b[1][i] for b in boxes.values()) for i in range(3)]
+    own = boxes[body]
+    # Distance from the body's box, moving AGAINST `direction`, to the face of
+    # the arrangement's bound on that side. Per axis, the body's own bound in
+    # the approach direction meets the arrangement's outer bound.
+    span = 0.0
+    for i in range(3):
+        if unit[i] > 1e-9:
+            span = max(span, (own[0][i] - lo[i]) / unit[i])
+        elif unit[i] < -1e-9:
+            span = max(span, (hi[i] - own[1][i]) / -unit[i])
+    hull = own
+    for k in sample(0.0, span, samples):
+        hull = ([min(hull[0][i], own[0][i] - unit[i] * k) for i in range(3)],
+                [max(hull[1][i], own[1][i] - unit[i] * k) for i in range(3)])
+    return hull
+
+
 #: WHAT AN INTERFACE SAYS ABOUT ITS PAIR SHARING SPACE. Three answers, and they
 #: are not interchangeable: a kind whose meaning REQUIRES the pair to meet
 #: exempts that pair from generic interference, and CLEARANCE is the opposite
@@ -1903,7 +2012,14 @@ def region_occupancy_check(state) -> List[str]:
             problems.append("REGION_VOLUME_MALFORMED: %s" % r["entity_id"])
             continue
         box = aabb(c, h)
-        for body in (r.get("owning_bodies") or []):
+        owners = [b for b in (r.get("owning_bodies") or []) if isinstance(b, str)]
+        if not owners:
+            # The loop below is over the owners, so a region with none passed
+            # this check by having nobody to fail it. S03-C12 names it.
+            problems.append("REGION_WITHOUT_OWNER: %s (%s) is owned by no body"
+                            % (r["entity_id"], r.get("role")))
+            continue
+        for body in owners:
             if body in boxes and excludes_occupancy(r.get("role")) \
                     and overlaps(box, boxes[body]):
                 problems.append(
@@ -2160,31 +2276,18 @@ def assembly_path_findings(payload) -> List[str]:
     boxes = _payload_boxes(payload)
     steps = sorted((payload.get("AssemblyStep") or []),
                    key=lambda s: s.get("order_index") or 0)
-    directions = {}
-    for s in steps:
-        d = s.get("insertion_direction")
-        if isinstance(d, list) and len(d) == 3:
-            directions[s["entity_id"]] = d
     problems, placed = [], []
     for s in steps:
         body = s.get("body")
         if body not in boxes:
             placed.append(body)
             continue
-        d = directions.get(s["entity_id"])
+        d, code, note = approach_direction(s)
         if d is None:
-            problems.append("ASSEMBLY_DIRECTION_MISSING: %s" % s["entity_id"])
+            problems.append("ASSEMBLY_%s: %s" % (code.replace("INSERTION_", ""), note))
             placed.append(body)
             continue
-        norm = math.sqrt(sum(x * x for x in d)) or 1.0
-        unit = [x / norm for x in d]
-        span = max(max(boxes[b][1][i] - boxes[b][0][i] for i in range(3))
-                   for b in boxes) * 2.0
-        hull = boxes[body]
-        for k in sample(0.0, span, SAMPLES):
-            hull = (
-                [min(hull[0][i], boxes[body][0][i] - unit[i] * k) for i in range(3)],
-                [max(hull[1][i], boxes[body][1][i] - unit[i] * k) for i in range(3)])
+        hull = insertion_hull(boxes, body, d)
         for prior in placed:
             if prior in boxes and overlaps(hull, boxes[prior]):
                 problems.append(

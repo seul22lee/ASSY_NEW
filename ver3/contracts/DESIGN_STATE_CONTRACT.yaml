@@ -711,7 +711,19 @@ entity_families:
         orbits out of. Named as an s05 input before the U-2B correction, and
         produced by nothing then or now.
     purpose: "A region where two bodies meet, with its declared kind."
-    optional_fields: [addresses_obligations, mating_geometry]
+    # `feature` - WHICH feature of the pair this interface is. One body pair
+    # carries several features in any real hinge - a journal that runs clear
+    # and a retainer that grips - and two interfaces on one pair with no
+    # feature named are one feature described twice: when their kinds then
+    # disagree, the pair is held to nothing. The feasibility reader used to
+    # take feature identity from `nominal` when that happened to be a string,
+    # a field no producer authors as a name, so no design could ever make two
+    # features on one pair distinct. s03 names the feature; nothing derives it.
+    optional_fields: [addresses_obligations, feature, mating_geometry]
+    # `nominal` is the interface's CONDITION - the producer's default for it is
+    # the word NOMINAL - and it names nothing. Recorded responses hold `true`
+    # in it and hold prose in it, because nothing said what it was; neither
+    # is a feature identity, and no reader takes one from it.
     required_fields: [entity_id, bodies, interaction_kind, nominal]
     mating_geometry_rules:
       - "inner_body and outer_body are the interface's own two bodies, one each. A geometry about some other pair refines nothing here."
@@ -1361,6 +1373,17 @@ entity_families:
     optional_fields: [insertion_direction]
     termination_strategy: [LATER_BODY_COVER, ROTATION, ELASTICITY]
     path_kind: [RIGID, DEFORMATION_RESOLVED]
+    # THE SIDE A PART ARRIVES FROM, as an axis word. s03 owns it - it is a
+    # statement about the assembly order, not about geometry - and it was a
+    # required field with no vocabulary, no prompt description and no reader.
+    # s04a then asked the model a second time "which direction the body arrives
+    # from, as a vector", and the corridor evaluator read that vector as the
+    # part's MOTION - the opposite sense - so the three statements about one
+    # arrival disagreed and nothing noticed. One owner, one vocabulary:
+    # `insertion_direction` is DERIVED from `access_side` by s04a (the unit
+    # vector pointing from the access side INTO the arrangement) and is refused
+    # where it contradicts it.
+    access_side: ["+X", "-X", "+Y", "-Y", "+Z", "-Z"]
     rules:
       - "A rigid part installed by one straight translation always leaves the reverse direction open; retention needs one of the three termination strategies."
       - "A DEFORMATION_RESOLVED path forces NOT_VERIFIED, never PASS. Rigid geometry cannot observe the deflection the path depends on."

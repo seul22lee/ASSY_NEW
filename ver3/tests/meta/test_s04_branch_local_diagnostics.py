@@ -59,7 +59,11 @@ class _TwoBranches(_fixtures.StateBuilder, unittest.TestCase):
     def setUpClass(cls):
         cls.c = Contracts()
 
-    def build(self, second_body_centre=(0.0, 0.0, 0.0), interfaced=False):
+    def build(self, second_body_centre=(0.0, 0.0, 0.0), interfaced=False,
+              second_arrives_from="-Z"):
+        """Both branches' second bodies arrive from `second_arrives_from`,
+        travelling the opposite way - the vector is the motion from the side."""
+        motion = {"-Z": [0.0, 0.0, 1.0], "+Z": [0.0, 0.0, -1.0]}[second_arrives_from]
         s = DesignState(run_id="s04-branch")
         self.add(s, "s02", "Candidate", "CND-A", principle={"h": "f"})
         self.add(s, "s02", "Candidate", "CND-B", principle={"h": "f"})
@@ -102,16 +106,17 @@ class _TwoBranches(_fixtures.StateBuilder, unittest.TestCase):
                     "frame": "world", "maturity": "PROVISIONAL"},
                    "s04a:arrangement", premise_refs=[branch]),
                 Op("CREATE", "AssemblyStep", "ASY-%s1" % tag,
-                   {"order_index": 1, "body": bodies[0], "access_side": "+Z",
+                   {"order_index": 1, "body": bodies[0], "access_side": "-Z",
                     "activates": [], "termination_strategy": "NONE",
                     "path_kind": "RIGID", "depends_on": [],
                     "insertion_direction": [0.0, 0.0, 1.0]},
                    "s03b:relations", premise_refs=[branch]),
                 Op("CREATE", "AssemblyStep", "ASY-%s2" % tag,
-                   {"order_index": 2, "body": bodies[1], "access_side": "+Z",
+                   {"order_index": 2, "body": bodies[1],
+                    "access_side": second_arrives_from,
                     "activates": [], "termination_strategy": "NONE",
                     "path_kind": "RIGID", "depends_on": [],
-                    "insertion_direction": [0.0, 0.0, 1.0]},
+                    "insertion_direction": motion},
                    "s03b:relations", premise_refs=[branch]),
                 Op("CREATE", "State", "STA-CFG-%s1" % tag,
                    {"name": "open", "configuration": "CFG-%s1" % tag,
@@ -303,7 +308,7 @@ class TestCanonicalOwnershipIsTransitiveAndScoped(_TwoBranches):
                {"body": "BOD-A3", "extent": box((0.0, 0.0, 0.0)), "frame": "world",
                 "maturity": "PROVISIONAL"}, "s04a:arrangement"),
             Op("CREATE", "AssemblyStep", "ASY-A3",
-               {"order_index": 3, "body": "BOD-A3", "access_side": "+Z",
+               {"order_index": 3, "body": "BOD-A3", "access_side": "-Z",
                 "activates": [], "termination_strategy": "NONE",
                 "path_kind": "RIGID", "depends_on": [],
                 "insertion_direction": [0.0, 0.0, 1.0]},
@@ -343,12 +348,12 @@ class TestNothingOwnedIsNotNothingBranched(_fixtures.StateBuilder, unittest.Test
                {"instance_identity": "one", "role": "stray",
                 "created_by_stage": "s03"}, "s03:topology"),
             Op("CREATE", "AssemblyStep", "ASY-X1",
-               {"order_index": 1, "body": "BOD-X1", "access_side": "+Z",
+               {"order_index": 1, "body": "BOD-X1", "access_side": "-Z",
                 "activates": [], "termination_strategy": "NONE",
                 "path_kind": "RIGID", "depends_on": [],
                 "insertion_direction": [0.0, 0.0, 1.0]}, "s03b:relations"),
             Op("CREATE", "AssemblyStep", "ASY-X2",
-               {"order_index": 2, "body": "BOD-X2", "access_side": "+Z",
+               {"order_index": 2, "body": "BOD-X2", "access_side": "-Z",
                 "activates": [], "termination_strategy": "NONE",
                 "path_kind": "RIGID", "depends_on": [],
                 "insertion_direction": [0.0, 0.0, 1.0]}, "s03b:relations"),
@@ -499,7 +504,11 @@ class TestAssemblyPathIsBranchLocal(_TwoBranches):
         self.assertTrue(findings, "the overlapping arrangement obstructed nothing")
 
     def test_moving_the_second_body_clear_removes_it(self):
-        state = self.build(second_body_centre=(0.0, 0.0, 40.0))
+        """Above the first body AND arriving from above: a part that sits at
+        z=40 but comes up from below still passes through whatever is at the
+        origin, and the corridor now reaches that far."""
+        state = self.build(second_body_centre=(0.0, 0.0, 40.0),
+                           second_arrives_from="+Z")
         self.assertEqual([], [f for f in assembly_path_check(state)
                               if f.startswith("ASSEMBLY_PATH_OBSTRUCTED")])
 

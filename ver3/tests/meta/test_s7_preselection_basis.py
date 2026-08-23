@@ -32,10 +32,11 @@ import unittest
 from . import _fixtures, _paths                                        # noqa: F401
 
 import ver3.assy_v3.stages.feasibility as s07                          # noqa: E402
+from ver3.assy_v3.stages.s03_topology_and_mobility import S03TopologyAndMobility  # noqa: E402
 from ver3.assy_v3.state.design_state import Contracts                   # noqa: E402
 from ver3.assy_v3.state.patch import Op                                 # noqa: E402
 from .test_s7_feasibility import (                                      # noqa: E402
-    HINGE_BOXES, _Feas, _group, arrangement, motion, realization, topology)
+    HINGE_BOXES, _Feas, _group, arrangement, motion, realization, side_of, topology)
 
 THREE = {"BOD-G0A": ([0, 0, 0], [1, 1, 1]),
          "BOD-G1A": ([1.5, 0, 0], [1, 1, 1]),
@@ -170,8 +171,10 @@ class TestInsertionCorridor(_Feas):
               "BOD-G1A": ([0.5, 0, 0], [2.5, 1.5, 1.5])}
 
     def steps(self, sfx="A", second_dir=(1, 0, 0)):
+        """The second body arrives so as to travel along `second_dir`."""
         r = realization(sfx, steps=(0, 1))
         r["assembly_steps"][1]["order_index"] = 2
+        r["assembly_steps"][1]["access_side"] = side_of(second_dir)
         return r
 
     def test_I1_a_declared_mating_target_is_not_an_obstruction(self):
@@ -180,7 +183,6 @@ class TestInsertionCorridor(_Feas):
         is going to sit in. That is arriving, not colliding."""
         top = topology("A", 2, [(0, 1)])                 # one CONTACT interface
         arr = arrangement(self.NESTED, steps=["ASY-0A", "ASY-1A"])
-        arr["assembly_directions"][1]["direction"] = [1, 0, 0]
         state = self.hinge(s03a=top, s03b=self.steps(), s04a=arr)
         v = self.domain(self.assess(state, apply_patch=False), "assemblability")
         self.assertNotIn("INSERTION_PATH_NOT_CLEAR", v.reason_codes, v.summary)
@@ -201,9 +203,8 @@ class TestInsertionCorridor(_Feas):
         r = realization("A", steps=(0, 1, 2))
         for n, s in enumerate(r["assembly_steps"]):
             s["order_index"] = n + 1
+            s["access_side"] = side_of([-1, 0, 0])
         arr = arrangement(boxes, steps=["ASY-0A", "ASY-1A", "ASY-2A"])
-        for d in arr["assembly_directions"]:
-            d["direction"] = [-1, 0, 0]
         state = self.hinge(s03a=top, s03b=r, s04a=arr)
         v = self.domain(self.assess(state, apply_patch=False), "assemblability")
         self.assertIn("INSERTION_PATH_NOT_CLEAR", v.reason_codes)
@@ -218,7 +219,6 @@ class TestInsertionCorridor(_Feas):
         top = topology("A", 3, [(0, 2)])
         boxes = dict(self.NESTED, **{"BOD-G2A": ([9, 0, 0], [1, 1, 1])})
         arr = arrangement(boxes, steps=["ASY-0A", "ASY-1A"])
-        arr["assembly_directions"][1]["direction"] = [1, 0, 0]
         state = self.hinge(s03a=top, s03b=self.steps(), s04a=arr)
         v = self.domain(self.assess(state, apply_patch=False), "assemblability")
         self.assertIn("INSERTION_PATH_NOT_CLEAR", v.reason_codes)
@@ -229,7 +229,6 @@ class TestInsertionCorridor(_Feas):
         top = topology("A", 2, [(0, 1)])
         top["interfaces"][0]["interaction_kind"] = "CLEARANCE"
         arr = arrangement(self.NESTED, steps=["ASY-0A", "ASY-1A"])
-        arr["assembly_directions"][1]["direction"] = [1, 0, 0]
         state = self.hinge(s03a=top, s03b=self.steps(), s04a=arr)
         v = self.domain(self.assess(state, apply_patch=False), "assemblability")
         self.assertIn("INSERTION_PATH_NOT_CLEAR", v.reason_codes)
@@ -237,7 +236,6 @@ class TestInsertionCorridor(_Feas):
     def test_I4_step_order_is_deterministic(self):
         top = topology("A", 2, [(0, 1)])
         arr = arrangement(self.NESTED, steps=["ASY-0A", "ASY-1A"])
-        arr["assembly_directions"][1]["direction"] = [1, 0, 0]
 
         def run(reverse):
             r = self.steps()
@@ -349,10 +347,14 @@ class TestFeatureExpectation(_Feas):
         cls.c = Contracts()
 
     def pair(self, kinds_and_names):
+        """`feature` is the name of WHICH feature of the pair an interface is;
+        None leaves it unnamed. `nominal` is a status and names nothing."""
         top = topology("A", 2, [(0, 1)])
-        top["interfaces"] = [{"id": "IFC-%dA" % n, "bodies": ["BOD-G0A", "BOD-G1A"],
-                              "interaction_kind": k, "nominal": name,
-                              "addresses_obligations": []}
+        top["interfaces"] = [dict({"id": "IFC-%dA" % n,
+                                   "bodies": ["BOD-G0A", "BOD-G1A"],
+                                   "interaction_kind": k, "nominal": True,
+                                   "addresses_obligations": []},
+                                  **({"feature": name} if name else {}))
                              for n, (k, name) in enumerate(kinds_and_names)]
         return self.hinge(s03a=top)
 
@@ -373,17 +375,56 @@ class TestFeatureExpectation(_Feas):
         self.assertIn("INTERFACE_EXPECTATION_CONFLICT", v.reason_codes)
 
     def test_F3_unnamed_duplicates_that_disagree_stay_conservative(self):
-        """`nominal: true` names no feature. Two such rows are one feature
+        """No `feature` names no feature. Two such rows are one feature
         described twice, and if they disagree that is the conflict."""
-        state = self.pair([("CLEARANCE", True), ("CONTACT", True)])
+        state = self.pair([("CLEARANCE", None), ("CONTACT", None)])
         v = self.domain(self.assess(state, apply_patch=False), "gross_interference")
         self.assertIn("INTERFACE_EXPECTATION_CONFLICT", v.reason_codes)
         self.assertEqual(s07.NOT_ESTABLISHED, v.status)
 
     def test_F4_a_named_and_an_unnamed_feature_are_two_features(self):
-        state = self.pair([("CLEARANCE", "JOURNAL"), ("CONTACT", True)])
+        state = self.pair([("CLEARANCE", "JOURNAL"), ("CONTACT", None)])
         v = self.domain(self.assess(state, apply_patch=False), "gross_interference")
         self.assertNotIn("INTERFACE_EXPECTATION_CONFLICT", v.reason_codes)
+
+    def test_F5_a_status_is_not_a_name(self):
+        """`nominal` is the interface's status. A string there names no
+        feature: two rows that disagree are still one feature described
+        twice, whatever the status field happens to hold."""
+        top = topology("A", 2, [(0, 1)])
+        top["interfaces"] = [{"id": "IFC-%dA" % n, "bodies": ["BOD-G0A", "BOD-G1A"],
+                              "interaction_kind": k, "nominal": status,
+                              "addresses_obligations": []}
+                             for n, (k, status) in enumerate(
+                                 [("CLEARANCE", "NOMINAL"), ("CONTACT", "WORN")])]
+        v = self.domain(self.assess(self.hinge(s03a=top), apply_patch=False),
+                        "gross_interference")
+        self.assertIn("INTERFACE_EXPECTATION_CONFLICT", v.reason_codes)
+
+    def test_F6_the_producer_declares_a_pair_described_twice_without_names(self):
+        """The owner's gate: s03a reports the omission it now has a field for,
+        so the state is not silently the one the consumer cannot read."""
+        top = topology("A", 2, [(0, 1)])
+        top["interfaces"] = [{"id": "IFC-%dA" % n, "bodies": ["BOD-G0A", "BOD-G1A"],
+                              "interaction_kind": k, "nominal": True,
+                              "addresses_obligations": []}
+                             for n, k in enumerate(["CLEARANCE", "CONTACT"])]
+        problems = S03TopologyAndMobility().completeness(top, {"consumer_view": {}})
+        self.assertTrue(any("IFC-0A" in p and "name no feature" in p for p in problems),
+                        problems)
+        top["interfaces"][0]["feature"] = "JOURNAL"
+        top["interfaces"][1]["feature"] = "STOP_FACE"
+        problems = S03TopologyAndMobility().completeness(top, {"consumer_view": {}})
+        self.assertEqual([], [p for p in problems if "feature" in p], problems)
+        top["interfaces"][1]["feature"] = "JOURNAL"
+        problems = S03TopologyAndMobility().completeness(top, {"consumer_view": {}})
+        self.assertTrue(any("same feature" in p for p in problems), problems)
+        # And the name reaches the state through the owner's own operations.
+        state = self.hinge(s03a=dict(top, interfaces=[
+            dict(top["interfaces"][0], feature="JOURNAL"),
+            dict(top["interfaces"][1], feature="STOP_FACE")]))
+        self.assertEqual({"JOURNAL", "STOP_FACE"},
+                         {i.get("feature") for i in state.family("Interface")})
 
 
 # =====================================================================

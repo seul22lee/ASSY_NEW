@@ -22,7 +22,7 @@ import ver3.assy_v3.stages.s04_envelope_and_motion as s04              # noqa: E
 from ver3.assy_v3.state.design_state import Contracts, ContractError    # noqa: E402
 from ver3.assy_v3.state.patch import Op                                 # noqa: E402
 from .test_s7_feasibility import (                                      # noqa: E402
-    _Feas, _group, arrangement, motion, realization, topology)
+    _Feas, _group, arrangement, motion, realization, side_of, topology)
 
 #: A lid (G0) with a pin (G1) inside its knuckle, turning about +Y. The boxes
 #: overlap because the pin IS inside the lid.
@@ -45,11 +45,16 @@ def geometry(**over):
     return g
 
 
-def pin_arrangement(geom=None, boxes=None, direction=(0, 1, 0)):
+def pin_arrangement(geom=None, boxes=None):
     arr = arrangement(boxes or PIN_IN_LID, steps=["ASY-0A"])
-    arr["assembly_directions"][0]["direction"] = list(direction)
     arr["mating_geometry"] = [geom] if geom else []
     return arr
+
+
+def arriving(r, along, index=0):
+    """Step `index` of realization `r` arrives so its body travels `along`."""
+    r["assembly_steps"][index]["access_side"] = side_of(along)
+    return r
 
 
 class _Mating(_Feas):
@@ -61,16 +66,16 @@ class _Mating(_Feas):
     def pin(self, geom=None, kind="CLEARANCE", axis="+Y", boxes=None,
             direction=(0, 1, 0), s03b=None):
         return self.hinge(s03a=pin_topology(kind, axis),
-                          s03b=s03b if s03b is not None else realization("A"),
-                          s04a=pin_arrangement(geom, boxes, direction),
+                          s03b=(s03b if s03b is not None
+                                else arriving(realization("A"), direction)),
+                          s04a=pin_arrangement(geom, boxes),
                           s04b=motion("A", "JNT-0A", _group(1, "A")))
 
     def inserted(self, geom=None, direction=(0, 1, 0)):
         """The lid first, then the PIN arriving into it along `direction`."""
-        r = realization("A", steps=(0, 1))
+        r = arriving(realization("A", steps=(0, 1)), direction, index=1)
         r["assembly_steps"][1]["order_index"] = 2
         arr = arrangement(PIN_IN_LID, steps=["ASY-0A", "ASY-1A"])
-        arr["assembly_directions"][1]["direction"] = list(direction)
         arr["mating_geometry"] = [geom] if geom else []
         return self.hinge(s03a=pin_topology(), s03b=r, s04a=arr,
                           s04b=motion("A", "JNT-0A", _group(1, "A")))
@@ -243,13 +248,19 @@ class TestInsertion(_Mating):
     def test_F4d_a_missing_insertion_direction_is_an_absence(self):
         """Valid geometry, a corridor that needs the narrow phase, and no
         direction stated for the step. Nothing can be measured along an axis
-        nobody named - and nothing is contradicted."""
-        r = realization("A", steps=(0, 1))
-        r["assembly_steps"][1]["order_index"] = 2
-        arr = arrangement(PIN_IN_LID, steps=["ASY-0A"])        # no direction for ASY-1A
+        nobody named - and nothing is contradicted.
+
+        s04a derives the direction for every step it is shown, so "no
+        direction" is a step s04a has not spoken for: here one s03 adds after
+        the arrangement was written."""
+        arr = arrangement(PIN_IN_LID, steps=["ASY-0A"])
         arr["mating_geometry"] = [geometry()]
-        state = self.hinge(s03a=pin_topology(), s03b=r, s04a=arr,
+        state = self.hinge(s03a=pin_topology(), s03b=realization("A"), s04a=arr,
                            s04b=motion("A", "JNT-0A", _group(1, "A")))
+        late = dict(realization("A", steps=(0, 1))["assembly_steps"][1],
+                    order_index=2, access_side="-Y")
+        self.revise(state, Op("CREATE", "AssemblyStep", late.pop("id"), late,
+                              "s03b:relations", premise_refs=["CND-A"]), stage="s03")
         v = self.asm(state)
         self.assertEqual(s07.NOT_ESTABLISHED, v.status, v.summary)
         self.assertIn("INSERTION_DIRECTION_MISSING", v.reason_codes)
@@ -286,9 +297,8 @@ class TestInsertion(_Mating):
         r = realization("A", steps=(2, 0, 1))
         for n, s in enumerate(r["assembly_steps"]):
             s["order_index"] = n + 1
+            s["access_side"] = side_of([0, -1, 0])
         arr = arrangement(boxes, steps=["ASY-2A", "ASY-0A", "ASY-1A"])
-        for d in arr["assembly_directions"]:
-            d["direction"] = [0, -1, 0]
         arr["mating_geometry"] = [geometry()]
         state = self.hinge(s03a=top, s03b=r, s04a=arr,
                            s04b=motion("A", "JNT-0A", _group(1, "A")))

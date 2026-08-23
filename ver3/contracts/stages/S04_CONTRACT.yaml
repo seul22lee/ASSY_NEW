@@ -104,7 +104,9 @@ s04a:
     # configurations in coordinates. The claim described a producer that never
     # existed, and `State.configuration` now makes the real relation typed.
     creates: [Envelope, ReferenceScale, ReachResult, EliminationRecord]
-    extends: [FunctionalRegion volume, AssemblyStep insertion_direction]
+    # AssemblyStep insertion_direction is DERIVED from s03's access_side, not
+    # asked of the model: one statement of arrival, the side, and its vector.
+    extends: [FunctionalRegion volume, AssemblyStep insertion_direction, Interface mating_geometry]
     also_owns: ["the elimination of a candidate on geometric grounds"]
 
   absolute_scale_rule: >

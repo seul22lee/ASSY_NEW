@@ -281,17 +281,19 @@ class _Evidence:
         # snap retainer on one hinge pair are how a real hinge is built, and one
         # runs clear while the other is an interference fit. Collapsing them to
         # the pair read the design as contradicting itself. Feature identity is
-        # the interface's own `nominal` when it is a name; an interface whose
-        # `nominal` is a bare flag names no feature, so two unnamed interfaces on
-        # a pair are one feature described twice - and if they disagree, that
-        # is the conflict this reader exists to find, exactly as before.
+        # the interface's own `feature`, the field s03 owns for exactly this;
+        # an interface that names none is one feature described as many times
+        # as the pair has unnamed rows - and if those disagree, that is the
+        # conflict this reader exists to find. It USED TO read `nominal` as a
+        # name when that was a string: a status field no producer authors as
+        # a name, so no design could ever make two features on a pair distinct.
         features: Dict[Any, Dict[Any, set]] = {}
         for i in self.fam("Interface"):
             bodies_of = (i.get("bodies") or [])[:2]
             if len(bodies_of) < 2:
                 continue
-            nominal = i.get("nominal")
-            feature = nominal if isinstance(nominal, str) and nominal.strip() else None
+            named = i.get("feature")
+            feature = named.strip() if isinstance(named, str) and named.strip() else None
             features.setdefault(frozenset(bodies_of), {}).setdefault(
                 feature, set()).add(s04.interface_expectation(i))
         expectation, conflicted = {}, set()
@@ -1306,9 +1308,12 @@ def _assemblability(ev: _Evidence) -> Verdict:
                 status = _weaken(status, NOT_ESTABLISHED)
             placed.append(body)
             continue
-        direction = step.get("insertion_direction")
-        if not (isinstance(direction, list) and len(direction) == 3):
-            codes.append("INSERTION_DIRECTION_MISSING")
+        direction, code, note = s04.approach_direction(step)
+        if direction is None:
+            # Missing, unreadable or self-contradicting: nothing this domain
+            # can build a corridor from, and the code names which.
+            codes.append(code)
+            notes.append(note)
             status = _weaken(status, NOT_ESTABLISHED)
             placed.append(body)
             continue
@@ -1317,7 +1322,7 @@ def _assemblability(ev: _Evidence) -> Verdict:
             status = _weaken(status, NOT_ESTABLISHED)
             placed.append(body)
             continue
-        hull = _insertion_hull(boxes, body, direction)
+        hull = s04.insertion_hull(boxes, body, direction)
         # The hull is built from every box in the arrangement - the span comes
         # from the largest of them - so the clearance answer rests on all of
         # them and on the basis they are measured in.
@@ -1384,23 +1389,6 @@ def _assemblability(ev: _Evidence) -> Verdict:
     return Verdict("assemblability", status, codes, used, "; ".join(notes[:5]))
 
 
-def _insertion_hull(boxes, body, direction):
-    """The volume a body sweeps arriving along its declared direction.
-
-    The same construction `assembly_path_check` performs; the span and the
-    sampling come from there so the two cannot describe different insertions.
-    """
-    norm = math.sqrt(sum(x * x for x in direction)) or 1.0
-    unit = [x / norm for x in direction]
-    span = max(max(boxes[b][1][i] - boxes[b][0][i] for i in range(3))
-               for b in boxes) * 2.0
-    hull = boxes[body]
-    for k in s04.sample(0.0, span, s04.SAMPLES):
-        hull = ([min(hull[0][i], boxes[body][0][i] - unit[i] * k) for i in range(3)],
-                [max(hull[1][i], boxes[body][1][i] - unit[i] * k) for i in range(3)])
-    return hull
-
-
 def _gross_interference(ev: _Evidence) -> Verdict:
     """Nothing sweeps or sits where it must not - as far as boxes can show.
 
@@ -1427,11 +1415,30 @@ def _gross_interference(ev: _Evidence) -> Verdict:
     every one rests on a value the author stated rather than on a box.
     """
     boxes = ev.boxes()
-    keepouts = [(r["entity_id"], s04.aabb(r["volume"]["centre"],
-                                          r["volume"]["half_extent"]))
-                for r in ev.fam("FunctionalRegion")
-                if r.get("role") == "KEEP_OUT" and isinstance(r.get("volume"), dict)
-                and isinstance((r.get("volume") or {}).get("centre"), list)]
+    # THE REGIONS NOTHING MAY ENTER. KEEP_OUT by role, and NOT the contract's
+    # `excludes_occupancy` policy, which is a different question: that policy
+    # says which regions a body may not SIT in at rest - an ACCESS region with
+    # a body parked in it is an access the design does not have - and a moving
+    # part passing THROUGH an access region is not that. Only KEEP_OUT says "a
+    # body entering it is the promise being broken", and a sweep is an entering.
+    #
+    # A region is a property OF a body - the one whose surface bounds it - and
+    # one that names no owner is a claim with no subject: the producer's own
+    # check (S03-C12) calls it REGION_WITHOUT_OWNER, and reading its box as an
+    # obstacle anyway would let an unattributed volume the model pictured
+    # decide a candidate. It is reported below as evidence this domain cannot
+    # use, not swept against.
+    keepouts, ownerless = [], []
+    for r in ev.fam("FunctionalRegion"):
+        if r.get("role") != "KEEP_OUT":
+            continue
+        if not [b for b in (r.get("owning_bodies") or []) if isinstance(b, str)]:
+            ownerless.append(r["entity_id"])
+            continue
+        vol = r.get("volume")
+        if isinstance(vol, dict) and isinstance(vol.get("centre"), list) \
+                and isinstance(vol.get("half_extent"), list):
+            keepouts.append((r["entity_id"], s04.aabb(vol["centre"], vol["half_extent"])))
     moving = {g for t in ev.fam("Transition")
               for g in ((t.get("path") or {}).get("moving_groups") or [])}
     bodies = [b.get("entity_id") for b in ev.fam("Body")]
@@ -1440,13 +1447,19 @@ def _gross_interference(ev: _Evidence) -> Verdict:
     # the question unanswerable rather than absent - reading applicability off
     # the envelopes would have let an unplaced mechanism report that nothing
     # could interfere.
-    if len(bodies) < 2 and not moving and not keepouts:
+    if len(bodies) < 2 and not moving and not keepouts and not ownerless:
         return Verdict("gross_interference", NOT_APPLICABLE, ["NOTHING_COEXISTS"])
     expectation, conflicted = ev.pair_expectation()
     exempt = {p for p, e in expectation.items() if e == s04.TOUCHES}
     envelope_of = ev.envelope_of()
     codes, notes, used = [], [], []
     status = PASS
+    for rid in ownerless:
+        codes.append("REGION_WITHOUT_OWNER")
+        notes.append("%s excludes occupancy and names no owning body, so it has no "
+                     "position relative to any part" % rid)
+        used.append(rid)
+        status = _weaken(status, NOT_ESTABLISHED)
     for pair in sorted(conflicted, key=sorted):
         codes.append("INTERFACE_EXPECTATION_CONFLICT")
         notes.append("%s are declared both to meet and to stay clear"
