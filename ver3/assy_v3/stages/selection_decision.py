@@ -1,16 +1,21 @@
 """WHAT DID THE HUMAN DECIDE, AND WAS IT STILL TRUE WHEN THEY SAID IT?
 
 S7-E. The first place a SelectionDecision may exist, and the last place anything
-in this pipeline gets to choose - because it does not choose. Three separate acts
+in this pipeline gets to choose - because it does not choose. Four separate acts
 live here and the separation is the whole design:
 
     BUILD THE REVIEW      one immutable snapshot of exactly what a person is
-                          shown. No provider, no writes.
+                          shown - including the commitment already standing,
+                          if one does. No provider, no writes.
     RECORD THE SUBMISSION a HumanDecisionInput saying what they asked for and
                           what was on the screen when they asked.
     COMMIT, OR REFUSE     a deterministic writer that rebuilds the review from
                           CURRENT state and writes a commitment only if the two
                           are the same review.
+    REVISE, OR REFUSE     the same authority exercised again: a SELECT made on
+                          a review that SHOWED the standing commitment retires
+                          it and records the new one in ONE patch, under every
+                          check the commit act makes.
 
 WHY THE SNAPSHOT IS ONE OBJECT
 
@@ -48,8 +53,13 @@ FOUR THINGS THIS WRITER WILL NOT DO
     because a person looking at an old opinion is looking at an old screen. The
     two are different questions and they have different answers.
 
-    IT WILL NOT REOPEN. A standing commitment is left exactly as it is; changing
-    one is lifecycle work this step does not do.
+    IT WILL NOT REOPEN QUIETLY. The commit act leaves a standing commitment
+    exactly as it is. Changing one is the revision act's, and only on a SELECT
+    whose review showed the person the commitment they are changing: the old
+    decision is invalidated and kept as history, the new one is written beside
+    it in the same patch, so at no moment do two stand and at no moment does
+    none - and everything premised on the old one goes stale by ordinary
+    propagation, which is what moves the downstream off the abandoned choice.
 """
 from __future__ import annotations
 
@@ -95,6 +105,8 @@ SUBMISSION_CONTEXT_MISMATCH = "SUBMISSION_CONTEXT_MISMATCH"
 SELECTION_NO_LONGER_ELIGIBLE = "SELECTION_NO_LONGER_ELIGIBLE"
 SELECTION_CONTEXT_INCONSISTENT = "SELECTION_CONTEXT_INCONSISTENT"
 DECISION_ALREADY_STANDING = "DECISION_ALREADY_STANDING"
+SELECTION_REVISED = "SELECTION_REVISED"
+NO_STANDING_COMMITMENT = "NO_STANDING_COMMITMENT"
 
 #: Outcomes that wrote nothing and are not failures: a person declining to commit
 #: has answered the question they were asked.
@@ -140,6 +152,12 @@ class HumanReviewSnapshot:
 
     comparison: Dict[str, Any]
     profile: Dict[str, Any]
+    #: The standing SelectionDecision the design already made, or None. A review
+    #: built while one stands is a REVISION review: the person is shown the
+    #: commitment they would be changing, and it is inside the digest, so a
+    #: commitment appearing, moving or going stale between screen and submission
+    #: is a stale screen like any other.
+    standing_decision: Optional[Dict[str, Any]]
     candidates: Tuple[Dict[str, Any], ...]
     eligibility: Tuple[Dict[str, Any], ...]
     eligible_candidates: Tuple[str, ...]
@@ -154,6 +172,7 @@ class HumanReviewSnapshot:
     def payload(self) -> Dict[str, Any]:
         """Exactly what the digest is taken over, and exactly what is rendered."""
         return {"comparison": self.comparison, "profile": self.profile,
+                "standing_decision": self.standing_decision,
                 "candidates": list(self.candidates),
                 "eligibility": list(self.eligibility),
                 "eligible_candidates": list(self.eligible_candidates),
@@ -284,8 +303,21 @@ def build_human_review_snapshot(state) -> HumanReviewOutcome:
         return _by_id([r for r in (payload.get(family) or [])
                        if isinstance(r, dict) and r.get("entity_id") in basis])
 
+    decisions = [d for d in (payload.get("SelectionDecision") or [])
+                 if isinstance(d, dict)]
+    if len(decisions) > 1:
+        # The boundary's relational invariant makes this unreachable through
+        # ordinary writes; a state that holds it anyway is not one to render.
+        return HumanReviewOutcome(
+            REVIEW_CONTEXT_AMBIGUOUS,
+            problems=["%d standing selection decisions: %s"
+                      % (len(decisions),
+                         ", ".join(sorted(d.get("entity_id", "?")
+                                          for d in decisions)))],
+            consumer_view=view.as_dict())
     snapshot_fields = dict(
         comparison=_shown(comparison), profile=_shown(profile),
+        standing_decision=_shown(decisions[0]) if decisions else None,
         candidates=tuple(_by_id([c for c in (payload.get("Candidate") or [])
                                  if isinstance(c, dict)])),
         eligibility=tuple(rows), eligible_candidates=eligible,
@@ -410,6 +442,12 @@ def materialize_human_decision_input(state, snapshot: HumanReviewSnapshot,
         "reviewed_concerns": snapshot.concern_ids()}
     if candidate is not None:
         fields["selected_candidate"] = candidate
+        if snapshot.standing_decision is not None:
+            # A SELECT made while a commitment stands asks for a REVISION, and
+            # says so by naming the commitment the screen showed. From the
+            # snapshot, never from the client - a screen cannot claim to be
+            # revising a commitment it did not display.
+            fields["revises"] = snapshot.standing_decision["entity_id"]
     eid = input_identity(snapshot.digest, action, candidate, text)
     if state.has_entity(eid):
         # IDEMPOTENT, AND NOT AN UPDATE. The same submission is one submission;
@@ -455,7 +493,8 @@ class SelectionCommitOutcome:
 
     @property
     def committed(self) -> bool:
-        return self.status in (SELECTION_COMMITTED, SELECTION_UNCHANGED)
+        return self.status in (SELECTION_COMMITTED, SELECTION_REVISED,
+                               SELECTION_UNCHANGED)
 
     @property
     def accepted(self) -> bool:
@@ -487,6 +526,132 @@ def _submitted(state, human_decision_id: Any):
         return None, ["%s is not a current human decision input"
                       % human_decision_id]
     return found[0], []
+
+
+def _screen_still_current(state, human):
+    """(snapshot, None) when what the person saw is what the design says now;
+    (None or snapshot, refusal) otherwise. STEPS 3-6 of the contract order,
+    shared by the commit act and the revision act so the two cannot come to
+    different conclusions about one screen.
+
+    STEP 3 - the current review, rebuilt. Never a cached snapshot and never
+    the one the client is holding. STEP 4 - the digest, RECOMPUTED: the
+    submitted one is a claim about a screen; this is the design saying what
+    that screen would show now. STEPS 5/6 - the named context, explicitly:
+    the digest already covers all of it; naming the mismatch is what makes
+    the refusal auditable.
+    """
+    review = build_human_review_snapshot(state)
+    if not review.ready:
+        # The material moved so far that there is no review to compare against.
+        # That is a stale screen by definition: the person must look again.
+        return None, SelectionCommitOutcome(
+            STALE_SUBMISSION,
+            problems=["the current review context is %s" % review.status]
+                     + review.problems, human_input=human)
+    snapshot = review.snapshot
+    if human.get("premise_digest") != snapshot.digest:
+        return snapshot, SelectionCommitOutcome(
+            STALE_SUBMISSION,
+            problems=["the submission was made against %s and the current review "
+                      "is %s" % (str(human.get("premise_digest"))[:12],
+                                 snapshot.digest[:12])],
+            snapshot=snapshot, human_input=human)
+    named = [("comparison", human.get("comparison"), snapshot.comparison["entity_id"]),
+             ("profile", human.get("profile"), snapshot.profile["entity_id"]),
+             ("reviewed_advisories", sorted(human.get("reviewed_advisories") or []),
+              snapshot.advisory_ids()),
+             ("reviewed_concerns", sorted(human.get("reviewed_concerns") or []),
+              snapshot.concern_ids())]
+    mismatched = ["the submission names %s %r and the current review is %r"
+                  % (what, was, now) for what, was, now in named if was != now]
+    if mismatched:
+        return snapshot, SelectionCommitOutcome(
+            SUBMISSION_CONTEXT_MISMATCH, problems=mismatched, snapshot=snapshot,
+            human_input=human)
+    return snapshot, None
+
+
+def _select_still_eligible(snapshot, human) -> Optional[SelectionCommitOutcome]:
+    """None when the SELECT names a currently eligible candidate; the refusal
+    (or the non-select acknowledgement) otherwise. STEPS 7-9, shared.
+
+    STEP 7 - a person who declined to commit has answered the question:
+    nothing is written, nothing is chosen for them, and it is not a failure.
+    STEP 8 - eligibility, RE-ESTABLISHED: `population_established` is False
+    when any retained candidate's eligibility cannot currently be decided,
+    and an unknown candidate makes the whole population unknown - committing
+    from the subset that happened to be knowable would commit against a
+    design nobody has. STEP 9 - the comparison is CROSS-CHECKED against the
+    recomputed population, never used in place of it.
+    """
+    if human.get("action") == KEEP_UNRESOLVED:
+        return SelectionCommitOutcome(HUMAN_KEPT_UNRESOLVED, snapshot=snapshot,
+                                      human_input=human)
+    if human.get("action") == REQUEST_MORE_EVIDENCE:
+        return SelectionCommitOutcome(MORE_EVIDENCE_REQUESTED, snapshot=snapshot,
+                                      human_input=human)
+    if human.get("action") != SELECT:
+        return SelectionCommitOutcome(
+            INVALID_HUMAN_INPUT,
+            problems=["action %r is not one this writer knows"
+                      % human.get("action")], snapshot=snapshot, human_input=human)
+    candidate = human.get("selected_candidate")
+    if not snapshot.population_established:
+        return SelectionCommitOutcome(
+            SELECTION_CONTEXT_INCONSISTENT,
+            problems=["the eligible population is not currently established: %s"
+                      % "; ".join("%s is %s (%s)" % (r["candidate"], r["verdict"],
+                                                     r["why"])
+                                  for r in snapshot.eligibility
+                                  if r["verdict"] == sel.UNRESOLVED)],
+            snapshot=snapshot, human_input=human)
+    if candidate not in snapshot.eligible_candidates:
+        return SelectionCommitOutcome(
+            SELECTION_NO_LONGER_ELIGIBLE,
+            problems=["%s is not currently eligible: %s"
+                      % (candidate,
+                         "; ".join(r["why"] for r in snapshot.eligibility
+                                   if r["candidate"] == candidate) or "unknown")],
+            snapshot=snapshot, human_input=human)
+    if sorted(snapshot.comparison.get("candidates") or []) != \
+            sorted(snapshot.eligible_candidates):
+        return SelectionCommitOutcome(
+            SELECTION_CONTEXT_INCONSISTENT,
+            problems=["the comparison holds %s and the currently eligible set is "
+                      "%s" % (sorted(snapshot.comparison.get("candidates") or []),
+                              sorted(snapshot.eligible_candidates))],
+            snapshot=snapshot, human_input=human)
+    return None
+
+
+def _decision_fields(snapshot, human, candidate):
+    """The SelectionDecision's fields and premises, from one construction.
+
+    PREMISES ARE THE FACTS, and the human's request. Advisory material is in
+    the considered fields and NOT here, so rewording a review after the fact
+    leaves the decision standing - the wording was never what made the
+    candidate choosable.
+    """
+    basis = snapshot.basis_refs()
+    fields = {
+        "selected_candidate": candidate,
+        "eligible_candidates": list(snapshot.eligible_candidates),
+        "feasibility_assessments": [r["entity_id"]
+                                    for r in snapshot.feasibility_assessments],
+        "hard_requirement_results": [r["entity_id"]
+                                     for r in snapshot.hard_requirement_results],
+        "selection_profile": snapshot.profile["entity_id"],
+        "comparison": snapshot.comparison["entity_id"],
+        "human_decision": human["entity_id"],
+        "considered_advisories": sorted(human.get("reviewed_advisories") or []),
+        "considered_concerns": sorted(human.get("reviewed_concerns") or [])}
+    if human.get("rationale"):
+        fields["rationale"] = human["rationale"]
+    premises = sorted(set(basis) | {human["entity_id"],
+                                    snapshot.comparison["entity_id"],
+                                    snapshot.profile["entity_id"]})
+    return basis, fields, premises
 
 
 def commit_human_selection(state, human_decision_id: str,
@@ -524,119 +689,20 @@ def commit_human_selection(state, human_decision_id: str,
                                           for d in standing)))],
             human_input=human)
 
-    # STEP 3 - THE CURRENT REVIEW, rebuilt. Never a cached snapshot and never the
-    # one the client is holding.
-    review = build_human_review_snapshot(state)
-    if not review.ready:
-        # The material moved so far that there is no review to compare against.
-        # That is a stale screen by definition: the person must look again.
-        return SelectionCommitOutcome(
-            STALE_SUBMISSION,
-            problems=["the current review context is %s" % review.status]
-                     + review.problems, human_input=human)
-    snapshot = review.snapshot
-
-    # STEP 4 - THE DIGEST, RECOMPUTED. The submitted one is a claim about a
-    # screen; this is the design saying what that screen would show now.
-    if human.get("premise_digest") != snapshot.digest:
-        return SelectionCommitOutcome(
-            STALE_SUBMISSION,
-            problems=["the submission was made against %s and the current review "
-                      "is %s" % (str(human.get("premise_digest"))[:12],
-                                 snapshot.digest[:12])],
-            snapshot=snapshot, human_input=human)
-
-    # STEP 5/6 - the named context, explicitly. The digest already covers all of
-    # it; naming the mismatch is what makes the refusal auditable.
-    named = [("comparison", human.get("comparison"), snapshot.comparison["entity_id"]),
-             ("profile", human.get("profile"), snapshot.profile["entity_id"]),
-             ("reviewed_advisories", sorted(human.get("reviewed_advisories") or []),
-              snapshot.advisory_ids()),
-             ("reviewed_concerns", sorted(human.get("reviewed_concerns") or []),
-              snapshot.concern_ids())]
-    mismatched = ["the submission names %s %r and the current review is %r"
-                  % (what, was, now) for what, was, now in named if was != now]
-    if mismatched:
-        return SelectionCommitOutcome(SUBMISSION_CONTEXT_MISMATCH,
-                                      problems=mismatched, snapshot=snapshot,
-                                      human_input=human)
-
-    # STEP 7 - a person who declined to commit has answered the question. Nothing
-    # is written, nothing is chosen for them, and it is not a failure.
-    if human.get("action") == KEEP_UNRESOLVED:
-        return SelectionCommitOutcome(HUMAN_KEPT_UNRESOLVED, snapshot=snapshot,
-                                      human_input=human)
-    if human.get("action") == REQUEST_MORE_EVIDENCE:
-        return SelectionCommitOutcome(MORE_EVIDENCE_REQUESTED, snapshot=snapshot,
-                                      human_input=human)
-    if human.get("action") != SELECT:
-        return SelectionCommitOutcome(
-            INVALID_HUMAN_INPUT,
-            problems=["action %r is not one this writer knows"
-                      % human.get("action")], snapshot=snapshot, human_input=human)
-
-    # STEP 8 - ELIGIBILITY, RE-ESTABLISHED. `population_established` is False when
-    # any retained candidate's eligibility cannot currently be decided, and an
-    # unknown candidate makes the whole population unknown: committing from the
-    # subset that happened to be knowable would commit against a design nobody has.
+    # STEPS 3-9, shared with the revision act: the screen is still current and
+    # the SELECT is still selectable.
+    snapshot, refusal = _screen_still_current(state, human)
+    if refusal is not None:
+        return refusal
+    refusal = _select_still_eligible(snapshot, human)
+    if refusal is not None:
+        return refusal
     candidate = human.get("selected_candidate")
-    if not snapshot.population_established:
-        return SelectionCommitOutcome(
-            SELECTION_CONTEXT_INCONSISTENT,
-            problems=["the eligible population is not currently established: %s"
-                      % "; ".join("%s is %s (%s)" % (r["candidate"], r["verdict"],
-                                                     r["why"])
-                                  for r in snapshot.eligibility
-                                  if r["verdict"] == sel.UNRESOLVED)],
-            snapshot=snapshot, human_input=human)
-    if candidate not in snapshot.eligible_candidates:
-        return SelectionCommitOutcome(
-            SELECTION_NO_LONGER_ELIGIBLE,
-            problems=["%s is not currently eligible: %s"
-                      % (candidate,
-                         "; ".join(r["why"] for r in snapshot.eligibility
-                                   if r["candidate"] == candidate) or "unknown")],
-            snapshot=snapshot, human_input=human)
-
-    # STEP 9 - the comparison is CROSS-CHECKED against the recomputed population,
-    # never used in place of it. A comparison whose population no longer matches
-    # the eligible set is evidence about a design that has moved.
-    if sorted(snapshot.comparison.get("candidates") or []) != \
-            sorted(snapshot.eligible_candidates):
-        return SelectionCommitOutcome(
-            SELECTION_CONTEXT_INCONSISTENT,
-            problems=["the comparison holds %s and the currently eligible set is "
-                      "%s" % (sorted(snapshot.comparison.get("candidates") or []),
-                              sorted(snapshot.eligible_candidates))],
-            snapshot=snapshot, human_input=human)
 
     # STEP 10 - the commitment.
-    basis = snapshot.basis_refs()
+    basis, fields, premises = _decision_fields(snapshot, human, candidate)
     eid = decision_identity(human, candidate, snapshot.comparison["entity_id"],
                             snapshot.profile["entity_id"], basis)
-    fields = {
-        "selected_candidate": candidate,
-        "eligible_candidates": list(snapshot.eligible_candidates),
-        "feasibility_assessments": [r["entity_id"]
-                                    for r in snapshot.feasibility_assessments],
-        "hard_requirement_results": [r["entity_id"]
-                                     for r in snapshot.hard_requirement_results],
-        "selection_profile": snapshot.profile["entity_id"],
-        "comparison": snapshot.comparison["entity_id"],
-        "human_decision": human["entity_id"],
-        # CONSIDERED, exactly as submitted. Not whatever advisory happens to be
-        # newest at commit time: what a decision may record is what the person
-        # actually read, and the digest is what guarantees that was current.
-        "considered_advisories": sorted(human.get("reviewed_advisories") or []),
-        "considered_concerns": sorted(human.get("reviewed_concerns") or [])}
-    if human.get("rationale"):
-        fields["rationale"] = human["rationale"]
-    # PREMISES ARE THE FACTS, and the human's request. Advisory material is in
-    # the fields above and NOT here, so rewording a review after the fact leaves
-    # this standing - the wording was never what made the candidate choosable.
-    premises = sorted(set(basis) | {human["entity_id"],
-                                    snapshot.comparison["entity_id"],
-                                    snapshot.profile["entity_id"]})
     op = Op("CREATE", "SelectionDecision", eid, fields, "selection:decision",
             premise_refs=premises)
     patch = StagePatch(
@@ -649,4 +715,104 @@ def commit_human_selection(state, human_decision_id: str,
     problems = state.validate(patch)
     return SelectionCommitOutcome(
         SELECTION_COMMITTED if not problems else SELECTION_CONTEXT_INCONSISTENT,
+        eid, None if problems else patch, problems, snapshot, human)
+
+
+def revise_human_selection(state, human_decision_id: str,
+                           run_id: Optional[str] = None,
+                           attempt: int = 1) -> SelectionCommitOutcome:
+    """Change what the design committed to, because a person asked to.
+
+    THE SAME AUTHORITY, EXERCISED AGAIN - and the same discipline. The commit
+    act refuses to touch a standing commitment; this act exists for exactly
+    that case, and it is narrower, not looser: it acts only on a SELECT whose
+    review SHOWED the person the standing commitment (the snapshot carries it,
+    the digest covers it, and the submission names it in `revises`), and it
+    re-establishes everything the commit act does before writing anything.
+
+    ONE PATCH does both halves: the standing decision is INVALIDATED - kept in
+    state with its history, its dependents staled by ordinary propagation,
+    which is what moves downstream artifacts off the abandoned choice - and
+    the new decision is CREATED beside it. At no point do two decisions stand
+    and at no point does none; the boundary's one-standing invariant checks
+    the patch's RESULT, which is exactly one.
+
+    WHAT IT WILL NOT DO. Choose (a non-SELECT action is not a revision and
+    gets the commit act's answer, so the two writers cannot disagree about
+    one submission); act on a submission that names no commitment, or a
+    different one than now stands; re-commit the same candidate
+    (SELECTION_UNCHANGED - a revision that changes nothing is not a
+    revision); or write anything on a screen the design has moved out from
+    under.
+    """
+    human, problems = _submitted(state, human_decision_id)
+    if human is None:
+        return SelectionCommitOutcome(INVALID_HUMAN_INPUT, problems=problems)
+
+    # THE STANDING COMMITMENT, AND THE ONE THE PERSON WAS SHOWN. Both must
+    # exist and they must be the same record: a commitment that appeared,
+    # moved or went stale since the screen is a different design.
+    standing = state.standing("SelectionDecision")
+    if not standing:
+        return SelectionCommitOutcome(
+            NO_STANDING_COMMITMENT,
+            problems=["no selection commitment stands; a first decision is the "
+                      "commit act's to write"], human_input=human)
+    if len(standing) > 1:                                   # pragma: no cover
+        return SelectionCommitOutcome(
+            SELECTION_CONTEXT_INCONSISTENT,
+            problems=["%d selection decisions stand" % len(standing)],
+            human_input=human)
+    current = standing[0]
+    if current.get("human_decision") == human["entity_id"]:
+        # The replay of an already-honoured revision: idempotent, not an error.
+        return SelectionCommitOutcome(SELECTION_UNCHANGED, current["entity_id"],
+                                      human_input=human)
+    if human.get("action") != SELECT:
+        # NOT A REVISION. A person keeping the question open or asking for
+        # more evidence names no commitment, because they are changing none.
+        # ONE SUBMISSION HAS ONE ANSWER whichever writer reads it, so this is
+        # the commit act's answer and not a second one: the commitment stands,
+        # untouched, and the record of what they asked stays.
+        return commit_human_selection(state, human_decision_id, run_id, attempt)
+    if human.get("revises") != current["entity_id"]:
+        return SelectionCommitOutcome(
+            SUBMISSION_CONTEXT_MISMATCH,
+            problems=["the submission revises %r and the standing commitment is "
+                      "%s" % (human.get("revises"), current["entity_id"])],
+            human_input=human)
+
+    snapshot, refusal = _screen_still_current(state, human)
+    if refusal is not None:
+        return refusal
+    refusal = _select_still_eligible(snapshot, human)
+    if refusal is not None:
+        return refusal
+    candidate = human.get("selected_candidate")
+    if candidate == current.get("selected_candidate"):
+        return SelectionCommitOutcome(
+            SELECTION_UNCHANGED, current["entity_id"],
+            problems=["%s is already the selected candidate; a revision that "
+                      "changes nothing is not a revision" % candidate],
+            snapshot=snapshot, human_input=human)
+
+    basis, fields, premises = _decision_fields(snapshot, human, candidate)
+    eid = decision_identity(human, candidate, snapshot.comparison["entity_id"],
+                            snapshot.profile["entity_id"], basis)
+    ops = [Op("INVALIDATE", "SelectionDecision", current["entity_id"], {},
+              "selection:decision",
+              reason="the human revised the selection to %s (%s)"
+                     % (candidate, human["entity_id"])),
+           Op("CREATE", "SelectionDecision", eid, fields, "selection:decision",
+              premise_refs=premises)]
+    patch = StagePatch(
+        patch_id="%s-selection-revision-%s" % (run_id or state.run_id, eid),
+        run_id=run_id or state.run_id, stage_id=RESPONSIBILITY,
+        stage_attempt=attempt, parent_state_hash=state.state_hash(),
+        operations=ops, execution_status="SUCCESS",
+        provenance={"purpose": "revise the selection to the candidate the human "
+                               "selected", "provider": "deterministic"})
+    problems = state.validate(patch)
+    return SelectionCommitOutcome(
+        SELECTION_REVISED if not problems else SELECTION_CONTEXT_INCONSISTENT,
         eid, None if problems else patch, problems, snapshot, human)

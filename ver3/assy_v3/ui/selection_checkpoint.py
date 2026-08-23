@@ -67,6 +67,9 @@ NOT_READY_MESSAGE = ("There is nothing to decide yet: %s. A decision screen is "
 #: none of them offers to do it for them.
 MESSAGES = {
     dec.SELECTION_COMMITTED: "Committed %s.",
+    dec.SELECTION_REVISED: ("Revised the commitment to %s. The previous decision "
+                            "is kept as history and everything built on it will "
+                            "be re-established."),
     dec.SELECTION_UNCHANGED: "%s was already committed by this submission.",
     dec.HUMAN_KEPT_UNRESOLVED: ("Recorded: the decision is kept open. Nothing "
                                 "was committed."),
@@ -83,6 +86,9 @@ MESSAGES = {
     dec.DECISION_ALREADY_STANDING: (
         "A selection already stands for this design. Changing a commitment is "
         "not something this screen does."),
+    dec.NO_STANDING_COMMITMENT: (
+        "The commitment this review showed no longer stands, so there is "
+        "nothing to revise. Nothing was written; refresh the decision view."),
     dec.INVALID_HUMAN_INPUT: "That submission was not accepted: %s",
 }
 
@@ -147,6 +153,14 @@ def review_lines(snapshot: dec.HumanReviewSnapshot) -> List[str]:
              "Comparison %s, outcome %s."
              % (snapshot.comparison.get("entity_id"),
                 snapshot.comparison.get("outcome"))]
+    if snapshot.standing_decision is not None:
+        # A person shown a design that has already committed must see the
+        # commitment: a SELECT on this screen asks to REVISE it.
+        lines.append("**The design is currently committed to %s** (decision %s). "
+                     "Selecting a different candidate revises that commitment; "
+                     "the previous decision is kept as history."
+                     % (snapshot.standing_decision.get("selected_candidate"),
+                        snapshot.standing_decision.get("entity_id")))
     if snapshot.comparison.get("stopping_priority"):
         lines.append("The comparison stopped at priority %s."
                      % snapshot.comparison["stopping_priority"])
@@ -225,7 +239,8 @@ class CheckpointOutcome:
 
     @property
     def committed(self) -> bool:
-        return self.status in (dec.SELECTION_COMMITTED, dec.SELECTION_UNCHANGED)
+        return self.status in (dec.SELECTION_COMMITTED, dec.SELECTION_REVISED,
+                               dec.SELECTION_UNCHANGED)
 
 
 def render_review(surface, snapshot: dec.HumanReviewSnapshot) -> None:
@@ -272,7 +287,14 @@ def submit(state, snapshot: dec.HumanReviewSnapshot, action: Any,
     if recorded.patch is not None:
         state.apply(recorded.patch)
 
-    out = dec.commit_human_selection(state, recorded.input_id, run_id)
+    # ONE SUBMISSION, ONE WRITER - WHICH writer follows from what the screen
+    # showed: a review displaying a standing commitment submits a SELECT to the
+    # revision act, anything else to the commit act. Both are backend writers;
+    # this file still constructs no operation and retries nothing.
+    if snapshot.standing_decision is not None and action == dec.SELECT:
+        out = dec.revise_human_selection(state, recorded.input_id, run_id)
+    else:
+        out = dec.commit_human_selection(state, recorded.input_id, run_id)
     if out.patch is not None:
         state.apply(out.patch)
     template = MESSAGES.get(out.status, out.status)

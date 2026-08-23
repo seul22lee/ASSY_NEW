@@ -3034,11 +3034,23 @@ assurance_families:
         cardinality: many
         resolvable: false
         referent_population: ALL_RETAINED_BRANCHES
+      # THE COMMITMENT THE PERSON WAS SHOWN THEY ARE CHANGING. Present exactly
+      # when the review displayed a standing SelectionDecision and the action
+      # is SELECT: the submission then asks for a REVISION, and the writer that
+      # honours it must find that same commitment still standing. Copied from
+      # the snapshot, never supplied by the client - a screen cannot claim to
+      # be revising a commitment it did not show.
+      revises:
+        kind: reference
+        target: SelectionDecision
+        cardinality: one
+        resolvable: false
+        referent_population: DESIGN_WIDE
     owned_by: selection
     authority_class: AUTHORITATIVE
     purpose: "What a human submitted at the decision screen, and what they were looking at when they submitted it."
     required_fields: [entity_id, action, rationale, comparison, profile, premise_digest]
-    optional_fields: [selected_candidate, reviewed_advisories, reviewed_concerns]
+    optional_fields: [selected_candidate, reviewed_advisories, reviewed_concerns, revises]
     action: [SELECT, KEEP_UNRESOLVED, REQUEST_MORE_EVIDENCE]
     rules:
       - >
@@ -3217,6 +3229,21 @@ assurance_families:
         list in place of re-establishing eligibility. A screen submits a claim
         about what it showed; only the design can say whether that is still what
         it says. (S7-E)
+      - >
+        REVISION IS THE SAME AUTHORITY, EXERCISED AGAIN. A person may change a
+        standing commitment: the review shows them the commitment they are
+        changing, their SELECT names it (`HumanDecisionInput.revises`), and the
+        same deterministic writer - the revision act of the `selection_decision`
+        pass - INVALIDATES the standing decision and records the new one in ONE
+        patch, so at no point do two stand and at no point does none. The
+        invalidated decision remains in state with its history; everything
+        premised on it loses unqualified authority by ordinary propagation,
+        which is what moves the downstream off the abandoned choice. The commit
+        act still refuses to touch a standing commitment; a submission that
+        names none cannot revise; a submission made before the commitment
+        existed, or after it moved, fails the recomputed digest. Selecting the
+        same candidate again is SELECTION_UNCHANGED and writes nothing: a
+        revision that changes nothing is not a revision.
 
 # ---------------------------------------------------------------- U-2B (S-2)
 # The canonical contract is deliberately AHEAD of several producers. Recording

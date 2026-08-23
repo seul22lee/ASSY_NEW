@@ -175,7 +175,11 @@ class TestDeclaredCorpus(_Base):
         # embodiment block must be read as discharged once the block has
         # settled it, and the Constraint that carries the settlement was in no
         # feasibility view.
-        self.assertEqual(70, len(rows), "the premise corpus changed size")
+        # 71 at the selection revision closure: `standing_commitment`, declared
+        # by the human review pass, MAY_BE_EMPTY. A person shown a design that
+        # has already committed must see the commitment their SELECT would
+        # revise, and the decision family was in no review view.
+        self.assertEqual(71, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

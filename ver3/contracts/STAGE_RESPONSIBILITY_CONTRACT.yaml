@@ -1309,6 +1309,25 @@ stages:
         represented as absence rather than filled in.
       requires_semantics:
       - advisory
+    - class: standing_commitment
+      # THE DECISION THE DESIGN ALREADY MADE, if it has. A review built while a
+      # commitment stands is a REVISION review: the person must see the
+      # commitment they would be changing, it enters the snapshot and so the
+      # digest, and their SELECT then names it. MAY_BE_EMPTY is the first
+      # decision's case, not a gap.
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: before a first commitment there is nothing being revised,
+          and a review over no commitment is the ordinary first decision
+      what: the standing selection commitment, where one exists
+      justified_by_question: What exactly was on the screen when the person submitted?
+      why: A person shown a design that has already committed must see the
+        commitment - submitting a SELECT against a screen that hid it would
+        revise a decision nobody displayed.
+      requires_semantics:
+      - selection_decision
     permitted_output_semantics:
     - HumanDecisionInput
     prohibited_decisions:
@@ -1427,7 +1446,10 @@ stages:
     - Committing on a digest the writer did not recompute from current state
     - Trusting the comparison's candidate list in place of re-establishing eligibility
     - Treating advisory material as a premise of the commitment
-    - Replacing, superseding or withdrawing a standing commitment
+    - Replacing, superseding or withdrawing a standing commitment the submission
+      did not name - the commit act refuses one outright, and the revision act
+      acts only on a SELECT whose review showed the person the commitment they
+      are revising, invalidating it and recording its replacement in one patch
     - Creating a commitment from a non-select action
     authority_rule: >
       THE HUMAN IS THE ONLY CHOOSER AND THE PREMISES ARE RE-READ. Everything this

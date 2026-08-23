@@ -675,11 +675,20 @@ class TestStaleSubmission(_Decision):
         self.assertNoCommitment(state, out)
 
     def test_E23b_the_writer_recomputes_rather_than_trusting_the_digest(self):
-        source = inspect.getsource(dec.commit_human_selection)
-        self.assertIn("build_human_review_snapshot(state)", source)
-        self.assertLess(source.index("build_human_review_snapshot(state)"),
-                        source.index('human.get("premise_digest")'),
+        """The recompute lives in the ONE gate both writers pass through: the
+        review is rebuilt from current state before the submitted digest is so
+        much as read, and neither the commit act nor the revision act has any
+        other route to a snapshot."""
+        gate = inspect.getsource(dec._screen_still_current)
+        self.assertIn("build_human_review_snapshot(state)", gate)
+        self.assertLess(gate.index("build_human_review_snapshot(state)"),
+                        gate.index('human.get("premise_digest")'),
                         "the submitted digest is read before one is recomputed")
+        for writer in (dec.commit_human_selection, dec.revise_human_selection):
+            source = inspect.getsource(writer)
+            self.assertIn("_screen_still_current(state, human)", source, writer)
+            self.assertNotIn("build_human_review_snapshot", source,
+                             "%s has a second route to a snapshot" % writer)
 
 
 # =====================================================================
@@ -1220,6 +1229,9 @@ class TestCheckpointScreen(_Decision):
         self.assertNotIn("build_human_review_snapshot", source,
                          "the screen rebuilt the review and submitted again")
         self.assertEqual(1, source.count("commit_human_selection("))
+        self.assertEqual(1, source.count("revise_human_selection("),
+                         "the revision act has one call site, chosen by what "
+                         "the screen showed")
 
     def test_E70_advisory_absence_leaves_every_control_live(self):
         state, _cmp = self.compared()
@@ -1363,7 +1375,10 @@ class TestRunnerAndScope(_Decision):
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     self.assertNotIn("provider", alias.name)
-        self.assertEqual(['"provider": "human"', '"provider": "deterministic"'],
+        # Three patches now: a human's submission, and the two deterministic
+        # writers' - the commit act and the revision act.
+        self.assertEqual(['"provider": "human"', '"provider": "deterministic"',
+                          '"provider": "deterministic"'],
                          [m.group(0) for m in
                           __import__("re").finditer(r'"provider": "\w+"', code)])
 
@@ -1480,6 +1495,351 @@ class TestContractTruth(_Decision):
                            if rule.get("by_role") else [rule["population"]])
             self.assertNotIn("COMMITTED_BRANCH", populations)
             self.assertNotIn("selection_decision", premise["requires_semantics"])
+
+
+# =====================================================================
+# E85-E97 - changing a commitment: the same authority, exercised again
+# =====================================================================
+class TestSelectionRevision(_Decision):
+    """A person may change what the design committed to. What is guarded here is
+    that the change is THEIRS and only theirs, that it is made under every check
+    the first commitment was made under, that the abandoned decision is history
+    rather than erased, and that the downstream follows the new choice by
+    ordinary propagation rather than by anything written to make it so."""
+
+    def validity(self, state, eid):
+        return state.entities[eid]["_validity"]
+
+    def committed(self, candidate="CND-A", **kw):
+        state = self.reviewable(**kw)
+        out = self.decide(state, candidate, "a recorded human reason")
+        self.assertEqual(dec.SELECTION_COMMITTED, out.status, out.problems)
+        return state, self.committed_decision(state)["entity_id"]
+
+    def revise_act(self, state, input_id):
+        """The revision act, applied. Named apart from the fixture chain's
+        `revise(state, op)`, which the eligibility probes below still use."""
+        out = dec.revise_human_selection(state, input_id)
+        if out.patch is not None:
+            state.apply(out.patch)
+        return out
+
+    def revision(self, state, candidate, rationale="on reflection, the other",
+                 snapshot=None):
+        """A SELECT submitted against a review that showed the commitment, then
+        handed to the revision act."""
+        snapshot = snapshot if snapshot is not None else self.review_of(state)
+        submitted = self.submit(state, snapshot, dec.SELECT, candidate, rationale)
+        self.assertTrue(submitted.ok, submitted.problems)
+        return self.revise_act(state, submitted.input_id), submitted.input_id
+
+    def test_E85_a_review_after_a_commitment_shows_the_commitment(self):
+        state = self.reviewable()
+        before = self.review_of(state)
+        self.assertIsNone(before.standing_decision)
+        out = self.decide(state, "CND-A", "a reason")
+        self.assertEqual(dec.SELECTION_COMMITTED, out.status, out.problems)
+        after = self.review_of(state)
+        self.assertEqual(out.decision_id, after.standing_decision["entity_id"])
+        self.assertEqual("CND-A", after.standing_decision["selected_candidate"])
+        self.assertEqual("SelectionDecision", after.standing_decision["family"])
+        # The commitment is INSIDE the digest: a screen from before it existed
+        # is a different screen.
+        self.assertNotEqual(before.digest, after.digest)
+        self.assertIn("standing_decision", after.payload())
+        # and the person is told, in the words of the screen
+        text = "\n".join(ui.review_lines(after))
+        self.assertIn("currently committed to CND-A", text)
+        self.assertIn(out.decision_id, text)
+        self.assertIn("kept as history", text)
+
+    def test_E86_a_select_on_such_a_review_names_the_commitment_it_revises(self):
+        state, first = self.committed("CND-A")
+        snapshot = self.review_of(state)
+        submitted = self.submit(state, snapshot, dec.SELECT, "CND-B", "B after all")
+        self.assertTrue(submitted.ok, submitted.problems)
+        human = state.entities[submitted.input_id]
+        self.assertEqual(first, human["revises"])
+        # From the snapshot, never from the client: the signature offers no
+        # way to claim a revision the screen did not show.
+        params = inspect.signature(dec.materialize_human_decision_input).parameters
+        self.assertNotIn("revises", params)
+        # and a submission made where nothing stands names nothing
+        fresh = self.reviewable()
+        plain = self.submit(fresh, self.review_of(fresh), dec.SELECT, "CND-B")
+        self.assertNotIn("revises", fresh.entities[plain.input_id])
+
+    def test_E87_A_to_B_retires_A_and_records_B_in_one_patch(self):
+        state, first = self.committed("CND-A")
+        out, _input = self.revision(state, "CND-B")
+        self.assertEqual(dec.SELECTION_REVISED, out.status, out.problems)
+        self.assertTrue(out.committed)
+        self.assertTrue(out.accepted)
+        # ONE patch, two operations, both on the decision family, both written
+        # by the selection owner.
+        self.assertEqual(["INVALIDATE", "CREATE"],
+                         [op.kind for op in out.patch.operations])
+        self.assertEqual({"SelectionDecision"},
+                         {op.entity_type for op in out.patch.operations})
+        self.assertEqual("selection", out.patch.stage_id)
+        self.assertEqual(first, out.patch.operations[0].entity_id)
+        self.assertEqual(out.decision_id, out.patch.operations[1].entity_id)
+        # the reason A was retired is the person's request, named
+        self.assertIn("CND-B", out.patch.operations[0].reason)
+        self.assertIn(_input, out.patch.operations[0].reason)
+        # exactly one stands, and it is B
+        standing = state.standing("SelectionDecision")
+        self.assertEqual([out.decision_id], [d["entity_id"] for d in standing])
+        self.assertEqual("CND-B", standing[0]["selected_candidate"])
+        self.assertNotEqual(first, out.decision_id)
+
+    def test_E88_A_remains_historical_and_is_not_erased(self):
+        state, first = self.committed("CND-A")
+        was = {k: v for k, v in state.entities[first].items()
+               if not k.startswith("_")}
+        out, _input = self.revision(state, "CND-B")
+        self.assertEqual(dec.SELECTION_REVISED, out.status, out.problems)
+        self.assertTrue(state.has_entity(first))
+        self.assertEqual("INVALIDATED", self.validity(state, first))
+        # its content is exactly what it was: history is not rewritten
+        self.assertEqual(was, {k: v for k, v in state.entities[first].items()
+                               if not k.startswith("_")})
+        self.assertEqual(2, len(state.family("SelectionDecision")))
+        # and the reason it was retired names the person's request
+        record = state.entities[first]["_invalidations"][-1]
+        self.assertEqual("selection", record["stage"])
+        self.assertIn("CND-B", record["reason"])
+        # B does not rest on A: a revision is a new commitment, not an
+        # amendment, so nothing about A's premises leaks into B's standing.
+        premises = set(state.entities[out.decision_id]["_premises"])
+        self.assertNotIn(first, premises)
+        self.assertIn(state.entities[out.decision_id]["human_decision"], premises)
+
+    def test_E89_no_automatic_chooser_exists_in_the_revision_act(self):
+        state, first = self.committed("CND-A")
+        # a non-select action is not a revision, however it is routed: both
+        # writers give it the one answer the commit act gives (E56b)
+        snapshot = self.review_of(state)
+        for action in (dec.KEEP_UNRESOLVED, dec.REQUEST_MORE_EVIDENCE):
+            submitted = self.submit(state, snapshot, action, None, "a reason")
+            self.assertTrue(submitted.ok, submitted.problems)
+            self.assertNotIn("revises", state.entities[submitted.input_id])
+            out = self.revise_act(state, submitted.input_id)
+            self.assertEqual(dec.DECISION_ALREADY_STANDING, out.status, out.problems)
+            self.assertEqual(out.status,
+                             self.commit(state, submitted.input_id).status)
+            self.assertIsNone(out.patch)
+            self.assertEqual(first, self.committed_decision(state)["entity_id"])
+        # selecting the candidate that already stands changes nothing
+        out, _input = self.revision(state, "CND-A", "the same, on purpose")
+        self.assertEqual(dec.SELECTION_UNCHANGED, out.status)
+        self.assertIsNone(out.patch)
+        self.assertEqual(first, out.decision_id)
+        self.assertEqual(1, len(state.family("SelectionDecision")))
+        # and there is no first commitment the revision act would write
+        undecided = self.reviewable()
+        submitted = self.submit(undecided, self.review_of(undecided), dec.SELECT,
+                                "CND-B")
+        out = self.revise_act(undecided, submitted.input_id)
+        self.assertEqual(dec.NO_STANDING_COMMITMENT, out.status)
+        self.assertNoCommitment(undecided, out)
+        # structurally: the candidate written is the one the human named
+        source = inspect.getsource(dec.revise_human_selection)
+        self.assertIn('human.get("selected_candidate")', source)
+        for auto in ("frontier", "recommended", "eligible_candidates[",
+                     "candidates[0]"):
+            self.assertNotIn(auto, source)
+
+    def test_E90_B_must_still_be_currently_eligible(self):
+        state, first = self.committed("CND-A")
+        self.blocking(state, {"CND-A": sel.SATISFIED, "CND-B": sel.VIOLATED})
+        fresh = self.review_of(state)
+        self.assertEqual(("CND-A",), fresh.eligible_candidates)
+        self.assertEqual(first, fresh.standing_decision["entity_id"])
+        out, _input = self.revision(state, "CND-B", snapshot=fresh)
+        self.assertEqual(dec.SELECTION_NO_LONGER_ELIGIBLE, out.status)
+        self.assertIsNone(out.patch)
+        self.assertEqual(first, self.committed_decision(state)["entity_id"])
+        self.assertEqual("STANDING", self.validity(state, first))
+
+    def test_E90b_preference_cannot_rescue_an_ineligible_revision(self):
+        state, first = self.committed("CND-A", preferences=self.OTHER)
+        self.assertEqual(["CND-B"],
+                         state.standing("CandidateComparison")[0]["frontier"])
+        self.blocking(state, {"CND-A": sel.SATISFIED, "CND-B": sel.VIOLATED})
+        out, _input = self.revision(state, "CND-B", snapshot=self.review_of(state))
+        self.assertEqual(dec.SELECTION_NO_LONGER_ELIGIBLE, out.status)
+        self.assertEqual(first, self.committed_decision(state)["entity_id"])
+
+    def test_E91_a_screen_the_design_moved_under_cannot_revise(self):
+        """The advisory is reworded: the commitment stands (E62) and the screen
+        is stale (E26). The revision act is held to the screen."""
+        state, first = self.committed("CND-A", advisory=review(
+            kind="PREFER_CANDIDATE", candidate="CND-A", reasoning="prefer A"))
+        snapshot = self.review_of(state)
+        self.invalidate(state, state.standing("SelectionAdvisory")[0]["entity_id"],
+                        why="the reviewer reworded it")
+        self.assertEqual("STANDING", self.validity(state, first))
+        out, _input = self.revision(state, "CND-B", snapshot=snapshot)
+        self.assertEqual(dec.STALE_SUBMISSION, out.status)
+        self.assertIsNone(out.patch)
+        self.assertEqual(first, self.committed_decision(state)["entity_id"])
+
+    def test_E91c_a_commitment_that_went_stale_is_not_there_to_revise(self):
+        """The profile changes: the commitment loses its premises by ordinary
+        propagation (E59). There is then no standing commitment, and the
+        revision act says so rather than writing a first decision."""
+        state, first = self.committed("CND-A")
+        snapshot = self.review_of(state)
+        self.profile(state, self.OTHER)
+        self.assertEqual("STALE", self.validity(state, first))
+        out, _input = self.revision(state, "CND-B", snapshot=snapshot)
+        self.assertEqual(dec.NO_STANDING_COMMITMENT, out.status)
+        self.assertIsNone(out.patch)
+        self.assertEqual([], state.standing("SelectionDecision"))
+        self.assertEqual(1, len(state.family("SelectionDecision")))
+
+    def test_E91b_a_submission_from_before_the_commitment_cannot_revise_it(self):
+        state = self.reviewable()
+        early = self.submit(state, self.review_of(state), dec.SELECT, "CND-B",
+                            "B, before anything stood")
+        out = self.decide(state, "CND-A", "A")
+        self.assertEqual(dec.SELECTION_COMMITTED, out.status, out.problems)
+        first = out.decision_id
+        replay = self.revise_act(state, early.input_id)
+        self.assertEqual(dec.SUBMISSION_CONTEXT_MISMATCH, replay.status)
+        self.assertIn(first, " ".join(replay.problems))
+        self.assertIsNone(replay.patch)
+        self.assertEqual(first, self.committed_decision(state)["entity_id"])
+        # and the commit act still refuses to touch what stands
+        self.assertEqual(dec.DECISION_ALREADY_STANDING,
+                         self.commit(state, early.input_id).status)
+
+    def test_E92_what_was_built_on_A_goes_stale_and_the_branches_stay_whole(self):
+        state, first = self.committed("CND-A")
+        self.revise(state, Op("CREATE", "Feature", "FEA-ON-A",
+                              {"body": "BOD-G0A", "feature_kind": "BOSS",
+                               "geometry": {"centre": [0, 0, 0],
+                                            "half_extent": [1, 1, 1]}},
+                              "s05:embodiment",
+                              premise_refs=["CND-A", first]), stage="s05")
+        self.assertEqual("STANDING", self.validity(state, "FEA-ON-A"))
+        out, _input = self.revision(state, "CND-B")
+        self.assertEqual(dec.SELECTION_REVISED, out.status, out.problems)
+        self.assertEqual("STALE", self.validity(state, "FEA-ON-A"),
+                         "embodiment authored on the abandoned choice is still "
+                         "current")
+        self.assertEqual(first, state.entities["FEA-ON-A"]["_stale_because"][-1]
+                         ["root"])
+        # the new decision did not go stale with the old one's dependents
+        self.assertEqual("STANDING", self.validity(state, out.decision_id))
+        # selection is not deletion, in either direction
+        for candidate in ("CND-A", "CND-B"):
+            self.assertEqual("STANDING", self.validity(state, candidate))
+        # and the record of both submissions stands: history, not premises
+        for human in state.family("HumanDecisionInput"):
+            self.assertEqual("STANDING", human["_validity"])
+
+    def test_E93_the_view_s05_and_the_downstream_switch_to_B(self):
+        from ver3.assy_v3.downstream import execution
+        from ver3.assy_v3.lifecycle import s7_reconcile as lc
+        from ver3.assy_v3.stages.s05_embodiment import S05Embodiment
+        from ver3.assy_v3.view.consumer_view import committed_branch
+        state, first = self.committed("CND-A")
+        contracts = ds.Contracts()
+        self.assertEqual("CND-A", committed_branch(state, contracts))
+        self.assertEqual("CND-A", S05Embodiment().consumer_view(state).branch)
+        out, _input = self.revision(state, "CND-B")
+        self.assertEqual(dec.SELECTION_REVISED, out.status, out.problems)
+        self.assertEqual("CND-B", committed_branch(state, contracts))
+        view = S05Embodiment().consumer_view(state)
+        self.assertEqual("CND-B", view.branch)
+        shown = [d["entity_id"] for d in view.payload().get("SelectionDecision", [])]
+        self.assertEqual([out.decision_id], shown,
+                         "s05 was shown a decision that no longer stands")
+        self.assertEqual("CND-B", execution.current_selection(state))
+        self.assertEqual(out.decision_id, lc.current_commitment(state)["entity_id"])
+        self.assertEqual(lc.CURRENT_COMMITMENT, lc.reconcile_s7(state).human_state)
+
+    def test_E94_the_screen_routes_a_select_to_the_revision_act(self):
+        state, first = self.committed("CND-A")
+        surface = _Surface(action=dec.SELECT, candidate="CND-B",
+                           rationale="B, on reflection", submitted=True)
+        out = ui.checkpoint(surface, state)
+        self.assertEqual(dec.SELECTION_REVISED, out.status, out.problems)
+        self.assertTrue(out.committed)
+        self.assertIn("currently committed to CND-A", surface.text())
+        self.assertEqual("success", surface.said[-1][0])
+        self.assertIn("CND-B", surface.said[-1][1])
+        self.assertIn("kept as history", surface.said[-1][1])
+        self.assertEqual("CND-B", self.committed_decision(state)["selected_candidate"])
+        self.assertEqual("INVALIDATED", self.validity(state, first))
+        # every status the revision act can return is a sentence, not a code
+        for status in (dec.SELECTION_REVISED, dec.NO_STANDING_COMMITMENT):
+            self.assertIn(status, ui.MESSAGES)
+        # the screen still authors nothing: E67 holds over the routing too
+        source = _code(_source("assy_v3", "ui", "selection_checkpoint.py"))
+        self.assertNotIn("INVALIDATE", source)
+        self.assertNotIn("standing(", source)
+
+    def test_E94b_the_screen_sends_a_non_select_to_the_commit_act(self):
+        state, first = self.committed("CND-A")
+        surface = _Surface(action=dec.KEEP_UNRESOLVED, rationale="thinking",
+                           submitted=True)
+        out = ui.checkpoint(surface, state)
+        self.assertEqual(dec.DECISION_ALREADY_STANDING, out.status)
+        self.assertEqual(first, self.committed_decision(state)["entity_id"])
+
+    def test_E95_a_revision_can_itself_be_revised(self):
+        """No first-decision special case. B -> A again is a third decision
+        with its own identity; A's original record stays retired."""
+        state, first = self.committed("CND-A")
+        second, _i = self.revision(state, "CND-B", "B")
+        self.assertEqual(dec.SELECTION_REVISED, second.status, second.problems)
+        third, _i = self.revision(state, "CND-A", "A, after all")
+        self.assertEqual(dec.SELECTION_REVISED, third.status, third.problems)
+        self.assertEqual(3, len({first, second.decision_id, third.decision_id}))
+        self.assertEqual([third.decision_id],
+                         [d["entity_id"] for d in state.standing("SelectionDecision")])
+        self.assertEqual("CND-A", self.committed_decision(state)["selected_candidate"])
+        for retired in (first, second.decision_id):
+            self.assertEqual("INVALIDATED", self.validity(state, retired))
+        self.assertEqual(3, len(state.family("SelectionDecision")))
+
+    def test_E96_replaying_an_honoured_revision_changes_nothing(self):
+        state, first = self.committed("CND-A")
+        out, input_id = self.revision(state, "CND-B")
+        picture = {e: dict(r) for e, r in state.entities.items()}
+        again = self.revise_act(state, input_id)
+        self.assertEqual(dec.SELECTION_UNCHANGED, again.status)
+        self.assertEqual(out.decision_id, again.decision_id)
+        self.assertIsNone(again.patch)
+        self.assertEqual(picture, {e: dict(r) for e, r in state.entities.items()})
+        # and the commit act, handed the same input, reports the same
+        self.assertEqual(dec.SELECTION_UNCHANGED, self.commit(state, input_id).status)
+
+    def test_E97_the_contracts_say_what_runs(self):
+        families = _paths.contract("DESIGN_STATE_CONTRACT.yaml")["assurance_families"]
+        hdi = families["HumanDecisionInput"]
+        self.assertIn("revises", hdi["optional_fields"])
+        self.assertNotIn("revises", hdi["required_fields"])
+        self.assertEqual("SelectionDecision",
+                         hdi["field_semantics"]["revises"]["target"])
+        self.assertEqual("one", hdi["field_semantics"]["revises"]["cardinality"])
+        rules = " ".join(families["SelectionDecision"]["rules"])
+        self.assertIn("REVISION IS THE SAME AUTHORITY", rules)
+        self.assertIn("ONE patch", rules)
+        resp = _paths.contract("STAGE_RESPONSIBILITY_CONTRACT.yaml")["stages"]
+        review = {pc["class"]: pc
+                  for pc in resp["selection_human_review"]
+                  ["required_reasoning_premise_classes"]}
+        self.assertEqual("MAY_BE_EMPTY",
+                         review["standing_commitment"]["instance_selection"]["existence"])
+        self.assertEqual(["selection_decision"],
+                         review["standing_commitment"]["requires_semantics"])
+        prohibited = " ".join(resp["selection_decision"]["prohibited_decisions"])
+        self.assertIn("revision act", prohibited)
+        self.assertIn("did not name", prohibited)
 
 
 if __name__ == "__main__":                                       # pragma: no cover
