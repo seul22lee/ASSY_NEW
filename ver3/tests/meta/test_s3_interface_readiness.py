@@ -433,7 +433,12 @@ class TestSourceB(_Base):
         # were deciding that for themselves before it existed, from a
         # configuration's `distinguishing_basis` and from which side of a joint
         # is written as its child.
-        self.assertEqual(38, total)
+        #
+        # 39 at the parameter authority closure: `embodiment_settlement`,
+        # declared by feasibility. It resolves through the role of the same
+        # name to the Constraint family - the one place a settled fit is
+        # written - so a deferred sizing obligation can be read as discharged.
+        self.assertEqual(39, total)
         pending = [pc for s in self.resp["stages"].values()
                    for pc in (s.get("premise_classes_pending_step") or [])]
         self.assertEqual([], pending, "a pending class survived S7-A")

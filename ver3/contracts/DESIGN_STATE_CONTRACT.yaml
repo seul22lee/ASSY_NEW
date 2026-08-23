@@ -223,6 +223,12 @@ semantic_role_vocabulary:
     A HARD requirement on the design - what may be built at all. Distinct from a
     preference, which says which buildable thing is wanted and may never make a
     candidate ineligible. (S-7 / U-8)
+  embodiment_settlement: >
+    A relation the embodiment block states between its parameters, and what
+    the settlement said about it. The typed answer to a question an earlier
+    maturity can only defer: whether the fit of a mating interface is realized
+    by sizes with an authority. Absent before the block has run, which is an
+    honest absence and not a gap.
   realized_configuration: >
     The coordinate values that realize one named configuration - what the
     mechanism is actually SET TO when it is in that state, as against the
@@ -693,6 +699,21 @@ entity_families:
             required: true
           engagement_length:
             kind: number
+          # THE MATURITY OF THE SIZES, ON THE RECORD. EVIDENCE_MATURITY is a
+          # property of a value (STATUS_SEMANTICS), and these values have
+          # exactly one: this field is writable by s04 and by no one else,
+          # and s04 is prohibited "any authoritative dimension". So the
+          # diameters and the engagement are REPRESENTATIVE - at the scale
+          # of the envelopes, consistent with the boxes they sit in - and
+          # they are promoted by nothing: the authoritative fit is another
+          # record (the Constraint that governs this interface, S05-C9, and
+          # the settlement s06 writes against it). One value, so that a
+          # reader dispatches on the record and not on provenance prose, and
+          # so that a record written before the field existed - by the only
+          # writer, at the only maturity - reads the same as one written now.
+          maturity:
+            kind: enum
+            values: [PROVISIONAL]
     owned_by: s03
     extendable_by: [s04, s05]
     extendable_fields:
@@ -729,7 +750,9 @@ entity_families:
       - "inner_body and outer_body are the interface's own two bodies, one each. A geometry about some other pair refines nothing here."
       - "axis_joint names a non-FIXED joint relating the same two bodies, and its axis_direction and frame_origin ARE the mating axis. axis_direction is stated only when no such joint exists. Stating both is two authors of one fact and is refused by the reader."
       - "Diameters and engagement are in the ReferenceScale basis every Envelope is expressed in."
-      - "This record establishes no clearance. `s04.mating_fit` reads it, and it alone decides what the numbers mean for the interface's declared kind."
+      - "This record establishes no clearance and contradicts none. `s04.mating_relation` reads it for the RELATION - the pair, the feature kinds, the axis, representative sizes consistent with the arrangement - which is what selection rests on; `s04.mating_fit` asks the FIT only of sizes with an authority, and before embodiment none exist."
+      - "The fit of a mating interface is owed by the embodiment block: S05-C9 makes every declared clearance a Constraint that governs the interface, and s06 settles it. Until then a feasibility domain records MATING_RELATION_ESTABLISHED beside SIZING_DEFERRED_TO_EMBODIMENT and is not weakened by the deferral; a settlement that is present is read, and one that says the fit is not realized is the contradiction."
+      - "A representative size the arrangement cannot hold - a bore wider than the body it is cut in, a pin fatter than the body it is, an engagement longer than the pin - is MATING_SIZE_EXCEEDS_ARRANGEMENT: s04a's numbers against s04a's boxes, NOT_ESTABLISHED and s04a's to re-arrange, never INFEASIBLE. An engagement of nothing is the one relation-level contradiction: it mates with nothing at any size."
     # S7-B CORRECTION - CONTRACT TRUTH. This list read
     # [DECLARED_CONTACT, DECLARED_CLEARANCE, DECLARED_INTERFERENCE_FIT,
     #  DECLARED_COMPLIANT_INTERACTION, NOT_INTENDED_TO_INTERACT]
@@ -966,6 +989,7 @@ entity_families:
       - "A value without a cited solver artifact is not settled (S05-C10, R-23)."
 
   Constraint:
+    semantic_roles: [embodiment_settlement]
     owned_by: s05
     extendable_by: [s06]
     # One field: what the settlement said about this relation. s06 may record an
@@ -3349,6 +3373,16 @@ spatial_commitments:
         premise, so replacing it costs all of them their unqualified authority -
         the correct consequence of changing what the numbers mean.
   field_level:
+    - family: Interface
+      field: mating_geometry
+      committed_by: s04a
+      class: PROVISIONAL
+      enforced_by: "extendable_fields.mating_geometry == s04; the record carries maturity PROVISIONAL and the boundary admits no other; a later change is a SUPERSEDE with a reason"
+      note: >
+        The one s04a commitment that is PROVISIONAL rather than COMPARABLE: a
+        relation with representative sizes, which no later pass promotes.
+        The authoritative sizes live on s05 Parameters and the authoritative
+        fit on the Constraint that governs the interface.
     - family: FunctionalRegion
       field: volume
       committed_by: s04a

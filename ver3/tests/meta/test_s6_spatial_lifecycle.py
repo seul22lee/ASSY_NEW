@@ -250,8 +250,12 @@ class TestCommitmentRepresentation(_Probe):
         entity = {d["family"] for d in decl["entity_level"]}
         field = {(d["family"], d["field"]) for d in decl["field_level"]}
         self.assertEqual({"Envelope", "ReferenceScale"}, entity)
+        # `Interface.mating_geometry` joined the declaration at the parameter
+        # authority closure: it had been the one s04a value committed under no
+        # class at all, and read as if solved.
         self.assertEqual({("FunctionalRegion", "volume"),
-                          ("AssemblyStep", "insertion_direction")}, field)
+                          ("AssemblyStep", "insertion_direction"),
+                          ("Interface", "mating_geometry")}, field)
 
     def test_entity_level_commitments_carry_their_class_and_field_ones_do_not(self):
         """The granularity rule, checked rather than described. A class on the

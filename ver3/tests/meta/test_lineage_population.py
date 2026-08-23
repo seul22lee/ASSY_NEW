@@ -379,7 +379,13 @@ class TestAuthorshipStaysInProductionCode(_Base):
     #: It is the s04 commit path, which is S-4 work and is not migrated. Pinned by
     #: name so a NEW tool-side premise site fails this test instead of joining a
     #: crowd. Growing this set is a decision, not an accident.
-    TOOL_PREMISE_SITES = {"_commit_s04"}
+    #: `ops_from` and `build` in `tools/bm001_replay.py` REPLAY recorded
+    #: operations - the premise refs they carry are the ones the producing pass
+    #: wrote, copied from the committed patch rows verbatim - and author none.
+    #: They are named here so the replay of lineage and the authorship of it
+    #: stay distinguishable to this guard; a tool that DECIDES a premise is
+    #: still caught.
+    TOOL_PREMISE_SITES = {"_commit_s04", "ops_from", "build"}
 
     def _premise_sites(self):
         """(file, enclosing function) for every premise authorship act in tools."""

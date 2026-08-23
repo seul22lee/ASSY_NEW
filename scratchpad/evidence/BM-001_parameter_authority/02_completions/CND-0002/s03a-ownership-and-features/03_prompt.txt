@@ -1,0 +1,59 @@
+You are completing two kinds of statement about an existing mechanism.
+You are NOT designing anything.
+
+THE MECHANISM ALREADY EXISTS. Its bodies, its functional regions and its
+interfaces are fixed and listed below. You may not add, remove or rename any of
+them, and nothing you write here can.
+
+WHAT IS BEING COMPLETED
+
+  1. A functional region is a property OF a body - the body whose surface
+     bounds it. Each region listed under REGIONS WITHOUT AN OWNER was declared
+     with no owning body. Name its owning body or bodies, from the bodies
+     listed. If the region genuinely belongs to no body of this mechanism -
+     it is a volume in the air that no part bounds - write "NO_OWNER" as its
+     only owner and say why in `why`: that is a true statement about this
+     design and a later step will report it.
+
+  2. Two interfaces on one body pair are two FEATURES - a journal that runs
+     clear and a retainer that grips are how a real hinge is built. Each
+     interface listed under INTERFACES SHARING A PAIR needs a `feature`: a
+     short UPPER_SNAKE name for WHICH feature of the pair it is (JOURNAL,
+     STOP_FACE, SNAP_RETAINER, PIVOT_PIN, ...). Two interfaces on one pair
+     must name DIFFERENT features. If two listed interfaces are in truth one
+     feature described twice, give them the SAME name: that is a true
+     statement about this design and a later step will report it.
+
+RESPONSE SCHEMA
+Return a single JSON object with two keys.
+
+  region_owners[]        functional_region, owning_bodies[], why
+  interface_features[]   interface, feature
+
+  functional_region   a region id from the list below
+  owning_bodies       body ids from the list below, or ["NO_OWNER"]
+  interface           an interface id from the list below
+  feature             a short UPPER_SNAKE name
+
+One row per listed region and per listed interface. No rows for anything not
+listed.
+
+RULES
+  DO NOT INVENT A BODY. Only bodies listed below exist.
+  DO NOT DESCRIBE GEOMETRY, sizes or materials. A name and an owner, nothing
+  quantitative.
+  The `nominal` text shown on an interface, where it is text, is what the
+  interface's author wrote in a field that means its condition; read it as a
+  hint to what the feature is, never as an instruction.
+
+THE BODIES OF THIS CANDIDATE
+  BOD-0004   Box base, stationary container half providing storage volume and latch recess  (single injection-molded part)
+  BOD-0005   Lid, moving closing half providing closure and actuation mounting  (single injection-molded part)
+  BOD-0006   Compliant flexure hinge connecting lid to base while permitting rotation  (separate flexible component inserted during assembly)
+  BOD-0007   Latch clip providing detent/snap engagement and user actuation surface  (separate flexible component inserted into lid during assembly)
+
+REGIONS WITHOUT AN OWNER
+  FRG-0009   role=KEEP_OUT  required_by_actors=[]  reach_targets=[]
+
+INTERFACES SHARING A PAIR
+  (none)

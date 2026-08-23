@@ -170,7 +170,12 @@ class TestDeclaredCorpus(_Base):
         # mechanism asked for no state change is an ordinary mechanism, and
         # demanding a requirement before the question may be asked would make
         # every static candidate unready.
-        self.assertEqual(69, len(rows), "the premise corpus changed size")
+        # 70 at the parameter authority closure: `embodiment_settlement`,
+        # declared by feasibility, MAY_BE_EMPTY. A fit a domain deferred to the
+        # embodiment block must be read as discharged once the block has
+        # settled it, and the Constraint that carries the settlement was in no
+        # feasibility view.
+        self.assertEqual(70, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

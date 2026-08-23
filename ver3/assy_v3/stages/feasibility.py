@@ -325,12 +325,52 @@ class _Evidence:
                  and isinstance(i.get("mating_geometry"), dict)]
         return found
 
+    def fit_settlement(self, interface):
+        """(status, code, note, refs) - what the embodiment block has settled
+        about this interface's fit, or None where nothing has.
+
+        THE TYPED ANSWER TO QUESTION TWO. S05-C9 makes every declared clearance
+        a Constraint that `governs_interface`; s06 extends that Constraint
+        with a `settlement` naming the solver status and the margin. Nothing
+        is written for a system that did not settle, so a settlement that IS
+        here is a FEASIBLE one - the fit realized by solved sizes - and a
+        constraint with none is the fit still owed. Read here so an evaluator
+        asked after the block has run does not call settled what it can see.
+        """
+        iid = interface.get("entity_id")
+        governing = [c for c in self.fam("Constraint")
+                     if c.get("governs_interface") == iid
+                     and str(c.get("kind", "")).upper() in ("CLEARANCE",
+                                                            "INTERFERENCE_FREE")]
+        settled = [c for c in governing if isinstance(c.get("settlement"), dict)]
+        if not settled:
+            return None
+        refs = [c["entity_id"] for c in settled]
+        bad = [c for c in settled
+               if str(c["settlement"].get("solver_status", "")).lower() != "feasible"
+               or (isinstance(c["settlement"].get("margin"), (int, float))
+                   and c["settlement"]["margin"] < 0)]
+        if bad:
+            return (s04.FIT_CONTRADICTED, "REQUIRED_CLEARANCE_NOT_REALIZED",
+                    "%s: the constraint governing its fit settled %s"
+                    % (iid, ", ".join("%s as %s" % (c["entity_id"],
+                                                   c["settlement"].get("solver_status"))
+                                      for c in bad)), refs)
+        return (s04.FIT_ESTABLISHED, "ANALYTICAL_FIT_ESTABLISHED",
+                "%s: the constraint governing its fit is settled" % iid, refs)
+
     def narrow_phase(self, pair, boxes):
         """(status, code, note, refs) for an overlapping pair, by the one rule.
 
         Asked only where the broad phase is inconclusive. A pair with no
         geometry is what it always was - unestablished - and a pair with two
         geometries is a question the design has answered twice.
+
+        TWO MATURITIES, ONE READER. The relation is s04's and decides
+        selection; the fit is the embodiment block's. Where that block has
+        settled the fit, its settlement is the answer; where it has not, the
+        fit is DEFERRED - an obligation with an owner, beside an established
+        relation - and never decided from representative sizes.
         """
         carrying = self.mating_for(pair)
         if not carrying:
@@ -342,7 +382,14 @@ class _Evidence:
                     [i["entity_id"] for i in carrying])
         interface = carrying[0]
         joints = {j["entity_id"]: j for j in self.fam("Joint")}
-        return s04.mating_fit(interface, interface["mating_geometry"], joints, boxes)
+        status, code, note, refs = s04.mating_fit(
+            interface, interface["mating_geometry"], joints, boxes)
+        if status != s04.FIT_DEFERRED:
+            return status, code, note, refs
+        settled = self.fit_settlement(interface)
+        if settled is None:
+            return status, code, note, refs
+        return settled[0], settled[1], settled[2], refs + settled[3]
 
     def envelopes_of(self, body: str) -> List[str]:
         """Every envelope id currently claiming this body. What an ambiguity is
@@ -1365,6 +1412,19 @@ def _assemblability(ev: _Evidence) -> Verdict:
                         carrying[0], carrying[0]["mating_geometry"], joints,
                         boxes, direction)
                     used += refs
+                    if fit == s04.FIT_DEFERRED:
+                        # The same two maturities `gross_interference` reads:
+                        # the relation and the approach are s04's and stand;
+                        # the fit is settled by the constraint that governs
+                        # the interface, where the block has run.
+                        settled = ev.fit_settlement(carrying[0])
+                        if settled is not None:
+                            fit, code, note = settled[0], settled[1], settled[2]
+                            used += settled[3]
+                        else:
+                            codes.append("MATING_RELATION_ESTABLISHED")
+                            codes.append(code)
+                            continue
                     if fit == s04.FIT_ESTABLISHED:
                         codes.append(code)
                         continue
@@ -1407,12 +1467,25 @@ def _gross_interference(ev: _Evidence) -> Verdict:
     clearance and overlap proves nothing. Inventing a FAIL from a box to balance
     the vocabulary would manufacture failures the geometry does not support.
 
-    THE NARROW PHASE DOES HAVE ONE. Where an intended mating interface carries
-    `mating_geometry`, `s04.mating_fit` reads the authored sizes against the
-    interface's declared kind, and numbers the design itself wrote can
-    positively contradict it: a CLEARANCE pin no smaller than its bore, a press
-    fit smaller than its hole. Those are the only FAILs this domain produces, and
-    every one rests on a value the author stated rather than on a box.
+    THE NARROW PHASE HAS ONE, AT THE RIGHT MATURITY. Where an intended mating
+    interface carries `mating_geometry`, `s04.mating_relation` reads the
+    principle - the pair, the feature kinds, the axis, representative sizes
+    consistent with the arrangement - and that is what selection rests on.
+    The FIT - a CLEARANCE pin strictly smaller than its bore, a press fit no
+    smaller than its hole - is read by `s04.mating_fit` from sizes that have
+    an authority, and before embodiment none do: s04a is prohibited "any
+    authoritative dimension", and its representative numbers can neither
+    establish nor contradict the fit. Until the Constraint that governs the
+    interface (S05-C9) is settled by s06, the fit is SIZING_DEFERRED_TO_
+    EMBODIMENT beside MATING_RELATION_ESTABLISHED - an obligation with an
+    owner, costing the domain nothing now, exactly as a snap-fit's limit to
+    produce is. A settlement that is here is read; one that says the fit is
+    not realized is the one FAIL this domain produces, and it rests on solved
+    values, never on a box and never on a representative.
+
+    It USED TO FAIL on the representative numbers themselves: a 4.0 pin in a
+    4.0 bore, authored by a pass whose contract calls every dimension
+    provisional, eliminated a candidate before anything had sized it.
     """
     boxes = ev.boxes()
     # THE REGIONS NOTHING MAY ENTER. KEEP_OUT by role, and NOT the contract's
@@ -1497,6 +1570,14 @@ def _gross_interference(ev: _Evidence) -> Verdict:
         if code is None:
             continue
         used += refs
+        if fit == s04.FIT_DEFERRED:
+            # The relation is established at this maturity and the fit is
+            # the embodiment block's to settle: an obligation, recorded by
+            # name, that costs the domain nothing now (the same principle as
+            # a snap-fit's limit to produce).
+            codes.append("MATING_RELATION_ESTABLISHED")
+            codes.append(code)
+            continue
         codes.append(code)
         if fit == s04.FIT_CONTRADICTED:
             notes.append(note)
@@ -1519,6 +1600,14 @@ def _gross_interference(ev: _Evidence) -> Verdict:
                 fit, code, note, refs = ev.narrow_phase(pair, boxes)
                 used += refs
                 if fit == s04.FIT_ESTABLISHED:
+                    codes.append(code)
+                    analytically_clear.add(pair)
+                    continue
+                if fit == s04.FIT_DEFERRED:
+                    # The pin IS in its bore by the established relation;
+                    # the boxes overlapping is that, and the fit is owed to
+                    # embodiment, not to the broad phase.
+                    codes.append("MATING_RELATION_ESTABLISHED")
                     codes.append(code)
                     analytically_clear.add(pair)
                     continue

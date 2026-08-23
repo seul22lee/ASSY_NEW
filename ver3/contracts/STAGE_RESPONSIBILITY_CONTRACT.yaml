@@ -544,12 +544,17 @@ stages:
     - Envelope
     - FunctionalRegion.volume
     - AssemblyStep.insertion_direction
+    - Interface.mating_geometry
     - ReachResult
     - EliminationRecord
     - ReferenceScale
     prohibited_decisions:
     - Selecting a candidate
     - Any authoritative dimension
+    # And so: no size this responsibility writes may eliminate a candidate.
+    # Its mating sizes are representative (maturity PROVISIONAL on the record)
+    # and establish the mating RELATION; the fit they would decide is owed by
+    # s05's Constraint and s06's settlement.
   feasibility:
     name: mechanical feasibility
     # S-7 / U-8. SPLIT OUT OF `gate`, which asked two questions and answered them
@@ -654,6 +659,28 @@ stages:
       - topology_element
       - topology_relation
       - load_route
+    - class: embodiment_settlement
+      # THE FIT OF A MATING INTERFACE IS OWED, NOT DECIDED, BEFORE EMBODIMENT:
+      # s04a's sizes are representative and a feasibility domain records
+      # SIZING_DEFERRED_TO_EMBODIMENT beside the established relation. What
+      # discharges that obligation is typed state this responsibility can
+      # read when it exists - the Constraint that governs the interface
+      # (S05-C9) and the settlement s06 wrote against it - so an evaluator
+      # asked after the block has run calls settled what it can see, and one
+      # asked before it finds nothing and defers. MAY_BE_EMPTY is the normal
+      # case at selection.
+      instance_selection:
+        population: INVOCATION_BRANCH
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: before the embodiment block has run no relation is
+          settled, and the fit is deferred by name rather than missing
+      what: the settled relations of this candidate's embodiment, if any
+      justified_by_question: Which mechanical domains has the design actually established for it, and which has it not?
+      why: A deferred obligation that has since been discharged must be read as
+        discharged, or the evaluator says "owed" of a fit the solver realized.
+      requires_semantics:
+      - embodiment_settlement
     - class: realized_motion
       # S7-B. ONE EXISTENCE RULE FOR FOUR ROLES SAID THE WRONG THING ABOUT TWO OF
       # THEM. "A mechanism with no realized motion has no motion to judge" is the

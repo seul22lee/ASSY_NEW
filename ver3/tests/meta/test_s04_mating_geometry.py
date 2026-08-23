@@ -92,49 +92,95 @@ class _Mating(_Feas):
 # =====================================================================
 class TestAnalyticalFit(_Mating):
 
-    def test_F1_a_pin_smaller_than_its_bore_clears(self):
-        """Overlapping boxes, CLEARANCE declared, and the geometry says the pin
-        is 1.0 in a 1.05 bore. Broad phase inconclusive, narrow phase decides."""
+    def test_F1_a_pin_in_its_bore_is_an_established_relation(self):
+        """Overlapping boxes, CLEARANCE declared, and the geometry says a pin
+        of about 1.0 in a bore of about 1.05 along the joint's axis. Broad
+        phase inconclusive; the narrow phase establishes the RELATION - which
+        is what selection rests on - and records the fit as the embodiment
+        block's obligation. It does not call the fit established: nothing
+        with an authority has sized it yet."""
         v = self.gross(self.pin(geometry()))
         self.assertEqual(s07.PASS, v.status, v.summary)
-        self.assertIn("ANALYTICAL_FIT_ESTABLISHED", v.reason_codes)
+        self.assertIn("MATING_RELATION_ESTABLISHED", v.reason_codes)
+        self.assertIn("SIZING_DEFERRED_TO_EMBODIMENT", v.reason_codes)
+        self.assertNotIn("ANALYTICAL_FIT_ESTABLISHED", v.reason_codes)
         self.assertNotIn("CLEARANCE_PAIR_OVERLAPS", v.reason_codes)
         for p in ("IFC-0A", "JNT-0A", "BOD-G0A", "BOD-G1A", "ENV-G0A", "ENV-G1A",
                   "SCL-CND-A"):
             self.assertIn(p, v.premises, p)
 
-    def test_F2_a_pin_too_large_for_its_bore_fails(self):
-        """THE ONE POSITIVE CONTRADICTION THIS TIER CAN MAKE. The design said
-        clearance and wrote a pin no smaller than its bore."""
-        for d in (1.05, 1.2):
-            out = self.assess(self.pin(geometry(inner_diameter=d)), apply_patch=False)
+    def test_F2_representative_sizes_decide_no_fit(self):
+        """A pin written no smaller than its bore, at the maturity s04a has: a
+        line-to-line 1.0 in 1.0, and a 1.0 in a 0.9. Neither is a
+        contradiction of the design - S04_CONTRACT prohibits s04a any
+        authoritative dimension and S05 leaves every dimension unsolved until
+        s06 - so neither eliminates the candidate. The relation stands and
+        the fit is owed. (A 4.0 pin in a 4.0 bore used to be INFEASIBLE.)"""
+        for d_out in (1.0, 0.9):
+            out = self.assess(self.pin(geometry(inner_diameter=1.0, outer_diameter=d_out)),
+                              apply_patch=False)
             v = self.domain(out, "gross_interference")
-            self.assertEqual(s07.FAIL, v.status, v.summary)
-            self.assertIn("REQUIRED_CLEARANCE_NOT_REALIZED", v.reason_codes)
-            self.assertEqual(s07.INFEASIBLE, out.status)
+            self.assertEqual(s07.PASS, v.status, v.summary)
+            self.assertIn("MATING_RELATION_ESTABLISHED", v.reason_codes)
+            self.assertIn("SIZING_DEFERRED_TO_EMBODIMENT", v.reason_codes)
+            self.assertNotIn("REQUIRED_CLEARANCE_NOT_REALIZED", v.reason_codes)
+            self.assertNotEqual(s07.INFEASIBLE, out.status)
 
-    def test_F2b_a_press_fit_smaller_than_its_hole_fails_end_to_end(self):
-        """INTERFERENCE_FIT declared, and the authored pin is SMALLER than the
-        hole: a press fit that cannot press. Asked of the candidate, through
-        the real evaluator - not of `mating_fit` directly - because the TOUCHES
-        box exemption used to stop the geometry ever being read, and the bad
-        fit came out FEASIBLE_FOR_SELECTION."""
+    def test_F2a_authoritative_sizes_still_contradict_strictly(self):
+        """THE NUMERICAL TRUTH IS PRESERVED where it belongs: asked of sizes
+        with an authority, a CLEARANCE pin no smaller than its bore is the
+        positive contradiction it always was, equal included; a press fit
+        smaller than its hole likewise."""
+        state = self.pin(geometry())
+        iface = next(i for i in state.family("Interface") if i["entity_id"] == "IFC-0A")
+        joints = {j["entity_id"]: j for j in state.family("Joint")}
+        boxes = {e["body"]: s04.aabb(e["extent"]["centre"], e["extent"]["half_extent"])
+                 for e in state.family("Envelope")}
+        geom = iface["mating_geometry"]
+        for d_in, d_out in ((1.0, 1.0), (1.05, 1.0), (1.2, 1.0)):
+            fit, code, _n, _r = s04.mating_fit(iface, geom, joints, boxes,
+                                               sizes={"inner_diameter": d_in,
+                                                      "outer_diameter": d_out})
+            self.assertEqual((s04.FIT_CONTRADICTED, "REQUIRED_CLEARANCE_NOT_REALIZED"),
+                             (fit, code), (d_in, d_out))
+        fit, code, _n, _r = s04.mating_fit(iface, geom, joints, boxes,
+                                           sizes={"inner_diameter": 0.98,
+                                                  "outer_diameter": 1.0})
+        self.assertEqual((s04.FIT_ESTABLISHED, "ANALYTICAL_FIT_ESTABLISHED"), (fit, code))
+        press = dict(iface, interaction_kind="INTERFERENCE_FIT")
+        fit, code, _n, _r = s04.mating_fit(press, geom, joints, boxes,
+                                           sizes={"inner_diameter": 0.9,
+                                                  "outer_diameter": 1.0})
+        self.assertEqual((s04.FIT_CONTRADICTED, "REQUIRED_CONTACT_NOT_REALIZED"), (fit, code))
+        for d_in in (1.0, 1.05):
+            fit, code, _n, _r = s04.mating_fit(press, geom, joints, boxes,
+                                               sizes={"inner_diameter": d_in,
+                                                      "outer_diameter": 1.0})
+            self.assertEqual(s04.FIT_ESTABLISHED, fit, d_in)
+
+    def test_F2b_a_press_fit_smaller_than_its_hole_is_deferred_not_passed(self):
+        """INTERFERENCE_FIT declared, and the representative pin is SMALLER
+        than the hole. At s04's maturity that is neither a press fit
+        established nor one contradicted: the relation stands, the sizes are
+        owed. Asked through the real evaluator, because the TOUCHES box
+        exemption used to stop the geometry ever being read."""
         out = self.assess(self.pin(geometry(inner_diameter=0.9),
                                    kind="INTERFERENCE_FIT"), apply_patch=False)
         v = self.domain(out, "gross_interference")
-        self.assertEqual(s07.FAIL, v.status, v.summary)
-        self.assertIn("REQUIRED_CONTACT_NOT_REALIZED", v.reason_codes)
-        self.assertEqual(s07.INFEASIBLE, out.status)
+        self.assertEqual(s07.PASS, v.status, v.summary)
+        self.assertIn("SIZING_DEFERRED_TO_EMBODIMENT", v.reason_codes)
+        self.assertNotIn("REQUIRED_CONTACT_NOT_REALIZED", v.reason_codes)
+        self.assertNotIn("ANALYTICAL_FIT_ESTABLISHED", v.reason_codes)
         self.assertIn("IFC-0A", v.premises)
 
-    def test_F2c_a_real_press_fit_passes_and_the_box_overlap_is_still_exempt(self):
-        """The exemption is from the BOX test, not from the numbers. A pin no
-        smaller than its hole under INTERFERENCE_FIT is what was declared."""
-        for d in (1.05, 1.2):
-            v = self.gross(self.pin(geometry(inner_diameter=d), kind="INTERFERENCE_FIT"))
-            self.assertEqual(s07.PASS, v.status, v.summary)
-            self.assertIn("ANALYTICAL_FIT_ESTABLISHED", v.reason_codes)
-            self.assertNotIn("UNDECLARED_PAIR_OVERLAPS", v.reason_codes)
+    def test_F2c_a_press_fit_relation_keeps_the_box_overlap_exempt(self):
+        """The exemption is from the BOX test, not from the numbers. The
+        relation is read whatever the kind, and the sizes it carries are
+        consistent with the boxes they sit in."""
+        v = self.gross(self.pin(geometry(inner_diameter=1.0), kind="INTERFERENCE_FIT"))
+        self.assertEqual(s07.PASS, v.status, v.summary)
+        self.assertIn("MATING_RELATION_ESTABLISHED", v.reason_codes)
+        self.assertNotIn("UNDECLARED_PAIR_OVERLAPS", v.reason_codes)
 
     def test_F2d_a_touches_pair_with_no_geometry_stays_exempt(self):
         """No new universal metric requirement on every legacy CONTACT pair."""
@@ -181,7 +227,7 @@ class TestAnalyticalFit(_Mating):
                            s04b=motion("A", "JNT-0A", _group(1, "A"), transition=False,
                                        coords=(0, 0)))
         v = self.gross(state)
-        self.assertIn("ANALYTICAL_FIT_ESTABLISHED", v.reason_codes, v.summary)
+        self.assertIn("MATING_RELATION_ESTABLISHED", v.reason_codes, v.summary)
 
     def test_F10_an_unsupported_feature_pair_is_never_guessed(self):
         """A thread in a bore is not a pin in a bore. The reader does not know
@@ -207,10 +253,31 @@ class TestAnalyticalFit(_Mating):
         self.assertEqual(s07.PASS, v.status, v.summary)
         self.assertNotIn("ANALYTICAL_FIT_ESTABLISHED", v.reason_codes)
 
-    def test_F12_engagement_longer_than_the_pin_is_a_contradiction(self):
+    def test_F12_engagement_longer_than_the_pin_is_an_arrangement_not_realized(self):
+        """Representative engagement against the representative pin: both are
+        s04a's, one maturity against itself, so a pin engaged over more than
+        its length is the arrangement not yet realizing the relation - for
+        s04a to re-arrange - not the design contradicting itself."""
         v = self.gross(self.pin(geometry(engagement_length=30)))
-        self.assertEqual(s07.FAIL, v.status)
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status, v.summary)
+        self.assertIn("MATING_SIZE_EXCEEDS_ARRANGEMENT", v.reason_codes)
+        self.assertNotIn("REQUIRED_ENGAGEMENT_NOT_REALIZED", v.reason_codes)
+
+    def test_F12b_an_engagement_of_nothing_is_a_relation_contradicted(self):
+        """A pin engaged over no length mates with nothing at any size: the
+        one thing a relation cannot be, and so contradicted at s04's maturity."""
+        out = self.assess(self.pin(geometry(engagement_length=0)), apply_patch=False)
+        v = self.domain(out, "gross_interference")
+        self.assertEqual(s07.FAIL, v.status, v.summary)
         self.assertIn("REQUIRED_ENGAGEMENT_NOT_REALIZED", v.reason_codes)
+
+    def test_F12c_a_feature_wider_than_its_body_is_an_arrangement_not_realized(self):
+        """The pin's body is 1.0 across and its representative diameter says
+        1.2: s04a's sizes against s04a's boxes. Unestablished, never a fit."""
+        v = self.gross(self.pin(geometry(inner_diameter=1.2)))
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status, v.summary)
+        self.assertIn("MATING_SIZE_EXCEEDS_ARRANGEMENT", v.reason_codes)
+        self.assertNotIn("REQUIRED_CLEARANCE_NOT_REALIZED", v.reason_codes)
 
     def test_F13_a_geometry_about_another_pair_refines_nothing(self):
         """The interface is G0-G1; the geometry names G1 twice."""
@@ -230,7 +297,8 @@ class TestInsertion(_Mating):
         the mating axis, so that pair passes the narrow-phase predicate."""
         v = self.asm(self.inserted(geometry(), direction=(0, 1, 0)))
         self.assertEqual(s07.PASS, v.status, v.summary)
-        self.assertIn("ANALYTICAL_INSERTION_ESTABLISHED", v.reason_codes)
+        self.assertIn("MATING_RELATION_ESTABLISHED", v.reason_codes)
+        self.assertIn("SIZING_DEFERRED_TO_EMBODIMENT", v.reason_codes)
         self.assertNotIn("INSERTION_PATH_NOT_CLEAR", v.reason_codes)
 
     def test_F4b_driven_in_sideways_is_a_contradiction(self):
@@ -305,7 +373,7 @@ class TestInsertion(_Mating):
         v = self.asm(state)
         self.assertIn("INSERTION_PATH_NOT_CLEAR", v.reason_codes, v.summary)
         self.assertIn("BOD-G1A entering meets BOD-G2A", v.summary)
-        self.assertIn("ANALYTICAL_INSERTION_ESTABLISHED", v.reason_codes,
+        self.assertIn("MATING_RELATION_ESTABLISHED", v.reason_codes,
                       "the mating pair was still established")
 
 
@@ -397,10 +465,12 @@ class TestOtherReaders(_Mating):
         none = self.pin(None)
         self.assertTrue(any("CLEARANCE_NOT_VERIFIED" in p
                             for p in s04.configuration_interference_check(none)))
+        # An arrangement the sizes do not fit is NOT_VERIFIED here, as there -
+        # and nothing at this maturity is a conviction.
         bad = self.pin(geometry(inner_diameter=1.2))
-        found = [p for p in s04.configuration_interference_check(bad)
-                 if "REQUIRED_CLEARANCE_NOT_REALIZED" in p]
-        self.assertTrue(found, s04.configuration_interference_check(bad))
+        found = s04.configuration_interference_check(bad)
+        self.assertTrue(any("CLEARANCE_NOT_VERIFIED" in p for p in found), found)
+        self.assertFalse([p for p in found if "REQUIRED_CLEARANCE_NOT_REALIZED" in p])
 
     def test_E1_a_nested_reference_into_another_branch_is_refused_at_the_write(self):
         """`mating_geometry.axis_joint` declares INVOCATION_BRANCH, exactly as
@@ -461,7 +531,8 @@ class TestProducer(_Mating):
         prompt = s04.S04A_PROMPT
         self.assertIn("mating_geometry[]", prompt)
         self.assertIn("OVERLAP ON PURPOSE", prompt)
-        self.assertIn("not stated by you", prompt)
+        self.assertIn("REPRESENTATIVE", prompt)
+        self.assertIn("decide no fit", prompt)
         self.assertIn("Do not state that anything interferes or is clear", prompt)
 
     def test_B4_nothing_invents_an_interface_from_an_overlap(self):

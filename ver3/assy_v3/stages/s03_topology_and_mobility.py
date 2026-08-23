@@ -849,6 +849,59 @@ class S03TopologyAndMobility(Stage):
         return ops
 
     # ---------------------------------------------------------- completeness
+    def completion_operations(self, parsed, regions, interfaces, bodies, branch):
+        """(ops, problems) - the owner completing what it authored without.
+
+        TWO OMISSIONS THIS PASS'S OWN COMPLETENESS DECLARES, completed by
+        this pass and by no one else: the owning body of a region authored
+        with none (S03-C12), and the feature of an interface sharing a pair
+        (which feature of the pair each one IS). `parsed` is the owner's
+        answer to exactly those questions - `region_owners[]` and
+        `interface_features[]` - and every row is held to what was asked:
+        a region or interface not asked about is refused, a body this
+        candidate has not is refused, and "NO_OWNER" is recorded as the
+        owner's statement that no body bounds the region, which completes
+        nothing and is reported, never resolved by a guess. SUPERSEDE,
+        because the owner is revising its own record, with the reason on
+        the record and the lineage this pass authors.
+        """
+        ops: List[Op] = []
+        problems: List[str] = []
+        asked_regions = {r.get("entity_id") for r in regions}
+        asked_ifaces = {i.get("entity_id") for i in interfaces}
+        for row in (parsed or {}).get("region_owners") or []:
+            rid = row.get("functional_region")
+            owners = [b for b in (row.get("owning_bodies") or []) if isinstance(b, str)]
+            if rid not in asked_regions:
+                problems.append("region %s was not asked about" % rid)
+                continue
+            if owners == ["NO_OWNER"] or not owners:
+                problems.append("region %s: the owner stage states it belongs to no "
+                                "body (%s)" % (rid, row.get("why")))
+                continue
+            unknown = [b for b in owners if b not in bodies]
+            if unknown:
+                problems.append("region %s names bodies this candidate has not: %s"
+                                % (rid, unknown))
+                continue
+            ops.append(Op("SUPERSEDE", "FunctionalRegion", rid, {"owning_bodies": owners},
+                          "s03:topology", premise_refs=[branch] + owners,
+                          reason="owner stage completed the owning body of a region "
+                                 "authored with none (S03-C12)"))
+        for row in (parsed or {}).get("interface_features") or []:
+            iid, name = row.get("interface"), str(row.get("feature") or "").strip()
+            if iid not in asked_ifaces:
+                problems.append("interface %s was not asked about" % iid)
+                continue
+            if not name:
+                problems.append("interface %s: no feature named" % iid)
+                continue
+            ops.append(Op("SUPERSEDE", "Interface", iid, {"feature": name}, "s03:topology",
+                          premise_refs=[branch],
+                          reason="owner stage named which feature of the pair this "
+                                 "interface is (feature identity)"))
+        return ops, problems
+
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
         out: List[str] = []
         if not parsed.get("bodies"):
@@ -2064,6 +2117,50 @@ class S03BMobilityAndAssembly(Stage):
                 out.append("an irrelevance claim names %s, which is not a degree "
                            "of freedom this pipeline has" % ", ".join(str(b) for b in bad))
         return out
+
+    def release_completion_operations(self, parsed, relations, joints, branch):
+        """(ops, problems) - the owner completing a released restraint's evidence.
+
+        A restraint a transition releases must say which relative joint
+        motion it removes and by what principle it is overcome; this pass's
+        completeness declares either omission, and this is the pass
+        completing it - SUPERSEDE on its own record, the reason stated, the
+        lineage this pass authors. `parsed` is the owner's `completions[]`
+        to exactly the restraints asked; a relation not asked about, or a
+        motion naming a joint or DOF this candidate's joints do not declare,
+        is refused rather than written. Rows the restraint already has are
+        kept; a statement beginning "NOT OVERCOMABLE:" is recorded as the
+        owner's statement and read downstream as what it says.
+        """
+        asked = {r.get("entity_id"): r for r in relations}
+        ops: List[Op] = []
+        problems: List[str] = []
+        for row in (parsed or {}).get("completions") or []:
+            name = row.get("relation")
+            cur = asked.get(name)
+            if cur is None:
+                problems.append("relation %s was not asked about" % name)
+                continue
+            fields: Dict[str, Any] = {}
+            motions = []
+            for m in row.get("blocked_relative_motions") or []:
+                j, d = m.get("joint"), m.get("dof")
+                if j in joints and d in (joints[j].get("dof") or []):
+                    motions.append({"joint": j, "dof": d})
+                else:
+                    problems.append("%s names %s/%s, which this candidate's joints "
+                                    "do not declare" % (name, j, d))
+            if motions and motions != (cur.get("blocked_relative_motions") or []):
+                fields["blocked_relative_motions"] = motions
+            spec = str(row.get("defeat_specification") or "").strip()
+            if spec and spec != cur.get("defeat_specification"):
+                fields["defeat_specification"] = spec
+            if fields:
+                ops.append(Op("SUPERSEDE", "ConstraintRelation", name, fields,
+                              "s03b:relations", premise_refs=[branch],
+                              reason="owner stage completed the release evidence of a "
+                                     "restraint a transition releases"))
+        return ops, problems
 
     def derived_operations(self, parsed, inputs, state):
         """The TOTAL DOF disposition, derived from the relations just authored.
