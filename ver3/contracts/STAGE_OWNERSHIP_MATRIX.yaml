@@ -122,7 +122,9 @@ stages:
     # it.
     owns: [EliminationRecord, Envelope, ReachResult, ReferenceScale, State, SweptVolume, Transition, Witness]
 
-    extends: [AssemblyStep, FunctionalRegion, Joint]
+    # Interface: the `mating_geometry` field only. The entity stays s03's;
+    # the narrow-phase refinement is delegated to the pass that realizes space.
+    extends: [AssemblyStep, FunctionalRegion, Interface, Joint]
     may_not:
       - "Treat a rendered sheet as the authoritative artifact (R-01, INV-005)."
       - "Substitute a constant offset for a motion model (R-07)."

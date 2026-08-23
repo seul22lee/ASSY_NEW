@@ -1341,6 +1341,19 @@ def _assemblability(ev: _Evidence) -> Verdict:
                 # drives the pin along the mating axis. Without the geometry
                 # the corridor is what it always was, unestablished.
                 carrying = ev.mating_for(pair)
+                if len(carrying) > 1:
+                    # TWO GEOMETRIES FOR ONE PAIR is the same ambiguity here as
+                    # in `gross_interference`, and it has the same name: the
+                    # design answered one question twice, which establishes
+                    # nothing and contradicts nothing. It used to fall through
+                    # to the generic corridor finding, so one defect had two
+                    # meanings depending on which domain read it.
+                    codes.append("MATING_GEOMETRY_STATED_TWICE")
+                    notes.append("%s carry mating geometry for one pair"
+                                 % ", ".join(sorted(i["entity_id"] for i in carrying)))
+                    used += [i["entity_id"] for i in carrying]
+                    status = _weaken(status, NOT_ESTABLISHED)
+                    continue
                 if len(carrying) == 1:
                     joints = {j["entity_id"]: j for j in ev.fam("Joint")}
                     fit, code, note, refs = s04.insertion_fit(
@@ -1400,13 +1413,18 @@ def _gross_interference(ev: _Evidence) -> Verdict:
     into the weakest. `interface_expectation` is s04's, so the classification has
     one reader.
 
-    NO FAIL PATH, and that is a statement about the evidence rather than about
-    the mechanisms. An axis-aligned box overlap is not a collision: the real
-    bodies are smaller than their boxes, so no-overlap proves clearance and
-    overlap proves nothing. Until the representation holds exact geometry there
-    is nothing here that could positively contradict a requirement, and inventing
-    a FAIL to balance the vocabulary would manufacture failures the geometry does
-    not support.
+    THE BOXES HAVE NO FAIL PATH, and that is a statement about the evidence
+    rather than about the mechanisms. An axis-aligned box overlap is not a
+    collision: the real bodies are smaller than their boxes, so no-overlap proves
+    clearance and overlap proves nothing. Inventing a FAIL from a box to balance
+    the vocabulary would manufacture failures the geometry does not support.
+
+    THE NARROW PHASE DOES HAVE ONE. Where an intended mating interface carries
+    `mating_geometry`, `s04.mating_fit` reads the authored sizes against the
+    interface's declared kind, and numbers the design itself wrote can
+    positively contradict it: a CLEARANCE pin no smaller than its bore, a press
+    fit smaller than its hole. Those are the only FAILs this domain produces, and
+    every one rests on a value the author stated rather than on a box.
     """
     boxes = ev.boxes()
     keepouts = [(r["entity_id"], s04.aabb(r["volume"]["centre"],
@@ -1451,6 +1469,28 @@ def _gross_interference(ev: _Evidence) -> Verdict:
     # THE PAIRS THE NARROW PHASE ESTABLISHED. A sweep that enters one of them
     # is the pin turning in its bore, which is what the geometry says happens.
     analytically_clear = set()
+    # A DECLARED MATING THAT CARRIES GEOMETRY IS MEASURED WHATEVER ITS KIND.
+    # TOUCHES exempts a pair from the BOX test - two bodies meant to meet are
+    # supposed to overlap as boxes - and that exemption stands. It does not
+    # exempt the pair from its own numbers: a press fit whose pin is smaller
+    # than its hole is a contradiction the design authored, and the exemption
+    # used to hide it, because the narrow phase was only ever asked about
+    # CLEARANCE. A TOUCHES pair with no geometry is what it always was - exempt,
+    # and not suddenly held to a metric requirement nobody stated.
+    for pair in sorted(exempt, key=sorted):
+        if any(b not in boxes for b in pair):
+            continue
+        fit, code, note, refs = ev.narrow_phase(pair, boxes)
+        if code is None:
+            continue
+        used += refs
+        codes.append(code)
+        if fit == s04.FIT_CONTRADICTED:
+            notes.append(note)
+            status = FAIL
+        elif fit != s04.FIT_ESTABLISHED:
+            notes.append(note)
+            status = _weaken(status, NOT_ESTABLISHED)
     for x in range(len(names)):
         for y in range(x + 1, len(names)):
             pair = frozenset((names[x], names[y]))

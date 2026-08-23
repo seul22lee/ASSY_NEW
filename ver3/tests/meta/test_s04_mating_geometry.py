@@ -108,18 +108,34 @@ class TestAnalyticalFit(_Mating):
             self.assertIn("REQUIRED_CLEARANCE_NOT_REALIZED", v.reason_codes)
             self.assertEqual(s07.INFEASIBLE, out.status)
 
-    def test_F2b_a_press_fit_smaller_than_its_hole_fails(self):
-        """The other kind, the other way round: INTERFERENCE_FIT with a pin
-        smaller than the hole is not a press fit."""
-        v = self.gross(self.pin(geometry(inner_diameter=0.9), kind="INTERFERENCE_FIT"))
-        # TOUCHES pairs are exempt from the broad phase; the contradiction is
-        # still read where the geometry is consulted.
-        state = self.pin(geometry(inner_diameter=0.9), kind="INTERFERENCE_FIT")
-        i = state.entities["IFC-0A"]
-        joints = {j["entity_id"]: j for j in state.family("Joint")}
-        status, code, _n, _r = s04.mating_fit(i, i["mating_geometry"], joints, {})
-        self.assertEqual(s04.FIT_CONTRADICTED, status)
-        self.assertEqual("REQUIRED_CONTACT_NOT_REALIZED", code)
+    def test_F2b_a_press_fit_smaller_than_its_hole_fails_end_to_end(self):
+        """INTERFERENCE_FIT declared, and the authored pin is SMALLER than the
+        hole: a press fit that cannot press. Asked of the candidate, through
+        the real evaluator - not of `mating_fit` directly - because the TOUCHES
+        box exemption used to stop the geometry ever being read, and the bad
+        fit came out FEASIBLE_FOR_SELECTION."""
+        out = self.assess(self.pin(geometry(inner_diameter=0.9),
+                                   kind="INTERFERENCE_FIT"), apply_patch=False)
+        v = self.domain(out, "gross_interference")
+        self.assertEqual(s07.FAIL, v.status, v.summary)
+        self.assertIn("REQUIRED_CONTACT_NOT_REALIZED", v.reason_codes)
+        self.assertEqual(s07.INFEASIBLE, out.status)
+        self.assertIn("IFC-0A", v.premises)
+
+    def test_F2c_a_real_press_fit_passes_and_the_box_overlap_is_still_exempt(self):
+        """The exemption is from the BOX test, not from the numbers. A pin no
+        smaller than its hole under INTERFERENCE_FIT is what was declared."""
+        for d in (1.05, 1.2):
+            v = self.gross(self.pin(geometry(inner_diameter=d), kind="INTERFERENCE_FIT"))
+            self.assertEqual(s07.PASS, v.status, v.summary)
+            self.assertIn("ANALYTICAL_FIT_ESTABLISHED", v.reason_codes)
+            self.assertNotIn("UNDECLARED_PAIR_OVERLAPS", v.reason_codes)
+
+    def test_F2d_a_touches_pair_with_no_geometry_stays_exempt(self):
+        """No new universal metric requirement on every legacy CONTACT pair."""
+        v = self.gross(self.pin(None, kind="INTERFERENCE_FIT"))
+        self.assertEqual(s07.PASS, v.status, v.summary)
+        self.assertNotIn("REQUIRED_CONTACT_NOT_REALIZED", v.reason_codes)
 
     def test_F3_overlapping_boxes_with_no_geometry_stay_unestablished(self):
         """What it always was. Never FAIL from a box overlap alone."""
@@ -224,6 +240,43 @@ class TestInsertion(_Mating):
         self.assertEqual(s07.NOT_ESTABLISHED, v.status)
         self.assertIn("INSERTION_PATH_NOT_CLEAR", v.reason_codes)
 
+    def test_F4d_a_missing_insertion_direction_is_an_absence(self):
+        """Valid geometry, a corridor that needs the narrow phase, and no
+        direction stated for the step. Nothing can be measured along an axis
+        nobody named - and nothing is contradicted."""
+        r = realization("A", steps=(0, 1))
+        r["assembly_steps"][1]["order_index"] = 2
+        arr = arrangement(PIN_IN_LID, steps=["ASY-0A"])        # no direction for ASY-1A
+        arr["mating_geometry"] = [geometry()]
+        state = self.hinge(s03a=pin_topology(), s03b=r, s04a=arr,
+                           s04b=motion("A", "JNT-0A", _group(1, "A")))
+        v = self.asm(state)
+        self.assertEqual(s07.NOT_ESTABLISHED, v.status, v.summary)
+        self.assertIn("INSERTION_DIRECTION_MISSING", v.reason_codes)
+        self.assertNotIn("INSERTION_NOT_ALONG_MATING_AXIS", v.reason_codes)
+
+    def test_F14_two_geometries_for_one_pair_mean_the_same_in_both_domains(self):
+        """The design answered one question twice. That is an ambiguity, not
+        a collision, and it has ONE name wherever it is read: assemblability
+        used to fall through to the generic corridor finding."""
+        state = self.inserted(geometry(), direction=(0, 1, 0))
+        self.revise(state, Op("CREATE", "Interface", "IFC-DUP",
+                              {"bodies": ["BOD-G0A", "BOD-G1A"],
+                               "interaction_kind": "CLEARANCE", "nominal": "SECOND",
+                               "addresses_obligations": []}, "t",
+                              premise_refs=["CND-A"]), stage="s03")
+        g = dict(geometry()); g.pop("interface")
+        self.revise(state, Op("EXTEND", "Interface", "IFC-DUP",
+                              {"mating_geometry": g}, "t",
+                              premise_refs=["CND-A"]), stage="s04")
+        out = self.assess(state, apply_patch=False)
+        for d in ("gross_interference", "assemblability"):
+            v = self.domain(out, d)
+            self.assertEqual(s07.NOT_ESTABLISHED, v.status, (d, v.summary))
+            self.assertIn("MATING_GEOMETRY_STATED_TWICE", v.reason_codes, d)
+            self.assertNotIn("INSERTION_PATH_NOT_CLEAR", v.reason_codes, d)
+        self.assertNotEqual(s07.INFEASIBLE, out.status)
+
     def test_F5_an_unrelated_body_in_the_corridor_still_obstructs(self):
         """Three bodies: the pin mates with G0 and its corridor also crosses
         G2, which nothing declares. G2 is still an obstacle."""
@@ -316,6 +369,62 @@ class TestLifecycle(_Mating):
                         tuple(self.domain(out, d).reason_codes))
                     for d in ("gross_interference", "assemblability")}
         self.assertEqual(run(False), run(True))
+
+
+# =====================================================================
+# The s04 check reads the same rule; the boundary refuses another branch
+# =====================================================================
+class TestOtherReaders(_Mating):
+
+    def test_C1_the_configuration_interference_check_reads_the_same_rule(self):
+        """S04A-C4 reports an overlapping CLEARANCE pair as NOT_VERIFIED. With
+        an established fit it reports nothing for that pair; with a
+        contradicted one it reports the contradiction, in the fit rule's own
+        words - not "unverified" of a pin the evaluator has convicted."""
+        clean = self.pin(geometry())
+        self.assertEqual([], [p for p in s04.configuration_interference_check(clean)
+                              if "BOD-G0A" in p and "BOD-G1A" in p])
+        none = self.pin(None)
+        self.assertTrue(any("CLEARANCE_NOT_VERIFIED" in p
+                            for p in s04.configuration_interference_check(none)))
+        bad = self.pin(geometry(inner_diameter=1.2))
+        found = [p for p in s04.configuration_interference_check(bad)
+                 if "REQUIRED_CLEARANCE_NOT_REALIZED" in p]
+        self.assertTrue(found, s04.configuration_interference_check(bad))
+
+    def test_E1_a_nested_reference_into_another_branch_is_refused_at_the_write(self):
+        """`mating_geometry.axis_joint` declares INVOCATION_BRANCH, exactly as
+        a top-level reference would. The branch-authority walk used to stop at
+        the top level, so another candidate's joint - which RESOLVES - was
+        accepted one level down."""
+        from ver3.assy_v3.state.patch import StagePatch
+        state = self.seed()
+        self.candidates(state)
+        self.hinge(state=state, s03a=pin_topology(), s04a=pin_arrangement(None),
+                   s04b=motion("A", "JNT-0A", _group(1, "A")))
+        top_b = topology("B", 2, [(0, 1)], axis="+Y")
+        top_b["interfaces"][0]["interaction_kind"] = "CLEARANCE"
+        self.branch(state, "B", top_b, realization("B"),
+                    arrangement({k.replace("A", "B"): v for k, v in PIN_IN_LID.items()},
+                                steps=["ASY-0B"]),
+                    motion("B", "JNT-0B", _group(1, "B")))
+        base = dict(geometry()); base.pop("interface")
+
+        def trial(geom):
+            patch = StagePatch(
+                patch_id="probe", run_id=state.run_id, stage_id="s04", stage_attempt=9,
+                parent_state_hash=state.state_hash(),
+                operations=[Op("EXTEND", "Interface", "IFC-0A",
+                               {"mating_geometry": geom}, "s04a:arrangement",
+                               premise_refs=["CND-A"])],
+                execution_status="SUCCESS", provenance={"provider": "probe"})
+            return state.validate(patch)
+        self.assertEqual([], trial(base))
+        for field, foreign in (("axis_joint", "JNT-0B"), ("outer_body", "BOD-G0B")):
+            problems = trial(dict(base, **{field: foreign}))
+            self.assertTrue(any("FOREIGN_BRANCH" in p
+                                and "mating_geometry[0].%s" % field in p
+                                for p in problems), (field, problems))
 
 
 # =====================================================================

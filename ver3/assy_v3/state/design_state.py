@@ -742,30 +742,52 @@ class DesignState:
                     if (by_id[i].entity_type if i in by_id and by_id[i].kind == "CREATE"
                         else self.stored_family(i)) == "Candidate"}
 
+        def check(op, branch, label, spec, val):
+            """ONE rule for a branch-local reference, wherever it sits."""
+            if spec is None or spec.get("referent_population") != "INVOCATION_BRANCH":
+                return
+            for ref in (val if isinstance(val, list) else [val]):
+                if not isinstance(ref, str) or not ref.strip() or ref == branch:
+                    continue
+                sibling = by_id.get(ref)
+                premises = (list(sibling.premise_refs) if sibling is not None
+                            else list((entities.get(ref) or {}).get("_premises") or []))
+                foreign = candidates_of(premises) - {branch}
+                if foreign:
+                    out.append(
+                        "FOREIGN_BRANCH: %s.%s names %s, which rests on %s, "
+                        "while this operation rests on %s; %s is drawn from "
+                        "the invocation branch and an id that merely exists "
+                        "in the design is another candidate's"
+                        % (op.entity_id, label, ref, ", ".join(sorted(foreign)),
+                           branch, "%s.%s" % (op.entity_type, label)))
+
         for op in patch.operations:
             branches = candidates_of(op.premise_refs)
             if len(branches) != 1:
                 continue
             branch = next(iter(branches))
             for field, val in sorted((op.fields or {}).items()):
-                spec = self.c.reference_spec(op.entity_type, field)
-                if spec is None or spec.get("referent_population") != "INVOCATION_BRANCH":
+                check(op, branch, field, self.c.reference_spec(op.entity_type, field), val)
+                # A NESTED REFERENCE IS A REFERENCE. A member of a record or a
+                # record-list row declared `referent_population:
+                # INVOCATION_BRANCH` is governed by exactly the rule above; the
+                # walk used to stop at the top level, so a branch-local id one
+                # level down - a mating geometry's axis joint - resolved and was
+                # accepted from another candidate's mechanism. Same descent the
+                # reference-integrity walker and the consumer graph make.
+                rows = self.c.record_list_spec(op.entity_type, field)
+                if rows is None:
                     continue
-                for ref in (val if isinstance(val, list) else [val]):
-                    if not isinstance(ref, str) or not ref.strip() or ref == branch:
+                members = (val if isinstance(val, list)
+                           else [val] if isinstance(val, dict) else [])
+                for index, row in enumerate(members):
+                    if not isinstance(row, dict):
                         continue
-                    sibling = by_id.get(ref)
-                    premises = (list(sibling.premise_refs) if sibling is not None
-                                else list((entities.get(ref) or {}).get("_premises") or []))
-                    foreign = candidates_of(premises) - {branch}
-                    if foreign:
-                        out.append(
-                            "FOREIGN_BRANCH: %s.%s names %s, which rests on %s, "
-                            "while this operation rests on %s; %s is drawn from "
-                            "the invocation branch and an id that merely exists "
-                            "in the design is another candidate's"
-                            % (op.entity_id, field, ref, ", ".join(sorted(foreign)),
-                               branch, "%s.%s" % (op.entity_type, field)))
+                    for name, sub in (rows.get("record_field_semantics") or {}).items():
+                        if isinstance(sub, dict) and sub.get("kind") == "reference":
+                            check(op, branch, "%s[%d].%s" % (field, index, name),
+                                  sub, row.get(name))
         return out
 
     def _conditional_references(self, patch, seen, known, family, op) -> List[str]:
