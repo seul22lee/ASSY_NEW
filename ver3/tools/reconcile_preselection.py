@@ -355,6 +355,44 @@ def _recorded(outdir: str, prompt: str) -> Optional[Dict[str, Any]]:
     return json.load(open(parsed)).get("parsed")
 
 
+class _LazyProvider:
+    """The live provider, constructed on the first question no recording
+    answers. A run whose every question is already recorded makes no call and
+    therefore needs no credential - which is what lets the canonical state be
+    rebuilt anywhere the evidence is.
+    """
+
+    def __init__(self, model: Optional[str]) -> None:
+        self._model, self._real = model, None
+
+    def _resolve(self):
+        if self._real is None:
+            from ver3.live_providers.deepseek import DeepSeekProvider
+            self._real = DeepSeekProvider(model=self._model, temperature=1.0,
+                                          max_attempts=1)
+        return self._real
+
+    @property
+    def model(self):
+        return self._real.model if self._real else (self._model or "deepseek (unresolved)")
+
+    @property
+    def provider_id(self):
+        return self._real.provider_id if self._real else "deepseek"
+
+    @property
+    def records(self):
+        return self._real.records if self._real else []
+
+    @records.setter
+    def records(self, value):
+        if self._real is not None:
+            self._real.records = value
+
+    def generate(self, request, attempt_index=0):
+        return self._resolve().generate(request, attempt_index)
+
+
 def _call(provider, prompt: str, purpose: str, stage_id: str, run_id: str, outdir: str):
     recorded = _recorded(outdir, prompt)
     if recorded is not None:
@@ -499,8 +537,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     calls: List[Dict[str, Any]] = []
     completions: Dict[str, Dict[str, Any]] = {}
     if not args.no_provider:
-        from ver3.live_providers.deepseek import DeepSeekProvider
-        provider = DeepSeekProvider(model=args.model, temperature=1.0, max_attempts=1)
+        provider = _LazyProvider(args.model)
         for cid in R.ORDER:
             t = complete_topology(state, cid, provider, out)
             if "skipped" not in t:

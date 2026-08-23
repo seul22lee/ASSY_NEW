@@ -1,0 +1,94 @@
+{
+ "awaiting": "an explicit human choice, and the preference statement (possibly empty) the comparison is made under",
+ "candidate_summaries": {
+  "CND-0001": {
+   "assembly_order": [
+    "ASY-0001: BOD-0001 from +Z",
+    "ASY-0002: BOD-0003 from +Y",
+    "ASY-0003: BOD-0002 from +Y"
+   ],
+   "bodies": {
+    "BOD-0001": "Stationary box base providing storage volume, support surface, hinge knuckles, and latch recess",
+    "BOD-0002": "Moving lid providing closure, hinge knuckle, and integrated snap tab",
+    "BOD-0003": "Hinge pin connecting base and lid, providing axial retention and radial support"
+   },
+   "candidate": "CND-0001",
+   "deferred_downstream": [
+    "SIZING_DEFERRED_TO_EMBODIMENT"
+   ],
+   "interfaces": {
+    "IFC-0001": "INTERFERENCE_FIT ['BOD-0001', 'BOD-0003']",
+    "IFC-0002": "CLEARANCE ['BOD-0002', 'BOD-0003']",
+    "IFC-0003": "CONTACT ['BOD-0001', 'BOD-0002'] feature=STOP_FACE",
+    "IFC-0004": "COMPLIANT_INTERACTION ['BOD-0001', 'BOD-0002'] feature=SNAP_RETAINER"
+   },
+   "joints": {
+    "JNT-0001": "FIXED RGP-0001->RGP-0002 dof=[] axis=NONE",
+    "JNT-0002": "REVOLUTE RGP-0002->RGP-0003 dof=['RY'] axis=+Y",
+    "JNT-0003": "COMPLIANT RGP-0003->RGP-0004 dof=['RY'] axis=+Y"
+   },
+   "mating_geometry": [
+    {
+     "axis_joint": "JNT-0002",
+     "engagement_length": 60.0,
+     "inner_body": "BOD-0003",
+     "inner_diameter": 4.0,
+     "inner_feature": "PIN",
+     "interface": "IFC-0002",
+     "maturity": "PROVISIONAL",
+     "outer_body": "BOD-0002",
+     "outer_diameter": 4.0,
+     "outer_feature": "BORE"
+    }
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR"
+   }
+  },
+  "CND-0004": {
+   "assembly_order": [
+    "ASY-0105: BOD-0012 from +Z",
+    "ASY-0106: BOD-0013 from -X"
+   ],
+   "bodies": {
+    "BOD-0012": "Stationary guide housing; provides prismatic guide surfaces, opening aperture, and external support.",
+    "BOD-0013": "Moving storage container; slides along prismatic axis; includes front pull surface for actuation and storage volume."
+   },
+   "candidate": "CND-0004",
+   "deferred_downstream": [],
+   "interfaces": {
+    "IFC-0016": "CONTACT ['BOD-0012', 'BOD-0013'] feature=PRISMATIC_GUIDE_1",
+    "IFC-0017": "CONTACT ['BOD-0012', 'BOD-0013'] feature=PRISMATIC_GUIDE_2",
+    "IFC-0018": "CONTACT ['BOD-0012', 'BOD-0013'] feature=STOP_FACE",
+    "IFC-0019": "CONTACT ['BOD-0012', 'BOD-0013'] feature=STOP_FACE"
+   },
+   "joints": {
+    "JNT-0013": "PRISMATIC RGP-0016->RGP-0015 dof=['TX'] axis=+X"
+   },
+   "mating_geometry": [],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "MAINTAIN_CONFIGURATION": "FRICTION_HOLD",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "PRISMATIC_PAIR"
+   }
+  }
+ },
+ "eligible": [
+  "CND-0001",
+  "CND-0004"
+ ],
+ "next_controlled_operations": [
+  "1. the user states selection_preferences (a criteria mapping, or {} for 'no preferences') -> sel.materialize_selection_profile(state, preferences); apply the patch",
+  "2. sel.evaluate_candidate_comparison(state); apply the patch (deterministic, eligible candidates only)",
+  "3. optional: the selection_advisory pass reviews the comparison (DeepSeek, advisory only)",
+  "4. dec.build_human_review_snapshot(state) -> shown to the person",
+  "5. dec.materialize_human_decision_input(state, snapshot, action=SELECT, candidate=<their choice>, rationale=<their words>); apply",
+  "6. dec.commit_human_selection(state, input_id) -> the ONE SelectionDecision, written only if the digest still matches and the candidate is still eligible; apply",
+  "7. persist 05_selection_decision / 06_selected_consumer_view and the before/after hashes; the s05 view then scopes to the selected branch"
+ ],
+ "status": "READY_TO_SELECT"
+}
