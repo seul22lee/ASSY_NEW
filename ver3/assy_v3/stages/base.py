@@ -103,6 +103,15 @@ class GenerationSettings:
                 "deadline_s": self.deadline_s, "seed": self.seed}
 
 
+#: THE INPUT KEY THAT MAKES AN INVOCATION A REPAIR. A caller that asks a pass
+#: to revise what it produced puts the classified findings here, and the pass
+#: renders them into its prompt and turns its answer into revisions of what
+#: stands rather than a second copy of it. Absent, an invocation is what it
+#: always was. Declared once, here, so the loop and the stages cannot spell it
+#: differently.
+REPAIR_KEY = "repair"
+
+
 def carry_invocation_premises(ops: List[Op], premises: List[str]) -> List[Op]:
     """Put the stage's declared invocation premises onto the values it authored.
 
@@ -318,6 +327,20 @@ class Stage:
         """
         return []
 
+    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any],
+                          state) -> List[Op]:
+        """What this response means when it is a REPAIR of what already stands.
+
+        Called only when `inputs[REPAIR_KEY]` is present, after the ordinary
+        operations are assembled and before the patch is built. The ordinary
+        hooks say what the response STATES; this says how a statement about an
+        entity that already exists is recorded - a SUPERSEDE with the round's
+        reason where a value changed, nothing where it did not, a retirement
+        and a re-creation where a realization is one coherent set. Default: the
+        response is not a repair of anything, so nothing is rewritten.
+        """
+        return ops
+
     def invoke(self, provider, state, run_id: str, inputs: Optional[Dict[str, Any]] = None,
                attempt: int = 1, invocation=None,
                budget_chars: Optional[int] = None,
@@ -438,6 +461,13 @@ class Stage:
                                                 self.invocation_premises(inputs))
                 ops = ops + self.refinement_operations(parsed, inputs, state)
                 ops = ops + self.derived_operations(parsed, inputs, state)
+                if inputs.get(REPAIR_KEY):
+                    # A REPAIR REVISES WHAT STANDS. The same three hooks said
+                    # what the response states; this rewrites CREATE-of-what-
+                    # exists and EXTEND-over-a-value into the controlled
+                    # revisions the boundary accepts, with this round as the
+                    # reason on every one of them.
+                    ops = self.repair_operations(ops, inputs, state)
                 missing = self.completeness(parsed, inputs)
         except (KeyError, TypeError, AttributeError, IndexError, ValueError) as exc:
             return StageOutcome(

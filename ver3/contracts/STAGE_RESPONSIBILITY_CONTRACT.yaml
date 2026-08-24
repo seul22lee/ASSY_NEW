@@ -555,6 +555,12 @@ stages:
     # Its mating sizes are representative (maturity PROVISIONAL on the record)
     # and establish the mating RELATION; the fit they would decide is owed by
     # s05's Constraint and s06's settlement.
+    # UNIT B. A repair revises values this pass owns and nothing upstream.
+    - In a repair, adding, removing, renaming or retyping any body, rigid
+      group, joint, interface, configuration, assembly step, functional region,
+      requirement, load case or principle, or changing the scale basis
+    - Answering a finding of any class but REPAIRABLE_S04 in a repair, or
+      answering the same finding twice in one round to keep the better answer
   feasibility:
     name: mechanical feasibility
     # S-7 / U-8. SPLIT OUT OF `gate`, which asked two questions and answered them
@@ -1611,6 +1617,13 @@ stages:
     - SweptVolume
     prohibited_decisions:
     - Contradicting an s04a commitment without an explicit supersession
+    # UNIT B. A repair revises values this pass owns and nothing upstream.
+    - In a repair, adding, removing, renaming or retyping any body, rigid
+      group, joint, interface, configuration, assembly step, functional region,
+      requirement, load case or principle, or changing the scale basis
+    - Answering a finding of any class but REPAIRABLE_S04 in a repair, or
+      answering the same finding twice in one round to keep the better answer;
+      sweeping a composite motion this method cannot compute
   s05:
     name: physical embodiment
     # THE CANONICAL DECLARATION, added because the runtime needs one.

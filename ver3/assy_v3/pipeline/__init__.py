@@ -17,11 +17,13 @@ from .progression import (LIVE, PRODUCING_RESPONSIBILITIES, REPLAY, UNDECLARED,
                           Progression, StageExecution, execute_s01_to_s04,
                           execute_stage, full_live_qualification, note_seeded,
                           response_source_of, s03_passes, s04_passes, window1)
+from .repair import RepairOutcome, RepairRound, s04_repair_rounds
 
 __all__ = ["LIVE", "REPLAY", "UNDECLARED", "PRODUCING_RESPONSIBILITIES",
            "PROVIDER_CONDITION", "RESPONSE_CONDITION", "PARSER_DEFECT",
            "CONTRACT_CONDITION", "CHECK_FINDING", "INTERFACE_FINDING",
            "VIEW_INSUFFICIENT",
            "Progression", "StageExecution", "execute_stage", "note_seeded",
-           "window1", "s03_passes", "s04_passes", "execute_s01_to_s04",
+           "window1", "s03_passes", "s04_passes", "s04_repair_rounds",
+           "RepairOutcome", "RepairRound", "execute_s01_to_s04",
            "full_live_qualification", "response_source_of"]

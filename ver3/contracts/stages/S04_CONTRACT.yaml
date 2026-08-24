@@ -68,6 +68,13 @@ authority_status:
     class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
     authoritative_for_canonical_semantics: false
+  repair_lifecycle:
+    class: "OPERATIONAL"
+    note: >
+      How the two passes revise what they produced. The classes it acts on,
+      the ownership of every value it revises and the controlled operations
+      it uses are canonical elsewhere; this section says how the loop runs.
+    authoritative_for_canonical_semantics: false
 stage_id: s04
 passes: [s04a, s04b]
 status: draft
@@ -357,6 +364,73 @@ s04b:
   later_owned:
     - what: engagement_sites
       owner: "later stages; see DESIGN_STATE_CONTRACT.Interface.engagement_site_status"
+
+# =====================================================================
+repair_lifecycle:
+  # UNIT B. S04 REALIZES AND REPAIRS; IT NEVER ELIMINATES. A finding about the
+  # arrangement or the realization is a finding about a value one of these
+  # two passes produced, and the pass that produced it is asked to revise it.
+  principle: >
+    realize -> check -> diagnose -> repair -> re-check, bounded. The check is
+    the feasibility responsibility answering again over current state; the
+    diagnosis is the REPAIRABLE_S04 class its domain records carry (Unit A);
+    the repair is the owning pass revising values it owns; the re-check is the
+    same evaluator again. Nothing in the loop decides anything about the
+    candidate: it applies the owner's patches and records what happened.
+  trigger: >
+    ONLY findings of class REPAIRABLE_S04 on the branch's current
+    FeasibilityDomainAssessments. A MechanicalFeasibilityAssessment status is
+    never a trigger, nor is prose, nor a hard requirement. OWNER_REVISION
+    belongs to the upstream owner (Unit C), DEFERRED_DOWNSTREAM to s05/s06,
+    UNSUPPORTED to nobody - a capability limit is recorded, not retried - and
+    REQUIRED_MINIMUM_ABSENT names a fact no repair may invent.
+  deterministic_first: >
+    A finding a pass can repair by derivation is repaired by derivation and
+    never asked of a model: s04a re-derives an insertion vector from the side
+    s03 stated (INSERTION_DIRECTION_MISSING, INSERTION_DIRECTION_CONTRADICTS_
+    ACCESS_SIDE); s04b recomputes an occupancy the method can compute and did
+    not deliver (OCCUPANCY_NOT_COMPUTED). A group two joints carry is left as
+    it is - OCCUPANCY_UNSUPPORTED_COMPOSITE_MOTION is UNSUPPORTED, and no
+    repair may pretend to sweep what this method cannot compose.
+  owner_reinvocation: >
+    What remains is put to the owning pass as REPAIR CONTEXT: the findings,
+    with the domain's note, and the values the pass produced before. The pass
+    restates its whole answer in its ordinary schema; what differs is recorded
+    as a revision and what does not is recorded as nothing. s04a may revise
+    extents and centres, region volumes, mating geometry, reach conclusions
+    and the elimination statement; s04b may revise joint origins, state
+    coordinates, transitions, and - with a geometric reason - extents. Neither
+    may add, remove, rename or retype any body, rigid group, joint, interface,
+    configuration, assembly step, functional region, requirement, load case or
+    principle, and neither may change the scale basis: those are earlier
+    stages' facts, and a repair that touched them would be a new candidate
+    wearing a repair's reason.
+  how_a_revision_is_recorded: >
+    Through the boundary's own operations and no others. An s04a value that
+    changed is SUPERSEDED with the round as its reason and the previous value
+    kept; an unchanged value writes nothing. An s04b realization is ONE
+    COHERENT SET - every state, path and occupancy of one answer - so the
+    standing set is INVALIDATED whole and the new set CREATED whole under ids
+    that name the round; a joint origin that changed is superseded in place.
+    Everything premised on a revised value loses unqualified authority by
+    ordinary propagation - the occupancies, the domain records, the
+    candidate-level answer, and anything selection wrote over them - and the
+    re-check writes the new answers beside the old ones. Nothing is deleted;
+    nothing is overwritten out of existence.
+  bound: >
+    At most N rounds per candidate (2 to begin with). A round whose findings
+    are the findings of an earlier round is a CYCLE and ends the loop. One
+    invocation per pass per round, taken whatever it says: NO FAVOURABLE
+    RETRY - nothing asks twice and keeps the better answer, and nothing picks
+    among answers. A repair invocation that does not land ends the loop; a
+    loop offered no provider makes its derivation repairs and ends.
+  ending: >
+    Every ending is evidence and none is a verdict. What is still repairable
+    when the loop ends stays on the record as open obligations of a candidate
+    that is exactly as feasible as its required minimum and its arguments say
+    (Unit A) - never INFEASIBLE by exhaustion, never NOT_ESTABLISHED for a
+    finding outside the minimum, and never repaired by a hand that was not
+    the owner's.
 
 llm_role: >
   Low. This is computation. The LLM proposes candidate placements for a solver

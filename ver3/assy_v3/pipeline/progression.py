@@ -553,6 +553,11 @@ def execute_s01_to_s04(provider, state, request_text: str, choose_candidate, *,
     if out_b is None or out_b.patch is None or out_b.problems:
         return progression
     s04_passes(provider, state, progression, invocation=invocation)
+    # THE CHAIN STOPS HERE, by the scope rule this module keeps: nothing that
+    # reads S04's evidence - feasibility, comparison, selection, assurance -
+    # runs inside the producing progression. The bounded S04 repair loop is
+    # the sibling `pipeline.repair`, called by a caller after the chain: it
+    # invokes the passes through `execute_stage` and asks feasibility to check.
     return progression
 
 

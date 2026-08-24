@@ -41,7 +41,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from ..state.authority import thaw as _thaw
 from ..state.patch import Op
-from .base import Stage, carry_invocation_premises
+from .base import REPAIR_KEY, Stage, carry_invocation_premises
 #: The canonical DOF vocabulary and the one answer to what a joint frees, read
 #: from the pass that owns them rather than restated - two spellings of one
 #: closed set is how they drift apart.
@@ -281,6 +281,132 @@ def _branch(inputs) -> str:
     return c if isinstance(c, str) and c else "UNBRANCHED"
 
 
+# =========================================================================
+# repair - an s04 pass revising what it produced
+# =========================================================================
+#: What a repair round may ask of each pass, in the pass's own words, and what
+#: no repair may do. Rendered into the prompt so the boundary is stated to the
+#: model in the same terms the write boundary enforces it in.
+REPAIR_MAY_NOT = (
+    "add, remove, rename or retype any body, rigid group, joint, interface, "
+    "configuration, assembly step, functional region, requirement, load case "
+    "or principle - those belong to earlier stages, and a finding about them "
+    "is not yours to answer; change the scale basis; state that anything "
+    "interferes or is clear")
+
+
+def repair_of(inputs) -> Optional[Dict[str, Any]]:
+    """The repair context an invocation carries, or None for an ordinary one."""
+    r = (inputs or {}).get(REPAIR_KEY)
+    return r if isinstance(r, dict) else None
+
+
+def repair_reason(inputs) -> str:
+    """The ONE reason every revision of a repair round carries: which round,
+    and which findings it answers. Read back from the record, not from prose."""
+    r = repair_of(inputs) or {}
+    codes = sorted({f.get("code") for f in (r.get("findings") or [])
+                    if isinstance(f, dict) and f.get("code")})
+    return "s04 repair round %s: %s" % (r.get("round"), ", ".join(codes) or "-")
+
+
+def repair_context_text(inputs, may_revise: str) -> str:
+    """The REPAIR CONTEXT appended to a pass's prompt, or "" outside a repair.
+
+    The findings are the classified REPAIRABLE_S04 rows the feasibility
+    responsibility wrote - domain, code, and the domain's own note - and the
+    current values the pass produced, so it revises what stands rather than
+    re-imagining it. The pass is told what it may revise and what it may not,
+    and to restate its whole answer: only values that differ are recorded as
+    revisions, so restating an unchanged value costs nothing.
+    """
+    r = repair_of(inputs)
+    if not r:
+        return ""
+    lines = ["", "REPAIR ROUND %s" % r.get("round"),
+             "The answer you gave before was checked deterministically. These "
+             "findings are about values YOU produced, and this call asks you to "
+             "revise them:"]
+    for f in r.get("findings") or []:
+        if isinstance(f, dict):
+            lines.append("  - %s: %s%s" % (f.get("domain"), f.get("code"),
+                                           " - " + f["note"] if f.get("note") else ""))
+    lines += ["", "WHAT YOU MAY REVISE: %s." % may_revise,
+              "WHAT YOU MAY NOT DO: %s." % REPAIR_MAY_NOT,
+              "RESTATE YOUR WHOLE ANSWER in the same schema as before. A value "
+              "you restate unchanged is recorded as unchanged; a value you change "
+              "is recorded as a revision of the previous one, with this round as "
+              "its reason, and everything computed from the previous value is "
+              "recomputed. Do not restate a finding as fixed: fix the value.",
+              "", "THE VALUES YOU PRODUCED BEFORE", _render(r.get("current") or {})]
+    return "\n".join(lines)
+
+
+def branch_realization(state, branch: str, families: Sequence[str]
+                       ) -> Dict[str, List[Dict[str, Any]]]:
+    """The STANDING records of these families that belong to ONE branch, by the
+    canonical branch resolver. What a repair revises, and what its context
+    shows: never another candidate's realization, never a stale one."""
+    from ..view.consumer_view import branch_membership
+
+    records = [(f, r) for f in families for r in state.standing(f)]
+    if not records:
+        return {f: [] for f in families}
+    membership = branch_membership(state, state.c, [r["entity_id"] for _f, r in records])
+    out: Dict[str, List[Dict[str, Any]]] = {f: [] for f in families}
+    for family, record in records:
+        if branch in membership.get(record["entity_id"], ()):
+            out[family].append(record)
+    return out
+
+
+def re_realize_operations(state, ops: Sequence[Op], reason: str,
+                          retire: Sequence[Tuple[str, str]] = ()) -> List[Op]:
+    """Turn a pass's ordinary operations into REVISIONS of what stands.
+
+    THE BOUNDARY'S OWN VOCABULARY, and nothing beside it. A CREATE of an id
+    that already exists becomes a SUPERSEDE of the fields that differ, with the
+    round's reason - or nothing, where nothing differs; a record is never
+    re-created beside itself. An EXTEND over a field that already holds a
+    value becomes a SUPERSEDE of it where it differs, and an EXTEND of the
+    fields still absent. Entities named in `retire` are INVALIDATED first, so
+    a realization that is one coherent set - every state, every path, every
+    occupancy of one answer - is retired whole and re-created whole under
+    fresh ids, with the previous set kept as history. Nothing is deleted,
+    nothing is overwritten out of existence, and every revision says why.
+    """
+    out: List[Op] = []
+    for family, eid in retire:
+        rec = state.entities.get(eid) if state.has_entity(eid) else None
+        if rec is not None and rec.get("_validity") == _STANDING:
+            out.append(Op("INVALIDATE", family, eid, {}, "s04:repair", reason=reason))
+    for op in ops:
+        if op.kind == "CREATE" and state.has_entity(op.entity_id):
+            rec = state.entities[op.entity_id]
+            changed = {k: v for k, v in op.fields.items()
+                       if k not in rec or rec.get(k) != v}
+            if changed:
+                out.append(Op("SUPERSEDE", op.entity_type, op.entity_id, changed,
+                              op.provenance_ref, premise_refs=list(op.premise_refs),
+                              reason=reason))
+            continue
+        if op.kind == "EXTEND" and state.has_entity(op.entity_id):
+            rec = state.entities[op.entity_id]
+            absent = {k: v for k, v in op.fields.items() if k not in rec}
+            changed = {k: v for k, v in op.fields.items()
+                       if k in rec and rec.get(k) != v}
+            if absent:
+                out.append(Op("EXTEND", op.entity_type, op.entity_id, absent,
+                              op.provenance_ref, premise_refs=list(op.premise_refs)))
+            if changed:
+                out.append(Op("SUPERSEDE", op.entity_type, op.entity_id, changed,
+                              op.provenance_ref, premise_refs=list(op.premise_refs),
+                              reason=reason))
+            continue
+        out.append(op)
+    return out
+
+
 class S04AEnvelopeAndReach(Stage):
     # Both passes are s04. The contract calls them PASSES of one stage, and the
     # ownership matrix owns families at stage granularity, so a pass id here
@@ -289,9 +415,57 @@ class S04AEnvelopeAndReach(Stage):
     pass_id = "s04a"
     purpose = "give the topology a provisional arrangement so feasibility can be computed"
 
+    #: The findings this pass repairs WITHOUT A MODEL, by its own derivation
+    #: pass: the insertion vector is a function of the side s03 stated, so a
+    #: missing or contradicting one is re-derived, never re-asked.
+    DERIVED_REPAIRS = ("INSERTION_DIRECTION_MISSING",
+                       "INSERTION_DIRECTION_CONTRADICTS_ACCESS_SIDE")
+
+    #: What this pass may revise in a repair, in its own words.
+    REPAIR_MAY_REVISE = ("the extent and centre of any body; the volume of any "
+                         "functional region; the mating geometry of any nested "
+                         "interface; whether each actor reaches its target, and "
+                         "from which side; and the elimination statement")
+
     def prompt(self, inputs: Dict[str, Any]) -> str:
-        return S04A_PROMPT.format(mechanism=_render(inputs["consumer_view"]),
-                                  contact_pairs=_contact_pairs_text(inputs["consumer_view"]))
+        return (S04A_PROMPT.format(mechanism=_render(inputs["consumer_view"]),
+                                   contact_pairs=_contact_pairs_text(inputs["consumer_view"]))
+                + repair_context_text(inputs, self.REPAIR_MAY_REVISE))
+
+    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any], state) -> List[Op]:
+        """A repaired arrangement REVISES the arrangement that stands.
+
+        The scale is kept: a repair that changed the basis would be a new
+        arrangement wearing a repair's reason, so any operation on the
+        ReferenceScale is dropped. A reach conclusion is a statement about one
+        (actor, target), so a restated one supersedes the record that already
+        answers that pair, and only a pair nobody answered gets a new record.
+        Everything else - extents, region volumes, mating geometry, the
+        elimination statement - is the generic rule: changed is superseded,
+        unchanged is nothing.
+        """
+        reason = repair_reason(inputs)
+        branch = _branch(inputs)
+        existing = branch_realization(state, branch, ("ReachResult",))["ReachResult"]
+        by_pair = {(r.get("actor"), r.get("target")): r["entity_id"] for r in existing}
+        rewritten: List[Op] = []
+        fresh = 0
+        for op in ops:
+            if op.entity_type == "ReferenceScale":
+                continue
+            if op.kind == "CREATE" and op.entity_type == "ReachResult":
+                key = (op.fields.get("actor"), op.fields.get("target"))
+                if key in by_pair:
+                    op = Op(op.kind, op.entity_type, by_pair[key], op.fields,
+                            op.provenance_ref, premise_refs=list(op.premise_refs))
+                else:
+                    fresh += 1
+                    op = Op(op.kind, op.entity_type,
+                            "RCH-%s-R%s-%04d" % (branch, repair_of(inputs).get("round"), fresh),
+                            op.fields, op.provenance_ref,
+                            premise_refs=list(op.premise_refs))
+            rewritten.append(op)
+        return re_realize_operations(state, rewritten, reason)
 
     def invocation_premises(self, inputs: Dict[str, Any]) -> List[str]:
         """The candidate this arrangement embodies. s04 runs once per alternative
@@ -1212,8 +1386,32 @@ class S04BPlacementAndMotion(Stage):
     pass_id = "s04b"
     purpose = "place the mechanism and describe its motion so clearance can be computed"
 
+    #: The findings this pass repairs WITHOUT A MODEL: an occupancy the method
+    #: can compute and did not deliver is recomputed from what stands.
+    DERIVED_REPAIRS = ("OCCUPANCY_NOT_COMPUTED",)
+
+    REPAIR_MAY_REVISE = ("the origin of any joint; the coordinates of any "
+                         "configuration; which groups move and which "
+                         "coordinates change in any transition; and, with a "
+                         "geometric reason, the extent of any body")
+
     def prompt(self, inputs: Dict[str, Any]) -> str:
-        return S04B_PROMPT.format(mechanism=_render(inputs["consumer_view"]))
+        return (S04B_PROMPT.format(mechanism=_render(inputs["consumer_view"]))
+                + repair_context_text(inputs, self.REPAIR_MAY_REVISE))
+
+    @staticmethod
+    def _sfx(inputs) -> str:
+        """The id suffix of a repair round's realization, "" outside one.
+
+        A realization is ONE COHERENT SET - every state, every path, every
+        occupancy of one answer - and a repaired one replaces it whole: the
+        previous set is retired and kept, the new set is created under ids
+        that say which round produced them. Reusing the ids would be
+        overwriting history; superseding each record in place would leave a
+        path standing on coordinates it was not computed between.
+        """
+        r = repair_of(inputs)
+        return "-R%s" % r.get("round") if r else ""
 
     def invocation_premises(self, inputs: Dict[str, Any]) -> List[str]:
         b = _branch(inputs)
@@ -1251,9 +1449,10 @@ class S04BPlacementAndMotion(Stage):
         # and the valid one was refused for EXTEND_OVER_EXISTING. A response
         # the gate refuses is a response that did not happen.
         refused = self._contradicted_distinctness(parsed, inputs)
+        sfx = self._sfx(inputs)
         for st in ([] if refused else parsed.get("state_coordinates", [])):
             coords = st.get("coordinates", {})
-            ops.append(Op("CREATE", "State", "STA-%s" % st["configuration"], {
+            ops.append(Op("CREATE", "State", "STA-%s%s" % (st["configuration"], sfx), {
                 "name": st["configuration"],
                 "configuration": st["configuration"],
                 "joint_coordinates": coords},
@@ -1284,13 +1483,13 @@ class S04BPlacementAndMotion(Stage):
             if not {required.get("from_configuration"),
                     required.get("to_configuration")} <= realized:
                 continue
-            ops.append(Op("CREATE", "Transition", t["id"], {
-                "from_state": "STA-%s" % required.get("from_configuration"),
-                "to_state": "STA-%s" % required.get("to_configuration"),
+            ops.append(Op("CREATE", "Transition", "%s%s" % (t["id"], sfx), {
+                "from_state": "STA-%s%s" % (required.get("from_configuration"), sfx),
+                "to_state": "STA-%s%s" % (required.get("to_configuration"), sfx),
                 "realizes_requirement": t["realizes_requirement"],
                 "path": {"moving_groups": t.get("moving_groups", [])},
                 "changed_coordinates": t.get("changed_coordinates", [])},
-                prov, premise_refs=self._transition_premises(view, t)))
+                prov, premise_refs=self._transition_premises(view, t, sfx)))
         return ops
 
     # ------------------------------------------------------ dependency graph
@@ -1345,7 +1544,7 @@ class S04BPlacementAndMotion(Stage):
                 return r.get("from_configuration"), r.get("to_configuration")
         return None, None
 
-    def _transition_premises(self, view, t) -> List[str]:
+    def _transition_premises(self, view, t, sfx: str = "") -> List[str]:
         """Its requirement, its endpoints, what moves, and what it says changes.
 
         THE REQUIREMENT IS A PREMISE. It decides the endpoints and the motion
@@ -1354,15 +1553,16 @@ class S04BPlacementAndMotion(Stage):
         the transitive walk then applies to everything computed from it.
         """
         frm, to = self._endpoints(view, t)
-        out = {"STA-%s" % frm if frm else None,
-               "STA-%s" % to if to else None,
+        out = {"STA-%s%s" % (frm, sfx) if frm else None,
+               "STA-%s%s" % (to, sfx) if to else None,
                t.get("realizes_requirement")}
         out |= {g for g in (t.get("moving_groups") or []) if isinstance(g, str)}
         out |= {j for j in (t.get("changed_coordinates") or []) if isinstance(j, str)}
         return sorted({x for x in out if isinstance(x, str) and x}
                       | set(self._scale_premise(view)))
 
-    def _sweep_premises(self, view, t, group, joint_id, envelope_id) -> List[str]:
+    def _sweep_premises(self, view, t, group, joint_id, envelope_id,
+                        sfx: str = "") -> List[str]:
         """Exactly what `sweep_hull` read to produce this occupancy.
 
         The transition and the moving group it is about, both endpoint states
@@ -1372,9 +1572,9 @@ class S04BPlacementAndMotion(Stage):
         envelope and it is not.
         """
         frm, to = self._endpoints(view, t)
-        out = {t.get("id"), group, joint_id, envelope_id,
-               "STA-%s" % frm if frm else None,
-               "STA-%s" % to if to else None}
+        out = {"%s%s" % (t.get("id"), sfx), group, joint_id, envelope_id,
+               "STA-%s%s" % (frm, sfx) if frm else None,
+               "STA-%s%s" % (to, sfx) if to else None}
         return sorted({x for x in out if isinstance(x, str) and x}
                       | set(self._scale_premise(view)))
 
@@ -1512,6 +1712,7 @@ class S04BPlacementAndMotion(Stage):
         coords = {st.get("configuration"): (st.get("coordinates") or {})
                   for st in (parsed.get("state_coordinates") or [])}
         ops: List[Op] = []
+        sfx = self._sfx(inputs)
         for t in parsed.get("transitions") or []:
             frm, to = self._endpoints(view, t)
             # NO SWEEP FOR A TRANSITION THAT WAS NOT WRITTEN. `to_operations`
@@ -1552,14 +1753,14 @@ class S04BPlacementAndMotion(Stage):
                 if not swept["computable"]:
                     continue
                 ops.append(Op("CREATE", "SweptVolume",
-                              "SWV-%s-%s" % (t["id"], group),
-                              {"rigid_group": group, "transition": t["id"],
+                              "SWV-%s%s-%s" % (t["id"], sfx, group),
+                              {"rigid_group": group, "transition": "%s%s" % (t["id"], sfx),
                                "sampling_declaration": swept["sampling_declaration"],
                                "occupancy": {"aabb": swept["hull"]},
                                "fidelity": swept["motion_evidence_level"]},
                               "s04b:computation",
                               premise_refs=self._sweep_premises(
-                                  view, t, group, jid, envelope_of.get(body))))
+                                  view, t, group, jid, envelope_of.get(body), sfx)))
         # THE EVIDENCE LIVES IN ONE PLACE, on the SweptVolume the computation
         # produced. Copying it onto the Transition as well would put the same
         # claim in two records that can disagree - and the Transition is where
@@ -1572,6 +1773,96 @@ class S04BPlacementAndMotion(Stage):
         # candidate costs it standing. `run` passes only `to_operations` through
         # this, so a derived value has to say it itself.
         return carry_invocation_premises(ops, self.invocation_premises(inputs))
+
+    #: The realization families this pass retires whole and re-creates whole
+    #: in a repair. A Joint's origin is s03's entity with s04's field, so it is
+    #: superseded in place by the generic rule; the three below are s04's own.
+    REALIZATION = ("State", "Transition", "SweptVolume")
+
+    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any], state) -> List[Op]:
+        """A repaired realization RETIRES the one that stands and re-creates it.
+
+        The coordinates, the paths and the occupancies of one answer are one
+        set; `to_operations` already writes them under this round's ids, so
+        what remains is to retire the branch's standing set - every state,
+        transition and occupancy the resolver puts on this branch - with the
+        round's reason, in the same patch. Joint placements are the generic
+        rule: a changed origin supersedes the stored one, an unchanged one
+        writes nothing, an absent one is extended as before. Envelope
+        revisions arrive as supersessions already and pass through.
+        """
+        branch = _branch(inputs)
+        standing = branch_realization(state, branch, self.REALIZATION)
+        retire = [(family, r["entity_id"]) for family in self.REALIZATION
+                  for r in standing[family]]
+        return re_realize_operations(state, ops, repair_reason(inputs), retire)
+
+    def derive_occupancy(self, state, branch: str, attempt: int = 1):
+        """The occupancy this method can compute and did not deliver, computed.
+
+        A DERIVATION PASS WITHOUT A MODEL, like s04a's `derive_arrival`. For
+        every (transition, moving group) of the branch with no current
+        occupancy, exactly one carrying joint among the transition's changed
+        coordinates, a placed box and a usable joint, `sweep_hull` is run from
+        what stands and the SweptVolume is written under a fresh id. A group two
+        joints carry is left exactly as it is: that is a capability limit this
+        pass reports by name, not a computation it skipped, and no repair pass
+        may pretend otherwise.
+        """
+        from ..state.patch import StagePatch
+        payload = branch_realization(
+            state, branch, ("Envelope", "RigidGroup", "Joint", "State",
+                            "Transition", "SweptVolume", "ReferenceScale"))
+        boxes = _payload_boxes(payload)
+        gb = {g["entity_id"]: g.get("body") for g in payload["RigidGroup"]}
+        joints = {j["entity_id"]: j for j in payload["Joint"]}
+        states = {st["entity_id"]: st for st in payload["State"]}
+        swept = {(v.get("transition"), v.get("rigid_group")) for v in payload["SweptVolume"]}
+        scale = [r["entity_id"] for r in payload["ReferenceScale"]]
+        envelope_of = {e.get("body"): e["entity_id"] for e in payload["Envelope"]}
+        ops: List[Op] = []
+        for t in sorted(payload["Transition"], key=lambda x: x["entity_id"]):
+            a, b = states.get(t.get("from_state")), states.get(t.get("to_state"))
+            if not (a and b):
+                continue
+            ca, cb = a.get("joint_coordinates") or {}, b.get("joint_coordinates") or {}
+            changed = {c for c in (t.get("changed_coordinates") or []) if isinstance(c, str)}
+            for group in sorted((t.get("path") or {}).get("moving_groups") or []):
+                if (t["entity_id"], group) in swept:
+                    continue
+                body = gb.get(group)
+                carrying = [j for j in incident_joints(joints.values(), group)
+                            if j.get("entity_id") in changed]
+                if body not in boxes or len(carrying) != 1:
+                    continue
+                drive = carrying[0]
+                jid = drive["entity_id"]
+                hull = sweep_hull(boxes[body], drive, drive.get("frame_origin"),
+                                  float(ca.get(jid, 0) or 0), float(cb.get(jid, 0) or 0))
+                if not hull["computable"]:
+                    continue
+                base_id = "SWV-%s-%s" % (t["entity_id"], group)
+                eid, k = base_id, 0
+                while state.has_entity(eid):
+                    k += 1
+                    eid = "%s-D%d" % (base_id, k)
+                ops.append(Op("CREATE", "SweptVolume", eid,
+                              {"rigid_group": group, "transition": t["entity_id"],
+                               "sampling_declaration": hull["sampling_declaration"],
+                               "occupancy": {"aabb": hull["hull"]},
+                               "fidelity": hull["motion_evidence_level"]},
+                              "s04b:computation",
+                              premise_refs=sorted({t["entity_id"], group, jid,
+                                                   envelope_of.get(body),
+                                                   a["entity_id"], b["entity_id"],
+                                                   branch} | set(scale) - {None})))
+        return StagePatch(
+            patch_id="%s-%s-derive-occupancy-%s-a%d" % (state.run_id, self.stage_id, branch, attempt),
+            run_id=state.run_id, stage_id=self.stage_id, stage_attempt=attempt,
+            parent_state_hash=state.state_hash(), operations=ops,
+            execution_status="SUCCESS",
+            provenance={"purpose": "s04b:computation - occupancy from what stands, "
+                                   "no model", "provider": "none"})
 
     def _contradicted_distinctness(self, parsed, inputs) -> List[str]:
         """The declared distinctions THESE NUMBERS POSITIVELY CONTRADICT.

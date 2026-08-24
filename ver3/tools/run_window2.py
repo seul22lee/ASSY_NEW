@@ -319,11 +319,16 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
 
 
 def run_s04(case_id: str, state, provider, trial: int,
-            invocation=None, progression=None) -> Dict[str, Any]:
+            invocation=None, progression=None, repair_rounds: int = 0,
+            repair_provider=None) -> Dict[str, Any]:
     """s04a then s04b, from the mechanism projection ONLY. Never raises.
 
-    The refresh-on-refinement loop and the acceptance rule live in the pipeline;
-    what remains here is the interface report and the record.
+    The refresh-on-refinement loop, the acceptance rule and the bounded repair
+    loop live in the pipeline; what remains here is the interface report and
+    the record. `repair_rounds` is OPT-IN for this runner: a replay campaign
+    has recordings for the passes it asked and none for a repair it never
+    asked, so the loop runs only when a caller says so, with the provider it
+    names (None: derivation repairs only, and what remains stays open).
     """
     progression = progression or Progression()
     rec: Dict[str, Any] = {"case": case_id, "trial": trial, "failures": [],
@@ -336,6 +341,13 @@ def run_s04(case_id: str, state, provider, trial: int,
         progression.fail(INTERFACE_FINDING, "s03->s04", gap)
 
     outcomes = s04_passes(provider, state, progression, invocation=invocation)
+    last = outcomes[-1] if outcomes else None
+    if repair_rounds > 0 and invocation is not None and last is not None \
+            and last.patch is not None and not last.problems:
+        from ver3.assy_v3.pipeline.repair import s04_repair_rounds
+        rec["s04_repair"] = s04_repair_rounds(
+            repair_provider, state, progression, invocation,
+            rounds=repair_rounds).as_record()
 
     for key, out in zip(("s04a", "s04b"), list(outcomes) + [None, None]):
         execution = progression.by_responsibility(key)
