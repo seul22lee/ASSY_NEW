@@ -52,6 +52,24 @@ def prefs(**criteria):
     return {c: {"objective": o, "priority": p} for c, (o, p) in criteria.items()}
 
 
+def infeasible(**fields):
+    """The fields a hand-written INFEASIBLE assessment must carry.
+
+    UNIT A. The boundary refuses INFEASIBLE without a structured
+    `physical_argument` (INV-011), so a probe that forces a candidate
+    infeasible states one - a synthetic contradiction naming synthetic
+    premises. The probes below are about what selection DOES with an
+    infeasible candidate, not about how it became one.
+    """
+    out = {"status": "INFEASIBLE",
+           "physical_argument": {
+               "contradiction": "a probe-stated incompatibility",
+               "premises": ["a premise the probe names"],
+               "architectural_commitments": ["the probe's candidate"]}}
+    out.update(fields)
+    return out
+
+
 class _Selection(_Feas):
     """One accumulated design holding as many candidate branches as a case wants."""
 
@@ -280,7 +298,7 @@ class TestEligibility(_Selection):
         shapes are the ones the producer writes."""
         state = self.built(("A", "B", "C", "D", "E"))
         self.revise(state, Op("SUPERSEDE", "MechanicalFeasibilityAssessment",
-                              "MFA-CND-C", {"status": "INFEASIBLE"}, "t",
+                              "MFA-CND-C", infeasible(), "t",
                               reason="probe"), stage="feasibility")
         constraint = self.constraint(state)
         for candidate, status in (("CND-A", "SATISFIED"), ("CND-B", "SATISFIED"),
@@ -352,8 +370,8 @@ class TestEligibility(_Selection):
         state = self.built(("A", "B"))
         self.revise(state, Op("CREATE", "MechanicalFeasibilityAssessment",
                               "MFA-CND-A-SECOND",
-                              {"candidate": "CND-A", "status": "INFEASIBLE",
-                               "domain_assessments": []}, "t",
+                              infeasible(candidate="CND-A", domain_assessments=[]),
+                              "t",
                               premise_refs=["CND-A"]), stage="feasibility")
         out = self.compare(state, prefs(joint_count=(MINIMIZE, HIGH)))
         self.assertEqual(sel.ELIGIBILITY_NOT_ESTABLISHED, out.status)
@@ -389,7 +407,7 @@ class TestEligibility(_Selection):
         leaves nothing unresolved."""
         state = self.built(("A", "B"))
         self.revise(state, Op("SUPERSEDE", "MechanicalFeasibilityAssessment",
-                              "MFA-CND-B", {"status": "INFEASIBLE"}, "t",
+                              "MFA-CND-B", infeasible(), "t",
                               reason="probe"), stage="feasibility")
         constraint = self.constraint(state)
         self.hrc(state, "CND-A", constraint, "SATISFIED")   # and none for B
@@ -809,7 +827,7 @@ class TestDependency(_Selection):
         becoming eligible is a different comparison."""
         state = self.built(("A", "B"))
         self.revise(state, Op("SUPERSEDE", "MechanicalFeasibilityAssessment",
-                              "MFA-CND-B", {"status": "INFEASIBLE"}, "t",
+                              "MFA-CND-B", infeasible(), "t",
                               reason="probe"), stage="feasibility")
         out = self.compare(state, prefs(joint_count=(MINIMIZE, HIGH)))
         eid = out.patch.operations[0].entity_id
@@ -863,7 +881,7 @@ class TestPopulationEdges(_Selection):
     def test_C49_no_eligible_candidate_writes_nothing(self):
         state = self.built(("A",))
         self.revise(state, Op("SUPERSEDE", "MechanicalFeasibilityAssessment",
-                              "MFA-CND-A", {"status": "INFEASIBLE"}, "t",
+                              "MFA-CND-A", infeasible(), "t",
                               reason="probe"), stage="feasibility")
         out = self.compare(state, prefs(joint_count=(MINIMIZE, HIGH)))
         self.assertEqual(sel.NO_ELIGIBLE_CANDIDATES, out.status)

@@ -568,6 +568,11 @@ stages:
     - Does the established evidence contain anything that stops this candidate working?
     - Which mechanical domains has the design actually established for it, and which has it not?
     - Is each hard design requirement satisfied, violated, or not yet evaluable for it?
+    # UNIT A. The candidate-level answer is a VIABILITY answer, and the detail
+    # is kept: every finding a domain makes is classified - repairable by s04,
+    # revisable by its owner, owed downstream, unsupported, or a required
+    # minimum fact the design lacks - and carried on the assessment.
+    - Which of the findings are obligations the candidate carries into selection, and which pass answers each?
     required_reasoning_premise_classes:
     - class: candidate_engineering_evidence
       # S7-B FINAL CORRECTION. ONE EXISTENCE RULE FOR SEVEN ROLES, and for three
@@ -858,6 +863,10 @@ stages:
     - Authoring a SelectionDecision
     - Letting a model declare a mechanism feasible
     - Turning missing evidence into feasibility
+    - Turning a repairable realization finding, an owner-revisable authoring
+      defect, a deferred obligation or an unsupported analysis into candidate
+      NOT_ESTABLISHED or INFEASIBLE (STATUS_SEMANTICS C-13)
+    - Stating INFEASIBLE without a structured physical argument (INV-011)
     prohibited_inputs:
     - Any selection preference or SelectionProfile
     input_isolation_rule: >

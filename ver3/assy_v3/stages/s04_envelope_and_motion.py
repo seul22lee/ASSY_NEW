@@ -2213,9 +2213,7 @@ def motion_evidence_check(state) -> List[str]:
     computation should have run is a finding.
     """
     problems = []
-    evidenced = set()
     for v in state.standing("SweptVolume"):
-        evidenced.add(v.get("transition"))
         d = v.get("sampling_declaration")
         level = v.get("fidelity")
         if not isinstance(d, dict):
@@ -2240,12 +2238,19 @@ def motion_evidence_check(state) -> List[str]:
         # this check deciding how much evidence an unseen argument needs. What
         # this check owes is that the level matches the computation, which is the
         # comparison above.
+    # PER REQUIRED (TRANSITION, MOVING GROUP), not per transition. One swept
+    # group used to evidence a transition that moves three, so two bodies'
+    # motion was never computed and this check said nothing - partial geometry
+    # read as complete. Every group a transition says it moves is accounted
+    # for by name.
+    swept = {(v.get("transition"), v.get("rigid_group"))
+             for v in state.standing("SweptVolume")}
     for t in state.standing("Transition"):
-        if not ((t.get("path") or {}).get("moving_groups") or []):
-            continue
-        if t["entity_id"] not in evidenced:
-            problems.append("MOTION_NOT_COMPUTED: %s moves something and no swept "
-                            "occupancy was computed for it" % t["entity_id"])
+        for group in ((t.get("path") or {}).get("moving_groups") or []):
+            if (t["entity_id"], group) not in swept:
+                problems.append("MOTION_NOT_COMPUTED: %s moves %s and no swept "
+                                "occupancy was computed for it"
+                                % (t["entity_id"], group))
     return problems
 
 

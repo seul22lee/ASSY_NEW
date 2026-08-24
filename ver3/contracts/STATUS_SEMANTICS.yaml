@@ -475,6 +475,21 @@ forbidden_collapses:
     correct: "REPRESENTATION_INCOMPLETE, and FALSE_ACCEPTANCE if it reached a PASS"
     why: "The unexamined contact is the one that jams."
 
+  - id: C-13
+    collapse: "a repairable realization finding, an owner-revisable authoring defect, a deferred obligation or an unsupported analysis -> candidate not established or ineligible"
+    correct: >
+      NOT_ESTABLISHED only for a declared pre-selection required-minimum fact
+      the design has not shown; otherwise FEASIBLE_FOR_SELECTION with the
+      finding carried as a structured open obligation, and the domain record
+      keeping its own NOT_ESTABLISHED or FAIL
+    why: >
+      A current realization failing is not the mechanism failing, and an
+      analysis the pipeline cannot run is not evidence about the mechanism.
+      Letting either decide eligibility is C-01 and C-02 at the selection seam:
+      the candidate is charged for the pipeline's inaction under a status that
+      never says so.
+    invariant: [INV-007, INV-011]
+
 collapse_enforcement:
   enforced_by: ver3/tests/meta/test_status_semantics.py
   checks:

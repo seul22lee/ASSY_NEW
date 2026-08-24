@@ -43,7 +43,7 @@ from ver3.assy_v3.state.patch import Op, StagePatch                    # noqa: E
 from ver3.tools import run_window2                                     # noqa: E402
 from .test_s02_s03b_integration import _Canned                         # noqa: E402
 from .test_s7_selection import (                                       # noqa: E402
-    HIGH, MEDIUM, LOW, MINIMIZE, MAXIMIZE, _Selection, prefs)
+    HIGH, MEDIUM, LOW, MINIMIZE, MAXIMIZE, _Selection, infeasible, prefs)
 
 
 class _Failing:
@@ -240,7 +240,7 @@ class TestPopulationAuthority(_Advisory):
         calling one candidate unacceptable."""
         state = self.built(("A", "B", "C"))
         self.revise(state, Op("SUPERSEDE", "MechanicalFeasibilityAssessment",
-                              "MFA-CND-C", {"status": "INFEASIBLE"}, "t",
+                              "MFA-CND-C", infeasible(), "t",
                               reason="probe"), stage="feasibility")
         state, cmp_ = self.compared(state=state)
         self.assertEqual(["CND-A", "CND-B"], cmp_.eligible)

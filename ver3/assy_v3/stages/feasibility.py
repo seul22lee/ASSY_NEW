@@ -35,6 +35,19 @@ THREE RULES DECIDE ALMOST EVERYTHING BELOW
     declared to differ that realize the same coordinate, a DOF required to move
     that a relation blocks. Not an absence, and not a model's opinion.
 
+    A DOMAIN'S STATUS IS NOT THE CANDIDATE'S ANSWER (Unit A). Every reason code
+    a domain emits is CLASSIFIED by the contract - repairable by s04, revisable
+    by its upstream owner, owed downstream, unsupported by this pipeline, a
+    fact the pre-selection required minimum names and the design lacks, or an
+    incompatibility inherent in the architecture - and the candidate-level
+    assessment is aggregated from the CLASSES, never from the statuses. A
+    domain that reads FAIL because the current realization contradicts itself
+    is a repair; a domain that reads NOT_ESTABLISHED because this code cannot
+    sweep a composite motion is an obligation. Both stay exactly what they are
+    on the domain record. INFEASIBLE needs a structured physical argument, and
+    nothing here produces one yet, so it is reachable only by an evaluator that
+    can state one. NOT_ESTABLISHED is reserved for the required minimum.
+
 WHY DOMAIN-LEVEL RECORDS
 
     A motion verdict and a load verdict rest on different facts. One record for
@@ -60,6 +73,7 @@ from ..lifecycle.records import (CURRENT_MULTIPLICITY,             # noqa: F401
                                  current_compliance,
                                  current_domain_assessment,
                                  multiplicity)
+from ..state.design_state import Contracts
 from ..state.patch import Op, StagePatch
 from ..view.consumer_view import InvocationContext, ViewStatus
 from . import s03_topology_and_mobility as s03
@@ -96,6 +110,31 @@ FEASIBLE, INFEASIBLE, MFA_NOT_ESTABLISHED = (
 MODEL_LOCAL_NEGATIVE = "MODEL_LOCAL_NEGATIVE"
 MODEL_LOCAL_POSITIVE = "MODEL_LOCAL_POSITIVE"
 
+#: THE FINDING CLASSES, in the contract's words. What a reason code MEANS for
+#: the candidate before selection. Read back from the contract at load so the
+#: two cannot drift; named here so an evaluator can say which it is emitting.
+ESTABLISHED = "ESTABLISHED"
+REPAIRABLE_S04 = "REPAIRABLE_S04"
+OWNER_REVISION = "OWNER_REVISION"
+DEFERRED_DOWNSTREAM = "DEFERRED_DOWNSTREAM"
+UNSUPPORTED = "UNSUPPORTED"
+REQUIRED_MINIMUM_ABSENT = "REQUIRED_MINIMUM_ABSENT"
+ARCHITECTURE_INCOMPATIBILITY = "ARCHITECTURE_INCOMPATIBILITY"
+#: The classes that are obligations - carried on the record, never decisive.
+OBLIGATION_CLASSES = (REPAIRABLE_S04, OWNER_REVISION, DEFERRED_DOWNSTREAM,
+                      UNSUPPORTED)
+
+#: The one occupancy this method cannot compute: a moving group two or more of
+#: the transition's changed joints touch. Its pose is the COMPOSITION of those
+#: motions, and `sweep_hull` rotates one box about one joint. Said as a
+#: capability limit, by name, so it is never read as evidence about the group.
+OCCUPANCY_UNSUPPORTED_COMPOSITE_MOTION = "OCCUPANCY_UNSUPPORTED_COMPOSITE_MOTION"
+
+#: What an INFEASIBLE rests on. The same keys the contract's conditional
+#: requirement demands of `MechanicalFeasibilityAssessment.physical_argument`;
+#: an argument missing any of them is refused before it can decide anything.
+ARGUMENT_KEYS = ("contradiction", "premises", "architectural_commitments")
+
 #: THE EFFECTS THAT DEMAND MOTION, taken from `PhysicalEffectObligation.effect`'s
 #: own vocabulary. PREVENT_MOTION is deliberately not among them: it demands that
 #: motion NOT occur, which is a different question and not this one asked
@@ -123,17 +162,28 @@ class Verdict:
     fact look like a present one.
     """
 
-    __slots__ = ("domain", "status", "reason_codes", "premises", "summary")
+    __slots__ = ("domain", "status", "reason_codes", "premises", "summary",
+                 "arguments")
 
     def __init__(self, domain: str, status: str,
                  reason_codes: Optional[Sequence[str]] = None,
                  premises: Optional[Sequence[str]] = None,
-                 summary: str = ""):
+                 summary: str = "",
+                 arguments: Optional[Sequence[Dict[str, Any]]] = None):
         self.domain = domain
         self.status = status
         self.reason_codes = sorted(set(reason_codes or ()))
         self.premises = sorted({p for p in (premises or ()) if isinstance(p, str) and p})
         self.summary = summary
+        #: THE ARGUMENTS BEHIND AN ARCHITECTURE_INCOMPATIBILITY, one record
+        #: each: the contradiction, the premises it rests on, the architectural
+        #: commitments it follows from. Empty for every other finding, and
+        #: empty today for every evaluator above: no domain can yet prove that
+        #: a mechanism cannot satisfy a demand under ANY admissible realization
+        #: of its commitments, and saying so without the proof is what INV-011
+        #: forbids. An evaluator that can prove it states the code and carries
+        #: the argument; the aggregation refuses the code without one.
+        self.arguments = [dict(a) for a in (arguments or ()) if isinstance(a, dict)]
 
 
 class FeasibilityOutcome:
@@ -1134,11 +1184,37 @@ def _spatial_realization(ev: _Evidence) -> Verdict:
                     status = _weaken(status, NOT_ESTABLISHED)
                     continue
                 used.append(joint["entity_id"])
-    swept = {v.get("transition") for v in ev.fam("SweptVolume")}
-    for t in ev.fam("Transition"):
-        if ((t.get("path") or {}).get("moving_groups") or []) \
-                and t.get("entity_id") not in swept:
-            codes.append("OCCUPANCY_NOT_COMPUTED")
+    # OCCUPANCY IS ACCOUNTED FOR PER REQUIRED (TRANSITION, MOVING GROUP). A
+    # transition that moves three groups and carries one SweptVolume used to
+    # read as evidenced, so two bodies' motion was never swept and nothing said
+    # so - partial geometry read as complete, one domain over from where that
+    # defect was already named. Every group a transition says it moves either
+    # has a current occupancy or has a finding that says why not, and WHY is
+    # read from the same typed facts the producer read: a group two or more of
+    # the changed joints touch is a composition this method cannot sweep - a
+    # capability limit, named as one - and anything else is a computation the
+    # producer did not deliver.
+    swept = {(v.get("transition"), v.get("rigid_group"))
+             for v in ev.fam("SweptVolume")}
+    for t in sorted(ev.fam("Transition"), key=lambda x: str(x.get("entity_id"))):
+        changed = {c for c in (t.get("changed_coordinates") or [])
+                   if isinstance(c, str)}
+        for group in sorted((t.get("path") or {}).get("moving_groups") or []):
+            if (t.get("entity_id"), group) in swept:
+                continue
+            carrying = [j for j in s04.incident_joints(joints, group)
+                        if j.get("entity_id") in changed]
+            if len(carrying) > 1:
+                codes.append(OCCUPANCY_UNSUPPORTED_COMPOSITE_MOTION)
+                notes.append("%s is moved by %s through %s at once; this "
+                             "method sweeps one box about one joint and cannot "
+                             "compose them"
+                             % (group, t.get("entity_id"),
+                                ", ".join(sorted(j["entity_id"] for j in carrying))))
+            else:
+                codes.append("OCCUPANCY_NOT_COMPUTED")
+                notes.append("%s is moved by %s and no occupancy was computed "
+                             "for it" % (group, t.get("entity_id")))
             status = _weaken(status, NOT_ESTABLISHED)
     used += [v.get("entity_id") for v in ev.fam("SweptVolume")]
     # s04a's OWN CONCLUSION THAT THIS ARRANGEMENT CANNOT EXIST. It is a
@@ -1700,19 +1776,172 @@ def _weaken(current: str, candidate: str) -> str:
     return current
 
 
-def aggregate(verdicts: Sequence[Verdict]) -> str:
-    """The whole of the eligibility rule.
+# =====================================================================
+# classification - what a finding means for the candidate, and whose it is
+# =====================================================================
+_CLASSIFICATION: Optional[Dict[str, Any]] = None
 
-    Applicable FAIL beats everything; applicable NOT_ESTABLISHED beats PASS;
-    NOT_APPLICABLE never blocks. Nothing about complexity enters, because nothing
-    about complexity is an input.
+
+def classification() -> Dict[str, Any]:
+    """The contract's finding classes, code table and required minimum.
+
+    READ FROM THE CONTRACT, ONCE. `FeasibilityDomainAssessment.
+    finding_classification` says what each reason code means for the candidate
+    and which pass answers it; `MechanicalFeasibilityAssessment.
+    pre_selection_required_minimum` says which facts a candidate must have
+    shown to be comparable. Nothing here keeps a second table: a class decided
+    in code beside the contract would be two answers to one question, and the
+    first time a code was added to one and not the other nobody would know.
     """
-    applicable = [v.status for v in verdicts if v.status != NOT_APPLICABLE]
-    if FAIL in applicable:
-        return INFEASIBLE
-    if NOT_ESTABLISHED in applicable:
-        return MFA_NOT_ESTABLISHED
-    return FEASIBLE
+    global _CLASSIFICATION
+    if _CLASSIFICATION is None:
+        fams = Contracts().families
+        fda = fams.get("FeasibilityDomainAssessment") or {}
+        mfa = fams.get("MechanicalFeasibilityAssessment") or {}
+        _CLASSIFICATION = {
+            "classes": dict(fda.get("finding_classes") or {}),
+            "codes": {k: dict(v) for k, v in
+                      (fda.get("finding_classification") or {}).items()},
+            "minimum": dict(mfa.get("pre_selection_required_minimum") or {}),
+        }
+    return _CLASSIFICATION
+
+
+def _argument_problems(domain: str, argument: Any) -> List[str]:
+    """Why an argument is not one. Structural, and fails closed."""
+    if not isinstance(argument, dict):
+        return ["%s: an architecture incompatibility carries a mapping argument, "
+                "not %r" % (domain, type(argument).__name__)]
+    out = []
+    for key in ARGUMENT_KEYS:
+        if key not in argument:
+            out.append("%s: the physical argument states no %r" % (domain, key))
+    if not (isinstance(argument.get("contradiction"), str)
+            and argument["contradiction"].strip()):
+        out.append("%s: the physical argument's contradiction is not a statement"
+                   % domain)
+    for key in ("premises", "architectural_commitments"):
+        value = argument.get(key)
+        if not (isinstance(value, list) and value
+                and all(isinstance(x, str) and x for x in value)):
+            out.append("%s: the physical argument's %s must name at least one "
+                       "entity" % (domain, key))
+    return out
+
+
+def classify(verdict: Verdict):
+    """(obligations, problems) for ONE domain's verdict, from the contract.
+
+    An obligation row is {domain, code, class, owner} plus `negates` where the
+    finding leaves a required-minimum fact unestablished. Establishments and
+    non-questions produce no row. TOTAL, OR REFUSED: a code the contract does
+    not classify is a finding this responsibility cannot explain, and a FAIL
+    or NOT_ESTABLISHED domain that explains itself with nothing but
+    establishments is a domain that did not say why - both are problems, so
+    the evaluator writes no assessment over them rather than an aggregate
+    nobody can read back.
+    """
+    table = classification()
+    rows, problems = [], []
+    for code in verdict.reason_codes:
+        spec = table["codes"].get(code)
+        if spec is None:
+            problems.append("%s: reason code %s has no classification in the "
+                            "contract" % (verdict.domain, code))
+            continue
+        cls = spec.get("class")
+        if cls not in table["classes"]:
+            problems.append("%s: reason code %s classifies to %r, which is no "
+                            "finding class" % (verdict.domain, code, cls))
+            continue
+        if cls in (ESTABLISHED, NOT_APPLICABLE):
+            continue
+        row = {"domain": verdict.domain, "code": code, "class": cls,
+               "owner": spec.get("owner")}
+        fact = spec.get("negates")
+        if fact:
+            if fact not in table["minimum"]:
+                problems.append("%s: reason code %s negates %r, which is no "
+                                "required-minimum fact" % (verdict.domain, code, fact))
+                continue
+            row["negates"] = fact
+        if cls == ARCHITECTURE_INCOMPATIBILITY:
+            # THE CLASS NO TABLE MAY GRANT. The code is admissible only beside
+            # an argument the verdict itself carries; the row then carries it.
+            if not verdict.arguments:
+                problems.append("%s: %s is stated with no physical argument; "
+                                "INFEASIBLE is reserved for an impossibility "
+                                "supported by one (INV-011)"
+                                % (verdict.domain, code))
+                continue
+            for argument in verdict.arguments:
+                problems += _argument_problems(verdict.domain, argument)
+            row["arguments"] = [dict(a) for a in verdict.arguments]
+        rows.append(row)
+    if verdict.status in (FAIL, NOT_ESTABLISHED) and not rows and not problems:
+        problems.append("%s is %s and every reason code it carries is an "
+                        "establishment; the domain has not said why"
+                        % (verdict.domain, verdict.status))
+    if verdict.arguments and not any(r["class"] == ARCHITECTURE_INCOMPATIBILITY
+                                     for r in rows) and not problems:
+        problems.append("%s carries a physical argument and states no "
+                        "architecture incompatibility" % verdict.domain)
+    return rows, problems
+
+
+class Aggregation:
+    """The candidate-level answer, and exactly what decided it."""
+
+    __slots__ = ("status", "blocking", "obligations", "physical_argument",
+                 "problems")
+
+    def __init__(self, status, blocking, obligations, physical_argument, problems):
+        self.status = status
+        self.blocking = list(blocking)
+        self.obligations = list(obligations)
+        self.physical_argument = physical_argument
+        self.problems = list(problems)
+
+
+def aggregate(verdicts: Sequence[Verdict]) -> Aggregation:
+    """The whole of the candidate-level rule, from the CLASSES of the findings.
+
+    INFEASIBLE iff some domain states an ARCHITECTURE_INCOMPATIBILITY and
+    carries the argument for it - the one thing the contract will not let a
+    table grant. Else NOT_ESTABLISHED iff some finding negates a fact of the
+    pre-selection required minimum: the design has not shown what a candidate
+    must show to be compared, whether the fact is absent, ambiguous, or
+    contradicted by a realization its owner can still repair. Else
+    FEASIBLE_FOR_SELECTION, with every remaining finding - repairable,
+    owner-revisable, deferred, unsupported - carried as an open obligation.
+
+    NO DOMAIN STATUS IS READ. A FAIL whose contradiction its owner may revise
+    without changing the principle is a repair; a NOT_ESTABLISHED outside the
+    minimum is an obligation; a NOT_APPLICABLE is nothing. Nothing about
+    complexity enters, because nothing about complexity is an input.
+    """
+    blocking, obligations, arguments, problems = [], [], [], []
+    for v in verdicts:
+        rows, rows_problems = classify(v)
+        problems += rows_problems
+        for row in rows:
+            if row["class"] == ARCHITECTURE_INCOMPATIBILITY:
+                arguments.append(row)
+            elif row.get("negates"):
+                blocking.append(row)
+            else:
+                obligations.append(row)
+    if problems:
+        return Aggregation(None, blocking, obligations, None, problems)
+    if arguments:
+        first = arguments[0]
+        argument = dict(first["arguments"][0])
+        argument.setdefault("domain", first["domain"])
+        return Aggregation(INFEASIBLE, blocking + arguments, obligations,
+                           argument, [])
+    if blocking:
+        return Aggregation(MFA_NOT_ESTABLISHED, blocking, obligations, None, [])
+    return Aggregation(FEASIBLE, [], obligations, None, [])
 
 
 # =====================================================================
@@ -1885,7 +2114,15 @@ def evaluate_candidate_feasibility(state, candidate_id: str,
     ev = _Evidence(view.payload(), candidate_id)
     verdicts = [DOMAIN_EVALUATORS[d](ev) for d in DOMAINS]
     compliance = evaluate_hard_requirements(ev)
-    status = aggregate(verdicts)
+    agg = aggregate(verdicts)
+    if agg.problems:
+        # A FINDING THIS RESPONSIBILITY CANNOT CLASSIFY, or an infeasibility
+        # stated without its argument. No assessment is written over either:
+        # an aggregate nobody can read back is worse than none.
+        return FeasibilityOutcome(candidate_id, None, verdicts, compliance, None,
+                                  ["%s: %s" % (RESPONSIBILITY, p)
+                                   for p in agg.problems], view.as_dict())
+    status = agg.status
 
     conflicting = multiplicity(state, candidate_id)
     if conflicting:
@@ -1898,11 +2135,15 @@ def evaluate_candidate_feasibility(state, candidate_id: str,
     ops: List[Op] = []
     domain_ids, raw_union = [], set()
     for v in verdicts:
+        rows, _problems = classify(v)
         made, eid = address_operations(
             state, "FeasibilityDomainAssessment",
             "FDA-%s-%s" % (candidate_id, _TOKEN[v.domain]),
             {"candidate": candidate_id, "domain": v.domain, "status": v.status,
-             "reason_codes": v.reason_codes, "summary": v.summary},
+             "reason_codes": v.reason_codes, "summary": v.summary,
+             # THE STRUCTURED READING OF THE CODES: what each means for the
+             # candidate and whose it is. The status above is untouched.
+             "obligations": [{k: r[k] for k in r if k != "domain"} for r in rows]},
             sorted({candidate_id} | set(v.premises)), prov,
             current_domain_assessment(state, candidate_id, v.domain))
         ops += made
@@ -1912,12 +2153,24 @@ def evaluate_candidate_feasibility(state, candidate_id: str,
     # propagation transitive, so naming the domain records is enough on its own
     # now; the raw premises stay because they are true, they cost nothing, and
     # deleting correct provenance to demonstrate a mechanism is not a test of it.
+    fields = {"candidate": candidate_id, "status": status,
+              "domain_assessments": domain_ids, "evaluated_domains": list(DOMAINS),
+              "findings": [_finding(v) for v in verdicts
+                           if v.status in (FAIL, NOT_ESTABLISHED)],
+              # WHY IT IS NOT FEASIBLE_FOR_SELECTION, structured: the
+              # required-minimum facts the design has not shown. Empty on a
+              # FEASIBLE answer.
+              "blocking_findings": [dict(r) for r in agg.blocking],
+              # WHAT THE CANDIDATE CARRIES INTO SELECTION, structured: every
+              # finding outside the minimum, with its class and its owner. A
+              # FEASIBLE answer with rows here is a candidate that may be
+              # chosen with its debts on the record, not one with none.
+              "open_obligations": [dict(r) for r in agg.obligations]}
+    if agg.physical_argument is not None:
+        fields["physical_argument"] = dict(agg.physical_argument)
     made, _mfa = address_operations(
         state, "MechanicalFeasibilityAssessment", "MFA-%s" % candidate_id,
-        {"candidate": candidate_id, "status": status,
-         "domain_assessments": domain_ids, "evaluated_domains": list(DOMAINS),
-         "findings": [_finding(v) for v in verdicts
-                      if v.status in (FAIL, NOT_ESTABLISHED)]},
+        fields,
         sorted({candidate_id} | set(domain_ids) | raw_union), prov,
         current_assessment(state, candidate_id),
         basis_over=sorted({candidate_id} | raw_union))

@@ -50,6 +50,11 @@ ADVISORY_LABEL = "Advisory / reviewer opinion - not a decision"
 CONCERN_LABEL = ("Concerns raised for a human to weigh. A concern decides "
                  "nothing, and importance is not authority.")
 
+#: Every obligation row is followed by this, so a list of what a candidate
+#: still owes cannot read as a list of reasons not to choose it.
+OBLIGATION_LABEL = ("An obligation is work with an owner, recorded with the "
+                    "feasibility answer. It decides nothing here.")
+
 #: The candidate control starts here, and this is not a candidate.
 CHOOSE_PLACEHOLDER = "- choose a candidate -"
 
@@ -192,6 +197,32 @@ def review_lines(snapshot: dec.HumanReviewSnapshot) -> List[str]:
                  % (len(snapshot.feasibility_assessments),
                     len(snapshot.hard_requirement_results),
                     len(snapshot.design_constraints)))
+
+    # WHAT EACH CANDIDATE CARRIES, as the feasibility answer recorded it. Read
+    # off the records the eligibility basis names and rendered generically -
+    # a row is shown for what it says, and nothing here branches on it,
+    # classifies it, or lets it decide anything. A person choosing a candidate
+    # with open obligations chooses with them on the screen.
+    shown = False
+    for record in snapshot.feasibility_assessments:
+        rows = ([("not established", r)
+                 for r in (record.get("blocking_findings") or [])]
+                + [("open", r) for r in (record.get("open_obligations") or [])])
+        if not rows:
+            continue
+        shown = True
+        lines.append("## What %s still carries (%s)"
+                     % (record.get("candidate"), record.get("entity_id")))
+        for kind, r in rows:
+            if not isinstance(r, dict):
+                continue
+            lines.append("- %s: %s %s [%s, owner %s]%s"
+                         % (kind, r.get("domain"), r.get("code"), r.get("class"),
+                            r.get("owner"),
+                            " - leaves %s unestablished" % r["negates"]
+                            if r.get("negates") else ""))
+    if shown:
+        lines.append(OBLIGATION_LABEL)
 
     lines.append("## %s" % ADVISORY_LABEL)
     if not snapshot.advisories:

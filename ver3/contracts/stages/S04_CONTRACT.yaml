@@ -87,7 +87,12 @@ s04a:
   engineering_question: >
     Can any of these candidates fit, reach and be approached at all?
   engineering_responsibility: >
-    Kill candidates cheaply, each for a stated geometric reason.
+    Give every retained candidate a provisional arrangement it can be judged
+    on, and report each geometric finding against that arrangement with its
+    reason. REALIZE AND REPORT, NEVER ELIMINATE: a finding here is a finding
+    about the current arrangement, which s04 may revise; the feasibility
+    responsibility classifies what it means for the candidate (Unit A), and no
+    reason s04a can state makes a mechanism infeasible by itself.
   runs_on: "EVERY retained candidate"
 
   required_inputs:
@@ -107,7 +112,7 @@ s04a:
     # AssemblyStep insertion_direction is DERIVED from s03's access_side, not
     # asked of the model: one statement of arrival, the side, and its vector.
     extends: [FunctionalRegion volume, AssemblyStep insertion_direction, Interface mating_geometry]
-    also_owns: ["the elimination of a candidate on geometric grounds"]
+    also_owns: ["a recorded geometric finding against the arrangement it produced (EliminationRecord) - repair feedback about the realization, never a verdict on the candidate"]
 
   absolute_scale_rule: >
     Where the source states no size - the common case - overall scale is a

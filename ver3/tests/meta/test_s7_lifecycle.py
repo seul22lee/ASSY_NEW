@@ -440,25 +440,33 @@ class TestFeasibilityReconciliation(_Lifecycle):
         self.assertEqual("PASS", records.current_domain_assessment(
             state, "CND-A", "spatial_realization")["status"])
 
-    def test_F12_new_contradicting_evidence_makes_it_infeasible(self):
+    def test_F12_new_contradicting_evidence_reopens_the_choice(self):
         """A POSITIVE CONTRADICTION, not an absence: the site the load routes to
         is inside the product, so the route closes in the wrong place. An
         overlap between unconnected boxes would not do - S7-B is deliberately
-        conservative there, and lifecycle does not get to sharpen it."""
+        conservative there, and lifecycle does not get to sharpen it.
+
+        UNIT A. OLD ASSUMPTION: the contradiction made both candidates
+        INFEASIBLE. NEW INVARIANT: each route is its owner's to re-author
+        without changing the principle, so the REACTION_ROUTE fact is
+        unestablished and both are NOT_ESTABLISHED - which is still
+        INELIGIBLE, still no comparison, still a reopened commitment."""
         state, decision = self.committed()
         self.contradiction(state)
         out = self.reconcile(state)
         for candidate in ("CND-A", "CND-B"):
-            self.assertEqual("INFEASIBLE", out.feasibility[candidate])
-            self.assertEqual("INFEASIBLE",
+            self.assertEqual("NOT_ESTABLISHED", out.feasibility[candidate])
+            self.assertEqual("NOT_ESTABLISHED",
                              self.mfa(state, candidate)["status"])
+            self.assertEqual("FAIL", records.current_domain_assessment(
+                state, candidate, "load_reaction_closure")["status"])
         self.assertEqual(sel.NO_ELIGIBLE_CANDIDATES, out.comparison)
         self.assertIsNone(self.comparison(state))
         self.assertEqual(STALE, self.validity(state, decision))
         # and no preference rescues it
         again = self.reconcile(state, selection_preferences=prefs(
             rigid_body_count=(MAXIMIZE, HIGH)))
-        self.assertEqual("INFEASIBLE", self.mfa(state, "CND-A")["status"])
+        self.assertEqual("NOT_ESTABLISHED", self.mfa(state, "CND-A")["status"])
         self.assertIsNone(self.comparison(state))
         self.assertEqual(lc.REVIEW_NOT_READY, again.human_state)
 

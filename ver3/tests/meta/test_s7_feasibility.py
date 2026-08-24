@@ -432,10 +432,17 @@ class TestValidMechanisms(_Feas):
 # =====================================================================
 class TestDomainPolicy(_Feas):
 
-    def test_B4_a_declared_distinctness_that_is_not_realized_is_infeasible(self):
+    def test_B4_a_declared_distinctness_that_is_not_realized_is_not_established(self):
         """Two configurations declared to differ, realized at the same
         coordinate. A positive contradiction: the design says the mechanism is
         in two states and the numbers say it is in one.
+
+        UNIT A. OLD ASSUMPTION: the domain's FAIL made the candidate
+        INFEASIBLE. NEW INVARIANT: the coordinates are s04b's, and s04b may
+        state others without changing the principle - a repairable
+        contradiction that leaves the MOTION_REALIZED fact of the required
+        minimum unestablished. The domain keeps its FAIL; the candidate is
+        NOT_ESTABLISHED, never INFEASIBLE.
 
         THE CONTRADICTION IS PUT INTO STATE BY A REVISION, because s04b refuses
         to author one: realizing declared distinctness is that pass's
@@ -455,15 +462,18 @@ class TestDomainPolicy(_Feas):
         self.assertEqual(s07.FAIL, self.domain(out, "required_configurations").status)
         self.assertIn("DECLARED_DISTINCTNESS_NOT_REALIZED",
                       self.domain(out, "required_configurations").reason_codes)
-        self.assertEqual(s07.INFEASIBLE, out.status)
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
+        self.assertNotEqual(s07.INFEASIBLE, out.status)
 
-    def test_B4b_a_transition_that_moves_what_it_did_not_declare_is_infeasible(self):
+    def test_B4b_a_transition_that_moves_what_it_did_not_declare_is_not_established(self):
+        """UNIT A: the same shape as B4 - s04b's own declaration against
+        s04b's own numbers, repairable by s04b, negating MOTION_REALIZED."""
         state = self.hinge(s04b=motion("A", "JNT-0A", _group(1, "A"), changed=[]))
         out = self.assess(state)
         self.assertEqual(s07.FAIL, self.domain(out, "motion_and_transitions").status)
         self.assertIn("UNDECLARED_COORDINATE_CHANGE",
                       self.domain(out, "motion_and_transitions").reason_codes)
-        self.assertEqual(s07.INFEASIBLE, out.status)
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
 
     def test_B5_a_required_transition_that_is_absent_is_not_established(self):
         """NOT_APPLICABLE would be the wrong answer and the dangerous one: the
@@ -497,7 +507,12 @@ class TestDomainPolicy(_Feas):
             self.assertNotEqual(s07.FAIL, w.status,
                                 "%s turned an overlap into a contradiction" % w.domain)
 
-    def test_B7_a_terminus_that_is_not_the_declared_site_is_infeasible(self):
+    def test_B7_a_terminus_that_is_not_the_declared_site_is_not_established(self):
+        """UNIT A. OLD ASSUMPTION: a route closing at the wrong site made the
+        candidate INFEASIBLE. NEW INVARIANT: the route is s03b's, and s03b may
+        re-route without changing the principle; the contradiction leaves the
+        REACTION_ROUTE fact unestablished and is an owner revision, not an
+        impossibility. The domain keeps its FAIL."""
         # The site EXISTS, is EXTERNAL, and is not the one the load case names.
         # A dangling reference and an internal terminus are different findings,
         # and this probe is about closing in the wrong place.
@@ -511,9 +526,11 @@ class TestDomainPolicy(_Feas):
         v = self.domain(out, "load_reaction_closure")
         self.assertEqual(s07.FAIL, v.status)
         self.assertIn("TERMINUS_NOT_THE_DECLARED_SITE", v.reason_codes)
-        self.assertEqual(s07.INFEASIBLE, out.status)
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
+        self.assertNotEqual(s07.INFEASIBLE, out.status)
 
-    def test_B7b_a_terminus_inside_the_product_is_infeasible(self):
+    def test_B7b_a_terminus_inside_the_product_is_not_established(self):
+        """UNIT A: as B7 - the route may be re-authored to close outside."""
         state = self.hinge(s03b=realization("A", terminates="RSR-0001"))
         self.revise(state, Op("SUPERSEDE", "ReactionSiteRequirement", "RSR-0001",
                               {"boundary_side": "INTERNAL"}, "t",
@@ -522,11 +539,17 @@ class TestDomainPolicy(_Feas):
         v = self.domain(out, "load_reaction_closure")
         self.assertEqual(s07.FAIL, v.status)
         self.assertIn("TERMINAL_SITE_INTERNAL", v.reason_codes)
-        self.assertEqual(s07.INFEASIBLE, out.status)
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
 
-    def test_B8_a_positive_gap_on_the_load_route_is_infeasible(self):
+    def test_B8_a_positive_gap_on_the_load_route_is_not_established(self):
         """A GAP IS PROOF, where an overlap is not: the real bodies are smaller
-        than their boxes, so boxes that are apart are bodies that are apart."""
+        than their boxes, so boxes that are apart are bodies that are apart.
+
+        UNIT A. OLD ASSUMPTION: proof of a gap was proof of infeasibility.
+        NEW INVARIANT: it is proof that THIS arrangement does not carry the
+        load - s04a's placement, which s04a may revise - so the ARRANGEMENT
+        fact is unestablished and the candidate NOT_ESTABLISHED. Both domains
+        keep their FAIL."""
         state = self.hinge(
             s04a=arrangement({"BOD-G0A": ([0, 0, 0], [1, 1, 1]),
                               "BOD-G1A": ([9, 0, 0], [1, 1, 1])},
@@ -535,7 +558,8 @@ class TestDomainPolicy(_Feas):
         v = self.domain(out, "load_reaction_closure")
         self.assertEqual(s07.FAIL, v.status)
         self.assertIn("HOP_BODIES_APART", v.reason_codes)
-        self.assertEqual(s07.INFEASIBLE, out.status)
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
+        self.assertNotEqual(s07.INFEASIBLE, out.status)
         self.assertEqual(s07.FAIL, self.domain(out, "spatial_realization").status,
                          "the topology connects them and they are apart")
 
@@ -644,6 +668,11 @@ class TestModelLocalFindings(_Feas):
                           "the conclusion the verdict rests on is its premise")
 
     def test_B13_an_elimination_record_alone_cannot_make_it_infeasible(self):
+        """UNIT A. OLD ASSUMPTION: s04a's elimination weakened the candidate
+        to NOT_ESTABLISHED. NEW INVARIANT: it weakens the DOMAIN, and is a
+        REPAIRABLE_S04 obligation on a FEASIBLE_FOR_SELECTION answer - a
+        model's opinion about an arrangement the same pass may revise names no
+        required-minimum fact and proves nothing about the mechanism."""
         state = self.hinge(s04a=arrangement(HINGE_BOXES, steps=["ASY-0A"],
                                             eliminated=True))
         self.assertTrue([e for e in state.family("EliminationRecord")
@@ -652,8 +681,9 @@ class TestModelLocalFindings(_Feas):
         v = self.domain(out, "spatial_realization")
         self.assertEqual(s07.NOT_ESTABLISHED, v.status)
         self.assertIn(s07.MODEL_LOCAL_NEGATIVE, v.reason_codes)
-        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status,
-                         "a model-local elimination became the pipeline's verdict")
+        self.assertNotEqual(s07.INFEASIBLE, out.status,
+                            "a model-local elimination became the pipeline's verdict")
+        self.assertEqual(s07.FEASIBLE, out.status)
 
 
 # =====================================================================
@@ -1193,7 +1223,10 @@ class TestDemandDrivenApplicability(_Feas):
         self.assertEqual(s07.NOT_ESTABLISHED, v.status)
         self.assertIn("CLEARANCE_PAIR_OVERLAPS", v.reason_codes)
         self.assertNotEqual(s07.FAIL, v.status, "an overlap is not a collision")
-        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
+        # UNIT A. OLD ASSUMPTION: the unestablished overlap made the candidate
+        # NOT_ESTABLISHED. NEW INVARIANT: the domain stays unestablished and
+        # the candidate is feasible with the overlap as an s04a obligation.
+        self.assertEqual(s07.FEASIBLE, out.status)
 
     def test_B32b_a_clearance_pair_that_is_clear_passes(self):
         """The exemption question and the geometry question are different: a

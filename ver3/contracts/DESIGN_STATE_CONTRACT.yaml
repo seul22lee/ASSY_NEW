@@ -2627,7 +2627,12 @@ assurance_families:
       rests on, and a single record for all nine could only carry the union - so
       changing an envelope would have staled the load closure it cannot affect.
     required_fields: [entity_id, candidate, domain, status, reason_codes]
-    optional_fields: [summary]
+    # `obligations` is the STRUCTURED reading of `reason_codes`: one row per
+    # code that is not an establishment - {code, class, owner, note} - written
+    # by the evaluator from `finding_classification` below. The status stays
+    # what the domain established; the row says what the finding means for the
+    # candidate before selection and whose it is to answer.
+    optional_fields: [summary, obligations]
     domain:
       - physical_realization
       - load_reaction_closure
@@ -2660,6 +2665,198 @@ assurance_families:
         MODEL_LOCAL_POSITIVE - and cannot by itself produce PASS or FAIL. A
         deterministic wrapper around a model's opinion is still the model's
         opinion.
+      - >
+        A FINDING IS CLASSIFIED, NEVER MERELY COUNTED. Every reason code this
+        family may carry has a row in `finding_classification`: what it means
+        for the candidate before selection (`class`), which pass answers it
+        (`owner`), and which pre-selection required-minimum fact it leaves
+        unestablished (`negates`), if any. A NOT_ESTABLISHED or FAIL domain
+        whose codes classify to nothing but establishments is a domain the
+        evaluator cannot explain, and it refuses to write rather than guess.
+        The status is the domain's; the class is the candidate's; neither is
+        read off the other.
+    # WHAT EACH FINDING MEANS BEFORE SELECTION, AND WHOSE IT IS. The reason
+    # code says what the evaluator saw. The class says what that means for the
+    # candidate: a realization s04 can repair, a fact its upstream owner can
+    # revise without changing the principle, work a later stage owns, an
+    # analysis this pipeline cannot compute, a fact the required minimum names
+    # and the design lacks, or - only ever with a structured argument - an
+    # incompatibility inherent in the architecture. Declared here and read by
+    # the evaluator through the contract; nothing classifies from prose, from a
+    # candidate, from a benchmark or from the order anything was written.
+    finding_classes:
+      ESTABLISHED: "the domain established this; it carries no obligation"
+      NOT_APPLICABLE: "the design asks no question in this domain; no obligation"
+      REPAIRABLE_S04: >-
+        the CURRENT realization fails, and a value s04 owns - an extent, a
+        placement, a coordinate, a mating geometry, a derived direction, an
+        occupancy it computes - could be revised to repair it. A bad
+        realization is not a bad mechanism.
+      OWNER_REVISION: >-
+        a fact an upstream owner authored is absent, malformed or contradicts
+        another fact the same owner authored, and that owner may revise it
+        without changing the mechanism principle or its architectural
+        commitments.
+      DEFERRED_DOWNSTREAM: >-
+        an obligation a later stage owns by contract - sizing, fit, feature
+        embodiment, settlement - which costs the candidate nothing before
+        selection and is discharged where it is owned.
+      UNSUPPORTED: >-
+        an analysis this pipeline cannot compute for this realization. A
+        capability limit, recorded as one; never evidence about the mechanism
+        (INV-011).
+      REQUIRED_MINIMUM_ABSENT: >-
+        a fact the pre-selection required minimum names is absent or
+        ambiguous, so the candidate has not reached comparable maturity
+        (INV-007). Not a verdict on the mechanism; a statement of what the
+        design has not yet shown.
+      ARCHITECTURE_INCOMPATIBILITY: >-
+        a positive physical or logical argument that the mechanism cannot
+        satisfy a demand under any admissible realization of its architectural
+        commitments. NEVER ASSIGNED BY THIS TABLE: only an evaluator that
+        carries a structured `physical_argument` may state it, and the
+        candidate-level assessment refuses INFEASIBLE without one.
+    # `negates` names the `pre_selection_required_minimum` fact (declared on
+    # MechanicalFeasibilityAssessment) the finding leaves unestablished, or is
+    # null. A negating finding makes the candidate NOT_ESTABLISHED whatever its
+    # class - the design has not shown the minimum - and a non-negating one is
+    # an open obligation carried on a FEASIBLE_FOR_SELECTION answer. Owners are
+    # the PASSES that answer, because a repair is asked of a pass.
+    finding_classification:
+      # -- establishments and non-questions ---------------------------------
+      ALL_EFFECTS_DISCHARGED:            {class: ESTABLISHED}
+      EVERY_LOAD_CLOSES_EXTERNALLY:      {class: ESTABLISHED}
+      EVERY_DECLARED_ROUTE_CLOSES:       {class: ESTABLISHED}
+      EVERY_DEMANDED_CHANGE_REACHABLE:   {class: ESTABLISHED}
+      EVERY_CONFIGURATION_REALIZED:      {class: ESTABLISHED}
+      EVERY_TRANSITION_MOVES_WHAT_IT_DECLARES: {class: ESTABLISHED}
+      ARRANGEMENT_COMPLETE_AND_CONNECTED: {class: ESTABLISHED}
+      EVERY_ACTOR_REACHES_ITS_REGION:    {class: ESTABLISHED}
+      ORDER_CONSISTENT_AND_PATHS_CLEAR:  {class: ESTABLISHED}
+      NO_CONSERVATIVE_OVERLAP:           {class: ESTABLISHED}
+      ANALYTICAL_FIT_ESTABLISHED:        {class: ESTABLISHED}
+      ANALYTICAL_INSERTION_ESTABLISHED:  {class: ESTABLISHED}
+      MATING_RELATION_ESTABLISHED:       {class: ESTABLISHED}
+      DEFORMATION_RESOLVED_BY_ELASTIC_FIT: {class: ESTABLISHED}
+      # The evidence LEVEL of a reach conclusion, written beside the PASS so a
+      # reader knows it rests on s04a's conclusion about boxes and sides.
+      MODEL_LOCAL_POSITIVE:              {class: ESTABLISHED}
+      NO_EFFECT_DEMANDED:                {class: NOT_APPLICABLE}
+      NO_LOAD_CASE:                      {class: NOT_APPLICABLE}
+      NO_REQUIRED_MOTION:                {class: NOT_APPLICABLE}
+      NO_CONFIGURATION:                  {class: NOT_APPLICABLE}
+      NO_BODY:                           {class: NOT_APPLICABLE}
+      NO_REACH_REQUIREMENT:              {class: NOT_APPLICABLE}
+      NOTHING_TO_ASSEMBLE:               {class: NOT_APPLICABLE}
+      NOTHING_COEXISTS:                  {class: NOT_APPLICABLE}
+      # -- the required minimum, absent or ambiguous -------------------------
+      BODY_WITHOUT_ENVELOPE:             {class: REQUIRED_MINIMUM_ABSENT, owner: s04a, negates: ARRANGEMENT}
+      INTERFERENCE_GEOMETRY_MISSING:     {class: REQUIRED_MINIMUM_ABSENT, owner: s04a, negates: ARRANGEMENT}
+      INSERTION_GEOMETRY_MISSING:        {class: REQUIRED_MINIMUM_ABSENT, owner: s04a, negates: ARRANGEMENT}
+      INSERTION_GEOMETRY_INCOMPLETE:     {class: REQUIRED_MINIMUM_ABSENT, owner: s04a, negates: ARRANGEMENT}
+      HOP_GEOMETRY_MISSING:              {class: REQUIRED_MINIMUM_ABSENT, owner: s04a, negates: ARRANGEMENT}
+      BODY_ENVELOPED_TWICE:              {class: REQUIRED_MINIMUM_ABSENT, owner: s04a, negates: ARRANGEMENT}
+      SCALE_AMBIGUOUS:                   {class: REQUIRED_MINIMUM_ABSENT, owner: s04a, negates: ARRANGEMENT}
+      EFFECT_NOT_DISCHARGED:             {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: EFFECTS_REALIZED}
+      EFFECT_TYPE_MISMATCH:              {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: EFFECTS_REALIZED}
+      LOAD_PATH_MISSING:                 {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: REACTION_ROUTE}
+      LOAD_PATH_OPEN:                    {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: REACTION_ROUTE}
+      TERMINAL_SITE_NOT_GIVEN:           {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: REACTION_ROUTE}
+      LOAD_PATH_TOO_SHORT:               {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: REACTION_ROUTE}
+      HOP_NOT_AN_INTERFACE:              {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: REACTION_ROUTE}
+      REACH_REALIZATION_ABSENT:          {class: REQUIRED_MINIMUM_ABSENT, owner: s03a, negates: ACCESS}
+      REACH_REGION_NOT_DECLARED_FOR_ACTOR: {class: REQUIRED_MINIMUM_ABSENT, owner: s03a, negates: ACCESS}
+      REACH_CONCLUSION_ABSENT:           {class: REQUIRED_MINIMUM_ABSENT, owner: s04a, negates: ACCESS}
+      MOTION_DEMANDED_WITHOUT_TRANSITION_REQUIREMENT: {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: MOTION_REALIZED}
+      JOINT_ABSENT:                      {class: REQUIRED_MINIMUM_ABSENT, owner: s03a, negates: MOTION_REALIZED}
+      REQUIRED_TRANSITION_MISSING:       {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      REQUIRED_TRANSITION_NOT_REALIZED:  {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      TRANSITION_REQUIREMENT_REALIZED_MULTIPLE_TIMES: {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      ENDPOINT_STATE_ABSENT:             {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      ENDPOINT_COORDINATES_ABSENT:       {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      REQUIRED_COORDINATE_ABSENT:        {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      REQUIRED_COORDINATE_NOT_A_NUMBER:  {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      MOVING_SIDE_ABSENT:                {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      TRANSITION_ENDPOINT_MISSING:       {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      CONFIGURATION_NOT_REALIZED:        {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      CONFIGURATION_REALIZED_TWICE:      {class: REQUIRED_MINIMUM_ABSENT, owner: s04b, negates: MOTION_REALIZED}
+      ASSEMBLY_ORDER_MISSING:            {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: ASSEMBLY_ORDER}
+      ASSEMBLY_ORDER_NOT_TOTAL:          {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: ASSEMBLY_ORDER}
+      ASSEMBLY_DEPENDENCY_UNKNOWN:       {class: REQUIRED_MINIMUM_ABSENT, owner: s03b, negates: ASSEMBLY_ORDER}
+      # -- contradictions in the CURRENT realization that leave a minimum fact
+      #    unestablished. Positive, and repairable: the owner may revise the
+      #    contradicting premise without changing the principle, so none of
+      #    these is architecture-level. They cost NOT_ESTABLISHED, never
+      #    INFEASIBLE.
+      CONNECTED_BODIES_APART:            {class: REPAIRABLE_S04, owner: s04a, negates: ARRANGEMENT}
+      HOP_BODIES_APART:                  {class: REPAIRABLE_S04, owner: s04a, negates: ARRANGEMENT}
+      REACH_CONCLUDED_UNREACHABLE:       {class: REPAIRABLE_S04, owner: s04a, negates: ACCESS}
+      ENDPOINT_MISMATCH:                 {class: REPAIRABLE_S04, owner: s04b, negates: MOTION_REALIZED}
+      REQUIRED_RELATIVE_MOTION_NOT_REALIZED: {class: REPAIRABLE_S04, owner: s04b, negates: MOTION_REALIZED}
+      MOVING_SIDE_UNRELATED:             {class: REPAIRABLE_S04, owner: s04b, negates: MOTION_REALIZED}
+      DECLARED_CHANGE_NOT_REALIZED:      {class: REPAIRABLE_S04, owner: s04b, negates: MOTION_REALIZED}
+      UNDECLARED_COORDINATE_CHANGE:      {class: REPAIRABLE_S04, owner: s04b, negates: MOTION_REALIZED}
+      DECLARED_DISTINCTNESS_NOT_REALIZED: {class: REPAIRABLE_S04, owner: s04b, negates: MOTION_REALIZED}
+      TERMINUS_NOT_THE_DECLARED_SITE:    {class: OWNER_REVISION, owner: s03b, negates: REACTION_ROUTE}
+      TERMINAL_SITE_INTERNAL:            {class: OWNER_REVISION, owner: s03b, negates: REACTION_ROUTE}
+      HOPS_NOT_CONNECTED:                {class: OWNER_REVISION, owner: s03b, negates: REACTION_ROUTE}
+      DECLARED_ROUTE_CONTRADICTS_ITSELF: {class: OWNER_REVISION, owner: s03b, negates: REACTION_ROUTE}
+      LOAD_ROUTE_CONTRADICTED:           {class: OWNER_REVISION, owner: s03b, negates: REACTION_ROUTE}
+      ASSEMBLY_ORDER_CONTRADICTED:       {class: OWNER_REVISION, owner: s03b, negates: ASSEMBLY_ORDER}
+      DOF_NOT_SUPPORTED:                 {class: OWNER_REVISION, owner: s03a, negates: MOTION_REALIZED}
+      UNRELEASED_REQUIRED_MOTION:        {class: OWNER_REVISION, owner: s03b, negates: MOTION_REALIZED}
+      # A fit contradicted at AUTHORITATIVE maturity by the settlement the
+      # convergence block wrote: the arrangement as sized does not hold. The
+      # block may change placements, dimensions and feature alternatives, or
+      # escalate to s03 - so it is revisable, and not architecture-level until
+      # an evaluator carries the solver's conflicting set as an argument.
+      REQUIRED_CLEARANCE_NOT_REALIZED:   {class: OWNER_REVISION, owner: s06, negates: ARRANGEMENT}
+      REQUIRED_CONTACT_NOT_REALIZED:     {class: OWNER_REVISION, owner: s06, negates: ARRANGEMENT}
+      # -- open obligations: repairable by s04, on a FEASIBLE answer ----------
+      JOINT_NOT_PLACED:                  {class: REPAIRABLE_S04, owner: s04b}
+      MOVING_GROUP_HAS_NO_JOINT:         {class: REPAIRABLE_S04, owner: s04b}
+      OCCUPANCY_NOT_COMPUTED:            {class: REPAIRABLE_S04, owner: s04b}
+      MODEL_LOCAL_NEGATIVE:              {class: REPAIRABLE_S04, owner: s04a}
+      REQUIRED_MOTION_NOT_DECLARED:      {class: REPAIRABLE_S04, owner: s04b}
+      DISTINCTNESS_NOT_REALIZED_HERE:    {class: REPAIRABLE_S04, owner: s04b}
+      DISTINCTNESS_SIBLING_NOT_REALIZED: {class: REPAIRABLE_S04, owner: s04b}
+      DISTINCTNESS_COORDINATE_MISSING:   {class: REPAIRABLE_S04, owner: s04b}
+      CLEARANCE_PAIR_OVERLAPS:           {class: REPAIRABLE_S04, owner: s04a}
+      UNDECLARED_PAIR_OVERLAPS:          {class: REPAIRABLE_S04, owner: s04a}
+      SWEEP_MEETS_KEEP_OUT:              {class: REPAIRABLE_S04, owner: s04b}
+      SWEEP_MEETS_CLEARANCE_PAIR:        {class: REPAIRABLE_S04, owner: s04b}
+      SWEEP_MEETS_UNDECLARED_BODY:       {class: REPAIRABLE_S04, owner: s04b}
+      INSERTION_PATH_NOT_CLEAR:          {class: REPAIRABLE_S04, owner: s04a}
+      INSERTION_DIRECTION_MISSING:       {class: REPAIRABLE_S04, owner: s04a}
+      INSERTION_DIRECTION_CONTRADICTS_ACCESS_SIDE: {class: REPAIRABLE_S04, owner: s04a}
+      MATING_GEOMETRY_NOT_ESTABLISHED:   {class: REPAIRABLE_S04, owner: s04a}
+      MATING_AXIS_NOT_ESTABLISHED:       {class: REPAIRABLE_S04, owner: s04a}
+      MATING_SIZE_EXCEEDS_ARRANGEMENT:   {class: REPAIRABLE_S04, owner: s04a}
+      REQUIRED_ENGAGEMENT_NOT_REALIZED:  {class: REPAIRABLE_S04, owner: s04a}
+      MATING_GEOMETRY_STATED_TWICE:      {class: REPAIRABLE_S04, owner: s04a}
+      # -- open obligations: an upstream owner revises, on a FEASIBLE answer --
+      INTERFACE_EXPECTATION_CONFLICT:    {class: OWNER_REVISION, owner: s03a}
+      JOINT_AXIS_UNUSABLE:               {class: OWNER_REVISION, owner: s03a}
+      REGION_WITHOUT_OWNER:              {class: OWNER_REVISION, owner: s03a}
+      DISTINCTNESS_NAMES_NO_SIBLING:     {class: OWNER_REVISION, owner: s03a}
+      DISTINCTNESS_JOINT_NOT_VISIBLE:    {class: OWNER_REVISION, owner: s03a}
+      DISTINCTNESS_DOF_NOT_SUPPORTED:    {class: OWNER_REVISION, owner: s03a}
+      RELEASE_EVIDENCE_NOT_ESTABLISHED:  {class: OWNER_REVISION, owner: s03b}
+      RELEASE_NOT_ACTIVE_AT_SOURCE:      {class: OWNER_REVISION, owner: s03b}
+      RELEASE_RELATIVE_MOTION_NOT_ESTABLISHED: {class: OWNER_REVISION, owner: s03b}
+      RELEASE_RELATION_NOT_APPLICABLE:   {class: OWNER_REVISION, owner: s03b}
+      DEFORMATION_RESOLVED_PATH_UNSUPPORTED: {class: OWNER_REVISION, owner: s03b}
+      INSERTION_NOT_ALONG_MATING_AXIS:   {class: OWNER_REVISION, owner: s03b}
+      ACCESS_SIDE_UNREADABLE:            {class: OWNER_REVISION, owner: s03b}
+      # -- owed downstream, by contract --------------------------------------
+      SIZING_DEFERRED_TO_EMBODIMENT:     {class: DEFERRED_DOWNSTREAM, owner: s05}
+      # -- what this pipeline cannot compute ---------------------------------
+      OCCUPANCY_UNSUPPORTED_COMPOSITE_MOTION: {class: UNSUPPORTED, owner: s04b}
+      UNSUPPORTED_MATING_GEOMETRY:       {class: UNSUPPORTED, owner: s04a}
+      REQUIRED_DOF_NOT_RESOLVABLE:       {class: UNSUPPORTED, owner: s04b}
+      DISTINCTNESS_COORDINATE_NOT_RESOLVABLE: {class: UNSUPPORTED, owner: s04b}
+      # -- the one class no table may grant ----------------------------------
+      ARCHITECTURE_INCOMPATIBILITY:      {class: ARCHITECTURE_INCOMPATIBILITY, owner: s02}
 
   MechanicalFeasibilityAssessment:
     semantic_roles: [eligibility_evidence]
@@ -2683,8 +2880,71 @@ assurance_families:
     # `findings` is a HUMAN-READABLE SUMMARY and is not a second domain-status
     # authority. The canonical per-domain result is `domain_assessments`; free
     # text beside it that could disagree is how two answers start.
-    optional_fields: [findings, blocking_findings, evaluated_domains]
+    #
+    # `blocking_findings` is the STRUCTURED reason the status is not
+    # FEASIBLE_FOR_SELECTION: the required-minimum facts the design has not
+    # shown, one row per negating finding {domain, code, class, owner, fact}.
+    # `open_obligations` is everything else the domains found and the
+    # candidate carries into selection, one row per finding {domain, code,
+    # class, owner}. `physical_argument` is the argument an INFEASIBLE rests
+    # on, and is required exactly then.
+    optional_fields: [findings, blocking_findings, evaluated_domains,
+                      open_obligations, physical_argument]
     status: [FEASIBLE_FOR_SELECTION, INFEASIBLE, NOT_ESTABLISHED]
+    conditional_requirements:
+      - name: infeasible_carries_a_physical_argument
+        applies_when: {field: status, equals: INFEASIBLE}
+        additional_required_fields: [physical_argument]
+        required_shape:
+          physical_argument:
+            mapping: true
+            required_keys: [contradiction, premises, architectural_commitments]
+            non_empty_string: [contradiction]
+        why: >-
+          INV-011: INFEASIBLE is reserved for a physical or logical
+          impossibility supported by an argument. The argument is a record -
+          the contradiction stated, the premises it rests on, the architectural
+          commitments it follows from - and not a sentence; a status without
+          one is refused at the boundary, so no evaluator and no hand can write
+          an infeasibility it cannot show.
+    # THE PRE-SELECTION REQUIRED MINIMUM: what a candidate must have SHOWN
+    # before it is comparable (INV-007, "comparable completeness", made
+    # computable). Each fact names the finding codes that leave it
+    # unestablished through `finding_classification.<code>.negates`. A fact
+    # absent, ambiguous, or contradicted by a still-repairable finding is
+    # NOT_ESTABLISHED; nothing outside this list may make a candidate
+    # NOT_ESTABLISHED, however unfinished it is.
+    pre_selection_required_minimum:
+      ARRANGEMENT:
+        what: one current extent for every body, in one basis, with the bodies the topology connects meeting
+        inv_007: packaging feasible
+      EFFECTS_REALIZED:
+        what: every demanded physical effect discharged by an interaction that produces that effect
+        inv_007: obligations realized
+      REACTION_ROUTE:
+        what: every load case carried by a declared route that closes at its declared external site
+        inv_007: supports and reactions present
+      ACCESS:
+        what: every reach demand answered by a declared region and a conclusion that the arrangement reaches it
+        inv_007: access demonstrated
+      MOTION_REALIZED:
+        what: every demanded state change realized once, between the demanded states, by coordinates that move the required joint
+        inv_007: first-order realization of the demanded function
+      ASSEMBLY_ORDER:
+        what: a total, acyclic assembly order whose dependencies resolve
+        inv_007: packaging feasible - it can be put together in some order
+    # NOT IN THE MINIMUM, deliberately. Each of these is an obligation with an
+    # owner, an analysis this pipeline may not be able to compute, or a
+    # question a later stage answers - and a candidate is not less comparable
+    # for carrying it. Putting any of them here would make "we have not
+    # computed this" into "this candidate has not reached maturity".
+    pre_selection_required_minimum_excludes:
+      - swept occupancy of every moving group, composite or not
+      - conservative clearance of boxes, corridors and sweeps
+      - the fit of any mating interface, and every dimension
+      - material, strength, stiffness and settlement
+      - the resolution of a multi-DOF joint's coordinate
+      - a release's defeat specification, and other restraint bookkeeping
     evaluated_domains:
       - physical_realization
       - load_reaction_closure
@@ -2696,11 +2956,19 @@ assurance_families:
       - assemblability
       - gross_interference
     aggregation: >
-      any applicable domain FAIL -> INFEASIBLE; else any applicable domain
-      NOT_ESTABLISHED -> NOT_ESTABLISHED; else FEASIBLE_FOR_SELECTION.
-      NOT_APPLICABLE never blocks. Complexity, part count, preference and
-      relative quality are not inputs, and a mechanism is not less feasible for
-      having more joints than one somebody would rather have.
+      CLASS-DRIVEN, NOT STATUS-DRIVEN. Every domain finding is classified by
+      `FeasibilityDomainAssessment.finding_classification`. INFEASIBLE iff some
+      domain carries an ARCHITECTURE_INCOMPATIBILITY with a structured
+      physical_argument; else NOT_ESTABLISHED iff some finding negates a
+      `pre_selection_required_minimum` fact; else FEASIBLE_FOR_SELECTION, with
+      every remaining REPAIRABLE_S04, OWNER_REVISION, DEFERRED_DOWNSTREAM and
+      UNSUPPORTED finding carried as an open obligation. A domain's own status
+      is never read for the aggregate: a FAIL whose contradiction an owner can
+      revise is a repair, not an impossibility, and a NOT_ESTABLISHED outside
+      the minimum is an obligation, not immaturity. NOT_APPLICABLE never
+      blocks. Complexity, part count, preference and relative quality are not
+      inputs, and a mechanism is not less feasible for having more joints than
+      one somebody would rather have.
     rules:
       - >
         ITS PREMISES ARE THE DOMAIN ASSESSMENTS AND EVERYTHING THEY USED. The raw
@@ -2730,11 +2998,26 @@ assurance_families:
         asking a prompt not to look. A SelectionProfile reaching this
         responsibility's consumer view is a contract failure.
       - >
-        MISSING EVIDENCE IS NOT FEASIBILITY. A domain the design has not
-        established yields NOT_ESTABLISHED for that domain and for the assessment;
-        it never yields FEASIBLE_FOR_SELECTION. FEASIBLE_FOR_SELECTION means the
-        established evidence contains nothing that stops this candidate - not
-        that the candidate has been proven to work, which is assurance (U-9).
+        MISSING EVIDENCE IS NOT FEASIBILITY, AND IT IS NOT INFEASIBILITY
+        EITHER. A required-minimum fact the design has not established yields
+        NOT_ESTABLISHED for the assessment, and the domain that reported it
+        keeps its own NOT_ESTABLISHED. A finding outside the minimum - a
+        realization s04 can repair, a fact its owner can revise, work a later
+        stage owns, an analysis this pipeline cannot compute - leaves the
+        domain exactly as it found it and is carried on the assessment as an
+        open obligation; it never yields NOT_ESTABLISHED for the candidate and
+        never INFEASIBLE. FEASIBLE_FOR_SELECTION means the required minimum is
+        shown and nothing established contradicts the architecture - not that
+        the candidate has been proven to work, which is assurance (U-9), and
+        not that nothing is owed: what is owed is listed on the record.
+      - >
+        A CURRENT REALIZATION FAILING IS NOT THE MECHANISM FAILING, and an
+        analysis the pipeline cannot run is not evidence about the mechanism.
+        INFEASIBLE is stated only with a `physical_argument` naming the
+        contradiction, its premises and the architectural commitments it
+        follows from; a contradiction whose premise the owner may legally
+        revise without changing the principle is classified as repair or
+        owner revision first, and never becomes INFEASIBLE by exhaustion.
       - >
         NOT AUTHORED BY A MODEL. It is derived from what S1-S6 established, so a
         model cannot declare a mechanism feasible; the name says

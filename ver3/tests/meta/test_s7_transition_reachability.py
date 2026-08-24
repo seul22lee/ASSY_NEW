@@ -494,14 +494,19 @@ class TestTheVocabulary(_Reach):
             if "child_group" in src:
                 self.assertIn("parent_group", src, fn.__name__)
 
-    def test_V5_the_aggregate_rule_is_unchanged(self):
-        """Any applicable FAIL is INFEASIBLE; else any NOT_ESTABLISHED is
-        NOT_ESTABLISHED; else feasible. Asserted through this domain, since it is
-        the one whose contribution to the aggregate just changed."""
+    def test_V5_the_aggregate_rule_reads_classes_not_statuses(self):
+        """UNIT A. OLD ASSUMPTION: any applicable FAIL was INFEASIBLE. NEW
+        INVARIANT: an unreleased explicit blocker is s03b's restraint against
+        s03b's demand - an owner revision that leaves MOTION_REALIZED
+        unestablished - so the domain keeps its FAIL and the candidate is
+        NOT_ESTABLISHED, never INFEASIBLE without an argument. A demand nothing
+        moves is a required-minimum absence, NOT_ESTABLISHED as before; a clean
+        realization is feasible as before."""
         fail = self.assess(self.probe(s03b=evidence(relations=[restraint()])),
                            apply_patch=False)
         self.assertEqual(s07.FAIL, self.domain(fail, DOMAIN).status)
-        self.assertEqual(s07.INFEASIBLE, fail.status)
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, fail.status)
+        self.assertNotEqual(s07.INFEASIBLE, fail.status)
 
         open_ = self.assess(self.probe(s04b=realized(moving=())),
                             apply_patch=False)

@@ -95,7 +95,12 @@ class TestReachBasis(_Feas):
 
     def test_R2_a_negative_conclusion_fails(self):
         """s04a looked at its own arrangement and said the actor cannot get
-        there. That is positive evidence, not an absence."""
+        there. That is positive evidence, not an absence.
+
+        UNIT A. OLD ASSUMPTION: the FAIL made the candidate INFEASIBLE. NEW
+        INVARIANT: it is a conclusion about an arrangement s04a may revise -
+        a repair that leaves the ACCESS fact unestablished - so the domain
+        keeps its FAIL and the candidate is NOT_ESTABLISHED."""
         state = self.demanding()
         self.hinge(state=state, s03a=with_region(topology("A", 2, [(0, 1)])),
                    s04a=reach_arrangement(HINGE_BOXES, "FRG-A", "ACT-0001",
@@ -105,7 +110,8 @@ class TestReachBasis(_Feas):
         self.assertEqual(s07.FAIL, v.status)
         self.assertIn("REACH_CONCLUDED_UNREACHABLE", v.reason_codes)
         self.assertIn(s07.MODEL_LOCAL_NEGATIVE, v.reason_codes)
-        self.assertEqual(s07.INFEASIBLE, out.status)
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
+        self.assertNotEqual(s07.INFEASIBLE, out.status)
 
     def test_R3_a_region_with_no_conclusion_is_not_established(self):
         state = self.demanding()

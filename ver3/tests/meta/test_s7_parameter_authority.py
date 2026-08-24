@@ -177,7 +177,15 @@ class TestProvisionalSizesDecideNoFit(_Authority):
         v = self.domain(out, "gross_interference")
         self.assertEqual(s07.FAIL, v.status, v.summary)
         self.assertIn("REQUIRED_CLEARANCE_NOT_REALIZED", v.reason_codes)
-        self.assertEqual(s07.INFEASIBLE, out.status)
+        # UNIT A. OLD ASSUMPTION: a settlement saying the fit is not realized
+        # made the candidate INFEASIBLE. NEW INVARIANT: it is a positive
+        # finding at authoritative maturity in the convergence block's hands -
+        # the block may change placements, dimensions and feature alternatives
+        # or escalate to s03 - so the ARRANGEMENT fact is unestablished and the
+        # candidate NOT_ESTABLISHED until the block resolves or an evaluator
+        # carries the solver's conflicting set as an argument.
+        self.assertEqual(s07.MFA_NOT_ESTABLISHED, out.status)
+        self.assertNotEqual(s07.INFEASIBLE, out.status)
 
 
 # =====================================================================
