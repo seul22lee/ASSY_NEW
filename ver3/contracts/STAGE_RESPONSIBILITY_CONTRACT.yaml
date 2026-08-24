@@ -363,6 +363,14 @@ stages:
     prohibited_decisions:
     - Any magnitude, position or axis placement
     - Selecting a candidate
+    # UNIT C. An owner revision revises facts this pass owns and never
+    # replaces the candidate's architecture or the mechanism principle.
+    - In an owner revision, adding or removing any body, rigid group or joint,
+      changing what a body is or does, which bodies a rigid group holds, a
+      joint's type or which groups it connects, or changing the mechanism
+      principle or the candidate
+    - Answering a finding of any class but OWNER_REVISION in an owner revision,
+      or answering the same finding twice in one round to keep the better answer
   s03b:
     name: interaction and constraint
     responsibility: State what physically transmits each required effect, what constrains what,
@@ -461,6 +469,12 @@ stages:
     - Position, dimension or axis placement
     - Selecting a candidate
     - Authoring a DOF disposition directly; it is derived from cited premises
+    # UNIT C. An owner revision revises facts this pass owns and nothing upstream.
+    - In an owner revision, adding, removing, renaming or retyping any body,
+      rigid group, joint, interface or configuration, or changing the mechanism
+      principle or the candidate
+    - Answering a finding of any class but OWNER_REVISION in an owner revision,
+      or answering the same finding twice in one round to keep the better answer
   s04a:
     name: coarse spatial realization and comparability
     responsibility: Give each retained candidate a provisional arrangement sufficient to decide

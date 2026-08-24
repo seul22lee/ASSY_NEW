@@ -41,7 +41,9 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from ..state.authority import thaw as _thaw
 from ..state.patch import Op
-from .base import REPAIR_KEY, Stage, carry_invocation_premises
+from .base import (CAUSE_FINDINGS, CAUSE_UPSTREAM_REVISION, REPAIR_KEY, Stage,
+                   branch_records, carry_invocation_premises,
+                   revise_standing_operations)
 #: The canonical DOF vocabulary and the one answer to what a joint frees, read
 #: from the pass that owns them rather than restated - two spellings of one
 #: closed set is how they drift apart.
@@ -207,9 +209,11 @@ RULES
 5. The side each body arrives from is already stated by the assembly step
    you were given (its access_side); do not restate it. Place every body so
    that arriving from that side is possible.
-6. If this topology CANNOT be given a consistent arrangement at all, say so and
-   name the geometric reason. That is a real and useful result: it eliminates a
-   candidate cheaply, which is what this pass is for.
+6. If you cannot give this topology a consistent arrangement, say so in
+   `elimination` and name the GEOMETRIC reason. That is a finding about the
+   arrangement YOU attempted, and it is recorded as one: the pass that made it
+   is asked to revise it, a later responsibility classifies what it means for
+   the candidate, and nothing you state here eliminates a candidate.
 7. For every interface that is a NESTED MATING FEATURE - a pin in a bore, a
    shaft in a bearing, a dowel in a hole, a slider in a guide - the analytical
    geometry of the mating: which body is the inner feature and which the outer,
@@ -247,8 +251,11 @@ Return a single JSON object with these keys, each a list unless marked.
                         relates the two bodies (a fixed dowel), give
                         axis_direction as one of +X -X +Y -Y +Z -Z instead, and
                         never both.
-  elimination           object {{eliminated (boolean), reason}} - reason is a
-                        GEOMETRIC statement, or null when not eliminated
+  elimination           object {{eliminated (boolean), reason}} - eliminated is
+                        true only when YOU could not arrange this topology
+                        consistently; reason is a GEOMETRIC statement, or null
+                        when you could. A finding against your own arrangement,
+                        never a verdict on the candidate
 
 REFERENCES
   envelopes[].body                a body id from the input
@@ -301,12 +308,53 @@ def repair_of(inputs) -> Optional[Dict[str, Any]]:
     return r if isinstance(r, dict) else None
 
 
+def repair_cause(inputs) -> str:
+    """Why this invocation restates what it produced: findings about its own
+    values (Unit B), or a revision upstream of it (Unit C)."""
+    r = repair_of(inputs) or {}
+    return r.get("cause") or CAUSE_FINDINGS
+
+
+def repair_generation(inputs) -> str:
+    """The label under which this invocation's fresh ids are minted.
+
+    The GENERATION of a realization, not the round: a loop nested in another
+    loop numbers its rounds from one again, and two realizations of one branch
+    minted under one round number would collide. The caller reads the next
+    free generation off the state (`next_realization_generation`) and puts
+    it in the context; a context without one falls back to its round, which
+    is what the first loop ever run on a branch gets either way.
+    """
+    r = repair_of(inputs) or {}
+    return str(r.get("round") if r.get("generation") is None else r.get("generation"))
+
+
+def next_realization_generation(state, branch: str) -> int:
+    """The first generation under which this branch has realized nothing.
+
+    Probed by `has_entity` on the State ids a realization of this branch's
+    configurations would carry - every realization has at least one State,
+    and a retired one keeps its records - so a generation that was ever used
+    is seen whatever its validity. No ordinal is read off any id.
+    """
+    configurations = [c["entity_id"] for c in
+                      branch_records(state, branch, ("Configuration",))["Configuration"]]
+    k = 1
+    while any(state.has_entity("STA-%s-R%d" % (cfg, k)) for cfg in configurations):
+        k += 1
+    return k
+
+
 def repair_reason(inputs) -> str:
     """The ONE reason every revision of a repair round carries: which round,
-    and which findings it answers. Read back from the record, not from prose."""
+    why, and which findings it answers. Read back from the record, not from
+    prose."""
     r = repair_of(inputs) or {}
     codes = sorted({f.get("code") for f in (r.get("findings") or [])
                     if isinstance(f, dict) and f.get("code")})
+    if repair_cause(inputs) == CAUSE_UPSTREAM_REVISION:
+        return ("s04 re-realization after upstream revision round %s: %s"
+                % (r.get("round"), ", ".join(codes) or "-"))
     return "s04 repair round %s: %s" % (r.get("round"), ", ".join(codes) or "-")
 
 
@@ -323,6 +371,30 @@ def repair_context_text(inputs, may_revise: str) -> str:
     r = repair_of(inputs)
     if not r:
         return ""
+    if repair_cause(inputs) == CAUSE_UPSTREAM_REVISION:
+        # UNIT C. The mechanism changed under the answer. The findings shown
+        # are the upstream owner's, for orientation; what this pass is asked
+        # is to realize the mechanism as it stands NOW, not to answer them.
+        lines = ["", "RE-REALIZATION ROUND %s" % r.get("round"),
+                 "The mechanism you are given has been REVISED by the stage that "
+                 "authored it, to answer these findings about facts that stage owns:"]
+        for f in r.get("findings") or []:
+            if isinstance(f, dict):
+                lines.append("  - %s: %s%s" % (f.get("domain"), f.get("code"),
+                                               " - " + f["note"] if f.get("note") else ""))
+        lines += ["", "Your previous answer was reasoned from the mechanism as it "
+                  "stood before that revision, so it is not evidence about the "
+                  "mechanism as it stands now. Realize the CURRENT mechanism, in "
+                  "the same schema as before; the values you produced before are "
+                  "shown so you revise them rather than re-imagine them.",
+                  "", "WHAT YOU MAY REVISE: %s." % may_revise,
+                  "WHAT YOU MAY NOT DO: %s." % REPAIR_MAY_NOT,
+                  "A value you restate unchanged is recorded as unchanged; a value "
+                  "you change is recorded as a revision of the previous one, with "
+                  "this round as its reason, and everything computed from the "
+                  "previous value is recomputed.",
+                  "", "THE VALUES YOU PRODUCED BEFORE", _render(r.get("current") or {})]
+        return "\n".join(lines)
     lines = ["", "REPAIR ROUND %s" % r.get("round"),
              "The answer you gave before was checked deterministically. These "
              "findings are about values YOU produced, and this call asks you to "
@@ -344,67 +416,24 @@ def repair_context_text(inputs, may_revise: str) -> str:
 
 def branch_realization(state, branch: str, families: Sequence[str]
                        ) -> Dict[str, List[Dict[str, Any]]]:
-    """The STANDING records of these families that belong to ONE branch, by the
-    canonical branch resolver. What a repair revises, and what its context
-    shows: never another candidate's realization, never a stale one."""
-    from ..view.consumer_view import branch_membership
-
-    records = [(f, r) for f in families for r in state.standing(f)]
-    if not records:
-        return {f: [] for f in families}
-    membership = branch_membership(state, state.c, [r["entity_id"] for _f, r in records])
-    out: Dict[str, List[Dict[str, Any]]] = {f: [] for f in families}
-    for family, record in records:
-        if branch in membership.get(record["entity_id"], ()):
-            out[family].append(record)
-    return out
+    """The STANDING records of these families that belong to ONE branch. The
+    generic resolver in `base`, under the name this module has always used."""
+    return branch_records(state, branch, families)
 
 
 def re_realize_operations(state, ops: Sequence[Op], reason: str,
                           retire: Sequence[Tuple[str, str]] = ()) -> List[Op]:
     """Turn a pass's ordinary operations into REVISIONS of what stands.
 
-    THE BOUNDARY'S OWN VOCABULARY, and nothing beside it. A CREATE of an id
-    that already exists becomes a SUPERSEDE of the fields that differ, with the
-    round's reason - or nothing, where nothing differs; a record is never
-    re-created beside itself. An EXTEND over a field that already holds a
-    value becomes a SUPERSEDE of it where it differs, and an EXTEND of the
-    fields still absent. Entities named in `retire` are INVALIDATED first, so
-    a realization that is one coherent set - every state, every path, every
-    occupancy of one answer - is retired whole and re-created whole under
-    fresh ids, with the previous set kept as history. Nothing is deleted,
-    nothing is overwritten out of existence, and every revision says why.
+    The generic rule (`base.revise_standing_operations`): a CREATE of what
+    stands becomes a SUPERSEDE of what differs or nothing; a CREATE of what
+    no longer stands becomes an INVALIDATE and a CREATE under a fresh
+    revision id; an EXTEND over a value becomes a SUPERSEDE where it differs;
+    entities in `retire` are INVALIDATED first, under s04's repair
+    provenance. Nothing is deleted, and every revision says why.
     """
-    out: List[Op] = []
-    for family, eid in retire:
-        rec = state.entities.get(eid) if state.has_entity(eid) else None
-        if rec is not None and rec.get("_validity") == _STANDING:
-            out.append(Op("INVALIDATE", family, eid, {}, "s04:repair", reason=reason))
-    for op in ops:
-        if op.kind == "CREATE" and state.has_entity(op.entity_id):
-            rec = state.entities[op.entity_id]
-            changed = {k: v for k, v in op.fields.items()
-                       if k not in rec or rec.get(k) != v}
-            if changed:
-                out.append(Op("SUPERSEDE", op.entity_type, op.entity_id, changed,
-                              op.provenance_ref, premise_refs=list(op.premise_refs),
-                              reason=reason))
-            continue
-        if op.kind == "EXTEND" and state.has_entity(op.entity_id):
-            rec = state.entities[op.entity_id]
-            absent = {k: v for k, v in op.fields.items() if k not in rec}
-            changed = {k: v for k, v in op.fields.items()
-                       if k in rec and rec.get(k) != v}
-            if absent:
-                out.append(Op("EXTEND", op.entity_type, op.entity_id, absent,
-                              op.provenance_ref, premise_refs=list(op.premise_refs)))
-            if changed:
-                out.append(Op("SUPERSEDE", op.entity_type, op.entity_id, changed,
-                              op.provenance_ref, premise_refs=list(op.premise_refs),
-                              reason=reason))
-            continue
-        out.append(op)
-    return out
+    return revise_standing_operations(state, ops, reason, retire,
+                                      retire_provenance="s04:repair")
 
 
 class S04AEnvelopeAndReach(Stage):
@@ -461,7 +490,7 @@ class S04AEnvelopeAndReach(Stage):
                 else:
                     fresh += 1
                     op = Op(op.kind, op.entity_type,
-                            "RCH-%s-R%s-%04d" % (branch, repair_of(inputs).get("round"), fresh),
+                            "RCH-%s-R%s-%04d" % (branch, repair_generation(inputs), fresh),
                             op.fields, op.provenance_ref,
                             premise_refs=list(op.premise_refs))
             rewritten.append(op)
@@ -1404,14 +1433,14 @@ class S04BPlacementAndMotion(Stage):
         """The id suffix of a repair round's realization, "" outside one.
 
         A realization is ONE COHERENT SET - every state, every path, every
-        occupancy of one answer - and a repaired one replaces it whole: the
-        previous set is retired and kept, the new set is created under ids
-        that say which round produced them. Reusing the ids would be
-        overwriting history; superseding each record in place would leave a
-        path standing on coordinates it was not computed between.
+        occupancy of one answer - and a repaired or re-realized one replaces
+        it whole: the previous set is retired and kept, the new set is created
+        under ids that say which GENERATION of this branch's realization they
+        are (`repair_generation`). Reusing the ids would be overwriting
+        history; superseding each record in place would leave a path standing
+        on coordinates it was not computed between.
         """
-        r = repair_of(inputs)
-        return "-R%s" % r.get("round") if r else ""
+        return "-R%s" % repair_generation(inputs) if repair_of(inputs) else ""
 
     def invocation_premises(self, inputs: Dict[str, Any]) -> List[str]:
         b = _branch(inputs)

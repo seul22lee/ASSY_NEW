@@ -24,6 +24,15 @@ authority_status:
       relation: EXACT
     projected_key: creates
     projects: which families this stage owns
+  owner_revision_lifecycle:
+    class: "OPERATIONAL"
+    note: >
+      How the two passes revise a fact they authored when the feasibility
+      responsibility classifies a finding about it as OWNER_REVISION, and
+      what that revision causes downstream. The classes it acts on, the
+      ownership of every value it revises and the controlled operations it
+      uses are canonical elsewhere; this section says how the loop runs.
+    authoritative_for_canonical_semantics: false
   current_producer:
     class: RETIRED
     describes: >
@@ -440,6 +449,88 @@ next_stage_consumer_requirement:
   consumer_b: s04b
   needs_b: [total_dof_disposition_with_cited_premises, constraint_relations,
             assembly_steps_with_order_and_access_side, load_paths_as_hypotheses]
+
+owner_revision_lifecycle:
+  # UNIT C. AN UPSTREAM AUTHORING DEFECT IS REPAIRED BY ITS OWNER, and every
+  # downstream realization and assessment that depended on the old fact is
+  # rebuilt from current premises. Owner-revision exhaustion is not mechanism
+  # infeasibility.
+  principle: >
+    check -> route -> revise -> rebuild -> re-check, bounded. The check is the
+    feasibility responsibility answering again over current state; the
+    routing is the OWNER the contract's finding classification names for
+    each OWNER_REVISION code - s03a for topology and ownership, s03b for
+    mobility, assembly, load and release; the revision is that pass revising
+    the fact it authored; the rebuild is everything downstream of the revised
+    fact realized again from current premises; the re-check is the same
+    evaluator again. Nothing in the loop decides anything about the
+    candidate: it applies the owners' patches and records what happened.
+  trigger: >
+    ONLY findings of class OWNER_REVISION on the branch's current
+    FeasibilityDomainAssessments whose owner is s03a or s03b. A
+    MechanicalFeasibilityAssessment status is never a trigger, nor is prose,
+    nor a candidate's or a benchmark's identity. REPAIRABLE_S04 belongs to
+    the s04 repair loop, DEFERRED_DOWNSTREAM to s05/s06, UNSUPPORTED to nobody
+    - a capability limit is recorded, not retried - and REQUIRED_MINIMUM_ABSENT
+    names a fact no revision may invent. An OWNER_REVISION finding owned by a
+    later stage is reported unrouted and left as found.
+  owner_reinvocation: >
+    Each owner with a finding is put its OWNER REVISION CONTEXT: the typed
+    findings - domain, code, the domain's note, and the records each was
+    found on - the standing records of those premises the pass does not own,
+    and the pass's own standing records for the branch. The pass restates its
+    whole answer in its ordinary schema under the same ids; what differs is
+    recorded as a revision and what does not is recorded as nothing. ONE
+    INVOCATION PER OWNER PER ROUND, s03a before s03b; where s03a revised,
+    s03b's single invocation also carries what changed above it.
+  legal_revision_scope: >
+    The owner may revise only facts it owns, and only where that preserves
+    the candidate's architecture and the mechanism principle. s03a may revise
+    a joint's free DOF, axis direction and frame, an interface's kind and
+    feature, a configuration's basis, a functional region's role and owning
+    bodies, and the open decisions; it may NOT add or remove a body, rigid
+    group or joint, change what a body is, which bodies a group holds, a
+    joint's type or which groups it connects, and a revision that would is
+    refused whole as an ARCHITECTURE_ESCALATION. s03b may revise every fact
+    of its relations, interactions, load paths, assembly steps and transition
+    requirements, and the DOF disposition is re-derived from them. Neither
+    may change the S02 principle or the candidate: a finding that cannot be
+    resolved without that is declared ESCALATED by the owner and left open.
+  how_a_revision_is_recorded: >
+    Through the boundary's own operations and no others. A restated value
+    that changed is SUPERSEDED with the round as its reason and the previous
+    value kept; an unchanged value writes nothing; a restated record that had
+    lost standing is INVALIDATED and re-created under a fresh revision id,
+    because a supersession does not restore standing. Everything premised on
+    a revised fact loses unqualified authority by ordinary propagation.
+    Nothing is deleted; nothing is overwritten out of existence.
+  what_a_revision_causes: >
+    Where any revision landed, the branch downstream of it is REBUILT from
+    current premises before it is checked again: s03b is re-authored where
+    s03a revised; s04a and s04b are re-realized from the mechanism as it now
+    stands - s04a's changed values superseded, s04b's realization retired
+    whole and re-created whole under the branch's next generation - and the
+    bounded s04 repair loop runs over that realization. A standing S04
+    realization is never reused merely because its ids exist: it was reasoned
+    from the mechanism as it stood before. A rebuild step that does not land
+    ends the loop with no feasibility offered.
+  bound: >
+    At most N rounds per candidate (2 to begin with). A round whose findings
+    are the findings of an earlier round OVER THE SAME BASIS - the same
+    (domain, code, owner) over the same current revisions of the premises
+    each was found on, never a free-text summary - is a CYCLE and ends the
+    loop; the same code over a basis a revision changed is a different
+    finding, and counts against the budget instead. One invocation per owner
+    per round, taken whatever it says: NO FAVOURABLE RETRY - nothing asks
+    twice and keeps the better answer, and nothing picks among answers.
+  ending: >
+    Every ending is evidence and none is a verdict. What is still owner-
+    revisable when the loop ends - by cycle, by budget, by a refused or
+    escalated revision, by an invocation that did not land, or with no
+    provider offered - stays on the record as open obligations of a candidate
+    that is exactly as feasible as its required minimum and its arguments say
+    (Unit A): never INFEASIBLE by exhaustion, and never resolved by a hand
+    that was not the owner's.
 
 llm_role: >
   High for topology and strategy proposal. NONE for the DOF grid, in either half

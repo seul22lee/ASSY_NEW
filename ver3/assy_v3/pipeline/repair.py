@@ -18,9 +18,12 @@ without one.
 """
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
+from ..stages.base import (CAUSE_FINDINGS, CAUSE_UPSTREAM_REVISION, REPAIR_KEY,
+                           authored_families)
 from .progression import (CONTRACT_CONDITION, DeterministicExecution, Progression,
                           execute_stage)
 
@@ -41,14 +44,24 @@ REPAIR_FAILED = "REPAIR_FAILED"          # a repair invocation did not land
 NO_EVIDENCE = "NO_EVIDENCE"              # feasibility could not evaluate the branch
 
 
+
+def s04_families() -> Tuple[str, ...]:
+    """What an s04 pass is shown of its own previous answer when asked to
+    restate it: the families the two passes may author, from the contract."""
+    return authored_families("s04a", "s04b")
+
+
 @dataclass(frozen=True)
 class RepairRound:
     """One round: what was found, what was done about it, in that order."""
 
     branch: str
     round: int
-    #: The repairable findings this round started from, as (domain, code).
-    signature: Tuple[Tuple[str, str], ...]
+    #: The repairable findings this round started from, as the TYPED identity
+    #: `finding_signature` gives them: (domain, code, owner, basis), where the
+    #: basis is a digest over the current revisions of the premises the
+    #: finding was found on.
+    signature: Tuple[Tuple[str, ...], ...]
     #: The derivation passes that ran and wrote, by responsibility.
     deterministic: Tuple[str, ...] = ()
     #: The producing passes re-invoked with repair context, by responsibility.
@@ -82,10 +95,12 @@ class RepairOutcome:
                 "feasibility": self.feasibility}
 
 
-def _repairable_findings(state, progression: Progression, branch: str):
-    """(status, rows) - feasibility answered again over current state, and the
-    REPAIRABLE_S04 rows of its domain verdicts. The answer is written through
-    the owner's own entry point, so the check IS the canonical check."""
+def classified_findings(state, progression: Progression, branch: str):
+    """(status, rows) - feasibility answered again over current state, and
+    EVERY classified obligation row of its domain verdicts, each carrying the
+    domain's note and the premises the verdict was decided from. The answer
+    is written through the owner's own entry point, so the check IS the
+    canonical check; a caller reads the class it acts on off the rows."""
     from ..stages import feasibility as feas
 
     out = feas.evaluate_candidate_feasibility(state, branch)
@@ -100,13 +115,40 @@ def _repairable_findings(state, progression: Progression, branch: str):
     rows = []
     for v in out.verdicts:
         for row in feas.classify(v)[0]:
-            if row.get("class") == REPAIRABLE_S04:
-                rows.append(dict(row, note=v.summary))
+            rows.append(dict(row, note=v.summary, premises=sorted(v.premises)))
     return out.status, rows
 
 
-def _signature(rows) -> Tuple[Tuple[str, str], ...]:
-    return tuple(sorted({(r["domain"], r["code"]) for r in rows}))
+def _repairable_findings(state, progression: Progression, branch: str):
+    """(status, rows) - the REPAIRABLE_S04 rows of the canonical check."""
+    status, rows = classified_findings(state, progression, branch)
+    return status, [r for r in rows if r.get("class") == REPAIRABLE_S04]
+
+
+def finding_signature(state, rows) -> Tuple[Tuple[str, ...], ...]:
+    """The TYPED identity of a set of findings over the basis they rest on.
+
+    (domain, code, owner, basis) per finding, where the basis is a digest over
+    the CURRENT REVISION of every premise the finding's verdict was decided
+    from (`entity_revision_digest`: a lifecycle question, not an engineering
+    one). Two rounds that find the same code over a basis that changed in
+    between are two different findings - the earlier repair moved something
+    and the problem is now a different one - and only the same code over the
+    same basis is the same finding come back. No free text enters: a summary
+    reworded is not a finding changed, and a finding changed under an
+    unchanged summary is not the same finding.
+    """
+    out = set()
+    for r in rows:
+        basis = hashlib.sha256("|".join(
+            "%s=%s" % (p, state.entity_revision_digest(p))
+            for p in sorted(r.get("premises") or ())).encode()).hexdigest()[:16]
+        out.add((r["domain"], r["code"], r.get("owner") or "", basis))
+    return tuple(sorted(out))
+
+
+def _signature(state, rows):
+    return finding_signature(state, rows)
 
 
 def _deterministic_repairs(state, progression: Progression, branch: str, rows,
@@ -161,9 +203,10 @@ def s04_repair_rounds(provider, state, progression: Progression, invocation, *,
     leaves what is still open as open obligations on the record. None of them
     is INFEASIBLE, which needs an argument no loop can write.
     """
-    from ..stages.s04_envelope_and_motion import (REPAIR_KEY, S04AEnvelopeAndReach,
+    from ..stages.s04_envelope_and_motion import (S04AEnvelopeAndReach,
                                                   S04BPlacementAndMotion,
-                                                  branch_realization)
+                                                  branch_realization,
+                                                  next_realization_generation)
     branch = getattr(invocation, "branch", None)
     stages = {"s04a": S04AEnvelopeAndReach(), "s04b": S04BPlacementAndMotion()}
     outcome = RepairOutcome(branch=branch, status=BUDGET_EXHAUSTED)
@@ -176,7 +219,7 @@ def s04_repair_rounds(provider, state, progression: Progression, invocation, *,
         if not rows:
             outcome.status, outcome.feasibility = SETTLED, status
             return outcome
-        signature = _signature(rows)
+        signature = _signature(state, rows)
         if signature in seen:
             outcome.status, outcome.open, outcome.feasibility = CYCLE, rows, status
             progression.fail(CONTRACT_CONDITION, "s04",
@@ -203,9 +246,8 @@ def s04_repair_rounds(provider, state, progression: Progression, invocation, *,
             outcome.rounds.append(record)
             outcome.status, outcome.open, outcome.feasibility = NO_PROVIDER, rows, status
             return outcome
-        current = branch_realization(state, branch, (
-            "ReferenceScale", "Envelope", "FunctionalRegion", "Interface", "ReachResult",
-            "EliminationRecord", "AssemblyStep", "Joint", "State", "Transition"))
+        current = branch_realization(state, branch, s04_families())
+        generation = next_realization_generation(state, branch)
         invoked: List[str] = []
         problems: List[str] = []
         for pass_id in ("s04a", "s04b"):
@@ -213,7 +255,8 @@ def s04_repair_rounds(provider, state, progression: Progression, invocation, *,
             if not mine:
                 continue
             stage = stages[pass_id]
-            repair = {"round": n, "findings": mine, "current": current}
+            repair = {"round": n, "cause": CAUSE_FINDINGS, "findings": mine,
+                      "current": current, "generation": generation}
             out = None
             for refresh in range(refreshes + 1):
                 out, _ = execute_stage(stage, provider, state, progression,
@@ -247,3 +290,55 @@ def s04_repair_rounds(provider, state, progression: Progression, invocation, *,
     return outcome
 
 
+def s04_re_realization(provider, state, progression: Progression, invocation, *,
+                       round: int, findings, refreshes: int = 1
+                       ) -> Tuple[List[str], List[str]]:
+    """Realize the branch AGAIN, from the mechanism as it now stands.
+
+    UNIT C'S CALL INTO S04'S LIFECYCLE. An upstream owner revised a fact the
+    standing realization was reasoned from, so the realization is not
+    evidence about the mechanism as it stands - whether or not any of its
+    records went stale by premises: a still-standing realization is not
+    reused merely because its ids exist. Both passes are re-invoked, s04a
+    then s04b, each with RE-REALIZATION CONTEXT (the upstream findings, for
+    orientation, and its own previous values, to revise rather than
+    re-imagine) and the ordinary bounded refinement refresh. Their answers
+    are recorded as revisions of what stands: s04a's changed values are
+    superseded and unchanged ones write nothing; s04b's realization is
+    retired whole and re-created whole under the branch's next generation.
+    One invocation per pass; nothing is compared and nothing retried.
+
+    Returns (invoked, problems). A pass that does not land ends the
+    re-realization - what stands is then a realization of the OLD mechanism
+    with an upstream revision beside it, and the caller reports that rather
+    than trusting a check over it.
+    """
+    from ..stages.s04_envelope_and_motion import (S04AEnvelopeAndReach,
+                                                  S04BPlacementAndMotion,
+                                                  branch_realization,
+                                                  next_realization_generation)
+    branch = getattr(invocation, "branch", None)
+    invoked: List[str] = []
+    problems: List[str] = []
+    generation = next_realization_generation(state, branch)
+    for attempt, stage in enumerate((S04AEnvelopeAndReach(), S04BPlacementAndMotion()),
+                                    start=1):
+        context = {"round": round, "cause": CAUSE_UPSTREAM_REVISION,
+                   "findings": [dict(f) for f in findings],
+                   "current": branch_realization(state, branch, s04_families()),
+                   "generation": generation}
+        out = None
+        for refresh in range(refreshes + 1):
+            out, _ = execute_stage(stage, provider, state, progression,
+                                   inputs={"candidate": branch, REPAIR_KEY: context},
+                                   attempt=20 + 2 * round + attempt, invocation=invocation)
+            if out is None or out.patch is None or out.problems:
+                break
+            if not out.refinement_only:
+                break
+        invoked.append(stage.responsibility_id())
+        if out is None or out.patch is None or out.problems:
+            problems.append("%s: the re-realization did not land"
+                            % stage.responsibility_id())
+            break
+    return invoked, problems

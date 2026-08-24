@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from ..providers.interfaces import GenerationRequest
 from ..providers.status import ExecutionStatus
@@ -37,8 +37,16 @@ class StageError(Exception):
     """A programming error in the stage itself. Never a provider condition."""
 
 
-def render_namespace_occupancy(occupancy: Optional[Dict[str, Any]]) -> str:
+def render_namespace_occupancy(occupancy: Optional[Dict[str, Any]],
+                               revising: bool = False) -> str:
     """The ids already taken in the families this responsibility may create.
+
+    `revising` is an invocation that carries a repair or owner-revision
+    context: the pass is restating what it authored under the ids it already
+    holds, so the list is rendered as what it then is - the records a
+    restated id revises - and not as ids the pass may not emit. Telling a
+    revising pass that every id it emits must be new would ask it to re-create
+    its answer beside itself, which the boundary rightly refuses.
 
     ONE renderer for every stage, appended by `build_prompt` below, so no stage's
     prompt template mentions a family and no stage decides whether it needs this.
@@ -52,6 +60,18 @@ def render_namespace_occupancy(occupancy: Optional[Dict[str, Any]]) -> str:
     """
     if not occupancy:
         return ""
+    if revising:
+        lines = ["", "IDS ALREADY IN USE",
+                 "These entities already exist in the design state. In THIS call you",
+                 "are revising what you authored: an id in this list that you restate",
+                 "is a revision of that record, not a collision, and an id you emit",
+                 "that is not in this list is a new record. This is an identity list",
+                 "and nothing more - it is not something to reason from."]
+        for family in sorted(occupancy):
+            ids = list(occupancy[family] or [])
+            if ids:
+                lines.append("  %s: %s" % (family, ", ".join(str(i) for i in ids)))
+        return "\n".join(lines) + "\n"
     lines = ["", "IDS ALREADY IN USE",
              "These entities already exist in the design state. The ids are listed",
              "so you do not reuse one: every id you emit must be new. This is an",
@@ -141,6 +161,131 @@ def carry_invocation_premises(ops: List[Op], premises: List[str]) -> List[Op]:
                       op.provenance_ref,
                       premise_refs=list(op.premise_refs) + extra,
                       reason=op.reason))
+    return out
+
+
+#: WHY a pass is being asked to restate what it authored. Carried in the
+#: repair context under `cause`, rendered into the prompt in the pass's own
+#: words, and written into the reason of every revision the answer produces.
+#: The two causes are different questions with the same mechanics: findings
+#: about values the pass itself produced (Unit B), and a revision UPSTREAM of
+#: the pass whose facts its answer was reasoned from (Unit C).
+CAUSE_FINDINGS = "FINDINGS"
+CAUSE_UPSTREAM_REVISION = "UPSTREAM_REVISION"
+
+_STANDING, _STALE = "STANDING", "STALE"
+
+
+def authored_families(*responsibility_ids: str) -> Tuple[str, ...]:
+    """The families these responsibilities may author, READ FROM THE CONTRACT.
+
+    `permitted_output_semantics` per pass, a dotted entry (`Interface.
+    mating_geometry`) collapsed to the family it extends, in declared order
+    and without repeats. What a pass is shown of its own previous answer, and
+    what an owner revision may revise, is this set - never a table kept
+    beside the contract, which is the defect ADR-002 removed.
+    """
+    from ..view.boundary import responsibility_contract
+
+    stages = responsibility_contract()["stages"]
+    out: List[str] = []
+    for rid in responsibility_ids:
+        for semantic in stages[rid].get("permitted_output_semantics") or []:
+            family = str(semantic).split(".")[0]
+            if family not in out:
+                out.append(family)
+    return tuple(out)
+
+
+def branch_records(state, branch: str, families: Sequence[str]
+                   ) -> Dict[str, List[Dict[str, Any]]]:
+    """The STANDING records of these families that belong to ONE branch, by
+    the canonical branch resolver. What a revision revises, and what its
+    context shows: never another candidate's records, never a stale one."""
+    from ..view.consumer_view import branch_membership
+
+    records = [(f, r) for f in families for r in state.standing(f)]
+    if not records:
+        return {f: [] for f in families}
+    membership = branch_membership(state, state.c, [r["entity_id"] for _f, r in records])
+    out: Dict[str, List[Dict[str, Any]]] = {f: [] for f in families}
+    for family, record in records:
+        if branch in membership.get(record["entity_id"], ()):
+            out[family].append(record)
+    return out
+
+
+def fresh_revision_id(state, entity_id: str) -> str:
+    """The first free revision id of an entity that must be re-created beside
+    itself: `<id>-R1`, `-R2`, ... The number is an opaque part of a new id and
+    nothing reads it back; the probe is `has_entity`, never an ordinal."""
+    k = 1
+    while state.has_entity("%s-R%d" % (entity_id, k)):
+        k += 1
+    return "%s-R%d" % (entity_id, k)
+
+
+def revise_standing_operations(state, ops: Sequence[Op], reason: str,
+                               retire: Sequence[Tuple[str, str]] = (),
+                               retire_provenance: str = "revision") -> List[Op]:
+    """Turn a pass's ordinary operations into REVISIONS of what stands.
+
+    THE BOUNDARY'S OWN VOCABULARY, and nothing beside it. A CREATE of an id
+    that already exists and STANDS becomes a SUPERSEDE of the fields that
+    differ, with the reason - or nothing, where nothing differs; a record is
+    never re-created beside itself. A CREATE of an id that exists and NO
+    LONGER STANDS - stale because a premise it rests on was revised - is what
+    the lifecycle already does for an assessment whose basis changed: the
+    stale record is INVALIDATED and the restated one CREATED under a fresh
+    revision id, because a supersession does not restore standing and nothing
+    may silently regain authority. An EXTEND over a field that already holds
+    a value becomes a SUPERSEDE of it where it differs, and an EXTEND of the
+    fields still absent. Entities named in `retire` are INVALIDATED first, so
+    a realization that is one coherent set is retired whole and re-created
+    whole under fresh ids, with the previous set kept as history. Nothing is
+    deleted, nothing is overwritten out of existence, and every revision says
+    why.
+    """
+    out: List[Op] = []
+    retired = set()
+    for family, eid in retire:
+        rec = state.entities.get(eid) if state.has_entity(eid) else None
+        if rec is not None and rec.get("_validity") == _STANDING:
+            out.append(Op("INVALIDATE", family, eid, {}, retire_provenance, reason=reason))
+            retired.add(eid)
+    for op in ops:
+        if op.kind == "CREATE" and state.has_entity(op.entity_id) \
+                and op.entity_id not in retired:
+            rec = state.entities[op.entity_id]
+            if rec.get("_validity") != _STANDING:
+                if rec.get("_validity") == _STALE:
+                    out.append(Op("INVALIDATE", op.entity_type, op.entity_id, {},
+                                  op.provenance_ref, reason=reason))
+                out.append(Op("CREATE", op.entity_type,
+                              fresh_revision_id(state, op.entity_id), op.fields,
+                              op.provenance_ref, premise_refs=list(op.premise_refs)))
+                continue
+            changed = {k: v for k, v in op.fields.items()
+                       if k not in rec or rec.get(k) != v}
+            if changed:
+                out.append(Op("SUPERSEDE", op.entity_type, op.entity_id, changed,
+                              op.provenance_ref, premise_refs=list(op.premise_refs),
+                              reason=reason))
+            continue
+        if op.kind == "EXTEND" and state.has_entity(op.entity_id):
+            rec = state.entities[op.entity_id]
+            absent = {k: v for k, v in op.fields.items() if k not in rec}
+            changed = {k: v for k, v in op.fields.items()
+                       if k in rec and rec.get(k) != v}
+            if absent:
+                out.append(Op("EXTEND", op.entity_type, op.entity_id, absent,
+                              op.provenance_ref, premise_refs=list(op.premise_refs)))
+            if changed:
+                out.append(Op("SUPERSEDE", op.entity_type, op.entity_id, changed,
+                              op.provenance_ref, premise_refs=list(op.premise_refs),
+                              reason=reason))
+            continue
+        out.append(op)
     return out
 
 
@@ -240,7 +385,7 @@ class Stage:
         appends what it was given and nothing else.
         """
         return self.prompt(inputs) + render_namespace_occupancy(
-            inputs.get(self.occupancy_key))
+            inputs.get(self.occupancy_key), revising=bool(inputs.get(REPAIR_KEY)))
 
     def to_operations(self, parsed: Dict[str, Any],
                       inputs: Optional[Dict[str, Any]] = None) -> List[Op]:
@@ -469,6 +614,14 @@ class Stage:
                     # reason on every one of them.
                     ops = self.repair_operations(ops, inputs, state)
                 missing = self.completeness(parsed, inputs)
+        except StageError as exc:
+            # A HOOK REFUSED THE RESPONSE ON THIS STAGE'S OWN TERMS - a revision
+            # that would replace what the pass may not replace. Well-formed,
+            # parsed, and not a patch: the reason travels as the problem, so a
+            # caller can read what was refused rather than that something was.
+            return StageOutcome(self.stage_id, ExecutionStatus.SCHEMA_FAILURE, None,
+                                problems=[str(exc)],
+                                raw_response=result.response.raw_text)
         except (KeyError, TypeError, AttributeError, IndexError, ValueError) as exc:
             return StageOutcome(
                 self.stage_id, ExecutionStatus.SCHEMA_FAILURE, None,

@@ -25,7 +25,9 @@ import re
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from ..state.patch import Op
-from .base import Stage, carry_invocation_premises
+from .base import (CAUSE_FINDINGS, CAUSE_UPSTREAM_REVISION, REPAIR_KEY, Stage,
+                   StageError, authored_families, branch_records,
+                   carry_invocation_premises, revise_standing_operations)
 
 def _family(name: str) -> Dict[str, Any]:
     """One entity family's contract record. READ, never restated.
@@ -705,6 +707,202 @@ def _candidate_premise(candidate) -> List[str]:
     return [candidate] if isinstance(candidate, str) and candidate else []
 
 
+# =========================================================================
+# owner revision - an s03 pass revising a fact it authored (Unit C)
+# =========================================================================
+#: The finding class an owner revision answers, in the contract's word.
+OWNER_REVISION = "OWNER_REVISION"
+
+#: The typed marker of a revision this pass REFUSED because landing it would
+#: replace the candidate's architecture. Carried at the head of the outcome's
+#: problem, so a caller reads what was refused rather than that something was.
+ARCHITECTURE_ESCALATION = "ARCHITECTURE_ESCALATION"
+
+#: The typed marker of an escalation the OWNER declared: a finding it could
+#: not resolve without doing what a revision may not do. Carried in the
+#: outcome's declared incompleteness, one entry per finding.
+ESCALATED = "ESCALATED"
+
+#: What each pass shows of its own previous answer, and revises: the
+#: families the responsibility contract lets it author, read from there.
+S03A_FAMILIES = authored_families("s03a")
+S03B_FAMILIES = authored_families("s03b")
+
+#: THE CANDIDATE'S ARCHITECTURE, as this stage records it: which bodies exist
+#: and what each is, which bodies form a rigid unit, and which joints of what
+#: type connect which groups. An owner revision that adds, removes or retypes
+#: any of these is a different mechanism wearing a revision's reason; it is
+#: refused here, whole, and reported as an architecture escalation. What is
+#: NOT architecture - a joint's free DOF, axis direction and frame, an
+#: interface's kind and feature, a configuration's basis, a region's owner -
+#: is owner-authored support the pass may revise.
+ARCHITECTURE = {"Body": ("instance_identity", "role"),
+                "RigidGroup": ("body", "members"),
+                "Joint": ("joint_type", "parent_group", "child_group")}
+
+REVISION_MAY_NOT = (
+    "add or remove any body, rigid group or joint; change what a body is or "
+    "does, which bodies a rigid group holds, a joint's type or which groups "
+    "it connects; change the mechanism principle or the candidate; state any "
+    "magnitude, position or axis placement; or answer a finding of any class "
+    "but OWNER_REVISION")
+
+
+def revision_of(inputs) -> Optional[Dict[str, Any]]:
+    """The owner-revision context an invocation carries, or None outside one."""
+    r = (inputs or {}).get(REPAIR_KEY)
+    return r if isinstance(r, dict) else None
+
+
+def revision_cause(inputs) -> str:
+    r = revision_of(inputs) or {}
+    return r.get("cause") or CAUSE_FINDINGS
+
+
+def _codes(rows) -> str:
+    return ", ".join(sorted({f.get("code") for f in (rows or [])
+                             if isinstance(f, dict) and f.get("code")})) or "-"
+
+
+def revision_reason(inputs, pass_id: str) -> str:
+    """The ONE reason every revision of an owner-revision round carries: which
+    pass, which round, why, and which findings it answers."""
+    r = revision_of(inputs) or {}
+    if revision_cause(inputs) == CAUSE_UPSTREAM_REVISION:
+        return ("%s re-authoring after upstream revision round %s: %s"
+                % (pass_id, r.get("round"), _codes(r.get("upstream"))))
+    reason = "%s owner revision round %s: %s" % (pass_id, r.get("round"),
+                                                 _codes(r.get("findings")))
+    if r.get("upstream"):
+        reason += " (after upstream revision: %s)" % _codes(r.get("upstream"))
+    return reason
+
+
+def revision_context_text(inputs, may_revise: str) -> str:
+    """The OWNER REVISION CONTEXT appended to a pass's prompt, or "" outside one.
+
+    The findings are the classified OWNER_REVISION rows the feasibility
+    responsibility wrote about facts THIS pass authored - domain, code, the
+    domain's note, and the records it was found on - and the pass's own
+    standing records, so it revises what stands rather than re-authoring the
+    mechanism. The pass is told what it may revise, what it may not, that a
+    finding it cannot resolve within that boundary is ESCALATED and not
+    resolved, and to restate its whole answer under the same ids. After an
+    upstream revision the pass is told what changed above it and asked to
+    re-author against the mechanism as it now stands.
+    """
+    r = revision_of(inputs)
+    if not r:
+        return ""
+    lines: List[str] = []
+    findings = [f for f in (r.get("findings") or []) if isinstance(f, dict)]
+    upstream = [f for f in (r.get("upstream") or []) if isinstance(f, dict)]
+    if findings:
+        lines += ["", "OWNER REVISION ROUND %s" % r.get("round"),
+                  "A deterministic check of the design found these defects in facts "
+                  "YOU authored for this candidate. Each names the domain that found "
+                  "it, the finding, the domain's note, and the records it was found on:"]
+        for f in findings:
+            lines.append("  - %s: %s%s%s" % (
+                f.get("domain"), f.get("code"),
+                " - " + f["note"] if f.get("note") else "",
+                " (on: %s)" % ", ".join(f["premises"]) if f.get("premises") else ""))
+    if upstream:
+        lines += ["", "WHAT CHANGED UPSTREAM (round %s)" % r.get("round"),
+                  "The stage before you revised facts your previous answer was "
+                  "reasoned from, to answer these findings about facts it owns:"]
+        for f in upstream:
+            lines.append("  - %s: %s%s" % (f.get("domain"), f.get("code"),
+                                           " - " + f["note"] if f.get("note") else ""))
+        lines.append("Re-author against the mechanism AS IT STANDS NOW, shown in the "
+                     "typed input; your previous answer is shown below so you revise "
+                     "it rather than re-imagine it.")
+    lines += ["", "WHAT YOU MAY REVISE: %s." % may_revise,
+              "WHAT YOU MAY NOT DO: %s." % REVISION_MAY_NOT,
+              "IF A FINDING CANNOT BE RESOLVED WITHOUT DOING ONE OF THOSE THINGS, do "
+              "not resolve it: list it under `escalations` - a list of "
+              "{\"code\", \"why\"} - and leave the records it is about as they "
+              "stand. An escalation is recorded as your statement that the finding "
+              "needs a decision above this stage; it is not a failure and it is "
+              "not a verdict on the candidate.",
+              "RESTATE YOUR WHOLE ANSWER in the same schema as before, UNDER THE SAME "
+              "IDS as the records below. An id you keep is a revision of that "
+              "record: a value you restate unchanged is recorded as unchanged, a "
+              "value you change is recorded as a revision of the previous one with "
+              "this round as its reason, and everything downstream that rested on "
+              "the previous value is rebuilt. A record you omit is left standing as "
+              "it is. Do not restate a finding as fixed: fix the fact.",
+              "", "THE RECORDS YOU AUTHORED BEFORE", _render(r.get("current") or {})]
+    if r.get("premises"):
+        lines += ["", "THE RECORDS THE FINDINGS WERE FOUND ON, WHICH ARE NOT YOURS",
+                  _render(r.get("premises"))]
+    return "\n".join(lines)
+
+
+def architecture_problems(ops: Iterable[Op]) -> List[str]:
+    """Every way these operations would replace the candidate's architecture.
+
+    Read off the CONVERTED operations, so an unchanged restatement - which
+    converts to nothing - is never a problem, and only an actual addition,
+    removal or retyping is."""
+    out: List[str] = []
+    for op in ops:
+        fields = ARCHITECTURE.get(op.entity_type)
+        if fields is None:
+            continue
+        if op.kind == "CREATE":
+            out.append("adds %s %s" % (op.entity_type, op.entity_id))
+        elif op.kind == "INVALIDATE":
+            out.append("removes %s %s" % (op.entity_type, op.entity_id))
+        elif op.kind == "SUPERSEDE":
+            for name in sorted(op.fields):
+                if name in fields:
+                    out.append("changes %s.%s of %s" % (op.entity_type, name, op.entity_id))
+    return out
+
+
+def owner_revision_operations(state, ops: List[Op], inputs, pass_id: str,
+                              guard: bool) -> List[Op]:
+    """What a restated answer means as a REVISION of what this pass authored.
+
+    The generic rule turns a CREATE of what stands into a SUPERSEDE of what
+    differs or nothing, and a CREATE of what no longer stands into a fresh
+    revision beside the retired record (`revise_standing_operations`). Then
+    two things this stage adds: a revision of a record s03 does not own -
+    an open decision, which anyone may create and its author alone may
+    revise - is dropped rather than refused, since the answer was asked to
+    restate it; and, where `guard` is set, an operation that would replace
+    the architecture refuses the whole answer with an ARCHITECTURE_ESCALATION,
+    because a revision is not a place to land a different mechanism.
+    """
+    reason = revision_reason(inputs, pass_id)
+    converted = revise_standing_operations(state, ops, reason,
+                                           retire_provenance="s03:revision")
+    kept = [op for op in converted
+            if not (op.kind == "SUPERSEDE" and state.c.owner_of(op.entity_type) != "s03")]
+    if guard:
+        problems = architecture_problems(kept)
+        if problems:
+            raise StageError("%s: this revision would replace the candidate's "
+                             "architecture, which no owner revision may do - %s"
+                             % (ARCHITECTURE_ESCALATION, "; ".join(problems)))
+    return kept
+
+
+def declared_escalations(parsed, inputs) -> List[str]:
+    """The owner's own statement of what it could not resolve within its
+    authority, as typed entries of the outcome's declared incompleteness.
+    Read only in a revision; outside one the key means nothing."""
+    if not revision_of(inputs):
+        return []
+    out: List[str] = []
+    for e in (parsed or {}).get("escalations") or []:
+        if isinstance(e, dict) and e.get("code"):
+            out.append("%s %s: %s" % (ESCALATED, e.get("code"),
+                                      str(e.get("why") or "").strip() or "no reason given"))
+    return out
+
+
 class S03TopologyAndMobility(Stage):
     stage_id = "s03"
     pass_id = "s03a"
@@ -713,6 +911,16 @@ class S03TopologyAndMobility(Stage):
     #: schema exposed no such field - a responsibility statement describing the
     #: producer it had already stopped being.
     purpose = "turn a candidate family into a mechanism topology"
+
+    #: What this pass may revise in an owner revision, in its own words. The
+    #: architecture - which bodies, groups and joints exist, of what kind,
+    #: connected how - is not on the list, and `ARCHITECTURE` refuses it.
+    REVISION_MAY_REVISE = (
+        "a joint's degrees of freedom, axis direction and frame; an interface's "
+        "kind, nominal condition, feature and obligations; a configuration's "
+        "name, kind, bodies present, expected mobility and distinguishing basis; "
+        "a functional region's role, owning bodies, actors and reach targets; "
+        "and the open decisions")
 
     def prompt(self, inputs: Dict[str, Any]) -> str:
         projection = inputs["consumer_view"]
@@ -723,7 +931,14 @@ class S03TopologyAndMobility(Stage):
             interaction_kinds=" | ".join(INTERACTION_KINDS),
             region_roles=" | ".join(REGION_ROLES),
             candidate=_render(candidate),
-            projection=_render(projection))
+            projection=_render(projection)) + revision_context_text(
+                inputs, self.REVISION_MAY_REVISE)
+
+    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any], state) -> List[Op]:
+        """An owner revision REVISES the topology that stands, and never
+        replaces it: the generic rule, under this pass's reason, behind the
+        architecture guard."""
+        return owner_revision_operations(state, ops, inputs, self.pass_id, guard=True)
 
     def invocation_premises(self, inputs: Dict[str, Any]) -> List[str]:
         """The candidate this pass was invoked to embody.
@@ -959,6 +1174,9 @@ class S03TopologyAndMobility(Stage):
                 if b not in bodies:
                     out.append("functional region %s is owned by %s, which is not "
                                "a body you emitted" % (f.get("id"), b))
+        # WHAT THE OWNER DECLARED IT COULD NOT RESOLVE within a revision. Its
+        # own statement, typed, beside what the contract found missing.
+        out.extend(declared_escalations(parsed, inputs))
         return out
 
 
@@ -1875,6 +2093,18 @@ class S03BMobilityAndAssembly(Stage):
     pass_id = "s03b"
     purpose = "author the blocking relations, load paths and assembly order"
 
+    #: What this pass may revise in an owner revision, in its own words.
+    REVISION_MAY_REVISE = (
+        "every fact of a constraint relation, physical interaction, load path, "
+        "assembly step and transition requirement, and the open decisions; the "
+        "DOF disposition is re-derived from what you state")
+
+    def repair_operations(self, ops, inputs, state):
+        """An owner revision REVISES the relations, paths, order and demands
+        that stand. This pass authors no architecture, so the guard has
+        nothing to refuse here; what it may not touch it cannot write."""
+        return owner_revision_operations(state, ops, inputs, self.pass_id, guard=False)
+
     def prompt(self, inputs):
         return S03B_PROMPT.format(
             axis_directions=" | ".join(AXIS_DIRECTIONS),
@@ -1887,7 +2117,8 @@ class S03BMobilityAndAssembly(Stage):
             # without anyone editing prose.
             references=render_reference_rules(),
             candidate=_render(inputs.get("candidate") or {}),
-            mechanism=_render(inputs["consumer_view"]))
+            mechanism=_render(inputs["consumer_view"])) + revision_context_text(
+                inputs, self.REVISION_MAY_REVISE)
 
     def invocation_premises(self, inputs):
         """The same candidate, carried on this pass's demands.
@@ -2420,4 +2651,5 @@ class S03BMobilityAndAssembly(Stage):
             if side not in AXIS_DIRECTIONS or side == "NONE":
                 out.append("assembly step %s arrives from %r, which names no side"
                            % (step.get("id"), side))
+        out.extend(declared_escalations(parsed, inputs))
         return out

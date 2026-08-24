@@ -320,7 +320,7 @@ def run_s03(case_id: str, candidate: Dict[str, Any], base_state,
 
 def run_s04(case_id: str, state, provider, trial: int,
             invocation=None, progression=None, repair_rounds: int = 0,
-            repair_provider=None) -> Dict[str, Any]:
+            repair_provider=None, owner_revision_rounds: int = 0) -> Dict[str, Any]:
     """s04a then s04b, from the mechanism projection ONLY. Never raises.
 
     The refresh-on-refinement loop, the acceptance rule and the bounded repair
@@ -329,6 +329,9 @@ def run_s04(case_id: str, state, provider, trial: int,
     has recordings for the passes it asked and none for a repair it never
     asked, so the loop runs only when a caller says so, with the provider it
     names (None: derivation repairs only, and what remains stays open).
+    `owner_revision_rounds` is opt-in the same way: the owner-revision loop
+    (Unit C) runs after the repair loop, with the same `repair_provider`, and
+    with None it identifies and routes what it would revise and stops.
     """
     progression = progression or Progression()
     rec: Dict[str, Any] = {"case": case_id, "trial": trial, "failures": [],
@@ -348,6 +351,13 @@ def run_s04(case_id: str, state, provider, trial: int,
         rec["s04_repair"] = s04_repair_rounds(
             repair_provider, state, progression, invocation,
             rounds=repair_rounds).as_record()
+    if owner_revision_rounds > 0 and invocation is not None and last is not None \
+            and last.patch is not None and not last.problems:
+        from ver3.assy_v3.pipeline.owner_revision import s03_owner_revision_rounds
+        rec["s03_owner_revision"] = s03_owner_revision_rounds(
+            repair_provider, state, progression, invocation,
+            rounds=owner_revision_rounds,
+            repair_rounds=max(repair_rounds, 2)).as_record()
 
     for key, out in zip(("s04a", "s04b"), list(outcomes) + [None, None]):
         execution = progression.by_responsibility(key)
